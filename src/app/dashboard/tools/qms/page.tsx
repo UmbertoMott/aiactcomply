@@ -1,7 +1,10 @@
 "use client";
 
-import { Trash2, FileText } from "lucide-react";
+import { Trash2, FileText, CheckCircle } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
+import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
+import type { QMSResult } from "@/lib/dossier/storage-schema";
 
 const templateSections = [
   { id: "compliance", title: "Strategia conformità normativa", desc: "Comprese procedure di valutazione e gestione modifiche", art: "Art. 17(1)(a)" },
@@ -51,9 +54,42 @@ export default function QMSPage() {
   }
 
   const completedCount = sections.filter((s) => s.completed).length;
+  const [savedAt, setSavedAt] = useState<string | null>(() =>
+    readFromStorage<QMSResult>("qms")?.completedAt ?? null
+  );
+
+  function saveToDossier() {
+    const completedAt = new Date().toISOString();
+    writeToStorage<QMSResult>("qms", {
+      qmsDocumentRef: `QMS-AIComply-v1.0-${new Date().toISOString().split("T")[0]}`,
+      postMarketPlanExists: sections.some((s) => s.id.includes("monitoring") && s.completed),
+      internalReviewCycle: "Trimestrale",
+      responsibleManager: "AI Compliance Officer",
+      certifications: [],
+      completedAt,
+    });
+    setSavedAt(completedAt);
+  }
 
   return (
     <div className="max-w-4xl">
+      {savedAt ? (
+        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+          style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)", fontFamily: "var(--font-inter, system-ui)" }}>
+          <CheckCircle size={13} strokeWidth={1.5} style={{ color: "#15803d" }} />
+          <span style={{ color: "#15803d" }}>✓ Risultati salvati nel dossier · Aggiornato il {new Date(savedAt).toLocaleDateString("it-IT")}</span>
+          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>Vedi dossier →</Link>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+          style={{ background: "rgba(59,130,246,0.04)", border: "1px solid rgba(59,130,246,0.12)", fontFamily: "var(--font-inter, system-ui)" }}>
+          <span style={{ color: "rgba(0,0,0,0.45)" }}>Salva la configurazione QMS nel dossier di compliance</span>
+          <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1 hover:opacity-80"
+            style={{ background: "#3b82f6", color: "#ffffff", border: "none", cursor: "pointer" }}>
+            Salva nel dossier
+          </button>
+        </div>
+      )}
       <h1 className="text-2xl font-bold text-foreground mb-2">QMS Builder</h1>
       <p className="text-sm text-muted-foreground mb-8">
         Sistema di Gestione della Qualità — Art. 17 Regolamento UE 2024/1689.

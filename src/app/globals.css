@@ -54,6 +54,71 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ─── Dossier print styles ─────────────────────────────────────────────────── */
+@media print {
+  /* Hide everything except the dossier root */
+  body > *:not(#dossier-print-root) {
+    display: none !important;
+  }
+
+  #dossier-print-root {
+    display: block !important;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    overflow: visible;
+    background: #fff;
+  }
+
+  /* Page setup */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  @page :first {
+    margin: 0;
+  }
+
+  /* Page breaks */
+  .dossier-cover {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .dossier-toc {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .dossier-section {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  /* Preserve background colours */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Hide interactive chrome */
+  button,
+  nav,
+  aside,
+  [data-no-print] {
+    display: none !important;
+  }
+}
+
+/* In screen mode hide the print root */
+@media screen {
+  #dossier-print-root {
+    display: none !important;
+  }
+}
+
 @layer utilities {
   .gradient-text {
     background: linear-gradient(135deg, #3b82f6, #6366f1, #8b5cf6);

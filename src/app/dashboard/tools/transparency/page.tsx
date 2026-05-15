@@ -3,10 +3,13 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronRight, AlertTriangle, CheckCircle, Download, BookOpen } from "lucide-react";
+import Link from "next/link";
 import {
   NUTRITION_LABEL, INSTRUCTIONS, SAMPLE_DECISIONS,
   generateExplanation, type DecisionExplanation,
 } from "@/lib/simulation/transparency-engine";
+import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
+import type { TransparencyResult } from "@/lib/dossier/storage-schema";
 
 const card = { background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
 
@@ -421,6 +424,21 @@ export default function TransparencyPage() {
   const [tab,        setTab]        = useState<Tab>("explain");
   const [selectedId, setSelectedId] = useState(0);
   const [customSeed, setCustomSeed] = useState<number | null>(null);
+  const [savedAt,    setSavedAt]    = useState<string | null>(() =>
+    readFromStorage<TransparencyResult>("transparency")?.completedAt ?? null
+  );
+
+  function saveToDossier() {
+    const completedAt = new Date().toISOString();
+    writeToStorage<TransparencyResult>("transparency", {
+      userInformedOfAI: true,
+      informationProvided: NUTRITION_LABEL.inputRequirements,
+      contactPoint: "compliance@azienda.eu",
+      languagesAvailable: ["italiano", "inglese"],
+      completedAt,
+    });
+    setSavedAt(completedAt);
+  }
 
   const allDecisions = customSeed !== null
     ? [generateExplanation(customSeed), ...SAMPLE_DECISIONS]
@@ -430,6 +448,24 @@ export default function TransparencyPage() {
 
   return (
     <div className="max-w-6xl" style={{ fontFamily: "var(--font-inter, system-ui)" }}>
+
+      {/* Dossier saved banner */}
+      {savedAt ? (
+        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+          style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)" }}>
+          <span style={{ color: "#15803d" }}>✓ Risultati salvati nel dossier · Aggiornato il {new Date(savedAt).toLocaleDateString("it-IT")}</span>
+          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>Vedi dossier →</Link>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+          style={{ background: "rgba(59,130,246,0.04)", border: "1px solid rgba(59,130,246,0.12)" }}>
+          <span style={{ color: "rgba(0,0,0,0.45)" }}>Salva la configurazione Transparency nel dossier di compliance</span>
+          <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1 transition-opacity hover:opacity-80"
+            style={{ background: "#3b82f6", color: "#ffffff", border: "none", cursor: "pointer" }}>
+            Salva nel dossier
+          </button>
+        </div>
+      )}
 
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">

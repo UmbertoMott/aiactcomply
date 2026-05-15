@@ -2,11 +2,14 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, Shield, RefreshCw, AlertTriangle } from "lucide-react";
+import { Download, Shield, RefreshCw, AlertTriangle, CheckCircle } from "lucide-react";
+import Link from "next/link";
 import {
   generateLogChain, verifyChain, LEVEL_STYLE,
   type LogEntry, type EventLevel,
 } from "@/lib/simulation/logvault-engine";
+import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
+import type { LogvaultResult } from "@/lib/dossier/storage-schema";
 
 const card = { background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
 
@@ -115,6 +118,9 @@ export default function LogVaultPage() {
   const [filter,       setFilter]       = useState<EventLevel | "all">("all");
   const [killActive,   setKillActive]   = useState(false);
   const [autoScroll,   setAutoScroll]   = useState(true);
+  const [savedAt,      setSavedAt]      = useState<string | null>(() =>
+    readFromStorage<LogvaultResult>("logvault")?.completedAt ?? null
+  );
   const listRef = useRef<HTMLDivElement>(null);
 
   const logs      = generateLogChain(24, tampered);
@@ -128,6 +134,20 @@ export default function LogVaultPage() {
 
   const resetTamper = useCallback(() => { setTampered(false); setSelected(null); }, []);
 
+  function saveToDossier() {
+    const completedAt = new Date().toISOString();
+    const eventTypes = [...new Set(logs.map((l) => l.eventType))];
+    writeToStorage<LogvaultResult>("logvault", {
+      loggingEnabled: true,
+      retentionDays: 90,
+      loggedEvents: eventTypes,
+      storageLocation: "LogVault — Append-Only Storage (simulato)",
+      accessControl: "Role-based — solo operatori autorizzati",
+      completedAt,
+    });
+    setSavedAt(completedAt);
+  }
+
   useEffect(() => {
     if (autoScroll && listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight;
@@ -136,6 +156,25 @@ export default function LogVaultPage() {
 
   return (
     <div className="max-w-6xl" style={{ fontFamily: "var(--font-inter, system-ui)" }}>
+
+      {/* Dossier saved banner */}
+      {savedAt ? (
+        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+          style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)" }}>
+          <CheckCircle size={13} strokeWidth={1.5} style={{ color: "#15803d" }} />
+          <span style={{ color: "#15803d" }}>✓ Risultati salvati nel dossier · Aggiornato il {new Date(savedAt).toLocaleDateString("it-IT")}</span>
+          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>Vedi dossier →</Link>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+          style={{ background: "rgba(59,130,246,0.04)", border: "1px solid rgba(59,130,246,0.12)" }}>
+          <span style={{ color: "rgba(0,0,0,0.45)" }}>Salva la configurazione LogVault nel dossier di compliance</span>
+          <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1 transition-opacity hover:opacity-80"
+            style={{ background: "#3b82f6", color: "#ffffff", border: "none", cursor: "pointer" }}>
+            Salva nel dossier
+          </button>
+        </div>
+      )}
 
       {/* SVG filter defs */}
       <svg style={{ width: 0, height: 0, position: "absolute" }}>

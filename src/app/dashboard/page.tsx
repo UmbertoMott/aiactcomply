@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Shield, BarChart3, FileText, Database, Eye, Users,
   CheckCircle, Cpu, ClipboardCheck, AlertTriangle, ArrowRight, Ban,
@@ -8,6 +8,7 @@ import {
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { isOnboardingDone } from "@/components/onboarding/OnboardingWizard";
+import { aggregateDossier, getDossierSections, getCompletionPercentage, getCompletedCount } from "@/lib/dossier/dossier-engine";
 
 // Lazy-load wizard (avoids SSR issues with localStorage)
 const OnboardingWizard = dynamic(
@@ -37,12 +38,15 @@ const quickTools: {
 
 export default function DashboardPage() {
   const [showWizard, setShowWizard] = useState(false);
+  const [dossierPct, setDossierPct] = useState(0);
+  const [dossierDone, setDossierDone] = useState(0);
 
   useEffect(() => {
-    // Show wizard only for first-time visitors
-    if (!isOnboardingDone()) {
-      setShowWizard(true);
-    }
+    if (!isOnboardingDone()) setShowWizard(true);
+    const data = aggregateDossier();
+    const sections = getDossierSections(data);
+    setDossierPct(getCompletionPercentage(sections));
+    setDossierDone(getCompletedCount(sections));
   }, []);
 
   return (
@@ -52,6 +56,40 @@ export default function DashboardPage() {
       )}
 
       <div className="max-w-5xl">
+
+        {/* Dossier progress banner */}
+        <Link
+          href="/dashboard/dossier"
+          className="flex items-center gap-4 rounded-xl p-4 mb-6 transition-all hover:shadow-md"
+          style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+        >
+          <div className="flex-shrink-0">
+            <div className="text-[11px] font-semibold uppercase mb-1.5" style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "0.8px" }}>
+              📄 Dossier di compliance
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-1.5 rounded-full w-40" style={{ background: "rgba(0,0,0,0.07)" }}>
+                <div
+                  className="h-1.5 rounded-full transition-all duration-500"
+                  style={{
+                    width: `${dossierPct}%`,
+                    background: dossierPct >= 80 ? "#15803d" : dossierPct >= 40 ? "#d97706" : "#dc2626",
+                  }}
+                />
+              </div>
+              <span className="text-[13px] font-semibold" style={{ color: "#0D1016" }}>{dossierPct}%</span>
+            </div>
+            <p className="text-[11px] mt-1" style={{ color: "rgba(0,0,0,0.4)" }}>
+              {dossierDone} di 10 sezioni pronte · Prossima scadenza: 2 ago 2026
+            </p>
+          </div>
+          <span
+            className="ml-auto flex items-center gap-1 text-[12px] font-medium rounded-full px-4 py-1.5 flex-shrink-0"
+            style={{ background: "#0D1016", color: "#ffffff" }}
+          >
+            Genera Dossier PDF <ArrowRight size={12} />
+          </span>
+        </Link>
 
         {/* Header */}
         <div className="mb-8">

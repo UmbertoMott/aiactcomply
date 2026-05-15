@@ -2,11 +2,17 @@
 
 import { useState } from "react";
 import { Shield, Zap, AlertTriangle, Play, RefreshCw, CheckCircle } from "lucide-react";
+import Link from "next/link";
 import { simulateRedTeamAttack, getDefenseHealth, type RedTeamAttack } from "@/lib/simulation/red-team";
+import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
+import type { ResilienceResult } from "@/lib/dossier/storage-schema";
 
 export default function ResiliencePage() {
   const [attacks, setAttacks] = useState<RedTeamAttack[]>([]);
   const [running, setRunning] = useState(false);
+  const [savedAt, setSavedAt] = useState<string | null>(() =>
+    readFromStorage<ResilienceResult>("resilience")?.completedAt ?? null
+  );
 
   function runBatch() {
     setRunning(true);
@@ -20,8 +26,39 @@ export default function ResiliencePage() {
   const health = getDefenseHealth(attacks);
   const lastBreach = attacks.find((a) => a.result === "breach");
 
+  function saveToDossier() {
+    const completedAt = new Date().toISOString();
+    writeToStorage<ResilienceResult>("resilience", {
+      accuracyMetric: health.defenseRate,
+      robustnessTested: attacks.length > 0,
+      cybersecurityMeasures: ["Rilevamento adversarial inputs", "Rate limiting", "Output sanitization", "Audit log immutabile"],
+      fallbackProcedure: "In caso di breach: disabilitazione automatica e notifica al compliance officer",
+      lastTestedAt: attacks.length > 0 ? new Date().toISOString() : "",
+      completedAt,
+    });
+    setSavedAt(completedAt);
+  }
+
   return (
     <div className="max-w-5xl">
+      {savedAt ? (
+        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+          style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)", fontFamily: "var(--font-inter, system-ui)" }}>
+          <CheckCircle size={13} strokeWidth={1.5} style={{ color: "#15803d" }} />
+          <span style={{ color: "#15803d" }}>✓ Risultati salvati nel dossier · Aggiornato il {new Date(savedAt).toLocaleDateString("it-IT")}</span>
+          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>Vedi dossier →</Link>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+          style={{ background: "rgba(59,130,246,0.04)", border: "1px solid rgba(59,130,246,0.12)", fontFamily: "var(--font-inter, system-ui)" }}>
+          <span style={{ color: "rgba(0,0,0,0.45)" }}>Salva i risultati Red Teaming nel dossier di compliance</span>
+          <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1 hover:opacity-80"
+            style={{ background: "#3b82f6", color: "#ffffff", border: "none", cursor: "pointer" }}>
+            Salva nel dossier
+          </button>
+        </div>
+      )}
+
       <h1 className="text-2xl font-bold text-foreground mb-2">Continuous Red Teaming (Art. 15)</h1>
       <p className="text-sm text-muted-foreground mb-8">Bombardamento periodico del modello con attacchi simulati. Salute difensiva in tempo reale.</p>
 

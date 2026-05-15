@@ -2,6 +2,9 @@
 
 import { useState, useRef } from "react";
 import { CheckCircle, Brain, StopCircle, AlertTriangle } from "lucide-react";
+import Link from "next/link";
+import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
+import type { OversightResult } from "@/lib/dossier/storage-schema";
 
 export default function OversightPage() {
   const [approved, setApproved] = useState(false);
@@ -9,6 +12,21 @@ export default function OversightPage() {
   const [frictionReason, setFrictionReason] = useState("");
   const [approvalTime, setApprovalTime] = useState<number | null>(null);
   const startTime = useRef<number>(0);
+  const [savedAt, setSavedAt] = useState<string | null>(() =>
+    readFromStorage<OversightResult>("oversight")?.completedAt ?? null
+  );
+
+  function saveToDossier() {
+    const completedAt = new Date().toISOString();
+    writeToStorage<OversightResult>("oversight", {
+      oversightMechanism: "Safety Friction Gate — Anti Automation Bias (Art. 14)",
+      humanInterventionPoints: ["Approvazione output AI con confidenza > 80%", "Override manuale obbligatorio per output critici"],
+      stopCapability: true,
+      responsiblePersons: ["Responsabile HR", "AI Compliance Officer"],
+      completedAt,
+    });
+    setSavedAt(completedAt);
+  }
 
   function handleApprove() {
     startTime.current = Date.now();
@@ -31,6 +49,22 @@ export default function OversightPage() {
 
   return (
     <div className="max-w-4xl">
+      {savedAt ? (
+        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+          style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)", fontFamily: "var(--font-inter, system-ui)" }}>
+          <span style={{ color: "#15803d" }}>✓ Risultati salvati nel dossier · Aggiornato il {new Date(savedAt).toLocaleDateString("it-IT")}</span>
+          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>Vedi dossier →</Link>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+          style={{ background: "rgba(59,130,246,0.04)", border: "1px solid rgba(59,130,246,0.12)", fontFamily: "var(--font-inter, system-ui)" }}>
+          <span style={{ color: "rgba(0,0,0,0.45)" }}>Salva la configurazione Oversight nel dossier di compliance</span>
+          <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1 hover:opacity-80"
+            style={{ background: "#3b82f6", color: "#ffffff", border: "none", cursor: "pointer" }}>
+            Salva nel dossier
+          </button>
+        </div>
+      )}
       <h1 className="text-2xl font-bold text-foreground mb-2">Safety Friction Gate (Art. 14)</h1>
       <p className="text-sm text-muted-foreground mb-8">Se il supervisore approva un&apos;azione rischiosa in &lt; 2s, il sistema blocca il tasto Confirm e richiede motivazione testuale obbligatoria (Anti Automation Bias).</p>
 

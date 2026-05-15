@@ -12,6 +12,8 @@ import {
   type CheckAnswer,
   type FinalVerdict,
 } from "@/lib/simulation/prohibited-practices-engine";
+import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
+import type { ProhibitedCheckResult } from "@/lib/dossier/storage-schema";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const card = {
@@ -107,6 +109,10 @@ export default function ProhibitedPage() {
   const [mode, setMode]             = useState<"checklist" | "result">("checklist");
   const [verdict, setVerdict]       = useState<FinalVerdict | null>(null);
   const [clearOpen, setClearOpen]   = useState(false);
+  const [saved, setSaved]           = useState<string | null>(() => {
+    const existing = readFromStorage<ProhibitedCheckResult>("prohibited");
+    return existing?.completedAt ?? null;
+  });
 
   const total     = PROHIBITED_CHECKS.length;
   const answered  = Object.values(answers).filter((v) => v !== null).length;
@@ -122,14 +128,48 @@ export default function ProhibitedPage() {
       checkId: c.id,
       answer: answers[c.id] ?? null,
     }));
-    setVerdict(calculateVerdict(PROHIBITED_CHECKS, results));
+    const v = calculateVerdict(PROHIBITED_CHECKS, results);
+    setVerdict(v);
+
+    // Persist to dossier storage
+    const completedAt = new Date().toISOString();
+    const typedAnswers = Object.fromEntries(
+      Object.entries(answers).filter((e): e is [string, "yes" | "no" | "unsure"] =>
+        e[1] === "yes" || e[1] === "no" || e[1] === "unsure"
+      )
+    );
+    writeToStorage<ProhibitedCheckResult>("prohibited", {
+      answers: typedAnswers,
+      verdict: v.verdict,
+      violatedChecks: v.violatedChecks.map((c) => c.id),
+      completedAt,
+    });
+    setSaved(completedAt);
     setMode("result");
   }
+
+  // ── Saved banner ────────────────────────────────────────────────────────────
+  const SavedBanner = saved ? (
+    <div
+      className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+      style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)" }}
+    >
+      <CheckCircle size={13} strokeWidth={1.5} style={{ color: "#15803d" }} />
+      <span style={{ color: "#15803d" }}>
+        ✓ Risultati salvati nel dossier · Aggiornato il{" "}
+        {new Date(saved).toLocaleDateString("it-IT")}
+      </span>
+      <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>
+        Vedi dossier →
+      </Link>
+    </div>
+  ) : null;
 
   // ── Checklist mode ──────────────────────────────────────────────────────────
   if (mode === "checklist") {
     return (
       <div className="max-w-5xl" style={font}>
+        {SavedBanner}
         {/* Page header */}
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-1 flex-wrap">
@@ -359,6 +399,7 @@ export default function ProhibitedPage() {
 
   return (
     <div className="max-w-5xl" style={font}>
+      {SavedBanner}
       {/* Page header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-1">

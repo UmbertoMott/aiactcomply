@@ -2,10 +2,13 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import {
   MOCK_DATASETS, calculateBiasReport, getTemporalSnapshots,
   COLUMN_LINEAGE, type TemporalSnapshot,
 } from "@/lib/simulation/data-audit-engine";
+import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
+import type { DataAuditResult } from "@/lib/dossier/storage-schema";
 
 function Bar({ value, max = 1, color }: { value: number; max?: number; color: string }) {
   return (
@@ -24,6 +27,9 @@ export default function DataAuditPage() {
   const [datasetId, setDatasetId] = useState(MOCK_DATASETS[0].id);
   const [snapIdx,   setSnapIdx]   = useState(5);
   const [ctgan,     setCtgan]     = useState(false);
+  const [savedAt,   setSavedAt]   = useState<string | null>(() =>
+    readFromStorage<DataAuditResult>("dataAudit")?.completedAt ?? null
+  );
 
   const dataset   = MOCK_DATASETS.find((d) => d.id === datasetId)!;
   const snapshots = getTemporalSnapshots(datasetId);
@@ -47,8 +53,47 @@ export default function DataAuditPage() {
 
   const card = { background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
 
+  function saveToDossier() {
+    const completedAt = new Date().toISOString();
+    writeToStorage<DataAuditResult>("dataAudit", {
+      datasets: MOCK_DATASETS.map((ds) => {
+        const r = calculateBiasReport(ds.id, snapshots[snapIdx].asOf, ctgan);
+        return {
+          name: ds.name,
+          source: ds.source,
+          size: `${ds.rows.toLocaleString("it-IT")} record`,
+          biasChecked: true,
+          qualityScore: Math.round((1 - r.ofi) * 100),
+          personalData: ds.sensitiveFeatures.length > 0,
+          issues: r.ofi > 0.15 ? ["OFI elevato — verificare bias"] : [],
+        };
+      }),
+      overallQuality: report.riskLevel === "low" ? "pass" : report.riskLevel === "critical" ? "fail" : "review",
+      completedAt,
+    });
+    setSavedAt(completedAt);
+  }
+
   return (
     <div className="max-w-5xl" style={{ fontFamily: "var(--font-inter, system-ui)" }}>
+
+      {/* Dossier saved banner */}
+      {savedAt ? (
+        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+          style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)" }}>
+          <span style={{ color: "#15803d" }}>✓ Risultati salvati nel dossier · Aggiornato il {new Date(savedAt).toLocaleDateString("it-IT")}</span>
+          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>Vedi dossier →</Link>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+          style={{ background: "rgba(59,130,246,0.04)", border: "1px solid rgba(59,130,246,0.12)" }}>
+          <span style={{ color: "rgba(0,0,0,0.45)" }}>Salva i risultati del Data Audit nel dossier di compliance</span>
+          <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1 transition-opacity hover:opacity-80"
+            style={{ background: "#3b82f6", color: "#ffffff", border: "none", cursor: "pointer" }}>
+            Salva nel dossier
+          </button>
+        </div>
+      )}
 
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">

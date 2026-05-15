@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GitBranch, Download, ChevronRight, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import Link from "next/link";
+import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
+import type { DocugenResult } from "@/lib/dossier/storage-schema";
 
 // ─── Annex IV — 9 sections ────────────────────────────────────────────────────
 const ANNEX_IV = [
@@ -125,6 +128,25 @@ export default function DocuGenPage() {
   }
 
   const doneCount  = ANNEX_IV.filter((s) => getSectionStatus(s.id) === "done").length;
+  const [savedAt, setSavedAt] = useState<string | null>(() =>
+    readFromStorage<DocugenResult>("docugen")?.completedAt ?? null
+  );
+
+  function saveToDossier() {
+    const completedAt = new Date().toISOString();
+    writeToStorage<DocugenResult>("docugen", {
+      systemName: "HR Screening AI v2.1.0",
+      provider: "AIComply Demo Org",
+      purpose: getContent("s1"),
+      capabilities: getContent("s2"),
+      limitations: getContent("s5") || "Accuracy scende a 79% su carriere non lineari",
+      humanOversight: getContent("s7") || "Supervisione obbligatoria per score < 65%",
+      performanceMetrics: getContent("s6") || "Accuracy: 87.3% · F1: 0.84",
+      trainingData: getContent("s4") || AUTO_CONTENT["data-audit"],
+      completedAt,
+    });
+    setSavedAt(completedAt);
+  }
   const draftCount = ANNEX_IV.filter((s) => getSectionStatus(s.id) === "draft").length;
   const emptyRequired = ANNEX_IV.filter((s) => s.required && getSectionStatus(s.id) === "empty");
   const canFinalize = emptyRequired.length === 0;
@@ -133,6 +155,24 @@ export default function DocuGenPage() {
 
   return (
     <div className="max-w-6xl" style={{ fontFamily: "var(--font-inter, system-ui)" }}>
+
+      {/* Dossier saved banner */}
+      {savedAt ? (
+        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+          style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)" }}>
+          <span style={{ color: "#15803d" }}>✓ Risultati salvati nel dossier · Aggiornato il {new Date(savedAt).toLocaleDateString("it-IT")}</span>
+          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>Vedi dossier →</Link>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+          style={{ background: "rgba(59,130,246,0.04)", border: "1px solid rgba(59,130,246,0.12)" }}>
+          <span style={{ color: "rgba(0,0,0,0.45)" }}>Salva il Fascicolo Tecnico nel dossier di compliance</span>
+          <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1 transition-opacity hover:opacity-80"
+            style={{ background: "#3b82f6", color: "#ffffff", border: "none", cursor: "pointer" }}>
+            Salva nel dossier
+          </button>
+        </div>
+      )}
 
       {/* ── Header ── */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">

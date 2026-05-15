@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Shield, Box, GitBranch, Users, Eye, Activity,
-  Menu, X, ChevronRight, LogOut, Database, Network, Ban,
+  Menu, X, ChevronRight, LogOut, Database, Network, Ban, FileArchive,
 } from "lucide-react";
+import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { logout } from "./actions";
 
 type NavItem = {
@@ -63,6 +64,14 @@ const navGroups: NavGroup[] = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [dossierPct, setDossierPct] = useState(0);
+
+  useEffect(() => {
+    // Read dossier completion from localStorage
+    const data = aggregateDossier();
+    const sections = getDossierSections(data);
+    setDossierPct(getCompletionPercentage(sections));
+  }, [pathname]); // Refresh on navigation
 
   const currentItem = navGroups
     .flatMap((g) => g.items)
@@ -101,6 +110,33 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-4 px-3">
+          {/* Dossier — top-level entry */}
+          <div className="mb-4 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+            <Link
+              href="/dashboard/dossier"
+              onClick={() => setSidebarOpen(false)}
+              className="flex items-center justify-between px-2 py-2 rounded-md text-[11px] transition-all"
+              style={
+                pathname.startsWith("/dashboard/dossier")
+                  ? { background: "rgba(255,255,255,0.1)", color: "#ffffff" }
+                  : { color: "rgba(255,255,255,0.55)" }
+              }
+            >
+              <div className="flex items-center gap-2">
+                <FileArchive className="h-3.5 w-3.5 flex-shrink-0" />
+                <span className="font-medium">Dossier</span>
+              </div>
+              <span
+                className="text-[9px] px-1.5 py-0.5 rounded font-semibold"
+                style={{
+                  background: dossierPct >= 80 ? "rgba(22,163,74,0.3)" : dossierPct >= 40 ? "rgba(202,138,4,0.3)" : "rgba(220,38,38,0.3)",
+                  color: dossierPct >= 80 ? "#86efac" : dossierPct >= 40 ? "#fde68a" : "#fca5a5",
+                }}
+              >
+                {dossierPct}%
+              </span>
+            </Link>
+          </div>
           {navGroups.map((group) => (
             <div key={group.label} className="mb-5">
               <p
