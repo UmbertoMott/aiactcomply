@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Shield, BarChart3, FileText, Database, Eye, Users,
-  CheckCircle, Cpu, ClipboardCheck, AlertTriangle, ArrowRight,
+  CheckCircle, Cpu, ClipboardCheck, AlertTriangle, ArrowRight, Ban,
 } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -15,7 +15,15 @@ const OnboardingWizard = dynamic(
   { ssr: false }
 );
 
-const quickTools = [
+const quickTools: {
+  icon: React.FC<React.SVGProps<SVGSVGElement>>;
+  title: string;
+  desc: string;
+  href: string;
+  art: string;
+  urgent?: boolean;
+}[] = [
+  { icon: Ban,            title: "Art. 5 Checker", desc: "Pratiche vietate — già in vigore", href: "/dashboard/tools/prohibited",  art: "Art. 5", urgent: true },
   { icon: Shield,         title: "AI Classifier",  desc: "Classifica il tuo sistema AI",    href: "/dashboard/tools/classifier",  art: "Art. 6" },
   { icon: BarChart3,      title: "Risk Manager",   desc: "Gestione iterativa del rischio",   href: "/dashboard/tools/risk-manager", art: "Art. 9" },
   { icon: Database,       title: "Data Audit",     desc: "Qualità e provenienza dataset",    href: "/dashboard/tools/data-audit",   art: "Art. 10" },
@@ -108,33 +116,45 @@ export default function DashboardPage() {
               href={tool.href}
               className="group rounded-xl p-5 transition-all duration-200 hover:shadow-md"
               style={{
-                background: "#ffffff",
-                border: "1px solid rgba(0,0,0,0.07)",
+                background: tool.urgent ? "rgba(220,38,38,0.02)" : "#ffffff",
+                border: tool.urgent ? "1px solid rgba(220,38,38,0.2)" : "1px solid rgba(0,0,0,0.07)",
                 boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
               }}
             >
               <div className="flex items-start justify-between mb-3">
                 <div
                   className="rounded-lg p-2"
-                  style={{ background: "rgba(59,130,246,0.08)" }}
+                  style={{ background: tool.urgent ? "rgba(220,38,38,0.08)" : "rgba(59,130,246,0.08)" }}
                 >
-                  <tool.icon className="h-3.5 w-3.5" style={{ color: "#3b82f6" }} />
+                  <tool.icon className="h-3.5 w-3.5" style={{ color: tool.urgent ? "#dc2626" : "#3b82f6" }} />
                 </div>
-                <span
-                  className="text-[10px] font-medium rounded px-1.5 py-0.5"
-                  style={{ background: "#f5f5f4", color: "rgba(0,0,0,0.35)" }}
-                >
-                  {tool.art}
-                </span>
+                {tool.urgent ? (
+                  <span
+                    className="text-[10px] font-semibold rounded-full px-2 py-0.5 uppercase"
+                    style={{ background: "rgba(220,38,38,0.1)", color: "#b91c1c", letterSpacing: "0.3px" }}
+                  >
+                    IN VIGORE
+                  </span>
+                ) : (
+                  <span
+                    className="text-[10px] font-medium rounded px-1.5 py-0.5"
+                    style={{ background: "#f5f5f4", color: "rgba(0,0,0,0.35)" }}
+                  >
+                    {tool.art}
+                  </span>
+                )}
               </div>
               <h3 className="text-[13px] font-medium mb-1" style={{ color: "#0D1016" }}>{tool.title}</h3>
               <p className="text-[11px] mb-3" style={{ color: "rgba(0,0,0,0.42)" }}>{tool.desc}</p>
               <div className="flex items-center justify-between">
                 <span
                   className="text-[10px] rounded-full px-2 py-0.5"
-                  style={{ background: "#f5f5f4", color: "rgba(0,0,0,0.3)" }}
+                  style={{
+                    background: tool.urgent ? "rgba(220,38,38,0.07)" : "#f5f5f4",
+                    color: tool.urgent ? "#b91c1c" : "rgba(0,0,0,0.3)",
+                  }}
                 >
-                  Da completare
+                  {tool.urgent ? "Verifica ora" : "Da completare"}
                 </span>
                 <ArrowRight className="h-3 w-3 transition-colors" style={{ color: "rgba(0,0,0,0.2)" }} />
               </div>

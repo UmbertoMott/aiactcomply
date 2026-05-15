@@ -1,15 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Shield, Box, GitBranch, Users, Eye, Activity,
-  Menu, X, ChevronRight, LogOut, Database, Network,
+  Menu, X, ChevronRight, LogOut, Database, Network, Ban,
 } from "lucide-react";
 import { logout } from "./actions";
 
-const navGroups = [
+type NavItem = {
+  icon: React.FC<React.SVGProps<SVGSVGElement>>;
+  label: string;
+  href: string;
+  art: string;
+  urgent?: boolean;
+};
+type NavGroup = { label: string; items: NavItem[] };
+
+const navGroups: NavGroup[] = [
   {
     label: "Core",
     items: [
@@ -37,7 +46,8 @@ const navGroups = [
   {
     label: "Tool",
     items: [
-      { icon: Shield, label: "AI Classifier", href: "/dashboard/tools/classifier", art: "Art. 6" },
+      { icon: Ban,    label: "Art. 5 Checker", href: "/dashboard/tools/prohibited", art: "Art. 5", urgent: true },
+      { icon: Shield, label: "AI Classifier",  href: "/dashboard/tools/classifier", art: "Art. 6" },
       { icon: Activity, label: "Drift Detection", href: "/dashboard/tools/risk-manager", art: "Art. 9" },
       { icon: Database, label: "Data Audit", href: "/dashboard/tools/data-audit", art: "Art. 10" },
       { icon: Box, label: "DocuGen AI", href: "/dashboard/tools/docugen", art: "Art. 11" },
@@ -114,13 +124,36 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     }
                   >
                     <div className="flex items-center gap-2">
-                      <item.icon className="h-3.5 w-3.5 flex-shrink-0" />
+                      <item.icon
+                        className="h-3.5 w-3.5 flex-shrink-0"
+                        style={item.urgent && !isActive ? { color: "rgba(252,165,165,0.8)" } : undefined}
+                      />
                       <span>{item.label}</span>
+                      {item.urgent && (
+                        <span className="relative flex h-1.5 w-1.5 flex-shrink-0">
+                          <span
+                            className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                            style={{ background: "#f87171" }}
+                          />
+                          <span
+                            className="relative inline-flex rounded-full h-1.5 w-1.5"
+                            style={{ background: "#ef4444" }}
+                          />
+                        </span>
+                      )}
                     </div>
-                    {item.art && (
+                    {item.art && !item.urgent && (
                       <span
                         className="text-[9px] px-1.5 py-0.5 rounded"
                         style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.3)" }}
+                      >
+                        {item.art}
+                      </span>
+                    )}
+                    {item.urgent && (
+                      <span
+                        className="text-[9px] px-1.5 py-0.5 rounded font-semibold"
+                        style={{ background: "rgba(220,38,38,0.3)", color: "#fca5a5" }}
                       >
                         {item.art}
                       </span>
