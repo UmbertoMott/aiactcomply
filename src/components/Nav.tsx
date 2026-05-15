@@ -47,17 +47,17 @@ export default function Nav() {
 
       <div className="flex items-center gap-3">
         <Link
-          href="/dashboard"
+          href="/login"
           className="text-[13px] text-white/45 hover:text-white/70 transition-colors"
         >
           Accedi
         </Link>
         <Link
-          href="/dashboard"
+          href="/register"
           className="text-[13px] font-medium text-[#0D1016] bg-white rounded-full px-5 py-2 hover:bg-gray-100 transition-colors"
           style={{ letterSpacing: "-0.2px" }}
         >
-          Prenota demo
+          Inizia gratis
         </Link>
       </div>
     </nav>
