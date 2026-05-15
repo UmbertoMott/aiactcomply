@@ -52,14 +52,22 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
+  --font-mono: ui-monospace, monospace;
+
+  --color-hero: #0D1016;
+  --color-surface: #FAFAF9;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-inter, var(--font-sans), system-ui, sans-serif);
+  -webkit-font-smoothing: antialiased;
 }
 
 @layer utilities {
