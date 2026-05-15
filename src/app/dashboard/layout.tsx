@@ -4,20 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Shield,
-  Box,
-  GitBranch,
-  Users,
-  Eye,
-  Activity,
-  Menu,
-  X,
-  ChevronRight,
-  LogOut,
-  Database,
-  Network,
+  Shield, Box, GitBranch, Users, Eye, Activity,
+  Menu, X, ChevronRight, LogOut, Database, Network,
 } from "lucide-react";
-import ThemeSwitcher from "@/components/ui/ThemeSwitcher";
 import { logout } from "./actions";
 
 const navGroups = [
@@ -46,7 +35,7 @@ const navGroups = [
     ],
   },
   {
-    label: "Tool Legacy",
+    label: "Tool",
     items: [
       { icon: Shield, label: "AI Classifier", href: "/dashboard/tools/classifier", art: "Art. 6" },
       { icon: Activity, label: "Drift Detection", href: "/dashboard/tools/risk-manager", art: "Art. 9" },
@@ -61,11 +50,7 @@ const navGroups = [
   },
 ];
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -74,105 +59,121 @@ export default function DashboardLayout({
     .find((i) => pathname.startsWith(i.href));
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen" style={{ background: "#FAFAF9" }}>
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+          className="fixed inset-0 z-40 lg:hidden"
+          style={{ background: "rgba(0,0,0,0.4)" }}
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
+      {/* Sidebar — dark like homepage nav */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 border-r border-border bg-card transform transition-transform duration-200 lg:translate-x-0 lg:static lg:z-auto ${
+        className={`fixed inset-y-0 left-0 z-50 w-56 flex flex-col transform transition-transform duration-200 lg:translate-x-0 lg:static lg:z-auto ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
+        style={{ background: "#0D1016" }}
       >
-        <div className="flex flex-col h-full">
-          <div className="h-16 flex items-center justify-between px-6 border-b border-border">
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <Shield className="h-6 w-6 text-primary" />
-              <span className="font-bold text-foreground">
-                AI<span className="text-primary">Comply</span>
-              </span>
-            </Link>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
+        {/* Logo */}
+        <div className="h-14 flex items-center justify-between px-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+          <Link
+            href="/dashboard"
+            className="text-[15px] font-semibold"
+            style={{ color: "#ffffff", letterSpacing: "-0.4px" }}
+          >
+            AI<span style={{ color: "rgba(255,255,255,0.3)", fontWeight: 300 }}>Comply</span>
+          </Link>
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden" style={{ color: "rgba(255,255,255,0.4)" }}>
+            <X className="h-4 w-4" />
+          </button>
+        </div>
 
-          <nav className="flex-1 overflow-y-auto py-4 px-3">
-            {navGroups.map((group) => (
-              <div key={group.label} className="mb-4">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-3 mb-2">
-                  {group.label}
-                </p>
-                {group.items.map((item) => {
-                  const isActive = pathname.startsWith(item.href);
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setSidebarOpen(false)}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm mb-0.5 transition-colors ${
-                        isActive
-                          ? "bg-primary/10 text-primary font-medium"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                      }`}
-                    >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      <span className="flex-1">{item.label}</span>
-                      {item.art && (
-                        <span className="text-[10px] text-muted-foreground bg-muted rounded px-1.5 py-0.5">
-                          {item.art}
-                        </span>
-                      )}
-                    </Link>
-                  );
-                })}
-              </div>
-            ))}
-          </nav>
-
-          <div className="border-t border-border p-4">
-            <form action={logout}>
-              <button
-                type="submit"
-                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-danger hover:bg-danger/10 transition-colors"
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto py-4 px-3">
+          {navGroups.map((group) => (
+            <div key={group.label} className="mb-5">
+              <p
+                className="text-[9px] font-semibold uppercase px-2 mb-1.5"
+                style={{ color: "rgba(255,255,255,0.2)", letterSpacing: "0.8px" }}
               >
-                <LogOut className="h-4 w-4" />
-                Esci
-              </button>
-            </form>
-          </div>
+                {group.label}
+              </p>
+              {group.items.map((item) => {
+                const isActive = pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setSidebarOpen(false)}
+                    className="flex items-center justify-between px-2 py-1.5 rounded-md text-[11px] mb-0.5 transition-all"
+                    style={
+                      isActive
+                        ? { background: "rgba(255,255,255,0.1)", color: "#ffffff" }
+                        : { color: "rgba(255,255,255,0.42)" }
+                    }
+                  >
+                    <div className="flex items-center gap-2">
+                      <item.icon className="h-3.5 w-3.5 flex-shrink-0" />
+                      <span>{item.label}</span>
+                    </div>
+                    {item.art && (
+                      <span
+                        className="text-[9px] px-1.5 py-0.5 rounded"
+                        style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.3)" }}
+                      >
+                        {item.art}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
+        </nav>
+
+        {/* Logout */}
+        <div className="px-3 py-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          <form action={logout}>
+            <button
+              type="submit"
+              className="flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-[11px] transition-all"
+              style={{ color: "rgba(255,255,255,0.3)" }}
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              Esci
+            </button>
+          </form>
         </div>
       </aside>
 
+      {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 border-b border-border flex items-center px-6 bg-card/50">
+        {/* Topbar */}
+        <header
+          className="h-14 flex items-center px-6"
+          style={{ background: "#ffffff", borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+        >
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden text-muted-foreground hover:text-foreground mr-4"
+            className="lg:hidden mr-4"
+            style={{ color: "rgba(0,0,0,0.4)" }}
           >
             <Menu className="h-5 w-5" />
           </button>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Link href="/dashboard" className="hover:text-foreground">
+          <div className="flex items-center gap-1.5 text-[12px]" style={{ color: "rgba(0,0,0,0.35)" }}>
+            <Link href="/dashboard" className="hover:opacity-70 transition-opacity">
               Dashboard
             </Link>
             {currentItem && (
               <>
                 <ChevronRight className="h-3 w-3" />
-                <span className="text-foreground">{currentItem.label}</span>
+                <span style={{ color: "#0D1016" }}>{currentItem.label}</span>
               </>
             )}
           </div>
-          <div className="ml-auto">
-            <ThemeSwitcher />
-          </div>
         </header>
+
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>

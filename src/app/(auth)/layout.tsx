@@ -1,43 +1,71 @@
 "use client";
 
-import ThemeSwitcher from "@/components/ui/ThemeSwitcher";
-
-export default function AuthLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen">
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-accent to-purple-600 items-center justify-center p-12 relative">
-        <div className="absolute top-4 right-4">
-          <ThemeSwitcher />
+      {/* Left panel — dark, matches homepage nav/hero */}
+      <div
+        className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12"
+        style={{ background: "#0D1016" }}
+      >
+        <div
+          className="text-white font-semibold text-[18px]"
+          style={{ letterSpacing: "-0.5px" }}
+        >
+          AI<span style={{ color: "rgba(255,255,255,0.3)", fontWeight: 300 }}>Comply</span>
         </div>
-        <div className="max-w-md">
-          <h1 className="text-4xl font-bold text-white mb-6">AIComply</h1>
-          <p className="text-lg text-white/80 leading-relaxed">
-            Piattaforma Algorithmic Trust per la conformità al Regolamento UE
-            2024/1689 sull&apos;Intelligenza Artificiale.
+
+        <div>
+          <p
+            className="text-[11px] font-semibold uppercase mb-6"
+            style={{ color: "rgba(255,255,255,0.25)", letterSpacing: "1.5px" }}
+          >
+            Regolamento UE 2024/1689
           </p>
-          <div className="mt-12 space-y-4">
+          <h2
+            className="text-white mb-6"
+            style={{ fontSize: "36px", fontWeight: 400, letterSpacing: "-1.5px", lineHeight: 1.1 }}
+          >
+            Compliance AI Act.<br />
+            <span style={{ color: "rgba(255,255,255,0.35)" }}>Automatizzata.</span>
+          </h2>
+          <div className="space-y-3">
             {[
-              "Evidence Layer immutabile con hash crittografico",
-              "AIA-Architect: Dossier Vivente Allegato IV",
-              "Rights-Simulator: FRIA con Red Teaming",
-              "Guardian-Agent: sorveglianza runtime",
+              "Evidence Layer immutabile SHA-256",
+              "AIA-Architect — Dossier Vivente Allegato IV",
+              "Rights-Simulator — FRIA automatizzato",
+              "Guardian-Agent — sorveglianza runtime",
             ].map((item) => (
               <div key={item} className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-white/40" />
-                <span className="text-white/70 text-sm">{item}</span>
+                <div
+                  className="w-1 h-1 rounded-full flex-shrink-0"
+                  style={{ background: "rgba(255,255,255,0.25)" }}
+                />
+                <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.45)" }}>
+                  {item}
+                </span>
               </div>
             ))}
           </div>
         </div>
+
+        <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.2)" }}>
+          © 2025 AIComply. Tutti i diritti riservati.
+        </p>
       </div>
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-md">
-          <div className="flex justify-end mb-4 lg:hidden">
-            <ThemeSwitcher />
+
+      {/* Right panel — white, clean */}
+      <div
+        className="flex-1 flex items-center justify-center p-6"
+        style={{ background: "#FAFAF9" }}
+      >
+        <div className="w-full max-w-[400px]">
+          {/* Mobile logo */}
+          <div
+            className="lg:hidden text-[18px] font-semibold mb-10"
+            style={{ color: "#0D1016", letterSpacing: "-0.5px" }}
+          >
+            AI<span style={{ color: "rgba(0,0,0,0.25)", fontWeight: 300 }}>Comply</span>
           </div>
           {children}
         </div>
