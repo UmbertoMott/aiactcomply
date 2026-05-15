@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIComply — Homepage Design v2</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, 'Helvetica Neue', sans-serif;
+    background: #111;
+    color: #fff;
+    font-size: 14px;
+  }
+
+  /* SCALE WRAPPER */
+  .scale-wrap {
+    transform: scale(0.7);
+    transform-origin: top center;
+    width: 143%;
+    margin-left: -21.5%;
+  }
+
+  /* ── NAV ── */
+  .nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(13, 16, 22, 0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .nav-logo {
+    font-size: 17px; font-weight: 600; letter-spacing: -0.5px; color: #fff;
+  }
+  .nav-logo span { color: rgba(255,255,255,0.45); font-weight: 300; }
+  .nav-links {
+    display: flex; gap: 32px;
+    font-size: 13px; color: rgba(255,255,255,0.55); font-weight: 400;
+  }
+  .nav-actions { display: flex; gap: 12px; align-items: center; }
+  .nav-login {
+    font-size: 13px; color: rgba(255,255,255,0.55); cursor: pointer;
+  }
+  .nav-cta {
+    font-size: 13px; font-weight: 500; color: #0D1016;
+    background: #fff; padding: 8px 20px;
+    border-radius: 100px; cursor: pointer;
+    letter-spacing: -0.2px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: #0D1016;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 80px 48px 100px;
+    position: relative; overflow: hidden;
+    text-align: center;
+  }
+
+  /* Mesh gradient background */
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(30, 58, 138, 0.35) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 90%, rgba(17, 24, 83, 0.4) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 50% 50%, rgba(15, 23, 60, 0.3) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Subtle grid */
+  .hero::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 64px 64px;
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.65);
+    font-size: 12px; letter-spacing: 0.3px;
+    padding: 6px 16px; border-radius: 100px;
+    margin-bottom: 36px; position: relative; z-index: 1;
+  }
+  .hero-badge-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #3b82f6;
+    box-shadow: 0 0 8px rgba(59,130,246,0.8);
+  }
+
+  .hero-h1 {
+    font-size: 68px; font-weight: 400;
+    letter-spacing: -3px; line-height: 1.0;
+    color: #fff; max-width: 820px;
+    position: relative; z-index: 1;
+    margin-bottom: 24px;
+  }
+  .hero-h1 em {
+    font-style: normal;
+    background: linear-gradient(135deg, #93c5fd 0%, #6366f1 50%, #818cf8 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  .hero-sub {
+    font-size: 18px; font-weight: 300;
+    color: rgba(255,255,255,0.5);
+    max-width: 520px; line-height: 1.6;
+    letter-spacing: -0.2px;
+    position: relative; z-index: 1;
+    margin-bottom: 44px;
+  }
+
+  .hero-actions {
+    display: flex; gap: 12px; justify-content: center;
+    position: relative; z-index: 1;
+    margin-bottom: 72px;
+  }
+  .btn-primary {
+    font-size: 14px; font-weight: 500;
+    background: #fff; color: #0D1016;
+    padding: 13px 28px; border-radius: 100px;
+    cursor: pointer; letter-spacing: -0.3px;
+  }
+  .btn-secondary {
+    font-size: 14px; font-weight: 400;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.75);
+    padding: 13px 28px; border-radius: 100px;
+    cursor: pointer; letter-spacing: -0.3px;
+  }
+
+  /* Product screenshot mockup */
+  .hero-visual {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 900px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px; overflow: hidden;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.05),
+      0 40px 80px rgba(0,0,0,0.6),
+      0 0 120px rgba(59,130,246,0.08);
+  }
+  .hero-visual-bar {
+    background: rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: rgba(255,255,255,0.15); }
+  .dot-y { background: rgba(255,255,255,0.15); }
+  .dot-g { background: rgba(255,255,255,0.15); }
+  .hero-visual-url {
+    margin: 0 auto;
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px; padding: 4px 16px;
+    font-size: 11px; color: rgba(255,255,255,0.3);
+  }
+  .hero-visual-body {
+    padding: 28px;
+    display: grid; grid-template-columns: 220px 1fr; gap: 16px;
+    min-height: 280px;
+  }
+
+  /* Sidebar */
+  .mock-sidebar {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px; padding: 16px;
+  }
+  .mock-sidebar-logo {
+    font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8);
+    margin-bottom: 20px; letter-spacing: -0.3px;
+  }
+  .mock-nav-item {
+    font-size: 11px; color: rgba(255,255,255,0.35);
+    padding: 8px 10px; border-radius: 6px; margin-bottom: 2px;
+  }
+  .mock-nav-item.active {
+    background: rgba(59,130,246,0.15);
+    color: rgba(255,255,255,0.8);
+  }
+
+  /* Main content area */
+  .mock-main { display: flex; flex-direction: column; gap: 12px; }
+  .mock-header-row {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .mock-title {
+    font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.85);
+    letter-spacing: -0.4px;
+  }
+  .mock-badge-compliant {
+    font-size: 10px; font-weight: 600;
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80; border-radius: 100px;
+    padding: 3px 10px;
+    border: 1px solid rgba(74,222,128,0.2);
+  }
+  .mock-cards-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+  .mock-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px; padding: 14px;
+  }
+  .mock-card-label { font-size: 10px; color: rgba(255,255,255,0.35); margin-bottom: 6px; }
+  .mock-card-value { font-size: 22px; font-weight: 600; color: rgba(255,255,255,0.85); letter-spacing: -0.8px; }
+  .mock-card-sub { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+  .mock-progress-section {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px; padding: 14px;
+  }
+  .mock-progress-label { font-size: 10px; color: rgba(255,255,255,0.35); margin-bottom: 8px; display: flex; justify-content: space-between; }
+  .mock-progress-bar { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+  .mock-progress-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, #3b82f6, #6366f1); }
+
+  /* ── SECTION SHARED ── */
+  .section-light {
+    background: #FAFAF9;
+    padding: 100px 48px;
+    color: #0D1016;
+  }
+  .section-dark {
+    background: #0D1016;
+    padding: 100px 48px;
+    color: #fff;
+  }
+  .section-inner { max-width: 960px; margin: 0 auto; }
+
+  .section-eyebrow {
+    font-size: 12px; font-weight: 500; letter-spacing: 1.5px;
+    text-transform: uppercase; color: rgba(0,0,0,0.35);
+    margin-bottom: 16px;
+  }
+  .section-eyebrow-light { color: rgba(255,255,255,0.35); }
+
+  .section-h2 {
+    font-size: 48px; font-weight: 400; letter-spacing: -2px;
+    line-height: 1.05; color: #0D1016; max-width: 640px;
+    margin-bottom: 60px;
+  }
+  .section-h2-light { color: #fff; }
+
+  /* ── PAIN SECTION ── */
+  .pain-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+  .pain-card {
+    border-top: 1px solid rgba(0,0,0,0.1);
+    padding: 28px 0 0 0;
+  }
+  .pain-number {
+    font-size: 40px; font-weight: 300; letter-spacing: -2px;
+    color: #0D1016; margin-bottom: 8px;
+  }
+  .pain-label { font-size: 13px; color: rgba(0,0,0,0.45); line-height: 1.5; }
+
+  /* ── STEPPER ── */
+  .stepper-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+  .stepper-steps { display: flex; flex-direction: column; gap: 0; }
+  .step {
+    display: flex; gap: 24px;
+    padding: 28px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    cursor: pointer;
+  }
+  .step:first-child { padding-top: 0; }
+  .step-num {
+    font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.25);
+    width: 24px; flex-shrink: 0; padding-top: 2px;
+  }
+  .step-content { flex: 1; }
+  .step-title {
+    font-size: 16px; font-weight: 500; color: rgba(255,255,255,0.85);
+    letter-spacing: -0.4px; margin-bottom: 8px;
+  }
+  .step-desc { font-size: 13px; color: rgba(255,255,255,0.4); line-height: 1.6; }
+  .step-tags { display: flex; gap: 6px; margin-top: 12px; }
+  .step-tag {
+    font-size: 10px; color: rgba(255,255,255,0.35);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 3px 10px; border-radius: 100px;
+  }
+  .step.active .step-num { color: #3b82f6; }
+  .step.active .step-title { color: #fff; }
+  .step.active .step-desc { color: rgba(255,255,255,0.6); }
+
+  /* Stepper visual */
+  .stepper-visual {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    position: sticky; top: 80px;
+  }
+  .sv-header {
+    padding: 14px 18px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-size: 11px; color: rgba(255,255,255,0.3);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sv-indicator { width: 6px; height: 6px; border-radius: 50%; background: #3b82f6; box-shadow: 0 0 8px rgba(59,130,246,0.8); }
+  .sv-body { padding: 20px; min-height: 320px; }
+
+  /* Risk assessment visual */
+  .ra-list { display: flex; flex-direction: column; gap: 10px; }
+  .ra-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: rgba(255,255,255,0.04); border-radius: 8px; border: 1px solid rgba(255,255,255,0.07); }
+  .ra-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .ra-dot.high { background: #ef4444; box-shadow: 0 0 8px rgba(239,68,68,0.5); }
+  .ra-dot.med { background: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.4); }
+  .ra-dot.low { background: #22c55e; box-shadow: 0 0 8px rgba(34,197,94,0.4); }
+  .ra-name { font-size: 12px; color: rgba(255,255,255,0.7); flex: 1; letter-spacing: -0.2px; }
+  .ra-badge { font-size: 10px; padding: 2px 8px; border-radius: 100px; font-weight: 500; }
+  .ra-badge.high { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+  .ra-badge.med { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
+  .ra-badge.low { background: rgba(34,197,94,0.12); color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
+  .ra-progress { width: 60px; height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+  .ra-fill { height: 100%; border-radius: 2px; }
+
+  /* ── SOCIAL PROOF ── */
+  .stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 40px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 48px; }
+  .stat-value { font-size: 44px; font-weight: 300; letter-spacing: -2px; color: #0D1016; margin-bottom: 4px; }
+  .stat-label { font-size: 13px; color: rgba(0,0,0,0.45); }
+
+  /* ── CTA FINAL ── */
+  .cta-inner {
+    max-width: 680px; margin: 0 auto; text-align: center;
+  }
+  .cta-h2 {
+    font-size: 52px; font-weight: 400; letter-spacing: -2.5px;
+    line-height: 1.05; color: #fff; margin-bottom: 20px;
+  }
+  .cta-sub { font-size: 16px; color: rgba(255,255,255,0.45); font-weight: 300; margin-bottom: 36px; }
+  .cta-actions { display: flex; gap: 12px; justify-content: center; }
+
+  /* ── NOTE ── */
+  .design-note {
+    background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 8px; padding: 14px 18px;
+    font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.6;
+    margin-top: 8px;
+  }
+
+  /* Approve buttons */
+  .approve-row { display: flex; gap: 12px; justify-content: center; padding: 40px 48px; background: #111; }
+  .approve-btn {
+    padding: 12px 32px; border-radius: 100px; font-size: 13px; font-weight: 500;
+    cursor: pointer; border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.05);
+    transition: all 0.2s;
+  }
+  .approve-btn.yes { background: rgba(59,130,246,0.15); border-color: rgba(59,130,246,0.3); color: #93c5fd; }
+</style>
+</head>
+<body>
+
+<div class="scale-wrap">
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">AI<span>Comply</span></div>
+  <div class="nav-links">
+    <span>Prodotto</span>
+    <span>Prezzi</span>
+    <span>Risorse</span>
+    <span>Azienda</span>
+  </div>
+  <div class="nav-actions">
+    <span class="nav-login">Accedi</span>
+    <span class="nav-cta">Prenota demo</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">
+    <div class="hero-badge-dot"></div>
+    EU AI Act — In vigore agosto 2026
+  </div>
+
+  <h1 class="hero-h1">
+    AI Act compliance,<br><em>senza compromessi.</em>
+  </h1>
+
+  <p class="hero-sub">
+    AIComply automatizza risk assessment, documentazione e integrazione nei tuoi workflow. Dal caos normativo alla conformità certificata.
+  </p>
+
+  <div class="hero-actions">
+    <div class="btn-primary">Prenota una demo gratuita</div>
+    <div class="btn-secondary">Scopri come funziona</div>
+  </div>
+
+  <!-- Product screenshot -->
+  <div class="hero-visual">
+    <div class="hero-visual-bar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <div class="hero-visual-url">app.aicomply.eu</div>
+    </div>
+    <div class="hero-visual-body">
+      <!-- Sidebar -->
+      <div class="mock-sidebar">
+        <div class="mock-sidebar-logo">AIComply</div>
+        <div class="mock-nav-item active">Dashboard</div>
+        <div class="mock-nav-item">Risk Assessment</div>
+        <div class="mock-nav-item">Documenti</div>
+        <div class="mock-nav-item">Integrazioni</div>
+        <div class="mock-nav-item">Monitoraggio</div>
+      </div>
+      <!-- Main content -->
+      <div class="mock-main">
+        <div class="mock-header-row">
+          <div class="mock-title">Compliance Overview</div>
+          <div class="mock-badge-compliant">Compliant</div>
+        </div>
+        <div class="mock-cards-row">
+          <div class="mock-card">
+            <div class="mock-card-label">Sistemi mappati</div>
+            <div class="mock-card-value">12</div>
+            <div class="mock-card-sub">3 alto rischio</div>
+          </div>
+          <div class="mock-card">
+            <div class="mock-card-label">Documenti generati</div>
+            <div class="mock-card-value">47</div>
+            <div class="mock-card-sub">Aggiornati automaticamente</div>
+          </div>
+          <div class="mock-card">
+            <div class="mock-card-label">Prossima scadenza</div>
+            <div class="mock-card-value">14d</div>
+            <div class="mock-card-sub">Review Q2 2026</div>
+          </div>
+        </div>
+        <div class="mock-progress-section">
+          <div class="mock-progress-label">
+            <span>Completamento requisiti AI Act</span>
+            <span style="color:rgba(255,255,255,0.6); font-weight:500;">84%</span>
+          </div>
+          <div class="mock-progress-bar">
+            <div class="mock-progress-fill" style="width:84%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="design-note" style="max-width:900px; margin-top:20px;">
+    In produzione: screenshot reali del tool animati con Framer Motion — fade-in + leggero translate-up all'entrata nella viewport. Il browser mock mostra dati live del cliente.
+  </div>
+</section>
+
+<!-- PAIN SECTION — light -->
+<section class="section-light">
+  <div class="section-inner">
+    <div class="section-eyebrow">Il problema</div>
+    <h2 class="section-h2">La conformità normativa AI è un problema non risolto.</h2>
+    <div class="pain-grid">
+      <div class="pain-card">
+        <div class="pain-number">6–18</div>
+        <div class="pain-label">mesi per completare un audit di conformità AI manuale</div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-number">100+</div>
+        <div class="pain-label">requisiti dell'AI Act da mappare articolo per articolo</div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-number">35M€</div>
+        <div class="pain-label">sanzione massima per non conformità ai sistemi ad alto rischio</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STEPPER — dark -->
+<section class="section-dark">
+  <div class="section-inner">
+    <div class="section-eyebrow section-eyebrow-light">Come funziona</div>
+    <h2 class="section-h2 section-h2-light" style="margin-bottom:48px;">Da zero a compliant<br>in tre passaggi.</h2>
+
+    <div class="stepper-wrap">
+      <div class="stepper-steps">
+
+        <div class="step active">
+          <div class="step-num">01</div>
+          <div class="step-content">
+            <div class="step-title">Risk Assessment automatico</div>
+            <div class="step-desc">Descrivi il tuo sistema AI. AIComply lo classifica secondo l'AI Act — Alto, Limitato o Minimo rischio — e identifica ogni requisito applicabile in pochi minuti.</div>
+            <div class="step-tags">
+              <span class="step-tag">Classificazione automatica</span>
+              <span class="step-tag">Gap analysis</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-content">
+            <div class="step-title">Documentazione generata</div>
+            <div class="step-desc">Technical Documentation, Conformity Declaration, Risk Register. Generati automaticamente, sempre aggiornati, pronti per l'audit di qualsiasi autorità di vigilanza.</div>
+            <div class="step-tags">
+              <span class="step-tag">PDF / DOCX export</span>
+              <span class="step-tag">Versionato</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-content">
+            <div class="step-title">Integrazione nel workflow</div>
+            <div class="step-desc">Jira, Confluence, GitHub. I task di conformità entrano direttamente nel backlog del tuo team. Nessun silos separato, nessuna duplicazione di lavoro.</div>
+            <div class="step-tags">
+              <span class="step-tag">Jira</span>
+              <span class="step-tag">Confluence</span>
+              <span class="step-tag">GitHub</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Visual panel -->
+      <div class="stepper-visual">
+        <div class="sv-header">
+          <div class="sv-indicator"></div>
+          Risk Assessment — Sistema CRM AI
+        </div>
+        <div class="sv-body">
+          <div class="ra-list">
+            <div style="font-size:11px; color:rgba(255,255,255,0.3); margin-bottom:12px; letter-spacing:0.5px; text-transform:uppercase;">Sistemi rilevati</div>
+            <div class="ra-item">
+              <div class="ra-dot high"></div>
+              <div class="ra-name">Modello credit scoring</div>
+              <div class="ra-badge high">Alto rischio</div>
+              <div class="ra-progress"><div class="ra-fill" style="width:90%; background:#ef4444;"></div></div>
+            </div>
+            <div class="ra-item">
+              <div class="ra-dot high"></div>
+              <div class="ra-name">Facial recognition ingresso</div>
+              <div class="ra-badge high">Alto rischio</div>
+              <div class="ra-progress"><div class="ra-fill" style="width:85%; background:#ef4444;"></div></div>
+            </div>
+            <div class="ra-item">
+              <div class="ra-dot med"></div>
+              <div class="ra-name">Chatbot customer support</div>
+              <div class="ra-badge med">Limitato</div>
+              <div class="ra-progress"><div class="ra-fill" style="width:50%; background:#f59e0b;"></div></div>
+            </div>
+            <div class="ra-item">
+              <div class="ra-dot low"></div>
+              <div class="ra-name">AI content recommendation</div>
+              <div class="ra-badge low">Minimo</div>
+              <div class="ra-progress"><div class="ra-fill" style="width:20%; background:#22c55e;"></div></div>
+            </div>
+          </div>
+          <div style="margin-top:20px; padding:12px 14px; background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.15); border-radius:8px;">
+            <div style="font-size:11px; color:#93c5fd; margin-bottom:4px; font-weight:500;">Assessment completato</div>
+            <div style="font-size:11px; color:rgba(255,255,255,0.4);">14 requisiti identificati · 3 documenti da generare · 8 task Jira creati</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- STATS — light -->
+<section class="section-light">
+  <div class="section-inner">
+    <div class="section-eyebrow">Adottato in Europa</div>
+    <div class="stats-row">
+      <div>
+        <div class="stat-value">50+</div>
+        <div class="stat-label">aziende europee conformi con AIComply</div>
+      </div>
+      <div>
+        <div class="stat-value">300+</div>
+        <div class="stat-label">sistemi AI classificati e documentati</div>
+      </div>
+      <div>
+        <div class="stat-value">&lt;48h</div>
+        <div class="stat-label">dal primo accesso al primo assessment completo</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL — dark -->
+<section class="section-dark">
+  <div class="cta-inner">
+    <h2 class="cta-h2">Pronti a essere<br>compliant?</h2>
+    <p class="cta-sub">Demo di 30 minuti. Ti mostriamo il tuo primo risk assessment in tempo reale — sul tuo sistema AI, non su un esempio generico.</p>
+    <div class="cta-actions">
+      <div class="btn-primary" style="font-size:14px;">Prenota demo gratuita</div>
+      <div class="btn-secondary" style="font-size:14px;">Parla con il team</div>
+    </div>
+  </div>
+</section>
+
+</div><!-- end scale-wrap -->
+
+<!-- APPROVE -->
+<div class="approve-row">
+  <div style="font-size:13px; color:rgba(255,255,255,0.4); display:flex; align-items:center; margin-right:8px;">Questo design ti convince?</div>
+  <button class="approve-btn yes" onclick="this.textContent='✓ Approvato'; this.style.background='rgba(34,197,94,0.2)'; this.style.borderColor='rgba(34,197,94,0.4)'; this.style.color='#4ade80'">
+    Approvo, andiamo avanti
+  </button>
+  <button class="approve-btn" onclick="this.textContent='Segnalato'">
+    Voglio modifiche
+  </button>
+</div>
+
+</body>
+</html>

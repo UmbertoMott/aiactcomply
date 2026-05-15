@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIComply — Homepage v3 (con Tool Gallery)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, 'Helvetica Neue', sans-serif; background: #111; color: #fff; font-size: 14px; }
+
+  .scale-wrap { transform: scale(0.7); transform-origin: top center; width: 143%; margin-left: -21.5%; }
+
+  /* NAV */
+  .nav { display: flex; align-items: center; justify-content: space-between; padding: 18px 48px; background: rgba(13,16,22,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .nav-logo { font-size: 17px; font-weight: 600; letter-spacing: -0.5px; color: #fff; }
+  .nav-logo span { color: rgba(255,255,255,0.35); font-weight: 300; }
+  .nav-links { display: flex; gap: 32px; font-size: 13px; color: rgba(255,255,255,0.45); }
+  .nav-cta { font-size: 13px; font-weight: 500; color: #0D1016; background: #fff; padding: 8px 20px; border-radius: 100px; }
+  .nav-login { font-size: 13px; color: rgba(255,255,255,0.45); margin-right: 4px; }
+
+  /* HERO */
+  .hero { background: #0D1016; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 48px 100px; position: relative; overflow: hidden; text-align: center; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 20% 10%, rgba(30,58,138,0.35) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 80% 90%, rgba(17,24,83,0.4) 0%, transparent 60%); pointer-events: none; }
+  .hero::after { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px); background-size: 64px 64px; pointer-events: none; }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.55); font-size: 12px; padding: 6px 16px; border-radius: 100px; margin-bottom: 36px; position: relative; z-index: 1; }
+  .hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #3b82f6; box-shadow: 0 0 8px rgba(59,130,246,0.8); }
+  .hero-h1 { font-size: 68px; font-weight: 400; letter-spacing: -3px; line-height: 1.0; color: #fff; max-width: 820px; position: relative; z-index: 1; margin-bottom: 24px; }
+  .hero-h1 em { font-style: normal; background: linear-gradient(135deg, #93c5fd 0%, #6366f1 50%, #818cf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-sub { font-size: 18px; font-weight: 300; color: rgba(255,255,255,0.45); max-width: 520px; line-height: 1.6; letter-spacing: -0.2px; position: relative; z-index: 1; margin-bottom: 44px; }
+  .hero-actions { display: flex; gap: 12px; justify-content: center; position: relative; z-index: 1; margin-bottom: 72px; }
+  .btn-primary { font-size: 14px; font-weight: 500; background: #fff; color: #0D1016; padding: 13px 28px; border-radius: 100px; cursor: pointer; }
+  .btn-secondary { font-size: 14px; font-weight: 400; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); padding: 13px 28px; border-radius: 100px; cursor: pointer; }
+
+  /* Hero visual */
+  .hero-visual { position: relative; z-index: 1; width: 100%; max-width: 900px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 120px rgba(59,130,246,0.08); }
+  .hv-bar { background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.08); padding: 12px 16px; display: flex; align-items: center; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.12); }
+  .hv-url { margin: 0 auto; background: rgba(255,255,255,0.05); border-radius: 6px; padding: 4px 16px; font-size: 11px; color: rgba(255,255,255,0.25); }
+  .hv-body { padding: 24px; display: grid; grid-template-columns: 200px 1fr; gap: 16px; min-height: 260px; }
+  .mock-sidebar { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 14px; }
+  .mock-sidebar-logo { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.75); margin-bottom: 18px; }
+  .mock-nav-item { font-size: 11px; color: rgba(255,255,255,0.3); padding: 7px 10px; border-radius: 5px; margin-bottom: 2px; }
+  .mock-nav-item.active { background: rgba(59,130,246,0.15); color: rgba(255,255,255,0.8); }
+  .mock-main { display: flex; flex-direction: column; gap: 12px; }
+  .mock-header-row { display: flex; align-items: center; justify-content: space-between; }
+  .mock-title { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.85); letter-spacing: -0.4px; }
+  .mock-badge-ok { font-size: 10px; font-weight: 600; background: rgba(34,197,94,0.15); color: #4ade80; border-radius: 100px; padding: 3px 10px; border: 1px solid rgba(74,222,128,0.2); }
+  .mock-cards-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+  .mock-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px; }
+  .mock-card-label { font-size: 10px; color: rgba(255,255,255,0.3); margin-bottom: 5px; }
+  .mock-card-value { font-size: 20px; font-weight: 600; color: rgba(255,255,255,0.85); letter-spacing: -0.8px; }
+  .mock-card-sub { font-size: 10px; color: rgba(255,255,255,0.25); margin-top: 2px; }
+  .mock-prog { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 12px; }
+  .mock-prog-top { font-size: 10px; color: rgba(255,255,255,0.3); margin-bottom: 8px; display: flex; justify-content: space-between; }
+  .mock-prog-bar { height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+  .mock-prog-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #6366f1); border-radius: 2px; }
+
+  /* SECTIONS */
+  .section-light { background: #FAFAF9; padding: 100px 48px; color: #0D1016; }
+  .section-dark { background: #0D1016; padding: 100px 48px; color: #fff; }
+  .section-inner { max-width: 960px; margin: 0 auto; }
+  .section-eyebrow { font-size: 12px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(0,0,0,0.3); margin-bottom: 16px; }
+  .section-eyebrow-light { color: rgba(255,255,255,0.3); }
+  .section-h2 { font-size: 48px; font-weight: 400; letter-spacing: -2px; line-height: 1.05; color: #0D1016; max-width: 640px; margin-bottom: 60px; }
+  .section-h2-light { color: #fff; }
+
+  /* PAIN */
+  .pain-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+  .pain-card { border-top: 1px solid rgba(0,0,0,0.1); padding: 28px 0 0; }
+  .pain-number { font-size: 40px; font-weight: 300; letter-spacing: -2px; color: #0D1016; margin-bottom: 8px; }
+  .pain-label { font-size: 13px; color: rgba(0,0,0,0.45); line-height: 1.5; }
+
+  /* STEPPER */
+  .stepper-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+  .stepper-steps { display: flex; flex-direction: column; }
+  .step { display: flex; gap: 24px; padding: 28px 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .step:first-child { padding-top: 0; }
+  .step-num { font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.2); width: 24px; flex-shrink: 0; padding-top: 2px; }
+  .step-content { flex: 1; }
+  .step-title { font-size: 16px; font-weight: 500; color: rgba(255,255,255,0.5); letter-spacing: -0.4px; margin-bottom: 8px; }
+  .step-desc { font-size: 13px; color: rgba(255,255,255,0.25); line-height: 1.6; }
+  .step-tags { display: flex; gap: 6px; margin-top: 12px; }
+  .step-tag { font-size: 10px; color: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.08); padding: 3px 10px; border-radius: 100px; }
+  .step.active .step-num { color: #3b82f6; }
+  .step.active .step-title { color: #fff; }
+  .step.active .step-desc { color: rgba(255,255,255,0.55); }
+  .step.active .step-tag { color: rgba(255,255,255,0.4); border-color: rgba(255,255,255,0.12); }
+  .stepper-visual { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+  .sv-header { padding: 14px 18px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 11px; color: rgba(255,255,255,0.3); display: flex; align-items: center; gap: 8px; }
+  .sv-dot { width: 6px; height: 6px; border-radius: 50%; background: #3b82f6; box-shadow: 0 0 8px rgba(59,130,246,0.8); }
+  .sv-body { padding: 20px; }
+  .ra-list { display: flex; flex-direction: column; gap: 8px; }
+  .ra-sub { font-size: 10px; color: rgba(255,255,255,0.25); margin-bottom: 10px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .ra-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: rgba(255,255,255,0.04); border-radius: 7px; border: 1px solid rgba(255,255,255,0.06); }
+  .ra-dot-c { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .ra-name { font-size: 11px; color: rgba(255,255,255,0.65); flex: 1; }
+  .ra-badge { font-size: 9px; padding: 2px 8px; border-radius: 100px; font-weight: 500; }
+  .high { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.18); }
+  .high-dot { background: #ef4444; box-shadow: 0 0 6px rgba(239,68,68,0.5); }
+  .med { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.18); }
+  .med-dot { background: #f59e0b; }
+  .low { background: rgba(34,197,94,0.12); color: #4ade80; border: 1px solid rgba(34,197,94,0.18); }
+  .low-dot { background: #22c55e; }
+  .ra-result { margin-top: 14px; padding: 11px 13px; background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.15); border-radius: 8px; font-size: 11px; }
+  .ra-result-title { color: #93c5fd; font-weight: 500; margin-bottom: 3px; }
+  .ra-result-sub { color: rgba(255,255,255,0.35); }
+
+  /* STATS */
+  .stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 40px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 48px; }
+  .stat-value { font-size: 44px; font-weight: 300; letter-spacing: -2px; color: #0D1016; margin-bottom: 4px; }
+  .stat-label { font-size: 13px; color: rgba(0,0,0,0.4); line-height: 1.5; }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     TOOL GALLERY — nuova sezione
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  .section-tools {
+    background: #FAFAF9;
+    padding: 100px 48px;
+    color: #0D1016;
+  }
+  .tools-header { max-width: 960px; margin: 0 auto 56px; }
+  .tools-grid {
+    max-width: 960px; margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 20px;
+  }
+
+  /* Ogni tool card */
+  .tool-card {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid rgba(0,0,0,0.07);
+    background: #fff;
+    transition: transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94),
+                box-shadow 0.35s cubic-bezier(0.25,0.46,0.45,0.94);
+  }
+  .tool-card:hover {
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
+  }
+  /* Card grande (sinistra, occupa 2 righe) */
+  .tool-card.tall { grid-row: span 2; }
+
+  /* Screenshot area */
+  .tool-screenshot {
+    width: 100%; overflow: hidden;
+    position: relative;
+  }
+  .tool-card.tall .tool-screenshot { height: 380px; }
+  .tool-card:not(.tall) .tool-screenshot { height: 200px; }
+
+  /* Overlay al hover */
+  .tool-screenshot::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(13,16,22,0);
+    transition: background 0.3s ease;
+  }
+  .tool-card:hover .tool-screenshot::after {
+    background: rgba(13,16,22,0.04);
+  }
+
+  /* Screenshot inner (dark UI mock) */
+  .tool-ui {
+    width: 100%; height: 100%;
+    background: #0D1016;
+    padding: 0;
+    transition: transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
+  }
+  .tool-card:hover .tool-ui {
+    transform: scale(1.03) translateY(-4px);
+  }
+  .tool-ui-bar {
+    background: rgba(255,255,255,0.04);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .tool-ui-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.1); }
+  .tool-ui-body { padding: 16px; }
+
+  /* Info area */
+  .tool-info {
+    padding: 20px 24px 22px;
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 12px;
+  }
+  .tool-info-left { flex: 1; }
+  .tool-name { font-size: 15px; font-weight: 600; color: #0D1016; letter-spacing: -0.4px; margin-bottom: 4px; }
+  .tool-desc { font-size: 12px; color: rgba(0,0,0,0.45); line-height: 1.5; }
+  .tool-arrow {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: rgba(0,0,0,0.35);
+    flex-shrink: 0; margin-top: 2px;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+  }
+  .tool-card:hover .tool-arrow {
+    background: #0D1016; border-color: #0D1016; color: #fff;
+  }
+
+  /* ── Tool 1: Risk Assessment (tall) ── */
+  .tool-ui-risk { height: 100%; }
+  .risk-header { padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .risk-title-txt { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); letter-spacing: -0.3px; }
+  .risk-score-badge { font-size: 10px; font-weight: 600; background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); padding: 3px 10px; border-radius: 100px; }
+  .risk-items { padding: 0 16px; display: flex; flex-direction: column; gap: 7px; }
+  .risk-row { display: flex; align-items: center; gap: 10px; padding: 9px 11px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 7px; }
+  .risk-row-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .risk-row-name { font-size: 11px; color: rgba(255,255,255,0.6); flex: 1; }
+  .risk-row-tag { font-size: 9px; padding: 2px 7px; border-radius: 100px; font-weight: 500; }
+  .risk-bar { height: 2px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; margin-top: 8px; }
+  .risk-bar-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #6366f1); border-radius: 2px; }
+  .risk-summary { margin: 12px 16px 0; padding: 10px 12px; background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.15); border-radius: 7px; }
+  .risk-sum-title { font-size: 10px; color: #93c5fd; font-weight: 500; margin-bottom: 2px; }
+  .risk-sum-body { font-size: 10px; color: rgba(255,255,255,0.3); }
+
+  /* ── Tool 2: Doc generator ── */
+  .tool-ui-docs { padding: 16px; }
+  .doc-list { display: flex; flex-direction: column; gap: 6px; }
+  .doc-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; }
+  .doc-icon { width: 28px; height: 28px; border-radius: 5px; background: rgba(59,130,246,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .doc-icon-inner { width: 10px; height: 12px; background: rgba(147,197,253,0.6); border-radius: 1px; }
+  .doc-name { font-size: 11px; color: rgba(255,255,255,0.65); flex: 1; }
+  .doc-status { font-size: 9px; color: #4ade80; }
+  .doc-gen-btn { margin: 10px 0 0; width: 100%; padding: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; font-size: 11px; color: rgba(255,255,255,0.5); text-align: center; }
+
+  /* ── Tool 3: Integrations ── */
+  .tool-ui-int { padding: 16px; }
+  .int-list { display: flex; flex-direction: column; gap: 6px; }
+  .int-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; }
+  .int-logo { width: 24px; height: 24px; border-radius: 4px; flex-shrink: 0; }
+  .int-name { font-size: 11px; color: rgba(255,255,255,0.65); flex: 1; }
+  .int-connected { font-size: 9px; padding: 2px 7px; border-radius: 100px; }
+  .int-on { background: rgba(34,197,94,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.15); }
+  .int-off { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.08); }
+
+  /* CTA */
+  .cta-inner { max-width: 680px; margin: 0 auto; text-align: center; }
+  .cta-h2 { font-size: 52px; font-weight: 400; letter-spacing: -2.5px; line-height: 1.05; color: #fff; margin-bottom: 20px; }
+  .cta-sub { font-size: 16px; color: rgba(255,255,255,0.4); font-weight: 300; margin-bottom: 36px; line-height: 1.6; }
+  .cta-actions { display: flex; gap: 12px; justify-content: center; }
+
+  /* APPROVE */
+  .approve-row { display: flex; gap: 12px; justify-content: center; align-items: center; padding: 40px 48px; background: #111; }
+  .approve-btn { padding: 12px 32px; border-radius: 100px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.05); }
+  .approve-btn.yes { background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.25); color: #93c5fd; }
+</style>
+</head>
+<body>
+<div class="scale-wrap">
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">AI<span>Comply</span></div>
+  <div class="nav-links"><span>Prodotto</span><span>Prezzi</span><span>Risorse</span><span>Azienda</span></div>
+  <div style="display:flex;gap:12px;align-items:center;">
+    <span class="nav-login">Accedi</span>
+    <span class="nav-cta">Prenota demo</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge"><div class="hero-badge-dot"></div>EU AI Act — In vigore agosto 2026</div>
+  <h1 class="hero-h1">AI Act compliance,<br><em>senza compromessi.</em></h1>
+  <p class="hero-sub">AIComply automatizza risk assessment, documentazione e integrazione nei tuoi workflow. Dal caos normativo alla conformità certificata.</p>
+  <div class="hero-actions">
+    <div class="btn-primary">Prenota una demo gratuita</div>
+    <div class="btn-secondary">Scopri come funziona</div>
+  </div>
+  <div class="hero-visual">
+    <div class="hv-bar"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="hv-url">app.aicomply.eu</div></div>
+    <div class="hv-body">
+      <div class="mock-sidebar">
+        <div class="mock-sidebar-logo">AIComply</div>
+        <div class="mock-nav-item active">Dashboard</div>
+        <div class="mock-nav-item">Risk Assessment</div>
+        <div class="mock-nav-item">Documenti</div>
+        <div class="mock-nav-item">Integrazioni</div>
+      </div>
+      <div class="mock-main">
+        <div class="mock-header-row"><div class="mock-title">Compliance Overview</div><div class="mock-badge-ok">Compliant</div></div>
+        <div class="mock-cards-row">
+          <div class="mock-card"><div class="mock-card-label">Sistemi mappati</div><div class="mock-card-value">12</div><div class="mock-card-sub">3 alto rischio</div></div>
+          <div class="mock-card"><div class="mock-card-label">Documenti generati</div><div class="mock-card-value">47</div><div class="mock-card-sub">Aggiornati automaticamente</div></div>
+          <div class="mock-card"><div class="mock-card-label">Prossima scadenza</div><div class="mock-card-value">14d</div><div class="mock-card-sub">Review Q2 2026</div></div>
+        </div>
+        <div class="mock-prog">
+          <div class="mock-prog-top"><span>Completamento requisiti AI Act</span><span style="color:rgba(255,255,255,0.6);font-weight:500;">84%</span></div>
+          <div class="mock-prog-bar"><div class="mock-prog-fill" style="width:84%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAIN -->
+<section class="section-light">
+  <div class="section-inner">
+    <div class="section-eyebrow">Il problema</div>
+    <h2 class="section-h2">La conformità normativa AI è un problema non risolto.</h2>
+    <div class="pain-grid">
+      <div class="pain-card"><div class="pain-number">6–18</div><div class="pain-label">mesi per completare un audit di conformità AI manuale</div></div>
+      <div class="pain-card"><div class="pain-number">100+</div><div class="pain-label">requisiti dell'AI Act da mappare articolo per articolo</div></div>
+      <div class="pain-card"><div class="pain-number">35M€</div><div class="pain-label">sanzione massima per non conformità ai sistemi ad alto rischio</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- STEPPER -->
+<section class="section-dark">
+  <div class="section-inner">
+    <div class="section-eyebrow section-eyebrow-light">Come funziona</div>
+    <h2 class="section-h2 section-h2-light" style="margin-bottom:48px;">Da zero a compliant<br>in tre passaggi.</h2>
+    <div class="stepper-wrap">
+      <div class="stepper-steps">
+        <div class="step active">
+          <div class="step-num">01</div>
+          <div class="step-content">
+            <div class="step-title">Risk Assessment automatico</div>
+            <div class="step-desc">Descrivi il tuo sistema AI. AIComply lo classifica secondo l'AI Act — Alto, Limitato o Minimo rischio — e identifica ogni requisito applicabile in pochi minuti.</div>
+            <div class="step-tags"><span class="step-tag">Classificazione automatica</span><span class="step-tag">Gap analysis</span></div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-content">
+            <div class="step-title">Documentazione generata</div>
+            <div class="step-desc">Technical Documentation, Conformity Declaration, Risk Register. Generati automaticamente, sempre aggiornati, pronti per qualsiasi audit.</div>
+            <div class="step-tags"><span class="step-tag">PDF / DOCX export</span><span class="step-tag">Versionato</span></div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-content">
+            <div class="step-title">Integrazione nel workflow</div>
+            <div class="step-desc">Jira, Confluence, GitHub. I task di conformità entrano direttamente nel backlog del team. Nessun silos separato.</div>
+            <div class="step-tags"><span class="step-tag">Jira</span><span class="step-tag">Confluence</span><span class="step-tag">GitHub</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="stepper-visual">
+        <div class="sv-header"><div class="sv-dot"></div>Risk Assessment — Sistema CRM AI</div>
+        <div class="sv-body">
+          <div class="ra-list">
+            <div class="ra-sub">Sistemi rilevati</div>
+            <div class="ra-item"><div class="ra-dot-c high-dot"></div><div class="ra-name">Modello credit scoring</div><div class="ra-badge high">Alto rischio</div></div>
+            <div class="ra-item"><div class="ra-dot-c high-dot"></div><div class="ra-name">Facial recognition</div><div class="ra-badge high">Alto rischio</div></div>
+            <div class="ra-item"><div class="ra-dot-c med-dot"></div><div class="ra-name">Chatbot customer support</div><div class="ra-badge med">Limitato</div></div>
+            <div class="ra-item"><div class="ra-dot-c low-dot"></div><div class="ra-name">Content recommendation</div><div class="ra-badge low">Minimo</div></div>
+          </div>
+          <div class="ra-result"><div class="ra-result-title">Assessment completato</div><div class="ra-result-sub">14 requisiti identificati · 3 documenti da generare · 8 task Jira creati</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="section-light">
+  <div class="section-inner">
+    <div class="section-eyebrow">Adottato in Europa</div>
+    <div class="stats-row">
+      <div><div class="stat-value">50+</div><div class="stat-label">aziende europee conformi con AIComply</div></div>
+      <div><div class="stat-value">300+</div><div class="stat-label">sistemi AI classificati e documentati</div></div>
+      <div><div class="stat-value">&lt;48h</div><div class="stat-label">dal primo accesso al primo assessment completo</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     TOOL GALLERY — nuova sezione
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="section-tools">
+  <div class="tools-header">
+    <div class="section-eyebrow">Il prodotto</div>
+    <h2 class="section-h2" style="margin-bottom:0;">Tre strumenti.<br>Un'unica piattaforma.</h2>
+  </div>
+
+  <div class="tools-grid">
+
+    <!-- Card grande — Risk Assessment -->
+    <div class="tool-card tall" onclick="window.location='/risk-assessment'">
+      <div class="tool-screenshot">
+        <div class="tool-ui">
+          <div class="tool-ui-bar"><div class="tool-ui-dot"></div><div class="tool-ui-dot"></div><div class="tool-ui-dot"></div></div>
+          <div class="tool-ui-risk">
+            <div class="risk-header">
+              <div class="risk-title-txt">Risk Assessment</div>
+              <div class="risk-score-badge">84% compliant</div>
+            </div>
+            <div class="risk-items">
+              <div class="risk-row"><div class="risk-row-dot" style="background:#ef4444;box-shadow:0 0 6px rgba(239,68,68,0.5)"></div><div class="risk-row-name">Modello credit scoring</div><div class="risk-row-tag high">Alto rischio</div></div>
+              <div class="risk-row"><div class="risk-row-dot" style="background:#ef4444;box-shadow:0 0 6px rgba(239,68,68,0.5)"></div><div class="risk-row-name">Facial recognition ingresso</div><div class="risk-row-tag high">Alto rischio</div></div>
+              <div class="risk-row"><div class="risk-row-dot" style="background:#f59e0b"></div><div class="risk-row-name">Chatbot customer support</div><div class="risk-row-tag med">Limitato</div></div>
+              <div class="risk-row"><div class="risk-row-dot" style="background:#22c55e"></div><div class="risk-row-name">Content recommendation</div><div class="risk-row-tag low">Minimo</div></div>
+              <div class="risk-row"><div class="risk-row-dot" style="background:#22c55e"></div><div class="risk-row-name">Search personalizzata</div><div class="risk-row-tag low">Minimo</div></div>
+            </div>
+            <div class="risk-bar" style="margin:10px 16px 0;"><div class="risk-bar-fill" style="width:84%"></div></div>
+            <div class="risk-summary">
+              <div class="risk-sum-title">Gap analysis completata</div>
+              <div class="risk-sum-body">14 requisiti applicabili · 3 gap critici rilevati · Priorità automatica</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tool-info">
+        <div class="tool-info-left">
+          <div class="tool-name">Risk Assessment</div>
+          <div class="tool-desc">Classifica automaticamente i tuoi sistemi AI e identifica ogni requisito AI Act applicabile.</div>
+        </div>
+        <div class="tool-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- Card piccola — Doc Generator -->
+    <div class="tool-card" onclick="window.location='/documenti'">
+      <div class="tool-screenshot">
+        <div class="tool-ui">
+          <div class="tool-ui-bar"><div class="tool-ui-dot"></div><div class="tool-ui-dot"></div><div class="tool-ui-dot"></div></div>
+          <div class="tool-ui-docs">
+            <div class="doc-list">
+              <div class="doc-item"><div class="doc-icon"><div class="doc-icon-inner"></div></div><div class="doc-name">Technical Documentation</div><div class="doc-status">Generato</div></div>
+              <div class="doc-item"><div class="doc-icon"><div class="doc-icon-inner"></div></div><div class="doc-name">Conformity Declaration</div><div class="doc-status">Generato</div></div>
+              <div class="doc-item"><div class="doc-icon"><div class="doc-icon-inner" style="opacity:0.4"></div></div><div class="doc-name">Risk Register</div><div class="doc-status" style="color:rgba(255,255,255,0.3)">In corso...</div></div>
+            </div>
+            <div class="doc-gen-btn">Genera tutti i documenti</div>
+          </div>
+        </div>
+      </div>
+      <div class="tool-info">
+        <div class="tool-info-left">
+          <div class="tool-name">Generatore documenti</div>
+          <div class="tool-desc">Tutta la documentazione richiesta dall'AI Act, generata e aggiornata automaticamente.</div>
+        </div>
+        <div class="tool-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- Card piccola — Integrazioni -->
+    <div class="tool-card" onclick="window.location='/integrazioni'">
+      <div class="tool-screenshot">
+        <div class="tool-ui">
+          <div class="tool-ui-bar"><div class="tool-ui-dot"></div><div class="tool-ui-dot"></div><div class="tool-ui-dot"></div></div>
+          <div class="tool-ui-int">
+            <div class="int-list">
+              <div class="int-item"><div class="int-logo" style="background:rgba(59,130,246,0.2)"></div><div class="int-name">Jira</div><div class="int-connected int-on">Connesso</div></div>
+              <div class="int-item"><div class="int-logo" style="background:rgba(99,102,241,0.2)"></div><div class="int-name">Confluence</div><div class="int-connected int-on">Connesso</div></div>
+              <div class="int-item"><div class="int-logo" style="background:rgba(255,255,255,0.08)"></div><div class="int-name">GitHub</div><div class="int-connected int-off">Configura</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tool-info">
+        <div class="tool-info-left">
+          <div class="tool-name">Integrazioni</div>
+          <div class="tool-desc">Connetti AIComply ai tuoi strumenti. I task di compliance entrano nel backlog del team.</div>
+        </div>
+        <div class="tool-arrow">→</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA FINALE -->
+<section class="section-dark">
+  <div class="cta-inner">
+    <h2 class="cta-h2">Pronti a essere<br>compliant?</h2>
+    <p class="cta-sub">Demo di 30 minuti. Ti mostriamo il tuo primo risk assessment in tempo reale — sul tuo sistema AI, non su un esempio generico.</p>
+    <div class="cta-actions">
+      <div class="btn-primary">Prenota demo gratuita</div>
+      <div class="btn-secondary">Parla con il team</div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div class="approve-row">
+  <span style="font-size:13px;color:rgba(255,255,255,0.35);">Il design ti convince?</span>
+  <button class="approve-btn yes" onclick="this.textContent='✓ Approvato';this.style.background='rgba(34,197,94,0.15)';this.style.borderColor='rgba(34,197,94,0.3)';this.style.color='#4ade80'">Approvo, andiamo avanti</button>
+  <button class="approve-btn" onclick="this.textContent='Segnalato'">Voglio modifiche</button>
+</div>
+
+</body>
+</html>

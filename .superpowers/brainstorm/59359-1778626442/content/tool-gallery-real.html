@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tool Gallery — Real Screenshots</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #0a0a0a; color: #fff; padding: 40px; }
+
+  h2 { font-size: 28px; font-weight: 400; letter-spacing: -1px; color: #fff; margin-bottom: 8px; }
+  .subtitle { font-size: 14px; color: rgba(255,255,255,0.4); margin-bottom: 40px; }
+
+  /* GRID */
+  .tools-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 16px;
+    max-width: 960px;
+  }
+  .tool-card {
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid rgba(0,0,0,0.08);
+    transition: transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.35s cubic-bezier(0.25,0.46,0.45,0.94);
+  }
+  .tool-card:hover {
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.25), 0 4px 16px rgba(0,0,0,0.1);
+  }
+  .tool-card.tall { grid-row: span 2; }
+
+  .tool-screenshot { overflow: hidden; position: relative; }
+  .tool-card.tall .tool-screenshot { height: 420px; }
+  .tool-card:not(.tall) .tool-screenshot { height: 210px; }
+
+  .tool-ui {
+    width: 100%; height: 100%;
+    transition: transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
+  }
+  .tool-card:hover .tool-ui { transform: scale(1.03) translateY(-4px); }
+
+  /* SHARED UI CHROME */
+  .ui-topbar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    background: #f8f9fa;
+  }
+  .ui-dot { width: 9px; height: 9px; border-radius: 50%; }
+  .ui-dot-r { background: #ff5f57; }
+  .ui-dot-y { background: #ffbd2e; }
+  .ui-dot-g { background: #28c840; }
+  .ui-url { margin: 0 auto; font-size: 11px; color: #888; background: #efefef; border-radius: 4px; padding: 3px 12px; }
+
+  /* AI CLASSIFIER UI */
+  .classifier-wrap { display: flex; height: calc(100% - 36px); }
+  .cl-sidebar {
+    width: 160px; flex-shrink: 0;
+    background: #fff; border-right: 1px solid #f0f0f0;
+    padding: 14px 10px;
+  }
+  .cl-logo { font-size: 12px; font-weight: 700; color: #1a1a1a; margin-bottom: 18px; display: flex; align-items: center; gap: 6px; }
+  .cl-logo-icon { width: 16px; height: 16px; border-radius: 4px; background: linear-gradient(135deg, #3b82f6, #6366f1); }
+  .cl-nav-group { font-size: 9px; font-weight: 600; color: #999; letter-spacing: 0.8px; text-transform: uppercase; margin: 12px 0 6px; }
+  .cl-nav-item { font-size: 11px; color: #555; padding: 5px 8px; border-radius: 5px; margin-bottom: 1px; display: flex; align-items: center; justify-content: space-between; }
+  .cl-nav-item.active { background: #eff6ff; color: #1d4ed8; font-weight: 500; }
+  .cl-tag { font-size: 9px; background: #e0e7ff; color: #4338ca; border-radius: 3px; padding: 1px 5px; }
+  .cl-tag.red { background: #fee2e2; color: #dc2626; }
+  .cl-main { flex: 1; padding: 16px; background: #fafafa; overflow: hidden; }
+  .cl-title { font-size: 14px; font-weight: 700; color: #111; margin-bottom: 3px; }
+  .cl-sub { font-size: 10px; color: #777; margin-bottom: 12px; }
+  .cl-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+  .cl-tab { font-size: 10px; padding: 4px 10px; border-radius: 5px; color: #666; border: 1px solid #e5e7eb; }
+  .cl-tab.active { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+  .cl-files { background: #fff; border-radius: 7px; border: 1px solid #e5e7eb; overflow: hidden; }
+  .cl-file { display: flex; align-items: center; justify-content: space-between; padding: 7px 12px; border-bottom: 1px solid #f3f4f6; font-size: 10px; color: #374151; }
+  .cl-file:last-child { border-bottom: none; }
+  .cl-badge { font-size: 9px; color: #dc2626; font-weight: 600; }
+  .cl-right { width: 160px; flex-shrink: 0; padding: 14px 12px; background: #fff; border-left: 1px solid #f0f0f0; }
+  .cl-riepilogo { font-size: 11px; font-weight: 600; color: #111; margin-bottom: 10px; }
+  .cl-stat-row { display: flex; justify-content: space-between; font-size: 10px; color: #555; margin-bottom: 6px; }
+  .cl-stat-num { font-weight: 700; color: #111; }
+  .cl-stat-num.red { color: #dc2626; }
+  .cl-stat-num.orange { color: #d97706; }
+  .cl-score-box { margin-top: 10px; padding: 8px; background: #fef2f2; border-radius: 6px; border: 1px solid #fecaca; }
+  .cl-score-title { font-size: 9px; font-weight: 600; color: #991b1b; margin-bottom: 5px; }
+  .cl-score-item { display: flex; justify-content: space-between; font-size: 9px; color: #555; margin-bottom: 3px; }
+  .cl-score-bad { color: #dc2626; font-weight: 600; }
+
+  /* AIA-ARCHITECT UI */
+  .aia-wrap { display: flex; height: calc(100% - 36px); }
+  .aia-sidebar {
+    width: 150px; flex-shrink: 0;
+    background: #fff; border-right: 1px solid #f0f0f0;
+    padding: 12px 10px;
+  }
+  .aia-logo { font-size: 12px; font-weight: 700; color: #1a1a1a; margin-bottom: 16px; display: flex; align-items: center; gap: 6px; }
+  .aia-logo-icon { width: 16px; height: 16px; border-radius: 4px; background: linear-gradient(135deg, #3b82f6, #6366f1); }
+  .aia-nav-item { font-size: 10px; color: #555; padding: 5px 7px; border-radius: 4px; margin-bottom: 1px; display: flex; align-items: center; justify-content: space-between; }
+  .aia-nav-item.active { background: #eff6ff; color: #1d4ed8; font-weight: 500; }
+  .aia-art { font-size: 8px; background: #e0e7ff; color: #4338ca; border-radius: 3px; padding: 1px 4px; }
+  .aia-main { flex: 1; padding: 14px; background: #fafafa; }
+  .aia-title { font-size: 14px; font-weight: 700; color: #111; margin-bottom: 2px; }
+  .aia-sub { font-size: 10px; color: #777; margin-bottom: 10px; }
+  .aia-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
+  .aia-tab { font-size: 10px; padding: 4px 10px; border-radius: 5px; color: #666; border: 1px solid #e5e7eb; }
+  .aia-tab.active { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+  .aia-section-title { font-size: 11px; font-weight: 600; color: #333; margin-bottom: 8px; }
+  .aia-table { background: #fff; border-radius: 7px; border: 1px solid #e5e7eb; overflow: hidden; width: 100%; }
+  .aia-thead { display: grid; grid-template-columns: 80px 70px 90px 1fr 50px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 6px 10px; }
+  .aia-thead span { font-size: 9px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+  .aia-row { display: grid; grid-template-columns: 80px 70px 90px 1fr 50px; padding: 7px 10px; border-bottom: 1px solid #f3f4f6; align-items: center; }
+  .aia-row:last-child { border-bottom: none; }
+  .aia-cell { font-size: 10px; color: #374151; }
+  .aia-feature { color: #2563eb; }
+  .aia-bias { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-align: center; }
+  .aia-bias.high { background: #fee2e2; color: #dc2626; }
+  .aia-bias.med { background: #fef3c7; color: #d97706; }
+  .aia-bias.low { background: #dcfce7; color: #16a34a; }
+
+  /* DOCUGEN UI */
+  .dg-wrap { height: calc(100% - 36px); padding: 14px; background: #fafafa; overflow: hidden; }
+  .dg-title { font-size: 13px; font-weight: 700; color: #111; margin-bottom: 2px; }
+  .dg-sub { font-size: 10px; color: #777; margin-bottom: 12px; }
+  .dg-stats { display: flex; gap: 10px; margin-bottom: 12px; }
+  .dg-stat { flex: 1; background: #fff; border: 1px solid #e5e7eb; border-radius: 7px; padding: 8px 10px; }
+  .dg-stat-val { font-size: 20px; font-weight: 700; color: #111; letter-spacing: -1px; }
+  .dg-stat-label { font-size: 9px; color: #888; }
+  .dg-stat-export { flex: 1.2; background: #fff; border: 1px solid #e5e7eb; border-radius: 7px; padding: 8px 10px; display: flex; align-items: center; justify-content: center; }
+  .dg-export-btn { font-size: 10px; color: #4f46e5; font-weight: 600; border: 1px solid #c7d2fe; border-radius: 5px; padding: 5px 10px; background: #eef2ff; }
+  .dg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
+  .dg-item { font-size: 10px; color: #374151; padding: 7px 10px; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; }
+  .dg-item span { font-size: 9px; color: #9ca3af; }
+  .dg-section { background: #fff; border: 1px solid #e5e7eb; border-radius: 7px; padding: 10px; }
+  .dg-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .dg-section-title { font-size: 10px; font-weight: 600; color: #111; }
+  .dg-badge-draft { font-size: 9px; background: #f3f4f6; color: #6b7280; padding: 2px 7px; border-radius: 4px; }
+  .dg-textarea { width: 100%; font-size: 10px; color: #9ca3af; padding: 6px 8px; border: 1px solid #e5e7eb; border-radius: 5px; background: #fafafa; font-style: italic; }
+
+  /* CARD FOOTER */
+  .tool-info {
+    padding: 16px 20px 18px;
+    display: flex; align-items: flex-start; justify-content: space-between;
+    background: #fff;
+  }
+  .tool-name { font-size: 14px; font-weight: 600; color: #0D1016; letter-spacing: -0.3px; margin-bottom: 3px; }
+  .tool-desc { font-size: 12px; color: rgba(0,0,0,0.45); line-height: 1.4; }
+  .tool-arrow {
+    width: 30px; height: 30px; border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.12);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: rgba(0,0,0,0.35); flex-shrink: 0; margin-top: 2px;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .tool-card:hover .tool-arrow { background: #0D1016; color: #fff; border-color: #0D1016; }
+
+  /* SECTION HEADER */
+  .section-wrap { max-width: 960px; margin-bottom: 40px; }
+  .eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 12px; }
+  .section-title { font-size: 40px; font-weight: 400; letter-spacing: -2px; color: #fff; line-height: 1.05; }
+
+  /* NOTE */
+  .note { max-width: 960px; margin-top: 20px; padding: 12px 16px; background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 8px; font-size: 12px; color: rgba(255,255,255,0.45); line-height: 1.5; }
+
+  /* APPROVE */
+  .approve-row { display: flex; gap: 12px; align-items: center; margin-top: 40px; }
+  .approve-btn { padding: 10px 28px; border-radius: 100px; font-size: 13px; cursor: pointer; border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.05); }
+  .approve-btn.yes { background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.25); color: #93c5fd; }
+</style>
+</head>
+<body>
+
+<div class="section-wrap">
+  <div class="eyebrow">Il prodotto</div>
+  <div class="section-title">Tre strumenti.<br>Un'unica piattaforma.</div>
+</div>
+
+<div class="tools-grid">
+
+  <!-- CARD 1: AI Classifier (tall) -->
+  <div class="tool-card tall">
+    <div class="tool-screenshot">
+      <div class="tool-ui">
+        <div class="ui-topbar">
+          <div class="ui-dot ui-dot-r"></div><div class="ui-dot ui-dot-y"></div><div class="ui-dot ui-dot-g"></div>
+          <div class="ui-url">localhost:3000/dashboard/tools/classifier</div>
+        </div>
+        <div class="classifier-wrap">
+          <!-- Sidebar -->
+          <div class="cl-sidebar">
+            <div class="cl-logo"><div class="cl-logo-icon"></div>AIComply</div>
+            <div class="cl-nav-group">Core</div>
+            <div class="cl-nav-item">Evidence Layer <span class="cl-tag" style="background:#e0e7ff;color:#4338ca;">Core</span></div>
+            <div class="cl-nav-group">Moduli</div>
+            <div class="cl-nav-item">AIA-Architect <span class="cl-tag">Art.11</span></div>
+            <div class="cl-nav-item">Rights-Simulator <span class="cl-tag">Art.27</span></div>
+            <div class="cl-nav-item">Guardian-Agent <span class="cl-tag">Art.14</span></div>
+            <div class="cl-nav-group">Tool Legacy</div>
+            <div class="cl-nav-item active">AI Classifier <span class="cl-tag red">Art.6</span></div>
+            <div class="cl-nav-item">Drift Detection <span class="cl-tag">Art.9</span></div>
+            <div class="cl-nav-item">DocuGen AI <span class="cl-tag">Art.11</span></div>
+          </div>
+          <!-- Main -->
+          <div class="cl-main">
+            <div class="cl-title">AI Classifier — Discovery Engine</div>
+            <div class="cl-sub">AST Analysis → Infrastructure Mapping → Art. 6(3) Decision Tree</div>
+            <div class="cl-tabs">
+              <div class="cl-tab">Repository</div>
+              <div class="cl-tab active">Discovery</div>
+              <div class="cl-tab">Art. 6(3)</div>
+              <div class="cl-tab">Certificato</div>
+            </div>
+            <div style="font-size:10px;font-weight:600;color:#333;margin-bottom:6px;">File Browser — Code-to-Law Map</div>
+            <div class="cl-files">
+              <div class="cl-file"><span>requirements.txt</span><span class="cl-badge">3 segnali</span></div>
+              <div class="cl-file"><span>src/api/main.py</span><span class="cl-badge">4 segnali</span></div>
+              <div class="cl-file"><span>src/models/screener.py</span><span class="cl-badge">3 segnali</span></div>
+              <div class="cl-file"><span>src/utils/preprocessing.py</span><span class="cl-badge" style="color:#d97706">1 segnale</span></div>
+              <div class="cl-file"><span>src/api/health.py</span><span style="font-size:9px;color:#aaa;">—</span></div>
+              <div class="cl-file"><span>src/utils/bias_audit.py</span><span class="cl-badge" style="color:#d97706">1 segnale</span></div>
+            </div>
+          </div>
+          <!-- Right panel -->
+          <div class="cl-right">
+            <div class="cl-riepilogo">Riepilogo Discovery</div>
+            <div class="cl-stat-row"><span>Librerie totali</span><span class="cl-stat-num">8</span></div>
+            <div class="cl-stat-row"><span>Segnali critici</span><span class="cl-stat-num red">1</span></div>
+            <div class="cl-stat-row"><span>Alta severità</span><span class="cl-stat-num orange">2</span></div>
+            <div class="cl-stat-row"><span>Endpoint rischiosi</span><span class="cl-stat-num red">1</span></div>
+            <div class="cl-stat-row"><span>Articoli mappati</span><span class="cl-stat-num">3</span></div>
+            <div class="cl-stat-row"><span>Confidenza max</span><span class="cl-stat-num" style="color:#16a34a">95%</span></div>
+            <div class="cl-score-box">
+              <div class="cl-score-title">AI Risk Scorer</div>
+              <div class="cl-score-item"><span>PATTERN_BIO_001</span><span class="cl-score-bad">Unacceptable</span></div>
+              <div class="cl-score-item"><span>PATTERN_BIO_002</span><span class="cl-score-bad">10%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tool-info">
+      <div>
+        <div class="tool-name">AI Classifier</div>
+        <div class="tool-desc">Scansiona il codice reale e mappa ogni componente AI agli articoli dell'AI Act applicabili.</div>
+      </div>
+      <div class="tool-arrow">→</div>
+    </div>
+  </div>
+
+  <!-- CARD 2: AIA-Architect -->
+  <div class="tool-card">
+    <div class="tool-screenshot">
+      <div class="tool-ui">
+        <div class="ui-topbar">
+          <div class="ui-dot ui-dot-r"></div><div class="ui-dot ui-dot-y"></div><div class="ui-dot ui-dot-g"></div>
+          <div class="ui-url">localhost:3000/dashboard/modules/aia-architect</div>
+        </div>
+        <div class="aia-wrap">
+          <div class="aia-sidebar">
+            <div class="aia-logo"><div class="aia-logo-icon"></div>AIComply</div>
+            <div style="font-size:9px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Moduli</div>
+            <div class="aia-nav-item active">AIA-Architect <span class="aia-art">Art.11</span></div>
+            <div class="aia-nav-item">Rights-Simulator <span class="aia-art">Art.27</span></div>
+            <div class="aia-nav-item">Guardian-Agent <span class="aia-art">Art.14</span></div>
+            <div class="aia-nav-item">Trust-Labeler <span class="aia-art">Art.50</span></div>
+          </div>
+          <div class="aia-main">
+            <div class="aia-title">AIA-Architect</div>
+            <div class="aia-sub">Motore AST Parser: analisi semantica → Art. 10 → Dossier Vivente Annex IV</div>
+            <div class="aia-tabs">
+              <div class="aia-tab">Editor Codice</div>
+              <div class="aia-tab active">AST Scan</div>
+              <div class="aia-tab">Annex IV JSON</div>
+            </div>
+            <div class="aia-section-title">Data Lineage Column-Level — Art. 10</div>
+            <div class="aia-table">
+              <div class="aia-thead"><span>FONTE</span><span>COLONNA</span><span>FEATURE</span><span>TRASFORM.</span><span>BIAS</span></div>
+              <div class="aia-row"><span class="aia-cell">DB_utenti</span><span class="aia-cell">eta</span><span class="aia-cell aia-feature">age_group</span><span class="aia-cell">binning(0-18...)</span><span class="aia-bias med">23%</span></div>
+              <div class="aia-row"><span class="aia-cell">DB_utenti</span><span class="aia-cell">reddito</span><span class="aia-cell aia-feature">income_bracket</span><span class="aia-cell">binning+scaling</span><span class="aia-bias high">45%</span></div>
+              <div class="aia-row"><span class="aia-cell">DB_utenti</span><span class="aia-cell">cap_residenza</span><span class="aia-cell aia-feature">district</span><span class="aia-cell">one-hot encoding</span><span class="aia-bias low">12%</span></div>
+              <div class="aia-row"><span class="aia-cell">Snowflake.prod</span><span class="aia-cell">codice_settore</span><span class="aia-cell aia-feature">sector</span><span class="aia-cell">entity embedding</span><span class="aia-bias high">67%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tool-info">
+      <div>
+        <div class="tool-name">AIA-Architect</div>
+        <div class="tool-desc">Analisi semantica del codice e mappatura automatica Art. 10 con rilevamento bias.</div>
+      </div>
+      <div class="tool-arrow">→</div>
+    </div>
+  </div>
+
+  <!-- CARD 3: DocuGen AI -->
+  <div class="tool-card">
+    <div class="tool-screenshot">
+      <div class="tool-ui">
+        <div class="ui-topbar">
+          <div class="ui-dot ui-dot-r"></div><div class="ui-dot ui-dot-y"></div><div class="ui-dot ui-dot-g"></div>
+          <div class="ui-url">localhost:3000/dashboard/tools/docugen</div>
+        </div>
+        <div class="dg-wrap">
+          <div class="dg-title">DocuGen AI</div>
+          <div class="dg-sub">Generatore documentazione tecnica conforme Art. 11 e Allegato IV</div>
+          <div class="dg-stats">
+            <div class="dg-stat"><div class="dg-stat-val">1</div><div class="dg-stat-label">Sezioni</div></div>
+            <div class="dg-stat"><div class="dg-stat-val">0</div><div class="dg-stat-label">Completate</div></div>
+            <div class="dg-stat"><div class="dg-stat-val">11</div><div class="dg-stat-label">Template disponibili</div></div>
+            <div class="dg-stat-export"><div class="dg-export-btn">Esporta PDF</div></div>
+          </div>
+          <div class="dg-grid">
+            <div class="dg-item">Specifiche di progettazione <span>(IV.1(b))</span></div>
+            <div class="dg-item">Architettura e algoritmo <span>(IV.1(c))</span></div>
+            <div class="dg-item">Dati di addestramento <span>(IV.1(d))</span></div>
+            <div class="dg-item">Misure di sorveglianza umana <span>(IV.1(e))</span></div>
+          </div>
+          <div class="dg-section">
+            <div class="dg-section-header">
+              <span class="dg-section-title">Descrizione generale del sistema AI</span>
+              <span class="dg-badge-draft">In bozza</span>
+            </div>
+            <div class="dg-textarea">Inserisci il contenuto della sezione...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tool-info">
+      <div>
+        <div class="tool-name">DocuGen AI</div>
+        <div class="tool-desc">Genera automaticamente la documentazione Allegato IV richiesta dall'AI Act, pronta per l'audit.</div>
+      </div>
+      <div class="tool-arrow">→</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="note">
+  In produzione: screenshot reali catturati dall'app. Hover solleva la card (+6px scale 1.01) e lo screenshot interno scala leggermente. Click rimanda al tool specifico. La sezione si chiama "Tre strumenti. Un'unica piattaforma." e si inserisce subito prima della CTA "Pronti a essere compliant?".
+</div>
+
+<div class="approve-row">
+  <span style="font-size:13px;color:rgba(255,255,255,0.3)">Questa sezione ti convince?</span>
+  <button class="approve-btn yes" onclick="this.textContent='✓ Approvato';this.style.color='#4ade80';this.style.borderColor='rgba(74,222,128,0.3)'">Approvo il design completo</button>
+  <button class="approve-btn" onclick="this.textContent='Modifiche richieste'">Voglio modifiche</button>
+</div>
+
+</body>
+</html>

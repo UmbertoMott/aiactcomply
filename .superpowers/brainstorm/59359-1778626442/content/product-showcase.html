@@ -1,0 +1,76 @@
+<h2>Come vuoi mostrare il prodotto in azione?</h2>
+<p class="subtitle">La sezione più coinvolgente della homepage — come si vede AIComply al lavoro?</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="animated-dashboard" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f0f4ff; height:180px; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; padding:16px;">
+      <!-- Fake animated dashboard mockup -->
+      <div style="background:#fff; border-radius:8px; box-shadow:0 4px 24px rgba(59,130,246,0.15); width:100%; padding:12px; font-family:system-ui; font-size:11px;">
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+          <div style="background:#3b82f6; color:#fff; border-radius:4px; padding:3px 8px; font-size:9px; font-weight:700;">RISK SCORE</div>
+          <div style="background:#f0fdf4; color:#16a34a; border-radius:4px; padding:3px 8px; font-size:9px; font-weight:700;">✓ COMPLIANT</div>
+        </div>
+        <div style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">
+          <div style="flex:1; background:#e0ecff; border-radius:3px; height:6px;"><div style="width:72%; background:#3b82f6; height:6px; border-radius:3px;"></div></div>
+          <span style="color:#1e3a8a; font-weight:700;">72%</span>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <div style="flex:1; background:#fef3c7; border-radius:4px; padding:4px 6px; font-size:9px; color:#92400e;">⚠ 3 gaps</div>
+          <div style="flex:1; background:#dbeafe; border-radius:4px; padding:4px 6px; font-size:9px; color:#1d4ed8;">📄 12 docs</div>
+          <div style="flex:1; background:#f0fdf4; border-radius:4px; padding:4px 6px; font-size:9px; color:#15803d;">🔗 Jira ✓</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Dashboard animata</h3>
+      <p>Un mock del vero dashboard di AIComply che si "compila" in tempo reale con animazioni CSS. Risk score che sale, documenti che appaiono, integrazioni che si attivano.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="scrolling-steps" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f0f4ff; height:180px; display:flex; align-items:center; justify-content:center; overflow:hidden; padding:16px;">
+      <div style="width:100%; font-family:system-ui;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; opacity:0.4;">
+          <div style="width:20px; height:20px; border-radius:50%; background:#3b82f6; color:#fff; font-size:9px; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0;">1</div>
+          <div style="flex:1; background:#e0ecff; border-radius:4px; padding:5px 8px; font-size:10px; color:#1e3a8a;">Carica il tuo sistema AI</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <div style="width:20px; height:20px; border-radius:50%; background:#3b82f6; color:#fff; font-size:9px; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0;">2</div>
+          <div style="flex:1; background:#dbeafe; border-radius:4px; padding:5px 8px; font-size:10px; color:#1e40af; font-weight:600; border:1px solid #93c5fd;">→ Risk Assessment in corso...</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; opacity:0.3;">
+          <div style="width:20px; height:20px; border-radius:50%; background:#cbd5e1; color:#fff; font-size:9px; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0;">3</div>
+          <div style="flex:1; background:#f1f5f9; border-radius:4px; padding:5px 8px; font-size:10px; color:#64748b;">Documenti generati automaticamente</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Stepper interattivo</h3>
+      <p>Scrollando, l'utente "cammina" attraverso i 3 step del processo (assess → document → integrate). Ogni step si anima entrando nel viewport. Racconta il workflow.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="split-before-after" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f0f4ff; height:180px; display:flex; align-items:center; justify-content:center; overflow:hidden; padding:16px;">
+      <div style="display:flex; gap:8px; width:100%; font-family:system-ui; font-size:10px;">
+        <div style="flex:1; background:#fef2f2; border-radius:6px; padding:8px; border:1px solid #fecaca;">
+          <div style="color:#dc2626; font-weight:700; margin-bottom:6px; font-size:9px;">SENZA AIComply</div>
+          <div style="color:#7f1d1d; line-height:1.4;">📋 Fogli Excel<br/>⏳ 6-18 mesi<br/>❌ Rischio sanzioni<br/>🤷 Incertezza</div>
+        </div>
+        <div style="display:flex; align-items:center; color:#94a3b8; font-size:16px;">→</div>
+        <div style="flex:1; background:#f0fdf4; border-radius:6px; padding:8px; border:1px solid #bbf7d0;">
+          <div style="color:#16a34a; font-weight:700; margin-bottom:6px; font-size:9px;">CON AIComply</div>
+          <div style="color:#14532d; line-height:1.4;">⚡ Automatico<br/>🕐 Ore non anni<br/>✅ Sempre compliant<br/>📊 Dashboard chiaro</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Before/After animato</h3>
+      <p>Un confronto visuale tra "prima" (caos, Excel, mesi di lavoro) e "dopo" (automatizzato, veloce, compliant). Slider o reveal animato. Impatto immediato sul decision maker.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:24px;">Clicca la tua preferenza e dimmi la scelta in chat. Puoi anche scegliere più di una se vuoi combinarle.</p>
