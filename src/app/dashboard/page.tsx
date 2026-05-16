@@ -9,6 +9,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { isOnboardingDone } from "@/components/onboarding/OnboardingWizard";
 import { aggregateDossier, getDossierSections, getCompletionPercentage, getCompletedCount } from "@/lib/dossier/dossier-engine";
+import DeadlineBanner from "@/components/notifications/DeadlineBanner";
 
 // Lazy-load wizard (avoids SSR issues with localStorage)
 const OnboardingWizard = dynamic(
@@ -193,19 +194,8 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* Alert scadenze */}
-        <div
-          className="rounded-xl p-4 mb-8 flex items-start gap-3"
-          style={{ background: "#fffbeb", border: "1px solid rgba(217,119,6,0.2)" }}
-        >
-          <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#d97706" }} />
-          <div>
-            <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>Scadenze normative</p>
-            <p className="text-[12px] mt-0.5" style={{ color: "rgba(0,0,0,0.45)" }}>
-              Le pratiche vietate (Art. 5) sono in vigore dal 2 febbraio 2025. I sistemi ad alto rischio devono essere conformi entro il 2 agosto 2026.
-            </p>
-          </div>
-        </div>
+        {/* Alert scadenze — dinamico */}
+        <DeadlineBanner />
 
         {/* GPAI promo */}
         <div

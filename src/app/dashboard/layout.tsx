@@ -5,10 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Shield, Box, GitBranch, Users, Eye, Activity,
-  Menu, X, ChevronRight, LogOut, Database, Network, Ban, FileArchive, Scale, Search, Cpu,
+  Menu, X, ChevronRight, LogOut, Database, Network, Ban, FileArchive, Scale, Search, Cpu, Bell,
 } from "lucide-react";
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { logout } from "./actions";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 type NavItem = {
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
@@ -43,6 +44,7 @@ const navGroups: NavGroup[] = [
     items: [
       { icon: GitBranch, label: "Connectors", href: "/dashboard/connectors", art: "" },
       { icon: Network, label: "Trust Center", href: "/dashboard/trust-center", art: "" },
+      { icon: Bell, label: "Notifiche", href: "/dashboard/notifications", art: "" },
     ],
   },
   {
@@ -242,6 +244,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <span style={{ color: "#0D1016" }}>{currentItem.label}</span>
               </>
             )}
+          </div>
+          <div className="ml-auto">
+            <NotificationBell />
           </div>
         </header>
 
