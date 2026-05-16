@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Shield, BarChart3, FileText, Database, Eye, Users,
-  CheckCircle, Cpu, ClipboardCheck, AlertTriangle, ArrowRight, Ban,
+  CheckCircle, Cpu, ClipboardCheck, AlertTriangle, ArrowRight, Ban, Scale, Search,
 } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -34,12 +34,16 @@ const quickTools: {
   { icon: Users,          title: "Oversight",      desc: "Sorveglianza umana",               href: "/dashboard/tools/oversight",    art: "Art. 14" },
   { icon: CheckCircle,    title: "Resilience",     desc: "Accuratezza e cybersecurity",      href: "/dashboard/tools/resilience",   art: "Art. 15" },
   { icon: ClipboardCheck, title: "QMS Builder",    desc: "Sistema gestione qualità",         href: "/dashboard/tools/qms",          art: "Art. 17" },
+  { icon: Scale,         title: "FRIA",            desc: "Valutazione diritti fondamentali", href: "/dashboard/tools/fria",         art: "Art. 27" },
 ];
 
 export default function DashboardPage() {
   const [showWizard, setShowWizard] = useState(false);
   const [dossierPct, setDossierPct] = useState(0);
   const [dossierDone, setDossierDone] = useState(0);
+  const [hasSources, setHasSources] = useState(true); // default true to avoid flash
+  const [newSystemCount, setNewSystemCount] = useState(0);
+  const [newSystemNames, setNewSystemNames] = useState<string[]>([]);
 
   useEffect(() => {
     if (!isOnboardingDone()) setShowWizard(true);
@@ -47,6 +51,17 @@ export default function DashboardPage() {
     const sections = getDossierSections(data);
     setDossierPct(getCompletionPercentage(sections));
     setDossierDone(getCompletedCount(sections));
+    // Discovery state
+    try {
+      const srcRaw = localStorage.getItem("aicomply_discovery_sources");
+      const sysRaw = localStorage.getItem("aicomply_discovered_systems");
+      const srcs = srcRaw ? JSON.parse(srcRaw) : [];
+      const sys = sysRaw ? JSON.parse(sysRaw) : [];
+      setHasSources(srcs.length > 0);
+      const pending = sys.filter((s: { status: string; addedToCompliance: boolean }) => !s.addedToCompliance && s.status !== "ignored");
+      setNewSystemCount(pending.length);
+      setNewSystemNames(pending.slice(0, 2).map((s: { name: string }) => s.name));
+    } catch { /* ignore */ }
   }, []);
 
   return (
@@ -80,7 +95,7 @@ export default function DashboardPage() {
               <span className="text-[13px] font-semibold" style={{ color: "#0D1016" }}>{dossierPct}%</span>
             </div>
             <p className="text-[11px] mt-1" style={{ color: "rgba(0,0,0,0.4)" }}>
-              {dossierDone} di 10 sezioni pronte · Prossima scadenza: 2 ago 2026
+              {dossierDone} di 11 sezioni pronte · Prossima scadenza: 2 ago 2026
             </p>
           </div>
           <span
@@ -103,6 +118,58 @@ export default function DashboardPage() {
             Inizia completando i tool di compliance per i tuoi sistemi AI.
           </p>
         </div>
+
+        {/* Discovery promo */}
+        {newSystemCount > 0 ? (
+          <div
+            className="rounded-xl p-4 mb-6 flex items-start gap-3"
+            style={{ background: "rgba(220,38,38,0.02)", border: "1px solid rgba(220,38,38,0.2)" }}
+          >
+            <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#dc2626" }} />
+            <div className="flex-1 min-w-0">
+              <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
+                {newSystemCount} {newSystemCount === 1 ? "sistema AI rilevato richiede" : "sistemi AI rilevati richiedono"} classificazione
+              </p>
+              {newSystemNames.length > 0 && (
+                <p className="text-[11px] mt-0.5 truncate" style={{ color: "rgba(0,0,0,0.45)" }}>
+                  {newSystemNames.join(" · ")}
+                </p>
+              )}
+            </div>
+            <Link
+              href="/dashboard/discovery"
+              className="flex-shrink-0 flex items-center gap-1 text-[11px] font-medium rounded-full px-3 py-1.5"
+              style={{ background: "#dc2626", color: "#ffffff" }}
+            >
+              Vedi sistemi <ArrowRight size={11} />
+            </Link>
+          </div>
+        ) : !hasSources ? (
+          <div
+            className="rounded-xl p-4 mb-6 flex items-center gap-3"
+            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+          >
+            <div
+              className="rounded-lg p-2 flex-shrink-0"
+              style={{ background: "rgba(59,130,246,0.08)" }}
+            >
+              <Search className="h-4 w-4" style={{ color: "#3b82f6" }} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>Non sai quanti sistemi AI hai?</p>
+              <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.45)" }}>
+                Connetti GitHub, AWS o Azure per scoprirli in automatico
+              </p>
+            </div>
+            <Link
+              href="/dashboard/discovery"
+              className="flex-shrink-0 flex items-center gap-1 text-[11px] font-medium rounded-full px-3 py-1.5"
+              style={{ background: "#0D1016", color: "#ffffff" }}
+            >
+              Avvia Discovery <ArrowRight size={11} />
+            </Link>
+          </div>
+        ) : null}
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
@@ -138,6 +205,32 @@ export default function DashboardPage() {
               Le pratiche vietate (Art. 5) sono in vigore dal 2 febbraio 2025. I sistemi ad alto rischio devono essere conformi entro il 2 agosto 2026.
             </p>
           </div>
+        </div>
+
+        {/* GPAI promo */}
+        <div
+          className="rounded-xl p-4 mb-6 flex items-center gap-3"
+          style={{ background: "rgba(59,130,246,0.03)", border: "1px solid rgba(59,130,246,0.15)" }}
+        >
+          <div className="rounded-lg p-2 flex-shrink-0" style={{ background: "rgba(59,130,246,0.08)" }}>
+            <Cpu className="h-4 w-4" style={{ color: "#3b82f6" }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-0.5">
+              <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>GPAI Module — Art. 51-55</p>
+              <span className="text-[9px] font-semibold rounded-full px-2 py-0.5 uppercase" style={{ background: "rgba(22,163,74,0.1)", color: "#15803d" }}>In vigore ✓</span>
+            </div>
+            <p className="text-[11px]" style={{ color: "rgba(0,0,0,0.45)" }}>
+              Usi OpenAI, Anthropic o Google AI? Hai obblighi già operativi dal 2 agosto 2025.
+            </p>
+          </div>
+          <Link
+            href="/dashboard/modules/gpai"
+            className="flex-shrink-0 flex items-center gap-1 text-[11px] font-medium rounded-full px-3 py-1.5"
+            style={{ background: "#3b82f6", color: "#ffffff" }}
+          >
+            Configura <ArrowRight size={11} />
+          </Link>
         </div>
 
         {/* Tools grid */}

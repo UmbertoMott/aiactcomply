@@ -91,6 +91,15 @@ export interface QMSResult {
   completedAt: string;
 }
 
+export interface GPAIResult {
+  modelsCount: number;
+  hasSystemicRisk: boolean;
+  roles: string[];
+  obligationsCompleted: number;
+  obligationsTotal: number;
+  completedAt: string;
+}
+
 export interface ProhibitedCheckResult {
   answers: Record<string, "yes" | "no" | "unsure">;
   verdict: "violation" | "potential_violation" | "conditional" | "clear";
@@ -116,6 +125,7 @@ export interface DossierData {
   oversight?: OversightResult;
   resilience?: ResilienceResult;
   qms?: QMSResult;
+  gpai?: GPAIResult;
 }
 
 export const STORAGE_KEYS = {
@@ -129,6 +139,8 @@ export const STORAGE_KEYS = {
   oversight:   "aicomply_oversight_result",
   resilience:  "aicomply_resilience_result",
   qms:         "aicomply_qms_result",
+  fria:        "aicomply_fria_result",
+  gpai:        "aicomply_gpai_result",
   onboarding:  "aicomply_onboarding_data",
 } as const;
 

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Shield, Box, GitBranch, Users, Eye, Activity,
-  Menu, X, ChevronRight, LogOut, Database, Network, Ban, FileArchive,
+  Menu, X, ChevronRight, LogOut, Database, Network, Ban, FileArchive, Scale, Search, Cpu,
 } from "lucide-react";
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { logout } from "./actions";
@@ -23,6 +23,7 @@ const navGroups: NavGroup[] = [
   {
     label: "Core",
     items: [
+      { icon: Search, label: "Discovery", href: "/dashboard/discovery", art: "" },
       { icon: Database, label: "Evidence Layer", href: "/dashboard/evidence-layer", art: "Core" },
     ],
   },
@@ -30,11 +31,11 @@ const navGroups: NavGroup[] = [
     label: "Moduli",
     items: [
       { icon: Box, label: "AIA-Architect", href: "/dashboard/modules/aia-architect", art: "Art. 11" },
-      { icon: Users, label: "Rights-Simulator", href: "/dashboard/modules/rights-simulator", art: "Art. 27" },
       { icon: Activity, label: "Guardian-Agent", href: "/dashboard/modules/guardian-agent", art: "Art. 14" },
       { icon: Eye, label: "Trust-Labeler", href: "/dashboard/modules/trust-labeler", art: "Art. 50" },
       { icon: Activity, label: "Post-Market", href: "/dashboard/post-market", art: "Art. 72" },
       { icon: Shield, label: "Compliance-Nexus", href: "/dashboard/compliance-nexus", art: "Art. 71" },
+      { icon: Cpu, label: "GPAI Module", href: "/dashboard/modules/gpai", art: "Art. 51-55" },
     ],
   },
   {
@@ -57,6 +58,7 @@ const navGroups: NavGroup[] = [
       { icon: Users, label: "Oversight", href: "/dashboard/tools/oversight", art: "Art. 14" },
       { icon: Shield, label: "Resilience", href: "/dashboard/tools/resilience", art: "Art. 15" },
       { icon: Shield, label: "QMS Builder", href: "/dashboard/tools/qms", art: "Art. 17" },
+      { icon: Scale,  label: "FRIA",        href: "/dashboard/tools/fria", art: "Art. 27" },
     ],
   },
 ];

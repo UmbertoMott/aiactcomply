@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function RightsSimulatorPage() {
+export default function FRIAModulePage() {
   redirect("/dashboard/tools/fria");
 }

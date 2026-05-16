@@ -201,3 +201,308 @@ export function classifyRisk(
     timestamp: new Date().toISOString(),
   };
 }
+
+// ─── SORGENTI ESTERNE ─────────────────────────────────────────────────────
+
+export type SourceType =
+  | "github_repo"
+  | "file_upload"
+  | "npm_package"
+  | "docker_image"
+  | "aws_sagemaker"
+  | "azure_ml"
+  | "huggingface";
+
+export interface DiscoverySource {
+  id: string;
+  type: SourceType;
+  label: string;
+  config: Record<string, string>;
+  status: "idle" | "scanning" | "done" | "error";
+  lastScannedAt?: string;
+  errorMessage?: string;
+}
+
+export interface DiscoveredSystem {
+  id: string;
+  sourceId: string;
+  name: string;
+  description: string;
+  detectedLibraries: DetectedLibrary[];
+  detectedEndpoints: APIEndpoint[];
+  inferredRiskLevel: ClassificationResult["riskLevel"];
+  inferredAnnexCategory: string | null;
+  confidence: "high" | "medium" | "low";
+  evidence: string[];
+  status: "new" | "under_review" | "classified" | "ignored";
+  addedToCompliance: boolean;
+  discoveredAt: string;
+}
+
+export const SOURCE_CATALOG: Array<{
+  type: SourceType;
+  name: string;
+  icon: string;
+  description: string;
+  configFields: Array<{
+    key: string;
+    label: string;
+    placeholder: string;
+    secret: boolean;
+  }>;
+}> = [
+  {
+    type: "github_repo",
+    name: "GitHub Repository",
+    icon: "GitBranch",
+    description: "Scansiona un repository GitHub per rilevare librerie AI, model files e API endpoints.",
+    configFields: [
+      { key: "url", label: "URL Repository", placeholder: "https://github.com/myorg/myrepo", secret: false },
+      { key: "token", label: "Personal Access Token", placeholder: "ghp_xxxxxxxxxxxx", secret: true },
+      { key: "branch", label: "Branch", placeholder: "main", secret: false },
+    ],
+  },
+  {
+    type: "file_upload",
+    name: "Upload file progetto",
+    icon: "Upload",
+    description: "Carica requirements.txt, package.json, o un file di testo con le dipendenze del progetto.",
+    configFields: [],
+  },
+  {
+    type: "npm_package",
+    name: "NPM / package.json",
+    icon: "Package",
+    description: "Analizza le dipendenze npm per rilevare librerie AI (TensorFlow.js, ONNX, ecc.).",
+    configFields: [
+      { key: "packageJson", label: "Contenuto package.json", placeholder: '{"dependencies": {...}}', secret: false },
+    ],
+  },
+  {
+    type: "aws_sagemaker",
+    name: "AWS SageMaker",
+    icon: "Cloud",
+    description: "Elenca gli endpoint SageMaker attivi nel tuo account AWS.",
+    configFields: [
+      { key: "accessKeyId", label: "AWS Access Key ID", placeholder: "AKIAIOSFODNN7EXAMPLE", secret: false },
+      { key: "secretKey", label: "AWS Secret Key", placeholder: "wJalrXUtnFEMI/...", secret: true },
+      { key: "region", label: "Region", placeholder: "eu-west-1", secret: false },
+    ],
+  },
+  {
+    type: "azure_ml",
+    name: "Azure Machine Learning",
+    icon: "Cloud",
+    description: "Scopri i modelli e gli endpoint registrati nel tuo workspace Azure ML.",
+    configFields: [
+      { key: "subscriptionId", label: "Subscription ID", placeholder: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", secret: false },
+      { key: "workspace", label: "Workspace Name", placeholder: "my-ml-workspace", secret: false },
+      { key: "clientSecret", label: "Client Secret", placeholder: "...", secret: true },
+    ],
+  },
+  {
+    type: "huggingface",
+    name: "Hugging Face",
+    icon: "Cpu",
+    description: "Rileva modelli Hugging Face in uso nel codebase o scaricati dall'Hub.",
+    configFields: [
+      { key: "orgOrUser", label: "Organizzazione o utente HF", placeholder: "myorg", secret: false },
+      { key: "token", label: "HF Token (opzionale)", placeholder: "hf_xxxxxxxxxxxx", secret: true },
+    ],
+  },
+];
+
+export const NPM_RISK_LIBRARY: Record<string, {
+  domain: string;
+  annexCategory: string | null;
+  severity: DetectedLibrary["severity"];
+  description: string;
+}> = {
+  "@tensorflow/tfjs": { domain: "Deep Learning", annexCategory: null, severity: "low", description: "TensorFlow.js — verificare task specifico" },
+  "onnxruntime-web": { domain: "Inferenza modelli", annexCategory: null, severity: "medium", description: "Runtime ONNX — modelli pre-addestrati" },
+  "face-api.js": { domain: "Biometrico", annexCategory: "1. Identificazione biometrica", severity: "high", description: "Riconoscimento facciale browser-side" },
+  "brain.js": { domain: "Machine Learning", annexCategory: null, severity: "low", description: "Neural network generico JS" },
+  "ml5": { domain: "Machine Learning", annexCategory: null, severity: "low", description: "ML accessibile — verificare uso" },
+  "compromise": { domain: "NLP", annexCategory: null, severity: "low", description: "NLP leggero — analisi testo" },
+  "natural": { domain: "NLP", annexCategory: null, severity: "low", description: "NLP — classificazione testo" },
+  "sentiment": { domain: "NLP", annexCategory: "4. Occupazione", severity: "medium", description: "Analisi sentiment — attenzione se su lavoratori" },
+  "node-face-recognition": { domain: "Biometrico", annexCategory: "1. Identificazione biometrica", severity: "critical", description: "Riconoscimento facciale — Art. 5 se spazi pubblici" },
+  "openai": { domain: "GPAI", annexCategory: null, severity: "medium", description: "OpenAI API — GPAI, verificare Art. 52" },
+  "anthropic": { domain: "GPAI", annexCategory: null, severity: "medium", description: "Anthropic API — GPAI" },
+  "@google-cloud/aiplatform": { domain: "Cloud AI", annexCategory: null, severity: "medium", description: "Google Vertex AI" },
+  "aws-sdk": { domain: "Cloud AI", annexCategory: null, severity: "low", description: "AWS SDK — verificare uso SageMaker/Rekognition" },
+  "azure-cognitiveservices-face": { domain: "Biometrico", annexCategory: "1. Identificazione biometrica", severity: "high", description: "Azure Face API — identificazione biometrica" },
+};
+
+export function simulateScan(source: DiscoverySource): DiscoveredSystem[] {
+  const base = {
+    sourceId: source.id,
+    discoveredAt: new Date().toISOString(),
+    status: "new" as const,
+    addedToCompliance: false,
+  };
+
+  if (source.type === "github_repo") {
+    const url = source.config.url || "";
+    const repoName = url.split("/").slice(-1)[0] || "unknown-repo";
+    return [
+      {
+        ...base,
+        id: `disc-${Date.now()}-1`,
+        name: repoName,
+        description: `Sistema rilevato in ${repoName}: usa scikit-learn per classificazione e xgboost per scoring. API endpoint /api/score rilevato.`,
+        detectedLibraries: [
+          { name: "scikit-learn", version: "1.3.0", source: "requirements.txt" as const, riskDomain: "Machine Learning", annexCategory: "4. Occupazione", severity: "medium" as const, description: "Classificazione ML", codeEvidence: "requirements.txt:4 — scikit-learn==1.3.0" },
+          { name: "xgboost", version: "1.7.6", source: "requirements.txt" as const, riskDomain: "Scoring", annexCategory: "5. Servizi essenziali", severity: "high" as const, description: "Credit scoring / valutazione finanziaria", codeEvidence: "requirements.txt:7 — xgboost==1.7.6" },
+        ],
+        detectedEndpoints: [
+          { path: "/api/score", methods: ["POST"], inputType: "financial" as const, riskFlagged: true, description: "Scoring finanziario" },
+        ],
+        inferredRiskLevel: "High" as const,
+        inferredAnnexCategory: "5. Servizi essenziali",
+        confidence: "high" as const,
+        evidence: [
+          "requirements.txt: xgboost==1.7.6 — scoring finanziario ad alto rischio",
+          "API endpoint /api/score con input di tipo finanziario",
+          "scikit-learn: classificatore — contesto finanziario conferma Allegato III",
+        ],
+      },
+    ];
+  }
+
+  if (source.type === "aws_sagemaker") {
+    return [
+      {
+        ...base,
+        id: `disc-${Date.now()}-2`,
+        name: "sagemaker-churn-predictor",
+        description: "Endpoint SageMaker attivo: modello di predizione churn clienti. Framework: sklearn. Istanza: ml.m5.large.",
+        detectedLibraries: [
+          { name: "scikit-learn", version: "detected", source: "import" as const, riskDomain: "Machine Learning", annexCategory: null, severity: "medium" as const, description: "Classificazione ML", codeEvidence: "SageMaker endpoint config: sklearn-2023-09-01" },
+        ],
+        detectedEndpoints: [
+          { path: "sagemaker-endpoint://churn-predictor-v2", methods: ["POST"], inputType: "personal_data" as const, riskFlagged: false, description: "Predizione churn" },
+        ],
+        inferredRiskLevel: "Limited" as const,
+        inferredAnnexCategory: null,
+        confidence: "medium" as const,
+        evidence: [
+          "SageMaker endpoint attivo: churn-predictor-v2",
+          "Framework sklearn rilevato dalla configurazione endpoint",
+          "Nessuna libreria ad alto rischio identificata",
+        ],
+      },
+      {
+        ...base,
+        id: `disc-${Date.now()}-3`,
+        name: "sagemaker-cv-screener",
+        description: "Endpoint SageMaker: screening automatico CV con NLP. Usa transformers. Alta probabilità Allegato III punto 4 (Occupazione).",
+        detectedLibraries: [
+          { name: "transformers", version: "detected", source: "import" as const, riskDomain: "NLP", annexCategory: "4. Occupazione", severity: "medium" as const, description: "LLM — screening CV o chatbot HR", codeEvidence: "SageMaker endpoint config: huggingface-pytorch-inference" },
+        ],
+        detectedEndpoints: [
+          { path: "sagemaker-endpoint://cv-screener-prod", methods: ["POST"], inputType: "personal_data" as const, riskFlagged: true, description: "Screening CV candidati" },
+        ],
+        inferredRiskLevel: "High" as const,
+        inferredAnnexCategory: "4. Occupazione",
+        confidence: "high" as const,
+        evidence: [
+          "SageMaker endpoint: cv-screener-prod — nome fortemente indicativo",
+          "Framework HuggingFace PyTorch — NLP su dati occupazionali",
+          "Input type: dati personali di candidati",
+          "Allegato III punto 4: reclutamento e selezione del personale",
+        ],
+      },
+    ];
+  }
+
+  if (source.type === "huggingface") {
+    return [
+      {
+        ...base,
+        id: `disc-${Date.now()}-4`,
+        name: `${source.config.orgOrUser || "org"}/emotion-classifier`,
+        description: "Modello HuggingFace rilevato: classificatore emozioni. Se usato in contesto lavorativo o educativo, violazione Art. 5.1.f.",
+        detectedLibraries: [
+          { name: "transformers", version: "detected", source: "import" as const, riskDomain: "Biometrico", annexCategory: "1. Identificazione biometrica", severity: "high" as const, description: "Analisi emozioni — Art. 5.1.f se in lavoro/scuola", codeEvidence: `HF Hub: ${source.config.orgOrUser || "org"}/emotion-classifier` },
+        ],
+        detectedEndpoints: [],
+        inferredRiskLevel: "Unacceptable" as const,
+        inferredAnnexCategory: "1. Identificazione biometrica",
+        confidence: "medium" as const,
+        evidence: [
+          `Modello HuggingFace: ${source.config.orgOrUser || "org"}/emotion-classifier`,
+          "Task: text-classification → emotion detection",
+          "⚠️ Art. 5.1.f: riconoscimento emozioni vietato in luoghi di lavoro e istruzione",
+        ],
+      },
+    ];
+  }
+
+  if (source.type === "npm_package" || source.type === "file_upload") {
+    const content = source.config.packageJson || source.config.fileContent || "";
+    const found: DetectedLibrary[] = [];
+    for (const [pkg, risk] of Object.entries(NPM_RISK_LIBRARY)) {
+      if (content.includes(pkg)) {
+        found.push({
+          name: pkg,
+          version: "detected",
+          source: "import" as const,
+          riskDomain: risk.domain,
+          annexCategory: risk.annexCategory,
+          severity: risk.severity,
+          description: risk.description,
+          codeEvidence: `package.json: "${pkg}"`,
+        });
+      }
+    }
+    if (found.length === 0) return [];
+    const hasCritical = found.some((l) => l.severity === "critical");
+    const hasHigh = found.some((l) => l.severity === "high");
+    return [
+      {
+        ...base,
+        id: `disc-${Date.now()}-5`,
+        name: "sistema-rilevato-da-package",
+        description: `Rilevate ${found.length} librerie AI nel file analizzato.`,
+        detectedLibraries: found,
+        detectedEndpoints: [],
+        inferredRiskLevel: hasCritical ? "Unacceptable" as const : hasHigh ? "High" as const : "Limited" as const,
+        inferredAnnexCategory: found.find((l) => l.annexCategory)?.annexCategory ?? null,
+        confidence: "medium" as const,
+        evidence: found.map((l) => `${l.name}: ${l.description}`),
+      },
+    ];
+  }
+
+  return [];
+}
+
+export const DISCOVERY_STORAGE_KEYS = {
+  sources: "aicomply_discovery_sources",
+  discovered: "aicomply_discovered_systems",
+} as const;
+
+export function loadDiscoverySources(): DiscoverySource[] {
+  try {
+    if (typeof window === "undefined") return [];
+    return JSON.parse(localStorage.getItem(DISCOVERY_STORAGE_KEYS.sources) || "[]");
+  } catch { return []; }
+}
+
+export function saveDiscoverySources(sources: DiscoverySource[]): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(DISCOVERY_STORAGE_KEYS.sources, JSON.stringify(sources));
+}
+
+export function loadDiscoveredSystems(): DiscoveredSystem[] {
+  try {
+    if (typeof window === "undefined") return [];
+    return JSON.parse(localStorage.getItem(DISCOVERY_STORAGE_KEYS.discovered) || "[]");
+  } catch { return []; }
+}
+
+export function saveDiscoveredSystems(systems: DiscoveredSystem[]): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(DISCOVERY_STORAGE_KEYS.discovered, JSON.stringify(systems));
+}
