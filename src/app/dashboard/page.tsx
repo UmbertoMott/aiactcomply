@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Shield, BarChart3, FileText, Database, Eye, Users,
-  CheckCircle, Cpu, ClipboardCheck, AlertTriangle, ArrowRight, Ban, Scale, Search,
+  CheckCircle, Cpu, ClipboardCheck, AlertTriangle, ArrowRight, Ban, Scale, Search, BadgeCheck,
 } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -36,6 +36,7 @@ const quickTools: {
   { icon: CheckCircle,    title: "Resilience",     desc: "Accuratezza e cybersecurity",      href: "/dashboard/tools/resilience",   art: "Art. 15" },
   { icon: ClipboardCheck, title: "QMS Builder",    desc: "Sistema gestione qualità",         href: "/dashboard/tools/qms",          art: "Art. 17" },
   { icon: Scale,         title: "FRIA",            desc: "Valutazione diritti fondamentali", href: "/dashboard/tools/fria",         art: "Art. 27" },
+  { icon: BadgeCheck,    title: "Conformity Assessment", desc: "Dichiarazione di Conformità UE + CE", href: "/dashboard/tools/conformity", art: "Art. 43" },
 ];
 
 export default function DashboardPage() {

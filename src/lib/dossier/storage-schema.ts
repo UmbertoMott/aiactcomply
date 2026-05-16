@@ -100,6 +100,16 @@ export interface GPAIResult {
   completedAt: string;
 }
 
+export interface ConformityResult {
+  path: string;
+  score: number;
+  passed: number;
+  total: number;
+  declarationGenerated: boolean;
+  registrationRef?: string;
+  completedAt: string;
+}
+
 export interface ProhibitedCheckResult {
   answers: Record<string, "yes" | "no" | "unsure">;
   verdict: "violation" | "potential_violation" | "conditional" | "clear";
@@ -126,6 +136,7 @@ export interface DossierData {
   resilience?: ResilienceResult;
   qms?: QMSResult;
   gpai?: GPAIResult;
+  conformity?: ConformityResult;
 }
 
 export const STORAGE_KEYS = {
@@ -141,6 +152,7 @@ export const STORAGE_KEYS = {
   qms:         "aicomply_qms_result",
   fria:        "aicomply_fria_result",
   gpai:        "aicomply_gpai_result",
+  conformity:  "aicomply_conformity_assessment",
   onboarding:  "aicomply_onboarding_data",
 } as const;
 

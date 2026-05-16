@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Shield, Box, GitBranch, Users, Eye, Activity,
-  Menu, X, ChevronRight, LogOut, Database, Network, Ban, FileArchive, Scale, Search, Cpu, Bell,
+  Menu, X, ChevronRight, LogOut, Database, Network, Ban, FileArchive, Scale, Search, Cpu, Bell, BadgeCheck,
 } from "lucide-react";
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { logout } from "./actions";
@@ -60,7 +60,8 @@ const navGroups: NavGroup[] = [
       { icon: Users, label: "Oversight", href: "/dashboard/tools/oversight", art: "Art. 14" },
       { icon: Shield, label: "Resilience", href: "/dashboard/tools/resilience", art: "Art. 15" },
       { icon: Shield, label: "QMS Builder", href: "/dashboard/tools/qms", art: "Art. 17" },
-      { icon: Scale,  label: "FRIA",        href: "/dashboard/tools/fria", art: "Art. 27" },
+      { icon: Scale,      label: "FRIA",                href: "/dashboard/tools/fria",       art: "Art. 27" },
+      { icon: BadgeCheck, label: "Conformity",           href: "/dashboard/tools/conformity", art: "Art. 43" },
     ],
   },
 ];
