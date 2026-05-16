@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Shield, Box, GitBranch, Users, Eye, Activity,
-  Menu, X, ChevronRight, LogOut, Database, Network, Ban, FileArchive, Scale, Search, Cpu, Bell, BadgeCheck,
+  Menu, X, ChevronRight, LogOut, Database, Network, Ban, FileArchive, Scale, Search, Cpu, Bell, BadgeCheck, BarChart2,
 } from "lucide-react";
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { logout } from "./actions";
@@ -37,6 +37,7 @@ const navGroups: NavGroup[] = [
       { icon: Activity, label: "Post-Market", href: "/dashboard/post-market", art: "Art. 72" },
       { icon: Shield, label: "Compliance-Nexus", href: "/dashboard/compliance-nexus", art: "Art. 71" },
       { icon: Cpu, label: "GPAI Module", href: "/dashboard/modules/gpai", art: "Art. 51-55" },
+      { icon: BarChart2, label: "XAI Center", href: "/dashboard/modules/xai", art: "Art. 13" },
     ],
   },
   {
