@@ -376,7 +376,7 @@ export default function ProhibitedPage() {
                     disabled={!allDone}
                     className="flex items-center gap-1.5 rounded-full px-5 py-1.5 text-[12px] font-medium transition-all disabled:opacity-30"
                     style={{
-                      background: allDone ? "#3b82f6" : "rgba(0,0,0,0.08)",
+                      background: allDone ? "#0D1016" : "rgba(0,0,0,0.08)",
                       color: allDone ? "#ffffff" : "rgba(0,0,0,0.3)",
                       border: "none",
                       cursor: allDone ? "pointer" : "not-allowed",
@@ -605,7 +605,7 @@ export default function ProhibitedPage() {
           <Link
             href="/dashboard/tools/classifier"
             className="flex items-center gap-1.5 rounded-full px-5 py-2 text-[12px] font-medium transition-all hover:opacity-85"
-            style={{ background: "#3b82f6", color: "#ffffff" }}
+            style={{ background: "#0D1016", color: "#ffffff" }}
           >
             Procedi al Risk Manager <ChevronRight size={12} />
           </Link>

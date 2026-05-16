@@ -57,10 +57,10 @@ export default function OversightPage() {
         </div>
       ) : (
         <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[12px]"
-          style={{ background: "rgba(59,130,246,0.04)", border: "1px solid rgba(59,130,246,0.12)", fontFamily: "var(--font-inter, system-ui)" }}>
+          style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", fontFamily: "var(--font-inter, system-ui)" }}>
           <span style={{ color: "rgba(0,0,0,0.45)" }}>Salva la configurazione Oversight nel dossier di compliance</span>
           <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1 hover:opacity-80"
-            style={{ background: "#3b82f6", color: "#ffffff", border: "none", cursor: "pointer" }}>
+            style={{ background: "#0D1016", color: "#ffffff", border: "none", cursor: "pointer" }}>
             Salva nel dossier
           </button>
         </div>

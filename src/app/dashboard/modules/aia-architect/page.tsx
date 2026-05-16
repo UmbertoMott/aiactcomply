@@ -69,7 +69,7 @@ export default function AIAArchitectPage() {
       </div>
 
       {/* Tab nav */}
-      <div className="flex items-center gap-1 border border-border rounded-xl bg-card p-1 mb-6">
+      <div className="flex gap-6 mb-6" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
         {[
           { id: "editor" as const, label: "Editor Codice", icon: Code2 },
           { id: "ast" as const, label: "AST Scan", icon: GitBranch },
@@ -78,11 +78,14 @@ export default function AIAArchitectPage() {
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex-1 rounded-lg px-4 py-2 text-xs font-medium transition-colors ${
-              tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-            }`}
+            className="flex items-center gap-1.5 pb-3 text-[13px] font-medium transition-all border-b-2"
+            style={
+              tab === t.id
+                ? { borderColor: "#0D1016", color: "#0D1016" }
+                : { borderColor: "transparent", color: "rgba(0,0,0,0.42)" }
+            }
           >
-            <t.icon className="h-3.5 w-3.5 inline mr-1.5" />
+            <t.icon className="h-3.5 w-3.5" />
             {t.label}
           </button>
         ))}
