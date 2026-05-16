@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Shield, BarChart3, FileText, Database, Eye, Users,
-  CheckCircle, Cpu, ClipboardCheck, AlertTriangle, ArrowRight, Ban, Scale, Search, BadgeCheck, BarChart2,
+  CheckCircle, Cpu, ClipboardCheck, AlertTriangle, ArrowRight, Ban, Scale, Search, BadgeCheck, BarChart2, X,
 } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -47,6 +47,8 @@ export default function DashboardPage() {
   const [hasSources, setHasSources] = useState(true); // default true to avoid flash
   const [newSystemCount, setNewSystemCount] = useState(0);
   const [newSystemNames, setNewSystemNames] = useState<string[]>([]);
+  const [gpaiDismissed, setGpaiDismissed] = useState(true); // start hidden to avoid flash
+  const [discoveryDismissed, setDiscoveryDismissed] = useState(false);
 
   useEffect(() => {
     if (!isOnboardingDone()) setShowWizard(true);
@@ -54,6 +56,8 @@ export default function DashboardPage() {
     const sections = getDossierSections(data);
     setDossierPct(getCompletionPercentage(sections));
     setDossierDone(getCompletedCount(sections));
+    // Dismiss states
+    setGpaiDismissed(localStorage.getItem("aicomply_gpai_banner_dismissed") === "1");
     // Discovery state
     try {
       const srcRaw = localStorage.getItem("aicomply_discovery_sources");
@@ -73,39 +77,32 @@ export default function DashboardPage() {
         <OnboardingWizard onComplete={() => setShowWizard(false)} />
       )}
 
-      <div className="max-w-5xl">
+      <div className="w-full">
 
-        {/* Dossier progress banner */}
+        {/* Dossier progress — slim bar */}
         <Link
           href="/dashboard/dossier"
-          className="flex items-center gap-4 rounded-xl p-4 mb-6 transition-all hover:shadow-md"
-          style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+          className="flex items-center gap-3 rounded-lg px-3 py-2 mb-5 hover:opacity-80 transition-opacity"
+          style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}
         >
-          <div className="flex-shrink-0">
-            <div className="text-[11px] font-semibold uppercase mb-1.5" style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "0.8px" }}>
-              📄 Dossier di compliance
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-1.5 rounded-full w-40" style={{ background: "rgba(0,0,0,0.07)" }}>
-                <div
-                  className="h-1.5 rounded-full transition-all duration-500"
-                  style={{
-                    width: `${dossierPct}%`,
-                    background: dossierPct >= 80 ? "#15803d" : dossierPct >= 40 ? "#d97706" : "#dc2626",
-                  }}
-                />
-              </div>
-              <span className="text-[13px] font-semibold" style={{ color: "#0D1016" }}>{dossierPct}%</span>
-            </div>
-            <p className="text-[11px] mt-1" style={{ color: "rgba(0,0,0,0.4)" }}>
-              {dossierDone} di 11 sezioni pronte · Prossima scadenza: 2 ago 2026
-            </p>
+          <span className="text-[11px] font-medium flex-shrink-0" style={{ color: "rgba(0,0,0,0.4)" }}>
+            Dossier
+          </span>
+          <div className="flex-1 h-1 rounded-full" style={{ background: "rgba(0,0,0,0.07)" }}>
+            <div
+              className="h-1 rounded-full transition-all duration-500"
+              style={{
+                width: `${dossierPct}%`,
+                background: dossierPct >= 80 ? "#15803d" : dossierPct >= 40 ? "#d97706" : "#dc2626",
+              }}
+            />
           </div>
-          <span
-            className="ml-auto flex items-center gap-1 text-[12px] font-medium rounded-full px-4 py-1.5 flex-shrink-0"
-            style={{ background: "#0D1016", color: "#ffffff" }}
-          >
-            Genera Dossier PDF <ArrowRight size={12} />
+          <span className="text-[11px] font-semibold flex-shrink-0" style={{ color: "#0D1016" }}>{dossierPct}%</span>
+          <span className="text-[11px] flex-shrink-0" style={{ color: "rgba(0,0,0,0.3)" }}>
+            {dossierDone}/11 sezioni
+          </span>
+          <span className="flex items-center gap-1 text-[11px] font-medium flex-shrink-0" style={{ color: "rgba(0,0,0,0.5)" }}>
+            Genera PDF <ArrowRight size={10} />
           </span>
         </Link>
 
@@ -122,55 +119,47 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* Discovery promo */}
+        {/* Discovery — slim bar */}
         {newSystemCount > 0 ? (
           <div
-            className="rounded-xl p-4 mb-6 flex items-start gap-3"
-            style={{ background: "rgba(220,38,38,0.02)", border: "1px solid rgba(220,38,38,0.2)" }}
+            className="flex items-center gap-2.5 rounded-lg px-3 py-2 mb-4"
+            style={{ background: "rgba(220,38,38,0.04)", border: "1px solid rgba(220,38,38,0.18)" }}
           >
-            <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#dc2626" }} />
-            <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
-                {newSystemCount} {newSystemCount === 1 ? "sistema AI rilevato richiede" : "sistemi AI rilevati richiedono"} classificazione
-              </p>
-              {newSystemNames.length > 0 && (
-                <p className="text-[11px] mt-0.5 truncate" style={{ color: "rgba(0,0,0,0.45)" }}>
-                  {newSystemNames.join(" · ")}
-                </p>
-              )}
-            </div>
+            <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#dc2626" }} />
+            <p className="text-[11px] font-medium flex-1 min-w-0 truncate" style={{ color: "#dc2626" }}>
+              {newSystemCount} {newSystemCount === 1 ? "sistema" : "sistemi"} AI{newSystemNames.length > 0 ? ` (${newSystemNames.join(", ")})` : ""} richied{newSystemCount === 1 ? "e" : "ono"} classificazione
+            </p>
             <Link
               href="/dashboard/discovery"
-              className="flex-shrink-0 flex items-center gap-1 text-[11px] font-medium rounded-full px-3 py-1.5"
-              style={{ background: "#dc2626", color: "#ffffff" }}
+              className="flex-shrink-0 text-[11px] font-medium whitespace-nowrap hover:opacity-70 transition-opacity"
+              style={{ color: "#dc2626" }}
             >
-              Vedi sistemi <ArrowRight size={11} />
+              Classifica →
             </Link>
           </div>
-        ) : !hasSources ? (
+        ) : !hasSources && !discoveryDismissed ? (
           <div
-            className="rounded-xl p-4 mb-6 flex items-center gap-3"
-            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+            className="flex items-center gap-2.5 rounded-lg px-3 py-2 mb-4"
+            style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.08)" }}
           >
-            <div
-              className="rounded-lg p-2 flex-shrink-0"
-              style={{ background: "rgba(59,130,246,0.08)" }}
-            >
-              <Search className="h-4 w-4" style={{ color: "#3b82f6" }} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>Non sai quanti sistemi AI hai?</p>
-              <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.45)" }}>
-                Connetti GitHub, AWS o Azure per scoprirli in automatico
-              </p>
-            </div>
+            <Search className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "rgba(0,0,0,0.35)" }} />
+            <p className="text-[11px] flex-1 min-w-0" style={{ color: "rgba(0,0,0,0.5)" }}>
+              Non sai quanti sistemi AI hai? Connetti GitHub, AWS o Azure.
+            </p>
             <Link
               href="/dashboard/discovery"
-              className="flex-shrink-0 flex items-center gap-1 text-[11px] font-medium rounded-full px-3 py-1.5"
-              style={{ background: "#0D1016", color: "#ffffff" }}
+              className="flex-shrink-0 text-[11px] font-medium whitespace-nowrap hover:opacity-70 transition-opacity"
+              style={{ color: "#0D1016" }}
             >
-              Avvia Discovery <ArrowRight size={11} />
+              Avvia Discovery →
             </Link>
+            <button
+              onClick={() => setDiscoveryDismissed(true)}
+              className="flex-shrink-0 p-0.5 rounded hover:opacity-60 transition-opacity"
+              style={{ color: "rgba(0,0,0,0.3)" }}
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
           </div>
         ) : null}
 
@@ -196,34 +185,40 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* Alert scadenze — dinamico */}
+        {/* Alert scadenze — slim */}
         <DeadlineBanner />
 
-        {/* GPAI promo */}
-        <div
-          className="rounded-xl p-4 mb-6 flex items-center gap-3"
-          style={{ background: "rgba(59,130,246,0.03)", border: "1px solid rgba(59,130,246,0.15)" }}
-        >
-          <div className="rounded-lg p-2 flex-shrink-0" style={{ background: "rgba(59,130,246,0.08)" }}>
-            <Cpu className="h-4 w-4" style={{ color: "#3b82f6" }} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-0.5">
-              <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>GPAI Module — Art. 51-55</p>
-              <span className="text-[9px] font-semibold rounded-full px-2 py-0.5 uppercase" style={{ background: "rgba(22,163,74,0.1)", color: "#15803d" }}>In vigore ✓</span>
-            </div>
-            <p className="text-[11px]" style={{ color: "rgba(0,0,0,0.45)" }}>
-              Usi OpenAI, Anthropic o Google AI? Hai obblighi già operativi dal 2 agosto 2025.
-            </p>
-          </div>
-          <Link
-            href="/dashboard/modules/gpai"
-            className="flex-shrink-0 flex items-center gap-1 text-[11px] font-medium rounded-full px-3 py-1.5"
-            style={{ background: "#3b82f6", color: "#ffffff" }}
+        {/* GPAI promo — slim, dismissibile */}
+        {!gpaiDismissed && (
+          <div
+            className="flex items-center gap-2.5 rounded-lg px-3 py-2 mb-4"
+            style={{ background: "rgba(22,163,74,0.04)", border: "1px solid rgba(22,163,74,0.18)" }}
           >
-            Configura <ArrowRight size={11} />
-          </Link>
-        </div>
+            <Cpu className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#15803d" }} />
+            <p className="text-[11px] flex-1 min-w-0 truncate" style={{ color: "rgba(0,0,0,0.6)" }}>
+              <span className="font-semibold" style={{ color: "#15803d" }}>GPAI Module Art. 51-55 — IN VIGORE.</span>{" "}
+              Usi OpenAI, Anthropic o Google AI? Hai obblighi già operativi.
+            </p>
+            <Link
+              href="/dashboard/modules/gpai"
+              className="flex-shrink-0 text-[11px] font-medium whitespace-nowrap hover:opacity-70 transition-opacity"
+              style={{ color: "#15803d" }}
+            >
+              Configura →
+            </Link>
+            <button
+              onClick={() => {
+                setGpaiDismissed(true);
+                localStorage.setItem("aicomply_gpai_banner_dismissed", "1");
+              }}
+              className="flex-shrink-0 p-0.5 rounded hover:opacity-60 transition-opacity"
+              style={{ color: "rgba(0,0,0,0.3)" }}
+              aria-label="Chiudi"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
 
         {/* Tools grid */}
         <p
