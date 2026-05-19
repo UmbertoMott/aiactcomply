@@ -10,6 +10,7 @@ import {
 } from "@/lib/simulation/logvault-engine";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { LogvaultResult } from "@/lib/dossier/storage-schema";
+import { appendEvidence } from "@/lib/evidence/evidence-layer";
 
 const card = { background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
 
@@ -118,12 +119,23 @@ export default function LogVaultPage() {
   const [filter,       setFilter]       = useState<EventLevel | "all">("all");
   const [killActive,   setKillActive]   = useState(false);
   const [autoScroll,   setAutoScroll]   = useState(true);
+  const [systemName,   setSystemName]   = useState(() =>
+    typeof window !== "undefined" ? (localStorage.getItem("logvault_system_name") ?? "CV-Screener AI") : "CV-Screener AI"
+  );
+  const [logCount,     setLogCount]     = useState(24);
+  const [showConfig,   setShowConfig]   = useState(false);
+  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
   const [savedAt,      setSavedAt]      = useState<string | null>(() =>
     readFromStorage<LogvaultResult>("logvault")?.completedAt ?? null
   );
   const listRef = useRef<HTMLDivElement>(null);
 
-  const logs      = generateLogChain(24, tampered);
+  function showToast(msg: string, type: "success" | "error" = "success") {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  }
+
+  const logs      = generateLogChain(logCount, tampered);
   const integrity = verifyChain(logs);
   const filtered  = filter === "all" ? logs : logs.filter((l) => l.level === filter);
 
@@ -137,15 +149,89 @@ export default function LogVaultPage() {
   function saveToDossier() {
     const completedAt = new Date().toISOString();
     const eventTypes = [...new Set(logs.map((l) => l.eventType))];
+    const storageLocation = `LogVault — ${systemName} — Append-Only Storage`;
+
     writeToStorage<LogvaultResult>("logvault", {
       loggingEnabled: true,
       retentionDays: 90,
       loggedEvents: eventTypes,
-      storageLocation: "LogVault — Append-Only Storage (simulato)",
+      storageLocation,
       accessControl: "Role-based — solo operatori autorizzati",
       completedAt,
     });
+
+    appendEvidence(
+      "log",
+      {
+        type: "LogVault — Registro Eventi AI Art. 12 & 14",
+        systemName,
+        totalEntries: logs.length,
+        criticalEvents: logs.filter((l) => l.level === "critical").length,
+        warningEvents: logs.filter((l) => l.level === "warning").length,
+        chainIntegrity: integrity.valid ? "VALID" : `BROKEN at #${integrity.brokenAt}`,
+        driftMax: `${(driftMax * 100).toFixed(0)}%`,
+        killSwitchActivated: killActive,
+        eventTypes,
+        firstHash: logs[0]?.entryHash.slice(0, 12),
+        lastHash: logs[logs.length - 1]?.entryHash.slice(0, 12),
+        savedAt: completedAt,
+      },
+      "logvault"
+    );
+
     setSavedAt(completedAt);
+    showToast("Configurazione LogVault salvata nel dossier");
+  }
+
+  function exportEvidence() {
+    const report = {
+      export_type: "LogVault — Forensic Evidence Export",
+      regulation: "EU 2024/1689 — Art. 12 (Logging), Art. 14 (Human Oversight)",
+      exported_at: new Date().toISOString(),
+      system_name: systemName,
+      chain_integrity: {
+        valid: integrity.valid,
+        broken_at: integrity.brokenAt,
+        verified_count: integrity.verifiedCount,
+        total: logs.length,
+      },
+      summary: {
+        critical_events: logs.filter((l) => l.level === "critical").length,
+        warning_events: logs.filter((l) => l.level === "warning").length,
+        safe_events: logs.filter((l) => l.level === "safe").length,
+        drift_max: driftMax.toFixed(4),
+        kill_switch_activated: killActive,
+      },
+      hash_anchors: {
+        genesis: logs[0]?.prevHash ?? "—",
+        head: logs[logs.length - 1]?.entryHash ?? "—",
+      },
+      entries: logs.map((e) => ({
+        id: e.id,
+        sequenceId: e.sequenceId,
+        timestamp: e.timestamp.toISOString(),
+        level: e.level,
+        eventType: e.eventType,
+        operatorId: e.operatorId,
+        modelVersion: e.modelVersion,
+        input: e.input,
+        output: e.output,
+        confidence: e.confidence,
+        driftScore: e.driftScore,
+        c2paAttested: e.c2paAttested,
+        prevHash: e.prevHash,
+        entryHash: e.entryHash,
+      })),
+    };
+
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    a.download = `logvault-evidence-${systemName.replace(/\s+/g, "_").toLowerCase()}-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("Evidence esportata — " + logs.length + " record");
   }
 
   useEffect(() => {
@@ -203,12 +289,71 @@ export default function LogVaultPage() {
               : { background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.09)", color: "rgba(0,0,0,0.45)" }}>
             {tampered ? "⚠ Tamper simulato attivo" : "Simula manomissione"}
           </button>
-          <button className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-opacity hover:opacity-70"
+          <button onClick={() => setShowConfig(!showConfig)}
+            className="text-[11px] px-3 py-2 rounded-lg transition-all"
+            style={{ background: showConfig ? "rgba(13,16,22,0.1)" : "#f5f5f4", border: "1px solid rgba(0,0,0,0.09)", color: "rgba(0,0,0,0.55)" }}>
+            ⚙ Config
+          </button>
+          <button onClick={exportEvidence}
+            className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-opacity hover:opacity-70"
             style={{ background: "#0D1016", color: "#fff" }}>
             <Download className="h-3.5 w-3.5" /> Esporta Evidence
           </button>
         </div>
       </div>
+
+      {/* Config panel */}
+      <AnimatePresence>
+        {showConfig && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden mb-4"
+          >
+            <div className="rounded-xl p-4" style={card}>
+              <p className="text-[10px] font-semibold uppercase mb-3" style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "1px" }}>
+                Configurazione LogVault
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[11px] block mb-1" style={{ color: "rgba(0,0,0,0.5)" }}>
+                    Sistema monitorato
+                  </label>
+                  <input
+                    type="text"
+                    value={systemName}
+                    onChange={(e) => {
+                      setSystemName(e.target.value);
+                      localStorage.setItem("logvault_system_name", e.target.value);
+                    }}
+                    className="w-full text-[12px] px-3 py-2 rounded-lg outline-none"
+                    style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.1)", color: "#0D1016" }}
+                    placeholder="es. CV-Screener AI v2"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] block mb-1" style={{ color: "rgba(0,0,0,0.5)" }}>
+                    Numero di record simulati: <span style={{ color: "#0D1016", fontWeight: 600 }}>{logCount}</span>
+                  </label>
+                  <input
+                    type="range"
+                    min={12}
+                    max={100}
+                    step={4}
+                    value={logCount}
+                    onChange={(e) => setLogCount(Number(e.target.value))}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-[9px] mt-0.5" style={{ color: "rgba(0,0,0,0.3)" }}>
+                    <span>12</span><span>100</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
@@ -442,6 +587,24 @@ export default function LogVaultPage() {
           )}
         </div>
       </div>
+
+      {/* Toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg"
+            style={{
+              background: toast.type === "error" ? "rgba(220,38,38,0.95)" : "#0D1016",
+              color: "#ffffff",
+            }}
+          >
+            {toast.type === "error" ? "⚠" : "✓"} {toast.msg}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
