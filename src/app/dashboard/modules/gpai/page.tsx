@@ -1,15 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import {
   Cpu, Plus, X, CheckCircle, AlertTriangle, FileText,
-  Copy, Download, ChevronDown, ChevronUp, Shield,
+  Copy, Download, ChevronDown, ChevronUp,
   Activity, ExternalLink, Info,
 } from "lucide-react";
 import {
   GPAI_CATALOG, GPAIUsageEntry, GPAIRole, GPAIModel,
-  GPAI_OBLIGATIONS,
   USE_CASE_SUGGESTIONS, ROLE_DESCRIPTIONS,
   loadGPAIInventory, saveGPAIInventory,
   loadCompletedObligations, saveCompletedObligations,
@@ -21,11 +19,7 @@ import {
   RedTeamAttack, DriftReport,
 } from "@/lib/simulation/red-team";
 import { writeToStorage } from "@/lib/dossier/storage-schema";
-
-// Suppress unused import warnings — these are exported from the engine but not all used directly
-void GPAI_OBLIGATIONS;
-void Shield;
-void Link;
+import { appendEvidence } from "@/lib/evidence/evidence-layer";
 
 const card: React.CSSProperties = {
   background: "#ffffff",
@@ -33,6 +27,10 @@ const card: React.CSSProperties = {
   boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
   borderRadius: "12px",
 };
+
+const ATTACKS_KEY = "gpai_attacks";
+const DRIFT_KEY = "gpai_drift_values";
+const COMPANY_KEY = "gpai_company_name";
 
 export default function GPAIPage() {
   const [inventory, setInventory] = useState<GPAIUsageEntry[]>([]);
@@ -60,11 +58,33 @@ export default function GPAIPage() {
   });
   const [expandedEntry, setExpandedEntry] = useState<string | null>(null);
   const [generatedDoc, setGeneratedDoc] = useState<{ type: string; content: string } | null>(null);
-  const [attacks, setAttacks] = useState<RedTeamAttack[]>([]);
-  const [driftValues, setDriftValues] = useState({ accuracy: 94.2, precision: 86.1, recall: 91.3, f1: 88.7 });
+  const [attacks, setAttacks] = useState<RedTeamAttack[]>(() => {
+    if (typeof window === "undefined") return [];
+    try { return JSON.parse(localStorage.getItem(ATTACKS_KEY) ?? "[]") as RedTeamAttack[]; }
+    catch { return []; }
+  });
+  const [driftValues, setDriftValues] = useState<{ accuracy: number; precision: number; recall: number; f1: number }>(() => {
+    if (typeof window === "undefined") return { accuracy: 94.2, precision: 86.1, recall: 91.3, f1: 88.7 };
+    try {
+      const stored = JSON.parse(localStorage.getItem(DRIFT_KEY) ?? "null");
+      return stored ?? { accuracy: 94.2, precision: 86.1, recall: 91.3, f1: 88.7 };
+    } catch { return { accuracy: 94.2, precision: 86.1, recall: 91.3, f1: 88.7 }; }
+  });
   const [incidentForm, setIncidentForm] = useState({ description: "", severity: "alta" as "critica" | "alta" | "media", systemName: "" });
   const [toast, setToast] = useState<string | null>(null);
-  const [companyName] = useState("La tua azienda");
+  const [savedAt, setSavedAt] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem("gpai_saved_at") ?? null;
+  });
+  const [companyName, setCompanyNameState] = useState<string>(() => {
+    if (typeof window === "undefined") return "La tua azienda";
+    return localStorage.getItem(COMPANY_KEY) ?? "La tua azienda";
+  });
+
+  function setCompanyName(v: string) {
+    setCompanyNameState(v);
+    if (typeof window !== "undefined") localStorage.setItem(COMPANY_KEY, v);
+  }
 
   useEffect(() => {
     setInventory(loadGPAIInventory());
@@ -116,23 +136,72 @@ export default function GPAIPage() {
 
   function handleSimulateAttack() {
     const attack = simulateRedTeamAttack();
-    setAttacks((prev) => [attack, ...prev].slice(0, 10));
+    const updated = [attack, ...attacks].slice(0, 20);
+    setAttacks(updated);
+    if (typeof window !== "undefined") localStorage.setItem(ATTACKS_KEY, JSON.stringify(updated));
+    if (attack.result === "breach") {
+      appendEvidence(
+        "incident",
+        {
+          type: "Red-Teaming GPAI — Vulnerabilità rilevata",
+          attackId: attack.id,
+          attackType: attack.type,
+          target: attack.target,
+          details: attack.details,
+          defenseScore: attack.defenseScore,
+          detectedAt: attack.timestamp,
+        },
+        "gpai"
+      );
+      showToast(`⚠️ Vulnerabilità rilevata — breach registrato nell'evidence`);
+    } else {
+      showToast(`✅ ${attack.type.replace(/_/g, " ")} — ${attack.result}`);
+    }
   }
 
   function handleSaveToDossier() {
+    if (inventory.length === 0) {
+      showToast("Aggiungi almeno un modello GPAI prima di salvare");
+      return;
+    }
     const obligations = getApplicableObligations(inventory);
+    const completedAt = new Date().toISOString();
+    const hasSystemicRisk = inventory.some((e) => {
+      const m = GPAI_CATALOG.find((c) => c.id === e.modelId);
+      return m?.systemicRisk === "systemic";
+    });
     writeToStorage("gpai", {
       modelsCount: inventory.length,
-      hasSystemicRisk: inventory.some((e) => {
-        const m = GPAI_CATALOG.find((c) => c.id === e.modelId);
-        return m?.systemicRisk === "systemic";
-      }),
+      hasSystemicRisk,
       roles: [...new Set(inventory.map((e) => e.role))],
       obligationsCompleted: completedObligations.length,
       obligationsTotal: obligations.length,
-      completedAt: new Date().toISOString(),
+      completedAt,
     });
-    showToast("Salvato nel Dossier di compliance");
+    appendEvidence(
+      "adr",
+      {
+        type: "GPAI Module — Inventario Modelli Art. 51-55",
+        companyName,
+        modelsCount: inventory.length,
+        hasSystemicRisk,
+        models: inventory.map((e) => ({
+          model: GPAI_CATALOG.find((c) => c.id === e.modelId)?.name ?? e.modelId,
+          role: e.role,
+          useCases: e.useCases,
+          isFineTuned: e.isFineTuned,
+          exposedToEndUsers: e.exposedToEndUsers,
+        })),
+        obligationsCompleted: completedObligations.length,
+        obligationsTotal: obligations.length,
+        complianceScore: score,
+        savedAt: completedAt,
+      },
+      "gpai"
+    );
+    setSavedAt(completedAt);
+    if (typeof window !== "undefined") localStorage.setItem("gpai_saved_at", completedAt);
+    showToast("GPAI Module salvato nel Dossier di compliance");
   }
 
   function copyToClipboard(text: string) {
@@ -783,7 +852,11 @@ export default function GPAIPage() {
                   <input
                     type="range" min="70" max="100" step="0.1"
                     value={current}
-                    onChange={(e) => setDriftValues((v) => ({ ...v, [key]: parseFloat(e.target.value) }))}
+                    onChange={(e) => {
+                      const updated = { ...driftValues, [key]: parseFloat(e.target.value) };
+                      setDriftValues(updated);
+                      if (typeof window !== "undefined") localStorage.setItem(DRIFT_KEY, JSON.stringify(updated));
+                    }}
                     className="w-full accent-blue-500 h-1.5"
                   />
                   <p className="text-[10px] mt-1" style={{ color: "rgba(0,0,0,0.35)" }}>soglia: {(config.threshold * 100).toFixed(0)}%</p>
@@ -835,7 +908,25 @@ export default function GPAIPage() {
               </div>
             </div>
             <button
-              onClick={() => setGeneratedDoc({ type: "Notifica Incidente AI Office UE", content: generateIncidentReport(incidentForm.description, incidentForm.severity, incidentForm.systemName, companyName) })}
+              onClick={() => {
+                if (!incidentForm.description.trim()) {
+                  showToast("Inserisci la descrizione dell'incidente prima di generare");
+                  return;
+                }
+                const content = generateIncidentReport(incidentForm.description, incidentForm.severity, incidentForm.systemName, companyName);
+                setGeneratedDoc({ type: "Notifica Incidente AI Office UE", content });
+                appendEvidence(
+                  "incident",
+                  {
+                    type: "Incident Report GPAI — Art. 54.1.c — Notifica AI Office UE",
+                    severity: incidentForm.severity,
+                    systemName: incidentForm.systemName || "non specificato",
+                    description: incidentForm.description,
+                    generatedAt: new Date().toISOString(),
+                  },
+                  "gpai"
+                );
+              }}
               className="flex items-center gap-2 rounded-lg px-4 py-2 text-[12px] font-medium"
               style={{ background: "rgba(220,38,38,0.08)", color: "#b91c1c", border: "1px solid rgba(220,38,38,0.15)" }}
             >
@@ -902,7 +993,16 @@ export default function GPAIPage() {
             <span className="text-[11px] font-medium rounded px-2 py-0.5" style={{ background: "rgba(59,130,246,0.08)", color: "#3b82f6" }}>Art. 51-55</span>
             <span className="text-[11px] font-semibold rounded-full px-2 py-0.5" style={{ background: "rgba(22,163,74,0.1)", color: "#15803d" }}>In vigore: 2 ago 2025</span>
           </div>
-          <h1 className="text-[24px] font-semibold mb-1" style={{ color: "#0D1016", letterSpacing: "-0.5px" }}>GPAI — General Purpose AI</h1>
+          <div className="flex items-start justify-between gap-4 mb-1">
+            <h1 className="text-[24px] font-semibold" style={{ color: "#0D1016", letterSpacing: "-0.5px" }}>GPAI — General Purpose AI</h1>
+            <input
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              placeholder="Nome azienda per i documenti…"
+              className="rounded-lg px-3 py-1.5 text-[12px] focus:outline-none mt-1 flex-shrink-0"
+              style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.09)", color: "#0D1016", width: "220px" }}
+            />
+          </div>
           <p className="text-[12px] mb-3" style={{ color: "rgba(0,0,0,0.45)" }}>
             Se usi OpenAI, Anthropic, Google o altri modelli fondazionali nei tuoi prodotti, hai obblighi specifici già operativi.
           </p>
@@ -918,6 +1018,25 @@ export default function GPAIPage() {
             </div>
           )}
         </div>
+
+        {/* Dossier banner */}
+        {savedAt ? (
+          <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+            style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)", fontFamily: "var(--font-inter, system-ui)" }}>
+            <CheckCircle size={13} strokeWidth={1.5} style={{ color: "#15803d" }} />
+            <span style={{ color: "#15803d" }}>✓ GPAI Module salvato nel dossier · Aggiornato il {new Date(savedAt).toLocaleDateString("it-IT")}</span>
+            <a href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>Vedi dossier →</a>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", fontFamily: "var(--font-inter, system-ui)" }}>
+            <span style={{ color: "rgba(0,0,0,0.45)" }}>Salva l&apos;inventario GPAI e il compliance score nel dossier</span>
+            <button onClick={handleSaveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1 hover:opacity-80"
+              style={{ background: "#0D1016", color: "#ffffff", border: "none", cursor: "pointer" }}>
+              Salva nel dossier
+            </button>
+          </div>
+        )}
 
         {/* Warning banner */}
         {inventory.length === 0 && (
