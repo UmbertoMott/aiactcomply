@@ -27,7 +27,47 @@ import { scanProfiling, hasHardBlock, generateExemptionDossier, EXEMPTION_CRITER
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { generatePassport, verifyPassport, exportForRegulator, getPassportSummary, type ConformityPassport } from "@/lib/crypto/passport";
 
+// ─── ADDITION 1 — Persistence ────────────────────────────────────────
+
+const STORAGE_KEY = "classifier_result";
+
+interface PersistedClassification {
+  systemName: string;
+  result: ReturnType<typeof classifyRisk>;
+  passportId: string | null;
+  exemptionDossierId: string | null;
+  savedAt: string;
+}
+
+function saveResult(
+  systemName: string,
+  r: ReturnType<typeof classifyRisk>,
+  passportId: string | null,
+  dossierId: string | null
+) {
+  const record: PersistedClassification = {
+    systemName,
+    result: r,
+    passportId,
+    exemptionDossierId: dossierId,
+    savedAt: new Date().toISOString(),
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(record));
+}
+
+function loadSavedResult(): PersistedClassification | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as PersistedClassification) : null;
+  } catch {
+    return null;
+  }
+}
+
+// ─── COMPONENT ───────────────────────────────────────────────────────
+
 export default function ClassifierPage() {
+  // Existing state
   const [phase, setPhase] = useState<"intro" | "scan" | "decision" | "result">("intro");
   const [files] = useState(MOCK_PROJECT_FILES);
   const [result, setResult] = useState<ReturnType<typeof classifyRisk> | null>(null);
@@ -44,10 +84,33 @@ export default function ClassifierPage() {
   const [passport, setPassport] = useState<ConformityPassport | null>(null);
   const [passportOpen, setPassportOpen] = useState(false);
 
+  // ADDITION 2 — New state
+  const [inputMode, setInputMode] = useState<"demo" | "manual">("demo");
+  const [customSystemName, setCustomSystemName] = useState("");
+  const [customRequirements, setCustomRequirements] = useState("");
+  const [customPythonCode, setCustomPythonCode] = useState("");
+  const [toast, setToast] = useState<string | null>(null);
+  const [savedClassification] = useState<PersistedClassification | null>(() => loadSavedResult());
+
+  // ADDITION 4 — Derived active inputs (must precede useMemos that depend on them)
+  const activeSystemName: string =
+    inputMode === "manual" && customSystemName.trim()
+      ? customSystemName.trim()
+      : "CV-Screener AI";
+
+  const activeFiles: Record<string, string> =
+    inputMode === "manual" && (customRequirements.trim() || customPythonCode.trim())
+      ? {
+          ...(customRequirements.trim() ? { "requirements.txt": customRequirements } : {}),
+          ...(customPythonCode.trim() ? { "main.py": customPythonCode } : {}),
+        }
+      : files;
+
+  // ADDITION 6 — scanResult uses activeFiles
   const scanResult = useMemo(() => {
     if (phase === "intro") return null;
-    return scanRepository(files);
-  }, [phase, files]);
+    return scanRepository(activeFiles);
+  }, [phase, activeFiles]);
 
   const schemaColumns = useMemo(() => {
     if (!scanResult) return [];
@@ -66,8 +129,15 @@ export default function ClassifierPage() {
 
   const lawMatches = selectedFile ? matchCodeToLaw(files[selectedFile] || "") : [];
 
+  // ADDITION 3 — Toast helper
+  function showToast(msg: string) {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  }
+
+  // ADDITION 5 — runScan uses activeFiles
   function runScan() {
-    const { libraries, endpoints } = scanRepository(files);
+    const { libraries, endpoints } = scanRepository(activeFiles);
     setPhase("scan");
     const scorer = new AIRiskScorer();
     const discoveryData: DiscoveryData = {
@@ -82,6 +152,7 @@ export default function ClassifierPage() {
     setPhase("decision");
   }
 
+  // ADDITION 7 — finalizeClassification uses activeSystemName + saveResult + showToast
   function finalizeClassification() {
     if (!scanResult) return;
     const res = classifyRisk(
@@ -92,21 +163,29 @@ export default function ClassifierPage() {
     );
     setResult(res);
     setPhase("result");
-    appendEvidence("decision", {
+    void appendEvidence("decision", {
       type: "AI Classification",
-      system: "CV-Screener AI",
+      system: activeSystemName,
       riskLevel: res.riskLevel,
       annexCategory: res.annexCategory,
       exempted: res.isExemptedArt6_3,
       libraries: res.libraries.map((l) => l.name),
     }, "aicomply-classifier");
 
-    // Generate Conformity Passport
-    const confidence = scorerResult ? parseFloat(scorerResult.detailed_findings[0]?.confidence || "0") : 0;
+    const confidence = scorerResult ? parseFloat(scorerResult.detailed_findings[0]?.confidence ?? "0") : 0;
     const exemptionStatus = exemptionDossier ? exemptionDossier.status : "NONE";
     const profilingStatus = hasHardBlock(profilingSignals) ? "BLOCKED" : profilingSignals.length > 0 ? "WARNINGS" : "CLEAN";
-    const p = generatePassport(res.riskLevel, confidence, exemptionStatus, profilingStatus);
+    const p = generatePassport(
+      res.riskLevel,
+      confidence,
+      exemptionStatus,
+      profilingStatus,
+      activeSystemName
+    );
     setPassport(p);
+
+    saveResult(activeSystemName, res, p.passport_id, exemptionDossier?.id ?? null);
+    showToast(`Classificazione completata: ${res.riskLevel} — salvata su Evidence Layer`);
   }
 
   const riskColors: Record<string, string> = {
@@ -154,42 +233,162 @@ export default function ClassifierPage() {
         ))}
       </div>
 
-      {/* PHASE: INTRO */}
+      {/* ADDITION 9 — PHASE: INTRO (rewritten inner content) */}
       {phase === "intro" && (
-        <div className="grid lg:grid-cols-2 gap-6">
-          <div className="rounded-xl border border-border bg-card p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Code2 className="h-5 w-5 text-primary" />
-              <h2 className="text-base font-semibold text-foreground">Progetto: CV-Screener AI</h2>
+        <div className="space-y-6">
+          {/* Saved result banner */}
+          {savedClassification && (
+            <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 flex items-center justify-between">
+              <div className="text-xs text-muted-foreground">
+                <span className="text-primary font-medium">Ultima classificazione:</span>{" "}
+                {savedClassification.systemName} —{" "}
+                <span className={`font-semibold ${
+                  savedClassification.result.riskLevel === "Unacceptable" ? "text-danger" :
+                  savedClassification.result.riskLevel === "High" ? "text-warning" :
+                  "text-success"
+                }`}>{savedClassification.result.riskLevel}</span>
+                {" "}· {savedClassification.savedAt.slice(0, 10)}
+              </div>
+              <span className="text-[10px] text-muted-foreground">
+                {savedClassification.result.score}/100 score
+              </span>
             </div>
-            <div className="space-y-2 text-xs text-muted-foreground">
-              {Object.entries(files).map(([path]) => (
-                <div key={path} className="flex items-center gap-2 py-1">
-                  <FileText className="h-3.5 w-3.5 text-muted-foreground" />
-                  {path}
+          )}
+
+          {/* Input mode selector */}
+          <div className="rounded-xl border border-border bg-card p-5">
+            <h2 className="text-sm font-semibold text-foreground mb-4">Modalità di classificazione</h2>
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <button
+                onClick={() => setInputMode("demo")}
+                className={`rounded-lg border p-4 text-left transition-colors ${
+                  inputMode === "demo"
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/30"
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <Brain className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium text-foreground">Progetto demo</span>
                 </div>
-              ))}
+                <p className="text-[11px] text-muted-foreground">
+                  CV-Screener AI — scenario di screening HR con librerie pre-caricate. Ideale per esplorare il tool.
+                </p>
+              </button>
+              <button
+                onClick={() => setInputMode("manual")}
+                className={`rounded-lg border p-4 text-left transition-colors ${
+                  inputMode === "manual"
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/30"
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <Code2 className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium text-foreground">Il mio sistema AI</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Inserisci il nome del sistema e incolla il tuo requirements.txt per classificare il tuo progetto reale.
+                </p>
+              </button>
             </div>
-            <button onClick={runScan} className="mt-6 w-full rounded-lg bg-primary px-4 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 flex items-center justify-center gap-2">
-              <Search className="h-4 w-4" />
-              Avvia Discovery Engine
-            </button>
+
+            {/* Manual input fields */}
+            {inputMode === "manual" && (
+              <div className="space-y-3 border-t border-border pt-4">
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">
+                    Nome sistema AI <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    value={customSystemName}
+                    onChange={(e) => setCustomSystemName(e.target.value)}
+                    placeholder="es. HR Screening Platform v2.1"
+                    className="w-full rounded-lg border border-border bg-muted/20 px-3 py-2 text-xs text-foreground"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">
+                    requirements.txt (incolla il contenuto)
+                  </label>
+                  <textarea
+                    value={customRequirements}
+                    onChange={(e) => setCustomRequirements(e.target.value)}
+                    placeholder={"scikit-learn==1.3.0\nxgboost==1.7.6\npandas==2.0.3\n..."}
+                    rows={5}
+                    className="w-full rounded-lg border border-border bg-muted/20 px-3 py-2 text-xs text-foreground font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">
+                    Codice Python principale (opzionale — per endpoint e profilazione)
+                  </label>
+                  <textarea
+                    value={customPythonCode}
+                    onChange={(e) => setCustomPythonCode(e.target.value)}
+                    placeholder={"@app.route('/api/screen-candidate', methods=['POST'])\ndef screen_candidate():\n    ..."}
+                    rows={5}
+                    className="w-full rounded-lg border border-border bg-muted/20 px-3 py-2 text-xs text-foreground font-mono"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h2 className="text-sm font-semibold text-foreground mb-4">Cosa farà il Discovery Engine:</h2>
-            <div className="space-y-3">
-              {[
-                { icon: Search, text: "Scannerà requirements.txt e file .py per librerie critiche" },
-                { icon: Server, text: "Analizzerà gli endpoint API per dati biometrici/sensibili" },
-                { icon: Scale, text: "Applicherà l'Art. 6(3) per valutare la deroga non-alto-rischio" },
-                { icon: Hash, text: "Genererà un certificato firmato SHA-256" },
-              ].map((s, i) => (
-                <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-                  <s.icon className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                  {s.text}
-                </div>
-              ))}
+          {/* Files preview + start */}
+          <div className="grid lg:grid-cols-2 gap-6">
+            <div className="rounded-xl border border-border bg-card p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Code2 className="h-5 w-5 text-primary" />
+                <h2 className="text-base font-semibold text-foreground">
+                  {inputMode === "demo"
+                    ? "Progetto: CV-Screener AI"
+                    : activeSystemName || "Progetto personalizzato"}
+                </h2>
+              </div>
+              <div className="space-y-2 text-xs text-muted-foreground">
+                {Object.entries(activeFiles).map(([path]) => (
+                  <div key={path} className="flex items-center gap-2 py-1">
+                    <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                    {path}
+                  </div>
+                ))}
+                {inputMode === "manual" && Object.keys(activeFiles).length === 0 && (
+                  <p className="text-warning text-[11px]">
+                    Nessun file inserito — il scan partirà con file vuoti.
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={() => {
+                  if (inputMode === "manual" && !customSystemName.trim()) {
+                    showToast("Inserisci il nome del sistema AI prima di procedere");
+                    return;
+                  }
+                  runScan();
+                }}
+                className="mt-6 w-full rounded-lg bg-primary px-4 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 flex items-center justify-center gap-2"
+              >
+                <Search className="h-4 w-4" />
+                Avvia Discovery Engine
+              </button>
+            </div>
+
+            <div className="rounded-xl border border-border bg-card p-6">
+              <h2 className="text-sm font-semibold text-foreground mb-4">Cosa farà il Discovery Engine:</h2>
+              <div className="space-y-3">
+                {[
+                  { icon: Search, text: "Scannerà requirements.txt e file .py per librerie critiche" },
+                  { icon: Server, text: "Analizzerà gli endpoint API per dati biometrici/sensibili" },
+                  { icon: Scale, text: "Applicherà l'Art. 6(3) per valutare la deroga non-alto-rischio" },
+                  { icon: Hash, text: "Genererà un certificato firmato SHA-256" },
+                ].map((s, i) => (
+                  <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <s.icon className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    {s.text}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -384,7 +583,7 @@ export default function ClassifierPage() {
               </div>
             )}
 
-            {/* AI Risk Scorer — Confidence Scores */}
+            {/* AI Risk Scorer */}
             {scorerResult && scorerResult.detailed_findings.length > 0 && (
               <div className="rounded-xl border border-border bg-card p-5">
                 <div className="flex items-center justify-between mb-3">
@@ -460,7 +659,6 @@ export default function ClassifierPage() {
                 </div>
               </div>
 
-              {/* Profiling scanner results */}
               {profilingSignals.length > 0 && (
                 <div className="rounded-lg border border-warning/30 bg-warning/5 p-4 mb-6">
                   <AlertTriangle className="h-4 w-4 text-warning inline mr-1" />
@@ -473,7 +671,6 @@ export default function ClassifierPage() {
                 </div>
               )}
 
-              {/* 4 Pillars */}
               <div className="space-y-4 mb-6">
                 <p className="text-xs font-medium text-foreground">Seleziona uno o più criteri applicabili (Art. 6(3), lettere a-d):</p>
                 {EXEMPTION_CRITERIA.map((criterion) => {
@@ -515,7 +712,6 @@ export default function ClassifierPage() {
                 })}
               </div>
 
-              {/* Rationale */}
               <div className="mb-6">
                 <label className="block text-xs font-medium text-foreground mb-2">
                   Motivazione dettagliata obbligatoria
@@ -529,17 +725,17 @@ export default function ClassifierPage() {
                 />
               </div>
 
-              {/* Summary + Action */}
               <div className="flex items-center justify-between">
                 <div className="text-xs text-muted-foreground">
                   <strong>{selectedCriteria.length}</strong>/4 criteri selezionati
                   {rationale.trim().length > 0 && <span className="text-success ml-2">✓ Motivazione presente</span>}
                 </div>
+                {/* ADDITION 8 — Fixed exemption button onClick */}
                 <button
                   onClick={() => {
-                    const dossier = generateExemptionDossier("CV-Screener AI", profilingSignals, selectedCriteria, rationale);
+                    const dossier = generateExemptionDossier(activeSystemName, profilingSignals, selectedCriteria, rationale);
                     setExemptionDossier(dossier);
-                    setHasProfiling(false);
+                    if (!hasHardBlock(profilingSignals)) setHasProfiling(false);
                     setExemptionRequested(selectedCriteria.length > 0);
                     finalizeClassification();
                   }}
@@ -589,7 +785,8 @@ export default function ClassifierPage() {
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               {[
-                { label: "Sistema", value: "CV-Screener AI" },
+                // ADDITION 10 — use activeSystemName
+                { label: "Sistema", value: activeSystemName },
                 { label: "Categoria", value: result.annexCategory || "N/A" },
                 { label: "Deroga Art. 6(3)", value: result.isExemptedArt6_3 ? "Concessa" : "Non richiesta" },
                 { label: "Score", value: `${result.score}/100` },
@@ -601,14 +798,12 @@ export default function ClassifierPage() {
               ))}
             </div>
 
-            {/* Rationale */}
             {result.exemptionRationale && (
               <div className="rounded-lg border border-border bg-card/50 p-4 mb-4">
                 <p className="text-xs text-muted-foreground leading-relaxed">{result.exemptionRationale}</p>
               </div>
             )}
 
-            {/* Evidence */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
                 <Hash className="h-3 w-3" />
@@ -693,7 +888,6 @@ export default function ClassifierPage() {
 
               {passportOpen && (
                 <div className="space-y-4">
-                  {/* Summary */}
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     {[
                       { label: "ID Passport", value: passport.passport_id.slice(0, 8), color: "text-primary" },
@@ -708,7 +902,6 @@ export default function ClassifierPage() {
                     ))}
                   </div>
 
-                  {/* Audit Trail */}
                   <details className="group">
                     <summary className="text-xs font-medium text-foreground cursor-pointer hover:text-primary">🔍 Audit Trail</summary>
                     <div className="mt-2 space-y-1 text-[10px] font-mono text-muted-foreground bg-muted rounded-lg p-3">
@@ -719,7 +912,6 @@ export default function ClassifierPage() {
                     </div>
                   </details>
 
-                  {/* Technical Fingerprint */}
                   <details className="group">
                     <summary className="text-xs font-medium text-foreground cursor-pointer hover:text-primary">🔐 Technical Fingerprint</summary>
                     <div className="mt-2 space-y-1 text-[10px] font-mono text-muted-foreground bg-muted rounded-lg p-3">
@@ -729,14 +921,12 @@ export default function ClassifierPage() {
                     </div>
                   </details>
 
-                  {/* Legal Declaration */}
                   <div className="rounded-lg border border-border bg-muted p-3">
                     <p className="text-[10px] text-muted-foreground italic leading-relaxed">
                       {passport.legal_declaration}
                     </p>
                   </div>
 
-                  {/* Verification + Export */}
                   <div className="flex items-center gap-3">
                     <div className="flex-1 rounded-lg border border-success/30 bg-success/5 p-2.5 text-[10px] text-success flex items-center gap-2">
                       <Shield className="h-3.5 w-3.5" />
@@ -800,6 +990,39 @@ export default function ClassifierPage() {
               ))}
             </div>
           </div>
+
+          {/* ADDITION 11 — Nuova classificazione button */}
+          <div className="flex justify-end">
+            <button
+              onClick={() => {
+                setPhase("intro");
+                setResult(null);
+                setPassport(null);
+                setExemptionDossier(null);
+                setPassportOpen(false);
+                setSigned(false);
+                setHasProfiling(null);
+                setExemptionRequested(false);
+                setSelectedCriteria([]);
+                setRationale("");
+                setScorerResult(null);
+                setCustomSystemName("");
+                setCustomRequirements("");
+                setCustomPythonCode("");
+              }}
+              className="rounded-lg border border-border px-4 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+            >
+              <Search className="h-3.5 w-3.5" />
+              Classifica un altro sistema
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ADDITION 12 — Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 rounded-xl bg-card border border-border px-4 py-3 text-sm text-foreground shadow-xl">
+          {toast}
         </div>
       )}
     </div>
