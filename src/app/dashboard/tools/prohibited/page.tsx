@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   AlertOctagon, AlertTriangle, CheckCircle, HelpCircle,
-  ChevronRight, ChevronDown, ChevronUp, ArrowLeft, Printer,
+  ChevronRight, ChevronDown, ChevronUp, ArrowLeft, Printer, Download,
 } from "lucide-react";
 import {
   PROHIBITED_CHECKS,
@@ -14,6 +14,7 @@ import {
 } from "@/lib/simulation/prohibited-practices-engine";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { ProhibitedCheckResult } from "@/lib/dossier/storage-schema";
+import { appendEvidence } from "@/lib/evidence/evidence-layer";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const card = {
@@ -104,15 +105,36 @@ const VERDICT_META: Record<
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function ProhibitedPage() {
-  const [answers, setAnswers]       = useState<Record<string, CheckAnswer>>({});
-  const [activeCheck, setActiveCheck] = useState(0);
-  const [mode, setMode]             = useState<"checklist" | "result">("checklist");
-  const [verdict, setVerdict]       = useState<FinalVerdict | null>(null);
-  const [clearOpen, setClearOpen]   = useState(false);
-  const [saved, setSaved]           = useState<string | null>(() => {
+  const [answers, setAnswers] = useState<Record<string, CheckAnswer>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const saved = localStorage.getItem("prohibited_answers");
+      return saved ? (JSON.parse(saved) as Record<string, CheckAnswer>) : {};
+    } catch { return {}; }
+  });
+  const [activeCheck, setActiveCheck] = useState(() => {
+    if (typeof window === "undefined") return 0;
+    try { return parseInt(localStorage.getItem("prohibited_active_check") ?? "0") || 0; }
+    catch { return 0; }
+  });
+  const [mode, setMode]   = useState<"checklist" | "result">("checklist");
+  const [verdict, setVerdict] = useState<FinalVerdict | null>(null);
+  const [clearOpen, setClearOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const [saved, setSaved] = useState<string | null>(() => {
     const existing = readFromStorage<ProhibitedCheckResult>("prohibited");
     return existing?.completedAt ?? null;
   });
+
+  function showToast(msg: string) {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  }
+
+  function goToCheck(idx: number) {
+    setActiveCheck(idx);
+    localStorage.setItem("prohibited_active_check", String(idx));
+  }
 
   const total     = PROHIBITED_CHECKS.length;
   const answered  = Object.values(answers).filter((v) => v !== null).length;
@@ -120,7 +142,11 @@ export default function ProhibitedPage() {
   const check     = PROHIBITED_CHECKS[activeCheck];
 
   function setAnswer(id: string, val: CheckAnswer) {
-    setAnswers((prev) => ({ ...prev, [id]: val }));
+    setAnswers((prev) => {
+      const next = { ...prev, [id]: val };
+      localStorage.setItem("prohibited_answers", JSON.stringify(next));
+      return next;
+    });
   }
 
   function handleCalcVerdict() {
@@ -131,21 +157,44 @@ export default function ProhibitedPage() {
     const v = calculateVerdict(PROHIBITED_CHECKS, results);
     setVerdict(v);
 
-    // Persist to dossier storage
     const completedAt = new Date().toISOString();
     const typedAnswers = Object.fromEntries(
       Object.entries(answers).filter((e): e is [string, "yes" | "no" | "unsure"] =>
         e[1] === "yes" || e[1] === "no" || e[1] === "unsure"
       )
     );
+
     writeToStorage<ProhibitedCheckResult>("prohibited", {
       answers: typedAnswers,
       verdict: v.verdict,
       violatedChecks: v.violatedChecks.map((c) => c.id),
       completedAt,
     });
+
+    appendEvidence(
+      "decision",
+      {
+        type: "Art. 5 — Verifica Pratiche Vietate AI Act",
+        verdict: v.verdict,
+        verdictLabel: v.verdict === "violation" ? "VIOLAZIONE RILEVATA"
+          : v.verdict === "potential_violation" ? "RISCHIO POTENZIALE"
+          : v.verdict === "clear" ? "NESSUNA VIOLAZIONE"
+          : "VALUTAZIONE INCOMPLETA",
+        violatedChecks: v.violatedChecks.map((c) => ({ id: c.id, title: c.title, article: c.article })),
+        potentialChecks: v.potentialChecks.map((c) => ({ id: c.id, title: c.title, article: c.article })),
+        clearChecks: v.clearChecks.length,
+        totalChecks: PROHIBITED_CHECKS.length,
+        summaryText: v.summaryText,
+        completedAt,
+      },
+      "prohibited"
+    );
+
     setSaved(completedAt);
     setMode("result");
+    // Pulisci il progress salvato — il verdetto è stato calcolato
+    localStorage.removeItem("prohibited_answers");
+    localStorage.removeItem("prohibited_active_check");
   }
 
   // ── Saved banner ────────────────────────────────────────────────────────────
@@ -212,7 +261,7 @@ export default function ProhibitedPage() {
                   return (
                     <button
                       key={c.id}
-                      onClick={() => setActiveCheck(i)}
+                      onClick={() => goToCheck(i)}
                       className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-all"
                       style={{
                         background: isActive ? "rgba(59,130,246,0.05)" : "transparent",
@@ -348,7 +397,7 @@ export default function ProhibitedPage() {
               {/* Navigation */}
               <div className="flex items-center justify-between mt-6 pt-4" style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}>
                 <button
-                  onClick={() => setActiveCheck((p) => Math.max(0, p - 1))}
+                  onClick={() => goToCheck(Math.max(0, activeCheck - 1))}
                   disabled={activeCheck === 0}
                   className="flex items-center gap-1.5 text-[12px] transition-opacity disabled:opacity-30"
                   style={{ color: "rgba(0,0,0,0.45)", background: "none", border: "none", cursor: activeCheck === 0 ? "not-allowed" : "pointer", padding: 0 }}
@@ -358,7 +407,7 @@ export default function ProhibitedPage() {
 
                 {activeCheck < total - 1 ? (
                   <button
-                    onClick={() => setActiveCheck((p) => Math.min(total - 1, p + 1))}
+                    onClick={() => goToCheck(Math.min(total - 1, activeCheck + 1))}
                     disabled={!answers[check.id]}
                     className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[12px] font-medium transition-all disabled:opacity-30"
                     style={{
@@ -389,8 +438,18 @@ export default function ProhibitedPage() {
             </div>
           </div>
         </div>
-      </div>
-    );
+
+      {/* Toast */}
+      {toast && (
+        <div
+          className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg"
+          style={{ background: "#0D1016", color: "#ffffff" }}
+        >
+          ✓ {toast}
+        </div>
+      )}
+    </div>
+  );
   }
 
   // ── Result mode ─────────────────────────────────────────────────────────────
@@ -584,26 +643,61 @@ export default function ProhibitedPage() {
         className="flex flex-wrap items-center justify-between gap-3 pt-4"
         style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}
       >
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <button
-            onClick={() => setMode("checklist")}
+            onClick={() => { setMode("checklist"); goToCheck(0); }}
             className="flex items-center gap-1.5 rounded-full px-4 py-2 text-[12px] font-medium transition-all hover:opacity-80"
             style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.6)", border: "none", cursor: "pointer" }}
           >
             <ArrowLeft size={12} /> Rivedi le risposte
           </button>
           <button
+            onClick={() => {
+              const report = {
+                export_type: "Art. 5 AI Act — Verifica Pratiche Vietate",
+                exported_at: new Date().toISOString(),
+                regulation: "EU 2024/1689 — Art. 5 (Pratiche vietate)",
+                verdict: verdict.verdict,
+                summary: verdict.summaryText,
+                recommended_action: verdict.recommendedAction,
+                violated_checks: verdict.violatedChecks.map((c) => ({
+                  id: c.id, title: c.title, article: c.article, description: c.description,
+                })),
+                potential_checks: verdict.potentialChecks.map((c) => ({
+                  id: c.id, title: c.title, article: c.article,
+                  exceptions: c.exceptions,
+                })),
+                clear_checks: verdict.clearChecks.map((c) => ({
+                  id: c.id, title: c.title, article: c.article,
+                })),
+                generated_at: verdict.generatedAt,
+              };
+              const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `art5-check-${verdict.verdict}-${new Date().toISOString().slice(0, 10)}.json`;
+              a.click();
+              URL.revokeObjectURL(url);
+              showToast("Report Art. 5 esportato");
+            }}
+            className="flex items-center gap-1.5 rounded-full px-4 py-2 text-[12px] font-medium transition-all hover:opacity-80"
+            style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.6)", border: "none", cursor: "pointer" }}
+          >
+            <Download size={12} /> Esporta JSON
+          </button>
+          <button
             onClick={() => window.print()}
             className="flex items-center gap-1.5 rounded-full px-4 py-2 text-[12px] font-medium transition-all hover:opacity-80"
             style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.6)", border: "none", cursor: "pointer" }}
           >
-            <Printer size={12} /> Esporta report
+            <Printer size={12} /> Stampa PDF
           </button>
         </div>
 
         {verdict.verdict !== "violation" && (
           <Link
-            href="/dashboard/tools/classifier"
+            href="/dashboard/tools/risk-manager"
             className="flex items-center gap-1.5 rounded-full px-5 py-2 text-[12px] font-medium transition-all hover:opacity-85"
             style={{ background: "#0D1016", color: "#ffffff" }}
           >
@@ -611,6 +705,16 @@ export default function ProhibitedPage() {
           </Link>
         )}
       </div>
+
+      {/* Toast */}
+      {toast && (
+        <div
+          className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg"
+          style={{ background: "#0D1016", color: "#ffffff" }}
+        >
+          ✓ {toast}
+        </div>
+      )}
     </div>
   );
 }
