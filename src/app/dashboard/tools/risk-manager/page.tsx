@@ -23,7 +23,7 @@ import {
   Search,
   Eye,
 } from "lucide-react";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, type Dispatch, type SetStateAction } from "react";
 import {
   RiskItem,
   RiskCategory,
@@ -56,6 +56,53 @@ import {
   type RiskSuggestion,
   type ResidualWarning,
 } from "@/lib/simulation/risk-manager-engine";
+import { appendEvidence } from "@/lib/evidence/evidence-layer";
+
+// ─── FIX 1 — Typed form state ─────────────────────────────────────────
+
+type RiskFormState = {
+  description: string;
+  category: RiskCategory;
+  severity: Severity;
+  probability: Probability;
+  mitigation: string;
+  residual: ResidualRisk;
+};
+
+type GPAIFormState = {
+  modelName: string;
+  providerName: string;
+  computeFlops: string;
+  trainingDataSize: string;
+  openSource: boolean;
+  energyKwh: string;
+  hasModelCard: boolean;
+};
+
+type TempFormState = {
+  entityType: string;
+  entityId: string;
+  dataJson: string;
+  validTime: string;
+};
+
+// ─── FIX 5 — Persistence helpers ─────────────────────────────────────
+
+const STORAGE_KEY = "risk_manager_report";
+
+function loadReport(): RiskManagerReport {
+  if (typeof window === "undefined") return createEmptyRiskReport("Nuovo Sistema AI");
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as RiskManagerReport) : createEmptyRiskReport("Nuovo Sistema AI");
+  } catch {
+    return createEmptyRiskReport("Nuovo Sistema AI");
+  }
+}
+
+function saveReport(r: RiskManagerReport) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(r));
+}
 
 // ─── SEZIONI ──────────────────────────────────────────────────────────
 
@@ -87,21 +134,36 @@ function cls(...args: (string | false | undefined | null)[]) {
 
 export default function RiskManagerPage() {
   const [phase, setPhase] = useState<Phase>("scoping");
-  const [report, setReport] = useState<RiskManagerReport>(() =>
-    createEmptyRiskReport("Nuovo Sistema AI")
-  );
+
+  // FIX 5 — load from localStorage
+  const [report, setReport] = useState<RiskManagerReport>(() => loadReport());
   const [finalized, setFinalized] = useState(false);
+
+  // FIX 6 — Toast
+  const [toast, setToast] = useState<{ msg: string; type: "error" | "success" } | null>(null);
+
+  function showToast(msg: string, type: "error" | "success" = "success") {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  }
+
+  // FIX 5 — updateReport helper persists every change
+  function updateReport(updater: (prev: RiskManagerReport) => RiskManagerReport) {
+    setReport((prev) => {
+      const next = updater(prev);
+      saveReport(next);
+      return next;
+    });
+  }
+
+  // FIX 5 — auto-save on systemName change (from ScopingPhase direct setReport call)
+  useEffect(() => { saveReport(report); }, [report.systemName]);
 
   // ─── SCOPING STATE ──────────────────────────────────────────────
   const [showRiskForm, setShowRiskForm] = useState(false);
-  const [riskForm, setRiskForm] = useState<{
-    description: string;
-    category: RiskCategory;
-    severity: Severity;
-    probability: Probability;
-    mitigation: string;
-    residual: ResidualRisk;
-  }>({
+
+  // FIX 1/2 — typed riskForm
+  const [riskForm, setRiskForm] = useState<RiskFormState>({
     description: "",
     category: "health-safety",
     severity: "medium",
@@ -118,7 +180,8 @@ export default function RiskManagerPage() {
       quantitativeScore: computeRiskScore(riskForm.severity, riskForm.probability),
       createdAt: new Date().toISOString(),
     };
-    setReport((prev) => ({
+    // FIX 5
+    updateReport((prev) => ({
       ...prev,
       risks: [...prev.risks, newRisk],
       overallScore: computeOverallScore([...prev.risks, newRisk]),
@@ -136,7 +199,8 @@ export default function RiskManagerPage() {
 
   function removeRisk(id: string) {
     const updated = report.risks.filter((r) => r.id !== id);
-    setReport((prev) => ({ ...prev, risks: updated, overallScore: computeOverallScore(updated) }));
+    // FIX 5
+    updateReport((prev) => ({ ...prev, risks: updated, overallScore: computeOverallScore(updated) }));
   }
 
   // ─── MONTE CARLO STATE ──────────────────────────────────────────
@@ -152,24 +216,38 @@ export default function RiskManagerPage() {
   function handleRunMC() {
     const result = runMonteCarlo(mcInput);
     setMcResult(result);
-    setReport((prev) => ({ ...prev, monteCarloResults: result }));
+    // FIX 5
+    updateReport((prev) => ({ ...prev, monteCarloResults: result }));
   }
 
   // ─── TEMPORAL STATE ─────────────────────────────────────────────
   const [temporalRecords, setTemporalRecords] = useState<TemporalRecord[]>([]);
-  const [tempForm, setTempForm] = useState({ entityType: "", entityId: "", dataJson: "", validTime: "" });
+  const [tempForm, setTempForm] = useState<TempFormState>({
+    entityType: "",
+    entityId: "",
+    dataJson: "",
+    validTime: "",
+  });
 
   async function addTemporal() {
     if (!tempForm.entityType || !tempForm.dataJson) return;
     try {
-      const data = JSON.parse(tempForm.dataJson);
-      const record = await createTemporalRecord(tempForm.entityType, tempForm.entityId, data, tempForm.validTime || new Date().toISOString());
+      const data = JSON.parse(tempForm.dataJson) as Record<string, unknown>;
+      const record = await createTemporalRecord(
+        tempForm.entityType,
+        tempForm.entityId,
+        data,
+        tempForm.validTime || new Date().toISOString()
+      );
       const updated = [...temporalRecords, record];
       setTemporalRecords(updated);
-      setReport((prev) => ({ ...prev, temporalLedger: updated }));
+      // FIX 5
+      updateReport((prev) => ({ ...prev, temporalLedger: updated }));
       setTempForm({ entityType: "", entityId: "", dataJson: "", validTime: "" });
     } catch {
-      alert("JSON non valido");
+      // FIX 6
+      showToast("JSON non valido — verifica la sintassi", "error");
+      return;
     }
   }
 
@@ -183,20 +261,25 @@ export default function RiskManagerPage() {
       const baseline = driftBaselineStr.split(",").map(Number);
       const current = driftCurrentStr.split(",").map(Number);
       if (baseline.some(isNaN) || current.some(isNaN)) {
-        alert("Inserisci valori numerici separati da virgola");
+        // FIX 6
+        showToast("Inserisci valori numerici separati da virgola", "error");
         return;
       }
       const result = detectDrift(baseline, current);
       const updated = [...driftResults, result];
       setDriftResults(updated);
-      setReport((prev) => ({ ...prev, driftWindows: updated }));
+      // FIX 5
+      updateReport((prev) => ({ ...prev, driftWindows: updated }));
     } catch {
-      alert("Errore nel calcolo PSI");
+      // FIX 6
+      showToast("Errore nel calcolo PSI", "error");
+      return;
     }
   }
 
   // ─── GPAI STATE ─────────────────────────────────────────────────
-  const [gpaiForm, setGpaiForm] = useState({
+  // FIX 3 — typed gpaiForm
+  const [gpaiForm, setGpaiForm] = useState<GPAIFormState>({
     modelName: "",
     providerName: "",
     computeFlops: "",
@@ -218,7 +301,7 @@ export default function RiskManagerPage() {
       hasModelCard: gpaiForm.hasModelCard,
     });
     setGpaiResult(result);
-    setReport((prev) => ({ ...prev, gpaiAssessment: result }));
+    updateReport((prev) => ({ ...prev, gpaiAssessment: result }));
   }
 
   // ─── SANCTIONS STATE ────────────────────────────────────────────
@@ -234,11 +317,58 @@ export default function RiskManagerPage() {
     );
   }
 
-  // ─── FINALIZE ───────────────────────────────────────────────────
+  // ─── FIX 7 — FINALIZE with Evidence Layer ───────────────────────
   async function handleFinalize() {
     const final = await finalizeRiskReport({ ...report, sanctions });
     setReport(final);
+    saveReport(final);
     setFinalized(true);
+
+    await appendEvidence("decision", {
+      type: "Risk Assessment Finalizzato",
+      system: final.systemName,
+      overallScore: final.overallScore,
+      overallRating: final.overallRating,
+      totalRisks: final.risks.length,
+      highRisks: final.risks.filter((r) => r.severity === "high").length,
+      evidenceHash: final.evidenceHash,
+      monteCarloRun: !!final.monteCarloResults,
+      driftWindows: final.driftWindows.length,
+      gpaiAssessed: !!final.gpaiAssessment,
+      sanctionsResolved: final.sanctions.filter((s) => s.status === "resolved").length,
+    }, "risk-manager");
+
+    showToast("Report finalizzato e registrato su Evidence Layer ✓");
+  }
+
+  // ─── FIX 8 — Download report ────────────────────────────────────
+  function downloadReport() {
+    const blob = new Blob(
+      [JSON.stringify({ ...report, sanctions }, null, 2)],
+      { type: "application/json" }
+    );
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `risk-report-${report.systemName.replace(/\s+/g, "-").toLowerCase()}-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("Report scaricato");
+  }
+
+  // ─── FIX 9 — Reset assessment ───────────────────────────────────
+  function resetAssessment() {
+    const fresh = createEmptyRiskReport("Nuovo Sistema AI");
+    setReport(fresh);
+    saveReport(fresh);
+    setFinalized(false);
+    setSanctions(getSanctionTracker());
+    setMcResult(null);
+    setTemporalRecords([]);
+    setDriftResults([]);
+    setGpaiResult(null);
+    setPhase("scoping");
+    showToast("Nuovo assessment avviato");
   }
 
   // ─── NAVIGATION ─────────────────────────────────────────────────
@@ -354,10 +484,13 @@ export default function RiskManagerPage() {
         )}
 
         {phase === "output" && (
+          // FIX 8 + 9 — add onDownload and onReset
           <OutputPhase
             report={{ ...report, sanctions }}
             finalized={finalized}
             handleFinalize={handleFinalize}
+            onDownload={downloadReport}
+            onReset={resetAssessment}
           />
         )}
       </div>
@@ -384,12 +517,24 @@ export default function RiskManagerPage() {
           </button>
         )}
       </div>
+
+      {/* FIX 6 — Toast */}
+      {toast && (
+        <div className={`fixed bottom-6 right-6 z-50 rounded-xl border px-4 py-3 text-sm shadow-xl ${
+          toast.type === "error"
+            ? "bg-card border-danger/30 text-danger"
+            : "bg-card border-border text-foreground"
+        }`}>
+          {toast.msg}
+        </div>
+      )}
     </div>
   );
 }
 
 // ─── PHASE COMPONENTS ──────────────────────────────────────────────────
 
+// FIX 2 — Proper types in ScopingPhase props
 function ScopingPhase({
   report,
   setReport,
@@ -402,8 +547,8 @@ function ScopingPhase({
 }: {
   report: RiskManagerReport;
   setReport: (r: RiskManagerReport) => void;
-  riskForm: any;
-  setRiskForm: (f: any) => void;
+  riskForm: RiskFormState;
+  setRiskForm: Dispatch<SetStateAction<RiskFormState>>;
   showRiskForm: boolean;
   setShowRiskForm: (v: boolean) => void;
   addRisk: () => void;
@@ -412,16 +557,15 @@ function ScopingPhase({
   const highCount = report.risks.filter((r) => r.severity === "high").length;
   const score = report.overallScore;
 
-  // ─── Auto-fill suggestion state ─────────────────────────────────
   const [suggestion, setSuggestion] = useState<RiskSuggestion | null>(null);
   const [showGuide, setShowGuide] = useState(false);
   const [residualWarning, setResidualWarning] = useState<ResidualWarning>({ show: false, message: "", severity: "info" });
   const [suggestionUsed, setSuggestionUsed] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Debounced text analysis → suggestion
+  // FIX 2 — (prev: RiskFormState) instead of (prev: typeof riskForm)
   const handleDescriptionChange = useCallback((value: string) => {
-    setRiskForm((prev: typeof riskForm) => ({ ...prev, description: value }));
+    setRiskForm((prev: RiskFormState) => ({ ...prev, description: value }));
     setSuggestionUsed(false);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
@@ -433,7 +577,6 @@ function ScopingPhase({
     }, 600);
   }, [setRiskForm]);
 
-  // Validate residual risk on any relevant field change
   useEffect(() => {
     setResidualWarning(validateResidualRisk(
       riskForm.severity,
@@ -449,7 +592,8 @@ function ScopingPhase({
 
   function applySuggestion() {
     if (!suggestion) return;
-    setRiskForm((prev: typeof riskForm) => ({
+    // FIX 2 — (prev: RiskFormState) instead of (prev: typeof riskForm)
+    setRiskForm((prev: RiskFormState) => ({
       ...prev,
       severity: suggestion.severity,
       probability: suggestion.probability,
@@ -460,10 +604,9 @@ function ScopingPhase({
 
   return (
     <div>
-      {/* Header with guide button */}
       <div className="flex items-center justify-between mb-1">
         <h2 className="text-lg font-semibold text-foreground">
-          Scoping & Identificazione Rischi
+          Scoping &amp; Identificazione Rischi
         </h2>
         <button
           onClick={() => setShowGuide(!showGuide)}
@@ -487,7 +630,6 @@ function ScopingPhase({
         />
       </p>
 
-      {/* Guida ai Criteri slide-out panel */}
       {showGuide && (
         <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 mb-6">
           <h4 className="text-sm font-semibold text-foreground mb-3">Criteri di valutazione AI Act</h4>
@@ -544,7 +686,6 @@ function ScopingPhase({
         </div>
       )}
 
-      {/* Scoreboard */}
       <div className="grid grid-cols-4 gap-4 mb-6">
         {[
           { label: "Rischi totali", value: report.risks.length, color: "text-foreground" },
@@ -559,7 +700,6 @@ function ScopingPhase({
         ))}
       </div>
 
-      {/* Add risk button */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold text-foreground">Rischi identificati</h3>
         <button
@@ -571,10 +711,8 @@ function ScopingPhase({
         </button>
       </div>
 
-      {/* Risk form */}
       {showRiskForm && (
         <div className="rounded-xl border border-border bg-muted/50 p-4 mb-4 space-y-3">
-          {/* Description + auto-fill suggestion */}
           <div>
             <textarea
               value={riskForm.description}
@@ -641,7 +779,6 @@ function ScopingPhase({
                 <option key={k} value={k}>{v}</option>
               ))}
             </select>
-            {/* Severity with suggestion badge */}
             <div className="relative">
               <select
                 value={riskForm.severity}
@@ -663,7 +800,6 @@ function ScopingPhase({
                 </span>
               )}
             </div>
-            {/* Probability with suggestion badge */}
             <div className="relative">
               <select
                 value={riskForm.probability}
@@ -702,7 +838,6 @@ function ScopingPhase({
             </button>
           </div>
 
-          {/* Residual risk validation warning */}
           {residualWarning.show && (
             <div className={cls(
               "rounded-lg border p-3 text-xs flex items-start gap-2",
@@ -724,7 +859,6 @@ function ScopingPhase({
         </div>
       )}
 
-      {/* Risk list */}
       <div className="space-y-2">
         {report.risks.length === 0 ? (
           <div className="rounded-xl border border-border bg-muted/30 p-8 text-center">
@@ -797,10 +931,11 @@ function QuantitativePhase({
         ].map((f) => (
           <div key={f.key}>
             <label className="block text-[10px] font-medium text-muted-foreground mb-1 uppercase">{f.label}</label>
+            {/* FIX 4 — typed key access */}
             <input
               type="number"
-              value={(mcInput as any)[f.key]}
-              onChange={(e) => setMcInput({ ...mcInput, [f.key]: Number(e.target.value) })}
+              value={mcInput[f.key as keyof MonteCarloInput]}
+              onChange={(e) => setMcInput({ ...mcInput, [f.key as keyof MonteCarloInput]: Number(e.target.value) })}
               step={f.step}
               min={0}
               max={f.key === "iterations" ? 100000 : 1}
@@ -836,7 +971,6 @@ function QuantitativePhase({
             ))}
           </div>
 
-          {/* Distribution bars */}
           <div className="rounded-xl border border-border bg-muted/30 p-4">
             <h4 className="text-xs font-semibold text-foreground mb-3">Distribuzione rischio simulato</h4>
             <div className="space-y-1">
@@ -873,8 +1007,8 @@ function TemporalPhase({
   addTemporal,
 }: {
   temporalRecords: TemporalRecord[];
-  tempForm: { entityType: string; entityId: string; dataJson: string; validTime: string };
-  setTempForm: (v: any) => void;
+  tempForm: TempFormState;
+  setTempForm: Dispatch<SetStateAction<TempFormState>>;
   addTemporal: () => void;
 }) {
   return (
@@ -1051,21 +1185,22 @@ function DriftPhase({
 
 // ─── GPAI PHASE ────────────────────────────────────────────────────
 
+// FIX 3 — Proper types in GPAIPhase props
 function GPAIPhase({
   gpaiForm,
   setGpaiForm,
   gpaiResult,
   handleAssessGPAI,
 }: {
-  gpaiForm: any;
-  setGpaiForm: (v: any) => void;
+  gpaiForm: GPAIFormState;
+  setGpaiForm: Dispatch<SetStateAction<GPAIFormState>>;
   gpaiResult: GPAIRiskAssessment | null;
   handleAssessGPAI: () => void;
 }) {
   return (
     <div>
       <h2 className="text-lg font-semibold text-foreground mb-1">
-        GPAI & Rischio Sistemico
+        GPAI &amp; Rischio Sistemico
       </h2>
       <p className="text-xs text-muted-foreground mb-6">
         Valuta il rischio sistemico di modelli General-Purpose AI (Art.
@@ -1210,7 +1345,7 @@ function SanctionsPhase({
   return (
     <div>
       <h2 className="text-lg font-semibold text-foreground mb-1">
-        Governance & Sanzioni (Art. 99)
+        Governance &amp; Sanzioni (Art. 99)
       </h2>
       <p className="text-xs text-muted-foreground mb-6">
         Monitora lo stato delle sanzioni potenziali per violazioni
@@ -1263,14 +1398,19 @@ function SanctionsPhase({
 
 // ─── OUTPUT PHASE ───────────────────────────────────────────────────
 
+// FIX 8 + 9 — add onDownload and onReset props
 function OutputPhase({
   report,
   finalized,
   handleFinalize,
+  onDownload,
+  onReset,
 }: {
   report: RiskManagerReport;
   finalized: boolean;
   handleFinalize: () => void;
+  onDownload: () => void;
+  onReset: () => void;
 }) {
   const resolvedSanctions = report.sanctions.filter((s) => s.status === "resolved").length;
 
@@ -1283,7 +1423,6 @@ function OutputPhase({
         Riepilogo completo della valutazione dei rischi AI Act.
       </p>
 
-      {/* Scoreboard */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
         {[
           { label: "Rischi", value: report.risks.length },
@@ -1299,7 +1438,6 @@ function OutputPhase({
         ))}
       </div>
 
-      {/* System summary */}
       <div className="rounded-xl border border-border bg-muted/30 p-4 mb-6">
         <h4 className="text-sm font-semibold text-foreground mb-2">Sistema: {report.systemName}</h4>
         <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
@@ -1312,7 +1450,6 @@ function OutputPhase({
         </div>
       </div>
 
-      {/* Overall rating */}
       <div
         className={cls(
           "rounded-xl border p-4 mb-6 text-center",
@@ -1333,7 +1470,6 @@ function OutputPhase({
         </p>
       </div>
 
-      {/* Finalize */}
       {!finalized ? (
         <button
           onClick={handleFinalize}
@@ -1343,12 +1479,36 @@ function OutputPhase({
           Finalizza e sigilla (SHA-256)
         </button>
       ) : (
-        <div className="rounded-xl border border-success/30 bg-success/5 p-6 text-center">
-          <CheckCircle className="h-8 w-8 text-success mx-auto mb-2" />
-          <p className="text-sm font-semibold text-success">Report finalizzato e sigillato</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Evidence hash: {report.evidenceHash.slice(0, 32)}...
-          </p>
+        <div className="space-y-3">
+          <div className="rounded-xl border border-success/30 bg-success/5 p-6 text-center">
+            <CheckCircle className="h-8 w-8 text-success mx-auto mb-2" />
+            <p className="text-sm font-semibold text-success">Report finalizzato e sigillato</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Evidence hash: {report.evidenceHash.slice(0, 32)}...
+            </p>
+          </div>
+
+          {/* FIX 8 — Download button */}
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={onDownload}
+              className="flex items-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Download className="h-4 w-4" />
+              Scarica report JSON (per auditor)
+            </button>
+          </div>
+
+          {/* FIX 9 — Reset button */}
+          <div className="flex justify-center">
+            <button
+              onClick={onReset}
+              className="flex items-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors mt-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Nuovo assessment
+            </button>
+          </div>
         </div>
       )}
     </div>
