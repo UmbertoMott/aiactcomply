@@ -154,6 +154,7 @@ export const STORAGE_KEYS = {
   gpai:        "aicomply_gpai_result",
   conformity:  "aicomply_conformity_assessment",
   onboarding:  "aicomply_onboarding_data",
+  xai:         "aicomply_xai_result",
 } as const;
 
 export function readFromStorage<T>(key: keyof typeof STORAGE_KEYS): T | null {

@@ -24,6 +24,9 @@ import {
   CounterfactualScenario,
   XAIReport,
 } from "@/lib/xai/xai-engine";
+import { writeToStorage } from "@/lib/dossier/storage-schema";
+import { appendEvidence } from "@/lib/evidence/evidence-layer";
+import Link from "next/link";
 
 // ─── SHARED STYLES ────────────────────────────────────────────────────────────
 
@@ -462,16 +465,20 @@ function ReportTab({
   report,
   onGenerate,
   onSave,
+  onCopy,
   loading,
 }: {
   report: XAIReport | null;
   onGenerate: () => void;
   onSave: () => void;
+  onCopy: () => void;
   loading: boolean;
 }) {
   function copyJSON() {
     if (!report) return;
-    navigator.clipboard.writeText(JSON.stringify(report, null, 2)).catch(() => undefined);
+    navigator.clipboard.writeText(JSON.stringify(report, null, 2))
+      .then(() => onCopy())
+      .catch(() => undefined);
   }
 
   if (!report) {
@@ -625,9 +632,16 @@ export default function XAIPage() {
   const [tab, setTab] = useState<Tab>("importance");
   const [features, setFeatures] = useState<GlobalFeatureImportance[] | null>(null);
   const [biasResults, setBiasResults] = useState<BiasAnalysisResult[] | null>(null);
-  const [counterfactuals] = useState<CounterfactualScenario[]>(generateCounterfactuals());
+  const [counterfactuals, setCounterfactuals] = useState<CounterfactualScenario[]>(() => generateCounterfactuals());
   const [report, setReport] = useState<XAIReport | null>(null);
   const [loading, setLoading] = useState<"features" | "bias" | "report" | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const [savedAt, setSavedAt] = useState<string | null>(null);
+
+  function showToast(msg: string) {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  }
 
   // Load snapshot on mount
   useEffect(() => {
@@ -636,7 +650,15 @@ export default function XAIPage() {
       setReport(snap.report);
       setFeatures(snap.report.featureImportance);
       setBiasResults(snap.report.biasResults);
+      if (snap.report.counterfactuals && snap.report.counterfactuals.length > 0) {
+        setCounterfactuals(snap.report.counterfactuals);
+      }
+      if (snap.savedAt) {
+        setSavedAt(snap.savedAt);
+      }
     }
+    const storedSavedAt = typeof window !== "undefined" ? localStorage.getItem("xai_saved_at") : null;
+    if (storedSavedAt) setSavedAt(storedSavedAt);
   }, []);
 
   function handleCalculateFeatures() {
@@ -668,14 +690,53 @@ export default function XAIPage() {
       setBiasResults(br);
       setReport(r);
       saveXAISnapshot(r);
+      appendEvidence(
+        "adr",
+        {
+          type: "XAI Report — Spiegabilità Art. 13 AI Act",
+          overallXAIScore: r.overallXAIScore,
+          modelVersion: r.modelVersion,
+          complianceFlagsCount: r.complianceFlags.length,
+          criticalFlags: r.complianceFlags.filter((f: string) => f.startsWith("[CRITICO]")),
+          recommendationsCount: r.recommendations.length,
+          biasGroupsFlagged: br.filter((b) => b.flagged).length,
+          featuresAnalyzed: fi.length,
+          proxyFeaturesDetected: fi.filter((f) => f.isProxy).length,
+          generatedAt: r.generatedAt,
+        },
+        "xai"
+      );
       setLoading(null);
+      showToast(`✓ XAI Report generato — Score: ${r.overallXAIScore}`);
     }, 50);
   }
 
   function handleSaveSnapshot() {
-    if (report) {
-      saveXAISnapshot(report);
-    }
+    if (!report) return;
+    saveXAISnapshot(report);
+    const completedAt = new Date().toISOString();
+    writeToStorage("xai", {
+      overallXAIScore: report.overallXAIScore,
+      modelVersion: report.modelVersion,
+      complianceFlagsCount: report.complianceFlags.length,
+      hasCriticalFlags: report.complianceFlags.some((f: string) => f.startsWith("[CRITICO]")),
+      completedAt,
+    });
+    appendEvidence(
+      "adr",
+      {
+        type: "XAI Snapshot — Spiegabilità & Bias · Art. 13 AI Act",
+        overallXAIScore: report.overallXAIScore,
+        modelVersion: report.modelVersion,
+        complianceFlags: report.complianceFlags,
+        recommendations: report.recommendations,
+        savedAt: completedAt,
+      },
+      "xai"
+    );
+    setSavedAt(completedAt);
+    if (typeof window !== "undefined") localStorage.setItem("xai_saved_at", completedAt);
+    showToast("XAI Snapshot salvato nel Dossier di compliance");
   }
 
   const tabs: { key: Tab; label: string }[] = [
@@ -686,7 +747,36 @@ export default function XAIPage() {
   ];
 
   return (
-    <div style={{ background: "#FAFAF9", minHeight: "100vh", padding: "32px" }}>
+    <div className="max-w-4xl">
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg"
+          style={{ background: "#0D1016", color: "#ffffff" }}>
+          {toast}
+        </div>
+      )}
+
+      {/* Dossier banner */}
+      {savedAt ? (
+        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+          style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)" }}>
+          <CheckCircle size={13} strokeWidth={1.5} style={{ color: "#15803d" }} />
+          <span style={{ color: "#15803d" }}>✓ XAI Snapshot salvato nel dossier · Aggiornato il {new Date(savedAt).toLocaleDateString("it-IT")}</span>
+          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>Vedi dossier →</Link>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+          style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}>
+          <span style={{ color: "rgba(0,0,0,0.45)" }}>Genera il report XAI e salva nel dossier di compliance (Art. 13)</span>
+          {report && (
+            <button onClick={handleSaveSnapshot} className="text-[11px] font-medium rounded-full px-3 py-1 hover:opacity-80"
+              style={{ background: "#0D1016", color: "#ffffff", border: "none", cursor: "pointer" }}>
+              Salva nel dossier
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Header */}
       <div style={{ marginBottom: "28px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
@@ -762,6 +852,7 @@ export default function XAIPage() {
           report={report}
           onGenerate={handleGenerateReport}
           onSave={handleSaveSnapshot}
+          onCopy={() => showToast("JSON copiato negli appunti")}
           loading={loading === "report"}
         />
       )}
