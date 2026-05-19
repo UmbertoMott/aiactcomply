@@ -30,7 +30,8 @@ function KillSwitch({ onActivate }: { onActivate: () => void }) {
           clearInterval(intervalRef.current!);
           setActivated(true);
           setHolding(false);
-          onActivate();
+          // onActivate() must NOT be called inside a setState updater (renders parent during render)
+          // useEffect below fires it after the state commit
           return 100;
         }
         return p + 3.4; // ~3s
@@ -44,6 +45,12 @@ function KillSwitch({ onActivate }: { onActivate: () => void }) {
     setHolding(false);
     setProgress(0);
   };
+
+  // Fire onActivate after activated becomes true — safe, outside render phase
+  useEffect(() => {
+    if (activated) onActivate();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activated]);
 
   useEffect(() => () => clearInterval(intervalRef.current!), []);
 

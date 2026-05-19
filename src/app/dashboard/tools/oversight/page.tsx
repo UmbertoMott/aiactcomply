@@ -1,20 +1,54 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, Brain, StopCircle, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { OversightResult } from "@/lib/dossier/storage-schema";
+import { appendEvidence } from "@/lib/evidence/evidence-layer";
+
+interface FrictionEvent {
+  id: string;
+  type: "approved" | "friction_bypassed" | "blocked";
+  timestamp: string;
+  elapsed: number;
+  reason?: string;
+}
 
 export default function OversightPage() {
-  const [approved, setApproved] = useState(false);
+  const [approved,       setApproved]       = useState(false);
   const [frictionActive, setFrictionActive] = useState(false);
   const [frictionReason, setFrictionReason] = useState("");
-  const [approvalTime, setApprovalTime] = useState<number | null>(null);
+  const [blocked,        setBlocked]        = useState(false);
+  const [events,         setEvents]         = useState<FrictionEvent[]>(() => {
+    if (typeof window === "undefined") return [];
+    try { return JSON.parse(localStorage.getItem("oversight_events") ?? "[]") as FrictionEvent[]; }
+    catch { return []; }
+  });
+  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
   const startTime = useRef<number>(0);
   const [savedAt, setSavedAt] = useState<string | null>(() =>
     readFromStorage<OversightResult>("oversight")?.completedAt ?? null
   );
+
+  // Avvia il timer quando il componente monta (non al click!)
+  useEffect(() => {
+    startTime.current = Date.now();
+  }, []);
+
+  function showToast(msg: string, type: "success" | "error" = "success") {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  }
+
+  function addEvent(ev: FrictionEvent) {
+    setEvents((prev) => {
+      const next = [ev, ...prev].slice(0, 20); // tieni ultimi 20
+      localStorage.setItem("oversight_events", JSON.stringify(next));
+      return next;
+    });
+  }
 
   function saveToDossier() {
     const completedAt = new Date().toISOString();
@@ -25,26 +59,86 @@ export default function OversightPage() {
       responsiblePersons: ["Responsabile HR", "AI Compliance Officer"],
       completedAt,
     });
+    appendEvidence(
+      "decision",
+      {
+        type: "Oversight — Configurazione Friction Gate Art. 14",
+        totalEvents: events.length,
+        approvals: events.filter((e) => e.type === "approved").length,
+        frictionGates: events.filter((e) => e.type === "friction_bypassed").length,
+        blocks: events.filter((e) => e.type === "blocked").length,
+        savedAt: completedAt,
+      },
+      "oversight"
+    );
     setSavedAt(completedAt);
+    showToast("Configurazione Oversight salvata nel dossier");
   }
 
   function handleApprove() {
-    startTime.current = Date.now();
     const elapsed = (Date.now() - startTime.current) / 1000;
-    setApprovalTime(elapsed);
 
-    if (elapsed < 1.5) {
-      // Too fast! Trigger Friction Gate
+    if (elapsed < 2.0) {
+      // Troppo rapido — Automation Bias sospetto
       setFrictionActive(true);
+      addEvent({
+        id: crypto.randomUUID(),
+        type: "friction_bypassed",
+        timestamp: new Date().toISOString(),
+        elapsed,
+      });
       return;
     }
+
+    // Approvazione normale (> 2s)
     setApproved(true);
+    const ev: FrictionEvent = {
+      id: crypto.randomUUID(),
+      type: "approved",
+      timestamp: new Date().toISOString(),
+      elapsed,
+    };
+    addEvent(ev);
+    appendEvidence(
+      "decision",
+      {
+        type: "Supervisione umana — Approvazione deliberata Art. 14",
+        scenario: "Screening CV: candidato respinto con confidenza 89%",
+        elapsedSeconds: elapsed.toFixed(2),
+        frictionTriggered: false,
+        timestamp: ev.timestamp,
+      },
+      "oversight"
+    );
+    showToast("Output approvato e registrato nell'Evidence Layer");
   }
 
   function confirmWithReason() {
     if (!frictionReason.trim()) return;
     setApproved(true);
     setFrictionActive(false);
+    const ev: FrictionEvent = {
+      id: crypto.randomUUID(),
+      type: "friction_bypassed",
+      timestamp: new Date().toISOString(),
+      elapsed: (Date.now() - startTime.current) / 1000,
+      reason: frictionReason.trim(),
+    };
+    addEvent(ev);
+    appendEvidence(
+      "decision",
+      {
+        type: "Friction Gate superato con motivazione — Art. 14(4)",
+        scenario: "Screening CV: candidato respinto con confidenza 89%",
+        motivazione: frictionReason.trim(),
+        elapsedSeconds: ev.elapsed.toFixed(2),
+        frictionTriggered: true,
+        timestamp: ev.timestamp,
+      },
+      "oversight"
+    );
+    showToast("Approvazione con motivazione registrata nell'Evidence Layer");
+    setFrictionReason("");
   }
 
   return (
@@ -101,7 +195,32 @@ export default function OversightPage() {
                   className="rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground disabled:opacity-50">
                   Conferma con motivazione
                 </button>
-                <button className="rounded-lg border border-danger/30 px-3 py-2 text-xs font-medium text-danger hover:bg-danger/10">
+                <button
+                  onClick={() => {
+                    setFrictionActive(false);
+                    setBlocked(true);
+                    const ev: FrictionEvent = {
+                      id: crypto.randomUUID(),
+                      type: "blocked",
+                      timestamp: new Date().toISOString(),
+                      elapsed: (Date.now() - startTime.current) / 1000,
+                      reason: frictionReason.trim() || "Output bloccato dall'operatore",
+                    };
+                    addEvent(ev);
+                    appendEvidence(
+                      "decision",
+                      {
+                        type: "Output bloccato da supervisore umano — Art. 14",
+                        scenario: "Screening CV: candidato respinto con confidenza 89%",
+                        reason: ev.reason,
+                        timestamp: ev.timestamp,
+                      },
+                      "oversight"
+                    );
+                    showToast("Output bloccato e registrato nell'Evidence Layer", "error");
+                    setFrictionReason("");
+                  }}
+                  className="rounded-lg border border-danger/30 px-3 py-2 text-xs font-medium text-danger hover:bg-danger/10">
                   Blocca output
                 </button>
               </div>
@@ -109,27 +228,45 @@ export default function OversightPage() {
           )}
 
           {approved && !frictionActive && (
-            <div className="rounded-lg border border-success/30 bg-success/5 p-3 text-xs text-success flex items-center gap-2">
+            <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
+              className="rounded-lg border border-success/30 bg-success/5 p-3 text-xs flex items-center gap-2"
+              style={{ color: "#16a34a" }}>
               <CheckCircle className="h-4 w-4" /> Output approvato e registrato nell&apos;Evidence Layer.
-            </div>
+            </motion.div>
+          )}
+          {blocked && (
+            <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
+              className="rounded-lg p-3 text-xs flex items-center gap-2"
+              style={{ background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.2)", color: "#dc2626" }}>
+              <StopCircle className="h-4 w-4" /> Output bloccato — Registrato nell&apos;Evidence Layer.
+            </motion.div>
           )}
         </div>
 
         <div className="rounded-xl border border-border bg-card p-5">
           <h2 className="text-sm font-semibold text-foreground mb-3">Log Eventi Friction Gate</h2>
-          <div className="space-y-2 text-xs text-muted-foreground">
-            <div className="flex items-center gap-2 py-1 border-b border-border/50">
-              <span className="h-2 w-2 rounded-full bg-success" />
-              <span>Ultima approvazione: {approved ? "ok" : "—"}</span>
-            </div>
-            <div className="flex items-center gap-2 py-1 border-b border-border/50">
-              <span className="h-2 w-2 rounded-full bg-warning" />
-              <span>Friction Gate: {frictionActive ? "Attivato" : "Inattivo"}</span>
-            </div>
-            <div className="flex items-center gap-2 py-1">
-              <span className="h-2 w-2 rounded-full bg-primary" />
-              <span>Automation Bias: Contrastato con motivazione obbligatoria</span>
-            </div>
+          <div className="space-y-1 max-h-48 overflow-y-auto">
+            {events.length === 0 ? (
+              <p className="text-xs text-muted-foreground py-2">Nessun evento registrato. Usa il pannello a sinistra per interagire.</p>
+            ) : (
+              events.map((ev) => (
+                <div key={ev.id} className="flex items-start gap-2 py-1.5 border-b border-border/40 text-[11px]">
+                  <span className="h-2 w-2 rounded-full flex-shrink-0 mt-1"
+                    style={{ background: ev.type === "approved" ? "#16a34a" : ev.type === "blocked" ? "#dc2626" : "#ca8a04" }} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-medium" style={{ color: "#0D1016" }}>
+                        {ev.type === "approved" ? "Approvato" : ev.type === "blocked" ? "Bloccato" : "Friction Gate"}
+                      </span>
+                      <span className="text-[10px] font-mono flex-shrink-0" style={{ color: "rgba(0,0,0,0.35)" }}>
+                        {new Date(ev.timestamp).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                      </span>
+                    </div>
+                    <p style={{ color: "rgba(0,0,0,0.4)" }}>{ev.elapsed.toFixed(1)}s · {ev.reason ?? (ev.type === "approved" ? "Deliberata" : "Attivato automaticamente")}</p>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
           <div className="mt-4 rounded-lg bg-muted p-3 text-[10px] text-muted-foreground">
             <Brain className="h-3 w-3 inline mr-1 text-primary" />
@@ -138,6 +275,24 @@ export default function OversightPage() {
           </div>
         </div>
       </div>
+
+      {/* Toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg"
+            style={{
+              background: toast.type === "error" ? "rgba(220,38,38,0.95)" : "#0D1016",
+              color: "#ffffff",
+            }}
+          >
+            {toast.type === "error" ? "⛔" : "✓"} {toast.msg}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
