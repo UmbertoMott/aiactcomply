@@ -6,6 +6,66 @@ import { GitBranch, Download, ChevronRight, AlertTriangle, CheckCircle, Clock } 
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { DocugenResult } from "@/lib/dossier/storage-schema";
+import { appendEvidence } from "@/lib/evidence/evidence-layer";
+
+const STORAGE_KEY = "docugen_state";
+
+interface DocuGenState {
+  content: Record<string, string>;
+  status: Record<string, "empty" | "draft" | "done">;
+  systemName: string;
+  activeVersion: number;
+}
+
+const DEFAULT_STATE: DocuGenState = {
+  content: {},
+  status: {},
+  systemName: "",
+  activeVersion: 0,
+};
+
+function loadState(): DocuGenState {
+  if (typeof window === "undefined") return DEFAULT_STATE;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as DocuGenState) : DEFAULT_STATE;
+  } catch { return DEFAULT_STATE; }
+}
+
+function saveState(s: DocuGenState) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+}
+
+// Read real data from other tools' localStorage
+function readCrossToolContent(): Record<string, string> {
+  if (typeof window === "undefined") return AUTO_CONTENT;
+  const overrides: Record<string, string> = { ...AUTO_CONTENT };
+
+  // Data Audit result
+  try {
+    const raw = localStorage.getItem("risk_manager_report");
+    if (raw) {
+      const rm = JSON.parse(raw) as {
+        systemName?: string;
+        overallScore?: number;
+        overallRating?: string;
+        risks?: Array<{ description: string; severity: string; mitigation: string }>;
+      };
+      if (rm.systemName) {
+        overrides["risk-manager"] =
+          `**[Auto-importato da Risk Manager — Art. 9]**\n\n` +
+          `Sistema: ${rm.systemName}\n` +
+          `Rating complessivo: ${rm.overallRating ?? "N/A"} (score: ${rm.overallScore?.toFixed(2) ?? "N/A"})\n\n` +
+          `Rischi identificati:\n` +
+          (rm.risks ?? []).slice(0, 5).map((r, i) =>
+            `${i + 1}. ${r.description} (${r.severity.toUpperCase()}) — ${r.mitigation}`
+          ).join("\n");
+      }
+    }
+  } catch { /* fallback to AUTO_CONTENT */ }
+
+  return overrides;
+}
 
 // ─── Annex IV — 9 sections ────────────────────────────────────────────────────
 const ANNEX_IV = [
@@ -104,19 +164,55 @@ const STATUS_STYLE: Record<string, { bg: string; text: string; border: string }>
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function DocuGenPage() {
-  const [activeVersion, setActiveVersion] = useState(0);
+  const [persisted, setPersistedRaw] = useState<DocuGenState>(() => loadState());
   const [activeSection, setActiveSection] = useState("s1");
-  const [content, setContent] = useState<Record<string, string>>({});
-  const [status, setStatus] = useState<Record<string, "empty" | "draft" | "done">>({});
   const [compareMode, setCompareMode] = useState(false);
   const [compareIdx, setCompareIdx] = useState(1);
+  const [toast, setToast] = useState<string | null>(null);
+  const [crossContent] = useState<Record<string, string>>(() => readCrossToolContent());
+
+  // Destructure for easy access
+  const { content, status, systemName, activeVersion } = persisted;
+
+  function setPersisted(updater: (prev: DocuGenState) => DocuGenState) {
+    setPersistedRaw((prev) => {
+      const next = updater(prev);
+      saveState(next);
+      return next;
+    });
+  }
+
+  // Helpers that update the persisted state
+  function setContent(upd: Record<string, string> | ((p: Record<string, string>) => Record<string, string>)) {
+    setPersisted((prev) => ({
+      ...prev,
+      content: typeof upd === "function" ? upd(prev.content) : upd,
+    }));
+  }
+  function setStatus(upd: Record<string, "empty" | "draft" | "done"> | ((p: Record<string, "empty" | "draft" | "done">) => Record<string, "empty" | "draft" | "done">)) {
+    setPersisted((prev) => ({
+      ...prev,
+      status: typeof upd === "function" ? upd(prev.status) : upd,
+    }));
+  }
+  function setActiveVersion(v: number) {
+    setPersisted((prev) => ({ ...prev, activeVersion: v }));
+  }
+  function setSystemName(v: string) {
+    setPersisted((prev) => ({ ...prev, systemName: v }));
+  }
+
+  function showToast(msg: string) {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  }
 
   const version = VERSIONS[activeVersion];
 
-  function getContent(sectionId: string) {
+  function getContent(sectionId: string): string {
     const sec = ANNEX_IV.find((s) => s.id === sectionId)!;
     if (content[sectionId] !== undefined) return content[sectionId];
-    if (sec.autoSource) return AUTO_CONTENT[sec.autoSource] ?? "";
+    if (sec.autoSource) return crossContent[sec.autoSource] ?? "";
     return "";
   }
 
@@ -132,24 +228,91 @@ export default function DocuGenPage() {
     readFromStorage<DocugenResult>("docugen")?.completedAt ?? null
   );
 
-  function saveToDossier() {
+  async function saveToDossier() {
     const completedAt = new Date().toISOString();
+    const resolvedName = systemName.trim() || "Sistema AI (non specificato)";
+
     writeToStorage<DocugenResult>("docugen", {
-      systemName: "HR Screening AI v2.1.0",
-      provider: "AIComply Demo Org",
+      systemName: resolvedName,
+      provider: "AIComply",
       purpose: getContent("s1"),
       capabilities: getContent("s2"),
-      limitations: getContent("s5") || "Accuracy scende a 79% su carriere non lineari",
-      humanOversight: getContent("s7") || "Supervisione obbligatoria per score < 65%",
-      performanceMetrics: getContent("s6") || "Accuracy: 87.3% · F1: 0.84",
-      trainingData: getContent("s4") || AUTO_CONTENT["data-audit"],
+      limitations: getContent("s5") || "Da compilare",
+      humanOversight: getContent("s7") || "Da compilare",
+      performanceMetrics: getContent("s6") || "Da compilare",
+      trainingData: getContent("s4") || crossContent["data-audit"],
       completedAt,
     });
+
+    await appendEvidence("adr", {
+      type: "Fascicolo Tecnico Annex IV — Art. 11",
+      systemName: resolvedName,
+      sectionsCompleted: doneCount,
+      sectionsTotal: ANNEX_IV.length,
+      requiredRemaining: emptyRequired.length,
+      version: VERSIONS[activeVersion]?.tag ?? "draft",
+      commit: VERSIONS[activeVersion]?.commit ?? "—",
+    }, "docugen-ai");
+
     setSavedAt(completedAt);
+    showToast("Fascicolo salvato nel dossier e registrato su Evidence Layer ✓");
   }
   const draftCount = ANNEX_IV.filter((s) => getSectionStatus(s.id) === "draft").length;
   const emptyRequired = ANNEX_IV.filter((s) => s.required && getSectionStatus(s.id) === "empty");
   const canFinalize = emptyRequired.length === 0;
+
+  function exportFullDocument() {
+    const resolvedName = systemName.trim() || "sistema-ai";
+    const doc = {
+      meta: {
+        format: "AIComply Fascicolo Tecnico — Annex IV",
+        regulation: "Regolamento UE 2024/1689 — Art. 11",
+        systemName: resolvedName,
+        version: VERSIONS[activeVersion]?.tag ?? "draft",
+        commit: VERSIONS[activeVersion]?.commit ?? "",
+        exportedAt: new Date().toISOString(),
+        completionPct: Math.round((doneCount / 9) * 100),
+      },
+      sections: ANNEX_IV.map((s) => ({
+        id: s.id,
+        ref: s.ref,
+        title: s.title,
+        required: s.required,
+        status: getSectionStatus(s.id),
+        autoSource: s.autoSource ?? null,
+        content: getContent(s.id),
+      })),
+    };
+    const filename = `annex-iv-${resolvedName.replace(/\s+/g, "-").toLowerCase()}-${new Date().toISOString().slice(0, 10)}.json`;
+    const blob = new Blob([JSON.stringify(doc, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+    showToast(`Fascicolo esportato: ${filename}`);
+  }
+
+  function exportMarkdown() {
+    const resolvedName = systemName.trim() || "Sistema AI";
+    const lines: string[] = [
+      `# Fascicolo Tecnico — ${resolvedName}`,
+      `**Regolamento UE 2024/1689 — Art. 11, Allegato IV**`,
+      `Versione: ${VERSIONS[activeVersion]?.tag ?? "draft"} · Esportato: ${new Date().toLocaleDateString("it-IT")}`,
+      "",
+    ];
+    ANNEX_IV.forEach((s) => {
+      lines.push(`## ${s.ref} — ${s.title}${s.required ? " *(Obbligatoria)*" : ""}`);
+      lines.push(getContent(s.id) || "_Da compilare_");
+      lines.push("");
+    });
+    const filename = `annex-iv-${resolvedName.replace(/\s+/g, "-").toLowerCase()}-${new Date().toISOString().slice(0, 10)}.md`;
+    const blob = new Blob([lines.join("\n")], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+    showToast(`Markdown esportato: ${filename}`);
+  }
 
   const activeS = ANNEX_IV.find((s) => s.id === activeSection)!;
 
@@ -184,6 +347,22 @@ export default function DocuGenPage() {
           <h1 className="text-[24px] font-medium" style={{ color: "#0D1016", letterSpacing: "-0.8px" }}>
             DocuGen AI — Fascicolo Tecnico
           </h1>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-[11px]" style={{ color: "rgba(0,0,0,0.38)" }}>Sistema:</span>
+            <input
+              value={systemName}
+              onChange={(e) => setSystemName(e.target.value)}
+              placeholder="Nome del sistema AI documentato..."
+              className="text-[12px] bg-transparent outline-none border-b"
+              style={{
+                color: "#0D1016",
+                borderBottomColor: "rgba(0,0,0,0.15)",
+                minWidth: "220px",
+              }}
+              onFocus={(e) => (e.target.style.borderBottomColor = "rgba(59,130,246,0.5)")}
+              onBlur={(e) => (e.target.style.borderBottomColor = "rgba(0,0,0,0.15)")}
+            />
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -221,10 +400,13 @@ export default function DocuGenPage() {
           </button>
 
           {/* Export */}
-          <button className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-opacity hover:opacity-80"
-            style={{ background: "#0D1016", color: "#fff" }}>
+          <button
+            onClick={exportFullDocument}
+            className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-opacity hover:opacity-80"
+            style={{ background: "#0D1016", color: "#fff", cursor: "pointer" }}
+          >
             <Download className="h-3.5 w-3.5" />
-            Esporta
+            Esporta JSON
           </button>
         </div>
       </div>
@@ -388,7 +570,7 @@ export default function DocuGenPage() {
 
                 <div className="flex items-center gap-2 ml-4">
                   {["empty", "draft", "done"].map((st) => (
-                    <button key={st} onClick={() => setStatus({ ...status, [activeSection]: st as "empty" | "draft" | "done" })}
+                    <button key={st} onClick={() => setStatus((prev) => ({ ...prev, [activeSection]: st as "empty" | "draft" | "done" }))}
                       className="text-[10px] px-2.5 py-1 rounded-full transition-all"
                       style={getSectionStatus(activeSection) === st
                         ? { background: st === "done" ? "rgba(22,163,74,0.12)" : st === "draft" ? "rgba(59,130,246,0.12)" : "rgba(0,0,0,0.07)", color: st === "done" ? "#16a34a" : st === "draft" ? "#2563eb" : "rgba(0,0,0,0.45)", fontWeight: 600 }
@@ -430,8 +612,10 @@ export default function DocuGenPage() {
               <textarea
                 value={getContent(activeSection)}
                 onChange={(e) => {
-                  setContent({ ...content, [activeSection]: e.target.value });
-                  if (!status[activeSection]) setStatus({ ...status, [activeSection]: "draft" });
+                  const val = e.target.value;
+                  setContent((prev) => ({ ...prev, [activeSection]: val }));
+                  if (!status[activeSection])
+                    setStatus((prev) => ({ ...prev, [activeSection]: "draft" }));
                 }}
                 className="w-full rounded-lg px-4 py-3 text-[13px] outline-none resize-none transition-all"
                 style={{
@@ -450,17 +634,30 @@ export default function DocuGenPage() {
               {/* Bottom actions */}
               <div className="flex items-center justify-between mt-3">
                 <div className="flex gap-2">
-                  {["Markdown", "JSON", "PDF firmato"].map((fmt) => (
-                    <button key={fmt}
+                  {[
+                    { label: "Markdown", action: exportMarkdown },
+                    { label: "JSON", action: exportFullDocument },
+                    { label: "PDF firmato", action: () => showToast("Export PDF disponibile nella versione Enterprise") },
+                  ].map(({ label, action }) => (
+                    <button
+                      key={label}
+                      onClick={action}
                       className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded transition-opacity hover:opacity-70"
-                      style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.45)" }}>
-                      <Download className="h-3 w-3" /> {fmt}
+                      style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.45)", cursor: "pointer" }}
+                    >
+                      <Download className="h-3 w-3" /> {label}
                     </button>
                   ))}
                 </div>
                 {canFinalize && version.status !== "Finalized" && (
-                  <button className="text-[12px] font-medium px-4 py-1.5 rounded-full transition-opacity hover:opacity-80"
-                    style={{ background: "#0D1016", color: "#fff" }}>
+                  <button
+                    onClick={async () => {
+                      await saveToDossier();
+                      showToast("Fascicolo finalizzato e salvato ✓");
+                    }}
+                    className="text-[12px] font-medium px-4 py-1.5 rounded-full transition-opacity hover:opacity-80"
+                    style={{ background: "#0D1016", color: "#fff", cursor: "pointer" }}
+                  >
                     Finalizza fascicolo →
                   </button>
                 )}
@@ -521,6 +718,13 @@ export default function DocuGenPage() {
           )}
         </div>
       </div>
+
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 rounded-xl px-4 py-3 text-[13px] shadow-xl"
+          style={{ background: "#0D1016", color: "#fff", border: "1px solid rgba(255,255,255,0.08)" }}>
+          {toast}
+        </div>
+      )}
     </div>
   );
 }
