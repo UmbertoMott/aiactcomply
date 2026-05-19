@@ -10,6 +10,7 @@ import {
 } from "@/lib/simulation/transparency-engine";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { TransparencyResult } from "@/lib/dossier/storage-schema";
+import { appendEvidence } from "@/lib/evidence/evidence-layer";
 
 const card = { background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
 
@@ -103,9 +104,12 @@ function DecisionCard({ dec, active, onClick }: { dec: DecisionExplanation; acti
 }
 
 // ─── Explainability view ──────────────────────────────────────────────────────
-function ExplainView({ dec }: { dec: DecisionExplanation }) {
+function ExplainView({ dec, confirmed, onConfirm }: {
+  dec: DecisionExplanation;
+  confirmed: boolean;
+  onConfirm: (id: string, value: boolean) => void;
+}) {
   const [expanded, setExpanded] = useState(false);
-  const [confirmedUnderstanding, setConfirmedUnderstanding] = useState(false);
   const maxShap = Math.max(...dec.features.map((f) => f.absInfluence));
 
   const outputColor = { APPROVED: "#16a34a", REJECTED: "#dc2626", REVIEW: "#ca8a04" }[dec.output];
@@ -198,8 +202,8 @@ function ExplainView({ dec }: { dec: DecisionExplanation }) {
       {/* Human understanding confirmation — Art. 14 */}
       <div className="rounded-xl p-4" style={card}>
         <label className="flex items-start gap-3 cursor-pointer">
-          <input type="checkbox" checked={confirmedUnderstanding}
-            onChange={(e) => setConfirmedUnderstanding(e.target.checked)}
+          <input type="checkbox" checked={confirmed}
+            onChange={(e) => onConfirm(dec.inferenceId, e.target.checked)}
             className="mt-0.5" />
           <div>
             <p className="text-[12px] font-medium" style={{ color: "#0D1016" }}>
@@ -210,7 +214,7 @@ function ExplainView({ dec }: { dec: DecisionExplanation }) {
             </p>
           </div>
         </label>
-        {confirmedUnderstanding && (
+        {confirmed && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             className="mt-3 flex items-center gap-2 text-[11px]" style={{ color: "#16a34a" }}>
             <CheckCircle className="h-3.5 w-3.5" />
@@ -223,7 +227,7 @@ function ExplainView({ dec }: { dec: DecisionExplanation }) {
 }
 
 // ─── Nutrition Label ──────────────────────────────────────────────────────────
-function NutritionView() {
+function NutritionView({ onDownload }: { onDownload: () => void }) {
   const nl = NUTRITION_LABEL;
   const accuracyDiff = nl.declaredAccuracy - nl.measuredAccuracy;
 
@@ -302,7 +306,9 @@ function NutritionView() {
           <span className="text-[9px]" style={{ color: "rgba(0,0,0,0.35)" }}>
             {nl.annexIVRef} · Audit: {nl.lastAudit}
           </span>
-          <button className="flex items-center gap-1 text-[10px] px-2.5 py-1 rounded transition-opacity hover:opacity-70"
+          <button
+            onClick={onDownload}
+            className="flex items-center gap-1 text-[10px] px-2.5 py-1 rounded transition-opacity hover:opacity-70"
             style={{ background: "#0D1016", color: "#fff" }}>
             <Download className="h-3 w-3" /> Scarica
           </button>
@@ -424,9 +430,45 @@ export default function TransparencyPage() {
   const [tab,        setTab]        = useState<Tab>("explain");
   const [selectedId, setSelectedId] = useState(0);
   const [customSeed, setCustomSeed] = useState<number | null>(null);
+  const [toast,      setToast]      = useState<{ msg: string; type: "success" | "error" } | null>(null);
+  const [confirmedDecisions, setConfirmedDecisions] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    try {
+      const raw = localStorage.getItem("transparency_confirmed_decisions");
+      return raw ? new Set<string>(JSON.parse(raw) as string[]) : new Set<string>();
+    } catch { return new Set<string>(); }
+  });
   const [savedAt,    setSavedAt]    = useState<string | null>(() =>
     readFromStorage<TransparencyResult>("transparency")?.completedAt ?? null
   );
+
+  function showToast(msg: string, type: "success" | "error" = "success") {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  }
+
+  function handleConfirm(inferenceId: string, value: boolean) {
+    setConfirmedDecisions((prev) => {
+      const next = new Set(prev);
+      if (value) next.add(inferenceId);
+      else next.delete(inferenceId);
+      localStorage.setItem("transparency_confirmed_decisions", JSON.stringify([...next]));
+      return next;
+    });
+    if (value) {
+      appendEvidence(
+        "decision",
+        {
+          type: "Supervisione umana confermata — Art. 14",
+          inferenceId,
+          confirmedAt: new Date().toISOString(),
+          operator: "operatore_corrente",
+        },
+        "transparency"
+      );
+      showToast(`Comprensione confermata per ${inferenceId}`);
+    }
+  }
 
   function saveToDossier() {
     const completedAt = new Date().toISOString();
@@ -437,7 +479,35 @@ export default function TransparencyPage() {
       languagesAvailable: ["italiano", "inglese"],
       completedAt,
     });
+    appendEvidence(
+      "decision",
+      {
+        type: "Transparency & XAI — Configurazione Art. 13",
+        systemName: NUTRITION_LABEL.systemName,
+        riskClass: NUTRITION_LABEL.riskClass,
+        measuredAccuracy: NUTRITION_LABEL.measuredAccuracy,
+        declaredAccuracy: NUTRITION_LABEL.declaredAccuracy,
+        confirmedDecisionsCount: confirmedDecisions.size,
+        confirmedDecisionIds: [...confirmedDecisions],
+        modelVersion: NUTRITION_LABEL.modelVersion,
+        lastAudit: NUTRITION_LABEL.lastAudit,
+        savedAt: completedAt,
+      },
+      "transparency"
+    );
     setSavedAt(completedAt);
+    showToast("Configurazione Transparency salvata nel dossier");
+  }
+
+  function downloadNutritionLabel() {
+    const blob = new Blob([JSON.stringify(NUTRITION_LABEL, null, 2)], { type: "application/json" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    a.download = `ai-nutrition-label-${NUTRITION_LABEL.systemName.replace(/\s+/g, "_").toLowerCase()}-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("AI Nutrition Label esportato");
   }
 
   const allDecisions = customSeed !== null
@@ -517,13 +587,18 @@ export default function TransparencyPage() {
           {/* Explanation detail */}
           <div className="flex-1 min-w-0">
             <AnimatePresence mode="wait">
-              <ExplainView key={selected.inferenceId} dec={selected} />
+              <ExplainView
+                key={selected.inferenceId}
+                dec={selected}
+                confirmed={confirmedDecisions.has(selected.inferenceId)}
+                onConfirm={handleConfirm}
+              />
             </AnimatePresence>
           </div>
         </div>
       )}
 
-      {tab === "nutrition"    && <NutritionView />}
+      {tab === "nutrition"    && <NutritionView onDownload={downloadNutritionLabel} />}
       {tab === "instructions" && <InstructionsView />}
 
       {/* XAI Center promo */}
@@ -550,6 +625,24 @@ export default function TransparencyPage() {
           Vai al modulo →
         </a>
       </div>
+
+      {/* Toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg"
+            style={{
+              background: toast.type === "error" ? "rgba(220,38,38,0.95)" : "#0D1016",
+              color: "#ffffff",
+            }}
+          >
+            {toast.type === "error" ? "⚠" : "✓"} {toast.msg}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
