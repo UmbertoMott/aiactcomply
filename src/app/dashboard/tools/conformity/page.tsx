@@ -15,6 +15,7 @@ import {
 } from "@/lib/conformity/conformity-engine";
 import { submitToAuthority } from "@/lib/compliance/gateway";
 import { writeToStorage } from "@/lib/dossier/storage-schema";
+import { appendEvidence } from "@/lib/evidence/evidence-layer";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -135,7 +136,12 @@ export default function ConformityPage() {
   const [evidence, setEvidence] = useState<ConformityEvidence>({});
   const [path, setPath] = useState<PathDetermination | null>(null);
   const [results, setResults] = useState<AssessmentResult[]>([]);
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(() => {
+    if (typeof window === "undefined") return 1;
+    const saved = localStorage.getItem("aicomply_conformity_step");
+    const n = saved ? parseInt(saved) : 1;
+    return ([1, 2, 3, 4, 5].includes(n) ? n : 1) as 1 | 2 | 3 | 4 | 5;
+  });
   const [declaration, setDeclaration] = useState<string>("");
   const [signatoryForm, setSignatoryForm] = useState({
     companyName: "", companyAddress: "", signatoryName: "", signatoryRole: "",
@@ -146,11 +152,22 @@ export default function ConformityPage() {
   const [declarationGenerated, setDeclarationGenerated] = useState(false);
   const [ceChecklist, setCeChecklist] = useState<Record<string, boolean>>({});
   const [registering, setRegistering] = useState(false);
-  const [registrationRef, setRegistrationRef] = useState<string>("");
+  const [registrationRef, setRegistrationRef] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
+    try {
+      const saved = localStorage.getItem("aicomply_registration_result");
+      return saved ? (JSON.parse(saved) as { referenceNumber: string }).referenceNumber ?? "" : "";
+    } catch { return ""; }
+  });
   const [manualRisk, setManualRisk] = useState("high");
   const [manualAnnex, setManualAnnex] = useState("");
   const [toast, setToast] = useState<string>("");
   const [registrationError, setRegistrationError] = useState<string>("");
+
+  // Persisti lo step corrente
+  useEffect(() => {
+    localStorage.setItem("aicomply_conformity_step", String(step));
+  }, [step]);
 
   // ─── init ──────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -584,14 +601,32 @@ export default function ConformityPage() {
     };
 
     const handleSaveDossier = () => {
+      const completedAt = new Date().toISOString();
       writeToStorage("conformity", {
         path: path?.path ?? "self",
         score,
         passed,
         total,
         declarationGenerated: true,
-        completedAt: new Date().toISOString(),
+        completedAt,
       });
+      appendEvidence(
+        "adr",
+        {
+          type: "Conformity Assessment — Dichiarazione di Conformità UE Art. 43",
+          assessmentPath: path?.path ?? "self",
+          pathReason: path?.reason ?? "—",
+          score,
+          passed,
+          total,
+          declarationGenerated: true,
+          signatoryName: signatoryForm.signatoryName,
+          signatoryRole: signatoryForm.signatoryRole,
+          companyName: signatoryForm.companyName,
+          savedAt: completedAt,
+        },
+        "conformity"
+      );
       showToast("Salvato nel dossier ✓");
     };
 
@@ -734,15 +769,45 @@ export default function ConformityPage() {
     };
 
     const handleComplete = () => {
+      const completedAt = new Date().toISOString();
+      const ceMarkingApplied = Object.values(ceChecklist).filter(Boolean).length >= 3;
+      const registeredInDatabase = !!registrationRef;
+      const currentSystemName = evidence.classifier?.systemName || evidence.docugen?.systemName || "—";
+      const currentRiskClass = evidence.classifier?.riskLevel || "high";
+
       saveConformitySnapshot({
         path: path?.path ?? "self",
         score,
         results,
         declarationGenerated,
-        ceMarkingApplied: Object.values(ceChecklist).filter(Boolean).length >= 3,
-        registeredInDatabase: !!registrationRef,
-        completedAt: new Date().toISOString(),
+        ceMarkingApplied,
+        registeredInDatabase,
+        completedAt,
       });
+
+      appendEvidence(
+        "adr",
+        {
+          type: "Conformity Assessment completato — Art. 43 + Art. 48 + Art. 49",
+          assessmentPath: path?.path ?? "self",
+          score,
+          passed,
+          total,
+          declarationGenerated,
+          ceMarkingApplied,
+          registeredInDatabase,
+          registrationRef: registrationRef || null,
+          ceChecklistItems: Object.entries(ceChecklist)
+            .filter(([, v]) => v)
+            .map(([k]) => k),
+          systemName: currentSystemName,
+          riskClass: currentRiskClass,
+          completedAt,
+        },
+        "conformity"
+      );
+
+      localStorage.setItem("aicomply_conformity_step", "5");
       setStep(5);
     };
 
@@ -993,6 +1058,12 @@ export default function ConformityPage() {
           </Link>
           <button style={btnGhost} onClick={() => setStep(1)}>
             Rivedi Assessment
+          </button>
+          <button style={btnGhost} onClick={() => {
+            localStorage.removeItem("aicomply_conformity_step");
+            setStep(1);
+          }}>
+            Ricomincia da capo
           </button>
         </div>
       </div>
