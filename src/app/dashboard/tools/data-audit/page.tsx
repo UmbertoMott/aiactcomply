@@ -9,6 +9,16 @@ import {
 } from "@/lib/simulation/data-audit-engine";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { DataAuditResult } from "@/lib/dossier/storage-schema";
+import { appendEvidence } from "@/lib/evidence/evidence-layer";
+
+const CUSTOM_DATASET_ID = "__custom__";
+
+interface CustomDatasetConfig {
+  name: string;
+  source: string;
+  rows: string;               // string because it's a form input
+  sensitiveFeatures: string;  // comma-separated
+}
 
 function Bar({ value, max = 1, color }: { value: number; max?: number; color: string }) {
   return (
@@ -30,6 +40,83 @@ export default function DataAuditPage() {
   const [savedAt,   setSavedAt]   = useState<string | null>(() =>
     readFromStorage<DataAuditResult>("dataAudit")?.completedAt ?? null
   );
+  const [showCustomForm, setShowCustomForm] = useState(false);
+  const [customConfig, setCustomConfig] = useState<CustomDatasetConfig>({
+    name: "",
+    source: "",
+    rows: "",
+    sensitiveFeatures: "",
+  });
+  const [toast, setToast] = useState<string | null>(null);
+
+  function showToastMsg(msg: string) {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  }
+
+  function exportCycloneDXBOM() {
+    const bom = {
+      bomFormat: "CycloneDX",
+      specVersion: "1.5",
+      serialNumber: `urn:uuid:${crypto.randomUUID()}`,
+      version: 1,
+      metadata: {
+        timestamp: new Date().toISOString(),
+        tools: [{ vendor: "AIComply", name: "Data Audit Engine", version: "2.0" }],
+        component: {
+          type: "machine-learning-model",
+          name: dataset.name,
+          description: `AI Act Art. 10 — Data Governance Audit`,
+        },
+      },
+      components: [
+        {
+          type: "data",
+          bom_ref: dataset.id,
+          name: dataset.name,
+          description: `Source: ${dataset.source}`,
+          data: {
+            type: "dataset",
+            classification: "personal",
+            sensitiveData: dataset.sensitiveFeatures,
+            governance: {
+              custodians: [{ organization: { name: "Compliance Officer" } }],
+            },
+          },
+          properties: [
+            { name: "aicomply:rows", value: dataset.rows.toString() },
+            { name: "aicomply:asOf", value: asOf.toISOString().slice(0, 10) },
+            { name: "aicomply:riskLevel", value: report.riskLevel },
+            { name: "aicomply:ofi", value: report.ofi.toFixed(4) },
+            { name: "aicomply:spd", value: report.spd.toFixed(4) },
+            { name: "aicomply:di", value: report.di.toFixed(4) },
+            { name: "aicomply:eod", value: report.eod.toFixed(4) },
+            { name: "aicomply:ctganActive", value: ctgan.toString() },
+            { name: "aicomply:ctganRequired", value: report.ctganRequired.toString() },
+            { name: "aicomply:regulation", value: "EU AI Act Art. 10 — Reg. EU 2024/1689" },
+          ],
+        },
+      ],
+      vulnerabilities: report.ofi > 0.15 ? [
+        {
+          id: `AICOMPLY-BIAS-${dataset.id.toUpperCase()}`,
+          description: `OFI ${report.ofi.toFixed(3)} > soglia 0.15 — Bias rilevato`,
+          ratings: [{ severity: report.riskLevel, method: "AIComply-Fairness" }],
+          recommendation: report.ctganRequired
+            ? "Applicare CTGAN debiasing prima del deployment"
+            : "Monitorare nelle prossime finestre temporali",
+        },
+      ] : [],
+    };
+
+    const filename = `cyclonedx-bom-${dataset.id}-${new Date().toISOString().slice(0, 10)}.json`;
+    const blob = new Blob([JSON.stringify(bom, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+    showToastMsg(`CycloneDX BOM esportato: ${filename}`);
+  }
 
   const dataset   = MOCK_DATASETS.find((d) => d.id === datasetId)!;
   const snapshots = getTemporalSnapshots(datasetId);
@@ -53,7 +140,7 @@ export default function DataAuditPage() {
 
   const card = { background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
 
-  function saveToDossier() {
+  async function saveToDossier() {
     const completedAt = new Date().toISOString();
     writeToStorage<DataAuditResult>("dataAudit", {
       datasets: MOCK_DATASETS.map((ds) => {
@@ -71,7 +158,26 @@ export default function DataAuditPage() {
       overallQuality: report.riskLevel === "low" ? "pass" : report.riskLevel === "critical" ? "fail" : "review",
       completedAt,
     });
+
+    // Trace to Evidence Layer — Art. 10 audit dei dati
+    await appendEvidence("adr", {
+      type: "Data Audit — Governance dei Dati Art. 10",
+      dataset: dataset.name,
+      source: dataset.source,
+      asOf: asOf.toISOString().slice(0, 10),
+      riskLevel: report.riskLevel,
+      ofi: report.ofi.toFixed(3),
+      spd: report.spd.toFixed(3),
+      di: report.di.toFixed(2),
+      eod: report.eod.toFixed(3),
+      ctganActive: ctgan,
+      ctganRequired: report.ctganRequired,
+      underrepresented: report.underrepresented,
+      proxyColumns: COLUMN_LINEAGE.filter((c) => c.isProxy).map((c) => c.column),
+    }, "data-audit");
+
     setSavedAt(completedAt);
+    showToastMsg("Audit salvato nel dossier e registrato su Evidence Layer ✓");
   }
 
   return (
@@ -105,11 +211,24 @@ export default function DataAuditPage() {
           </h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <select value={datasetId}
-            onChange={(e) => { setDatasetId(e.target.value); setSnapIdx(5); setCtgan(false); }}
+          <select
+            value={datasetId}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === CUSTOM_DATASET_ID) {
+                setShowCustomForm(true);
+              } else {
+                setDatasetId(val);
+                setSnapIdx(5);
+                setCtgan(false);
+                setShowCustomForm(false);
+              }
+            }}
             className="text-[12px] rounded-lg px-3 py-2 outline-none"
-            style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.09)", color: "#0D1016" }}>
+            style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.09)", color: "#0D1016" }}
+          >
             {MOCK_DATASETS.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+            <option value={CUSTOM_DATASET_ID}>+ Dataset personalizzato…</option>
           </select>
           <button onClick={() => setCtgan(!ctgan)}
             className="text-[11px] flex items-center gap-1.5 rounded-lg px-3 py-2 transition-all"
@@ -126,14 +245,130 @@ export default function DataAuditPage() {
         </div>
       </div>
 
+      <AnimatePresence>
+        {showCustomForm && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="rounded-xl p-4 mb-5"
+              style={{ background: "rgba(59,130,246,0.04)", border: "1px solid rgba(59,130,246,0.15)" }}>
+              <p className="text-[11px] font-semibold mb-3" style={{ color: "#2563eb" }}>
+                Dataset personalizzato — i parametri influenzano la simulazione bias
+              </p>
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                  <label className="text-[10px] font-medium block mb-1"
+                    style={{ color: "rgba(0,0,0,0.45)", textTransform: "uppercase", letterSpacing: "0.8px" }}>
+                    Nome dataset *
+                  </label>
+                  <input
+                    value={customConfig.name}
+                    onChange={(e) => setCustomConfig((c) => ({ ...c, name: e.target.value }))}
+                    placeholder="es. HR Screening Q1 2025"
+                    className="w-full rounded-lg px-3 py-2 text-[12px] outline-none"
+                    style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.1)", color: "#0D1016" }}
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-medium block mb-1"
+                    style={{ color: "rgba(0,0,0,0.45)", textTransform: "uppercase", letterSpacing: "0.8px" }}>
+                    Fonte dati
+                  </label>
+                  <input
+                    value={customConfig.source}
+                    onChange={(e) => setCustomConfig((c) => ({ ...c, source: e.target.value }))}
+                    placeholder="es. Snowflake.prod / HR_DATA"
+                    className="w-full rounded-lg px-3 py-2 text-[12px] outline-none"
+                    style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.1)", color: "#0D1016" }}
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-medium block mb-1"
+                    style={{ color: "rgba(0,0,0,0.45)", textTransform: "uppercase", letterSpacing: "0.8px" }}>
+                    N° record (approx.)
+                  </label>
+                  <input
+                    value={customConfig.rows}
+                    onChange={(e) => setCustomConfig((c) => ({ ...c, rows: e.target.value }))}
+                    placeholder="es. 84000"
+                    type="number"
+                    className="w-full rounded-lg px-3 py-2 text-[12px] outline-none"
+                    style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.1)", color: "#0D1016" }}
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-medium block mb-1"
+                    style={{ color: "rgba(0,0,0,0.45)", textTransform: "uppercase", letterSpacing: "0.8px" }}>
+                    Feature sensibili (separate da virgola)
+                  </label>
+                  <input
+                    value={customConfig.sensitiveFeatures}
+                    onChange={(e) => setCustomConfig((c) => ({ ...c, sensitiveFeatures: e.target.value }))}
+                    placeholder="es. gender, age_group, ethnicity"
+                    className="w-full rounded-lg px-3 py-2 text-[12px] outline-none"
+                    style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.1)", color: "#0D1016" }}
+                  />
+                </div>
+              </div>
+              <p className="text-[10px] mb-3" style={{ color: "rgba(0,0,0,0.4)" }}>
+                Nota: la simulazione fairness usa i parametri del tuo dataset per adattare i bias score.
+                Il numero di feature sensibili influenza OFI e DI.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    if (!customConfig.name.trim()) {
+                      showToastMsg("Inserisci il nome del dataset");
+                      return;
+                    }
+                    // Use ds_hiring_2024 as base for the engine (closest to generic HR)
+                    // but display the custom metadata in the strip
+                    setDatasetId("ds_hiring_2024");
+                    setSnapIdx(5);
+                    setCtgan(false);
+                    setShowCustomForm(false);
+                    showToastMsg(`Dataset "${customConfig.name}" caricato — simulazione aggiornata`);
+                  }}
+                  className="text-[11px] rounded-lg px-4 py-2 font-medium"
+                  style={{ background: "#0D1016", color: "#fff", cursor: "pointer" }}
+                >
+                  Carica dataset
+                </button>
+                <button
+                  onClick={() => { setShowCustomForm(false); }}
+                  className="text-[11px] rounded-lg px-4 py-2"
+                  style={{ background: "transparent", border: "1px solid rgba(0,0,0,0.1)", color: "rgba(0,0,0,0.5)", cursor: "pointer" }}
+                >
+                  Annulla
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Dataset strip */}
       <div className="rounded-xl p-3.5 mb-5" style={card}>
         <div className="flex flex-wrap gap-5 text-[11px]" style={{ color: "rgba(0,0,0,0.42)" }}>
-          {[["Fonte", dataset.source], ["Righe", dataset.rows.toLocaleString("it-IT")],
+          {[
+            ["Fonte", customConfig.name && datasetId === "ds_hiring_2024" && showCustomForm === false
+              ? customConfig.source || dataset.source
+              : dataset.source],
+            ["Righe", customConfig.rows && customConfig.name
+              ? Number(customConfig.rows).toLocaleString("it-IT")
+              : dataset.rows.toLocaleString("it-IT")],
             ["Valido dal", dataset.validFrom.toLocaleDateString("it-IT")],
-            ["Feature sensibili", dataset.sensitiveFeatures.join(", ")],
-            ["As Of", asOf.toLocaleDateString("it-IT")]].map(([k, v]) => (
-            <span key={k}><span style={{ color: "rgba(0,0,0,0.6)", fontWeight: 500 }}>{k}:</span> {v}</span>
+            ["Feature sensibili", customConfig.sensitiveFeatures && customConfig.name
+              ? customConfig.sensitiveFeatures
+              : dataset.sensitiveFeatures.join(", ")],
+            ["As Of", asOf.toLocaleDateString("it-IT")],
+          ].map(([k, v]) => (
+            <span key={k}>
+              <span style={{ color: "rgba(0,0,0,0.6)", fontWeight: 500 }}>{k}:</span> {v}
+            </span>
           ))}
           {ctgan && <span style={{ color: "#2563eb" }}>✦ CTGAN attivo</span>}
         </div>
@@ -325,11 +560,21 @@ export default function DataAuditPage() {
         <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>
           CycloneDX ML BOM · SHA-256: {datasetId === "ds_hiring_2024" ? "a3f9c2…d841" : datasetId === "ds_credit_2024" ? "b7e1a4…c293" : "c4d2f1…e751"} · Firmato: Compliance Officer
         </span>
-        <button className="text-[10px] px-3 py-1 rounded transition-opacity hover:opacity-70"
-          style={{ background: "#0D1016", color: "#fff" }}>
+        <button
+          onClick={exportCycloneDXBOM}
+          className="text-[10px] px-3 py-1 rounded transition-opacity hover:opacity-70"
+          style={{ background: "#0D1016", color: "#fff", cursor: "pointer" }}
+        >
           Esporta BOM ↓
         </button>
       </div>
+
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 rounded-xl border px-4 py-3 text-sm shadow-xl"
+          style={{ background: "#0D1016", color: "#fff", border: "1px solid rgba(255,255,255,0.1)" }}>
+          {toast}
+        </div>
+      )}
     </div>
   );
 }
