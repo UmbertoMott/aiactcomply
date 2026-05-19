@@ -17,6 +17,7 @@ import {
   getOverallFRIARisk,
 } from "@/lib/simulation/fria-engine";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
+import { appendEvidence } from "@/lib/evidence/evidence-layer";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -223,35 +224,107 @@ export default function FRIAPage() {
 
   function handleApprove() {
     if (!approverName.trim()) return;
+    const approvedAt = new Date().toISOString();
     setDoc((prev) => ({
       ...prev,
       status: "approved",
       approvedBy: approverName.trim(),
-      approvedAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      approvedAt,
+      updatedAt: approvedAt,
     }));
+    appendEvidence(
+      "decision",
+      {
+        type: "FRIA — Approvazione e firma Art. 27",
+        documentId: doc.id,
+        systemName: doc.section1.systemName ?? "—",
+        organizationName: doc.section1.organizationName ?? "—",
+        approvedBy: approverName.trim(),
+        overallRisk: getOverallFRIARisk(doc),
+        completeness: calculateFRIACompleteness(doc),
+        approvedAt,
+      },
+      "fria"
+    );
     setApprovalModal(false);
-    showToast("FRIA approvato e firmato");
+    showToast("FRIA approvato e firmato — registrato nell'Evidence Layer");
   }
 
   function handleSaveToDossier() {
     const overallRisk = getOverallFRIARisk(doc);
-    const completeness = calculateFRIACompleteness(doc);
-    writeToStorage("fria", { ...doc, updatedAt: new Date().toISOString() });
-    showToast("Salvato nel dossier di compliance");
-    // Also save a FRIAResult-compatible summary for the dossier engine
+    const friaCompleteness = calculateFRIACompleteness(doc);
+    const savedAt = new Date().toISOString();
+
+    writeToStorage("fria", { ...doc, updatedAt: savedAt });
+
     const friaSummary = {
       systemName: doc.section1.systemName ?? "",
       organizationName: doc.section1.organizationName ?? "",
       overallRisk,
-      completeness,
+      completeness: friaCompleteness,
       status: doc.status,
       approvedBy: doc.approvedBy,
-      completedAt: new Date().toISOString(),
+      completedAt: savedAt,
     };
     if (typeof window !== "undefined") {
       localStorage.setItem("aicomply_fria_result", JSON.stringify(friaSummary));
     }
+
+    appendEvidence(
+      "adr",
+      {
+        type: "FRIA — Valutazione Diritti Fondamentali Art. 27",
+        documentId: doc.id,
+        systemName: doc.section1.systemName ?? "—",
+        organizationName: doc.section1.organizationName ?? "—",
+        deploymentPurpose: doc.section1.deploymentPurpose ?? "—",
+        overallRisk,
+        completeness: friaCompleteness,
+        status: doc.status,
+        approvedBy: doc.approvedBy ?? null,
+        affectedCategoriesCount: (doc.section3.affectedCategories ?? []).length,
+        totalEstimatedAffected: doc.section3.totalEstimatedAffected ?? "—",
+        criticalRights: (doc.section4.assessments ?? [])
+          .filter((a) => a.residualRisk === "unacceptable")
+          .map((a) => a.rightId),
+        savedAt,
+      },
+      "fria"
+    );
+
+    showToast("FRIA salvato nel dossier di compliance");
+  }
+
+  function handleExportJSON() {
+    const overallRisk = getOverallFRIARisk(doc);
+    const friaCompleteness = calculateFRIACompleteness(doc);
+    const exportDoc = {
+      export_type: "Fundamental Rights Impact Assessment — Art. 27 EU AI Act",
+      exported_at: new Date().toISOString(),
+      regulation: "EU 2024/1689 — Art. 27 (FRIA)",
+      document_id: doc.id,
+      version: doc.version,
+      status: doc.status,
+      approved_by: doc.approvedBy ?? null,
+      approved_at: doc.approvedAt ?? null,
+      overall_risk: overallRisk,
+      completeness: friaCompleteness,
+      section1_identification: doc.section1,
+      section2_deployment_context: doc.section2,
+      section3_affected_categories: doc.section3,
+      section4_rights_assessments: doc.section4,
+      section5_data_governance: doc.section5,
+      section6_oversight_remedies: doc.section6,
+    };
+    const blob = new Blob([JSON.stringify(exportDoc, null, 2)], { type: "application/json" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    const sysName = (doc.section1.systemName ?? "sistema").replace(/\s+/g, "_").toLowerCase();
+    a.download = `fria-${sysName}-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("FRIA esportato in JSON — pronto per invio all'Autorità");
   }
 
   function handlePrint() {
@@ -259,7 +332,7 @@ export default function FRIAPage() {
   }
 
   const completeness = calculateFRIACompleteness(doc);
-  const overallRisk = step === 6 ? getOverallFRIARisk(doc) : null;
+
 
   // ─── Step renders ──────────────────────────────────────────────────────────
 
@@ -848,6 +921,13 @@ export default function FRIAPage() {
           >
             <CheckCircle size={14} />
             {doc.status === "approved" ? "Già approvato" : "Approva e firma"}
+          </button>
+          <button
+            onClick={handleExportJSON}
+            className="flex items-center gap-2 rounded-lg px-4 py-2 text-[12px] font-medium"
+            style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.09)", color: "#0D1016" }}
+          >
+            <FileText size={14} /> Esporta JSON
           </button>
           <button
             onClick={handlePrint}
