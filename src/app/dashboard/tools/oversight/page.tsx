@@ -142,7 +142,7 @@ export default function OversightPage() {
   }
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full">
       {savedAt ? (
         <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
           style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)", fontFamily: "var(--font-inter, system-ui)" }}>

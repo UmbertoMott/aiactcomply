@@ -217,7 +217,7 @@ export default function ProhibitedPage() {
   // ── Checklist mode ──────────────────────────────────────────────────────────
   if (mode === "checklist") {
     return (
-      <div className="max-w-5xl" style={font}>
+      <div className="w-full" style={font}>
         {SavedBanner}
         {/* Page header */}
         <div className="mb-6">
@@ -457,7 +457,7 @@ export default function ProhibitedPage() {
   const vm = VERDICT_META[verdict.verdict];
 
   return (
-    <div className="max-w-5xl" style={font}>
+    <div className="w-full" style={font}>
       {SavedBanner}
       {/* Page header */}
       <div className="mb-6">

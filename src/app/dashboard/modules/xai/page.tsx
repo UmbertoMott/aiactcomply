@@ -747,7 +747,7 @@ export default function XAIPage() {
   ];
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full">
       {/* Toast */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg"

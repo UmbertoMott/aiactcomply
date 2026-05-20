@@ -517,7 +517,7 @@ export default function TransparencyPage() {
   const selected = allDecisions[selectedId];
 
   return (
-    <div className="max-w-6xl" style={{ fontFamily: "var(--font-inter, system-ui)" }}>
+    <div className="w-full" style={{ fontFamily: "var(--font-inter, system-ui)" }}>
 
       {/* Dossier saved banner */}
       {savedAt ? (

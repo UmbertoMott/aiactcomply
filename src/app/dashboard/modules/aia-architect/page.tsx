@@ -493,7 +493,7 @@ export default function AIAArchitectPage() {
   };
 
   return (
-    <div className="max-w-3xl">
+    <div className="w-full">
       {/* Header */}
       <div className="mb-6">
         <h1

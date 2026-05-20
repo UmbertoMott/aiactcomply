@@ -248,7 +248,7 @@ export default function LogVaultPage() {
   }, [logs.length, autoScroll]);
 
   return (
-    <div className="max-w-6xl" style={{ fontFamily: "var(--font-inter, system-ui)" }}>
+    <div className="w-full" style={{ fontFamily: "var(--font-inter, system-ui)" }}>
 
       {/* Dossier saved banner */}
       {savedAt ? (

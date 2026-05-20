@@ -384,7 +384,7 @@ export default function RiskManagerPage() {
   // ─── RENDER ─────────────────────────────────────────────────────
 
   return (
-    <div className="max-w-5xl">
+    <div className="w-full">
       {/* Header */}
       <h1 className="text-2xl font-bold text-foreground mb-2">
         AI Act Risk Manager

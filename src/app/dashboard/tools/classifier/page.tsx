@@ -203,7 +203,7 @@ export default function ClassifierPage() {
   };
 
   return (
-    <div className="max-w-6xl">
+    <div className="w-full">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-foreground">AI Classifier — Discovery Engine</h1>
         <p className="mt-1 text-sm text-muted-foreground">

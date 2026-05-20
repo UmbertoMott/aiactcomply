@@ -983,7 +983,7 @@ export default function FRIAPage() {
         </div>
       )}
 
-      <div className="max-w-4xl">
+      <div className="w-full">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-1">

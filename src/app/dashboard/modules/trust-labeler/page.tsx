@@ -342,7 +342,7 @@ export default function TrustLabelerPage() {
   // ── Render ───────────────────────────────────────────────────────────────────
 
   return (
-    <div className="max-w-6xl">
+    <div className="w-full">
       {/* Header */}
       <div className="mb-5">
         <h1

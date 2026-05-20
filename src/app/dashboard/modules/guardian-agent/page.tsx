@@ -330,7 +330,7 @@ export default function GuardianAgentPage() {
   // ── Render ───────────────────────────────────────────────────────────────────
 
   return (
-    <div className="max-w-6xl">
+    <div className="w-full">
       {/* Header */}
       <div className="mb-6 flex items-start justify-between">
         <div>

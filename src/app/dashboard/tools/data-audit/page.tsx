@@ -181,7 +181,7 @@ export default function DataAuditPage() {
   }
 
   return (
-    <div className="max-w-5xl" style={{ fontFamily: "var(--font-inter, system-ui)" }}>
+    <div className="w-full" style={{ fontFamily: "var(--font-inter, system-ui)" }}>
 
       {/* Dossier saved banner */}
       {savedAt ? (
