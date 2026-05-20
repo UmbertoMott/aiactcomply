@@ -110,6 +110,23 @@ export interface ConformityResult {
   completedAt: string;
 }
 
+export interface FRIAResult {
+  systemName: string;
+  overallRisk: string;
+  docRef: string;
+  completedAt: string;
+  approvedBy?: string;
+  approvedAt?: string;
+}
+
+export interface XAIResult {
+  overallXAIScore: number;
+  modelVersion: string;
+  complianceFlagsCount: number;
+  hasCriticalFlags: boolean;
+  completedAt: string;
+}
+
 export interface ProhibitedCheckResult {
   answers: Record<string, "yes" | "no" | "unsure">;
   verdict: "violation" | "potential_violation" | "conditional" | "clear";
@@ -137,6 +154,8 @@ export interface DossierData {
   qms?: QMSResult;
   gpai?: GPAIResult;
   conformity?: ConformityResult;
+  fria?: FRIAResult;
+  xai?: XAIResult;
 }
 
 export const STORAGE_KEYS = {

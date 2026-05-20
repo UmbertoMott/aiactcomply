@@ -5,6 +5,7 @@ import type {
   DossierData, ClassifierResult, RiskManagerResult, DataAuditResult,
   DocugenResult, LogvaultResult, TransparencyResult,
   OversightResult, ResilienceResult, QMSResult, ProhibitedCheckResult,
+  FRIAResult, ConformityResult, GPAIResult, XAIResult,
 } from "./storage-schema";
 
 export interface DossierSection {
@@ -37,6 +38,10 @@ export function aggregateDossier(): DossierData {
     oversight:    readFromStorage<OversightResult>("oversight")          ?? undefined,
     resilience:   readFromStorage<ResilienceResult>("resilience")        ?? undefined,
     qms:          readFromStorage<QMSResult>("qms")                      ?? undefined,
+    gpai:         readFromStorage<GPAIResult>("gpai")                    ?? undefined,
+    conformity:   readFromStorage<ConformityResult>("conformity")        ?? undefined,
+    fria:         readFromStorage<FRIAResult>("fria")                    ?? undefined,
+    xai:          readFromStorage<XAIResult>("xai")                      ?? undefined,
   };
 }
 
@@ -123,6 +128,42 @@ export function getDossierSections(data: DossierData): DossierSection[] {
       href: "/dashboard/tools/qms",
       status: data.qms ? "complete" : "missing",
       completedAt: data.qms?.completedAt,
+    },
+    {
+      id: "conformity",
+      article: "Art. 43",
+      title: "Valutazione della Conformità",
+      href: "/dashboard/tools/conformity",
+      status: data.conformity ? "complete" : "missing",
+      completedAt: data.conformity?.completedAt,
+    },
+    {
+      id: "fria",
+      article: "Art. 49",
+      title: "Registrazione EU AI Database (FRIA)",
+      href: "/dashboard/tools/fria",
+      status: data.fria
+        ? (data.fria.approvedAt ? "complete" : "partial")
+        : "missing",
+      completedAt: data.fria?.approvedAt ?? data.fria?.completedAt,
+    },
+    {
+      id: "gpai",
+      article: "Art. 51-55",
+      title: "GPAI — Modelli Fondazionali",
+      href: "/dashboard/modules/gpai",
+      status: data.gpai
+        ? (data.gpai.obligationsCompleted > 0 ? "complete" : "partial")
+        : "missing",
+      completedAt: data.gpai?.completedAt,
+    },
+    {
+      id: "xai",
+      article: "Art. 13+",
+      title: "XAI — Spiegabilità e Bias",
+      href: "/dashboard/modules/xai",
+      status: data.xai ? "complete" : "missing",
+      completedAt: data.xai?.completedAt,
     },
   ];
 }

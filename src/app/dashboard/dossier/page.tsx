@@ -4,8 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   FileArchive, CheckCircle, AlertTriangle, XCircle,
-  ChevronRight, X, Printer, Eye,
+  ChevronRight, X, Printer, Eye, RefreshCw, Download, Edit2,
 } from "lucide-react";
+import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { aggregateDossier, getDossierSections, getCompletionPercentage, getCompletedCount } from "@/lib/dossier/dossier-engine";
 import type { DossierData } from "@/lib/dossier/storage-schema";
 import type { DossierSection } from "@/lib/dossier/dossier-engine";
@@ -78,24 +79,102 @@ export default function DossierPage() {
   const [pct, setPct]             = useState(0);
   const [done, setDone]           = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
+  const [toast, setToast]         = useState<string | null>(null);
+  const [editingMeta, setEditingMeta] = useState(false);
+  const [metaCompany, setMetaCompany] = useState("");
+  const [metaSystem, setMetaSystem]   = useState("");
 
-  useEffect(() => {
+  function showToast(msg: string) {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  }
+
+  function loadDossier() {
     const d = aggregateDossier();
     const s = getDossierSections(d);
     setData(d);
     setSections(s);
     setPct(getCompletionPercentage(s));
     setDone(getCompletedCount(s));
+    setMetaCompany(d.meta.companyName);
+    setMetaSystem(d.meta.systemName);
+  }
+
+  useEffect(() => {
+    loadDossier();
   }, []);
 
   const handlePrint = useCallback(() => {
     if (!data) return;
+    appendEvidence(
+      "adr",
+      {
+        type: "Dossier di Compliance — Stampa/Export PDF",
+        systemName: data.meta.systemName,
+        companyName: data.meta.companyName,
+        completionPct: pct,
+        sectionsComplete: done,
+        sectionsTotal: sections.length,
+        printedAt: new Date().toISOString(),
+      },
+      "dossier"
+    );
     triggerPrint(data);
-  }, [data]);
+  }, [data, pct, done, sections.length]);
+
+  function handleExportJSON() {
+    if (!data) return;
+    const exportPayload = {
+      export_type: "AIComply Dossier Export — Reg. UE 2024/1689",
+      exported_at: new Date().toISOString(),
+      meta: data.meta,
+      completion: { pct, done, total: sections.length },
+      sections: sections.map((s) => ({
+        id: s.id,
+        article: s.article,
+        title: s.title,
+        status: s.status,
+        completedAt: s.completedAt ?? null,
+      })),
+      data,
+    };
+    const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `dossier-${data.meta.systemName.replace(/\s+/g, "-")}-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    appendEvidence(
+      "adr",
+      {
+        type: "Dossier di Compliance — Export JSON",
+        systemName: data.meta.systemName,
+        completionPct: pct,
+        exportedAt: new Date().toISOString(),
+      },
+      "dossier"
+    );
+    showToast("Dossier esportato come JSON");
+  }
+
+  function handleSaveMeta() {
+    if (typeof window !== "undefined") {
+      const existing = JSON.parse(localStorage.getItem("aicomply_onboarding_data") ?? "{}");
+      localStorage.setItem("aicomply_onboarding_data", JSON.stringify({
+        ...existing,
+        companyName: metaCompany,
+        systemName: metaSystem,
+      }));
+    }
+    setEditingMeta(false);
+    loadDossier();
+    showToast("Dati aggiornati");
+  }
 
   if (!data) {
     return (
-      <div className="max-w-5xl" style={font}>
+      <div className="w-full" style={font}>
         <div className="h-8 w-48 rounded animate-pulse" style={{ background: "rgba(0,0,0,0.06)" }} />
       </div>
     );
@@ -152,18 +231,75 @@ export default function DossierPage() {
       )}
 
       {/* ── Page ── */}
-      <div className="max-w-5xl" style={font}>
+      <div className="w-full" style={font}>
+        {/* Toast */}
+        {toast && (
+          <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg"
+            style={{ background: "#0D1016", color: "#ffffff" }}>
+            {toast}
+          </div>
+        )}
+
         {/* Header */}
         <div className="mb-6">
-          <div className="flex items-center gap-2 mb-1">
-            <FileArchive size={20} strokeWidth={1.5} style={{ color: "#0D1016" }} />
-            <h1 style={{ fontSize: "28px", fontWeight: 400, letterSpacing: "-1px", color: "#0D1016" }}>
-              Dossier di Compliance
-            </h1>
+          <div className="flex items-center justify-between gap-4 mb-1">
+            <div className="flex items-center gap-2">
+              <FileArchive size={20} strokeWidth={1.5} style={{ color: "#0D1016" }} />
+              <h1 style={{ fontSize: "28px", fontWeight: 400, letterSpacing: "-1px", color: "#0D1016" }}>
+                Dossier di Compliance
+              </h1>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                onClick={() => { loadDossier(); showToast("Dossier aggiornato"); }}
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium hover:opacity-75 transition-opacity"
+                style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)", color: "rgba(0,0,0,0.55)", cursor: "pointer" }}
+              >
+                <RefreshCw size={11} /> Aggiorna
+              </button>
+              <button
+                onClick={handleExportJSON}
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium hover:opacity-75 transition-opacity"
+                style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)", color: "rgba(0,0,0,0.55)", cursor: "pointer" }}
+              >
+                <Download size={11} /> Esporta JSON
+              </button>
+            </div>
           </div>
-          <p className="text-[13px]" style={{ color: "rgba(0,0,0,0.42)" }}>
-            Pacchetto audit-ready — Regolamento UE 2024/1689
-          </p>
+
+          {/* Meta: company + system name con edit inline */}
+          {editingMeta ? (
+            <div className="flex items-center gap-2 mt-2 flex-wrap">
+              <input
+                value={metaCompany}
+                onChange={(e) => setMetaCompany(e.target.value)}
+                placeholder="Nome azienda"
+                className="rounded-lg px-2.5 py-1.5 text-[12px] focus:outline-none"
+                style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.1)", color: "#0D1016", width: "180px" }}
+              />
+              <input
+                value={metaSystem}
+                onChange={(e) => setMetaSystem(e.target.value)}
+                placeholder="Nome sistema AI"
+                className="rounded-lg px-2.5 py-1.5 text-[12px] focus:outline-none"
+                style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.1)", color: "#0D1016", width: "200px" }}
+              />
+              <button onClick={handleSaveMeta} className="text-[11px] font-medium rounded-full px-3 py-1"
+                style={{ background: "#0D1016", color: "#ffffff", cursor: "pointer" }}>Salva</button>
+              <button onClick={() => setEditingMeta(false)} className="text-[11px]"
+                style={{ color: "rgba(0,0,0,0.4)", cursor: "pointer", background: "none", border: "none" }}>Annulla</button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 mt-1">
+              <p className="text-[13px]" style={{ color: "rgba(0,0,0,0.42)" }}>
+                {data?.meta.companyName ?? "—"} · {data?.meta.systemName ?? "—"} · Regolamento UE 2024/1689
+              </p>
+              <button onClick={() => setEditingMeta(true)} title="Modifica"
+                style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex" }}>
+                <Edit2 size={11} style={{ color: "rgba(0,0,0,0.3)" }} />
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="grid lg:grid-cols-3 gap-5">
