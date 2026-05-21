@@ -115,12 +115,25 @@ function IconSourceOnly() {
 }
 
 // ─── Suggestions ──────────────────────────────────────────────
+// label shown on chip, query sent to RAG (short labels → no chunks)
 
-const SUGGESTIONS = [
-  "Sistemi ad alto rischio",
-  "Obblighi GPAI",
-  "Sanzioni Art. 99",
-  "Valutazione conformità",
+const SUGGESTIONS: { label: string; query: string }[] = [
+  {
+    label: "Sistemi ad alto rischio",
+    query: "Quali sistemi di intelligenza artificiale sono classificati ad alto rischio ai sensi del Regolamento UE 2024/1689?",
+  },
+  {
+    label: "Obblighi GPAI",
+    query: "Quali sono gli obblighi dei fornitori di modelli di IA per uso generale (GPAI) secondo il Regolamento UE 2024/1689?",
+  },
+  {
+    label: "Sanzioni Art. 99",
+    query: "Quali sanzioni amministrative sono previste dall'articolo 99 del Regolamento UE 2024/1689 per la violazione degli obblighi?",
+  },
+  {
+    label: "Valutazione conformità",
+    query: "Come si svolge la procedura di valutazione della conformità per i sistemi AI ad alto rischio ai sensi del Regolamento UE 2024/1689?",
+  },
 ];
 
 // ─── Toggle button (outside component to avoid remount on render) ─
@@ -464,11 +477,11 @@ export default function LegalAssistantPage() {
           {SUGGESTIONS.map((s, i) => (
             <button
               key={i}
-              onClick={() => { setInput(s); inputRef.current?.focus(); }}
+              onClick={() => { sendMessage(s.query); }}
               className="text-[9px] text-muted-foreground px-2 py-0.5 rounded transition-colors hover:text-accent"
               style={{ background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.08)" }}
             >
-              {s.length > 32 ? s.slice(0, 32) + "…" : s}
+              {s.label}
             </button>
           ))}
         </div>
