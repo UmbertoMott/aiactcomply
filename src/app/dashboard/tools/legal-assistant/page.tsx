@@ -123,6 +123,37 @@ const SUGGESTIONS = [
   "Valutazione conformità",
 ];
 
+// ─── Toggle button (outside component to avoid remount on render) ─
+
+function ToggleBtn({
+  mode,
+  active,
+  title,
+  onSelect,
+  children,
+}: {
+  mode: LayoutMode;
+  active: boolean;
+  title: string;
+  onSelect: (m: LayoutMode) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      title={title}
+      onClick={() => onSelect(mode)}
+      className="flex items-center justify-center w-[30px] h-[26px] rounded-[5px] transition-colors"
+      style={
+        active
+          ? { background: "#0D1016", color: "#fff" }
+          : { background: "transparent", color: "rgba(0,0,0,0.35)" }
+      }
+    >
+      {children}
+    </button>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────
 
 export default function LegalAssistantPage() {
@@ -135,6 +166,7 @@ export default function LegalAssistantPage() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -142,6 +174,12 @@ export default function LegalAssistantPage() {
 
   async function sendMessage(text: string) {
     if (!text.trim() || loading) return;
+
+    // Abort any in-flight request before starting a new one
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     const userMsg: ChatMessage = { role: "user", content: text.trim() };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
@@ -152,6 +190,7 @@ export default function LegalAssistantPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: text.trim(), lang: "it", topK: 5 }),
+        signal: controller.signal,
       });
       const data = await res.json();
 
@@ -181,7 +220,10 @@ export default function LegalAssistantPage() {
         return next;
       });
       setActiveChunkIndex(sources.length > 0 ? 0 : -1);
-    } catch {
+    } catch (err) {
+      // Ignore aborted requests (user fired a new query)
+      if (err instanceof Error && err.name === "AbortError") return;
+      console.error("[LegalAssistant] sendMessage error:", err);
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: "Errore di connessione. Riprova." },
@@ -208,30 +250,7 @@ export default function LegalAssistantPage() {
   const activeMsg = activeMsgIndex >= 0 ? messages[activeMsgIndex] : undefined;
   const activeSource = activeMsg?.sources?.[activeChunkIndex];
 
-  function ToggleBtn({
-    mode,
-    title,
-    children,
-  }: {
-    mode: LayoutMode;
-    title: string;
-    children: React.ReactNode;
-  }) {
-    return (
-      <button
-        title={title}
-        onClick={() => setLayout(mode)}
-        className="flex items-center justify-center w-[30px] h-[26px] rounded-[5px] transition-colors"
-        style={
-          layout === mode
-            ? { background: "#0D1016", color: "#fff" }
-            : { background: "transparent", color: "rgba(0,0,0,0.35)" }
-        }
-      >
-        {children}
-      </button>
-    );
-  }
+
 
   const chatPanel = (
     <div
@@ -599,9 +618,9 @@ export default function LegalAssistantPage() {
           className="flex gap-0.5 p-[3px] rounded-[7px] mt-1"
           style={{ background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.08)" }}
         >
-          <ToggleBtn mode="chat" title="Solo chat"><IconChatOnly /></ToggleBtn>
-          <ToggleBtn mode="split" title="Chat + testo sorgente"><IconSplit /></ToggleBtn>
-          <ToggleBtn mode="source" title="Solo testo sorgente"><IconSourceOnly /></ToggleBtn>
+          <ToggleBtn mode="chat" active={layout === "chat"} title="Solo chat" onSelect={setLayout}><IconChatOnly /></ToggleBtn>
+          <ToggleBtn mode="split" active={layout === "split"} title="Chat + testo sorgente" onSelect={setLayout}><IconSplit /></ToggleBtn>
+          <ToggleBtn mode="source" active={layout === "source"} title="Solo testo sorgente" onSelect={setLayout}><IconSourceOnly /></ToggleBtn>
         </div>
       </div>
 
