@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { BookOpen, Send } from "lucide-react";
+import { BookOpen, Scale, Send } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -46,7 +46,8 @@ function parseAnswer(raw: string): ParsedAnswer {
     const isBullet = /^[\*•\-]\s+/.test(line.trim());
     if (isBullet) {
       const clean = line.replace(/^[\*•\-]\s+/, "").trim();
-      const fonteMatch = clean.match(/\[Fonte:[^\]]+\]/i);
+      const allFonteMatches = [...clean.matchAll(/\[Fonte:[^\]]+\]/gi)];
+      const fonteMatch = allFonteMatches.length > 0 ? allFonteMatches[allFonteMatches.length - 1] : null;
       if (fonteMatch) {
         const rawCitation = fonteMatch[0];
         const text = clean.replace(rawCitation, "").trim();
@@ -69,7 +70,7 @@ function parseAnswer(raw: string): ParsedAnswer {
 function findChunkIndex(artRef: string, sources: SourceWithChunk[]): number {
   const base = artRef.replace(/\([^)]+\)$/, "").trim();
   const idx = sources.findIndex((s) => s.sectionRef?.startsWith(base));
-  return idx >= 0 ? idx : 0;
+  return idx;
 }
 
 // ─── Layout toggle icons (inline SVG) ────────────────────────
@@ -116,10 +117,10 @@ function IconSourceOnly() {
 // ─── Suggestions ──────────────────────────────────────────────
 
 const SUGGESTIONS = [
-  "Quali obblighi ha un fornitore AI ad alto rischio?",
-  "Cosa sono i sistemi AI ad alto rischio?",
-  "Sanzioni previste dall'Art. 99",
-  "Obblighi per i modelli GPAI",
+  "Sistemi ad alto rischio",
+  "Obblighi GPAI",
+  "Sanzioni Art. 99",
+  "Valutazione conformità",
 ];
 
 // ─── Main component ───────────────────────────────────────────
@@ -129,7 +130,7 @@ export default function LegalAssistantPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [activeChunkIndex, setActiveChunkIndex] = useState<number>(0);
+  const [activeChunkIndex, setActiveChunkIndex] = useState<number>(-1);
   const [activeMsgIndex, setActiveMsgIndex] = useState<number>(-1);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -179,7 +180,7 @@ export default function LegalAssistantPage() {
         setActiveMsgIndex(next.length - 1);
         return next;
       });
-      setActiveChunkIndex(0);
+      setActiveChunkIndex(sources.length > 0 ? 0 : -1);
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -248,7 +249,7 @@ export default function LegalAssistantPage() {
           className="w-[26px] h-[26px] flex items-center justify-center rounded-md flex-shrink-0"
           style={{ background: "#0D1016" }}
         >
-          <BookOpen className="h-3.5 w-3.5 text-white" />
+          <Scale className="h-3.5 w-3.5 text-white" />
         </div>
         <div>
           <div className="text-xs font-semibold text-foreground">AI Act Assistant</div>
@@ -320,7 +321,7 @@ export default function LegalAssistantPage() {
                           <div
                             key={bi}
                             onClick={() => b.artRef && handleBadgeClick(b.artRef, msgIdx)}
-                            className="flex items-start gap-1.5 px-1.5 py-1 rounded-md transition-colors"
+                            className={`flex items-start gap-1.5 px-1.5 py-1 rounded-md transition-colors${b.artRef && !isActive ? " hover:bg-[rgba(99,102,241,0.05)] hover:border-[rgba(99,102,241,0.15)]" : ""}`}
                             style={{
                               cursor: b.artRef ? "pointer" : "default",
                               border: isActive
@@ -491,7 +492,13 @@ export default function LegalAssistantPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-3">
-        {!activeSource ? (
+        {activeChunkIndex === -1 && activeMsg?.sources && activeMsg.sources.length > 0 ? (
+          <div className="flex flex-col items-center justify-center h-full gap-2 text-center">
+            <p className="text-xs text-muted-foreground max-w-[220px]">
+              Fonte non disponibile nei chunk recuperati
+            </p>
+          </div>
+        ) : !activeSource ? (
           <div className="flex flex-col items-center justify-center h-full gap-2 text-center">
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center"
@@ -500,14 +507,12 @@ export default function LegalAssistantPage() {
               <BookOpen className="h-4 w-4" style={{ color: "#4f46e5" }} />
             </div>
             <p className="text-xs text-muted-foreground max-w-[180px]">
-              Clicca un badge{" "}
-              <span style={{ color: "#4f46e5" }}>Art. X ↗</span>{" "}
-              per vedere il testo sorgente
+              Fai una domanda per vedere le fonti
             </p>
           </div>
         ) : (
           <div
-            className="rounded-md p-3"
+            className="rounded-md p-3 my-2"
             style={{
               background: "rgba(99,102,241,0.06)",
               border: "1px solid rgba(99,102,241,0.18)",
@@ -550,7 +555,7 @@ export default function LegalAssistantPage() {
               <div
                 key={i}
                 onClick={() => handleSourceRowClick(i, activeMsgIndex)}
-                className="flex items-center gap-2 px-2 py-1 rounded cursor-pointer transition-colors"
+                className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer transition-colors${activeChunkIndex !== i ? " hover:bg-[rgba(99,102,241,0.05)] hover:border-[rgba(99,102,241,0.1)]" : ""}`}
                 style={{
                   border:
                     activeChunkIndex === i
@@ -591,7 +596,7 @@ export default function LegalAssistantPage() {
         </div>
 
         <div
-          className="flex gap-0.5 p-0.5 rounded-[7px] mt-1"
+          className="flex gap-0.5 p-[3px] rounded-[7px] mt-1"
           style={{ background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.08)" }}
         >
           <ToggleBtn mode="chat" title="Solo chat"><IconChatOnly /></ToggleBtn>
