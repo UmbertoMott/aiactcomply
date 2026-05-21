@@ -11,6 +11,9 @@ import {
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { logout } from "./actions";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import DisclosureModal from "@/components/disclosure/DisclosureModal";
+import DisclosureBanner from "@/components/disclosure/DisclosureBanner";
+import MachineMarkers from "@/components/disclosure/MachineMarkers";
 
 type NavItem = {
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
@@ -96,7 +99,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const sidebarW = collapsed ? "w-[52px]" : "w-56";
 
   return (
-    <div className="flex h-screen w-full overflow-hidden" style={{ background: "#FAFAF9" }}>
+    <div className="flex flex-col h-screen w-full overflow-hidden" style={{ background: "#FAFAF9" }}>
+      {/* Art. 50 — machine-readable markers (meta tags + JSON-LD) */}
+      <MachineMarkers />
+      {/* Art. 50 — first-session blocking modal */}
+      <DisclosureModal lang="it" />
+      {/* Art. 50 — persistent non-dismissible banner */}
+      <DisclosureBanner lang="it" />
+      <div className="flex flex-1 min-h-0 overflow-hidden">
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 lg:hidden"
@@ -293,6 +303,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         <main className="flex-1 overflow-y-auto p-6 w-full">{children}</main>
+      </div>
       </div>
     </div>
   );
