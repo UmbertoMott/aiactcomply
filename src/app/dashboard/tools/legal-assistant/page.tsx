@@ -51,10 +51,14 @@ function parseAnswer(raw: string): ParsedAnswer {
       if (fonteMatch) {
         const rawCitation = fonteMatch[0];
         const text = clean.replace(rawCitation, "").trim();
-        const artMatch = rawCitation.match(/Art\.\s*(\d+)(?:[,\s]+([a-z\d]+)\))?/i);
+        // Try Art. X(y) pattern first, then §X.Y.Z, then fallback to sectionRef-like token
+        const artMatch = rawCitation.match(/Art(?:icle|icolo|\.)\s*(\d+)(?:\s*[\(,]\s*([a-z\d]+)\)?)?/i);
+        const secMatch = rawCitation.match(/§\s*([\d.]+)/);
         const artRef = artMatch
           ? `Art. ${artMatch[1]}${artMatch[2] ? `(${artMatch[2]})` : ""}`
-          : rawCitation.replace("[Fonte:", "").replace("]", "").trim().slice(0, 20);
+          : secMatch
+          ? `§${secMatch[1]}`
+          : rawCitation.replace(/^\[Fonte:\s*/i, "").replace(/\]$/, "").split("—").pop()?.trim().slice(0, 20) ?? "";
         bullets.push({ text, artRef, rawCitation });
       } else {
         bullets.push({ text: clean, artRef: "", rawCitation: "" });
@@ -68,8 +72,11 @@ function parseAnswer(raw: string): ParsedAnswer {
 }
 
 function findChunkIndex(artRef: string, sources: SourceWithChunk[]): number {
-  const base = artRef.replace(/\([^)]+\)$/, "").trim();
-  const idx = sources.findIndex((s) => s.sectionRef?.startsWith(base));
+  // Strip trailing paragraph specifier: "Art. 16(a)" → "Art. 16", "§3.6.2" → "§3.6"
+  const base = artRef.replace(/\([^)]+\)$/, "").replace(/(\.\d+)$/, "").trim();
+  const idx = sources.findIndex(
+    (s) => s.sectionRef?.startsWith(artRef) || s.sectionRef?.startsWith(base)
+  );
   return idx;
 }
 

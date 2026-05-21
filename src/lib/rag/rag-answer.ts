@@ -106,7 +106,7 @@ export async function answerWithRAG(
   try {
     rawAnswer = await generateText(prompt, {
       temperature:     0.1,
-      maxOutputTokens: 2048,
+      maxOutputTokens: 8192,
     });
   } catch (err) {
     // Graceful degradation: return error message as answer
