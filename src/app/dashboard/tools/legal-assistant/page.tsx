@@ -325,7 +325,7 @@ export default function LegalAssistantPage() {
                   }}
                 >
                   {msg.parsed?.intro && (
-                    <p className="text-muted-foreground mb-2 text-[11px]">
+                    <p className={`mb-2 text-[11px] ${msg.parsed.bullets?.length ? "text-muted-foreground" : "text-foreground"}`}>
                       {msg.parsed.intro}
                     </p>
                   )}
@@ -365,7 +365,8 @@ export default function LegalAssistantPage() {
                     </div>
                   )}
 
-                  {(!msg.parsed?.bullets || msg.parsed.bullets.length === 0) && (
+                  {/* Raw fallback: only when parseAnswer produced neither intro nor bullets */}
+                  {!msg.parsed?.intro && (!msg.parsed?.bullets || msg.parsed.bullets.length === 0) && (
                     <p className="text-[11px] text-foreground whitespace-pre-wrap">{msg.content}</p>
                   )}
 
@@ -480,8 +481,9 @@ export default function LegalAssistantPage() {
       className="flex flex-col min-w-0"
       style={{
         width: layout === "source" ? "100%" : "42%",
-        background: "#FAFAF9",
+        background: "#ffffff",
         flexShrink: 0,
+        borderLeft: layout === "split" ? "1px solid rgba(0,0,0,0.06)" : "none",
       }}
     >
       <div
@@ -561,7 +563,7 @@ export default function LegalAssistantPage() {
       {activeMsg?.sources && activeMsg.sources.length > 0 && (
         <div
           className="px-4 py-3 flex-shrink-0"
-          style={{ borderTop: "1px solid rgba(0,0,0,0.06)", background: "#fff" }}
+          style={{ borderTop: "1px solid rgba(0,0,0,0.06)", background: "#ffffff" }}
         >
           <p
             className="text-[9px] font-semibold uppercase mb-2"
