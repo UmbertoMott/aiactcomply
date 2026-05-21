@@ -9,7 +9,7 @@ Strategy:
 section_ref format: "§3.1.4", "§6.1", "Annex A §A.5.1"
 """
 import re
-from config import MAX_ARTICLE_CHARS
+from constants import MAX_ARTICLE_CHARS
 
 
 # ISO clause pattern: "3.1.4  Title" or "A.5.1  Title" or "Annex A (normative)"

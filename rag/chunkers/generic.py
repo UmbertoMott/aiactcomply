@@ -5,13 +5,13 @@ Used when semantic (article/paragraph) splitting finds no structure.
 section_ref is extracted by regex scan for "Art. N" in the chunk.
 """
 import re
-from config import FALLBACK_CHUNK_CHARS, FALLBACK_OVERLAP_CHARS
+from constants import FALLBACK_CHUNK_CHARS, FALLBACK_OVERLAP_CHARS
 
 
 ART_RE = re.compile(r"Art\.\s*(\d+(?:\(\d+\))?)")
 
 
-def _extract_section_ref(text: str) -> str | None:
+def _extract_section_ref(text: str) -> "str | None":
     """Return the first article reference found in the text, or None."""
     m = ART_RE.search(text)
     return f"Art. {m.group(1)}" if m else None

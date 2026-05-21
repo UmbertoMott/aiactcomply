@@ -10,7 +10,7 @@ Strategy:
 section_ref format: "Art. N" or "Art. N(P)" (P = paragraph number)
 """
 import re
-from config import MAX_ARTICLE_CHARS, FALLBACK_CHUNK_CHARS, FALLBACK_OVERLAP_CHARS
+from constants import MAX_ARTICLE_CHARS, FALLBACK_CHUNK_CHARS, FALLBACK_OVERLAP_CHARS
 
 
 # Match "Articolo N" followed by optional title on same or next line

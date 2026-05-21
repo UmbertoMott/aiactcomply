@@ -5,6 +5,7 @@ Uses psycopg2 direct connection (not Supabase SDK) for bulk INSERT performance.
 import json
 import psycopg2
 import psycopg2.extras
+from typing import Optional
 from config import DATABASE_URL, SKIP_EXISTING
 
 
@@ -17,7 +18,7 @@ def get_connection():
     return psycopg2.connect(DATABASE_URL)
 
 
-def get_existing_document_ids(conn) -> set[str]:
+def get_existing_document_ids(conn) -> "set[str]":
     """Return set of document_ids already in rag_chunks (for skip-existing)."""
     with conn.cursor() as cur:
         cur.execute("SELECT DISTINCT document_id FROM rag_chunks;")
@@ -47,8 +48,8 @@ def delete_document_chunks(conn, document_id: str) -> int:
 
 def insert_chunks(
     conn,
-    chunks: list[dict],
-    embeddings: list[list[float]],
+    chunks: "list[dict]",
+    embeddings: "list[list[float]]",
     document_id: str,
 ) -> int:
     """
@@ -105,11 +106,11 @@ def insert_chunks(
 
 def similarity_search(
     conn,
-    query_embedding: list[float],
+    query_embedding: "list[float]",
     top_k: int = 5,
-    document_filter: str | None = None,
+    document_filter: Optional[str] = None,
     min_similarity: float = 0.3,
-) -> list[dict]:
+) -> "list[dict]":
     """
     Python-side cosine similarity search for testing / non-TS access.
     """

@@ -2,7 +2,7 @@ pdfminer.six==20231228
 pdf2image==1.17.0
 pytesseract==0.3.13
 Pillow==10.4.0
-google-cloud-aiplatform==1.74.0
-psycopg2-binary==2.9.10
+psycopg2-binary>=2.9.9
+cryptography>=41.0.0
 python-dotenv==1.0.1
 pytest==8.3.4

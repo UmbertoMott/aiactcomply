@@ -9,7 +9,7 @@ Strategy:
 section_ref format: "§2.7.1", "§3.1", "Annex III §4.2"
 """
 import re
-from config import FALLBACK_CHUNK_CHARS, FALLBACK_OVERLAP_CHARS, MAX_ARTICLE_CHARS
+from constants import FALLBACK_CHUNK_CHARS, FALLBACK_OVERLAP_CHARS, MAX_ARTICLE_CHARS
 
 
 # Match paragraph headers like: "2.7.1", "3.", "Annex I", "§2.7"
