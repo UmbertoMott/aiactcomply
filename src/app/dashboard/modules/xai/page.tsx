@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
+import VerifyPinpoint from "@/components/disclosure/VerifyPinpoint";
 import {
   BarChart2,
   AlertTriangle,
@@ -777,6 +779,14 @@ export default function XAIPage() {
         </div>
       )}
 
+      {/* Art. 50 — AI Output Label */}
+      <div className="mb-4">
+        <AIOutputLabel
+          documentType="XAI — Spiegabilità e Bias · Art. 13 AI Act"
+          outputType="XAI"
+        />
+      </div>
+
       {/* Header */}
       <div style={{ marginBottom: "28px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
@@ -794,7 +804,8 @@ export default function XAIPage() {
           </h1>
         </div>
         <p style={{ fontSize: "13px", color: "rgba(0,0,0,0.42)", margin: 0 }}>
-          Spiegabilità globale del modello (SHAP) · Analisi disparate impact · Scenari controfattuali · Art. 13 AI Act
+          Spiegabilità globale del modello (SHAP) · Analisi disparate impact · Scenari controfattuali ·{" "}
+          <VerifyPinpoint article="Art. 13" lang="it">Art. 13 AI Act</VerifyPinpoint>
         </p>
       </div>
 

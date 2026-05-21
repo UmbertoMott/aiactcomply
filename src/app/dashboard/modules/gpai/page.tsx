@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
+import VerifyPinpoint from "@/components/disclosure/VerifyPinpoint";
 import {
   Cpu, Plus, X, CheckCircle, AlertTriangle, FileText,
   Copy, Download, ChevronDown, ChevronUp,
@@ -986,6 +988,14 @@ export default function GPAIPage() {
       )}
 
       <div className="w-full">
+        {/* Art. 50 — AI Output Label */}
+        <div className="mb-4">
+          <AIOutputLabel
+            documentType="GPAI — Modelli Fondazionali · Art. 51-55 AI Act"
+            outputType="GPA"
+          />
+        </div>
+
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-1">
@@ -1004,7 +1014,8 @@ export default function GPAIPage() {
             />
           </div>
           <p className="text-[12px] mb-3" style={{ color: "rgba(0,0,0,0.45)" }}>
-            Se usi OpenAI, Anthropic, Google o altri modelli fondazionali nei tuoi prodotti, hai obblighi specifici già operativi.
+            Se usi OpenAI, Anthropic, Google o altri modelli fondazionali nei tuoi prodotti, hai obblighi specifici ai sensi degli{" "}
+            <VerifyPinpoint article="Art. 51-55" lang="it">Art. 51-55 AI Act</VerifyPinpoint>{" "}già operativi.
           </p>
 
           {/* Stats row */}

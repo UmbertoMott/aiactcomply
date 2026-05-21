@@ -143,9 +143,9 @@ export function getDossierSections(data: DossierData): DossierSection[] {
       title: "Registrazione EU AI Database (FRIA)",
       href: "/dashboard/tools/fria",
       status: data.fria
-        ? (data.fria.approvedAt ? "complete" : "partial")
+        ? (data.fria.approvedBy ? "complete" : "partial")
         : "missing",
-      completedAt: data.fria?.approvedAt ?? data.fria?.completedAt,
+      completedAt: data.fria?.completedAt,
     },
     {
       id: "gpai",

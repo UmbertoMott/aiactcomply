@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
 import { GitBranch, Download, ChevronRight, AlertTriangle, CheckCircle, Clock } from "lucide-react";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
@@ -336,6 +337,14 @@ export default function DocuGenPage() {
           </button>
         </div>
       )}
+
+      {/* Art. 50 — AI Output Label */}
+      <div className="mb-4">
+        <AIOutputLabel
+          documentType="Documentazione Tecnica · Art. 11 AI Act (Allegato IV)"
+          outputType="DOC"
+        />
+      </div>
 
       {/* ── Header ── */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">

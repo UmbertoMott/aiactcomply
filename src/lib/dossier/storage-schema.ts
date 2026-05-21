@@ -112,11 +112,12 @@ export interface ConformityResult {
 
 export interface FRIAResult {
   systemName: string;
+  organizationName?: string;
   overallRisk: string;
-  docRef: string;
-  completedAt: string;
+  completeness?: number;
+  status?: string;
   approvedBy?: string;
-  approvedAt?: string;
+  completedAt: string;
 }
 
 export interface XAIResult {

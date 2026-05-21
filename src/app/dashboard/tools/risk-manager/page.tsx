@@ -57,6 +57,7 @@ import {
   type ResidualWarning,
 } from "@/lib/simulation/risk-manager-engine";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
+import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
 
 // ─── FIX 1 — Typed form state ─────────────────────────────────────────
 
@@ -385,6 +386,14 @@ export default function RiskManagerPage() {
 
   return (
     <div className="w-full">
+      {/* Art. 50 — AI Output Label */}
+      <div className="mb-4">
+        <AIOutputLabel
+          documentType="Gestione del Rischio — Drift Detection · Art. 9 AI Act"
+          outputType="RSK"
+        />
+      </div>
+
       {/* Header */}
       <h1 className="text-2xl font-bold text-foreground mb-2">
         AI Act Risk Manager

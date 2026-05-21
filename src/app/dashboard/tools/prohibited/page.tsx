@@ -15,6 +15,7 @@ import {
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { ProhibitedCheckResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
+import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const card = {
@@ -459,6 +460,13 @@ export default function ProhibitedPage() {
   return (
     <div className="w-full" style={font}>
       {SavedBanner}
+      {/* Art. 50 — AI Output Label */}
+      <div className="mb-4">
+        <AIOutputLabel
+          documentType="Verifica Pratiche Vietate · Art. 5 AI Act"
+          outputType="GEN"
+        />
+      </div>
       {/* Page header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-1">
