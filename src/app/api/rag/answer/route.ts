@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
       retrieveMs,
       generateMs: ragAnswer.latencyMs,
       chunksFound: chunks.length,
+      chunkTexts: chunks.map((c) => c.chunkText),
     });
   } catch (err) {
     console.error("[RAG answer] Error:", err);
