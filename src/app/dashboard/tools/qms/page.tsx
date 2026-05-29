@@ -1,6 +1,7 @@
 "use client";
 
 import { Trash2, FileText, CheckCircle, Download, Plus } from "lucide-react";
+import SignOffPanel from "@/components/ui/SignOffPanel";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -178,7 +179,7 @@ export default function QMSPage() {
       )}
 
       <div className="flex items-start justify-between mb-2">
-        <h1 className="text-2xl font-bold" style={{ color: "#0D1016" }}>QMS Builder</h1>
+        <h1 style={{ fontSize: 24, fontWeight: 500, letterSpacing: "-0.8px", color: "#0D1016" }}>QMS Builder</h1>
         <input
           value={systemName}
           onChange={(e) => setSystemName(e.target.value)}
@@ -299,6 +300,8 @@ export default function QMSPage() {
           ))}
         </AnimatePresence>
       </div>
+
+      <SignOffPanel toolKey="qms" toolLabel="Sistema di Gestione Qualità" />
 
       {/* Toast */}
       <AnimatePresence>
