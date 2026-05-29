@@ -419,6 +419,7 @@ export default function DashboardPage() {
                 nextAction={nextActions[0]?.title}
                 nextActionHref={nextActions[0]?.href}
                 index={0}
+                status="active"
               />
             )}
 
@@ -434,6 +435,7 @@ export default function DashboardPage() {
                     nextAction={nextActions[0]?.title}
                     nextActionHref={nextActions[0]?.href}
                     index={i}
+                    status={sys.status}
                   />
                 ))}
                 {/* Add system card */}
@@ -599,13 +601,14 @@ export default function DashboardPage() {
 
 // ── System Card ───────────────────────────────────────────────────────────────
 
-function SystemCard({ name, riskLevel, dossierPct, nextAction, nextActionHref, index }: {
+function SystemCard({ name, riskLevel, dossierPct, nextAction, nextActionHref, index, status }: {
   name: string;
   riskLevel?: string;
   dossierPct: number;
   nextAction?: string;
   nextActionHref?: string;
   index: number;
+  status?: string;
 }) {
   const cfg = riskLevel ? RISK_CFG[riskLevel] : null;
   const barColor = cfg?.bar ?? "rgba(0,0,0,0.15)";
@@ -642,6 +645,18 @@ function SystemCard({ name, riskLevel, dossierPct, nextAction, nextActionHref, i
           border: "1px solid rgba(0,0,0,0.08)",
         }}>
           Da classificare
+        </span>
+      )}
+
+      {/* Status badge */}
+      {status && status !== "ignored" && (
+        <span style={{
+          display: "inline-block", fontSize: 9, fontWeight: 600,
+          padding: "1px 6px", borderRadius: 3, marginBottom: 8, marginLeft: 4,
+          background: "rgba(21,128,61,0.06)", color: "#15803d",
+          border: "1px solid rgba(21,128,61,0.18)",
+        }}>
+          {status === "active" ? "Attivo" : status}
         </span>
       )}
 
