@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronRight, AlertTriangle, CheckCircle, Download, BookOpen } from "lucide-react";
 import Link from "next/link";
@@ -9,10 +9,20 @@ import {
   generateExplanation, type DecisionExplanation,
 } from "@/lib/simulation/transparency-engine";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
-import type { TransparencyResult } from "@/lib/dossier/storage-schema";
+import type { TransparencyResult, ClassifierResult, OversightResult, ResilienceResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
+import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
 
 const card = { background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
+
+const ART13_FIELDS = [
+  { id: "provider_identity",        label: "Identità e contatto del provider (Art. 13(3)(a))",                    placeholder: "Ragione sociale, indirizzo, email/telefono contatto" },
+  { id: "performance_specs",        label: "Caratteristiche, capacità e limitazioni di performance (Art. 13(3)(b))", placeholder: "Accuracy target, casi d'uso supportati, limitazioni note" },
+  { id: "training_data_specs",      label: "Specifiche relative ai dati di addestramento (Art. 13(3)(c))",          placeholder: "Tipologie dataset, periodo raccolta, filtri applicati" },
+  { id: "accuracy_metrics",         label: "Livello di accuracy e metriche di robustezza (Art. 13(3)(d))",          placeholder: "Accuracy su test set, F1-score, soglie accettabili" },
+  { id: "human_oversight_required", label: "Sorveglianza umana richiesta (Art. 13(3)(e))",                         placeholder: "Ruoli coinvolti, procedura di override, frequenza supervisione" },
+  { id: "lifecycle_updates",        label: "Vita utile attesa e aggiornamenti (Art. 13(3)(f))",                    placeholder: "Data ultimo aggiornamento, ciclo previsto, procedura notifica modifiche" },
+] as const;
 
 // ─── Tab nav ──────────────────────────────────────────────────────────────────
 type Tab = "explain" | "nutrition" | "instructions";
@@ -441,6 +451,23 @@ export default function TransparencyPage() {
   const [savedAt,    setSavedAt]    = useState<string | null>(() =>
     readFromStorage<TransparencyResult>("transparency")?.completedAt ?? null
   );
+  const [classifierData, setClassifierData] = useState<{ riskLevel?: string; systemName?: string } | null>(null);
+  const [art13Fields, setArt13Fields] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const cls = readFromStorage<ClassifierResult>("classifier");
+    const ovs = readFromStorage<OversightResult>("oversight");
+    const res = readFromStorage<ResilienceResult>("resilience");
+    if (cls) setClassifierData({ riskLevel: cls.riskLevel, systemName: cls.systemName });
+    const pre: Record<string, string> = {};
+    if (ovs?.responsiblePersons?.length) {
+      pre.human_oversight_required = ovs.responsiblePersons.join(", ");
+    }
+    if (res?.accuracyMetric) {
+      pre.accuracy_metrics = `${res.accuracyMetric}%`;
+    }
+    if (Object.keys(pre).length) setArt13Fields(pre);
+  }, []);
 
   function showToast(msg: string, type: "success" | "error" = "success") {
     setToast({ msg, type });
@@ -519,6 +546,8 @@ export default function TransparencyPage() {
   return (
     <div className="w-full" style={{ fontFamily: "var(--font-inter, system-ui)" }}>
 
+      <SystemContextBanner checkProhibited={true} />
+
       {/* Dossier saved banner */}
       {savedAt ? (
         <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
@@ -541,7 +570,7 @@ export default function TransparencyPage() {
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
           <p className="text-[11px] font-semibold uppercase mb-1"
-            style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "1.2px" }}>Art. 13 — Trasparenza & Spiegabilità</p>
+            style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "1.2px" }}>Art. 13 / Art. 50 — Trasparenza & Spiegabilità</p>
           <h1 className="text-[24px] font-medium" style={{ color: "#0D1016", letterSpacing: "-0.8px" }}>
             Transparency & XAI
           </h1>
@@ -625,6 +654,33 @@ export default function TransparencyPage() {
           Vai al modulo →
         </a>
       </div>
+
+      {/* Art. 13(3) — only for high-risk systems */}
+      {(classifierData?.riskLevel === "high" || classifierData?.riskLevel === "High") && (
+        <div style={{ marginTop: 28, padding: 20, borderRadius: 10, border: "1px solid rgba(220,38,38,0.18)", background: "rgba(220,38,38,0.03)" }}>
+          <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.08em", color: "rgba(220,38,38,0.7)", marginBottom: 16, margin: "0 0 16px" }}>
+            Informazioni obbligatorie per deployer — Art. 13(3) (sistema HIGH RISK)
+          </p>
+          {ART13_FIELDS.map((field) => (
+            <div key={field.id} style={{ marginBottom: 14 }}>
+              <label style={{ fontSize: 12, fontWeight: 500, color: "#0D1016", display: "block", marginBottom: 4 }}>
+                {field.label}
+              </label>
+              <textarea
+                value={art13Fields[field.id] ?? ""}
+                onChange={(e) => setArt13Fields((prev) => ({ ...prev, [field.id]: e.target.value }))}
+                placeholder={field.placeholder}
+                rows={2}
+                style={{
+                  width: "100%", padding: "7px 10px", borderRadius: 8,
+                  border: "1px solid rgba(0,0,0,0.07)", fontSize: 12,
+                  resize: "vertical" as const, fontFamily: "inherit", background: "#fff",
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Toast */}
       <AnimatePresence>
