@@ -20,6 +20,8 @@ export interface RiskManagerResult {
   }>;
   overallRiskLevel: "low" | "medium" | "high" | "critical";
   completedAt: string;
+  nextReviewDate?: string;
+  reviewCycle?: "monthly" | "quarterly" | "biannual" | "annual";
 }
 
 export interface DataAuditResult {
