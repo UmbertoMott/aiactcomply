@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Search,
   Code2,
@@ -18,6 +18,7 @@ import {
   Server,
   Download,
 } from "lucide-react";
+import SignOffPanel from "@/components/ui/SignOffPanel";
 import { scanRepository, classifyRisk } from "@/lib/simulation/discovery-engine";
 import { MOCK_PROJECT_FILES } from "@/lib/simulation/mock-project";
 import { matchCodeToLaw } from "@/lib/simulation/code-to-law";
@@ -26,6 +27,8 @@ import { AIRiskScorer, type DiscoveryData, type AnalysisOutput } from "@/lib/sem
 import { scanProfiling, hasHardBlock, generateExemptionDossier, EXEMPTION_CRITERIA, type ProfilingSignal, type ExemptionDossier } from "@/lib/semantic/exemption-engine";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { generatePassport, verifyPassport, exportForRegulator, getPassportSummary, type ConformityPassport } from "@/lib/crypto/passport";
+import { writeToStorage } from "@/lib/dossier/storage-schema";
+import type { ClassifierResult } from "@/lib/dossier/storage-schema";
 
 // ─── ADDITION 1 — Persistence ────────────────────────────────────────
 
@@ -53,6 +56,17 @@ function saveResult(
     savedAt: new Date().toISOString(),
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(record));
+  writeToStorage<ClassifierResult>("classifier", {
+    systemName: systemName,
+    systemDescription: "",
+    riskLevel: (r.riskLevel?.toLowerCase() ?? "minimal") as ClassifierResult["riskLevel"],
+    annexIII: !!(r.annexCategory),
+    applicableArticles: [
+      ...(r.annexCategory ? ["Annex III"] : []),
+      ...(r.isExemptedArt6_3 ? ["Art. 6(3)"] : []),
+    ],
+    completedAt: new Date().toISOString(),
+  });
 }
 
 function loadSavedResult(): PersistedClassification | null {
@@ -63,6 +77,31 @@ function loadSavedResult(): PersistedClassification | null {
     return null;
   }
 }
+
+// ─── Design tokens ────────────────────────────────────────────────────
+const T = {
+  text:    "#0D1016",
+  muted:   "rgba(0,0,0,0.42)",
+  faint:   "rgba(0,0,0,0.28)",
+  border:  "rgba(0,0,0,0.07)",
+  card:    "#ffffff",
+  bg:      "#FAFAF9",
+  red:     "#dc2626",
+  redBg:   "rgba(220,38,38,0.06)",
+  redBdr:  "rgba(220,38,38,0.18)",
+  amber:   "#d97706",
+  amberBg: "rgba(245,158,11,0.06)",
+  blue:    "#2563eb",
+  blueBg:  "rgba(37,99,235,0.06)",
+  green:   "#15803d",
+  greenBg: "rgba(22,163,74,0.06)",
+};
+const cardSt = {
+  background: T.card,
+  border: `1px solid ${T.border}`,
+  borderRadius: 12,
+  boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+};
 
 // ─── COMPONENT ───────────────────────────────────────────────────────
 
@@ -91,6 +130,11 @@ export default function ClassifierPage() {
   const [customPythonCode, setCustomPythonCode] = useState("");
   const [toast, setToast] = useState<string | null>(null);
   const [savedClassification] = useState<PersistedClassification | null>(() => loadSavedResult());
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    setIsSaved(localStorage.getItem(STORAGE_KEY) !== null);
+  }, []);
 
   // ADDITION 4 — Derived active inputs (must precede useMemos that depend on them)
   const activeSystemName: string =
@@ -114,8 +158,22 @@ export default function ClassifierPage() {
 
   const schemaColumns = useMemo(() => {
     if (!scanResult) return [];
-    return analyzeSchema(["gender", "age", "years_experience", "education_level", "salary", "marital_status", "face_image", "ethnicity"]);
-  }, [scanResult]);
+    // Extract schema hints from actual scanned files (SQL CREATE TABLE, SQLAlchemy, Prisma)
+    const schemaPattern = /(?:CREATE TABLE|class \w+\(Base\)|model \w+ \{)[^;{}]*?(\b\w+\b)/gi;
+    const detectedFields: string[] = [];
+    for (const content of Object.values(activeFiles)) {
+      const matches = content.matchAll(/(?:Column|field|column)\(['"]([\w_]+)['"]/gi);
+      for (const m of matches) detectedFields.push(m[1]);
+      // Prisma model fields
+      const prismaMatches = content.matchAll(/^\s+([\w_]+)\s+\w+/gm);
+      for (const m of prismaMatches) if (m[1].length > 2) detectedFields.push(m[1]);
+    }
+    // Fall back to risk-relevant defaults only if nothing detected from code
+    const fields = detectedFields.length > 0
+      ? detectedFields
+      : ["gender", "age", "years_experience", "education_level", "salary", "marital_status", "face_image", "ethnicity"];
+    return analyzeSchema(fields);
+  }, [scanResult, activeFiles]);
 
   const inferenceMatches = useMemo(() => {
     if (!scanResult) return [];
@@ -124,8 +182,8 @@ export default function ClassifierPage() {
 
   const policyCard = useMemo(() => {
     if (inferenceMatches.length === 0) return null;
-    return generatePolicyCard("CV-Screener AI", inferenceMatches, schemaColumns);
-  }, [inferenceMatches, schemaColumns]);
+    return generatePolicyCard(activeSystemName, inferenceMatches, schemaColumns);
+  }, [inferenceMatches, schemaColumns, activeSystemName]);
 
   const lawMatches = selectedFile ? matchCodeToLaw(files[selectedFile] || "") : [];
 
@@ -186,6 +244,42 @@ export default function ClassifierPage() {
 
     saveResult(activeSystemName, res, p.passport_id, exemptionDossier?.id ?? null);
     showToast(`Classificazione completata: ${res.riskLevel} — salvata su Evidence Layer`);
+
+    // Fire-and-forget audit trail — never blocks UI, never throws
+    void (async () => {
+      try {
+        let tenantId = typeof window !== "undefined" ? localStorage.getItem("aicomply_tenant_id") : null;
+        if (!tenantId) {
+          tenantId = crypto.randomUUID();
+          if (typeof window !== "undefined") localStorage.setItem("aicomply_tenant_id", tenantId);
+        }
+        await fetch("/api/audit/log", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tenantId,
+            outputType: "CLSF",
+            documentType: "AI Risk Classification",
+            outputText: JSON.stringify({
+              riskLevel: res.riskLevel,
+              annexCategory: res.annexCategory,
+              system: activeSystemName,
+              score: res.score,
+              isExemptedArt6_3: res.isExemptedArt6_3,
+              libraries: res.libraries.map((l) => l.name),
+            }),
+            requiresReview: res.riskLevel === "High" || res.riskLevel === "Unacceptable",
+            regulationRefs: [
+              "Art. 6 EU AI Act 2024/1689",
+              ...(res.annexCategory ? ["Annex III"] : []),
+              ...(res.isExemptedArt6_3 ? ["Art. 6(3)"] : []),
+            ],
+          }),
+        });
+      } catch {
+        // Intentionally swallowed — audit trail is best-effort for classifier
+      }
+    })();
   }
 
   const riskColors: Record<string, string> = {
@@ -202,35 +296,50 @@ export default function ClassifierPage() {
     Minimal: "shadow-[0_0_30px_rgba(34,197,94,0.15)] border-success/30",
   };
 
+  const PHASES_STEPS = [
+    { id: "intro",    label: "Repository", icon: GitBranch },
+    { id: "scan",     label: "Discovery",  icon: Search    },
+    { id: "decision", label: "Art. 6(3)",  icon: Scale     },
+    { id: "result",   label: "Certificato",icon: FileText  },
+  ] as const;
+  const phaseOrder = PHASES_STEPS.map((p) => p.id);
+
   return (
     <div className="w-full">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground">AI Classifier — Discovery Engine</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+      {/* ── Header ── */}
+      <div className="mb-7">
+        <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.4px", color: T.text, margin: 0 }}>
+          AI Classifier — Discovery Engine
+        </h1>
+        <p style={{ marginTop: 4, fontSize: 13, color: T.muted, lineHeight: 1.5 }}>
           Scansione automatica in 3 fasi: AST Analysis → Infrastructure Mapping →
           Art. 6(3) Decision Tree. Classificazione basata sul codice reale.
         </p>
       </div>
 
-      {/* Phase indicator */}
-      <div className="flex items-center gap-2 mb-8">
-        {[
-          { id: "intro", label: "Repository", icon: GitBranch },
-          { id: "scan", label: "Discovery", icon: Search },
-          { id: "decision", label: "Art. 6(3)", icon: Scale },
-          { id: "result", label: "Certificato", icon: FileText },
-        ].map((p, i) => (
-          <div key={p.id} className="flex items-center gap-2">
-            <div className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-              phase === p.id ? "bg-primary text-primary-foreground" :
-              ["intro", "scan", "decision", "result"].indexOf(phase) >= i ? "text-primary" : "text-muted-foreground"
-            }`}>
-              <p.icon className="h-3.5 w-3.5" />
-              {p.label}
+      {/* ── Phase stepper ── */}
+      <div className="flex items-center gap-0 mb-8"
+        style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: "6px", display: "inline-flex" }}>
+        {PHASES_STEPS.map((p, i) => {
+          const isActive = phase === p.id;
+          const isDone = phaseOrder.indexOf(phase) > i;
+          return (
+            <div key={p.id} className="flex items-center">
+              <div style={{
+                display: "flex", alignItems: "center", gap: 6,
+                borderRadius: 7, padding: "5px 12px", fontSize: 12, fontWeight: 500,
+                background: isActive ? T.text : "transparent",
+                color: isActive ? "#fff" : isDone ? T.green : T.muted,
+                transition: "all 0.15s",
+              }}>
+                <p.icon style={{ width: 13, height: 13 }} />
+                {p.label}
+                {isDone && <span style={{ fontSize: 10, color: T.green }}>✓</span>}
+              </div>
+              {i < 3 && <ChevronRight style={{ width: 12, height: 12, color: T.border, margin: "0 2px", flexShrink: 0 }} />}
             </div>
-            {i < 3 && <ChevronRight className="h-3 w-3 text-muted-foreground" />}
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* ADDITION 9 — PHASE: INTRO (rewritten inner content) */}
@@ -256,38 +365,38 @@ export default function ClassifierPage() {
           )}
 
           {/* Input mode selector */}
-          <div className="rounded-xl border border-border bg-card p-5">
-            <h2 className="text-sm font-semibold text-foreground mb-4">Modalità di classificazione</h2>
+          <div style={{ ...cardSt, padding: 20 }}>
+            <h2 style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 16 }}>Modalità di classificazione</h2>
             <div className="grid grid-cols-2 gap-3 mb-4">
               <button
                 onClick={() => setInputMode("demo")}
-                className={`rounded-lg border p-4 text-left transition-colors ${
-                  inputMode === "demo"
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/30"
-                }`}
+                style={{
+                  borderRadius: 9, border: `1px solid ${inputMode === "demo" ? T.blue : T.border}`,
+                  background: inputMode === "demo" ? T.blueBg : T.card,
+                  padding: 16, textAlign: "left", cursor: "pointer", transition: "border-color 0.15s",
+                }}
               >
-                <div className="flex items-center gap-2 mb-1">
-                  <Brain className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium text-foreground">Progetto demo</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                  <Brain style={{ width: 15, height: 15, color: T.blue }} />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Progetto demo</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground">
+                <p style={{ fontSize: 11, color: T.muted, lineHeight: 1.4 }}>
                   CV-Screener AI — scenario di screening HR con librerie pre-caricate. Ideale per esplorare il tool.
                 </p>
               </button>
               <button
                 onClick={() => setInputMode("manual")}
-                className={`rounded-lg border p-4 text-left transition-colors ${
-                  inputMode === "manual"
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/30"
-                }`}
+                style={{
+                  borderRadius: 9, border: `1px solid ${inputMode === "manual" ? T.blue : T.border}`,
+                  background: inputMode === "manual" ? T.blueBg : T.card,
+                  padding: 16, textAlign: "left", cursor: "pointer", transition: "border-color 0.15s",
+                }}
               >
-                <div className="flex items-center gap-2 mb-1">
-                  <Code2 className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium text-foreground">Il mio sistema AI</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                  <Code2 style={{ width: 15, height: 15, color: T.blue }} />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Il mio sistema AI</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground">
+                <p style={{ fontSize: 11, color: T.muted, lineHeight: 1.4 }}>
                   Inserisci il nome del sistema e incolla il tuo requirements.txt per classificare il tuo progetto reale.
                 </p>
               </button>
@@ -337,24 +446,24 @@ export default function ClassifierPage() {
 
           {/* Files preview + start */}
           <div className="grid lg:grid-cols-2 gap-6">
-            <div className="rounded-xl border border-border bg-card p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Code2 className="h-5 w-5 text-primary" />
-                <h2 className="text-base font-semibold text-foreground">
+            <div style={{ ...cardSt, padding: 24 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                <Code2 style={{ width: 16, height: 16, color: T.blue }} />
+                <h2 style={{ fontSize: 14, fontWeight: 600, color: T.text, margin: 0 }}>
                   {inputMode === "demo"
                     ? "Progetto: CV-Screener AI"
                     : activeSystemName || "Progetto personalizzato"}
                 </h2>
               </div>
-              <div className="space-y-2 text-xs text-muted-foreground">
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 {Object.entries(activeFiles).map(([path]) => (
-                  <div key={path} className="flex items-center gap-2 py-1">
-                    <FileText className="h-3.5 w-3.5 text-muted-foreground" />
-                    {path}
+                  <div key={path} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0" }}>
+                    <FileText style={{ width: 13, height: 13, color: T.muted, flexShrink: 0 }} />
+                    <span style={{ fontSize: 11, color: T.muted, fontFamily: "ui-monospace, monospace" }}>{path}</span>
                   </div>
                 ))}
                 {inputMode === "manual" && Object.keys(activeFiles).length === 0 && (
-                  <p className="text-warning text-[11px]">
+                  <p style={{ fontSize: 11, color: T.amber }}>
                     Nessun file inserito — il scan partirà con file vuoti.
                   </p>
                 )}
@@ -367,25 +476,30 @@ export default function ClassifierPage() {
                   }
                   runScan();
                 }}
-                className="mt-6 w-full rounded-lg bg-primary px-4 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 flex items-center justify-center gap-2"
+                style={{
+                  marginTop: 24, width: "100%", borderRadius: 8,
+                  background: T.text, color: "#fff", border: "none",
+                  padding: "10px 16px", fontSize: 13, fontWeight: 500,
+                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                }}
               >
-                <Search className="h-4 w-4" />
+                <Search style={{ width: 14, height: 14 }} />
                 Avvia Discovery Engine
               </button>
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-6">
-              <h2 className="text-sm font-semibold text-foreground mb-4">Cosa farà il Discovery Engine:</h2>
-              <div className="space-y-3">
+            <div style={{ ...cardSt, padding: 24 }}>
+              <h2 style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 16 }}>Cosa farà il Discovery Engine:</h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {[
                   { icon: Search, text: "Scannerà requirements.txt e file .py per librerie critiche" },
                   { icon: Server, text: "Analizzerà gli endpoint API per dati biometrici/sensibili" },
                   { icon: Scale, text: "Applicherà l'Art. 6(3) per valutare la deroga non-alto-rischio" },
                   { icon: Hash, text: "Genererà un certificato firmato SHA-256" },
                 ].map((s, i) => (
-                  <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-                    <s.icon className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    {s.text}
+                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                    <s.icon style={{ width: 14, height: 14, color: T.blue, marginTop: 1, flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, color: T.muted, lineHeight: 1.5 }}>{s.text}</span>
                   </div>
                 ))}
               </div>
@@ -1018,6 +1132,8 @@ export default function ClassifierPage() {
           </div>
         </div>
       )}
+
+      <SignOffPanel toolKey="classifier" toolLabel="Classificatore AI Act" />
 
       {/* ADDITION 12 — Toast */}
       {toast && (

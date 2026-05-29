@@ -92,11 +92,12 @@ export interface QMSResult {
 }
 
 export interface GPAIResult {
-  modelsCount: number;
-  hasSystemicRisk: boolean;
-  roles: string[];
+  role: "gpai_provider_systemic" | "gpai_provider_standard" | "downstream_high_risk" | "downstream_standard" | "not_applicable" | "incomplete";
+  gpai_providers_used: number;
+  art53_score: number;
+  art55_score: number;
+  code_of_practice_status: string;
   obligationsCompleted: number;
-  obligationsTotal: number;
   completedAt: string;
 }
 
@@ -120,6 +121,135 @@ export interface FRIAResult {
   completedAt: string;
 }
 
+/** @deprecated kept for backward compat with older dossier snapshots */
+export interface DPIARisk {
+  id: string;
+  title: string;
+  description: string;
+  likelihood: "low" | "medium" | "high";
+  impact: "low" | "medium" | "high";
+  mitigation: string;
+  residualRisk: "acceptable" | "review" | "unacceptable";
+}
+
+// ── DPIA WP248 rev.01 interfaces ────────────────────────────────────────────
+
+export interface DPIAScreeningCriterion {
+  id: string;
+  label: string;
+  description: string;
+  applies: "yes" | "no" | "partial" | "";
+  notes: string;
+}
+
+export interface DPIAAsset {
+  id: string;
+  name: string;
+  type: "hardware" | "software" | "network" | "database" | "document" | "person" | "other";
+  description: string;
+  personal_data: boolean;
+}
+
+export interface DPIAThreat {
+  id: string;
+  category: "illegitimate_access" | "unwanted_modification" | "data_disappearance";
+  source: string;
+  description: string;
+  likelihood: "low" | "medium" | "high";
+  severity: "low" | "medium" | "high";
+  risk_level: "low" | "medium" | "high";
+  mitigation: string;
+  residual_likelihood: "low" | "medium" | "high";
+  residual_severity: "low" | "medium" | "high";
+  residual_risk: "low" | "medium" | "high";
+}
+
+export interface DPIAProportionalityCheck {
+  id: string;
+  principle: string;
+  description: string;
+  status: "compliant" | "partial" | "non_compliant" | "na" | "";
+  notes: string;
+}
+
+export interface DPIARightsCheck {
+  id: string;
+  right: string;
+  article: string;
+  applicable: "yes" | "no" | "partial" | "";
+  how_ensured: string;
+}
+
+export interface DPIAResult {
+  screening: {
+    criteria: DPIAScreeningCriterion[];
+    criteria_met_count: number;
+    dpia_required: "yes" | "no" | "uncertain";
+    justification_if_no_dpia: string;
+  };
+  description: {
+    system_name: string;
+    organization_name: string;
+    controller_name: string;
+    dpo_name: string;
+    dpo_consulted: "yes" | "no" | "";
+    dpo_opinion: string;
+    processor_involved: "yes" | "no" | "";
+    processor_name: string;
+    processing_purposes: string;
+    legitimate_interest?: string;
+    personal_data_categories: string;
+    special_categories: string;
+    data_subjects_categories: string;
+    recipients: string;
+    retention_period: string;
+    assets: DPIAAsset[];
+    codes_of_conduct: string;
+    certifications: string;
+    data_subjects_opinions: "collected" | "not_applicable" | "not_collected" | "";
+    data_subjects_opinions_justification: string;
+    data_subjects_opinions_details: string;
+  };
+  proportionality: {
+    necessity_justification: string;
+    proportionality_checks: DPIAProportionalityCheck[];
+    rights_checks: DPIARightsCheck[];
+    processor_clauses_art28: "yes" | "no" | "na" | "";
+    international_transfers: "yes" | "no" | "";
+    international_transfers_safeguards: string;
+  };
+  risks: {
+    threats: DPIAThreat[];
+    overall_risk_before: "high" | "medium" | "low" | "";
+  };
+  measures: {
+    technical_measures: string;
+    organizational_measures: string;
+    overall_risk_after: "high" | "medium" | "low" | "";
+    prior_consultation_required: boolean;
+    prior_consultation_authority: string;
+    prior_consultation_date: string;
+    review_schedule: string;
+    review_trigger: string;
+  };
+  conclusion: {
+    compliant: "yes" | "no" | "conditional" | "";
+    conditions: string;
+    summary: string;
+    next_review_date: string;
+    completedAt: string;
+  };
+}
+
+export interface DeployerCheckResult {
+  system_name: string;
+  provider_name: string;
+  compliant_count: number;
+  partial_count: number;
+  non_compliant_count: number;
+  completedAt: string;
+}
+
 export interface XAIResult {
   overallXAIScore: number;
   modelVersion: string;
@@ -132,6 +262,55 @@ export interface ProhibitedCheckResult {
   answers: Record<string, "yes" | "no" | "unsure">;
   verdict: "violation" | "potential_violation" | "conditional" | "clear";
   violatedChecks: string[];
+  completedAt: string;
+}
+
+export interface L132CheckArea {
+  areaId: "hr_transparency" | "content_labeling" | "deepfake_risk" | "accessibility";
+  label: string;
+  compliant: boolean | null;
+  notes: string;
+  requirements: string[];
+  checks: (boolean | null)[];
+}
+
+export interface L132Result {
+  completedAt: string;
+  systemName: string;
+  systemType: string;
+  areas: L132CheckArea[];
+  overallStatus: "conforme" | "parzialmente_conforme" | "non_conforme" | "non_applicabile";
+  remediation: string;
+  isDeepfakeRisk: boolean;
+  requiresHRNotice: boolean;
+}
+
+export interface ProviderTransitionResult {
+  verdict: "provider" | "risk" | "deployer" | "incomplete";
+  triggered_checks: string[];
+  modification_count: number;
+  substantial_modifications: number;
+  completedAt: string;
+}
+
+export interface AuthRepResult {
+  provider_name: string;
+  provider_country: string;
+  ar_name: string;
+  ar_country: string;
+  system_name: string;
+  mandate_signed: boolean;
+  eudb_registered_by_ar: boolean;
+  completedAt: string;
+}
+
+export interface EUDBResult {
+  system_name: string;
+  provider_name: string;
+  registration_number: string;
+  member_states_count: number;
+  risk_classification: string;
+  registrationRequired: boolean;
   completedAt: string;
 }
 
@@ -156,7 +335,14 @@ export interface DossierData {
   gpai?: GPAIResult;
   conformity?: ConformityResult;
   fria?: FRIAResult;
+  dpia?: DPIAResult;
+  l132?: L132Result;
   xai?: XAIResult;
+  deployer?: DeployerCheckResult;
+  eudb?: EUDBResult;
+  authorizedRep?: AuthRepResult;
+  providerTransition?: ProviderTransitionResult;
+  art50?: { systemsCount: number; completedAt: string };
 }
 
 export const STORAGE_KEYS = {
@@ -171,10 +357,17 @@ export const STORAGE_KEYS = {
   resilience:  "aicomply_resilience_result",
   qms:         "aicomply_qms_result",
   fria:        "aicomply_fria_result",
+  dpia:        "aicomply_dpia_result",
+  l132:        "aicomply_l132_result",
   gpai:        "aicomply_gpai_result",
   conformity:  "aicomply_conformity_assessment",
   onboarding:  "aicomply_onboarding_data",
   xai:         "aicomply_xai_result",
+  deployer:    "aicomply_deployer_result",
+  eudb:        "aicomply_eudb_result",
+  authorizedRep: "aicomply_authorized_rep_result",
+  providerTransition: "aicomply_provider_transition_result",
+  art50: "aicomply_art50_result",
 } as const;
 
 export function readFromStorage<T>(key: keyof typeof STORAGE_KEYS): T | null {

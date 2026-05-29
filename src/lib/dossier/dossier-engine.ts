@@ -6,6 +6,7 @@ import type {
   DocugenResult, LogvaultResult, TransparencyResult,
   OversightResult, ResilienceResult, QMSResult, ProhibitedCheckResult,
   FRIAResult, ConformityResult, GPAIResult, XAIResult,
+  DPIAResult, DeployerCheckResult, L132Result, EUDBResult, AuthRepResult, ProviderTransitionResult,
 } from "./storage-schema";
 
 export interface DossierSection {
@@ -40,8 +41,15 @@ export function aggregateDossier(): DossierData {
     qms:          readFromStorage<QMSResult>("qms")                      ?? undefined,
     gpai:         readFromStorage<GPAIResult>("gpai")                    ?? undefined,
     conformity:   readFromStorage<ConformityResult>("conformity")        ?? undefined,
-    fria:         readFromStorage<FRIAResult>("fria")                    ?? undefined,
-    xai:          readFromStorage<XAIResult>("xai")                      ?? undefined,
+    fria:             readFromStorage<FRIAResult>("fria")                              ?? undefined,
+    xai:              readFromStorage<XAIResult>("xai")                               ?? undefined,
+    dpia:             readFromStorage<DPIAResult>("dpia")                             ?? undefined,
+    deployer:         readFromStorage<DeployerCheckResult>("deployer")                ?? undefined,
+    l132:             readFromStorage<L132Result>("l132")                             ?? undefined,
+    eudb:             readFromStorage<EUDBResult>("eudb")                             ?? undefined,
+    authorizedRep:    readFromStorage<AuthRepResult>("authorizedRep")                 ?? undefined,
+    providerTransition: readFromStorage<ProviderTransitionResult>("providerTransition") ?? undefined,
+    art50: readFromStorage<{ systemsCount: number; completedAt: string }>("art50") ?? undefined,
   };
 }
 
@@ -139,8 +147,8 @@ export function getDossierSections(data: DossierData): DossierSection[] {
     },
     {
       id: "fria",
-      article: "Art. 49",
-      title: "Registrazione EU AI Database (FRIA)",
+      article: "Art. 27",
+      title: "FRIA — Valutazione Impatto Diritti Fondamentali",
       href: "/dashboard/tools/fria",
       status: data.fria
         ? (data.fria.approvedBy ? "complete" : "partial")
@@ -151,7 +159,7 @@ export function getDossierSections(data: DossierData): DossierSection[] {
       id: "gpai",
       article: "Art. 51-55",
       title: "GPAI — Modelli Fondazionali",
-      href: "/dashboard/modules/gpai",
+      href: "/dashboard/tools/gpai",
       status: data.gpai
         ? (data.gpai.obligationsCompleted > 0 ? "complete" : "partial")
         : "missing",
@@ -164,6 +172,62 @@ export function getDossierSections(data: DossierData): DossierSection[] {
       href: "/dashboard/modules/xai",
       status: data.xai ? "complete" : "missing",
       completedAt: data.xai?.completedAt,
+    },
+    {
+      id: "dpia",
+      article: "Art. 35 GDPR",
+      title: "DPIA — Valutazione d'Impatto Privacy",
+      href: "/dashboard/tools/dpia",
+      status: data.dpia ? (data.dpia.conclusion?.completedAt ? "complete" : "partial") : "missing",
+      completedAt: data.dpia?.conclusion?.completedAt,
+    },
+    {
+      id: "deployer",
+      article: "Art. 26",
+      title: "Deployer Obligations",
+      href: "/dashboard/tools/deployer",
+      status: data.deployer ? "complete" : "missing",
+      completedAt: data.deployer?.completedAt,
+    },
+    {
+      id: "l132",
+      article: "L. 132/2025",
+      title: "L. 132/2025 — Adempimenti italiani",
+      href: "/dashboard/tools/l132",
+      status: data.l132 ? "complete" : "missing",
+      completedAt: data.l132?.completedAt,
+    },
+    {
+      id: "eudb",
+      article: "Art. 49",
+      title: "EUDB Registration",
+      href: "/dashboard/tools/eudb",
+      status: data.eudb ? "complete" : "missing",
+      completedAt: data.eudb?.completedAt,
+    },
+    {
+      id: "authorizedRep",
+      article: "Art. 22",
+      title: "Authorized Representative",
+      href: "/dashboard/tools/authorized-rep",
+      status: data.authorizedRep ? "complete" : "missing",
+      completedAt: data.authorizedRep?.completedAt,
+    },
+    {
+      id: "providerTransition",
+      article: "Art. 28",
+      title: "Provider Transition Check",
+      href: "/dashboard/tools/provider-transition",
+      status: data.providerTransition ? (data.providerTransition.verdict === "deployer" ? "complete" : "partial") : "missing",
+      completedAt: data.providerTransition?.completedAt,
+    },
+    {
+      id: "art50",
+      article: "Art. 50",
+      title: "Trasparenza Sistemi Limited/Minimal (Art. 50)",
+      href: "/dashboard/tools/art50-kit",
+      status: data.art50 ? "complete" : "missing",
+      completedAt: data.art50?.completedAt,
     },
   ];
 }
