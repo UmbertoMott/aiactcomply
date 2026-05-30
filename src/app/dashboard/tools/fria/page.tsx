@@ -1,1082 +1,1156 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import type { CSSProperties } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
-  ChevronRight, ChevronLeft, CheckCircle, AlertTriangle,
-  XCircle, Shield, Printer, FileText, Users, Scale,
-  Plus, Trash2, Info, ChevronDown, ChevronUp,
+  ChevronDown, ChevronRight, Plus, Trash2, CheckCircle,
+  AlertTriangle, Shield, Users, Activity, FileText, Download,
 } from "lucide-react";
-import {
-  FUNDAMENTAL_RIGHTS,
-  FRIADocument,
-  RightAssessment,
-  AffectedCategory,
-  createEmptyFRIA,
-  calculateFRIACompleteness,
-  getOverallFRIARisk,
-} from "@/lib/simulation/fria-engine";
+import SignOffPanel from "@/components/ui/SignOffPanel";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
+import type { FRIAResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
+import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import {
+  type FRIADocument, type FRIAScenario, type FRIARightImpact,
+  type FRIASeverityAssessment, type FRIAMitigationMeasure,
+  type FRIAStakeholder, type FRIAEngagementLog, type FRIAMonitoringItem,
+  FUNDAMENTAL_RIGHTS, RIGHTS_GROUPS,
+  createEmptyFRIA, computeSeverity, computePriority,
+  generatePublicSummary, calculateFRIACompleteness, getOverallFRIARisk,
+} from "@/lib/simulation/fria-engine";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Storage ─────────────────────────────────────────────────────────────────
+const FRIA_DOC_KEY = "aicomply_fria_document";
+function loadDoc(): FRIADocument {
+  if (typeof window === "undefined") return createEmptyFRIA();
+  try {
+    const raw = localStorage.getItem(FRIA_DOC_KEY);
+    if (raw) return JSON.parse(raw) as FRIADocument;
+  } catch { /* ignore */ }
+  return createEmptyFRIA();
+}
 
-type Step = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const STEPS = [
-  { label: "Identificazione", icon: FileText },
-  { label: "Contesto deploy", icon: Shield },
-  { label: "Soggetti coinvolti", icon: Users },
-  { label: "Diritti fondamentali", icon: Scale },
-  { label: "Dati personali", icon: Shield },
-  { label: "Supervisione e rimedi", icon: CheckCircle },
-  { label: "Risultato", icon: CheckCircle },
-] as const;
-
-const RISK_META = {
-  low:      { label: "Rischio basso",     bg: "#dcfce7", color: "#15803d", border: "rgba(22,163,74,0.2)" },
-  medium:   { label: "Rischio medio",     bg: "#fef9c3", color: "#a16207", border: "rgba(202,138,4,0.2)" },
-  high:     { label: "Rischio alto",      bg: "#fff7ed", color: "#c2410c", border: "rgba(234,88,12,0.2)" },
-  critical: { label: "Rischio critico",   bg: "#fef2f2", color: "#b91c1c", border: "rgba(185,28,28,0.2)" },
+// ─── Design tokens ────────────────────────────────────────────────────────────
+const T = {
+  text: "#0D1016", muted: "rgba(0,0,0,0.42)", faint: "rgba(0,0,0,0.28)",
+  border: "rgba(0,0,0,0.08)", card: "#ffffff", bg: "#f8f8f7",
+  red: "#dc2626", redBg: "rgba(220,38,38,0.06)", redBdr: "rgba(220,38,38,0.2)",
+  amber: "#d97706", amberBg: "rgba(202,138,4,0.06)", amberBdr: "rgba(202,138,4,0.2)",
+  blue: "#2563eb", blueBg: "rgba(37,99,235,0.06)", blueBdr: "rgba(37,99,235,0.2)",
+  green: "#16a34a", greenBg: "rgba(22,163,74,0.06)", greenBdr: "rgba(22,163,74,0.2)",
 } as const;
 
-const RELEVANCE_OPTS = [
-  { value: "not_relevant", label: "Non rilevante" },
-  { value: "low",          label: "Bassa" },
-  { value: "medium",       label: "Media" },
-  { value: "high",         label: "Alta" },
-  { value: "critical",     label: "Critica" },
-] as const;
-
-const RESIDUAL_OPTS = [
-  { value: "acceptable",   label: "Accettabile",    color: "#15803d" },
-  { value: "review",       label: "Da rivedere",    color: "#d97706" },
-  { value: "unacceptable", label: "Non accettabile", color: "#dc2626" },
-] as const;
-
-const DATA_TYPES_LIST = [
-  "Dati anagrafici", "Dati comportamentali", "Dati biometrici",
-  "Dati di salute", "Dati finanziari", "Dati di localizzazione",
-  "Dati di navigazione", "Dati di prestazione lavorativa",
-  "Dati educativi", "Dati giudiziari",
-];
-
-// ─── Sub-components ──────────────────────────────────────────────────────────
-
-const card = {
-  background: "#ffffff",
-  border: "1px solid rgba(0,0,0,0.07)",
-  boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-  borderRadius: "12px",
+const cardSt: CSSProperties = {
+  background: T.card, border: `1px solid ${T.border}`,
+  borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
 };
 
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+const inputSt: CSSProperties = {
+  width: "100%", padding: "7px 10px", borderRadius: 8,
+  border: `1px solid ${T.border}`, fontSize: 12, color: T.text,
+  background: T.card, outline: "none",
+};
+
+// ─── Tiny helpers ─────────────────────────────────────────────────────────────
+type RiskColor = "red" | "amber" | "green" | "blue" | "gray";
+
+function riskColorFor(v: string): RiskColor {
+  if (v === "high" || v === "critical") return "red";
+  if (v === "medium") return "amber";
+  if (v === "low") return "green";
+  return "gray";
+}
+
+function Badge({ label, color = "gray" }: { label: string; color?: RiskColor }) {
+  const map: Record<RiskColor, { bg: string; bdr: string; text: string }> = {
+    red:   { bg: T.redBg,   bdr: T.redBdr,   text: T.red   },
+    amber: { bg: T.amberBg, bdr: T.amberBdr, text: T.amber },
+    green: { bg: T.greenBg, bdr: T.greenBdr, text: T.green },
+    blue:  { bg: T.blueBg,  bdr: T.blueBdr,  text: T.blue  },
+    gray:  { bg: "rgba(0,0,0,0.04)", bdr: T.border, text: T.muted },
+  };
+  const c = map[color];
   return (
-    <div className="mb-5">
-      <label className="block text-[12px] font-medium mb-1" style={{ color: "#0D1016" }}>{label}</label>
-      {hint && <p className="text-[11px] mb-1.5" style={{ color: "rgba(0,0,0,0.4)" }}>{hint}</p>}
-      {children}
+    <span style={{ fontSize: 10, fontWeight: 500, padding: "2px 7px", borderRadius: 9999,
+      background: c.bg, border: `1px solid ${c.bdr}`, color: c.text }}>
+      {label}
+    </span>
+  );
+}
+
+function Sel({ label, value, options, onChange, note }: {
+  label: string; value: string; options: { value: string; label: string }[];
+  onChange: (v: string) => void; note?: string;
+}) {
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>{label}</label>
+      <select value={value} onChange={(e) => onChange(e.target.value)} style={inputSt}>
+        <option value="">— seleziona —</option>
+        {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+      </select>
+      {note && <p style={{ fontSize: 10, color: T.faint, marginTop: 3 }}>{note}</p>}
     </div>
   );
 }
 
-function Input({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+function Txt({ label, value, onChange, rows = 3, ph }: {
+  label: string; value: string; onChange: (v: string) => void; rows?: number; ph?: string;
+}) {
   return (
-    <input
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
-      style={{
-        background: "#fafaf9",
-        border: "1px solid rgba(0,0,0,0.1)",
-        color: "#0D1016",
-      }}
-    />
+    <div style={{ marginBottom: 12 }}>
+      <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>{label}</label>
+      <textarea value={value} onChange={(e) => onChange(e.target.value)} rows={rows} placeholder={ph}
+        style={{ ...inputSt, resize: "vertical" as const }} />
+    </div>
   );
 }
 
-function Textarea({ value, onChange, placeholder, rows = 3 }: { value: string; onChange: (v: string) => void; placeholder?: string; rows?: number }) {
+function Inp({ label, value, onChange, ph }: {
+  label: string; value: string; onChange: (v: string) => void; ph?: string;
+}) {
   return (
-    <textarea
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      rows={rows}
-      className="w-full rounded-lg px-3 py-2 text-[13px] outline-none resize-none"
-      style={{
-        background: "#fafaf9",
-        border: "1px solid rgba(0,0,0,0.1)",
-        color: "#0D1016",
-        lineHeight: "1.5",
-      }}
-    />
+    <div style={{ marginBottom: 12 }}>
+      <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>{label}</label>
+      <input type="text" value={value} onChange={(e) => onChange(e.target.value)} placeholder={ph} style={inputSt} />
+    </div>
   );
 }
 
-function Select<T extends string>({ value, onChange, options }: { value: T; onChange: (v: T) => void; options: { value: T; label: string }[] }) {
-  return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value as T)}
-      className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
-      style={{
-        background: "#fafaf9",
-        border: "1px solid rgba(0,0,0,0.1)",
-        color: "#0D1016",
-      }}
-    >
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>{o.label}</option>
-      ))}
-    </select>
-  );
-}
+// ─── Phase nav config ─────────────────────────────────────────────────────────
+type Phase = "1" | "2" | "3" | "4" | "5";
+const PHASES: { id: Phase; label: string; sub: string; Icon: React.ComponentType<{ style?: CSSProperties }> }[] = [
+  { id: "1", label: "Contesto", sub: "Analisi del deployment", Icon: FileText },
+  { id: "2", label: "Scenari", sub: "Impatti sui diritti", Icon: AlertTriangle },
+  { id: "3", label: "Decisione", sub: "Deployment & sign-off", Icon: Shield },
+  { id: "4", label: "Monitoraggio", sub: "Piano e trigger", Icon: Activity },
+  { id: "5", label: "Stakeholder", sub: "Mappatura e log", Icon: Users },
+];
 
-// ─── Main Component ──────────────────────────────────────────────────────────
+const DEFAULT_TRIGGERS = [
+  "Modifica sostanziale del sistema AI",
+  "Nuovo contesto di deployment",
+  "Violazione dei diritti fondamentali rilevata",
+  "Revisione annuale programmata",
+  "Cambio normativo rilevante",
+  "Nuovo rischio identificato",
+  "Reclamo fondato ricevuto",
+];
 
+// ─── Main component ───────────────────────────────────────────────────────────
 export default function FRIAPage() {
-  const [doc, setDoc] = useState<FRIADocument>(() => {
-    if (typeof window === "undefined") return createEmptyFRIA();
-    const saved = readFromStorage<FRIADocument>("fria");
-    return saved ?? createEmptyFRIA();
-  });
-  const [step, setStep] = useState<Step>(0);
-  const [activeRightIdx, setActiveRightIdx] = useState(0);
-  const [approvalModal, setApprovalModal] = useState(false);
-  const [approverName, setApproverName] = useState("");
-  const [toast, setToast] = useState<string | null>(null);
-  const [expandedRight, setExpandedRight] = useState<string | null>(null);
+  const [doc, setDoc] = useState<FRIADocument>(() => loadDoc());
+  const [phase, setPhase] = useState<Phase>("1");
+  const [openAcc, setOpenAcc] = useState<Set<"A" | "B" | "C">>(new Set(["A"]));
+  const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
+  const [p2Tab, setP2Tab] = useState<"rights" | "matrix">("rights");
+  const [openRights, setOpenRights] = useState<Set<string>>(new Set());
+  const [openRightGroups, setOpenRightGroups] = useState<Set<string>>(new Set(["dignity_group", "freedom_group", "equality_group"]));
+  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
+  const [dossierSavedAt, setDossierSavedAt] = useState<string | null>(() =>
+    readFromStorage<FRIAResult>("fria")?.completedAt ?? null
+  );
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Debounced autosave
+  // Pre-populate from Classifier
+  const classifierData = useMemo(() => {
+    try { const r = localStorage.getItem("aicomply_classifier_result"); return r ? JSON.parse(r) : null; }
+    catch { return null; }
+  }, []);
   useEffect(() => {
+    if (classifierData?.systemName && !doc.system_name) {
+      upDoc({ system_name: classifierData.systemName });
+    }
+  }, [classifierData]);
+
+  // ─── Persistence ─────────────────────────────────────────────────────────
+  function debounceSave(d: FRIADocument) {
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      writeToStorage("fria", { ...doc, updatedAt: new Date().toISOString() });
+      localStorage.setItem(FRIA_DOC_KEY, JSON.stringify(d));
     }, 500);
-    return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
-  }, [doc]);
-
-  function showToast(msg: string) {
-    setToast(msg);
-    setTimeout(() => setToast(null), 2500);
   }
 
-  function updateSection<K extends keyof FRIADocument>(
-    section: K,
-    patch: Partial<FRIADocument[K]>
-  ) {
-    setDoc((prev) => ({
-      ...prev,
-      [section]: { ...(prev[section] as object), ...(patch as object) },
-      updatedAt: new Date().toISOString(),
-    }));
+  // ─── Update helpers ───────────────────────────────────────────────────────
+  function upDoc(patch: Partial<Pick<FRIADocument, "system_name" | "organization" | "responsible_team" | "fria_start_date">>) {
+    setDoc((prev) => { const n = { ...prev, ...patch, updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
   }
-
-  const updateAssessment = useCallback((rightId: string, patch: Partial<RightAssessment>) => {
+  function upCtx(patch: Record<string, unknown>) {
     setDoc((prev) => {
-      const assessments = (prev.section4.assessments ?? []).map((a) =>
-        a.rightId === rightId ? { ...a, ...patch } : a
-      );
-      return { ...prev, section4: { assessments }, updatedAt: new Date().toISOString() };
+      const n = { ...prev, context: { ...prev.context, ...patch } as FRIADocument["context"], updatedAt: new Date().toISOString() };
+      debounceSave(n); return n;
     });
-  }, []);
-
-  function addAffectedCategory() {
-    const cats = doc.section3.affectedCategories ?? [];
-    updateSection("section3", {
-      affectedCategories: [
-        ...cats,
-        { category: "", estimatedNumber: "", vulnerability: "standard", consentMechanism: "" } as AffectedCategory,
-      ],
+  }
+  function upDeploy(patch: Record<string, unknown>) {
+    setDoc((prev) => {
+      const n = { ...prev, deployment: { ...prev.deployment, ...patch } as FRIADocument["deployment"], updatedAt: new Date().toISOString() };
+      debounceSave(n); return n;
     });
   }
 
-  function updateCategory(idx: number, patch: Partial<AffectedCategory>) {
-    const cats = [...(doc.section3.affectedCategories ?? [])];
-    cats[idx] = { ...cats[idx], ...patch };
-    updateSection("section3", { affectedCategories: cats });
+  // ─── Scenario helpers ─────────────────────────────────────────────────────
+  function addScenario() {
+    const sc: FRIAScenario = { id: crypto.randomUUID(), title: `Scenario ${doc.scenarios.length + 1}`, description: "", type: "", right_impacts: [] };
+    setDoc((prev) => { const n = { ...prev, scenarios: [...prev.scenarios, sc], updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
+    setActiveScenarioId(sc.id);
+    setP2Tab("rights");
+  }
+  function upScenario(id: string, patch: Partial<Pick<FRIAScenario, "title" | "description" | "type">>) {
+    setDoc((prev) => {
+      const n = { ...prev, scenarios: prev.scenarios.map((s) => s.id === id ? { ...s, ...patch } : s), updatedAt: new Date().toISOString() };
+      debounceSave(n); return n;
+    });
+  }
+  function delScenario(id: string) {
+    setDoc((prev) => { const n = { ...prev, scenarios: prev.scenarios.filter((s) => s.id !== id), updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
+    if (activeScenarioId === id) setActiveScenarioId(null);
+  }
+  function toggleRightImpact(scenarioId: string, rightId: string) {
+    setDoc((prev) => {
+      const sc = prev.scenarios.find((s) => s.id === scenarioId);
+      if (!sc) return prev;
+      const exists = sc.right_impacts.find((ri) => ri.right_id === rightId);
+      const newImpacts: FRIARightImpact[] = exists
+        ? sc.right_impacts.filter((ri) => ri.right_id !== rightId)
+        : [...sc.right_impacts, {
+            right_id: rightId,
+            severity: { extent_of_interference: "", scope_of_impact: "", persons_affected: "", gravity: "", irreversibility: "", computed_severity: "" } satisfies FRIASeverityAssessment,
+            likelihood: { likelihood: "", computed_priority: "" },
+            notes: "", mitigations: [], residual_risk: "",
+          }];
+      const n = { ...prev, scenarios: prev.scenarios.map((s) => s.id === scenarioId ? { ...s, right_impacts: newImpacts } : s), updatedAt: new Date().toISOString() };
+      debounceSave(n); return n;
+    });
+    setOpenRights((prev) => { const next = new Set(prev); next.has(rightId) ? next.delete(rightId) : next.add(rightId); return next; });
+  }
+  function upSeverity(scenarioId: string, rightId: string, patch: Partial<FRIASeverityAssessment>) {
+    setDoc((prev) => {
+      const n = {
+        ...prev,
+        scenarios: prev.scenarios.map((s) => s.id !== scenarioId ? s : {
+          ...s, right_impacts: s.right_impacts.map((ri) => {
+            if (ri.right_id !== rightId) return ri;
+            const sev: FRIASeverityAssessment = { ...ri.severity, ...patch };
+            sev.computed_severity = computeSeverity(sev);
+            const lik = { ...ri.likelihood, computed_priority: computePriority(sev.computed_severity, ri.likelihood.likelihood) };
+            return { ...ri, severity: sev, likelihood: lik };
+          }),
+        }),
+        updatedAt: new Date().toISOString(),
+      };
+      debounceSave(n); return n;
+    });
+  }
+  function upLikelihood(scenarioId: string, rightId: string, val: string) {
+    const typedVal = val as FRIARightImpact["likelihood"]["likelihood"];
+    setDoc((prev) => {
+      const n = {
+        ...prev,
+        scenarios: prev.scenarios.map((s) => s.id !== scenarioId ? s : {
+          ...s, right_impacts: s.right_impacts.map((ri) => {
+            if (ri.right_id !== rightId) return ri;
+            const lik = { likelihood: typedVal, computed_priority: computePriority(ri.severity.computed_severity, typedVal) };
+            return { ...ri, likelihood: lik };
+          }),
+        }),
+        updatedAt: new Date().toISOString(),
+      };
+      debounceSave(n); return n;
+    });
+  }
+  function upRightImpact(scenarioId: string, rightId: string, patch: Partial<Pick<FRIARightImpact, "notes" | "residual_risk">>) {
+    setDoc((prev) => {
+      const n = { ...prev, scenarios: prev.scenarios.map((s) => s.id !== scenarioId ? s : { ...s, right_impacts: s.right_impacts.map((ri) => ri.right_id !== rightId ? ri : { ...ri, ...patch }) }), updatedAt: new Date().toISOString() };
+      debounceSave(n); return n;
+    });
+  }
+  function addMitigation(scenarioId: string, rightId: string) {
+    const m: FRIAMitigationMeasure = { id: crypto.randomUUID(), description: "", category: "", responsible: "", deadline: "", status: "" };
+    setDoc((prev) => {
+      const n = { ...prev, scenarios: prev.scenarios.map((s) => s.id !== scenarioId ? s : { ...s, right_impacts: s.right_impacts.map((ri) => ri.right_id !== rightId ? ri : { ...ri, mitigations: [...ri.mitigations, m] }) }), updatedAt: new Date().toISOString() };
+      debounceSave(n); return n;
+    });
+  }
+  function upMitigation(scenarioId: string, rightId: string, mitId: string, patch: Partial<FRIAMitigationMeasure>) {
+    setDoc((prev) => {
+      const n = { ...prev, scenarios: prev.scenarios.map((s) => s.id !== scenarioId ? s : { ...s, right_impacts: s.right_impacts.map((ri) => ri.right_id !== rightId ? ri : { ...ri, mitigations: ri.mitigations.map((m) => m.id !== mitId ? m : { ...m, ...patch }) }) }), updatedAt: new Date().toISOString() };
+      debounceSave(n); return n;
+    });
+  }
+  function delMitigation(scenarioId: string, rightId: string, mitId: string) {
+    setDoc((prev) => {
+      const n = { ...prev, scenarios: prev.scenarios.map((s) => s.id !== scenarioId ? s : { ...s, right_impacts: s.right_impacts.map((ri) => ri.right_id !== rightId ? ri : { ...ri, mitigations: ri.mitigations.filter((m) => m.id !== mitId) }) }), updatedAt: new Date().toISOString() };
+      debounceSave(n); return n;
+    });
   }
 
-  function removeCategory(idx: number) {
-    const cats = (doc.section3.affectedCategories ?? []).filter((_, i) => i !== idx);
-    updateSection("section3", { affectedCategories: cats });
+  // ─── Monitoring helpers ────────────────────────────────────────────────────
+  function addMonItem() {
+    const item: FRIAMonitoringItem = { id: crypto.randomUUID(), what: "", frequency: "", responsible: "" };
+    setDoc((prev) => { const n = { ...prev, monitoring: { ...prev.monitoring, items: [...prev.monitoring.items, item] }, updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
+  }
+  function upMonItem(id: string, patch: Partial<Omit<FRIAMonitoringItem, "id">>) {
+    setDoc((prev) => { const n = { ...prev, monitoring: { ...prev.monitoring, items: prev.monitoring.items.map((i) => i.id !== id ? i : { ...i, ...patch }) }, updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
+  }
+  function delMonItem(id: string) {
+    setDoc((prev) => { const n = { ...prev, monitoring: { ...prev.monitoring, items: prev.monitoring.items.filter((i) => i.id !== id) }, updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
+  }
+  function toggleTrigger(t: string) {
+    setDoc((prev) => {
+      const triggers = prev.monitoring.update_triggers.includes(t)
+        ? prev.monitoring.update_triggers.filter((x) => x !== t)
+        : [...prev.monitoring.update_triggers, t];
+      const n = { ...prev, monitoring: { ...prev.monitoring, update_triggers: triggers }, updatedAt: new Date().toISOString() }; debounceSave(n); return n;
+    });
+  }
+  function addUpdateRecord() {
+    const rec = { id: crypto.randomUUID(), date: new Date().toISOString().slice(0, 10), reason: "", updater: "", summary: "" };
+    setDoc((prev) => { const n = { ...prev, monitoring: { ...prev.monitoring, update_history: [rec, ...prev.monitoring.update_history] }, updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
+  }
+  function upUpdateRecord(id: string, patch: Record<string, string>) {
+    setDoc((prev) => { const n = { ...prev, monitoring: { ...prev.monitoring, update_history: prev.monitoring.update_history.map((r) => r.id !== id ? r : { ...r, ...patch }) }, updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
   }
 
-  function toggleMitigation(rightId: string, example: string) {
-    const assessment = (doc.section4.assessments ?? []).find((a) => a.rightId === rightId);
-    if (!assessment) return;
-    const current = assessment.mitigationMeasures ?? [];
-    const next = current.includes(example)
-      ? current.filter((m) => m !== example)
-      : [...current, example];
-    updateAssessment(rightId, { mitigationMeasures: next });
+  // ─── Stakeholder helpers ───────────────────────────────────────────────────
+  function addStakeholder() {
+    const s: FRIAStakeholder = { id: crypto.randomUUID(), name: "", organization: "", category: "", engagement_method: "", phases: [], status: "" };
+    setDoc((prev) => { const n = { ...prev, stakeholders: [...prev.stakeholders, s], updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
+  }
+  function upStakeholder(id: string, patch: Partial<Omit<FRIAStakeholder, "id" | "phases">>) {
+    setDoc((prev) => { const n = { ...prev, stakeholders: prev.stakeholders.map((s) => s.id !== id ? s : { ...s, ...patch }), updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
+  }
+  function delStakeholder(id: string) {
+    setDoc((prev) => { const n = { ...prev, stakeholders: prev.stakeholders.filter((s) => s.id !== id), updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
+  }
+  function addEngagement() {
+    const e: FRIAEngagementLog = { id: crypto.randomUUID(), date: new Date().toISOString().slice(0, 10), stakeholder_id: "", method: "", findings: "", how_incorporated: "" };
+    setDoc((prev) => { const n = { ...prev, engagement_log: [...prev.engagement_log, e], updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
+  }
+  function upEngagement(id: string, patch: Record<string, string>) {
+    setDoc((prev) => { const n = { ...prev, engagement_log: prev.engagement_log.map((e) => e.id !== id ? e : { ...e, ...patch }), updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
+  }
+  function delEngagement(id: string) {
+    setDoc((prev) => { const n = { ...prev, engagement_log: prev.engagement_log.filter((e) => e.id !== id), updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
   }
 
-  function toggleDataType(type: string) {
-    const current = doc.section5.dataTypes ?? [];
-    const next = current.includes(type) ? current.filter((t) => t !== type) : [...current, type];
-    updateSection("section5", { dataTypes: next });
+  // ─── Dossier / export ─────────────────────────────────────────────────────
+  function showToast(msg: string, type: "success" | "error" = "success") {
+    setToast({ msg, type }); setTimeout(() => setToast(null), 3000);
   }
-
-  function handleApprove() {
-    if (!approverName.trim()) return;
-    const approvedAt = new Date().toISOString();
-    setDoc((prev) => ({
-      ...prev,
-      status: "approved",
-      approvedBy: approverName.trim(),
-      approvedAt,
-      updatedAt: approvedAt,
-    }));
-    appendEvidence(
-      "decision",
-      {
-        type: "FRIA — Approvazione e firma Art. 27",
-        documentId: doc.id,
-        systemName: doc.section1.systemName ?? "—",
-        organizationName: doc.section1.organizationName ?? "—",
-        approvedBy: approverName.trim(),
-        overallRisk: getOverallFRIARisk(doc),
-        completeness: calculateFRIACompleteness(doc),
-        approvedAt,
-      },
-      "fria"
-    );
-    setApprovalModal(false);
-    showToast("FRIA approvato e firmato — registrato nell'Evidence Layer");
-  }
-
-  function handleSaveToDossier() {
+  function saveToDossier() {
+    const completedAt = new Date().toISOString();
     const overallRisk = getOverallFRIARisk(doc);
-    const friaCompleteness = calculateFRIACompleteness(doc);
-    const savedAt = new Date().toISOString();
-
-    writeToStorage("fria", { ...doc, updatedAt: savedAt });
-
-    const friaSummary = {
-      systemName: doc.section1.systemName ?? "",
-      organizationName: doc.section1.organizationName ?? "",
-      overallRisk,
-      completeness: friaCompleteness,
-      status: doc.status,
-      approvedBy: doc.approvedBy,
-      completedAt: savedAt,
-    };
-    if (typeof window !== "undefined") {
-      localStorage.setItem("aicomply_fria_result", JSON.stringify(friaSummary));
-    }
-
-    appendEvidence(
-      "adr",
-      {
-        type: "FRIA — Valutazione Diritti Fondamentali Art. 27",
-        documentId: doc.id,
-        systemName: doc.section1.systemName ?? "—",
-        organizationName: doc.section1.organizationName ?? "—",
-        deploymentPurpose: doc.section1.deploymentPurpose ?? "—",
-        overallRisk,
-        completeness: friaCompleteness,
-        status: doc.status,
-        approvedBy: doc.approvedBy ?? null,
-        affectedCategoriesCount: (doc.section3.affectedCategories ?? []).length,
-        totalEstimatedAffected: doc.section3.totalEstimatedAffected ?? "—",
-        criticalRights: (doc.section4.assessments ?? [])
-          .filter((a) => a.residualRisk === "unacceptable")
-          .map((a) => a.rightId),
-        savedAt,
-      },
-      "fria"
-    );
-
-    showToast("FRIA salvato nel dossier di compliance");
+    const completeness = calculateFRIACompleteness(doc);
+    writeToStorage<FRIAResult>("fria", {
+      systemName: doc.system_name || "Sistema AI",
+      organizationName: doc.organization || undefined,
+      overallRisk, completeness,
+      status: doc.status ?? "draft",
+      approvedBy: doc.deployment.approver_name || undefined,
+      completedAt,
+    });
+    appendEvidence("adr", {
+      type: "FRIA Art. 27 — Valutazione Impatto Diritti Fondamentali",
+      systemName: doc.system_name, organization: doc.organization,
+      totalScenarios: doc.scenarios.length, overallRisk,
+      completeness: `${completeness}%`, recommendation: doc.deployment.recommendation, savedAt: completedAt,
+    }, "fria");
+    localStorage.setItem(FRIA_DOC_KEY, JSON.stringify(doc));
+    setDossierSavedAt(completedAt);
+    showToast("FRIA salvata nel dossier di compliance");
+  }
+  function exportReport() {
+    const blob = new Blob([JSON.stringify({ export_type: "FRIA Art. 27 EU AI Act", exported_at: new Date().toISOString(), document: doc }, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `fria-${(doc.system_name || "doc").replace(/\s+/g, "-")}-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click(); URL.revokeObjectURL(url); showToast("FRIA esportata");
   }
 
-  function handleExportJSON() {
-    const overallRisk = getOverallFRIARisk(doc);
-    const friaCompleteness = calculateFRIACompleteness(doc);
-    const exportDoc = {
-      export_type: "Fundamental Rights Impact Assessment — Art. 27 EU AI Act",
-      exported_at: new Date().toISOString(),
-      regulation: "EU 2024/1689 — Art. 27 (FRIA)",
-      document_id: doc.id,
-      version: doc.version,
-      status: doc.status,
-      approved_by: doc.approvedBy ?? null,
-      approved_at: doc.approvedAt ?? null,
-      overall_risk: overallRisk,
-      completeness: friaCompleteness,
-      section1_identification: doc.section1,
-      section2_deployment_context: doc.section2,
-      section3_affected_categories: doc.section3,
-      section4_rights_assessments: doc.section4,
-      section5_data_governance: doc.section5,
-      section6_oversight_remedies: doc.section6,
-    };
-    const blob = new Blob([JSON.stringify(exportDoc, null, 2)], { type: "application/json" });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement("a");
-    a.href     = url;
-    const sysName = (doc.section1.systemName ?? "sistema").replace(/\s+/g, "_").toLowerCase();
-    a.download = `fria-${sysName}-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast("FRIA esportato in JSON — pronto per invio all'Autorità");
-  }
-
-  function handlePrint() {
-    window.print();
-  }
-
+  // ─── Derived ──────────────────────────────────────────────────────────────
   const completeness = calculateFRIACompleteness(doc);
+  const overallRisk = getOverallFRIARisk(doc);
+  const activeScenario = doc.scenarios.find((s) => s.id === activeScenarioId) ?? null;
 
+  // ─── Phase 1 render ───────────────────────────────────────────────────────
+  function renderPhase1() {
+    const c = doc.context;
+    type SecId = "A" | "B" | "C";
+    const sections: { id: SecId; label: string; fields: number; filled: number }[] = [
+      { id: "A", label: "A — Contesto di deployment", fields: 11,
+        filled: [c.intended_purpose_match, c.timeframe, c.frequency, c.legal_basis, c.dpia_done, c.main_users, c.affected_persons, c.legal_framework, c.complaint_mechanisms, c.intended_purpose_explanation, c.dpia_explanation].filter(Boolean).length },
+      { id: "B", label: "B — Caratteristiche del sistema AI", fields: 13,
+        filled: [c.technology_overview, c.has_generative_component, c.training_data_types, c.gdpr_provider_compliance_confidence, c.training_data_representative, c.bias_assessed, c.data_quality_sufficient, c.processes_personal_data, c.personal_data_types, c.gdpr_processing_compliant, c.controls_input_data, c.input_data_representative, c.accuracy_acceptable].filter(Boolean).length },
+      { id: "C", label: "C — Governance", fields: 5,
+        filled: [c.substantial_modifications_planned, c.human_oversight_assigned, c.oversight_persons_trained, c.workers_informed, c.affected_persons_informed].filter(Boolean).length },
+    ];
+    const yNP = [{ value: "yes", label: "Sì" }, { value: "no", label: "No" }, { value: "partial", label: "Parzialmente" }];
+    const yN  = [{ value: "yes", label: "Sì" }, { value: "no", label: "No" }];
+    const hml = [{ value: "high", label: "Alto" }, { value: "medium", label: "Medio" }, { value: "low", label: "Basso" }];
 
-  // ─── Step renders ──────────────────────────────────────────────────────────
-
-  function renderStep1() {
-    const s = doc.section1;
     return (
       <div>
-        <h2 className="text-[16px] font-semibold mb-1" style={{ color: "#0D1016" }}>Identificazione dell&apos;organizzazione e del sistema</h2>
-        <p className="text-[12px] mb-6" style={{ color: "rgba(0,0,0,0.45)" }}>Art. 27 AI Act — informazioni di base sul deployer e sul sistema AI valutato.</p>
-        <div className="grid md:grid-cols-2 gap-x-6">
-          <Field label="Nome organizzazione *">
-            <Input value={s.organizationName ?? ""} onChange={(v) => updateSection("section1", { organizationName: v })} placeholder="Es. Comune di Milano" />
-          </Field>
-          <Field label="Ruolo organizzazione *">
-            <Select
-              value={(s.organizationRole ?? "deployer") as "deployer" | "provider" | "both"}
-              onChange={(v) => updateSection("section1", { organizationRole: v })}
-              options={[
-                { value: "deployer", label: "Deployer (utilizza il sistema)" },
-                { value: "provider", label: "Provider (sviluppa il sistema)" },
-                { value: "both",     label: "Entrambi" },
-              ]}
-            />
-          </Field>
-          <Field label="Nome sistema AI *">
-            <Input value={s.systemName ?? ""} onChange={(v) => updateSection("section1", { systemName: v })} placeholder="Es. Sistema di scoring creditizio" />
-          </Field>
-          <Field label="Versione sistema">
-            <Input value={s.systemVersion ?? ""} onChange={(v) => updateSection("section1", { systemVersion: v })} placeholder="Es. 2.3.1" />
-          </Field>
-          <Field label="Provider del sistema AI">
-            <Input value={s.systemProvider ?? ""} onChange={(v) => updateSection("section1", { systemProvider: v })} placeholder="Es. OpenAI / sviluppato internamente" />
-          </Field>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 1 — Analisi del contesto</h2>
+          <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Cluster A: contesto di deployment · Cluster B: caratteristiche AI · Cluster C: governance</p>
         </div>
-        <Field label="Finalità del deployment *" hint="Descrivere lo scopo concreto per cui il sistema viene utilizzato">
-          <Textarea value={s.deploymentPurpose ?? ""} onChange={(v) => updateSection("section1", { deploymentPurpose: v })} placeholder="Es. Automatizzare la pre-selezione dei candidati per assunzioni nel settore pubblico..." rows={3} />
-        </Field>
-        <Field label="Contesto operativo *" hint="Dove e come il sistema opera concretamente">
-          <Textarea value={s.deploymentContext ?? ""} onChange={(v) => updateSection("section1", { deploymentContext: v })} placeholder="Es. Integrato nel sistema HR, elabora circa 500 candidature/mese, output è una raccomandazione per i selezionatori..." rows={3} />
-        </Field>
-      </div>
-    );
-  }
-
-  function renderStep2() {
-    const s = doc.section2;
-    return (
-      <div>
-        <h2 className="text-[16px] font-semibold mb-1" style={{ color: "#0D1016" }}>Contesto di deployment</h2>
-        <p className="text-[12px] mb-6" style={{ color: "rgba(0,0,0,0.45)" }}>Dettagli operativi e livello di autonomia del sistema.</p>
-        <div className="grid md:grid-cols-2 gap-x-6">
-          <Field label="Data inizio deployment">
-            <Input value={s.deploymentStartDate ?? ""} onChange={(v) => updateSection("section2", { deploymentStartDate: v })} placeholder="AAAA-MM-GG" />
-          </Field>
-          <Field label="Frequenza di revisione FRIA">
-            <Select
-              value={(s.reviewFrequency ?? "annual") as "monthly" | "quarterly" | "biannual" | "annual"}
-              onChange={(v) => updateSection("section2", { reviewFrequency: v })}
-              options={[
-                { value: "monthly",   label: "Mensile" },
-                { value: "quarterly", label: "Trimestrale" },
-                { value: "biannual",  label: "Semestrale" },
-                { value: "annual",    label: "Annuale" },
-              ]}
-            />
-          </Field>
-          <Field label="Ambito geografico">
-            <Input value={s.geographicScope ?? ""} onChange={(v) => updateSection("section2", { geographicScope: v })} placeholder="Es. Italia, Lombardia, solo sede di Milano..." />
-          </Field>
-          <Field label="Livello di autonomia *">
-            <Select
-              value={(s.autonomyLevel ?? "human_in_loop") as "full_auto" | "human_in_loop" | "human_on_loop" | "advisory"}
-              onChange={(v) => updateSection("section2", { autonomyLevel: v })}
-              options={[
-                { value: "full_auto",      label: "Completamente automatizzato" },
-                { value: "human_in_loop",  label: "Human-in-the-loop (umano approva ogni decisione)" },
-                { value: "human_on_loop",  label: "Human-on-the-loop (umano può intervenire)" },
-                { value: "advisory",       label: "Consultivo (raccomandazione non vincolante)" },
-              ]}
-            />
-          </Field>
-        </div>
-        <Field label="Integrazione con processi umani *" hint="Come il sistema si inserisce nei processi decisionali esistenti">
-          <Textarea value={s.integrationWithHumanProcess ?? ""} onChange={(v) => updateSection("section2", { integrationWithHumanProcess: v })} placeholder="Es. Il sistema fornisce un punteggio che un selezionatore umano può accettare o rifiutare. La decisione finale è sempre umana..." rows={4} />
-        </Field>
-      </div>
-    );
-  }
-
-  function renderStep3() {
-    const cats = doc.section3.affectedCategories ?? [];
-    return (
-      <div>
-        <h2 className="text-[16px] font-semibold mb-1" style={{ color: "#0D1016" }}>Soggetti e categorie coinvolti</h2>
-        <p className="text-[12px] mb-6" style={{ color: "rgba(0,0,0,0.45)" }}>Identificare chi è direttamente o indirettamente impattato dalle decisioni del sistema.</p>
-
-        {cats.length === 0 && (
-          <div className="rounded-xl p-6 text-center mb-4" style={{ background: "#fafaf9", border: "1px dashed rgba(0,0,0,0.12)" }}>
-            <p className="text-[12px]" style={{ color: "rgba(0,0,0,0.4)" }}>Nessuna categoria aggiunta. Aggiungi almeno una categoria di soggetti coinvolti.</p>
-          </div>
-        )}
-
-        {cats.map((cat, idx) => (
-          <div key={idx} className="rounded-xl p-4 mb-3" style={card}>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[12px] font-medium" style={{ color: "#0D1016" }}>Categoria {idx + 1}</span>
-              <button onClick={() => removeCategory(idx)} style={{ color: "rgba(0,0,0,0.3)" }}>
-                <Trash2 size={14} />
+        {sections.map((sec) => {
+          const open = openAcc.has(sec.id);
+          const pct = Math.round((sec.filled / sec.fields) * 100);
+          return (
+            <div key={sec.id} style={{ ...cardSt, marginBottom: 12 }}>
+              <button
+                onClick={() => setOpenAcc((prev) => { const n = new Set(prev); n.has(sec.id) ? n.delete(sec.id) : n.add(sec.id); return n; })}
+                style={{ width: "100%", padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", cursor: "pointer" }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{sec.label}</span>
+                  <Badge label={`${sec.filled}/${sec.fields}`} color={pct === 100 ? "green" : pct > 50 ? "amber" : "gray"} />
+                </div>
+                {open ? <ChevronDown style={{ width: 15, height: 15, color: T.muted }} /> : <ChevronRight style={{ width: 15, height: 15, color: T.muted }} />}
               </button>
-            </div>
-            <div className="grid md:grid-cols-2 gap-x-4 gap-y-3">
-              <Field label="Categoria di soggetti">
-                <Input value={cat.category} onChange={(v) => updateCategory(idx, { category: v })} placeholder="Es. Lavoratori, candidati, clienti..." />
-              </Field>
-              <Field label="Numero stimato">
-                <Input value={cat.estimatedNumber} onChange={(v) => updateCategory(idx, { estimatedNumber: v })} placeholder="Es. ~500/mese, 2.000/anno..." />
-              </Field>
-              <Field label="Vulnerabilità">
-                <Select
-                  value={cat.vulnerability}
-                  onChange={(v) => updateCategory(idx, { vulnerability: v })}
-                  options={[
-                    { value: "standard", label: "Standard" },
-                    { value: "elevated", label: "Elevata (minori, disabili, soggetti vulnerabili...)" },
-                  ]}
-                />
-              </Field>
-              <Field label="Meccanismo di consenso">
-                <Input value={cat.consentMechanism} onChange={(v) => updateCategory(idx, { consentMechanism: v })} placeholder="Es. Informativa GDPR, consenso esplicito..." />
-              </Field>
-            </div>
-          </div>
-        ))}
-
-        <button
-          onClick={addAffectedCategory}
-          className="flex items-center gap-2 rounded-lg px-4 py-2 text-[12px] font-medium w-full justify-center"
-          style={{ background: "rgba(59,130,246,0.06)", border: "1px dashed rgba(59,130,246,0.3)", color: "#3b82f6" }}
-        >
-          <Plus size={14} /> Aggiungi categoria
-        </button>
-
-        <div className="mt-5">
-          <Field label="Totale soggetti stimati coinvolti">
-            <Input value={doc.section3.totalEstimatedAffected ?? ""} onChange={(v) => updateSection("section3", { totalEstimatedAffected: v })} placeholder="Es. 6.000 persone/anno" />
-          </Field>
-        </div>
-      </div>
-    );
-  }
-
-  function renderStep4() {
-    const assessments = doc.section4.assessments ?? [];
-    const currentRight = FUNDAMENTAL_RIGHTS[activeRightIdx];
-    const assessment = assessments.find((a) => a.rightId === currentRight.id) ?? {
-      rightId: currentRight.id,
-      relevance: "not_relevant" as const,
-      relevanceJustification: "",
-      identifiedRisks: "",
-      mitigationMeasures: [],
-      residualRisk: "acceptable" as const,
-      customMitigations: "",
-    };
-
-    const relevanceColors: Record<string, string> = {
-      not_relevant: "rgba(0,0,0,0.2)",
-      low: "#3b82f6",
-      medium: "#d97706",
-      high: "#ea580c",
-      critical: "#dc2626",
-    };
-
-    return (
-      <div className="flex gap-4 min-h-[500px]">
-        {/* Right selector sidebar */}
-        <div className="flex-shrink-0 w-44">
-          <p className="text-[10px] font-semibold uppercase mb-2" style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "0.6px" }}>Diritti (8)</p>
-          <div className="space-y-1">
-            {FUNDAMENTAL_RIGHTS.map((r, idx) => {
-              const a = assessments.find((x) => x.rightId === r.id);
-              const rel = a?.relevance ?? "not_relevant";
-              return (
-                <button
-                  key={r.id}
-                  onClick={() => setActiveRightIdx(idx)}
-                  className="w-full text-left rounded-lg px-2.5 py-2 text-[11px] transition-all"
-                  style={{
-                    background: activeRightIdx === idx ? "rgba(59,130,246,0.08)" : "transparent",
-                    border: activeRightIdx === idx ? "1px solid rgba(59,130,246,0.2)" : "1px solid transparent",
-                    color: activeRightIdx === idx ? "#0D1016" : "rgba(0,0,0,0.5)",
-                  }}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: relevanceColors[rel] }} />
-                    <span className="leading-tight">{r.title}</span>
-                  </div>
-                  <div className="text-[9px] mt-0.5 ml-3" style={{ color: "rgba(0,0,0,0.3)" }}>{r.code}</div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Right assessment panel */}
-        <div className="flex-1 min-w-0">
-          <div className="rounded-xl p-4 mb-3" style={{ background: "rgba(59,130,246,0.03)", border: "1px solid rgba(59,130,246,0.1)" }}>
-            <div className="flex items-start justify-between mb-1">
-              <div>
-                <span className="text-[10px] font-medium" style={{ color: "rgba(0,0,0,0.35)" }}>{currentRight.code} · {currentRight.charter}</span>
-                <h3 className="text-[14px] font-semibold mt-0.5" style={{ color: "#0D1016" }}>{currentRight.title}</h3>
-              </div>
-            </div>
-            <p className="text-[11px] leading-relaxed" style={{ color: "rgba(0,0,0,0.5)" }}>{currentRight.description}</p>
-          </div>
-
-          {/* Trigger questions */}
-          <button
-            onClick={() => setExpandedRight(expandedRight === currentRight.id ? null : currentRight.id)}
-            className="flex items-center gap-1.5 text-[11px] mb-3"
-            style={{ color: "#3b82f6" }}
-          >
-            <Info size={12} />
-            Domande guida
-            {expandedRight === currentRight.id ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-          </button>
-          {expandedRight === currentRight.id && (
-            <div className="rounded-lg p-3 mb-3" style={{ background: "#fafaf9", border: "1px solid rgba(0,0,0,0.07)" }}>
-              <ul className="space-y-1.5">
-                {currentRight.triggerQuestions.map((q, i) => (
-                  <li key={i} className="flex items-start gap-2 text-[11px]" style={{ color: "rgba(0,0,0,0.6)" }}>
-                    <span className="flex-shrink-0 mt-0.5 text-[10px]" style={{ color: "rgba(0,0,0,0.3)" }}>→</span>
-                    {q}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <div className="grid md:grid-cols-2 gap-x-4">
-            <Field label="Rilevanza per questo sistema">
-              <Select
-                value={assessment.relevance}
-                onChange={(v) => updateAssessment(currentRight.id, { relevance: v as RightAssessment["relevance"] })}
-                options={RELEVANCE_OPTS as unknown as { value: RightAssessment["relevance"]; label: string }[]}
-              />
-            </Field>
-            <Field label="Rischio residuo">
-              <Select
-                value={assessment.residualRisk}
-                onChange={(v) => updateAssessment(currentRight.id, { residualRisk: v as RightAssessment["residualRisk"] })}
-                options={RESIDUAL_OPTS as unknown as { value: RightAssessment["residualRisk"]; label: string }[]}
-              />
-            </Field>
-          </div>
-
-          <Field label="Giustificazione della rilevanza" hint="Spiegare perché questo diritto è o non è rilevante">
-            <Textarea value={assessment.relevanceJustification} onChange={(v) => updateAssessment(currentRight.id, { relevanceJustification: v })} placeholder="Es. Il sistema classifica i candidati — il rischio di trattamento degradante è reale..." rows={2} />
-          </Field>
-
-          {assessment.relevance !== "not_relevant" && (
-            <>
-              <Field label="Rischi identificati">
-                <Textarea value={assessment.identifiedRisks} onChange={(v) => updateAssessment(currentRight.id, { identifiedRisks: v })} placeholder="Descrivere i rischi concreti per questo diritto..." rows={2} />
-              </Field>
-
-              <Field label="Misure di mitigazione" hint="Seleziona o aggiungi misure">
-                <div className="space-y-1.5 mb-2">
-                  {currentRight.mitigationExamples.map((m, i) => {
-                    const selected = (assessment.mitigationMeasures ?? []).includes(m);
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => toggleMitigation(currentRight.id, m)}
-                        className="flex items-start gap-2 w-full text-left rounded-lg px-3 py-2 text-[11px] transition-all"
-                        style={{
-                          background: selected ? "rgba(22,163,74,0.06)" : "#fafaf9",
-                          border: selected ? "1px solid rgba(22,163,74,0.2)" : "1px solid rgba(0,0,0,0.07)",
-                          color: selected ? "#15803d" : "rgba(0,0,0,0.55)",
-                        }}
-                      >
-                        <span className="flex-shrink-0 mt-0.5">{selected ? "✓" : "○"}</span>
-                        {m}
-                      </button>
-                    );
-                  })}
-                </div>
-                <Textarea value={assessment.customMitigations} onChange={(v) => updateAssessment(currentRight.id, { customMitigations: v })} placeholder="Misure aggiuntive personalizzate..." rows={2} />
-              </Field>
-            </>
-          )}
-
-          <div className="flex justify-between mt-2">
-            <button
-              onClick={() => setActiveRightIdx(Math.max(0, activeRightIdx - 1))}
-              disabled={activeRightIdx === 0}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px]"
-              style={{ background: "#f5f5f4", color: activeRightIdx === 0 ? "rgba(0,0,0,0.2)" : "#0D1016" }}
-            >
-              <ChevronLeft size={14} /> Precedente
-            </button>
-            <button
-              onClick={() => setActiveRightIdx(Math.min(FUNDAMENTAL_RIGHTS.length - 1, activeRightIdx + 1))}
-              disabled={activeRightIdx === FUNDAMENTAL_RIGHTS.length - 1}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px]"
-              style={{ background: "#f5f5f4", color: activeRightIdx === FUNDAMENTAL_RIGHTS.length - 1 ? "rgba(0,0,0,0.2)" : "#0D1016" }}
-            >
-              Successivo <ChevronRight size={14} />
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  function renderStep5() {
-    const s = doc.section5;
-    const selectedTypes = s.dataTypes ?? [];
-    return (
-      <div>
-        <h2 className="text-[16px] font-semibold mb-1" style={{ color: "#0D1016" }}>Governance dei dati personali</h2>
-        <p className="text-[12px] mb-6" style={{ color: "rgba(0,0,0,0.45)" }}>Art. 8 Carta UE / GDPR — valutazione del trattamento dei dati personali nel sistema.</p>
-
-        <Field label="Tipologie di dati trattati" hint="Seleziona tutte le tipologie pertinenti">
-          <div className="flex flex-wrap gap-2 mb-2">
-            {DATA_TYPES_LIST.map((t) => {
-              const sel = selectedTypes.includes(t);
-              return (
-                <button
-                  key={t}
-                  onClick={() => toggleDataType(t)}
-                  className="rounded-full px-3 py-1 text-[11px] transition-all"
-                  style={{
-                    background: sel ? "rgba(59,130,246,0.1)" : "#f5f5f4",
-                    border: sel ? "1px solid rgba(59,130,246,0.3)" : "1px solid transparent",
-                    color: sel ? "#3b82f6" : "rgba(0,0,0,0.5)",
-                    fontWeight: sel ? 500 : 400,
-                  }}
-                >
-                  {t}
-                </button>
-              );
-            })}
-          </div>
-        </Field>
-
-        <div className="grid md:grid-cols-2 gap-x-6">
-          <Field label="Il sistema tratta dati personali?">
-            <Select
-              value={s.personalDataProcessed === undefined ? "" : s.personalDataProcessed ? "yes" : "no"}
-              onChange={(v) => updateSection("section5", { personalDataProcessed: v === "yes" })}
-              options={[
-                { value: "", label: "Seleziona..." },
-                { value: "yes", label: "Sì" },
-                { value: "no", label: "No" },
-              ]}
-            />
-          </Field>
-          <Field label="Il sistema tratta dati sensibili (art. 9 GDPR)?">
-            <Select
-              value={s.sensitiveDataProcessed === undefined ? "" : s.sensitiveDataProcessed ? "yes" : "no"}
-              onChange={(v) => updateSection("section5", { sensitiveDataProcessed: v === "yes" })}
-              options={[
-                { value: "", label: "Seleziona..." },
-                { value: "yes", label: "Sì (salute, biometria, religione, orientamento sessuale...)" },
-                { value: "no", label: "No" },
-              ]}
-            />
-          </Field>
-          <Field label="DPO consultato?">
-            <Select
-              value={s.dpoConsulted === undefined ? "" : s.dpoConsulted ? "yes" : "no"}
-              onChange={(v) => updateSection("section5", { dpoConsulted: v === "yes" })}
-              options={[
-                { value: "", label: "Seleziona..." },
-                { value: "yes", label: "Sì, il DPO è stato consultato" },
-                { value: "no", label: "No" },
-              ]}
-            />
-          </Field>
-          <Field label="Riferimento DPIA (se presente)">
-            <Input value={s.dpiaLink ?? ""} onChange={(v) => updateSection("section5", { dpiaLink: v })} placeholder="Es. DPIA-2025-HR-001 o URL documento" />
-          </Field>
-        </div>
-
-        <Field label="Policy di conservazione dati *">
-          <Textarea value={s.dataRetentionPolicy ?? ""} onChange={(v) => updateSection("section5", { dataRetentionPolicy: v })} placeholder="Es. I dati vengono conservati per 12 mesi dalla raccolta, poi anonimizzati. I log del sistema vengono conservati 6 mesi..." rows={3} />
-        </Field>
-      </div>
-    );
-  }
-
-  function renderStep6() {
-    const s = doc.section6;
-    return (
-      <div>
-        <h2 className="text-[16px] font-semibold mb-1" style={{ color: "#0D1016" }}>Supervisione umana e meccanismi di rimedio</h2>
-        <p className="text-[12px] mb-6" style={{ color: "rgba(0,0,0,0.45)" }}>Art. 14 e Art. 47 Carta UE — garantire che le persone impattate possano contestare le decisioni.</p>
-
-        <Field label="Meccanismo di supervisione umana *">
-          <Textarea value={s.oversightMechanism ?? ""} onChange={(v) => updateSection("section6", { oversightMechanism: v })} placeholder="Es. Ogni decisione negativa è revisionata da un HR manager prima dell'invio. Il sistema non produce output definitivi..." rows={3} />
-        </Field>
-
-        <div className="grid md:grid-cols-2 gap-x-6">
-          <Field label="Revisione umana su richiesta?">
-            <Select
-              value={s.humanReviewOnRequest === undefined ? "" : s.humanReviewOnRequest ? "yes" : "no"}
-              onChange={(v) => updateSection("section6", { humanReviewOnRequest: v === "yes" })}
-              options={[
-                { value: "", label: "Seleziona..." },
-                { value: "yes", label: "Sì, garantita su richiesta" },
-                { value: "no", label: "No" },
-              ]}
-            />
-          </Field>
-          <Field label="Notifica agli interessati?">
-            <Select
-              value={s.notificationToAffected === undefined ? "" : s.notificationToAffected ? "yes" : "no"}
-              onChange={(v) => updateSection("section6", { notificationToAffected: v === "yes" })}
-              options={[
-                { value: "", label: "Seleziona..." },
-                { value: "yes", label: "Sì" },
-                { value: "no", label: "No" },
-              ]}
-            />
-          </Field>
-          <Field label="Scadenza per ricorsi (giorni)">
-            <Input
-              value={String(s.appealDeadlineDays ?? 30)}
-              onChange={(v) => updateSection("section6", { appealDeadlineDays: parseInt(v) || 30 })}
-              placeholder="30"
-            />
-          </Field>
-          <Field label="Metodo di notifica">
-            <Input value={s.notificationMethod ?? ""} onChange={(v) => updateSection("section6", { notificationMethod: v })} placeholder="Es. Email automatica, lettera raccomandata..." />
-          </Field>
-          <Field label="Responsabile FRIA *">
-            <Input value={s.responsiblePerson ?? ""} onChange={(v) => updateSection("section6", { responsiblePerson: v })} placeholder="Es. Mario Rossi, DPO" />
-          </Field>
-          <Field label="Contatto responsabile">
-            <Input value={s.responsibleContact ?? ""} onChange={(v) => updateSection("section6", { responsibleContact: v })} placeholder="Es. m.rossi@example.com" />
-          </Field>
-        </div>
-
-        <Field label="Processo di ricorso *" hint="Descrivere i passi concreti che una persona può seguire per contestare una decisione">
-          <Textarea value={s.appealProcess ?? ""} onChange={(v) => updateSection("section6", { appealProcess: v })} placeholder="1. L'interessato invia email a dpo@azienda.it con oggetto 'Ricorso decisione AI'&#10;2. Il DPO apre un ticket entro 5gg&#10;3. Un HR manager rivede la decisione entro 15gg lavorativi&#10;4. L'esito viene comunicato per iscritto..." rows={5} />
-        </Field>
-      </div>
-    );
-  }
-
-  function renderResult() {
-    const risk = getOverallFRIARisk(doc);
-    const meta = RISK_META[risk];
-    const assessments = doc.section4.assessments ?? [];
-    const relevant = assessments.filter((a) => a.relevance !== "not_relevant");
-    const critical = assessments.filter((a) => a.residualRisk === "unacceptable");
-    const toReview = assessments.filter((a) => a.residualRisk === "review");
-
-    const recommendedActions: string[] = [];
-    if (critical.length > 0) recommendedActions.push(`Risolvere urgentemente ${critical.length} diritto/i con rischio residuo inaccettabile`);
-    if (toReview.length > 0) recommendedActions.push(`Revisionare le misure di mitigazione per ${toReview.length} diritto/i`);
-    if (!doc.section5.dpoConsulted) recommendedActions.push("Consultare il DPO prima del deployment");
-    if (!doc.section6.humanReviewOnRequest) recommendedActions.push("Implementare meccanismo di revisione umana su richiesta");
-    if (!doc.section6.notificationToAffected) recommendedActions.push("Definire processo di notifica agli interessati");
-    if (completeness < 70) recommendedActions.push(`Completare le sezioni mancanti (completezza attuale: ${completeness}%)`);
-
-    return (
-      <div>
-        <h2 className="text-[16px] font-semibold mb-1" style={{ color: "#0D1016" }}>Risultato della valutazione FRIA</h2>
-        <p className="text-[12px] mb-6" style={{ color: "rgba(0,0,0,0.45)" }}>
-          Sintesi della Fundamental Rights Impact Assessment — Art. 27 AI Act
-        </p>
-
-        {/* Overall risk banner */}
-        <div className="rounded-xl p-5 mb-5 flex items-center gap-4" style={{ background: meta.bg, border: `1px solid ${meta.border}` }}>
-          <div className="rounded-full p-2" style={{ background: `${meta.color}20` }}>
-            {risk === "low" ? <CheckCircle size={20} style={{ color: meta.color }} /> :
-             risk === "medium" ? <AlertTriangle size={20} style={{ color: meta.color }} /> :
-             <XCircle size={20} style={{ color: meta.color }} />}
-          </div>
-          <div className="flex-1">
-            <p className="text-[13px] font-semibold" style={{ color: meta.color }}>{meta.label}</p>
-            <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.5)" }}>
-              {relevant.length} diritti rilevanti su 8 · {critical.length} rischi critici · {toReview.length} da rivedere
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-[22px] font-semibold" style={{ color: meta.color }}>{completeness}%</p>
-            <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>completezza</p>
-          </div>
-        </div>
-
-        {/* Rights summary table */}
-        <div className="rounded-xl overflow-hidden mb-5" style={card}>
-          <div className="px-4 py-3" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
-            <p className="text-[12px] font-semibold" style={{ color: "#0D1016" }}>Diritti fondamentali valutati</p>
-          </div>
-          <div className="divide-y" style={{ borderColor: "rgba(0,0,0,0.04)" }}>
-            {FUNDAMENTAL_RIGHTS.map((r) => {
-              const a = assessments.find((x) => x.rightId === r.id);
-              const rel = a?.relevance ?? "not_relevant";
-              const res = a?.residualRisk ?? "acceptable";
-              const relColor: Record<string, string> = { not_relevant: "rgba(0,0,0,0.2)", low: "#3b82f6", medium: "#d97706", high: "#ea580c", critical: "#dc2626" };
-              const resColor: Record<string, string> = { acceptable: "#15803d", review: "#d97706", unacceptable: "#dc2626" };
-              return (
-                <div key={r.id} className="flex items-center px-4 py-2.5 gap-3">
-                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: relColor[rel] }} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-medium truncate" style={{ color: "#0D1016" }}>{r.title}</p>
-                    <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>{r.code}</p>
-                  </div>
-                  {rel !== "not_relevant" && (
-                    <span className="text-[10px] rounded-full px-2 py-0.5" style={{ background: `${resColor[res]}15`, color: resColor[res] }}>
-                      {res === "acceptable" ? "Accettabile" : res === "review" ? "Da rivedere" : "Inaccettabile"}
-                    </span>
+              {open && (
+                <div style={{ padding: "0 20px 20px" }}>
+                  {sec.id === "A" && (
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 20px" }}>
+                      <Sel label="Corrispondenza con finalità prevista" value={c.intended_purpose_match}
+                        options={yNP} onChange={(v) => upCtx({ intended_purpose_match: v })} />
+                      <Inp label="Spiegazione" value={c.intended_purpose_explanation}
+                        onChange={(v) => upCtx({ intended_purpose_explanation: v })} ph="Descrivi eventuali discrepanze" />
+                      <Inp label="Periodo/timeframe di utilizzo" value={c.timeframe}
+                        onChange={(v) => upCtx({ timeframe: v })} ph="es. 2025–2027" />
+                      <Inp label="Frequenza d'uso" value={c.frequency}
+                        onChange={(v) => upCtx({ frequency: v })} ph="es. quotidiano, mensile" />
+                      <Txt label="Base giuridica" value={c.legal_basis}
+                        onChange={(v) => upCtx({ legal_basis: v })} rows={2} ph="es. Art. 6(1)(e) GDPR, contratto…" />
+                      <Sel label="DPIA completata" value={c.dpia_done}
+                        options={[{ value: "yes", label: "Sì" }, { value: "no", label: "No" }, { value: "in_progress", label: "In corso" }]}
+                        onChange={(v) => upCtx({ dpia_done: v })} />
+                      <Inp label="Principali utilizzatori del sistema" value={c.main_users}
+                        onChange={(v) => upCtx({ main_users: v })} ph="es. HR, supervisori, operatori pubblici" />
+                      <Inp label="Persone interessate dalle decisioni" value={c.affected_persons}
+                        onChange={(v) => upCtx({ affected_persons: v })} ph="es. candidati, utenti di servizi" />
+                      <Txt label="Quadro giuridico applicabile" value={c.legal_framework}
+                        onChange={(v) => upCtx({ legal_framework: v })} rows={2} ph="Normative, regolamenti settoriali…" />
+                      <Txt label="Meccanismi di reclamo" value={c.complaint_mechanisms}
+                        onChange={(v) => upCtx({ complaint_mechanisms: v })} rows={2} ph="Dove le persone possono presentare reclamo" />
+                    </div>
                   )}
-                  <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.3)" }}>
-                    {rel === "not_relevant" ? "Non rilevante" : rel === "low" ? "Bassa" : rel === "medium" ? "Media" : rel === "high" ? "Alta" : "Critica"}
-                  </span>
+                  {sec.id === "B" && (
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 20px" }}>
+                      <Txt label="Panoramica tecnologica" value={c.technology_overview}
+                        onChange={(v) => upCtx({ technology_overview: v })} rows={3} ph="Descrivi il sistema e le sue funzionalità…" />
+                      <Sel label="Componente generativa (LLM/Diffusion)" value={c.has_generative_component}
+                        options={[{ value: "yes", label: "Sì" }, { value: "no", label: "No" }, { value: "unknown", label: "Non noto" }]}
+                        onChange={(v) => upCtx({ has_generative_component: v })} />
+                      <Inp label="Tipi di dati di training" value={c.training_data_types}
+                        onChange={(v) => upCtx({ training_data_types: v })} ph="es. testi web, CV, immagini…" />
+                      <Sel label="Fiducia nella conformità GDPR del provider" value={c.gdpr_provider_compliance_confidence}
+                        options={hml} onChange={(v) => upCtx({ gdpr_provider_compliance_confidence: v })} />
+                      <Sel label="Dati di training rappresentativi" value={c.training_data_representative}
+                        options={yNP} onChange={(v) => upCtx({ training_data_representative: v })} />
+                      <Sel label="Bias valutato" value={c.bias_assessed}
+                        options={yNP} onChange={(v) => upCtx({ bias_assessed: v })} />
+                      <Sel label="Qualità dei dati sufficiente" value={c.data_quality_sufficient}
+                        options={yNP} onChange={(v) => upCtx({ data_quality_sufficient: v })} />
+                      <Sel label="Tratta dati personali" value={c.processes_personal_data}
+                        options={yN} onChange={(v) => upCtx({ processes_personal_data: v })} />
+                      <Inp label="Tipi di dati personali trattati" value={c.personal_data_types}
+                        onChange={(v) => upCtx({ personal_data_types: v })} ph="es. nome, CV, dati biometrici" />
+                      <Sel label="Trattamento GDPR conforme" value={c.gdpr_processing_compliant}
+                        options={yNP} onChange={(v) => upCtx({ gdpr_processing_compliant: v })} />
+                      <Sel label="Controllo sui dati in input" value={c.controls_input_data}
+                        options={yN} onChange={(v) => upCtx({ controls_input_data: v })} />
+                      <Sel label="Dati in input rappresentativi" value={c.input_data_representative}
+                        options={yNP} onChange={(v) => upCtx({ input_data_representative: v })} />
+                      <Sel label="Accuratezza accettabile" value={c.accuracy_acceptable}
+                        options={yNP} onChange={(v) => upCtx({ accuracy_acceptable: v })} />
+                    </div>
+                  )}
+                  {sec.id === "C" && (
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 20px" }}>
+                      <Sel label="Modifiche sostanziali pianificate" value={c.substantial_modifications_planned}
+                        options={yN} onChange={(v) => upCtx({ substantial_modifications_planned: v })} />
+                      <Sel label="Supervisione umana assegnata" value={c.human_oversight_assigned}
+                        options={yN} onChange={(v) => upCtx({ human_oversight_assigned: v })} />
+                      <Sel label="Supervisori formati adeguatamente" value={c.oversight_persons_trained}
+                        options={yNP} onChange={(v) => upCtx({ oversight_persons_trained: v })} />
+                      <Sel label="Lavoratori informati (Art. 26(7))" value={c.workers_informed}
+                        options={[{ value: "yes", label: "Sì" }, { value: "no", label: "No" }, { value: "na", label: "N/A" }]}
+                        onChange={(v) => upCtx({ workers_informed: v })} />
+                      <Sel label="Persone interessate informate" value={c.affected_persons_informed}
+                        options={yNP} onChange={(v) => upCtx({ affected_persons_informed: v })} />
+                    </div>
+                  )}
                 </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Recommended actions */}
-        {recommendedActions.length > 0 && (
-          <div className="rounded-xl p-4 mb-5" style={{ background: "#fffbeb", border: "1px solid rgba(217,119,6,0.2)" }}>
-            <p className="text-[12px] font-semibold mb-2" style={{ color: "#0D1016" }}>Azioni raccomandate</p>
-            <ul className="space-y-1.5">
-              {recommendedActions.map((a, i) => (
-                <li key={i} className="flex items-start gap-2 text-[11px]" style={{ color: "rgba(0,0,0,0.6)" }}>
-                  <AlertTriangle size={12} className="flex-shrink-0 mt-0.5" style={{ color: "#d97706" }} />
-                  {a}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Status & info */}
-        <div className="rounded-xl p-4 mb-5" style={card}>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>Stato</p>
-              <p className="text-[12px] font-medium mt-0.5" style={{ color: "#0D1016" }}>
-                {doc.status === "approved" ? "✅ Approvato" : doc.status === "review" ? "⏳ In revisione" : "📝 Bozza"}
-              </p>
+              )}
             </div>
-            {doc.approvedBy && (
-              <div>
-                <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>Approvato da</p>
-                <p className="text-[12px] font-medium mt-0.5" style={{ color: "#0D1016" }}>{doc.approvedBy}</p>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // ─── Phase 2 render ───────────────────────────────────────────────────────
+  function renderPhase2() {
+    return (
+      <div>
+        <div style={{ marginBottom: 20 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 2 — Sviluppo scenari e impatto</h2>
+          <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Identifica scenari tipici e worst-case. Valuta l&apos;impatto su ciascun diritto fondamentale.</p>
+        </div>
+        <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+          {/* Scenario list */}
+          <div style={{ width: 196, flexShrink: 0 }}>
+            <div style={{ ...cardSt, overflow: "hidden" }}>
+              <div style={{ padding: "10px 12px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>Scenari</span>
+                <button onClick={addScenario} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, background: T.text, color: "#fff", border: "none", borderRadius: 6, padding: "4px 8px", cursor: "pointer" }}>
+                  <Plus style={{ width: 11, height: 11 }} /> Nuovo
+                </button>
+              </div>
+              {doc.scenarios.length === 0 ? (
+                <div style={{ padding: "24px 12px", textAlign: "center", fontSize: 12, color: T.muted }}>Nessuno scenario</div>
+              ) : (
+                doc.scenarios.map((s) => (
+                  <button key={s.id} onClick={() => { setActiveScenarioId(s.id); setP2Tab("rights"); }}
+                    style={{ width: "100%", padding: "10px 12px", textAlign: "left", background: activeScenarioId === s.id ? T.bg : "none", border: "none", borderBottom: `1px solid ${T.border}`, cursor: "pointer" }}>
+                    <div style={{ fontSize: 12, fontWeight: 500, color: T.text, marginBottom: 2 }}>{s.title || "Senza titolo"}</div>
+                    <div style={{ fontSize: 10, color: T.muted }}>{s.right_impacts.length} dir. · {s.type || "—"}</div>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Scenario detail */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {!activeScenario ? (
+              <div style={{ ...cardSt, padding: 40, textAlign: "center" }}>
+                <AlertTriangle style={{ width: 32, height: 32, color: T.border, margin: "0 auto 12px" }} />
+                <p style={{ fontSize: 13, color: T.muted }}>Seleziona uno scenario dalla lista o creane uno nuovo</p>
+              </div>
+            ) : (
+              <div style={{ ...cardSt }}>
+                {/* Scenario meta */}
+                <div style={{ padding: "16px 20px", borderBottom: `1px solid ${T.border}` }}>
+                  <div style={{ display: "flex", gap: 12, marginBottom: 10 }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ fontSize: 11, fontWeight: 500, color: T.muted, display: "block", marginBottom: 4 }}>Titolo scenario</label>
+                      <input value={activeScenario.title} onChange={(e) => upScenario(activeScenario.id, { title: e.target.value })} style={inputSt} />
+                    </div>
+                    <div style={{ width: 160 }}>
+                      <label style={{ fontSize: 11, fontWeight: 500, color: T.muted, display: "block", marginBottom: 4 }}>Tipo</label>
+                      <select value={activeScenario.type} onChange={(e) => upScenario(activeScenario.id, { type: e.target.value as FRIAScenario["type"] })} style={inputSt}>
+                        <option value="">— tipo —</option>
+                        <option value="typical">Tipico</option>
+                        <option value="worst_case">Worst case</option>
+                      </select>
+                    </div>
+                    <button onClick={() => delScenario(activeScenario.id)} style={{ alignSelf: "flex-end", padding: 7, borderRadius: 8, border: `1px solid ${T.redBdr}`, background: T.redBg, cursor: "pointer" }}>
+                      <Trash2 style={{ width: 13, height: 13, color: T.red }} />
+                    </button>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 11, fontWeight: 500, color: T.muted, display: "block", marginBottom: 4 }}>Descrizione</label>
+                    <textarea value={activeScenario.description} onChange={(e) => upScenario(activeScenario.id, { description: e.target.value })} rows={2}
+                      placeholder="Descrivi lo scenario di utilizzo…" style={{ ...inputSt, resize: "vertical" }} />
+                  </div>
+                </div>
+
+                {/* Tabs */}
+                <div style={{ display: "flex", padding: "0 20px", borderBottom: `1px solid ${T.border}` }}>
+                  {([{ id: "rights", label: "Valutazione diritti" }, { id: "matrix", label: "Matrice rischi 3×3" }] as const).map((t) => (
+                    <button key={t.id} onClick={() => setP2Tab(t.id)}
+                      style={{ padding: "10px 16px", fontSize: 12, fontWeight: p2Tab === t.id ? 600 : 400, color: p2Tab === t.id ? T.text : T.muted, background: "none", border: "none", borderBottom: p2Tab === t.id ? `2px solid ${T.text}` : "2px solid transparent", cursor: "pointer" }}>
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+
+                {p2Tab === "rights" && (
+                  <div style={{ padding: "16px 20px", maxHeight: 540, overflow: "auto" }}>
+                    {RIGHTS_GROUPS.map((grp) => {
+                      const rights = FUNDAMENTAL_RIGHTS.filter((r) => grp.rightIds.includes(r.id));
+                      const openGrp = openRightGroups.has(grp.id);
+                      const selCount = rights.filter((r) => activeScenario.right_impacts.some((ri) => ri.right_id === r.id)).length;
+                      return (
+                        <div key={grp.id} style={{ marginBottom: 8, border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden" }}>
+                          <button onClick={() => setOpenRightGroups((prev) => { const n = new Set(prev); n.has(grp.id) ? n.delete(grp.id) : n.add(grp.id); return n; })}
+                            style={{ width: "100%", padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", background: openGrp ? T.bg : T.card, border: "none", cursor: "pointer" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                              <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{grp.label}</span>
+                              {selCount > 0 && <Badge label={`${selCount} sel.`} color="blue" />}
+                            </div>
+                            {openGrp ? <ChevronDown style={{ width: 13, height: 13, color: T.muted }} /> : <ChevronRight style={{ width: 13, height: 13, color: T.muted }} />}
+                          </button>
+                          {openGrp && (
+                            <div style={{ padding: "8px 14px 12px" }}>
+                              {rights.map((right) => {
+                                const impact = activeScenario.right_impacts.find((ri) => ri.right_id === right.id);
+                                const checked = !!impact;
+                                const openAssess = openRights.has(right.id);
+                                return (
+                                  <div key={right.id} style={{ marginBottom: checked ? 8 : 0 }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 0" }}>
+                                      <input type="checkbox" checked={checked} onChange={() => toggleRightImpact(activeScenario.id, right.id)} style={{ cursor: "pointer", flexShrink: 0 }} />
+                                      <span style={{ fontSize: 12, color: checked ? T.text : T.muted, fontWeight: checked ? 500 : 400, flex: 1 }}>{right.name}</span>
+                                      <span style={{ fontSize: 10, color: T.faint }}>{right.charter_art}</span>
+                                      {right.is_absolute && <Badge label="assoluto" color="red" />}
+                                      {checked && (
+                                        <button onClick={() => setOpenRights((prev) => { const n = new Set(prev); n.has(right.id) ? n.delete(right.id) : n.add(right.id); return n; })}
+                                          style={{ fontSize: 10, color: T.blue, background: "none", border: "none", cursor: "pointer", padding: "2px 4px" }}>
+                                          {openAssess ? "chiudi ↑" : "valuta ↓"}
+                                        </button>
+                                      )}
+                                    </div>
+                                    {checked && openAssess && impact && (
+                                      <div style={{ marginLeft: 22, marginBottom: 8, padding: 14, background: T.bg, borderRadius: 8, border: `1px solid ${T.border}` }}>
+                                        {/* Sector risk hints from ECNL/DIHR catalogue */}
+                                        {(() => {
+                                          const sectorHints = Object.entries(right.sector_risks ?? {}).filter(([, v]) => v && v.trim().length > 0);
+                                          if (sectorHints.length === 0) return null;
+                                          const sectorLabel: Record<string, string> = {
+                                            biometrics: "Biometria", education: "Educazione",
+                                            employment: "Occupazione/Lavoro", essential_services: "Servizi essenziali",
+                                            law_enforcement: "Forze dell'ordine", migration: "Migrazione", justice: "Giustizia",
+                                          };
+                                          return (
+                                            <div style={{ marginBottom: 14, padding: "10px 12px", borderRadius: 7, background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
+                                              <div style={{ fontSize: 10, fontWeight: 600, color: T.blue, textTransform: "uppercase" as const, letterSpacing: "0.5px", marginBottom: 7 }}>
+                                                Rischi documentati ECNL/DIHR per settore
+                                              </div>
+                                              <div style={{ display: "flex", flexDirection: "column" as const, gap: 4 }}>
+                                                {sectorHints.map(([sector, desc]) => (
+                                                  <div key={sector} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                                                    <span style={{ fontSize: 10, fontWeight: 600, color: T.blue, minWidth: 120, flexShrink: 0 }}>{sectorLabel[sector] ?? sector}</span>
+                                                    <span style={{ fontSize: 11, color: T.text, lineHeight: 1.4 }}>{desc}</span>
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          );
+                                        })()}
+                                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+                                          <Sel label="Entità interferenza" value={impact.severity.extent_of_interference}
+                                            options={[{ value: "core_violation", label: "Violazione del nucleo essenziale" }, { value: "significant", label: "Significativa" }, { value: "limited", label: "Limitata" }]}
+                                            onChange={(v) => upSeverity(activeScenario.id, right.id, { extent_of_interference: v as FRIASeverityAssessment["extent_of_interference"] })} />
+                                          <Sel label="Portata geografica" value={impact.severity.scope_of_impact}
+                                            options={[{ value: "multiple_countries", label: "Più paesi" }, { value: "one_country", label: "Un paese" }, { value: "region", label: "Regione/locale" }]}
+                                            onChange={(v) => upSeverity(activeScenario.id, right.id, { scope_of_impact: v as FRIASeverityAssessment["scope_of_impact"] })} />
+                                          <Sel label="Persone interessate" value={impact.severity.persons_affected}
+                                            options={[{ value: "most", label: "La maggior parte" }, { value: "some", label: "Alcune" }, { value: "few", label: "Poche" }]}
+                                            onChange={(v) => upSeverity(activeScenario.id, right.id, { persons_affected: v as FRIASeverityAssessment["persons_affected"] })} />
+                                          <Sel label="Gravità" value={impact.severity.gravity}
+                                            options={[{ value: "high", label: "Alta" }, { value: "medium", label: "Media" }, { value: "low", label: "Bassa" }]}
+                                            onChange={(v) => upSeverity(activeScenario.id, right.id, { gravity: v as FRIASeverityAssessment["gravity"] })} />
+                                          <Sel label="Reversibilità" value={impact.severity.irreversibility}
+                                            options={[{ value: "none", label: "Irreversibile" }, { value: "complex", label: "Difficilmente reversibile" }, { value: "medium", label: "Parzialmente reversibile" }]}
+                                            onChange={(v) => upSeverity(activeScenario.id, right.id, { irreversibility: v as FRIASeverityAssessment["irreversibility"] })} />
+                                          <div style={{ marginBottom: 12 }}>
+                                            <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>Severità calcolata</label>
+                                            <div style={{ padding: "7px 0" }}>
+                                              {impact.severity.computed_severity
+                                                ? <Badge label={impact.severity.computed_severity.toUpperCase()} color={riskColorFor(impact.severity.computed_severity)} />
+                                                : <span style={{ fontSize: 12, color: T.faint }}>— non calcolata —</span>}
+                                            </div>
+                                          </div>
+                                          <Sel label="Probabilità" value={impact.likelihood.likelihood}
+                                            options={[{ value: "high", label: "Alta" }, { value: "medium", label: "Media" }, { value: "low", label: "Bassa" }]}
+                                            onChange={(v) => upLikelihood(activeScenario.id, right.id, v)} />
+                                          <div style={{ marginBottom: 12 }}>
+                                            <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>Priorità calcolata</label>
+                                            <div style={{ padding: "7px 0" }}>
+                                              {impact.likelihood.computed_priority
+                                                ? <Badge label={impact.likelihood.computed_priority.toUpperCase()} color={riskColorFor(impact.likelihood.computed_priority)} />
+                                                : <span style={{ fontSize: 12, color: T.faint }}>— non calcolata —</span>}
+                                            </div>
+                                          </div>
+                                          <Sel label="Rischio residuo" value={impact.residual_risk}
+                                            options={[{ value: "acceptable", label: "Accettabile" }, { value: "review", label: "Da rivedere" }, { value: "unacceptable", label: "Inaccettabile" }]}
+                                            onChange={(v) => upRightImpact(activeScenario.id, right.id, { residual_risk: v as FRIARightImpact["residual_risk"] })} />
+                                        </div>
+                                        <Txt label="Note" value={impact.notes} onChange={(v) => upRightImpact(activeScenario.id, right.id, { notes: v })} rows={2} ph="Osservazioni specifiche…" />
+                                        {/* Mitigations */}
+                                        <div style={{ marginTop: 4 }}>
+                                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                                            <span style={{ fontSize: 11, fontWeight: 600, color: T.text }}>Mitigazioni ({impact.mitigations.length})</span>
+                                            <button onClick={() => addMitigation(activeScenario.id, right.id)} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, background: T.text, color: "#fff", border: "none", borderRadius: 6, padding: "4px 8px", cursor: "pointer" }}>
+                                              <Plus style={{ width: 10, height: 10 }} /> Aggiungi
+                                            </button>
+                                          </div>
+                                          {impact.mitigations.map((m) => (
+                                            <div key={m.id} style={{ marginBottom: 8, padding: 10, background: T.card, border: `1px solid ${T.border}`, borderRadius: 8 }}>
+                                              <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
+                                                <input value={m.description} onChange={(e) => upMitigation(activeScenario.id, right.id, m.id, { description: e.target.value })} placeholder="Descrizione misura…" style={{ ...inputSt, flex: 1 }} />
+                                                <button onClick={() => delMitigation(activeScenario.id, right.id, m.id)} style={{ padding: 4, border: "none", background: "none", cursor: "pointer" }}>
+                                                  <Trash2 style={{ width: 12, height: 12, color: T.red }} />
+                                                </button>
+                                              </div>
+                                              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 130px 1fr", gap: 6 }}>
+                                                <select value={m.category} onChange={(e) => upMitigation(activeScenario.id, right.id, m.id, { category: e.target.value as FRIAMitigationMeasure["category"] })} style={inputSt}>
+                                                  <option value="">Categoria</option>
+                                                  <option value="organizational">Organizzativa</option>
+                                                  <option value="technical">Tecnica</option>
+                                                  <option value="contractual">Contrattuale</option>
+                                                </select>
+                                                <input value={m.responsible} onChange={(e) => upMitigation(activeScenario.id, right.id, m.id, { responsible: e.target.value })} placeholder="Responsabile" style={inputSt} />
+                                                <input type="date" value={m.deadline} onChange={(e) => upMitigation(activeScenario.id, right.id, m.id, { deadline: e.target.value })} style={inputSt} />
+                                                <select value={m.status} onChange={(e) => upMitigation(activeScenario.id, right.id, m.id, { status: e.target.value as FRIAMitigationMeasure["status"] })} style={inputSt}>
+                                                  <option value="">Stato</option>
+                                                  <option value="planned">Pianificata</option>
+                                                  <option value="implemented">Implementata</option>
+                                                  <option value="verified">Verificata</option>
+                                                </select>
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {p2Tab === "matrix" && (
+                  <div style={{ padding: "16px 20px" }}>
+                    {activeScenario.right_impacts.length === 0 ? (
+                      <p style={{ fontSize: 13, color: T.muted, textAlign: "center", padding: 32 }}>Nessun diritto valutato. Usa il tab &quot;Valutazione diritti&quot; per iniziare.</p>
+                    ) : (
+                      <div>
+                        <p style={{ fontSize: 12, color: T.muted, marginBottom: 16 }}>Matrice probabilità × severità — scenario: <strong>{activeScenario.title}</strong></p>
+                        <div style={{ display: "grid", gridTemplateColumns: "80px 1fr 1fr 1fr", gap: 3 }}>
+                          <div style={{ fontSize: 10, color: T.faint, textAlign: "center" }} />
+                          {["Alta severità", "Media severità", "Bassa severità"].map((h) => (
+                            <div key={h} style={{ padding: "6px 8px", fontSize: 11, fontWeight: 600, color: T.muted, textAlign: "center", background: T.bg, borderRadius: 6 }}>{h}</div>
+                          ))}
+                          {(["high", "medium", "low"] as const).map((lik) => {
+                            const rowLabel = lik === "high" ? "Alta prob." : lik === "medium" ? "Media prob." : "Bassa prob.";
+                            return [
+                              <div key={`lbl-${lik}`} style={{ padding: "8px", fontSize: 11, fontWeight: 600, color: T.muted, background: T.bg, borderRadius: 6, display: "flex", alignItems: "center" }}>{rowLabel}</div>,
+                              ...(["high", "medium", "low"] as const).map((sev) => {
+                                const cellItems = activeScenario.right_impacts.filter((ri) => ri.severity.computed_severity === sev && ri.likelihood.likelihood === lik);
+                                const priority = computePriority(sev, lik);
+                                const cellStyle = priority === "high"
+                                  ? { bg: T.redBg, bdr: T.redBdr }
+                                  : priority === "medium"
+                                    ? { bg: T.amberBg, bdr: T.amberBdr }
+                                    : { bg: T.greenBg, bdr: T.greenBdr };
+                                return (
+                                  <div key={`${lik}-${sev}`} style={{ padding: 8, minHeight: 64, background: cellItems.length > 0 ? cellStyle.bg : T.bg, border: `1px solid ${cellItems.length > 0 ? cellStyle.bdr : T.border}`, borderRadius: 6 }}>
+                                    {cellItems.map((ri) => {
+                                      const r = FUNDAMENTAL_RIGHTS.find((f) => f.id === ri.right_id);
+                                      return <div key={ri.right_id} style={{ fontSize: 10, color: T.text, marginBottom: 2, lineHeight: 1.3 }}>{r?.name ?? ri.right_id}</div>;
+                                    })}
+                                    {cellItems.length === 0 && <span style={{ fontSize: 10, color: T.faint }}>—</span>}
+                                  </div>
+                                );
+                              }),
+                            ];
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
-            <div>
-              <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>ID documento</p>
-              <p className="text-[12px] font-medium mt-0.5" style={{ color: "#0D1016" }}>{doc.id}</p>
-            </div>
-            <div>
-              <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>Versione</p>
-              <p className="text-[12px] font-medium mt-0.5" style={{ color: "#0D1016" }}>{doc.version}</p>
-            </div>
           </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex flex-wrap gap-3">
-          <button
-            onClick={handleSaveToDossier}
-            className="flex items-center gap-2 rounded-lg px-4 py-2 text-[12px] font-medium"
-            style={{ background: "#0D1016", color: "#ffffff" }}
-          >
-            <FileText size={14} /> Salva nel Dossier
-          </button>
-          <button
-            onClick={() => setApprovalModal(true)}
-            disabled={doc.status === "approved"}
-            className="flex items-center gap-2 rounded-lg px-4 py-2 text-[12px] font-medium"
-            style={{
-              background: doc.status === "approved" ? "#f5f5f4" : "rgba(22,163,74,0.1)",
-              color: doc.status === "approved" ? "rgba(0,0,0,0.3)" : "#15803d",
-              border: "1px solid",
-              borderColor: doc.status === "approved" ? "transparent" : "rgba(22,163,74,0.2)",
-            }}
-          >
-            <CheckCircle size={14} />
-            {doc.status === "approved" ? "Già approvato" : "Approva e firma"}
-          </button>
-          <button
-            onClick={handleExportJSON}
-            className="flex items-center gap-2 rounded-lg px-4 py-2 text-[12px] font-medium"
-            style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.09)", color: "#0D1016" }}
-          >
-            <FileText size={14} /> Esporta JSON
-          </button>
-          <button
-            onClick={handlePrint}
-            className="flex items-center gap-2 rounded-lg px-4 py-2 text-[12px] font-medium"
-            style={{ background: "#f5f5f4", color: "#0D1016" }}
-          >
-            <Printer size={14} /> Stampa / PDF
-          </button>
         </div>
       </div>
     );
   }
 
-  // ─── Render ────────────────────────────────────────────────────────────────
-
-  return (
-    <>
-      {/* Toast */}
-      {toast && (
-        <div
-          className="fixed top-4 right-4 z-50 rounded-xl px-4 py-2.5 text-[12px] font-medium shadow-lg"
-          style={{ background: "#0D1016", color: "#ffffff" }}
-        >
-          {toast}
+  // ─── Phase 3 render ───────────────────────────────────────────────────────
+  function renderPhase3() {
+    const d = doc.deployment;
+    return (
+      <div>
+        <div style={{ marginBottom: 20 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 3 — Decisione di deployment</h2>
+          <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Valuta gli impatti residui, determina la raccomandazione e genera la sintesi pubblica.</p>
         </div>
-      )}
+        {/* Absolute rights alert — ECNL/DIHR: cannot be balanced by proportionality */}
+        {(() => {
+          const absoluteImpacted = doc.scenarios.flatMap((s) => s.right_impacts).filter((ri) => {
+            const rightDef = FUNDAMENTAL_RIGHTS.find((r) => r.id === ri.right_id);
+            return rightDef?.is_absolute && (ri.severity.computed_severity === "high" || ri.severity.computed_severity === "medium");
+          });
+          if (absoluteImpacted.length === 0) return null;
+          const names = [...new Set(absoluteImpacted.map((ri) => {
+            const r = FUNDAMENTAL_RIGHTS.find((f) => f.id === ri.right_id);
+            return r?.name ?? ri.right_id;
+          }))];
+          return (
+            <div style={{ marginBottom: 16, padding: "12px 16px", borderRadius: 8, background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.25)", display: "flex", gap: 10, alignItems: "flex-start" }}>
+              <AlertTriangle style={{ width: 16, height: 16, color: T.red, flexShrink: 0, marginTop: 1 }} />
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: T.red, marginBottom: 4 }}>
+                  Diritti assoluti impattati — nessun bilanciamento ammissibile
+                </div>
+                <div style={{ fontSize: 12, color: "#7f1d1d", lineHeight: 1.5 }}>
+                  {names.join(", ")} sono diritti assoluti ai sensi della Carta UE e della CEDU.
+                  La loro limitazione non può essere giustificata da considerazioni di proporzionalità o necessità
+                  (cfr. ECNL/DIHR Guide to FRIA, Dec 2025, §3.2). Se il sistema AI incide su questi diritti in modo significativo,
+                  la raccomandazione deve essere <strong>non autorizzato al deployment</strong> oppure le misure di mitigazione
+                  devono eliminare completamente l&apos;impatto.
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
-      {/* Approval modal */}
-      {approvalModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
-          <div className="rounded-2xl p-6 w-full max-w-sm mx-4" style={{ background: "#ffffff" }}>
-            <h3 className="text-[15px] font-semibold mb-2" style={{ color: "#0D1016" }}>Approva FRIA</h3>
-            <p className="text-[12px] mb-4" style={{ color: "rgba(0,0,0,0.5)" }}>Inserisci il nome del responsabile che approva questa valutazione.</p>
-            <Input value={approverName} onChange={setApproverName} placeholder="Es. Mario Rossi, DPO" />
-            <div className="flex gap-2 mt-4">
-              <button
-                onClick={() => setApprovalModal(false)}
-                className="flex-1 rounded-lg px-4 py-2 text-[12px]"
-                style={{ background: "#f5f5f4", color: "#0D1016" }}
-              >
-                Annulla
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
+          <div style={{ ...cardSt, padding: 20 }}>
+            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 16px" }}>Impatti e proporzionalità</h3>
+            <Txt label="Impatti residui dopo mitigazione" value={d.remaining_impacts_after_mitigation}
+              onChange={(v) => upDeploy({ remaining_impacts_after_mitigation: v })} rows={4}
+              ph="Descrivi gli impatti che rimangono dopo le misure di mitigazione…" />
+            <Txt label="Necessità e proporzionalità (diritti qualificati)" value={d.qualified_rights_necessity_proportionality}
+              onChange={(v) => upDeploy({ qualified_rights_necessity_proportionality: v })} rows={4}
+              ph="Per i diritti non assoluti: perché la limitazione è necessaria e proporzionata?" />
+          </div>
+          <div style={{ ...cardSt, padding: 20 }}>
+            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 16px" }}>Raccomandazione</h3>
+            {[
+              { value: "deploy",                label: "✅ Autorizzato al deployment",        color: T.green, bg: T.greenBg, bdr: T.greenBdr },
+              { value: "deploy_with_conditions", label: "⚠ Autorizzato con condizioni",        color: T.amber, bg: T.amberBg, bdr: T.amberBdr },
+              { value: "do_not_deploy",          label: "❌ Non autorizzato al deployment",    color: T.red,   bg: T.redBg,   bdr: T.redBdr   },
+            ].map((opt) => (
+              <button key={opt.value} onClick={() => upDeploy({ recommendation: opt.value })}
+                style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", marginBottom: 8, borderRadius: 8, border: `1px solid ${d.recommendation === opt.value ? opt.bdr : T.border}`, background: d.recommendation === opt.value ? opt.bg : T.card, cursor: "pointer", textAlign: "left" }}>
+                <span style={{ fontSize: 12, fontWeight: d.recommendation === opt.value ? 600 : 400, color: d.recommendation === opt.value ? opt.color : T.muted }}>{opt.label}</span>
               </button>
-              <button
-                onClick={handleApprove}
-                disabled={!approverName.trim()}
-                className="flex-1 rounded-lg px-4 py-2 text-[12px] font-medium"
-                style={{ background: approverName.trim() ? "#15803d" : "#f5f5f4", color: approverName.trim() ? "#ffffff" : "rgba(0,0,0,0.3)" }}
-              >
-                Approva
-              </button>
+            ))}
+            {d.recommendation === "deploy_with_conditions" && (
+              <Txt label="Condizioni obbligatorie" value={d.conditions} onChange={(v) => upDeploy({ conditions: v })} rows={3}
+                ph="Elenca le condizioni da soddisfare prima del deployment…" />
+            )}
+            <Txt label="Giustificazione della decisione" value={d.decision_justification}
+              onChange={(v) => upDeploy({ decision_justification: v })} rows={4}
+              ph="Motivazione dettagliata della decisione…" />
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <Inp label="Approvato da" value={d.approver_name} onChange={(v) => upDeploy({ approver_name: v })} ph="Nome e Cognome" />
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>Data approvazione</label>
+                <input type="date" value={d.approver_date} onChange={(e) => upDeploy({ approver_date: e.target.value })} style={inputSt} />
+              </div>
             </div>
           </div>
         </div>
-      )}
 
-      <div className="w-full">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[11px] font-medium rounded px-2 py-0.5" style={{ background: "rgba(59,130,246,0.08)", color: "#3b82f6" }}>Art. 27</span>
-            <span className="text-[11px]" style={{ color: "rgba(0,0,0,0.3)" }}>Fundamental Rights Impact Assessment</span>
+        {/* Public summary */}
+        <div style={{ ...cardSt, padding: 20, marginBottom: 20 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>Sintesi pubblica obbligatoria (Art. 27)</h3>
+            <button onClick={() => { const s = generatePublicSummary(doc); upDeploy({ public_summary: s }); showToast("Sintesi pubblica generata"); }}
+              style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, background: T.text, color: "#fff", border: "none", borderRadius: 8, padding: "7px 14px", cursor: "pointer" }}>
+              <FileText style={{ width: 13, height: 13 }} /> Genera sintesi
+            </button>
           </div>
-          <h1 className="text-[24px] font-semibold" style={{ color: "#0D1016", letterSpacing: "-0.5px" }}>FRIA — Valutazione d&apos;impatto sui diritti fondamentali</h1>
-          <p className="text-[12px] mt-1" style={{ color: "rgba(0,0,0,0.45)" }}>
-            Obbligatoria per deployer di sistemi AI ad alto rischio che interagiscono con persone fisiche.
-          </p>
+          <textarea value={d.public_summary} onChange={(e) => upDeploy({ public_summary: e.target.value })} rows={14}
+            placeholder="Clicca 'Genera sintesi' per creare automaticamente il testo basato sui dati inseriti…"
+            style={{ ...inputSt, resize: "vertical", fontFamily: "monospace", fontSize: 11, lineHeight: 1.6 }} />
         </div>
 
-        {/* Progress stepper */}
-        {step < 6 && (
-          <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-1">
-            {STEPS.slice(0, 6).map((s, i) => (
-              <React.Fragment key={i}>
-                <button
-                  onClick={() => setStep(i as Step)}
-                  className="flex-shrink-0 flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] transition-all"
-                  style={{
-                    background: step === i ? "#0D1016" : step > i ? "rgba(22,163,74,0.08)" : "#f5f5f4",
-                    color: step === i ? "#ffffff" : step > i ? "#15803d" : "rgba(0,0,0,0.4)",
-                    fontWeight: step === i ? 500 : 400,
-                  }}
-                >
-                  {step > i ? <CheckCircle size={11} /> : <span className="text-[10px]">{i + 1}</span>}
-                  <span className="hidden sm:inline">{s.label}</span>
-                </button>
-                {i < 5 && <ChevronRight size={10} className="flex-shrink-0" style={{ color: "rgba(0,0,0,0.2)" }} />}
-              </React.Fragment>
+        {/* SignOff */}
+        <SignOffPanel toolKey="fria" toolLabel="FRIA Art. 27" />
+      </div>
+    );
+  }
+
+  // ─── Phase 4 render ───────────────────────────────────────────────────────
+  function renderPhase4() {
+    const mon = doc.monitoring;
+    return (
+      <div>
+        <div style={{ marginBottom: 20 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 4 — Piano di monitoraggio</h2>
+          <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Definisci cosa monitorare, i trigger per l&apos;aggiornamento e mantieni lo storico delle revisioni.</p>
+        </div>
+
+        {/* Monitoring items */}
+        <div style={{ ...cardSt, padding: 20, marginBottom: 16 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>Elementi da monitorare</h3>
+            <button onClick={addMonItem} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, background: T.text, color: "#fff", border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer" }}>
+              <Plus style={{ width: 11, height: 11 }} /> Aggiungi
+            </button>
+          </div>
+          {mon.items.length === 0 ? (
+            <p style={{ fontSize: 12, color: T.muted, padding: "8px 0" }}>Nessun elemento di monitoraggio definito.</p>
+          ) : (
+            <div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 140px 160px 32px", gap: 8, marginBottom: 6 }}>
+                {["Cosa monitorare", "Frequenza", "Responsabile", ""].map((h) => (
+                  <div key={h} style={{ fontSize: 11, fontWeight: 600, color: T.muted }}>{h}</div>
+                ))}
+              </div>
+              {mon.items.map((item) => (
+                <div key={item.id} style={{ display: "grid", gridTemplateColumns: "1fr 140px 160px 32px", gap: 8, marginBottom: 6 }}>
+                  <input value={item.what} onChange={(e) => upMonItem(item.id, { what: e.target.value })} placeholder="es. Tasso di errore, bias metrics…" style={inputSt} />
+                  <input value={item.frequency} onChange={(e) => upMonItem(item.id, { frequency: e.target.value })} placeholder="es. mensile" style={inputSt} />
+                  <input value={item.responsible} onChange={(e) => upMonItem(item.id, { responsible: e.target.value })} placeholder="es. DPO" style={inputSt} />
+                  <button onClick={() => delMonItem(item.id)} style={{ padding: 7, border: "none", background: "none", cursor: "pointer" }}>
+                    <Trash2 style={{ width: 13, height: 13, color: T.red }} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Update triggers */}
+        <div style={{ ...cardSt, padding: 20, marginBottom: 16 }}>
+          <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 14px" }}>Trigger per aggiornamento FRIA</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
+            {DEFAULT_TRIGGERS.map((t) => (
+              <label key={t} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", borderRadius: 7, cursor: "pointer", background: mon.update_triggers.includes(t) ? T.blueBg : "none" }}>
+                <input type="checkbox" checked={mon.update_triggers.includes(t)} onChange={() => toggleTrigger(t)} style={{ cursor: "pointer" }} />
+                <span style={{ fontSize: 12, color: T.text }}>{t}</span>
+              </label>
             ))}
           </div>
-        )}
-
-        {/* Main card */}
-        <div className="rounded-2xl p-6" style={card}>
-          {step === 0 && renderStep1()}
-          {step === 1 && renderStep2()}
-          {step === 2 && renderStep3()}
-          {step === 3 && renderStep4()}
-          {step === 4 && renderStep5()}
-          {step === 5 && renderStep6()}
-          {step === 6 && renderResult()}
         </div>
 
-        {/* Navigation */}
-        {step < 6 && (
-          <div className="flex items-center justify-between mt-4">
-            <button
-              onClick={() => setStep((s) => Math.max(0, s - 1) as Step)}
-              disabled={step === 0}
-              className="flex items-center gap-2 rounded-lg px-4 py-2 text-[12px] font-medium"
-              style={{ background: "#f5f5f4", color: step === 0 ? "rgba(0,0,0,0.2)" : "#0D1016" }}
-            >
-              <ChevronLeft size={14} /> Indietro
+        {/* Update history */}
+        <div style={{ ...cardSt, padding: 20 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>Storico aggiornamenti</h3>
+            <button onClick={addUpdateRecord} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, background: T.text, color: "#fff", border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer" }}>
+              <Plus style={{ width: 11, height: 11 }} /> Nuovo record
             </button>
-            <div className="flex items-center gap-3">
-              <span className="text-[11px]" style={{ color: "rgba(0,0,0,0.35)" }}>
-                Completezza: {completeness}%
-              </span>
-              <button
-                onClick={() => setStep((s) => Math.min(6, s + 1) as Step)}
-                className="flex items-center gap-2 rounded-lg px-4 py-2 text-[12px] font-medium"
-                style={{ background: "#0D1016", color: "#ffffff" }}
-              >
-                {step === 5 ? "Vedi risultato" : "Avanti"} <ChevronRight size={14} />
+          </div>
+          {mon.update_history.length === 0 ? (
+            <p style={{ fontSize: 12, color: T.muted }}>Nessuna revisione registrata.</p>
+          ) : (
+            mon.update_history.map((rec) => (
+              <div key={rec.id} style={{ marginBottom: 10, padding: 14, background: T.bg, borderRadius: 8, border: `1px solid ${T.border}` }}>
+                <div style={{ display: "grid", gridTemplateColumns: "140px 1fr 1fr", gap: 8, marginBottom: 8 }}>
+                  <input type="date" value={rec.date} onChange={(e) => upUpdateRecord(rec.id, { date: e.target.value })} style={inputSt} />
+                  <input value={rec.reason} onChange={(e) => upUpdateRecord(rec.id, { reason: e.target.value })} placeholder="Motivo aggiornamento" style={inputSt} />
+                  <input value={rec.updater} onChange={(e) => upUpdateRecord(rec.id, { updater: e.target.value })} placeholder="Redatto da" style={inputSt} />
+                </div>
+                <textarea value={rec.summary} onChange={(e) => upUpdateRecord(rec.id, { summary: e.target.value })} rows={2}
+                  placeholder="Sintesi delle modifiche apportate…" style={{ ...inputSt, resize: "vertical" }} />
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Phase 5 render ───────────────────────────────────────────────────────
+  function renderPhase5() {
+    return (
+      <div>
+        <div style={{ marginBottom: 20 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 5 — Stakeholder e coinvolgimento</h2>
+          <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Mappa i portatori di interesse e documenta il processo di consultazione.</p>
+        </div>
+
+        {/* Stakeholders */}
+        <div style={{ ...cardSt, padding: 20, marginBottom: 16 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>Stakeholder ({doc.stakeholders.length})</h3>
+            <button onClick={addStakeholder} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, background: T.text, color: "#fff", border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer" }}>
+              <Plus style={{ width: 11, height: 11 }} /> Aggiungi
+            </button>
+          </div>
+          {doc.stakeholders.length === 0 ? (
+            <p style={{ fontSize: 12, color: T.muted, padding: "8px 0" }}>Nessun stakeholder mappato.</p>
+          ) : (
+            doc.stakeholders.map((s) => (
+              <div key={s.id} style={{ marginBottom: 10, padding: 14, background: T.bg, borderRadius: 8, border: `1px solid ${T.border}` }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 28px", gap: 8, marginBottom: 8 }}>
+                  <input value={s.name} onChange={(e) => upStakeholder(s.id, { name: e.target.value })} placeholder="Nome" style={inputSt} />
+                  <input value={s.organization} onChange={(e) => upStakeholder(s.id, { organization: e.target.value })} placeholder="Organizzazione" style={inputSt} />
+                  <select value={s.category} onChange={(e) => upStakeholder(s.id, { category: e.target.value as FRIAStakeholder["category"] })} style={inputSt}>
+                    <option value="">Categoria</option>
+                    <option value="primary_affected">Primari (soggetti interessati)</option>
+                    <option value="secondary_intermediary">Secondari (intermediari)</option>
+                    <option value="tertiary_broader">Terziari (sistema più ampio)</option>
+                  </select>
+                  <select value={s.status} onChange={(e) => upStakeholder(s.id, { status: e.target.value as FRIAStakeholder["status"] })} style={inputSt}>
+                    <option value="">Stato</option>
+                    <option value="identified">Identificato</option>
+                    <option value="contacted">Contattato</option>
+                    <option value="consulted">Consultato</option>
+                    <option value="informed">Informato</option>
+                  </select>
+                  <button onClick={() => delStakeholder(s.id)} style={{ padding: 4, border: "none", background: "none", cursor: "pointer" }}>
+                    <Trash2 style={{ width: 13, height: 13, color: T.red }} />
+                  </button>
+                </div>
+                <input value={s.engagement_method} onChange={(e) => upStakeholder(s.id, { engagement_method: e.target.value })}
+                  placeholder="Metodo di coinvolgimento (es. intervista, focus group, survey…)" style={inputSt} />
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Engagement log */}
+        <div style={{ ...cardSt, padding: 20 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>Log di engagement ({doc.engagement_log.length})</h3>
+            <button onClick={addEngagement} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, background: T.text, color: "#fff", border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer" }}>
+              <Plus style={{ width: 11, height: 11 }} /> Aggiungi
+            </button>
+          </div>
+          {doc.engagement_log.length === 0 ? (
+            <p style={{ fontSize: 12, color: T.muted }}>Nessuna attività di engagement documentata.</p>
+          ) : (
+            doc.engagement_log.map((e) => (
+              <div key={e.id} style={{ marginBottom: 10, padding: 14, background: T.bg, borderRadius: 8, border: `1px solid ${T.border}` }}>
+                <div style={{ display: "grid", gridTemplateColumns: "130px 1fr 1fr 28px", gap: 8, marginBottom: 8 }}>
+                  <input type="date" value={e.date} onChange={(ev) => upEngagement(e.id, { date: ev.target.value })} style={inputSt} />
+                  <select value={e.stakeholder_id} onChange={(ev) => upEngagement(e.id, { stakeholder_id: ev.target.value })} style={inputSt}>
+                    <option value="">Stakeholder</option>
+                    {doc.stakeholders.map((s) => <option key={s.id} value={s.id}>{s.name || s.id}</option>)}
+                  </select>
+                  <input value={e.method} onChange={(ev) => upEngagement(e.id, { method: ev.target.value })} placeholder="Metodo (es. intervista, survey…)" style={inputSt} />
+                  <button onClick={() => delEngagement(e.id)} style={{ padding: 4, border: "none", background: "none", cursor: "pointer" }}>
+                    <Trash2 style={{ width: 13, height: 13, color: T.red }} />
+                  </button>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                  <textarea value={e.findings} onChange={(ev) => upEngagement(e.id, { findings: ev.target.value })} rows={2}
+                    placeholder="Principali evidenze emerse…" style={{ ...inputSt, resize: "vertical" }} />
+                  <textarea value={e.how_incorporated} onChange={(ev) => upEngagement(e.id, { how_incorporated: ev.target.value })} rows={2}
+                    placeholder="Come sono state incorporate nella FRIA…" style={{ ...inputSt, resize: "vertical" }} />
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Main render ──────────────────────────────────────────────────────────
+  return (
+    <div className="w-full" style={{ display: "flex", flexDirection: "column", gap: 0, minHeight: 0, fontFamily: "var(--font-inter, system-ui)" }}>
+
+      <SystemContextBanner checkProhibited={true} />
+
+      <div style={{ display: "flex", gap: 0, minHeight: 0 }}>
+
+      {/* ── Left sidebar ── */}
+      <div style={{ width: 232, flexShrink: 0, borderRight: `1px solid ${T.border}`, background: T.card, display: "flex", flexDirection: "column", minHeight: "100%" }}>
+        {/* System name + org */}
+        <div style={{ padding: "16px 14px 12px", borderBottom: `1px solid ${T.border}` }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", marginBottom: 8 }}>Sistema AI</div>
+          <input value={doc.system_name} onChange={(e) => upDoc({ system_name: e.target.value })} placeholder="Nome del sistema AI"
+            style={{ ...inputSt, marginBottom: 6, fontSize: 13, fontWeight: 500 }} />
+          <input value={doc.organization} onChange={(e) => upDoc({ organization: e.target.value })} placeholder="Organizzazione"
+            style={{ ...inputSt, marginBottom: 6 }} />
+          <input value={doc.responsible_team} onChange={(e) => upDoc({ responsible_team: e.target.value })} placeholder="Team responsabile" style={{ ...inputSt, marginBottom: 6 }} />
+          <div>
+            <label style={{ display: "block", fontSize: 10, fontWeight: 500, color: T.faint, marginBottom: 3 }}>Data avvio FRIA</label>
+            <input type="date" value={doc.fria_start_date} onChange={(e) => upDoc({ fria_start_date: e.target.value })} style={inputSt} />
+          </div>
+        </div>
+
+        {/* Phase nav */}
+        <div style={{ padding: "10px 8px", flex: 1 }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", padding: "0 6px", marginBottom: 6 }}>Fasi FRIA</div>
+          {PHASES.map((p) => {
+            const isActive = phase === p.id;
+            const { Icon } = p;
+            return (
+              <button key={p.id} onClick={() => setPhase(p.id)}
+                style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 10px", borderRadius: 8, border: "none", marginBottom: 2, cursor: "pointer", background: isActive ? T.text : "none", textAlign: "left" as const }}>
+                <span style={{ width: 22, height: 22, borderRadius: 6, background: isActive ? "rgba(255,255,255,0.15)" : T.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Icon style={{ width: 12, height: 12, color: isActive ? "#fff" : T.muted }} />
+                </span>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: isActive ? "#fff" : T.text }}>{p.id}. {p.label}</div>
+                  <div style={{ fontSize: 10, color: isActive ? "rgba(255,255,255,0.6)" : T.faint }}>{p.sub}</div>
+                </div>
               </button>
+            );
+          })}
+        </div>
+
+        {/* Summary stats */}
+        <div style={{ padding: "12px 14px", borderTop: `1px solid ${T.border}` }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", marginBottom: 10 }}>Riepilogo FRIA</div>
+          <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: 11, color: T.muted }}>Completezza</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{completeness}%</span>
+            </div>
+            <div style={{ height: 4, background: T.bg, borderRadius: 9999, overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${completeness}%`, background: completeness > 75 ? T.green : completeness > 40 ? T.amber : T.red, borderRadius: 9999, transition: "width 0.3s" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: 11, color: T.muted }}>Rischio globale</span>
+              <Badge label={overallRisk.toUpperCase()} color={riskColorFor(overallRisk)} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ fontSize: 11, color: T.muted }}>Scenari</span>
+              <span style={{ fontSize: 11, fontWeight: 500, color: T.text }}>{doc.scenarios.length}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ fontSize: 11, color: T.muted }}>Stakeholder</span>
+              <span style={{ fontSize: 11, fontWeight: 500, color: T.text }}>{doc.stakeholders.length}</span>
             </div>
           </div>
-        )}
-
-        {step === 6 && (
-          <div className="mt-4">
-            <button
-              onClick={() => setStep(0)}
-              className="flex items-center gap-2 rounded-lg px-4 py-2 text-[12px]"
-              style={{ background: "#f5f5f4", color: "#0D1016" }}
-            >
-              <ChevronLeft size={14} /> Torna alla valutazione
+          <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
+            <button onClick={saveToDossier} style={{ flex: 1, fontSize: 11, fontWeight: 500, padding: "6px 8px", borderRadius: 7, background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
+              Salva dossier
+            </button>
+            <button onClick={exportReport} style={{ padding: "6px 9px", borderRadius: 7, background: T.bg, border: `1px solid ${T.border}`, cursor: "pointer", display: "flex", alignItems: "center" }}>
+              <Download style={{ width: 12, height: 12, color: T.muted }} />
             </button>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Print styles */}
-      <style>{`
-        @media print {
-          body > *:not(#fria-print-root) { display: none !important; }
-          #fria-print-root { display: block !important; }
-          @page { size: A4; margin: 20mm; }
-        }
-      `}</style>
-    </>
+      {/* ── Main content ── */}
+      <div style={{ flex: 1, minWidth: 0, padding: "0 4px 40px 28px", overflowY: "auto" as const }}>
+        {/* Dossier save banner */}
+        {dossierSavedAt ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 8, padding: "10px 14px", marginBottom: 20, background: T.greenBg, border: `1px solid ${T.greenBdr}`, fontSize: 12 }}>
+            <CheckCircle style={{ width: 13, height: 13, color: T.green, flexShrink: 0 }} />
+            <span style={{ color: "#15803d" }}>FRIA salvata nel dossier · {new Date(dossierSavedAt).toLocaleDateString("it-IT")}</span>
+            <Link href="/dashboard/dossier" style={{ marginLeft: "auto", fontSize: 11, fontWeight: 500, color: T.green }}>Vedi dossier →</Link>
+          </div>
+        ) : (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderRadius: 8, padding: "10px 14px", marginBottom: 20, background: T.card, border: `1px solid ${T.border}`, fontSize: 12 }}>
+            <span style={{ color: T.muted }}>Salva i risultati FRIA nel dossier di compliance (Art. 27)</span>
+            <button onClick={saveToDossier} style={{ fontSize: 11, fontWeight: 500, borderRadius: 20, padding: "4px 12px", background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>Salva nel dossier</button>
+          </div>
+        )}
+
+        {phase === "1" && renderPhase1()}
+        {phase === "2" && renderPhase2()}
+        {phase === "3" && renderPhase3()}
+        {phase === "4" && renderPhase4()}
+        {phase === "5" && renderPhase5()}
+      </div>
+
+      {/* Toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }}
+            style={{ position: "fixed", bottom: 24, right: 24, zIndex: 50, display: "flex", alignItems: "center", gap: 8, padding: "10px 16px", borderRadius: 10, fontSize: 12, fontWeight: 500, boxShadow: "0 4px 16px rgba(0,0,0,0.12)", background: toast.type === "error" ? "rgba(220,38,38,0.95)" : T.text, color: "#fff" }}>
+            {toast.type === "error" ? "⚠" : "✓"} {toast.msg}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      </div>
+    </div>
   );
 }
