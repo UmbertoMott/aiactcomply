@@ -8,6 +8,22 @@ import {
 } from "lucide-react";
 import { writeToStorage } from "@/lib/dossier/storage-schema";
 
+// ── Design tokens ──────────────────────────────────────────────────────────────
+const T = {
+  text:   "#0D1016",
+  muted:  "rgba(0,0,0,0.42)",
+  faint:  "rgba(0,0,0,0.28)",
+  border: "rgba(0,0,0,0.07)",
+  card:   "#ffffff",
+  bg:     "#f8f9fa",
+};
+const cardSt: React.CSSProperties = {
+  background: T.card,
+  border:     `1px solid ${T.border}`,
+  boxShadow:  "0 1px 3px rgba(0,0,0,0.04)",
+  borderRadius: 12,
+};
+
 // ─── Data model ────────────────────────────────────────────────────────────────
 
 type Art50System = {
@@ -267,8 +283,8 @@ export default function Art50KitPage() {
       {/* ── HEADER ROW ── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Art. 50 Kit</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-xl font-semibold" style={{ color: T.text }}>Art. 50 Kit</h1>
+          <p className="text-sm mt-0.5" style={{ color: T.muted }}>
             Gestisci la disclosure AI dei tuoi sistemi · {systems.length}{" "}
             sistema{systems.length !== 1 ? "i" : "o"} registrato{systems.length !== 1 ? "i" : ""}
           </p>
@@ -304,7 +320,7 @@ export default function Art50KitPage() {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1.5">
+              <label className="block text-xs font-medium mb-1.5" style={{ color: T.muted }}>
                 Nome sistema *
               </label>
               <input
@@ -312,11 +328,12 @@ export default function Art50KitPage() {
                 placeholder="es. Chatbot sito web"
                 value={formName}
                 onChange={e => setFormName(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                style={{ border: `1px solid ${T.border}` }}
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1.5">
+              <label className="block text-xs font-medium mb-1.5" style={{ color: T.muted }}>
                 URL sito
               </label>
               <input
@@ -324,11 +341,12 @@ export default function Art50KitPage() {
                 placeholder="https://tuo-sito.it"
                 value={formUrl}
                 onChange={e => setFormUrl(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                style={{ border: `1px solid ${T.border}` }}
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-xs font-medium text-gray-600 mb-2">
+              <label className="block text-xs font-medium mb-2" style={{ color: T.muted }}>
                 Tipo sistema *
               </label>
               <div className="flex flex-wrap gap-2">
@@ -366,7 +384,8 @@ export default function Art50KitPage() {
                 setFormUrl("");
                 setFormType("chatbot");
               }}
-              className="px-4 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 rounded-lg text-sm hover:opacity-80 transition-colors"
+              style={{ border: `1px solid ${T.border}`, background: T.card, color: T.muted }}
             >
               Annulla
             </button>
@@ -387,11 +406,11 @@ export default function Art50KitPage() {
       {systems.length === 0 && !showForm && (
         <div
           className="rounded-xl py-16 text-center"
-          style={{ border: "2px dashed #d1d5db", background: "#ffffff" }}
+          style={{ border: "2px dashed rgba(0,0,0,0.14)", background: T.card }}
         >
-          <Shield className="h-10 w-10 mx-auto mb-4" style={{ color: "#d1d5db" }} />
-          <p className="font-medium text-gray-600">Nessun sistema registrato</p>
-          <p className="text-sm text-gray-400 mt-1 max-w-xs mx-auto">
+          <Shield className="h-10 w-10 mx-auto mb-4" style={{ color: T.faint }} />
+          <p className="font-medium" style={{ color: T.muted }}>Nessun sistema registrato</p>
+          <p className="text-sm mt-1 max-w-xs mx-auto" style={{ color: T.faint }}>
             Aggiungi il tuo primo sistema AI per avviare la compliance Art. 50.
           </p>
           <button
@@ -416,9 +435,12 @@ export default function Art50KitPage() {
             return (
               <div
                 key={system.id}
-                className="bg-white rounded-xl p-5 transition-all"
+                className="rounded-xl p-5 transition-all"
                 style={{
-                  border: isExpanded ? "1px solid #bfdbfe" : "1px solid #f3f4f6",
+                  background: T.card,
+                  border: isExpanded ? "1px solid #bfdbfe" : `1px solid ${T.border}`,
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+                  borderRadius: 12,
                 }}
               >
                 <div className="flex items-start justify-between gap-4">
@@ -437,11 +459,11 @@ export default function Art50KitPage() {
                     {/* Info block */}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-medium text-gray-900 text-sm">{system.name}</span>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
+                        <span className="font-medium text-sm" style={{ color: T.text }}>{system.name}</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: T.bg, color: T.muted }}>
                           {TYPE_LABELS[system.type]}
                         </span>
-                        <span className="text-xs text-gray-400 font-mono">{system.registroId}</span>
+                        <span className="text-xs font-mono" style={{ color: T.faint }}>{system.registroId}</span>
                       </div>
 
                       {system.url && (
@@ -471,7 +493,7 @@ export default function Art50KitPage() {
                       )}
 
                       {system.lastScannedAt ? (
-                        <p className="text-xs text-gray-400 mt-1.5">
+                        <p className="text-xs mt-1.5" style={{ color: T.faint }}>
                           Ultimo scan:{" "}
                           {new Date(system.lastScannedAt).toLocaleDateString("it-IT", {
                             day: "2-digit", month: "short", year: "numeric",
@@ -492,7 +514,8 @@ export default function Art50KitPage() {
                       onClick={() => scanSystem(system)}
                       disabled={scanning === system.id || !system.url}
                       title={!system.url ? "Aggiungi un URL per avviare la scansione" : "Ri-scansiona"}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-all"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs disabled:opacity-40 transition-all hover:opacity-80"
+                      style={{ border: `1px solid ${T.border}`, color: T.muted, background: T.card }}
                     >
                       <RefreshCw
                         className={`h-3 w-3 ${scanning === system.id ? "animate-spin" : ""}`}
@@ -503,7 +526,8 @@ export default function Art50KitPage() {
                     <button
                       onClick={() => downloadRegistro(system)}
                       title="Scarica Registro di Implementazione"
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-600 hover:bg-gray-50 transition-all"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all hover:opacity-80"
+                      style={{ border: `1px solid ${T.border}`, color: T.muted, background: T.card }}
                     >
                       <Download className="h-3 w-3" />
                       Registro
@@ -535,16 +559,16 @@ export default function Art50KitPage() {
 
                 {/* ── EXPANDED DETAIL PANEL ── */}
                 {isExpanded && (
-                  <div className="mt-4 pt-4" style={{ borderTop: "1px solid #e5e7eb" }}>
+                  <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${T.border}` }}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                       {/* Signals */}
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
+                        <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: T.faint }}>
                           Analisi Art. 50
                         </p>
                         {system.signals.length === 0 ? (
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs" style={{ color: T.faint }}>
                             Nessuna scansione disponibile. Avvia la scansione per vedere i dettagli.
                           </p>
                         ) : (
@@ -560,7 +584,7 @@ export default function Art50KitPage() {
                                   ) : (
                                     <XCircle className="h-3.5 w-3.5 text-red-400 flex-shrink-0" />
                                   )}
-                                  <span className="text-gray-700 font-mono">{sig.criterion}</span>
+                                  <span className="font-mono" style={{ color: T.text }}>{sig.criterion}</span>
                                 </div>
                                 <span
                                   className="font-medium tabular-nums"
@@ -576,7 +600,7 @@ export default function Art50KitPage() {
 
                       {/* Registro summary */}
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
+                        <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: T.faint }}>
                           Registro di implementazione
                         </p>
                         <div className="space-y-1.5 text-xs">
@@ -598,20 +622,21 @@ export default function Art50KitPage() {
                             ] as [string, string][]
                           ).map(([label, value]) => (
                             <div key={label} className="flex gap-3">
-                              <span className="w-28 flex-shrink-0 text-gray-400">{label}</span>
-                              <span className="text-gray-700 font-medium">{value}</span>
+                              <span className="w-28 flex-shrink-0" style={{ color: T.faint }}>{label}</span>
+                              <span className="font-medium" style={{ color: T.text }}>{value}</span>
                             </div>
                           ))}
                         </div>
 
                         <button
                           onClick={() => downloadRegistro(system)}
-                          className="mt-4 flex items-center gap-2 text-xs text-blue-600 hover:underline"
+                          className="mt-4 flex items-center gap-2 text-xs hover:underline"
+                          style={{ color: "#2563eb" }}
                         >
                           <Download className="h-3 w-3" /> Scarica registro .txt
                         </button>
 
-                        <p className="mt-2 text-xs text-gray-400 leading-relaxed">
+                        <p className="mt-2 text-xs leading-relaxed" style={{ color: T.faint }}>
                           AI Comply non rilascia attestazioni di conformità legale.
                           La conformità all&apos;Art. 50 rimane responsabilità del titolare.
                         </p>
@@ -627,10 +652,10 @@ export default function Art50KitPage() {
 
       {/* ── INFO FOOTER ── */}
       <div
-        className="rounded-xl px-5 py-4 text-xs text-gray-500 leading-relaxed"
-        style={{ background: "#f9fafb", border: "1px solid #f3f4f6" }}
+        className="rounded-xl px-5 py-4 text-xs leading-relaxed"
+        style={{ background: T.bg, border: `1px solid ${T.border}`, color: T.muted }}
       >
-        <strong className="text-gray-700">Art. 50 AI Act — cosa richiede.</strong>{" "}
+        <strong style={{ color: T.text }}>Art. 50 AI Act — cosa richiede.</strong>{" "}
         I sistemi AI che interagiscono direttamente con persone fisiche devono informare
         gli utenti della natura artificiale del sistema in modo chiaro, tempestivo e
         comprensibile (Art. 50(1)). Obbligatorio dal 2 dicembre 2026 per tutti i sistemi
