@@ -36,6 +36,12 @@ export interface DataAuditResult {
   }>;
   overallQuality: "pass" | "review" | "fail";
   completedAt: string;
+  labelingProcess?: string;
+  labelingInstructions?: string;
+  geoCoverage?: string;
+  geoGapNote?: string;
+  usesSpecialCategoriesForBias?: boolean;
+  specialCategoryGuarantees?: string;
 }
 
 export interface DocugenResult {

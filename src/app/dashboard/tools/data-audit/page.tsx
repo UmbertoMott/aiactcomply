@@ -126,6 +126,12 @@ export default function DataAuditPage() {
   });
   const [realReport, setRealReport]     = useState<BiasReport | null>(null);
   const [csvParseError, setCsvParseError] = useState<string>("");
+  const [labelingProcess, setLabelingProcess] = useState("");
+  const [labelingInstructions, setLabelingInstructions] = useState("");
+  const [geoCoverage, setGeoCoverage] = useState("");
+  const [geoGapNote, setGeoGapNote] = useState("");
+  const [usesSpecialCategoriesForBias, setUsesSpecialCategoriesForBias] = useState(false);
+  const [specialCategoryGuarantees, setSpecialCategoryGuarantees] = useState("");
 
   function showToastMsg(msg: string) {
     setToast(msg);
@@ -229,6 +235,12 @@ export default function DataAuditPage() {
       }),
       overallQuality: report.riskLevel === "low" ? "pass" : report.riskLevel === "critical" ? "fail" : "review",
       completedAt,
+      labelingProcess,
+      labelingInstructions,
+      geoCoverage,
+      geoGapNote,
+      usesSpecialCategoriesForBias,
+      specialCategoryGuarantees,
     });
 
     await appendEvidence("adr", {
@@ -624,6 +636,96 @@ export default function DataAuditPage() {
             >
               Esporta BOM ↓
             </button>
+          </div>
+
+          {/* Art. 10(3) — Processo di etichettatura */}
+          <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, padding: 20, marginBottom: 16 }}>
+            <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 12, color: "#0D1016" }}>
+              Processo di etichettatura (Art. 10(3))
+            </div>
+            <label style={{ fontSize: 13, fontWeight: 500, marginBottom: 6, display: "block" as const, color: "#0D1016" }}>
+              Descrivi il processo di etichettatura (labeling) dei dati di addestramento
+            </label>
+            <textarea
+              value={labelingProcess}
+              onChange={(e) => setLabelingProcess(e.target.value)}
+              placeholder="Es: etichettatura manuale da 3 annotatori con consensus; tool usato; criteri di qualità; % di disaccordo massimo accettato..."
+              style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.07)", fontSize: 13, resize: "vertical" as const, minHeight: 80, boxSizing: "border-box" as const }}
+            />
+            <label style={{ fontSize: 13, fontWeight: 500, marginTop: 12, marginBottom: 8, display: "block" as const, color: "#0D1016" }}>
+              Istruzioni di etichettatura disponibili (Art. 10(3))
+            </label>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" as const }}>
+              {["Sì — documentate internamente", "Sì — allegate alla doc tecnica", "No — da produrre"].map(opt => (
+                <label key={opt} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, cursor: "pointer" }}>
+                  <input type="radio" name="labeling_instructions" value={opt}
+                    checked={labelingInstructions === opt}
+                    onChange={() => setLabelingInstructions(opt)} />
+                  {opt}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Art. 10(4) — Rappresentatività geografica */}
+          <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, padding: 20, marginBottom: 16 }}>
+            <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 12, color: "#0D1016" }}>
+              Rappresentatività geografica (Art. 10(4))
+            </div>
+            <label style={{ fontSize: 13, fontWeight: 500, marginBottom: 8, display: "block" as const, color: "#0D1016" }}>
+              Il dataset copre adeguatamente le aree geografiche in cui il sistema sarà deployato?
+            </label>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" as const, marginBottom: 12 }}>
+              {["Sì", "Parzialmente", "No", "Non applicabile"].map(opt => (
+                <label key={opt} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, cursor: "pointer" }}>
+                  <input type="radio" name="geo_coverage" value={opt}
+                    checked={geoCoverage === opt} onChange={() => setGeoCoverage(opt)} />
+                  {opt}
+                </label>
+              ))}
+            </div>
+            {(geoCoverage === "Parzialmente" || geoCoverage === "No") && (
+              <textarea
+                value={geoGapNote}
+                onChange={(e) => setGeoGapNote(e.target.value)}
+                placeholder="Descrivi le aree geografiche sotto-rappresentate e le misure di mitigazione previste..."
+                style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.07)", fontSize: 13, resize: "vertical" as const, minHeight: 60, boxSizing: "border-box" as const }}
+              />
+            )}
+          </div>
+
+          {/* Art. 10(5) — Categorie speciali per bias detection */}
+          <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, padding: 20, marginBottom: 16 }}>
+            <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, color: "#0D1016" }}>
+              Trattamento categorie speciali per bias detection (Art. 10(5))
+            </div>
+            <div style={{ fontSize: 12, color: "rgba(0,0,0,0.42)", marginBottom: 12 }}>
+              Art. 10(5) consente eccezionalmente il trattamento di dati di categorie speciali al solo fine di rilevare e correggere bias algoritmici, con garanzie adeguate.
+            </div>
+            <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer" }}>
+              <input
+                type="checkbox"
+                checked={usesSpecialCategoriesForBias}
+                onChange={(e) => setUsesSpecialCategoriesForBias(e.target.checked)}
+                style={{ marginTop: 2 }}
+              />
+              <span style={{ fontSize: 13 }}>
+                Il sistema tratta categorie speciali di dati esclusivamente per bias detection (Art. 10(5))
+              </span>
+            </label>
+            {usesSpecialCategoriesForBias && (
+              <div style={{ marginTop: 12 }}>
+                <label style={{ fontSize: 13, fontWeight: 500, marginBottom: 6, display: "block" as const, color: "#0D1016" }}>
+                  Garanzie tecniche e organizzative adottate:
+                </label>
+                <textarea
+                  value={specialCategoryGuarantees}
+                  onChange={(e) => setSpecialCategoryGuarantees(e.target.value)}
+                  placeholder="Es: pseudonimizzazione, accesso limitato, cancellazione post-analisi, base giuridica GDPR Art. 9(2)(g)..."
+                  style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.07)", fontSize: 13, resize: "vertical" as const, minHeight: 70, boxSizing: "border-box" as const }}
+                />
+              </div>
+            )}
           </div>
 
           <SignOffPanel toolKey="data-audit" toolLabel="Data & Training Audit" />
