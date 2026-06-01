@@ -169,7 +169,7 @@ export default function ResiliencePage() {
       )}
 
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.4px", color: "#0D1016", margin: 0 }}>Continuous Red Teaming (Art. 15)</h1>
+        <h1 style={{ fontSize: 24, fontWeight: 500, letterSpacing: "-0.8px", color: "#0D1016", margin: 0 }}>Continuous Red Teaming (Art. 15)</h1>
         <p style={{ marginTop: 4, fontSize: 13, color: "rgba(0,0,0,0.42)", lineHeight: 1.5 }}>Bombardamento periodico del modello con attacchi simulati. Salute difensiva in tempo reale.</p>
       </div>
 
@@ -204,7 +204,7 @@ export default function ResiliencePage() {
       <div className="flex flex-wrap items-center gap-2 mb-6">
         <button onClick={runBatch} disabled={running}
           className="flex items-center gap-1.5 text-[12px] px-4 py-2 rounded-lg transition-opacity hover:opacity-80 disabled:opacity-50"
-          style={{ background: "#0D1016", color: "#ffffff" }}>
+          style={{ background: "#0D1016", color: "#ffffff", borderRadius: 9999 }}>
           {running ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
           {running ? "Simulazione in corso..." : "Esegui 5 attacchi simulati"}
         </button>
@@ -212,12 +212,12 @@ export default function ResiliencePage() {
           <>
             <button onClick={exportReport}
               className="flex items-center gap-1.5 text-[12px] px-4 py-2 rounded-lg transition-opacity hover:opacity-70"
-              style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.09)", color: "rgba(0,0,0,0.6)" }}>
+              style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.09)", color: "rgba(0,0,0,0.6)", borderRadius: 9999 }}>
               <Download className="h-3.5 w-3.5" /> Esporta report
             </button>
             <button onClick={resetAttacks}
               className="text-[12px] px-4 py-2 rounded-lg transition-opacity hover:opacity-70"
-              style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.09)", color: "rgba(0,0,0,0.45)" }}>
+              style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.09)", color: "rgba(0,0,0,0.45)", borderRadius: 9999 }}>
               Reset log
             </button>
           </>
