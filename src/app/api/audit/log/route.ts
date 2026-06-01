@@ -9,6 +9,7 @@ import { insertAuditRecord } from "@/lib/audit/audit-trail";
 import { generateServerOutputId } from "@/lib/audit/output-id-server";
 import { createAuditClient } from "@/lib/audit/audit-trail";
 import { getAIModelName, getSystemVersion } from "@/lib/disclosure/ai-config";
+import { getSession } from "@/lib/auth/mock-auth";
 
 const BodySchema = z.object({
   tenantId:      z.string().uuid(),
@@ -24,6 +25,12 @@ const BodySchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  // Require authenticated session
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   let body: unknown;
   try {
     body = await request.json();
@@ -40,6 +47,10 @@ export async function POST(request: NextRequest) {
   }
 
   const data = parsed.data;
+
+  // Override identity fields from verified session — never trust client-supplied values
+  const userId    = session.id;
+  const userEmail = session.email;
   const supabase = createAuditClient();
 
   // Generate server-side output ID (PostgreSQL sequence)
@@ -62,8 +73,8 @@ export async function POST(request: NextRequest) {
       modelName:    getAIModelName(),
       modelVersion: data.modelVersion,
       systemVersion: getSystemVersion(),
-      userId:       data.userId,
-      userEmail:    data.userEmail,
+      userId:       userId,
+      userEmail:    userEmail,
       ipAddress:    request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? undefined,
       userAgent:    request.headers.get("user-agent") ?? undefined,
       requiresReview: data.requiresReview ?? true,
