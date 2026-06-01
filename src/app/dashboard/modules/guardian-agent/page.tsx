@@ -2,134 +2,111 @@
 
 import { useState, useEffect } from "react";
 import {
-  Shield,
-  Eye,
-  AlertTriangle,
-  Cpu,
-  StopCircle,
-  ChevronRight,
-  UserCheck,
-  Radio,
-  RefreshCw,
-  Settings,
-  History,
-  BarChart2,
+  Shield, AlertTriangle, Cpu, StopCircle, ChevronRight,
+  UserCheck, Radio, RefreshCw, Settings, History, BarChart2,
 } from "lucide-react";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 
-// Suppress unused import warning — kept for potential future use
-void Eye;
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
+// ─── Types ─────────────────────────────────────────────────────────────
 type KillSwitchState = "disarmed" | "armed" | "triggered" | "overridden";
-type LogSeverity = "info" | "warning" | "critical";
+type LogSeverity    = "info" | "warning" | "critical";
 type EscalationLevel = "watch" | "assist" | "autonomous";
 
 interface LogEvent {
-  time: string;
-  agent: string;
-  event: string;
-  severity: LogSeverity;
-  trace: string;
+  time: string; agent: string; event: string;
+  severity: LogSeverity; trace: string;
 }
-
 type HistoryEvent = {
-  id: string;
-  timestamp: string;
+  id: string; timestamp: string;
   type: "kill_switch" | "override" | "drift_alert" | "reset" | "friction_gate";
-  description: string;
-  metadata?: Record<string, string>;
+  description: string; metadata?: Record<string, string>;
 };
-
 type PersistedState = {
-  killState: KillSwitchState;
-  escalationLevel: EscalationLevel;
-  driftThreshold: number;
-  frictionGateMinSeconds: number;
-  systemName: string;
-  operatorEmail: string;
+  killState: KillSwitchState; escalationLevel: EscalationLevel;
+  driftThreshold: number; frictionGateMinSeconds: number;
+  systemName: string; operatorEmail: string;
 };
 
-// ─── Persistence helpers ──────────────────────────────────────────────────────
-
+// ─── Persistence ────────────────────────────────────────────────────────
 const STORAGE_KEY = "guardian_agent_state";
 const HISTORY_KEY = "guardian_agent_history";
 
 function defaultState(): PersistedState {
-  return {
-    killState: "disarmed",
-    escalationLevel: "watch",
-    driftThreshold: 5,
-    frictionGateMinSeconds: 3,
-    systemName: "AI System",
-    operatorEmail: "",
-  };
+  return { killState: "disarmed", escalationLevel: "watch", driftThreshold: 5, frictionGateMinSeconds: 3, systemName: "AI System", operatorEmail: "" };
 }
-
 function loadState(): PersistedState {
   if (typeof window === "undefined") return defaultState();
   const raw = localStorage.getItem(STORAGE_KEY);
   return raw ? { ...defaultState(), ...JSON.parse(raw) } : defaultState();
 }
-
-function saveState(s: PersistedState) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
-}
-
+function saveState(s: PersistedState) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
 function loadHistory(): HistoryEvent[] {
   if (typeof window === "undefined") return [];
   const raw = localStorage.getItem(HISTORY_KEY);
   return raw ? JSON.parse(raw) : [];
 }
-
 function appendHistory(event: Omit<HistoryEvent, "id" | "timestamp">) {
   const history = loadHistory();
-  history.unshift({
-    id: crypto.randomUUID(),
-    timestamp: new Date().toISOString(),
-    ...event,
-  });
+  history.unshift({ id: crypto.randomUUID(), timestamp: new Date().toISOString(), ...event });
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 100)));
 }
 
-// ─── Initial log data ─────────────────────────────────────────────────────────
-
 const INITIAL_LOGS: LogEvent[] = [
-  { time: "14:32:15", agent: "Sentinel-α", event: "Drift detection: accuracy -2.3%", severity: "warning", trace: "inf-7a3f..." },
-  { time: "14:30:00", agent: "Sentinel-β", event: "Pattern mismatch: input outlier", severity: "info", trace: "inf-7a3e..." },
-  { time: "14:20:01", agent: "Sentinel-α", event: "Prompt injection attempt blocked", severity: "critical", trace: "inf-7a3b..." },
+  { time: "14:32:15", agent: "Sentinel-α", event: "Drift detection: accuracy -2.3%",     severity: "warning",  trace: "inf-7a3f..." },
+  { time: "14:30:00", agent: "Sentinel-β", event: "Pattern mismatch: input outlier",      severity: "info",     trace: "inf-7a3e..." },
+  { time: "14:20:01", agent: "Sentinel-α", event: "Prompt injection attempt blocked",     severity: "critical", trace: "inf-7a3b..." },
 ];
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Design tokens (matches app-wide palette) ───────────────────────────
+const T = {
+  text:    "#0D1016",
+  muted:   "rgba(0,0,0,0.42)",
+  faint:   "rgba(0,0,0,0.28)",
+  border:  "rgba(0,0,0,0.07)",
+  card:    "#ffffff",
+  bg:      "#FAFAF9",
+  red:     "#dc2626",
+  redBg:   "rgba(220,38,38,0.06)",
+  redBdr:  "rgba(220,38,38,0.18)",
+  amber:   "#d97706",
+  amberBg: "rgba(245,158,11,0.06)",
+  blue:    "#2563eb",
+  blueBg:  "rgba(37,99,235,0.06)",
+  green:   "#15803d",
+  greenBg: "rgba(22,163,74,0.06)",
+};
 
+const card = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
+
+// ─── Small shared components ────────────────────────────────────────────
+function SeverityPip({ s }: { s: LogSeverity }) {
+  const c = s === "critical" ? T.red : s === "warning" ? T.amber : T.blue;
+  return <span style={{ width: 6, height: 6, borderRadius: "50%", background: c, flexShrink: 0, display: "inline-block" }} />;
+}
+
+// ─── Page ───────────────────────────────────────────────────────────────
 export default function GuardianAgentPage() {
-  const [killState, setKillState] = useState<KillSwitchState>("disarmed");
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [killState,    setKillState]    = useState<KillSwitchState>("disarmed");
+  const [showConfirm,  setShowConfirm]  = useState(false);
   const [overrideReason, setOverrideReason] = useState("");
   const [showOverride, setShowOverride] = useState(false);
-  const [selectedLog, setSelectedLog] = useState<LogEvent | null>(null);
-  const [logs, setLogs] = useState<LogEvent[]>(INITIAL_LOGS);
-  const [driftPct, setDriftPct] = useState(2.3);
-  const [autoMode, setAutoMode] = useState<"normal" | "drift-alert">("normal");
+  const [selectedLog,  setSelectedLog]  = useState<LogEvent | null>(null);
+  const [logs,         setLogs]         = useState<LogEvent[]>(INITIAL_LOGS);
+  const [driftPct,     setDriftPct]     = useState(2.3);
+  const [autoMode,     setAutoMode]     = useState<"normal" | "drift-alert">("normal");
   const [escalationLevel, setEscalationLevel] = useState<EscalationLevel>("watch");
-  const [frictionActive, setFrictionActive] = useState(false);
-  const [frictionReason, setFrictionReason] = useState("");
+  const [frictionActive,  setFrictionActive]  = useState(false);
+  const [frictionReason,  setFrictionReason]  = useState("");
   const [frictionStartTime, setFrictionStartTime] = useState<number | null>(null);
-  const [frictionElapsed, setFrictionElapsed] = useState(0);
-  // Config
-  const [driftThreshold, setDriftThreshold] = useState(5);
+  const [frictionElapsed,   setFrictionElapsed]   = useState(0);
+  const [driftThreshold,    setDriftThreshold]    = useState(5);
   const [frictionGateMinSeconds, setFrictionGateMinSeconds] = useState(3);
-  const [systemName, setSystemName] = useState("AI System");
+  const [systemName,   setSystemName]   = useState("AI System");
   const [operatorEmail, setOperatorEmail] = useState("");
-  // Navigation
-  const [activeTab, setActiveTab] = useState<"monitor" | "config" | "history">("monitor");
-  // History
-  const [history, setHistory] = useState<HistoryEvent[]>([]);
-  // Config save feedback
-  const [configSaved, setConfigSaved] = useState(false);
+  const [activeTab,    setActiveTab]    = useState<"monitor" | "config" | "history">("monitor");
+  const [history,      setHistory]      = useState<HistoryEvent[]>([]);
+  const [configSaved,  setConfigSaved]  = useState(false);
 
-  // ── Load from localStorage on mount ────────────────────────────────────────
   useEffect(() => {
     const s = loadState();
     setKillState(s.killState === "triggered" ? "disarmed" : s.killState);
@@ -141,251 +118,169 @@ export default function GuardianAgentPage() {
     setHistory(loadHistory());
   }, []);
 
-  // ── Persist state on change ─────────────────────────────────────────────────
   useEffect(() => {
     saveState({ killState, escalationLevel, driftThreshold, frictionGateMinSeconds, systemName, operatorEmail });
   }, [killState, escalationLevel, driftThreshold, frictionGateMinSeconds, systemName, operatorEmail]);
 
-  // ── Drift threshold check ───────────────────────────────────────────────────
   useEffect(() => {
-    if (driftPct > driftThreshold) {
-      setAutoMode("drift-alert");
-    } else {
-      setAutoMode("normal");
-    }
+    setAutoMode(driftPct > driftThreshold ? "drift-alert" : "normal");
   }, [driftPct, driftThreshold]);
 
-  // ── Friction gate timer ─────────────────────────────────────────────────────
   useEffect(() => {
     if (!frictionActive || frictionStartTime === null) return;
-    const interval = setInterval(() => {
-      setFrictionElapsed(Math.floor((Date.now() - frictionStartTime) / 1000));
-    }, 500);
+    const interval = setInterval(() => setFrictionElapsed(Math.floor((Date.now() - frictionStartTime) / 1000)), 500);
     return () => clearInterval(interval);
   }, [frictionActive, frictionStartTime]);
 
-  // ── Escalation constraints ──────────────────────────────────────────────────
-  const canArm = escalationLevel === "assist" || escalationLevel === "autonomous";
+  const canArm     = escalationLevel === "assist" || escalationLevel === "autonomous";
   const canTrigger = escalationLevel === "autonomous";
   const canOverride = escalationLevel === "assist" || escalationLevel === "autonomous";
 
-  // ── Helpers ─────────────────────────────────────────────────────────────────
-
   function addLog(agent: string, event: string, severity: LogSeverity) {
-    const newLog: LogEvent = {
+    setLogs((prev) => [{
       time: new Date().toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
-      agent,
-      event,
-      severity,
-      trace: `inf-${Math.random().toString(16).slice(2, 10)}`,
-    };
-    setLogs((prev) => [newLog, ...prev]);
+      agent, event, severity, trace: `inf-${Math.random().toString(16).slice(2, 10)}`,
+    }, ...prev]);
   }
 
   function activateFriction() {
-    setFrictionActive(true);
-    setFrictionStartTime(Date.now());
-    setFrictionElapsed(0);
+    setFrictionActive(true); setFrictionStartTime(Date.now()); setFrictionElapsed(0);
   }
 
   function buildTrace(log: LogEvent): string[] {
-    const base = [
-      `Agente: ${log.agent}`,
-      `Trace ID: ${log.trace}`,
-      `Timestamp: ${log.time}`,
-      `Severity: ${log.severity.toUpperCase()}`,
-    ];
-    if (log.severity === "critical") {
-      return [
-        ...base,
-        `Evento: ${log.event}`,
-        "→ Policy check: soglia critica superata",
-        "→ Kill switch protocol: ENGAGED",
-        `→ Operatore notificato: ${operatorEmail || "non configurato"}`,
-        "→ Evidence Layer: record scritto ✓",
-      ];
-    }
-    if (log.severity === "warning") {
-      return [
-        ...base,
-        `Evento: ${log.event}`,
-        "→ Policy check: soglia warning superata",
-        `→ Drift threshold: ${driftThreshold}%`,
-        "→ Escalation: monitoraggio aumentato",
-        "→ Azione richiesta: revisione umana raccomandata",
-      ];
-    }
-    return [
-      ...base,
-      `Evento: ${log.event}`,
-      "→ Policy check: OK",
-      "→ Nessuna azione richiesta",
-      "→ Log registrato: Evidence Layer (prossimo batch)",
-    ];
+    const base = [`Agente: ${log.agent}`, `Trace ID: ${log.trace}`, `Timestamp: ${log.time}`, `Severity: ${log.severity.toUpperCase()}`];
+    if (log.severity === "critical") return [...base, `Evento: ${log.event}`, "→ Policy check: soglia critica superata", "→ Kill switch protocol: ENGAGED", `→ Operatore: ${operatorEmail || "non configurato"}`, "→ Evidence Layer: record scritto ✓"];
+    if (log.severity === "warning")  return [...base, `Evento: ${log.event}`, "→ Policy check: warning superata", `→ Drift threshold: ${driftThreshold}%`, "→ Azione: revisione umana raccomandata"];
+    return [...base, `Evento: ${log.event}`, "→ Policy check: OK", "→ Nessuna azione richiesta"];
   }
 
-  const severityDot = (s: LogSeverity) => {
-    const colors: Record<LogSeverity, string> = { info: "bg-primary", warning: "bg-warning", critical: "bg-danger" };
-    return <span className={`h-2 w-2 rounded-full shrink-0 ${colors[s]}`} />;
-  };
-
-  // ── Actions ─────────────────────────────────────────────────────────────────
-
-  function armKillSwitch() {
+  async function armKillSwitch() {
     setKillState("armed");
     addLog("Operative-γ", "Kill switch armed — awaiting human confirmation", "critical");
   }
 
   async function confirmKill() {
-    setKillState("triggered");
-    setShowConfirm(false);
-    addLog("Operative-γ", "⚠ KILL SWITCH TRIGGERED by user — system halted", "critical");
-    addLog("Sentinel-α", "System output stopped. All inference pipelines frozen.", "critical");
-    appendHistory({
-      type: "kill_switch",
-      description: `Kill switch attivato per ${systemName}`,
-      metadata: { drift: `${driftPct}%`, escalation: escalationLevel },
-    });
+    setKillState("triggered"); setShowConfirm(false);
+    addLog("Operative-γ", "⚠ KILL SWITCH TRIGGERED — system halted", "critical");
+    addLog("Sentinel-α", "All inference pipelines frozen.", "critical");
+    appendHistory({ type: "kill_switch", description: `Kill switch attivato per ${systemName}`, metadata: { drift: `${driftPct}%`, escalation: escalationLevel } });
     setHistory(loadHistory());
-    await appendEvidence(
-      "incident",
-      {
-        descrizione: `Kill switch attivato — ${systemName} arrestato`,
-        data_incidente: new Date().toLocaleString("it-IT"),
-        gravità: "Critico — notifica obbligatoria",
-        componenti_coinvolti: systemName,
-        azioni_intraprese: "Sistema arrestato tramite Guardian-Agent kill switch",
-        notificato_autorità: "In valutazione",
-        stato: "Aperto",
-      },
-      `guardian-agent${operatorEmail ? ` / ${operatorEmail}` : ""}`
-    );
+    await appendEvidence("incident", { descrizione: `Kill switch attivato — ${systemName}`, data_incidente: new Date().toLocaleString("it-IT"), gravità: "Critico — notifica obbligatoria", componenti_coinvolti: systemName, azioni_intraprese: "Sistema arrestato tramite Guardian-Agent kill switch", notificato_autorità: "In valutazione", stato: "Aperto" }, `guardian-agent${operatorEmail ? ` / ${operatorEmail}` : ""}`);
   }
 
   async function executeOverride() {
     if (!overrideReason.trim()) return;
-    setKillState("overridden");
-    setShowOverride(false);
+    setKillState("overridden"); setShowOverride(false);
     addLog("Operative-γ", `Override → HITL. Motivo: ${overrideReason}`, "info");
-    addLog("Sentinel-α", "Human-in-the-loop activated. Operator assigned.", "info");
-    appendHistory({
-      type: "override",
-      description: `Override eseguito. Motivo: ${overrideReason.slice(0, 100)}`,
-      metadata: { operator: operatorEmail || "non specificato" },
-    });
+    addLog("Sentinel-α", "Human-in-the-loop activated.", "info");
+    appendHistory({ type: "override", description: `Override eseguito. Motivo: ${overrideReason.slice(0, 100)}`, metadata: { operator: operatorEmail || "non specificato" } });
     setHistory(loadHistory());
-    await appendEvidence(
-      "decision",
-      {
-        titolo: `Override HITL — ${systemName}`,
-        decisione_presa: "Controllo delegato a operatore umano",
-        motivazione_algoritmica: overrideReason,
-        revisione_umana: "Sì, approvata",
-        stakeholder: operatorEmail || "Team Operations",
-      },
-      `guardian-agent${operatorEmail ? ` / ${operatorEmail}` : ""}`
-    );
+    await appendEvidence("decision", { titolo: `Override HITL — ${systemName}`, decisione_presa: "Controllo delegato a operatore umano", motivazione_algoritmica: overrideReason, revisione_umana: "Sì, approvata", stakeholder: operatorEmail || "Team Operations" }, `guardian-agent${operatorEmail ? ` / ${operatorEmail}` : ""}`);
     setOverrideReason("");
   }
 
   function resetSystem() {
     appendHistory({ type: "reset", description: `Sistema ripristinato da stato: ${killState}` });
-    setKillState("disarmed");
-    setHistory(loadHistory());
+    setKillState("disarmed"); setHistory(loadHistory());
     addLog("Sentinel-β", "System reset complete. All agents reinitialized.", "info");
   }
 
   function simulateDrift() {
     const newDrift = +(Math.random() * 10).toFixed(1);
     setDriftPct(newDrift);
-    addLog(
-      "Sentinel-α",
-      `Drift detection: accuracy ${newDrift > 0 ? "-" : "+"}${Math.abs(newDrift)}%`,
-      newDrift > driftThreshold ? "critical" : "warning"
-    );
-    appendHistory({
-      type: "drift_alert",
-      description: `Drift rilevato: ${newDrift}% ${newDrift > driftThreshold ? "(soglia superata)" : ""}`,
-      metadata: { threshold: `${driftThreshold}%` },
-    });
+    addLog("Sentinel-α", `Drift detection: accuracy ${newDrift > 0 ? "-" : "+"}${Math.abs(newDrift)}%`, newDrift > driftThreshold ? "critical" : "warning");
+    appendHistory({ type: "drift_alert", description: `Drift rilevato: ${newDrift}% ${newDrift > driftThreshold ? "(soglia superata)" : ""}`, metadata: { threshold: `${driftThreshold}%` } });
     setHistory(loadHistory());
     if (newDrift > driftThreshold) {
-      addLog("Operative-γ", "⚠ CRITICAL DRIFT — Auto-arming kill switch per policy", "critical");
+      addLog("Operative-γ", "⚠ CRITICAL DRIFT — Auto-arming kill switch", "critical");
       setKillState("armed");
     }
   }
 
   function handleSaveConfig() {
     saveState({ killState, escalationLevel, driftThreshold, frictionGateMinSeconds, systemName, operatorEmail });
-    setConfigSaved(true);
-    setTimeout(() => setConfigSaved(false), 2000);
+    setConfigSaved(true); setTimeout(() => setConfigSaved(false), 2000);
   }
 
   function clearHistory() {
     if (!confirm("Cancellare tutto lo storico eventi?")) return;
-    localStorage.removeItem(HISTORY_KEY);
-    setHistory([]);
+    localStorage.removeItem(HISTORY_KEY); setHistory([]);
   }
 
-  // ── Render ───────────────────────────────────────────────────────────────────
+  // ── Kill switch pill label / color ──────────────────────────────────
+  const ksColor = killState === "triggered" ? T.red : killState === "armed" ? T.amber : killState === "overridden" ? T.blue : T.faint;
+  const ksLabel = killState === "disarmed" ? "Disarmato" : killState === "armed" ? "Armato" : killState === "triggered" ? "ATTIVATO" : "Overridden";
 
+  // ─── Render ──────────────────────────────────────────────────────────
   return (
     <div className="w-full">
-      {/* Header */}
-      <div className="mb-6 flex items-start justify-between">
+
+      {/* ── HEADER ────────────────────────────────────────────────────── */}
+      <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            Guardian-Agent
+          <div className="flex items-center gap-2.5 mb-1">
+            <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.5px", color: T.text }}>
+              Guardian Agent
+            </h1>
             {systemName && (
-              <span className="text-muted-foreground font-normal"> — {systemName}</span>
+              <span style={{ fontSize: 13, color: T.muted, fontWeight: 400 }}>— {systemName}</span>
             )}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Control Plane di sorveglianza runtime. Governance attiva: kill switch,
-            override HITL, explainability trace.
+          </div>
+          <p style={{ fontSize: 13, color: T.muted }}>
+            Control plane di sorveglianza runtime · Kill switch · Override HITL · Explainability trace
           </p>
-          <div className="flex gap-2 mt-2">
+          <div className="flex gap-1.5 mt-2">
             {["Art. 14", "Art. 9", "Art. 15"].map((art) => (
-              <span key={art} className="text-[10px] bg-muted rounded-full px-2 py-0.5 text-muted-foreground">
+              <span key={art} style={{ fontSize: 10, color: T.faint, background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "2px 7px" }}>
                 {art}
               </span>
             ))}
           </div>
         </div>
-        <div className={`rounded-lg px-4 py-2 text-xs font-medium flex items-center gap-2 ${
-          autoMode === "drift-alert"
-            ? "bg-danger/10 text-danger border border-danger/30 animate-pulse"
-            : "bg-success/10 text-success border border-success/30"
-        }`}>
-          <Radio className="h-3 w-3" />
-          {autoMode === "drift-alert" ? "DRIFT CRITICO — Modalità mitigazione attiva" : "Operativo — nessuna anomalia"}
+
+        {/* Status pill */}
+        <div
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl flex-shrink-0"
+          style={autoMode === "drift-alert"
+            ? { background: T.redBg, border: `1px solid ${T.redBdr}` }
+            : { background: T.greenBg, border: "1px solid rgba(22,163,74,0.18)" }}
+        >
+          <Radio
+            className="h-3 w-3"
+            style={{ color: autoMode === "drift-alert" ? T.red : T.green }}
+          />
+          <span style={{ fontSize: 11, fontWeight: 600, color: autoMode === "drift-alert" ? T.red : T.green }}>
+            {autoMode === "drift-alert" ? "Drift critico — mitigazione attiva" : "Operativo"}
+          </span>
         </div>
       </div>
 
-      {/* Tab navigation */}
-      <div className="flex gap-5 mb-6" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
-        {[
-          { id: "monitor" as const, label: "Monitor", Icon: Radio },
-          { id: "config" as const, label: "Configurazione", Icon: Settings },
-          { id: "history" as const, label: "Storico", Icon: History },
-        ].map(({ id, label, Icon }) => (
+      {/* ── TABS ──────────────────────────────────────────────────────── */}
+      <div className="flex gap-6 mb-6" style={{ borderBottom: `1px solid ${T.border}` }}>
+        {([
+          { id: "monitor" as const, label: "Monitor",        Icon: Radio },
+          { id: "config"  as const, label: "Configurazione", Icon: Settings },
+          { id: "history" as const, label: "Storico",        Icon: History },
+        ] as const).map(({ id, label, Icon }) => (
           <button
             key={id}
             onClick={() => setActiveTab(id)}
-            className="flex items-center gap-1.5 pb-3 text-[13px] font-medium transition-all border-b-2"
-            style={
-              activeTab === id
-                ? { borderColor: "#0D1016", color: "#0D1016" }
-                : { borderColor: "transparent", color: "rgba(0,0,0,0.42)" }
-            }
+            className="flex items-center gap-1.5 pb-3 transition-all"
+            style={{
+              fontSize: 13,
+              fontWeight: activeTab === id ? 500 : 400,
+              color: activeTab === id ? T.text : T.muted,
+              background: "none",
+              border: "none",
+              borderBottom: `2px solid ${activeTab === id ? T.text : "transparent"}`,
+              cursor: "pointer",
+              paddingBottom: 12,
+            }}
           >
             <Icon className="h-3.5 w-3.5" />
             {label}
             {id === "history" && history.length > 0 && (
-              <span
-                className="ml-0.5 text-[10px] font-semibold rounded-full px-1.5 py-0.5"
-                style={{ background: "rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.45)" }}
-              >
+              <span style={{ fontSize: 10, fontWeight: 600, color: T.faint, background: "rgba(0,0,0,0.05)", borderRadius: 10, padding: "1px 6px" }}>
                 {history.length}
               </span>
             )}
@@ -393,112 +288,100 @@ export default function GuardianAgentPage() {
         ))}
       </div>
 
-      {/* ── TAB: Monitor ──────────────────────────────────────────────────────── */}
+      {/* ══════════════════════════════════════════════════════════════
+          TAB: MONITOR
+      ══════════════════════════════════════════════════════════════ */}
       {activeTab === "monitor" && (
         <>
-          {/* Drift alert banner */}
+          {/* Drift alert — only if active */}
           {autoMode === "drift-alert" && (
-            <div className="rounded-xl border border-danger/30 bg-danger/5 p-5 mb-6">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="h-6 w-6 text-danger mt-0.5 shrink-0 animate-pulse" />
-                <div>
-                  <h3 className="text-base font-bold text-danger">Allarme deriva critica</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Drift accuratezza al {driftPct}% — superata soglia del {driftThreshold}%. Il sistema si è
-                    auto-configurato in modalità mitigazione. Kill switch armato.
-                    {killState !== "triggered" && " Azione richiesta: conferma o override."}
-                  </p>
-                  <div className="flex gap-2 mt-3">
-                    <button
-                      onClick={() => setShowConfirm(true)}
-                      className="rounded-lg bg-danger px-4 py-2 text-xs font-medium text-white hover:bg-danger/90 flex items-center gap-1.5"
-                    >
-                      <StopCircle className="h-3.5 w-3.5" /> Arresta sistema
-                    </button>
-                    <button
-                      onClick={() => setShowOverride(true)}
-                      className="rounded-lg border border-border px-4 py-2 text-xs font-medium text-foreground hover:bg-muted flex items-center gap-1.5"
-                    >
-                      <UserCheck className="h-3.5 w-3.5" /> Delegare a operatore umano
-                    </button>
-                  </div>
+            <div className="rounded-xl px-5 py-4 mb-5 flex items-start gap-4"
+              style={{ background: T.redBg, border: `1px solid ${T.redBdr}` }}>
+              <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: T.red }} />
+              <div className="flex-1">
+                <p style={{ fontSize: 13, fontWeight: 600, color: T.red, marginBottom: 4 }}>
+                  Deriva critica — {driftPct}% (soglia: {driftThreshold}%)
+                </p>
+                <p style={{ fontSize: 12, color: T.muted }}>
+                  Kill switch armato automaticamente. Azione richiesta: conferma arresto o delega a operatore.
+                </p>
+                <div className="flex gap-2 mt-3">
+                  <button onClick={() => setShowConfirm(true)}
+                    className="flex items-center gap-1.5 rounded-lg px-3 py-1.5"
+                    style={{ background: T.red, color: "#fff", fontSize: 11, fontWeight: 600, border: "none", cursor: "pointer" }}>
+                    <StopCircle className="h-3 w-3" /> Arresta sistema
+                  </button>
+                  <button onClick={() => setShowOverride(true)}
+                    className="flex items-center gap-1.5 rounded-lg px-3 py-1.5"
+                    style={{ background: "transparent", color: T.text, fontSize: 11, fontWeight: 500, border: `1px solid ${T.border}`, cursor: "pointer" }}>
+                    <UserCheck className="h-3 w-3" /> Delega operatore
+                  </button>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Stats cards */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
-            <div className="rounded-xl border border-border bg-card p-4">
-              <Cpu className="h-4 w-4 text-muted-foreground mb-2" />
-              <div className={`text-lg font-bold ${killState === "triggered" ? "text-danger" : "text-success"}`}>
-                {killState === "triggered" ? "HALTED" : "Active"}
-              </div>
-              <div className="mt-1 text-xs text-muted-foreground">System state</div>
-            </div>
-            <div className="rounded-xl border border-border bg-card p-4">
-              <StopCircle className="h-4 w-4 text-muted-foreground mb-2" />
-              <div className={`text-lg font-bold ${
-                killState === "triggered" ? "text-danger" :
-                killState === "armed" ? "text-warning" :
-                killState === "overridden" ? "text-primary" : "text-muted-foreground"
-              }`}>
-                {killState === "disarmed" ? "Disarmato" :
-                 killState === "armed" ? "Armato" :
-                 killState === "triggered" ? "ATTIVATO" : "Overridden"}
-              </div>
-              <div className="mt-1 text-xs text-muted-foreground">Kill switch</div>
-            </div>
-            <div className="rounded-xl border border-border bg-card p-4">
-              <UserCheck className="h-4 w-4 text-muted-foreground mb-2" />
-              <div className="text-lg font-bold text-primary">
-                {killState === "overridden" ? "Attivo" : "In attesa"}
-              </div>
-              <div className="mt-1 text-xs text-muted-foreground">Human-in-the-loop</div>
-            </div>
-            <div className="rounded-xl border border-border bg-card p-4">
-              <AlertTriangle className="h-4 w-4 text-muted-foreground mb-2" />
-              <div className={`text-lg font-bold ${driftPct > driftThreshold ? "text-danger" : "text-success"}`}>
-                {driftPct}%
-              </div>
-              <div className="mt-1 text-xs text-muted-foreground">Drift accuratezza</div>
-              <div className="mt-0.5 text-[10px] text-muted-foreground">Soglia: {driftThreshold}%</div>
+          {/* ── STATS STRIP ─────────────────────────────────────────── */}
+          <div className="rounded-xl mb-5" style={card}>
+            <div className="grid grid-cols-4">
+              {[
+                { label: "System state",    value: killState === "triggered" ? "HALTED" : "Active",
+                  color: killState === "triggered" ? T.red : T.green },
+                { label: "Kill switch",     value: ksLabel, color: ksColor },
+                { label: "Human-in-loop",   value: killState === "overridden" ? "Attivo" : "Standby",
+                  color: killState === "overridden" ? T.blue : T.faint },
+                { label: `Drift (soglia ${driftThreshold}%)`, value: `${driftPct}%`,
+                  color: driftPct > driftThreshold ? T.red : T.green },
+              ].map((s, i) => (
+                <div key={s.label} className="px-5 py-4"
+                  style={{ borderRight: i < 3 ? `1px solid ${T.border}` : "none" }}>
+                  <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.4px", color: s.color, lineHeight: 1.1 }}>
+                    {s.value}
+                  </div>
+                  <div style={{ fontSize: 11, color: T.faint, marginTop: 3 }}>{s.label}</div>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Control panel */}
-          <div className="grid lg:grid-cols-3 gap-6 mb-6">
+          {/* ── MAIN GRID ───────────────────────────────────────────── */}
+          <div className="grid lg:grid-cols-3 gap-5">
             <div className="lg:col-span-2 space-y-4">
-              {/* Escalation Protocol */}
-              <div className="rounded-xl border border-border bg-card p-5">
-                <h2 className="text-sm font-semibold text-foreground mb-4">
-                  Protocollo di Escalation — 3 livelli
-                </h2>
-                <div className="grid grid-cols-3 gap-3 mb-4">
-                  {(["watch", "assist", "autonomous"] as const).map((level) => {
+
+              {/* Escalation protocol */}
+              <div className="rounded-xl p-5" style={card}>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 style={{ fontSize: 13, fontWeight: 600, color: T.text }}>
+                    Protocollo di escalation
+                  </h2>
+                  <span style={{ fontSize: 10, color: T.faint, background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "2px 7px" }}>
+                    3 livelli
+                  </span>
+                </div>
+                {/* Segmented control */}
+                <div className="flex rounded-lg overflow-hidden" style={{ border: `1px solid ${T.border}` }}>
+                  {(["watch", "assist", "autonomous"] as const).map((level, i) => {
                     const isActive = escalationLevel === level;
-                    const labels = {
-                      watch: "Watch (Osservazione)",
-                      assist: "Assist (Suggerimento)",
-                      autonomous: "Autonomous (Intervento)",
-                    };
+                    const labels = { watch: "Watch", assist: "Assist", autonomous: "Autonomous" };
+                    const descs  = { watch: "Monitoraggio passivo", assist: "Suggerimenti HITL", autonomous: "Kill switch + override" };
                     return (
                       <button
                         key={level}
                         onClick={() => setEscalationLevel(level)}
-                        className={`rounded-lg border px-3 py-3 text-xs font-medium transition-colors text-left ${
-                          isActive ? "bg-primary/10 border-primary text-primary" : "border-border text-muted-foreground hover:border-primary/30"
-                        }`}
+                        className="flex-1 px-4 py-3 text-left transition-colors"
+                        style={{
+                          background: isActive ? T.text : T.card,
+                          borderRight: i < 2 ? `1px solid ${isActive ? "transparent" : T.border}` : "none",
+                          cursor: "pointer",
+                          border: "none",
+                        }}
                       >
-                        <div className={`h-1.5 w-full rounded-full mb-2 ${isActive ? "bg-primary" : "bg-muted"}`} />
-                        {labels[level]}
-                        <p className="text-[10px] text-muted-foreground mt-1">
-                          {level === "watch"
-                            ? "Solo monitoraggio passivo"
-                            : level === "assist"
-                            ? "Suggerimenti con HITL"
-                            : "Kill switch e override"}
-                        </p>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: isActive ? "#fff" : T.text, marginBottom: 2 }}>
+                          {labels[level]}
+                        </div>
+                        <div style={{ fontSize: 10, color: isActive ? "rgba(255,255,255,0.6)" : T.faint }}>
+                          {descs[level]}
+                        </div>
                       </button>
                     );
                   })}
@@ -506,198 +389,184 @@ export default function GuardianAgentPage() {
               </div>
 
               {/* Friction Gate */}
-              <div className="rounded-xl border border-border bg-card p-5">
-                <h2 className="text-sm font-semibold text-foreground mb-4">
-                  Friction Gate — Anti Automation Bias
-                  <span className="ml-2 text-[10px] font-normal text-muted-foreground bg-muted rounded-full px-2 py-0.5">Art. 14(4)</span>
-                </h2>
-                <div className="rounded-lg border border-warning/30 bg-warning/5 p-4">
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="h-5 w-5 text-warning mt-0.5 shrink-0" />
-                    <div className="w-full">
-                      <p className="text-xs font-medium text-foreground mb-1">
-                        Rilevato: approvazione rapida di output rischioso
+              <div className="rounded-xl p-5" style={card}>
+                <div className="flex items-center gap-2 mb-3">
+                  <h2 style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Friction Gate</h2>
+                  <span style={{ fontSize: 10, color: T.faint, background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "2px 7px" }}>
+                    Art. 14(4) · Anti automation bias
+                  </span>
+                </div>
+                <div className="rounded-lg p-4" style={{ background: T.amberBg, border: `1px solid rgba(245,158,11,0.2)` }}>
+                  <p style={{ fontSize: 12, fontWeight: 500, color: T.text, marginBottom: 4 }}>
+                    Rilevato: approvazione rapida di output rischioso
+                  </p>
+                  <p style={{ fontSize: 11, color: T.muted, marginBottom: 12 }}>
+                    Soglia minima impostata: {frictionGateMinSeconds}s. L&apos;automation bias può portare a trascurare errori critici.
+                  </p>
+                  {!frictionActive ? (
+                    <button onClick={activateFriction} className="rounded-lg px-3 py-1.5"
+                      style={{ fontSize: 11, fontWeight: 500, color: T.amber, background: "transparent", border: `1px solid rgba(245,158,11,0.3)`, cursor: "pointer" }}>
+                      Simula approvazione rapida
+                    </button>
+                  ) : (
+                    <div className="space-y-2">
+                      <p style={{ fontSize: 11, fontWeight: 600, color: T.red }}>
+                        Friction Gate attivato — motivazione obbligatoria
                       </p>
-                      <p className="text-[10px] text-muted-foreground mb-3">
-                        Soglia minima impostata: {frictionGateMinSeconds}s (configurabile nel tab Configurazione).
-                        L&apos;automation bias può portare a trascurare errori critici.
+                      <textarea value={frictionReason} onChange={(e) => setFrictionReason(e.target.value)}
+                        placeholder="Spiega perché questo output è accettabile nonostante il rischio..."
+                        className="w-full rounded-lg px-3 py-2 focus:outline-none"
+                        style={{ fontSize: 11, border: `1px solid ${T.border}`, background: T.card, color: T.text, resize: "none" }}
+                        rows={2}
+                      />
+                      <p style={{ fontSize: 11, color: frictionElapsed >= frictionGateMinSeconds ? T.green : T.muted }}>
+                        {frictionElapsed < frictionGateMinSeconds
+                          ? `Attendi ancora ${frictionGateMinSeconds - frictionElapsed}s prima di confermare`
+                          : "✓ Tempo minimo di riflessione completato"}
                       </p>
-                      {!frictionActive ? (
+                      <div className="flex gap-2">
                         <button
-                          onClick={activateFriction}
-                          className="rounded-lg border border-warning/30 px-3 py-1.5 text-[10px] font-medium text-warning hover:bg-warning/10"
-                        >
-                          Simula approvazione rapida
+                          disabled={!frictionReason.trim() || frictionElapsed < frictionGateMinSeconds}
+                          onClick={() => {
+                            addLog("Operative-γ", `Friction Gate superato dopo ${frictionElapsed}s`, "info");
+                            appendHistory({ type: "friction_gate", description: `Friction Gate superato (${frictionElapsed}s). Motivo: ${frictionReason.slice(0, 80)}` });
+                            setHistory(loadHistory()); setFrictionActive(false); setFrictionReason(""); setFrictionStartTime(null); setFrictionElapsed(0);
+                          }}
+                          className="rounded-lg px-3 py-1.5"
+                          style={{ fontSize: 11, fontWeight: 600, background: T.text, color: "#fff", border: "none", cursor: "pointer", opacity: (!frictionReason.trim() || frictionElapsed < frictionGateMinSeconds) ? 0.35 : 1 }}>
+                          Conferma con motivazione
                         </button>
-                      ) : (
-                        <div className="space-y-2">
-                          <p className="text-[10px] text-danger font-medium">⛔ Friction Gate attivato — motivazione obbligatoria</p>
-                          <textarea
-                            value={frictionReason}
-                            onChange={(e) => setFrictionReason(e.target.value)}
-                            placeholder="Spiega perché questo output è accettabile nonostante il rischio..."
-                            className="w-full rounded-lg border border-border bg-card px-3 py-2 text-[10px] text-foreground placeholder:text-muted-foreground"
-                            rows={2}
-                          />
-                          <p className={`text-[10px] font-medium ${frictionElapsed >= frictionGateMinSeconds ? "text-success" : "text-muted-foreground"}`}>
-                            {frictionElapsed < frictionGateMinSeconds
-                              ? `⏱ Attendi ancora ${frictionGateMinSeconds - frictionElapsed}s prima di confermare`
-                              : "✓ Tempo minimo di riflessione completato"}
-                          </p>
-                          <div className="flex gap-2">
-                            <button
-                              disabled={!frictionReason.trim() || frictionElapsed < frictionGateMinSeconds}
-                              onClick={() => {
-                                addLog("Operative-γ", `Friction Gate superato dopo ${frictionElapsed}s: ${frictionReason.slice(0, 40)}...`, "info");
-                                appendHistory({
-                                  type: "friction_gate",
-                                  description: `Friction Gate superato (${frictionElapsed}s). Motivo: ${frictionReason.slice(0, 80)}`,
-                                });
-                                setHistory(loadHistory());
-                                setFrictionActive(false);
-                                setFrictionReason("");
-                                setFrictionStartTime(null);
-                                setFrictionElapsed(0);
-                              }}
-                              className="rounded-lg bg-primary px-3 py-1.5 text-[10px] font-medium text-primary-foreground disabled:opacity-50"
-                            >
-                              Conferma con motivazione
-                            </button>
-                            <button
-                              onClick={() => setShowConfirm(true)}
-                              className="rounded-lg border border-danger/30 px-3 py-1.5 text-[10px] font-medium text-danger hover:bg-danger/10"
-                            >
-                              Blocca output (Kill Switch)
-                            </button>
-                          </div>
-                        </div>
-                      )}
+                        <button onClick={() => setShowConfirm(true)} className="rounded-lg px-3 py-1.5"
+                          style={{ fontSize: 11, fontWeight: 500, color: T.red, background: T.redBg, border: `1px solid ${T.redBdr}`, cursor: "pointer" }}>
+                          Blocca output
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
-              {/* Governance Panel — with escalation constraints */}
-              <div className="rounded-xl border border-border bg-card p-5">
-                <h2 className="text-sm font-semibold text-foreground mb-4">
-                  Pannello di Governance — Art. 14
-                </h2>
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Arm kill switch */}
-                  <div>
-                    <button
-                      onClick={armKillSwitch}
-                      disabled={killState === "triggered" || !canArm}
-                      className="w-full rounded-lg border border-danger/30 bg-danger/5 px-4 py-3 text-xs font-medium text-danger hover:bg-danger/10 disabled:opacity-30 transition-colors text-left"
-                    >
-                      <StopCircle className="h-4 w-4 mb-1" />
-                      Arma Kill Switch
-                      <p className="text-[10px] text-muted-foreground mt-0.5">Prepara arresto d&apos;emergenza</p>
-                    </button>
-                    {!canArm && (
-                      <p className="text-[9px] text-muted-foreground mt-0.5 px-1">
-                        Richiede escalation: Assist o Autonomous
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Trigger kill switch */}
-                  <div>
-                    <button
-                      onClick={() => setShowConfirm(true)}
-                      disabled={killState !== "armed" || !canTrigger}
-                      className="w-full rounded-lg bg-danger px-4 py-3 text-xs font-medium text-white hover:bg-danger/90 disabled:opacity-30 transition-colors text-left"
-                    >
-                      <StopCircle className="h-4 w-4 mb-1" />
-                      ATTIVA KILL SWITCH
-                      <p className="text-[10px] text-white/70 mt-0.5">Arresto immediato del sistema</p>
-                    </button>
-                    {!canTrigger && (
-                      <p className="text-[9px] text-muted-foreground mt-0.5 px-1">
-                        Richiede escalation: Autonomous
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Override */}
-                  <div>
-                    <button
-                      onClick={() => setShowOverride(true)}
-                      disabled={killState === "triggered" || !canOverride}
-                      className="w-full rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-xs font-medium text-primary hover:bg-primary/10 disabled:opacity-30 transition-colors text-left"
-                    >
-                      <UserCheck className="h-4 w-4 mb-1" />
-                      Override → Operatore Umano
-                      <p className="text-[10px] text-muted-foreground mt-0.5">Reindirizza a HITL</p>
-                    </button>
-                    {!canOverride && (
-                      <p className="text-[9px] text-muted-foreground mt-0.5 px-1">
-                        Richiede escalation: Assist o Autonomous
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Reset */}
-                  <div>
-                    <button
-                      onClick={resetSystem}
-                      disabled={killState === "disarmed"}
-                      className="w-full rounded-lg border border-border px-4 py-3 text-xs font-medium text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors text-left"
-                    >
-                      <RefreshCw className="h-4 w-4 mb-1" />
-                      Reset Sistema
-                      <p className="text-[10px] text-muted-foreground mt-0.5">Ripristino agenti</p>
-                    </button>
-                  </div>
+              {/* Governance panel */}
+              <div className="rounded-xl p-5" style={card}>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Pannello di governance</h2>
+                  <span style={{ fontSize: 10, color: T.faint, background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "2px 7px" }}>Art. 14</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {[
+                    {
+                      label: "Arma Kill Switch",
+                      sub: "Prepara arresto d'emergenza",
+                      Icon: StopCircle,
+                      onClick: armKillSwitch,
+                      disabled: killState === "triggered" || !canArm,
+                      hint: !canArm ? "Richiede Assist o Autonomous" : undefined,
+                      variant: "outline-danger" as const,
+                    },
+                    {
+                      label: "ATTIVA KILL SWITCH",
+                      sub: "Arresto immediato del sistema",
+                      Icon: StopCircle,
+                      onClick: () => setShowConfirm(true),
+                      disabled: killState !== "armed" || !canTrigger,
+                      hint: !canTrigger ? "Richiede Autonomous" : undefined,
+                      variant: "filled-danger" as const,
+                    },
+                    {
+                      label: "Override → Operatore",
+                      sub: "Reindirizza a HITL",
+                      Icon: UserCheck,
+                      onClick: () => setShowOverride(true),
+                      disabled: killState === "triggered" || !canOverride,
+                      hint: !canOverride ? "Richiede Assist o Autonomous" : undefined,
+                      variant: "outline-blue" as const,
+                    },
+                    {
+                      label: "Reset sistema",
+                      sub: "Ripristino agenti",
+                      Icon: RefreshCw,
+                      onClick: resetSystem,
+                      disabled: killState === "disarmed",
+                      hint: undefined,
+                      variant: "outline-neutral" as const,
+                    },
+                  ].map((btn) => {
+                    const styles: Record<string, React.CSSProperties> = {
+                      "outline-danger":  { background: T.redBg, border: `1px solid ${T.redBdr}`, color: T.red },
+                      "filled-danger":   { background: T.red, border: "none", color: "#fff" },
+                      "outline-blue":    { background: T.blueBg, border: `1px solid rgba(37,99,235,0.2)`, color: T.blue },
+                      "outline-neutral": { background: "rgba(0,0,0,0.02)", border: `1px solid ${T.border}`, color: T.muted },
+                    };
+                    return (
+                      <div key={btn.label}>
+                        <button
+                          onClick={btn.onClick}
+                          disabled={btn.disabled}
+                          className="w-full rounded-lg px-4 py-3 text-left transition-opacity hover:opacity-80"
+                          style={{ ...styles[btn.variant], cursor: "pointer", opacity: btn.disabled ? 0.3 : 1 }}
+                        >
+                          <btn.Icon className="h-3.5 w-3.5 mb-1.5" />
+                          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2 }}>{btn.label}</div>
+                          <div style={{ fontSize: 10, opacity: 0.65 }}>{btn.sub}</div>
+                        </button>
+                        {btn.hint && btn.disabled && (
+                          <p style={{ fontSize: 10, color: T.faint, marginTop: 3, paddingLeft: 2 }}>{btn.hint}</p>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
               {/* Agent log */}
-              <div className="rounded-xl border border-border bg-card">
-                <div className="flex items-center justify-between px-5 py-3 border-b border-border">
-                  <h2 className="text-sm font-semibold text-foreground">Agent Log — Real Time</h2>
+              <div className="rounded-xl overflow-hidden" style={card}>
+                <div className="flex items-center justify-between px-5 py-3"
+                  style={{ borderBottom: `1px solid ${T.border}` }}>
+                  <h2 style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Agent Log</h2>
                   <div className="flex items-center gap-3">
-                    <button
-                      onClick={simulateDrift}
-                      className="rounded-lg border border-border px-2.5 py-1.5 text-[10px] text-muted-foreground hover:text-foreground"
-                    >
+                    <button onClick={simulateDrift} className="rounded-md px-2.5 py-1.5"
+                      style={{ fontSize: 10, color: T.muted, background: "rgba(0,0,0,0.03)", border: `1px solid ${T.border}`, cursor: "pointer" }}>
                       Simula drift
                     </button>
-                    <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
-                    <span className="text-[10px] text-muted-foreground">Live</span>
+                    <div className="flex items-center gap-1.5">
+                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: T.green, display: "inline-block" }} />
+                      <span style={{ fontSize: 10, color: T.faint }}>Live</span>
+                    </div>
                   </div>
                 </div>
-                <div className="divide-y divide-border/50 max-h-64 overflow-y-auto">
+                <div style={{ maxHeight: 240, overflowY: "auto", background: "#FAFAFA" }}>
                   {logs.map((log, i) => (
                     <div
                       key={i}
-                      className={`px-5 py-3 hover:bg-muted/30 cursor-pointer transition-colors ${selectedLog?.trace === log.trace ? "bg-muted/40" : ""}`}
                       onClick={() => setSelectedLog(log)}
+                      className="flex items-start gap-3 px-5 py-2.5 cursor-pointer transition-colors hover:bg-white"
+                      style={{ borderBottom: `1px solid rgba(0,0,0,0.04)`, background: selectedLog?.trace === log.trace ? "#fff" : undefined }}
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-2">
-                          {severityDot(log.severity)}
-                          <span className="text-xs text-muted-foreground font-mono">{log.agent}</span>
+                      <SeverityPip s={log.severity} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2 mb-0.5">
+                          <span style={{ fontSize: 10, fontWeight: 600, color: T.muted, fontFamily: "monospace" }}>{log.agent}</span>
+                          <span style={{ fontSize: 10, color: T.faint, fontFamily: "monospace", flexShrink: 0 }}>{log.time}</span>
                         </div>
-                        <span className="text-[10px] text-muted-foreground font-mono">{log.time}</span>
+                        <p style={{ fontSize: 11, color: log.severity === "critical" ? T.red : T.text, fontFamily: "monospace" }}>
+                          {log.event}
+                        </p>
                       </div>
-                      <p className={`mt-1 text-xs ml-4 ${
-                        log.severity === "critical" ? "text-danger font-medium" : "text-foreground"
-                      }`}>{log.event}</p>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            {/* Right panel */}
+            {/* ── RIGHT PANEL ─────────────────────────────────────────── */}
             <div className="lg:col-span-1 space-y-4">
-              {/* Trace view */}
-              <div className="rounded-xl border border-border bg-card p-5">
+
+              {/* Explainability trace */}
+              <div className="rounded-xl p-5" style={card}>
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-sm font-semibold text-foreground">Explainability Trace</h2>
+                  <h2 style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Explainability Trace</h2>
                   {selectedLog && (
-                    <span className="text-[10px] font-mono text-muted-foreground bg-muted rounded px-1.5 py-0.5">
+                    <span style={{ fontSize: 9, fontFamily: "monospace", color: T.faint, background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "2px 6px" }}>
                       {selectedLog.trace}
                     </span>
                   )}
@@ -705,160 +574,113 @@ export default function GuardianAgentPage() {
                 {selectedLog ? (
                   <div className="space-y-1.5">
                     {buildTrace(selectedLog).map((step, i) => (
-                      <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-                        <ChevronRight className="h-3 w-3 mt-0.5 shrink-0 text-primary/60" />
-                        <span className={step.startsWith("→") ? "text-foreground" : ""}>{step}</span>
+                      <div key={i} className="flex items-start gap-2">
+                        <ChevronRight className="h-3 w-3 mt-0.5 flex-shrink-0" style={{ color: "rgba(37,99,235,0.5)" }} />
+                        <span style={{ fontSize: 11, color: step.startsWith("→") ? T.text : T.muted, fontFamily: "monospace" }}>
+                          {step}
+                        </span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-muted-foreground">
+                  <p style={{ fontSize: 11, color: T.muted }}>
                     Art. 86 — Diritto alla spiegazione. Clicca un evento nel log per vedere la catena di inferenza.
                   </p>
                 )}
               </div>
 
               {/* Kill switch status */}
-              <div className="rounded-xl border border-border bg-card p-5">
-                <h2 className="text-sm font-semibold text-foreground mb-3">Stato Kill Switch</h2>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">Stato</span>
-                    <span className={`text-xs font-mono font-medium ${
-                      killState === "triggered" ? "text-danger" :
-                      killState === "armed" ? "text-warning" :
-                      killState === "overridden" ? "text-primary" : "text-muted-foreground"
-                    }`}>{killState.toUpperCase()}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">HITL</span>
-                    <span className={`text-xs font-mono ${killState === "overridden" ? "text-success" : "text-muted-foreground"}`}>
-                      {killState === "overridden" ? "Active" : "Standby"}
+              <div className="rounded-xl p-5" style={card}>
+                <h2 style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 16 }}>Stato sistema</h2>
+                {[
+                  { label: "Kill switch", value: ksLabel, color: ksColor },
+                  { label: "HITL", value: killState === "overridden" ? "Attivo" : "Standby", color: killState === "overridden" ? T.green : T.faint },
+                  { label: "Ultimo override", value: killState === "overridden" ? new Date().toLocaleTimeString("it-IT") : "—", color: T.faint },
+                  { label: "Escalation", value: escalationLevel, color: T.blue },
+                ].map((row) => (
+                  <div key={row.label} className="flex items-center justify-between py-2.5"
+                    style={{ borderBottom: `1px solid rgba(0,0,0,0.04)` }}>
+                    <span style={{ fontSize: 11, color: T.muted }}>{row.label}</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, fontFamily: "monospace", color: row.color, textTransform: "capitalize" }}>
+                      {row.value}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">Ultimo override</span>
-                    <span className="text-xs text-muted-foreground font-mono">
-                      {killState === "overridden" ? new Date().toLocaleTimeString() : "—"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">Escalation</span>
-                    <span className="text-xs font-mono text-primary capitalize">{escalationLevel}</span>
-                  </div>
-                </div>
+                ))}
               </div>
 
-              <div className="rounded-xl border border-danger/30 bg-danger/5 p-4 text-xs text-muted-foreground">
-                <AlertTriangle className="h-4 w-4 text-danger inline mr-1" />
-                <strong className="text-foreground">Art. 14(4) — </strong>
-                Il supervisore umano può ignorare, annullare o ribaltare l&apos;output in qualsiasi momento.
+              {/* Art 14 note */}
+              <div className="rounded-xl px-4 py-3.5" style={{ background: "rgba(0,0,0,0.02)", border: `1px solid ${T.border}` }}>
+                <p style={{ fontSize: 11, color: T.muted, lineHeight: 1.5 }}>
+                  <span style={{ fontWeight: 600, color: T.text }}>Art. 14(4) — </span>
+                  Il supervisore umano può ignorare, annullare o ribaltare l&apos;output del sistema AI in qualsiasi momento.
+                </p>
               </div>
             </div>
           </div>
         </>
       )}
 
-      {/* ── TAB: Configurazione ───────────────────────────────────────────────── */}
+      {/* ══════════════════════════════════════════════════════════════
+          TAB: CONFIGURAZIONE
+      ══════════════════════════════════════════════════════════════ */}
       {activeTab === "config" && (
-        <div className="max-w-2xl space-y-5">
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h2 className="text-sm font-semibold text-foreground mb-5">Impostazioni Guardian-Agent</h2>
-
+        <div className="max-w-xl space-y-4">
+          <div className="rounded-xl p-6" style={card}>
+            <h2 style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 20 }}>
+              Impostazioni Guardian-Agent
+            </h2>
             <div className="space-y-4">
-              {/* System name */}
-              <div>
-                <label className="block text-[11px] font-medium text-muted-foreground mb-1">
-                  Nome sistema monitorato
-                </label>
-                <input
-                  type="text"
-                  value={systemName}
-                  onChange={(e) => setSystemName(e.target.value)}
-                  placeholder="Es. CV-Screener, MedDiag Pro"
-                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
+              {[
+                { label: "Nome sistema monitorato", value: systemName, setter: setSystemName, type: "text", placeholder: "Es. CV-Screener, MedDiag Pro", hint: undefined },
+                { label: "Email operatore", value: operatorEmail, setter: setOperatorEmail, type: "email", placeholder: "operatore@azienda.it", hint: undefined },
+              ].map((field) => (
+                <div key={field.label}>
+                  <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 5 }}>
+                    {field.label}
+                  </label>
+                  <input
+                    type={field.type}
+                    value={field.value}
+                    onChange={(e) => field.setter(e.target.value)}
+                    placeholder={field.placeholder}
+                    className="w-full rounded-lg px-3 py-2 focus:outline-none"
+                    style={{ fontSize: 12, border: `1px solid ${T.border}`, background: "#FAFAF9", color: T.text }}
+                  />
+                </div>
+              ))}
 
-              {/* Operator email */}
-              <div>
-                <label className="block text-[11px] font-medium text-muted-foreground mb-1">
-                  Email operatore per notifiche override
-                </label>
-                <input
-                  type="email"
-                  value={operatorEmail}
-                  onChange={(e) => setOperatorEmail(e.target.value)}
-                  placeholder="operatore@azienda.it"
-                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
+              {[
+                { label: "Soglia drift critica (%)", value: driftThreshold, setter: setDriftThreshold, hint: "Sopra questa soglia il kill switch viene armato automaticamente" },
+                { label: "Tempo minimo friction gate (s)", value: frictionGateMinSeconds, setter: setFrictionGateMinSeconds, hint: "Secondi minimi di riflessione prima di confermare azioni rischiose" },
+              ].map((field) => (
+                <div key={field.label}>
+                  <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 5 }}>
+                    {field.label}
+                  </label>
+                  <input type="number" min={1} max={30} value={field.value}
+                    onChange={(e) => field.setter(Number(e.target.value))}
+                    className="w-full rounded-lg px-3 py-2 focus:outline-none"
+                    style={{ fontSize: 12, border: `1px solid ${T.border}`, background: "#FAFAF9", color: T.text }}
+                  />
+                  {field.hint && <p style={{ fontSize: 10, color: T.faint, marginTop: 4 }}>{field.hint}</p>}
+                </div>
+              ))}
 
-              {/* Drift threshold */}
               <div>
-                <label className="block text-[11px] font-medium text-muted-foreground mb-1">
-                  Soglia drift critica (%)
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  max={30}
-                  value={driftThreshold}
-                  onChange={(e) => setDriftThreshold(Number(e.target.value))}
-                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-                <p className="text-[10px] text-muted-foreground mt-1">
-                  Sopra questa soglia il kill switch viene armato automaticamente
-                </p>
-              </div>
-
-              {/* Friction gate timer */}
-              <div>
-                <label className="block text-[11px] font-medium text-muted-foreground mb-1">
-                  Tempo minimo friction gate (secondi)
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  max={30}
-                  value={frictionGateMinSeconds}
-                  onChange={(e) => setFrictionGateMinSeconds(Number(e.target.value))}
-                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-                <p className="text-[10px] text-muted-foreground mt-1">
-                  Secondi minimi di riflessione prima di confermare azioni rischiose
-                </p>
-              </div>
-
-              {/* Escalation default */}
-              <div>
-                <label className="block text-[11px] font-medium text-muted-foreground mb-2">
+                <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 8 }}>
                   Livello escalation predefinito
                 </label>
-                <div className="grid grid-cols-3 gap-3">
-                  {(["watch", "assist", "autonomous"] as const).map((level) => {
+                <div className="flex rounded-lg overflow-hidden" style={{ border: `1px solid ${T.border}` }}>
+                  {(["watch", "assist", "autonomous"] as const).map((level, i) => {
                     const isActive = escalationLevel === level;
-                    const labels = {
-                      watch: "Watch",
-                      assist: "Assist",
-                      autonomous: "Autonomous",
-                    };
-                    const descs = {
-                      watch: "Solo monitoraggio passivo",
-                      assist: "Suggerimenti con HITL",
-                      autonomous: "Kill switch e override",
-                    };
+                    const labels = { watch: "Watch", assist: "Assist", autonomous: "Autonomous" };
+                    const descs  = { watch: "Monitoraggio passivo", assist: "Suggerimenti HITL", autonomous: "Kill switch + override" };
                     return (
-                      <button
-                        key={level}
-                        onClick={() => setEscalationLevel(level)}
-                        className={`rounded-lg border px-3 py-3 text-xs font-medium transition-colors text-left ${
-                          isActive ? "bg-primary/10 border-primary text-primary" : "border-border text-muted-foreground hover:border-primary/30"
-                        }`}
-                      >
-                        <div className={`h-1.5 w-full rounded-full mb-2 ${isActive ? "bg-primary" : "bg-muted"}`} />
-                        {labels[level]}
-                        <p className="text-[10px] text-muted-foreground mt-1">{descs[level]}</p>
+                      <button key={level} onClick={() => setEscalationLevel(level)}
+                        className="flex-1 px-3 py-3 text-left transition-colors"
+                        style={{ background: isActive ? T.text : T.card, borderRight: i < 2 ? `1px solid ${isActive ? "transparent" : T.border}` : "none", cursor: "pointer", border: "none" }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: isActive ? "#fff" : T.text, marginBottom: 2 }}>{labels[level]}</div>
+                        <div style={{ fontSize: 10, color: isActive ? "rgba(255,255,255,0.55)" : T.faint }}>{descs[level]}</div>
                       </button>
                     );
                   })}
@@ -866,58 +688,54 @@ export default function GuardianAgentPage() {
               </div>
             </div>
 
-            {/* Save button */}
-            <div className="mt-6 flex items-center gap-3">
-              <button
-                onClick={handleSaveConfig}
-                className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-              >
+            <div className="flex items-center gap-3 mt-6">
+              <button onClick={handleSaveConfig} className="rounded-lg px-5 py-2"
+                style={{ fontSize: 12, fontWeight: 600, background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
                 Salva configurazione
               </button>
               {configSaved && (
-                <span className="text-sm text-success font-medium flex items-center gap-1">
-                  ✓ Configurazione salvata
-                </span>
+                <span style={{ fontSize: 12, fontWeight: 500, color: T.green }}>✓ Salvato</span>
               )}
             </div>
           </div>
 
-          {/* Art. 14 banner */}
-          <div className="rounded-xl border border-border bg-muted/30 p-4 text-[11px] text-muted-foreground">
-            <BarChart2 className="h-4 w-4 text-muted-foreground inline mr-1.5 mb-0.5" />
-            <strong className="text-foreground">Art. 14(4) — </strong>
-            Le soglie configurate qui determinano il comportamento automatico del Guardian-Agent in produzione.
-            Ogni modifica viene registrata nell&apos;Evidence Layer.
+          <div className="rounded-xl px-4 py-3.5" style={{ background: "rgba(0,0,0,0.02)", border: `1px solid ${T.border}` }}>
+            <p style={{ fontSize: 11, color: T.muted, lineHeight: 1.5 }}>
+              <BarChart2 className="h-3.5 w-3.5 inline mr-1.5 mb-0.5" style={{ color: T.faint }} />
+              <span style={{ fontWeight: 600, color: T.text }}>Art. 14(4) — </span>
+              Le soglie configurate qui determinano il comportamento automatico del Guardian-Agent in produzione. Ogni modifica viene registrata nell&apos;Evidence Layer.
+            </p>
           </div>
         </div>
       )}
 
-      {/* ── TAB: Storico ──────────────────────────────────────────────────────── */}
+      {/* ══════════════════════════════════════════════════════════════
+          TAB: STORICO
+      ══════════════════════════════════════════════════════════════ */}
       {activeTab === "history" && (
-        <div className="space-y-5">
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              { label: "Kill switch attivati", count: history.filter((h) => h.type === "kill_switch").length, color: "text-danger" },
-              { label: "Override eseguiti", count: history.filter((h) => h.type === "override").length, color: "text-primary" },
-              { label: "Alert drift", count: history.filter((h) => h.type === "drift_alert").length, color: "text-warning" },
-            ].map((stat) => (
-              <div key={stat.label} className="rounded-xl border border-border bg-card p-4">
-                <div className={`text-2xl font-bold ${stat.color}`}>{stat.count}</div>
-                <div className="mt-1 text-xs text-muted-foreground">{stat.label}</div>
-              </div>
-            ))}
+        <div className="space-y-4">
+          <div className="rounded-xl" style={card}>
+            <div className="grid grid-cols-3">
+              {[
+                { label: "Kill switch attivati", count: history.filter((h) => h.type === "kill_switch").length, color: T.red },
+                { label: "Override eseguiti",    count: history.filter((h) => h.type === "override").length,    color: T.blue },
+                { label: "Alert drift",           count: history.filter((h) => h.type === "drift_alert").length, color: T.amber },
+              ].map((s, i) => (
+                <div key={s.label} className="px-6 py-4"
+                  style={{ borderRight: i < 2 ? `1px solid ${T.border}` : "none" }}>
+                  <div style={{ fontSize: 24, fontWeight: 600, letterSpacing: "-0.5px", color: s.color }}>{s.count}</div>
+                  <div style={{ fontSize: 11, color: T.faint, marginTop: 3 }}>{s.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Event list */}
-          <div className="rounded-xl border border-border bg-card">
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
-              <h2 className="text-sm font-semibold text-foreground">Eventi registrati</h2>
+          <div className="rounded-xl overflow-hidden" style={card}>
+            <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${T.border}` }}>
+              <h2 style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Eventi registrati</h2>
               {history.length > 0 && (
-                <button
-                  onClick={clearHistory}
-                  className="text-xs text-danger hover:opacity-70 transition-opacity"
-                >
+                <button onClick={clearHistory}
+                  style={{ fontSize: 11, color: T.red, background: "none", border: "none", cursor: "pointer" }}>
                   Cancella storico
                 </button>
               )}
@@ -925,65 +743,46 @@ export default function GuardianAgentPage() {
 
             {history.length === 0 ? (
               <div className="px-5 py-12 text-center">
-                <History className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground font-medium mb-1">Nessun evento registrato</p>
-                <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                  Le azioni critiche (kill switch, override, drift alert) appariranno qui e
-                  verranno archiviate sull&apos;Evidence Layer.
+                <History className="h-8 w-8 mx-auto mb-3" style={{ color: "rgba(0,0,0,0.12)" }} />
+                <p style={{ fontSize: 13, fontWeight: 500, color: T.text, marginBottom: 6 }}>Nessun evento registrato</p>
+                <p style={{ fontSize: 12, color: T.muted, maxWidth: 340, margin: "0 auto" }}>
+                  Kill switch, override e drift alert appariranno qui e saranno archiviati sull&apos;Evidence Layer.
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-border/50">
-                {history.map((event) => {
-                  const iconMap: Record<HistoryEvent["type"], { Icon: React.FC<React.SVGProps<SVGSVGElement>>; color: string }> = {
-                    kill_switch: { Icon: StopCircle, color: "text-danger" },
-                    override: { Icon: UserCheck, color: "text-primary" },
-                    drift_alert: { Icon: AlertTriangle, color: "text-warning" },
-                    reset: { Icon: RefreshCw, color: "text-muted-foreground" },
-                    friction_gate: { Icon: Shield, color: "text-yellow-500" },
+              <div>
+                {history.map((event, i) => {
+                  const typeColors: Record<HistoryEvent["type"], string> = {
+                    kill_switch: T.red, override: T.blue, drift_alert: T.amber, reset: T.faint, friction_gate: T.amber,
                   };
-                  const { Icon, color } = iconMap[event.type];
+                  const typeIcons: Record<HistoryEvent["type"], React.FC<React.SVGProps<SVGSVGElement>>> = {
+                    kill_switch: StopCircle, override: UserCheck, drift_alert: AlertTriangle, reset: RefreshCw, friction_gate: Shield,
+                  };
+                  const Icon = typeIcons[event.type];
+                  const color = typeColors[event.type];
                   return (
-                    <div key={event.id} className="px-5 py-3 hover:bg-muted/20 transition-colors">
-                      <div className="flex items-start gap-3">
-                        <Icon className={`h-4 w-4 ${color} mt-0.5 shrink-0`} />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-foreground">{event.description}</p>
-                          {event.metadata && Object.keys(event.metadata).length > 0 && (
-                            <div className="flex flex-wrap gap-2 mt-1">
-                              {Object.entries(event.metadata).map(([k, v]) => (
-                                <span key={k} className="text-[10px] text-muted-foreground font-mono">
-                                  {k}: {v}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex flex-col items-end gap-1 shrink-0">
-                          <span
-                            className="text-[10px] font-medium rounded-full px-2 py-0.5"
-                            style={{
-                              background: event.type === "kill_switch" ? "rgba(220,38,38,0.1)" :
-                                          event.type === "override" ? "rgba(59,130,246,0.1)" :
-                                          event.type === "drift_alert" ? "rgba(245,158,11,0.1)" :
-                                          event.type === "friction_gate" ? "rgba(234,179,8,0.1)" :
-                                          "rgba(0,0,0,0.06)",
-                              color: event.type === "kill_switch" ? "#b91c1c" :
-                                     event.type === "override" ? "#1d4ed8" :
-                                     event.type === "drift_alert" ? "#92400e" :
-                                     event.type === "friction_gate" ? "#854d0e" :
-                                     "rgba(0,0,0,0.45)",
-                            }}
-                          >
-                            {event.type.replace("_", " ")}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground font-mono">
-                            {new Date(event.timestamp).toLocaleString("it-IT", {
-                              day: "2-digit", month: "2-digit",
-                              hour: "2-digit", minute: "2-digit",
-                            })}
-                          </span>
-                        </div>
+                    <div key={event.id} className="flex items-start gap-3 px-5 py-3 hover:bg-black/[0.01] transition-colors"
+                      style={{ borderBottom: i < history.length - 1 ? `1px solid rgba(0,0,0,0.04)` : "none" }}>
+                      <Icon className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" style={{ color }} />
+                      <div className="flex-1 min-w-0">
+                        <p style={{ fontSize: 12, color: T.text }}>{event.description}</p>
+                        {event.metadata && Object.keys(event.metadata).length > 0 && (
+                          <div className="flex flex-wrap gap-3 mt-1">
+                            {Object.entries(event.metadata).map(([k, v]) => (
+                              <span key={k} style={{ fontSize: 10, color: T.faint, fontFamily: "monospace" }}>
+                                {k}: {v}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                        <span style={{ fontSize: 10, fontWeight: 600, color, background: `${color}18`, borderRadius: 4, padding: "1px 6px", textTransform: "capitalize" }}>
+                          {event.type.replace("_", " ")}
+                        </span>
+                        <span style={{ fontSize: 10, color: T.faint, fontFamily: "monospace" }}>
+                          {new Date(event.timestamp).toLocaleString("it-IT", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                        </span>
                       </div>
                     </div>
                   );
@@ -994,65 +793,60 @@ export default function GuardianAgentPage() {
         </div>
       )}
 
-      {/* ── Confirm kill switch modal ─────────────────────────────────────────── */}
+      {/* ── CONFIRM KILL SWITCH MODAL ─────────────────────────────── */}
       {showConfirm && (
-        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-6">
-          <div className="max-w-md w-full rounded-2xl border border-danger/30 bg-card p-6">
-            <AlertTriangle className="h-10 w-10 text-danger mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-foreground text-center mb-2">Conferma arresto d&apos;emergenza</h3>
-            <p className="text-sm text-muted-foreground text-center mb-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: "rgba(0,0,0,0.55)" }}>
+          <div className="max-w-md w-full rounded-2xl p-7" style={{ background: T.card, border: `1px solid ${T.redBdr}`, boxShadow: "0 20px 60px rgba(0,0,0,0.18)" }}>
+            <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: T.redBg }}>
+              <StopCircle className="h-5 w-5" style={{ color: T.red }} />
+            </div>
+            <h3 style={{ fontSize: 16, fontWeight: 600, color: T.text, textAlign: "center", marginBottom: 8 }}>
+              Conferma arresto d&apos;emergenza
+            </h3>
+            <p style={{ fontSize: 12, color: T.muted, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>
               Stai per attivare il Kill Switch. Il sistema AI verrà arrestato immediatamente.
               Questa azione viene registrata nell&apos;Evidence Layer con hash crittografico.
             </p>
             <div className="flex gap-3">
-              <button
-                onClick={() => setShowConfirm(false)}
-                className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
-              >
+              <button onClick={() => setShowConfirm(false)} className="flex-1 rounded-xl py-2.5"
+                style={{ fontSize: 13, fontWeight: 500, color: T.text, background: "rgba(0,0,0,0.03)", border: `1px solid ${T.border}`, cursor: "pointer" }}>
                 Annulla
               </button>
-              <button
-                onClick={confirmKill}
-                className="flex-1 rounded-lg bg-danger px-4 py-2.5 text-sm font-medium text-white hover:bg-danger/90 transition-colors"
-              >
-                <StopCircle className="h-4 w-4 inline mr-1" />
-                CONFERMA ARRESTO
+              <button onClick={confirmKill} className="flex-1 rounded-xl py-2.5"
+                style={{ fontSize: 13, fontWeight: 600, color: "#fff", background: T.red, border: "none", cursor: "pointer" }}>
+                Conferma arresto
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── Override modal ────────────────────────────────────────────────────── */}
+      {/* ── OVERRIDE MODAL ─────────────────────────────────────────── */}
       {showOverride && (
-        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-6">
-          <div className="max-w-md w-full rounded-2xl border border-primary/30 bg-card p-6">
-            <UserCheck className="h-10 w-10 text-primary mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-foreground text-center mb-2">Delega a operatore umano</h3>
-            <p className="text-sm text-muted-foreground text-center mb-4">
-              Il controllo passa a un supervisore umano (Human-in-the-loop).
-              Specifica il motivo dell&apos;override.
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: "rgba(0,0,0,0.55)" }}>
+          <div className="max-w-md w-full rounded-2xl p-7" style={{ background: T.card, border: `1px solid rgba(37,99,235,0.2)`, boxShadow: "0 20px 60px rgba(0,0,0,0.18)" }}>
+            <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: T.blueBg }}>
+              <UserCheck className="h-5 w-5" style={{ color: T.blue }} />
+            </div>
+            <h3 style={{ fontSize: 16, fontWeight: 600, color: T.text, textAlign: "center", marginBottom: 8 }}>
+              Delega a operatore umano
+            </h3>
+            <p style={{ fontSize: 12, color: T.muted, textAlign: "center", lineHeight: 1.6, marginBottom: 16 }}>
+              Il controllo passa a un supervisore umano (Human-in-the-loop). Specifica il motivo dell&apos;override.
             </p>
-            <textarea
-              value={overrideReason}
-              onChange={(e) => setOverrideReason(e.target.value)}
-              className="w-full rounded-lg border border-border bg-muted px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground"
+            <textarea value={overrideReason} onChange={(e) => setOverrideReason(e.target.value)}
               placeholder="Motivo dell'override (es. falso positivo critico, bias rilevato...)"
+              className="w-full rounded-xl px-4 py-3 focus:outline-none mb-4"
+              style={{ fontSize: 12, border: `1px solid ${T.border}`, background: "#FAFAF9", color: T.text, resize: "none" }}
               rows={3}
             />
-            <div className="flex gap-3 mt-4">
-              <button
-                onClick={() => setShowOverride(false)}
-                className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
-              >
+            <div className="flex gap-3">
+              <button onClick={() => setShowOverride(false)} className="flex-1 rounded-xl py-2.5"
+                style={{ fontSize: 13, fontWeight: 500, color: T.text, background: "rgba(0,0,0,0.03)", border: `1px solid ${T.border}`, cursor: "pointer" }}>
                 Annulla
               </button>
-              <button
-                onClick={executeOverride}
-                disabled={!overrideReason.trim()}
-                className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
-              >
-                <UserCheck className="h-4 w-4 inline mr-1" />
+              <button onClick={executeOverride} disabled={!overrideReason.trim()} className="flex-1 rounded-xl py-2.5"
+                style={{ fontSize: 13, fontWeight: 600, color: "#fff", background: T.blue, border: "none", cursor: "pointer", opacity: !overrideReason.trim() ? 0.4 : 1 }}>
                 Conferma override
               </button>
             </div>
