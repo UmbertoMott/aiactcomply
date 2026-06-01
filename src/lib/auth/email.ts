@@ -1,5 +1,14 @@
 import nodemailer from "nodemailer";
 
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+}
+
 function getTransporter() {
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
@@ -26,7 +35,7 @@ export async function sendOTPEmail(email: string, otp: string, name: string) {
     html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
         <h2 style="color: #6366f1;">AIComply</h2>
-        <p>Ciao <strong>${name}</strong>,</p>
+        <p>Ciao <strong>${escapeHtml(name)}</strong>,</p>
         <p>Il tuo codice di verifica è:</p>
         <div style="background: #0f172a; border-radius: 12px; padding: 24px; text-align: center; margin: 24px 0;">
           <span style="font-size: 36px; letter-spacing: 8px; font-weight: 700; color: #6366f1;">
@@ -59,7 +68,7 @@ export async function sendWelcomeEmail(email: string, name: string) {
     html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
         <h2 style="color: #6366f1;">AIComply</h2>
-        <p>Ciao <strong>${name}</strong>,</p>
+        <p>Ciao <strong>${escapeHtml(name)}</strong>,</p>
         <p>Grazie per esserti registrato su <strong>AIComply</strong>.</p>
         <p>Ora puoi accedere alla dashboard per iniziare il percorso di compliance al Regolamento UE 2024/1689.</p>
         <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard"
