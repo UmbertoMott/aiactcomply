@@ -2,11 +2,11 @@
 
 import { Trash2, FileText, CheckCircle, Download, Plus } from "lucide-react";
 import SignOffPanel from "@/components/ui/SignOffPanel";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
-import type { QMSResult } from "@/lib/dossier/storage-schema";
+import type { QMSResult, ClassifierResult, RiskManagerResult, DataAuditResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 
 const STORAGE_KEY = "qms_sections";
@@ -89,6 +89,56 @@ export default function QMSPage() {
   const [savedAt, setSavedAt] = useState<string | null>(() =>
     readFromStorage<QMSResult>("qms")?.completedAt ?? null
   );
+
+  // Pre-populate from Classifier, RiskManager, DataAudit on mount
+  useEffect(() => {
+    const classifier = readFromStorage<ClassifierResult>("classifier");
+    const riskManager = readFromStorage<RiskManagerResult>("riskManager");
+    const dataAudit = readFromStorage<DataAuditResult>("dataAudit");
+
+    // Pre-populate systemName from classifier
+    if (classifier?.systemName && !systemName) {
+      setSystemName(classifier.systemName);
+    }
+
+    // Pre-populate risk section content from risk manager data
+    if (riskManager?.risks?.length) {
+      setSections(prev => {
+        const riskSection = prev.find(s => s.title === "Sistema gestione rischi");
+        if (!riskSection || riskSection.content) return prev;
+        const summary = `Livello di rischio complessivo: ${riskManager.overallRiskLevel}. ` +
+          `${riskManager.risks.length} rischi identificati. ` +
+          riskManager.risks
+            .slice(0, 3)
+            .map(r => `${r.title} (probabilità: ${r.likelihood}, impatto: ${r.impact}, mitigazione: ${r.mitigation})`)
+            .join("; ") +
+          (riskManager.risks.length > 3 ? "; ..." : ".");
+        const next = prev.map(s =>
+          s.title === "Sistema gestione rischi" ? { ...s, content: summary } : s
+        );
+        if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        return next;
+      });
+    }
+
+    // Pre-populate data_mgmt section content from data audit data
+    if (dataAudit?.datasets?.length) {
+      setSections(prev => {
+        const dataSection = prev.find(s => s.title === "Gestione dati");
+        if (!dataSection || dataSection.content) return prev;
+        const personalCount = dataAudit.datasets.filter(d => d.personalData).length;
+        const summary = `Qualità complessiva: ${dataAudit.overallQuality}. ` +
+          `${dataAudit.datasets.length} dataset analizzati, di cui ${personalCount} con dati personali. ` +
+          `Dataset: ${dataAudit.datasets.map(d => d.name).join(", ")}.`;
+        const next = prev.map(s =>
+          s.title === "Gestione dati" ? { ...s, content: summary } : s
+        );
+        if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        return next;
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function saveToDossier() {
     if (sections.length === 0) {
