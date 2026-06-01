@@ -106,6 +106,7 @@ interface EUDBSystemData {
   annex_reference: string;
   conformity_declaration_number: string;
   instructions_url: string;
+  technical_doc_url: string;
   notified_body_certificate: string;
 }
 
@@ -139,6 +140,7 @@ function createEmptyDoc(): EUDBDoc {
       member_states: [],
       risk_classification: "", annex_reference: "",
       conformity_declaration_number: "", instructions_url: "",
+      technical_doc_url: "",
       notified_body_certificate: "",
     },
     eudb_registration_number: "",
@@ -206,6 +208,7 @@ SEZIONE C — DOCUMENTAZIONE DI CONFORMITÀ
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 N. Dichiarazione di Conformità UE: ${s.conformity_declaration_number || "[DA INSERIRE]"}
 URL Istruzioni per l'uso: ${s.instructions_url || "[DA INSERIRE]"}
+URL Documentazione Tecnica (Annex VIII): ${s.technical_doc_url || "[DA INSERIRE]"}
 Certificato Notified Body: ${s.notified_body_certificate || "Non applicabile"}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -723,6 +726,9 @@ export default function EUDBPage() {
             </Field>
             <Field label="URL istruzioni per l'uso">
               <input style={inputSt} value={s.instructions_url} onChange={e => patchSystem("instructions_url", e.target.value)} placeholder="https://..." />
+            </Field>
+            <Field label="URL documentazione tecnica (Annex VIII)">
+              <input style={inputSt} value={s.technical_doc_url} onChange={e => patchSystem("technical_doc_url", e.target.value)} placeholder="https://... (link alla documentazione tecnica Annex IV)" />
             </Field>
             <Field label="Certificato Notified Body (se Annex I pathway)">
               <input style={inputSt} value={s.notified_body_certificate} onChange={e => patchSystem("notified_body_certificate", e.target.value)} placeholder="es. NB-2025-IT-0042 (opzionale)" />
