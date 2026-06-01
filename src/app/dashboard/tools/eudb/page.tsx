@@ -333,7 +333,7 @@ function MemberStatesSelect({
           style={{
             position: "absolute", top: "100%", left: 0, right: 0, zIndex: 50,
             background: T.card, border: `1px solid ${T.border}`,
-            borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
+            borderRadius: 8, boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
             maxHeight: 220, overflowY: "auto", marginTop: 4,
           }}
         >
@@ -1001,7 +1001,7 @@ export default function EUDBPage() {
             padding: "10px 18px", borderRadius: 10,
             background: T.green, color: "#fff",
             fontSize: 12, fontWeight: 500,
-            boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
           }}
         >
           {toast}

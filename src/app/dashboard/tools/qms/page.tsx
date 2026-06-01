@@ -235,7 +235,7 @@ export default function QMSPage() {
           onChange={(e) => setSystemName(e.target.value)}
           placeholder="Nome sistema AI…"
           className="rounded-lg px-3 py-1.5 text-[12px] focus:outline-none"
-          style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.09)", color: "#0D1016", width: "200px" }}
+          style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)", color: "#0D1016", width: "200px" }}
         />
       </div>
       <p className="text-sm mb-8" style={{ color: "rgba(0,0,0,0.45)" }}>
@@ -321,7 +321,7 @@ export default function QMSPage() {
                     className="text-[10px] font-medium rounded-full px-2 py-0.5 transition-colors"
                     style={s.completed
                       ? { background: "rgba(22,163,74,0.1)", border: "1px solid rgba(22,163,74,0.3)", color: "#16a34a" }
-                      : { background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.09)", color: "rgba(0,0,0,0.45)" }}
+                      : { background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.45)" }}
                   >
                     {s.completed ? "OK" : "Bozza"}
                   </button>

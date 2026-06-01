@@ -37,7 +37,7 @@ const cardSt: CSSProperties = {
 
 const inputSt: CSSProperties = {
   width: "100%", padding: "7px 10px", borderRadius: 8,
-  border: `1px solid ${T.border}`, fontSize: 12,
+  border: `1px solid rgba(0,0,0,0.07)`, fontSize: 12,
   color: T.text, background: T.card, outline: "none",
 };
 
@@ -926,7 +926,7 @@ export default function AuthorizedRepPage() {
           padding: "10px 18px", borderRadius: 10,
           background: T.green, color: "#fff",
           fontSize: 12, fontWeight: 500,
-          boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
         }}>
           {toast}
         </div>
