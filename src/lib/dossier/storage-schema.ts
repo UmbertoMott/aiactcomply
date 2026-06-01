@@ -5,6 +5,7 @@ export interface ClassifierResult {
   systemDescription: string;
   riskLevel: "unacceptable" | "high" | "limited" | "minimal";
   annexIII: boolean;
+  annexI?: boolean;
   applicableArticles: string[];
   completedAt: string;
 }

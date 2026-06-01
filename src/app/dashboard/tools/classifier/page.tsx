@@ -46,7 +46,8 @@ function saveResult(
   systemName: string,
   r: ReturnType<typeof classifyRisk>,
   passportId: string | null,
-  dossierId: string | null
+  dossierId: string | null,
+  annexI: boolean
 ) {
   const record: PersistedClassification = {
     systemName,
@@ -61,6 +62,7 @@ function saveResult(
     systemDescription: "",
     riskLevel: (r.riskLevel?.toLowerCase() ?? "minimal") as ClassifierResult["riskLevel"],
     annexIII: !!(r.annexCategory),
+    annexI: annexI,
     applicableArticles: [
       ...(r.annexCategory ? ["Annex III"] : []),
       ...(r.isExemptedArt6_3 ? ["Art. 6(3)"] : []),
@@ -131,6 +133,7 @@ export default function ClassifierPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [savedClassification] = useState<PersistedClassification | null>(() => loadSavedResult());
   const [isSaved, setIsSaved] = useState(false);
+  const [annexIAnswer, setAnnexIAnswer] = useState<string>("");
 
   useEffect(() => {
     setIsSaved(localStorage.getItem(STORAGE_KEY) !== null);
@@ -242,7 +245,7 @@ export default function ClassifierPage() {
     );
     setPassport(p);
 
-    saveResult(activeSystemName, res, p.passport_id, exemptionDossier?.id ?? null);
+    saveResult(activeSystemName, res, p.passport_id, exemptionDossier?.id ?? null, annexIAnswer === "Sì — è safety component di prodotto Annex I");
     showToast(`Classificazione completata: ${res.riskLevel} — salvata su Evidence Layer`);
 
     // Fire-and-forget audit trail — never blocks UI, never throws
@@ -363,6 +366,32 @@ export default function ClassifierPage() {
               </span>
             </div>
           )}
+
+          {/* Annex I preliminary check — Art. 6(1) */}
+          <div style={{ ...cardSt, padding: 20 }}>
+            <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, color: T.text }}>
+              Il sistema AI è incorporato o costituisce un componente di sicurezza di un prodotto
+              soggetto a normativa armonizzata UE (Annex I)?
+            </div>
+            <div style={{ fontSize: 12, color: T.muted, marginBottom: 12 }}>
+              Esempi Annex I: macchinari (Dir. 2006/42/CE), dispositivi medici (MDR 2017/745),
+              veicoli a motore, ascensori, impianti a pressione, giocattoli, dispositivi radio.
+            </div>
+            {["Sì — è safety component di prodotto Annex I", "No — non è safety component", "Non sono sicuro"].map(opt => (
+              <label key={opt} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, cursor: "pointer" }}>
+                <input type="radio" name="annex1_check" value={opt}
+                  checked={annexIAnswer === opt} onChange={() => setAnnexIAnswer(opt)} />
+                <span style={{ fontSize: 13, color: T.text }}>{opt}</span>
+              </label>
+            ))}
+            {annexIAnswer === "Sì — è safety component di prodotto Annex I" && (
+              <div style={{ background: "#FFF7ED", border: "1px solid #FED7AA", borderRadius: 8, padding: "10px 14px", marginTop: 8, fontSize: 12, color: "#92400e" }}>
+                ⚠️ I sistemi Annex I seguono il percorso di conformity assessment specifico del prodotto madre
+                (notified body obbligatorio per la maggior parte). La classificazione come high-risk avviene
+                ai sensi dell&apos;Art. 6(1).
+              </div>
+            )}
+          </div>
 
           {/* Input mode selector */}
           <div style={{ ...cardSt, padding: 20 }}>
