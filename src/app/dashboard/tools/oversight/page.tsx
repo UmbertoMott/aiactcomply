@@ -431,7 +431,7 @@ export default function OversightPage() {
 
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 500, letterSpacing: "-0.8px", color: "#0D1016", margin: 0 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 500, letterSpacing: "-0.8px", color: T.text, margin: 0 }}>
           Supervisione Umana — Art. 14 AI Act
         </h1>
         <p style={{ marginTop: 4, fontSize: 12, color: T.muted, lineHeight: 1.55 }}>
