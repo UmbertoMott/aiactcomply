@@ -5,12 +5,16 @@ import { registrationSchema, loginSchema } from "@/lib/auth/password-validator";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { sendOTPEmail, sendWelcomeEmail } from "@/lib/auth/email";
+import { randomInt } from "crypto";
 
-function generateOTP() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+function generateOTP(): string {
+  // crypto.randomInt is cryptographically secure (CSPRNG)
+  return randomInt(100000, 1000000).toString();
 }
 
 const MOCK_OTPS = new Map<string, { code: string; expires: number }>();
+const OTP_ATTEMPTS = new Map<string, number>();
+const MAX_OTP_ATTEMPTS = 5;
 
 export async function signup(formData: FormData) {
   const rawData = {
@@ -30,7 +34,12 @@ export async function signup(formData: FormData) {
   MOCK_OTPS.set(userId, { code: otp, expires: Date.now() + 10 * 60 * 1000 });
 
   const cookieStore = await cookies();
-  cookieStore.set("pending_user", JSON.stringify({ userId, ...rawData }), {
+  cookieStore.set("pending_user", JSON.stringify({
+    userId,
+    email: rawData.email,
+    phone: rawData.phone,
+    company: rawData.company,
+  }), {
     httpOnly: true,
     maxAge: 600,
     path: "/",
@@ -84,22 +93,34 @@ export async function loginEmail(formData: FormData) {
 }
 
 export async function verifyOTP(formData: FormData) {
-  const code = formData.get("code") as string;
-  const userId = formData.get("userId") as string;
+  const code       = formData.get("code")       as string;
+  const userId     = formData.get("userId")     as string;
+  const redirectTo = (formData.get("redirectTo") as string) || "/dashboard";
 
   const record = MOCK_OTPS.get(userId);
   if (!record) {
     return { error: "Codice non valido o scaduto. Richiedine uno nuovo." };
   }
+
+  const attempts = (OTP_ATTEMPTS.get(userId) ?? 0) + 1;
+  if (attempts > MAX_OTP_ATTEMPTS) {
+    MOCK_OTPS.delete(userId);
+    OTP_ATTEMPTS.delete(userId);
+    return { error: "Troppi tentativi. Richiedere un nuovo codice." };
+  }
+  OTP_ATTEMPTS.set(userId, attempts);
+
   if (record.code !== code) {
     return { error: "Codice errato. Riprova." };
   }
   if (record.expires < Date.now()) {
     MOCK_OTPS.delete(userId);
+    OTP_ATTEMPTS.delete(userId);
     return { error: "Codice scaduto. Richiedine uno nuovo." };
   }
 
   MOCK_OTPS.delete(userId);
+  OTP_ATTEMPTS.delete(userId);
 
   const cookieStore = await cookies();
   const pending = cookieStore.get("pending_user");
@@ -117,7 +138,7 @@ export async function verifyOTP(formData: FormData) {
     await sendWelcomeEmail(userData.email, userData.company);
   }
 
-  redirect("/dashboard");
+  redirect(redirectTo);
 }
 
 export async function resendOTP(userId: string) {
@@ -134,8 +155,3 @@ export async function resendOTP(userId: string) {
   return { success: true };
 }
 
-export async function getMockOTP(userId: string) {
-  const record = MOCK_OTPS.get(userId);
-  if (!record || record.expires < Date.now()) return null;
-  return record.code;
-}

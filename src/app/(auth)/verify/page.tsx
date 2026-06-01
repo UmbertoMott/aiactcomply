@@ -1,7 +1,7 @@
 "use client";
 
-import { verifyOTP, resendOTP, getMockOTP } from "@/app/(auth)/actions/auth";
-import { useState, useRef, Suspense, useEffect } from "react";
+import { verifyOTP, resendOTP } from "@/app/(auth)/actions/auth";
+import { useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 function VerifyForm() {
@@ -14,12 +14,10 @@ function VerifyForm() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
 
   const uid = searchParams.get("uid") || "";
-  const [displayOTP, setDisplayOTP] = useState("");
-
-  useEffect(() => {
-    if (uid) getMockOTP(uid).then((code) => code && setDisplayOTP(code));
-  }, [uid]);
-
+  const fromScanner  = searchParams.get("from")     === "scanner";
+  const scanUrl      = searchParams.get("url")      || "";
+  const scanScore    = searchParams.get("score")    || "";
+  const scanCritical = searchParams.get("critical") || "";
   const title =
     reason === "inactive"
       ? "Verifica di sicurezza richiesta"
@@ -76,6 +74,13 @@ function VerifyForm() {
     const formData = new FormData();
     formData.set("code", fullCode);
     formData.set("userId", searchParams.get("uid") || "");
+    if (fromScanner) {
+      const onboardParams = new URLSearchParams();
+      if (scanUrl)      onboardParams.set("url",      scanUrl);
+      if (scanScore)    onboardParams.set("score",    scanScore);
+      if (scanCritical) onboardParams.set("critical", scanCritical);
+      formData.set("redirectTo", `/dashboard/onboarding?${onboardParams.toString()}`);
+    }
 
     const result = await verifyOTP(formData);
     if (result?.error) {
@@ -89,8 +94,6 @@ function VerifyForm() {
     const result = await resendOTP(uid);
     if (result?.success) {
       setError("");
-      const code = await getMockOTP(uid);
-      if (code) setDisplayOTP(code);
     }
     setResending(false);
   }
@@ -100,16 +103,7 @@ function VerifyForm() {
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-foreground">{title}</h2>
         <p className="mt-2 text-muted-foreground text-sm">{subtitle}</p>
-        {displayOTP && (
-          <div className="mt-4 rounded-lg border border-warning/30 bg-warning/5 px-4 py-3 text-center">
-            <p className="text-[11px] text-warning mb-1">
-              🔧 MOCK — In produzione verrà inviato via SMS
-            </p>
-            <p className="text-xl font-bold tracking-widest text-warning">
-              {displayOTP}
-            </p>
-          </div>
-        )}
+
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
