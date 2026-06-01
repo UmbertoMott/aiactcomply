@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
-import type { OversightResult } from "@/lib/dossier/storage-schema";
+import type { OversightResult, ClassifierResult, RiskManagerResult, ResilienceResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
 
@@ -215,6 +215,40 @@ export default function OversightPage() {
   const startTime = useRef<number>(Date.now());
 
   useEffect(() => { startTime.current = Date.now(); }, []);
+
+  // Pre-populate from other tools' localStorage data
+  useEffect(() => {
+    const cls = readFromStorage<ClassifierResult>("classifier");
+    const risk = readFromStorage<RiskManagerResult>("riskManager");
+    const res = readFromStorage<ResilienceResult>("resilience");
+
+    setConfig(prev => {
+      const patch: Partial<OversightConfig> = {};
+
+      // Pre-populate known_capabilities from classifier riskLevel
+      if (!prev.known_capabilities && cls?.riskLevel) {
+        patch.known_capabilities = `Sistema classificato come rischio "${cls.riskLevel}" (EU AI Act). ${cls.systemDescription ?? ""}`.trim();
+      }
+
+      // Pre-populate do_not_use_conditions from top risk titles
+      if (prev.do_not_use_conditions.length === 0 && risk?.risks && risk.risks.length > 0) {
+        const topRisks = risk.risks
+          .filter(r => r.residualRisk !== "acceptable")
+          .slice(0, 3)
+          .map(r => r.title);
+        if (topRisks.length > 0) {
+          patch.do_not_use_conditions = topRisks;
+        }
+      }
+
+      // Pre-populate confidence_threshold from resilience accuracyMetric
+      if (!prev.confidence_threshold && res?.accuracyMetric != null) {
+        patch.confidence_threshold = String((res.accuracyMetric / 100).toFixed(2));
+      }
+
+      return Object.keys(patch).length > 0 ? { ...prev, ...patch } : prev;
+    });
+  }, []);
 
   // Autosave config 800ms
   function upConfig(patch: Partial<OversightConfig>) {

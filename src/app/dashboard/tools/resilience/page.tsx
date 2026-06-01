@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shield, Zap, AlertTriangle, Play, RefreshCw, CheckCircle, Download } from "lucide-react";
 import Link from "next/link";
 import { simulateRedTeamAttack, getDefenseHealth, type RedTeamAttack } from "@/lib/simulation/red-team";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
-import type { ResilienceResult } from "@/lib/dossier/storage-schema";
+import type { ResilienceResult, ClassifierResult, RiskManagerResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 
 const STORAGE_KEY = "resilience_attacks";
@@ -22,6 +22,19 @@ export default function ResiliencePage() {
   const [savedAt, setSavedAt] = useState<string | null>(() =>
     readFromStorage<ResilienceResult>("resilience")?.completedAt ?? null
   );
+
+  // Pre-populate from other tools' localStorage data
+  // NOTE: this component has no system name field and no attack vector selection state —
+  // attacks are purely simulated at random. Pre-population logic is ready here for when
+  // those fields are added. cls.systemName and risk data are read but not yet applied.
+  useEffect(() => {
+    const _cls = readFromStorage<ClassifierResult>("classifier");
+    const _risk = readFromStorage<RiskManagerResult>("riskManager");
+    // No applicable state to pre-populate in the current component shape.
+    // When a systemName or selectedAttackVectors state is added, wire them here.
+    void _cls;
+    void _risk;
+  }, []);
 
   function showToast(msg: string, type: "success" | "error" = "success") {
     setToast({ msg, type });
@@ -155,8 +168,10 @@ export default function ResiliencePage() {
         </div>
       )}
 
-      <h1 className="text-2xl font-bold text-foreground mb-2">Continuous Red Teaming (Art. 15)</h1>
-      <p className="text-sm text-muted-foreground mb-8">Bombardamento periodico del modello con attacchi simulati. Salute difensiva in tempo reale.</p>
+      <div style={{ marginBottom: 28 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.4px", color: "#0D1016", margin: 0 }}>Continuous Red Teaming (Art. 15)</h1>
+        <p style={{ marginTop: 4, fontSize: 13, color: "rgba(0,0,0,0.42)", lineHeight: 1.5 }}>Bombardamento periodico del modello con attacchi simulati. Salute difensiva in tempo reale.</p>
+      </div>
 
       <div className="grid grid-cols-4 gap-4 mb-6">
         {[
