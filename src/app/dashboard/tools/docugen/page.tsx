@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
 import { GitBranch, Download, ChevronRight, AlertTriangle, CheckCircle, Clock } from "lucide-react";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
-import type { DocugenResult } from "@/lib/dossier/storage-schema";
+import type { DocugenResult, DataAuditResult, RiskManagerResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
+import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
 
 const STORAGE_KEY = "docugen_state";
 
@@ -42,26 +43,31 @@ function readCrossToolContent(): Record<string, string> {
   if (typeof window === "undefined") return AUTO_CONTENT;
   const overrides: Record<string, string> = { ...AUTO_CONTENT };
 
-  // Data Audit result
+  // Data Audit result (from storage-schema)
   try {
-    const raw = localStorage.getItem("risk_manager_report");
-    if (raw) {
-      const rm = JSON.parse(raw) as {
-        systemName?: string;
-        overallScore?: number;
-        overallRating?: string;
-        risks?: Array<{ description: string; severity: string; mitigation: string }>;
-      };
-      if (rm.systemName) {
-        overrides["risk-manager"] =
-          `**[Auto-importato da Risk Manager — Art. 9]**\n\n` +
-          `Sistema: ${rm.systemName}\n` +
-          `Rating complessivo: ${rm.overallRating ?? "N/A"} (score: ${rm.overallScore?.toFixed(2) ?? "N/A"})\n\n` +
-          `Rischi identificati:\n` +
-          (rm.risks ?? []).slice(0, 5).map((r, i) =>
-            `${i + 1}. ${r.description} (${r.severity.toUpperCase()}) — ${r.mitigation}`
-          ).join("\n");
-      }
+    const dataAudit = readFromStorage<DataAuditResult>("dataAudit");
+    if (dataAudit) {
+      overrides["data-audit"] = [
+        `**[Auto-importato da Data Audit — Art. 10]**`,
+        ``,
+        `Dataset analizzati: ${dataAudit.datasets?.map((d) => d.name).join(", ") || "N/D"}`,
+        `Qualità complessiva: ${dataAudit.overallQuality || "N/D"}`,
+        `Dati personali: ${dataAudit.datasets?.some((d) => d.personalData) ? "Sì — DPIA richiesta" : "No"}`,
+      ].join("\n");
+    }
+  } catch { /* fallback to AUTO_CONTENT */ }
+
+  // Risk Manager result (from storage-schema)
+  try {
+    const riskData = readFromStorage<RiskManagerResult>("riskManager");
+    if (riskData) {
+      overrides["risk-manager"] = [
+        `**[Auto-importato da Risk Manager — Art. 9]**`,
+        ``,
+        `Rischi identificati: ${riskData.risks?.length || 0}`,
+        `Livello rischio complessivo: ${riskData.overallRiskLevel || "N/D"}`,
+        `Prossima revisione: ${riskData.nextReviewDate || "da pianificare"}`,
+      ].join("\n");
     }
   } catch { /* fallback to AUTO_CONTENT */ }
 
@@ -171,6 +177,16 @@ export default function DocuGenPage() {
   const [compareIdx, setCompareIdx] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
   const [crossContent] = useState<Record<string, string>>(() => readCrossToolContent());
+
+  const classifierData = useMemo(() => {
+    try { const r = localStorage.getItem("aicomply_classifier_result"); return r ? JSON.parse(r) : null; }
+    catch { return null; }
+  }, []);
+  useEffect(() => {
+    if (classifierData?.systemName && !persisted.systemName) {
+      setSystemName(classifierData.systemName);
+    }
+  }, [classifierData]);
 
   // Destructure for easy access
   const { content, status, systemName, activeVersion } = persisted;
@@ -319,6 +335,8 @@ export default function DocuGenPage() {
 
   return (
     <div className="w-full" style={{ fontFamily: "var(--font-inter, system-ui)" }}>
+
+      <SystemContextBanner checkProhibited={true} />
 
       {/* Dossier saved banner */}
       {savedAt ? (
