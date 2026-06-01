@@ -82,6 +82,8 @@ export interface ResilienceResult {
   fallbackProcedure: string;
   lastTestedAt: string;
   completedAt: string;
+  accuracyThreshold?: number;
+  fallbackChecks?: Record<string, boolean>;
 }
 
 export interface QMSResult {

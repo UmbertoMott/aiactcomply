@@ -22,6 +22,8 @@ export default function ResiliencePage() {
   const [savedAt, setSavedAt] = useState<string | null>(() =>
     readFromStorage<ResilienceResult>("resilience")?.completedAt ?? null
   );
+  const [accuracyThreshold, setAccuracyThreshold] = useState<number>(95);
+  const [fallbackChecks, setFallbackChecks] = useState<Record<string, boolean>>({});
 
   // Pre-populate from other tools' localStorage data
   // NOTE: this component has no system name field and no attack vector selection state —
@@ -98,6 +100,8 @@ export default function ResiliencePage() {
       fallbackProcedure: "In caso di breach: disabilitazione automatica e notifica al compliance officer",
       lastTestedAt: completedAt,
       completedAt,
+      accuracyThreshold,
+      fallbackChecks,
     });
     appendEvidence(
       "adr",
@@ -222,6 +226,50 @@ export default function ResiliencePage() {
             </button>
           </>
         )}
+      </div>
+
+      {/* Accuracy threshold — Art. 15(1) */}
+      <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, padding: 20, marginBottom: 16 }}>
+        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
+          Soglia di accuracy accettabile dichiarata (Art. 15(1))
+        </div>
+        <div style={{ fontSize: 12, color: "rgba(0,0,0,0.42)", marginBottom: 12 }}>
+          Threshold sotto cui il sistema non deve scendere in produzione
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <input
+            type="number"
+            min={0}
+            max={100}
+            value={accuracyThreshold}
+            onChange={(e) => setAccuracyThreshold(Number(e.target.value))}
+            style={{ width: 80, padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.07)", fontSize: 13 }}
+          />
+          <span style={{ fontSize: 13, color: "rgba(0,0,0,0.42)" }}>%</span>
+        </div>
+      </div>
+
+      {/* Fallback procedures — Art. 15(4) */}
+      <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, padding: 20, marginBottom: 16 }}>
+        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
+          Procedure di fallback in caso di guasto o inconsistenza (Art. 15(4))
+        </div>
+        {[
+          { id: "fallback_human", label: "Trasferimento automatico a supervisore umano in caso di errore critico" },
+          { id: "fallback_degraded", label: "Modalità degradata documentata (funzionalità ridotta vs interruzione totale)" },
+          { id: "fallback_logging", label: "Logging automatico di tutti gli errori e guasti per analisi post-incident" },
+          { id: "fallback_recovery", label: "Procedura di recovery documentata con tempi massimi di ripristino (RTO)" },
+        ].map(item => (
+          <label key={item.id} style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 10, cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={fallbackChecks[item.id] ?? false}
+              onChange={(e) => setFallbackChecks(prev => ({ ...prev, [item.id]: e.target.checked }))}
+              style={{ marginTop: 2 }}
+            />
+            <span style={{ fontSize: 13 }}>{item.label}</span>
+          </label>
+        ))}
       </div>
 
       <div className="rounded-xl overflow-hidden"
