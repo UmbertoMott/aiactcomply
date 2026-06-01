@@ -406,7 +406,7 @@ export default function Art50KitPage() {
       {systems.length === 0 && !showForm && (
         <div
           className="rounded-xl py-16 text-center"
-          style={{ border: "2px dashed rgba(0,0,0,0.14)", background: T.card }}
+          style={{ border: "2px dashed rgba(0,0,0,0.14)", background: T.card, borderRadius: 12 }}
         >
           <Shield className="h-10 w-10 mx-auto mb-4" style={{ color: T.faint }} />
           <p className="font-medium" style={{ color: T.muted }}>Nessun sistema registrato</p>
@@ -550,7 +550,8 @@ export default function Art50KitPage() {
 
                     <button
                       onClick={() => deleteSystem(system.id)}
-                      className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 transition-all"
+                      className="p-1.5 rounded-lg border transition-all hover:text-red-500 hover:border-red-200"
+                      style={{ border: `1px solid ${T.border}`, color: T.muted }}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
