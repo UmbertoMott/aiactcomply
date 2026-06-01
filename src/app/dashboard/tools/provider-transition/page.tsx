@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useRef, useCallback, CSSProperties } from "react";
+import { useState, useRef, useCallback, useEffect, CSSProperties } from "react";
 import {
   ArrowRightLeft, AlertTriangle, CheckCircle2, Info,
   ChevronDown, ChevronRight, Save, Plus, Trash2, ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
-import { writeToStorage } from "@/lib/dossier/storage-schema";
-import type { ProviderTransitionResult } from "@/lib/dossier/storage-schema";
+import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
+import type { ProviderTransitionResult, ClassifierResult, DeployerCheckResult } from "@/lib/dossier/storage-schema";
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
 
@@ -380,6 +380,20 @@ export default function ProviderTransitionPage() {
   const saveObl      = useCallback(debounce<Record<string, boolean>>(oblTimer, v => {
     try { localStorage.setItem(OBL_KEY, JSON.stringify(v)); } catch { /* ignore */ }
   }), []);
+
+  // ── Synergy: pre-populate from classifier + deployer storage ─────────────
+  useEffect(() => {
+    const dep = readFromStorage<DeployerCheckResult>("deployer");
+    // If deployer tool has been completed and saved, mark the "deployer" obligation done
+    if (dep?.completedAt && !loadObligDone()["deployer"]) {
+      setObligDone(prev => {
+        const next = { ...prev, deployer: true };
+        try { localStorage.setItem(OBL_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+        return next;
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function setAnswer(id: string, val: TransitionAnswer) {
     setAnswers(prev => {

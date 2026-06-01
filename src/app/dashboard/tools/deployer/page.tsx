@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
-import type { DeployerCheckResult } from "@/lib/dossier/storage-schema";
+import type { DeployerCheckResult, LogvaultResult, FRIAResult } from "@/lib/dossier/storage-schema";
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
 
@@ -424,6 +424,38 @@ export default function DeployerPage() {
       setDoc(prev => ({ ...prev, system_name: classifierData.systemName }));
     }
   }, [classifierData]);
+
+  // ── Synergy: pre-populate D5 from LogVault, D9 from FRIA ─────────────────
+  useEffect(() => {
+    const logvault = readFromStorage<LogvaultResult>("logvault");
+    const fria = readFromStorage<FRIAResult>("fria");
+
+    setDoc(prev => {
+      let changed = false;
+      const obligations = prev.obligations.map(ob => {
+        // D5 — log retention: if logvault.retentionDays >= 180, mark compliant
+        if (ob.id === "d5" && logvault?.retentionDays != null) {
+          const isCompliant = logvault.retentionDays >= 180;
+          const note = `LogVault: ${logvault.retentionDays}g (Art. 26(6))`;
+          if ((!ob.status || ob.status === "not_assessed") && !ob.notes) {
+            changed = true;
+            return { ...ob, status: (isCompliant ? "compliant" : "partial") as DeployerObligation["status"], notes: note };
+          }
+        }
+        // D9 — FRIA: if fria.overallRisk exists, add a note about FRIA completion
+        if (ob.id === "d9" && fria?.overallRisk && !ob.notes) {
+          changed = true;
+          return {
+            ...ob,
+            notes: `FRIA completata — rischio complessivo: ${fria.overallRisk}${fria.completedAt ? ` (${new Date(fria.completedAt).toLocaleDateString("it-IT")})` : ""}`,
+          };
+        }
+        return ob;
+      });
+      return changed ? { ...prev, obligations } : prev;
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function toggleOpen(id: string) {
     setOpenIds(prev => {

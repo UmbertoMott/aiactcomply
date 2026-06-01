@@ -5,8 +5,8 @@ import {
   Database, ChevronRight, ChevronLeft, CheckCircle2, AlertTriangle,
   Info, Copy, Save, Globe, Building2, FileText,
 } from "lucide-react";
-import { writeToStorage } from "@/lib/dossier/storage-schema";
-import type { EUDBResult } from "@/lib/dossier/storage-schema";
+import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
+import type { EUDBResult, ConformityResult, AuthRepResult } from "@/lib/dossier/storage-schema";
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
 
@@ -404,6 +404,19 @@ export default function EUDBPage() {
   useEffect(() => {
     if (classifierData?.systemName && !doc.system.system_name) {
       patchSystem("system_name", classifierData.systemName);
+    }
+
+    // Synergy: pre-populate conformity declaration number from ConformityResult
+    const conformity = readFromStorage<ConformityResult>("conformity");
+    if (conformity?.registrationRef && !doc.system.conformity_declaration_number) {
+      patchSystem("conformity_declaration_number", conformity.registrationRef);
+    }
+
+    // Synergy: pre-populate Authorized Representative from AuthRepResult
+    const authRep = readFromStorage<AuthRepResult>("authorizedRep");
+    if (authRep?.ar_name && !doc.provider.ar_name) {
+      patchProvider("ar_name", authRep.ar_name);
+      patchProvider("has_authorized_rep", true);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [classifierData]);
