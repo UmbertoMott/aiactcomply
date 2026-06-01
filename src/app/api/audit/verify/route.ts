@@ -11,6 +11,7 @@
 // Requires: CRON_SECRET env var to protect this endpoint from public access.
 
 import { type NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { verifyHashChain, sendIntegrityAlert } from "@/lib/audit/audit-verify";
 
 export const dynamic = "force-dynamic";
@@ -18,11 +19,16 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   // Protect with shared secret (set in Vercel env + cron Authorization header)
   const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const authHeader = request.headers.get("authorization");
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  if (!cronSecret) {
+    console.error("[SECURITY] CRON_SECRET env var not set — endpoint disabled");
+    return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
+  }
+  const authHeader = request.headers.get("authorization") ?? "";
+  const expected = `Bearer ${cronSecret}`;
+  const authBuf = Buffer.from(authHeader.padEnd(expected.length, "\0").slice(0, expected.length));
+  const expBuf  = Buffer.from(expected);
+  if (authHeader.length !== expected.length || !timingSafeEqual(authBuf, expBuf)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const tenantId = request.nextUrl.searchParams.get("tenantId");

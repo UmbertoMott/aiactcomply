@@ -5,6 +5,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { timingSafeEqual } from "crypto";
 import { redactForGDPR } from "@/lib/audit/audit-gdpr";
 
 const BodySchema = z.object({
@@ -17,11 +18,15 @@ const BodySchema = z.object({
 export async function POST(request: NextRequest) {
   // Protect: only internal service calls or admin role
   const apiKey = process.env.GDPR_API_KEY;
-  if (apiKey) {
-    const auth = request.headers.get("x-api-key");
-    if (auth !== apiKey) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  if (!apiKey) {
+    console.error("[SECURITY] GDPR_API_KEY env var not set — endpoint disabled");
+    return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
+  }
+  const auth = request.headers.get("x-api-key") ?? "";
+  const apiKeyBuf = Buffer.from(apiKey);
+  const authBuf   = Buffer.from(auth.padEnd(apiKey.length, "\0").slice(0, apiKey.length));
+  if (auth.length !== apiKey.length || !timingSafeEqual(apiKeyBuf, authBuf)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   let body: unknown;
