@@ -3,12 +3,14 @@
 import { signup } from "@/app/(auth)/actions/auth";
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { PASSWORD_RULES } from "@/lib/auth/password-validator";
 
 function RegisterForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
-  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [passwordTouched, setPasswordTouched] = useState(false);
+  const [passedRules, setPassedRules] = useState<string[]>([]);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -19,16 +21,15 @@ function RegisterForm() {
 
   function checkPassword(value: string) {
     setPassword(value);
-    const errors: string[] = [];
-    if (value.length < 8) errors.push("Minimo 8 caratteri");
-    if (!/[A-Z]/.test(value)) errors.push("Almeno una maiuscola");
-    if (!/[^A-Za-z0-9]/.test(value)) errors.push("Almeno un carattere speciale");
-    setPasswordErrors(errors);
+    setPasswordTouched(true);
+    setPassedRules(PASSWORD_RULES.filter((r) => r.test(value)).map((r) => r.id));
   }
+
+  const passwordValid = passedRules.length === PASSWORD_RULES.length;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (passwordErrors.length > 0) return;
+    if (!passwordValid) return;
     setLoading(true);
     setError("");
 
@@ -154,20 +155,36 @@ function RegisterForm() {
             value={password}
             onChange={(e) => checkPassword(e.target.value)}
             className="w-full rounded-lg border border-border bg-muted px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-            placeholder="Min. 8 caratteri, 1 maiuscola, 1 speciale"
+            placeholder="Min. 8 caratteri, maiuscola, numero, simbolo"
           />
-          {passwordErrors.length > 0 && (
-            <ul className="mt-2 space-y-1">
-              {passwordErrors.map((err) => (
-                <li
-                  key={err}
-                  className="text-xs text-danger flex items-center gap-1"
-                >
-                  <span>•</span>
-                  {err}
-                </li>
-              ))}
-            </ul>
+          {/* Password strength bar */}
+          {passwordTouched && (
+            <div className="mt-2 space-y-1.5">
+              <div className="flex gap-1">
+                {PASSWORD_RULES.map((r, i) => (
+                  <div
+                    key={r.id}
+                    className="h-1 flex-1 rounded-full transition-colors duration-200"
+                    style={{
+                      background: passedRules.includes(r.id)
+                        ? i < 2 ? "#f59e0b" : i < 4 ? "#6366f1" : "#10b981"
+                        : "rgba(99,102,241,0.15)",
+                    }}
+                  />
+                ))}
+              </div>
+              <ul className="space-y-0.5">
+                {PASSWORD_RULES.map((r) => {
+                  const ok = passedRules.includes(r.id);
+                  return (
+                    <li key={r.id} className="flex items-center gap-1.5 text-xs" style={{ color: ok ? "#10b981" : "#94a3b8" }}>
+                      <span>{ok ? "✓" : "○"}</span>
+                      {r.label}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           )}
         </div>
 
@@ -179,7 +196,7 @@ function RegisterForm() {
 
         <button
           type="submit"
-          disabled={loading || passwordErrors.length > 0}
+          disabled={loading || (passwordTouched && !passwordValid)}
           className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
         >
           {loading ? "Creazione account..." : "Crea account"}

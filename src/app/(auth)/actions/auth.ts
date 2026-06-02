@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server-actions";
+import { createClient, createAdminClient } from "@/lib/supabase/server-actions";
 import { registrationSchema, loginSchema } from "@/lib/auth/password-validator";
 import { redirect } from "next/navigation";
 
@@ -16,6 +16,37 @@ export async function signup(formData: FormData) {
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message };
   }
+
+  // ── Duplicate checks (using service-role admin client) ───────────────
+  try {
+    const admin = createAdminClient();
+
+    // listUsers (max 1000 — sufficient for early-stage)
+    const { data: listData } = await admin.auth.admin.listUsers({ perPage: 1000, page: 1 });
+    const users = listData?.users ?? [];
+
+    // 1. Duplicate email — Supabase silently ignores re-signups when email
+    //    confirmation is ON (email enumeration protection), so we check ourselves.
+    const emailTaken = users.some(
+      (u) => u.email?.toLowerCase() === rawData.email.toLowerCase()
+    );
+    if (emailTaken) {
+      return { error: "Email già registrata. Accedi con le tue credenziali." };
+    }
+
+    // 2. Duplicate company name (case-insensitive)
+    const normalised = rawData.company.trim().toLowerCase();
+    const companyTaken = users.some(
+      (u) => (u.user_metadata?.company ?? "").trim().toLowerCase() === normalised
+    );
+    if (companyTaken) {
+      return { error: "Nome azienda già registrato. Usa un nome diverso o contatta il supporto." };
+    }
+  } catch (adminErr) {
+    // Non-blocking: if admin check fails (e.g. missing env var in dev) we let signUp proceed.
+    console.warn("[SIGNUP] Admin pre-check skipped:", adminErr);
+  }
+  // ─────────────────────────────────────────────────────────────────────
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
