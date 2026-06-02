@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/audit/verify",
+      "schedule": "0 3 * * 0"
+    },
+    {
+      "path": "/api/audit/backup",
+      "schedule": "0 * * * *"
+    }
+  ]
+}
