@@ -4,16 +4,19 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Shield, Box, GitBranch, Users, Eye, Activity,
-  Menu, X, ChevronRight, ChevronLeft, LogOut, Database, Network, Ban,
-  FileArchive, Scale, Search, Cpu, Bell, BadgeCheck, BarChart2, BookOpen,
+  GitBranch, Users, Eye, Menu, X, ChevronRight, ChevronLeft, LogOut, Ban,
+  FileArchive, FileText, Scale, Search, Cpu, Bell, BadgeCheck, BarChart2, BookOpen, GraduationCap, ShieldAlert,
+  Layers, Bot, Tag, TrendingUp, Globe, Building2, Sliders, Zap,
+  ClipboardList, FileCode, Archive, Gauge, Settings, BookMarked, Award, Map, Database, UserCheck, ArrowRightLeft,
 } from "lucide-react";
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
+import { useUserRole, ROLE_LABELS } from "@/lib/hooks/useUserRole";
 import { logout } from "./actions";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import DisclosureModal from "@/components/disclosure/DisclosureModal";
 import DisclosureBanner from "@/components/disclosure/DisclosureBanner";
 import MachineMarkers from "@/components/disclosure/MachineMarkers";
+import ChatAssistant from "@/components/ui/ChatAssistant";
 
 type NavItem = {
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
@@ -24,50 +27,98 @@ type NavItem = {
 };
 type NavGroup = { label: string; items: NavItem[] };
 
+const ROLE_HIDDEN_HREFS: Record<string, string[]> = {
+  deployer: [
+    "/dashboard/modules/aia-architect",
+    "/dashboard/tools/docugen",
+    "/dashboard/tools/resilience",
+    "/dashboard/tools/qms",
+    "/dashboard/tools/conformity",
+    "/dashboard/modules/xai",
+    "/dashboard/modules/gpai",
+  ],
+  importer: [
+    "/dashboard/modules/aia-architect",
+    "/dashboard/modules/guardian-agent",
+    "/dashboard/tools/oversight",
+    "/dashboard/tools/resilience",
+    "/dashboard/tools/qms",
+    "/dashboard/modules/gpai",
+  ],
+  distributor: [
+    "/dashboard/modules/aia-architect",
+    "/dashboard/modules/guardian-agent",
+    "/dashboard/tools/docugen",
+    "/dashboard/tools/oversight",
+    "/dashboard/tools/data-audit",
+    "/dashboard/tools/resilience",
+    "/dashboard/tools/qms",
+    "/dashboard/tools/conformity",
+    "/dashboard/modules/xai",
+    "/dashboard/modules/gpai",
+    "/dashboard/tools/fria",
+    "/dashboard/tools/risk-manager",
+    "/dashboard/tools/logvault",
+    "/dashboard/post-market",
+  ],
+  provider: [],
+};
+
 const navGroups: NavGroup[] = [
   {
     label: "Core",
     items: [
-      { icon: Search, label: "Discovery", href: "/dashboard/discovery", art: "" },
-      { icon: Database, label: "Evidence Layer", href: "/dashboard/evidence-layer", art: "Core" },
+      { icon: Map,          label: "Roadmap",       href: "/dashboard/journey",        art: ""     },
+      { icon: Search,       label: "Discovery",     href: "/dashboard/discovery",      art: ""     },
+      { icon: Archive,      label: "Evidence Layer", href: "/dashboard/evidence-layer", art: "Core" },
     ],
   },
   {
-    label: "Moduli",
+    label: "Monitoraggio",
     items: [
-      { icon: Box, label: "AIA-Architect", href: "/dashboard/modules/aia-architect", art: "Art. 11" },
-      { icon: Activity, label: "Guardian-Agent", href: "/dashboard/modules/guardian-agent", art: "Art. 14" },
-      { icon: Eye, label: "Trust-Labeler", href: "/dashboard/modules/trust-labeler", art: "Art. 50" },
-      { icon: Activity, label: "Post-Market", href: "/dashboard/post-market", art: "Art. 72" },
-      { icon: Shield, label: "Compliance-Nexus", href: "/dashboard/compliance-nexus", art: "Art. 71" },
-      { icon: Cpu, label: "GPAI Module", href: "/dashboard/modules/gpai", art: "Art. 51-55" },
-      { icon: BarChart2, label: "XAI Center", href: "/dashboard/modules/xai", art: "Art. 13" },
+      { icon: Layers,     label: "Doc Monitor",       href: "/dashboard/modules/aia-architect",  art: "Art. 11"    },
+      { icon: Bot,        label: "Oversight Monitor", href: "/dashboard/modules/guardian-agent", art: "Art. 14"    },
+      { icon: Tag,        label: "AI Disclosure",     href: "/dashboard/modules/trust-labeler",  art: "Art. 50"    },
+      { icon: TrendingUp, label: "Post-Market",       href: "/dashboard/post-market",            art: "Art. 72"    },
+      { icon: Globe,      label: "Compliance Hub",    href: "/dashboard/compliance-nexus",       art: "Art. 71"    },
+      { icon: Cpu,        label: "GPAI Module",       href: "/dashboard/modules/gpai",           art: "Art. 51-55" },
+      { icon: BarChart2,  label: "XAI Lab",           href: "/dashboard/modules/xai",            art: "Art. 13"    },
     ],
   },
   {
     label: "Integrazioni",
     items: [
-      { icon: GitBranch, label: "Connectors", href: "/dashboard/connectors", art: "" },
-      { icon: Network, label: "Trust Center", href: "/dashboard/trust-center", art: "" },
-      { icon: Bell, label: "Notifiche", href: "/dashboard/notifications", art: "" },
+      { icon: GitBranch,  label: "Connectors",   href: "/dashboard/connectors",         art: ""        },
+      { icon: Building2,  label: "Trust Center", href: "/dashboard/trust-center",       art: ""        },
+      { icon: Bell,       label: "Notifiche",    href: "/dashboard/notifications",       art: ""        },
+      { icon: FileText,   label: "Q-AutoFill",   href: "/dashboard/tools/questionnaire", art: "Buyer Q" },
     ],
   },
   {
-    label: "Tool",
+    label: "Valutazioni",
     items: [
-      { icon: Ban,    label: "Art. 5 Checker", href: "/dashboard/tools/prohibited", art: "Art. 5", urgent: true },
-      { icon: Shield, label: "AI Classifier",  href: "/dashboard/tools/classifier", art: "Art. 6" },
-      { icon: Activity, label: "Drift Detection", href: "/dashboard/tools/risk-manager", art: "Art. 9" },
-      { icon: Database, label: "Data Audit", href: "/dashboard/tools/data-audit", art: "Art. 10" },
-      { icon: Box, label: "DocuGen AI", href: "/dashboard/tools/docugen", art: "Art. 11" },
-      { icon: Eye, label: "LogVault", href: "/dashboard/tools/logvault", art: "Art. 12" },
-      { icon: Eye, label: "Transparency", href: "/dashboard/tools/transparency", art: "Art. 13" },
-      { icon: Users, label: "Oversight", href: "/dashboard/tools/oversight", art: "Art. 14" },
-      { icon: Shield, label: "Resilience", href: "/dashboard/tools/resilience", art: "Art. 15" },
-      { icon: Shield, label: "QMS Builder", href: "/dashboard/tools/qms", art: "Art. 17" },
-      { icon: Scale,      label: "FRIA",            href: "/dashboard/tools/fria",             art: "Art. 27" },
-      { icon: BadgeCheck, label: "Conformity",       href: "/dashboard/tools/conformity",       art: "Art. 43" },
-      { icon: BookOpen,   label: "Legal Assistant",  href: "/dashboard/tools/legal-assistant",  art: "Art. 9"  },
+      { icon: GraduationCap, label: "AI Literacy",    href: "/dashboard/tools/literacy",        art: "Art. 4",   urgent: true },
+      { icon: Scale,         label: "L.132/2025",     href: "/dashboard/tools/l132",            art: "L.132/25", urgent: true },
+      { icon: ShieldAlert,   label: "DPIA",           href: "/dashboard/tools/dpia",            art: "Art. 35"               },
+      { icon: Ban,           label: "Art. 5 Checker", href: "/dashboard/tools/prohibited",      art: "Art. 5",   urgent: true },
+      { icon: Sliders,       label: "AI Classifier",  href: "/dashboard/tools/classifier",      art: "Art. 6"                },
+      { icon: Cpu,           label: "GPAI Assessment", href: "/dashboard/tools/gpai",           art: "Art. 53-55"            },
+      { icon: Zap,           label: "Risk Manager",   href: "/dashboard/tools/risk-manager",    art: "Art. 9"                },
+      { icon: ClipboardList, label: "Data Audit",     href: "/dashboard/tools/data-audit",      art: "Art. 10"               },
+      { icon: FileCode,      label: "DocuGen AI",     href: "/dashboard/tools/docugen",         art: "Art. 11"               },
+      { icon: FileArchive,   label: "LogVault",       href: "/dashboard/tools/logvault",        art: "Art. 12"               },
+      { icon: Eye,           label: "Transparency",   href: "/dashboard/tools/transparency",    art: "Art. 13"               },
+      { icon: Users,         label: "Oversight",      href: "/dashboard/tools/oversight",       art: "Art. 14"               },
+      { icon: Building2,     label: "Deployer",       href: "/dashboard/tools/deployer",        art: "Art. 26"               },
+      { icon: Database,      label: "EUDB Registration", href: "/dashboard/tools/eudb",            art: "Art. 49"               },
+      { icon: UserCheck,     label: "Authorized Rep.",  href: "/dashboard/tools/authorized-rep",  art: "Art. 22"               },
+      { icon: ArrowRightLeft,label: "Provider Transition", href: "/dashboard/tools/provider-transition", art: "Art. 28"            },
+      { icon: Gauge,         label: "Resilience",     href: "/dashboard/tools/resilience",      art: "Art. 15"               },
+      { icon: Settings,      label: "QMS Builder",    href: "/dashboard/tools/qms",             art: "Art. 17"               },
+      { icon: BookMarked,    label: "FRIA",           href: "/dashboard/tools/fria",            art: "Art. 27"               },
+      { icon: BadgeCheck,    label: "Art. 50 Kit",    href: "/dashboard/tools/art50-kit",       art: "Art. 50",  urgent: true },
+      { icon: Award,         label: "Conformity",     href: "/dashboard/tools/conformity",      art: "Art. 43"               },
+      { icon: BookOpen,      label: "Legal Assistant", href: "/dashboard/tools/legal-assistant", art: "Art. 9"               },
     ],
   },
 ];
@@ -80,6 +131,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return localStorage.getItem("sidebar_collapsed") === "true";
   });
   const [dossierPct, setDossierPct] = useState(0);
+  const { role } = useUserRole();
+
+  const hiddenHrefs = role ? (ROLE_HIDDEN_HREFS[role] ?? []) : [];
+  const filteredNavGroups = navGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => !hiddenHrefs.includes(item.href)),
+    }))
+    .filter((group) => group.items.length > 0);
 
   function toggleCollapse() {
     const next = !collapsed;
@@ -93,7 +153,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setDossierPct(getCompletionPercentage(sections));
   }, [pathname]);
 
-  const currentItem = navGroups
+  const currentItem = filteredNavGroups
     .flatMap((g) => g.items)
     .find((i) => pathname.startsWith(i.href));
 
@@ -129,12 +189,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
         >
           {collapsed ? (
-            <Link href="/dashboard" className="w-full flex items-center justify-center text-[13px] font-bold" style={{ color: "#ffffff" }}>
+            <Link href="/" className="w-full flex items-center justify-center text-[13px] font-bold" style={{ color: "#ffffff" }}>
               AI
             </Link>
           ) : (
             <>
-              <Link href="/dashboard" className="text-[15px] font-semibold" style={{ color: "#ffffff", letterSpacing: "-0.4px" }}>
+              <Link href="/" className="text-[15px] font-semibold" style={{ color: "#ffffff", letterSpacing: "-0.4px" }}>
                 AI<span style={{ color: "rgba(255,255,255,0.35)", fontWeight: 300 }}>Comply</span>
               </Link>
               <button onClick={() => setSidebarOpen(false)} className="lg:hidden" style={{ color: "rgba(255,255,255,0.5)" }}>
@@ -180,7 +240,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
 
             {/* Groups */}
-            {navGroups.map((group) => (
+            {filteredNavGroups.map((group) => (
               <div key={group.label} className="mb-5">
                 {!collapsed && (
                   <p
@@ -206,30 +266,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       }
                     >
                       <div className={`flex items-center ${collapsed ? "" : "gap-2"}`}>
-                        <item.icon
-                          className="h-3.5 w-3.5 flex-shrink-0"
-                          style={item.urgent && !isActive ? { color: "rgba(252,165,165,0.9)" } : undefined}
-                        />
+                        <item.icon className="h-3.5 w-3.5 flex-shrink-0" />
                         {!collapsed && <span>{item.label}</span>}
-                        {!collapsed && item.urgent && (
-                          <span className="relative flex h-1.5 w-1.5 flex-shrink-0">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: "#f87171" }} />
-                            <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ background: "#ef4444" }} />
-                          </span>
-                        )}
                       </div>
-                      {!collapsed && item.art && !item.urgent && (
+                      {!collapsed && item.art && (
                         <span
                           className="text-[9px] px-1.5 py-0.5 rounded"
                           style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.55)" }}
-                        >
-                          {item.art}
-                        </span>
-                      )}
-                      {!collapsed && item.urgent && (
-                        <span
-                          className="text-[9px] px-1.5 py-0.5 rounded font-semibold"
-                          style={{ background: "rgba(220,38,38,0.3)", color: "#fca5a5" }}
                         >
                           {item.art}
                         </span>
@@ -298,6 +341,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </>
             )}
           </div>
+          {role && (
+            <div className="ml-4 hidden lg:flex items-center gap-1.5">
+              <span
+                className="text-[10px] px-2 py-0.5 rounded-full font-medium"
+                style={{
+                  background: "rgba(0,0,0,0.05)",
+                  color: "rgba(0,0,0,0.45)",
+                  border: "1px solid rgba(0,0,0,0.08)",
+                }}
+              >
+                {ROLE_LABELS[role]}
+              </span>
+              <Link
+                href="/dashboard/onboarding?changeRole=1"
+                className="text-[10px] transition-opacity hover:opacity-70"
+                style={{ color: "rgba(0,0,0,0.3)" }}
+              >
+                cambia
+              </Link>
+            </div>
+          )}
           <div className="ml-auto">
             <NotificationBell />
           </div>
@@ -306,6 +370,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <main className="flex-1 overflow-y-auto p-6 w-full">{children}</main>
       </div>
       </div>
+
+      {/* AI Chat Assistant — globale, flottante bottom-right */}
+      <ChatAssistant />
     </div>
   );
 }

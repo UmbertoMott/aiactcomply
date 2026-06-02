@@ -8,12 +8,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12"
         style={{ background: "#0D1016" }}
       >
-        <div
-          className="text-white font-semibold text-[18px]"
-          style={{ letterSpacing: "-0.5px" }}
+        <a
+          href="/"
+          className="text-white font-semibold text-[18px] hover:opacity-80 transition-opacity"
+          style={{ letterSpacing: "-0.5px", textDecoration: "none" }}
         >
           AI<span style={{ color: "rgba(255,255,255,0.3)", fontWeight: 300 }}>Comply</span>
-        </div>
+        </a>
 
         <div>
           <p
@@ -61,12 +62,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       >
         <div className="w-full max-w-[400px]">
           {/* Mobile logo */}
-          <div
-            className="lg:hidden text-[18px] font-semibold mb-10"
-            style={{ color: "#0D1016", letterSpacing: "-0.5px" }}
+          <a
+            href="/"
+            className="lg:hidden text-[18px] font-semibold mb-10 block hover:opacity-70 transition-opacity"
+            style={{ color: "#0D1016", letterSpacing: "-0.5px", textDecoration: "none" }}
           >
             AI<span style={{ color: "rgba(0,0,0,0.25)", fontWeight: 300 }}>Comply</span>
-          </div>
+          </a>
           {children}
         </div>
       </div>
