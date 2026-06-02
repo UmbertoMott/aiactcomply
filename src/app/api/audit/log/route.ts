@@ -10,6 +10,7 @@ import { generateServerOutputId } from "@/lib/audit/output-id-server";
 import { createAuditClient } from "@/lib/audit/audit-trail";
 import { getAIModelName, getSystemVersion } from "@/lib/disclosure/ai-config";
 import { getSession } from "@/lib/auth/mock-auth";
+import { createHash } from "crypto";
 
 const BodySchema = z.object({
   tenantId:      z.string().uuid(),
@@ -75,7 +76,12 @@ export async function POST(request: NextRequest) {
       systemVersion: getSystemVersion(),
       userId:       userId,
       userEmail:    userEmail,
-      ipAddress:    request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? undefined,
+      ipAddress:    (() => {
+        const raw = request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? request.headers.get("x-real-ip") ?? null;
+        if (!raw) return undefined;
+        // Hash IP for GDPR compliance — one-way, non-reversible
+        return "sha256:" + createHash("sha256").update(raw + (process.env.SESSION_SECRET ?? "")).digest("hex").slice(0, 16);
+      })(),
       userAgent:    request.headers.get("user-agent") ?? undefined,
       requiresReview: data.requiresReview ?? true,
       regulationRefs: data.regulationRefs,
