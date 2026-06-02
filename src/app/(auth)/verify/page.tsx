@@ -73,6 +73,7 @@ function VerifyForm() {
 
     const formData = new FormData();
     formData.set("code", fullCode);
+    formData.set("email", searchParams.get("email") || "");
     formData.set("userId", searchParams.get("uid") || "");
     if (fromScanner) {
       const onboardParams = new URLSearchParams();

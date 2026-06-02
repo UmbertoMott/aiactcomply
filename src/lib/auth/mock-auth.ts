@@ -1,11 +1,8 @@
 "use server";
 
-import { cookies } from "next/headers";
-import { createHmac, timingSafeEqual } from "crypto";
+import { createClient } from "@/lib/supabase/server-actions";
 
-const SESSION_KEY = "aicomply_session";
-const SECRET = process.env.SESSION_SECRET ?? "dev-only-change-in-production";
-
+// Backward-compatible type (same shape as before)
 export type MockUser = {
   id: string;
   email: string;
@@ -15,60 +12,32 @@ export type MockUser = {
   phoneVerified: boolean;
 };
 
-function signPayload(payload: string): string {
-  const sig = createHmac("sha256", SECRET).update(payload).digest("base64url");
-  return `${payload}.${sig}`;
-}
-
-function verifyAndExtract(signed: string): string | null {
-  const lastDot = signed.lastIndexOf(".");
-  if (lastDot === -1) return null;
-  const payload = signed.slice(0, lastDot);
-  const sig = signed.slice(lastDot + 1);
-  const expected = createHmac("sha256", SECRET).update(payload).digest("base64url");
-  try {
-    const sigBuf = Buffer.from(sig, "base64url");
-    const expBuf = Buffer.from(expected, "base64url");
-    if (sigBuf.length !== expBuf.length) return null;
-    if (!timingSafeEqual(sigBuf, expBuf)) return null;
-  } catch {
-    return null;
-  }
-  return payload;
-}
-
-const COOKIE_OPTS = (maxAge: number) => ({
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax" as const,
-  maxAge,
-  path: "/",
-});
-
-export async function setSession(user: MockUser) {
-  const cookieStore = await cookies();
-  cookieStore.set(SESSION_KEY, signPayload(JSON.stringify(user)), COOKIE_OPTS(60 * 60 * 24 * 30));
-}
-
-export async function setSessionLong(user: MockUser) {
-  const cookieStore = await cookies();
-  cookieStore.set(SESSION_KEY, signPayload(JSON.stringify(user)), COOKIE_OPTS(60 * 60 * 24 * 365));
-}
-
 export async function getSession(): Promise<MockUser | null> {
   try {
-    const cookieStore = await cookies();
-    const session = cookieStore.get(SESSION_KEY);
-    if (!session) return null;
-    const payload = verifyAndExtract(session.value);
-    if (!payload) return null;
-    return JSON.parse(payload) as MockUser;
+    const supabase = await createClient();
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user) return null;
+    return {
+      id:            user.id,
+      email:         user.email ?? "",
+      phone:         (user.user_metadata?.phone as string) ?? "",
+      company:       (user.user_metadata?.company as string) ?? "",
+      lastLogin:     user.last_sign_in_at ?? new Date().toISOString(),
+      phoneVerified: user.phone_confirmed_at != null,
+    };
   } catch {
     return null;
   }
 }
 
-export async function clearSession() {
-  const cookieStore = await cookies();
-  cookieStore.delete(SESSION_KEY);
+// These are no longer needed (Supabase manages session cookies automatically)
+// but kept for backward compatibility — they are now no-ops
+export async function setSession(_user: MockUser): Promise<void> {}
+export async function setSessionLong(_user: MockUser): Promise<void> {}
+
+export async function clearSession(): Promise<void> {
+  try {
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+  } catch {}
 }

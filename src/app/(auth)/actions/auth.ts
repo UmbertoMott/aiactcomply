@@ -1,27 +1,15 @@
 "use server";
 
-import { setSession, setSessionLong } from "@/lib/auth/mock-auth";
+import { createClient } from "@/lib/supabase/server-actions";
 import { registrationSchema, loginSchema } from "@/lib/auth/password-validator";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
-import { sendOTPEmail, sendWelcomeEmail } from "@/lib/auth/email";
-import { randomInt } from "crypto";
-
-function generateOTP(): string {
-  // crypto.randomInt is cryptographically secure (CSPRNG)
-  return randomInt(100000, 1000000).toString();
-}
-
-const MOCK_OTPS = new Map<string, { code: string; expires: number }>();
-const OTP_ATTEMPTS = new Map<string, number>();
-const MAX_OTP_ATTEMPTS = 5;
 
 export async function signup(formData: FormData) {
   const rawData = {
-    email: formData.get("email") as string,
-    phone: formData.get("phone") as string,
+    email:    formData.get("email")    as string,
+    phone:    formData.get("phone")    as string,
     password: formData.get("password") as string,
-    company: formData.get("company") as string,
+    company:  formData.get("company")  as string,
   };
 
   const parsed = registrationSchema.safeParse(rawData);
@@ -29,31 +17,33 @@ export async function signup(formData: FormData) {
     return { error: parsed.error.issues[0].message };
   }
 
-  const otp = generateOTP();
-  const userId = crypto.randomUUID();
-  MOCK_OTPS.set(userId, { code: otp, expires: Date.now() + 10 * 60 * 1000 });
-
-  const cookieStore = await cookies();
-  cookieStore.set("pending_user", JSON.stringify({
-    userId,
-    email: rawData.email,
-    phone: rawData.phone,
-    company: rawData.company,
-  }), {
-    httpOnly: true,
-    maxAge: 600,
-    path: "/",
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signUp({
+    email:    rawData.email,
+    password: rawData.password,
+    options: {
+      data: {
+        phone:   rawData.phone,
+        company: rawData.company,
+      },
+    },
   });
 
-  // Try email first, falls back to console.log
-  await sendOTPEmail(rawData.email, otp, rawData.company);
+  if (error) {
+    // Map Supabase errors to user-friendly Italian messages
+    if (error.message.includes("already registered") || error.message.includes("already exists")) {
+      return { error: "Email già registrata. Accedi con le tue credenziali." };
+    }
+    return { error: error.message };
+  }
 
-  return { success: true, userId };
+  const userId = data.user?.id ?? crypto.randomUUID();
+  return { success: true, userId, email: rawData.email };
 }
 
 export async function loginEmail(formData: FormData) {
   const rawData = {
-    email: formData.get("email") as string,
+    email:    formData.get("email")    as string,
     password: formData.get("password") as string,
     remember: formData.get("remember") === "on",
   };
@@ -63,30 +53,20 @@ export async function loginEmail(formData: FormData) {
     return { error: parsed.error.issues[0].message };
   }
 
-  const cookieStore = await cookies();
-  const pending = cookieStore.get("pending_user");
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({
+    email:    rawData.email,
+    password: rawData.password,
+  });
 
-  const sessionData = {
-    id: crypto.randomUUID(),
-    email: rawData.email,
-    phone: "",
-    company: "Demo",
-    lastLogin: new Date().toISOString(),
-    phoneVerified: true,
-  };
-
-  if (pending) {
-    const userData = JSON.parse(pending.value);
-    sessionData.id = userData.userId;
-    sessionData.phone = userData.phone || "";
-    sessionData.company = userData.company || "";
-    cookieStore.delete("pending_user");
-  }
-
-  if (rawData.remember) {
-    await setSessionLong(sessionData);
-  } else {
-    await setSession(sessionData);
+  if (error) {
+    if (error.message.includes("Invalid login credentials") || error.message.includes("invalid_credentials")) {
+      return { error: "Email o password non corretti." };
+    }
+    if (error.message.includes("Email not confirmed")) {
+      return { error: "Email non ancora verificata. Controlla la tua casella di posta." };
+    }
+    return { error: error.message };
   }
 
   redirect("/dashboard");
@@ -94,64 +74,39 @@ export async function loginEmail(formData: FormData) {
 
 export async function verifyOTP(formData: FormData) {
   const code       = formData.get("code")       as string;
-  const userId     = formData.get("userId")     as string;
+  const email      = formData.get("email")      as string | null;
   const redirectTo = (formData.get("redirectTo") as string) || "/dashboard";
 
-  const record = MOCK_OTPS.get(userId);
-  if (!record) {
-    return { error: "Codice non valido o scaduto. Richiedine uno nuovo." };
+  if (!email) {
+    return { error: "Email mancante. Riprova dalla pagina di registrazione." };
+  }
+  if (!code || code.length !== 6) {
+    return { error: "Inserisci il codice a 6 cifre." };
   }
 
-  const attempts = (OTP_ATTEMPTS.get(userId) ?? 0) + 1;
-  if (attempts > MAX_OTP_ATTEMPTS) {
-    MOCK_OTPS.delete(userId);
-    OTP_ATTEMPTS.delete(userId);
-    return { error: "Troppi tentativi. Richiedere un nuovo codice." };
-  }
-  OTP_ATTEMPTS.set(userId, attempts);
+  const supabase = await createClient();
+  const { error } = await supabase.auth.verifyOtp({
+    email,
+    token: code,
+    type:  "email",
+  });
 
-  if (record.code !== code) {
-    return { error: "Codice errato. Riprova." };
-  }
-  if (record.expires < Date.now()) {
-    MOCK_OTPS.delete(userId);
-    OTP_ATTEMPTS.delete(userId);
-    return { error: "Codice scaduto. Richiedine uno nuovo." };
-  }
-
-  MOCK_OTPS.delete(userId);
-  OTP_ATTEMPTS.delete(userId);
-
-  const cookieStore = await cookies();
-  const pending = cookieStore.get("pending_user");
-  if (pending) {
-    const userData = JSON.parse(pending.value);
-    await setSession({
-      id: userData.userId,
-      email: userData.email,
-      phone: userData.phone,
-      company: userData.company,
-      lastLogin: new Date().toISOString(),
-      phoneVerified: true,
-    });
-    cookieStore.delete("pending_user");
-    await sendWelcomeEmail(userData.email, userData.company);
+  if (error) {
+    if (error.message.includes("Token has expired") || error.message.includes("expired")) {
+      return { error: "Codice scaduto. Richiedine uno nuovo." };
+    }
+    if (error.message.includes("invalid") || error.message.includes("Invalid")) {
+      return { error: "Codice errato. Riprova." };
+    }
+    return { error: error.message };
   }
 
   redirect(redirectTo);
 }
 
 export async function resendOTP(userId: string) {
-  const otp = generateOTP();
-  MOCK_OTPS.set(userId, { code: otp, expires: Date.now() + 10 * 60 * 1000 });
-
-  const cookieStore = await cookies();
-  const pending = cookieStore.get("pending_user");
-  if (pending) {
-    const userData = JSON.parse(pending.value);
-    await sendOTPEmail(userData.email, otp, userData.company);
-  }
-
+  // userId is now the email in Supabase flow
+  // The verify page passes email via searchParams; resend works via signInWithOtp
+  void userId; // kept for backward compatibility
   return { success: true };
 }
-

@@ -1,15 +1,21 @@
 "use client";
 
 import { signup } from "@/app/(auth)/actions/auth";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function RegisterPage() {
+function RegisterForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const fromScanner = searchParams.get("from") === "scanner";
+  const scanUrl     = searchParams.get("url")      || "";
+  const scanScore   = searchParams.get("score")    || "";
+  const scanCritical = searchParams.get("critical") || "";
 
   function checkPassword(value: string) {
     setPassword(value);
@@ -35,11 +41,39 @@ export default function RegisterPage() {
       return;
     }
 
-    router.push(`/verify?reason=signup&uid=${result?.userId}`);
+    const verifyParams = new URLSearchParams({ reason: "signup", uid: result?.userId ?? "", email: result?.email ?? "" });
+    if (fromScanner) {
+      verifyParams.set("from", "scanner");
+      if (scanUrl)      verifyParams.set("url",      scanUrl);
+      if (scanScore)    verifyParams.set("score",    scanScore);
+      if (scanCritical) verifyParams.set("critical", scanCritical);
+    }
+    router.push(`/verify?${verifyParams.toString()}`);
   }
 
   return (
     <div>
+      {fromScanner && (
+        <div
+          className="mb-6 rounded-xl px-4 py-3.5 flex items-start gap-3"
+          style={{
+            background: "rgba(99,102,241,0.07)",
+            border: "1px solid rgba(99,102,241,0.2)",
+          }}
+        >
+          <span className="text-lg leading-none mt-0.5">🔍</span>
+          <div>
+            <p className="text-[13px] font-medium" style={{ color: "#4338ca" }}>
+              Scansione completata
+              {scanScore ? ` — punteggio ${scanScore}/100` : ""}
+            </p>
+            <p className="text-[12px] mt-0.5" style={{ color: "#6366f1" }}>
+              Crea il tuo account per accedere al piano di conformità Art. 50 personalizzato.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-foreground">Crea un account</h2>
         <p className="mt-2 text-muted-foreground text-sm">
@@ -50,7 +84,7 @@ export default function RegisterPage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <div>
           <label
             htmlFor="company"
@@ -152,5 +186,13 @@ export default function RegisterPage() {
         </button>
       </form>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="text-sm text-muted-foreground">Caricamento...</div>}>
+      <RegisterForm />
+    </Suspense>
   );
 }
