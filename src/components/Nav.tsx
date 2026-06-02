@@ -34,14 +34,21 @@ export default function Nav() {
         <Link href="#" className="hover:text-white/80 transition-colors">
           Prodotto
         </Link>
-        <Link href="#" className="hover:text-white/80 transition-colors">
+        <Link href="/pricing" className="hover:text-white/80 transition-colors">
           Prezzi
         </Link>
-        <Link href="#" className="hover:text-white/80 transition-colors">
-          Risorse
+        <Link
+          href="/scanner"
+          className="hover:text-white/80 transition-colors flex items-center gap-1.5"
+        >
+          <span
+            className="inline-block w-1.5 h-1.5 rounded-full bg-blue-400"
+            aria-hidden="true"
+          />
+          Scanner Art. 50
         </Link>
-        <Link href="#" className="hover:text-white/80 transition-colors">
-          Azienda
+        <Link href="/risorse" className="hover:text-white/80 transition-colors">
+          Risorse
         </Link>
       </div>
 
