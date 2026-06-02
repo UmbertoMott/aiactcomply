@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Bell, AlertTriangle, Clock, Calendar, CheckCircle,
-  X, Filter, ToggleLeft, ToggleRight, Info, ArrowRight,
+  X, Filter, Info, ArrowRight,
   Award, Play, ClipboardList,
 } from "lucide-react";
 import {
@@ -382,18 +382,65 @@ function Toggle({
   onChange?: (v: boolean) => void;
   disabled?: boolean;
 }) {
+  const W = 44, H = 26, THUMB = 20, PAD = 3;
+  const travel = W - THUMB - PAD * 2;
+
+  const trackOn  = "linear-gradient(135deg, #16a34a 0%, #15803d 100%)";
+  const trackOff = disabled && on
+    ? "linear-gradient(135deg, #16a34a 0%, #15803d 100%)"   // locked-on stays green
+    : "linear-gradient(135deg, rgba(0,0,0,0.13) 0%, rgba(0,0,0,0.18) 100%)";
+
   return (
     <button
       onClick={() => !disabled && onChange && onChange(!on)}
       disabled={disabled}
-      className="flex-shrink-0"
-      style={{ opacity: disabled ? 0.5 : 1, cursor: disabled ? "not-allowed" : "pointer" }}
+      aria-checked={on}
+      role="switch"
+      className="flex-shrink-0 relative focus:outline-none"
+      style={{
+        width: W,
+        height: H,
+        borderRadius: H / 2,
+        background: on ? trackOn : trackOff,
+        boxShadow: on
+          ? "inset 0 1px 3px rgba(0,0,0,0.25), 0 0 0 0.5px rgba(0,0,0,0.06)"
+          : "inset 0 1px 2px rgba(0,0,0,0.18), 0 0 0 0.5px rgba(0,0,0,0.08)",
+        transition: "background 0.22s ease, box-shadow 0.22s ease",
+        cursor: disabled ? "not-allowed" : "pointer",
+        border: "none",
+        padding: 0,
+      }}
     >
-      {on ? (
-        <ToggleRight className="h-5 w-5" style={{ color: "#15803d" }} />
-      ) : (
-        <ToggleLeft className="h-5 w-5" style={{ color: "rgba(0,0,0,0.3)" }} />
-      )}
+      {/* Thumb */}
+      <span
+        style={{
+          position: "absolute",
+          top: PAD,
+          left: PAD,
+          width: THUMB,
+          height: THUMB,
+          borderRadius: "50%",
+          background: disabled && on
+            ? "rgba(255,255,255,0.85)"
+            : "#ffffff",
+          boxShadow: on
+            ? "0 2px 6px rgba(0,0,0,0.28), 0 0.5px 1px rgba(0,0,0,0.15)"
+            : "0 1px 4px rgba(0,0,0,0.22), 0 0.5px 1px rgba(0,0,0,0.12)",
+          transform: `translateX(${on ? travel : 0}px) ${on ? "scale(1.04)" : "scale(1)"}`,
+          transition: "transform 0.22s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.22s ease",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {/* Lock icon for disabled-on */}
+        {disabled && on && (
+          <svg width="8" height="9" viewBox="0 0 8 9" fill="none">
+            <rect x="1" y="4" width="6" height="5" rx="1" fill="#15803d"/>
+            <path d="M2 4V3a2 2 0 1 1 4 0v1" stroke="#15803d" strokeWidth="1.2" strokeLinecap="round"/>
+          </svg>
+        )}
+      </span>
     </button>
   );
 }
