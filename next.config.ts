@@ -23,6 +23,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  serverExternalPackages: ["@aws-sdk/client-s3"],
   async headers() {
     return [
       {
