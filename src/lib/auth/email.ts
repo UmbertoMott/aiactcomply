@@ -84,3 +84,59 @@ export async function sendWelcomeEmail(email: string, name: string) {
     `,
   });
 }
+
+export async function sendWaitlistNotification(entry: {
+  name: string;
+  email: string;
+  company: string;
+  role?: string;
+  ai_systems: string;
+  plan: string;
+}): Promise<void> {
+  const notifyEmail = process.env.WAITLIST_NOTIFY_EMAIL ?? "dridrop@gmail.com";
+  const transporter = getTransporter();
+
+  if (!transporter) {
+    console.log(`[WAITLIST] Nuovo iscritto: ${entry.name} <${entry.email}> (${entry.company}) — piano: ${entry.plan}`);
+    return;
+  }
+
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM || "AIComply <noreply@aicomply.app>",
+    to: notifyEmail,
+    subject: `🎯 Nuovo iscritto waitlist — ${escapeHtml(entry.name)} (${escapeHtml(entry.company)})`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #6366f1;">AIComply — Nuovo iscritto waitlist</h2>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+          <tr style="border-bottom:1px solid #e2e8f0;">
+            <td style="padding:8px 0;color:#64748b;width:40%;">Nome</td>
+            <td style="padding:8px 0;font-weight:500;">${escapeHtml(entry.name)}</td>
+          </tr>
+          <tr style="border-bottom:1px solid #e2e8f0;">
+            <td style="padding:8px 0;color:#64748b;">Email</td>
+            <td style="padding:8px 0;"><a href="mailto:${escapeHtml(entry.email)}">${escapeHtml(entry.email)}</a></td>
+          </tr>
+          <tr style="border-bottom:1px solid #e2e8f0;">
+            <td style="padding:8px 0;color:#64748b;">Azienda</td>
+            <td style="padding:8px 0;font-weight:500;">${escapeHtml(entry.company)}</td>
+          </tr>
+          <tr style="border-bottom:1px solid #e2e8f0;">
+            <td style="padding:8px 0;color:#64748b;">Ruolo</td>
+            <td style="padding:8px 0;">${escapeHtml(entry.role ?? "—")}</td>
+          </tr>
+          <tr style="border-bottom:1px solid #e2e8f0;">
+            <td style="padding:8px 0;color:#64748b;">Sistemi AI</td>
+            <td style="padding:8px 0;">${escapeHtml(entry.ai_systems)}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#64748b;">Piano</td>
+            <td style="padding:8px 0;text-transform:capitalize;">${escapeHtml(entry.plan)}</td>
+          </tr>
+        </table>
+        <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
+        <p style="color:#64748b;font-size:12px;">AIComply Waitlist · ${new Date().toLocaleString("it-IT")}</p>
+      </div>
+    `,
+  });
+}
