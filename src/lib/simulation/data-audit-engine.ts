@@ -178,6 +178,101 @@ export const COLUMN_LINEAGE: ColumnLineage[] = [
   { source: "DB_utenti",     column: "eta",           feature: "age_group",      isProxy: false,                       influence: 0.23 },
 ];
 
+// ─── Real dataset analysis ────────────────────────────────────────────────────
+
+export interface RealDatasetConfig {
+  name: string;
+  sensitiveCol: string;
+  outcomeCol: string;
+  positiveOutcome: string;
+}
+
+/**
+ * Parse a CSV string into an array of row objects.
+ * First row is treated as headers.
+ */
+export function parseCSV(text: string): Record<string, string>[] {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  const headers = lines[0].split(",").map((h) => h.trim().replace(/^"|"$/g, ""));
+  return lines.slice(1).map((line) => {
+    const values = line.split(",").map((v) => v.trim().replace(/^"|"$/g, ""));
+    const row: Record<string, string> = {};
+    headers.forEach((h, i) => { row[h] = values[i] ?? ""; });
+    return row;
+  });
+}
+
+/**
+ * Compute a bias report from CSV records using the given config.
+ * Compares outcome rates between groups in the sensitive column.
+ */
+export function computeRealBiasReport(
+  records: Record<string, string>[],
+  config: RealDatasetConfig
+): BiasReport {
+  const { sensitiveCol, outcomeCol, positiveOutcome, name } = config;
+  const groups: Record<string, { total: number; positive: number }> = {};
+
+  for (const row of records) {
+    const group = row[sensitiveCol] ?? "unknown";
+    const outcome = row[outcomeCol] ?? "";
+    if (!groups[group]) groups[group] = { total: 0, positive: 0 };
+    groups[group].total++;
+    if (outcome === positiveOutcome) groups[group].positive++;
+  }
+
+  const rates = Object.entries(groups).map(([group, { total, positive }]) => ({
+    group,
+    rate: total > 0 ? positive / total : 0,
+    count: total,
+  }));
+
+  if (rates.length === 0) {
+    return {
+      ofi: 0,
+      spd: 0,
+      di: 1,
+      eod: 0,
+      groups: [],
+      riskLevel: "low",
+      ctganRequired: false,
+      underrepresented: [],
+      timestamp: new Date(),
+    };
+  }
+
+  const maxRate = Math.max(...rates.map((r) => r.rate));
+  const minRate = Math.min(...rates.map((r) => r.rate));
+  const disparity = maxRate - minRate;
+  const avgRate = rates.reduce((a, b) => a + b.rate, 0) / rates.length;
+
+  // Map to BiasReport standard fields
+  const spd = disparity;
+  const di = minRate > 0 && maxRate > 0 ? minRate / maxRate : 1;
+  const eod = spd * 0.68;
+  const ofi = Math.max(0, spd * 1.4 - eod * 0.9);
+
+  const riskLevel: BiasReport["riskLevel"] =
+    di < 0.7  ? "critical" :
+    di < 0.8  ? "high"     :
+    di < 0.9  ? "medium"   : "low";
+
+  const realGroups: GroupMetrics[] = rates.map((r) => ({
+    group: r.group,
+    size: r.count,
+    selectionRate: +r.rate.toFixed(3),
+    tpr: +r.rate.toFixed(3),
+    fpr: +(Math.abs(r.rate - avgRate) * 0.5).toFixed(3),
+  }));
+
+  const underrepresented = realGroups
+    .filter((g) => g.selectionRate < 0.15)
+    .map((g) => g.group);
+
+  return { ofi, spd, di, eod, groups: realGroups, riskLevel, ctganRequired: di < 0.8, underrepresented, timestamp: new Date() };
+}
+
 // ─── Risk helpers ─────────────────────────────────────────────────────────────
 
 export const RISK_COLORS: Record<BiasReport["riskLevel"], { bg: string; text: string; border: string }> = {

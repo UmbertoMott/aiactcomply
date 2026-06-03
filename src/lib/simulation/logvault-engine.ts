@@ -132,3 +132,103 @@ export const LEVEL_STYLE: Record<EventLevel, { dot: string; bg: string; text: st
   warning:  { dot: "#ca8a04", bg: "rgba(202,138,4,0.07)",   text: "#a16207", border: "rgba(202,138,4,0.2)"   },
   critical: { dot: "#dc2626", bg: "rgba(220,38,38,0.07)",   text: "#b91c1c", border: "rgba(220,38,38,0.2)"   },
 };
+
+// ─── Import utilities ─────────────────────────────────────────────────────────
+
+export interface ImportResult {
+  entries: LogEntry[];
+  importedCount: number;
+  originalCount: number;
+  errors: string[];
+  warnings: string[];
+  sourceFormat: string;
+}
+
+/** Parse a JSON file exported from LogVault (array of LogEntry). */
+export function parseImportedJSON(text: string): ImportResult {
+  const errors: string[] = [];
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    return { entries: [], importedCount: 0, originalCount: 0, sourceFormat: "json", warnings: [], errors: ["JSON non valido"] };
+  }
+
+  const raw = Array.isArray(parsed) ? parsed : (parsed as { entries?: unknown[] }).entries ?? [];
+  const originalCount = raw.length;
+  const entries: LogEntry[] = [];
+
+  for (let i = 0; i < raw.length; i++) {
+    const item = raw[i];
+    if (item && typeof item === "object") {
+      const r = item as Record<string, unknown>;
+      const level = (["safe", "warning", "critical"].includes(r.level as string)
+        ? r.level : "safe") as EventLevel;
+      const tsRaw = typeof r.timestamp === "string" ? r.timestamp : typeof r.ts === "string" ? r.ts : null;
+      entries.push({
+        id:           typeof r.id === "string"           ? r.id            : crypto.randomUUID(),
+        sequenceId:   typeof r.sequenceId === "number"   ? r.sequenceId    : i + 1,
+        timestamp:    tsRaw ? new Date(tsRaw) : new Date(),
+        level,
+        eventType:    typeof r.eventType === "string"    ? r.eventType     : "imported.event",
+        input:        typeof r.input === "string"        ? r.input         : "",
+        output:       typeof r.output === "string"       ? r.output        : "",
+        confidence:   typeof r.confidence === "number"   ? r.confidence    : 0,
+        operatorId:   typeof r.operatorId === "string"   ? r.operatorId    : "",
+        modelVersion: typeof r.modelVersion === "string" ? r.modelVersion  : "",
+        driftScore:   typeof r.driftScore === "number"   ? r.driftScore    : 0,
+        prevHash:     typeof r.prevHash === "string"     ? r.prevHash      : "",
+        entryHash:    typeof r.entryHash === "string"    ? r.entryHash     : "",
+        c2paAttested: typeof r.c2paAttested === "boolean" ? r.c2paAttested : false,
+      });
+    }
+  }
+
+  return { entries, importedCount: entries.length, originalCount, sourceFormat: "json", warnings: [], errors };
+}
+
+/** Parse a CSV file with columns: id, sequenceId, timestamp, level, eventType, input, output, confidence, operatorId, modelVersion, driftScore, prevHash, entryHash, c2paAttested */
+export function parseImportedCSV(text: string): ImportResult {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) {
+    return { entries: [], importedCount: 0, originalCount: 0, sourceFormat: "csv", warnings: [], errors: ["File CSV vuoto o intestazione mancante"] };
+  }
+
+  const headers = lines[0].split(",").map((h) => h.trim().replace(/^"|"$/g, "").toLowerCase());
+  const originalCount = lines.length - 1;
+  const entries: LogEntry[] = [];
+  const errors: string[] = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(",").map((v) => v.trim().replace(/^"|"$/g, ""));
+    const row: Record<string, string> = {};
+    headers.forEach((h, idx) => { row[h] = cols[idx] ?? ""; });
+
+    const levelRaw = row.level ?? row.livello ?? "";
+    const level = (["safe", "warning", "critical"].includes(levelRaw) ? levelRaw : "safe") as EventLevel;
+    const tsRaw = row.timestamp || row.ts || row.data || null;
+
+    entries.push({
+      id:           row.id             || crypto.randomUUID(),
+      sequenceId:   row.sequenceid     ? parseInt(row.sequenceid, 10) : i,
+      timestamp:    tsRaw ? new Date(tsRaw) : new Date(),
+      level,
+      eventType:    row.eventtype      || row.event      || row.evento || "imported.event",
+      input:        row.input          || "",
+      output:       row.output         || "",
+      confidence:   row.confidence     ? parseFloat(row.confidence) : 0,
+      operatorId:   row.operatorid     || row.actor      || row.attore || "",
+      modelVersion: row.modelversion   || "",
+      driftScore:   row.driftscore     ? parseFloat(row.driftscore) : 0,
+      prevHash:     row.prevhash       || row.prev_hash  || "",
+      entryHash:    row.entryhash      || row.hash       || "",
+      c2paAttested: row.c2paattested   === "true",
+    });
+  }
+
+  if (errors.length > 0 && entries.length === 0) {
+    return { entries: [], importedCount: 0, originalCount, sourceFormat: "csv", warnings: [], errors };
+  }
+
+  return { entries, importedCount: entries.length, originalCount, sourceFormat: "csv", warnings: [], errors };
+}
