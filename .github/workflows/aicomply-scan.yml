@@ -1,0 +1,246 @@
+# ============================================================
+# AIComply — EU AI Act Compliance Scanner (Progetto C)
+# GitHub Action: Shift-Left Compliance CI/CD
+# Esegue scansione statica della codebase alla ricerca di
+# segnali di non conformità EU AI Act prima del merge.
+# ============================================================
+
+name: AIComply EU AI Act Scan
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  aiact-compliance-scan:
+    name: EU AI Act Compliance Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ─── 1. Rileva chiamate a modelli AI esterni ──────────────────────────
+      - name: Scan — External AI API calls
+        id: scan_apis
+        run: |
+          echo "## 🔍 Scanning for external AI API calls..." >> $GITHUB_STEP_SUMMARY
+
+          FINDINGS=""
+
+          # OpenAI
+          if grep -rn "openai\|OpenAI\|gpt-4\|gpt-3\|text-davinci" \
+            --include="*.py" --include="*.ts" --include="*.js" \
+            --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null; then
+            FINDINGS="${FINDINGS}openai,"
+            echo "⚠️ **OpenAI API** usage detected" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Anthropic
+          if grep -rn "anthropic\|claude-" \
+            --include="*.py" --include="*.ts" --include="*.js" \
+            --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null; then
+            FINDINGS="${FINDINGS}anthropic,"
+            echo "⚠️ **Anthropic API** usage detected" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Google AI / Vertex
+          if grep -rn "google.generativeai\|vertexai\|palm\|gemini" \
+            --include="*.py" --include="*.ts" --include="*.js" \
+            --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null; then
+            FINDINGS="${FINDINGS}google-ai,"
+            echo "⚠️ **Google AI** usage detected" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Azure OpenAI
+          if grep -rn "azure.*openai\|AzureOpenAI" \
+            --include="*.py" --include="*.ts" --include="*.js" \
+            --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null; then
+            FINDINGS="${FINDINGS}azure-openai,"
+            echo "⚠️ **Azure OpenAI** usage detected" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "EXTERNAL_AI_FINDINGS=${FINDINGS}" >> $GITHUB_ENV
+
+          if [ -z "$FINDINGS" ]; then
+            echo "✅ No external AI API calls detected" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      # ─── 2. Rileva librerie ML ────────────────────────────────────────────
+      - name: Scan — ML Libraries
+        id: scan_ml
+        run: |
+          echo "## 🤖 Scanning for ML libraries..." >> $GITHUB_STEP_SUMMARY
+
+          ML_FINDINGS=""
+
+          # Python ML libraries
+          for lib in "torch" "tensorflow" "sklearn" "scikit-learn" "transformers" \
+                     "xgboost" "lightgbm" "catboost" "keras" "jax" "paddlepaddle" \
+                     "llamaindex" "langchain" "autogpt"; do
+            if grep -rn "$lib" \
+              --include="*.py" --include="requirements*.txt" --include="pyproject.toml" \
+              --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null | grep -v "^Binary"; then
+              ML_FINDINGS="${ML_FINDINGS}${lib},"
+              echo "⚠️ **${lib}** detected — verify EU AI Act classification" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          # JS/TS ML libraries
+          for lib in "tensorflow" "@tensorflow" "onnxruntime" "ml5" "brain.js" \
+                     "synaptic" "natural" "@huggingface"; do
+            if grep -rn "$lib" \
+              --include="package.json" --include="*.ts" --include="*.js" \
+              --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null; then
+              ML_FINDINGS="${ML_FINDINGS}${lib},"
+              echo "⚠️ **${lib}** (JS) detected — verify EU AI Act classification" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          echo "ML_FINDINGS=${ML_FINDINGS}" >> $GITHUB_ENV
+
+          if [ -z "$ML_FINDINGS" ]; then
+            echo "✅ No ML libraries detected" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      # ─── 3. Rileva segnali AI Vietata (Art. 5) ───────────────────────────
+      - name: Scan — Prohibited AI signals (Art. 5)
+        id: scan_prohibited
+        run: |
+          echo "## 🚨 Scanning for Prohibited AI signals (Art. 5)..." >> $GITHUB_STEP_SUMMARY
+
+          PROHIBITED_FINDINGS=""
+          CRITICAL=false
+
+          # Riconoscimento emozioni
+          for kw in "emotion.recogni" "facial_emotion" "sentiment.*face" \
+                    "emotion_detect" "affective.comput" "FER" "EmotionNet"; do
+            if grep -rni "$kw" \
+              --include="*.py" --include="*.ts" --include="*.js" \
+              --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null; then
+              PROHIBITED_FINDINGS="${PROHIBITED_FINDINGS}emotion-recognition,"
+              CRITICAL=true
+              echo "🚨 **CRITICAL** Emotion recognition detected — PROHIBITED under Art. 5(1)(f)" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          # Categorizzazione biometrica
+          for kw in "biometric.categori" "racial.classif" "ethnic.classif" \
+                    "gender.classif.*biometric" "political.*opinion.*AI"; do
+            if grep -rni "$kw" \
+              --include="*.py" --include="*.ts" --include="*.js" \
+              --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null; then
+              PROHIBITED_FINDINGS="${PROHIBITED_FINDINGS}biometric-categorization,"
+              CRITICAL=true
+              echo "🚨 **CRITICAL** Biometric categorization detected — PROHIBITED under Art. 5(1)(g)" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          # Social scoring
+          for kw in "social.scor\|social_credit\|citizen.rank\|behavior.scor.*government"; do
+            if grep -rni "$kw" \
+              --include="*.py" --include="*.ts" --include="*.js" \
+              --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null; then
+              PROHIBITED_FINDINGS="${PROHIBITED_FINDINGS}social-scoring,"
+              CRITICAL=true
+              echo "🚨 **CRITICAL** Social scoring detected — PROHIBITED under Art. 5(1)(c)" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          # Sorveglianza biometrica real-time in spazi pubblici
+          for kw in "realtime.biometric\|real_time.*facial\|live.facial.recogn"; do
+            if grep -rni "$kw" \
+              --include="*.py" --include="*.ts" --include="*.js" \
+              --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null; then
+              PROHIBITED_FINDINGS="${PROHIBITED_FINDINGS}realtime-biometric,"
+              CRITICAL=true
+              echo "🚨 **CRITICAL** Real-time biometric surveillance detected — PROHIBITED under Art. 5(1)(h)" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          echo "PROHIBITED_FINDINGS=${PROHIBITED_FINDINGS}" >> $GITHUB_ENV
+          echo "CRITICAL_VIOLATIONS=${CRITICAL}" >> $GITHUB_ENV
+
+          if [ -z "$PROHIBITED_FINDINGS" ]; then
+            echo "✅ No prohibited AI signals detected" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      # ─── 4. Verifica disclosure Art. 50 ──────────────────────────────────
+      - name: Scan — Art. 50 Transparency & Disclosure
+        id: scan_disclosure
+        run: |
+          echo "## 📋 Scanning for Art. 50 transparency markers..." >> $GITHUB_STEP_SUMMARY
+
+          # Cerca marcatori di disclosure
+          HAS_DISCLOSURE=false
+          for kw in "ai.generat\|generated.by.ai\|ai.output\|AIOutputLabel\|disclosure" \
+                    "watermark\|machine.readable\|ai.produced"; do
+            if grep -rni "$kw" \
+              --include="*.ts" --include="*.tsx" --include="*.py" \
+              --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null | grep -q .; then
+              HAS_DISCLOSURE=true
+              break
+            fi
+          done
+
+          if [ "$HAS_DISCLOSURE" = "true" ]; then
+            echo "✅ AI output disclosure markers found" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ No AI output disclosure markers found — Art. 50 may require labeling" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      # ─── 5. Notifica AIComply via webhook ────────────────────────────────
+      - name: Report to AIComply
+        if: always()
+        env:
+          AICOMPLY_WEBHOOK: ${{ secrets.AICOMPLY_WEBHOOK_URL }}
+          AICOMPLY_API_KEY: ${{ secrets.AICOMPLY_API_KEY }}
+        run: |
+          if [ -z "$AICOMPLY_WEBHOOK" ]; then
+            echo "ℹ️ AICOMPLY_WEBHOOK_URL not configured — skipping report"
+            exit 0
+          fi
+
+          curl -s -X POST "$AICOMPLY_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -H "X-AIComply-Key: $AICOMPLY_API_KEY" \
+            -d "{
+              \"repository\": \"$GITHUB_REPOSITORY\",
+              \"commit\": \"$GITHUB_SHA\",
+              \"branch\": \"$GITHUB_REF_NAME\",
+              \"run_id\": \"$GITHUB_RUN_ID\",
+              \"findings\": {
+                \"external_ai\": \"$EXTERNAL_AI_FINDINGS\",
+                \"ml_libraries\": \"$ML_FINDINGS\",
+                \"prohibited\": \"$PROHIBITED_FINDINGS\",
+                \"critical\": $CRITICAL_VIOLATIONS
+              },
+              \"dashboard_url\": \"https://aicomply-omega.vercel.app/dashboard\"
+            }"
+
+          echo "✅ Report sent to AIComply dashboard" >> $GITHUB_STEP_SUMMARY
+
+      # ─── 6. Blocca build se violazioni critiche ───────────────────────────
+      - name: Enforce compliance gate
+        if: always()
+        run: |
+          echo "## 📊 Compliance Gate Result" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$CRITICAL_VIOLATIONS" = "true" ]; then
+            echo "❌ **BUILD BLOCKED** — Critical EU AI Act violations detected" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Violations found: $PROHIBITED_FINDINGS" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "👉 Fix in AIComply: https://aicomply-omega.vercel.app/dashboard/tools/prohibited" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "✅ **BUILD PASSED** — No critical violations" >> $GITHUB_STEP_SUMMARY
+            if [ -n "$EXTERNAL_AI_FINDINGS" ] || [ -n "$ML_FINDINGS" ]; then
+              echo "⚠️ Warnings present — review AIComply dashboard for details" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi

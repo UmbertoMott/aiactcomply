@@ -13,6 +13,38 @@ import {
 } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 
+// ─── DB sync helpers ──────────────────────────────────────────────────────────
+async function loadAISystems(): Promise<{ id: string; name: string; risk_tier: string }[]> {
+  try {
+    const res = await fetch("/api/ai-systems");
+    if (!res.ok) return [];
+    const { data } = await res.json();
+    return data || [];
+  } catch { return []; }
+}
+
+async function saveMog231ToDB(
+  aiSystemId: string,
+  mogId: string | null,
+  flags: Record<string, boolean>,
+  parts: Record<string, unknown>
+): Promise<string | null> {
+  try {
+    const res = await fetch("/api/mog231", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ai_system_id: aiSystemId,
+        mog_id: mogId,
+        updates: { ...flags, ...parts },
+      }),
+    });
+    if (!res.ok) return mogId;
+    const { data } = await res.json();
+    return data?.id ?? mogId;
+  } catch { return mogId; }
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const SYSTEM_TYPE_OPTS = [
@@ -525,11 +557,57 @@ export default function L132Page() {
   const [toast, setToast] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
-  // Load saved state
+  // ─── DB Sync State ──────────────────────────────────────────────────────────
+  const [mogId, setMogId] = useState<string | null>(null);
+  const [aiSystemId, setAiSystemId] = useState<string | null>(null);
+  const [aiSystems, setAiSystems] = useState<{ id: string; name: string; risk_tier: string }[]>([]);
+  const [dbSynced, setDbSynced] = useState(false);
+  const [dbSyncing, setDbSyncing] = useState(false);
+
+  // Load saved state (localStorage + DB)
   useEffect(() => {
-    const saved = readFromStorage<L132Result>("l132");
-    if (saved) setForm(resultToForm(saved));
+    const savedLocal = readFromStorage<L132Result>("l132");
+    if (savedLocal) setForm(resultToForm(savedLocal));
+    // Carica sistemi AI dal DB
+    loadAISystems().then(setAiSystems);
   }, []);
+
+  // Auto-save su DB quando cambia il form (debounced 2s)
+  useEffect(() => {
+    if (!aiSystemId) return;
+    const timer = setTimeout(async () => {
+      setDbSyncing(true);
+      const r = formToResult(form);
+      const flags = {
+        l132_deepfake_compliant: form.isDeepfakeRisk
+          ? form.deepfakeChecks.filter(Boolean).length >= 4
+          : true,
+        l132_minors_protection: true, // gestito separatamente
+        l132_hr_transparency: form.requiresHRNotice
+          ? form.hrChecks.every((c) => c === true)
+          : true,
+        l132_content_labeling: form.labelingChecks.every((c) => c === true),
+        criminal_risk_acknowledged: form.isDeepfakeRisk
+          ? form.deepfakeChecks[5] === true
+          : false,
+      };
+      const parts = {
+        part_a_risk_areas: {
+          system_type: form.systemType,
+          deployed_in_italy: form.deployedInItaly,
+          deepfake_risk: form.isDeepfakeRisk,
+          overall_status: r.overallStatus,
+        },
+        part_d_training: { remediation: form.remediation },
+        status: r.overallStatus === "conforme" ? "complete" : "draft",
+      };
+      const newId = await saveMog231ToDB(aiSystemId, mogId, flags, parts);
+      if (newId && !mogId) setMogId(newId);
+      setDbSynced(true);
+      setDbSyncing(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [form, aiSystemId]);
 
   function showToast(msg: string) {
     setToast(msg);
@@ -578,6 +656,32 @@ export default function L132Page() {
 
   return (
     <div className="max-w-2xl mx-auto pb-12">
+
+      {/* ── DB Sync Banner ─────────────────────────────────────────────────── */}
+      {aiSystems.length > 0 && (
+        <div className="flex items-center gap-3 rounded-lg px-4 py-2.5 mb-4 text-[12px]"
+          style={{ background: "rgba(220,38,38,0.04)", border: "1px solid rgba(220,38,38,0.12)" }}>
+          <Scale className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#dc2626" }} />
+          <span style={{ color: "rgba(0,0,0,0.45)" }}>Sistema AI:</span>
+          <select
+            value={aiSystemId || ""}
+            onChange={(e) => setAiSystemId(e.target.value || null)}
+            className="text-[12px] bg-transparent outline-none flex-1"
+            style={{ color: "#0D1016" }}
+          >
+            <option value="">— seleziona sistema AI —</option>
+            {aiSystems.map((s) => (
+              <option key={s.id} value={s.id}>{s.name} ({s.risk_tier})</option>
+            ))}
+          </select>
+          <span className="text-[11px]" style={{
+            color: dbSyncing ? "#dc2626" : dbSynced ? "#16a34a" : "rgba(0,0,0,0.3)"
+          }}>
+            {dbSyncing ? "⟳ Sync..." : dbSynced ? "✓ DB salvato" : "○ Non sync"}
+          </span>
+        </div>
+      )}
+
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="mb-6">
         <div className="flex items-start gap-3">
