@@ -29,6 +29,35 @@ const CATEGORY_LABELS: Record<TrainingCategory, string> = {
   altro:      "Altro",
 };
 
+// ─── Ruoli aziendali Art. 4 L.132/2025 + MOG 231 ──────────────────────────────
+
+type StaffRole =
+  | "dirigenti"
+  | "manager_ai"
+  | "developer"
+  | "hr"
+  | "legal_compliance"
+  | "tutti_dipendenti";
+
+const STAFF_ROLE_LABELS: Record<StaffRole, string> = {
+  dirigenti:        "Dirigenti / CXO",
+  manager_ai:       "Manager sistemi AI",
+  developer:        "Sviluppatori / Data scientist",
+  hr:               "Risorse umane",
+  legal_compliance: "Legale / Compliance",
+  tutti_dipendenti: "Tutti i dipendenti",
+};
+
+// Ore minime raccomandate per ruolo (MOG 231 best practice)
+const ROLE_MIN_HOURS: Record<StaffRole, number> = {
+  dirigenti:        4,
+  manager_ai:       8,
+  developer:        6,
+  hr:               4,
+  legal_compliance: 6,
+  tutti_dipendenti: 2,
+};
+
 type TrainingSession = {
   id: string;
   date: string;              // YYYY-MM-DD
@@ -36,6 +65,7 @@ type TrainingSession = {
   category: TrainingCategory;
   trainer: string;
   attendees: string[];       // names / roles
+  roles: StaffRole[];        // ruoli aziendali coinvolti
   durationMinutes: number;
   notes: string;
   createdAt: string;
@@ -67,6 +97,154 @@ function formatDate(iso: string): string {
   });
 }
 
+// ─── Calcolo compliance per ruolo ─────────────────────────────────────────────
+
+function computeHoursByRole(sessions: TrainingSession[]): Record<StaffRole, number> {
+  const hours: Record<StaffRole, number> = {
+    dirigenti: 0, manager_ai: 0, developer: 0,
+    hr: 0, legal_compliance: 0, tutti_dipendenti: 0,
+  };
+  for (const s of sessions) {
+    const h = s.durationMinutes / 60;
+    for (const role of (s.roles || [])) {
+      hours[role] = (hours[role] || 0) + h;
+    }
+    if ((s.roles || []).length > 0) {
+      hours.tutti_dipendenti += h;
+    }
+  }
+  return hours;
+}
+
+function computeLiteracyScore(sessions: TrainingSession[]): number {
+  const hours = computeHoursByRole(sessions);
+  const roles = Object.keys(ROLE_MIN_HOURS) as StaffRole[];
+  let met = 0;
+  for (const role of roles) {
+    if ((hours[role] || 0) >= ROLE_MIN_HOURS[role]) met++;
+  }
+  return Math.round((met / roles.length) * 100);
+}
+
+async function syncToMog231(sessions: TrainingSession[]): Promise<void> {
+  try {
+    const classifierRaw = localStorage.getItem("aicomply_classifier_result");
+    let aiSystemId: string | null = null;
+    if (classifierRaw) {
+      const parsed = JSON.parse(classifierRaw);
+      aiSystemId = parsed?.aiSystemId || null;
+    }
+    if (!aiSystemId) return;
+
+    const hoursByRole = computeHoursByRole(sessions);
+    const literacyScore = computeLiteracyScore(sessions);
+
+    const partDTraining = {
+      training_plan: "Formazione AI conforme Art. 4 EU AI Act + L.132/2025",
+      completed_courses: sessions.map(s => ({
+        title: s.title,
+        date: s.date,
+        hours: s.durationMinutes / 60,
+        roles: s.roles || [],
+        category: s.category,
+      })),
+      hours_per_role: hoursByRole,
+      next_training_date: null,
+      literacy_score: literacyScore,
+    };
+
+    await fetch("/api/mog231", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ai_system_id: aiSystemId,
+        updates: {
+          part_d_training: partDTraining,
+          ...(literacyScore >= 80 ? { l132_hr_transparency: true } : {}),
+        },
+      }),
+    });
+  } catch {
+    // Sync silenzioso — non interrompere l'UX
+  }
+}
+
+// ─── RoleCompliancePanel ──────────────────────────────────────────────────────
+
+function RoleCompliancePanel({ sessions }: { sessions: TrainingSession[] }) {
+  const hours = computeHoursByRole(sessions);
+  const roles = Object.keys(ROLE_MIN_HOURS) as StaffRole[];
+  const score = computeLiteracyScore(sessions);
+
+  return (
+    <div
+      className="rounded-xl p-4 mb-6"
+      style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}
+    >
+      {/* Header con score globale */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.35)" }}>
+            Compliance Art. 4 L.132/2025
+          </p>
+          <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.4)" }}>
+            Ore formazione per ruolo vs. soglie MOG 231
+          </p>
+        </div>
+        <div className="text-right">
+          <div
+            className="text-2xl font-bold"
+            style={{ color: score >= 80 ? "#16a34a" : score >= 50 ? "#d97706" : "#dc2626" }}
+          >
+            {score}%
+          </div>
+          <div className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>
+            {score >= 80 ? "Conforme" : score >= 50 ? "Parziale" : "Insufficiente"}
+          </div>
+        </div>
+      </div>
+
+      {/* Barre per ruolo */}
+      <div className="space-y-2.5">
+        {roles.map(role => {
+          const done = hours[role] || 0;
+          const min = ROLE_MIN_HOURS[role];
+          const pct = Math.min((done / min) * 100, 100);
+          const ok = done >= min;
+          return (
+            <div key={role}>
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-xs" style={{ color: "rgba(0,0,0,0.6)" }}>
+                  {STAFF_ROLE_LABELS[role]}
+                </span>
+                <span className="text-[11px] font-medium" style={{ color: ok ? "#16a34a" : "rgba(0,0,0,0.4)" }}>
+                  {done.toFixed(1)}h / {min}h min
+                </span>
+              </div>
+              <div className="h-1.5 rounded-full w-full" style={{ background: "rgba(0,0,0,0.07)" }}>
+                <div
+                  className="h-1.5 rounded-full transition-all duration-500"
+                  style={{
+                    width: `${pct}%`,
+                    background: ok ? "#16a34a" : pct > 0 ? "#d97706" : "rgba(0,0,0,0.15)",
+                  }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {score < 100 && (
+        <p className="text-[11px] mt-3" style={{ color: "rgba(0,0,0,0.4)" }}>
+          Le soglie sono basate su best practice MOG 231. Art. 4 EU AI Act non prescrive ore minime specifiche,
+          ma richiede &quot;adeguato livello di competenza AI&quot; documentato.
+        </p>
+      )}
+    </div>
+  );
+}
+
 // ─── Toast ─────────────────────────────────────────────────────────────────────
 
 type Toast = { msg: string; type: "success" | "error" };
@@ -94,6 +272,7 @@ export default function LiteracyPage() {
   const [fAttendees, setFAttendees] = useState("");   // comma-separated
   const [fDuration, setFDuration] = useState("60");
   const [fNotes,    setFNotes]    = useState("");
+  const [formRoles, setFormRoles] = useState<StaffRole[]>([]);
 
   useEffect(() => {
     setStore(load());
@@ -137,6 +316,7 @@ export default function LiteracyPage() {
       category:        fCategory,
       trainer:         fTrainer.trim(),
       attendees:       attendeeList,
+      roles:           formRoles,
       durationMinutes: parseInt(fDuration) || 60,
       notes:           fNotes.trim(),
       createdAt:       new Date().toISOString(),
@@ -145,9 +325,10 @@ export default function LiteracyPage() {
     const next: LiteracyStore = { sessions: [session, ...store.sessions] };
     setStore(next);
     save(next);
+    syncToMog231(next.sessions);
     showToast("Sessione registrata");
     setShowForm(false);
-    setFTitle(""); setFTrainer(""); setFAttendees(""); setFNotes(""); setFDuration("60");
+    setFTitle(""); setFTrainer(""); setFAttendees(""); setFNotes(""); setFDuration("60"); setFormRoles([]);
   }
 
   // ── Delete session ───────────────────────────────────────────────────────────
@@ -157,6 +338,7 @@ export default function LiteracyPage() {
     const next: LiteracyStore = { sessions: store.sessions.filter(s => s.id !== id) };
     setStore(next);
     save(next);
+    syncToMog231(next.sessions);
     if (expanded === id) setExpanded(null);
     showToast("Sessione eliminata");
   }
@@ -189,6 +371,9 @@ export default function LiteracyPage() {
       lines.push(`    Categoria:    ${CATEGORY_LABELS[s.category]}`);
       lines.push(`    Formatore:    ${s.trainer || "non specificato"}`);
       lines.push(`    Durata:       ${s.durationMinutes} minuti`);
+      if ((s.roles || []).length > 0) {
+        lines.push(`    Ruoli:        ${s.roles.map(r => STAFF_ROLE_LABELS[r]).join(", ")}`);
+      }
       if (s.attendees.length) {
         lines.push(`    Partecipanti: ${s.attendees.join(", ")}`);
       }
@@ -408,6 +593,38 @@ export default function LiteracyPage() {
                 />
               </div>
 
+              {/* Ruoli coinvolti */}
+              <div className="md:col-span-2">
+                <label className="block text-xs font-medium mb-2" style={{ color: "rgba(0,0,0,0.55)" }}>
+                  Ruoli coinvolti{" "}
+                  <span style={{ color: "rgba(0,0,0,0.35)" }}>(seleziona tutti)</span>
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {(Object.keys(STAFF_ROLE_LABELS) as StaffRole[]).map(role => {
+                    const selected = formRoles.includes(role);
+                    return (
+                      <button
+                        key={role}
+                        type="button"
+                        onClick={() =>
+                          setFormRoles(prev =>
+                            prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role],
+                          )
+                        }
+                        className="px-3 py-1.5 rounded-lg text-xs font-medium border transition-all"
+                        style={{
+                          background: selected ? "rgba(13,16,22,0.08)" : "transparent",
+                          border: selected ? "1px solid rgba(13,16,22,0.25)" : "1px solid rgba(0,0,0,0.1)",
+                          color: selected ? "#0D1016" : "rgba(0,0,0,0.45)",
+                        }}
+                      >
+                        {STAFF_ROLE_LABELS[role]}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Attendees */}
               <div>
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
@@ -487,7 +704,12 @@ export default function LiteracyPage() {
         </div>
       )}
 
-      {/* ── E. Sessions list ── */}
+      {/* ── E. Compliance per ruolo ── */}
+      {sessions.length > 0 && (
+        <RoleCompliancePanel sessions={sessions} />
+      )}
+
+      {/* ── F. Sessions list ── */}
       {sessions.length > 0 && (
         <div className="space-y-2">
           {[...sessions]
@@ -596,7 +818,25 @@ export default function LiteracyPage() {
                             ))}
                           </div>
                           <div>
-                            {session.attendees.length > 0 && (
+                            {(session.roles || []).length > 0 && (
+                              <>
+                                <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(0,0,0,0.35)" }}>
+                                  Ruoli coinvolti
+                                </p>
+                                <div className="flex flex-wrap gap-1.5 mb-3">
+                                  {(session.roles || []).map(r => (
+                                    <span
+                                      key={r}
+                                      className="text-[10px] font-medium px-2 py-0.5 rounded-full"
+                                      style={{ background: "rgba(13,16,22,0.07)", color: "#0D1016" }}
+                                    >
+                                      {STAFF_ROLE_LABELS[r]}
+                                    </span>
+                                  ))}
+                                </div>
+                              </>
+                            )}
+                          {session.attendees.length > 0 && (
                               <>
                                 <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(0,0,0,0.35)" }}>
                                   Partecipanti ({session.attendees.length})
