@@ -68,6 +68,7 @@ const navGroups: NavGroup[] = [
   {
     label: "Core",
     items: [
+      { icon: Zap,          label: "Copilot",       href: "/dashboard/copilot",        art: "New"  },
       { icon: Map,          label: "Roadmap",       href: "/dashboard/journey",        art: ""     },
       { icon: Search,       label: "Discovery",     href: "/dashboard/discovery",      art: ""     },
       { icon: Archive,      label: "Evidence Layer", href: "/dashboard/evidence-layer", art: "Core" },
