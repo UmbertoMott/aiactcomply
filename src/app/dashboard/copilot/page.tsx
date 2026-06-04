@@ -34,8 +34,7 @@ interface RoadmapStep {
 
 // ─── Tool paths per profilo ───────────────────────────────────────────────────
 
-function buildRoadmap(answers: CopilotAnswers, doneTools: string[]): RoadmapStep[] {
-  const isDone = (id: string) => doneTools.includes(id);
+function buildRoadmap(answers: CopilotAnswers, isDone: (id: string) => boolean): RoadmapStep[] {
 
   if (answers.profile === "startup_dev") {
     const steps: RoadmapStep[] = [
@@ -240,13 +239,66 @@ function QuestionCard({
 const COPILOT_KEY = "copilot_answers";
 const DONE_TOOLS_KEY = "copilot_done_tools";
 
+/**
+ * Mappa tool-id → chiave localStorage reale (da storage-schema.ts STORAGE_KEYS).
+ * Usata per verificare il completamento reale invece del flag manuale.
+ */
+const TOOL_STORAGE_MAP: Record<string, string> = {
+  classifier:   "aicomply_classifier_result",
+  scanner:      "aicomply_art50_result",         // scanner pubblico non salva → usiamo art50-kit
+  docugen:      "aicomply_docugen_result",
+  transparency: "aicomply_transparency_result",
+  logvault:     "aicomply_logvault_result",
+  fria:         "aicomply_fria_result",
+  dpia:         "aicomply_dpia_result",
+  qms:          "aicomply_qms_result",
+  l132:         "aicomply_l132_result",
+  conformity:   "aicomply_conformity_assessment",
+  riskManager:  "aicomply_risk_manager_result",
+  gpai:         "aicomply_gpai_result",
+  dataAudit:    "aicomply_data_audit_result",
+  oversight:    "aicomply_oversight_result",
+  deployer:     "aicomply_deployer_result",
+  art50:        "aicomply_art50_result",
+};
+
+/** Legge una chiave localStorage e verifica che contenga dati non vuoti. */
+function checkStorageDone(toolId: string): boolean {
+  try {
+    const key = TOOL_STORAGE_MAP[toolId];
+    if (!key) return false;
+    const raw = localStorage.getItem(key);
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    // Considera "done" se l'oggetto ha completedAt oppure è semplicemente non-null/non-vuoto
+    if (parsed && typeof parsed === "object") {
+      return !!(parsed.completedAt || parsed.riskLevel || parsed.systemName ||
+                parsed.verdict || parsed.sections || parsed.entries ||
+                parsed.loggingEnabled || Object.keys(parsed).length > 0);
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export default function CopilotPage() {
   const router = useRouter();
-  const [step, setStep] = useState<0 | 1 | 2 | 3>(0); // 0=q1, 1=q2, 2=q3, 3=roadmap
+  const [step, setStep] = useState<0 | 1 | 2 | 3>(0);
   const [answers, setAnswers] = useState<CopilotAnswers>({ profile: null, riskTier: null, urgency: null });
-  const [doneTools, setDoneTools] = useState<string[]>([]);
+  const [doneTools, setDoneTools] = useState<string[]>([]);   // override manuale
+  const [realDone, setRealDone] = useState<Record<string, boolean>>({});
 
-  // Carica stato salvato
+  /** Ri-scansiona localStorage e aggiorna realDone */
+  function refreshRealDone() {
+    const result: Record<string, boolean> = {};
+    for (const toolId of Object.keys(TOOL_STORAGE_MAP)) {
+      result[toolId] = checkStorageDone(toolId);
+    }
+    setRealDone(result);
+  }
+
+  // Carica stato salvato + scansione reale
   useEffect(() => {
     try {
       const saved = localStorage.getItem(COPILOT_KEY);
@@ -258,6 +310,14 @@ export default function CopilotPage() {
       const savedDone = localStorage.getItem(DONE_TOOLS_KEY);
       if (savedDone) setDoneTools(JSON.parse(savedDone));
     } catch { /* ignore */ }
+    refreshRealDone();
+  }, []);
+
+  // Ri-scansiona quando la tab torna in focus (utente ha completato un tool in un'altra tab)
+  useEffect(() => {
+    const handler = () => refreshRealDone();
+    window.addEventListener("focus", handler);
+    return () => window.removeEventListener("focus", handler);
   }, []);
 
   function saveAnswers(next: CopilotAnswers) {
@@ -265,10 +325,12 @@ export default function CopilotPage() {
     localStorage.setItem(COPILOT_KEY, JSON.stringify(next));
   }
 
+  /** Override manuale — solo per tool senza storage key (es. scanner pubblico) */
   function markDone(toolId: string) {
     const next = [...new Set([...doneTools, toolId])];
     setDoneTools(next);
     localStorage.setItem(DONE_TOOLS_KEY, JSON.stringify(next));
+    refreshRealDone();
   }
 
   function reset() {
@@ -277,7 +339,10 @@ export default function CopilotPage() {
     localStorage.removeItem(COPILOT_KEY);
   }
 
-  const roadmap = step === 3 && answers.profile ? buildRoadmap(answers, doneTools) : [];
+  // isDone: prima controlla storage reale, poi l'override manuale
+  const effectiveDone = (id: string) => realDone[id] || doneTools.includes(id);
+
+  const roadmap = step === 3 && answers.profile ? buildRoadmap(answers, effectiveDone) : [];
   const completedCount = roadmap.filter((s) => s.done).length;
   const progressPct = roadmap.length > 0 ? Math.round((completedCount / roadmap.length) * 100) : 0;
 
@@ -512,21 +577,31 @@ export default function CopilotPage() {
 
                       {/* Actions */}
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        {!s.done && (
-                          <button
-                            onClick={() => markDone(s.id)}
-                            className="text-[11px] px-2.5 py-1.5 rounded-lg transition-opacity hover:opacity-70"
+                        {s.done ? (
+                          <span
+                            className="text-[11px] px-2.5 py-1.5 rounded-lg font-medium"
                             style={{ background: "rgba(22,163,74,0.08)", color: "#16a34a", border: "1px solid rgba(22,163,74,0.2)" }}
                           >
-                            ✓ Fatto
-                          </button>
+                            {realDone[s.id] ? "✓ Completato" : "✓ Fatto"}
+                          </span>
+                        ) : (
+                          /* Mostra "✓ Fatto" manuale solo per tool senza storage key (es. scanner pubblico) */
+                          !TOOL_STORAGE_MAP[s.id] || s.id === "scanner" ? (
+                            <button
+                              onClick={() => markDone(s.id)}
+                              className="text-[11px] px-2.5 py-1.5 rounded-lg transition-opacity hover:opacity-70"
+                              style={{ background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.45)", border: "1px solid rgba(0,0,0,0.1)" }}
+                            >
+                              Segna fatto
+                            </button>
+                          ) : null
                         )}
                         <button
                           onClick={() => router.push(s.href)}
                           className="flex items-center gap-1 text-[11px] px-3 py-1.5 rounded-lg transition-opacity hover:opacity-80"
                           style={{ background: s.done ? "rgba(0,0,0,0.04)" : "#0D1016", color: s.done ? "rgba(0,0,0,0.4)" : "#fff" }}
                         >
-                          {s.done ? "Rivedi" : "Vai"} <ArrowRight className="h-3 w-3" />
+                          {s.done ? "Rivedi" : "Vai →"}
                         </button>
                       </div>
                     </div>
