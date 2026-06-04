@@ -8,6 +8,7 @@ import {
   FileArchive, FileText, Scale, Search, Cpu, Bell, BadgeCheck, BarChart2, BookOpen, GraduationCap, ShieldAlert,
   Layers, Bot, Tag, TrendingUp, Globe, Building2, Sliders, Zap,
   ClipboardList, FileCode, Archive, Gauge, Settings, BookMarked, Award, Map, Database, UserCheck, ArrowRightLeft,
+  Crosshair,
 } from "lucide-react";
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { useUserRole, ROLE_LABELS } from "@/lib/hooks/useUserRole";
@@ -68,8 +69,9 @@ const navGroups: NavGroup[] = [
   {
     label: "Core",
     items: [
-      { icon: Zap,          label: "Copilot",       href: "/dashboard/copilot",        art: "New"  },
-      { icon: Map,          label: "Roadmap",       href: "/dashboard/journey",        art: ""     },
+      { icon: Zap,          label: "Copilot",       href: "/dashboard/copilot",        art: "New"   },
+      { icon: Crosshair,    label: "Triage AI",     href: "/dashboard/triage",         art: "Nuovo", urgent: true },
+      { icon: Map,          label: "Roadmap",       href: "/dashboard/journey",        art: ""      },
       { icon: Search,       label: "Discovery",     href: "/dashboard/discovery",      art: ""     },
       { icon: Archive,      label: "Evidence Layer", href: "/dashboard/evidence-layer", art: "Core" },
     ],
