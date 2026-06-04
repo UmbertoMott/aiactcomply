@@ -8,7 +8,7 @@ import {
   FileArchive, FileText, Scale, Search, Cpu, Bell, BadgeCheck, BarChart2, BookOpen, GraduationCap, ShieldAlert,
   Layers, Bot, Tag, TrendingUp, Globe, Building2, Sliders, Zap,
   ClipboardList, FileCode, Archive, Gauge, Settings, BookMarked, Award, Map, Database, UserCheck, ArrowRightLeft,
-  Crosshair,
+  Crosshair, Landmark,
 } from "lucide-react";
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { useUserRole, ROLE_LABELS } from "@/lib/hooks/useUserRole";
@@ -102,6 +102,7 @@ const navGroups: NavGroup[] = [
     items: [
       { icon: GraduationCap, label: "AI Literacy",    href: "/dashboard/tools/literacy",        art: "Art. 4",   urgent: true },
       { icon: Scale,         label: "L.132/2025",     href: "/dashboard/tools/l132",            art: "L.132/25", urgent: true },
+      { icon: Landmark,      label: "AGID / ACN",     href: "/dashboard/tools/agid-acn",        art: "L.132"                 },
       { icon: ShieldAlert,   label: "DPIA",           href: "/dashboard/tools/dpia",            art: "Art. 35"               },
       { icon: Ban,           label: "Art. 5 Checker", href: "/dashboard/tools/prohibited",      art: "Art. 5",   urgent: true },
       { icon: Sliders,       label: "AI Classifier",  href: "/dashboard/tools/classifier",      art: "Art. 6"                },
