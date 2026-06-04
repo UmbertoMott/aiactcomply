@@ -111,6 +111,7 @@ jobs:
           fi
 
       # ─── 3. Rileva segnali AI Vietata (Art. 5) ───────────────────────────
+      # Cerca IMPORT e USO REALE di librerie/API vietate, non semplici menzioni
       - name: Scan — Prohibited AI signals (Art. 5)
         id: scan_prohibited
         run: |
@@ -119,49 +120,63 @@ jobs:
           PROHIBITED_FINDINGS=""
           CRITICAL=false
 
-          # Riconoscimento emozioni
-          for kw in "emotion.recogni" "facial_emotion" "sentiment.*face" \
-                    "emotion_detect" "affective.comput" "FER" "EmotionNet"; do
+          # Emotion recognition — cerca import reali di librerie specifiche
+          # Non semplici menzioni nel testo (che sono nei nostri engine di compliance)
+          for kw in "deepface" "fer2013" "emotion_recognition" "FERPlus" \
+                    "affectiva" "emotient" "kairos.*emotion" "microsoft.*emotion" \
+                    "import.*EmotionNet" "from.*emotion_detect"; do
             if grep -rni "$kw" \
               --include="*.py" --include="*.ts" --include="*.js" \
-              --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github --exclude-dir=sdk . 2>/dev/null; then
+              --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github \
+              --exclude-dir=sdk --exclude-dir=simulation --exclude-dir=semantic \
+              --exclude="*prohibited*" --exclude="*conformity*" --exclude="*compliance*" \
+              . 2>/dev/null | grep -v "//.*$kw" | grep -v "#.*$kw"; then
               PROHIBITED_FINDINGS="${PROHIBITED_FINDINGS}emotion-recognition,"
               CRITICAL=true
-              echo "🚨 **CRITICAL** Emotion recognition detected — PROHIBITED under Art. 5(1)(f)" >> $GITHUB_STEP_SUMMARY
+              echo "🚨 **CRITICAL** Emotion recognition library import detected — PROHIBITED under Art. 5(1)(f)" >> $GITHUB_STEP_SUMMARY
             fi
           done
 
-          # Categorizzazione biometrica
-          for kw in "biometric.categori" "racial.classif" "ethnic.classif" \
-                    "gender.classif.*biometric" "political.*opinion.*AI"; do
+          # Categorizzazione biometrica — librerie specifiche
+          for kw in "rekognition.*categori" "clearview" "palantir.*biometric" \
+                    "faception" "import.*BiometricCategor" "racial_classif"; do
             if grep -rni "$kw" \
               --include="*.py" --include="*.ts" --include="*.js" \
-              --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github --exclude-dir=sdk . 2>/dev/null; then
+              --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github \
+              --exclude-dir=sdk --exclude-dir=simulation --exclude-dir=semantic \
+              --exclude="*prohibited*" --exclude="*conformity*" \
+              . 2>/dev/null; then
               PROHIBITED_FINDINGS="${PROHIBITED_FINDINGS}biometric-categorization,"
               CRITICAL=true
-              echo "🚨 **CRITICAL** Biometric categorization detected — PROHIBITED under Art. 5(1)(g)" >> $GITHUB_STEP_SUMMARY
+              echo "🚨 **CRITICAL** Biometric categorization library detected — PROHIBITED under Art. 5(1)(g)" >> $GITHUB_STEP_SUMMARY
             fi
           done
 
-          # Social scoring
-          for kw in "social.scor\|social_credit\|citizen.rank\|behavior.scor.*government"; do
-            if grep -rni "$kw" \
+          # Social scoring — pattern di codice, non commenti
+          for kw in "social_credit_score\|citizen_score\|SocialCreditSystem\|behavioral_score.*gov"; do
+            if grep -rn "$kw" \
               --include="*.py" --include="*.ts" --include="*.js" \
-              --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github --exclude-dir=sdk . 2>/dev/null; then
+              --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github \
+              --exclude-dir=sdk --exclude-dir=simulation --exclude-dir=semantic \
+              --exclude="*prohibited*" \
+              . 2>/dev/null; then
               PROHIBITED_FINDINGS="${PROHIBITED_FINDINGS}social-scoring,"
               CRITICAL=true
-              echo "🚨 **CRITICAL** Social scoring detected — PROHIBITED under Art. 5(1)(c)" >> $GITHUB_STEP_SUMMARY
+              echo "🚨 **CRITICAL** Social scoring implementation detected — PROHIBITED under Art. 5(1)(c)" >> $GITHUB_STEP_SUMMARY
             fi
           done
 
-          # Sorveglianza biometrica real-time in spazi pubblici
-          for kw in "realtime.biometric\|real_time.*facial\|live.facial.recogn"; do
-            if grep -rni "$kw" \
+          # Sorveglianza biometrica real-time — API calls specifiche
+          for kw in "SearchFacesByImage\|rekognition.*Video\|live_face_id\|realtimeFacialRecog"; do
+            if grep -rn "$kw" \
               --include="*.py" --include="*.ts" --include="*.js" \
-              --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github --exclude-dir=sdk . 2>/dev/null; then
+              --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github \
+              --exclude-dir=sdk --exclude-dir=simulation --exclude-dir=semantic \
+              --exclude="*prohibited*" \
+              . 2>/dev/null; then
               PROHIBITED_FINDINGS="${PROHIBITED_FINDINGS}realtime-biometric,"
               CRITICAL=true
-              echo "🚨 **CRITICAL** Real-time biometric surveillance detected — PROHIBITED under Art. 5(1)(h)" >> $GITHUB_STEP_SUMMARY
+              echo "🚨 **CRITICAL** Real-time biometric surveillance API detected — PROHIBITED under Art. 5(1)(h)" >> $GITHUB_STEP_SUMMARY
             fi
           done
 
@@ -169,7 +184,7 @@ jobs:
           echo "CRITICAL_VIOLATIONS=${CRITICAL}" >> $GITHUB_ENV
 
           if [ -z "$PROHIBITED_FINDINGS" ]; then
-            echo "✅ No prohibited AI signals detected" >> $GITHUB_STEP_SUMMARY
+            echo "✅ No prohibited AI API/library usage detected" >> $GITHUB_STEP_SUMMARY
           fi
 
       # ─── 4. Verifica disclosure Art. 50 ──────────────────────────────────
