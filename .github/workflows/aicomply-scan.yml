@@ -18,14 +18,12 @@ jobs:
     name: EU AI Act Compliance Scan
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        env:
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-        with:
-          fetch-depth: 0
 
       # ─── 1. Rileva chiamate a modelli AI esterni ──────────────────────────
       - name: Scan — External AI API calls
