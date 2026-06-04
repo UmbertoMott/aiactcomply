@@ -38,6 +38,52 @@ function saveState(s: DocuGenState) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
 }
 
+// ─── DB sync helpers ──────────────────────────────────────────────────────────
+async function loadFromDB(): Promise<{ technicalFileId: string | null; aiSystemId: string | null }> {
+  try {
+    const res = await fetch("/api/technical-file");
+    if (!res.ok) return { technicalFileId: null, aiSystemId: null };
+    const { data } = await res.json();
+    if (data && data.length > 0) {
+      return { technicalFileId: data[0].id, aiSystemId: data[0].ai_system_id };
+    }
+  } catch { /* fallback to localStorage */ }
+  return { technicalFileId: null, aiSystemId: null };
+}
+
+async function saveToDBSection(
+  section: string,
+  sectionData: Record<string, unknown>,
+  aiSystemId: string,
+  technicalFileId: string | null
+): Promise<string | null> {
+  try {
+    const body = {
+      ai_system_id: aiSystemId,
+      technical_file_id: technicalFileId,
+      section,
+      section_data: sectionData,
+    };
+    const res = await fetch("/api/technical-file", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) return technicalFileId;
+    const { data } = await res.json();
+    return data?.id ?? technicalFileId;
+  } catch { return technicalFileId; }
+}
+
+async function loadAISystems(): Promise<{ id: string; name: string; risk_tier: string }[]> {
+  try {
+    const res = await fetch("/api/ai-systems");
+    if (!res.ok) return [];
+    const { data } = await res.json();
+    return data || [];
+  } catch { return []; }
+}
+
 // Read real data from other tools' localStorage
 function readCrossToolContent(): Record<string, string> {
   if (typeof window === "undefined") return AUTO_CONTENT;
@@ -177,6 +223,51 @@ export default function DocuGenPage() {
   const [compareIdx, setCompareIdx] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
   const [crossContent] = useState<Record<string, string>>(() => readCrossToolContent());
+
+  // ─── DB Sync State ──────────────────────────────────────────────────────────
+  const [technicalFileId, setTechnicalFileId] = useState<string | null>(null);
+  const [aiSystemId, setAiSystemId] = useState<string | null>(null);
+  const [aiSystems, setAiSystems] = useState<{ id: string; name: string; risk_tier: string }[]>([]);
+  const [dbSynced, setDbSynced] = useState(false);
+  const [dbSyncing, setDbSyncing] = useState(false);
+
+  // Carica sistemi AI e stato DB al mount
+  useEffect(() => {
+    loadAISystems().then(setAiSystems);
+    loadFromDB().then(({ technicalFileId: tfId, aiSystemId: asId }) => {
+      if (tfId) setTechnicalFileId(tfId);
+      if (asId) setAiSystemId(asId);
+      if (tfId) setDbSynced(true);
+    });
+  }, []);
+
+  // Auto-save su DB quando cambia il contenuto (debounced 2s)
+  useEffect(() => {
+    if (!aiSystemId || !persisted.content || Object.keys(persisted.content).length === 0) return;
+    const timer = setTimeout(async () => {
+      setDbSyncing(true);
+      // Mappa sezioni locali → sezioni DB
+      const sectionMap: Record<string, string> = {
+        s1: "s1_general", s2: "s2_components", s3: "s3_data_governance",
+        s4: "s4_monitoring", s5: "s5_transparency", s6: "s6_performance", s7: "s7_declaration",
+      };
+      // Salva la sezione attiva
+      const dbSection = sectionMap[activeSection];
+      if (dbSection && persisted.content[activeSection]) {
+        const newId = await saveToDBSection(
+          dbSection,
+          { content: persisted.content[activeSection], status: persisted.status[activeSection] || "draft" },
+          aiSystemId,
+          technicalFileId
+        );
+        if (newId && !technicalFileId) setTechnicalFileId(newId);
+        setDbSynced(true);
+      }
+      setDbSyncing(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [persisted.content, activeSection, aiSystemId]);
+
 
   const classifierData = useMemo(() => {
     try { const r = localStorage.getItem("aicomply_classifier_result"); return r ? JSON.parse(r) : null; }
@@ -353,6 +444,28 @@ export default function DocuGenPage() {
             style={{ background: "#0D1016", color: "#ffffff", border: "none", cursor: "pointer" }}>
             Salva nel dossier
           </button>
+        </div>
+      )}
+
+      {/* DB Sync Banner */}
+      {aiSystems.length > 0 && (
+        <div className="flex items-center gap-3 rounded-lg px-4 py-2.5 mb-4 text-[12px]"
+          style={{ background: "rgba(59,130,246,0.05)", border: "1px solid rgba(59,130,246,0.12)" }}>
+          <span style={{ color: "rgba(0,0,0,0.45)" }}>Sistema AI:</span>
+          <select
+            value={aiSystemId || ""}
+            onChange={(e) => setAiSystemId(e.target.value || null)}
+            className="text-[12px] bg-transparent outline-none"
+            style={{ color: "#0D1016" }}
+          >
+            <option value="">— seleziona sistema AI —</option>
+            {aiSystems.map((s) => (
+              <option key={s.id} value={s.id}>{s.name} ({s.risk_tier})</option>
+            ))}
+          </select>
+          <span className="ml-auto text-[11px]" style={{ color: dbSyncing ? "#2563eb" : dbSynced ? "#16a34a" : "rgba(0,0,0,0.3)" }}>
+            {dbSyncing ? "⟳ Sincronizzando..." : dbSynced ? "✓ Salvato su DB" : "○ Non sincronizzato"}
+          </span>
         </div>
       )}
 
