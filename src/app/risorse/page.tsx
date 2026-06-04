@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description:
       "Guide pratiche sull'EU AI Act, aggiornamenti normativi e risorse per la compliance AI in Italia.",
     type: "website",
-    url: "https://aicomply-omega.vercel.app/risorse",
+    url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://aicomply-omega.vercel.app"}/risorse`,
   },
 };
 

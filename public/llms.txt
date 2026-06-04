@@ -1,0 +1,63 @@
+# AIComply
+
+> Piattaforma SaaS per la conformità all'EU AI Act (Regolamento UE 2024/1689).
+> Classificazione del rischio AI, documentazione tecnica, gestione obblighi normativi.
+> Interamente in italiano. Target: PMI italiane, sviluppatori AI, compliance officer.
+
+## Prodotto
+
+AIComply è l'unica piattaforma SaaS completamente in italiano per la compliance all'EU AI Act.
+Copre tutti gli articoli chiave del regolamento attraverso 18 tool integrati con dossier condiviso e synergy automatica.
+Prezzo: da €49/mese (Starter) a €199/mese (Professional). Scanner Art. 50 gratuito senza registrazione.
+
+## Tool disponibili
+
+- **Classifier** — Classificazione rischio AI (Art. 6, Annex III). Rileva automaticamente se un sistema è ad alto rischio, a rischio limitato o proibito. Include exemption dossier Art. 6(3).
+- **Risk Manager** — Sistema di gestione rischi Art. 9. Monte Carlo, PSI drift detection, Sanction Tracker.
+- **Data Audit** — Governance dati Art. 10. Bias metrics (OFI, SPD, DI, EOD), CTGAN augmentation, column lineage.
+- **LogVault** — Logging hash-chained Art. 12 & 14. C2PA attestation, Kill Switch, import/export log.
+- **Transparency** — Documentazione Art. 13. Nutrition Label AI, istruzioni deployer, Art. 50 disclosure.
+- **Oversight** — Supervisione umana Art. 14. Protocolli override, sessioni di supervisione documentate.
+- **Resilience** — Accuratezza e robustezza Art. 15. Red Team testing, soglie accuracy, fallback.
+- **FRIA** — Valutazione impatto diritti fondamentali Art. 27. 11 diritti, stakeholder engagement, deployment decision.
+- **DPIA** — Data Protection Impact Assessment (GDPR + AI Act).
+- **QMS** — Quality Management System Art. 17. 10 sezioni Art. 17(1)(a)-(j).
+- **DocuGen** — Documentazione tecnica Annex IV Art. 11. Auto-import da Data Audit e Risk Manager.
+- **GPAI** — General Purpose AI compliance Art. 51-55. Soglia FLOPs, modelli open-source.
+- **Art. 50 Kit** — Disclosure utenti finali Art. 50. Snippet HTML/React/WordPress, Registro Implementazione.
+- **Conformity** — Dichiarazione conformità UE Art. 47. Wizard 3 step, EU Declaration esportabile.
+- **EUDB** — Registrazione database UE Art. 49. Annex VIII pre-compilato.
+- **Deployer** — Obblighi deployer Art. 26. Checklist Art. 26(1)-(9).
+- **Provider Transition** — Riqualificazione provider Art. 28. Trigger fine-tuning, white-label.
+- **Authorized Rep** — Rappresentante autorizzato Art. 22. Per provider extra-UE.
+- **L. 132/2025** — Legge italiana adeguamento AI Act (in vigore dal 10 ottobre 2025).
+- **Legal Assistant** — RAG su testo EU AI Act. Domande libere in italiano, citazioni normative.
+
+## Articoli del blog
+
+- [Scadenze AI Act 2025-2028: calendario aggiornato dopo il rinvio dell'Omnibus](https://aicomply-omega.vercel.app/risorse/scadenze-ai-act-aggiornate-calendario-2025-2028)
+  Data pubblicazione: 2 giugno 2026. Calendario completo post-accordo Omnibus 7 maggio 2026.
+
+- [Cos'è un sistema AI ad alto rischio: la guida pratica all'Annex III](https://aicomply-omega.vercel.app/risorse/sistema-ai-alto-rischio-annex-iii-obblighi)
+  Data pubblicazione: 3 giugno 2026. 8 settori Annex III, esenzioni Art. 6(3), 7 obblighi.
+
+## Pagine principali
+
+- [Homepage](https://aicomply-omega.vercel.app): Panoramica prodotto, features principali, CTA scanner gratuito
+- [Pricing](https://aicomply-omega.vercel.app/pricing): Scanner (€0), Starter (€49/mese), Professional (€199/mese)
+- [Scanner Art. 50](https://aicomply-omega.vercel.app/scanner): Analisi gratuita e anonima compliance Art. 50
+- [Risorse](https://aicomply-omega.vercel.app/risorse): Blog — guide pratiche EU AI Act in italiano
+- [Waitlist](https://aicomply-omega.vercel.app/waitlist): Accesso anticipato con prezzo bloccato
+
+## Articoli chiave AI Act coperti
+
+Art. 5 (pratiche vietate), Art. 6 (classificazione), Art. 9 (gestione rischi), Art. 10 (dati),
+Art. 11 (documentazione tecnica), Art. 12 (logging), Art. 13 (trasparenza), Art. 14 (supervisione umana),
+Art. 15 (accuratezza/robustezza), Art. 17 (QMS), Art. 22 (authorized rep), Art. 26 (deployer),
+Art. 27 (FRIA), Art. 28 (provider transition), Art. 47 (conformità), Art. 49 (EUDB),
+Art. 50 (disclosure utenti), Art. 51-55 (GPAI), L. 132/2025 (legge italiana)
+
+## Contatti
+
+- Email: dridrop@gmail.com
+- GitHub: https://github.com/UmbertoMott/aiactcomply

@@ -1,9 +1,12 @@
 import { MetadataRoute } from "next";
+import { getAllPosts } from "@/lib/blog/posts";
 
-const BASE_URL = "https://aicomply-omega.vercel.app";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aicomply-omega.vercel.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
+  const posts = getAllPosts();
+
+  const staticPages: MetadataRoute.Sitemap = [
     {
       url: BASE_URL,
       lastModified: new Date(),
@@ -17,22 +20,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-      url: `${BASE_URL}/risorse`,
+      url: `${BASE_URL}/waitlist`,
       lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/risorse/scadenze-ai-act-aggiornate-calendario-2025-2028`,
-      lastModified: new Date("2025-01-15"),
       changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/risorse/sistema-ai-alto-rischio-annex-iii-obblighi`,
-      lastModified: new Date("2025-02-01"),
-      changeFrequency: "monthly",
-      priority: 0.7,
+      priority: 0.6,
     },
     {
       url: `${BASE_URL}/scanner`,
@@ -40,5 +31,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    {
+      url: `${BASE_URL}/risorse`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
   ];
+
+  const blogPages: MetadataRoute.Sitemap = posts.map((post) => ({
+    url: `${BASE_URL}/risorse/${post.slug}`,
+    lastModified: new Date(post.dateISO),
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...blogPages];
 }

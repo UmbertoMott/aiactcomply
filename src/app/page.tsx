@@ -7,7 +7,7 @@ import Stats from "@/components/sections/Stats";
 import ToolGallery from "@/components/sections/ToolGallery";
 import CtaFinal from "@/components/sections/CtaFinal";
 
-const BASE_URL = "https://aicomply-omega.vercel.app";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aicomply-omega.vercel.app";
 
 export const metadata: Metadata = {
   title: "AIComply — Software Conformità EU AI Act | Classificazione e Documentazione",
@@ -75,14 +75,65 @@ const jsonLd = {
       url: BASE_URL,
       description:
         "Software SaaS per la conformità al Regolamento EU AI Act (2024/1689). Classificazione rischio AI, documentazione tecnica, FRIA, DPIA e gestione scadenze normative.",
-      offers: {
-        "@type": "Offer",
-        price: "0",
-        priceCurrency: "EUR",
-        description: "Piano gratuito disponibile",
-      },
+      featureList: [
+        "Classificazione rischio AI (Art. 6)",
+        "Risk Manager (Art. 9)",
+        "Data Audit bias metrics (Art. 10)",
+        "Logging hash-chained (Art. 12)",
+        "Documentazione tecnica Annex IV (Art. 11)",
+        "FRIA valutazione diritti fondamentali (Art. 27)",
+        "DPIA integrata",
+        "GPAI compliance (Art. 51-55)",
+        "Legal Assistant RAG EU AI Act",
+        "Scanner Art. 50 gratuito",
+      ],
+      offers: [
+        {
+          "@type": "Offer",
+          name: "Scanner",
+          price: "0",
+          priceCurrency: "EUR",
+          description: "Scanner Art. 50 gratuito e anonimo",
+        },
+        {
+          "@type": "Offer",
+          name: "Starter",
+          price: "49",
+          priceCurrency: "EUR",
+          priceSpecification: { "@type": "UnitPriceSpecification", billingDuration: "P1M" },
+          description: "1 sistema AI, compliance Art. 50 completa",
+        },
+        {
+          "@type": "Offer",
+          name: "Professional",
+          price: "199",
+          priceCurrency: "EUR",
+          priceSpecification: { "@type": "UnitPriceSpecification", billingDuration: "P1M" },
+          description: "5 sistemi AI, dossier completo, Legal Assistant RAG",
+        },
+      ],
       author: {
         "@id": `${BASE_URL}/#organization`,
+      },
+      inLanguage: "it",
+      audience: {
+        "@type": "Audience",
+        audienceType: "Business",
+        geographicArea: { "@type": "Country", name: "Italy" },
+      },
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${BASE_URL}/#website`,
+      url: BASE_URL,
+      name: "AIComply",
+      description: "Piattaforma SaaS per la conformità al Regolamento EU AI Act in italiano",
+      inLanguage: "it",
+      publisher: { "@id": `${BASE_URL}/#organization` },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: { "@type": "EntryPoint", urlTemplate: `${BASE_URL}/risorse?q={search_term_string}` },
+        "query-input": "required name=search_term_string",
       },
     },
   ],
