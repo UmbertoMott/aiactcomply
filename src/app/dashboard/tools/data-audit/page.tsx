@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -14,6 +14,7 @@ import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { DataAuditResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { DBStatusBadge, type DBSource } from "@/components/ui/DBStatusBadge";
 
 const CUSTOM_DATASET_ID = "__custom__";
 
@@ -116,6 +117,13 @@ export default function DataAuditPage() {
   // ── Shared state ─────────────────────────────────────────────────────────
   const [auditMode, setAuditMode] = useState<AuditMode>("demo");
   const [toast, setToast] = useState<string | null>(null);
+  const [dbSource, setDbSource] = useState<DBSource>("loading");
+
+  useEffect(() => {
+    fetch("/api/ai-systems")
+      .then(r => setDbSource(r.ok ? "db" : "localStorage"))
+      .catch(() => setDbSource("localStorage"));
+  }, []);
 
   // ── Real mode state ──────────────────────────────────────────────────────
   const [csvRecords, setCsvRecords]     = useState<Record<string, string>[]>([]);
@@ -269,6 +277,11 @@ export default function DataAuditPage() {
     <div className="w-full" style={{ fontFamily: "var(--font-inter, system-ui)" }}>
 
       <SystemContextBanner checkProhibited={true} />
+
+      {/* ── DB Status ────────────────────────────────────────────────────────── */}
+      <div style={{ marginBottom: 12 }}>
+        <DBStatusBadge source={dbSource} />
+      </div>
 
       {/* ── Mode tabs ──────────────────────────────────────────────────────── */}
       <div style={{ display: "flex", gap: 0, marginBottom: 24, borderBottom: "1px solid rgba(0,0,0,0.07)" }}>

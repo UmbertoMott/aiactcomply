@@ -12,3 +12,9 @@ export function createClient() {
   if (!config) return null;
   return createBrowserClient(config.url, config.key);
 }
+
+/** Returns true if Supabase env vars are configured. Safe to call during SSR. */
+export function useSupabaseAvailable(): boolean {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+  return url.startsWith("http");
+}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { DBStatusBadge, type DBSource } from "@/components/ui/DBStatusBadge";
 import {
   GraduationCap, Plus, Download, Trash2, Users, Calendar,
   CheckCircle, Clock, BookOpen, ChevronDown, ChevronUp,
@@ -77,6 +78,13 @@ export default function LiteracyPage() {
   const [showForm, setShowForm] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [toast, setToast]     = useState<Toast | null>(null);
+  const [dbSource, setDbSource] = useState<DBSource>("loading");
+
+  useEffect(() => {
+    fetch("/api/ai-systems")
+      .then(r => setDbSource(r.ok ? "db" : "localStorage"))
+      .catch(() => setDbSource("localStorage"));
+  }, []);
 
   // Form state
   const [fDate,     setFDate]     = useState(() => new Date().toISOString().slice(0, 10));
@@ -247,9 +255,12 @@ export default function LiteracyPage() {
           <h1 className="text-xl font-semibold" style={{ color: "#0D1016" }}>
             AI Literacy — Art. 4
           </h1>
-          <p className="text-sm mt-0.5" style={{ color: "rgba(0,0,0,0.45)" }}>
-            Registro documentale delle sessioni di formazione sull&apos;intelligenza artificiale
-          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-sm" style={{ color: "rgba(0,0,0,0.45)" }}>
+              Registro documentale delle sessioni di formazione sull&apos;intelligenza artificiale
+            </p>
+            <DBStatusBadge source={dbSource} />
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <button

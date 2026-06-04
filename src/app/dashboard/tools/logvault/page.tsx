@@ -13,6 +13,7 @@ import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { LogvaultResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { DBStatusBadge, type DBSource } from "@/components/ui/DBStatusBadge";
 
 const card: CSSProperties = { background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
 
@@ -133,6 +134,13 @@ export default function LogVaultPage() {
   // ── Shared state ──────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState<"demo" | "import">("demo");
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
+  const [dbSource, setDbSource] = useState<DBSource>("loading");
+
+  useEffect(() => {
+    fetch("/api/logvault/ingest")
+      .then(r => setDbSource(r.ok ? "db" : "localStorage"))
+      .catch(() => setDbSource("localStorage"));
+  }, []);
 
   // ── Import state ──────────────────────────────────────────────────────────
   const [importResult,      setImportResult]      = useState<ImportResult | null>(null);
@@ -262,6 +270,11 @@ export default function LogVaultPage() {
   return (
     <div className="w-full" style={{ fontFamily: "var(--font-inter, system-ui)" }}>
       <SystemContextBanner checkProhibited={true} />
+
+      {/* ── DB Status ────────────────────────────────────────────────────────── */}
+      <div style={{ marginBottom: 12 }}>
+        <DBStatusBadge source={dbSource} />
+      </div>
 
       {/* ── Tab switcher ─────────────────────────────────────────────────────── */}
       <div style={{ display: "flex", gap: 4, marginBottom: 16, background: "rgba(0,0,0,0.04)", borderRadius: 10, padding: 3, width: "fit-content" }}>
