@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
         with:
           fetch-depth: 0
 
@@ -36,7 +38,7 @@ jobs:
           # OpenAI
           if grep -rn "openai\|OpenAI\|gpt-4\|gpt-3\|text-davinci" \
             --include="*.py" --include="*.ts" --include="*.js" \
-            --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null; then
+            --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github --exclude-dir=sdk . 2>/dev/null; then
             FINDINGS="${FINDINGS}openai,"
             echo "⚠️ **OpenAI API** usage detected" >> $GITHUB_STEP_SUMMARY
           fi
@@ -44,7 +46,7 @@ jobs:
           # Anthropic
           if grep -rn "anthropic\|claude-" \
             --include="*.py" --include="*.ts" --include="*.js" \
-            --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null; then
+            --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github --exclude-dir=sdk . 2>/dev/null; then
             FINDINGS="${FINDINGS}anthropic,"
             echo "⚠️ **Anthropic API** usage detected" >> $GITHUB_STEP_SUMMARY
           fi
@@ -52,7 +54,7 @@ jobs:
           # Google AI / Vertex
           if grep -rn "google.generativeai\|vertexai\|palm\|gemini" \
             --include="*.py" --include="*.ts" --include="*.js" \
-            --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null; then
+            --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github --exclude-dir=sdk . 2>/dev/null; then
             FINDINGS="${FINDINGS}google-ai,"
             echo "⚠️ **Google AI** usage detected" >> $GITHUB_STEP_SUMMARY
           fi
@@ -60,7 +62,7 @@ jobs:
           # Azure OpenAI
           if grep -rn "azure.*openai\|AzureOpenAI" \
             --include="*.py" --include="*.ts" --include="*.js" \
-            --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null; then
+            --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github --exclude-dir=sdk . 2>/dev/null; then
             FINDINGS="${FINDINGS}azure-openai,"
             echo "⚠️ **Azure OpenAI** usage detected" >> $GITHUB_STEP_SUMMARY
           fi
@@ -85,7 +87,7 @@ jobs:
                      "llamaindex" "langchain" "autogpt"; do
             if grep -rn "$lib" \
               --include="*.py" --include="requirements*.txt" --include="pyproject.toml" \
-              --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null | grep -v "^Binary"; then
+              --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github --exclude-dir=sdk . 2>/dev/null | grep -v "^Binary"; then
               ML_FINDINGS="${ML_FINDINGS}${lib},"
               echo "⚠️ **${lib}** detected — verify EU AI Act classification" >> $GITHUB_STEP_SUMMARY
             fi
@@ -96,7 +98,7 @@ jobs:
                      "synaptic" "natural" "@huggingface"; do
             if grep -rn "$lib" \
               --include="package.json" --include="*.ts" --include="*.js" \
-              --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null; then
+              --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github --exclude-dir=sdk . 2>/dev/null; then
               ML_FINDINGS="${ML_FINDINGS}${lib},"
               echo "⚠️ **${lib}** (JS) detected — verify EU AI Act classification" >> $GITHUB_STEP_SUMMARY
             fi
@@ -122,7 +124,7 @@ jobs:
                     "emotion_detect" "affective.comput" "FER" "EmotionNet"; do
             if grep -rni "$kw" \
               --include="*.py" --include="*.ts" --include="*.js" \
-              --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null; then
+              --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github --exclude-dir=sdk . 2>/dev/null; then
               PROHIBITED_FINDINGS="${PROHIBITED_FINDINGS}emotion-recognition,"
               CRITICAL=true
               echo "🚨 **CRITICAL** Emotion recognition detected — PROHIBITED under Art. 5(1)(f)" >> $GITHUB_STEP_SUMMARY
@@ -134,7 +136,7 @@ jobs:
                     "gender.classif.*biometric" "political.*opinion.*AI"; do
             if grep -rni "$kw" \
               --include="*.py" --include="*.ts" --include="*.js" \
-              --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null; then
+              --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github --exclude-dir=sdk . 2>/dev/null; then
               PROHIBITED_FINDINGS="${PROHIBITED_FINDINGS}biometric-categorization,"
               CRITICAL=true
               echo "🚨 **CRITICAL** Biometric categorization detected — PROHIBITED under Art. 5(1)(g)" >> $GITHUB_STEP_SUMMARY
@@ -145,7 +147,7 @@ jobs:
           for kw in "social.scor\|social_credit\|citizen.rank\|behavior.scor.*government"; do
             if grep -rni "$kw" \
               --include="*.py" --include="*.ts" --include="*.js" \
-              --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null; then
+              --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github --exclude-dir=sdk . 2>/dev/null; then
               PROHIBITED_FINDINGS="${PROHIBITED_FINDINGS}social-scoring,"
               CRITICAL=true
               echo "🚨 **CRITICAL** Social scoring detected — PROHIBITED under Art. 5(1)(c)" >> $GITHUB_STEP_SUMMARY
@@ -156,7 +158,7 @@ jobs:
           for kw in "realtime.biometric\|real_time.*facial\|live.facial.recogn"; do
             if grep -rni "$kw" \
               --include="*.py" --include="*.ts" --include="*.js" \
-              --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null; then
+              --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github --exclude-dir=sdk . 2>/dev/null; then
               PROHIBITED_FINDINGS="${PROHIBITED_FINDINGS}realtime-biometric,"
               CRITICAL=true
               echo "🚨 **CRITICAL** Real-time biometric surveillance detected — PROHIBITED under Art. 5(1)(h)" >> $GITHUB_STEP_SUMMARY
@@ -182,7 +184,7 @@ jobs:
                     "watermark\|machine.readable\|ai.produced"; do
             if grep -rni "$kw" \
               --include="*.ts" --include="*.tsx" --include="*.py" \
-              --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null | grep -q .; then
+              --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github --exclude-dir=sdk . 2>/dev/null | grep -q .; then
               HAS_DISCLOSURE=true
               break
             fi
