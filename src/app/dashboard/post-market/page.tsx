@@ -36,6 +36,8 @@ type Incident = {
   authority: string;
   affectedUsers?: string;
   actions: string;
+  rootCause?: string;      // Sezione 4 — Rapporto completo Art. 73(4)
+  finalMeasures?: string;  // Sezione 6 — Rapporto completo Art. 73(4)
   createdAt: string;
 };
 
@@ -85,6 +87,58 @@ ${inc.actions || "Indagine avviata — aggiornamenti a seguire"}
 IMPEGNI
 La società si impegna a trasmettere un rapporto completo entro 15 giorni
 dalla data del presente atto (entro il ${new Date(new Date(inc.date).getTime() + 15 * 24 * 60 * 60 * 1000).toLocaleDateString("it-IT")}).
+
+Firma: _______________________
+Ruolo: Responsabile Conformità AI
+Data: ${new Date().toLocaleDateString("it-IT")}`;
+}
+
+function generateFullReport(inc: Incident): string {
+  return `RAPPORTO COMPLETO — INCIDENTE GRAVE
+Ai sensi dell'Art. 73(4) del Regolamento (UE) 2024/1689
+
+Data rapporto: ${new Date().toLocaleDateString("it-IT")}
+Autorità destinataria: ${inc.authority}
+
+═══════════════════════════════════════════════════════
+SEZIONE 1 — IDENTIFICAZIONE
+═══════════════════════════════════════════════════════
+ID Incidente: ${inc.id}
+Sistema AI coinvolto: ${inc.system}
+Data rilevamento: ${inc.date}
+Gravità: ${inc.severity.toUpperCase()}
+Status: ${inc.status}
+
+═══════════════════════════════════════════════════════
+SEZIONE 2 — DESCRIZIONE DETTAGLIATA
+═══════════════════════════════════════════════════════
+${inc.description}
+
+═══════════════════════════════════════════════════════
+SEZIONE 3 — IMPATTO
+═══════════════════════════════════════════════════════
+Utenti/soggetti impattati: ${inc.affectedUsers || "Nessun impatto su utenti riportato"}
+
+═══════════════════════════════════════════════════════
+SEZIONE 4 — ANALISI CAUSA RADICE
+═══════════════════════════════════════════════════════
+${inc.rootCause || "[CAMPO OBBLIGATORIO - Compilare prima di generare il rapporto]"}
+
+═══════════════════════════════════════════════════════
+SEZIONE 5 — AZIONI IMMEDIATE INTRAPRESE
+═══════════════════════════════════════════════════════
+${inc.actions || "Nessuna azione registrata"}
+
+═══════════════════════════════════════════════════════
+SEZIONE 6 — MISURE DEFINITIVE ADOTTATE
+═══════════════════════════════════════════════════════
+${inc.finalMeasures || "[CAMPO OBBLIGATORIO - Compilare prima di generare il rapporto]"}
+
+═══════════════════════════════════════════════════════
+SEZIONE 7 — DICHIARAZIONE
+═══════════════════════════════════════════════════════
+Il presente rapporto è redatto in conformità all'Art. 73(4) del Regolamento (UE) 2024/1689
+e costituisce il rapporto completo a seguito della notifica preliminare del ${inc.date}.
 
 Firma: _______________________
 Ruolo: Responsabile Conformità AI
@@ -1196,6 +1250,100 @@ export default function PostMarketPage() {
                 </div>
               </>
             )}
+
+            {/* ── Rapporto Completo Art. 73(4) ── */}
+            <div
+              className="rounded-xl p-4"
+              style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#fff" }}
+            >
+              <p className="text-[12px] font-medium mb-1" style={{ color: "#0D1016" }}>
+                Rapporto Completo — Art. 73(4)
+              </p>
+              <p className="text-[11px] mb-3" style={{ color: "rgba(0,0,0,0.42)" }}>
+                Compila le sezioni obbligatorie per sbloccare la generazione del rapporto completo.
+              </p>
+
+              {/* Sezione 4: Causa radice */}
+              <div style={{ marginBottom: 10 }}>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "rgba(0,0,0,0.42)", marginBottom: 4 }}>
+                  Sezione 4 — Analisi causa radice <span style={{ color: "#dc2626" }}>*</span>
+                </label>
+                <textarea
+                  value={selected?.rootCause ?? ""}
+                  rows={3}
+                  placeholder="Causa radice: errore sistema, gap nel training data, failure deployment, errore operativo…"
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const sid = selected?.id;
+                    if (!sid) return;
+                    const update = (inc: Incident) => inc.id === sid ? { ...inc, rootCause: val } : inc;
+                    setIncidents(prev => { const next = prev.map(update); localStorage.setItem(INCIDENTS_KEY, JSON.stringify(next)); return next; });
+                    setSelected(s => s ? { ...s, rootCause: val } : s);
+                  }}
+                  style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)", fontSize: 12, color: "#0D1016", background: "#fff", outline: "none", resize: "vertical" }}
+                />
+              </div>
+
+              {/* Sezione 6: Misure definitive */}
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "rgba(0,0,0,0.42)", marginBottom: 4 }}>
+                  Sezione 6 — Misure definitive adottate <span style={{ color: "#dc2626" }}>*</span>
+                </label>
+                <textarea
+                  value={selected?.finalMeasures ?? ""}
+                  rows={3}
+                  placeholder="Misure permanenti: patch, retraining, modifica processo, nuovi controlli…"
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const sid = selected?.id;
+                    if (!sid) return;
+                    const update = (inc: Incident) => inc.id === sid ? { ...inc, finalMeasures: val } : inc;
+                    setIncidents(prev => { const next = prev.map(update); localStorage.setItem(INCIDENTS_KEY, JSON.stringify(next)); return next; });
+                    setSelected(s => s ? { ...s, finalMeasures: val } : s);
+                  }}
+                  style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)", fontSize: 12, color: "#0D1016", background: "#fff", outline: "none", resize: "vertical" }}
+                />
+              </div>
+
+              {/* Bottone genera rapporto completo */}
+              {(() => {
+                const canGenerate = !!(selected?.rootCause?.trim() && selected?.finalMeasures?.trim());
+                return (
+                  <button
+                    disabled={!canGenerate}
+                    onClick={() => {
+                      if (!selected) return;
+                      const text = generateFullReport(selected);
+                      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+                      const url  = URL.createObjectURL(blob);
+                      const a    = document.createElement("a");
+                      a.href = url;
+                      a.download = `rapporto-completo-art73-${selected.id.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.txt`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                      appendEvidence("incident", {
+                        type: "Post-Market Report Completo Art. 73(4)",
+                        incidentId: selected.id,
+                        system: selected.system,
+                        generatedAt: new Date().toISOString(),
+                      }, "post-market");
+                    }}
+                    className="w-full flex items-center justify-center gap-1.5 rounded-lg py-2 text-[11px] font-semibold transition-opacity"
+                    style={{
+                      background: canGenerate ? "#0D1016" : "rgba(0,0,0,0.08)",
+                      color: canGenerate ? "#fff" : "rgba(0,0,0,0.3)",
+                      border: "none",
+                      cursor: canGenerate ? "pointer" : "not-allowed",
+                    }}
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    {canGenerate
+                      ? "Genera Rapporto Completo Art. 73(4)"
+                      : "Compila le sezioni obbligatorie per sbloccare"}
+                  </button>
+                );
+              })()}
+            </div>
 
             {/* Art. 73 timeline ref */}
             <div

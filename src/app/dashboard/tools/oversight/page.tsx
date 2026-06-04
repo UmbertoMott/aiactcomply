@@ -570,7 +570,7 @@ export default function OversightPage() {
                   rows={2} placeholder="es. Score 0-1 (> 0.8 = alta confidenza), label binaria ACCEPT/REJECT, top-3 feature importance…"
                   style={taSt} />
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 12 }}>
                 <div>
                   <Lbl>Soglia di confidenza minima</Lbl>
                   <input value={config.confidence_threshold}
@@ -850,7 +850,7 @@ export default function OversightPage() {
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
           {/* Metrics */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12 }}>
+          <div className="grid grid-cols-2 md:grid-cols-4" style={{ gap: 12 }}>
             {[
               { label: "Totale eventi",    value: String(totalEvents),                   color: T.text  },
               { label: "Approvazioni",     value: `${approvedCount} (${totalEvents > 0 ? Math.round(approvedCount / totalEvents * 100) : 0}%)`, color: T.green },
