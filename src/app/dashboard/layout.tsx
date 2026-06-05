@@ -8,7 +8,7 @@ import {
   FileArchive, FileText, Scale, Search, Cpu, Bell, BadgeCheck, BarChart2, BookOpen, GraduationCap, ShieldAlert,
   Layers, Bot, Tag, TrendingUp, Globe, Building2, Sliders, Zap,
   ClipboardList, FileCode, Archive, Gauge, Settings, BookMarked, Award, Map, Database, UserCheck, ArrowRightLeft,
-  Crosshair, Landmark, GitMerge,
+  Crosshair, Landmark, GitMerge, Waves,
 } from "lucide-react";
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { useUserRole, ROLE_LABELS } from "@/lib/hooks/useUserRole";
@@ -111,7 +111,8 @@ const navGroups: NavGroup[] = [
       { icon: Zap,           label: "Risk Manager",   href: "/dashboard/tools/risk-manager",    art: "Art. 9"                },
       { icon: ClipboardList, label: "Data Audit",     href: "/dashboard/tools/data-audit",      art: "Art. 10"               },
       { icon: FileCode,      label: "DocuGen AI",     href: "/dashboard/tools/docugen",         art: "Art. 11"               },
-      { icon: FileArchive,   label: "LogVault",       href: "/dashboard/tools/logvault",        art: "Art. 12"               },
+      { icon: FileArchive,   label: "LogVault",        href: "/dashboard/tools/logvault",        art: "Art. 12"               },
+      { icon: Waves,         label: "Drift Monitor",  href: "/dashboard/tools/drift-monitor",   art: "Art. 15"               },
       { icon: Eye,           label: "Transparency",   href: "/dashboard/tools/transparency",    art: "Art. 13"               },
       { icon: Users,         label: "Oversight",      href: "/dashboard/tools/oversight",       art: "Art. 14"               },
       { icon: Building2,     label: "Deployer",       href: "/dashboard/tools/deployer",        art: "Art. 26"               },
