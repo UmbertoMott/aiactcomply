@@ -9,9 +9,19 @@ import { NextResponse } from "next/server";
 const CRON_SECRET = process.env.CRON_SECRET || "";
 const PYTHON_PIPELINE_URL = process.env.RAG_PIPELINE_URL || ""; // URL al worker Python esterno
 
+function isAuthorized(req: Request): boolean {
+  if (!CRON_SECRET) return false;
+  // Vercel Cron usa Authorization: Bearer $CRON_SECRET
+  const auth = req.headers.get("authorization");
+  if (auth === `Bearer ${CRON_SECRET}`) return true;
+  // Trigger manuale usa X-Cron-Secret
+  const xCron = req.headers.get("x-cron-secret");
+  if (xCron === CRON_SECRET) return true;
+  return false;
+}
+
 export async function POST(req: Request) {
-  const provided = req.headers.get("x-cron-secret");
-  if (!CRON_SECRET || provided !== CRON_SECRET) {
+  if (!isAuthorized(req)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

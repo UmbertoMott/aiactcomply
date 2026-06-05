@@ -7,6 +7,10 @@
     {
       "path": "/api/audit/backup",
       "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/rag/refresh",
+      "schedule": "0 4 * * 1"
     }
   ]
 }

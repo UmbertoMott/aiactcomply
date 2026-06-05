@@ -94,8 +94,8 @@ export default function TrustPassportPage() {
   function generate() {
     setError(null);
     const baseUrl = typeof window !== "undefined"
-      ? `${window.location.origin}/trust`
-      : "https://aicomply.app/trust";
+      ? `${window.location.origin}/trust/passport`
+      : "https://aicomply.app/trust/passport";
 
     const p = buildTrustPassport({
       companyName,
