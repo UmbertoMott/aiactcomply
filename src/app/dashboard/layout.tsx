@@ -8,7 +8,7 @@ import {
   FileArchive, FileText, Scale, Search, Cpu, Bell, BadgeCheck, BarChart2, BookOpen, GraduationCap, ShieldAlert,
   Layers, Bot, Tag, TrendingUp, Globe, Building2, Sliders, Zap,
   ClipboardList, FileCode, Archive, Gauge, Settings, BookMarked, Award, Map, Database, UserCheck, ArrowRightLeft,
-  Crosshair, Landmark,
+  Crosshair, Landmark, GitMerge,
 } from "lucide-react";
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { useUserRole, ROLE_LABELS } from "@/lib/hooks/useUserRole";
@@ -84,6 +84,7 @@ const navGroups: NavGroup[] = [
       { icon: Tag,        label: "AI Disclosure",     href: "/dashboard/modules/trust-labeler",  art: "Art. 50"    },
       { icon: TrendingUp, label: "Post-Market",       href: "/dashboard/post-market",            art: "Art. 72"    },
       { icon: Globe,      label: "Compliance Hub",    href: "/dashboard/compliance-nexus",       art: "Art. 71"    },
+      { icon: GitMerge,  label: "NIST AI RMF",       href: "/dashboard/tools/nist-rmf",         art: "Multi-FW"   },
       { icon: Cpu,        label: "GPAI Module",       href: "/dashboard/modules/gpai",           art: "Art. 51-55" },
       { icon: BarChart2,  label: "XAI Lab",           href: "/dashboard/modules/xai",            art: "Art. 13"    },
     ],
