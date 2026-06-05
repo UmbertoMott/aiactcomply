@@ -613,7 +613,7 @@ export default function ConformityPage() {
       appendEvidence(
         "adr",
         {
-          type: "Conformity Assessment — Dichiarazione di Conformità UE Art. 43",
+          type: "Conformity Assessment — Dichiarazione di Conformità UE Art. 43 + Art. 47",
           assessmentPath: path?.path ?? "self",
           pathReason: path?.reason ?? "—",
           score,
