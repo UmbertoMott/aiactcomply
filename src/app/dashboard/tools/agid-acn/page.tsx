@@ -51,9 +51,9 @@ const AUTHORITIES = [
       { trigger: "Sistema AI ad alto rischio per infrastrutture critiche",          deadline: "Prima del deploy",       article: "Art. 49 EU AI Act" },
     ],
     sandbox: {
-      description: "La Regulatory Sandbox italiana è operativa tramite AGID. Consente alle imprese di testare sistemi AI innovativi in un ambiente controllato con deroghe temporanee agli obblighi normativi.",
-      how_to_apply: "Presentare domanda tramite portale AGID con: descrizione del sistema, piano di testing, identificazione rischi, misure di mitigazione proposte.",
-      url: "https://www.agid.gov.it/it/design-servizi/intelligenza-artificiale",
+      description: "La Regulatory Sandbox AI italiana deve essere operativa entro il 2 agosto 2026 (scadenza EU AI Act Art. 57). AGID coordina la sua istituzione in collaborazione con ACN. Consente alle imprese di testare sistemi AI in un ambiente controllato con deroghe temporanee.",
+      how_to_apply: "La procedura di candidatura sarà pubblicata da AGID sul portale ufficiale. Sarà necessario presentare: descrizione del sistema, piano di testing, identificazione rischi e misure di mitigazione proposte.",
+      url: "https://www.agid.gov.it/it/aree-di-intervento/intelligenza-artificiale",
     },
   },
   {
@@ -66,8 +66,8 @@ const AUTHORITIES = [
     colorBdr: "rgba(124,58,237,0.2)",
     role: "Autorità nazionale per la cybersicurezza — supervisione requisiti Art. 15 EU AI Act (robustezza e sicurezza informatica)",
     website: "https://www.acn.gov.it",
-    contact: "acn@pec.acn.gov.it",
-    phone: "+39 06 9892 6500",
+    contact: "info@acn.gov.it / acn@pec.acn.gov.it",
+    phone: "",
     powers: [
       "Supervisione requisiti cybersecurity per AI ad alto rischio (Art. 15)",
       "Gestione incidenti di sicurezza su sistemi AI critici",
@@ -92,7 +92,7 @@ const AUTHORITIES = [
     colorBdr: T.greenBdr,
     role: "Autorità di controllo GDPR — supervisione intersezione GDPR/AI Act, DPIA obbligatorie, trattamento dati biometrici",
     website: "https://www.garanteprivacy.it",
-    contact: "garante@gpdp.it / garante@pec.gpdp.it",
+    contact: "protocollo@gpdp.it / protocollo@pec.gpdp.it",
     phone: "+39 06 696771",
     powers: [
       "Approvazione o blocco di trattamenti dati ad alto rischio (Art. 36 GDPR)",
@@ -214,9 +214,11 @@ function AuthorityCard({ auth }: { auth: typeof AUTHORITIES[number] }) {
                     className="flex items-center gap-2 text-xs hover:underline" style={{ color: auth.color }}>
                     <ExternalLink className="w-3 h-3" /> {auth.website}
                   </a>
-                  <div className="flex items-center gap-2 text-xs" style={{ color: T.muted }}>
-                    <Phone className="w-3 h-3" /> {auth.phone}
-                  </div>
+                  {auth.phone && (
+                    <div className="flex items-center gap-2 text-xs" style={{ color: T.muted }}>
+                      <Phone className="w-3 h-3" /> {auth.phone}
+                    </div>
+                  )}
                   <div className="text-xs font-mono" style={{ color: T.muted }}>{auth.contact}</div>
                 </div>
               </div>
