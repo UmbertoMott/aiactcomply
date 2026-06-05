@@ -103,16 +103,7 @@ export async function exportDossierToPdfA3(input: DossierExportInput): Promise<P
   const jsonHash = sha256(jsonBytes);
   const jsonFilename = `dossier-annex-iv-${input.systemId}-${new Date().toISOString().slice(0, 10)}.json`;
 
-  // Carica pdf-lib dinamicamente (consente di non bloccare il build se non installato)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let PDFDocument: any;
-  try {
-    // @ts-expect-error — pdf-lib è dipendenza opzionale, da installare con: npm install pdf-lib
-    const mod = await import("pdf-lib");
-    PDFDocument = mod.PDFDocument;
-  } catch {
-    throw new Error("pdf-lib non installato. Esegui: npm install pdf-lib");
-  }
+  const { PDFDocument } = await import("pdf-lib");
 
   const pdfDoc = await PDFDocument.create();
   pdfDoc.setTitle(`Dossier Annex IV — ${input.systemName}`);

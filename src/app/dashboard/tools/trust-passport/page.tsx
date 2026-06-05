@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import QRCode from "qrcode";
 import {
   ShieldCheck, Download, RefreshCw, Award, AlertCircle,
-  CheckCircle2, Circle, ExternalLink, FileText, Copy,
+  CheckCircle2, Circle, ExternalLink, FileText, Copy, FileDown,
 } from "lucide-react";
 import { buildTrustPassport, passportToMarkdown, type TrustPassport } from "@/lib/trust/passport-engine";
 
@@ -23,10 +24,17 @@ const T = {
   purple: "#7c3aed", purpleBg: "rgba(124,58,237,0.06)", purpleBdr: "rgba(124,58,237,0.2)",
 };
 
-// QR code generator semplice usando Google Charts API (no dependency)
-// In produzione sostituire con `qrcode` npm package per generazione client-side
-function qrCodeUrl(data: string, size = 200): string {
-  return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(data)}`;
+// QR code generato lato client come Data URL — nessuna dipendenza esterna
+async function generateQrDataUrl(data: string, size = 200): Promise<string> {
+  try {
+    return await QRCode.toDataURL(data, {
+      width: size,
+      margin: 1,
+      color: { dark: "#0D1016", light: "#ffffff" },
+    });
+  } catch {
+    return "";
+  }
 }
 
 // ─── Pillar Card ──────────────────────────────────────────────────────────────
@@ -90,6 +98,8 @@ export default function TrustPassportPage() {
   const [companyName, setCompanyName] = useState("La mia azienda");
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState<string>("");
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   function generate() {
     setError(null);
@@ -111,6 +121,37 @@ export default function TrustPassportPage() {
   }
 
   useEffect(() => { generate(); /* eslint-disable-next-line */ }, []);
+
+  // Genera QR code quando il passport cambia
+  useEffect(() => {
+    if (passport?.qrCodeData) {
+      generateQrDataUrl(passport.qrCodeData, 200).then(setQrDataUrl);
+    }
+  }, [passport?.qrCodeData]);
+
+  async function downloadPdfA3() {
+    if (!passport) return;
+    setPdfLoading(true);
+    try {
+      const res = await fetch("/api/trust-passport/pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(passport),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `ai-trust-passport-${passport.systemId}-${new Date().toISOString().slice(0, 10)}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert(`Errore generazione PDF: ${e}`);
+    } finally {
+      setPdfLoading(false);
+    }
+  }
 
   function downloadMarkdown() {
     if (!passport) return;
@@ -214,7 +255,10 @@ export default function TrustPassportPage() {
               </p>
             </div>
             <div className="flex-shrink-0 text-center">
-              <img src={qrCodeUrl(passport.qrCodeData, 100)} alt="QR verifica" className="w-24 h-24 rounded-lg" />
+              {qrDataUrl
+                ? <img src={qrDataUrl} alt="QR verifica" className="w-24 h-24 rounded-lg bg-white p-1" />
+                : <div className="w-24 h-24 rounded-lg bg-white/10 flex items-center justify-center text-[10px]" style={{ color: T.faint }}>generazione QR…</div>
+              }
               <p className="text-[9px] mt-1" style={{ color: T.faint }}>Scansiona per verificare</p>
             </div>
           </div>
@@ -286,11 +330,17 @@ export default function TrustPassportPage() {
 
           {/* Actions */}
           <div className="flex flex-wrap gap-3">
-            <button onClick={downloadMarkdown}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white"
+            <button onClick={downloadPdfA3} disabled={pdfLoading}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
               style={{ background: T.purple }}>
+              <FileDown className="w-4 h-4" />
+              {pdfLoading ? "Generazione PDF..." : "Scarica PDF/A-3 firmabile"}
+            </button>
+            <button onClick={downloadMarkdown}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm"
+              style={{ background: T.card, color: T.text, border: `1px solid ${T.border}` }}>
               <Download className="w-4 h-4" />
-              Scarica Dichiarazione (Markdown)
+              Markdown
             </button>
             <Link href="/dashboard/dossier"
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm"
