@@ -35,6 +35,12 @@ export interface RagSource {
   sectionRef?: string;
   pageNumber?: number;
   similarity: number;
+  // ─── Version control (RAG auto-update) ───
+  effectiveDate?: string;   // ISO date — data entrata in vigore della fonte
+  version?: string;         // es. "2024-08", "v2"
+  sourceUrl?: string;       // URL ufficiale del documento
+  publisher?: string;       // "EU Commission", "AGID", "AI Office"
+  isLatest?: boolean;       // false se status = 'superseded' nel manifest
 }
 
 export interface RagQueryResult {
