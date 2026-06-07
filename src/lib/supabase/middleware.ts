@@ -8,7 +8,6 @@ export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
   if (!url.startsWith("http")) {
-    // Supabase not configured — allow all traffic (dev fallback)
     return supabaseResponse;
   }
 
@@ -27,12 +26,12 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  // IMPORTANT: Do NOT use getSession() here — use getUser() to validate JWT server-side
   const { data: { user } } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const isAuthPage  = pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/verify");
-  const isDashboard = pathname.startsWith("/dashboard");
+  const isAuthPage   = pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/verify");
+  const isVerifyMFA  = pathname.startsWith("/verify-mfa");
+  const isDashboard  = pathname.startsWith("/dashboard");
 
   if (!user && isDashboard) {
     const redirectUrl = request.nextUrl.clone();
@@ -40,7 +39,32 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (user && isAuthPage) {
+  // ── Daily session enforcement (free-plan alternative to Supabase Pro time-box) ──
+  // Force re-login if last_sign_in_at is older than 24 hours.
+  const SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24h
+  if (user && isDashboard) {
+    const lastSignIn = new Date(user.last_sign_in_at ?? 0).getTime();
+    if (Date.now() - lastSignIn > SESSION_MAX_AGE_MS) {
+      await supabase.auth.signOut();
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/login";
+      redirectUrl.searchParams.set("reason", "session_expired");
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
+  // MFA enforcement: if user has TOTP enrolled but current session is aal1, require upgrade
+  if (user && isDashboard) {
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal?.nextLevel === "aal2" && aal?.currentLevel !== "aal2") {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/verify-mfa";
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
+  // Prevent authenticated users from accessing auth pages (but allow /verify-mfa)
+  if (user && isAuthPage && !isVerifyMFA) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/dashboard";
     return NextResponse.redirect(redirectUrl);

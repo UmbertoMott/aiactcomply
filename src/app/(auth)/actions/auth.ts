@@ -2,7 +2,26 @@
 
 import { createClient, createAdminClient } from "@/lib/supabase/server-actions";
 import { registrationSchema, loginSchema } from "@/lib/auth/password-validator";
+import { checkRateLimit, resetRateLimit } from "@/lib/auth/rate-limit";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+
+function getClientIP(): string {
+  return "unknown"; // In Next.js 16 server actions, use headers() if forwarded IP is needed
+}
+
+async function resolveIP(): Promise<string> {
+  try {
+    const h = await headers();
+    return (
+      h.get("x-forwarded-for")?.split(",")[0].trim() ??
+      h.get("x-real-ip") ??
+      "unknown"
+    );
+  } catch {
+    return "unknown";
+  }
+}
 
 export async function signup(formData: FormData) {
   const rawData = {
@@ -21,12 +40,9 @@ export async function signup(formData: FormData) {
   try {
     const admin = createAdminClient();
 
-    // listUsers (max 1000 — sufficient for early-stage)
     const { data: listData } = await admin.auth.admin.listUsers({ perPage: 1000, page: 1 });
     const users = listData?.users ?? [];
 
-    // 1. Duplicate email — Supabase silently ignores re-signups when email
-    //    confirmation is ON (email enumeration protection), so we check ourselves.
     const emailTaken = users.some(
       (u) => u.email?.toLowerCase() === rawData.email.toLowerCase()
     );
@@ -34,7 +50,6 @@ export async function signup(formData: FormData) {
       return { error: "Email già registrata. Accedi con le tue credenziali." };
     }
 
-    // 2. Duplicate company name (case-insensitive)
     const normalised = rawData.company.trim().toLowerCase();
     const companyTaken = users.some(
       (u) => (u.user_metadata?.company ?? "").trim().toLowerCase() === normalised
@@ -43,7 +58,6 @@ export async function signup(formData: FormData) {
       return { error: "Nome azienda già registrato. Usa un nome diverso o contatta il supporto." };
     }
   } catch (adminErr) {
-    // Non-blocking: if admin check fails (e.g. missing env var in dev) we let signUp proceed.
     console.warn("[SIGNUP] Admin pre-check skipped:", adminErr);
   }
   // ─────────────────────────────────────────────────────────────────────
@@ -61,7 +75,6 @@ export async function signup(formData: FormData) {
   });
 
   if (error) {
-    // Map Supabase errors to user-friendly Italian messages
     if (error.message.includes("already registered") || error.message.includes("already exists")) {
       return { error: "Email già registrata. Accedi con le tue credenziali." };
     }
@@ -76,12 +89,19 @@ export async function loginEmail(formData: FormData) {
   const rawData = {
     email:    formData.get("email")    as string,
     password: formData.get("password") as string,
-    remember: formData.get("remember") === "on",
   };
 
   const parsed = loginSchema.safeParse(rawData);
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message };
+  }
+
+  // Rate limiting
+  const ip = await resolveIP();
+  const rl = checkRateLimit(ip);
+  if (!rl.allowed) {
+    const mins = Math.ceil((rl.retryAfterSeconds ?? 900) / 60);
+    return { error: `Troppi tentativi. Riprova tra ${mins} minuti.` };
   }
 
   const supabase = await createClient();
@@ -98,6 +118,15 @@ export async function loginEmail(formData: FormData) {
       return { error: "Email non ancora verificata. Controlla la tua casella di posta." };
     }
     return { error: error.message };
+  }
+
+  // Reset rate limit on success
+  resetRateLimit(ip);
+
+  // Check if MFA upgrade is required
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.nextLevel === "aal2" && aal?.currentLevel !== "aal2") {
+    redirect("/verify-mfa");
   }
 
   redirect("/dashboard");
@@ -136,8 +165,6 @@ export async function verifyOTP(formData: FormData) {
 }
 
 export async function resendOTP(userId: string) {
-  // userId is now the email in Supabase flow
-  // The verify page passes email via searchParams; resend works via signInWithOtp
-  void userId; // kept for backward compatibility
+  void userId;
   return { success: true };
 }
