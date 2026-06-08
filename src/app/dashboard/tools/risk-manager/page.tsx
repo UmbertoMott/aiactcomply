@@ -60,6 +60,8 @@ import {
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { writeToStorage } from "@/lib/dossier/storage-schema";
+import type { RiskManagerResult } from "@/lib/dossier/storage-schema";
 
 // ─── FIX 1 — Typed form state ─────────────────────────────────────────
 
@@ -105,6 +107,24 @@ function loadReport(): RiskManagerReport {
 
 function saveReport(r: RiskManagerReport) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(r));
+  // Sync to shared STORAGE_KEYS so Journey, DocuGen and NIST-RMF can read it
+  // nextReviewDate and reviewCycle are added dynamically on finalize (not in base type)
+  const rAny = r as unknown as Record<string, unknown>;
+  const normalized: RiskManagerResult = {
+    risks: r.risks.map((item) => ({
+      id: item.id,
+      title: item.description,
+      likelihood: item.probability as "low" | "medium" | "high",
+      impact: item.severity as "low" | "medium" | "high",
+      mitigation: item.mitigation,
+      residualRisk: item.residual as "acceptable" | "review" | "unacceptable",
+    })),
+    overallRiskLevel: (r.overallRating ?? "low") as "low" | "medium" | "high" | "critical",
+    completedAt: new Date().toISOString(),
+    nextReviewDate: typeof rAny.nextReviewDate === "string" ? rAny.nextReviewDate : undefined,
+    reviewCycle: (rAny.reviewCycle as RiskManagerResult["reviewCycle"]) ?? undefined,
+  };
+  writeToStorage<RiskManagerResult>("riskManager", normalized);
 }
 
 // ─── SEZIONI ──────────────────────────────────────────────────────────
@@ -490,6 +510,19 @@ export default function RiskManagerPage() {
             setShowRiskForm={setShowRiskForm}
             addRisk={addRisk}
             removeRisk={removeRisk}
+            addPresetRisk={(preset: RiskFormState) => {
+              const newRisk: RiskItem = {
+                ...preset,
+                id: `risk-${Date.now()}`,
+                quantitativeScore: computeRiskScore(preset.severity, preset.probability),
+                createdAt: new Date().toISOString(),
+              };
+              updateReport((prev) => ({
+                ...prev,
+                risks: [...prev.risks, newRisk],
+                overallScore: computeOverallScore([...prev.risks, newRisk]),
+              }));
+            }}
           />
         )}
 
@@ -609,6 +642,221 @@ export default function RiskManagerPage() {
 
 // ─── PHASE COMPONENTS ──────────────────────────────────────────────────
 
+// ─── Catalogo predefinito AI Act ──────────────────────────────────────────────
+
+const RISK_CATALOG: Array<{
+  id: string;
+  label: string;
+  description: string;
+  category: RiskCategory;
+  severity: Severity;
+  probability: Probability;
+  mitigation: string;
+  residual: ResidualRisk;
+  article: string;
+  color: string;
+}> = [
+  {
+    id: "cat-hallucinations",
+    label: "Allucinazioni e output incorretti",
+    description: "Il modello genera informazioni false, fuorvianti o inventate presentandole come fatti certi.",
+    category: "health-safety",
+    severity: "high",
+    probability: "high",
+    mitigation: "Implementare human-in-the-loop per decisioni critiche. Aggiungere disclaimer sull'affidabilità degli output. Validazione incrociata con fonti autorevoli.",
+    residual: "monitor",
+    article: "Art. 9 + Art. 13",
+    color: "#dc2626",
+  },
+  {
+    id: "cat-data-leakage",
+    label: "Data leakage e memorizzazione dati",
+    description: "Il modello espone dati personali o sensibili contenuti nei dati di training o in sessioni precedenti.",
+    category: "privacy",
+    severity: "high",
+    probability: "medium",
+    mitigation: "Differential privacy durante il training. Audit periodici del modello. Implementare guardrail per filtrare PII negli output. Privacy by design.",
+    residual: "monitor",
+    article: "Art. 10 + Art. 9",
+    color: "#dc2626",
+  },
+  {
+    id: "cat-discriminatory-bias",
+    label: "Bias discriminatorio sistematico",
+    description: "Il sistema produce output sistematicamente sfavorevoli verso gruppi protetti (genere, etnia, età, disabilità).",
+    category: "discrimination",
+    severity: "high",
+    probability: "medium",
+    mitigation: "Bias testing su dataset rappresentativi. Fairness metrics (equalized odds, demographic parity). Audit esterno periodico. Monitoraggio continuo post-deploy.",
+    residual: "monitor",
+    article: "Art. 10 + Annex III",
+    color: "#dc2626",
+  },
+  {
+    id: "cat-model-inversion",
+    label: "Attacchi adversarial / model inversion",
+    description: "Attori malintenzionati manipolano input per estrarre informazioni riservate o compromettere il comportamento del modello.",
+    category: "security",
+    severity: "high",
+    probability: "low",
+    mitigation: "Adversarial robustness testing. Rate limiting sulle query. Input sanitization. Monitoraggio anomalie comportamentali.",
+    residual: "monitor",
+    article: "Art. 15",
+    color: "#d97706",
+  },
+  {
+    id: "cat-drift",
+    label: "Concept drift e degrado delle performance",
+    description: "La distribuzione dei dati in produzione si discosta dai dati di training, degradando l'accuratezza nel tempo.",
+    category: "health-safety",
+    severity: "medium",
+    probability: "high",
+    mitigation: "Pipeline di monitoring con PSI/KL divergence. Alert automatici per degrado KPI. Retraining periodico. Ciclo post-market Art. 72.",
+    residual: "monitor",
+    article: "Art. 72 + Art. 15",
+    color: "#d97706",
+  },
+  {
+    id: "cat-lack-explainability",
+    label: "Mancanza di spiegabilità (black box)",
+    description: "Il sistema prende decisioni che impattano persone fisiche senza poter fornire spiegazioni comprensibili.",
+    category: "transparency",
+    severity: "medium",
+    probability: "medium",
+    mitigation: "Implementare SHAP/LIME per spiegazioni locali. Documentare feature importance. Generare explanation sheet per utenti finali (XAI Lab).",
+    residual: "monitor",
+    article: "Art. 13 + Art. 14",
+    color: "#d97706",
+  },
+  {
+    id: "cat-overreliance",
+    label: "Over-reliance e automation bias",
+    description: "Gli operatori umani si affidano eccessivamente alle raccomandazioni del sistema senza esercitare supervisione critica.",
+    category: "autonomy",
+    severity: "medium",
+    probability: "high",
+    mitigation: "Formazione obbligatoria degli operatori (AI Literacy). Progettare UI con friction intenzionale. Audit periodici delle decisioni umane vs AI.",
+    residual: "monitor",
+    article: "Art. 14 + Art. 26",
+    color: "#d97706",
+  },
+  {
+    id: "cat-supply-chain",
+    label: "Rischi catena di fornitura del modello",
+    description: "Dipendenza da modelli o dataset di terze parti non verificati che possono introdurre vulnerabilità o bias non noti.",
+    category: "privacy",
+    severity: "medium",
+    probability: "medium",
+    mitigation: "Due diligence sui fornitori. Contractual obligations per provenance dei dati. Software Bill of Materials (SBOM) per componenti AI.",
+    residual: "monitor",
+    article: "Art. 10 + Art. 25",
+    color: "#d97706",
+  },
+];
+
+function CatalogSection({
+  addPresetRisk,
+}: {
+  addPresetRisk: (preset: RiskFormState) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [added, setAdded] = useState<Set<string>>(new Set());
+
+  function applyPreset(preset: typeof RISK_CATALOG[0]) {
+    addPresetRisk({
+      description: preset.description,
+      category: preset.category,
+      severity: preset.severity,
+      probability: preset.probability,
+      mitigation: preset.mitigation,
+      residual: preset.residual,
+    });
+    setAdded(prev => new Set(prev).add(preset.id));
+  }
+
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <button
+        onClick={() => setOpen(!open)}
+        style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          width: "100%", padding: "10px 14px", borderRadius: 10,
+          background: open ? "rgba(37,99,235,0.05)" : "rgba(0,0,0,0.02)",
+          border: `1px solid ${open ? "rgba(37,99,235,0.2)" : "rgba(0,0,0,0.08)"}`,
+          cursor: "pointer",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Database style={{ width: 14, height: 14, color: open ? "#2563eb" : "rgba(0,0,0,0.4)" }} />
+          <span style={{ fontSize: 12, fontWeight: 600, color: open ? "#2563eb" : T.text }}>
+            Catalogo AI Act — Aggiungi con un click
+          </span>
+          <span style={{
+            fontSize: 10, fontWeight: 600, padding: "1px 7px", borderRadius: 20,
+            background: "rgba(37,99,235,0.08)", color: "#2563eb",
+          }}>
+            {RISK_CATALOG.length} rischi
+          </span>
+        </div>
+        <span style={{ fontSize: 12, color: T.muted }}>{open ? "▲" : "▼"}</span>
+      </button>
+
+      {open && (
+        <div style={{
+          marginTop: 8, padding: "12px",
+          background: "rgba(0,0,0,0.015)",
+          border: "1px solid rgba(0,0,0,0.07)",
+          borderRadius: 10,
+        }}>
+          <p style={{ fontSize: 11, color: T.muted, marginBottom: 10 }}>
+            Rischi standard EU AI Act precompilati. Clicca su un rischio per aggiungerlo immediatamente alla matrice.
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 8 }}>
+            {RISK_CATALOG.map(preset => (
+              <button
+                key={preset.id}
+                onClick={() => !added.has(preset.id) && applyPreset(preset)}
+                disabled={added.has(preset.id)}
+                style={{
+                  textAlign: "left", padding: "10px 12px", borderRadius: 8, cursor: added.has(preset.id) ? "default" : "pointer",
+                  background: added.has(preset.id) ? "rgba(22,163,74,0.05)" : T.card,
+                  border: `1px solid ${added.has(preset.id) ? "rgba(22,163,74,0.25)" : "rgba(0,0,0,0.08)"}`,
+                  opacity: added.has(preset.id) ? 0.7 : 1,
+                  transition: "all 0.15s",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: 4 }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: T.text, lineHeight: 1.3 }}>
+                    {preset.label}
+                  </span>
+                  {added.has(preset.id) ? (
+                    <CheckCircle style={{ width: 13, height: 13, color: "#15803d", flexShrink: 0 }} />
+                  ) : (
+                    <Plus style={{ width: 13, height: 13, color: T.muted, flexShrink: 0 }} />
+                  )}
+                </div>
+                <p style={{ fontSize: 10, color: T.muted, marginBottom: 6, lineHeight: 1.4 }}>
+                  {preset.description.slice(0, 80)}…
+                </p>
+                <div style={{ display: "flex", gap: 5 }}>
+                  <span style={{
+                    fontSize: 10, fontWeight: 600, padding: "1px 6px", borderRadius: 4,
+                    background: preset.color === "#dc2626" ? "rgba(220,38,38,0.08)" : "rgba(217,119,6,0.08)",
+                    color: preset.color,
+                  }}>
+                    {preset.severity.toUpperCase()}
+                  </span>
+                  <span style={{ fontSize: 10, color: T.muted, padding: "1px 0" }}>{preset.article}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // FIX 2 — Proper types in ScopingPhase props
 function ScopingPhase({
   report,
@@ -619,6 +867,7 @@ function ScopingPhase({
   setShowRiskForm,
   addRisk,
   removeRisk,
+  addPresetRisk,
 }: {
   report: RiskManagerReport;
   setReport: (r: RiskManagerReport) => void;
@@ -628,6 +877,7 @@ function ScopingPhase({
   setShowRiskForm: (v: boolean) => void;
   addRisk: () => void;
   removeRisk: (id: string) => void;
+  addPresetRisk: (preset: RiskFormState) => void;
 }) {
   const highCount = report.risks.filter((r) => r.severity === "high").length;
   const score = report.overallScore;
@@ -782,6 +1032,9 @@ function ScopingPhase({
           </div>
         ))}
       </div>
+
+      {/* ── Catalogo predefinito AI Act ──────────────────────────────────── */}
+      <CatalogSection addPresetRisk={addPresetRisk} />
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
         <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>Rischi identificati</h3>
