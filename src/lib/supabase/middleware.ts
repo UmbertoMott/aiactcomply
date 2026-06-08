@@ -29,9 +29,10 @@ export async function updateSession(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const isAuthPage  = pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/verify");
-  const isVerifyMFA = pathname.startsWith("/verify-mfa");
-  const isDashboard = pathname.startsWith("/dashboard");
+  const isAuthPage    = pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/verify");
+  const isVerifyMFA   = pathname.startsWith("/verify-mfa");
+  const isVerifyOTP   = pathname.startsWith("/verify-login-otp");
+  const isDashboard   = pathname.startsWith("/dashboard");
 
   // ── Protezione route dashboard ─────────────────────────────────────────────
   if (!user && isDashboard) {
@@ -44,8 +45,16 @@ export async function updateSession(request: NextRequest) {
   // La scadenza è gestita nativamente da Supabase tramite Refresh Token.
   // Il componente SessionWarning nel frontend avvisa l'utente 5 minuti prima
   // della scadenza consentendo il rinnovo senza perdita di dati in compilazione.
-  // Il vecchio hard logout dopo 24h è stato rimosso (causava disconnessioni
-  // improvvise durante la compilazione di form lunghi).
+
+  // ── Email OTP enforcement — obbligatorio ad ogni login (cookie dura 24h) ───
+  if (user && isDashboard) {
+    const otpVerified = request.cookies.get("login_otp_verified")?.value;
+    if (!otpVerified) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/verify-login-otp";
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
 
   // ── MFA enforcement ────────────────────────────────────────────────────────
   // Se l'utente ha TOTP attivo ma la sessione è ancora AAL1, richiede verifica
@@ -59,7 +68,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // ── Redirect utente autenticato fuori dalle pagine auth ────────────────────
-  if (user && isAuthPage && !isVerifyMFA) {
+  if (user && isAuthPage && !isVerifyMFA && !isVerifyOTP) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/dashboard";
     return NextResponse.redirect(redirectUrl);

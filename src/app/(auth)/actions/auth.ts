@@ -5,6 +5,8 @@ import { registrationSchema, loginSchema } from "@/lib/auth/password-validator";
 import { checkRateLimitAsync, resetRateLimitAsync } from "@/lib/auth/rate-limit";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
+import { generateLoginOTP } from "@/lib/auth/login-otp";
+import { sendLoginOTPEmail } from "@/lib/auth/email";
 
 function getClientIP(): string {
   return "unknown"; // In Next.js 16 server actions, use headers() if forwarded IP is needed
@@ -123,13 +125,14 @@ export async function loginEmail(formData: FormData) {
   // Reset rate limit on success
   await resetRateLimitAsync(ip);
 
-  // Check if MFA upgrade is required
-  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-  if (aal?.nextLevel === "aal2" && aal?.currentLevel !== "aal2") {
-    redirect("/verify-mfa");
+  // Genera e invia OTP via email — step obbligatorio per tutti gli accessi
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user?.id && user?.email) {
+    const otpCode = generateLoginOTP(user.id, user.email);
+    await sendLoginOTPEmail(user.email, otpCode);
   }
 
-  redirect("/dashboard");
+  redirect("/verify-login-otp");
 }
 
 export async function verifyOTP(formData: FormData) {
