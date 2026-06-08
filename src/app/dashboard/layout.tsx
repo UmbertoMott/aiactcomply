@@ -19,6 +19,7 @@ import DisclosureBanner from "@/components/disclosure/DisclosureBanner";
 import MachineMarkers from "@/components/disclosure/MachineMarkers";
 import ChatAssistant from "@/components/ui/ChatAssistant";
 import UserMenu from "@/components/dashboard/UserMenu";
+import SessionWarning from "@/components/auth/SessionWarning";
 
 type NavItem = {
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
@@ -66,67 +67,66 @@ const ROLE_HIDDEN_HREFS: Record<string, string[]> = {
   provider: [],
 };
 
+// ── Sidebar consolidata (post-refactoring Gemini) ─────────────────────────────
+// Tool ridondanti rimossi:
+//   - Transparency, Oversight, Resilience, Art. 50 Kit → sotto-sezioni di DocuGen AI
+//   - L.132/2025, AGID/ACN → sezioni condizionali nel Compliance Hub (Italia/PA)
+//   - GPAI Assessment → fuso in GPAI Hub (unico punto per modelli generativi)
+//   - Sicurezza 2FA → spostato nel UserMenu dropdown (non è un tool operativo)
 const navGroups: NavGroup[] = [
   {
     label: "Core",
     items: [
-      { icon: Zap,          label: "Copilot",       href: "/dashboard/copilot",        art: "New"   },
-      { icon: Crosshair,    label: "Triage AI",     href: "/dashboard/triage",         art: "Nuovo", urgent: true },
-      { icon: Map,          label: "Roadmap",       href: "/dashboard/journey",        art: ""      },
-      { icon: Search,       label: "Discovery",     href: "/dashboard/discovery",      art: ""     },
-      { icon: Archive,      label: "Evidence Layer", href: "/dashboard/evidence-layer", art: "Core" },
+      { icon: Zap,       label: "Copilot",        href: "/dashboard/copilot",         art: "New"   },
+      { icon: Crosshair, label: "Triage AI",      href: "/dashboard/triage",          art: "Nuovo", urgent: true },
+      { icon: Map,       label: "Roadmap",        href: "/dashboard/journey",         art: ""      },
+      { icon: Search,    label: "Discovery",      href: "/dashboard/discovery",       art: ""      },
+      { icon: Archive,   label: "Evidence Layer", href: "/dashboard/evidence-layer",  art: "Core"  },
     ],
   },
   {
     label: "Monitoraggio",
     items: [
-      { icon: Layers,     label: "Doc Monitor",       href: "/dashboard/modules/aia-architect",  art: "Art. 11"    },
-      { icon: Bot,        label: "Oversight Monitor", href: "/dashboard/modules/guardian-agent", art: "Art. 14"    },
-      { icon: Tag,        label: "AI Disclosure",     href: "/dashboard/modules/trust-labeler",  art: "Art. 50"    },
-      { icon: TrendingUp, label: "Post-Market",       href: "/dashboard/post-market",            art: "Art. 72"    },
-      { icon: Globe,      label: "Compliance Hub",    href: "/dashboard/compliance-nexus",       art: "Art. 71"    },
-      { icon: GitMerge,  label: "NIST AI RMF",       href: "/dashboard/tools/nist-rmf",         art: "Multi-FW"   },
-      { icon: Cpu,        label: "GPAI Module",       href: "/dashboard/modules/gpai",           art: "Art. 51-55" },
-      { icon: BarChart2,  label: "XAI Lab",           href: "/dashboard/modules/xai",            art: "Art. 13"    },
+      { icon: Layers,    label: "Scanner Tecnico (All. IV)", href: "/dashboard/modules/aia-architect",  art: "Art. 11"    },
+      { icon: Bot,       label: "Oversight Monitor",         href: "/dashboard/modules/guardian-agent", art: "Art. 14"    },
+      { icon: Tag,       label: "AI Disclosure",             href: "/dashboard/modules/trust-labeler",  art: "Art. 50"    },
+      { icon: TrendingUp,label: "Post-Market",               href: "/dashboard/post-market",            art: "Art. 72"    },
+      { icon: Globe,     label: "Compliance Hub",            href: "/dashboard/compliance-nexus",       art: "Art. 71 + IT" },
+      { icon: GitMerge,  label: "NIST AI RMF",               href: "/dashboard/tools/nist-rmf",         art: "Multi-FW"   },
+      { icon: Cpu,       label: "GPAI Hub",                  href: "/dashboard/modules/gpai",           art: "Art. 51-55" },
+      { icon: BarChart2, label: "XAI Lab",                   href: "/dashboard/modules/xai",            art: "Art. 13"    },
     ],
   },
   {
     label: "Integrazioni",
     items: [
-      { icon: GitBranch,  label: "Connectors",   href: "/dashboard/connectors",         art: ""        },
-      { icon: Building2,   label: "Trust Center",      href: "/dashboard/trust-center",          art: ""           },
-      { icon: ShieldCheck, label: "AI-Trust Passport", href: "/dashboard/tools/trust-passport",  art: "Selling Kit" },
-      { icon: Bell,       label: "Notifiche",    href: "/dashboard/notifications",       art: ""        },
-      { icon: FileText,   label: "Q-AutoFill",   href: "/dashboard/tools/questionnaire", art: "Buyer Q" },
+      { icon: GitBranch,  label: "Connectors",        href: "/dashboard/connectors",         art: ""           },
+      { icon: Building2,  label: "Trust Center",      href: "/dashboard/trust-center",       art: ""           },
+      { icon: ShieldCheck,label: "AI-Trust Passport", href: "/dashboard/tools/trust-passport",art: "Selling Kit"},
+      { icon: Bell,       label: "Notifiche",          href: "/dashboard/notifications",       art: ""           },
+      { icon: FileText,   label: "Q-AutoFill",         href: "/dashboard/tools/questionnaire", art: "Buyer Q"    },
     ],
   },
   {
     label: "Valutazioni",
     items: [
-      { icon: GraduationCap, label: "AI Literacy",    href: "/dashboard/tools/literacy",        art: "Art. 4",   urgent: true },
-      { icon: Scale,         label: "L.132/2025",     href: "/dashboard/tools/l132",            art: "L.132/25", urgent: true },
-      { icon: Landmark,      label: "AGID / ACN",     href: "/dashboard/tools/agid-acn",        art: "L.132"                 },
-      { icon: ShieldAlert,   label: "DPIA",           href: "/dashboard/tools/dpia",            art: "Art. 35"               },
-      { icon: Ban,           label: "Art. 5 Checker", href: "/dashboard/tools/prohibited",      art: "Art. 5",   urgent: true },
-      { icon: Sliders,       label: "AI Classifier",  href: "/dashboard/tools/classifier",      art: "Art. 6"                },
-      { icon: Cpu,           label: "GPAI Assessment", href: "/dashboard/tools/gpai",           art: "Art. 53-55"            },
-      { icon: Zap,           label: "Risk Manager",   href: "/dashboard/tools/risk-manager",    art: "Art. 9"                },
-      { icon: ClipboardList, label: "Data Audit",     href: "/dashboard/tools/data-audit",      art: "Art. 10"               },
-      { icon: FileCode,      label: "DocuGen AI",     href: "/dashboard/tools/docugen",         art: "Art. 11"               },
-      { icon: FileArchive,   label: "LogVault",        href: "/dashboard/tools/logvault",        art: "Art. 12"               },
-      { icon: Waves,         label: "Drift Monitor",  href: "/dashboard/tools/drift-monitor",   art: "Art. 15"               },
-      { icon: Eye,           label: "Transparency",   href: "/dashboard/tools/transparency",    art: "Art. 13"               },
-      { icon: Users,         label: "Oversight",      href: "/dashboard/tools/oversight",       art: "Art. 14"               },
-      { icon: Building2,     label: "Deployer",       href: "/dashboard/tools/deployer",        art: "Art. 26"               },
-      { icon: Database,      label: "EUDB Registration", href: "/dashboard/tools/eudb",            art: "Art. 49"               },
-      { icon: UserCheck,     label: "Authorized Rep.",  href: "/dashboard/tools/authorized-rep",  art: "Art. 22"               },
-      { icon: ArrowRightLeft,label: "Provider Transition", href: "/dashboard/tools/provider-transition", art: "Art. 28"            },
-      { icon: Gauge,         label: "Resilience",     href: "/dashboard/tools/resilience",      art: "Art. 15"               },
-      { icon: Settings,      label: "QMS Builder",    href: "/dashboard/tools/qms",             art: "Art. 17"               },
-      { icon: BookMarked,    label: "FRIA",           href: "/dashboard/tools/fria",            art: "Art. 27"               },
-      { icon: BadgeCheck,    label: "Art. 50 Kit",    href: "/dashboard/tools/art50-kit",       art: "Art. 50",  urgent: true },
-      { icon: Award,         label: "Conformity",     href: "/dashboard/tools/conformity",      art: "Art. 43"               },
-      { icon: BookOpen,      label: "Legal Assistant", href: "/dashboard/tools/legal-assistant", art: "Art. 9"               },
+      { icon: GraduationCap, label: "AI Literacy",         href: "/dashboard/tools/literacy",            art: "Art. 4",    urgent: true },
+      { icon: ShieldAlert,   label: "DPIA",                href: "/dashboard/tools/dpia",                art: "Art. 35"                },
+      { icon: Ban,           label: "Art. 5 Checker",      href: "/dashboard/tools/prohibited",          art: "Art. 5",    urgent: true },
+      { icon: Sliders,       label: "AI Classifier",       href: "/dashboard/tools/classifier",          art: "Art. 6"                 },
+      { icon: Zap,           label: "Risk Manager",        href: "/dashboard/tools/risk-manager",        art: "Art. 9"                 },
+      { icon: ClipboardList, label: "Data Audit",          href: "/dashboard/tools/data-audit",          art: "Art. 10"                },
+      { icon: FileCode,      label: "DocuGen AI",          href: "/dashboard/tools/docugen",             art: "Art. 11"                },
+      { icon: FileArchive,   label: "LogVault",            href: "/dashboard/tools/logvault",            art: "Art. 12"                },
+      { icon: Waves,         label: "Drift Monitor",       href: "/dashboard/tools/drift-monitor",       art: "Art. 15"                },
+      { icon: Building2,     label: "Deployer",            href: "/dashboard/tools/deployer",            art: "Art. 26"                },
+      { icon: Database,      label: "EUDB Registration",   href: "/dashboard/tools/eudb",                art: "Art. 49"                },
+      { icon: UserCheck,     label: "Authorized Rep.",     href: "/dashboard/tools/authorized-rep",      art: "Art. 22"                },
+      { icon: ArrowRightLeft,label: "Provider Transition", href: "/dashboard/tools/provider-transition", art: "Art. 28"                },
+      { icon: Settings,      label: "QMS Builder",         href: "/dashboard/tools/qms",                 art: "Art. 17"                },
+      { icon: BookMarked,    label: "FRIA",                href: "/dashboard/tools/fria",                art: "Art. 27"                },
+      { icon: Award,         label: "Conformity",          href: "/dashboard/tools/conformity",          art: "Art. 43"                },
+      { icon: BookOpen,      label: "Legal Assistant",     href: "/dashboard/tools/legal-assistant",     art: "Art. 9"                 },
     ],
   },
 ];
@@ -384,6 +384,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* AI Chat Assistant — globale, flottante bottom-right */}
       <ChatAssistant />
+      {/* Session Warning — popup avviso scadenza sessione 5 min prima */}
+      <SessionWarning />
     </div>
   );
 }

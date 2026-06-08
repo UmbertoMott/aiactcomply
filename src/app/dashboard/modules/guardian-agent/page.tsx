@@ -104,6 +104,14 @@ export default function GuardianAgentPage() {
   const [systemName,   setSystemName]   = useState("AI System");
   const [operatorEmail, setOperatorEmail] = useState("");
   const [activeTab,    setActiveTab]    = useState<"monitor" | "config" | "history">("monitor");
+  // Webhook configurazione per kill switch reale (Art. 14)
+  const [webhookUrl,    setWebhookUrl]    = useState(() =>
+    typeof window !== "undefined" ? localStorage.getItem("guardian_webhook_url") ?? "" : ""
+  );
+  const [webhookSecret, setWebhookSecret] = useState(() =>
+    typeof window !== "undefined" ? localStorage.getItem("guardian_webhook_secret") ?? "" : ""
+  );
+  const [webhookStatus, setWebhookStatus] = useState<"idle" | "firing" | "sent" | "error">("idle");
   const [history,      setHistory]      = useState<HistoryEvent[]>([]);
   const [configSaved,  setConfigSaved]  = useState(false);
 
@@ -157,6 +165,36 @@ export default function GuardianAgentPage() {
   async function armKillSwitch() {
     setKillState("armed");
     addLog("Operative-γ", "Kill switch armed — awaiting human confirmation", "critical");
+  }
+
+  /**
+   * Invia il segnale di stop reale all'infrastruttura del cliente via webhook HTTP POST
+   * firmato con HMAC SHA-256. Il webhook è configurato nella tab Configurazione.
+   */
+  async function fireWebhookKillSwitch() {
+    if (!webhookUrl) {
+      addLog("Guardian-API", "⚠ Webhook non configurato — configura l'URL nella tab Configurazione", "warning");
+      return;
+    }
+    setWebhookStatus("firing");
+    addLog("Guardian-API", `→ Invio segnale di stop a ${webhookUrl}`, "critical");
+    try {
+      const res = await fetch("/api/guardian/kill", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ webhookUrl, secret: webhookSecret || undefined }),
+      });
+      if (res.ok) {
+        setWebhookStatus("sent");
+        addLog("Guardian-API", "✓ Segnale di stop inviato con successo — sistema esterno notificato", "critical");
+      } else {
+        setWebhookStatus("error");
+        addLog("Guardian-API", `✗ Errore webhook HTTP ${res.status} — verifica URL e raggiungibilità`, "warning");
+      }
+    } catch {
+      setWebhookStatus("error");
+      addLog("Guardian-API", "✗ Errore di rete — webhook irraggiungibile", "warning");
+    }
   }
 
   async function confirmKill() {
@@ -665,6 +703,73 @@ export default function GuardianAgentPage() {
                   {field.hint && <p style={{ fontSize: 10, color: T.faint, marginTop: 4 }}>{field.hint}</p>}
                 </div>
               ))}
+
+              {/* ── Webhook Kill Switch (Art. 14) ─────────────────────────────── */}
+              <div
+                className="rounded-xl p-4 space-y-3"
+                style={{ border: `1px solid ${T.border}`, background: "rgba(220,38,38,0.02)" }}
+              >
+                <div>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 2 }}>
+                    Webhook Kill Switch (Art. 14)
+                  </p>
+                  <p style={{ fontSize: 10, color: T.faint }}>
+                    Endpoint HTTP POST del tuo container AI. Quando il kill switch viene attivato, AIComply invia un segnale firmato HMAC SHA-256.
+                  </p>
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 5 }}>
+                    URL endpoint di emergenza
+                  </label>
+                  <input
+                    type="url"
+                    value={webhookUrl}
+                    onChange={(e) => {
+                      setWebhookUrl(e.target.value);
+                      if (typeof window !== "undefined") localStorage.setItem("guardian_webhook_url", e.target.value);
+                    }}
+                    placeholder="https://tua-infrastruttura.com/api/emergency-stop"
+                    className="w-full rounded-lg px-3 py-2 focus:outline-none"
+                    style={{ fontSize: 12, border: `1px solid ${T.border}`, background: "#FAFAF9", color: T.text }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 5 }}>
+                    Secret HMAC (opzionale)
+                  </label>
+                  <input
+                    type="password"
+                    value={webhookSecret}
+                    onChange={(e) => {
+                      setWebhookSecret(e.target.value);
+                      if (typeof window !== "undefined") localStorage.setItem("guardian_webhook_secret", e.target.value);
+                    }}
+                    placeholder="••••••••••••"
+                    className="w-full rounded-lg px-3 py-2 focus:outline-none"
+                    style={{ fontSize: 12, border: `1px solid ${T.border}`, background: "#FAFAF9", color: T.text }}
+                  />
+                  <p style={{ fontSize: 10, color: T.faint, marginTop: 4 }}>
+                    Se configurato, la richiesta viene firmata con X-AIComply-Signature: sha256=...
+                  </p>
+                </div>
+                {/* Test webhook */}
+                <button
+                  onClick={fireWebhookKillSwitch}
+                  disabled={!webhookUrl || webhookStatus === "firing"}
+                  className="rounded-lg px-4 py-2 text-[12px] font-medium transition-opacity"
+                  style={{
+                    background: webhookStatus === "sent" ? "#15803d" : webhookStatus === "error" ? "#dc2626" : T.text,
+                    color: "#fff",
+                    opacity: (!webhookUrl || webhookStatus === "firing") ? 0.5 : 1,
+                    cursor: !webhookUrl ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {webhookStatus === "firing" ? "Invio in corso..." :
+                   webhookStatus === "sent"   ? "✓ Segnale inviato" :
+                   webhookStatus === "error"  ? "✗ Errore — riprova" :
+                   "Test Kill Switch Webhook"}
+                </button>
+              </div>
 
               <div>
                 <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 8 }}>

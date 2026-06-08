@@ -499,11 +499,28 @@ export default function AIAArchitectPage() {
         <h1
           style={{ fontSize: "22px", fontWeight: 400, letterSpacing: "-0.5px", color: "#0D1016" }}
         >
-          AIA-Architect
+          Scanner Tecnico — Allegato IV
         </h1>
         <p className="text-[12px] mt-0.5" style={{ color: "rgba(0,0,0,0.42)" }}>
-          Compila la scheda del tuo sistema AI → genera il Dossier Vivente Allegato IV firmato SHA-256.
+          Scansiona l&apos;infrastruttura e pre-compila la <strong>sezione tecnica</strong> dell&apos;Allegato IV (Art. 11). Governance, bias e logica di business si completano in DocuGen AI.
         </p>
+        {/* Banner informativo — riposizionamento tool */}
+        <div
+          className="mt-3 rounded-lg px-4 py-2.5 flex items-start gap-2.5"
+          style={{
+            background: "rgba(29,78,216,0.05)",
+            border: "1px solid rgba(29,78,216,0.15)",
+          }}
+        >
+          <span style={{ fontSize: "14px", lineHeight: 1.5 }}>ℹ️</span>
+          <p className="text-[11px]" style={{ color: "#1d4ed8", lineHeight: 1.5 }}>
+            Questo scanner pre-compila automaticamente la sezione tecnica (codice, dipendenze, architettura).
+            Per completare l&apos;Allegato IV con governance, analisi dei bias e logica di business usa{" "}
+            <a href="/dashboard/tools/docugen" className="underline underline-offset-2 font-medium">
+              DocuGen AI
+            </a>.
+          </p>
+        </div>
       </div>
 
       {/* Progress bar */}

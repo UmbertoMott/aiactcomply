@@ -2,7 +2,7 @@
 
 import { createClient, createAdminClient } from "@/lib/supabase/server-actions";
 import { registrationSchema, loginSchema } from "@/lib/auth/password-validator";
-import { checkRateLimit, resetRateLimit } from "@/lib/auth/rate-limit";
+import { checkRateLimitAsync, resetRateLimitAsync } from "@/lib/auth/rate-limit";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 
@@ -98,7 +98,7 @@ export async function loginEmail(formData: FormData) {
 
   // Rate limiting
   const ip = await resolveIP();
-  const rl = checkRateLimit(ip);
+  const rl = await checkRateLimitAsync(ip);
   if (!rl.allowed) {
     const mins = Math.ceil((rl.retryAfterSeconds ?? 900) / 60);
     return { error: `Troppi tentativi. Riprova tra ${mins} minuti.` };
@@ -121,7 +121,7 @@ export async function loginEmail(formData: FormData) {
   }
 
   // Reset rate limit on success
-  resetRateLimit(ip);
+  await resetRateLimitAsync(ip);
 
   // Check if MFA upgrade is required
   const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();

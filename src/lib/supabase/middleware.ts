@@ -29,31 +29,26 @@ export async function updateSession(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const isAuthPage   = pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/verify");
-  const isVerifyMFA  = pathname.startsWith("/verify-mfa");
-  const isDashboard  = pathname.startsWith("/dashboard");
+  const isAuthPage  = pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/verify");
+  const isVerifyMFA = pathname.startsWith("/verify-mfa");
+  const isDashboard = pathname.startsWith("/dashboard");
 
+  // ── Protezione route dashboard ─────────────────────────────────────────────
   if (!user && isDashboard) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
     return NextResponse.redirect(redirectUrl);
   }
 
-  // ── Daily session enforcement (free-plan alternative to Supabase Pro time-box) ──
-  // Force re-login if last_sign_in_at is older than 24 hours.
-  const SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24h
-  if (user && isDashboard) {
-    const lastSignIn = new Date(user.last_sign_in_at ?? 0).getTime();
-    if (Date.now() - lastSignIn > SESSION_MAX_AGE_MS) {
-      await supabase.auth.signOut();
-      const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = "/login";
-      redirectUrl.searchParams.set("reason", "session_expired");
-      return NextResponse.redirect(redirectUrl);
-    }
-  }
+  // ── Gestione scadenza sessione ─────────────────────────────────────────────
+  // La scadenza è gestita nativamente da Supabase tramite Refresh Token.
+  // Il componente SessionWarning nel frontend avvisa l'utente 5 minuti prima
+  // della scadenza consentendo il rinnovo senza perdita di dati in compilazione.
+  // Il vecchio hard logout dopo 24h è stato rimosso (causava disconnessioni
+  // improvvise durante la compilazione di form lunghi).
 
-  // MFA enforcement: if user has TOTP enrolled but current session is aal1, require upgrade
+  // ── MFA enforcement ────────────────────────────────────────────────────────
+  // Se l'utente ha TOTP attivo ma la sessione è ancora AAL1, richiede verifica
   if (user && isDashboard) {
     const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
     if (aal?.nextLevel === "aal2" && aal?.currentLevel !== "aal2") {
@@ -63,7 +58,7 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // Prevent authenticated users from accessing auth pages (but allow /verify-mfa)
+  // ── Redirect utente autenticato fuori dalle pagine auth ────────────────────
   if (user && isAuthPage && !isVerifyMFA) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/dashboard";
