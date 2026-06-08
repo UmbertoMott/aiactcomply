@@ -356,6 +356,25 @@ export interface DossierData {
   art50?: { systemsCount: number; completedAt: string };
 }
 
+// ── Org Profile — flag organizzativi per sidebar condizionale ───────────────
+
+export interface OrgProfile {
+  /** True se l'organizzazione opera con la PA italiana → mostra L.132 + AGID/ACN */
+  paItaly: boolean;
+  /** True se il sistema classificato in Triage è un modello GPAI → mostra GPAI Assessment */
+  gpaiDetected: boolean;
+  /** True se l'utente ha abilitato il mapping NIST AI RMF (Enterprise opt-in) */
+  nistEnabled: boolean;
+  /** Nome organizzazione (opzionale) */
+  orgName?: string;
+}
+
+export const DEFAULT_ORG_PROFILE: OrgProfile = {
+  paItaly: false,
+  gpaiDetected: false,
+  nistEnabled: false,
+};
+
 export const STORAGE_KEYS = {
   prohibited:  "aicomply_prohibited_result",
   classifier:  "aicomply_classifier_result",
@@ -379,6 +398,7 @@ export const STORAGE_KEYS = {
   authorizedRep: "aicomply_authorized_rep_result",
   providerTransition: "aicomply_provider_transition_result",
   art50: "aicomply_art50_result",
+  orgProfile: "aicomply_org_profile",
 } as const;
 
 export function readFromStorage<T>(key: keyof typeof STORAGE_KEYS): T | null {
