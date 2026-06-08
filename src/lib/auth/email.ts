@@ -85,6 +85,47 @@ export async function sendWelcomeEmail(email: string, name: string) {
   });
 }
 
+export async function sendLoginOTPEmail(email: string, otp: string): Promise<void> {
+  const transporter = getTransporter();
+  if (!transporter) {
+    console.log(`[EMAIL MOCK] Login OTP per ${email}: ${otp}`);
+    return;
+  }
+
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM || "AIComply <noreply@aicomply.app>",
+    to: email,
+    subject: `${otp} — Il tuo codice di accesso AIComply`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px;">
+        <h2 style="color: #0D1016; margin: 0 0 8px;">AIComply</h2>
+        <p style="color: #64748b; font-size: 14px; margin: 0 0 24px;">Verifica del tuo accesso</p>
+
+        <p style="color: #1e293b; margin: 0 0 8px;">Hai richiesto l'accesso ad AIComply. Usa questo codice:</p>
+
+        <div style="background: #0D1016; border-radius: 12px; padding: 28px; text-align: center; margin: 24px 0;">
+          <span style="font-size: 40px; letter-spacing: 10px; font-weight: 700; color: #ffffff; font-family: monospace;">
+            ${otp}
+          </span>
+        </div>
+
+        <p style="color: #64748b; font-size: 13px; margin: 0 0 8px;">
+          ⏱️ Il codice scade tra <strong>10 minuti</strong>.
+        </p>
+        <p style="color: #64748b; font-size: 13px; margin: 0 0 24px;">
+          🔒 Se non stai cercando di accedere ad AIComply, ignora questa email.
+          Nessuna azione è necessaria — il tuo account è al sicuro.
+        </p>
+
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+        <p style="color: #94a3b8; font-size: 11px; margin: 0;">
+          AIComply · Compliance EU AI Act · Non rispondere a questa email
+        </p>
+      </div>
+    `,
+  });
+}
+
 export async function sendWaitlistNotification(entry: {
   name: string;
   email: string;
