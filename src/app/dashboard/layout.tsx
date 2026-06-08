@@ -8,7 +8,7 @@ import {
   FileArchive, FileText, Scale, Search, Cpu, Bell, BadgeCheck, BarChart2, BookOpen, GraduationCap, ShieldAlert,
   Layers, Bot, Tag, TrendingUp, Globe, Building2, Sliders, Zap,
   ClipboardList, FileCode, Archive, Gauge, Settings, BookMarked, Award, Map, Database, UserCheck, ArrowRightLeft,
-  Crosshair, Landmark, GitMerge, Waves, ShieldCheck,
+  Crosshair, Landmark, GitMerge, Waves, ShieldCheck, KeyRound,
 } from "lucide-react";
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { useUserRole, ROLE_LABELS } from "@/lib/hooks/useUserRole";
@@ -96,6 +96,7 @@ const navGroups: NavGroup[] = [
       { icon: Building2,   label: "Trust Center",      href: "/dashboard/trust-center",          art: ""           },
       { icon: ShieldCheck, label: "AI-Trust Passport", href: "/dashboard/tools/trust-passport",  art: "Selling Kit" },
       { icon: Bell,       label: "Notifiche",    href: "/dashboard/notifications",       art: ""        },
+      { icon: KeyRound,   label: "Sicurezza 2FA", href: "/dashboard/security/mfa",        art: ""        },
       { icon: FileText,   label: "Q-AutoFill",   href: "/dashboard/tools/questionnaire", art: "Buyer Q" },
     ],
   },
