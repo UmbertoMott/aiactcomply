@@ -157,18 +157,6 @@ function LoginForm() {
               </svg>
             }
           />
-          <OAuthButton
-            provider="azure"
-            label="Accedi con Microsoft"
-            icon={
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <rect x="0" y="0" width="8.5" height="8.5" fill="#F25022"/>
-                <rect x="9.5" y="0" width="8.5" height="8.5" fill="#7FBA00"/>
-                <rect x="0" y="9.5" width="8.5" height="8.5" fill="#00A4EF"/>
-                <rect x="9.5" y="9.5" width="8.5" height="8.5" fill="#FFB900"/>
-              </svg>
-            }
-          />
         </div>
 
         {state?.error && (
