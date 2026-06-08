@@ -1,10 +1,11 @@
 "use client";
 
 // Component 2 — Art. 50 Persistent Banner
-// Non-dismissible. Shown on all authenticated screens.
+// Dismissible. Shown on all authenticated screens.
 // Spec: background #E6F1FB, color #0C447C, height 32px.
 
-import { Info } from "lucide-react";
+import { useState } from "react";
+import { X } from "lucide-react";
 
 const copy = {
   it: "I contenuti di AIComply sono generati con il supporto dell'intelligenza artificiale — Art. 50 Reg. UE 2024/1689. Richiedono sempre revisione legale prima dell'uso ufficiale.",
@@ -16,9 +17,13 @@ interface DisclosureBannerProps {
 }
 
 export default function DisclosureBanner({ lang = "it" }: DisclosureBannerProps) {
+  const [dismissed, setDismissed] = useState(false);
+
+  if (dismissed) return null;
+
   return (
     <div
-      className="flex items-center justify-center gap-2 px-4 flex-shrink-0 select-none"
+      className="flex items-center justify-between gap-2 px-4 flex-shrink-0 select-none"
       style={{
         background: "#E6F1FB",
         borderBottom: "1px solid #B8D4F0",
@@ -26,13 +31,23 @@ export default function DisclosureBanner({ lang = "it" }: DisclosureBannerProps)
         minHeight: 32,
       }}
     >
-      <Info size={12} style={{ color: "#0C447C", flexShrink: 0 }} strokeWidth={2} />
+      <div className="flex-1" />
       <p
         className="text-center truncate"
         style={{ fontSize: "11px", fontWeight: 500, color: "#0C447C", lineHeight: 1 }}
       >
-        ⚠ {copy[lang]}
+        {copy[lang]}
       </p>
+      <div className="flex-1 flex justify-end">
+        <button
+          onClick={() => setDismissed(true)}
+          aria-label="Chiudi avviso"
+          className="flex items-center justify-center rounded hover:bg-blue-100 transition-colors"
+          style={{ width: 20, height: 20, color: "#0C447C" }}
+        >
+          <X size={12} strokeWidth={2} />
+        </button>
+      </div>
     </div>
   );
 }
