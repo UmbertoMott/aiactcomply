@@ -66,5 +66,21 @@ export async function resendLoginOTPAction() {
   const newCode = generateLoginOTP(user.id, user.email);
   await sendLoginOTPEmail(user.email, newCode);
 
+  // In dev/mock mode (SMTP not configured), expose code so user can still log in
+  const smtpConfigured = !!(process.env.SMTP_USER && process.env.SMTP_PASS);
+  if (!smtpConfigured && process.env.NODE_ENV !== "production") {
+    return { success: true, devCode: newCode };
+  }
+
   return { success: true };
+}
+
+/** DEV ONLY: returns the current OTP plaintext when SMTP is not configured */
+export async function getDevOTPHint(): Promise<{ code: string | null }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.id) return { code: null };
+
+  const { getDevOTPCode } = await import("@/lib/auth/login-otp");
+  return { code: getDevOTPCode(user.id) };
 }

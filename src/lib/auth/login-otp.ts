@@ -14,6 +14,10 @@ interface OTPEntry {
 // userId → OTPEntry
 const otpStore = new Map<string, OTPEntry>();
 
+// DEV ONLY: plaintext store so the verify page can show the code when SMTP not configured
+// Cleared immediately after reading (single-use, 10-min TTL same as OTP)
+const devPlaintextStore = new Map<string, { code: string; expiresAt: number }>();
+
 const OTP_TTL_MS   = 10 * 60 * 1000; // 10 minuti
 const MAX_ATTEMPTS = 5;
 
@@ -32,7 +36,25 @@ export function generateLoginOTP(userId: string, email: string): string {
     email,
   });
 
+  // In dev mode (SMTP not configured), store plaintext for UI hint
+  if (process.env.NODE_ENV !== "production") {
+    devPlaintextStore.set(userId, { code, expiresAt: Date.now() + OTP_TTL_MS });
+  }
+
   return code;
+}
+
+/**
+ * DEV ONLY: returns the plaintext OTP for display on the verify page when SMTP is not configured.
+ * Clears immediately after reading (single-use). Returns null in production or when SMTP is set.
+ */
+export function getDevOTPCode(userId: string): string | null {
+  if (process.env.NODE_ENV === "production") return null;
+  if (process.env.SMTP_USER && process.env.SMTP_PASS) return null;
+  const entry = devPlaintextStore.get(userId);
+  if (!entry || Date.now() > entry.expiresAt) return null;
+  // Do NOT delete — user may need to see it again if they mistype
+  return entry.code;
 }
 
 /** Verifica codice — ritorna success o motivo errore */
