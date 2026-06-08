@@ -26,7 +26,8 @@ import {
   CounterfactualScenario,
   XAIReport,
 } from "@/lib/xai/xai-engine";
-import { writeToStorage } from "@/lib/dossier/storage-schema";
+import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
+import type { RiskManagerResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import Link from "next/link";
 
@@ -70,7 +71,54 @@ const btn = (primary: boolean, small?: boolean): React.CSSProperties => ({
 
 // ─── TAB TYPES ────────────────────────────────────────────────────────────────
 
-type Tab = "importance" | "bias" | "counterfactual" | "report";
+type Tab = "importance" | "bias" | "counterfactual" | "report" | "sheet";
+
+// ─── RISK MANAGER CONTEXT BANNER ─────────────────────────────────────────────
+
+function RiskContextBanner({ riskData }: { riskData: RiskManagerResult | null }) {
+  if (!riskData || riskData.risks.length === 0) return null;
+  const highRisks = riskData.risks.filter((r) => r.impact === "high" || r.likelihood === "high");
+  if (highRisks.length === 0) return null;
+  return (
+    <div style={{
+      background: "rgba(245,158,11,0.06)",
+      border: "1px solid rgba(245,158,11,0.25)",
+      borderRadius: "10px",
+      padding: "12px 16px",
+      marginBottom: "16px",
+      display: "flex",
+      gap: "10px",
+      alignItems: "flex-start",
+    }}>
+      <AlertTriangle size={16} style={{ color: "#d97706", marginTop: 2, flexShrink: 0 }} />
+      <div>
+        <div style={{ fontSize: "13px", fontWeight: 600, color: "#92400e", marginBottom: "4px" }}>
+          {highRisks.length} rischi ad alto impatto rilevati da Risk Manager
+        </div>
+        <div style={{ fontSize: "12px", color: "#78350f", lineHeight: 1.5 }}>
+          {highRisks.slice(0, 3).map((r) => (
+            <span key={r.id} style={{
+              display: "inline-block",
+              background: "rgba(245,158,11,0.12)",
+              borderRadius: "4px",
+              padding: "1px 6px",
+              marginRight: "6px",
+              marginBottom: "4px",
+            }}>
+              {r.title}
+            </span>
+          ))}
+          {highRisks.length > 3 && (
+            <span style={{ color: "#92400e" }}>+{highRisks.length - 3} altri</span>
+          )}
+        </div>
+        <div style={{ fontSize: "11px", color: "#78350f", marginTop: "4px" }}>
+          Esegui l&apos;analisi Bias e Feature Importance per verificare se questi rischi emergono nel modello.
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ─── SEVERITY HELPERS ─────────────────────────────────────────────────────────
 
@@ -628,6 +676,141 @@ function ReportTab({
   );
 }
 
+// ─── Explainability Sheet per utenti finali ──────────────────────────────────
+
+function ExplainabilitySheetTab({
+  features,
+  modelVersion,
+}: {
+  features: GlobalFeatureImportance[] | null;
+  modelVersion: string;
+}) {
+  const [copied, setCopied] = useState(false);
+  const [systemName, setSystemName] = useState("Sistema AI");
+  const [systemPurpose, setSystemPurpose] = useState("supportare decisioni aziendali");
+  const [contactEmail, setContactEmail] = useState("compliance@azienda.it");
+
+  const topFeatures = [...(features ?? [])].sort((a, b) => b.meanAbsShap - a.meanAbsShap).slice(0, 5);
+
+  const sheetText = `SCHEDA DI SPIEGABILITÀ — SISTEMA AI
+Come funziona il sistema e come protegge i tuoi diritti
+${"-".repeat(60)}
+
+SISTEMA: ${systemName}
+VERSIONE: ${modelVersion}
+DATA: ${new Date().toLocaleDateString("it-IT")}
+
+COS'È QUESTO SISTEMA?
+Questo sistema utilizza l'intelligenza artificiale per ${systemPurpose}.
+Non è un essere umano — è un programma informatico che elabora informazioni
+per produrre un risultato.
+
+COME DECIDE?
+Il sistema analizza alcune informazioni su di te e assegna un "peso"
+a ciascuna di esse. I fattori che contano di più sono:
+
+${topFeatures.map((f, i) =>
+  `  ${i + 1}. ${f.feature} — influenza sul risultato: ${(f.meanAbsShap * 100).toFixed(0)}%
+     ${f.isProxy ? "⚠ Attenzione: questo fattore potrebbe essere un proxy per caratteristiche protette." : "Fattore direttamente misurato dal sistema."}`
+).join("\n")}
+
+COSA NON SA FARE?
+• Non conosce il contesto completo della tua situazione
+• Può sbagliare — i risultati non sono definitivi
+• Non ti conosce personalmente
+
+QUALI SONO I TUOI DIRITTI?
+Ai sensi del Regolamento UE 2024/1689 (AI Act) e del GDPR hai diritto a:
+✓ Chiedere una spiegazione della decisione che ti riguarda
+✓ Richiedere la revisione umana del risultato
+✓ Opporti a decisioni esclusivamente automatizzate
+✓ Correggere informazioni errate su di te
+✓ Presentare reclamo all'autorità di controllo
+
+COME CONTATTARCI?
+Per domande, opposizioni o reclami: ${contactEmail}
+Tempo di risposta: entro 30 giorni (Art. 12 GDPR)
+
+${"-".repeat(60)}
+Documento generato da AIComply — Reg. UE 2024/1689 Art. 13`;
+
+  function copySheet() {
+    navigator.clipboard.writeText(sheetText).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    });
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      {/* Header */}
+      <div style={{ ...card }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+          <div>
+            <h3 style={{ fontSize: 14, fontWeight: 700, color: "#0D1016", margin: 0 }}>
+              Scheda di Spiegabilità — Utenti Finali
+            </h3>
+            <p style={{ fontSize: 12, color: "rgba(0,0,0,0.42)", marginTop: 4 }}>
+              Documento in linguaggio semplice ex Art. 13 EU AI Act. Personalizza e scarica.
+            </p>
+          </div>
+          <button
+            onClick={copySheet}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "7px 14px", borderRadius: 8, cursor: "pointer",
+              background: copied ? "#16a34a" : "#0D1016", color: "#fff",
+              border: "none", fontSize: 12, fontWeight: 500,
+            }}
+          >
+            {copied ? <><CheckCircle size={13} /> Copiato!</> : <><Copy size={13} /> Copia testo</>}
+          </button>
+        </div>
+
+        {/* Personalizzazione */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 12 }}>
+          {[
+            { label: "Nome sistema", value: systemName, onChange: setSystemName },
+            { label: "Scopo sistema", value: systemPurpose, onChange: setSystemPurpose },
+            { label: "Email contatto", value: contactEmail, onChange: setContactEmail },
+          ].map(({ label, value, onChange }) => (
+            <div key={label}>
+              <label style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.5px", display: "block", marginBottom: 4 }}>
+                {label}
+              </label>
+              <input
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                style={{
+                  width: "100%", padding: "6px 10px", borderRadius: 7,
+                  border: "1px solid rgba(0,0,0,0.1)", fontSize: 12, color: "#0D1016",
+                  background: "#FAFAF9", outline: "none", boxSizing: "border-box",
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Preview */}
+      <div style={card}>
+        <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.35)", textTransform: "uppercase", letterSpacing: "0.5px", margin: "0 0 10px" }}>
+          Anteprima documento
+        </p>
+        <pre
+          style={{
+            fontSize: 11, color: "#0D1016", lineHeight: 1.7, whiteSpace: "pre-wrap",
+            fontFamily: "monospace", background: "#FAFAF9", padding: "14px 16px",
+            borderRadius: 8, border: "1px solid rgba(0,0,0,0.06)", margin: 0, overflowX: "auto",
+          }}
+        >
+          {sheetText}
+        </pre>
+      </div>
+    </div>
+  );
+}
+
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 
 export default function XAIPage() {
@@ -639,14 +822,16 @@ export default function XAIPage() {
   const [loading, setLoading] = useState<"features" | "bias" | "report" | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<string | null>(null);
+  const [riskManagerData, setRiskManagerData] = useState<RiskManagerResult | null>(null);
 
   function showToast(msg: string) {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
   }
 
-  // Load snapshot on mount
+  // Load snapshot and Risk Manager context on mount
   useEffect(() => {
+    setRiskManagerData(readFromStorage<RiskManagerResult>("riskManager"));
     const snap = loadXAISnapshot();
     if (snap) {
       setReport(snap.report);
@@ -746,6 +931,7 @@ export default function XAIPage() {
     { key: "bias", label: "Bias & Fairness" },
     { key: "counterfactual", label: "Counterfactual" },
     { key: "report", label: "XAI Report" },
+    { key: "sheet", label: "Scheda Utenti" },
   ];
 
   return (
@@ -778,6 +964,9 @@ export default function XAIPage() {
           )}
         </div>
       )}
+
+      {/* Risk Manager context — show high-risk items to guide analysis */}
+      <RiskContextBanner riskData={riskManagerData} />
 
       {/* Art. 50 — AI Output Label */}
       <div className="mb-4">
@@ -865,6 +1054,12 @@ export default function XAIPage() {
           onSave={handleSaveSnapshot}
           onCopy={() => showToast("JSON copiato negli appunti")}
           loading={loading === "report"}
+        />
+      )}
+      {tab === "sheet" && (
+        <ExplainabilitySheetTab
+          features={features ?? []}
+          modelVersion={report?.modelVersion ?? "v1.0.0"}
         />
       )}
     </div>

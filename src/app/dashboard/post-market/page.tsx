@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { motion, AnimatePresence } from "framer-motion";
+import { readFromStorage } from "@/lib/dossier/storage-schema";
+import type { RiskManagerResult } from "@/lib/dossier/storage-schema";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -206,10 +208,38 @@ function saveIncidents(list: Incident[]) {
   localStorage.setItem(INCIDENTS_KEY, JSON.stringify(list));
 }
 
+function buildAdaptivePlan(base: MonitoringCheck[]): MonitoringCheck[] {
+  try {
+    const riskData = readFromStorage<RiskManagerResult>("riskManager");
+    if (!riskData || riskData.risks.length === 0) return base;
+    const highRisks = riskData.risks.filter(
+      (r) => r.impact === "high" || r.likelihood === "high"
+    );
+    if (highRisks.length === 0) return base;
+    // Add one specific monitoring check per high-risk item (avoid duplicates)
+    const extraChecks: MonitoringCheck[] = highRisks.map((r, i) => ({
+      id: `rm-${r.id || i}`,
+      label: `Monitoraggio: ${r.title}`,
+      article: "Art. 72(1)",
+      frequency: r.impact === "high" ? "Settimanale" : "Mensile",
+      done: false,
+      notes: `Rischio importato da Risk Manager — livello impatto: ${r.impact}, probabilità: ${r.likelihood}`,
+    }));
+    // Merge without duplicates
+    const existingIds = new Set(base.map((c) => c.id));
+    const newChecks = extraChecks.filter((c) => !existingIds.has(c.id));
+    return [...base, ...newChecks];
+  } catch {
+    return base;
+  }
+}
+
 function loadPlan(): MonitoringCheck[] {
-  if (typeof window === "undefined") return DEFAULT_PLAN;
+  if (typeof window === "undefined") return buildAdaptivePlan(DEFAULT_PLAN);
   const raw = localStorage.getItem(PLAN_KEY);
-  return raw ? JSON.parse(raw) : DEFAULT_PLAN;
+  // If user has a saved plan, merge new risk-based checks
+  const basePlan: MonitoringCheck[] = raw ? JSON.parse(raw) : DEFAULT_PLAN;
+  return buildAdaptivePlan(basePlan);
 }
 
 function savePlan(plan: MonitoringCheck[]) {
