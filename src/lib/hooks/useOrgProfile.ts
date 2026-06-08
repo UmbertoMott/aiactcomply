@@ -13,13 +13,14 @@ export function useOrgProfile() {
   const [profile, setProfileState] = useState<OrgProfile>(DEFAULT_ORG_PROFILE);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     const stored = readFromStorage<OrgProfile>("orgProfile");
-    if (stored) setProfileState(stored);
+    if (stored) setProfileState({ ...DEFAULT_ORG_PROFILE, ...stored });
   }, []);
 
   const setProfile = useCallback((updates: Partial<OrgProfile>) => {
     setProfileState((prev) => {
-      const next = { ...prev, ...updates };
+      const next: OrgProfile = { ...DEFAULT_ORG_PROFILE, ...prev, ...updates };
       writeToStorage<OrgProfile>("orgProfile", next);
       return next;
     });
