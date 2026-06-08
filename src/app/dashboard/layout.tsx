@@ -303,6 +303,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               title="Esci"
               className={`flex items-center ${collapsed ? "justify-center w-full py-1.5" : "gap-2 w-full px-2 py-1.5"} rounded-md text-[11px] transition-all`}
               style={{ color: "rgba(255,255,255,0.5)" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,1)"; (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.08)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.5)"; (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
             >
               <LogOut className="h-3.5 w-3.5" />
               {!collapsed && "Esci"}
