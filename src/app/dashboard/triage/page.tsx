@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
-import type { ClassifierResult } from "@/lib/dossier/storage-schema";
+import type { ClassifierResult, OrgProfile } from "@/lib/dossier/storage-schema";
 import {
   ChevronRight, ChevronLeft, AlertTriangle, Shield,
   CheckCircle2, ArrowRight, FileText, Zap,
@@ -797,6 +797,13 @@ export default function TriagePage() {
         completedAt: new Date().toISOString(),
       };
       writeToStorage<ClassifierResult>("classifier", classifierData);
+      // Aggiorna gpaiDetected in OrgProfile se il tier è GPAI
+      if (r.riskTier === "gpai") {
+        const orgProfile = readFromStorage<OrgProfile>("orgProfile") ?? {
+          paItaly: false, gpaiDetected: false, nistEnabled: false
+        };
+        writeToStorage<OrgProfile>("orgProfile", { ...orgProfile, gpaiDetected: true });
+      }
     } catch {}
   }
 
