@@ -208,6 +208,120 @@ const AUTO_CONTENT: Record<string, string> = {
   "mlflow": `**[Auto-estratto da MLflow]**\n\nRun ID: mlf-2025-04-10-001 · Experiment: hr-screener-v2\nAccuracy: 87.3% | Precision: 84.1% | Recall: 89.7% | F1: 86.8%\nTest set: 12.400 record, hold-out 20% · Date: 2025-04-10\n\nHyperparameters: lr=2e-5, batch=32, epochs=4, max_seq=512\nArtifact: s3://mlflow-artifacts/hr-screener/v2.1.0/model.pt`,
 };
 
+// ── DocuGen Step Tracker ──────────────────────────────────────────────────────
+
+interface DocuGenStep {
+  id: string;
+  label: string;
+  art: string;
+  mandatory: boolean;
+  auto?: boolean;
+}
+
+const DOCUGEN_STEPS: DocuGenStep[] = [
+  { id: "s1", label: "01. Descrizione generale",       art: "All. IV §1",  mandatory: false },
+  { id: "s2", label: "02. Logica e architettura",       art: "All. IV §2a", mandatory: false, auto: true },
+  { id: "s3", label: "03. Specifiche di progettazione", art: "All. IV §2b", mandatory: false, auto: true },
+  { id: "s4", label: "04. Dati di addestramento",       art: "All. IV §2c", mandatory: false, auto: true },
+  { id: "s5", label: "05. Metriche di performance",     art: "All. IV §2d", mandatory: false, auto: true },
+  { id: "s6", label: "06. Art. 14 — Human Oversight",  art: "Art. 14",     mandatory: true  },
+  { id: "s7", label: "07. Modifiche nel ciclo di vita", art: "All. IV §2f", mandatory: false, auto: true },
+  { id: "s8", label: "08. Norme armonizzate",           art: "All. IV §2g", mandatory: false },
+  { id: "s9", label: "09. Art. 15 — Resilienza",        art: "Art. 15",     mandatory: true  },
+];
+
+function DocuGenStepTracker({
+  status,
+  getSectionStatus,
+}: {
+  status: Record<string, "empty" | "draft" | "done">;
+  getSectionStatus: (id: string) => "empty" | "draft" | "done";
+}) {
+  const mandatory = DOCUGEN_STEPS.filter((s) => s.mandatory);
+  const canExport = mandatory.every((s) => getSectionStatus(s.id) === "done");
+  const doneCount = DOCUGEN_STEPS.filter((s) => getSectionStatus(s.id) === "done").length;
+
+  return (
+    <div className="rounded-xl overflow-hidden mb-3" style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+      <div className="px-4 py-3 flex items-center justify-between" style={{ background: "rgba(0,0,0,0.02)", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+        <span className="text-[10px] font-semibold uppercase" style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "1px" }}>
+          Progresso DocuGen AI
+        </span>
+        <span className="text-[11px]" style={{ color: "rgba(0,0,0,0.4)" }}>
+          {doneCount}/{DOCUGEN_STEPS.length}
+        </span>
+      </div>
+
+      <div className="divide-y">
+        {DOCUGEN_STEPS.map((step) => {
+          const s = getSectionStatus(step.id);
+          const isDone = s === "done";
+          const isDraft = s === "draft";
+
+          return (
+            <div
+              key={step.id}
+              className="flex items-center gap-2.5 px-4 py-2.5"
+            >
+              <div
+                className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center"
+                style={{
+                  background: isDone ? "#0D1016" : isDraft ? "rgba(234,179,8,0.15)" : "rgba(0,0,0,0.06)",
+                  border: isDone ? "none" : isDraft ? "1.5px solid rgba(234,179,8,0.6)" : "1.5px solid rgba(0,0,0,0.15)",
+                }}
+              >
+                {isDone && (
+                  <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                    <path d="M1.5 4L3.5 6L6.5 2" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+                {isDraft && <div className="w-1.5 h-1.5 rounded-full" style={{ background: "rgba(234,179,8,0.8)" }} />}
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <span className="text-[11px] block truncate" style={{ color: isDone ? "#0D1016" : "rgba(0,0,0,0.55)" }}>
+                  {step.label}
+                </span>
+              </div>
+
+              <div className="flex gap-1 flex-shrink-0">
+                {step.mandatory && !isDone && (
+                  <span className="text-[9px] px-1 py-0.5 rounded"
+                    style={{ background: "rgba(220,38,38,0.08)", color: "#dc2626", fontWeight: 600 }}>
+                    OBB
+                  </span>
+                )}
+                {step.auto && (
+                  <span className="text-[9px] px-1 py-0.5 rounded"
+                    style={{ background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.35)" }}>
+                    AUTO
+                  </span>
+                )}
+                <span className="text-[9px] px-1 py-0.5 rounded"
+                  style={{ background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.35)" }}>
+                  {step.art}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {!canExport && (
+        <div className="px-4 py-2.5 flex items-center gap-2" style={{ background: "rgba(220,38,38,0.04)", borderTop: "1px solid rgba(220,38,38,0.1)" }}>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <circle cx="6" cy="6" r="5.5" stroke="#dc2626" strokeOpacity="0.5"/>
+            <path d="M6 4v3M6 8.5v.5" stroke="#dc2626" strokeWidth="1.2" strokeLinecap="round"/>
+          </svg>
+          <span className="text-[10px]" style={{ color: "#dc2626" }}>
+            Completa Art. 14 e Art. 15 per sbloccare l&apos;export
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Status styling ───────────────────────────────────────────────────────────
 const STATUS_STYLE: Record<string, { bg: string; text: string; border: string }> = {
   Finalized: { bg: "rgba(22,163,74,0.08)",  text: "#16a34a", border: "rgba(22,163,74,0.2)"  },
@@ -368,6 +482,10 @@ export default function DocuGenPage() {
   const draftCount = ANNEX_IV.filter((s) => getSectionStatus(s.id) === "draft").length;
   const emptyRequired = ANNEX_IV.filter((s) => s.required && getSectionStatus(s.id) === "empty");
   const canFinalize = emptyRequired.length === 0;
+  const canExport = useMemo(() => {
+    const mandatoryIds = DOCUGEN_STEPS.filter((s) => s.mandatory).map((s) => s.id);
+    return mandatoryIds.every((id) => getSectionStatus(id) === "done");
+  }, [status]);
 
   function exportFullDocument() {
     const resolvedName = systemName.trim() || "sistema-ai";
@@ -542,8 +660,10 @@ export default function DocuGenPage() {
           {/* Export */}
           <button
             onClick={exportFullDocument}
-            className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-opacity hover:opacity-80"
-            style={{ background: "#0D1016", color: "#fff", cursor: "pointer" }}
+            disabled={!canExport}
+            title={!canExport ? "Completa Art. 14 e Art. 15 prima di esportare" : undefined}
+            className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ background: "#0D1016", color: "#fff", cursor: canExport ? "pointer" : "not-allowed" }}
           >
             <Download className="h-3.5 w-3.5" />
             Esporta JSON
@@ -597,6 +717,9 @@ export default function DocuGenPage() {
 
         {/* Left: Annex IV navigator + radar */}
         <div className="flex-shrink-0 w-56">
+
+          {/* Step tracker */}
+          <DocuGenStepTracker status={status} getSectionStatus={getSectionStatus} />
 
           {/* Compliance radar */}
           <div className="rounded-xl p-4 mb-3"
