@@ -20,6 +20,7 @@ import MachineMarkers from "@/components/disclosure/MachineMarkers";
 import ChatAssistant from "@/components/ui/ChatAssistant";
 import UserMenu from "@/components/dashboard/UserMenu";
 import SessionWarning from "@/components/auth/SessionWarning";
+import { ProjectSwitcher } from "@/components/layout/ProjectSwitcher";
 
 type NavChild = {
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
@@ -426,6 +427,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           )}
           <div className="ml-auto flex items-center gap-2">
+            <ProjectSwitcher />
             <NotificationBell />
             <UserMenu />
           </div>

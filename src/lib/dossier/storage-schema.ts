@@ -401,11 +401,36 @@ export const STORAGE_KEYS = {
   orgProfile: "aicomply_org_profile",
 } as const;
 
+// ── Project-scoped storage key ───────────────────────────────────────────────
+
+function getActiveProjectId(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("aicomply_active_project_id") ?? null;
+}
+
+/**
+ * Restituisce la chiave localStorage per un tool:
+ * - Con progetto attivo → `aicomply_p_{projectId}_{toolId}`
+ * - Senza progetto → usa il legacy STORAGE_KEYS[key] per retrocompatibilità
+ */
+function scopedKey(key: keyof typeof STORAGE_KEYS): string {
+  const pid = getActiveProjectId();
+  return pid ? `aicomply_p_${pid}_${key}` : STORAGE_KEYS[key];
+}
+
 export function readFromStorage<T>(key: keyof typeof STORAGE_KEYS): T | null {
   try {
     if (typeof window === "undefined") return null;
-    const raw = localStorage.getItem(STORAGE_KEYS[key]);
-    return raw ? (JSON.parse(raw) as T) : null;
+    // Prima prova la chiave scoped al progetto attivo
+    const primary = scopedKey(key);
+    const raw = localStorage.getItem(primary);
+    if (raw) return JSON.parse(raw) as T;
+    // Fallback alla chiave legacy (dati pre-multiproject)
+    if (primary !== STORAGE_KEYS[key]) {
+      const legacy = localStorage.getItem(STORAGE_KEYS[key]);
+      if (legacy) return JSON.parse(legacy) as T;
+    }
+    return null;
   } catch {
     return null;
   }
@@ -414,7 +439,11 @@ export function readFromStorage<T>(key: keyof typeof STORAGE_KEYS): T | null {
 export function writeToStorage<T>(key: keyof typeof STORAGE_KEYS, data: T): void {
   try {
     if (typeof window === "undefined") return;
-    localStorage.setItem(STORAGE_KEYS[key], JSON.stringify(data));
+    localStorage.setItem(scopedKey(key), JSON.stringify(data));
+    // Version snapshot — import lazy per evitare circular
+    import("@/lib/projects/version-history").then(({ appendVersion }) => {
+      appendVersion(key, data);
+    }).catch(() => {});
   } catch {
     // ignore quota errors in SSR
   }

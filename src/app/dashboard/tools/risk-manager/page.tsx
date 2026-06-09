@@ -62,6 +62,8 @@ import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
 import { writeToStorage } from "@/lib/dossier/storage-schema";
 import type { RiskManagerResult } from "@/lib/dossier/storage-schema";
+import { useAutoSave } from "@/hooks/useAutoSave";
+import { VersionHistoryPanel } from "@/components/compliance/VersionHistoryPanel";
 
 // ─── FIX 1 — Typed form state ─────────────────────────────────────────
 
@@ -188,6 +190,9 @@ export default function RiskManagerPage() {
   const [finalized, setFinalized] = useState(false);
   const [nextReviewDate, setNextReviewDate] = useState<string>("");
   const [reviewCycle, setReviewCycle] = useState<"monthly" | "quarterly" | "biannual" | "annual">("annual");
+
+  // ── Auto-save ogni 30s ─────────────────────────────────────────────────────
+  const { justSaved: rmSaved } = useAutoSave("riskManager", report, saveReport);
 
   // FIX 6 — Toast
   const [toast, setToast] = useState<{ msg: string; type: "error" | "success" } | null>(null);
@@ -458,9 +463,16 @@ export default function RiskManagerPage() {
 
       {/* ── Header ── */}
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.4px", color: T.text, margin: 0 }}>
-          AI Act Risk Manager
-        </h1>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.4px", color: T.text, margin: 0 }}>
+            AI Act Risk Manager
+          </h1>
+          {rmSaved && (
+            <span style={{ fontSize: 10, color: "#16a34a", whiteSpace: "nowrap", marginTop: 4 }}>
+              ✓ Salvato automaticamente
+            </span>
+          )}
+        </div>
         <p style={{ marginTop: 4, fontSize: 13, color: T.muted, lineHeight: 1.5 }}>
           Framework completo di gestione quantitativa del rischio — Art. 9
           Regolamento UE 2024/1689. Monte Carlo, bitemporal audit, drift detection, GPAI systemic risk, sanzioni.
@@ -621,6 +633,19 @@ export default function RiskManagerPage() {
             <ArrowRight style={{ width: 14, height: 14 }} />
           </button>
         )}
+      </div>
+
+      {/* ── Version History ── */}
+      <div style={{ marginTop: 20 }}>
+        <VersionHistoryPanel
+          toolId="riskManager"
+          onRestore={(data) => {
+            const d = data as RiskManagerReport;
+            setReport(d);
+            saveReport(d);
+            showToast("Versione ripristinata ✓");
+          }}
+        />
       </div>
 
       {/* FIX 6 — Toast */}

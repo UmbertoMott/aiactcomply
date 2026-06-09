@@ -7,6 +7,8 @@ import { GitBranch, Download, ChevronRight, AlertTriangle, CheckCircle, Clock } 
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { DocugenResult, DataAuditResult, RiskManagerResult } from "@/lib/dossier/storage-schema";
+import { useAutoSave } from "@/hooks/useAutoSave";
+import { VersionHistoryPanel } from "@/components/compliance/VersionHistoryPanel";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
 
@@ -338,6 +340,9 @@ export default function DocuGenPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [crossContent] = useState<Record<string, string>>(() => readCrossToolContent());
 
+  // ── Auto-save ogni 30s ────────────────────────────────────────────────────
+  const { justSaved: docugenSaved } = useAutoSave("docugen", persisted, saveState);
+
   // ─── DB Sync State ──────────────────────────────────────────────────────────
   const [technicalFileId, setTechnicalFileId] = useState<string | null>(null);
   const [aiSystemId, setAiSystemId] = useState<string | null>(null);
@@ -552,12 +557,16 @@ export default function DocuGenPage() {
         <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
           style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)" }}>
           <span style={{ color: "#15803d" }}>✓ Risultati salvati nel dossier · Aggiornato il {new Date(savedAt).toLocaleDateString("it-IT")}</span>
+          {docugenSaved && <span className="text-[10px]" style={{ color: "#15803d" }}>· Salvato automaticamente</span>}
           <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>Vedi dossier →</Link>
         </div>
       ) : (
         <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[12px]"
           style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}>
-          <span style={{ color: "rgba(0,0,0,0.45)" }}>Salva il Fascicolo Tecnico nel dossier di compliance</span>
+          <span style={{ color: "rgba(0,0,0,0.45)" }}>
+            Salva il Fascicolo Tecnico nel dossier di compliance
+            {docugenSaved && <span className="ml-2 text-[10px]" style={{ color: "#16a34a" }}>✓ Salvato automaticamente</span>}
+          </span>
           <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1 transition-opacity hover:opacity-80"
             style={{ background: "#0D1016", color: "#ffffff", border: "none", cursor: "pointer" }}>
             Salva nel dossier
@@ -980,6 +989,14 @@ export default function DocuGenPage() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* ── Version History ── */}
+      <div className="mt-6">
+        <VersionHistoryPanel
+          toolId="docugen"
+          onRestore={(data) => setPersistedRaw(data as DocuGenState)}
+        />
       </div>
 
       {toast && (

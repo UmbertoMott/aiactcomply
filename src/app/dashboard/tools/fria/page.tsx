@@ -11,6 +11,8 @@ import {
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { FRIAResult } from "@/lib/dossier/storage-schema";
+import { useAutoSave } from "@/hooks/useAutoSave";
+import { VersionHistoryPanel } from "@/components/compliance/VersionHistoryPanel";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
 import {
@@ -154,6 +156,13 @@ export default function FRIAPage() {
     readFromStorage<FRIAResult>("fria")?.completedAt ?? null
   );
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Auto-save ogni 30s ────────────────────────────────────────────────────
+  const { justSaved: friaSaved } = useAutoSave(
+    "fria",
+    doc,
+    (d) => localStorage.setItem(FRIA_DOC_KEY, JSON.stringify(d))
+  );
 
   // Pre-populate from Classifier
   const classifierData = useMemo(() => {
@@ -1166,6 +1175,19 @@ export default function FRIAPage() {
             <button onClick={exportReport} style={{ padding: "6px 9px", borderRadius: 7, background: T.bg, border: `1px solid ${T.border}`, cursor: "pointer", display: "flex", alignItems: "center" }}>
               <Download style={{ width: 12, height: 12, color: T.muted }} />
             </button>
+          </div>
+          {/* Auto-save indicator */}
+          {friaSaved && (
+            <div style={{ marginTop: 8, fontSize: 10, color: "#16a34a", textAlign: "center" as const }}>
+              ✓ Salvato automaticamente
+            </div>
+          )}
+          {/* Version History */}
+          <div style={{ marginTop: 12 }}>
+            <VersionHistoryPanel
+              toolId="fria"
+              onRestore={(data) => setDoc(data as import("@/lib/simulation/fria-engine").FRIADocument)}
+            />
           </div>
         </div>
       </div>
