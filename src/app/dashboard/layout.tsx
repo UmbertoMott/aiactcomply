@@ -18,6 +18,7 @@ import DisclosureModal from "@/components/disclosure/DisclosureModal";
 import DisclosureBanner from "@/components/disclosure/DisclosureBanner";
 import MachineMarkers from "@/components/disclosure/MachineMarkers";
 import UserMenu from "@/components/dashboard/UserMenu";
+import ChatAssistant from "@/components/ui/ChatAssistant";
 import SessionWarning from "@/components/auth/SessionWarning";
 import { ProjectSwitcher } from "@/components/layout/ProjectSwitcher";
 
@@ -444,7 +445,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
       </div>
 
-{/* Session Warning — popup avviso scadenza sessione 5 min prima */}
+      {/* AI Chat Assistant — globale, flottante bottom-right */}
+      <ChatAssistant />
+      {/* Session Warning — popup avviso scadenza sessione 5 min prima */}
       <SessionWarning />
     </div>
   );

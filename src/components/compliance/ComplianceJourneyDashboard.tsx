@@ -138,7 +138,7 @@ export default function ComplianceJourneyDashboard() {
               <summary style={{ fontSize: 12, color: T.muted, cursor: "pointer", userSelect: "none", listStyle: "none" }}>
                 <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   <CheckCircle2 style={{ width: 13, height: 13, color: T.green }} />
-                  {doneSteps.length} paso completato{doneSteps.length > 1 ? "i" : ""}
+                  {doneSteps.length} passo{doneSteps.length > 1 ? "i" : ""} completat{doneSteps.length > 1 ? "i" : "o"}
                 </span>
               </summary>
               <div className="mt-2 space-y-1">
