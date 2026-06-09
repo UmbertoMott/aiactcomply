@@ -1,6 +1,8 @@
 "use client"
 import React from "react"
-import { readFromStorage } from "@/lib/dossier/storage-schema"
+import { readFromStorage, STORAGE_KEYS } from "@/lib/dossier/storage-schema"
+
+type StorageKey = keyof typeof STORAGE_KEYS
 
 const RADAR_AXES = [
   { key: "classifier",    label: "Classif." },
@@ -14,7 +16,7 @@ const RADAR_AXES = [
 ]
 
 function scoreFromStorage(key: string): number {
-  const stored = readFromStorage<any>(key)
+  const stored = readFromStorage<any>(key as StorageKey)
   if (!stored) return 0
   if (stored.completedAt) return 100
   return 50 // draft/parziale

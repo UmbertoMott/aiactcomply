@@ -1,10 +1,12 @@
 "use client"
-import { readFromStorage } from "@/lib/dossier/storage-schema"
+import { readFromStorage, STORAGE_KEYS } from "@/lib/dossier/storage-schema"
 import type {
   ClassifierResult, RiskManagerResult, DataAuditResult,
   OversightResult, ResilienceResult, ConformityResult,
   FRIAResult, OrgProfile,
 } from "@/lib/dossier/storage-schema"
+
+type StorageKey = keyof typeof STORAGE_KEYS
 
 export interface IdentifiedRisk {
   scenario: string
@@ -91,7 +93,7 @@ export function useComplianceContext(): GlobalComplianceContext {
     "transparency","oversight","resilience","qms","fria","dpia",
     "deployer","conformity","eudb","gpai","l132","orgProfile",
   ]
-  const completedTools = toolIds.filter(id => readFromStorage(id) !== null)
+  const completedTools = toolIds.filter(id => readFromStorage(id as StorageKey) !== null)
 
   // Map risk-manager risks to normalized format
   const identifiedRisks: IdentifiedRisk[] | undefined = riskMgr?.risks?.map(r => ({
@@ -107,8 +109,7 @@ export function useComplianceContext(): GlobalComplianceContext {
     .flatMap(d => d.issues ?? [])
 
   const biasChecked = dataAudit?.datasets?.some(d => d.biasChecked) ?? false
-  const personalData = dataAudit?.datasets?.some(d => d.personal_data !== undefined
-    ? (d as any).personal_data : d.personalData) ?? false
+  const personalData = dataAudit?.datasets?.some(d => d.personalData) ?? false
 
   return {
     systemName:             classifier?.systemName,
@@ -182,7 +183,7 @@ export function buildComplianceContextFromStorage(): GlobalComplianceContext {
     "transparency","oversight","resilience","qms","fria","dpia",
     "deployer","conformity","eudb","gpai","l132","orgProfile",
   ]
-  const completedTools = toolIds.filter(id => readFromStorage(id) !== null)
+  const completedTools = toolIds.filter(id => readFromStorage(id as StorageKey) !== null)
 
   return {
     systemName:         classifier?.systemName,
