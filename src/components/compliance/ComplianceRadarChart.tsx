@@ -4,7 +4,7 @@ import { readFromStorage, STORAGE_KEYS } from "@/lib/dossier/storage-schema"
 
 type StorageKey = keyof typeof STORAGE_KEYS
 
-const RADAR_AXES = [
+const RADAR_AXES: { key: StorageKey; label: string }[] = [
   { key: "classifier",    label: "Classif." },
   { key: "riskManager",  label: "Risk" },
   { key: "dataAudit",    label: "Data" },
@@ -15,8 +15,8 @@ const RADAR_AXES = [
   { key: "conformity",   label: "Conformità" },
 ]
 
-function scoreFromStorage(key: string): number {
-  const stored = readFromStorage<any>(key as StorageKey)
+function scoreFromStorage(key: StorageKey): number {
+  const stored = readFromStorage<any>(key)
   if (!stored) return 0
   if (stored.completedAt) return 100
   return 50 // draft/parziale

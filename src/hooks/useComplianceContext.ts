@@ -93,7 +93,7 @@ export function useComplianceContext(): GlobalComplianceContext {
     "transparency","oversight","resilience","qms","fria","dpia",
     "deployer","conformity","eudb","gpai","l132","orgProfile",
   ]
-  const completedTools = toolIds.filter(id => readFromStorage(id as StorageKey) !== null)
+  const completedTools = (toolIds as StorageKey[]).filter(id => readFromStorage(id) !== null)
 
   // Map risk-manager risks to normalized format
   const identifiedRisks: IdentifiedRisk[] | undefined = riskMgr?.risks?.map(r => ({
@@ -183,7 +183,7 @@ export function buildComplianceContextFromStorage(): GlobalComplianceContext {
     "transparency","oversight","resilience","qms","fria","dpia",
     "deployer","conformity","eudb","gpai","l132","orgProfile",
   ]
-  const completedTools = toolIds.filter(id => readFromStorage(id as StorageKey) !== null)
+  const completedTools = (toolIds as StorageKey[]).filter(id => readFromStorage(id) !== null)
 
   return {
     systemName:         classifier?.systemName,
