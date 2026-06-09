@@ -2,7 +2,7 @@
 import { generateText } from "@/lib/rag/rag-vertex"
 
 const VIOLATION_DESCRIPTIONS: Record<string, string> = {
-  emotion_recognition_workplace: "monitoraggio delle emozioni dei lavoratori in contesto lavorativo o educativo",
+  emotion_monitoring_workplace: "monitoraggio delle emozioni dei lavoratori in contesto lavorativo o educativo",
   social_scoring: "sistema di scoring sociale basato su comportamento delle persone fisiche da parte di autorità pubbliche",
   subliminal_manipulation: "tecniche subliminali o ingannevoli per distorcere il comportamento delle persone",
   real_time_biometric: "identificazione biometrica real-time in spazi pubblici accessibili per scopi di law enforcement",
