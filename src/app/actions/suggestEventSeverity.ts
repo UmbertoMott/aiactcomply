@@ -1,5 +1,5 @@
 "use server";
-import Anthropic from "@anthropic-ai/sdk";
+import { generateText } from "@/lib/rag/rag-vertex";
 import { z } from "zod";
 
 const SeveritySchema = z.object({
@@ -14,11 +14,6 @@ export async function suggestEventSeverity(
   eventDescription: string,
   systemRiskLevel: string
 ): Promise<EventSeveritySuggestion | { error: string }> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return { error: "ANTHROPIC_API_KEY non configurata." };
-
-  const client = new Anthropic({ apiKey });
-
   const prompt = `Sei un esperto di incident management per sistemi AI (Art. 12 e Art. 73 EU AI Act).
 
 Evento da classificare: "${eventDescription}"
@@ -32,12 +27,7 @@ Classifica la severity dell'evento e indica:
 Rispondi SOLO con JSON valido, nessun testo fuori dal JSON.`;
 
   try {
-    const response = await client.messages.create({
-      model:      "claude-haiku-4-5",
-      max_tokens: 300,
-      messages:   [{ role: "user", content: prompt }],
-    });
-    const text = response.content[0].type === "text" ? response.content[0].text : "";
+    const text = await generateText(prompt, { temperature: 0.1, maxOutputTokens: 300 });
     const cleaned = text.trim().replace(/^```json\s*/, "").replace(/```$/, "").trim();
     return SeveritySchema.parse(JSON.parse(cleaned));
   } catch {

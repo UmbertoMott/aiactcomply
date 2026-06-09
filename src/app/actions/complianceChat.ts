@@ -1,5 +1,5 @@
 "use server";
-import Anthropic from "@anthropic-ai/sdk";
+import { generateText } from "@/lib/rag/rag-vertex";
 
 interface ChatContext {
   currentTool:    string;
@@ -13,11 +13,6 @@ export async function complianceChat(
   userMessage: string,
   context: ChatContext
 ): Promise<{ answer: string } | { error: string }> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return { error: "ANTHROPIC_API_KEY non configurata." };
-
-  const client = new Anthropic({ apiKey });
-
   const systemPrompt = `Sei un esperto di conformità EU AI Act integrato in AIComply.
 Rispondi in italiano, in modo conciso e pratico (max 4 frasi).
 Cita sempre l'articolo di riferimento quando è rilevante.
@@ -32,15 +27,11 @@ Contesto attuale dell'utente:
 Usa questo contesto per dare risposte pertinenti alla situazione dell'utente.
 Non inventare obblighi non previsti dalla norma.`;
 
+  const fullPrompt = `${systemPrompt}\n\nDomanda utente: ${userMessage}`;
+
   try {
-    const response = await client.messages.create({
-      model:      "claude-haiku-4-5",
-      max_tokens: 400,
-      system:     systemPrompt,
-      messages:   [{ role: "user", content: userMessage }],
-    });
-    const text = response.content[0].type === "text" ? response.content[0].text : "";
-    return { answer: text };
+    const text = await generateText(fullPrompt, { temperature: 0.3, maxOutputTokens: 400 });
+    return { answer: text.trim() };
   } catch {
     return { error: "Assistente non disponibile al momento." };
   }

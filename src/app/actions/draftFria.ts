@@ -1,5 +1,5 @@
 "use server";
-import Anthropic from "@anthropic-ai/sdk";
+import { generateText } from "@/lib/rag/rag-vertex";
 import { z } from "zod";
 
 const FriaDraftSchema = z.object({
@@ -25,13 +25,8 @@ export async function draftFria(
   risks: Array<{ name?: string; title?: string; severity?: string | number }>,
   personalData: boolean
 ): Promise<FriaDraft | { error: string }> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return { error: "ANTHROPIC_API_KEY non configurata." };
-
-  const client = new Anthropic({ apiKey });
-
   const riskList = risks
-    .map((r) => `${r.name ?? r.title ?? "rischio"} (severity ${r.severity ?? "?"}`)
+    .map((r) => `${r.name ?? r.title ?? "rischio"} (severity ${r.severity ?? "?"})`)
     .join(", ") || "nessuno";
 
   const prompt = `Sei un esperto di valutazione impatto sui diritti fondamentali (Art. 27 EU AI Act).
@@ -64,12 +59,7 @@ Rispondi SOLO con JSON valido, nessun testo fuori dal JSON.
 Formato: { "phase1_description": "...", "phase2_rights": [...], "phase3_scenarios": [...] }`;
 
   try {
-    const response = await client.messages.create({
-      model:      "claude-haiku-4-5",
-      max_tokens: 2000,
-      messages:   [{ role: "user", content: prompt }],
-    });
-    const text = response.content[0].type === "text" ? response.content[0].text : "";
+    const text = await generateText(prompt, { temperature: 0.2, maxOutputTokens: 2000 });
     const cleaned = text.trim().replace(/^```json\s*/, "").replace(/```$/, "").trim();
     return FriaDraftSchema.parse(JSON.parse(cleaned));
   } catch {

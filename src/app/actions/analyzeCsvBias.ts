@@ -1,5 +1,5 @@
 "use server";
-import Anthropic from "@anthropic-ai/sdk";
+import { generateText } from "@/lib/rag/rag-vertex";
 import { z } from "zod";
 
 const BiasReportSchema = z.object({
@@ -16,11 +16,6 @@ export async function analyzeCsvBias(
   csvPreview: string,
   systemDescription: string
 ): Promise<AiBiasReport | { error: string }> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return { error: "ANTHROPIC_API_KEY non configurata." };
-
-  const client = new Anthropic({ apiKey });
-
   const prompt = `Sei un esperto di data governance per sistemi AI in conformità con Art. 10 EU AI Act.
 
 Analizza questo dataset (preview delle prime righe):
@@ -40,12 +35,7 @@ Analizza e rispondi con JSON che include:
 Rispondi SOLO con JSON valido, nessun testo fuori dal JSON.`;
 
   try {
-    const response = await client.messages.create({
-      model:      "claude-haiku-4-5",
-      max_tokens: 1000,
-      messages:   [{ role: "user", content: prompt }],
-    });
-    const text = response.content[0].type === "text" ? response.content[0].text : "";
+    const text = await generateText(prompt, { temperature: 0.1, maxOutputTokens: 1000 });
     const cleaned = text.trim().replace(/^```json\s*/, "").replace(/```$/, "").trim();
     return BiasReportSchema.parse(JSON.parse(cleaned));
   } catch {

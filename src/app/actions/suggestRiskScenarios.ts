@@ -1,5 +1,5 @@
 "use server";
-import Anthropic from "@anthropic-ai/sdk";
+import { generateText } from "@/lib/rag/rag-vertex";
 import { z } from "zod";
 
 const RiskScenarioSchema = z.object({
@@ -21,11 +21,6 @@ export async function suggestRiskScenarios(
   riskLevel: string,
   annexIII: boolean
 ): Promise<{ scenarios: SuggestedRiskScenario[] } | { error: string }> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return { error: "ANTHROPIC_API_KEY non configurata." };
-
-  const client = new Anthropic({ apiKey });
-
   const prompt = `Sei un esperto di risk management per sistemi AI in conformità con l'Art. 9 EU AI Act.
 
 Sistema AI da analizzare:
@@ -49,13 +44,7 @@ Rispondi SOLO con JSON valido, nessun testo fuori dal JSON.
 Formato esatto: { "scenarios": [ {...}, {...} ] }`;
 
   try {
-    const response = await client.messages.create({
-      model:      "claude-haiku-4-5",
-      max_tokens: 1500,
-      messages:   [{ role: "user", content: prompt }],
-    });
-
-    const text = response.content[0].type === "text" ? response.content[0].text : "";
+    const text = await generateText(prompt, { temperature: 0.2, maxOutputTokens: 1500 });
     const cleaned = text.trim().replace(/^```json\s*/, "").replace(/```$/, "").trim();
     const json = JSON.parse(cleaned);
     return RiskScenarioSchema.parse(json);
