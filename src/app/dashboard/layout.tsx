@@ -7,7 +7,7 @@ import {
   FileCode, Scale, ShieldAlert, BookMarked, ClipboardList, Crosshair,
   FileArchive, TrendingUp, Database, UserCheck, ArrowRightLeft, Map, Building2,
   Landmark, Zap, Menu, X, ChevronRight, ChevronLeft, ChevronDown,
-  LogOut, Settings,
+  LogOut, Settings, LayoutGrid,
 } from "lucide-react";
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { useUserRole, ROLE_LABELS } from "@/lib/hooks/useUserRole";
@@ -21,7 +21,7 @@ import ChatAssistant from "@/components/ui/ChatAssistant";
 import UserMenu from "@/components/dashboard/UserMenu";
 import SessionWarning from "@/components/auth/SessionWarning";
 import { ProjectSwitcher } from "@/components/layout/ProjectSwitcher";
-import { ComplianceAssistant } from "@/components/layout/ComplianceAssistant";
+
 
 type NavChild = {
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
@@ -43,6 +43,13 @@ type NavPillar = {
 };
 
 const PILLARS: NavPillar[] = [
+  {
+    id: "inventory",
+    icon: LayoutGrid,
+    label: "Inventario Sistemi AI",
+    href: "/dashboard/tools/inventory",
+    art: "Art. 6",
+  },
   {
     id: "triage",
     icon: Crosshair,
@@ -440,9 +447,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* AI Chat Assistant — globale, flottante bottom-right */}
       <ChatAssistant />
-      {/* Compliance Assistant — EU AI Act contextual Q&A */}
-      <ComplianceAssistant currentTool={pathname.split("/").filter(Boolean).pop() ?? "dashboard"} />
-      {/* Session Warning — popup avviso scadenza sessione 5 min prima */}
+{/* Session Warning — popup avviso scadenza sessione 5 min prima */}
       <SessionWarning />
     </div>
   );
