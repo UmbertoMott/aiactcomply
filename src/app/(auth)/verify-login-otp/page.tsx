@@ -10,17 +10,13 @@ export default function VerifyLoginOTPPage() {
   const [resendMsg, setResendMsg] = useState("");
   const [resendCooldown, setResendCooldown] = useState(60);
   const [isPending, startTransition] = useTransition();
-  const [devCode, setDevCode] = useState<string | null>(null);
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     inputsRef.current[0]?.focus();
-    // Assicura che esista un OTP valido per questa sessione.
-    // Se l'utente arriva con una sessione persistente (senza passare dal login),
-    // ensureOTPSent genera e invia automaticamente il codice.
-    ensureOTPSent().then(({ code: hint }) => {
-      if (hint) setDevCode(hint);
-    }).catch(() => {});
+
+    // Auto-genera OTP se l'utente arriva con sessione persistente
+    ensureOTPSent().catch(() => {});
 
     const timer = setInterval(() => {
       setResendCooldown((c) => (c > 0 ? c - 1 : 0));
@@ -89,21 +85,6 @@ export default function VerifyLoginOTPPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-[#E2E8F0] p-8">
-        {/* DEV MODE banner — visible only when SMTP not configured */}
-        {devCode && (
-          <div className="mb-6 rounded-xl p-4 text-center"
-            style={{ background: "rgba(234,179,8,0.1)", border: "1px solid rgba(234,179,8,0.4)" }}>
-            <p className="text-[11px] font-semibold mb-1" style={{ color: "rgba(161,128,0,0.9)" }}>
-              🔧 DEV MODE — SMTP non configurato
-            </p>
-            <p className="text-[11px] mb-2" style={{ color: "rgba(0,0,0,0.5)" }}>
-              Il codice non è stato inviato via email. Usa questo:
-            </p>
-            <div className="text-3xl font-mono font-bold tracking-widest" style={{ color: "#0D1016", letterSpacing: "0.2em" }}>
-              {devCode}
-            </div>
-          </div>
-        )}
 
         {/* Header */}
         <div className="text-center mb-8">
@@ -122,7 +103,6 @@ export default function VerifyLoginOTPPage() {
 
         {/* OTP Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* 6 input singola cifra */}
           <div className="flex gap-2 justify-center" onPaste={handlePaste}>
             {code.map((digit, i) => (
               <input
@@ -141,21 +121,18 @@ export default function VerifyLoginOTPPage() {
             ))}
           </div>
 
-          {/* Errore */}
           {error && (
             <p className="text-sm text-red-600 text-center bg-red-50 rounded-lg py-2 px-3">
               {error}
             </p>
           )}
 
-          {/* Successo resend */}
           {resendMsg && (
             <p className="text-sm text-green-600 text-center bg-green-50 rounded-lg py-2 px-3">
               {resendMsg}
             </p>
           )}
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={isPending || !allFilled}
@@ -167,7 +144,7 @@ export default function VerifyLoginOTPPage() {
           </button>
         </form>
 
-        {/* Rinvia codice */}
+        {/* Rinvia */}
         <div className="mt-6 text-center">
           <p className="text-sm text-[#64748B]">Non hai ricevuto il codice?</p>
           <button
@@ -181,7 +158,6 @@ export default function VerifyLoginOTPPage() {
           </button>
         </div>
 
-        {/* Torna al login */}
         <div className="mt-4 text-center">
           <Link href="/login" className="text-sm text-[#64748B] hover:text-[#0D1016] transition-colors">
             ← Torna al login
