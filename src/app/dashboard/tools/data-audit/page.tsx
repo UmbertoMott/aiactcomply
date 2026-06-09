@@ -11,7 +11,8 @@ import {
   type RealDatasetConfig, type BiasReport,
 } from "@/lib/simulation/data-audit-engine";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
-import type { DataAuditResult } from "@/lib/dossier/storage-schema";
+import type { DataAuditResult, ClassifierResult } from "@/lib/dossier/storage-schema";
+import { analyzeCsvBias, type AiBiasReport } from "@/app/actions/analyzeCsvBias";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
 import { DBStatusBadge, type DBSource } from "@/components/ui/DBStatusBadge";
@@ -124,6 +125,25 @@ export default function DataAuditPage() {
       .then(r => setDbSource(r.ok ? "db" : "localStorage"))
       .catch(() => setDbSource("localStorage"));
   }, []);
+
+  // ── AI bias analysis state ───────────────────────────────────────────────
+  const [csvRawText, setCsvRawText]       = useState<string>("");
+  const [aiBiasReport, setAiBiasReport]   = useState<AiBiasReport | null>(null);
+  const [loadingBias, setLoadingBias]     = useState(false);
+  const [biasAiError, setBiasAiError]     = useState<string | null>(null);
+
+  async function handleAnalyzeBias() {
+    if (!csvRawText) return;
+    setLoadingBias(true);
+    setBiasAiError(null);
+    const classifier = readFromStorage<ClassifierResult>("classifier");
+    const result = await analyzeCsvBias(csvRawText, classifier?.systemDescription ?? classifier?.systemName ?? "");
+    setLoadingBias(false);
+    if ("error" in result) { setBiasAiError(result.error); return; }
+    setAiBiasReport(result);
+    // Pre-compila sensitive data flag se rilevate colonne sensibili
+    if (result.sensitiveColumns.length > 0) setUsesSpecialCategoriesForBias(true);
+  }
 
   // ── Real mode state ──────────────────────────────────────────────────────
   const [csvRecords, setCsvRecords]     = useState<Record<string, string>[]>([]);
@@ -789,9 +809,11 @@ export default function DataAuditPage() {
                       setCsvParseError("File vuoto o formato non riconosciuto.");
                       return;
                     }
+                    setCsvRawText(text);
                     setCsvRecords(records);
                     setCsvColumns(Object.keys(records[0]));
                     setRealReport(null);
+                    setAiBiasReport(null);
                     setRealConfig(c => ({ ...c, name: file.name.replace(".csv", "") }));
                     showToastMsg(`${records.length} righe caricate da ${file.name}`);
                   };
@@ -821,6 +843,54 @@ export default function DataAuditPage() {
               </div>
             )}
           </div>
+
+          {/* AI Bias Analysis (Art. 10) */}
+          {csvRawText && (
+            <div style={{ marginTop: 12 }}>
+              <button
+                onClick={handleAnalyzeBias}
+                disabled={loadingBias}
+                style={{
+                  padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(37,99,235,0.3)",
+                  background: loadingBias ? "#f3f4f6" : "rgba(37,99,235,0.05)",
+                  color: loadingBias ? "#9ca3af" : "#2563eb",
+                  fontSize: 13, fontWeight: 500, cursor: loadingBias ? "default" : "pointer",
+                  display: "flex", alignItems: "center", gap: 6,
+                }}
+              >
+                {loadingBias ? "Analisi in corso…" : "✦ Analizza bias con AI (Art. 10)"}
+              </button>
+              {biasAiError && (
+                <p style={{ fontSize: 12, color: "#dc2626", marginTop: 6 }}>{biasAiError}</p>
+              )}
+              {aiBiasReport && (
+                <div style={{ marginTop: 12, padding: 14, background: "rgba(217,119,6,0.04)", borderRadius: 8, border: "1px solid rgba(217,119,6,0.15)" }}>
+                  <p style={{ fontSize: 12, color: "#d97706", fontWeight: 600, margin: "0 0 8px" }}>
+                    ✦ Bias Report AI — Art. 10(3) · Verifica e conferma prima di salvare
+                  </p>
+                  <p style={{ fontSize: 13, margin: "0 0 4px", color: "#374151" }}>
+                    <strong>Qualità dati stimata:</strong> {aiBiasReport.overallQualityScore}/100
+                  </p>
+                  {aiBiasReport.sensitiveColumns.length > 0 && (
+                    <p style={{ fontSize: 12, color: "#dc2626", margin: "0 0 4px" }}>
+                      ⚠ Colonne potenzialmente sensibili: {aiBiasReport.sensitiveColumns.join(", ")}
+                    </p>
+                  )}
+                  {aiBiasReport.missingValueFlags.length > 0 && (
+                    <p style={{ fontSize: 12, color: "#ca8a04", margin: "0 0 4px" }}>
+                      Valori mancanti: {aiBiasReport.missingValueFlags.map(f => `${f.column} (${f.pct}%)`).join(", ")}
+                    </p>
+                  )}
+                  {aiBiasReport.potentialBiasRisks.map((r, i) => (
+                    <p key={i} style={{ fontSize: 12, color: "#6b7280", margin: "2px 0" }}>• {r}</p>
+                  ))}
+                  <p style={{ fontSize: 12, marginTop: 6, color: "#374151" }}>
+                    <strong>Raccomandazione:</strong> {aiBiasReport.recommendation}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Configurazione colonne */}
           {csvColumns.length > 0 && (

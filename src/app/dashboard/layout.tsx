@@ -21,6 +21,7 @@ import ChatAssistant from "@/components/ui/ChatAssistant";
 import UserMenu from "@/components/dashboard/UserMenu";
 import SessionWarning from "@/components/auth/SessionWarning";
 import { ProjectSwitcher } from "@/components/layout/ProjectSwitcher";
+import { ComplianceAssistant } from "@/components/layout/ComplianceAssistant";
 
 type NavChild = {
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
@@ -439,6 +440,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* AI Chat Assistant — globale, flottante bottom-right */}
       <ChatAssistant />
+      {/* Compliance Assistant — EU AI Act contextual Q&A */}
+      <ComplianceAssistant currentTool={pathname.split("/").filter(Boolean).pop() ?? "dashboard"} />
       {/* Session Warning — popup avviso scadenza sessione 5 min prima */}
       <SessionWarning />
     </div>

@@ -64,6 +64,9 @@ import { writeToStorage } from "@/lib/dossier/storage-schema";
 import type { RiskManagerResult } from "@/lib/dossier/storage-schema";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { VersionHistoryPanel } from "@/components/compliance/VersionHistoryPanel";
+import { suggestRiskScenarios, type SuggestedRiskScenario } from "@/app/actions/suggestRiskScenarios";
+import { readFromStorage } from "@/lib/dossier/storage-schema";
+import type { ClassifierResult } from "@/lib/dossier/storage-schema";
 
 // ─── FIX 1 — Typed form state ─────────────────────────────────────────
 
@@ -193,6 +196,56 @@ export default function RiskManagerPage() {
 
   // ── Auto-save ogni 30s ─────────────────────────────────────────────────────
   const { justSaved: rmSaved } = useAutoSave("riskManager", report, saveReport);
+
+  // ── AI scenario generation ──────────────────────────────────────────────────
+  const [aiSuggestions, setAiSuggestions] = useState<SuggestedRiskScenario[] | null>(null);
+  const [loadingAI, setLoadingAI]         = useState(false);
+  const [aiError, setAiError]             = useState<string | null>(null);
+
+  async function handleSuggestRisks() {
+    const classifier = readFromStorage<ClassifierResult>("classifier");
+    if (!classifier?.systemName) {
+      setAiError("Completa prima il Classifier per ottenere suggerimenti contestuali.");
+      return;
+    }
+    setLoadingAI(true);
+    setAiError(null);
+    const result = await suggestRiskScenarios(
+      classifier.systemName,
+      classifier.systemDescription ?? "",
+      classifier.riskLevel ?? "unknown",
+      classifier.annexIII ?? false
+    );
+    setLoadingAI(false);
+    if ("error" in result) { setAiError(result.error); return; }
+    setAiSuggestions(result.scenarios);
+  }
+
+  function addSuggestedRisk(s: SuggestedRiskScenario) {
+    function numToLevel(n: number): "low" | "medium" | "high" {
+      if (n >= 4) return "high";
+      if (n >= 3) return "medium";
+      return "low";
+    }
+    const newRisk: RiskItem = {
+      id:                `risk-ai-${Date.now()}`,
+      description:       s.name + " — " + s.description,
+      category:          "health-safety",
+      severity:          numToLevel(s.severity),
+      probability:       numToLevel(s.likelihood),
+      mitigation:        s.mitigationHint,
+      residual:          "monitor",
+      quantitativeScore: computeRiskScore(numToLevel(s.severity), numToLevel(s.likelihood)),
+      createdAt:         new Date().toISOString(),
+    };
+    updateReport((prev) => ({
+      ...prev,
+      risks:         [...prev.risks, newRisk],
+      overallScore:  computeOverallScore([...prev.risks, newRisk]),
+    }));
+    setAiSuggestions((prev) => prev?.filter((x) => x !== s) ?? null);
+    showToast("Scenario aggiunto ✓");
+  }
 
   // FIX 6 — Toast
   const [toast, setToast] = useState<{ msg: string; type: "error" | "success" } | null>(null);
@@ -535,6 +588,12 @@ export default function RiskManagerPage() {
                 overallScore: computeOverallScore([...prev.risks, newRisk]),
               }));
             }}
+            aiSuggestions={aiSuggestions}
+            loadingAI={loadingAI}
+            aiError={aiError}
+            onSuggestRisks={handleSuggestRisks}
+            onAddSuggested={addSuggestedRisk}
+            onDismissSuggestions={() => setAiSuggestions(null)}
           />
         )}
 
@@ -893,6 +952,12 @@ function ScopingPhase({
   addRisk,
   removeRisk,
   addPresetRisk,
+  aiSuggestions,
+  loadingAI,
+  aiError,
+  onSuggestRisks,
+  onAddSuggested,
+  onDismissSuggestions,
 }: {
   report: RiskManagerReport;
   setReport: (r: RiskManagerReport) => void;
@@ -903,6 +968,12 @@ function ScopingPhase({
   addRisk: () => void;
   removeRisk: (id: string) => void;
   addPresetRisk: (preset: RiskFormState) => void;
+  aiSuggestions: SuggestedRiskScenario[] | null;
+  loadingAI: boolean;
+  aiError: string | null;
+  onSuggestRisks: () => void;
+  onAddSuggested: (s: SuggestedRiskScenario) => void;
+  onDismissSuggestions: () => void;
 }) {
   const highCount = report.risks.filter((r) => r.severity === "high").length;
   const score = report.overallScore;
@@ -1060,6 +1131,70 @@ function ScopingPhase({
 
       {/* ── Catalogo predefinito AI Act ──────────────────────────────────── */}
       <CatalogSection addPresetRisk={addPresetRisk} />
+
+      {/* ── AI scenario generation (Art. 9) ────────────────────────────────── */}
+      <div style={{ marginBottom: 16 }}>
+        <button
+          onClick={onSuggestRisks}
+          disabled={loadingAI}
+          style={{
+            padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(37,99,235,0.3)",
+            background: loadingAI ? "#f3f4f6" : "rgba(37,99,235,0.05)",
+            color: loadingAI ? "#9ca3af" : "#2563eb",
+            fontSize: 13, fontWeight: 500, cursor: loadingAI ? "default" : "pointer",
+            display: "flex", alignItems: "center", gap: 6,
+          }}
+        >
+          {loadingAI ? "Analisi in corso…" : "✦ Genera scenari con AI (Art. 9)"}
+        </button>
+        {aiError && (
+          <p style={{ fontSize: 12, color: "#dc2626", marginTop: 6 }}>{aiError}</p>
+        )}
+        {aiSuggestions && aiSuggestions.length > 0 && (
+          <div style={{ marginTop: 10, border: "1px solid rgba(217,119,6,0.2)", borderRadius: 10, overflow: "hidden" }}>
+            <div style={{
+              padding: "8px 14px", background: "rgba(217,119,6,0.06)",
+              borderBottom: "1px solid rgba(217,119,6,0.15)",
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+            }}>
+              <span style={{ fontSize: 12, color: "#d97706", fontWeight: 600 }}>
+                ✦ Suggerito da AI — verifica e conferma
+              </span>
+              <button
+                onClick={onDismissSuggestions}
+                style={{ fontSize: 11, background: "none", border: "none", cursor: "pointer", color: "#9ca3af" }}
+              >
+                Chiudi
+              </button>
+            </div>
+            {aiSuggestions.map((s, i) => (
+              <div key={i} style={{
+                padding: "10px 14px", borderBottom: "1px solid rgba(0,0,0,0.05)",
+                display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12,
+              }}>
+                <div style={{ flex: 1 }}>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: T.text }}>{s.name}</p>
+                  <p style={{ margin: "3px 0 0", fontSize: 12, color: "#6b7280" }}>{s.description}</p>
+                  <p style={{ margin: "3px 0 0", fontSize: 11, color: "#9ca3af" }}>
+                    Likelihood: {s.likelihood}/5 · Severity: {s.severity}/5 · {s.affectedGroups.join(", ")}
+                  </p>
+                  <p style={{ margin: "3px 0 0", fontSize: 11, color: "#d97706" }}>Mitigazione: {s.mitigationHint}</p>
+                </div>
+                <button
+                  onClick={() => onAddSuggested(s)}
+                  style={{
+                    padding: "5px 12px", borderRadius: 6, border: "none",
+                    background: "#2563eb", color: "white", fontSize: 12,
+                    fontWeight: 500, cursor: "pointer", whiteSpace: "nowrap",
+                  }}
+                >
+                  + Aggiungi
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
         <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>Rischi identificati</h3>

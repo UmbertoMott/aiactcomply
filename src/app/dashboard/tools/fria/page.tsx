@@ -13,6 +13,8 @@ import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { FRIAResult } from "@/lib/dossier/storage-schema";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { VersionHistoryPanel } from "@/components/compliance/VersionHistoryPanel";
+import { draftFria } from "@/app/actions/draftFria";
+import type { ClassifierResult, RiskManagerResult, DataAuditResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
 import {
@@ -163,6 +165,63 @@ export default function FRIAPage() {
     doc,
     (d) => localStorage.setItem(FRIA_DOC_KEY, JSON.stringify(d))
   );
+
+  // ── AI draft generator ────────────────────────────────────────────────────
+  const [loadingDraft, setLoadingDraft] = useState(false);
+  const [draftGenerated, setDraftGenerated] = useState(false);
+  const [draftError, setDraftError] = useState<string | null>(null);
+
+  // Leggi dati correlati per il banner contestuale
+  const riskData   = useMemo(() => readFromStorage<RiskManagerResult>("riskManager"), []);
+  const dataAudit  = useMemo(() => readFromStorage<DataAuditResult>("dataAudit"), []);
+
+  async function handleDraftFria() {
+    const classifier = readFromStorage<ClassifierResult>("classifier");
+    if (!classifier?.systemName) {
+      setDraftError("Completa prima il Classifier per generare la bozza.");
+      return;
+    }
+    setLoadingDraft(true);
+    setDraftError(null);
+    const result = await draftFria(
+      classifier.systemName,
+      classifier.systemDescription ?? "",
+      classifier.riskLevel ?? "",
+      riskData?.risks?.map((r) => ({ title: r.title, severity: r.impact })) ?? [],
+      dataAudit?.datasets?.some((d) => d.personalData) ?? false
+    );
+    setLoadingDraft(false);
+    if ("error" in result) { setDraftError(result.error); return; }
+
+    // Applica fase 1: intended_purpose_explanation
+    setDoc((prev) => {
+      const n = {
+        ...prev,
+        context: { ...prev.context, intended_purpose_explanation: result.phase1_description },
+        updatedAt: new Date().toISOString(),
+      };
+      debounceSave(n);
+      return n;
+    });
+
+    // Applica fase 3: aggiungi scenari
+    result.phase3_scenarios.forEach((s) => {
+      const sc: import("@/lib/simulation/fria-engine").FRIAScenario = {
+        id:           `fria-ai-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        title:        s.scenario,
+        description:  `Persone interessate: ${s.affectedPersons}. Likelihood: ${s.likelihood}/5.`,
+        type:         "automated_decision",
+        right_impacts: [],
+      };
+      setDoc((prev) => {
+        const n = { ...prev, scenarios: [...prev.scenarios, sc], updatedAt: new Date().toISOString() };
+        debounceSave(n);
+        return n;
+      });
+    });
+
+    setDraftGenerated(true);
+  }
 
   // Pre-populate from Classifier
   const classifierData = useMemo(() => {
@@ -1104,6 +1163,39 @@ export default function FRIAPage() {
     <div className="w-full" style={{ display: "flex", flexDirection: "column", gap: 0, minHeight: 0, fontFamily: "var(--font-inter, system-ui)" }}>
 
       <SystemContextBanner checkProhibited={true} />
+
+      {/* ── AI Draft Generator Banner (Art. 27) ─────────────────────────────── */}
+      <div style={{
+        padding: "12px 16px", borderRadius: 10, marginBottom: 16,
+        background: "rgba(37,99,235,0.04)", border: "1px solid rgba(37,99,235,0.15)",
+      }}>
+        <p style={{ fontSize: 13, margin: "0 0 8px", fontWeight: 500, color: "#0D1016" }}>
+          {readFromStorage<ClassifierResult>("classifier")?.systemName && (
+            <>Hai già completato il Classifier{riskData ? ", Risk Manager" : ""}{dataAudit ? " e Data Audit" : ""}.{" "}</>
+          )}
+          Genera una bozza delle prime 3 fasi della FRIA da quei dati.
+        </p>
+        <button
+          onClick={handleDraftFria}
+          disabled={loadingDraft}
+          style={{
+            padding: "7px 16px", borderRadius: 7, border: "none",
+            background: loadingDraft ? "#e5e7eb" : "#2563eb",
+            color: loadingDraft ? "#9ca3af" : "white",
+            fontSize: 13, fontWeight: 500, cursor: loadingDraft ? "default" : "pointer",
+          }}
+        >
+          {loadingDraft ? "Generazione bozza…" : "✦ Genera bozza AI da dati esistenti"}
+        </button>
+        {draftGenerated && (
+          <p style={{ fontSize: 12, color: "#d97706", margin: "6px 0 0" }}>
+            ✦ Bozza applicata — verifica ogni campo prima di salvare
+          </p>
+        )}
+        {draftError && (
+          <p style={{ fontSize: 12, color: "#dc2626", margin: "6px 0 0" }}>{draftError}</p>
+        )}
+      </div>
 
       <div style={{ display: "flex", gap: 0, minHeight: 0 }}>
 

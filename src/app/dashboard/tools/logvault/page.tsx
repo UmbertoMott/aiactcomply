@@ -10,7 +10,8 @@ import {
   type LogEntry, type EventLevel, type ImportResult,
 } from "@/lib/simulation/logvault-engine";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
-import type { LogvaultResult } from "@/lib/dossier/storage-schema";
+import type { LogvaultResult, ClassifierResult } from "@/lib/dossier/storage-schema";
+import { suggestEventSeverity, type EventSeveritySuggestion } from "@/app/actions/suggestEventSeverity";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
 import { DBStatusBadge, type DBSource } from "@/components/ui/DBStatusBadge";
@@ -165,6 +166,22 @@ export default function LogVaultPage() {
   function showToast(msg: string, type: "success" | "error" = "success") {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
+  }
+
+  // ── AI severity suggestion ─────────────────────────────────────────────────
+  const [eventDesc, setEventDesc]               = useState("");
+  const [severitySuggestion, setSeveritySuggestion] = useState<EventSeveritySuggestion | null>(null);
+  const [loadingSeverity, setLoadingSeverity]   = useState(false);
+  const [suggestedSeverityLabel, setSuggestedSeverityLabel] = useState<string | null>(null);
+
+  async function handleDescriptionBlur(description: string) {
+    if (description.length < 20) return;
+    setLoadingSeverity(true);
+    const classifier = readFromStorage<ClassifierResult>("classifier");
+    const result = await suggestEventSeverity(description, classifier?.riskLevel ?? "unknown");
+    setLoadingSeverity(false);
+    if ("error" in result) return;
+    setSeveritySuggestion(result);
   }
 
   // ── Demo derived ──────────────────────────────────────────────────────────
@@ -389,6 +406,53 @@ export default function LogVaultPage() {
                         <span>12</span><span>100</span>
                       </div>
                     </div>
+                  </div>
+
+                  {/* AI Severity Suggester (Art. 73) */}
+                  <div className="mt-4 pt-4" style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}>
+                    <p className="text-[10px] font-semibold uppercase mb-2" style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "1px" }}>
+                      ✦ Segnala evento — AI severity (Art. 73)
+                    </p>
+                    <textarea
+                      value={eventDesc}
+                      onChange={(e) => { setEventDesc(e.target.value); setSeveritySuggestion(null); }}
+                      onBlur={(e) => handleDescriptionBlur(e.target.value)}
+                      placeholder="Descrivi l'evento anomalo (min 20 caratteri)…"
+                      rows={2}
+                      className="w-full text-[12px] px-3 py-2 rounded-lg outline-none resize-none"
+                      style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.1)", color: "#0D1016" }}
+                    />
+                    {loadingSeverity && (
+                      <p className="text-[11px] mt-1" style={{ color: "rgba(0,0,0,0.35)" }}>Classificazione in corso…</p>
+                    )}
+                    {severitySuggestion && (
+                      <div style={{
+                        marginTop: 6, padding: "8px 12px", borderRadius: 7,
+                        background: "rgba(217,119,6,0.05)", border: "1px solid rgba(217,119,6,0.2)",
+                      }}>
+                        <p className="text-[12px] font-semibold mb-1" style={{ color: "#d97706" }}>
+                          ✦ Severity suggerita: <strong>{severitySuggestion.severity.toUpperCase()}</strong>
+                        </p>
+                        <p className="text-[11px]" style={{ color: "#6b7280" }}>{severitySuggestion.rationale}</p>
+                        {severitySuggestion.regulatoryFlag && (
+                          <p className="text-[11px] mt-1" style={{ color: "#dc2626" }}>
+                            ⚠ {severitySuggestion.regulatoryFlag}
+                          </p>
+                        )}
+                        <button
+                          onClick={() => { setSuggestedSeverityLabel(severitySuggestion.severity); setSeveritySuggestion(null); showToast(`Severity "${severitySuggestion.severity}" registrata`); }}
+                          className="mt-2 text-[11px] font-medium px-3 py-1 rounded-lg"
+                          style={{ background: "#2563eb", color: "white", border: "none", cursor: "pointer" }}
+                        >
+                          Applica
+                        </button>
+                      </div>
+                    )}
+                    {suggestedSeverityLabel && !severitySuggestion && (
+                      <p className="text-[11px] mt-1" style={{ color: "#16a34a" }}>
+                        ✓ Severity &quot;{suggestedSeverityLabel}&quot; applicata — verifica e registra nel sistema di logging
+                      </p>
+                    )}
                   </div>
                 </div>
               </motion.div>
