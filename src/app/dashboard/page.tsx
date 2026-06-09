@@ -14,6 +14,7 @@ import { REGULATORY_DEADLINES, daysUntil, type RegulatoryDeadline } from "@/lib/
 import { getAllEvidence, type EvidenceRecord } from "@/lib/evidence/evidence-layer";
 import { useUserRole } from "@/lib/hooks/useUserRole";
 import { readFromStorage, type ClassifierResult } from "@/lib/dossier/storage-schema";
+import { ComplianceRadarChart } from "@/components/compliance/ComplianceRadarChart";
 
 const OnboardingWizard = dynamic(
   () => import("@/components/onboarding/OnboardingWizard"),
@@ -464,6 +465,9 @@ export default function DashboardPage() {
 
           {/* ── RIGHT: Sidebar panel ────────────────────────────────── */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
+            {/* Radar conformità */}
+            <ComplianceRadarChart />
 
             {/* Scadenze urgenti */}
             {deadlines.length > 0 && (

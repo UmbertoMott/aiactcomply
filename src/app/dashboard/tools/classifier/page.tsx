@@ -30,6 +30,7 @@ import { generatePassport, verifyPassport, exportForRegulator, getPassportSummar
 import { writeToStorage } from "@/lib/dossier/storage-schema";
 import type { ClassifierResult } from "@/lib/dossier/storage-schema";
 import { loadOrgProfile, saveOrgProfile } from "@/lib/dossier/org-profile";
+import { parseBrainDump, type BrainDumpResult } from "@/app/actions/parseBrainDump";
 
 // ─── ADDITION 1 — Persistence ────────────────────────────────────────
 
@@ -144,6 +145,12 @@ export default function ClassifierPage() {
   const [savedClassification] = useState<PersistedClassification | null>(() => loadSavedResult());
   const [isSaved, setIsSaved] = useState(false);
   const [annexIAnswer, setAnnexIAnswer] = useState<string>("");
+
+  // Part 2 — BrainDump (Step 0)
+  const [brainDumpText, setBrainDumpText]       = useState("");
+  const [brainDumpLoading, setBrainDumpLoading] = useState(false);
+  const [brainDumpResult, setBrainDumpResult]   = useState<BrainDumpResult | null>(null);
+  const [brainDumpError, setBrainDumpError]     = useState<string | null>(null);
 
   useEffect(() => {
     setIsSaved(localStorage.getItem(STORAGE_KEY) !== null);
@@ -502,6 +509,130 @@ export default function ClassifierPage() {
       {/* ADDITION 9 — PHASE: INTRO (rewritten inner content) */}
       {phase === "intro" && (
         <div className="space-y-6">
+
+          {/* ── BrainDump — Step 0 ── */}
+          <div style={{
+            background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)",
+            borderRadius: 12, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.04)"
+          }}>
+            <p style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 4 }}>
+              ✦ Descrivi il tuo sistema AI in linguaggio libero
+            </p>
+            <p style={{ fontSize: 12, color: T.muted, marginBottom: 12 }}>
+              Dimmi cosa fa, chi lo usa, che dati elabora. L&apos;AI pre-compila il classificatore.
+            </p>
+            <textarea
+              value={brainDumpText}
+              onChange={(e) => setBrainDumpText(e.target.value)}
+              placeholder="Es: «Usiamo un modello che analizza i CV dei candidati e assegna un punteggio per pre-filtrare le candidature. Usa dati demografici come età e istruzione. I recruiter vedono solo i candidati con score > 70.»"
+              rows={4}
+              style={{
+                width: "100%", borderRadius: 8, padding: "10px 12px",
+                border: "1px solid rgba(0,0,0,0.12)", fontSize: 12, color: T.text,
+                resize: "vertical", outline: "none", lineHeight: 1.55,
+                fontFamily: "inherit",
+              }}
+            />
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10 }}>
+              <button
+                disabled={brainDumpLoading || brainDumpText.trim().length < 20}
+                onClick={async () => {
+                  setBrainDumpLoading(true);
+                  setBrainDumpError(null);
+                  setBrainDumpResult(null);
+                  const res = await parseBrainDump(brainDumpText);
+                  setBrainDumpLoading(false);
+                  if ("error" in res) {
+                    setBrainDumpError(res.error);
+                  } else {
+                    setBrainDumpResult(res);
+                    // Pre-fill system name if empty
+                    if (!customSystemName && res.systemName) {
+                      setCustomSystemName(res.systemName);
+                    }
+                    setInputMode("manual");
+                  }
+                }}
+                style={{
+                  padding: "7px 16px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+                  background: brainDumpText.trim().length < 20 ? "rgba(0,0,0,0.07)" : T.text,
+                  color: brainDumpText.trim().length < 20 ? T.faint : "#fff",
+                  border: "none", cursor: brainDumpText.trim().length < 20 ? "not-allowed" : "pointer",
+                  transition: "all 0.15s",
+                }}
+              >
+                {brainDumpLoading ? "Analisi in corso…" : "✦ Analizza con AI"}
+              </button>
+              {brainDumpResult && (
+                <span style={{ fontSize: 11, color: T.green }}>✓ Analisi completata</span>
+              )}
+            </div>
+
+            {/* Error */}
+            {brainDumpError && (
+              <p style={{ fontSize: 11, color: "#b91c1c", marginTop: 8 }}>⚠ {brainDumpError}</p>
+            )}
+
+            {/* Result cards */}
+            {brainDumpResult && (
+              <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
+                {/* Tier */}
+                <div style={{
+                  padding: "8px 12px", borderRadius: 8, fontSize: 12,
+                  background: brainDumpResult.likelyTier === "high_risk"
+                    ? "rgba(220,38,38,0.06)" : "rgba(245,158,11,0.06)",
+                  border: `1px solid ${brainDumpResult.likelyTier === "high_risk"
+                    ? "rgba(220,38,38,0.2)" : "rgba(245,158,11,0.2)"}`,
+                }}>
+                  <span style={{ fontWeight: 600, color: T.text }}>Tier stimato: </span>
+                  <span style={{ color: brainDumpResult.likelyTier === "high_risk" ? "#b91c1c" : "#a16207" }}>
+                    {brainDumpResult.likelyTier === "high_risk" ? "Alto rischio (Annex III)" :
+                     brainDumpResult.likelyTier === "limited" ? "Rischio limitato" :
+                     brainDumpResult.likelyTier === "minimal" ? "Rischio minimale" : brainDumpResult.likelyTier}
+                  </span>
+                  <span style={{ marginLeft: 8, fontSize: 11, color: T.faint }}>
+                    ({brainDumpResult.confidenceLevel === "high" ? "alta" : brainDumpResult.confidenceLevel === "medium" ? "media" : "bassa"} confidenza)
+                  </span>
+                </div>
+
+                {/* Art.5 risk warning */}
+                {brainDumpResult.art5Risk && (
+                  <div style={{
+                    padding: "8px 12px", borderRadius: 8, fontSize: 12,
+                    background: "rgba(220,38,38,0.07)", border: "1px solid rgba(220,38,38,0.25)",
+                  }}>
+                    <p style={{ fontWeight: 700, color: "#b91c1c", marginBottom: 2 }}>
+                      🚨 Possibile violazione Art. 5 rilevata
+                    </p>
+                    <p style={{ color: T.muted }}>
+                      Verifica la sezione &quot;Pratiche Vietate&quot; per confermare.
+                      {brainDumpResult.likelyTierArticle ? ` Riferimento: ${brainDumpResult.likelyTierArticle}` : ""}
+                    </p>
+                  </div>
+                )}
+
+                {/* Flagged warnings */}
+                {brainDumpResult.flaggedWarnings.length > 0 && (
+                  <div style={{
+                    padding: "8px 12px", borderRadius: 8, fontSize: 12,
+                    background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.2)",
+                  }}>
+                    <p style={{ fontWeight: 600, color: "#92400e", marginBottom: 4 }}>⚠ Segnalazioni</p>
+                    <ul style={{ margin: 0, paddingLeft: 16, color: T.muted }}>
+                      {brainDumpResult.flaggedWarnings.map((w, i) => (
+                        <li key={i} style={{ marginBottom: 2 }}>{w}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <p style={{ fontSize: 11, color: T.faint }}>
+                  ✦ AI — verifica · Completa il classificatore per una valutazione definitiva
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* Saved result banner */}
           {savedClassification && (
             <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 flex items-center justify-between">

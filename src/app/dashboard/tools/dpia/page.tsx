@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef, useCallback, CSSProperties } from "react";
 import SignOffPanel from "@/components/ui/SignOffPanel";
+import { draftDpiaSections } from "@/app/actions/draftDpiaSections";
+import { buildComplianceContextFromStorage } from "@/hooks/useComplianceContext";
 import {
   Search, Database, Scale, AlertTriangle, Shield, CheckCircle2,
   ChevronLeft, ChevronRight, Plus, Trash2, Download, FileText,
@@ -299,6 +301,11 @@ export default function DPIAPage() {
   const [step, setStep] = useState<Step>(0);
   const [saved, setSaved] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Part 3 — AI pre-fill
+  const [aiPrefillLoading, setAiPrefillLoading] = useState(false);
+  const [aiPrefillDone, setAiPrefillDone]       = useState(false);
+  const [aiPrefillError, setAiPrefillError]     = useState<string | null>(null);
 
   // Load from storage on mount
   useEffect(() => {
@@ -1361,6 +1368,96 @@ export default function DPIAPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {/* Part 3 — AI pre-fill button */}
+          <button
+            disabled={aiPrefillLoading}
+            onClick={async () => {
+              setAiPrefillLoading(true);
+              setAiPrefillError(null);
+              try {
+                const ctx = buildComplianceContextFromStorage();
+                const res = await draftDpiaSections(ctx);
+                if ("error" in res) {
+                  setAiPrefillError(res.error);
+                } else {
+                  // Apply assets (DPIAAsset shape from storage-schema)
+                  if (res.assets && res.assets.length > 0) {
+                    upDoc(d => ({
+                      ...d,
+                      description: {
+                        ...d.description,
+                        assets: res.assets.map((a: {
+                          assetName: string; dataCategory: string; legalBasis: string;
+                          retentionPeriod: string; sensitivityLevel: string
+                        }) => ({
+                          id: `ai_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+                          name: a.assetName ?? "",
+                          type: "database" as const,
+                          description: `${a.dataCategory} — ${a.legalBasis} · ✦ AI — verifica`,
+                          personal_data: true,
+                        })),
+                      }
+                    }));
+                  }
+                  // Apply threats (DPIAThreat shape from storage-schema)
+                  if (res.threats && res.threats.length > 0) {
+                    const toLevel = (n: number): "low" | "medium" | "high" =>
+                      n >= 4 ? "high" : n >= 3 ? "medium" : "low";
+                    upDoc(d => ({
+                      ...d,
+                      risks: {
+                        ...d.risks,
+                        threats: res.threats.map((t: {
+                          threatName: string; description: string;
+                          likelihood: number; impact: number;
+                          mitigation: string; residualRisk: string
+                        }) => ({
+                          id: `ai_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+                          category: "illegitimate_access" as const,
+                          source: "✦ AI — verifica",
+                          description: `${t.threatName}: ${t.description}`,
+                          likelihood: toLevel(t.likelihood),
+                          severity: toLevel(t.impact),
+                          risk_level: toLevel(Math.max(t.likelihood, t.impact)),
+                          mitigation: t.mitigation ?? "",
+                          residual_likelihood: "low" as const,
+                          residual_severity: "low" as const,
+                          residual_risk: (t.residualRisk as "low" | "medium" | "high") ?? "low" as const,
+                        })),
+                      }
+                    }));
+                  }
+                  // Apply measures
+                  if (res.technicalMeasures?.length || res.organizationalMeasures?.length) {
+                    upMeasures({
+                      technical_measures: Array.isArray(res.technicalMeasures)
+                        ? res.technicalMeasures.join("\n") : "",
+                      organizational_measures: Array.isArray(res.organizationalMeasures)
+                        ? res.organizationalMeasures.join("\n") : "",
+                      prior_consultation_required: res.priorConsultationRequired ?? false,
+                    });
+                  }
+                  setAiPrefillDone(true);
+                }
+              } catch {
+                setAiPrefillError("Errore durante la pre-compilazione AI.");
+              }
+              setAiPrefillLoading(false);
+            }}
+            style={{
+              padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+              background: aiPrefillDone ? "rgba(21,128,61,0.08)" : "rgba(245,158,11,0.1)",
+              color: aiPrefillDone ? "#15803d" : "#92400e",
+              border: `1px solid ${aiPrefillDone ? "rgba(21,128,61,0.2)" : "rgba(245,158,11,0.3)"}`,
+              cursor: aiPrefillLoading ? "wait" : "pointer",
+              transition: "all 0.15s",
+            }}
+          >
+            {aiPrefillLoading ? "⏳ Pre-compilazione…" : aiPrefillDone ? "✓ AI applicata" : "✦ Pre-compila fasi 2-3-4 con AI"}
+          </button>
+          {aiPrefillError && (
+            <span style={{ fontSize: 11, color: "#b91c1c" }}>⚠ {aiPrefillError}</span>
+          )}
           {saved && (
             <span style={{ fontSize: 11, color: T.green, display: "flex", alignItems: "center", gap: 4 }}>
               <Check className="h-3.5 w-3.5" /> Salvato

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import type { BiasWorkerOutput } from "@/workers/bias-analyzer.worker";
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -154,6 +155,45 @@ export default function DataAuditPage() {
   });
   const [realReport, setRealReport]     = useState<BiasReport | null>(null);
   const [csvParseError, setCsvParseError] = useState<string>("");
+
+  // Part 5 — Bias Web Worker state
+  const workerRef                                 = useRef<Worker | null>(null);
+  const [workerReport, setWorkerReport]           = useState<BiasWorkerOutput | null>(null);
+  const [workerLoading, setWorkerLoading]         = useState(false);
+  const [workerError, setWorkerError]             = useState<string | null>(null);
+
+  function runBiasWorker() {
+    if (!realConfig.sensitiveCol || !realConfig.outcomeCol || csvRecords.length === 0) return;
+    setWorkerLoading(true);
+    setWorkerError(null);
+    setWorkerReport(null);
+    const w = new Worker(
+      new URL("@/workers/bias-analyzer.worker.ts", import.meta.url),
+      { type: "module" }
+    );
+    workerRef.current = w;
+    w.onmessage = (e) => {
+      if (e.data.type === "result") {
+        setWorkerReport(e.data.payload as BiasWorkerOutput);
+        setWorkerLoading(false);
+        w.terminate();
+      }
+    };
+    w.onerror = () => {
+      setWorkerError("Errore nel Web Worker — controlla la console.");
+      setWorkerLoading(false);
+      w.terminate();
+    };
+    w.postMessage({
+      type: "analyze",
+      payload: {
+        rows: csvRecords,
+        targetColumn: realConfig.outcomeCol,
+        protectedColumn: realConfig.sensitiveCol,
+        positiveLabel: realConfig.positiveOutcome || "1",
+      },
+    });
+  }
   const [labelingProcess, setLabelingProcess] = useState("");
   const [labelingInstructions, setLabelingInstructions] = useState("");
   const [geoCoverage, setGeoCoverage] = useState("");
@@ -938,24 +978,122 @@ export default function DataAuditPage() {
                 </div>
               </div>
 
-              <button
-                disabled={!realConfig.sensitiveCol || !realConfig.outcomeCol}
-                onClick={() => {
-                  if (!realConfig.sensitiveCol || !realConfig.outcomeCol) return;
-                  const rpt = computeRealBiasReport(csvRecords, realConfig);
-                  setRealReport(rpt);
-                  showToastMsg("Analisi completata");
-                }}
-                style={{
-                  marginTop: 16, padding: "9px 20px", borderRadius: 8, fontSize: 13, fontWeight: 500,
-                  background: (!realConfig.sensitiveCol || !realConfig.outcomeCol) ? "rgba(0,0,0,0.07)" : "#0D1016",
-                  color: (!realConfig.sensitiveCol || !realConfig.outcomeCol) ? "rgba(0,0,0,0.3)" : "#fff",
-                  border: "none",
-                  cursor: (!realConfig.sensitiveCol || !realConfig.outcomeCol) ? "not-allowed" : "pointer",
-                }}
-              >
-                Analizza dataset
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 16 }}>
+                <button
+                  disabled={!realConfig.sensitiveCol || !realConfig.outcomeCol}
+                  onClick={() => {
+                    if (!realConfig.sensitiveCol || !realConfig.outcomeCol) return;
+                    const rpt = computeRealBiasReport(csvRecords, realConfig);
+                    setRealReport(rpt);
+                    showToastMsg("Analisi completata");
+                  }}
+                  style={{
+                    padding: "9px 20px", borderRadius: 8, fontSize: 13, fontWeight: 500,
+                    background: (!realConfig.sensitiveCol || !realConfig.outcomeCol) ? "rgba(0,0,0,0.07)" : "#0D1016",
+                    color: (!realConfig.sensitiveCol || !realConfig.outcomeCol) ? "rgba(0,0,0,0.3)" : "#fff",
+                    border: "none",
+                    cursor: (!realConfig.sensitiveCol || !realConfig.outcomeCol) ? "not-allowed" : "pointer",
+                  }}
+                >
+                  Analizza dataset
+                </button>
+
+                {/* Worker button */}
+                <button
+                  disabled={!realConfig.sensitiveCol || !realConfig.outcomeCol || workerLoading}
+                  onClick={runBiasWorker}
+                  style={{
+                    padding: "9px 20px", borderRadius: 8, fontSize: 13, fontWeight: 500,
+                    background: (!realConfig.sensitiveCol || !realConfig.outcomeCol) ? "rgba(0,0,0,0.07)"
+                      : workerLoading ? "rgba(245,158,11,0.1)" : "rgba(245,158,11,0.12)",
+                    color: (!realConfig.sensitiveCol || !realConfig.outcomeCol) ? "rgba(0,0,0,0.3)"
+                      : "#92400e",
+                    border: "1px solid rgba(245,158,11,0.25)",
+                    cursor: (!realConfig.sensitiveCol || !realConfig.outcomeCol || workerLoading) ? "not-allowed" : "pointer",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {workerLoading ? "⏳ Worker in esecuzione…" : "✦ Analisi matematica (Worker)"}
+                </button>
+                {workerError && <span style={{ fontSize: 11, color: "#b91c1c" }}>{workerError}</span>}
+              </div>
+            </div>
+          )}
+
+          {/* Worker results */}
+          {workerReport && (
+            <div style={{ background: "#fff", border: "1px solid rgba(245,158,11,0.2)", borderRadius: 12, padding: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                <h3 style={{ fontSize: 13, fontWeight: 600, color: "#0D1016", margin: 0 }}>
+                  Risultati Analisi Bias — Web Worker
+                </h3>
+                <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 10,
+                  background: "rgba(245,158,11,0.1)", color: "#92400e", fontWeight: 600 }}>
+                  ✦ AI — verifica
+                </span>
+              </div>
+
+              {/* Flag banners */}
+              {(workerReport.flagged || workerReport.flaggedDI) && (
+                <div style={{ padding: "10px 14px", borderRadius: 8, marginBottom: 12,
+                  background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.2)" }}>
+                  {workerReport.flagged && (
+                    <p style={{ fontSize: 12, color: "#b91c1c", margin: "0 0 2px" }}>
+                      🚨 <strong>Demographic Parity Difference</strong> {workerReport.demographicParityDifference.toFixed(3)} {'>'} 0.1 — possibile disparità
+                    </p>
+                  )}
+                  {workerReport.flaggedDI && (
+                    <p style={{ fontSize: 12, color: "#b91c1c", margin: 0 }}>
+                      🚨 <strong>Disparate Impact Ratio</strong> {workerReport.disparateImpactRatio.toFixed(3)} {'<'} 0.8 — violazione regola 4/5 (Art. 10)
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Metric row */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
+                {[
+                  { label: "DPD", value: workerReport.demographicParityDifference.toFixed(3), flag: workerReport.flagged },
+                  { label: "EOD", value: workerReport.equalizedOddsDifference.toFixed(3), flag: workerReport.equalizedOddsDifference > 0.1 },
+                  { label: "DI Ratio", value: workerReport.disparateImpactRatio.toFixed(3), flag: workerReport.flaggedDI },
+                ].map(m => (
+                  <div key={m.label} style={{
+                    padding: "10px 14px", borderRadius: 8,
+                    background: m.flag ? "rgba(220,38,38,0.05)" : "rgba(21,128,61,0.05)",
+                    border: `1px solid ${m.flag ? "rgba(220,38,38,0.15)" : "rgba(21,128,61,0.15)"}`,
+                    textAlign: "center" as const,
+                  }}>
+                    <p style={{ fontSize: 20, fontWeight: 700, color: m.flag ? "#b91c1c" : "#15803d", margin: 0 }}>{m.value}</p>
+                    <p style={{ fontSize: 10, color: "rgba(0,0,0,0.4)", marginTop: 2 }}>{m.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Groups table */}
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                <thead>
+                  <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+                    {["Gruppo", "N", "Tasso positivo", "TPR", "FPR"].map(h => (
+                      <th key={h} style={{ padding: "6px 10px", textAlign: "left" as const,
+                        fontWeight: 600, color: "rgba(0,0,0,0.42)", fontSize: 11 }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {workerReport.groups.map(g => (
+                    <tr key={g.label} style={{ borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
+                      <td style={{ padding: "7px 10px", fontWeight: 500, color: "#0D1016" }}>{g.label}</td>
+                      <td style={{ padding: "7px 10px", color: "rgba(0,0,0,0.55)" }}>{g.count}</td>
+                      <td style={{ padding: "7px 10px", color: "rgba(0,0,0,0.55)" }}>{(g.positiveRate * 100).toFixed(1)}%</td>
+                      <td style={{ padding: "7px 10px", color: "rgba(0,0,0,0.55)" }}>{g.truePositiveRate != null ? `${(g.truePositiveRate * 100).toFixed(1)}%` : "—"}</td>
+                      <td style={{ padding: "7px 10px", color: "rgba(0,0,0,0.55)" }}>{g.falsePositiveRate != null ? `${(g.falsePositiveRate * 100).toFixed(1)}%` : "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p style={{ fontSize: 10, color: "rgba(0,0,0,0.3)", marginTop: 8 }}>
+                {workerReport.datasetSize} righe analizzate · {workerReport.missingValues} valori mancanti · {workerReport.computedAt.slice(0, 19)}
+              </p>
             </div>
           )}
 

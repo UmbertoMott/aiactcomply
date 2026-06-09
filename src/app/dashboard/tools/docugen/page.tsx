@@ -492,6 +492,41 @@ export default function DocuGenPage() {
     return mandatoryIds.every((id) => getSectionStatus(id) === "done");
   }, [status]);
 
+  async function exportPdf() {
+    const resolvedName = systemName.trim() || "Sistema AI";
+    const sections = ANNEX_IV.map(s => ({
+      title: s.title,
+      article: s.ref,
+      content: getContent(s.id),
+      status: (getSectionStatus(s.id) === "done" ? "complete"
+        : getSectionStatus(s.id) === "partial" ? "partial" : "empty") as "complete" | "partial" | "empty",
+    }));
+    const payload = {
+      systemName: resolvedName,
+      systemId: `docugen-${Date.now()}`,
+      sections,
+    };
+    showToast("Generazione PDF in corso…");
+    try {
+      const res = await fetch("/api/compliance/export-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) { showToast("Errore export PDF"); return; }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `AIComply_${resolvedName.replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("PDF esportato ✓");
+    } catch {
+      showToast("Errore durante l'export PDF");
+    }
+  }
+
   function exportFullDocument() {
     const resolvedName = systemName.trim() || "sistema-ai";
     const doc = {
@@ -909,7 +944,7 @@ export default function DocuGenPage() {
                   {[
                     { label: "Markdown", action: exportMarkdown },
                     { label: "JSON", action: exportFullDocument },
-                    { label: "PDF firmato", action: () => showToast("Export PDF disponibile nella versione Enterprise") },
+                    { label: "PDF firmato", action: exportPdf },
                   ].map(({ label, action }) => (
                     <button
                       key={label}

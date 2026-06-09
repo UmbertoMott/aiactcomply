@@ -122,6 +122,39 @@ export default function DossierPage() {
     triggerPrint(data);
   }, [data, pct, done, sections.length]);
 
+  async function handleExportPdf() {
+    if (!data) return;
+    showToast("Generazione PDF in corso…");
+    const sectionPayload = sections.map(s => ({
+      title: s.title,
+      article: s.article ?? "",
+      content: `Stato: ${s.status}${s.completedAt ? ` — completato il ${new Date(s.completedAt).toLocaleDateString("it-IT")}` : ""}`,
+      status: (s.status === "complete" ? "complete" : s.status === "partial" ? "partial" : "empty") as "complete" | "partial" | "empty",
+    }));
+    try {
+      const res = await fetch("/api/compliance/export-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemName: data.meta.systemName,
+          systemId: `dossier-${Date.now()}`,
+          sections: sectionPayload,
+        }),
+      });
+      if (!res.ok) { showToast("Errore export PDF"); return; }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `AIComply_Dossier_${data.meta.systemName.replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("PDF esportato ✓");
+    } catch {
+      showToast("Errore durante l'export PDF");
+    }
+  }
+
   function handleExportJSON() {
     if (!data) return;
     const exportPayload = {
@@ -263,6 +296,13 @@ export default function DossierPage() {
                 style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)", color: "rgba(0,0,0,0.55)", cursor: "pointer" }}
               >
                 <Download size={11} /> Esporta JSON
+              </button>
+              <button
+                onClick={handleExportPdf}
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium hover:opacity-75 transition-opacity"
+                style={{ background: "#0D1016", border: "1px solid rgba(0,0,0,0.12)", color: "#fff", cursor: "pointer" }}
+              >
+                <Download size={11} /> Export PDF
               </button>
             </div>
           </div>

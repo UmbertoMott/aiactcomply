@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   AlertOctagon, AlertTriangle, CheckCircle, HelpCircle,
@@ -16,6 +16,7 @@ import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { ProhibitedCheckResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
+import { generateViolationMessage } from "@/app/actions/generateViolationMessage";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const card = {
@@ -126,6 +127,28 @@ export default function ProhibitedPage() {
     const existing = readFromStorage<ProhibitedCheckResult>("prohibited");
     return existing?.completedAt ?? null;
   });
+
+  // AI violation messages (generated after verdict)
+  const [aiMessages, setAiMessages] = useState<Record<string, string>>({});
+  const aiMsgFetched = useRef(false);
+
+  useEffect(() => {
+    if (
+      verdict?.verdict === "violation" &&
+      verdict.violatedChecks.length > 0 &&
+      !aiMsgFetched.current
+    ) {
+      aiMsgFetched.current = true;
+      const systemName =
+        typeof window !== "undefined"
+          ? (localStorage.getItem("aicomply_system_name") ?? "il sistema")
+          : "il sistema";
+      verdict.violatedChecks.forEach(async (c) => {
+        const msg = await generateViolationMessage(c.id, systemName);
+        setAiMessages((prev) => ({ ...prev, [c.id]: msg }));
+      });
+    }
+  }, [verdict]);
 
   function showToast(msg: string) {
     setToast(msg);
@@ -516,6 +539,31 @@ export default function ProhibitedPage() {
       {/* Violated checks */}
       {verdict.violatedChecks.length > 0 && (
         <section className="mb-4">
+          {/* Pulsing critical banner */}
+          <style>{`
+            @keyframes pulse-border {
+              0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.25); }
+              50%       { box-shadow: 0 0 0 6px rgba(220,38,38,0); }
+            }
+            .violation-pulse { animation: pulse-border 2s ease-in-out infinite; }
+          `}</style>
+          <div
+            className="violation-pulse rounded-xl p-4 mb-4 flex items-start gap-3"
+            style={{ background: "rgba(220,38,38,0.07)", border: "2px solid rgba(220,38,38,0.35)" }}
+          >
+            <AlertOctagon size={20} strokeWidth={1.5} style={{ color: "#b91c1c", flexShrink: 0, marginTop: 1 }} />
+            <div>
+              <p className="text-[12px] font-bold uppercase mb-1" style={{ color: "#b91c1c", letterSpacing: "0.8px" }}>
+                🚨 Violazione Art. 5 — Divieto Assoluto
+              </p>
+              <p className="text-[12px] leading-relaxed" style={{ color: "#0D1016" }}>
+                Il sistema presenta <strong>{verdict.violatedChecks.length}</strong> pratica/e vietata/e in assoluto.
+                Queste pratiche <strong>non possono essere abilitate</strong> nella UE indipendentemente dal caso d&apos;uso.
+                Sanzioni fino a <strong>35.000.000 €</strong> o il <strong>7% del fatturato mondiale</strong> (Art. 99(3) EU AI Act).
+              </p>
+            </div>
+          </div>
+
           <p className="text-[11px] font-semibold uppercase mb-2" style={{ color: "#b91c1c", letterSpacing: "0.8px" }}>
             🚫 Pratiche vietate rilevate ({verdict.violatedChecks.length})
           </p>
@@ -538,6 +586,22 @@ export default function ProhibitedPage() {
                 <p className="text-[12px] mb-2 leading-relaxed" style={{ color: "rgba(0,0,0,0.55)" }}>
                   {c.description}
                 </p>
+                {/* AI violation message */}
+                {aiMessages[c.id] ? (
+                  <div className="rounded-lg p-3 mb-2"
+                    style={{ background: "rgba(220,38,38,0.05)", border: "1px solid rgba(220,38,38,0.12)" }}>
+                    <p className="text-[10px] font-semibold uppercase mb-1" style={{ color: "rgba(220,38,38,0.6)", letterSpacing: "0.5px" }}>
+                      ✦ Analisi AI — verifica
+                    </p>
+                    <p className="text-[12px] leading-relaxed" style={{ color: "#0D1016" }}>
+                      {aiMessages[c.id]}
+                    </p>
+                  </div>
+                ) : verdict.verdict === "violation" ? (
+                  <p className="text-[11px] mb-2" style={{ color: "rgba(0,0,0,0.35)" }}>
+                    ✦ Generazione analisi AI in corso…
+                  </p>
+                ) : null}
                 <p
                   className="text-[11px] font-semibold rounded px-2 py-1 inline-block"
                   style={{ background: "rgba(220,38,38,0.08)", color: "#b91c1c" }}
