@@ -125,7 +125,7 @@ export async function loginEmail(formData: FormData) {
   // Reset rate limit on success
   await resetRateLimitAsync(ip);
 
-  // Genera e invia OTP via email — step obbligatorio per tutti gli accessi
+  // Genera e invia OTP via email (Resend) — step obbligatorio per tutti gli accessi
   const { data: { user } } = await supabase.auth.getUser();
   if (user?.id && user?.email) {
     const otpCode = generateLoginOTP(user.id, user.email);

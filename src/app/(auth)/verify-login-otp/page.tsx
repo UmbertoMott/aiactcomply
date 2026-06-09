@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useTransition } from "react";
 import Link from "next/link";
-import { verifyLoginOTPAction, resendLoginOTPAction, getDevOTPHint } from "./actions";
+import { verifyLoginOTPAction, resendLoginOTPAction, ensureOTPSent } from "./actions";
 
 export default function VerifyLoginOTPPage() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
@@ -15,8 +15,10 @@ export default function VerifyLoginOTPPage() {
 
   useEffect(() => {
     inputsRef.current[0]?.focus();
-    // Fetch dev hint (only returns data when SMTP not configured + non-production)
-    getDevOTPHint().then(({ code: hint }) => {
+    // Assicura che esista un OTP valido per questa sessione.
+    // Se l'utente arriva con una sessione persistente (senza passare dal login),
+    // ensureOTPSent genera e invia automaticamente il codice.
+    ensureOTPSent().then(({ code: hint }) => {
       if (hint) setDevCode(hint);
     }).catch(() => {});
 

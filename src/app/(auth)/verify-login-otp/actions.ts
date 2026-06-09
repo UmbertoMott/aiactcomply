@@ -75,12 +75,39 @@ export async function resendLoginOTPAction() {
   return { success: true };
 }
 
-/** DEV ONLY: returns the current OTP plaintext when SMTP is not configured */
-export async function getDevOTPHint(): Promise<{ code: string | null }> {
+/**
+ * Chiamata al mount della pagina verify-login-otp.
+ * Se non esiste un OTP valido per l'utente (es. sessione persistente che bypassa il login),
+ * ne genera e invia uno automaticamente.
+ * Restituisce anche il devCode se SMTP/Resend non è configurato.
+ */
+export async function ensureOTPSent(): Promise<{ code: string | null; sent: boolean }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user?.id) return { code: null };
+  if (!user?.id || !user?.email) return { code: null, sent: false };
 
-  const { getDevOTPCode } = await import("@/lib/auth/login-otp");
-  return { code: getDevOTPCode(user.id) };
+  const { getDevOTPCode, generateLoginOTP } = await import("@/lib/auth/login-otp");
+
+  // Se esiste già un OTP valido, restituisce solo il devCode (se disponibile)
+  const existingDevCode = getDevOTPCode(user.id);
+  if (existingDevCode) {
+    return { code: existingDevCode, sent: false };
+  }
+
+  // Nessun OTP attivo → genera e invia
+  const newCode = generateLoginOTP(user.id, user.email);
+  await sendLoginOTPEmail(user.email, newCode);
+
+  const smtpConfigured = !!(process.env.RESEND_API_KEY);
+  const devCode = (!smtpConfigured && process.env.NODE_ENV !== "production")
+    ? newCode
+    : getDevOTPCode(user.id);
+
+  return { code: devCode, sent: true };
+}
+
+/** @deprecated usa ensureOTPSent */
+export async function getDevOTPHint(): Promise<{ code: string | null }> {
+  const { code } = await ensureOTPSent();
+  return { code };
 }

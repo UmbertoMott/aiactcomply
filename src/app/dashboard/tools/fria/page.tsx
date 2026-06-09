@@ -166,6 +166,19 @@ export default function FRIAPage() {
     }
   }, [classifierData]);
 
+  // ── CONNECTION 2: Risk Manager → FRIA scenarios ───────────────────────────
+  const [rmScenarios, setRmScenarios] = useState<Array<{
+    id: string; title: string; likelihood: string; impact: string; mitigation: string;
+  }>>([]);
+  useEffect(() => {
+    const riskData = readFromStorage<{
+      risks?: Array<{ id: string; title: string; likelihood: string; impact: string; mitigation: string }>;
+    }>("riskManager");
+    if (riskData?.risks && riskData.risks.length > 0) {
+      setRmScenarios(riskData.risks);
+    }
+  }, []);
+
   // ─── Persistence ─────────────────────────────────────────────────────────
   function debounceSave(d: FRIADocument) {
     if (saveTimer.current) clearTimeout(saveTimer.current);
@@ -194,6 +207,13 @@ export default function FRIAPage() {
   // ─── Scenario helpers ─────────────────────────────────────────────────────
   function addScenario() {
     const sc: FRIAScenario = { id: crypto.randomUUID(), title: `Scenario ${doc.scenarios.length + 1}`, description: "", type: "", right_impacts: [] };
+    setDoc((prev) => { const n = { ...prev, scenarios: [...prev.scenarios, sc], updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
+    setActiveScenarioId(sc.id);
+    setP2Tab("rights");
+  }
+
+  function addScenarioFromRM(title: string, description: string) {
+    const sc: FRIAScenario = { id: crypto.randomUUID(), title, description, type: "operativo", right_impacts: [] };
     setDoc((prev) => { const n = { ...prev, scenarios: [...prev.scenarios, sc], updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
     setActiveScenarioId(sc.id);
     setP2Tab("rights");
@@ -502,6 +522,38 @@ export default function FRIAPage() {
           <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 2 — Sviluppo scenari e impatto</h2>
           <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Identifica scenari tipici e worst-case. Valuta l&apos;impatto su ciascun diritto fondamentale.</p>
         </div>
+
+        {/* ── Risk Manager suggestions banner ──────────────────────────── */}
+        {rmScenarios.length > 0 && (
+          <div style={{
+            padding: "10px 14px", borderRadius: 8, marginBottom: 16,
+            background: "rgba(217,119,6,0.06)", border: "1px solid rgba(217,119,6,0.2)",
+          }}>
+            <p style={{ fontSize: 12, color: "#d97706", margin: "0 0 8px", fontWeight: 500 }}>
+              <strong>{rmScenarios.length} rischi</strong> pre-caricati dal Risk Manager.
+              Puoi aggiungerli come scenari di partenza per questa fase.
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              {rmScenarios.map((r) => (
+                <button key={r.id}
+                  onClick={() => addScenarioFromRM(
+                    r.title,
+                    `Rischio importato dal Risk Manager — likelihood: ${r.likelihood}, impact: ${r.impact}${r.mitigation ? `. Mitigazione proposta: ${r.mitigation}` : ""}`
+                  )}
+                  style={{
+                    textAlign: "left", fontSize: 12, padding: "4px 10px",
+                    borderRadius: 6, border: "1px solid rgba(217,119,6,0.3)",
+                    background: "white", cursor: "pointer", color: "#92400e",
+                  }}>
+                  + Aggiungi scenario: {r.title}
+                  <span style={{ marginLeft: 6, opacity: 0.6 }}>
+                    ({r.likelihood} / {r.impact})
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
           {/* Scenario list */}
           <div style={{ width: 196, flexShrink: 0 }}>

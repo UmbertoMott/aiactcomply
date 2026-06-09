@@ -24,18 +24,14 @@ export default function ResiliencePage() {
   );
   const [accuracyThreshold, setAccuracyThreshold] = useState<number>(95);
   const [fallbackChecks, setFallbackChecks] = useState<Record<string, boolean>>({});
+  const [systemName, setSystemName] = useState<string>("");
 
-  // Pre-populate from other tools' localStorage data
-  // NOTE: this component has no system name field and no attack vector selection state —
-  // attacks are purely simulated at random. Pre-population logic is ready here for when
-  // those fields are added. cls.systemName and risk data are read but not yet applied.
+  // Pre-populate from Classifier
   useEffect(() => {
-    const _cls = readFromStorage<ClassifierResult>("classifier");
-    const _risk = readFromStorage<RiskManagerResult>("riskManager");
-    // No applicable state to pre-populate in the current component shape.
-    // When a systemName or selectedAttackVectors state is added, wire them here.
-    void _cls;
-    void _risk;
+    const existing = readFromStorage<ResilienceResult>("resilience");
+    if (existing) return; // Don't overwrite user's saved data
+    const cls = readFromStorage<ClassifierResult>("classifier");
+    if (cls?.systemName) setSystemName(cls.systemName);
   }, []);
 
   function showToast(msg: string, type: "success" | "error" = "success") {

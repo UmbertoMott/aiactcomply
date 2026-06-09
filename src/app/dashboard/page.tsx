@@ -20,6 +20,11 @@ const OnboardingWizard = dynamic(
   { ssr: false }
 );
 
+const ComplianceJourneyDashboard = dynamic(
+  () => import("@/components/compliance/ComplianceJourneyDashboard"),
+  { ssr: false }
+);
+
 // ── Design tokens ─────────────────────────────────────────────────────────────
 
 const T = {
@@ -327,6 +332,9 @@ export default function DashboardPage() {
             )}
           </div>
         )}
+
+        {/* ── COMPLIANCE JOURNEY ──────────────────────────────────────── */}
+        <ComplianceJourneyDashboard />
 
         {/* ── HEADER + DOSSIER ────────────────────────────────────────── */}
         <div className="flex items-start justify-between mb-6">

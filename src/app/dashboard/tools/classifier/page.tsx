@@ -29,6 +29,7 @@ import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { generatePassport, verifyPassport, exportForRegulator, getPassportSummary, type ConformityPassport } from "@/lib/crypto/passport";
 import { writeToStorage } from "@/lib/dossier/storage-schema";
 import type { ClassifierResult } from "@/lib/dossier/storage-schema";
+import { loadOrgProfile, saveOrgProfile } from "@/lib/dossier/org-profile";
 
 // ─── ADDITION 1 — Persistence ────────────────────────────────────────
 
@@ -109,6 +110,15 @@ const cardSt = {
 
 export default function ClassifierPage() {
   // Existing state
+  // Step 0: show conversational intro if org profile not yet configured
+  const [showStep0, setShowStep0] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("aicomply_step0_done") !== "1";
+  });
+  const [step0OrgType, setStep0OrgType] = useState<"pa" | "private" | "">("");
+  const [step0SystemType, setStep0SystemType] = useState<"hr" | "medical" | "credit" | "biometric" | "other" | "">("");
+  const [step0NistInterest, setStep0NistInterest] = useState(false);
+
   const [phase, setPhase] = useState<"intro" | "scan" | "decision" | "result">("intro");
   const [files] = useState(MOCK_PROJECT_FILES);
   const [result, setResult] = useState<ReturnType<typeof classifyRisk> | null>(null);
@@ -344,6 +354,150 @@ export default function ClassifierPage() {
           );
         })}
       </div>
+
+      {/* ── STEP 0: Conversational intro ────────────────────────────── */}
+      {showStep0 && (
+        <div style={{
+          background: "#fff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 14,
+          padding: 28, marginBottom: 24,
+        }}>
+          <div className="flex items-center gap-2 mb-1">
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "rgba(0,0,0,0.35)", textTransform: "uppercase" }}>
+              Passo 0 / Prima classificazione
+            </span>
+          </div>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: "#0D1016", margin: "0 0 6px" }}>
+            Raccontaci la tua organizzazione
+          </h2>
+          <p style={{ fontSize: 13, color: "rgba(0,0,0,0.45)", marginBottom: 24, lineHeight: 1.6 }}>
+            Rispondi a 3 domande rapide per personalizzare il tuo percorso di conformità EU AI Act.
+          </p>
+
+          {/* Q1: Tipo organizzazione */}
+          <div className="mb-5">
+            <p style={{ fontSize: 13, fontWeight: 500, color: "#0D1016", marginBottom: 10 }}>
+              1. Che tipo di organizzazione sei?
+            </p>
+            <div className="flex gap-3">
+              {[
+                { id: "pa" as const,      label: "Pubblica Amministrazione", sublabel: "Comune, Regione, Ministero, AUSL…" },
+                { id: "private" as const, label: "Privata / Enterprise",      sublabel: "Azienda, startup, libero professionista" },
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setStep0OrgType(opt.id)}
+                  style={{
+                    flex: 1, padding: "12px 16px", borderRadius: 10, textAlign: "left", cursor: "pointer",
+                    border: step0OrgType === opt.id ? "2px solid #0D1016" : "1px solid rgba(0,0,0,0.1)",
+                    background: step0OrgType === opt.id ? "rgba(13,16,22,0.04)" : "#fff",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "#0D1016" }}>{opt.label}</div>
+                  <div style={{ fontSize: 11, color: "rgba(0,0,0,0.45)", marginTop: 2 }}>{opt.sublabel}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Q2: Tipo sistema */}
+          <div className="mb-5">
+            <p style={{ fontSize: 13, fontWeight: 500, color: "#0D1016", marginBottom: 10 }}>
+              2. Che tipo di sistema AI vuoi classificare?
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+              {[
+                { id: "hr" as const,        label: "HR / Recruiting",      sublabel: "Selezione candidati, valutazioni" },
+                { id: "medical" as const,   label: "Medicale / Salute",    sublabel: "Diagnosi, triage, monitoraggio" },
+                { id: "credit" as const,    label: "Credito / Finance",    sublabel: "Scoring, frodi, valutazione rischio" },
+                { id: "biometric" as const, label: "Biometrico",           sublabel: "Riconoscimento facciale, voce" },
+                { id: "other" as const,     label: "Altro",                sublabel: "NLP, raccomandazioni, automazione…" },
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setStep0SystemType(opt.id)}
+                  style={{
+                    padding: "10px 14px", borderRadius: 8, textAlign: "left", cursor: "pointer",
+                    border: step0SystemType === opt.id ? "2px solid #0D1016" : "1px solid rgba(0,0,0,0.1)",
+                    background: step0SystemType === opt.id ? "rgba(13,16,22,0.04)" : "#fff",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  <div style={{ fontSize: 12, fontWeight: 600, color: "#0D1016" }}>{opt.label}</div>
+                  <div style={{ fontSize: 11, color: "rgba(0,0,0,0.4)", marginTop: 1 }}>{opt.sublabel}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Q3: NIST interest */}
+          <div className="mb-6">
+            <p style={{ fontSize: 13, fontWeight: 500, color: "#0D1016", marginBottom: 10 }}>
+              3. Hai requisiti di mappatura al NIST AI RMF?
+            </p>
+            <div className="flex gap-3">
+              {[
+                { value: true,  label: "Sì, usiamo NIST" },
+                { value: false, label: "No / Non so" },
+              ].map((opt) => (
+                <button
+                  key={String(opt.value)}
+                  onClick={() => setStep0NistInterest(opt.value)}
+                  style={{
+                    flex: 1, padding: "10px 16px", borderRadius: 10, cursor: "pointer",
+                    border: step0NistInterest === opt.value ? "2px solid #0D1016" : "1px solid rgba(0,0,0,0.1)",
+                    background: step0NistInterest === opt.value ? "rgba(13,16,22,0.04)" : "#fff",
+                    fontSize: 13, fontWeight: 500, color: "#0D1016",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="flex items-center gap-4">
+            <button
+              disabled={!step0OrgType || !step0SystemType}
+              onClick={() => {
+                // Save to OrgProfile
+                const existing = loadOrgProfile();
+                saveOrgProfile({
+                  ...existing,
+                  paItaly: step0OrgType === "pa",
+                  nistEnabled: step0NistInterest,
+                });
+                if (typeof window !== "undefined") {
+                  localStorage.setItem("aicomply_step0_done", "1");
+                }
+                setShowStep0(false);
+              }}
+              style={{
+                padding: "10px 24px", borderRadius: 8, fontSize: 13, fontWeight: 600,
+                background: "#0D1016", color: "#fff", border: "none",
+                cursor: (!step0OrgType || !step0SystemType) ? "not-allowed" : "pointer",
+                opacity: (!step0OrgType || !step0SystemType) ? 0.4 : 1,
+                transition: "opacity 0.15s",
+              }}
+            >
+              Continua con la classificazione →
+            </button>
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  localStorage.setItem("aicomply_step0_done", "1");
+                }
+                setShowStep0(false);
+              }}
+              style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", background: "none", border: "none", cursor: "pointer" }}
+            >
+              Salta
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ADDITION 9 — PHASE: INTRO (rewritten inner content) */}
       {phase === "intro" && (

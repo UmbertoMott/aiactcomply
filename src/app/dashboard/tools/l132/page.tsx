@@ -567,7 +567,15 @@ export default function L132Page() {
   // Load saved state (localStorage + DB)
   useEffect(() => {
     const savedLocal = readFromStorage<L132Result>("l132");
-    if (savedLocal) setForm(resultToForm(savedLocal));
+    if (savedLocal) {
+      setForm(resultToForm(savedLocal));
+    } else {
+      // Pre-populate systemName from Classifier on first open
+      const cls = readFromStorage<{ systemName?: string }>("classifier");
+      if (cls?.systemName) {
+        setForm((f) => ({ ...f, systemName: cls.systemName! }));
+      }
+    }
     // Carica sistemi AI dal DB
     loadAISystems().then(setAiSystems);
   }, []);
