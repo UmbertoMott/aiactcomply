@@ -499,7 +499,7 @@ export default function DocuGenPage() {
       article: s.ref,
       content: getContent(s.id),
       status: (getSectionStatus(s.id) === "done" ? "complete"
-        : getSectionStatus(s.id) === "partial" ? "partial" : "empty") as "complete" | "partial" | "empty",
+        : getSectionStatus(s.id) === "draft" ? "partial" : "empty") as "complete" | "partial" | "empty",
     }));
     const payload = {
       systemName: resolvedName,
