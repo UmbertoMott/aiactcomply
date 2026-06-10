@@ -14,6 +14,7 @@ import { buildComplianceContextFromStorage } from "@/hooks/useComplianceContext"
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { VersionHistoryPanel } from "@/components/compliance/VersionHistoryPanel";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
+import { appendVersion, listVersions, type VersionSnapshot } from "@/lib/projects/version-history";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
 
 const STORAGE_KEY = "docugen_state";
@@ -193,13 +194,7 @@ const ANNEX_IV = [
   },
 ];
 
-// ─── Simulated version history ────────────────────────────────────────────────
-const VERSIONS = [
-  { tag: "v2.1.0", commit: "a3f9c2d", date: "2025-04-10", status: "Finalized", changes: 3 },
-  { tag: "v2.0.1", commit: "b7e1a4c", date: "2025-02-28", status: "Finalized", changes: 1 },
-  { tag: "v2.0.0", commit: "c4d2f18", date: "2025-01-15", status: "Expired",   changes: 9 },
-  { tag: "v1.3.2", commit: "d9a5e31", date: "2024-11-20", status: "Expired",   changes: 2 },
-];
+// VERSIONS array removed — now uses real version-history.ts snapshots
 
 // ─── Auto-populated content (simulates cross-tool aggregation) ────────────────
 const AUTO_CONTENT: Record<string, string> = {
@@ -342,10 +337,19 @@ export default function DocuGenPage() {
   const [compareMode, setCompareMode] = useState(false);
   const [compareIdx, setCompareIdx] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
+  // Version history
+  const [versionSnapshots, setVersionSnapshots] = useState<VersionSnapshot[]>([]);
+  const [saveNote, setSaveNote] = useState("");
+  const [showSaveNote, setShowSaveNote] = useState(false);
   const [crossContent] = useState<Record<string, string>>(() => readCrossToolContent());
 
   // ── Auto-save ogni 30s ────────────────────────────────────────────────────
   const { justSaved: docugenSaved } = useAutoSave("docugen", persisted, saveState);
+
+  // ── Carica versioni al mount ──────────────────────────────────────────────
+  useEffect(() => {
+    setVersionSnapshots(listVersions("docugen"));
+  }, []);
 
   // ─── DB Sync State ──────────────────────────────────────────────────────────
   const [technicalFileId, setTechnicalFileId] = useState<string | null>(null);
@@ -446,7 +450,7 @@ export default function DocuGenPage() {
     setTimeout(() => setToast(null), 3000);
   }
 
-  const version = VERSIONS[activeVersion];
+  const version = versionSnapshots[0] ?? { tag: "bozza", status: "draft" as const, savedAt: "", sectionsChanged: [] as string[] };
 
   function getContent(sectionId: string): string {
     const sec = ANNEX_IV.find((s) => s.id === sectionId)!;
@@ -467,7 +471,7 @@ export default function DocuGenPage() {
     readFromStorage<DocugenResult>("docugen")?.completedAt ?? null
   );
 
-  async function saveToDossier() {
+  async function saveToDossier(asFinalized = false) {
     const completedAt = new Date().toISOString();
     const resolvedName = systemName.trim() || "Sistema AI (non specificato)";
 
@@ -483,18 +487,38 @@ export default function DocuGenPage() {
       completedAt,
     });
 
+    // Snapshot sezioni correnti
+    const sectionsSnapshot: Record<string, "empty" | "draft" | "done"> = {};
+    ANNEX_IV.forEach(s => { sectionsSnapshot[s.id] = getSectionStatus(s.id); });
+
+    // Crea snapshot reale nella cronologia
+    const isSubstantial = changeImpactReport?.isSubstantialModification ?? false;
+    appendVersion("docugen", persisted, {
+      label: asFinalized ? "Versione finalizzata" : "Salvataggio manuale",
+      note: saveNote.trim() || undefined,
+      status: asFinalized ? "finalized" : "draft",
+      isSubstantialModification: isSubstantial,
+      substModificationBasis: isSubstantial ? (changeImpactReport?.substModificationBasis ?? undefined) : undefined,
+      sectionsSnapshot,
+      systemName: resolvedName,
+    });
+
+    // Aggiorna lista versioni in UI
+    setVersionSnapshots(listVersions("docugen"));
+    setSaveNote("");
+    setShowSaveNote(false);
+
     await appendEvidence("adr", {
       type: "Fascicolo Tecnico Annex IV — Art. 11",
       systemName: resolvedName,
       sectionsCompleted: doneCount,
       sectionsTotal: ANNEX_IV.length,
       requiredRemaining: emptyRequired.length,
-      version: VERSIONS[activeVersion]?.tag ?? "draft",
-      commit: VERSIONS[activeVersion]?.commit ?? "—",
+      status: asFinalized ? "finalized" : "draft",
     }, "docugen-ai");
 
     setSavedAt(completedAt);
-    showToast("Fascicolo salvato nel dossier e registrato su Evidence Layer ✓");
+    showToast(asFinalized ? "✓ Versione finalizzata salvata nel dossier" : "Fascicolo salvato nel dossier ✓");
   }
   const draftCount = ANNEX_IV.filter((s) => getSectionStatus(s.id) === "draft").length;
   const emptyRequired = ANNEX_IV.filter((s) => s.required && getSectionStatus(s.id) === "empty");
@@ -546,8 +570,8 @@ export default function DocuGenPage() {
         format: "AIComply Fascicolo Tecnico — Annex IV",
         regulation: "Regolamento UE 2024/1689 — Art. 11",
         systemName: resolvedName,
-        version: VERSIONS[activeVersion]?.tag ?? "draft",
-        commit: VERSIONS[activeVersion]?.commit ?? "",
+        version: versionSnapshots[0]?.tag ?? "draft",
+        commit: versionSnapshots[0]?.id?.slice(0, 7) ?? "—",
         exportedAt: new Date().toISOString(),
         completionPct: Math.round((doneCount / 9) * 100),
       },
@@ -575,7 +599,7 @@ export default function DocuGenPage() {
     const lines: string[] = [
       `# Fascicolo Tecnico — ${resolvedName}`,
       `**Regolamento UE 2024/1689 — Art. 11, Allegato IV**`,
-      `Versione: ${VERSIONS[activeVersion]?.tag ?? "draft"} · Esportato: ${new Date().toLocaleDateString("it-IT")}`,
+      `Versione: ${versionSnapshots[0]?.tag ?? "draft"} · Esportato: ${new Date().toLocaleDateString("it-IT")}`,
       "",
     ];
     ANNEX_IV.forEach((s) => {
@@ -608,17 +632,43 @@ export default function DocuGenPage() {
           <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>Vedi dossier →</Link>
         </div>
       ) : (
-        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[12px]"
-          style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}>
-          <span style={{ color: "rgba(0,0,0,0.45)" }}>
-            Salva il Fascicolo Tecnico nel dossier di compliance
-            {docugenSaved && <span className="ml-2 text-[10px]" style={{ color: "#16a34a" }}>✓ Salvato automaticamente</span>}
-          </span>
-          <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1 transition-opacity hover:opacity-80"
-            style={{ background: "#0D1016", color: "#ffffff", border: "none", cursor: "pointer" }}>
-            Salva nel dossier
-          </button>
-        </div>
+        <>
+          <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-1 text-[12px]"
+            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}>
+            <span style={{ color: "rgba(0,0,0,0.45)" }}>
+              Salva il Fascicolo Tecnico nel dossier di compliance
+              {docugenSaved && <span className="ml-2 text-[10px]" style={{ color: "#16a34a" }}>✓ Auto-salvato</span>}
+            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <button
+                onClick={() => setShowSaveNote(v => !v)}
+                className="text-[11px] rounded-full px-3 py-1 transition-opacity hover:opacity-80"
+                style={{ background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer" }}>
+                {showSaveNote ? "▲" : "+ nota"}
+              </button>
+              <button onClick={() => saveToDossier(false)} className="text-[11px] font-medium rounded-full px-3 py-1 transition-opacity hover:opacity-80"
+                style={{ background: "rgba(0,0,0,0.08)", color: "#0D1016", border: "none", cursor: "pointer" }}>
+                Salva bozza
+              </button>
+              <button onClick={() => saveToDossier(true)} disabled={!canFinalize}
+                className="text-[11px] font-medium rounded-full px-3 py-1 transition-opacity hover:opacity-80 disabled:opacity-40"
+                style={{ background: "#0D1016", color: "#ffffff", border: "none", cursor: canFinalize ? "pointer" : "not-allowed" }}>
+                ✓ Finalizza versione
+              </button>
+            </div>
+          </div>
+          {showSaveNote && (
+            <div className="mb-5 rounded-lg" style={{ padding: "8px 16px 10px", background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", display: "flex", gap: 8, alignItems: "center" }}>
+              <Clock size={12} style={{ color: "rgba(0,0,0,0.3)", flexShrink: 0 }} />
+              <input
+                value={saveNote}
+                onChange={e => setSaveNote(e.target.value)}
+                placeholder="Nota opzionale — es. «Aggiornato dopo audit DPO del 10/06»"
+                style={{ flex: 1, fontSize: 11, padding: "5px 10px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016" }}
+              />
+            </div>
+          )}
+        </>
       )}
 
       {/* DB Sync Banner */}
@@ -680,38 +730,32 @@ export default function DocuGenPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {/* Version selector */}
+          {/* Version badge — reale */}
           <div className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-[12px]"
             style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)" }}>
             <GitBranch className="h-3.5 w-3.5" style={{ color: "rgba(0,0,0,0.35)" }} />
-            <select
-              value={activeVersion}
-              onChange={(e) => setActiveVersion(Number(e.target.value))}
-              className="bg-transparent outline-none text-[12px]"
-              style={{ color: "#0D1016" }}
-            >
-              {VERSIONS.map((v, i) => (
-                <option key={v.tag} value={i}>{v.tag} — {v.commit.slice(0, 7)}</option>
-              ))}
-            </select>
+            <span style={{ color: "#0D1016", fontSize: 11 }}>
+              {versionSnapshots.length > 0
+                ? `${versionSnapshots[0].tag ?? "bozza"} · ${versionSnapshots.length} snapshot`
+                : "Nessuna versione salvata"}
+            </span>
           </div>
 
-          {/* Status badge */}
-          <div className="text-[11px] font-medium px-3 py-2 rounded-lg"
-            style={STATUS_STYLE[version.status]}>
-            {version.status}
-          </div>
+          {/* Finalizzata badge */}
+          {versionSnapshots[0]?.status === "finalized" && (
+            <span className="text-[11px] font-medium px-3 py-2 rounded-lg"
+              style={{ background: "rgba(21,128,61,0.08)", color: "#15803d", border: "1px solid rgba(21,128,61,0.2)" }}>
+              ✓ Finalizzata
+            </span>
+          )}
 
-          {/* Compare toggle */}
-          <button
-            onClick={() => setCompareMode(!compareMode)}
-            className="text-[11px] px-3 py-2 rounded-lg transition-all"
-            style={compareMode
-              ? { background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.25)", color: "#4338ca" }
-              : { background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.45)" }}
-          >
-            Confronta versioni
-          </button>
+          {/* Modifica sostanziale warning */}
+          {versionSnapshots[0]?.isSubstantialModification && (
+            <span className="flex items-center gap-1 text-[11px] font-medium px-3 py-2 rounded-lg"
+              style={{ background: "rgba(220,38,38,0.07)", color: "#dc2626", border: "1px solid rgba(220,38,38,0.15)" }}>
+              <AlertTriangle className="h-3 w-3" /> Modifica sostanziale
+            </span>
+          )}
 
           {/* Export */}
           <button
@@ -730,10 +774,10 @@ export default function DocuGenPage() {
       {/* ── Stats row ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[
-          { label: "Sezioni completate", value: `${doneCount}/9`,  color: "#16a34a" },
-          { label: "In bozza",           value: draftCount,         color: "#2563eb" },
-          { label: "Obbligatorie vuote", value: emptyRequired.length, color: emptyRequired.length > 0 ? "#dc2626" : "#16a34a" },
-          { label: "Commit collegato",   value: version.commit,     color: "rgba(0,0,0,0.5)" },
+          { label: "Sezioni completate",  value: `${doneCount}/9`,              color: "#16a34a" },
+          { label: "In bozza",            value: draftCount,                     color: "#2563eb" },
+          { label: "Obbligatorie vuote",  value: emptyRequired.length,           color: emptyRequired.length > 0 ? "#dc2626" : "#16a34a" },
+          { label: "Versioni salvate",    value: versionSnapshots.length || "—", color: "rgba(0,0,0,0.5)" },
         ].map((c) => (
           <div key={c.label} className="rounded-xl p-4"
             style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
@@ -750,7 +794,7 @@ export default function DocuGenPage() {
         <div className="rounded-xl p-3 mb-4 flex items-center gap-3"
           style={{ background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.15)" }}>
           <span className="text-[12px]" style={{ color: "#4338ca" }}>
-            Confronto: <strong>{VERSIONS[activeVersion].tag}</strong> vs
+            Confronto: <strong>{versionSnapshots[0]?.tag ?? "corrente"}</strong> vs
           </span>
           <select
             value={compareIdx}
@@ -758,9 +802,9 @@ export default function DocuGenPage() {
             className="text-[12px] rounded px-2 py-1 outline-none"
             style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", color: "#4338ca" }}
           >
-            {VERSIONS.map((v, i) =>
-              i !== activeVersion ? <option key={v.tag} value={i}>{v.tag}</option> : null
-            )}
+            {versionSnapshots.slice(1).map((v, i) => (
+              <option key={v.id} value={i + 1}>{v.tag ?? `snapshot ${i + 1}`}</option>
+            ))}
           </select>
           <span className="text-[11px]" style={{ color: "rgba(0,0,0,0.35)" }}>
             Le variazioni sostanziali sono evidenziate in rosso
@@ -901,10 +945,11 @@ export default function DocuGenPage() {
               </div>
 
               {/* Compare diff banner */}
-              {compareMode && VERSIONS[compareIdx] && (
+              {compareMode && versionSnapshots[compareIdx] && (
                 <div className="rounded-lg px-3 py-2 mb-3 text-[11px]"
                   style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)", color: "#dc2626" }}>
-                  ∆ Variazioni rilevate rispetto a {VERSIONS[compareIdx].tag}: logica algoritmica modificata (commit {VERSIONS[compareIdx].commit})
+                  ∆ Confronto con {versionSnapshots[compareIdx].tag ?? `snapshot ${compareIdx}`} del {new Date(versionSnapshots[compareIdx].savedAt).toLocaleDateString("it-IT")}
+                  {versionSnapshots[compareIdx].sectionsChanged?.includes(activeSection) && " — questa sezione è stata modificata"}
                 </div>
               )}
 
@@ -922,7 +967,7 @@ export default function DocuGenPage() {
                        activeS.autoSource === "git" ? "Git History" :
                        "MLflow"}
                     </strong>
-                    {" "}— sincronizzato con commit {version.commit}
+                    {versionSnapshots.length > 0 && ` — versione ${version.tag}`}
                   </span>
                 </div>
               )}
@@ -968,7 +1013,7 @@ export default function DocuGenPage() {
                     </button>
                   ))}
                 </div>
-                {canFinalize && version.status !== "Finalized" && (
+                {canFinalize && version.status !== "finalized" && (
                   <button
                     onClick={async () => {
                       await saveToDossier();
@@ -1109,45 +1154,6 @@ export default function DocuGenPage() {
             </div>
           </div>
 
-          {/* ── Version timeline ── */}
-          <div className="mt-4 rounded-xl p-4"
-            style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
-            <p className="text-[10px] font-semibold uppercase mb-3"
-              style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "1px" }}>
-              Storico versioni — collegato a Git commit
-            </p>
-            <div className="flex items-center gap-0">
-              {VERSIONS.map((v, i) => {
-                const style = STATUS_STYLE[v.status];
-                const active = i === activeVersion;
-                return (
-                  <button key={v.tag} onClick={() => setActiveVersion(i)}
-                    className="flex-1 flex flex-col items-center gap-1 relative group">
-                    {i < VERSIONS.length - 1 && (
-                      <div className="absolute left-1/2 right-0 top-2 h-px" style={{ background: "rgba(0,0,0,0.08)" }} />
-                    )}
-                    <div className="w-4 h-4 rounded-full z-10 flex items-center justify-center"
-                      style={{
-                        background: active ? "#0D1016" : style.bg,
-                        border: `2px solid ${active ? "#0D1016" : style.border}`,
-                        boxShadow: active ? "0 0 0 3px rgba(13,16,22,0.1)" : "none",
-                      }}>
-                      {active && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                    </div>
-                    <span className="text-[10px] font-medium" style={{ color: active ? "#0D1016" : "rgba(0,0,0,0.45)" }}>
-                      {v.tag}
-                    </span>
-                    <span className="text-[9px]" style={{ color: "rgba(0,0,0,0.28)" }}>{v.date}</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded"
-                      style={{ background: style.bg, color: style.text, border: `1px solid ${style.border}` }}>
-                      {v.status}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           {/* ── Finalize blocker ── */}
           {!canFinalize && (
             <div className="mt-3 rounded-xl px-4 py-3 flex items-start gap-2"
@@ -1167,7 +1173,15 @@ export default function DocuGenPage() {
       <div className="mt-6">
         <VersionHistoryPanel
           toolId="docugen"
-          onRestore={(data) => setPersistedRaw(data as DocuGenState)}
+          onRestore={(data) => {
+            const d = data as DocuGenState;
+            if (d && typeof d === "object") {
+              setPersistedRaw({ ...DEFAULT_STATE, ...d });
+            }
+            setVersionSnapshots(listVersions("docugen"));
+            showToast("Versione ripristinata ✓");
+          }}
+          sectionLabels={Object.fromEntries(ANNEX_IV.map(s => [s.id, s.title]))}
         />
       </div>
 
