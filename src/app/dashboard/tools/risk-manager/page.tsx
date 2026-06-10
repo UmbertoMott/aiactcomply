@@ -107,8 +107,8 @@ function PhaseRow({
   const data = documentation[phase.id as keyof RiskDocumentation];
   const hasData = data && Object.keys(data).length > 0;
 
-  const borderColor = status === "active" ? "rgba(59,130,246,0.25)" : status === "complete" ? "rgba(22,163,74,0.2)" : "rgba(0,0,0,0.07)";
-  const bg = status === "active" ? "rgba(59,130,246,0.04)" : status === "complete" ? "rgba(22,163,74,0.04)" : "transparent";
+  const borderColor = status === "active" ? "rgba(0,0,0,0.2)" : status === "complete" ? "rgba(22,163,74,0.2)" : "rgba(0,0,0,0.07)";
+  const bg = status === "active" ? "rgba(0,0,0,0.03)" : status === "complete" ? "rgba(22,163,74,0.04)" : "transparent";
 
   return (
     <div style={{ border: `1px solid ${borderColor}`, background: bg, borderRadius: 8, overflow: "hidden", marginBottom: 4 }}>
@@ -123,13 +123,13 @@ function PhaseRow({
           {status === "complete" ? (
             <CheckCircle size={14} style={{ color: "#16a34a" }} />
           ) : status === "active" ? (
-            <div style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid #2563eb" }} />
+            <div style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid #0D1016" }} />
           ) : (
             <Clock size={14} style={{ color: "rgba(0,0,0,0.2)" }} />
           )}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: status === "active" ? "#1d4ed8" : status === "complete" ? "#15803d" : "rgba(0,0,0,0.4)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: status === "active" ? "#0D1016" : status === "complete" ? "#15803d" : "rgba(0,0,0,0.4)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {phase.label}
           </div>
           <div style={{ fontSize: 10, color: "rgba(0,0,0,0.3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -191,8 +191,8 @@ function ChatBubble({ message, index, onSpeak, isPlaying }: {
           {!isUser && (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                <Shield size={10} style={{ color: "#2563eb" }} />
-                <span style={{ fontSize: 9, color: "#2563eb", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                <Shield size={10} style={{ color: "#0D1016" }} />
+                <span style={{ fontSize: 9, color: "#0D1016", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
                   Risk Manager AI
                 </span>
               </div>
@@ -515,12 +515,12 @@ export default function RiskManagerPage() {
 
         {/* RIGHT — chat */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, overflow: "hidden", minWidth: 0 }}>
-          <div style={{ padding: "8px 16px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "rgba(37,99,235,0.04)", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#2563eb" }} />
-            <span style={{ fontSize: 12, fontWeight: 600, color: "#1d4ed8" }}>
+          <div style={{ padding: "8px 16px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "#f5f5f4", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#0D1016" }} />
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#0D1016" }}>
               Fase corrente: {PHASES[currentPhaseIndex]?.label}
             </span>
-            <span style={{ fontSize: 11, color: "rgba(0,0,0,0.35)" }}>
+            <span style={{ fontSize: 11, color: "rgba(0,0,0,0.45)" }}>
               — {PHASES[currentPhaseIndex]?.article}
             </span>
             <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4 }}>
