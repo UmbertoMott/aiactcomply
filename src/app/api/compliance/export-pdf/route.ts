@@ -22,12 +22,25 @@ interface ExportSection {
   status?: "complete" | "partial" | "empty"
 }
 
+type RiskTier = "high" | "unacceptable" | "limited" | "minimal" | "gpai" | null
+
 interface ExportRequest {
   systemName: string
   systemId?: string
   classifierHash?: string
+  tier?: RiskTier
   sections: ExportSection[]
 }
+
+// ─── Sezioni Art.50 (limited/minimal) ──────────────────────────────────────
+const ART50_SECTIONS = [
+  { id: "a50_1", title: "Identità del sistema AI",            article: "Art. 50(1)" },
+  { id: "a50_2", title: "Capacità e limitazioni principali",  article: "Art. 50(1)" },
+  { id: "a50_3", title: "Uso previsto e contesto",            article: "Art. 50(1)" },
+  { id: "a50_4", title: "Interazione con persone fisiche",    article: "Art. 50(2)" },
+  { id: "a50_5", title: "Meccanismo di override / opt-out",   article: "Art. 50(3)" },
+  { id: "a50_6", title: "Contatti e responsabile AI",         article: "Art. 50(4)" },
+]
 
 function truncate(text: string, maxLen = 80): string {
   if (!text) return ""
@@ -52,10 +65,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 })
   }
 
-  const { systemName = "Sistema AI", systemId, classifierHash, sections = [] } = body
+  const { systemName = "Sistema AI", systemId, classifierHash, tier, sections = [] } = body
+
+  // ── Tier branching ──────────────────────────────────────────────────────────
+  const isHighRisk = tier === "high" || tier === "unacceptable" || tier === null
+  const isLimited  = tier === "limited"
+  const isMinimal  = tier === "minimal"
+  const docTemplate = isHighRisk ? "annexiv" : isLimited ? "art50" : "minimal"
+  const templateLabel = isHighRisk
+    ? "Fascicolo Tecnico — Allegato IV"
+    : isLimited
+      ? "Dichiarazione di Trasparenza — Art. 50"
+      : "Nota di Conformità — Sistema a Rischio Minimo"
+  const regulationRef = isHighRisk
+    ? "Reg. UE 2024/1689 — Art. 11, Allegato IV"
+    : isLimited
+      ? "Reg. UE 2024/1689 — Art. 50"
+      : "Reg. UE 2024/1689 — Considerando 96"
+
+  // Per limited/minimal, genera sezioni Art.50 se non fornite
+  const effectiveSections: ExportSection[] = (docTemplate !== "annexiv" && sections.length === 0)
+    ? ART50_SECTIONS.map(s => ({ title: s.title, article: s.article, content: "", status: "empty" as const }))
+    : sections
 
   // ── SHA-256 del contenuto ───────────────────────────────────────────────────
-  const contentForHash = sections.map(s => `${s.title}:${s.content}`).join("|")
+  const contentForHash = effectiveSections.map(s => `${s.title}:${s.content}`).join("|")
   const contentHash = crypto
     .createHash("sha256")
     .update(contentForHash + systemId + new Date().toISOString().slice(0, 10))
@@ -174,8 +208,12 @@ export async function POST(req: NextRequest) {
 
   drawText(sanitize(systemName), { size: H1_SIZE, font: fontBold })
   y -= 6
-  drawText("Technical File — EU AI Act (Reg. UE 2024/1689)", {
-    size: 12, font: fontReg, color: rgb(0.42, 0.42, 0.42)
+  drawText(sanitize(templateLabel), {
+    size: 12, font: fontBold, color: rgb(0.145, 0.063, 0.086)
+  })
+  y -= 2
+  drawText(sanitize(regulationRef), {
+    size: 10, font: fontReg, color: rgb(0.42, 0.42, 0.42)
   })
   y -= 4
   drawText(`Generato da AIComply · ${today}`, {
@@ -184,10 +222,30 @@ export async function POST(req: NextRequest) {
   y -= 16
   drawHRule()
 
+  // Badge template tier
+  if (!isHighRisk) {
+    y -= 8
+    const tierLabel = isLimited ? "LIMITED RISK — Art. 50" : "MINIMAL RISK"
+    drawText(`⬛ ${tierLabel}`, { size: 9, font: fontBold, color: rgb(0.57, 0.27, 0.05) })
+    y -= 4
+    if (isLimited) {
+      drawText(
+        sanitize("Documento di trasparenza obbligatorio ex Art. 50 EU AI Act. Non richiesto Fascicolo Tecnico Allegato IV."),
+        { size: 8, color: rgb(0.55, 0.55, 0.55) }
+      )
+    } else {
+      drawText(
+        sanitize("Sistema a rischio minimo: obblighi ridotti. Nessun Fascicolo Tecnico richiesto. Codice di condotta volontario applicabile."),
+        { size: 8, color: rgb(0.55, 0.55, 0.55) }
+      )
+    }
+    y -= 8
+  }
+
   // Sommario
   drawText("Indice sezioni", { size: 11, font: fontBold })
   y -= 4
-  for (const s of sections) {
+  for (const s of effectiveSections) {
     const statusDot = s.status === "complete" ? "✓" : s.status === "partial" ? "~" : "○"
     drawText(`${statusDot}  ${sanitize(s.title)}${s.article ? `  (${s.article})` : ""}`,
       { size: 9, indent: 10 })
@@ -196,7 +254,7 @@ export async function POST(req: NextRequest) {
   y -= 20
 
   // ── SEZIONI ─────────────────────────────────────────────────────────────────
-  for (const section of sections) {
+  for (const section of effectiveSections) {
     ensureSpace(60)
     drawHRule()
     drawText(sanitize(section.title), { size: H2_SIZE, font: fontBold })
@@ -220,7 +278,7 @@ export async function POST(req: NextRequest) {
   ensureSpace(100)
   y -= 10
   drawHRule(rgb(0, 0, 0), 0.15)
-  drawText("Documento Verificabile di Conformità — AIComply", { size: 10, font: fontBold })
+  drawText(sanitize(`${templateLabel} — Documento Verificabile AIComply`), { size: 10, font: fontBold })
   y -= 4
   drawText(`SHA-256: ${contentHash}`, { size: 8, font: fontMono, color: rgb(0.22, 0.22, 0.22) })
   if (classifierHash) {
@@ -247,7 +305,8 @@ export async function POST(req: NextRequest) {
 
   // ── Serializza ──────────────────────────────────────────────────────────────
   const pdfBytes = await pdfDoc.save()
-  const filename  = `AIComply_${systemName.replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.pdf`
+  const templateSuffix = docTemplate === "art50" ? "_Art50" : docTemplate === "minimal" ? "_MinRisk" : "_AnnexIV"
+  const filename  = `AIComply_${systemName.replace(/\s+/g, "_")}${templateSuffix}_${new Date().toISOString().slice(0, 10)}.pdf`
 
   return new NextResponse(Buffer.from(pdfBytes), {
     headers: {

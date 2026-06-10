@@ -344,6 +344,16 @@ export default function DocuGenPage() {
   const [showVersionPanel, setShowVersionPanel] = useState(false);
   const [crossContent] = useState<Record<string, string>>(() => readCrossToolContent());
 
+  // Legge tier dal classifier per il branching PDF
+  const classifierTier = useMemo<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = localStorage.getItem("aicomply_classifier_result");
+      if (!raw) return null;
+      return (JSON.parse(raw) as { riskLevel?: string })?.riskLevel?.toLowerCase() ?? null;
+    } catch { return null; }
+  }, []);
+
   // ── Auto-save ogni 30s ────────────────────────────────────────────────────
   const { justSaved: docugenSaved } = useAutoSave("docugen", persisted, saveState);
 
@@ -531,16 +541,23 @@ export default function DocuGenPage() {
 
   async function exportPdf() {
     const resolvedName = systemName.trim() || "Sistema AI";
-    const sections = ANNEX_IV.map(s => ({
-      title: s.title,
-      article: s.ref,
-      content: getContent(s.id),
-      status: (getSectionStatus(s.id) === "done" ? "complete"
-        : getSectionStatus(s.id) === "draft" ? "partial" : "empty") as "complete" | "partial" | "empty",
-    }));
+    const isLimitedOrMinimal = classifierTier === "limited" || classifierTier === "minimal";
+
+    // High-risk: Annex IV completo; limited/minimal: sezioni Art.50
+    const sections = isLimitedOrMinimal
+      ? [] // il backend genera le sezioni Art.50 di default
+      : ANNEX_IV.map(s => ({
+          title: s.title,
+          article: s.ref,
+          content: getContent(s.id),
+          status: (getSectionStatus(s.id) === "done" ? "complete"
+            : getSectionStatus(s.id) === "draft" ? "partial" : "empty") as "complete" | "partial" | "empty",
+        }));
+
     const payload = {
       systemName: resolvedName,
       systemId: `docugen-${Date.now()}`,
+      tier: classifierTier,
       sections,
     };
     showToast("Generazione PDF in corso…");
@@ -710,8 +727,37 @@ export default function DocuGenPage() {
             Art. 11 · Allegato IV
           </p>
           <h1 className="text-[24px] font-medium" style={{ color: "#0D1016", letterSpacing: "-0.8px" }}>
-            DocuGen AI — Fascicolo Tecnico
+            DocuGen AI — {classifierTier === "limited"
+              ? "Dichiarazione Art. 50"
+              : classifierTier === "minimal"
+                ? "Nota di Conformità"
+                : "Fascicolo Tecnico"}
           </h1>
+          {classifierTier && (
+            <div className="flex items-center gap-2 mt-2 mb-1">
+              <span
+                style={{
+                  fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 5,
+                  background: classifierTier === "high" || classifierTier === "unacceptable"
+                    ? "rgba(220,38,38,0.08)" : classifierTier === "limited"
+                      ? "rgba(202,138,4,0.08)" : "rgba(22,163,74,0.08)",
+                  color: classifierTier === "high" || classifierTier === "unacceptable"
+                    ? "#dc2626" : classifierTier === "limited"
+                      ? "#92400e" : "#15803d",
+                  border: `1px solid ${classifierTier === "high" || classifierTier === "unacceptable"
+                    ? "rgba(220,38,38,0.2)" : classifierTier === "limited"
+                      ? "rgba(202,138,4,0.22)" : "rgba(22,163,74,0.18)"}`,
+                  textTransform: "uppercase" as const,
+                  letterSpacing: "0.05em",
+                }}
+              >
+                {classifierTier === "high" ? "⬛ HIGH RISK — Allegato IV obbligatorio"
+                  : classifierTier === "unacceptable" ? "⬛ RISCHIO INACCETTABILE"
+                  : classifierTier === "limited" ? "◻ LIMITED RISK — Art. 50 Transparency Doc"
+                  : "◻ MINIMAL RISK — Codice condotta volontario"}
+              </span>
+            </div>
+          )}
           <div className="flex items-center gap-2 mt-1">
             <span className="text-[11px]" style={{ color: "rgba(0,0,0,0.38)" }}>Sistema:</span>
             <input
@@ -771,16 +817,27 @@ export default function DocuGenPage() {
           </button>
 
           {/* Export */}
-          <button
-            onClick={exportFullDocument}
-            disabled={!canExport}
-            title={!canExport ? "Completa Art. 14 e Art. 15 prima di esportare" : undefined}
-            className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ background: "#0D1016", color: "#fff", cursor: canExport ? "pointer" : "not-allowed" }}
-          >
-            <Download className="h-3.5 w-3.5" />
-            Esporta JSON
-          </button>
+          {(classifierTier === "limited" || classifierTier === "minimal") ? (
+            <button
+              onClick={exportPdf}
+              className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-opacity hover:opacity-80"
+              style={{ background: "#0D1016", color: "#fff", cursor: "pointer" }}
+            >
+              <Download className="h-3.5 w-3.5" />
+              Esporta {classifierTier === "limited" ? "Art. 50 PDF" : "Nota Conformità PDF"}
+            </button>
+          ) : (
+            <button
+              onClick={exportFullDocument}
+              disabled={!canExport}
+              title={!canExport ? "Completa Art. 14 e Art. 15 prima di esportare" : undefined}
+              className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ background: "#0D1016", color: "#fff", cursor: canExport ? "pointer" : "not-allowed" }}
+            >
+              <Download className="h-3.5 w-3.5" />
+              Esporta JSON
+            </button>
+          )}
         </div>
       </div>
 
