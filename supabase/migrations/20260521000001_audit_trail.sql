@@ -49,8 +49,7 @@ CREATE TABLE IF NOT EXISTS ai_output_log (
 
   -- Lifecycle
   created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  expires_at           TIMESTAMPTZ GENERATED ALWAYS AS
-                         (created_at + INTERVAL '10 years') STORED,
+  expires_at           TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '10 years'),
 
   -- GDPR Art. 17 redaction (not deletion)
   gdpr_redacted        BOOLEAN     NOT NULL DEFAULT FALSE,

@@ -204,11 +204,18 @@ export function getDossierSections(data: DossierData): DossierSection[] {
           }
         : na("FRIA (Art. 27) obbligatoria per deployer di sistemi high-risk in ambito pubblico")),
     },
-    // Art. 51-55 — GPAI, solo se il sistema è o integra un GPAI
+    // Art. 51-55 — GPAI: differenzia obblighi provider GPAI vs downstream deployer
     {
       id: "gpai",
       article: "Art. 51-55",
-      title: "GPAI — Modelli Fondazionali",
+      title: (() => {
+        const gpaiRole = data.gpai?.role;
+        if (gpaiRole === "gpai_provider_systemic") return "GPAI Provider — Rischio Sistemico (Art. 55)";
+        if (gpaiRole === "gpai_provider_standard") return "GPAI Provider — Obblighi Standard (Art. 53)";
+        if (gpaiRole === "downstream_high_risk") return "GPAI Downstream — Sistema High-Risk";
+        if (gpaiRole === "downstream_standard") return "GPAI Downstream — Uso Standard";
+        return "GPAI — Modelli di Uso Generale";
+      })(),
       href: "/dashboard/tools/gpai",
       ...(isGpai || tier === null
         ? {
@@ -248,14 +255,15 @@ export function getDossierSections(data: DossierData): DossierSection[] {
         ? { status: data.deployer ? "complete" : "missing", completedAt: data.deployer?.completedAt }
         : na("Art. 26 si applica ai deployer; i provider hanno obblighi distinti (Art. 9-17)")),
     },
-    // L.132/2025 — operatività in Italia (non solo rapporti PA)
+    // L.132/2025 — operatività in Italia (trigger: sistema opera/è accessibile in Italia)
     {
       id: "l132",
       article: "L. 132/2025",
       title: "L. 132/2025 — Adempimenti italiani",
       href: "/dashboard/tools/l132",
-      status: data.l132 ? "complete" : "missing",
-      completedAt: data.l132?.completedAt,
+      ...(data.l132?.deployedInItaly === false
+        ? na("L.132/2025 si applica solo a sistemi che operano o sono accessibili in Italia")
+        : { status: data.l132 ? "complete" : "missing", completedAt: data.l132?.completedAt }),
     },
     // Art. 49 — registrazione EUDB, solo provider high-risk
     {

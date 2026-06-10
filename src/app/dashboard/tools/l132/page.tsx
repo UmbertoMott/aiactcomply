@@ -272,6 +272,7 @@ function formToResult(f: FormState): L132Result {
     remediation: f.remediation,
     isDeepfakeRisk: f.isDeepfakeRisk,
     requiresHRNotice: f.requiresHRNotice,
+    deployedInItaly: f.deployedInItaly,
   };
 }
 

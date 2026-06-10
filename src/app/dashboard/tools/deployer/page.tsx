@@ -422,11 +422,14 @@ export default function DeployerPage() {
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [doc]);
 
-  // Pre-populate system_name from Classifier
+  // Pre-populate system_name from Classifier + detect role
   const classifierData = useMemo(() => {
     try { const r = localStorage.getItem("aicomply_classifier_result"); return r ? JSON.parse(r) : null; }
     catch { return null; }
   }, []);
+  const classifierRole: string | null = classifierData?.role ?? null;
+  const isProviderRole = classifierRole === "provider" || classifierRole === "fornitore";
+
   useEffect(() => {
     if (classifierData?.systemName && !doc.system_name) {
       setDoc(prev => ({ ...prev, system_name: classifierData.systemName }));
@@ -505,6 +508,27 @@ export default function DeployerPage() {
     <div style={{ maxWidth: 820, margin: "0 auto", paddingBottom: 60 }}>
 
       <SystemContextBanner checkProhibited={true} />
+
+      {/* Role mismatch warning */}
+      {isProviderRole && (
+        <div
+          style={{
+            marginBottom: 16, padding: "10px 14px", borderRadius: 10,
+            background: "rgba(202,138,4,0.07)", border: "1px solid rgba(202,138,4,0.22)",
+            display: "flex", alignItems: "flex-start", gap: 10,
+          }}
+        >
+          <AlertTriangle size={14} style={{ color: T.amber, flexShrink: 0, marginTop: 1 }} />
+          <div>
+            <p style={{ fontSize: 12, fontWeight: 600, color: T.amber, marginBottom: 2 }}>
+              Il Classifier indica che sei un <strong>provider</strong>, non un deployer
+            </p>
+            <p style={{ fontSize: 11, color: "rgba(0,0,0,0.55)" }}>
+              Gli obblighi Art. 26 si applicano ai deployer (chi mette in produzione un sistema AI di un altro provider). Se il Classifier è corretto, il tool rilevante per te è il percorso provider (Art. 9-17). Puoi comunque completare questa valutazione se hai ruolo misto.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Page header */}
       <div style={{ marginBottom: 24 }}>

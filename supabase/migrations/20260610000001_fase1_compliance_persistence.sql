@@ -40,24 +40,28 @@ CREATE INDEX IF NOT EXISTS idx_tool_states_saved_at
 
 ALTER TABLE public.tool_states ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "tool_states_org_select" ON public.tool_states;
 CREATE POLICY "tool_states_org_select" ON public.tool_states
   FOR SELECT USING (
     organization_id IN (
       SELECT id FROM public.organizations WHERE owner_id = auth.uid()
     )
   );
+DROP POLICY IF EXISTS "tool_states_org_insert" ON public.tool_states;
 CREATE POLICY "tool_states_org_insert" ON public.tool_states
   FOR INSERT WITH CHECK (
     organization_id IN (
       SELECT id FROM public.organizations WHERE owner_id = auth.uid()
     )
   );
+DROP POLICY IF EXISTS "tool_states_org_update" ON public.tool_states;
 CREATE POLICY "tool_states_org_update" ON public.tool_states
   FOR UPDATE USING (
     organization_id IN (
       SELECT id FROM public.organizations WHERE owner_id = auth.uid()
     )
   );
+DROP POLICY IF EXISTS "tool_states_org_delete" ON public.tool_states;
 CREATE POLICY "tool_states_org_delete" ON public.tool_states
   FOR DELETE USING (
     organization_id IN (
@@ -66,10 +70,6 @@ CREATE POLICY "tool_states_org_delete" ON public.tool_states
   );
 
 -- Auto-update saved_at
-CREATE TRIGGER tool_states_saved_at
-  BEFORE UPDATE ON public.tool_states
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_saved_at();
-
 CREATE OR REPLACE FUNCTION update_updated_at_saved_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -77,6 +77,11 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS tool_states_saved_at ON public.tool_states;
+CREATE TRIGGER tool_states_saved_at
+  BEFORE UPDATE ON public.tool_states
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_saved_at();
 
 
 -- ─── 1.4 — Document Versions (Art. 43(4) — immutable versioning) ─────────────
@@ -115,12 +120,14 @@ CREATE INDEX IF NOT EXISTS idx_doc_versions_status
 
 ALTER TABLE public.document_versions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "doc_versions_org_select" ON public.document_versions;
 CREATE POLICY "doc_versions_org_select" ON public.document_versions
   FOR SELECT USING (
     organization_id IN (
       SELECT id FROM public.organizations WHERE owner_id = auth.uid()
     )
   );
+DROP POLICY IF EXISTS "doc_versions_org_insert" ON public.document_versions;
 CREATE POLICY "doc_versions_org_insert" ON public.document_versions
   FOR INSERT WITH CHECK (
     organization_id IN (
@@ -147,6 +154,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS doc_versions_unique_tag ON public.document_versions;
 CREATE TRIGGER doc_versions_unique_tag
   BEFORE INSERT ON public.document_versions
   FOR EACH ROW EXECUTE FUNCTION check_version_tag_unique();
@@ -182,6 +190,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_documents_source_hash_org
 
 ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "documents_org_all" ON public.documents;
 CREATE POLICY "documents_org_all" ON public.documents
   FOR ALL USING (
     organization_id IN (
@@ -226,6 +235,7 @@ CREATE INDEX IF NOT EXISTS idx_extracted_facts_document
 
 ALTER TABLE public.extracted_facts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "extracted_facts_org_all" ON public.extracted_facts;
 CREATE POLICY "extracted_facts_org_all" ON public.extracted_facts
   FOR ALL USING (
     organization_id IN (
@@ -245,6 +255,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS extracted_facts_confirm_timestamp ON public.extracted_facts;
 CREATE TRIGGER extracted_facts_confirm_timestamp
   BEFORE UPDATE ON public.extracted_facts
   FOR EACH ROW EXECUTE FUNCTION set_confirmed_at();
@@ -279,12 +290,14 @@ CREATE INDEX IF NOT EXISTS idx_field_history_ai_system
 
 ALTER TABLE public.field_history ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "field_history_org_select" ON public.field_history;
 CREATE POLICY "field_history_org_select" ON public.field_history
   FOR SELECT USING (
     organization_id IN (
       SELECT id FROM public.organizations WHERE owner_id = auth.uid()
     )
   );
+DROP POLICY IF EXISTS "field_history_org_insert" ON public.field_history;
 CREATE POLICY "field_history_org_insert" ON public.field_history
   FOR INSERT WITH CHECK (
     organization_id IN (
@@ -332,12 +345,14 @@ CREATE INDEX IF NOT EXISTS idx_hash_anchors_org
 
 ALTER TABLE public.hash_anchors ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "hash_anchors_org_select" ON public.hash_anchors;
 CREATE POLICY "hash_anchors_org_select" ON public.hash_anchors
   FOR SELECT USING (
     organization_id IN (
       SELECT id FROM public.organizations WHERE owner_id = auth.uid()
     )
   );
+DROP POLICY IF EXISTS "hash_anchors_org_insert" ON public.hash_anchors;
 CREATE POLICY "hash_anchors_org_insert" ON public.hash_anchors
   FOR INSERT WITH CHECK (
     organization_id IN (

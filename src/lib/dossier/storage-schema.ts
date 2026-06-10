@@ -298,6 +298,7 @@ export interface L132Result {
   remediation: string;
   isDeepfakeRisk: boolean;
   requiresHRNotice: boolean;
+  deployedInItaly?: boolean;
 }
 
 export interface ProviderTransitionResult {
