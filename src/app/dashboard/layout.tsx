@@ -56,7 +56,6 @@ const PILLARS: NavPillar[] = [
     label: "Triage",
     href: "/dashboard/triage",
     art: "Art. 5/6/51",
-    badge: "urgent",
   },
   {
     id: "risk",
