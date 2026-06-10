@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
-import { GitBranch, Download, ChevronRight, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { GitBranch, Download, ChevronRight, AlertTriangle, CheckCircle, Clock, History, ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { DocugenResult, DataAuditResult, RiskManagerResult } from "@/lib/dossier/storage-schema";
@@ -341,6 +341,7 @@ export default function DocuGenPage() {
   const [versionSnapshots, setVersionSnapshots] = useState<VersionSnapshot[]>([]);
   const [saveNote, setSaveNote] = useState("");
   const [showSaveNote, setShowSaveNote] = useState(false);
+  const [showVersionPanel, setShowVersionPanel] = useState(false);
   const [crossContent] = useState<Record<string, string>>(() => readCrossToolContent());
 
   // ── Auto-save ogni 30s ────────────────────────────────────────────────────
@@ -757,6 +758,18 @@ export default function DocuGenPage() {
             </span>
           )}
 
+          {/* Storico versioni toggle */}
+          <button
+            onClick={() => setShowVersionPanel(v => !v)}
+            className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-colors"
+            style={{ background: showVersionPanel ? "rgba(13,16,22,0.07)" : "#fff",
+              border: "1px solid rgba(0,0,0,0.12)", color: "rgba(0,0,0,0.6)", cursor: "pointer" }}
+          >
+            <History className="h-3.5 w-3.5" />
+            Storico versioni
+            {showVersionPanel ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+          </button>
+
           {/* Export */}
           <button
             onClick={exportFullDocument}
@@ -770,6 +783,23 @@ export default function DocuGenPage() {
           </button>
         </div>
       </div>
+
+      {/* ── Version History dropdown panel ── */}
+      {showVersionPanel && (
+        <div className="mb-6">
+          <VersionHistoryPanel
+            toolId="docugen"
+            onRestore={(data) => {
+              const d = data as DocuGenState;
+              if (d && typeof d === "object") setPersistedRaw({ ...DEFAULT_STATE, ...d });
+              setVersionSnapshots(listVersions("docugen"));
+              setShowVersionPanel(false);
+              showToast("Versione ripristinata ✓");
+            }}
+            sectionLabels={Object.fromEntries(ANNEX_IV.map(s => [s.id, s.title]))}
+          />
+        </div>
+      )}
 
       {/* ── Stats row ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -1167,22 +1197,6 @@ export default function DocuGenPage() {
             </div>
           )}
         </div>
-      </div>
-
-      {/* ── Version History ── */}
-      <div className="mt-6">
-        <VersionHistoryPanel
-          toolId="docugen"
-          onRestore={(data) => {
-            const d = data as DocuGenState;
-            if (d && typeof d === "object") {
-              setPersistedRaw({ ...DEFAULT_STATE, ...d });
-            }
-            setVersionSnapshots(listVersions("docugen"));
-            showToast("Versione ripristinata ✓");
-          }}
-          sectionLabels={Object.fromEntries(ANNEX_IV.map(s => [s.id, s.title]))}
-        />
       </div>
 
       {toast && (

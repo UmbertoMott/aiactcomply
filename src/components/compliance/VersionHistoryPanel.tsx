@@ -6,7 +6,7 @@ import {
   Tag, FileCheck, AlertTriangle, Edit3, Check, X, Trash2, Clock,
 } from "lucide-react";
 import {
-  listVersions, updateVersionNote, updateVersionTag, clearVersions,
+  listVersions, updateVersionNote, updateVersionTag, clearVersions, deleteVersion,
   type VersionSnapshot,
 } from "@/lib/projects/version-history";
 
@@ -50,12 +50,13 @@ const STATUS_CFG = {
 } as const;
 
 function VersionRow({
-  v, i, toolId, onRestore, sectionLabels, onUpdated,
+  v, i, toolId, onRestore, sectionLabels, onUpdated, onDeleted,
 }: {
   v: VersionSnapshot; i: number; toolId: string;
   onRestore: (data: unknown) => void;
   sectionLabels?: Record<string, string>;
   onUpdated: () => void;
+  onDeleted: () => void;
 }) {
   const [expanded,       setExpanded]       = useState(false);
   const [editingNote,    setEditingNote]    = useState(false);
@@ -63,6 +64,7 @@ function VersionRow({
   const [noteVal,        setNoteVal]        = useState(v.note ?? "");
   const [tagVal,         setTagVal]         = useState(v.tag ?? "");
   const [confirmRestore, setConfirmRestore] = useState(false);
+  const [confirmDelete,  setConfirmDelete]  = useState(false);
   const noteRef = useRef<HTMLTextAreaElement>(null);
   const tagRef  = useRef<HTMLInputElement>(null);
 
@@ -170,9 +172,20 @@ function VersionRow({
           )}
         </div>
 
-        {/* Expand chevron */}
-        <div style={{ flexShrink: 0, color: "rgba(0,0,0,0.25)", paddingTop: 2 }}>
-          {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+        {/* Actions: delete + expand chevron */}
+        <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0, paddingTop: 2 }}>
+          <button
+            onClick={e => { e.stopPropagation(); setConfirmDelete(true); setExpanded(true); }}
+            title="Elimina questa versione"
+            style={{ background: "none", border: "none", cursor: "pointer", padding: "1px 3px",
+              color: "rgba(0,0,0,0.2)", borderRadius: 4, display: "flex", alignItems: "center" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "#dc2626")}
+            onMouseLeave={e => (e.currentTarget.style.color = "rgba(0,0,0,0.2)")}>
+            <Trash2 size={12} />
+          </button>
+          <div style={{ color: "rgba(0,0,0,0.25)" }}>
+            {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+          </div>
         </div>
       </div>
 
@@ -226,6 +239,23 @@ function VersionRow({
               </button>
             )}
           </div>
+
+          {/* Delete confirm */}
+          {confirmDelete && (
+            <div style={{ marginBottom: 8, padding: "8px 10px", borderRadius: 7, display: "flex", alignItems: "center", gap: 8,
+              background: "rgba(220,38,38,0.05)", border: "1px solid rgba(220,38,38,0.2)" }}>
+              <Trash2 size={11} color="#dc2626" />
+              <span style={{ fontSize: 10, color: "#dc2626", flex: 1 }}>Eliminare la versione <strong>{v.tag}</strong>? Non è reversibile.</span>
+              <button onClick={() => { deleteVersion(toolId, v.id); onDeleted(); }}
+                style={{ fontSize: 10, fontWeight: 600, padding: "3px 10px", borderRadius: 5, background: "#dc2626", color: "#fff", border: "none", cursor: "pointer" }}>
+                Elimina
+              </button>
+              <button onClick={() => setConfirmDelete(false)}
+                style={{ fontSize: 10, padding: "3px 8px", borderRadius: 5, background: "rgba(0,0,0,0.06)", border: "none", cursor: "pointer" }}>
+                Annulla
+              </button>
+            </div>
+          )}
 
           {/* Actions */}
           <div style={{ display: "flex", gap: 6 }}>
@@ -332,6 +362,7 @@ export function VersionHistoryPanel({ toolId, onRestore, sectionLabels }: Versio
                     onRestore={(data) => { onRestore(data); setExpanded(false); }}
                     sectionLabels={sectionLabels}
                     onUpdated={refresh}
+                    onDeleted={refresh}
                   />
                 ))}
               </div>

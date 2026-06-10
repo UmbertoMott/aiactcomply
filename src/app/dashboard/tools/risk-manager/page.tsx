@@ -23,6 +23,9 @@ import {
   RefreshCw,
   Search,
   Eye,
+  History,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import React, { useState, useEffect, useRef, useCallback, type Dispatch, type SetStateAction } from "react";
 import {
@@ -260,6 +263,7 @@ export default function RiskManagerPage() {
 
   // FIX 6 — Toast
   const [toast, setToast] = useState<{ msg: string; type: "error" | "success" } | null>(null);
+  const [showVersionHistory, setShowVersionHistory] = useState(false);
 
   function showToast(msg: string, type: "error" | "success" = "success") {
     setToast({ msg, type });
@@ -531,12 +535,39 @@ export default function RiskManagerPage() {
           <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.4px", color: T.text, margin: 0 }}>
             AI Act Risk Manager
           </h1>
-          {rmSaved && (
-            <span style={{ fontSize: 10, color: "#16a34a", whiteSpace: "nowrap", marginTop: 4 }}>
-              ✓ Salvato automaticamente
-            </span>
-          )}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {rmSaved && (
+              <span style={{ fontSize: 10, color: "#16a34a", whiteSpace: "nowrap" }}>
+                ✓ Salvato automaticamente
+              </span>
+            )}
+            <button
+              onClick={() => setShowVersionHistory(v => !v)}
+              style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 500,
+                padding: "5px 12px", borderRadius: 8, cursor: "pointer", whiteSpace: "nowrap",
+                background: showVersionHistory ? "rgba(13,16,22,0.07)" : "#fff",
+                border: "1px solid rgba(0,0,0,0.12)", color: "rgba(0,0,0,0.6)",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
+              <History size={13} />
+              Storico versioni
+              {showVersionHistory ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            </button>
+          </div>
         </div>
+        {showVersionHistory && (
+          <div style={{ marginTop: 12, marginBottom: 8 }}>
+            <VersionHistoryPanel
+              toolId="riskManager"
+              onRestore={(data) => {
+                const d = data as RiskManagerReport;
+                setReport(d);
+                saveReport(d);
+                setShowVersionHistory(false);
+                showToast("Versione ripristinata ✓");
+              }}
+            />
+          </div>
+        )}
         <p style={{ marginTop: 4, fontSize: 13, color: T.muted, lineHeight: 1.5 }}>
           Framework completo di gestione quantitativa del rischio — Art. 9
           Regolamento UE 2024/1689. Monte Carlo, bitemporal audit, drift detection, GPAI systemic risk, sanzioni.
@@ -747,19 +778,6 @@ export default function RiskManagerPage() {
             <ArrowRight style={{ width: 14, height: 14 }} />
           </button>
         )}
-      </div>
-
-      {/* ── Version History ── */}
-      <div style={{ marginTop: 20 }}>
-        <VersionHistoryPanel
-          toolId="riskManager"
-          onRestore={(data) => {
-            const d = data as RiskManagerReport;
-            setReport(d);
-            saveReport(d);
-            showToast("Versione ripristinata ✓");
-          }}
-        />
       </div>
 
       {/* FIX 6 — Toast */}

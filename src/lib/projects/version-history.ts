@@ -129,6 +129,19 @@ export function updateVersionNote(toolId: string, versionId: string, note: strin
   } catch { /* ignore */ }
 }
 
+/** Elimina una singola versione per ID */
+export function deleteVersion(toolId: string, versionId: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    const key = versionsKey(toolId);
+    const raw = localStorage.getItem(key);
+    if (!raw) return;
+    const versions: VersionSnapshot[] = JSON.parse(raw);
+    const updated = versions.filter(v => v.id !== versionId);
+    localStorage.setItem(key, JSON.stringify(updated));
+  } catch { /* ignore */ }
+}
+
 /** Aggiorna il tag di una versione */
 export function updateVersionTag(toolId: string, versionId: string, tag: string): void {
   if (typeof window === "undefined") return;
