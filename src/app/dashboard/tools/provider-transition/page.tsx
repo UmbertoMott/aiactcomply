@@ -107,8 +107,8 @@ const TRANSITION_CHECKS: ProviderTransitionCheck[] = [
   },
   {
     id: "safety_degradation",
-    question: "Hai apportato modifiche che potrebbero ridurre la conformita' del sistema ai requisiti di sicurezza o accuratezza dichiarati dal provider?",
-    explanation: "Disabilitare safety filter, modificare soglie di confidenza, rimuovere meccanismi di override umano: tutte modifiche che peggiorano la conformita' configurano trigger Art. 28.",
+    question: "Hai apportato modifiche che potrebbero ridurre la conformità del sistema ai requisiti di sicurezza o accuratezza dichiarati dal provider?",
+    explanation: "Disabilitare safety filter, modificare soglie di confidenza, rimuovere meccanismi di override umano: tutte modifiche che peggiorano la conformità configurano trigger Art. 28.",
     trigger_article: "Art. 28(1)(b) + Art. 3(23)(c)",
     is_trigger: true,
   },

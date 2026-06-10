@@ -89,7 +89,7 @@ export default function ComplianceJourneyDashboard() {
           <p style={{ fontSize: 12, color: T.muted, marginTop: 2 }}>
             {pendingSteps.length === 0
               ? "Tutti i passi completati — ottimo lavoro! 🎉"
-              : `${pendingSteps.length} azione${pendingSteps.length > 1 ? "i" : "e"} rimanente${pendingSteps.length > 1 ? "i" : ""}`}
+              : `${pendingSteps.length} ${pendingSteps.length === 1 ? "azione rimanente" : "azioni rimanenti"}`}
           </p>
         </div>
 
@@ -138,7 +138,7 @@ export default function ComplianceJourneyDashboard() {
               <summary style={{ fontSize: 12, color: T.muted, cursor: "pointer", userSelect: "none", listStyle: "none" }}>
                 <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   <CheckCircle2 style={{ width: 13, height: 13, color: T.green }} />
-                  {doneSteps.length} passo{doneSteps.length > 1 ? "i" : ""} completat{doneSteps.length > 1 ? "i" : "o"}
+                  {doneSteps.length === 1 ? "1 passo completato" : `${doneSteps.length} passi completati`}
                 </span>
               </summary>
               <div className="mt-2 space-y-1">
