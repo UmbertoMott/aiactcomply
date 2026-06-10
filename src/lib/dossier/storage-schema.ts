@@ -466,7 +466,22 @@ export function writeToStorage<T>(key: keyof typeof STORAGE_KEYS, data: T): void
     import("@/lib/projects/version-history").then(({ appendVersion }) => {
       appendVersion(key, data);
     }).catch(() => {});
+    // Supabase sync — fire-and-forget, non blocca la UI
+    // Usa un debounce globale per non saturare su keystroke
+    _scheduleDbSync(key, data);
   } catch {
     // ignore quota errors in SSR
   }
+}
+
+// ─── Debounced Supabase sync (globale) ────────────────────────────────────────
+const _dbSyncTimers: Record<string, ReturnType<typeof setTimeout>> = {};
+
+function _scheduleDbSync<T>(key: string, data: T): void {
+  if (_dbSyncTimers[key]) clearTimeout(_dbSyncTimers[key]);
+  _dbSyncTimers[key] = setTimeout(() => {
+    import("@/app/actions/toolState").then(({ saveToolState }) => {
+      saveToolState(key, data).catch(() => {});
+    }).catch(() => {});
+  }, 2500);
 }
