@@ -393,9 +393,12 @@ export default function DPIAPage() {
       if (dataAudit?.datasets?.some((d: DataAuditResult["datasets"][number]) => d.personalData)) {
         if (!next.dataCategories.includes("comuni")) next.dataCategories = [...next.dataCategories, "comuni"];
       }
-      if (dataAudit?.datasets?.some((d: DataAuditResult["datasets"][number]) =>
-        d.sensitiveFeatures?.some((f: string) => ["salute","biometrici","genetici"].some(k => f.toLowerCase().includes(k)))
-      )) {
+      if (dataAudit?.datasets?.some((d: DataAuditResult["datasets"][number]) => {
+        const sf = (d as Record<string, unknown>).sensitiveFeatures;
+        return Array.isArray(sf) && sf.some((f: unknown) =>
+          typeof f === "string" && ["salute","biometrici","genetici"].some(k => f.toLowerCase().includes(k))
+        );
+      })) {
         if (!next.dataCategories.includes("art9_salute")) next.dataCategories = [...next.dataCategories, "art9_salute"];
       }
       return next;
