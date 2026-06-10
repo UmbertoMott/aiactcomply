@@ -24,42 +24,16 @@ export async function adaptRiskToSystem(
     return { risk: null, error: "CONTEXT_MISSING" };
   }
 
-  const prompt = `Sei un esperto di EU AI Act Art. 9 (gestione dei rischi).
-Adatti un rischio generico di catalogo al sistema AI specifico dell'utente.
+  const prompt = `Esperto EU AI Act Art. 9. Adatta il rischio al sistema specifico. Rispondi SOLO con JSON.
 
-REGOLE OBBLIGATORIE:
-- likelihoodBasis e impactBasis devono terminare con "[verify against current AI Act text]"
-- art9Reference deve citare il sottoparagrafo specifico dell'Art. 9 più pertinente (es. "Art. 9(2)(a) [verify against current AI Act text]")
-- adaptedDescription deve essere specifica al sistema, non generica
-- Non inventare obblighi inesistenti
-- Rispondi SOLO con JSON valido, nessun testo fuori dal JSON
+Rischio: "${catalogItem.title}" — ${catalogItem.description} (categoria: ${catalogItem.category})
+Sistema: "${context.systemName ?? "Sistema AI"}", ${context.systemDescription ?? ""}, tier: ${context.riskTier ?? "?"}
 
-Rischio di catalogo da adattare:
-- Titolo: "${catalogItem.title}"
-- Descrizione: "${catalogItem.description}"
-- Categoria: "${catalogItem.category}"
-
-Sistema AI dell'utente:
-- Nome: "${context.systemName ?? "Sistema AI"}"
-- Descrizione: "${context.systemDescription ?? "non specificata"}"
-- Tier: ${context.riskTier ?? "non determinato"}
-- Processa dati personali: ${context.personalData ? "sì" : "non confermato"}
-- Supervisione umana richiesta: ${context.humanOversightRequired ? "sì" : "non confermato"}
-
-Formato JSON atteso:
-{
-  "adaptedTitle": "...",
-  "adaptedDescription": "...",
-  "relevanceReason": "...",
-  "suggestedLikelihood": "low|medium|high",
-  "suggestedImpact": "low|medium|high",
-  "likelihoodBasis": "... [verify against current AI Act text]",
-  "impactBasis": "... [verify against current AI Act text]",
-  "art9Reference": "Art. 9(...) [verify against current AI Act text]"
-}`;
+JSON (tutti i campi obbligatori):
+{"adaptedTitle":"...","adaptedDescription":"...specifica al sistema...","relevanceReason":"...","suggestedLikelihood":"low|medium|high","suggestedImpact":"low|medium|high","likelihoodBasis":"... [verify against current AI Act text]","impactBasis":"... [verify against current AI Act text]","art9Reference":"Art. 9(?) [verify against current AI Act text]"}`;
 
   try {
-    const text = await generateText(prompt, { temperature: 0.2, maxOutputTokens: 800 });
+    const text = await generateText(prompt, { temperature: 0.2, maxOutputTokens: 350 });
     const cleaned = text.trim().replace(/^```json\s*/, "").replace(/```$/, "").trim();
     const parsed = AdaptedRiskSchema.parse(JSON.parse(cleaned));
     return { risk: parsed };
