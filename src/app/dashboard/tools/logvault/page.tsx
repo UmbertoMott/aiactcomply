@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback, useMemo, CSSProperties } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, Shield, RefreshCw, AlertTriangle, CheckCircle } from "lucide-react";
+import { Download, Shield, RefreshCw, AlertTriangle, CheckCircle, Settings, ChevronDown, ChevronUp, Info } from "lucide-react";
 import Link from "next/link";
 import {
   generateLogChain, verifyChain, LEVEL_STYLE,
@@ -128,6 +128,7 @@ export default function LogVaultPage() {
   );
   const [logCount,   setLogCount]   = useState(24);
   const [showConfig, setShowConfig] = useState(false);
+  const [showTamperInfo, setShowTamperInfo] = useState(false);
   const [savedAt,    setSavedAt]    = useState<string | null>(() =>
     readFromStorage<LogvaultResult>("logvault")?.completedAt ?? null
   );
@@ -353,17 +354,47 @@ export default function LogVaultPage() {
               </h1>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <button onClick={() => setTampered(!tampered)}
-                className="text-[11px] px-3 py-2 rounded-lg transition-all"
-                style={tampered
-                  ? { background: "rgba(220,38,38,0.08)", border: "1px solid rgba(220,38,38,0.2)", color: "#dc2626" }
-                  : { background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.09)", color: "rgba(0,0,0,0.45)" }}>
-                {tampered ? "⚠ Tamper simulato attivo" : "Simula manomissione"}
-              </button>
+              {/* Simula manomissione + info popover */}
+              <div style={{ position: "relative" }}>
+                <div className="flex items-center rounded-lg overflow-hidden" style={{ border: tampered ? "1px solid rgba(220,38,38,0.2)" : "1px solid rgba(0,0,0,0.09)" }}>
+                  <button onClick={() => setTampered(!tampered)}
+                    className="text-[11px] px-3 py-2 transition-all"
+                    style={{ background: tampered ? "rgba(220,38,38,0.08)" : "#f5f5f4", color: tampered ? "#dc2626" : "rgba(0,0,0,0.45)", borderRight: "1px solid rgba(0,0,0,0.07)" }}>
+                    {tampered ? "⚠ Tamper attivo" : "Simula manomissione"}
+                  </button>
+                  <button onClick={() => setShowTamperInfo(v => !v)}
+                    className="px-2 py-2 transition-all"
+                    style={{ background: tampered ? "rgba(220,38,38,0.05)" : "#f5f5f4", color: tampered ? "#dc2626" : "rgba(0,0,0,0.35)" }}>
+                    <Info className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                {showTamperInfo && (
+                  <div style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, zIndex: 50, width: 280, background: "#fff", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 10, padding: 14, boxShadow: "0 4px 16px rgba(0,0,0,0.1)" }}>
+                    <div className="flex items-center justify-between mb-2">
+                      <p style={{ fontSize: 11, fontWeight: 700, color: "#0D1016" }}>Simulazione manomissione log</p>
+                      <button onClick={() => setShowTamperInfo(false)} style={{ fontSize: 14, color: "rgba(0,0,0,0.3)", background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>✕</button>
+                    </div>
+                    <p style={{ fontSize: 11, color: "rgba(0,0,0,0.55)", lineHeight: 1.6, marginBottom: 8 }}>
+                      Attiva questa modalità per simulare un attacco di manomissione alla catena di log. Il sistema inserirà voci con hash non validi per testare il <strong>Forensic Engine</strong>.
+                    </p>
+                    <div style={{ padding: "8px 10px", borderRadius: 7, background: "rgba(220,38,38,0.05)", border: "1px solid rgba(220,38,38,0.15)" }}>
+                      <p style={{ fontSize: 10, fontWeight: 600, color: "#dc2626", marginBottom: 3 }}>Art. 12 AI Act — Obblighi di logging</p>
+                      <p style={{ fontSize: 10, color: "rgba(0,0,0,0.5)", lineHeight: 1.5 }}>I sistemi ad alto rischio devono garantire l'integrità dei log automatici. Questa simulazione verifica la capacità di rilevamento delle anomalie.</p>
+                    </div>
+                    <div style={{ marginTop: 8, padding: "6px 10px", borderRadius: 7, background: "rgba(245,158,11,0.05)", border: "1px solid rgba(245,158,11,0.2)" }}>
+                      <p style={{ fontSize: 10, color: "#92400e" }}>⚠ Solo per demo — non produce effetti su dati reali</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Config button con chevron */}
               <button onClick={() => setShowConfig(!showConfig)}
-                className="text-[11px] px-3 py-2 rounded-lg transition-all"
-                style={{ background: showConfig ? "rgba(13,16,22,0.1)" : "#f5f5f4", border: "1px solid rgba(0,0,0,0.09)", color: "rgba(0,0,0,0.55)" }}>
-                ⚙ Config
+                className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-all"
+                style={{ background: showConfig ? "rgba(13,16,22,0.08)" : "#f5f5f4", border: "1px solid rgba(0,0,0,0.09)", color: "rgba(0,0,0,0.55)" }}>
+                <Settings className="h-3.5 w-3.5" />
+                Config
+                {showConfig ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
               </button>
               <button onClick={exportEvidence}
                 className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-opacity hover:opacity-70"
