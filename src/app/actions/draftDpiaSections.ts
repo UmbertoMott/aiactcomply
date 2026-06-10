@@ -82,9 +82,37 @@ FORMATO RISPOSTA — solo JSON valido, nessun testo fuori dal JSON:
     const text = await generateText(prompt, { temperature: 0.1, maxOutputTokens: 2500 })
     const cleaned = text.trim().replace(/^```json\s*/m, "").replace(/```\s*$/m, "").trim()
     const match = cleaned.match(/\{[\s\S]*\}/)
-    if (!match) throw new Error("No JSON found")
-    return DpiaDraftSchema.parse(JSON.parse(match[0]))
-  } catch {
+    if (!match) throw new Error("No JSON found in response")
+    const raw = JSON.parse(match[0])
+
+    // Coerce numeric fields that might come back as strings
+    if (Array.isArray(raw.threats)) {
+      raw.threats = raw.threats.map((t: Record<string, unknown>) => ({
+        ...t,
+        likelihood: Math.min(5, Math.max(1, Number(t.likelihood) || 2)),
+        impact: Math.min(5, Math.max(1, Number(t.impact) || 2)),
+        affectedRights: Array.isArray(t.affectedRights) ? t.affectedRights : [],
+        residualRisk: ["low","medium","high"].includes(t.residualRisk as string)
+          ? t.residualRisk : "medium",
+        gdprReference: t.gdprReference ?? "",
+      }))
+    }
+    if (Array.isArray(raw.assets)) {
+      raw.assets = raw.assets.map((a: Record<string, unknown>) => ({
+        ...a,
+        sensitivityLevel: ["low","medium","high"].includes(a.sensitivityLevel as string)
+          ? a.sensitivityLevel : "medium",
+        gdprArticle: a.gdprArticle ?? "",
+      }))
+    }
+    raw.technicalMeasures = Array.isArray(raw.technicalMeasures) ? raw.technicalMeasures : []
+    raw.organizationalMeasures = Array.isArray(raw.organizationalMeasures) ? raw.organizationalMeasures : []
+    raw.priorConsultationRequired = Boolean(raw.priorConsultationRequired)
+    raw.priorConsultationRationale = raw.priorConsultationRationale ?? ""
+
+    return DpiaDraftSchema.parse(raw)
+  } catch (err) {
+    console.error("[draftDpiaSections] error:", err)
     return { error: "Impossibile generare la bozza DPIA. Compila manualmente le fasi 2-3-4." }
   }
 }
