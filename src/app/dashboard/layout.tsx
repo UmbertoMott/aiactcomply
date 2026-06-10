@@ -7,7 +7,7 @@ import {
   FileCode, Scale, ShieldAlert, BookMarked, ClipboardList, Crosshair,
   FileArchive, TrendingUp, Database, UserCheck, ArrowRightLeft, Map, Building2,
   Landmark, Zap, Menu, X, ChevronRight, ChevronLeft, ChevronDown,
-  LogOut, Settings, LayoutGrid, Siren,
+  LogOut, Settings, LayoutGrid, Siren, Home,
 } from "lucide-react";
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { useUserRole, ROLE_LABELS } from "@/lib/hooks/useUserRole";
@@ -43,6 +43,12 @@ type NavPillar = {
 };
 
 const PILLARS: NavPillar[] = [
+  {
+    id: "dashboard",
+    icon: Home,
+    label: "Dashboard",
+    href: "/dashboard",
+  },
   {
     id: "inventory",
     icon: LayoutGrid,
