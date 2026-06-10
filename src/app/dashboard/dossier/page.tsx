@@ -31,6 +31,10 @@ function StatusIcon({ status }: { status: DossierSection["status"] }) {
     return <CheckCircle size={14} strokeWidth={1.5} style={{ color: "#15803d", flexShrink: 0 }} />;
   if (status === "partial")
     return <AlertTriangle size={14} strokeWidth={1.5} style={{ color: "#d97706", flexShrink: 0 }} />;
+  if (status === "not_applicable")
+    return <div style={{ width: 14, height: 14, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ width: 8, height: 1.5, borderRadius: 1, background: "rgba(0,0,0,0.18)" }} />
+    </div>;
   return <XCircle size={14} strokeWidth={1.5} style={{ color: "rgba(0,0,0,0.2)", flexShrink: 0 }} />;
 }
 
@@ -128,7 +132,9 @@ export default function DossierPage() {
     const sectionPayload = sections.map(s => ({
       title: s.title,
       article: s.article ?? "",
-      content: `Stato: ${s.status}${s.completedAt ? ` — completato il ${new Date(s.completedAt).toLocaleDateString("it-IT")}` : ""}`,
+      content: s.status === "not_applicable"
+        ? `Non applicabile — ${s.notApplicableReason ?? "non richiesto per questo sistema/tier"}`
+        : `Stato: ${s.status}${s.completedAt ? ` — completato il ${new Date(s.completedAt).toLocaleDateString("it-IT")}` : ""}`,
       status: (s.status === "complete" ? "complete" : s.status === "partial" ? "partial" : "empty") as "complete" | "partial" | "empty",
     }));
     try {
@@ -377,14 +383,23 @@ export default function DossierPage() {
                 {sections.map((s) => (
                   <div key={s.id} className="flex items-start gap-2.5 px-4 py-2.5" style={{ borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
                     <StatusIcon status={s.status} />
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0" style={{ opacity: s.status === "not_applicable" ? 0.4 : 1 }}>
                       <div className="flex items-center gap-1.5">
                         <span className="text-[10px] font-semibold" style={{ color: "rgba(0,0,0,0.3)" }}>{s.article}</span>
-                        <span className="text-[11px] font-medium truncate" style={{ color: "#0D1016" }}>{s.title}</span>
+                        <span className="text-[11px] font-medium truncate" style={{ color: s.status === "not_applicable" ? "rgba(0,0,0,0.4)" : "#0D1016" }}>{s.title}</span>
+                        {s.status === "not_applicable" && (
+                          <span className="text-[9px] px-1 rounded" style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.3)", border: "1px solid rgba(0,0,0,0.07)", whiteSpace: "nowrap" }}>
+                            N/A
+                          </span>
+                        )}
                       </div>
                       {s.status === "complete" && s.completedAt ? (
                         <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.3)" }}>
                           {new Date(s.completedAt).toLocaleDateString("it-IT")}
+                        </p>
+                      ) : s.status === "not_applicable" ? (
+                        <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.3)", fontStyle: "italic" }}>
+                          {s.notApplicableReason ?? "Non applicabile per questo sistema"}
                         </p>
                       ) : s.status !== "complete" ? (
                         <Link

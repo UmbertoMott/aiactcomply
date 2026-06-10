@@ -8,6 +8,10 @@ export interface ClassifierResult {
   annexI?: boolean;
   applicableArticles: string[];
   completedAt: string;
+  /** Ruolo dell'organizzazione rispetto al sistema: provider/deployer */
+  role?: "provider" | "deployer" | "fornitore" | "dispiegatore" | "deployer/utilizzatore" | string;
+  /** Il sistema è o integra un modello di uso generale (GPAI) */
+  isGPAI?: boolean;
 }
 
 export interface RiskManagerResult {
