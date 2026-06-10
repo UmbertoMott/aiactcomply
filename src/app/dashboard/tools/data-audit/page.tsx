@@ -814,7 +814,13 @@ export default function DataAuditPage() {
 
           {/* AG Part 2 — AI Panels */}
           <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, padding: 20, marginBottom: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: "#0D1016", marginBottom: 14 }}>✦ Analisi AI — Art. 10</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#0D1016" }}>Analisi AI — Art. 10</span>
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.5px", padding: "2px 6px", borderRadius: 4,
+                background: "rgba(13,16,22,0.05)", color: "rgba(0,0,0,0.4)", border: "1px solid rgba(0,0,0,0.08)" }}>
+                ✦ AI
+              </span>
+            </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
 
               {/* Proxy Detector */}
@@ -834,8 +840,9 @@ export default function DataAuditPage() {
                     setProxyLoading(false);
                     if (res.result) setProxyResult(res.result);
                   }}
-                  style={{ fontSize: 11, color: "#2563eb", background: "rgba(37,99,235,0.06)", border: "1px solid rgba(37,99,235,0.2)", borderRadius: 5, padding: "5px 12px", cursor: "pointer" }}>
-                  {proxyLoading ? "✦ Analisi…" : "✦ Analizza proxy per attributi protetti (Art. 10(2)(f))"}
+                  style={{ fontSize: 11, color: "rgba(0,0,0,0.6)", background: "#fff", border: "1px solid rgba(0,0,0,0.14)", borderRadius: 6, padding: "5px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.35)" }}>✦</span>
+                  {proxyLoading ? "Analisi in corso…" : "Analizza proxy per attributi protetti (Art. 10(2)(f))"}
                 </button>
                 {proxyResult && (
                   <div style={{ marginTop: 8, padding: 12, borderRadius: 8, background: proxyResult.overallProxyRisk === "none" ? "rgba(22,163,74,0.04)" : "rgba(245,158,11,0.05)", border: `1px solid ${proxyResult.overallProxyRisk === "none" ? "rgba(22,163,74,0.2)" : "rgba(245,158,11,0.25)"}` }}>
@@ -872,8 +879,9 @@ export default function DataAuditPage() {
                     setWp248Loading(false);
                     if (res.score) setWp248Score(res.score);
                   }}
-                  style={{ fontSize: 11, color: "#7c3aed", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 5, padding: "5px 12px", cursor: "pointer" }}>
-                  {wp248Loading ? "✦ Analisi…" : "✦ Verifica necessità DPIA (criteri WP248 rev.01)"}
+                  style={{ fontSize: 11, color: "rgba(0,0,0,0.6)", background: "#fff", border: "1px solid rgba(0,0,0,0.14)", borderRadius: 6, padding: "5px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.35)" }}>✦</span>
+                  {wp248Loading ? "Analisi in corso…" : "Verifica necessità DPIA (criteri WP248 rev.01)"}
                 </button>
                 {wp248Score && (
                   <div style={{ marginTop: 8, padding: 12, borderRadius: 8, background: wp248Score.dpiaRequired ? "rgba(124,58,237,0.04)" : "rgba(22,163,74,0.04)", border: `1px solid ${wp248Score.dpiaRequired ? "rgba(124,58,237,0.25)" : "rgba(22,163,74,0.2)"}` }}>
@@ -910,8 +918,9 @@ export default function DataAuditPage() {
                     setDqLoading(false);
                     if (res.result) setDqResult(res.result);
                   }}
-                  style={{ fontSize: 11, color: "#059669", background: "rgba(5,150,105,0.05)", border: "1px solid rgba(5,150,105,0.2)", borderRadius: 5, padding: "5px 12px", cursor: "pointer" }}>
-                  {dqLoading ? "✦ Analisi…" : "✦ Verifica qualità dati Art. 10(3)"}
+                  style={{ fontSize: 11, color: "rgba(0,0,0,0.6)", background: "#fff", border: "1px solid rgba(0,0,0,0.14)", borderRadius: 6, padding: "5px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.35)" }}>✦</span>
+                  {dqLoading ? "Analisi in corso…" : "Verifica qualità dati Art. 10(3)"}
                 </button>
                 {dqResult && (
                   <div style={{ marginTop: 8, padding: 12, borderRadius: 8, background: "rgba(5,150,105,0.04)", border: "1px solid rgba(5,150,105,0.2)" }}>
