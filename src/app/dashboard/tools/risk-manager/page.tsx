@@ -65,6 +65,10 @@ import type { RiskManagerResult } from "@/lib/dossier/storage-schema";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { VersionHistoryPanel } from "@/components/compliance/VersionHistoryPanel";
 import { suggestRiskScenarios, type SuggestedRiskScenario } from "@/app/actions/suggestRiskScenarios";
+import { adaptRiskToSystem, type AdaptedRisk } from "@/app/actions/adaptRiskToSystem";
+import { checkArt9Coverage, type Art9Coverage } from "@/app/actions/checkArt9Coverage";
+import { scoreRelevance } from "@/lib/risk/catalog-relevance";
+import { useComplianceContext } from "@/hooks/useComplianceContext";
 import { readFromStorage } from "@/lib/dossier/storage-schema";
 import type { ClassifierResult } from "@/lib/dossier/storage-schema";
 
@@ -197,27 +201,34 @@ export default function RiskManagerPage() {
   // ── Auto-save ogni 30s ─────────────────────────────────────────────────────
   const { justSaved: rmSaved } = useAutoSave("riskManager", report, saveReport);
 
+  // ── Compliance context (from Classifier + other tools) ─────────────────────
+  const complianceCtx = useComplianceContext();
+
   // ── AI scenario generation ──────────────────────────────────────────────────
   const [aiSuggestions, setAiSuggestions] = useState<SuggestedRiskScenario[] | null>(null);
   const [loadingAI, setLoadingAI]         = useState(false);
   const [aiError, setAiError]             = useState<string | null>(null);
 
+  // ── Art. 9 gap check ────────────────────────────────────────────────────────
+  const [coverageResult, setCoverageResult]   = useState<Art9Coverage | null>(null);
+  const [coverageLoading, setCoverageLoading] = useState(false);
+  const [coverageChecked, setCoverageChecked] = useState(false);
+
   async function handleSuggestRisks() {
-    const classifier = readFromStorage<ClassifierResult>("classifier");
-    if (!classifier?.systemName) {
-      setAiError("Completa prima il Classifier per ottenere suggerimenti contestuali.");
+    if (!complianceCtx.riskTier || complianceCtx.riskTier === "unclassified") {
+      setAiError("Completa prima il Classificatore per ottenere suggerimenti contestuali.");
       return;
     }
     setLoadingAI(true);
     setAiError(null);
-    const result = await suggestRiskScenarios(
-      classifier.systemName,
-      classifier.systemDescription ?? "",
-      classifier.riskLevel ?? "unknown",
-      classifier.annexIII ?? false
-    );
+    const result = await suggestRiskScenarios(complianceCtx);
     setLoadingAI(false);
-    if ("error" in result) { setAiError(result.error); return; }
+    if ("error" in result) {
+      setAiError(result.error === "CONTEXT_MISSING"
+        ? "Completa prima il Classificatore per ottenere suggerimenti contestuali."
+        : result.error);
+      return;
+    }
     setAiSuggestions(result.scenarios);
   }
 
@@ -588,12 +599,56 @@ export default function RiskManagerPage() {
                 overallScore: computeOverallScore([...prev.risks, newRisk]),
               }));
             }}
+            handleAddAdaptedRisk={(adapted) => {
+              const sev = adapted.likelihood as "low" | "medium" | "high";
+              const prob = adapted.likelihood as "low" | "medium" | "high";
+              const newRisk: RiskItem = {
+                id: `risk-ai-adapted-${Date.now()}`,
+                description: adapted.title,
+                category: adapted.category as RiskCategory,
+                severity: sev,
+                probability: prob,
+                mitigation: adapted.description,
+                residual: "monitor",
+                quantitativeScore: computeRiskScore(sev, prob),
+                createdAt: new Date().toISOString(),
+              };
+              updateReport((prev) => ({
+                ...prev,
+                risks: [...prev.risks, newRisk],
+                overallScore: computeOverallScore([...prev.risks, newRisk]),
+              }));
+              showToast("Rischio adattato aggiunto ✓");
+            }}
+            openNewRiskForm={(prefill) => {
+              setRiskForm((prev) => ({ ...prev, description: prefill.title }));
+              setShowRiskForm(true);
+            }}
             aiSuggestions={aiSuggestions}
             loadingAI={loadingAI}
             aiError={aiError}
             onSuggestRisks={handleSuggestRisks}
             onAddSuggested={addSuggestedRisk}
             onDismissSuggestions={() => setAiSuggestions(null)}
+            complianceCtx={complianceCtx}
+            coverageResult={coverageResult}
+            coverageLoading={coverageLoading}
+            coverageChecked={coverageChecked}
+            onCheckCoverage={async () => {
+              setCoverageLoading(true);
+              const result = await checkArt9Coverage(
+                report.risks.map((r) => ({
+                  title: r.description,
+                  category: r.category,
+                  description: r.mitigation,
+                })),
+                complianceCtx
+              );
+              setCoverageResult(result.coverage);
+              setCoverageChecked(true);
+              setCoverageLoading(false);
+            }}
+            onResetCoverage={() => { setCoverageResult(null); setCoverageChecked(false); }}
           />
         )}
 
@@ -840,11 +895,30 @@ const RISK_CATALOG: Array<{
 
 function CatalogSection({
   addPresetRisk,
+  handleAddAdaptedRisk,
+  complianceCtx,
 }: {
   addPresetRisk: (preset: RiskFormState) => void;
+  handleAddAdaptedRisk: (adapted: { title: string; description: string; likelihood: string; category: string }) => void;
+  complianceCtx: ReturnType<typeof useComplianceContext>;
 }) {
   const [open, setOpen] = useState(false);
   const [added, setAdded] = useState<Set<string>>(new Set());
+  const [adaptations, setAdaptations] = React.useState<Record<string, AdaptedRisk | "loading" | "error">>({});
+
+  // Sort catalog by relevance score for the current system
+  const sortedCatalog = React.useMemo(() => {
+    return [...RISK_CATALOG]
+      .map((item) => ({
+        ...item,
+        relevanceScore: scoreRelevance(
+          { ...item, label: item.label },
+          complianceCtx.annexIII ? "biometric" : null,
+          complianceCtx.riskTier ?? null
+        ),
+      }))
+      .sort((a, b) => b.relevanceScore - a.relevanceScore);
+  }, [complianceCtx.riskTier, complianceCtx.annexIII]);
 
   function applyPreset(preset: typeof RISK_CATALOG[0]) {
     addPresetRisk({
@@ -856,6 +930,19 @@ function CatalogSection({
       residual: preset.residual,
     });
     setAdded(prev => new Set(prev).add(preset.id));
+  }
+
+  async function handleAdaptItem(item: typeof RISK_CATALOG[0]) {
+    setAdaptations(prev => ({ ...prev, [item.id]: "loading" }));
+    const result = await adaptRiskToSystem(
+      { title: item.label, description: item.description, category: item.category },
+      complianceCtx
+    );
+    if (result.risk) {
+      setAdaptations(prev => ({ ...prev, [item.id]: result.risk! }));
+    } else {
+      setAdaptations(prev => ({ ...prev, [item.id]: "error" }));
+    }
   }
 
   return (
@@ -893,22 +980,43 @@ function CatalogSection({
           borderRadius: 10,
         }}>
           <p style={{ fontSize: 11, color: T.muted, marginBottom: 10 }}>
-            Rischi standard EU AI Act precompilati. Clicca su un rischio per aggiungerlo immediatamente alla matrice.
+            Rischi standard EU AI Act precompilati, ordinati per rilevanza per il tuo sistema.
+            Clicca su un rischio per aggiungerlo, o usa ✦ per adattarlo con AI.
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 8 }}>
-            {RISK_CATALOG.map(preset => (
-              <button
+            {sortedCatalog.map(preset => (
+              <div
                 key={preset.id}
-                onClick={() => !added.has(preset.id) && applyPreset(preset)}
-                disabled={added.has(preset.id)}
                 style={{
-                  textAlign: "left", padding: "10px 12px", borderRadius: 8, cursor: added.has(preset.id) ? "default" : "pointer",
+                  textAlign: "left", padding: "10px 12px", borderRadius: 8,
                   background: added.has(preset.id) ? "rgba(22,163,74,0.05)" : T.card,
                   border: `1px solid ${added.has(preset.id) ? "rgba(22,163,74,0.25)" : "rgba(0,0,0,0.08)"}`,
                   opacity: added.has(preset.id) ? 0.7 : 1,
                   transition: "all 0.15s",
                 }}
               >
+                {/* Relevance badge */}
+                {preset.relevanceScore >= 0.8 && !added.has(preset.id) && (
+                  <span style={{
+                    fontSize: 10, fontWeight: 600, color: "#dc2626",
+                    background: "rgba(220,38,38,0.08)", borderRadius: 4,
+                    padding: "2px 6px", border: "1px solid rgba(220,38,38,0.2)",
+                    display: "inline-block", marginBottom: 6,
+                  }}>
+                    ⚠ Alta rilevanza per il tuo sistema
+                  </span>
+                )}
+                {preset.relevanceScore >= 0.5 && preset.relevanceScore < 0.8 && !added.has(preset.id) && (
+                  <span style={{
+                    fontSize: 10, fontWeight: 500, color: "#d97706",
+                    background: "rgba(217,119,6,0.08)", borderRadius: 4,
+                    padding: "2px 6px", border: "1px solid rgba(217,119,6,0.2)",
+                    display: "inline-block", marginBottom: 6,
+                  }}>
+                    Rilevante per il tuo sistema
+                  </span>
+                )}
+
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: 4 }}>
                   <span style={{ fontSize: 12, fontWeight: 600, color: T.text, lineHeight: 1.3 }}>
                     {preset.label}
@@ -916,13 +1024,16 @@ function CatalogSection({
                   {added.has(preset.id) ? (
                     <CheckCircle style={{ width: 13, height: 13, color: "#15803d", flexShrink: 0 }} />
                   ) : (
-                    <Plus style={{ width: 13, height: 13, color: T.muted, flexShrink: 0 }} />
+                    <Plus
+                      style={{ width: 13, height: 13, color: T.muted, flexShrink: 0, cursor: "pointer" }}
+                      onClick={() => applyPreset(preset)}
+                    />
                   )}
                 </div>
                 <p style={{ fontSize: 10, color: T.muted, marginBottom: 6, lineHeight: 1.4 }}>
                   {preset.description.slice(0, 80)}…
                 </p>
-                <div style={{ display: "flex", gap: 5 }}>
+                <div style={{ display: "flex", gap: 5, marginBottom: 6 }}>
                   <span style={{
                     fontSize: 10, fontWeight: 600, padding: "1px 6px", borderRadius: 4,
                     background: preset.color === "#dc2626" ? "rgba(220,38,38,0.08)" : "rgba(217,119,6,0.08)",
@@ -932,7 +1043,125 @@ function CatalogSection({
                   </span>
                   <span style={{ fontSize: 10, color: T.muted, padding: "1px 0" }}>{preset.article}</span>
                 </div>
-              </button>
+
+                {/* Add / Adapt buttons */}
+                {!added.has(preset.id) && !adaptations[preset.id] && (
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button
+                      onClick={() => applyPreset(preset)}
+                      style={{
+                        fontSize: 11, color: T.text, background: "rgba(0,0,0,0.04)",
+                        border: "1px solid rgba(0,0,0,0.08)", borderRadius: 5,
+                        padding: "3px 8px", cursor: "pointer",
+                      }}
+                    >
+                      + Aggiungi
+                    </button>
+                    <button
+                      onClick={() => handleAdaptItem(preset)}
+                      disabled={!complianceCtx.systemName && !complianceCtx.systemDescription}
+                      title={!complianceCtx.systemName ? "Completa prima il Classificatore" : undefined}
+                      style={{
+                        fontSize: 11, color: "#2563eb", background: "transparent",
+                        border: "1px solid rgba(37,99,235,0.3)", borderRadius: 5,
+                        padding: "3px 8px", cursor: "pointer",
+                        opacity: (!complianceCtx.systemName && !complianceCtx.systemDescription) ? 0.4 : 1,
+                      }}
+                    >
+                      ✦ Adatta
+                    </button>
+                  </div>
+                )}
+
+                {adaptations[preset.id] === "loading" && (
+                  <div style={{ fontSize: 11, color: "#6b7280", marginTop: 6 }}>
+                    ✦ Adattamento in corso…
+                  </div>
+                )}
+                {adaptations[preset.id] === "error" && (
+                  <div style={{ fontSize: 11, color: "#dc2626", marginTop: 6 }}>
+                    Errore — riprova
+                  </div>
+                )}
+
+                {adaptations[preset.id] && adaptations[preset.id] !== "loading" && adaptations[preset.id] !== "error" && (() => {
+                  const adapted = adaptations[preset.id] as AdaptedRisk;
+                  return (
+                    <div style={{
+                      marginTop: 8, padding: 10, background: "rgba(37,99,235,0.04)",
+                      border: "1px solid rgba(37,99,235,0.15)", borderRadius: 7,
+                    }}>
+                      <span style={{
+                        fontSize: 10, color: "#2563eb", fontWeight: 600,
+                        background: "rgba(37,99,235,0.08)", borderRadius: 4,
+                        padding: "2px 6px", display: "inline-block", marginBottom: 6,
+                      }}>
+                        ✦ AI — verifica e conferma
+                      </span>
+                      <p style={{ fontSize: 12, fontWeight: 600, margin: "0 0 4px", color: "#111827" }}>
+                        {adapted.adaptedTitle}
+                      </p>
+                      <p style={{ fontSize: 12, color: "#374151", margin: "0 0 4px" }}>
+                        {adapted.adaptedDescription}
+                      </p>
+                      <p style={{ fontSize: 11, color: "#6b7280", margin: "0 0 6px", fontStyle: "italic" }}>
+                        {adapted.relevanceReason}
+                      </p>
+                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as const, marginBottom: 8 }}>
+                        <span style={{ fontSize: 10, color: "#374151", background: "#f3f4f6", borderRadius: 4, padding: "2px 6px" }}>
+                          Probabilità: {adapted.suggestedLikelihood}
+                        </span>
+                        <span style={{ fontSize: 10, color: "#374151", background: "#f3f4f6", borderRadius: 4, padding: "2px 6px" }}>
+                          Impatto: {adapted.suggestedImpact}
+                        </span>
+                        <span style={{ fontSize: 10, color: "#374151", background: "#f3f4f6", borderRadius: 4, padding: "2px 6px" }}>
+                          {adapted.art9Reference}
+                        </span>
+                      </div>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <button
+                          onClick={() => {
+                            handleAddAdaptedRisk({
+                              title: adapted.adaptedTitle,
+                              description: adapted.adaptedDescription,
+                              likelihood: adapted.suggestedLikelihood,
+                              category: preset.category,
+                            });
+                            setAdaptations(prev => {
+                              const next = { ...prev };
+                              delete next[preset.id];
+                              return next;
+                            });
+                            setAdded(prev => new Set(prev).add(preset.id));
+                          }}
+                          style={{
+                            fontSize: 11, color: "white", background: "#2563eb",
+                            border: "none", borderRadius: 5, padding: "4px 10px", cursor: "pointer",
+                          }}
+                        >
+                          Usa questa versione
+                        </button>
+                        <button
+                          onClick={() => {
+                            setAdaptations(prev => {
+                              const next = { ...prev };
+                              delete next[preset.id];
+                              return next;
+                            });
+                          }}
+                          style={{
+                            fontSize: 11, color: "#6b7280", background: "transparent",
+                            border: "1px solid rgba(0,0,0,0.1)", borderRadius: 5,
+                            padding: "4px 10px", cursor: "pointer",
+                          }}
+                        >
+                          Mantieni originale
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
             ))}
           </div>
         </div>
@@ -952,12 +1181,20 @@ function ScopingPhase({
   addRisk,
   removeRisk,
   addPresetRisk,
+  handleAddAdaptedRisk,
+  openNewRiskForm,
   aiSuggestions,
   loadingAI,
   aiError,
   onSuggestRisks,
   onAddSuggested,
   onDismissSuggestions,
+  complianceCtx,
+  coverageResult,
+  coverageLoading,
+  coverageChecked,
+  onCheckCoverage,
+  onResetCoverage,
 }: {
   report: RiskManagerReport;
   setReport: (r: RiskManagerReport) => void;
@@ -968,12 +1205,20 @@ function ScopingPhase({
   addRisk: () => void;
   removeRisk: (id: string) => void;
   addPresetRisk: (preset: RiskFormState) => void;
+  handleAddAdaptedRisk: (adapted: { title: string; description: string; likelihood: string; category: string }) => void;
+  openNewRiskForm: (prefill: { title: string; source: string }) => void;
   aiSuggestions: SuggestedRiskScenario[] | null;
   loadingAI: boolean;
   aiError: string | null;
   onSuggestRisks: () => void;
   onAddSuggested: (s: SuggestedRiskScenario) => void;
   onDismissSuggestions: () => void;
+  complianceCtx: ReturnType<typeof useComplianceContext>;
+  coverageResult: Art9Coverage | null;
+  coverageLoading: boolean;
+  coverageChecked: boolean;
+  onCheckCoverage: () => Promise<void>;
+  onResetCoverage: () => void;
 }) {
   const highCount = report.risks.filter((r) => r.severity === "high").length;
   const score = report.overallScore;
@@ -1130,23 +1375,179 @@ function ScopingPhase({
       </div>
 
       {/* ── Catalogo predefinito AI Act ──────────────────────────────────── */}
-      <CatalogSection addPresetRisk={addPresetRisk} />
+      <CatalogSection
+        addPresetRisk={addPresetRisk}
+        handleAddAdaptedRisk={handleAddAdaptedRisk}
+        complianceCtx={complianceCtx}
+      />
 
-      {/* ── AI scenario generation (Art. 9) ────────────────────────────────── */}
+      {/* ── AI — progressive disclosure (Art. 9) ─────────────────────────── */}
       <div style={{ marginBottom: 16 }}>
-        <button
-          onClick={onSuggestRisks}
-          disabled={loadingAI}
-          style={{
-            padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(37,99,235,0.3)",
-            background: loadingAI ? "#f3f4f6" : "rgba(37,99,235,0.05)",
-            color: loadingAI ? "#9ca3af" : "#2563eb",
-            fontSize: 13, fontWeight: 500, cursor: loadingAI ? "default" : "pointer",
-            display: "flex", alignItems: "center", gap: 6,
-          }}
-        >
-          {loadingAI ? "Analisi in corso…" : "✦ Genera scenari con AI (Art. 9)"}
-        </button>
+
+        {/* Caso 1: no context → guida verso Classifier */}
+        {(!complianceCtx.riskTier || complianceCtx.riskTier === "unclassified") && (
+          <div style={{
+            padding: "10px 14px", borderRadius: 8,
+            background: "rgba(245,158,11,0.06)",
+            border: "1px solid rgba(245,158,11,0.2)",
+            fontSize: 12, color: "#92400e", marginBottom: 10,
+          }}>
+            <strong>⚠ Completa prima il Classificatore</strong>
+            <p style={{ margin: "4px 0 0", color: "#78350f" }}>
+              Per suggerimenti AI personalizzati, classifica prima il sistema nel tool Classificatore.
+              Il Risk Register funziona anche senza — usa il catalogo qui sopra.
+            </p>
+          </div>
+        )}
+
+        {/* Caso 2: context presente, 0-2 rischi → barra avanzamento */}
+        {complianceCtx.riskTier && complianceCtx.riskTier !== "unclassified" && report.risks.length < 3 && (
+          <div style={{
+            padding: "8px 12px", borderRadius: 7,
+            background: "rgba(37,99,235,0.04)",
+            border: "1px solid rgba(37,99,235,0.12)",
+            fontSize: 11, color: "#1e40af", marginBottom: 10,
+          }}>
+            ✦ Aggiungi almeno 3 rischi dal catalogo per sbloccare la verifica copertura Art. 9
+            <div style={{ marginTop: 6, background: "#e0e7ff", borderRadius: 4, height: 4, overflow: "hidden" }}>
+              <div style={{
+                height: "100%", background: "#2563eb",
+                width: `${(report.risks.length / 3) * 100}%`,
+                transition: "width 0.4s ease",
+              }} />
+            </div>
+          </div>
+        )}
+
+        {/* Caso 3: ≥3 rischi → bottone gap check */}
+        {complianceCtx.riskTier && complianceCtx.riskTier !== "unclassified" && report.risks.length >= 3 && !coverageChecked && (
+          <button
+            onClick={onCheckCoverage}
+            disabled={coverageLoading}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "8px 14px", borderRadius: 8,
+              background: coverageLoading ? "#e5e7eb" : "rgba(37,99,235,0.08)",
+              border: "1px solid rgba(37,99,235,0.2)",
+              color: coverageLoading ? "#9ca3af" : "#1e40af",
+              fontSize: 12, fontWeight: 600, cursor: coverageLoading ? "default" : "pointer",
+              marginBottom: 10,
+            }}
+          >
+            {coverageLoading ? "✦ Verifica in corso…" : "✦ Verifica copertura Art. 9"}
+          </button>
+        )}
+
+        {/* Gap check results */}
+        {coverageResult && (
+          <div style={{
+            marginBottom: 16, padding: 16, borderRadius: 10,
+            border: "1px solid rgba(37,99,235,0.2)",
+            background: "rgba(37,99,235,0.03)",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+              <div>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#1e40af" }}>
+                  ✦ Verifica copertura Art. 9
+                </span>
+                <span style={{
+                  marginLeft: 8, fontSize: 10, color: "#2563eb",
+                  background: "rgba(37,99,235,0.08)", borderRadius: 4,
+                  padding: "2px 6px", border: "1px solid rgba(37,99,235,0.2)",
+                }}>
+                  ✦ AI — verifica e conferma
+                </span>
+              </div>
+              <button
+                onClick={onResetCoverage}
+                style={{ fontSize: 11, background: "none", border: "none", cursor: "pointer", color: "#6b7280" }}
+              >
+                Riesegui
+              </button>
+            </div>
+
+            {/* Score circolare */}
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+              <div style={{ position: "relative", width: 56, height: 56, flexShrink: 0 }}>
+                <svg width="56" height="56" viewBox="0 0 56 56">
+                  <circle cx="28" cy="28" r="22" fill="none" stroke="#e5e7eb" strokeWidth="5" />
+                  <circle
+                    cx="28" cy="28" r="22" fill="none"
+                    stroke={coverageResult.coverageScore >= 70 ? "#10b981" : coverageResult.coverageScore >= 40 ? "#f59e0b" : "#ef4444"}
+                    strokeWidth="5"
+                    strokeDasharray={`${(coverageResult.coverageScore / 100) * 138.2} 138.2`}
+                    strokeLinecap="round"
+                    transform="rotate(-90 28 28)"
+                    style={{ transition: "stroke-dasharray 0.6s ease" }}
+                  />
+                </svg>
+                <span style={{
+                  position: "absolute", top: "50%", left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  fontSize: 13, fontWeight: 700, color: "#111827",
+                }}>
+                  {coverageResult.coverageScore}%
+                </span>
+              </div>
+              <p style={{ fontSize: 12, color: "#374151", margin: 0, flex: 1 }}>
+                {coverageResult.assessment}
+              </p>
+            </div>
+
+            {/* Aree mancanti */}
+            {coverageResult.missingAreas.length > 0 && (
+              <div>
+                <p style={{ fontSize: 11, fontWeight: 600, color: "#374151", margin: "0 0 8px" }}>
+                  Aree non coperte ({coverageResult.missingAreas.length}):
+                </p>
+                {coverageResult.missingAreas.map((gap, i) => (
+                  <div key={i} style={{
+                    padding: "8px 10px", marginBottom: 6, borderRadius: 7,
+                    background: gap.priority === "obbligatorio" ? "rgba(220,38,38,0.04)" : "rgba(245,158,11,0.04)",
+                    border: `1px solid ${gap.priority === "obbligatorio" ? "rgba(220,38,38,0.2)" : "rgba(245,158,11,0.2)"}`,
+                  }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: gap.priority === "obbligatorio" ? "#dc2626" : "#d97706" }}>
+                      {gap.priority === "obbligatorio" ? "⚠ Obbligatorio" : "Raccomandato"}
+                    </span>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: "#111827", margin: "3px 0 2px" }}>
+                      {gap.area}
+                    </p>
+                    <p style={{ fontSize: 11, color: "#6b7280", margin: "0 0 4px", fontStyle: "italic" }}>
+                      {gap.art9Requirement}
+                    </p>
+                    <p style={{ fontSize: 11, color: "#374151", margin: "0 0 6px" }}>
+                      Rischio suggerito: <em>{gap.suggestedRiskTitle}</em>
+                    </p>
+                    <button
+                      onClick={() => openNewRiskForm({ title: gap.suggestedRiskTitle, source: "ai_gap_check" })}
+                      style={{
+                        fontSize: 10, color: "#2563eb", background: "transparent",
+                        border: "1px solid rgba(37,99,235,0.3)", borderRadius: 4,
+                        padding: "2px 8px", cursor: "pointer",
+                      }}
+                    >
+                      + Aggiungi rischio
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {coverageResult.missingAreas.length === 0 && (
+              <div style={{
+                padding: "8px 12px", borderRadius: 7,
+                background: "rgba(16,185,129,0.06)",
+                border: "1px solid rgba(16,185,129,0.2)",
+                fontSize: 12, color: "#065f46",
+              }}>
+                ✓ Copertura Art. 9 soddisfacente per il tier dichiarato.
+                Ricorda che la conformità effettiva richiede verifica legale.
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Legacy one-shot AI suggestions (still shown if triggered) */}
         {aiError && (
           <p style={{ fontSize: 12, color: "#dc2626", marginTop: 6 }}>{aiError}</p>
         )}

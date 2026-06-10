@@ -1,6 +1,7 @@
 "use server";
 import { generateText } from "@/lib/rag/rag-vertex";
 import { z } from "zod";
+import type { GlobalComplianceContext } from "@/hooks/useComplianceContext";
 
 const RiskScenarioSchema = z.object({
   scenarios: z.array(z.object({
@@ -15,19 +16,24 @@ const RiskScenarioSchema = z.object({
 
 export type SuggestedRiskScenario = z.infer<typeof RiskScenarioSchema>["scenarios"][0];
 
+// ── New signature: accepts GlobalComplianceContext ─────────────────────────
 export async function suggestRiskScenarios(
-  systemName: string,
-  systemDescription: string,
-  riskLevel: string,
-  annexIII: boolean
+  context: GlobalComplianceContext
 ): Promise<{ scenarios: SuggestedRiskScenario[] } | { error: string }> {
+
+  // Guard: context insufficiente
+  if (!context.riskTier || context.riskTier === "unclassified") {
+    return { error: "CONTEXT_MISSING" };
+  }
+
   const prompt = `Sei un esperto di risk management per sistemi AI in conformità con l'Art. 9 EU AI Act.
 
 Sistema AI da analizzare:
-- Nome: ${systemName}
-- Descrizione: ${systemDescription}
-- Livello di rischio: ${riskLevel}
-- Allegato III applicabile: ${annexIII ? "sì" : "no"}
+- Nome: ${context.systemName ?? "Sistema AI"}
+- Descrizione: ${context.systemDescription ?? "nessuna descrizione"}
+- Livello di rischio: ${context.riskTier}
+- Allegato III applicabile: ${context.annexIII ? "sì" : "no"}
+- Articoli applicabili: ${context.applicableArticles?.join(", ") ?? "non determinati"}
 
 Genera 4-5 scenari di rischio specifici per questo sistema AI, conformi all'Art. 9(4) EU AI Act
 che richiede di considerare i gruppi vulnerabili.
