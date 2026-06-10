@@ -63,6 +63,7 @@ import {
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { DocumentUploadPanel } from "@/components/compliance/DocumentUploadPanel";
 import { writeToStorage } from "@/lib/dossier/storage-schema";
 import type { RiskManagerResult } from "@/lib/dossier/storage-schema";
 import { useAutoSave } from "@/hooks/useAutoSave";
@@ -520,6 +521,24 @@ export default function RiskManagerPage() {
   return (
     <div className="w-full">
       <SystemContextBanner checkProhibited={true} />
+
+      {/* RAG — Carica documenti tecnici per estrazione automatica campi */}
+      <div style={{ marginBottom: 16 }}>
+        <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.45)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+          Importa da documento
+        </p>
+        <DocumentUploadPanel
+          toolId="riskManager"
+          onFactConfirmed={(fieldTarget, value) => {
+            // Applica il fatto confermato al campo corrispondente del Risk Manager
+            if (fieldTarget === "riskManager.intendedPurpose") {
+              setReport(prev => ({ ...prev, intendedPurpose: value }));
+            } else if (fieldTarget === "riskManager.systemDescription") {
+              setReport(prev => ({ ...prev, systemDescription: value }));
+            }
+          }}
+        />
+      </div>
 
       {/* Art. 50 — AI Output Label */}
       <div className="mb-4">
