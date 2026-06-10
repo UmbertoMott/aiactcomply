@@ -10,7 +10,7 @@ const AI_DISCLOSURE_HEADERS: Record<string, string> = {
   "X-AI-Requires-Review": "true",
 };
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const response = await updateSession(request);
 
   // Add AI disclosure headers to all /api/ responses
