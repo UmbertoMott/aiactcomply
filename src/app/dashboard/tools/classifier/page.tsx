@@ -31,6 +31,7 @@ import { writeToStorage } from "@/lib/dossier/storage-schema";
 import type { ClassifierResult } from "@/lib/dossier/storage-schema";
 import { loadOrgProfile, saveOrgProfile } from "@/lib/dossier/org-profile";
 import { parseBrainDump, type BrainDumpResult } from "@/app/actions/parseBrainDump";
+import { detectDualRole, type DualRoleResult } from "@/app/actions/detectDualRole";
 
 // ─── ADDITION 1 — Persistence ────────────────────────────────────────
 
@@ -151,6 +152,14 @@ export default function ClassifierPage() {
   const [brainDumpLoading, setBrainDumpLoading] = useState(false);
   const [brainDumpResult, setBrainDumpResult]   = useState<BrainDumpResult | null>(null);
   const [brainDumpError, setBrainDumpError]     = useState<string | null>(null);
+
+  // Part AG1 — Dual Role Art. 25
+  const [orgRole, setOrgRole] = useState<"provider" | "deployer" | "">("");
+  const [vendorName, setVendorName] = useState("");
+  const [modificationsDesc, setModificationsDesc] = useState("");
+  const [dualRoleLoading, setDualRoleLoading] = useState(false);
+  const [dualRoleResult, setDualRoleResult] = useState<DualRoleResult | null>(null);
+  const [dualRoleError, setDualRoleError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsSaved(localStorage.getItem(STORAGE_KEY) !== null);
@@ -754,6 +763,116 @@ export default function ClassifierPage() {
                     className="w-full rounded-lg border border-border bg-muted/20 px-3 py-2 text-xs text-foreground font-mono"
                   />
                 </div>
+
+                {/* Ruolo organizzazione */}
+                <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 16, marginTop: 4 }}>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: T.text, display: "block", marginBottom: 10 }}>
+                    Ruolo della tua organizzazione rispetto a questo sistema AI
+                  </label>
+                  <div style={{ display: "flex", gap: 10 }}>
+                    {([
+                      { id: "provider" as const, label: "Provider", sub: "Sviluppo / immissione sul mercato" },
+                      { id: "deployer" as const, label: "Deployer", sub: "Utilizzo / messa in servizio" },
+                    ] as const).map((opt) => (
+                      <button key={opt.id} onClick={() => setOrgRole(opt.id)}
+                        style={{
+                          flex: 1, padding: "10px 12px", borderRadius: 9, textAlign: "left", cursor: "pointer",
+                          border: orgRole === opt.id ? `2px solid ${T.blue}` : `1px solid ${T.border}`,
+                          background: orgRole === opt.id ? T.blueBg : T.card, transition: "all 0.15s",
+                        }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{opt.label}</div>
+                        <div style={{ fontSize: 11, color: T.muted, marginTop: 2 }}>{opt.sub}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Dual-role panel — solo se deployer */}
+                {orgRole === "deployer" && (
+                  <div style={{
+                    background: T.blueBg, border: `1px solid rgba(37,99,235,0.2)`,
+                    borderRadius: 10, padding: 16, marginTop: 4,
+                  }}>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: T.blue, marginBottom: 12 }}>
+                      ✦ Verifica ruolo Art. 25 — il deployer che modifica diventa provider?
+                    </p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                      <div>
+                        <label style={{ fontSize: 11, color: T.muted, display: "block", marginBottom: 4 }}>
+                          Nome vendor / soluzione di base
+                        </label>
+                        <input value={vendorName} onChange={(e) => setVendorName(e.target.value)}
+                          placeholder="es. OpenAI GPT-4, Salesforce Einstein, SAP AI..."
+                          style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, color: T.text, background: T.card, outline: "none" }} />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: 11, color: T.muted, display: "block", marginBottom: 4 }}>
+                          Modifiche apportate al sistema base (descrizione libera)
+                        </label>
+                        <textarea value={modificationsDesc} onChange={(e) => setModificationsDesc(e.target.value)}
+                          placeholder="es. Fine-tuning su dati aziendali, cambio scopo d'uso, integrazione con output decisionali..."
+                          rows={3}
+                          style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, color: T.text, background: T.card, outline: "none", resize: "vertical" }} />
+                      </div>
+                      <button
+                        disabled={dualRoleLoading || !vendorName.trim()}
+                        onClick={async () => {
+                          setDualRoleLoading(true);
+                          setDualRoleError(null);
+                          setDualRoleResult(null);
+                          const res = await detectDualRole(customSystemName || "Sistema AI", vendorName, modificationsDesc);
+                          setDualRoleLoading(false);
+                          if (res.error) setDualRoleError(res.error);
+                          else setDualRoleResult(res.result);
+                        }}
+                        style={{
+                          padding: "8px 16px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+                          background: dualRoleLoading || !vendorName.trim() ? "rgba(0,0,0,0.08)" : T.blue,
+                          color: dualRoleLoading || !vendorName.trim() ? T.muted : "#fff",
+                          border: "none", cursor: dualRoleLoading || !vendorName.trim() ? "not-allowed" : "pointer",
+                          alignSelf: "flex-start",
+                        }}>
+                        {dualRoleLoading ? "Analisi in corso…" : "✦ Verifica ruolo Art. 25"}
+                      </button>
+                      {dualRoleError && (
+                        <p style={{ fontSize: 11, color: T.red }}>{dualRoleError === "MISSING_INPUT" ? "Inserisci nome sistema e vendor." : "Errore generazione. Riprova."}</p>
+                      )}
+                      {dualRoleResult && (
+                        <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: 12 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                            <span style={{
+                              fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 6,
+                              background: dualRoleResult.isDualRole ? "rgba(220,38,38,0.1)" : "rgba(22,163,74,0.1)",
+                              color: dualRoleResult.isDualRole ? T.red : T.green,
+                            }}>
+                              {dualRoleResult.roleVerdict === "both_provider_and_deployer" ? "Ruolo dual: PROVIDER + DEPLOYER" :
+                               dualRoleResult.roleVerdict === "provider" ? "Hai assunto ruolo di PROVIDER" :
+                               dualRoleResult.roleVerdict === "deployer" ? "Ruolo: DEPLOYER" : "Ruolo incerto"}
+                            </span>
+                            {dualRoleResult.art25Applies && (
+                              <span style={{ fontSize: 10, color: T.red, fontWeight: 600 }}>⚠ Art. 25 si applica</span>
+                            )}
+                          </div>
+                          <p style={{ fontSize: 12, color: T.text, marginBottom: 8 }}>{dualRoleResult.summary}</p>
+                          {dualRoleResult.substantialModification && (
+                            <p style={{ fontSize: 11, color: T.amber, marginBottom: 8 }}>
+                              Modifica sostanziale rilevata: {dualRoleResult.substantialModificationReason}
+                            </p>
+                          )}
+                          {dualRoleResult.art25Obligations.length > 0 && (
+                            <div>
+                              <p style={{ fontSize: 11, fontWeight: 600, color: T.muted, marginBottom: 4 }}>Obblighi Art. 25:</p>
+                              <ul style={{ margin: 0, paddingLeft: 16, fontSize: 11, color: T.muted }}>
+                                {dualRoleResult.art25Obligations.map((o, i) => <li key={i} style={{ marginBottom: 2 }}>{o}</li>)}
+                              </ul>
+                            </div>
+                          )}
+                          <p style={{ fontSize: 10, color: T.faint, marginTop: 8 }}>✦ AI — verifica e conferma</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

@@ -14,6 +14,9 @@ import {
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { DataAuditResult, ClassifierResult } from "@/lib/dossier/storage-schema";
 import { analyzeCsvBias, type AiBiasReport } from "@/app/actions/analyzeCsvBias";
+import { detectProxyFeatures, type ProxyFeaturesResult } from "@/app/actions/detectProxyFeatures";
+import { scoreWP248Criteria, type WP248Score } from "@/app/actions/scoreWP248";
+import { checkDataQuality, type DataQualityResult } from "@/app/actions/checkDataQuality";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
 import { DBStatusBadge, type DBSource } from "@/components/ui/DBStatusBadge";
@@ -200,6 +203,14 @@ export default function DataAuditPage() {
   const [geoGapNote, setGeoGapNote] = useState("");
   const [usesSpecialCategoriesForBias, setUsesSpecialCategoriesForBias] = useState(false);
   const [specialCategoryGuarantees, setSpecialCategoryGuarantees] = useState("");
+
+  // AG Part 2 — AI panels
+  const [proxyLoading, setProxyLoading] = useState(false);
+  const [proxyResult, setProxyResult] = useState<ProxyFeaturesResult | null>(null);
+  const [wp248Loading, setWp248Loading] = useState(false);
+  const [wp248Score, setWp248Score] = useState<WP248Score | null>(null);
+  const [dqLoading, setDqLoading] = useState(false);
+  const [dqResult, setDqResult] = useState<DataQualityResult | null>(null);
 
   function showToastMsg(msg: string) {
     setToast(msg);
@@ -799,6 +810,130 @@ export default function DataAuditPage() {
                 />
               </div>
             )}
+          </div>
+
+          {/* AG Part 2 — AI Panels */}
+          <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, padding: 20, marginBottom: 16 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "#0D1016", marginBottom: 14 }}>✦ Analisi AI — Art. 10</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+
+              {/* Proxy Detector */}
+              <div>
+                <button
+                  disabled={proxyLoading}
+                  onClick={async () => {
+                    setProxyLoading(true);
+                    setProxyResult(null);
+                    const dataset = MOCK_DATASETS.find(d => d.id === datasetId);
+                    const features = customConfig.sensitiveFeatures || dataset?.sensitiveFeatures?.join(", ") || "";
+                    const res = await detectProxyFeatures(
+                      dataset?.name || customConfig.name || "Dataset",
+                      features,
+                      dataset?.name || "sistema AI"
+                    );
+                    setProxyLoading(false);
+                    if (res.result) setProxyResult(res.result);
+                  }}
+                  style={{ fontSize: 11, color: "#2563eb", background: "rgba(37,99,235,0.06)", border: "1px solid rgba(37,99,235,0.2)", borderRadius: 5, padding: "5px 12px", cursor: "pointer" }}>
+                  {proxyLoading ? "✦ Analisi…" : "✦ Analizza proxy per attributi protetti (Art. 10(2)(f))"}
+                </button>
+                {proxyResult && (
+                  <div style={{ marginTop: 8, padding: 12, borderRadius: 8, background: proxyResult.overallProxyRisk === "none" ? "rgba(22,163,74,0.04)" : "rgba(245,158,11,0.05)", border: `1px solid ${proxyResult.overallProxyRisk === "none" ? "rgba(22,163,74,0.2)" : "rgba(245,158,11,0.25)"}` }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: "#2563eb", background: "rgba(37,99,235,0.08)", borderRadius: 4, padding: "2px 6px" }}>✦ AI — verifica e conferma</span>
+                    <p style={{ fontSize: 12, fontWeight: 600, margin: "6px 0 4px", color: "#0D1016" }}>Rischio proxy complessivo: <span style={{ color: proxyResult.overallProxyRisk === "high" ? "#dc2626" : proxyResult.overallProxyRisk === "medium" ? "#d97706" : "#15803d" }}>{proxyResult.overallProxyRisk.toUpperCase()}</span></p>
+                    <p style={{ fontSize: 11, color: "rgba(0,0,0,0.42)", marginBottom: 8 }}>{proxyResult.art10Assessment}</p>
+                    {proxyResult.proxyFeatures.map((pf, i) => (
+                      <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6, padding: "6px 8px", borderRadius: 6, background: pf.severity === "critical" || pf.severity === "high" ? "rgba(220,38,38,0.04)" : "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.06)" }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 5px", borderRadius: 4, background: pf.severity === "critical" ? "#dc2626" : pf.severity === "high" ? "#d97706" : "#6b7280", color: "#fff", whiteSpace: "nowrap", alignSelf: "flex-start" }}>{pf.severity}</span>
+                        <div>
+                          <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0 }}><span style={{ color: "#2563eb" }}>{pf.featureName}</span> → proxy per <span style={{ color: "#dc2626" }}>{pf.proxiedAttribute}</span></p>
+                          <p style={{ fontSize: 10, color: "rgba(0,0,0,0.42)", margin: "2px 0 0", fontStyle: "italic" }}>{pf.art10Risk}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* WP248 Scorer */}
+              <div>
+                <button
+                  disabled={wp248Loading}
+                  onClick={async () => {
+                    setWp248Loading(true);
+                    setWp248Score(null);
+                    const dataset = MOCK_DATASETS.find(d => d.id === datasetId);
+                    const res = await scoreWP248Criteria(
+                      `Elaborazione dati per ${dataset?.name || "sistema AI"}`,
+                      dataset?.sensitiveFeatures?.join(", ") || customConfig.sensitiveFeatures || "non specificate",
+                      "persone fisiche interessate dal sistema",
+                      dataset?.name || "sistema AI"
+                    );
+                    setWp248Loading(false);
+                    if (res.score) setWp248Score(res.score);
+                  }}
+                  style={{ fontSize: 11, color: "#7c3aed", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 5, padding: "5px 12px", cursor: "pointer" }}>
+                  {wp248Loading ? "✦ Analisi…" : "✦ Verifica necessità DPIA (criteri WP248 rev.01)"}
+                </button>
+                {wp248Score && (
+                  <div style={{ marginTop: 8, padding: 12, borderRadius: 8, background: wp248Score.dpiaRequired ? "rgba(124,58,237,0.04)" : "rgba(22,163,74,0.04)", border: `1px solid ${wp248Score.dpiaRequired ? "rgba(124,58,237,0.25)" : "rgba(22,163,74,0.2)"}` }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: "#2563eb", background: "rgba(37,99,235,0.08)", borderRadius: 4, padding: "2px 6px" }}>✦ AI — verifica e conferma</span>
+                    <p style={{ fontSize: 12, fontWeight: 700, margin: "6px 0 2px", color: wp248Score.dpiaRequired ? "#7c3aed" : "#15803d" }}>
+                      {wp248Score.dpiaRequired ? `⚠ DPIA OBBLIGATORIA — ${wp248Score.matchedCount} criteri soddisfatti` : `✓ DPIA non obbligatoria — ${wp248Score.matchedCount} criteri soddisfatti`}
+                    </p>
+                    <p style={{ fontSize: 11, color: "rgba(0,0,0,0.42)", marginBottom: 8 }}>{wp248Score.dpiaJustification}</p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                      {wp248Score.criteria.filter(c => c.matched).map((c, i) => (
+                        <span key={i} style={{ fontSize: 10, padding: "2px 7px", borderRadius: 99, background: "rgba(124,58,237,0.1)", color: "#7c3aed", border: "1px solid rgba(124,58,237,0.2)" }}>{c.label}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Data Quality Checker */}
+              <div>
+                <button
+                  disabled={dqLoading}
+                  onClick={async () => {
+                    setDqLoading(true);
+                    setDqResult(null);
+                    const dataset = MOCK_DATASETS.find(d => d.id === datasetId);
+                    const res = await checkDataQuality({
+                      name: dataset?.name || customConfig.name || "Dataset",
+                      size: customConfig.rows || String(dataset?.rows || ""),
+                      source: customConfig.source || dataset?.source || "",
+                      labelingProcess: labelingProcess || undefined,
+                      geoCoverage: geoCoverage || undefined,
+                      personalData: true,
+                    }, dataset?.name || "sistema AI");
+                    setDqLoading(false);
+                    if (res.result) setDqResult(res.result);
+                  }}
+                  style={{ fontSize: 11, color: "#059669", background: "rgba(5,150,105,0.05)", border: "1px solid rgba(5,150,105,0.2)", borderRadius: 5, padding: "5px 12px", cursor: "pointer" }}>
+                  {dqLoading ? "✦ Analisi…" : "✦ Verifica qualità dati Art. 10(3)"}
+                </button>
+                {dqResult && (
+                  <div style={{ marginTop: 8, padding: 12, borderRadius: 8, background: "rgba(5,150,105,0.04)", border: "1px solid rgba(5,150,105,0.2)" }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: "#2563eb", background: "rgba(37,99,235,0.08)", borderRadius: 4, padding: "2px 6px" }}>✦ AI — verifica e conferma</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "8px 0 4px" }}>
+                      <span style={{ fontSize: 18, fontWeight: 700, color: dqResult.qualityScore >= 70 ? "#15803d" : dqResult.qualityScore >= 50 ? "#d97706" : "#dc2626" }}>{dqResult.qualityScore}<span style={{ fontSize: 11, fontWeight: 400 }}>/100</span></span>
+                      <span style={{ fontSize: 11, color: "rgba(0,0,0,0.42)" }}>{dqResult.summary}</span>
+                    </div>
+                    {dqResult.art10Gaps.map((gap, i) => (
+                      <div key={i} style={{ display: "flex", gap: 6, marginBottom: 5, padding: "5px 8px", borderRadius: 6, background: gap.priority === "obbligatorio" ? "rgba(220,38,38,0.04)" : "rgba(245,158,11,0.04)", border: `1px solid ${gap.priority === "obbligatorio" ? "rgba(220,38,38,0.15)" : "rgba(245,158,11,0.15)"}` }}>
+                        <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 5px", borderRadius: 4, background: gap.priority === "obbligatorio" ? "#dc2626" : "#d97706", color: "#fff", whiteSpace: "nowrap", alignSelf: "flex-start" }}>{gap.priority === "obbligatorio" ? "OBB" : "RAC"}</span>
+                        <div>
+                          <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0 }}>{gap.requirement}</p>
+                          <p style={{ fontSize: 10, color: "rgba(0,0,0,0.42)", margin: "1px 0 0", fontStyle: "italic" }}>{gap.article} — {gap.gap}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+            </div>
           </div>
 
           <SignOffPanel toolKey="data-audit" toolLabel="Data & Training Audit" />

@@ -7,6 +7,10 @@ import { GitBranch, Download, ChevronRight, AlertTriangle, CheckCircle, Clock } 
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { DocugenResult, DataAuditResult, RiskManagerResult } from "@/lib/dossier/storage-schema";
+import { checkAnnexIVGaps, type AnnexIVGapsResult } from "@/app/actions/checkAnnexIVGaps";
+import { validateDocuGenCoherence, type CoherenceReport } from "@/app/actions/validateDocuGenCoherence";
+import { assessChangeImpact, type ChangeImpactReport } from "@/app/actions/assessChangeImpact";
+import { buildComplianceContextFromStorage } from "@/hooks/useComplianceContext";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { VersionHistoryPanel } from "@/components/compliance/VersionHistoryPanel";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
@@ -345,6 +349,14 @@ export default function DocuGenPage() {
 
   // ─── DB Sync State ──────────────────────────────────────────────────────────
   const [technicalFileId, setTechnicalFileId] = useState<string | null>(null);
+  // AG Part 3 — AI panels
+  const [annexIVReport, setAnnexIVReport] = useState<AnnexIVGapsResult | null>(null);
+  const [annexIVLoading, setAnnexIVLoading] = useState(false);
+  const [coherenceReport, setCoherenceReport] = useState<CoherenceReport | null>(null);
+  const [coherenceLoading, setCoherenceLoading] = useState(false);
+  const [changeDesc, setChangeDesc] = useState("");
+  const [changeImpactReport, setChangeImpactReport] = useState<ChangeImpactReport | null>(null);
+  const [changeImpactLoading, setChangeImpactLoading] = useState(false);
   const [aiSystemId, setAiSystemId] = useState<string | null>(null);
   const [aiSystems, setAiSystems] = useState<{ id: string; name: string; risk_tier: string }[]>([]);
   const [dbSynced, setDbSynced] = useState(false);
@@ -971,6 +983,131 @@ export default function DocuGenPage() {
               </div>
             </motion.div>
           </AnimatePresence>
+
+          {/* ── AG Part 3 — AI Analysis Panels ── */}
+          <div className="mt-4 rounded-xl p-4" style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)" }}>
+            <p className="text-[11px] font-semibold uppercase mb-3" style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "1px" }}>✦ Analisi AI — Art. 11 / Annex IV</p>
+            <div className="flex flex-wrap gap-2 mb-3" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)", paddingBottom: 12 }}>
+              <button
+                disabled={annexIVLoading}
+                onClick={async () => {
+                  setAnnexIVLoading(true);
+                  setAnnexIVReport(null);
+                  const c = persisted.content;
+                  const res = await checkAnnexIVGaps({
+                    systemName: persisted.systemName || c["s1"] || "",
+                    provider: c["s2"] || "",
+                    purpose: c["s3"] || "",
+                    capabilities: c["s4"] || "",
+                    limitations: c["s5"] || "",
+                    humanOversight: c["s6"] || "",
+                    performanceMetrics: c["s7"] || "",
+                    trainingData: c["s8"] || "",
+                  });
+                  setAnnexIVLoading(false);
+                  if (res.result) setAnnexIVReport(res.result);
+                }}
+                style={{ fontSize: 11, color: "#2563eb", background: "rgba(37,99,235,0.06)", border: "1px solid rgba(37,99,235,0.2)", borderRadius: 5, padding: "5px 12px", cursor: "pointer" }}>
+                {annexIVLoading ? "✦ Analisi…" : "✦ Verifica copertura Annex IV"}
+              </button>
+              <button
+                disabled={coherenceLoading}
+                onClick={async () => {
+                  setCoherenceLoading(true);
+                  setCoherenceReport(null);
+                  const ctx = buildComplianceContextFromStorage();
+                  const c = persisted.content;
+                  const res = await validateDocuGenCoherence({
+                    systemName: persisted.systemName,
+                    purpose: c["s3"] || "",
+                    capabilities: c["s4"] || "",
+                    limitations: c["s5"] || "",
+                    humanOversight: c["s6"] || "",
+                  }, ctx);
+                  setCoherenceLoading(false);
+                  if (res.report) setCoherenceReport(res.report);
+                }}
+                style={{ fontSize: 11, color: "#7c3aed", background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 5, padding: "5px 12px", cursor: "pointer" }}>
+                {coherenceLoading ? "✦ Analisi…" : "✦ Verifica coerenza inter-tool"}
+              </button>
+            </div>
+
+            {/* Annex IV Report */}
+            {annexIVReport && (
+              <div className="mb-3 p-3 rounded-lg" style={{ background: annexIVReport.coverageScore >= 80 ? "rgba(22,163,74,0.04)" : "rgba(245,158,11,0.05)", border: `1px solid ${annexIVReport.coverageScore >= 80 ? "rgba(22,163,74,0.2)" : "rgba(245,158,11,0.2)"}` }}>
+                <span style={{ fontSize: 10, fontWeight: 600, color: "#2563eb", background: "rgba(37,99,235,0.08)", borderRadius: 4, padding: "2px 6px" }}>✦ AI — verifica e conferma</span>
+                <p style={{ fontSize: 12, fontWeight: 700, margin: "6px 0 2px", color: "#0D1016" }}>Copertura Annex IV: <span style={{ color: annexIVReport.coverageScore >= 80 ? "#15803d" : "#d97706" }}>{annexIVReport.coverageScore}%</span></p>
+                <p style={{ fontSize: 11, color: "rgba(0,0,0,0.42)", marginBottom: 8 }}>{annexIVReport.summary}</p>
+                {annexIVReport.missingSections.map((ms, i) => (
+                  <div key={i} style={{ display: "flex", gap: 6, marginBottom: 4, padding: "4px 8px", borderRadius: 5, background: ms.priority === "obbligatorio" ? "rgba(220,38,38,0.04)" : "rgba(245,158,11,0.04)", border: `1px solid ${ms.priority === "obbligatorio" ? "rgba(220,38,38,0.15)" : "rgba(245,158,11,0.15)"}` }}>
+                    <span style={{ fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 3, background: ms.priority === "obbligatorio" ? "#dc2626" : "#d97706", color: "#fff", whiteSpace: "nowrap", alignSelf: "flex-start" }}>{ms.priority === "obbligatorio" ? "OBB" : "RAC"}</span>
+                    <div>
+                      <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0 }}>{ms.section}</p>
+                      <p style={{ fontSize: 10, color: "rgba(0,0,0,0.42)", margin: "1px 0 0", fontStyle: "italic" }}>{ms.annexIVRef}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Coherence Report */}
+            {coherenceReport && (
+              <div className="mb-3 p-3 rounded-lg" style={{ background: coherenceReport.coherenceScore >= 80 ? "rgba(22,163,74,0.04)" : "rgba(220,38,38,0.04)", border: `1px solid ${coherenceReport.coherenceScore >= 80 ? "rgba(22,163,74,0.2)" : "rgba(220,38,38,0.2)"}` }}>
+                <span style={{ fontSize: 10, fontWeight: 600, color: "#2563eb", background: "rgba(37,99,235,0.08)", borderRadius: 4, padding: "2px 6px" }}>✦ AI — verifica e conferma</span>
+                <p style={{ fontSize: 12, fontWeight: 700, margin: "6px 0 2px", color: "#0D1016" }}>Coerenza inter-tool: <span style={{ color: coherenceReport.coherenceScore >= 80 ? "#15803d" : "#dc2626" }}>{coherenceReport.coherenceScore}%</span> — {coherenceReport.overallStatus.replace(/_/g, " ")}</p>
+                {coherenceReport.inconsistencies.map((inc, i) => (
+                  <div key={i} style={{ display: "flex", gap: 6, marginBottom: 4, padding: "4px 8px", borderRadius: 5, background: inc.severity === "critical" ? "rgba(220,38,38,0.04)" : "rgba(245,158,11,0.04)", border: `1px solid ${inc.severity === "critical" ? "rgba(220,38,38,0.15)" : "rgba(245,158,11,0.15)"}` }}>
+                    <span style={{ fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 3, background: inc.severity === "critical" ? "#dc2626" : inc.severity === "warning" ? "#d97706" : "#6b7280", color: "#fff", whiteSpace: "nowrap", alignSelf: "flex-start" }}>{inc.severity}</span>
+                    <div>
+                      <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0 }}>{inc.field}: <span style={{ color: "#dc2626" }}>{inc.docuGenValue}</span> vs <span style={{ color: "#2563eb" }}>{inc.sourceContext}: {inc.contextValue}</span></p>
+                      <p style={{ fontSize: 10, color: "rgba(0,0,0,0.42)", margin: "1px 0 0", fontStyle: "italic" }}>{inc.art11Reference}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Change Impact */}
+            <div style={{ borderTop: "1px solid rgba(0,0,0,0.06)", paddingTop: 10 }}>
+              <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.5)", marginBottom: 6 }}>Hai modificato il sistema? Descrivi il cambiamento:</p>
+              <div style={{ display: "flex", gap: 8 }}>
+                <input
+                  value={changeDesc}
+                  onChange={e => setChangeDesc(e.target.value)}
+                  placeholder="Es. 'Aggiornato il modello con nuovi dati HR Q2 2026'"
+                  style={{ flex: 1, padding: "6px 10px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.12)", fontSize: 12 }}
+                />
+                <button
+                  disabled={changeImpactLoading || !changeDesc.trim()}
+                  onClick={async () => {
+                    setChangeImpactLoading(true);
+                    setChangeImpactReport(null);
+                    const ctx = buildComplianceContextFromStorage();
+                    const res = await assessChangeImpact(changeDesc, ctx.riskTier ?? null, ctx.annexIII ?? null);
+                    setChangeImpactLoading(false);
+                    if (res.report) setChangeImpactReport(res.report);
+                  }}
+                  style={{ fontSize: 11, color: "#059669", background: "rgba(5,150,105,0.06)", border: "1px solid rgba(5,150,105,0.2)", borderRadius: 5, padding: "5px 12px", cursor: "pointer", whiteSpace: "nowrap" }}>
+                  {changeImpactLoading ? "✦ Analisi…" : "✦ Analizza impatto"}
+                </button>
+              </div>
+              {changeImpactReport && (
+                <div style={{ marginTop: 8, padding: 10, borderRadius: 8, background: changeImpactReport.isSubstantialModification ? "rgba(220,38,38,0.04)" : "rgba(22,163,74,0.04)", border: `1px solid ${changeImpactReport.isSubstantialModification ? "rgba(220,38,38,0.2)" : "rgba(22,163,74,0.2)"}` }}>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: "#2563eb", background: "rgba(37,99,235,0.08)", borderRadius: 4, padding: "2px 6px" }}>✦ AI — verifica e conferma</span>
+                  <p style={{ fontSize: 12, fontWeight: 700, margin: "6px 0 2px", color: changeImpactReport.isSubstantialModification ? "#dc2626" : "#15803d" }}>
+                    {changeImpactReport.isSubstantialModification ? "⚠ Modifica sostanziale rilevata" : "✓ Modifica non sostanziale"}
+                    {changeImpactReport.requiresNewConformityAssessment && " — richiede nuovo Conformity Assessment"}
+                  </p>
+                  <p style={{ fontSize: 10, color: "rgba(0,0,0,0.42)", fontStyle: "italic", marginBottom: 6 }}>{changeImpactReport.substModificationBasis}</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                    {changeImpactReport.affectedAnnexIVSections.filter(s => s.updateRequired === "obbligatorio").map((s, i) => (
+                      <span key={i} style={{ fontSize: 10, padding: "2px 7px", borderRadius: 99, background: "rgba(220,38,38,0.1)", color: "#dc2626", border: "1px solid rgba(220,38,38,0.2)" }}>Aggiorna: {s.sectionLabel}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* ── Version timeline ── */}
           <div className="mt-4 rounded-xl p-4"

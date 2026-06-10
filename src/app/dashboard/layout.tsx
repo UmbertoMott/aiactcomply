@@ -7,7 +7,7 @@ import {
   FileCode, Scale, ShieldAlert, BookMarked, ClipboardList, Crosshair,
   FileArchive, TrendingUp, Database, UserCheck, ArrowRightLeft, Map, Building2,
   Landmark, Zap, Menu, X, ChevronRight, ChevronLeft, ChevronDown,
-  LogOut, Settings, LayoutGrid,
+  LogOut, Settings, LayoutGrid, Siren,
 } from "lucide-react";
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { useUserRole, ROLE_LABELS } from "@/lib/hooks/useUserRole";
@@ -99,6 +99,7 @@ const PILLARS: NavPillar[] = [
       { icon: Building2,      label: "Trust Center",        href: "/dashboard/trust-center",              art: ""        },
       { icon: Scale,          label: "L.132/2025",          href: "/dashboard/tools/l132",                art: "PA Italy", flag: "paItaly" },
       { icon: Landmark,       label: "AGID/ACN",            href: "/dashboard/tools/agid-acn",            art: "PA Italy", flag: "paItaly" },
+      { icon: Siren,          label: "Incident Notification", href: "/dashboard/tools/incident",          art: "Art. 73", badge: "new" },
     ],
   },
 ];

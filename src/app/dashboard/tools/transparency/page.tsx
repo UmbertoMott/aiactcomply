@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, ChevronRight, AlertTriangle, CheckCircle, Download, BookOpen } from "lucide-react";
+import { ChevronDown, ChevronRight, AlertTriangle, CheckCircle, Download, BookOpen, FileSearch } from "lucide-react";
 import Link from "next/link";
 import {
   NUTRITION_LABEL, INSTRUCTIONS, SAMPLE_DECISIONS,
@@ -10,6 +10,7 @@ import {
 } from "@/lib/simulation/transparency-engine";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { TransparencyResult, ClassifierResult, OversightResult, ResilienceResult } from "@/lib/dossier/storage-schema";
+import { processTransparencyNotice, type TransparencyNoticeResult } from "@/app/actions/processTransparencyNotice";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
 
@@ -453,6 +454,10 @@ export default function TransparencyPage() {
   );
   const [classifierData, setClassifierData] = useState<{ riskLevel?: string; systemName?: string } | null>(null);
   const [art13Fields, setArt13Fields] = useState<Record<string, string>>({});
+  // AG Part 4 — Transparency notice evaluation
+  const [noticeLoading, setNoticeLoading] = useState(false);
+  const [noticeResult, setNoticeResult] = useState<TransparencyNoticeResult | null>(null);
+  const [noticeError, setNoticeError] = useState<string | null>(null);
 
   useEffect(() => {
     const cls = readFromStorage<ClassifierResult>("classifier");
@@ -679,6 +684,75 @@ export default function TransparencyPage() {
               />
             </div>
           ))}
+        </div>
+      )}
+
+      {/* AG Part 4 — Art. 13 Notice Evaluator */}
+      {(classifierData?.riskLevel === "high" || classifierData?.riskLevel === "High") && Object.keys(art13Fields).length > 1 && (
+        <div style={{ marginTop: 20, padding: 18, borderRadius: 10, border: "1px solid rgba(37,99,235,0.2)", background: "rgba(37,99,235,0.03)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <FileSearch size={15} style={{ color: "#2563eb" }} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#0D1016" }}>✦ Valuta conformità Art. 13 — Notice Analyzer</span>
+            </div>
+            <button
+              disabled={noticeLoading}
+              onClick={async () => {
+                setNoticeLoading(true);
+                setNoticeError(null);
+                setNoticeResult(null);
+                const res = await processTransparencyNotice(art13Fields, classifierData?.systemName ?? "Sistema AI");
+                setNoticeLoading(false);
+                if (res.error) setNoticeError(res.error);
+                else setNoticeResult(res.result);
+              }}
+              style={{
+                padding: "7px 14px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+                background: noticeLoading ? "rgba(0,0,0,0.07)" : "#2563eb",
+                color: noticeLoading ? "rgba(0,0,0,0.4)" : "#fff",
+                border: "none", cursor: noticeLoading ? "not-allowed" : "pointer",
+              }}
+            >
+              {noticeLoading ? "Analisi…" : "✦ Analizza notice"}
+            </button>
+          </div>
+          {noticeError && <p style={{ fontSize: 11, color: "#dc2626" }}>Errore analisi. Riprova.</p>}
+          {noticeResult && (
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                <div style={{
+                  width: 52, height: 52, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+                  background: noticeResult.art13Score >= 80 ? "rgba(22,163,74,0.1)" : noticeResult.art13Score >= 50 ? "rgba(202,138,4,0.1)" : "rgba(220,38,38,0.1)",
+                  border: `2px solid ${noticeResult.art13Score >= 80 ? "rgba(22,163,74,0.4)" : noticeResult.art13Score >= 50 ? "rgba(202,138,4,0.4)" : "rgba(220,38,38,0.4)"}`,
+                }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: noticeResult.art13Score >= 80 ? "#15803d" : noticeResult.art13Score >= 50 ? "#92400e" : "#dc2626" }}>
+                    {noticeResult.art13Score}
+                  </span>
+                </div>
+                <div>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: "#0D1016", margin: 0 }}>Score Art. 13: {noticeResult.art13Score}/100</p>
+                  <p style={{ fontSize: 11, color: "rgba(0,0,0,0.45)", margin: 0 }}>{noticeResult.overallAssessment}</p>
+                </div>
+              </div>
+              {noticeResult.missingFields.length > 0 && (
+                <div>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: "#dc2626", marginBottom: 6 }}>Campi mancanti:</p>
+                  {noticeResult.missingFields.map((f, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 6, marginBottom: 6, padding: "6px 10px", borderRadius: 7, background: f.priority === "obbligatorio" ? "rgba(220,38,38,0.05)" : "rgba(202,138,4,0.05)", border: `1px solid ${f.priority === "obbligatorio" ? "rgba(220,38,38,0.18)" : "rgba(202,138,4,0.18)"}` }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, padding: "1px 5px", borderRadius: 4, background: f.priority === "obbligatorio" ? "rgba(220,38,38,0.15)" : "rgba(202,138,4,0.15)", color: f.priority === "obbligatorio" ? "#dc2626" : "#92400e", whiteSpace: "nowrap" }}>
+                        {f.priority === "obbligatorio" ? "OBB" : "RAC"}
+                      </span>
+                      <div>
+                        <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0 }}>{f.field}</p>
+                        <p style={{ fontSize: 10, color: "rgba(0,0,0,0.45)", margin: 0 }}>{f.article} — {f.reason}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <p style={{ fontSize: 10, color: "rgba(0,0,0,0.35)", marginTop: 8 }}>✦ AI — verifica e conferma</p>
+            </div>
+          )}
         </div>
       )}
 

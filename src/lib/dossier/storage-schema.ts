@@ -325,6 +325,21 @@ export interface EUDBResult {
   completedAt: string;
 }
 
+export interface IncidentResult {
+  systemName: string;
+  providerName: string;
+  incidentDate: string;
+  description: string;
+  affectedPersons: number | null;
+  severity: "minor" | "serious" | "critical";
+  isSeriousIncident: boolean;
+  art73Obligation: boolean;
+  notificationDeadlineHours: number;
+  notified: boolean;
+  notifiedAt?: string;
+  completedAt: string;
+}
+
 export interface DossierData {
   meta: {
     companyName: string;
@@ -354,6 +369,7 @@ export interface DossierData {
   authorizedRep?: AuthRepResult;
   providerTransition?: ProviderTransitionResult;
   art50?: { systemsCount: number; completedAt: string };
+  incident?: IncidentResult;
 }
 
 // ── Org Profile — flag organizzativi per sidebar condizionale ───────────────
@@ -399,6 +415,7 @@ export const STORAGE_KEYS = {
   providerTransition: "aicomply_provider_transition_result",
   art50: "aicomply_art50_result",
   orgProfile: "aicomply_org_profile",
+  incident: "aicomply_incident_result",
 } as const;
 
 // ── Project-scoped storage key ───────────────────────────────────────────────

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback, CSSProperties } from "
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import { draftDpiaSections } from "@/app/actions/draftDpiaSections";
 import { buildComplianceContextFromStorage } from "@/hooks/useComplianceContext";
+import { checkPriorConsultation, type PriorConsultationResult } from "@/app/actions/checkPriorConsultation";
 import {
   Search, Database, Scale, AlertTriangle, Shield, CheckCircle2,
   ChevronLeft, ChevronRight, Plus, Trash2, Download, FileText,
@@ -306,6 +307,10 @@ export default function DPIAPage() {
   const [aiPrefillLoading, setAiPrefillLoading] = useState(false);
   const [aiPrefillDone, setAiPrefillDone]       = useState(false);
   const [aiPrefillError, setAiPrefillError]     = useState<string | null>(null);
+  // AG Part 6 — Prior consultation Art. 36
+  const [priorConsultAILoading, setPriorConsultAILoading] = useState(false);
+  const [priorConsultAIResult, setPriorConsultAIResult] = useState<PriorConsultationResult | null>(null);
+  const [priorConsultAIError, setPriorConsultAIError] = useState<string | null>(null);
 
   // Load from storage on mount
   useEffect(() => {
@@ -1232,13 +1237,79 @@ export default function DPIAPage() {
             <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>
               Consultazione preventiva — Art. 36 GDPR
             </p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
               <div><Lbl required>Autorità di controllo competente</Lbl>
                 <input value={m.prior_consultation_authority} onChange={e => upMeasures({ prior_consultation_authority: e.target.value })}
                   style={inputSt} placeholder="es. Garante Privacy (IT), CNIL (FR), ICO (UK)…" /></div>
               <div><Lbl>Data prevista di consultazione</Lbl>
                 <input type="date" value={m.prior_consultation_date} onChange={e => upMeasures({ prior_consultation_date: e.target.value })}
                   style={inputSt} /></div>
+            </div>
+            {/* AG Part 6 — AI prior consultation check */}
+            <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: T.blue }}>✦ Verifica requisiti Art. 36 GDPR</span>
+                <button
+                  disabled={priorConsultAILoading}
+                  onClick={async () => {
+                    setPriorConsultAILoading(true);
+                    setPriorConsultAIError(null);
+                    setPriorConsultAIResult(null);
+                    const res = await checkPriorConsultation({
+                      overallRiskAfter: m.overall_risk_after as "high" | "medium" | "low" | "",
+                      technicalMeasures: m.technical_measures,
+                      organizationalMeasures: m.organizational_measures,
+                      systemName: doc.description.system_name,
+                      processingPurposes: doc.description.processing_purposes,
+                      specialCategories: doc.description.special_categories,
+                    });
+                    setPriorConsultAILoading(false);
+                    if (res.error) setPriorConsultAIError(res.error);
+                    else setPriorConsultAIResult(res.result);
+                  }}
+                  style={{
+                    padding: "6px 12px", borderRadius: 7, fontSize: 11, fontWeight: 600,
+                    background: priorConsultAILoading ? "rgba(0,0,0,0.07)" : T.blue,
+                    color: priorConsultAILoading ? T.muted : "#fff", border: "none",
+                    cursor: priorConsultAILoading ? "not-allowed" : "pointer",
+                  }}>
+                  {priorConsultAILoading ? "Analisi…" : "✦ Analizza obblighi"}
+                </button>
+              </div>
+              {priorConsultAIError && <p style={{ fontSize: 11, color: T.red }}>Errore. Riprova.</p>}
+              {priorConsultAIResult && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <p style={{ fontSize: 12, color: T.text }}>{priorConsultAIResult.gdprArticle36Assessment}</p>
+                  {priorConsultAIResult.requiredActions.length > 0 && (
+                    <div>
+                      {priorConsultAIResult.requiredActions.map((a, i) => (
+                        <div key={i} style={{ display: "flex", gap: 6, marginBottom: 5, padding: "5px 8px", borderRadius: 6,
+                          background: a.priority === "obbligatorio" ? T.redBg : T.amberBg,
+                          border: `1px solid ${a.priority === "obbligatorio" ? T.redBdr : T.amberBdr}` }}>
+                          <span style={{ fontSize: 10, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
+                            background: a.priority === "obbligatorio" ? "rgba(220,38,38,0.2)" : "rgba(202,138,4,0.2)",
+                            color: a.priority === "obbligatorio" ? T.red : T.amber, whiteSpace: "nowrap" }}>
+                            {a.priority === "obbligatorio" ? "OBB" : "RAC"}
+                          </span>
+                          <div>
+                            <p style={{ fontSize: 11, fontWeight: 500, color: T.text, margin: 0 }}>{a.action}</p>
+                            <p style={{ fontSize: 10, color: T.muted, margin: 0 }}>{a.article} — scadenza: {a.deadline}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {priorConsultAIResult.submissionChecklist.length > 0 && (
+                    <div>
+                      <p style={{ fontSize: 11, fontWeight: 600, color: T.text, marginBottom: 4 }}>Checklist invio:</p>
+                      <ul style={{ margin: 0, paddingLeft: 16, fontSize: 11, color: T.muted }}>
+                        {priorConsultAIResult.submissionChecklist.map((item, i) => <li key={i}>{item}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  <p style={{ fontSize: 10, color: T.faint }}>✦ AI — verifica e conferma</p>
+                </div>
+              )}
             </div>
           </div>
         )}

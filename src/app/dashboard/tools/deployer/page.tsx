@@ -3,13 +3,14 @@
 import { useState, useRef, useEffect, useMemo, CSSProperties } from "react";
 import {
   ChevronDown, ChevronRight, CheckCircle2, AlertTriangle, XCircle,
-  HelpCircle, Building2, ExternalLink, Save, Info,
+  HelpCircle, Building2, ExternalLink, Save, Info, FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { DeployerCheckResult, LogvaultResult, FRIAResult } from "@/lib/dossier/storage-schema";
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { draftWorkerNotification, type WorkerNotificationResult } from "@/app/actions/draftWorkerNotification";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -384,6 +385,13 @@ export default function DeployerPage() {
   const [saved, setSaved] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // AG Part 5 — Worker Notification Art. 26(7)
+  const [workerNotifAffectedRoles, setWorkerNotifAffectedRoles] = useState("");
+  const [workerNotifLoading, setWorkerNotifLoading] = useState(false);
+  const [workerNotifResult, setWorkerNotifResult] = useState<WorkerNotificationResult | null>(null);
+  const [workerNotifError, setWorkerNotifError] = useState<string | null>(null);
+  const [workerNotifOpen, setWorkerNotifOpen] = useState(false);
+
   // Load from localStorage
   useEffect(() => {
     try {
@@ -623,6 +631,87 @@ export default function DeployerPage() {
             onChange={updateObligation}
           />
         ))}
+      </div>
+
+      {/* Art. 26(7) Worker Notification AI Panel */}
+      <div style={{ ...cardSt, padding: 18, marginBottom: 20 }}>
+        <button
+          onClick={() => setWorkerNotifOpen(v => !v)}
+          style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <FileText size={15} style={{ color: T.blue }} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>✦ Bozza notifica lavoratori — Art. 26(7)</span>
+          </div>
+          {workerNotifOpen ? <ChevronDown size={14} style={{ color: T.muted }} /> : <ChevronRight size={14} style={{ color: T.muted }} />}
+        </button>
+        {workerNotifOpen && (
+          <div style={{ marginTop: 16 }}>
+            <p style={{ fontSize: 12, color: T.muted, marginBottom: 12 }}>
+              Genera la bozza di comunicazione da inviare ai lavoratori prima del deployment del sistema AI.
+            </p>
+            {!doc.system_name && (
+              <div style={{ padding: "8px 12px", borderRadius: 8, background: T.amberBg, border: `1px solid ${T.amberBdr}`, fontSize: 12, color: T.amber, marginBottom: 12 }}>
+                ⚠ Compila prima "Nome del sistema AI" e "Contesto di deployment" nel pannello in alto.
+              </div>
+            )}
+            <div style={{ marginBottom: 10 }}>
+              <label style={{ fontSize: 11, color: T.muted, display: "block", marginBottom: 4 }}>
+                Ruoli/funzioni coinvolte (es. operatori HR, supervisori, tutti i dipendenti)
+              </label>
+              <input
+                value={workerNotifAffectedRoles}
+                onChange={e => setWorkerNotifAffectedRoles(e.target.value)}
+                placeholder="es. Responsabili HR, Team Operations..."
+                style={inputSt}
+              />
+            </div>
+            <button
+              disabled={workerNotifLoading || !doc.system_name.trim()}
+              onClick={async () => {
+                setWorkerNotifLoading(true);
+                setWorkerNotifError(null);
+                setWorkerNotifResult(null);
+                const res = await draftWorkerNotification(
+                  doc.system_name,
+                  doc.deployment_context,
+                  doc.deployment_context,
+                  workerNotifAffectedRoles
+                );
+                setWorkerNotifLoading(false);
+                if (res.error) setWorkerNotifError(res.error);
+                else setWorkerNotifResult(res.result);
+              }}
+              style={{
+                padding: "8px 16px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+                background: workerNotifLoading || !doc.system_name.trim() ? "rgba(0,0,0,0.07)" : T.blue,
+                color: workerNotifLoading || !doc.system_name.trim() ? T.muted : "#fff",
+                border: "none", cursor: workerNotifLoading || !doc.system_name.trim() ? "not-allowed" : "pointer",
+                marginBottom: 12,
+              }}
+            >
+              {workerNotifLoading ? "Generazione…" : "✦ Genera bozza notifica"}
+            </button>
+            {workerNotifError && (
+              <p style={{ fontSize: 11, color: T.red, marginBottom: 8 }}>Errore generazione. Riprova.</p>
+            )}
+            {workerNotifResult && (
+              <div>
+                <div style={{ background: "rgba(0,0,0,0.02)", border: `1px solid ${T.border}`, borderRadius: 8, padding: 14, marginBottom: 10 }}>
+                  <pre style={{ fontSize: 11, color: T.text, whiteSpace: "pre-wrap", lineHeight: 1.6, margin: 0, fontFamily: "inherit" }}>
+                    {workerNotifResult.notificationText}
+                  </pre>
+                </div>
+                {workerNotifResult.warnings.length > 0 && (
+                  <div style={{ padding: "8px 12px", borderRadius: 8, background: T.amberBg, border: `1px solid ${T.amberBdr}`, fontSize: 11, color: T.amber, marginBottom: 8 }}>
+                    {workerNotifResult.warnings.map((w, i) => <div key={i}>⚠ {w}</div>)}
+                  </div>
+                )}
+                <p style={{ fontSize: 10, color: T.faint }}>✦ AI — verifica e conferma · Leggibilità: {workerNotifResult.readabilityScore}</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Save button */}
