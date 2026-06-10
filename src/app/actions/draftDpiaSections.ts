@@ -2,6 +2,7 @@
 import { generateText } from "@/lib/rag/rag-vertex"
 import { z } from "zod"
 import type { GlobalComplianceContext } from "@/hooks/useComplianceContext"
+import type { IntakeContext } from "@/app/actions/parseIntakeContext"
 
 const DpiaDraftSchema = z.object({
   assets: z.array(z.object({
@@ -30,19 +31,58 @@ const DpiaDraftSchema = z.object({
 
 export type DpiaDraft = z.infer<typeof DpiaDraftSchema>
 
+const SCALE_LABELS: Record<string, string> = {
+  under_100: "< 100 persone",
+  "100_to_10k": "100 – 10.000 persone",
+  "10k_to_1m": "10.000 – 1.000.000 persone",
+  over_1m: "> 1.000.000 persone",
+  large_scale_unknown: "larga scala (numero non noto)",
+};
+
+const SCOPE_LABELS: Record<string, string> = {
+  hr_recruitment: "Selezione del personale",
+  hr_performance: "Valutazione delle prestazioni HR",
+  credit_scoring: "Scoring creditizio",
+  fraud_detection: "Rilevamento frodi",
+  health_diagnosis: "Diagnostica medica",
+  health_monitoring: "Monitoraggio sanitario",
+  education_assessment: "Valutazione educativa",
+  public_services: "Servizi pubblici",
+  biometric_identification: "Identificazione biometrica",
+  marketing_profiling: "Profilazione marketing",
+  safety_critical: "Sicurezza critica",
+  other: "Altro",
+};
+
 export async function draftDpiaSections(
-  context: GlobalComplianceContext
+  context: GlobalComplianceContext,
+  intake?: IntakeContext
 ): Promise<DpiaDraft | { error: string }> {
 
+  // Merge intake overrides into context
+  const systemName = intake?.systemName || context.systemName || "non specificato";
+  const purpose = intake?.processingPurpose || context.systemDescription || "non specificata";
+  const riskTier = (intake?.highRiskAIAct === "yes" ? "high_risk" : context.riskTier) ?? "non classificato";
+  const dataCategories = intake?.dataCategories?.join(", ") || context.sensitiveFeatures?.join(", ") || "non specificate";
+  const scale = intake ? SCALE_LABELS[intake.subjectScale] ?? intake.subjectScale : (context.processesLargeScale ? "larga scala" : "non specificata");
+  const automatedDec = intake?.automatedDecisions ?? "unknown";
+  const scope = intake ? (SCOPE_LABELS[intake.systemScope] ?? intake.systemScope) : "non specificato";
+  const crossBorder = intake?.crossBorderTransfer ?? false;
+  const vulnerable = intake?.vulnerableSubjects ?? false;
+
   const contextSummary = `
-- Sistema: ${context.systemName ?? "non specificato"}
-- Descrizione: ${context.systemDescription ?? "non specificata"}
-- Risk tier EU AI Act: ${context.riskTier ?? "non classificato"}
+- Sistema: ${systemName}
+- Ambito applicativo: ${scope}
+- Finalità del trattamento: ${purpose}
+- Risk tier EU AI Act: ${riskTier}
 - Annex III: ${context.annexIII ?? false}
-- Dataset: ${context.datasetNames?.join(", ") ?? "nessuno"}
-- Feature sensibili: ${context.sensitiveFeatures?.join(", ") ?? "nessuna"}
-- Dati personali: ${context.personalData ?? false}
-- Processa larga scala: ${context.processesLargeScale ?? false}
+- Categorie dati trattati: ${dataCategories}
+- Dataset: ${context.datasetNames?.join(", ") ?? "non specificati"}
+- Scala interessati: ${scale}
+- Decisioni automatizzate: ${automatedDec}
+- Trasferimenti transfrontalieri: ${crossBorder}
+- Soggetti vulnerabili coinvolti: ${vulnerable}
+- Dati personali: ${context.personalData ?? intake?.dataCategories?.length ? true : false}
 - Bias verificato: ${context.biasChecked ?? false}
 - Rischi identificati: ${context.identifiedRisks?.map(r => `${r.scenario} (sev ${r.severity})`).join(", ") ?? "nessuno"}
 - Oversight umano: ${context.humanOversightRequired ?? false}
