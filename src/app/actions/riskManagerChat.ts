@@ -1,4 +1,6 @@
 "use server";
+export const maxDuration = 60; // Vercel Pro/Hobby cap — aumenta a 60s per Vertex AI
+
 import { generateText } from "@/lib/rag/rag-vertex";
 
 export type RiskPhaseId =
@@ -135,19 +137,18 @@ export async function riskManagerChat(
   systemContext: { systemName?: string; riskLevel?: string; isGPAI?: boolean } = {}
 ): Promise<ChatResponse> {
   const phasePrompt = PHASE_PROMPTS[currentPhase];
-  const docSummary = JSON.stringify(documentation, null, 2);
 
-  const systemPrompt = `Sei un esperto di conformità EU AI Act integrato in AIComply Risk Manager.
-Rispondi SEMPRE in italiano. Sii conciso e diretto (max 5-6 frasi per risposta).
-Cita gli articoli AI Act rilevanti quando appropriato.
+  // Solo le fasi già completate, senza il JSON completo per tenere il prompt corto
+  const completedSummary = Object.keys(documentation)
+    .filter(k => k !== currentPhase)
+    .map(k => `- ${k}: completata`)
+    .join("\n") || "nessuna fase completata";
 
-CONTESTO SISTEMA:
-- Nome: ${systemContext.systemName ?? "non specificato"}
-- Risk level: ${systemContext.riskLevel ?? "non classificato"}
-- GPAI: ${systemContext.isGPAI ? "Sì" : "No"}
+  const systemPrompt = `Sei un esperto EU AI Act integrato in AIComply Risk Manager.
+Rispondi in italiano. Sii conciso (max 5 frasi). Cita gli articoli AI Act rilevanti.
 
-DOCUMENTAZIONE ACCUMULATA FINORA:
-${docSummary}
+SISTEMA: ${systemContext.systemName ?? "non specificato"} | Risk: ${systemContext.riskLevel ?? "N/D"} | GPAI: ${systemContext.isGPAI ? "Sì" : "No"}
+FASI COMPLETATE: ${completedSummary}
 
 FASE CORRENTE — ${currentPhase.toUpperCase()}:
 ${phasePrompt}
@@ -161,7 +162,9 @@ Il blocco <extract> NON deve apparire nel testo della risposta mostrata all'uten
 Includi nel patch SOLO la chiave della fase corrente ("${currentPhase}").
 Non inventare dati — usa solo ciò che l'utente ha effettivamente comunicato.`;
 
+  // Ultimi 6 messaggi per tenere il prompt entro i limiti di token
   const conversation = messages
+    .slice(-6)
     .map((m) => `${m.role === "user" ? "Utente" : "Assistente"}: ${m.content}`)
     .join("\n\n");
 

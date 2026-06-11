@@ -373,7 +373,12 @@ export default function RiskManagerPage() {
     setIsLoading(true);
 
     const currentPhase = PHASES[currentPhaseIndex];
-    const result = await riskManagerChat(newMessages, currentPhase.id, documentation, systemContext);
+    const result = await Promise.race([
+      riskManagerChat(newMessages, currentPhase.id, documentation, systemContext),
+      new Promise<{ error: string }>(resolve =>
+        setTimeout(() => resolve({ error: "Timeout: risposta AI troppo lenta. Riprova." }), 55000)
+      ),
+    ]);
 
     if (result.error) {
       const updated = [...newMessages, { role: "assistant" as const, content: result.error }];
