@@ -62,6 +62,22 @@ interface ServiceAccount {
   token_uri: string;
 }
 
+/** Escapa i newline letterali che appaiono DENTRO le stringhe JSON, lasciando intatti quelli fuori. */
+function repairJsonNewlines(raw: string): string {
+  let inString = false;
+  let escaped = false;
+  let out = "";
+  for (let i = 0; i < raw.length; i++) {
+    const ch = raw[i];
+    if (escaped)          { out += ch; escaped = false; continue; }
+    if (ch === "\\" && inString) { out += ch; escaped = true; continue; }
+    if (ch === '"')        { inString = !inString; out += ch; continue; }
+    if ((ch === "\n" || ch === "\r") && inString) { out += "\\n"; continue; }
+    out += ch;
+  }
+  return out;
+}
+
 let _tokenCache: { token: string; expires: number } | null = null;
 
 async function getAccessToken(): Promise<string> {
@@ -76,9 +92,10 @@ async function getAccessToken(): Promise<string> {
     );
   }
 
-  // Vercel può iniettare newline letterali nel valore — li normalizziamo prima del parse
-  const saRaw = SA_JSON.replace(/\n/g, "\\n");
-  const sa: ServiceAccount = JSON.parse(saRaw);
+  // Vercel può iniettare newline letterali dentro i valori stringa del JSON
+  // (es. nella private_key). Li eseguiamo escape SOLO dentro le stringhe JSON,
+  // lasciando intatti i newline che separano le proprietà (validi in JSON).
+  const sa: ServiceAccount = JSON.parse(repairJsonNewlines(SA_JSON));
   const now = Math.floor(Date.now() / 1000);
   const exp = now + 3600;
 
