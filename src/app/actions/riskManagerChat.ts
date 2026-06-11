@@ -1,6 +1,4 @@
 "use server";
-export const maxDuration = 60; // Vercel Pro/Hobby cap — aumenta a 60s per Vertex AI
-
 import { generateText } from "@/lib/rag/rag-vertex";
 
 export type RiskPhaseId =
