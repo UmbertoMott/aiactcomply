@@ -76,7 +76,9 @@ async function getAccessToken(): Promise<string> {
     );
   }
 
-  const sa: ServiceAccount = JSON.parse(SA_JSON);
+  // Vercel può iniettare newline letterali nel valore — li normalizziamo prima del parse
+  const saRaw = SA_JSON.replace(/\n/g, "\\n");
+  const sa: ServiceAccount = JSON.parse(saRaw);
   const now = Math.floor(Date.now() / 1000);
   const exp = now + 3600;
 
