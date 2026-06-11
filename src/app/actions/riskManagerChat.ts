@@ -170,7 +170,9 @@ Non inventare dati — usa solo ciò che l'utente ha effettivamente comunicato.`
   try {
     const raw = await generateText(fullPrompt, { temperature: 0.3, maxOutputTokens: 800 });
     return parseResponse(raw);
-  } catch {
-    return { error: "Assistente non disponibile al momento. Riprova tra qualche secondo." };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[riskManagerChat] generateText failed:", msg);
+    return { error: `Errore AI: ${msg}` };
   }
 }
