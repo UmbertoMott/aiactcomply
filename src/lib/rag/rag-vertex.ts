@@ -12,7 +12,7 @@ const LOCATION  = process.env.VERTEX_LOCATION ?? "us-central1";
 const SA_JSON   = process.env.VERTEX_SERVICE_ACCOUNT_JSON ?? "";
 
 const EMBED_MODEL      = "text-embedding-004";
-const GENERATION_MODEL = "gemini-2.0-flash-001";
+const GENERATION_MODEL = "gemini-1.5-flash-002";
 
 // ─── Ollama fallback (self-hosted mode) ──────────────────────────────────────
 
