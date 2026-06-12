@@ -5,7 +5,8 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Shield, CheckCircle, Clock, Send, Download, RotateCcw,
   ChevronRight, AlertTriangle, Loader2, Play, Pause,
-  FileText, ChevronDown,
+  FileText, ChevronDown, Bold, Italic, Underline, Highlighter,
+  Pencil, Check,
 } from "lucide-react";
 import { riskManagerChat, type ChatMessage, type RiskDocumentation, type RiskPhaseId } from "@/app/actions/riskManagerChat";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
@@ -50,6 +51,7 @@ interface PersistedChatState {
   documentation: RiskDocumentation;
   currentPhaseIndex: number;
   completedPhases: RiskPhaseId[];
+  docEdits?: Partial<Record<RiskPhaseId, string>>;
 }
 
 function loadChatState(): PersistedChatState | null {
@@ -157,13 +159,53 @@ function PhaseRow({
 
 // ─── Phase viewer modal ───────────────────────────────────────────────────────
 
+function ToolbarBtn({ icon, title, onClick, active }: {
+  icon: React.ReactNode; title: string; onClick: () => void; active?: boolean;
+}) {
+  return (
+    <button
+      onMouseDown={e => e.preventDefault()} // non perdere la selezione di testo
+      onClick={onClick}
+      title={title}
+      style={{
+        width: 26, height: 26, borderRadius: 6,
+        background: active ? "#0D1016" : "transparent",
+        color: active ? "#ffffff" : "rgba(0,0,0,0.55)",
+        border: "none", cursor: "pointer",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        transition: "background 0.12s",
+      }}
+      onMouseEnter={e => { if (!active) e.currentTarget.style.background = "rgba(0,0,0,0.07)"; }}
+      onMouseLeave={e => { if (!active) e.currentTarget.style.background = "transparent"; }}
+    >
+      {icon}
+    </button>
+  );
+}
+
 function PhaseDocColumn({
-  phase, documentation, onClose,
+  phase, documentation, editedHtml, onSaveEdit, onClose,
 }: {
-  phase: Phase; documentation: RiskDocumentation; onClose: () => void;
+  phase: Phase; documentation: RiskDocumentation;
+  editedHtml?: string; onSaveEdit: (html: string) => void;
+  onClose: () => void;
 }) {
   const data = documentation[phase.id as keyof RiskDocumentation];
-  const hasData = data && Object.keys(data).length > 0;
+  const hasData = (data && Object.keys(data).length > 0) || !!editedHtml;
+  const [editing, setEditing] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const exec = (cmd: string, value?: string) => {
+    document.execCommand(cmd, false, value);
+    contentRef.current?.focus();
+  };
+
+  const toggleEdit = () => {
+    if (editing && contentRef.current) {
+      onSaveEdit(contentRef.current.innerHTML);
+    }
+    setEditing(e => !e);
+  };
 
   return (
     <div style={{
@@ -172,8 +214,8 @@ function PhaseDocColumn({
       overflow: "hidden", background: "#ffffff", minWidth: 0,
     }}>
       {/* Header colonna */}
-      <div style={{ padding: "10px 16px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "#fafafa", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexShrink: 0 }}>
-        <div style={{ minWidth: 0 }}>
+      <div style={{ padding: "8px 12px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "#fafafa", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+        <div style={{ minWidth: 0, flex: 1 }}>
           <p style={{ fontSize: 9, fontWeight: 600, color: "rgba(0,0,0,0.35)", letterSpacing: "0.8px", textTransform: "uppercase", margin: 0 }}>
             {phase.article} · Documento
           </p>
@@ -181,6 +223,27 @@ function PhaseDocColumn({
             {phase.label}
           </p>
         </div>
+
+        {/* Toolbar formattazione — visibile solo in modifica */}
+        {hasData && editing && (
+          <div style={{ display: "flex", alignItems: "center", gap: 2, padding: "2px 4px", background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8 }}>
+            <ToolbarBtn icon={<Bold size={13} />}        title="Grassetto"    onClick={() => exec("bold")} />
+            <ToolbarBtn icon={<Italic size={13} />}      title="Corsivo"      onClick={() => exec("italic")} />
+            <ToolbarBtn icon={<Underline size={13} />}   title="Sottolineato" onClick={() => exec("underline")} />
+            <ToolbarBtn icon={<Highlighter size={13} />} title="Evidenzia"    onClick={() => exec("hiliteColor", "#fef08a")} />
+          </div>
+        )}
+
+        {/* Matita / conferma modifica */}
+        {hasData && (
+          <ToolbarBtn
+            icon={editing ? <Check size={13} /> : <Pencil size={13} />}
+            title={editing ? "Salva modifiche" : "Modifica documento"}
+            onClick={toggleEdit}
+            active={editing}
+          />
+        )}
+
         <button
           onClick={onClose}
           title="Chiudi documento"
@@ -203,13 +266,12 @@ function PhaseDocColumn({
           <div style={{
             background: "#ffffff",
             borderRadius: 4,
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: editing ? "1px solid rgba(13,16,22,0.35)" : "1px solid rgba(0,0,0,0.08)",
             boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
             padding: "28px 32px",
             fontFamily: "Georgia, 'Times New Roman', serif",
           }}>
-            <AIOutputLabel documentType="Documentazione redatta · Estrazione automatica" />
-            <div style={{ borderBottom: "2px solid #0D1016", paddingBottom: 10, marginTop: 12, marginBottom: 18 }}>
+            <div style={{ borderBottom: "2px solid #0D1016", paddingBottom: 10, marginBottom: 18 }}>
               <p style={{ fontSize: 9, color: "rgba(0,0,0,0.45)", letterSpacing: "1px", textTransform: "uppercase", margin: 0, fontFamily: "var(--font-inter, system-ui)" }}>
                 Risk Register — {phase.article} · Reg. UE 2024/1689
               </p>
@@ -217,21 +279,32 @@ function PhaseDocColumn({
                 {phase.label.replace(/^\d+\.\s*/, "")}
               </h3>
             </div>
-            {Object.entries(data as Record<string, unknown>).map(([k, v]) => {
-              if (v === undefined || v === null) return null;
-              const displayVal = Array.isArray(v) ? (v as string[]).join(", ") : typeof v === "boolean" ? (v ? "Sì" : "No") : String(v);
-              const label = k.replace(/([A-Z])/g, " $1").replace(/_/g, " ").replace(/^./, c => c.toUpperCase());
-              return (
-                <div key={k} style={{ marginBottom: 14 }}>
-                  <p style={{ fontSize: 11.5, fontWeight: 700, color: "#0D1016", margin: "0 0 3px" }}>
-                    {label}
-                  </p>
-                  <p style={{ fontSize: 13, color: "#1a1a1a", lineHeight: 1.7, margin: 0, whiteSpace: "pre-wrap", textAlign: "justify" }}>
-                    {displayVal}
-                  </p>
-                </div>
-              );
-            })}
+
+            {/* Contenuto editabile */}
+            <div
+              ref={contentRef}
+              contentEditable={editing}
+              suppressContentEditableWarning
+              style={{ outline: "none", cursor: editing ? "text" : "default" }}
+              {...(editedHtml ? { dangerouslySetInnerHTML: { __html: editedHtml } } : {})}
+            >
+              {!editedHtml && Object.entries((data ?? {}) as Record<string, unknown>).map(([k, v]) => {
+                if (v === undefined || v === null) return null;
+                const displayVal = Array.isArray(v) ? (v as string[]).join(", ") : typeof v === "boolean" ? (v ? "Sì" : "No") : String(v);
+                const label = k.replace(/([A-Z])/g, " $1").replace(/_/g, " ").replace(/^./, c => c.toUpperCase());
+                return (
+                  <div key={k} style={{ marginBottom: 14 }}>
+                    <p style={{ fontSize: 11.5, fontWeight: 700, color: "#0D1016", margin: "0 0 3px" }}>
+                      {label}
+                    </p>
+                    <p style={{ fontSize: 13, color: "#1a1a1a", lineHeight: 1.7, margin: 0, whiteSpace: "pre-wrap", textAlign: "justify" }}>
+                      {displayVal}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+
             <div style={{ borderTop: "1px solid rgba(0,0,0,0.12)", marginTop: 20, paddingTop: 8 }}>
               <p style={{ fontSize: 9, color: "rgba(0,0,0,0.4)", fontStyle: "italic", margin: 0 }}>
                 Generato da AIComply · {new Date().toLocaleDateString("it-IT")} · [verify against current AI Act text]
@@ -425,6 +498,7 @@ export default function RiskManagerPage() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [viewerPhase, setViewerPhase] = useState<Phase | null>(null);
+  const [docEdits, setDocEdits] = useState<Partial<Record<RiskPhaseId, string>>>({});
   const [docWidth, setDocWidth] = useState(420);
   const [isResizing, setIsResizing] = useState(false);
   const layoutRef = useRef<HTMLDivElement>(null);
@@ -465,6 +539,7 @@ export default function RiskManagerPage() {
       setDocumentation(saved.documentation);
       setCurrentPhaseIndex(saved.currentPhaseIndex);
       setCompletedPhases(saved.completedPhases);
+      setDocEdits(saved.docEdits ?? {});
     } else {
       setMessages([{
         role: "assistant",
@@ -477,7 +552,16 @@ export default function RiskManagerPage() {
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
   const persistState = useCallback((msgs: ChatMessage[], doc: RiskDocumentation, phaseIdx: number, completed: RiskPhaseId[]) => {
-    saveChatState({ messages: msgs, documentation: doc, currentPhaseIndex: phaseIdx, completedPhases: completed });
+    saveChatState({ messages: msgs, documentation: doc, currentPhaseIndex: phaseIdx, completedPhases: completed, docEdits });
+  }, [docEdits]);
+
+  const saveDocEdit = useCallback((phaseId: RiskPhaseId, html: string) => {
+    setDocEdits(prev => {
+      const next = { ...prev, [phaseId]: html };
+      const saved = loadChatState();
+      if (saved) saveChatState({ ...saved, docEdits: next });
+      return next;
+    });
   }, []);
 
   const sendMessage = useCallback(async () => {
@@ -555,6 +639,8 @@ export default function RiskManagerPage() {
     setDocumentation({});
     setCurrentPhaseIndex(0);
     setCompletedPhases([]);
+    setDocEdits({});
+    setViewerPhase(null);
     setInput("");
   };
 
@@ -641,6 +727,8 @@ export default function RiskManagerPage() {
               <PhaseDocColumn
                 phase={viewerPhase}
                 documentation={documentation}
+                editedHtml={docEdits[viewerPhase.id]}
+                onSaveEdit={html => saveDocEdit(viewerPhase.id, html)}
                 onClose={() => setViewerPhase(null)}
               />
             </div>
