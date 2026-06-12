@@ -113,21 +113,17 @@ function useTTS() {
 // ─── Phase row ────────────────────────────────────────────────────────────────
 
 function PhaseRow({
-  phase, status, isExpanded, onToggle, documentation,
+  phase, status, onOpen, hasData,
 }: {
-  phase: Phase; status: PhaseStatus; isExpanded: boolean;
-  onToggle: () => void; documentation: RiskDocumentation;
+  phase: Phase; status: PhaseStatus; onOpen: () => void; hasData: boolean;
 }) {
-  const data = documentation[phase.id as keyof RiskDocumentation];
-  const hasData = data && Object.keys(data).length > 0;
-
   const borderColor = status === "active" ? "rgba(0,0,0,0.2)" : status === "complete" ? "rgba(22,163,74,0.2)" : "rgba(0,0,0,0.07)";
   const bg = status === "active" ? "rgba(0,0,0,0.03)" : status === "complete" ? "rgba(22,163,74,0.04)" : "transparent";
 
   return (
     <div style={{ border: `1px solid ${borderColor}`, background: bg, borderRadius: 8, overflow: "hidden", marginBottom: 4 }}>
       <button
-        onClick={onToggle}
+        onClick={onOpen}
         className="w-full flex items-center gap-2.5 text-left transition-colors"
         style={{ padding: "8px 10px", cursor: "pointer", background: "transparent" }}
         onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.02)")}
@@ -152,32 +148,119 @@ function PhaseRow({
         </div>
         <div style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 4 }}>
           <span style={{ fontSize: 9, color: "rgba(0,0,0,0.25)", fontFamily: "monospace" }}>{phase.article}</span>
-          {hasData && (
-            <ChevronRight size={11} style={{ color: "rgba(0,0,0,0.25)", transform: isExpanded ? "rotate(90deg)" : "none", transition: "transform 0.15s" }} />
-          )}
+          {hasData && <ChevronRight size={11} style={{ color: "rgba(0,0,0,0.25)" }} />}
         </div>
       </button>
+    </div>
+  );
+}
 
-      {isExpanded && hasData && (
-        <div style={{ padding: "8px 10px 10px", borderTop: "1px solid rgba(0,0,0,0.05)" }}>
-          <AIOutputLabel documentType="Estrazione automatica" />
-          <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 3 }}>
-            {Object.entries(data as Record<string, unknown>).map(([k, v]) => {
-              if (v === undefined || v === null) return null;
-              const displayVal = Array.isArray(v) ? (v as string[]).join(", ") : typeof v === "boolean" ? (v ? "Sì" : "No") : String(v);
-              return (
-                <div key={k} style={{ display: "flex", gap: 6, fontSize: 10 }}>
-                  <span style={{ color: "rgba(0,0,0,0.35)", flexShrink: 0, textTransform: "capitalize" }}>{k.replace(/([A-Z])/g, " $1").toLowerCase()}:</span>
-                  <span style={{ color: "#92400e", wordBreak: "break-word" }}>{displayVal}</span>
-                </div>
-              );
-            })}
+// ─── Phase viewer modal ───────────────────────────────────────────────────────
+
+function PhaseViewerModal({
+  phase, documentation, onClose,
+}: {
+  phase: Phase; documentation: RiskDocumentation; onClose: () => void;
+}) {
+  const data = documentation[phase.id as keyof RiskDocumentation];
+  const hasData = data && Object.keys(data).length > 0;
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, zIndex: 100,
+        background: "rgba(13,16,22,0.4)", backdropFilter: "blur(2px)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: 24,
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          width: "100%", maxWidth: 560, maxHeight: "80vh",
+          background: "#ffffff", borderRadius: 14,
+          border: "1px solid rgba(0,0,0,0.08)",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+          display: "flex", flexDirection: "column", overflow: "hidden",
+        }}
+      >
+        {/* Header */}
+        <div style={{ padding: "18px 22px 14px", borderBottom: "1px solid rgba(0,0,0,0.07)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+          <div>
+            <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.3)", letterSpacing: "1px", textTransform: "uppercase", margin: 0 }}>
+              {phase.article} · Reg. UE 2024/1689
+            </p>
+            <h2 style={{ fontSize: 17, fontWeight: 600, color: "#0D1016", letterSpacing: "-0.4px", margin: "4px 0 0" }}>
+              {phase.label}
+            </h2>
+            <p style={{ fontSize: 11, color: "rgba(0,0,0,0.4)", margin: "2px 0 0" }}>{phase.subtitle}</p>
           </div>
-          <p style={{ fontSize: 9, color: "rgba(0,0,0,0.2)", marginTop: 6, fontStyle: "italic" }}>
-            [verify against current AI Act text]
-          </p>
+          <button
+            onClick={onClose}
+            style={{
+              flexShrink: 0, width: 28, height: 28, borderRadius: 14,
+              background: "rgba(0,0,0,0.05)", border: "none", cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              color: "rgba(0,0,0,0.45)", fontSize: 14,
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.1)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "rgba(0,0,0,0.05)")}
+          >
+            ✕
+          </button>
         </div>
-      )}
+
+        {/* Body */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "18px 22px" }}>
+          {hasData ? (
+            <>
+              <AIOutputLabel documentType="Documentazione redatta · Estrazione automatica" />
+              <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 14 }}>
+                {Object.entries(data as Record<string, unknown>).map(([k, v]) => {
+                  if (v === undefined || v === null) return null;
+                  const displayVal = Array.isArray(v) ? (v as string[]).join(", ") : typeof v === "boolean" ? (v ? "Sì" : "No") : String(v);
+                  return (
+                    <div key={k}>
+                      <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.35)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 3px" }}>
+                        {k.replace(/([A-Z])/g, " $1")}
+                      </p>
+                      <p style={{ fontSize: 13, color: "#0D1016", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>
+                        {displayVal}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            <div style={{ textAlign: "center", padding: "32px 0" }}>
+              <Clock size={24} style={{ color: "rgba(0,0,0,0.15)", margin: "0 auto 10px" }} />
+              <p style={{ fontSize: 13, color: "rgba(0,0,0,0.4)", margin: 0 }}>
+                Questa fase non è ancora stata compilata.
+              </p>
+              <p style={{ fontSize: 11, color: "rgba(0,0,0,0.3)", marginTop: 4 }}>
+                Completa la conversazione nella chat per generare la documentazione.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        {hasData && (
+          <div style={{ padding: "10px 22px", borderTop: "1px solid rgba(0,0,0,0.06)", background: "#fafafa" }}>
+            <p style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", fontStyle: "italic", margin: 0 }}>
+              [verify against current AI Act text] — I contenuti estratti dall&apos;AI richiedono verifica legale professionale.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -352,7 +435,7 @@ export default function RiskManagerPage() {
   const [completedPhases, setCompletedPhases] = useState<RiskPhaseId[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [expandedPhase, setExpandedPhase] = useState<RiskPhaseId | null>(null);
+  const [viewerPhase, setViewerPhase] = useState<Phase | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -382,7 +465,6 @@ export default function RiskManagerPage() {
   }, []);
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
-  useEffect(() => { if (hydrated) setExpandedPhase(PHASES[currentPhaseIndex]?.id ?? null); }, [currentPhaseIndex, hydrated]);
 
   const persistState = useCallback((msgs: ChatMessage[], doc: RiskDocumentation, phaseIdx: number, completed: RiskPhaseId[]) => {
     saveChatState({ messages: msgs, documentation: doc, currentPhaseIndex: phaseIdx, completedPhases: completed });
@@ -423,7 +505,6 @@ export default function RiskManagerPage() {
     if (result.patch) {
       newDoc = { ...documentation, ...result.patch };
       setDocumentation(newDoc);
-      setExpandedPhase(currentPhase.id);
     }
 
     if (result.stepComplete && currentPhaseIndex < PHASES.length - 1) {
@@ -528,9 +609,8 @@ export default function RiskManagerPage() {
               return (
                 <PhaseRow
                   key={phase.id} phase={phase} status={status}
-                  isExpanded={expandedPhase === phase.id}
-                  onToggle={() => setExpandedPhase(expandedPhase === phase.id ? null : phase.id)}
-                  documentation={documentation}
+                  onOpen={() => setViewerPhase(phase)}
+                  hasData={!!documentation[phase.id as keyof RiskDocumentation]}
                 />
               );
             })}
@@ -617,6 +697,14 @@ export default function RiskManagerPage() {
           </div>
         </div>
       </div>
+
+      {viewerPhase && (
+        <PhaseViewerModal
+          phase={viewerPhase}
+          documentation={documentation}
+          onClose={() => setViewerPhase(null)}
+        />
+      )}
 
       <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
