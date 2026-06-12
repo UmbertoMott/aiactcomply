@@ -261,7 +261,7 @@ function PhaseDocColumn({
       </div>
 
       {/* Corpo — pagina stile documento */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#f0f0ef" }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#f0f0ef", display: "flex", flexDirection: "column" }}>
         {hasData ? (
           <div style={{
             background: "#ffffff",
@@ -270,6 +270,9 @@ function PhaseDocColumn({
             boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
             padding: "28px 32px",
             fontFamily: "Georgia, 'Times New Roman', serif",
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
           }}>
             <div style={{ borderBottom: "2px solid #0D1016", paddingBottom: 10, marginBottom: 18 }}>
               <p style={{ fontSize: 9, color: "rgba(0,0,0,0.45)", letterSpacing: "1px", textTransform: "uppercase", margin: 0, fontFamily: "var(--font-inter, system-ui)" }}>
@@ -285,7 +288,7 @@ function PhaseDocColumn({
               ref={contentRef}
               contentEditable={editing}
               suppressContentEditableWarning
-              style={{ outline: "none", cursor: editing ? "text" : "default" }}
+              style={{ outline: "none", cursor: editing ? "text" : "default", flex: 1 }}
               {...(editedHtml ? { dangerouslySetInnerHTML: { __html: editedHtml } } : {})}
             >
               {!editedHtml && Object.entries((data ?? {}) as Record<string, unknown>).map(([k, v]) => {
