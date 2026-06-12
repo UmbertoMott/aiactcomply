@@ -506,6 +506,14 @@ export default function RiskManagerPage() {
   const [isResizing, setIsResizing] = useState(false);
   const layoutRef = useRef<HTMLDivElement>(null);
 
+  // All'apertura, documento e chat si dividono lo spazio a metà
+  const openViewer = useCallback((phase: Phase) => {
+    const total = layoutRef.current?.clientWidth ?? 1200;
+    const available = total - 256 - 12 * 3 - 6; // sinistra fissa + gap + splitter
+    setDocWidth(Math.max(280, Math.floor(available / 2)));
+    setViewerPhase(phase);
+  }, []);
+
   const startResize = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     setIsResizing(true);
@@ -708,7 +716,7 @@ export default function RiskManagerPage() {
               return (
                 <PhaseRow
                   key={phase.id} phase={phase} status={status}
-                  onOpen={() => setViewerPhase(phase)}
+                  onOpen={() => openViewer(phase)}
                   hasData={!!documentation[phase.id as keyof RiskDocumentation]}
                 />
               );
