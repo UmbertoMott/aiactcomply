@@ -157,7 +157,7 @@ function PhaseRow({
 
 // ─── Phase viewer modal ───────────────────────────────────────────────────────
 
-function PhaseViewerModal({
+function PhaseDocColumn({
   phase, documentation, onClose,
 }: {
   phase: Phase; documentation: RiskDocumentation; onClose: () => void;
@@ -165,120 +165,87 @@ function PhaseViewerModal({
   const data = documentation[phase.id as keyof RiskDocumentation];
   const hasData = data && Object.keys(data).length > 0;
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: "fixed", inset: 0, zIndex: 100,
-        background: "rgba(13,16,22,0.4)", backdropFilter: "blur(2px)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        padding: 24,
-      }}
-    >
-      <div
-        onClick={e => e.stopPropagation()}
-        style={{
-          width: "100%", maxWidth: 720, maxHeight: "85vh",
-          background: "#ffffff", borderRadius: 14,
-          border: "1px solid rgba(0,0,0,0.08)",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
-          display: "flex", flexDirection: "column", overflow: "hidden",
-        }}
-      >
-        {/* Header */}
-        <div style={{ padding: "18px 22px 14px", borderBottom: "1px solid rgba(0,0,0,0.07)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
-          <div>
-            <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.3)", letterSpacing: "1px", textTransform: "uppercase", margin: 0 }}>
-              {phase.article} · Reg. UE 2024/1689
-            </p>
-            <h2 style={{ fontSize: 17, fontWeight: 600, color: "#0D1016", letterSpacing: "-0.4px", margin: "4px 0 0" }}>
-              {phase.label}
-            </h2>
-            <p style={{ fontSize: 11, color: "rgba(0,0,0,0.4)", margin: "2px 0 0" }}>{phase.subtitle}</p>
+    <div style={{
+      height: "100%", display: "flex", flexDirection: "column",
+      border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10,
+      overflow: "hidden", background: "#ffffff", minWidth: 0,
+    }}>
+      {/* Header colonna */}
+      <div style={{ padding: "10px 16px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "#fafafa", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexShrink: 0 }}>
+        <div style={{ minWidth: 0 }}>
+          <p style={{ fontSize: 9, fontWeight: 600, color: "rgba(0,0,0,0.35)", letterSpacing: "0.8px", textTransform: "uppercase", margin: 0 }}>
+            {phase.article} · Documento
+          </p>
+          <p style={{ fontSize: 12, fontWeight: 700, color: "#0D1016", margin: "1px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            {phase.label}
+          </p>
+        </div>
+        <button
+          onClick={onClose}
+          title="Chiudi documento"
+          style={{
+            flexShrink: 0, width: 24, height: 24, borderRadius: 12,
+            background: "rgba(0,0,0,0.05)", border: "none", cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "rgba(0,0,0,0.45)", fontSize: 12,
+          }}
+          onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.1)")}
+          onMouseLeave={e => (e.currentTarget.style.background = "rgba(0,0,0,0.05)")}
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Corpo — pagina stile documento */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#f0f0ef" }}>
+        {hasData ? (
+          <div style={{
+            background: "#ffffff",
+            borderRadius: 4,
+            border: "1px solid rgba(0,0,0,0.08)",
+            boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
+            padding: "28px 32px",
+            fontFamily: "Georgia, 'Times New Roman', serif",
+          }}>
+            <AIOutputLabel documentType="Documentazione redatta · Estrazione automatica" />
+            <div style={{ borderBottom: "2px solid #0D1016", paddingBottom: 10, marginTop: 12, marginBottom: 18 }}>
+              <p style={{ fontSize: 9, color: "rgba(0,0,0,0.45)", letterSpacing: "1px", textTransform: "uppercase", margin: 0, fontFamily: "var(--font-inter, system-ui)" }}>
+                Risk Register — {phase.article} · Reg. UE 2024/1689
+              </p>
+              <h3 style={{ fontSize: 17, fontWeight: 700, color: "#0D1016", margin: "5px 0 0" }}>
+                {phase.label.replace(/^\d+\.\s*/, "")}
+              </h3>
+            </div>
+            {Object.entries(data as Record<string, unknown>).map(([k, v]) => {
+              if (v === undefined || v === null) return null;
+              const displayVal = Array.isArray(v) ? (v as string[]).join(", ") : typeof v === "boolean" ? (v ? "Sì" : "No") : String(v);
+              const label = k.replace(/([A-Z])/g, " $1").replace(/_/g, " ").replace(/^./, c => c.toUpperCase());
+              return (
+                <div key={k} style={{ marginBottom: 14 }}>
+                  <p style={{ fontSize: 11.5, fontWeight: 700, color: "#0D1016", margin: "0 0 3px" }}>
+                    {label}
+                  </p>
+                  <p style={{ fontSize: 13, color: "#1a1a1a", lineHeight: 1.7, margin: 0, whiteSpace: "pre-wrap", textAlign: "justify" }}>
+                    {displayVal}
+                  </p>
+                </div>
+              );
+            })}
+            <div style={{ borderTop: "1px solid rgba(0,0,0,0.12)", marginTop: 20, paddingTop: 8 }}>
+              <p style={{ fontSize: 9, color: "rgba(0,0,0,0.4)", fontStyle: "italic", margin: 0 }}>
+                Generato da AIComply · {new Date().toLocaleDateString("it-IT")} · [verify against current AI Act text]
+              </p>
+            </div>
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              flexShrink: 0, width: 28, height: 28, borderRadius: 14,
-              background: "rgba(0,0,0,0.05)", border: "none", cursor: "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              color: "rgba(0,0,0,0.45)", fontSize: 14,
-            }}
-            onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.1)")}
-            onMouseLeave={e => (e.currentTarget.style.background = "rgba(0,0,0,0.05)")}
-          >
-            ✕
-          </button>
-        </div>
-
-        {/* Body — pagina stile documento */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px", background: "#f0f0ef" }}>
-          {hasData ? (
-            <div style={{
-              background: "#ffffff",
-              borderRadius: 4,
-              border: "1px solid rgba(0,0,0,0.08)",
-              boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
-              padding: "36px 40px",
-              fontFamily: "Georgia, 'Times New Roman', serif",
-            }}>
-              <AIOutputLabel documentType="Documentazione redatta · Estrazione automatica" />
-              {/* Intestazione documento */}
-              <div style={{ borderBottom: "2px solid #0D1016", paddingBottom: 12, marginTop: 14, marginBottom: 20 }}>
-                <p style={{ fontSize: 10, color: "rgba(0,0,0,0.45)", letterSpacing: "1px", textTransform: "uppercase", margin: 0, fontFamily: "var(--font-inter, system-ui)" }}>
-                  Risk Register — {phase.article} · Reg. UE 2024/1689
-                </p>
-                <h3 style={{ fontSize: 19, fontWeight: 700, color: "#0D1016", margin: "6px 0 0" }}>
-                  {phase.label.replace(/^\d+\.\s*/, "")}
-                </h3>
-              </div>
-              {/* Contenuto redatto */}
-              {Object.entries(data as Record<string, unknown>).map(([k, v]) => {
-                if (v === undefined || v === null) return null;
-                const displayVal = Array.isArray(v) ? (v as string[]).join(", ") : typeof v === "boolean" ? (v ? "Sì" : "No") : String(v);
-                const label = k.replace(/([A-Z])/g, " $1").replace(/_/g, " ").replace(/^./, c => c.toUpperCase());
-                return (
-                  <div key={k} style={{ marginBottom: 16 }}>
-                    <p style={{ fontSize: 12, fontWeight: 700, color: "#0D1016", margin: "0 0 4px" }}>
-                      {label}
-                    </p>
-                    <p style={{ fontSize: 13.5, color: "#1a1a1a", lineHeight: 1.75, margin: 0, whiteSpace: "pre-wrap", textAlign: "justify" }}>
-                      {displayVal}
-                    </p>
-                  </div>
-                );
-              })}
-              {/* Piè di pagina documento */}
-              <div style={{ borderTop: "1px solid rgba(0,0,0,0.12)", marginTop: 24, paddingTop: 10 }}>
-                <p style={{ fontSize: 9.5, color: "rgba(0,0,0,0.4)", fontStyle: "italic", margin: 0 }}>
-                  Generato da AIComply · {new Date().toLocaleDateString("it-IT")} · [verify against current AI Act text]
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div style={{ textAlign: "center", padding: "48px 0" }}>
-              <Clock size={24} style={{ color: "rgba(0,0,0,0.15)", margin: "0 auto 10px" }} />
-              <p style={{ fontSize: 13, color: "rgba(0,0,0,0.4)", margin: 0 }}>
-                Questa fase non è ancora stata compilata.
-              </p>
-              <p style={{ fontSize: 11, color: "rgba(0,0,0,0.3)", marginTop: 4 }}>
-                Completa la conversazione nella chat per generare la documentazione.
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        {hasData && (
-          <div style={{ padding: "10px 22px", borderTop: "1px solid rgba(0,0,0,0.06)", background: "#fafafa" }}>
-            <p style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", fontStyle: "italic", margin: 0 }}>
-              [verify against current AI Act text] — I contenuti estratti dall&apos;AI richiedono verifica legale professionale.
+        ) : (
+          <div style={{ textAlign: "center", padding: "48px 0" }}>
+            <Clock size={24} style={{ color: "rgba(0,0,0,0.15)", margin: "0 auto 10px" }} />
+            <p style={{ fontSize: 13, color: "rgba(0,0,0,0.4)", margin: 0 }}>
+              Questa fase non è ancora stata compilata.
+            </p>
+            <p style={{ fontSize: 11, color: "rgba(0,0,0,0.3)", marginTop: 4 }}>
+              Completa la conversazione nella chat per generare la documentazione.
             </p>
           </div>
         )}
@@ -458,6 +425,27 @@ export default function RiskManagerPage() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [viewerPhase, setViewerPhase] = useState<Phase | null>(null);
+  const [docWidth, setDocWidth] = useState(420);
+  const [isResizing, setIsResizing] = useState(false);
+  const layoutRef = useRef<HTMLDivElement>(null);
+
+  const startResize = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+    const startX = e.clientX;
+    const startWidth = docWidth;
+    const onMove = (ev: MouseEvent) => {
+      const max = (layoutRef.current?.clientWidth ?? 1200) * 0.6;
+      setDocWidth(Math.min(Math.max(startWidth + (ev.clientX - startX), 280), max));
+    };
+    const onUp = () => {
+      setIsResizing(false);
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+    };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  }, [docWidth]);
   const [hydrated, setHydrated] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -606,8 +594,8 @@ export default function RiskManagerPage() {
         </div>
       </div>
 
-      {/* Split layout */}
-      <div style={{ display: "flex", flex: 1, minHeight: 0, gap: 16, overflow: "hidden" }}>
+      {/* Split layout: sinistra fissa · documento (ridimensionabile) · chat */}
+      <div ref={layoutRef} style={{ display: "flex", flex: 1, minHeight: 0, gap: 12, overflow: "hidden" }}>
 
         {/* LEFT — progress */}
         <div style={{ width: 256, flexShrink: 0, display: "flex", flexDirection: "column", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, overflow: "hidden", background: "#fafafa" }}>
@@ -645,6 +633,34 @@ export default function RiskManagerPage() {
             </div>
           </div>
         </div>
+
+        {/* CENTER — documento (apribile, ridimensionabile) */}
+        {viewerPhase && (
+          <>
+            <div style={{ width: docWidth, flexShrink: 0, minWidth: 280, maxWidth: "60%" }}>
+              <PhaseDocColumn
+                phase={viewerPhase}
+                documentation={documentation}
+                onClose={() => setViewerPhase(null)}
+              />
+            </div>
+            {/* Splitter trascinabile */}
+            <div
+              onMouseDown={startResize}
+              style={{
+                width: 6, flexShrink: 0, cursor: "col-resize",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                borderRadius: 3,
+                background: isResizing ? "rgba(0,0,0,0.12)" : "transparent",
+                transition: isResizing ? "none" : "background 0.15s",
+              }}
+              onMouseEnter={e => { if (!isResizing) e.currentTarget.style.background = "rgba(0,0,0,0.08)"; }}
+              onMouseLeave={e => { if (!isResizing) e.currentTarget.style.background = "transparent"; }}
+            >
+              <div style={{ width: 2, height: 32, borderRadius: 1, background: "rgba(0,0,0,0.2)" }} />
+            </div>
+          </>
+        )}
 
         {/* RIGHT — chat */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, overflow: "hidden", minWidth: 0 }}>
@@ -719,14 +735,6 @@ export default function RiskManagerPage() {
           </div>
         </div>
       </div>
-
-      {viewerPhase && (
-        <PhaseViewerModal
-          phase={viewerPhase}
-          documentation={documentation}
-          onClose={() => setViewerPhase(null)}
-        />
-      )}
 
       <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
