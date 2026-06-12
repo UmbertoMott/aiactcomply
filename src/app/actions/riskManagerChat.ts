@@ -16,6 +16,20 @@ export interface ChatMessage {
   content: string;
 }
 
+// Voce strutturata del registro (Sezione 5 del template docx)
+export interface StructuredRiskEntry {
+  id?: string;
+  category?: string;
+  description?: string;
+  art9Reference?: string;
+  likelihood?: "low" | "medium" | "high";
+  impact?: "low" | "medium" | "high";
+  mitigations?: string;
+  owner?: string;
+  status?: "open" | "assessing" | "mitigating" | "mitigated" | "accepted" | "transferred";
+  nextReviewDate?: string;
+}
+
 export interface RiskDocumentation {
   scoping?: {
     systemName?: string;
@@ -23,12 +37,27 @@ export interface RiskDocumentation {
     classification?: string;
     scope?: string;
     article?: string;
+    // Sezione 3 del template — identificazione strutturata
+    identification?: {
+      systemName?: string;
+      providerDeployerRole?: string;
+      descriptionAndPurpose?: string;
+      riskTier?: "minimal" | "limited" | "high_risk" | "gpai" | "unclassified";
+      annexIIIArea?: string;
+      applicableArticles?: string[];
+      personalDataProcessed?: "yes" | "no" | "unspecified";
+      legalBasis?: string;
+      humanOversightRequired?: boolean;
+      registerOwner?: string;
+    };
   };
   identification?: {
     risks?: string[];
     count?: number;
     categories?: string[];
     highRisks?: string[];
+    // Sezione 5 del template — voci strutturate
+    riskEntries?: StructuredRiskEntry[];
   };
   montecarlo?: {
     iterations?: number;
@@ -60,6 +89,14 @@ export interface RiskDocumentation {
     sanctionRisk?: string;
     responsiblePerson?: string;
     reviewCycle?: string;
+    // Sezione 7 del template — log di revisione
+    reviewLog?: Array<{
+      date?: string;
+      trigger?: string;
+      outcome?: string;
+      reviewer?: string;
+      nextReviewDate?: string;
+    }>;
   };
   final?: {
     overallRisk?: string;
@@ -67,6 +104,23 @@ export interface RiskDocumentation {
     recommendation?: string;
     nextReviewDate?: string;
     completedAt?: string;
+    // Sezione 6 del template — gap check Art. 9
+    gapCheck?: {
+      coverageScore?: number;
+      assessment?: string;
+      missingAreas?: Array<{
+        area?: string;
+        art9Requirement?: string;
+        suggestedRiskTitle?: string;
+        priority?: "obbligatorio" | "raccomandato";
+      }>;
+    };
+    // Sezione 8 del template — sign-off
+    signOff?: {
+      riskOwner?: { name?: string; date?: string; signed?: boolean };
+      complianceLegal?: { name?: string; date?: string; signed?: boolean };
+      legalRepresentative?: { name?: string; date?: string; signed?: boolean };
+    };
   };
 }
 
@@ -79,13 +133,16 @@ interface ChatResponse {
 
 const PHASE_PROMPTS: Record<RiskPhaseId, string> = {
   scoping: `Stai guidando l'utente nella fase di SCOPING del Risk Manager AI Act (Art. 9 Reg. UE 2024/1689).
-Obiettivi: raccogliere nome sistema, contesto di deployment, classificazione rischio, ambito territoriale e casi d'uso previsti.
-Fai domande mirate e progressive. Quando hai sufficienti informazioni, includi un blocco <extract> con i dati raccolti.`,
+Obiettivi (Sezione 3 del Registro dei Rischi): nome sistema, ruolo (provider/deployer), descrizione e finalità, tier di rischio, area Allegato III, articoli applicabili, dati personali trattati (e base giuridica se sì), supervisione umana richiesta (Art. 14), risk owner del registro.
+Fai domande mirate e progressive. Quando hai sufficienti informazioni includi <extract> con questa struttura (compila SOLO i campi effettivamente comunicati dall'utente, ometti gli altri):
+{ "scoping": { "systemName": "...", "context": "...", "identification": { "systemName": "...", "providerDeployerRole": "provider|deployer", "descriptionAndPurpose": "...", "riskTier": "minimal|limited|high_risk|gpai", "annexIIIArea": "...", "applicableArticles": ["Art. 9", "..."], "personalDataProcessed": "yes|no", "legalBasis": "...", "humanOversightRequired": true, "registerOwner": "..." } } }`,
 
-  identification: `Stai guidando la fase di IDENTIFICAZIONE RISCHI (Art. 9(2) AI Act).
+  identification: `Stai guidando la fase di IDENTIFICAZIONE RISCHI (Art. 9(2) AI Act) — Sezione 5 del Registro dei Rischi.
 Obiettivi: identificare rischi per diritti fondamentali, bias algoritmico, opacità, perdita di controllo umano, dipendenze tecnologiche.
-Usa categorie: tecnico, etico, normativo, operativo, reputazionale.
-Aiuta l'utente a elencare almeno 3-5 rischi concreti. Quando hai sufficienti rischi, includi <extract>.`,
+Per ogni rischio chiedi (gradualmente, non tutto insieme): categoria, descrizione, probabilità (bassa/media/alta), impatto (basso/medio/alto), misure di mitigazione, owner, prossima revisione.
+Aiuta l'utente a elencare almeno 3-5 rischi concreti. Quando hai sufficienti rischi includi <extract> con (compila SOLO ciò che l'utente ha comunicato):
+{ "identification": { "riskEntries": [ { "id": "R-01", "category": "...", "description": "...", "art9Reference": "Art. 9(2)(a) [verificare sul testo AI Act vigente]", "likelihood": "low|medium|high", "impact": "low|medium|high", "mitigations": "...", "owner": "...", "status": "open", "nextReviewDate": "2026-09-01" } ] } }
+REGOLA: ogni art9Reference DEVE terminare con "[verificare sul testo AI Act vigente]".`,
 
   montecarlo: `Stai guidando la SIMULAZIONE MONTE CARLO per quantificazione rischi (metodologia ENISA AI Security Guidelines).
 Obiettivi: definire parametri probabilistici per ogni rischio, stimare score medio atteso, P95, worst case.
@@ -105,13 +162,16 @@ Quando l'utente ha definito le metriche, includi <extract>.`,
 Obiettivi: determinare se c'è un GPAI upstream, valutare rischio sistemico (soglia 10^25 FLOP), verificare adesione a codici di condotta.
 Se non applicabile, documenta perché. Includi <extract> con la valutazione.`,
 
-  governance: `Stai guidando la fase GOVERNANCE & SANZIONI (Art. 9 sistema di gestione rischi + Art. 99-100 AI Act).
-Obiettivi: identificare misure di governance concrete (responsabile AI, comitato revisione, procedure escalation), valutare esposizione sanzionatoria (max 35M€ o 7% fatturato), definire ciclo di revisione.
-Includi <extract> quando la governance è definita.`,
+  governance: `Stai guidando la fase GOVERNANCE & SANZIONI (Art. 9 sistema di gestione rischi + Art. 99-100 AI Act) — Sezione 7 del Registro.
+Obiettivi: misure di governance concrete (responsabile AI, comitato revisione, procedure escalation), esposizione sanzionatoria (max 35M€ o 7% fatturato), ciclo di revisione del registro (trigger: pianificata / modifica sostanziale / incidente / nuovi dati).
+Quando la governance è definita includi <extract> con (solo campi comunicati):
+{ "governance": { "art9Measures": ["..."], "responsiblePerson": "...", "reviewCycle": "...", "reviewLog": [ { "date": "2026-06-12", "trigger": "pianificata", "outcome": "...", "reviewer": "...", "nextReviewDate": "2026-09-12" } ] } }`,
 
-  final: `Stai guidando la FINALIZZAZIONE del Risk Register (sintesi Art. 9 AI Act).
-Obiettivi: consolidare tutti i dati raccolti, calcolare punteggio complessivo di rischio, generare raccomandazioni prioritizzate, definire data prossima revisione.
-Presenta un sommario strutturato del Risk Register completo. Includi <extract> con il riepilogo finale.`,
+  final: `Stai guidando la FINALIZZAZIONE del Risk Register (sintesi Art. 9 AI Act) — Sezioni 6 e 8 del Registro.
+Obiettivi: verifica di copertura Art. 9 (gap check: punteggio 0-100, valutazione sintetica, aree non coperte con priorità obbligatorio/raccomandato), raccolta nominativi per il sign-off (risk owner, responsabile compliance/legale, rappresentante legale), data prossima revisione.
+Presenta un sommario strutturato. Includi <extract> con (solo campi comunicati):
+{ "final": { "overallRisk": "...", "recommendation": "...", "nextReviewDate": "...", "gapCheck": { "coverageScore": 75, "assessment": "...", "missingAreas": [ { "area": "...", "art9Requirement": "Art. 9(2)(c) [verificare sul testo AI Act vigente]", "suggestedRiskTitle": "...", "priority": "obbligatorio" } ] }, "signOff": { "riskOwner": { "name": "...", "signed": false }, "complianceLegal": { "name": "...", "signed": false }, "legalRepresentative": { "name": "...", "signed": false } } } }
+REGOLA: ogni art9Requirement DEVE terminare con "[verificare sul testo AI Act vigente]".`,
 };
 
 function parseResponse(raw: string): { reply: string; patch?: Partial<RiskDocumentation>; stepComplete?: boolean } {
@@ -169,7 +229,7 @@ Non inventare dati — usa solo ciò che l'utente ha effettivamente comunicato.`
   const fullPrompt = `${systemPrompt}\n\n---\nCONVERSAZIONE:\n${conversation}`;
 
   try {
-    const raw = await generateText(fullPrompt, { temperature: 0.3, maxOutputTokens: 800 });
+    const raw = await generateText(fullPrompt, { temperature: 0.3, maxOutputTokens: 1600 });
     return parseResponse(raw);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

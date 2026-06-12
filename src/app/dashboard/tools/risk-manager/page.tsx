@@ -1,7 +1,7 @@
 "use client";
 export const maxDuration = 60;
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   Shield, CheckCircle, Clock, Send, Download, RotateCcw,
   ChevronRight, AlertTriangle, Loader2, Play, Pause,
@@ -13,6 +13,9 @@ import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { RiskManagerResult, ClassifierResult } from "@/lib/dossier/storage-schema";
 import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { RiskRegisterViewer } from "./components/RiskRegisterViewer";
+import { buildRiskRegisterDocument, buildAnnexSections, type AnnexSection } from "@/lib/risk/risk-register-mapper";
+import type { RiskRegisterDocument } from "@/lib/risk/risk-register-types";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -184,14 +187,13 @@ function ToolbarBtn({ icon, title, onClick, active }: {
 }
 
 function PhaseDocColumn({
-  phase, documentation, editedHtml, onSaveEdit, onClose,
+  registerDoc, annexes, editedHtml, onSaveEdit, onClose,
 }: {
-  phase: Phase; documentation: RiskDocumentation;
+  registerDoc: RiskRegisterDocument; annexes: AnnexSection[];
   editedHtml?: string; onSaveEdit: (html: string) => void;
   onClose: () => void;
 }) {
-  const data = documentation[phase.id as keyof RiskDocumentation];
-  const hasData = (data && Object.keys(data).length > 0) || !!editedHtml;
+  const hasData = true; // il viewer gestisce internamente lo stato vuoto
   const [editing, setEditing] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -217,10 +219,10 @@ function PhaseDocColumn({
       <div style={{ padding: "8px 12px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "#fafafa", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
         <div style={{ minWidth: 0, flex: 1 }}>
           <p style={{ fontSize: 9, fontWeight: 600, color: "rgba(0,0,0,0.35)", letterSpacing: "0.8px", textTransform: "uppercase", margin: 0 }}>
-            {phase.article} · Documento
+            Art. 9 · Documento
           </p>
           <p style={{ fontSize: 12, fontWeight: 700, color: "#0D1016", margin: "1px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            {phase.label}
+            Registro dei Rischi
           </p>
         </div>
 
@@ -276,10 +278,10 @@ function PhaseDocColumn({
           }}>
             <div style={{ borderBottom: "2px solid #0D1016", paddingBottom: 10, marginBottom: 18 }}>
               <p style={{ fontSize: 9, color: "rgba(0,0,0,0.45)", letterSpacing: "1px", textTransform: "uppercase", margin: 0, fontFamily: "var(--font-inter, system-ui)" }}>
-                Risk Register — {phase.article} · Reg. UE 2024/1689
+                Art. 9 · Reg. UE 2024/1689 — Sistema di gestione dei rischi
               </p>
               <h3 style={{ fontSize: 17, fontWeight: 700, color: "#0D1016", margin: "5px 0 0" }}>
-                {phase.label.replace(/^\d+\.\s*/, "")}
+                Registro dei Rischi{registerDoc.identification.systemName ? ` — ${registerDoc.identification.systemName}` : ""}
               </h3>
             </div>
 
@@ -291,40 +293,16 @@ function PhaseDocColumn({
               style={{ outline: "none", cursor: editing ? "text" : "default", flex: 1 }}
               {...(editedHtml ? { dangerouslySetInnerHTML: { __html: editedHtml } } : {})}
             >
-              {!editedHtml && Object.entries((data ?? {}) as Record<string, unknown>).map(([k, v]) => {
-                if (v === undefined || v === null) return null;
-                const displayVal = Array.isArray(v) ? (v as string[]).join(", ") : typeof v === "boolean" ? (v ? "Sì" : "No") : String(v);
-                const label = k.replace(/([A-Z])/g, " $1").replace(/_/g, " ").replace(/^./, c => c.toUpperCase());
-                return (
-                  <div key={k} style={{ marginBottom: 14 }}>
-                    <p style={{ fontSize: 11.5, fontWeight: 700, color: "#0D1016", margin: "0 0 3px" }}>
-                      {label}
-                    </p>
-                    <p style={{ fontSize: 13, color: "#1a1a1a", lineHeight: 1.7, margin: 0, whiteSpace: "pre-wrap", textAlign: "justify" }}>
-                      {displayVal}
-                    </p>
-                  </div>
-                );
-              })}
+              {!editedHtml && <RiskRegisterViewer doc={registerDoc} annexes={annexes} />}
             </div>
 
             <div style={{ borderTop: "1px solid rgba(0,0,0,0.12)", marginTop: 20, paddingTop: 8 }}>
               <p style={{ fontSize: 9, color: "rgba(0,0,0,0.4)", fontStyle: "italic", margin: 0 }}>
-                Generato da AIComply · {new Date().toLocaleDateString("it-IT")} · [verify against current AI Act text]
+                Generato da AIComply · {new Date().toLocaleDateString("it-IT")} · [verificare sul testo AI Act vigente]
               </p>
             </div>
           </div>
-        ) : (
-          <div style={{ textAlign: "center", padding: "48px 0" }}>
-            <Clock size={24} style={{ color: "rgba(0,0,0,0.15)", margin: "0 auto 10px" }} />
-            <p style={{ fontSize: 13, color: "rgba(0,0,0,0.4)", margin: 0 }}>
-              Questa fase non è ancora stata compilata.
-            </p>
-            <p style={{ fontSize: 11, color: "rgba(0,0,0,0.3)", marginTop: 4 }}>
-              Completa la conversazione nella chat per generare la documentazione.
-            </p>
-          </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
@@ -543,6 +521,16 @@ export default function RiskManagerPage() {
     isGPAI: classifierData?.isGPAI,
   };
 
+  // Registro dei Rischi derivato (sola lettura) dallo stato chat
+  const registerDoc: RiskRegisterDocument = useMemo(
+    () => buildRiskRegisterDocument(documentation, classifierData),
+    [documentation, classifierData]
+  );
+  const annexes: AnnexSection[] = useMemo(
+    () => buildAnnexSections(documentation),
+    [documentation]
+  );
+
   useEffect(() => {
     const saved = loadChatState();
     if (saved) {
@@ -736,10 +724,10 @@ export default function RiskManagerPage() {
           <>
             <div style={{ width: docWidth, flexShrink: 0, minWidth: 280, maxWidth: "60%" }}>
               <PhaseDocColumn
-                phase={viewerPhase}
-                documentation={documentation}
-                editedHtml={docEdits[viewerPhase.id]}
-                onSaveEdit={html => saveDocEdit(viewerPhase.id, html)}
+                registerDoc={registerDoc}
+                annexes={annexes}
+                editedHtml={docEdits["scoping"]}
+                onSaveEdit={html => saveDocEdit("scoping", html)}
                 onClose={() => setViewerPhase(null)}
               />
             </div>
