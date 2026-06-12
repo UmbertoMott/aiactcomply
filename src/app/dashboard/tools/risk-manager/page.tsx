@@ -225,21 +225,63 @@ function PhaseDocColumn({
   editedHtml?: string; onSaveEdit: (html: string) => void;
   onClose: () => void;
 }) {
-  const hasData = true; // il viewer gestisce internamente lo stato vuoto
   const [editing, setEditing] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const editRef = useRef<HTMLDivElement>(null);
+  const viewerRef = useRef<HTMLDivElement>(null);
 
   const exec = (cmd: string, value?: string) => {
     document.execCommand(cmd, false, value);
-    contentRef.current?.focus();
+    editRef.current?.focus();
   };
 
-  const toggleEdit = () => {
-    if (editing && contentRef.current) {
-      onSaveEdit(contentRef.current.innerHTML);
-    }
-    setEditing(e => !e);
+  const enterEdit = () => {
+    // Cattura l'HTML del viewer (o dell'html salvato) e passa a modalità edit
+    const source = editedHtml ?? viewerRef.current?.innerHTML ?? "";
+    setEditing(true);
+    // Dopo il re-render, popola il div editabile
+    setTimeout(() => {
+      if (editRef.current) {
+        editRef.current.innerHTML = source;
+        editRef.current.focus();
+      }
+    }, 0);
   };
+
+  const confirmEdit = () => {
+    if (editRef.current) onSaveEdit(editRef.current.innerHTML);
+    setEditing(false);
+  };
+
+  const docStyle: React.CSSProperties = {
+    background: "#ffffff",
+    borderRadius: 4,
+    border: editing ? "1px solid rgba(13,16,22,0.35)" : "1px solid rgba(0,0,0,0.08)",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
+    padding: "28px 32px",
+    fontFamily: "Georgia, 'Times New Roman', serif",
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+  };
+
+  const docHeader = (
+    <div style={{ borderBottom: "2px solid #0D1016", paddingBottom: 10, marginBottom: 18 }}>
+      <p style={{ fontSize: 9, color: "rgba(0,0,0,0.45)", letterSpacing: "1px", textTransform: "uppercase", margin: 0, fontFamily: "var(--font-inter, system-ui)" }}>
+        Art. 9 · Reg. UE 2024/1689 — Sistema di gestione dei rischi
+      </p>
+      <h3 style={{ fontSize: 17, fontWeight: 700, color: "#0D1016", margin: "5px 0 0" }}>
+        Registro dei Rischi{registerDoc.identification.systemName ? ` — ${registerDoc.identification.systemName}` : ""}
+      </h3>
+    </div>
+  );
+
+  const docFooter = (
+    <div style={{ borderTop: "1px solid rgba(0,0,0,0.12)", marginTop: 20, paddingTop: 8 }}>
+      <p style={{ fontSize: 9, color: "rgba(0,0,0,0.4)", fontStyle: "italic", margin: 0 }}>
+        Generato da AIComply · {new Date().toLocaleDateString("it-IT")} · [verificare sul testo AI Act vigente]
+      </p>
+    </div>
+  );
 
   return (
     <div style={{
@@ -259,7 +301,7 @@ function PhaseDocColumn({
         </div>
 
         {/* Toolbar formattazione — visibile solo in modifica */}
-        {hasData && editing && (
+        {editing && (
           <div style={{ display: "flex", alignItems: "center", gap: 2, padding: "2px 4px", background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8 }}>
             <ToolbarBtn icon={<Bold size={13} />}        title="Grassetto"    onClick={() => exec("bold")} />
             <ToolbarBtn icon={<Italic size={13} />}      title="Corsivo"      onClick={() => exec("italic")} />
@@ -269,14 +311,12 @@ function PhaseDocColumn({
         )}
 
         {/* Matita / conferma modifica */}
-        {hasData && (
-          <ToolbarBtn
-            icon={editing ? <Check size={13} /> : <Pencil size={13} />}
-            title={editing ? "Salva modifiche" : "Modifica documento"}
-            onClick={toggleEdit}
-            active={editing}
-          />
-        )}
+        <ToolbarBtn
+          icon={editing ? <Check size={13} /> : <Pencil size={13} />}
+          title={editing ? "Salva modifiche" : "Modifica documento"}
+          onClick={editing ? confirmEdit : enterEdit}
+          active={editing}
+        />
 
         <button
           onClick={onClose}
@@ -296,45 +336,31 @@ function PhaseDocColumn({
 
       {/* Corpo — pagina stile documento */}
       <div style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#f0f0ef", display: "flex", flexDirection: "column" }}>
-        {hasData ? (
-          <div style={{
-            background: "#ffffff",
-            borderRadius: 4,
-            border: editing ? "1px solid rgba(13,16,22,0.35)" : "1px solid rgba(0,0,0,0.08)",
-            boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
-            padding: "28px 32px",
-            fontFamily: "Georgia, 'Times New Roman', serif",
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-          }}>
-            <div style={{ borderBottom: "2px solid #0D1016", paddingBottom: 10, marginBottom: 18 }}>
-              <p style={{ fontSize: 9, color: "rgba(0,0,0,0.45)", letterSpacing: "1px", textTransform: "uppercase", margin: 0, fontFamily: "var(--font-inter, system-ui)" }}>
-                Art. 9 · Reg. UE 2024/1689 — Sistema di gestione dei rischi
-              </p>
-              <h3 style={{ fontSize: 17, fontWeight: 700, color: "#0D1016", margin: "5px 0 0" }}>
-                Registro dei Rischi{registerDoc.identification.systemName ? ` — ${registerDoc.identification.systemName}` : ""}
-              </h3>
-            </div>
-
-            {/* Contenuto editabile */}
+        {editing ? (
+          /* Modalità modifica: contentEditable puro, nessun componente React dentro */
+          <div style={docStyle}>
+            {docHeader}
             <div
-              ref={contentRef}
-              contentEditable={editing}
+              ref={editRef}
+              contentEditable
               suppressContentEditableWarning
-              style={{ outline: "none", cursor: editing ? "text" : "default", flex: 1 }}
-              {...(editedHtml ? { dangerouslySetInnerHTML: { __html: editedHtml } } : {})}
-            >
-              {!editedHtml && <RiskRegisterViewer doc={registerDoc} annexes={annexes} />}
-            </div>
-
-            <div style={{ borderTop: "1px solid rgba(0,0,0,0.12)", marginTop: 20, paddingTop: 8 }}>
-              <p style={{ fontSize: 9, color: "rgba(0,0,0,0.4)", fontStyle: "italic", margin: 0 }}>
-                Generato da AIComply · {new Date().toLocaleDateString("it-IT")} · [verificare sul testo AI Act vigente]
-              </p>
-            </div>
+              style={{ outline: "none", cursor: "text", flex: 1 }}
+            />
+            {docFooter}
           </div>
-        ) : null}
+        ) : (
+          /* Modalità lettura: RiskRegisterViewer come normale componente React */
+          <div style={docStyle}>
+            {docHeader}
+            <div ref={viewerRef} style={{ flex: 1 }}>
+              {editedHtml
+                ? <div dangerouslySetInnerHTML={{ __html: editedHtml }} />
+                : <RiskRegisterViewer doc={registerDoc} annexes={annexes} />
+              }
+            </div>
+            {docFooter}
+          </div>
+        )}
       </div>
     </div>
   );
