@@ -4,7 +4,7 @@ export const maxDuration = 60;
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Shield, CheckCircle, Clock, Send, Download, RotateCcw,
-  ChevronRight, AlertTriangle, Loader2, Volume2, VolumeX,
+  ChevronRight, AlertTriangle, Loader2, Play, Pause,
   FileText, ChevronDown,
 } from "lucide-react";
 import { riskManagerChat, type ChatMessage, type RiskDocumentation, type RiskPhaseId } from "@/app/actions/riskManagerChat";
@@ -67,12 +67,24 @@ function saveChatState(s: PersistedChatState) {
 
 function useTTS() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioIdRef = useRef<number | null>(null);
   const [playingId, setPlayingId] = useState<number | null>(null);
 
   const speak = useCallback(async (text: string, id: number) => {
-    // Stop current audio
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
-    if (playingId === id) { setPlayingId(null); return; }
+    // Stesso messaggio in riproduzione → pausa
+    if (playingId === id && audioRef.current) {
+      audioRef.current.pause();
+      setPlayingId(null);
+      return;
+    }
+    // Stesso messaggio in pausa → riprendi
+    if (audioIdRef.current === id && audioRef.current) {
+      audioRef.current.play();
+      setPlayingId(id);
+      return;
+    }
+    // Messaggio diverso → ferma il precedente e scarica il nuovo audio
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; audioIdRef.current = null; }
 
     setPlayingId(id);
     try {
@@ -86,8 +98,9 @@ function useTTS() {
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
       audioRef.current = audio;
-      audio.onended = () => { setPlayingId(null); URL.revokeObjectURL(url); };
-      audio.onerror = () => { setPlayingId(null); };
+      audioIdRef.current = id;
+      audio.onended = () => { setPlayingId(null); audioIdRef.current = null; URL.revokeObjectURL(url); };
+      audio.onerror = () => { setPlayingId(null); audioIdRef.current = null; };
       audio.play();
     } catch {
       setPlayingId(null);
@@ -199,10 +212,22 @@ function ChatBubble({ message, index, onSpeak, isPlaying }: {
               </div>
               <button
                 onClick={() => onSpeak(clean, index)}
-                title={isPlaying ? "Ferma audio" : "Ascolta"}
-                style={{ background: "none", border: "none", cursor: "pointer", padding: "0 0 0 8px", color: isPlaying ? "#2563eb" : "rgba(0,0,0,0.25)", display: "flex", alignItems: "center" }}
+                title={isPlaying ? "Pausa" : "Ascolta"}
+                style={{
+                  display: "flex", alignItems: "center", gap: 5,
+                  padding: "3px 10px", marginLeft: 8,
+                  fontSize: 10, fontWeight: 500,
+                  borderRadius: 20, cursor: "pointer",
+                  background: isPlaying ? "#0D1016" : "rgba(0,0,0,0.05)",
+                  color: isPlaying ? "#ffffff" : "rgba(0,0,0,0.45)",
+                  border: "1px solid " + (isPlaying ? "#0D1016" : "rgba(0,0,0,0.08)"),
+                  transition: "all 0.15s ease",
+                }}
+                onMouseEnter={e => { if (!isPlaying) e.currentTarget.style.background = "rgba(0,0,0,0.08)"; }}
+                onMouseLeave={e => { if (!isPlaying) e.currentTarget.style.background = "rgba(0,0,0,0.05)"; }}
               >
-                {isPlaying ? <VolumeX size={12} /> : <Volume2 size={12} />}
+                {isPlaying ? <Pause size={10} /> : <Play size={10} />}
+                {isPlaying ? "Pausa" : "Ascolta"}
               </button>
             </div>
           )}
