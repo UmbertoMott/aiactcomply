@@ -81,7 +81,7 @@ function repairJsonNewlines(raw: string): string {
 
 let _tokenCache: { token: string; expires: number } | null = null;
 
-async function getAccessToken(): Promise<string> {
+export async function getAccessToken(): Promise<string> {
   if (_tokenCache && Date.now() < _tokenCache.expires - 30_000) {
     return _tokenCache.token;
   }
