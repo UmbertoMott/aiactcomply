@@ -160,6 +160,38 @@ function PhaseRow({
   );
 }
 
+// ─── Error boundary ──────────────────────────────────────────────────────────
+
+class ViewerErrorBoundary extends React.Component<
+  { children: React.ReactNode; onClose: () => void },
+  { error: string | null }
+> {
+  constructor(props: { children: React.ReactNode; onClose: () => void }) {
+    super(props);
+    this.state = { error: null };
+  }
+  static getDerivedStateFromError(err: unknown) {
+    return { error: err instanceof Error ? err.message : String(err) };
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ height: "100%", display: "flex", flexDirection: "column", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, overflow: "hidden", background: "#ffffff" }}>
+          <div style={{ padding: "8px 12px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "#fafafa", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#991b1b" }}>Errore visualizzazione documento</span>
+            <button onClick={this.props.onClose} style={{ fontSize: 12, background: "none", border: "none", cursor: "pointer", color: "rgba(0,0,0,0.4)" }}>✕</button>
+          </div>
+          <div style={{ flex: 1, padding: 20, display: "flex", flexDirection: "column", gap: 8 }}>
+            <p style={{ fontSize: 12, color: "#991b1b", margin: 0, fontFamily: "monospace", background: "#FEE2E2", padding: "8px 12px", borderRadius: 6 }}>{this.state.error}</p>
+            <p style={{ fontSize: 11, color: "rgba(0,0,0,0.45)", margin: 0 }}>Ricarica la pagina o resetta la conversazione per ripristinare.</p>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // ─── Phase viewer modal ───────────────────────────────────────────────────────
 
 function ToolbarBtn({ icon, title, onClick, active }: {
@@ -723,13 +755,15 @@ export default function RiskManagerPage() {
         {viewerPhase && (
           <>
             <div style={{ width: docWidth, flexShrink: 0, minWidth: 280, maxWidth: "60%" }}>
-              <PhaseDocColumn
-                registerDoc={registerDoc}
-                annexes={annexes}
-                editedHtml={docEdits["scoping"]}
-                onSaveEdit={html => saveDocEdit("scoping", html)}
-                onClose={() => setViewerPhase(null)}
-              />
+              <ViewerErrorBoundary onClose={() => setViewerPhase(null)}>
+                <PhaseDocColumn
+                  registerDoc={registerDoc}
+                  annexes={annexes}
+                  editedHtml={docEdits["scoping"]}
+                  onSaveEdit={html => saveDocEdit("scoping", html)}
+                  onClose={() => setViewerPhase(null)}
+                />
+              </ViewerErrorBoundary>
             </div>
             {/* Splitter trascinabile */}
             <div
