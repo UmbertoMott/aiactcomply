@@ -184,7 +184,7 @@ function PhaseViewerModal({
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          width: "100%", maxWidth: 560, maxHeight: "80vh",
+          width: "100%", maxWidth: 720, maxHeight: "85vh",
           background: "#ffffff", borderRadius: 14,
           border: "1px solid rgba(0,0,0,0.08)",
           boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
@@ -217,30 +217,52 @@ function PhaseViewerModal({
           </button>
         </div>
 
-        {/* Body */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "18px 22px" }}>
+        {/* Body — pagina stile documento */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px", background: "#f0f0ef" }}>
           {hasData ? (
-            <>
+            <div style={{
+              background: "#ffffff",
+              borderRadius: 4,
+              border: "1px solid rgba(0,0,0,0.08)",
+              boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
+              padding: "36px 40px",
+              fontFamily: "Georgia, 'Times New Roman', serif",
+            }}>
               <AIOutputLabel documentType="Documentazione redatta · Estrazione automatica" />
-              <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 14 }}>
-                {Object.entries(data as Record<string, unknown>).map(([k, v]) => {
-                  if (v === undefined || v === null) return null;
-                  const displayVal = Array.isArray(v) ? (v as string[]).join(", ") : typeof v === "boolean" ? (v ? "Sì" : "No") : String(v);
-                  return (
-                    <div key={k}>
-                      <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.35)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 3px" }}>
-                        {k.replace(/([A-Z])/g, " $1")}
-                      </p>
-                      <p style={{ fontSize: 13, color: "#0D1016", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>
-                        {displayVal}
-                      </p>
-                    </div>
-                  );
-                })}
+              {/* Intestazione documento */}
+              <div style={{ borderBottom: "2px solid #0D1016", paddingBottom: 12, marginTop: 14, marginBottom: 20 }}>
+                <p style={{ fontSize: 10, color: "rgba(0,0,0,0.45)", letterSpacing: "1px", textTransform: "uppercase", margin: 0, fontFamily: "var(--font-inter, system-ui)" }}>
+                  Risk Register — {phase.article} · Reg. UE 2024/1689
+                </p>
+                <h3 style={{ fontSize: 19, fontWeight: 700, color: "#0D1016", margin: "6px 0 0" }}>
+                  {phase.label.replace(/^\d+\.\s*/, "")}
+                </h3>
               </div>
-            </>
+              {/* Contenuto redatto */}
+              {Object.entries(data as Record<string, unknown>).map(([k, v]) => {
+                if (v === undefined || v === null) return null;
+                const displayVal = Array.isArray(v) ? (v as string[]).join(", ") : typeof v === "boolean" ? (v ? "Sì" : "No") : String(v);
+                const label = k.replace(/([A-Z])/g, " $1").replace(/_/g, " ").replace(/^./, c => c.toUpperCase());
+                return (
+                  <div key={k} style={{ marginBottom: 16 }}>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: "#0D1016", margin: "0 0 4px" }}>
+                      {label}
+                    </p>
+                    <p style={{ fontSize: 13.5, color: "#1a1a1a", lineHeight: 1.75, margin: 0, whiteSpace: "pre-wrap", textAlign: "justify" }}>
+                      {displayVal}
+                    </p>
+                  </div>
+                );
+              })}
+              {/* Piè di pagina documento */}
+              <div style={{ borderTop: "1px solid rgba(0,0,0,0.12)", marginTop: 24, paddingTop: 10 }}>
+                <p style={{ fontSize: 9.5, color: "rgba(0,0,0,0.4)", fontStyle: "italic", margin: 0 }}>
+                  Generato da AIComply · {new Date().toLocaleDateString("it-IT")} · [verify against current AI Act text]
+                </p>
+              </div>
+            </div>
           ) : (
-            <div style={{ textAlign: "center", padding: "32px 0" }}>
+            <div style={{ textAlign: "center", padding: "48px 0" }}>
               <Clock size={24} style={{ color: "rgba(0,0,0,0.15)", margin: "0 auto 10px" }} />
               <p style={{ fontSize: 13, color: "rgba(0,0,0,0.4)", margin: 0 }}>
                 Questa fase non è ancora stata compilata.
