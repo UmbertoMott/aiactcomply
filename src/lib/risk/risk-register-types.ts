@@ -3,6 +3,7 @@
 import { z } from "zod";
 
 export const VERIFY_NOTE_IT = "[verificare sul testo AI Act vigente]";
+export const VERIFY_NOTE_EN = "[verify against current AI Act text]";
 
 // --- Sezione 3 del template: Identificazione sistema ---
 export const SystemIdentificationSchema = z.object({
@@ -18,6 +19,10 @@ export const SystemIdentificationSchema = z.object({
   registerOwner: z.string().optional(),
   firstCompiledAt: z.string().optional(),
   documentVersion: z.string().optional(),
+  // Triage GPAI — Art. 51-55: determina se il modulo condizionale deve apparire
+  incorporatesGpaiModel: z.enum(["yes", "no", "unspecified"]).default("unspecified"),
+  // Art. 9(9) — valutazione impatto su minori (<18) e altri gruppi vulnerabili
+  vulnerableGroupsImpactAssessment: z.string().optional(),
 });
 export type SystemIdentification = z.infer<typeof SystemIdentificationSchema>;
 

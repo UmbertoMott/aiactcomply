@@ -14,7 +14,7 @@ import type { RiskManagerResult, ClassifierResult } from "@/lib/dossier/storage-
 import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
 import { RiskRegisterViewer } from "./components/RiskRegisterViewer";
-import { buildRiskRegisterDocument, buildAnnexSections, type AnnexSection } from "@/lib/risk/risk-register-mapper";
+import { buildRiskRegisterDocument, buildAnnexSections, shouldShowGpaiModule, type AnnexSection } from "@/lib/risk/risk-register-mapper";
 import type { RiskRegisterDocument } from "@/lib/risk/risk-register-types";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -30,24 +30,43 @@ function stripMarkdown(text: string): string {
 
 // ─── Phase definitions ────────────────────────────────────────────────────────
 
-interface Phase { id: RiskPhaseId; label: string; subtitle: string; article: string }
+interface Phase {
+  id: RiskPhaseId;
+  label: string;
+  subtitle: string;
+  article: string;        // citazione primaria
+  supportRef?: string;    // citazione di supporto (opzionale)
+  docSection?: string;    // sezione del template docx
+}
 
+// 9 step numerati 1-9 (fonte: PARTE 0 del prompt di refactoring).
+// Il modulo condizionale gpai_systemic_risk NON è in questo array.
 const PHASES: Phase[] = [
-  { id: "scoping",        label: "1. Scoping",                 subtitle: "Ambito e contesto",        article: "Art. 9" },
-  { id: "identification", label: "2. Identificazione Rischi",  subtitle: "Catalogo rischi AI Act",   article: "Art. 9(2)" },
-  { id: "montecarlo",     label: "3. Simulazione Monte Carlo", subtitle: "Analisi quantitativa",     article: "ENISA Guidelines" },
-  { id: "bitemporal",     label: "4. Audit Bitemporale",       subtitle: "Versionamento e storico",  article: "Art. 12, 17" },
-  { id: "drift",          label: "5. Drift Detection",         subtitle: "Monitoraggio deriva",      article: "Art. 72" },
-  { id: "gpai",           label: "6. GPAI & Rischio Sistemico",subtitle: "Modelli uso generale",    article: "Art. 51-55" },
-  { id: "governance",     label: "7. Governance & Sanzioni",   subtitle: "Misure e responsabilità", article: "Art. 9, 99-100" },
-  { id: "final",          label: "8. Finalizzazione",          subtitle: "Risk Register completo",  article: "Art. 9(9)" },
+  { id: "scoping",        label: "1. Scoping — Ambito e contesto",                        subtitle: "Ambito e contesto",                     article: "Art. 9(1) [verify against current AI Act text]",                    supportRef: "Art. 6, Allegato III [verify against current AI Act text]",        docSection: "Sez. 3" },
+  { id: "identification", label: "2. Identificazione Rischi",                              subtitle: "incl. minori e gruppi vulnerabili",      article: "Art. 9(2)(a) [verify against current AI Act text]",                 supportRef: "Art. 9(9) [verify against current AI Act text]",                   docSection: "Sez. 5" },
+  { id: "estimation",     label: "3. Stima e Valutazione",                                 subtitle: "uso previsto e uso improprio",           article: "Art. 9(2)(b) [verify against current AI Act text]",                 docSection: "Sez. 5" },
+  { id: "testing",        label: "4. Test e Validazione — metriche e soglie",              subtitle: "metriche e soglie",                     article: "Art. 9(6)-(8) [verify against current AI Act text]",                docSection: "Sez. 4" },
+  { id: "mitigation",     label: "5. Misure di Gestione del Rischio",                      subtitle: "e Rischio Residuo",                     article: "Art. 9(2)(d), 9(4)-(5) [verify against current AI Act text]",      supportRef: "Art. 13 [verify against current AI Act text]",                     docSection: "Sez. 5 + 6" },
+  { id: "monitoring",     label: "6. Monitoraggio Post-Market",                            subtitle: "e Drift Detection",                     article: "Art. 9(2)(c) [verify against current AI Act text]",                 supportRef: "Art. 72 [verify against current AI Act text]",                     docSection: "Sez. 7" },
+  { id: "gap_check",      label: "7. Verifica di Copertura — Gap Check Art. 9",            subtitle: "Gap Check Art. 9",                      article: "Art. 9(2)(a)-(d), 9(6)-(8), 9(9) [verify against current AI Act text]", docSection: "Sez. 6" },
+  { id: "traceability",   label: "8. Tracciabilità e Mantenimento Continuo",               subtitle: "versionamento e audit log",             article: "Art. 9(1)-(2) [verify against current AI Act text]",                supportRef: "Art. 12, 17 [verify against current AI Act text]",                 docSection: "(trasversale)" },
+  { id: "signoff",        label: "9. Approvazione, Firme e Finalizzazione",                subtitle: "sign-off e approvazione",               article: "Art. 9(1) [verify against current AI Act text]",                    docSection: "Sez. 8" },
 ];
+
+// Modulo condizionale separato (non numerato, non in PHASES)
+const GPAI_MODULE: Phase = {
+  id: "gpai_systemic_risk",
+  label: "GPAI & Rischio Sistemico",
+  subtitle: "Modulo condizionale",
+  article: "Art. 51-55 (Capo V) [verify against current AI Act text]",
+  docSection: "(condizionale)",
+};
 
 type PhaseStatus = "pending" | "active" | "complete";
 
 // ─── Persistence ──────────────────────────────────────────────────────────────
 
-const CHAT_STORAGE_KEY = "aicomply_risk_manager_chat_v2";
+const CHAT_STORAGE_KEY = "aicomply_risk_manager_chat_v3";
 
 interface PersistedChatState {
   messages: ChatMessage[];
@@ -588,6 +607,8 @@ export default function RiskManagerPage() {
     () => buildAnnexSections(documentation),
     [documentation]
   );
+  // Modulo condizionale GPAI — visibile se riskTier=gpai o incorporatesGpaiModel=yes
+  const showGpaiModule = useMemo(() => shouldShowGpaiModule(documentation), [documentation]);
 
   useEffect(() => {
     const saved = loadChatState();
@@ -672,9 +693,9 @@ export default function RiskManagerPage() {
       setCompletedPhases(newCompleted);
       writeToStorage<RiskManagerResult>("riskManager", {
         risks: [],
-        overallRiskLevel: newDoc.final?.overallRisk === "alto" ? "high" : newDoc.final?.overallRisk === "critico" ? "critical" : "medium",
+        overallRiskLevel: newDoc.signoff?.overallRisk === "alto" ? "high" : newDoc.signoff?.overallRisk === "critico" ? "critical" : "medium",
         completedAt: new Date().toISOString(),
-        nextReviewDate: newDoc.final?.nextReviewDate,
+        nextReviewDate: newDoc.signoff?.nextReviewDate,
       });
     }
 
@@ -757,6 +778,7 @@ export default function RiskManagerPage() {
           </div>
 
           <div style={{ flex: 1, overflowY: "auto", padding: "10px" }}>
+            {/* 9 step numerati */}
             {PHASES.map((phase, idx) => {
               const status: PhaseStatus = completedPhases.includes(phase.id) ? "complete" : idx === currentPhaseIndex ? "active" : "pending";
               return (
@@ -767,12 +789,35 @@ export default function RiskManagerPage() {
                 />
               );
             })}
+
+            {/* Modulo condizionale GPAI — solo se tier=gpai o incorporatesGpaiModel=yes */}
+            {showGpaiModule && (
+              <>
+                <div style={{ margin: "8px 0 6px", display: "flex", alignItems: "center", gap: 6 }}>
+                  <div style={{ flex: 1, height: 1, background: "rgba(0,0,0,0.09)" }} />
+                  <span style={{ fontSize: 8.5, fontWeight: 700, color: "rgba(0,0,0,0.3)", textTransform: "uppercase", letterSpacing: "0.07em", whiteSpace: "nowrap" }}>
+                    Moduli aggiuntivi
+                  </span>
+                  <div style={{ flex: 1, height: 1, background: "rgba(0,0,0,0.09)" }} />
+                </div>
+                <PhaseRow
+                  phase={GPAI_MODULE}
+                  status={completedPhases.includes("gpai_systemic_risk") ? "complete" : currentPhaseIndex === PHASES.length && !completedPhases.includes("gpai_systemic_risk") ? "active" : "pending"}
+                  onOpen={() => openViewer(GPAI_MODULE)}
+                  hasData={!!documentation.gpai_systemic_risk}
+                />
+              </>
+            )}
           </div>
 
-          <div style={{ padding: "8px 12px", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
+          {/* Footer sidebar: verifica legale + nota Art. 99-101 (non interattiva) */}
+          <div style={{ padding: "8px 12px", borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", gap: 5 }}>
             <div style={{ display: "flex", alignItems: "flex-start", gap: 6, fontSize: 9, color: "rgba(0,0,0,0.35)" }}>
               <AlertTriangle size={10} style={{ flexShrink: 0, marginTop: 1, color: "#b45309" }} />
               <span>I campi estratti dall&apos;AI richiedono verifica legale professionale.</span>
+            </div>
+            <div style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", lineHeight: 1.4, paddingTop: 3, borderTop: "1px solid rgba(0,0,0,0.05)" }}>
+              La mancata conformità all&apos;Art. 9 può comportare sanzioni ai sensi degli artt. 99-101 [verify against current AI Act text].
             </div>
           </div>
         </div>

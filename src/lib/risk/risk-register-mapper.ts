@@ -1,6 +1,5 @@
 // Mapper: stato chat del Risk Manager → RiskRegisterDocument (sola lettura).
-// Non salva nulla: traduce i dati estratti dalla conversazione nella struttura
-// canonica del template Registro_Rischi_Template_AI_Act_Art9.docx.
+// Legge i nuovi campi post-refactor 9-step: gap_check, monitoring.reviewLog, signoff.signOff
 import type { RiskDocumentation } from "@/app/actions/riskManagerChat";
 import {
   VERIFY_NOTE_IT,
@@ -38,6 +37,8 @@ export function buildRiskRegisterDocument(
     registerOwner: idData.registerOwner,
     firstCompiledAt: undefined,
     documentVersion: "1.0",
+    incorporatesGpaiModel: idData.incorporatesGpaiModel ?? "unspecified",
+    vulnerableGroupsImpactAssessment: chatDoc.identification?.vulnerableGroupsImpactAssessment,
   };
 
   // Sezione 5 — voci strutturate; fallback dai rischi liberi (solo descrizione)
@@ -70,8 +71,8 @@ export function buildRiskRegisterDocument(
     })),
   ];
 
-  // Sezione 6 — gap check
-  const gc = chatDoc.final?.gapCheck;
+  // Sezione 6 — gap check (step 7 nuova sequenza)
+  const gc = chatDoc.gap_check;
   const gapCheck = gc
     ? {
         coverageScore: gc.coverageScore,
@@ -87,8 +88,8 @@ export function buildRiskRegisterDocument(
       }
     : undefined;
 
-  // Sezione 7 — log di revisione
-  const reviewLog = (chatDoc.governance?.reviewLog ?? [])
+  // Sezione 7 — log di revisione (da monitoring.reviewLog)
+  const reviewLog = (chatDoc.monitoring?.reviewLog ?? [])
     .filter(e => e.date || e.trigger)
     .map(e => ({
       date: e.date ?? "",
@@ -98,8 +99,8 @@ export function buildRiskRegisterDocument(
       nextReviewDate: e.nextReviewDate,
     }));
 
-  // Sezione 8 — sign-off
-  const so = chatDoc.final?.signOff;
+  // Sezione 8 — sign-off (da signoff.signOff)
+  const so = chatDoc.signoff?.signOff;
   const signOff = so
     ? {
         riskOwner:           { name: so.riskOwner?.name,           date: so.riskOwner?.date,           signed: so.riskOwner?.signed ?? false },
@@ -111,8 +112,6 @@ export function buildRiskRegisterDocument(
   return { identification, risks, gapCheck, reviewLog, signOff };
 }
 
-// Allegati tecnici: fasi della chat non coperte dal template del registro,
-// mostrate in coda al documento solo se compilate (regola n. 1).
 export interface AnnexSection {
   title: string;
   article: string;
@@ -126,9 +125,17 @@ export function buildAnnexSections(chatDoc: RiskDocumentation): AnnexSection[] {
     const fields = Object.fromEntries(Object.entries(data).filter(([, v]) => v !== undefined && v !== null && v !== ""));
     if (Object.keys(fields).length > 0) annexes.push({ title, article, fields });
   };
-  push("Analisi quantitativa (Monte Carlo)", "ENISA Guidelines", chatDoc.montecarlo as Record<string, unknown> | undefined);
-  push("Audit bitemporale", "Art. 12, 17", chatDoc.bitemporal as Record<string, unknown> | undefined);
-  push("Drift detection", "Art. 72", chatDoc.drift as Record<string, unknown> | undefined);
-  push("GPAI e rischio sistemico", "Art. 51-55", chatDoc.gpai as Record<string, unknown> | undefined);
+  push("Stima e Valutazione (uso previsto e uso improprio)", "Art. 9(2)(b) [verify against current AI Act text]", chatDoc.estimation as Record<string, unknown> | undefined);
+  push("Test e Validazione", "Art. 9(6)-(8) [verify against current AI Act text]", chatDoc.testing as Record<string, unknown> | undefined);
+  push("Misure di Gestione del Rischio", "Art. 9(2)(d), 9(4)-(5) [verify against current AI Act text]", chatDoc.mitigation as Record<string, unknown> | undefined);
+  push("Tracciabilità e Mantenimento Continuo", "Art. 9(1)-(2) [verify against current AI Act text]", chatDoc.traceability as Record<string, unknown> | undefined);
+  push("GPAI e Rischio Sistemico", "Art. 51-55 [verify against current AI Act text]", chatDoc.gpai_systemic_risk as Record<string, unknown> | undefined);
   return annexes;
+}
+
+/** Indica se il modulo GPAI condizionale deve essere mostrato in UI. */
+export function shouldShowGpaiModule(chatDoc: RiskDocumentation): boolean {
+  const tier = chatDoc.scoping?.identification?.riskTier;
+  const gpaiFlag = chatDoc.scoping?.identification?.incorporatesGpaiModel;
+  return tier === "gpai" || gpaiFlag === "yes";
 }

@@ -31,6 +31,8 @@ const ID_LABELS: Array<[keyof RiskRegisterDocument["identification"], string]> =
   ["legalBasis", "Base giuridica"],
   ["humanOversightRequired", "Supervisione umana richiesta (Art. 14)"],
   ["registerOwner", "Responsabile del registro (risk owner)"],
+  // Art. 9(9) — mostrato solo se compilato, con citazione esplicita
+  ["vulnerableGroupsImpactAssessment", "Impatto su minori e gruppi vulnerabili (Art. 9(9))"],
 ];
 
 const STATUS_LABELS: Record<string, string> = {
