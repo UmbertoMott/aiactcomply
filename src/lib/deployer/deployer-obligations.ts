@@ -62,12 +62,12 @@ export const DEPLOYER_OBLIGATIONS: readonly DeployerObligationDefinition[] = [
     id: "D-03",
     label: "Supervisione umana",
     description:
-      "Assegnare personale qualificato per la supervisione umana del sistema AI durante il funzionamento, con competenze tecniche adeguate.",
+      "Assegnare personale qualificato per la supervisione umana del sistema AI durante il funzionamento, con competenze tecniche adeguate — in conformità ai 5 requisiti operativi Art. 14(4)(a)-(e) [verificare sul testo AI Act vigente].",
     primaryReference: "Art. 26(5) AI Act [verificare sul testo AI Act vigente]",
-    supportReferences: ["Art. 14"],
+    supportReferences: ["Art. 14(4)(a)-(e) [verificare sul testo AI Act vigente]"],
     alwaysApplicable: true,
     evidenceType: "person_assignment",
-    linkedTool: null,
+    linkedTool: "/dashboard/tools/oversight",
   },
   {
     id: "D-04",
