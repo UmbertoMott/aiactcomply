@@ -90,6 +90,14 @@ const PILLARS: NavPillar[] = [
     art: "Art. 10",
   },
   {
+    id: "deployer",
+    icon: UserCheck,
+    label: "Deployer Dashboard",
+    href: "/dashboard/tools/deployer-dashboard",
+    art: "Art. 26",
+    badge: "new" as const,
+  },
+  {
     id: "compliance",
     icon: Scale,
     label: "Compliance Ops",
