@@ -42,15 +42,15 @@ interface Phase {
 // 9 step numerati 1-9 (fonte: PARTE 0 del prompt di refactoring).
 // Il modulo condizionale gpai_systemic_risk NON è in questo array.
 const PHASES: Phase[] = [
-  { id: "scoping",        label: "1. Scoping — Ambito e contesto",                        subtitle: "Ambito e contesto",                     article: "Art. 9(1) [verify against current AI Act text]",                    supportRef: "Art. 6, Allegato III [verify against current AI Act text]",        docSection: "Sez. 3" },
-  { id: "identification", label: "2. Identificazione Rischi",                              subtitle: "incl. minori e gruppi vulnerabili",      article: "Art. 9(2)(a) [verify against current AI Act text]",                 supportRef: "Art. 9(9) [verify against current AI Act text]",                   docSection: "Sez. 5" },
-  { id: "estimation",     label: "3. Stima e Valutazione",                                 subtitle: "uso previsto e uso improprio",           article: "Art. 9(2)(b) [verify against current AI Act text]",                 docSection: "Sez. 5" },
-  { id: "testing",        label: "4. Test e Validazione — metriche e soglie",              subtitle: "metriche e soglie",                     article: "Art. 9(6)-(8) [verify against current AI Act text]",                docSection: "Sez. 4" },
-  { id: "mitigation",     label: "5. Misure di Gestione del Rischio",                      subtitle: "e Rischio Residuo",                     article: "Art. 9(2)(d), 9(4)-(5) [verify against current AI Act text]",      supportRef: "Art. 13 [verify against current AI Act text]",                     docSection: "Sez. 5 + 6" },
-  { id: "monitoring",     label: "6. Monitoraggio Post-Market",                            subtitle: "e Drift Detection",                     article: "Art. 9(2)(c) [verify against current AI Act text]",                 supportRef: "Art. 72 [verify against current AI Act text]",                     docSection: "Sez. 7" },
-  { id: "gap_check",      label: "7. Verifica di Copertura — Gap Check Art. 9",            subtitle: "Gap Check Art. 9",                      article: "Art. 9(2)(a)-(d), 9(6)-(8), 9(9) [verify against current AI Act text]", docSection: "Sez. 6" },
-  { id: "traceability",   label: "8. Tracciabilità e Mantenimento Continuo",               subtitle: "versionamento e audit log",             article: "Art. 9(1)-(2) [verify against current AI Act text]",                supportRef: "Art. 12, 17 [verify against current AI Act text]",                 docSection: "(trasversale)" },
-  { id: "signoff",        label: "9. Approvazione, Firme e Finalizzazione",                subtitle: "sign-off e approvazione",               article: "Art. 9(1) [verify against current AI Act text]",                    docSection: "Sez. 8" },
+  { id: "scoping",        label: "1. Scoping",                  subtitle: "Ambito e contesto",          article: "Art. 9(1) [verify against current AI Act text]",               supportRef: "Art. 6, Allegato III [verify against current AI Act text]",   docSection: "Sez. 3" },
+  { id: "identification", label: "2. Identificazione Rischi",   subtitle: "incl. minori e vulnerabili", article: "Art. 9(2)(a) [verify against current AI Act text]",            supportRef: "Art. 9(9) [verify against current AI Act text]",              docSection: "Sez. 5" },
+  { id: "estimation",     label: "3. Stima e Valutazione",      subtitle: "uso previsto / improprio",   article: "Art. 9(2)(b) [verify against current AI Act text]",            docSection: "Sez. 5" },
+  { id: "testing",        label: "4. Test e Validazione",       subtitle: "metriche e soglie",          article: "Art. 9(6)-(8) [verify against current AI Act text]",           docSection: "Sez. 4" },
+  { id: "mitigation",     label: "5. Misure di Gestione",       subtitle: "rischio residuo",            article: "Art. 9(2)(d), 9(4)-(5) [verify against current AI Act text]", supportRef: "Art. 13 [verify against current AI Act text]",                docSection: "Sez. 5 + 6" },
+  { id: "monitoring",     label: "6. Monitoraggio Post-Market", subtitle: "drift detection",            article: "Art. 9(2)(c) [verify against current AI Act text]",            supportRef: "Art. 72 [verify against current AI Act text]",                docSection: "Sez. 7" },
+  { id: "gap_check",      label: "7. Gap Check Art. 9",         subtitle: "verifica di copertura",      article: "Art. 9(2)(a)-(d), 9(6)-(9) [verify against current AI Act text]", docSection: "Sez. 6" },
+  { id: "traceability",   label: "8. Tracciabilità",            subtitle: "versionamento e audit log",  article: "Art. 9(1)-(2) [verify against current AI Act text]",           supportRef: "Art. 12, 17 [verify against current AI Act text]",            docSection: "(trasversale)" },
+  { id: "signoff",        label: "9. Approvazione e Firme",     subtitle: "sign-off finale",            article: "Art. 9(1) [verify against current AI Act text]",               docSection: "Sez. 8" },
 ];
 
 // Modulo condizionale separato (non numerato, non in PHASES)
@@ -163,17 +163,25 @@ function PhaseRow({
           )}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: status === "active" ? "#0D1016" : status === "complete" ? "#15803d" : "rgba(0,0,0,0.4)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          <div style={{
+            fontSize: 11.5, fontWeight: 600,
+            fontFamily: "var(--font-inter, system-ui)",
+            color: status === "complete" ? "#15803d" : "#0D1016",
+            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          }}>
             {phase.label}
           </div>
-          <div style={{ fontSize: 10, color: "rgba(0,0,0,0.3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          <div style={{
+            fontSize: 10, fontFamily: "var(--font-inter, system-ui)",
+            color: "rgba(0,0,0,0.4)",
+            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          }}>
             {phase.subtitle}
           </div>
         </div>
-        <div style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 4 }}>
-          <span style={{ fontSize: 9, color: "rgba(0,0,0,0.25)", fontFamily: "monospace" }}>{phase.article}</span>
-          {hasData && <ChevronRight size={11} style={{ color: "rgba(0,0,0,0.25)" }} />}
-        </div>
+        {hasData && (
+          <ChevronRight size={11} style={{ flexShrink: 0, color: "rgba(0,0,0,0.25)" }} />
+        )}
       </button>
     </div>
   );
