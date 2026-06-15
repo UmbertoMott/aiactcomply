@@ -62,10 +62,10 @@ export const PROHIBITED_CHECKS: ProhibitedCheck[] = [
   },
   {
     id: "emotion_recognition",
-    article: "Art. 5.1.f",
+    article: "Art. 5(1)(f) [verify against current AI Act text]",
     title: "Riconoscimento emozioni lavoro/scuola",
     description:
-      "Sistemi di riconoscimento delle emozioni nei luoghi di lavoro o negli istituti di istruzione, salvo per motivi di sicurezza o medici.",
+      "Sistemi che inferiscono le emozioni di una persona fisica nei luoghi di lavoro e negli istituti di istruzione, salvo per motivi medici o di sicurezza. [verify against current AI Act text]",
     question:
       "Il tuo sistema rileva, classifica o inferisce lo stato emotivo di dipendenti (in ufficio, da remoto, in magazzino) o di studenti durante lezioni o esami?",
     exampleSystems: [
@@ -74,26 +74,28 @@ export const PROHIBITED_CHECKS: ProhibitedCheck[] = [
       "Tool HR che analizzano emozioni nelle video-interviste per la selezione",
     ],
     exceptions: [
-      "Motivi di sicurezza sul lavoro (es. rilevamento fatica in conducenti)",
-      "Scopi medici o terapeutici con consenso esplicito",
+      "Uso per motivi medici o di sicurezza [verify against current AI Act text]",
     ],
     severity: "conditional",
   },
   {
     id: "biometric_categorization",
-    article: "Art. 5.1.e",
-    title: "Categorizzazione biometrica",
+    article: "Art. 5(1)(g) [verify against current AI Act text]",
+    title: "Categorizzazione biometrica — attributi sensibili",
     description:
-      "Sistemi che classificano individualmente le persone in base a dati biometrici per inferire razza, opinioni politiche, fede religiosa, orientamento sessuale o altri attributi sensibili.",
+      "Sistemi di categorizzazione biometrica che classificano individualmente le persone fisiche sulla base di dati biometrici per dedurre o inferire razza, opinioni politiche, appartenenza sindacale, convinzioni religiose o filosofiche, vita sessuale o orientamento sessuale. [verify against current AI Act text]",
     question:
-      "Il tuo sistema usa dati biometrici (volto, voce, andatura, iride) per classificare le persone in base a etnia, religione, orientamento sessuale, opinioni politiche o sindacali?",
+      "Il tuo sistema usa dati biometrici (volto, voce, andatura, iride) per classificare individualmente le persone in base a etnia, religione, orientamento sessuale, opinioni politiche o sindacali?",
     exampleSystems: [
       "Sistemi di analisi del volto per inferire etnia a fini di targeting pubblicitario",
       "Tool di voice analysis per rilevare accento e inferire nazionalità",
       "Algoritmi che categorizzano persone per orientamento sessuale da immagini",
     ],
-    exceptions: [],
-    severity: "absolute",
+    exceptions: [
+      "Labelling/filtering di dataset biometrici lecitamente acquisiti, senza categorizzazione individuale di persone [verify against current AI Act text]",
+      "Categorizzazione biometrica nell'ambito di attività di contrasto (law enforcement) [verify against current AI Act text]",
+    ],
+    severity: "conditional",
   },
   {
     id: "criminal_prediction",
