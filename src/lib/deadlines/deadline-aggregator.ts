@@ -102,6 +102,68 @@ export function buildIncidentNotificationDeadline(system: AISystem, incident: In
   };
 }
 
+// buildProviderTransitionDeadline: exported — Art. 28 [verify against current AI Act text]
+export function buildProviderTransitionDeadline(
+  system: AISystem,
+  appliesTo: AIActTier[],
+): AIActDeadline | null {
+  // Reads the real modification registry to find the earliest substantial modification date
+  let earliestSubstDate: string | undefined;
+  let verdict: string | undefined;
+  try {
+    if (typeof window !== "undefined") {
+      const modsRaw = localStorage.getItem("provider_transition_modifications");
+      if (modsRaw) {
+        const mods = JSON.parse(modsRaw) as { date: string; is_substantial: boolean | null }[];
+        const substDates = mods
+          .filter(m => m.is_substantial === true)
+          .map(m => m.date)
+          .sort();
+        earliestSubstDate = substDates[0];
+      }
+      const answersRaw = localStorage.getItem("provider_transition_answers");
+      if (answersRaw) {
+        const answers = JSON.parse(answersRaw) as Record<string, string | null>;
+        const triggered = ["own_name","purpose_change","retraining","performance_impact","safety_degradation"]
+          .some(k => answers[k] === "yes");
+        const maintenance = answers["ordinary_maintenance"] === "yes";
+        if (triggered && !maintenance) verdict = "provider";
+        else if (triggered || Object.values(answers).some(v => v === "unsure")) verdict = "risk";
+        else verdict = "deployer";
+      }
+    }
+    // Also check legacy dualRoleFlag + deployer record
+    if (!verdict || verdict === "deployer") {
+      const deployerRaw = typeof window !== "undefined" ? localStorage.getItem("aicomply_deployer_record_v1") : null;
+      const deployerRec = deployerRaw ? JSON.parse(deployerRaw) as Record<string, unknown> : null;
+      const hasSubstantialMod = system.dualRoleFlag || Boolean(deployerRec?.substantialModificationFlag);
+      if (hasSubstantialMod && !verdict) verdict = "risk";
+    }
+  } catch { /* silent */ }
+
+  if (!verdict || verdict === "deployer") return null;
+
+  // Use earliest substantial modification date + 30 days as deadline, else 30 days from today
+  const baseDate = earliestSubstDate ?? new Date().toISOString().slice(0, 10);
+  const deadline = addDays(baseDate, 30);
+
+  return {
+    id: `provider_transition_${system.id}`,
+    date: deadline,
+    label: `Provider Transition — ${system.name}`,
+    description: verdict === "provider"
+      ? `Modifica sostanziale confermata per "${system.name}": obblighi da provider in vigore (Art. 28). Prima modifica sostanziale: ${earliestSubstDate ?? "non registrata"}. Completare le obbligazioni nel tool. [verify against current AI Act text]`
+      : `Modifica sostanziale potenziale per "${system.name}": richiesta valutazione legale per determinare obblighi da provider (Art. 28). [verify against current AI Act text]`,
+    article: "Art. 28 [verify against current AI Act text]",
+    applies_to: appliesTo.length ? appliesTo : (["high_risk_annex3"] as AIActTier[]),
+    tool_href: "/dashboard/compliance-ops/provider-transition",
+    severity: verdict === "provider" ? "critical" : "important",
+    isDynamic: true,
+    sourceSystemId: system.id,
+    sourceSystemName: system.name,
+  };
+}
+
 export function buildDynamicDeadlines(systems: AISystem[]): AIActDeadline[] {
   const dynamic: AIActDeadline[] = [];
 
@@ -147,25 +209,8 @@ export function buildDynamicDeadlines(systems: AISystem[]): AIActDeadline[] {
     }
 
     // 4. Provider Transition: valutazione obblighi da provider (Art. 28)
-    const deployerRaw = typeof window !== "undefined" ? localStorage.getItem(`aicomply_deployer_record_v1`) : null;
-    const deployerRec = deployerRaw ? (() => { try { return JSON.parse(deployerRaw); } catch { return null; } })() : null;
-    const hasSubstantialMod = system.dualRoleFlag || deployerRec?.substantialModificationFlag;
-
-    if (hasSubstantialMod) {
-      dynamic.push({
-        id: `provider_transition_${system.id}`,
-        date: addDays(new Date().toISOString().slice(0, 10), 30),
-        label: `Provider Transition — ${system.name}`,
-        description: `Modifica sostanziale rilevata per il sistema "${system.name}": valutare se scattano obblighi da provider (Art. 28). Termine operativo stimato 30gg — verificare con team legale [verify against current AI Act text].`,
-        article: "Art. 28 [verify against current AI Act text]",
-        applies_to: appliesTo,
-        tool_href: "/dashboard/tools/provider-transition",
-        severity: "important",
-        isDynamic: true,
-        sourceSystemId: system.id,
-        sourceSystemName: system.name,
-      });
-    }
+    const ptDeadline = buildProviderTransitionDeadline(system, appliesTo);
+    if (ptDeadline) dynamic.push(ptDeadline);
 
     // 5. FRIA/DPIA review cycle da Risk Manager
     if (system.nextReview) {

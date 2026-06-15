@@ -2,6 +2,7 @@
 export const maxDuration = 60;
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import ProviderTransitionAlertBanner from "@/components/shared/provider-transition-alert-banner";
 import {
   Shield, CheckCircle, Clock, Send, Download, RotateCcw,
   ChevronRight, AlertTriangle, Loader2, Play, Pause,
@@ -738,6 +739,7 @@ export default function RiskManagerPage() {
   return (
     <div style={{ fontFamily: "var(--font-inter, system-ui)", background: "#ffffff", height: "calc(100vh - 4rem)", display: "flex", flexDirection: "column" }}>
       <SystemContextBanner />
+      <ProviderTransitionAlertBanner />
 
       {/* Header */}
       <div style={{ paddingBottom: 16 }}>

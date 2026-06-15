@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
+import ProviderTransitionAlertBanner from "@/components/shared/provider-transition-alert-banner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { loadInventory, type AISystem } from "@/lib/inventory/ai-system";
@@ -88,6 +89,7 @@ export default function DeployerDashboardPage() {
 
   return (
     <div className="min-h-screen p-6 max-w-5xl mx-auto" style={{ ...FONT, color: "#0D1016" }}>
+      <ProviderTransitionAlertBanner />
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>

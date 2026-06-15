@@ -108,7 +108,7 @@ const PILLARS: NavPillar[] = [
       { icon: TrendingUp,     label: "Post-Market",         href: "/dashboard/post-market",               art: "Art. 72" },
       { icon: Database,       label: "Registrazione EUDB",  href: "/dashboard/compliance-ops/eudb",       art: "Art. 49" },
       { icon: UserCheck,      label: "Authorized Representative", href: "/dashboard/compliance-ops/authorized-rep", art: "Art. 22 [verify against current AI Act text]" },
-      { icon: ArrowRightLeft, label: "Provider Transition", href: "/dashboard/tools/provider-transition", art: "Art. 28" },
+      { icon: ArrowRightLeft, label: "Provider Transition", href: "/dashboard/compliance-ops/provider-transition", art: "Art. 28" },
       { icon: Building2,      label: "Trust Center",        href: "/dashboard/trust-center",              art: ""        },
       { icon: Scale,          label: "L.132/2025",          href: "/dashboard/tools/l132",                art: "PA Italy", flag: "paItaly" },
       { icon: Landmark,       label: "AGID/ACN",            href: "/dashboard/tools/agid-acn",            art: "PA Italy", flag: "paItaly" },

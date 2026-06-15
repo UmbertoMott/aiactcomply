@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import ProviderTransitionAlertBanner from "@/components/shared/provider-transition-alert-banner";
 import { motion, AnimatePresence } from "framer-motion";
 import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
 import { GitBranch, Download, ChevronRight, AlertTriangle, CheckCircle, Clock, History, ChevronDown, ChevronUp } from "lucide-react";
@@ -640,6 +641,7 @@ export default function DocuGenPage() {
     <div className="w-full" style={{ fontFamily: "var(--font-inter, system-ui)" }}>
 
       <SystemContextBanner checkProhibited={true} />
+      <ProviderTransitionAlertBanner />
 
       {/* Dossier saved banner */}
       {savedAt ? (
