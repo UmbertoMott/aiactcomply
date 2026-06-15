@@ -7,7 +7,7 @@ import {
   FileCode, Scale, ShieldAlert, BookMarked, ClipboardList, Crosshair,
   FileArchive, TrendingUp, Database, UserCheck, ArrowRightLeft, Map, Building2,
   Landmark, Zap, Menu, X, ChevronRight, ChevronLeft, ChevronDown,
-  LogOut, Settings, LayoutGrid, Siren, Home, CalendarClock,
+  LogOut, Settings, LayoutGrid, Siren, Home, CalendarClock, ShieldCheck,
 } from "lucide-react";
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { useUserRole, ROLE_LABELS } from "@/lib/hooks/useUserRole";
@@ -109,7 +109,7 @@ const PILLARS: NavPillar[] = [
       { icon: Database,       label: "Registrazione EUDB",  href: "/dashboard/compliance-ops/eudb",       art: "Art. 49" },
       { icon: UserCheck,      label: "Authorized Representative", href: "/dashboard/compliance-ops/authorized-rep", art: "Art. 22 [verify against current AI Act text]" },
       { icon: ArrowRightLeft, label: "Provider Transition", href: "/dashboard/compliance-ops/provider-transition", art: "Art. 28" },
-      { icon: Building2,      label: "Trust Center",        href: "/dashboard/trust-center",              art: ""        },
+      { icon: ShieldCheck,    label: "Trust Center",        href: "/dashboard/compliance-ops/trust-center", art: "Trasparenza [verify against current AI Act text]" },
       { icon: Scale,          label: "L.132/2025",          href: "/dashboard/tools/l132",                art: "PA Italy", flag: "paItaly" },
       { icon: Landmark,       label: "AGID/ACN",            href: "/dashboard/tools/agid-acn",            art: "PA Italy", flag: "paItaly" },
       { icon: Siren,          label: "Incident Notification", href: "/dashboard/tools/incident",          art: "Art. 73", badge: "new" },
@@ -125,6 +125,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return localStorage.getItem("sidebar_collapsed") === "true";
   });
   const [dossierPct, setDossierPct] = useState(0);
+  const [trustCenterPublished, setTrustCenterPublished] = useState(false);
   const { role } = useUserRole();
   const { profile: orgProfile } = useOrgProfile();
 
@@ -162,6 +163,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const data = aggregateDossier();
     const sections = getDossierSections(data);
     setDossierPct(getCompletionPercentage(sections));
+    // Trust Center published state
+    try {
+      const raw = localStorage.getItem("aicomply_trust_center_v1");
+      if (raw) {
+        const pages = JSON.parse(raw) as Record<string, { isPublished?: boolean }>;
+        setTrustCenterPublished(Object.values(pages).some(p => p.isPublished));
+      }
+    } catch { /* silent */ }
   }, [pathname]);
 
   const currentItem = PILLARS.flatMap((p) =>
@@ -336,11 +345,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                               <child.icon className="h-3 w-3 flex-shrink-0" />
                               {!collapsed && <span>{child.label}</span>}
                             </div>
-                            {!collapsed && child.art && (
-                              <span className="text-[9px] px-1 py-0.5 rounded"
-                                style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}>
-                                {child.art}
-                              </span>
+                            {!collapsed && (
+                              child.href === "/dashboard/compliance-ops/trust-center" && trustCenterPublished
+                                ? <span className="text-[9px] px-1 py-0.5 rounded border" style={{ background: "rgba(6,78,59,0.4)", color: "#6ee7b7", borderColor: "rgba(52,211,153,0.3)" }}>Pubblicato</span>
+                                : child.art
+                                  ? <span className="text-[9px] px-1 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}>{child.art}</span>
+                                  : null
                             )}
                           </Link>
                         );
