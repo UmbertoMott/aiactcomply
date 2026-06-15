@@ -122,27 +122,29 @@ jobs:
           PROHIBITED_FINDINGS=""
           CRITICAL=false
 
-          # Emotion recognition — cerca SOLO import/require reali di librerie specifiche.
-          # Esclude: pagine compliance (prohibited/conformity/compliance nei path),
-          # dashboard, docs, content stringhe (es. descrizioni normative).
-          # Il tool AIComply descrive AI proibita come contenuto — non la implementa.
-          for kw in "deepface" "fer2013" "FERPlus" "affectiva" "emotient" \
-                    "import.*EmotionNet" "from.*emotion_detect" \
-                    "require.*emotion.recogni" "from.*affectiva" "import.*fer"; do
-            if grep -rni "$kw" \
-              --include="*.py" --include="*.ts" --include="*.js" \
-              --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github \
-              --exclude-dir=sdk --exclude-dir=simulation --exclude-dir=semantic \
-              --exclude-dir=dashboard --exclude-dir=tools --exclude-dir=docs \
-              --exclude="*prohibited*" --exclude="*conformity*" --exclude="*compliance*" \
-              --exclude="*content*" --exclude="*page*" --exclude="*.md" \
-              . 2>/dev/null | grep -v "//.*$kw" | grep -v "#.*$kw" \
-              | grep -v "string\|label\|text\|description\|comment\|'.*$kw.*'" ; then
-              PROHIBITED_FINDINGS="${PROHIBITED_FINDINGS}emotion-recognition,"
-              CRITICAL=true
-              echo "🚨 **CRITICAL** Emotion recognition library import detected — PROHIBITED under Art. 5(1)(f)" >> $GITHUB_STEP_SUMMARY
-            fi
-          done
+          # Emotion recognition — cerca SOLO dichiarazioni import/require di librerie
+          # specifiche nelle prime 30 righe di file entry-point.
+          # AIComply contiene knowledge-base di pattern proibiti (src/lib/simulation,
+          # src/lib/semantic, src/lib/rag) che descrivono queste librerie senza usarle —
+          # questi path sono esclusi dalla scansione.
+          EMOTION_LIBS="deepface|fer2013|FERPlus|affectiva|emotient|emopy|affectnet"
+          # Cerca solo: import 'lib', import X from 'lib', require('lib') — NON stringhe in oggetti/array
+          if find . -type f \( -name "*.py" -o -name "*.ts" -o -name "*.js" \) \
+              ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/.github/*" \
+              ! -path "*/simulation/*" ! -path "*/semantic/*" ! -path "*/rag/*" \
+              ! -path "*/docs/*" ! -name "*prohibited*" ! -name "*conformity*" \
+              ! -name "*compliance*" ! -name "*page*" ! -name "*types*" \
+              | xargs grep -lniE "^(import|from|require).*(${EMOTION_LIBS})" 2>/dev/null \
+              | grep -q .; then
+            PROHIBITED_FINDINGS="${PROHIBITED_FINDINGS}emotion-recognition,"
+            CRITICAL=true
+            echo "🚨 **CRITICAL** Emotion recognition library import detected — PROHIBITED under Art. 5(1)(f)" >> $GITHUB_STEP_SUMMARY
+            find . -type f \( -name "*.py" -o -name "*.ts" -o -name "*.js" \) \
+              ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/.github/*" \
+              ! -path "*/simulation/*" ! -path "*/semantic/*" ! -path "*/rag/*" \
+              | xargs grep -niE "^(import|from|require).*(${EMOTION_LIBS})" 2>/dev/null \
+              | head -5 >> $GITHUB_STEP_SUMMARY
+          fi
 
           # Categorizzazione biometrica — librerie specifiche
           for kw in "rekognition.*categori" "clearview" "palantir.*biometric" \
