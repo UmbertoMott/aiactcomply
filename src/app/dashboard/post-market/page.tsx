@@ -19,6 +19,20 @@ import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { motion, AnimatePresence } from "framer-motion";
 import { readFromStorage } from "@/lib/dossier/storage-schema";
 import type { RiskManagerResult } from "@/lib/dossier/storage-schema";
+import {
+  loadPMMPlan,
+  savePMMPlan,
+  loadPMMReports,
+  savePMMReports,
+  computeNextReportDue,
+  ANNEX3_LAW_ENFORCEMENT_CHECKLIST,
+} from "@/lib/post-market/post-market-types";
+import type {
+  PostMarketMonitoringPlan,
+  PostMarketReport,
+  LogVaultMetricsSnapshot,
+} from "@/lib/post-market/post-market-types";
+import { proposePMMPlan, draftPostMarketReport } from "@/app/actions/postMarketActions";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -296,9 +310,19 @@ const EMPTY_FORM = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function PostMarketPage() {
-  const [tab, setTab] = useState<"incidents" | "plan">("incidents");
+  const [tab, setTab] = useState<"incidents" | "plan" | "monitoring">("incidents");
   const [incidents, setIncidents] = useState<Incident[]>(() => loadIncidents());
   const [plan, setPlan] = useState<MonitoringCheck[]>(() => loadPlan());
+
+  // ── Monitoring (Art. 72) state ─────────────────────────────────────────────
+  const [pmmPlan, setPmmPlan] = useState<PostMarketMonitoringPlan>(() => loadPMMPlan());
+  const [pmmReports, setPmmReports] = useState<PostMarketReport[]>(() => loadPMMReports());
+  const [pmmAiLoading, setPmmAiLoading] = useState(false);
+  const [pmmAiError, setPmmAiError] = useState<string | null>(null);
+  const [reportDraftLoading, setReportDraftLoading] = useState(false);
+  const [reportDraftError, setReportDraftError] = useState<string | null>(null);
+  const [draftReport, setDraftReport] = useState<PostMarketReport | null>(null);
+  const [showDraftModal, setShowDraftModal] = useState(false);
   const [selected, setSelected] = useState<Incident | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [showNotifyModal, setShowNotifyModal] = useState(false);
@@ -621,6 +645,7 @@ export default function PostMarketPage() {
             badge: activeIncidents.length,
           },
           { id: "plan" as const, label: "Piano Art. 72", Icon: ClipboardList, badge: 0 },
+          { id: "monitoring" as const, label: "Monitoraggio (Art. 72)", Icon: FileText, badge: 0 },
         ].map(({ id, label, Icon, badge }) => (
           <button
             key={id}
@@ -1728,6 +1753,518 @@ export default function PostMarketPage() {
                   style={{ background: "#15803d", border: "none", cursor: "pointer" }}
                 >
                   <CheckCircle className="h-3.5 w-3.5" /> Conferma notifica inviata
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── TAB 3: Monitoraggio (Art. 72) ── */}
+      {tab === "monitoring" && (
+        <div className="space-y-5">
+          {/* AI disclaimer */}
+          <div
+            className="flex items-start gap-2 rounded-lg px-3 py-2"
+            style={{ background: "rgba(245,158,11,0.07)", border: "1px solid rgba(245,158,11,0.2)" }}
+          >
+            <span className="text-[10px] font-semibold mt-0.5" style={{ color: "#92400e" }}>✦ AI</span>
+            <p className="text-[11px]" style={{ color: "#92400e" }}>
+              Le proposte AI sono bozze da verificare. Obblighi Art. 72 ricostruiti dalla memoria del modello — verificare contro testo consolidato Reg. (UE) 2024/1689. [verify against current AI Act text]
+            </p>
+          </div>
+
+          {/* PMM Plan editor */}
+          <div
+            className="rounded-xl overflow-hidden"
+            style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#fff" }}
+          >
+            <div
+              className="flex items-center justify-between px-5 py-3.5"
+              style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+            >
+              <div>
+                <span className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
+                  Piano di Monitoraggio Post-Market
+                </span>
+                <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.4)" }}>
+                  Art. 72(1) — sistema ad alto rischio [verify against current AI Act text]
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  disabled={pmmAiLoading}
+                  onClick={async () => {
+                    setPmmAiLoading(true);
+                    setPmmAiError(null);
+                    try {
+                      const riskRaw = localStorage.getItem("aicomply_risk_register_v1");
+                      const riskRec = riskRaw ? JSON.parse(riskRaw) : null;
+                      const result = await proposePMMPlan({
+                        systemName: riskRec?.systemName ?? "Sistema AI",
+                        systemRole: riskRec?.systemRole ?? "non specificato",
+                        tier: riskRec?.tier ?? "high_risk",
+                        riskLevel: riskRec?.overallRisk,
+                      });
+                      setPmmPlan((p) => ({
+                        ...p,
+                        pmmSystemDescription: result.pmmSystemDescription,
+                        monitoringMethodology: result.monitoringMethodology,
+                        dataCollectionFrequency: result.dataCollectionFrequency,
+                        aiConfirmed: false,
+                      }));
+                    } catch (e) {
+                      setPmmAiError(e instanceof Error ? e.message : "Errore AI");
+                    } finally {
+                      setPmmAiLoading(false);
+                    }
+                  }}
+                  className="flex items-center gap-1 text-[10px] font-semibold rounded-lg px-3 py-1.5"
+                  style={{
+                    background: pmmAiLoading ? "rgba(0,0,0,0.05)" : "rgba(245,158,11,0.1)",
+                    color: "#92400e",
+                    border: "1px solid rgba(245,158,11,0.25)",
+                    cursor: pmmAiLoading ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {pmmAiLoading ? "..." : "✦ Proponi piano AI"}
+                </button>
+                <button
+                  onClick={() => {
+                    savePMMPlan(pmmPlan);
+                    showToastMsg("✓ Piano salvato");
+                  }}
+                  className="flex items-center gap-1 text-[10px] font-semibold rounded-lg px-3 py-1.5"
+                  style={{ background: "#0D1016", color: "#fff", border: "none", cursor: "pointer" }}
+                >
+                  Salva piano
+                </button>
+              </div>
+            </div>
+
+            <div className="p-5 space-y-4">
+              {pmmAiError && (
+                <p className="text-[11px] rounded-lg px-3 py-2" style={{ background: "rgba(220,38,38,0.06)", color: "#b91c1c", border: "1px solid rgba(220,38,38,0.15)" }}>
+                  {pmmAiError}
+                </p>
+              )}
+              {!pmmPlan.aiConfirmed && (pmmPlan.pmmSystemDescription || pmmPlan.monitoringMethodology) && (
+                <div
+                  className="flex items-center justify-between rounded-lg px-3 py-2"
+                  style={{ background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.2)" }}
+                >
+                  <span className="text-[11px] font-medium" style={{ color: "#92400e" }}>
+                    ✦ AI — bozza non confermata. Revisiona e conferma.
+                  </span>
+                  <button
+                    onClick={() => {
+                      const confirmed = { ...pmmPlan, aiConfirmed: true };
+                      setPmmPlan(confirmed);
+                      savePMMPlan(confirmed);
+                      showToastMsg("✓ Piano confermato");
+                    }}
+                    className="text-[10px] font-semibold rounded px-2 py-1"
+                    style={{ background: "#92400e", color: "#fff", border: "none", cursor: "pointer" }}
+                  >
+                    Conferma piano
+                  </button>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
+                    Descrizione sistema (PMM)
+                  </label>
+                  <textarea
+                    rows={3}
+                    className="w-full rounded-lg text-[12px] p-2 resize-none focus:outline-none"
+                    style={{ border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", background: "#fff" }}
+                    value={pmmPlan.pmmSystemDescription}
+                    onChange={(e) => setPmmPlan((p) => ({ ...p, pmmSystemDescription: e.target.value, aiConfirmed: false }))}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
+                    Metodologia di monitoraggio
+                  </label>
+                  <textarea
+                    rows={3}
+                    className="w-full rounded-lg text-[12px] p-2 resize-none focus:outline-none"
+                    style={{ border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", background: "#fff" }}
+                    value={pmmPlan.monitoringMethodology}
+                    onChange={(e) => setPmmPlan((p) => ({ ...p, monitoringMethodology: e.target.value, aiConfirmed: false }))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
+                    Frequenza raccolta dati
+                  </label>
+                  <select
+                    className="w-full rounded-lg text-[12px] p-2 focus:outline-none"
+                    style={{ border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", background: "#fff", cursor: "pointer" }}
+                    value={pmmPlan.dataCollectionFrequency}
+                    onChange={(e) => {
+                      const freq = e.target.value as PostMarketMonitoringPlan["dataCollectionFrequency"];
+                      const nextDue = pmmPlan.inServiceDate ? computeNextReportDue(pmmPlan.inServiceDate, freq) : undefined;
+                      setPmmPlan((p) => ({ ...p, dataCollectionFrequency: freq, nextReportDueDate: nextDue, aiConfirmed: false }));
+                    }}
+                  >
+                    <option value="continuous">Continua</option>
+                    <option value="monthly">Mensile</option>
+                    <option value="quarterly">Trimestrale</option>
+                    <option value="annual">Annuale</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
+                    Data messa in servizio
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full rounded-lg text-[12px] p-2 focus:outline-none"
+                    style={{ border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", background: "#fff" }}
+                    value={pmmPlan.inServiceDate ?? ""}
+                    onChange={(e) => {
+                      const d = e.target.value;
+                      const nextDue = d ? computeNextReportDue(d, pmmPlan.dataCollectionFrequency) : undefined;
+                      setPmmPlan((p) => ({ ...p, inServiceDate: d || undefined, nextReportDueDate: nextDue, aiConfirmed: false }));
+                    }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
+                    Prossimo report previsto
+                  </label>
+                  <input
+                    type="date"
+                    readOnly
+                    className="w-full rounded-lg text-[12px] p-2 focus:outline-none"
+                    style={{ border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", background: "rgba(0,0,0,0.02)" }}
+                    value={pmmPlan.nextReportDueDate ?? ""}
+                  />
+                </div>
+              </div>
+
+              {/* Annex III checklist (law enforcement) */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <label className="text-[10px] font-medium" style={{ color: "rgba(0,0,0,0.45)" }}>
+                    Sistema Annex III (law enforcement / migrazione)?
+                  </label>
+                  <input
+                    type="checkbox"
+                    checked={pmmPlan.isAnnex3LawEnforcement ?? false}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setPmmPlan((p) => ({
+                        ...p,
+                        isAnnex3LawEnforcement: checked,
+                        annex3LawEnforcementChecklist: checked
+                          ? (p.annex3LawEnforcementChecklist ?? ANNEX3_LAW_ENFORCEMENT_CHECKLIST)
+                          : undefined,
+                        aiConfirmed: false,
+                      }));
+                    }}
+                    style={{ accentColor: "#0D1016" }}
+                  />
+                </div>
+                {pmmPlan.isAnnex3LawEnforcement && pmmPlan.annex3LawEnforcementChecklist && (
+                  <div className="space-y-2 rounded-lg p-3" style={{ background: "rgba(220,38,38,0.04)", border: "1px solid rgba(220,38,38,0.12)" }}>
+                    <p className="text-[10px] font-semibold mb-2" style={{ color: "#b91c1c" }}>
+                      Checklist aggiuntiva — Annex III law enforcement [verify against current AI Act text]
+                    </p>
+                    {pmmPlan.annex3LawEnforcementChecklist.map((item) => (
+                      <label key={item.id} className="flex items-start gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={item.completed}
+                          onChange={() => {
+                            const updated = pmmPlan.annex3LawEnforcementChecklist!.map((c) =>
+                              c.id === item.id ? { ...c, completed: !c.completed } : c
+                            );
+                            setPmmPlan((p) => ({ ...p, annex3LawEnforcementChecklist: updated, aiConfirmed: false }));
+                          }}
+                          style={{ accentColor: "#b91c1c", marginTop: "2px", flexShrink: 0 }}
+                        />
+                        <div>
+                          <p className="text-[11px]" style={{ color: "#0D1016" }}>{item.label}</p>
+                          <p className="text-[9px]" style={{ color: "rgba(0,0,0,0.35)" }}>{item.reference}</p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Deployer feedback */}
+              <div>
+                <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
+                  Sintesi feedback deployer (opzionale)
+                </label>
+                <textarea
+                  rows={2}
+                  className="w-full rounded-lg text-[12px] p-2 resize-none focus:outline-none"
+                  style={{ border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", background: "#fff" }}
+                  placeholder="Segnalazioni, reclami, feedback dagli utenti del sistema..."
+                  value={pmmPlan.deployerFeedbackSummary ?? ""}
+                  onChange={(e) => setPmmPlan((p) => ({ ...p, deployerFeedbackSummary: e.target.value, aiConfirmed: false }))}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Draft Report */}
+          <div
+            className="rounded-xl overflow-hidden"
+            style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#fff" }}
+          >
+            <div
+              className="flex items-center justify-between px-5 py-3.5"
+              style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+            >
+              <div>
+                <span className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
+                  Report di monitoraggio
+                </span>
+                <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.4)" }}>
+                  Art. 72(4) — bozza AI poi confermata dal compliance officer [verify against current AI Act text]
+                </p>
+              </div>
+              <button
+                disabled={reportDraftLoading}
+                onClick={async () => {
+                  setReportDraftLoading(true);
+                  setReportDraftError(null);
+                  try {
+                    const today = new Date().toISOString().slice(0, 10);
+                    const periodStart = pmmPlan.inServiceDate ?? new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+                    const metricsSnapshot: LogVaultMetricsSnapshot = {
+                      periodStart,
+                      periodEnd: today,
+                      totalEvents: 0,
+                      hasRealData: false,
+                    };
+                    const result = await draftPostMarketReport(pmmPlan, metricsSnapshot);
+                    const newReport: PostMarketReport = {
+                      id: "RPT-" + Date.now(),
+                      systemId: pmmPlan.systemId,
+                      periodStart,
+                      periodEnd: today,
+                      metricsSnapshot,
+                      narrative: result.narrative,
+                      flaggedAnomalies: result.flaggedAnomalies,
+                      aiConfirmed: false,
+                      createdAt: new Date().toISOString(),
+                    };
+                    setDraftReport(newReport);
+                    setShowDraftModal(true);
+                  } catch (e) {
+                    setReportDraftError(e instanceof Error ? e.message : "Errore AI");
+                  } finally {
+                    setReportDraftLoading(false);
+                  }
+                }}
+                className="flex items-center gap-1 text-[11px] font-semibold rounded-lg px-3 py-1.5"
+                style={{
+                  background: reportDraftLoading ? "rgba(0,0,0,0.05)" : "rgba(245,158,11,0.1)",
+                  color: "#92400e",
+                  border: "1px solid rgba(245,158,11,0.25)",
+                  cursor: reportDraftLoading ? "not-allowed" : "pointer",
+                }}
+              >
+                {reportDraftLoading ? "..." : "✦ Genera bozza report AI"}
+              </button>
+            </div>
+
+            {reportDraftError && (
+              <div className="px-5 py-3">
+                <p className="text-[11px] rounded-lg px-3 py-2" style={{ background: "rgba(220,38,38,0.06)", color: "#b91c1c", border: "1px solid rgba(220,38,38,0.15)" }}>
+                  {reportDraftError}
+                </p>
+              </div>
+            )}
+
+            {pmmReports.length === 0 ? (
+              <div className="px-5 py-8 text-center">
+                <FileText className="h-8 w-8 mx-auto mb-2" style={{ color: "rgba(0,0,0,0.15)" }} />
+                <p className="text-[12px]" style={{ color: "rgba(0,0,0,0.35)" }}>
+                  Nessun report salvato. Genera la prima bozza con il copilot AI.
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
+                {pmmReports.map((rpt) => (
+                  <div key={rpt.id} className="flex items-start gap-3 px-5 py-4">
+                    <div
+                      className="rounded-full h-2 w-2 mt-2 flex-shrink-0"
+                      style={{ background: rpt.aiConfirmed ? "#15803d" : "#d97706" }}
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[12px] font-medium" style={{ color: "#0D1016" }}>{rpt.id}</span>
+                        <span className="text-[9px] rounded-full px-2 py-0.5 font-medium" style={{
+                          background: rpt.aiConfirmed ? "rgba(21,128,61,0.08)" : "rgba(245,158,11,0.08)",
+                          color: rpt.aiConfirmed ? "#15803d" : "#92400e",
+                          border: `1px solid ${rpt.aiConfirmed ? "rgba(21,128,61,0.2)" : "rgba(245,158,11,0.2)"}`,
+                        }}>
+                          {rpt.aiConfirmed ? "Confermato" : "✦ AI — in attesa"}
+                        </span>
+                      </div>
+                      <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.4)" }}>
+                        {rpt.periodStart} → {rpt.periodEnd} · {rpt.flaggedAnomalies.length} anomali{rpt.flaggedAnomalies.length === 1 ? "a" : "e"}
+                      </p>
+                      <p className="text-[11px] mt-1 line-clamp-2" style={{ color: "rgba(0,0,0,0.6)" }}>
+                        {rpt.narrative}
+                      </p>
+                      {rpt.flaggedAnomalies.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {rpt.flaggedAnomalies.map((a, i) => (
+                            <span key={i} className="text-[9px] rounded px-1.5 py-0.5" style={{
+                              background: a.severity === "high" ? "rgba(220,38,38,0.07)" : "rgba(245,158,11,0.07)",
+                              color: a.severity === "high" ? "#b91c1c" : "#92400e",
+                              border: `1px solid ${a.severity === "high" ? "rgba(220,38,38,0.15)" : "rgba(245,158,11,0.15)"}`,
+                            }}>
+                              {a.metric}{a.riskRegisterRef ? ` · ${a.riskRegisterRef}` : ""}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    {!rpt.aiConfirmed && (
+                      <button
+                        onClick={() => {
+                          const updated = pmmReports.map((r) =>
+                            r.id === rpt.id ? { ...r, aiConfirmed: true } : r
+                          );
+                          setPmmReports(updated);
+                          savePMMReports(updated);
+                          void appendEvidence(
+                            "monitoring",
+                            { reportId: rpt.id, periodStart: rpt.periodStart, periodEnd: rpt.periodEnd, confirmed: true },
+                            "post-market-monitoring"
+                          );
+                          showToastMsg("✓ Report confermato e registrato nell'Evidence Layer");
+                        }}
+                        className="text-[10px] font-semibold rounded px-2 py-1 flex-shrink-0"
+                        style={{ background: "#15803d", color: "#fff", border: "none", cursor: "pointer" }}
+                      >
+                        Conferma
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Draft report modal */}
+      <AnimatePresence>
+        {showDraftModal && draftReport && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            style={{ background: "rgba(0,0,0,0.35)", backdropFilter: "blur(4px)" }}
+          >
+            <motion.div
+              initial={{ scale: 0.96, y: 10 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.96, y: 10 }}
+              transition={{ duration: 0.14 }}
+              className="rounded-2xl w-full max-w-xl mx-4"
+              style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", maxHeight: "80vh", overflowY: "auto" }}
+            >
+              <div
+                className="flex items-start justify-between px-6 py-4"
+                style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}
+              >
+                <div>
+                  <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
+                    Bozza report: {draftReport.id}
+                  </p>
+                  <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.4)" }}>
+                    ✦ AI — verifica e conferma finché aiConfirmed !== true [verify against current AI Act text]
+                  </p>
+                </div>
+                <button onClick={() => setShowDraftModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(0,0,0,0.35)" }}>
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="px-6 py-4 space-y-4">
+                <div>
+                  <p className="text-[10px] font-semibold mb-1.5" style={{ color: "rgba(0,0,0,0.45)" }}>NARRATIVA</p>
+                  <p className="text-[12px] leading-relaxed" style={{ color: "#0D1016" }}>{draftReport.narrative}</p>
+                </div>
+                {draftReport.flaggedAnomalies.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-semibold mb-1.5" style={{ color: "rgba(0,0,0,0.45)" }}>ANOMALIE SEGNALATE</p>
+                    <div className="space-y-2">
+                      {draftReport.flaggedAnomalies.map((a, i) => (
+                        <div key={i} className="rounded-lg px-3 py-2" style={{
+                          background: a.severity === "high" ? "rgba(220,38,38,0.05)" : "rgba(245,158,11,0.05)",
+                          border: `1px solid ${a.severity === "high" ? "rgba(220,38,38,0.15)" : "rgba(245,158,11,0.15)"}`,
+                        }}>
+                          <p className="text-[11px] font-medium" style={{ color: a.severity === "high" ? "#b91c1c" : "#92400e" }}>{a.metric}</p>
+                          <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.6)" }}>{a.description}</p>
+                          {a.riskRegisterRef && (
+                            <p className="text-[9px] mt-0.5" style={{ color: "rgba(0,0,0,0.4)" }}>Risk Register: {a.riskRegisterRef}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div
+                className="px-6 py-4 flex gap-2 justify-end"
+                style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}
+              >
+                <button
+                  onClick={() => setShowDraftModal(false)}
+                  className="text-[11px] font-medium rounded-lg px-3 py-2"
+                  style={{ border: "1px solid rgba(0,0,0,0.12)", color: "rgba(0,0,0,0.55)", background: "none", cursor: "pointer" }}
+                >
+                  Annulla
+                </button>
+                <button
+                  onClick={() => {
+                    const confirmed = { ...draftReport, aiConfirmed: true };
+                    const updated = [...pmmReports, confirmed];
+                    setPmmReports(updated);
+                    savePMMReports(updated);
+                    setShowDraftModal(false);
+                    void appendEvidence(
+                      "monitoring",
+                      { reportId: confirmed.id, periodStart: confirmed.periodStart, periodEnd: confirmed.periodEnd, confirmed: true },
+                      "post-market-monitoring"
+                    );
+                    showToastMsg("✓ Report confermato e salvato");
+                  }}
+                  className="text-[11px] font-semibold rounded-lg px-3 py-2"
+                  style={{ background: "#15803d", color: "#fff", border: "none", cursor: "pointer" }}
+                >
+                  <CheckCircle className="h-3.5 w-3.5 inline mr-1" /> Conferma e salva
+                </button>
+                <button
+                  onClick={() => {
+                    const draft = { ...draftReport, aiConfirmed: false };
+                    const updated = [...pmmReports, draft];
+                    setPmmReports(updated);
+                    savePMMReports(updated);
+                    setShowDraftModal(false);
+                    showToastMsg("Bozza salvata — da confermare");
+                  }}
+                  className="text-[11px] font-medium rounded-lg px-3 py-2"
+                  style={{ background: "rgba(0,0,0,0.06)", color: "#0D1016", border: "none", cursor: "pointer" }}
+                >
+                  Salva come bozza
                 </button>
               </div>
             </motion.div>
