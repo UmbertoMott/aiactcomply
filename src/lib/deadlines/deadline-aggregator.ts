@@ -2,6 +2,7 @@
 // Principio: zero inserimento manuale. Date derivate da campi gia presenti negli altri moduli.
 import type { AIActDeadline, AIActTier } from "./deadline-types";
 import type { AISystem } from "@/lib/inventory/ai-system";
+import { getOpenSevereIncidentEntries, type IncidentEntry } from "@/lib/incidents/incident-actions";
 
 function isEligibleForPostMarket(system: AISystem): boolean {
   return system.tier === "high_risk" || system.tier === "gpai_systemic";
@@ -36,31 +37,25 @@ function tierToAppliesTo(tier: AISystem["tier"]): AIActTier[] {
   return map[tier] ?? ["all"];
 }
 
-export interface IncidentEntry {
-  id: string;
-  date: string;       // ISO date — data evento
-  severity: string;
-}
-
-// Legge incidenti aperti da LogVault / Risk Register (localStorage)
-function getOpenSevereIncidents(systemId: string): IncidentEntry[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem("aicomply_logvault_record_v1");
-    if (!raw) return [];
-    const rec = JSON.parse(raw);
-    const events: IncidentEntry[] = (rec.importedLogs ?? [])
-      .filter((l: { systemId?: string; severity?: string; importedAt?: string }) =>
-        (!systemId || l.systemId === systemId) &&
-        (l.severity === "high" || l.severity === "critical")
-      )
-      .map((l: { id?: string; importedAt?: string; severity?: string }) => ({
-        id: l.id ?? crypto.randomUUID(),
-        date: l.importedAt ?? new Date().toISOString().slice(0, 10),
-        severity: l.severity ?? "high",
-      }));
-    return events.slice(0, 3); // max 3 per non sovraccaricare la timeline
-  } catch { return []; }
+// buildIncidentNotificationDeadline: exported for use in per-incident deadline cards
+export function buildIncidentNotificationDeadline(system: AISystem, incident: IncidentEntry): AIActDeadline {
+  const appliesTo = tierToAppliesTo(system.tier);
+  const is2d = incident.notificationDeadlineType === "immediate_2d";
+  return {
+    id: `incident_notification_${incident.id}`,
+    date: incident.notificationDeadlineDate ?? addDays(incident.date, is2d ? 2 : 15),
+    label: `Notifica incidente grave — ${system.name}`,
+    description: incident.description ?? `Scadenza notifica incidente ${incident.id} per il sistema "${system.name}". Verificare termine esatto.`,
+    article: is2d
+      ? "Art. 73(3) [verify against current AI Act text]"
+      : "Art. 73(2) [verify against current AI Act text]",
+    applies_to: appliesTo.length ? appliesTo : ["high_risk_annex3", "high_risk_annex1", "gpai_systemic"] as AIActTier[],
+    tool_href: `/dashboard/post-market?tab=incidents&incident=${incident.id}`,
+    severity: "critical",
+    isDynamic: true,
+    sourceSystemId: system.id,
+    sourceSystemName: system.name,
+  };
 }
 
 export function buildDynamicDeadlines(systems: AISystem[]): AIActDeadline[] {
@@ -111,22 +106,10 @@ export function buildDynamicDeadlines(systems: AISystem[]): AIActDeadline[] {
       });
     }
 
-    // 3. Incident Notification: countdown 15gg da eventi gravi (Art. 73)
-    const incidents = getOpenSevereIncidents(system.id);
+    // 3. Incident Notification: scadenze calcolate dagli incidenti reali (Art. 73)
+    const incidents = getOpenSevereIncidentEntries(system.id);
     for (const incident of incidents) {
-      dynamic.push({
-        id: `incident_${system.id}_${incident.id}`,
-        date: addDays(incident.date, 15),
-        label: `Notifica incidente grave — ${system.name}`,
-        description: `Scadenza stimata notifica incidente grave per il sistema "${system.name}" (15gg dalla data evento — verificare termine esatto contro Art. 73 [verify against current AI Act text]).`,
-        article: "Art. 73 [verify against current AI Act text]",
-        applies_to: appliesTo,
-        tool_href: "/dashboard/tools/incident",
-        severity: "critical",
-        isDynamic: true,
-        sourceSystemId: system.id,
-        sourceSystemName: system.name,
-      });
+      dynamic.push(buildIncidentNotificationDeadline(system, incident));
     }
 
     // 4. Provider Transition: valutazione obblighi da provider (Art. 28)
