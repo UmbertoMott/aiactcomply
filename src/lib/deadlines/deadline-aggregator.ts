@@ -8,8 +8,52 @@ function isEligibleForPostMarket(system: AISystem): boolean {
   return system.tier === "high_risk" || system.tier === "gpai_systemic";
 }
 
-function requiresEUDBRegistration(system: AISystem): boolean {
-  return system.tier === "high_risk" || system.tier === "gpai_systemic";
+// Exported — consumed by EUDB wizard (PROMPT AS) and deadline page badge
+export function requiresEUDBRegistration(system: AISystem): boolean {
+  // Rispecchia la logica di Step 1 (Q1/Q2) — validare contro Art. 49(1)/(3) [verify against current AI Act text]
+  const isHighRiskProvider =
+    (system.role === "provider" || system.role === "authorized_rep") &&
+    (system.tier === "high_risk" || system.tier === "gpai_systemic");
+  const isDeployerPublicAuthority =
+    system.role === "deployer" && system.tier === "high_risk";
+  // Check national security exemption from EUDB draft
+  try {
+    const draftRaw = typeof window !== "undefined" ? localStorage.getItem("aicomply_eudb_draft_v2") : null;
+    if (draftRaw) {
+      const draft = JSON.parse(draftRaw);
+      if (draft?.eligibility?.q3_public_deployer === "yes") return false; // esenzione sicurezza nazionale
+    }
+  } catch { /* silent */ }
+  return isHighRiskProvider || isDeployerPublicAuthority;
+}
+
+// Exported — consumed by buildDynamicDeadlines + EUDB wizard
+export function buildEUDBDeadline(system: AISystem): AIActDeadline | null {
+  if (!requiresEUDBRegistration(system)) return null;
+  // Already registered?
+  try {
+    const draftRaw = typeof window !== "undefined" ? localStorage.getItem("aicomply_eudb_draft_v2") : null;
+    if (draftRaw) {
+      const draft = JSON.parse(draftRaw);
+      if (draft?.eudb_registration_number) return null;
+    }
+  } catch { /* silent */ }
+  const referenceDate = system.nextReview;
+  if (!referenceDate) return null;
+  const appliesTo = tierToAppliesTo(system.tier);
+  return {
+    id: `eudb_registration_${system.id}`,
+    date: referenceDate,
+    label: `Registrazione EUDB — ${system.name}`,
+    description: `Registrazione del sistema "${system.name}" nella banca dati UE prima della messa sul mercato o in servizio — Art. 49(1) [verify against current AI Act text].`,
+    article: "Art. 49(1) [verify against current AI Act text]",
+    applies_to: appliesTo.length ? appliesTo : (["high_risk_annex3", "high_risk_annex1"] as AIActTier[]),
+    tool_href: `/dashboard/compliance-ops/eudb`,
+    severity: "important",
+    isDynamic: true,
+    sourceSystemId: system.id,
+    sourceSystemName: system.name,
+  };
 }
 
 function addMonths(isoDate: string, months: number): string {
@@ -90,21 +134,11 @@ export function buildDynamicDeadlines(systems: AISystem[]): AIActDeadline[] {
     const eudbRec = eudbRaw ? (() => { try { return JSON.parse(eudbRaw); } catch { return null; } })() : null;
     const plannedMarketDate: string | undefined = eudbRec?.plannedMarketDate ?? system.nextReview;
 
-    if (plannedMarketDate && requiresEUDBRegistration(system) && !(eudbRec?.registered)) {
-      dynamic.push({
-        id: `eudb_${system.id}`,
-        date: addDays(plannedMarketDate, -30),
-        label: `EUDB: registrazione — ${system.name}`,
-        description: `Scadenza preparazione registrazione EUDB per il sistema "${system.name}" (30gg prima della data di immissione pianificata). Verificare obbligo e termine esatto contro Art. 49 [verify against current AI Act text].`,
-        article: "Art. 49 [verify against current AI Act text]",
-        applies_to: appliesTo,
-        tool_href: "/dashboard/tools/eudb",
-        severity: "important",
-        isDynamic: true,
-        sourceSystemId: system.id,
-        sourceSystemName: system.name,
-      });
-    }
+    // 2. EUDB Registration — usa buildEUDBDeadline per coerenza con PROMPT AS
+    const eudbDeadline = buildEUDBDeadline(system);
+    if (eudbDeadline) dynamic.push(eudbDeadline);
+    // suppress unused variable warning
+    void plannedMarketDate; void eudbRec;
 
     // 3. Incident Notification: scadenze calcolate dagli incidenti reali (Art. 73)
     const incidents = getOpenSevereIncidentEntries(system.id);
