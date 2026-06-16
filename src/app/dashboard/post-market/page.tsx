@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   AlertTriangle,
   Clock,
@@ -329,8 +330,12 @@ const EMPTY_FORM = {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function PostMarketPage() {
-  const [tab, setTab] = useState<"incidents" | "plan" | "monitoring">("incidents");
+function PostMarketPageInner() {
+  const searchParams = useSearchParams();
+  const rawTab = searchParams.get("tab");
+  const initialTab: "incidents" | "plan" | "monitoring" =
+    rawTab === "monitoring" ? "monitoring" : rawTab === "plan" ? "plan" : "incidents";
+  const [tab, setTab] = useState<"incidents" | "plan" | "monitoring">(initialTab);
   const [incidents, setIncidents] = useState<Incident[]>(() => loadIncidents());
   const [plan, setPlan] = useState<MonitoringCheck[]>(() => loadPlan());
 
@@ -395,6 +400,18 @@ export default function PostMarketPage() {
       saveIncidents(merged);
       return merged;
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Deep link: ?incident=<id> → auto-seleziona l'incidente e attiva la tab
+  useEffect(() => {
+    const incidentId = searchParams.get("incident");
+    if (!incidentId) return;
+    const found = loadIncidents().find((i) => i.id === incidentId);
+    if (found) {
+      setTab("incidents");
+      setSelected(found);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -2473,5 +2490,13 @@ export default function PostMarketPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function PostMarketPage() {
+  return (
+    <Suspense>
+      <PostMarketPageInner />
+    </Suspense>
   );
 }
