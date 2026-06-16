@@ -478,7 +478,7 @@ export default function DataAuditPage() {
     });
     appendEvidence("decision", { type: "Data Audit Art. 10 — record salvato", documented, datasets: record.datasets.length, savedAt: now }, "dataAudit");
     setSavedAt(now);
-    showToast("Data Audit salvato nel dossier");
+    showToast("Qualità Dati salvato nel dossier");
   }
 
   // Computed summaries for "computed" source practices
@@ -570,7 +570,7 @@ export default function DataAuditPage() {
         </div>
       ) : (
         <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-4 text-[12px]" style={{ background: T.card, border: `1px solid ${T.border}` }}>
-          <span style={{ color: T.muted }}>Salva il Data Audit nel dossier di compliance</span>
+          <span style={{ color: T.muted }}>Salva Qualità Dati nel dossier di compliance</span>
           <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>Salva</button>
         </div>
       )}
@@ -583,8 +583,7 @@ export default function DataAuditPage() {
           <span className="text-[11px] font-medium px-2 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>Art. 10</span>
         </div>
         <p className="text-[12px]" style={{ color: T.muted }}>
-          Gestione e governance dei dati di addestramento per sistemi AI ad alto rischio.{" "}
-          <span style={{ opacity: 0.7 }}>[verify against current AI Act text]</span>
+          Requisiti di qualità, governance e provenienza dei dati di training, validazione e test per sistemi AI ad alto rischio.
         </p>
         {cls && (
           <div className="mt-2 flex items-center gap-3 text-[11px]" style={{ color: T.muted }}>

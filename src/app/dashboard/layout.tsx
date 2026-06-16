@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -31,6 +31,7 @@ type NavChild = {
   art?: string;
   badge?: "urgent" | "new";
   flag?: "paItaly" | "gpaiDetected" | "nistEnabled";
+  tooltip?: string;
 };
 
 type NavPillar = {
@@ -41,7 +42,29 @@ type NavPillar = {
   badge?: "urgent" | "new";
   href?: string;
   children?: NavChild[];
+  tooltip?: string;
 };
+
+function SidebarTooltip({ text, children }: { text: string; children: React.ReactNode }) {
+  const [show, setShow] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  return (
+    <div className="relative w-full"
+      onMouseEnter={() => { timer.current = setTimeout(() => setShow(true), 600); }}
+      onMouseLeave={() => { if (timer.current) clearTimeout(timer.current); setShow(false); }}
+    >
+      {children}
+      {show && (
+        <div
+          className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 px-2.5 py-1.5 rounded-lg text-[11px] pointer-events-none whitespace-nowrap"
+          style={{ background: "#1e2535", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.75)", maxWidth: 200 }}
+        >
+          {text}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const PILLARS: NavPillar[] = [
   {
@@ -89,6 +112,7 @@ const PILLARS: NavPillar[] = [
     label: "Qualità Dati",
     href: "/dashboard/tools/data-audit",
     art: "Art. 10",
+    tooltip: "Qualità e governance dei dati di training (Art. 10)",
   },
   {
     id: "deployer",
@@ -105,7 +129,7 @@ const PILLARS: NavPillar[] = [
     art: "Art. 12–72",
     children: [
       { icon: CalendarClock,  label: "Scadenze",            href: "/dashboard/compliance-ops/deadlines",  art: "Timeline" },
-      { icon: FileArchive,    label: "LogVault",            href: "/dashboard/tools/logvault",            art: "Art. 12" },
+      { icon: FileArchive,    label: "LogVault",            href: "/dashboard/tools/logvault",            art: "Art. 12", tooltip: "Registro log operativi e attività in deployment (Art. 12)" },
       { icon: TrendingUp,     label: "Post-Market",         href: "/dashboard/post-market",               art: "Art. 72-73" },
       { icon: Database,       label: "EUDB",                href: "/dashboard/compliance-ops/eudb",       art: "Art. 49" },
       { icon: UserCheck,      label: "Repr. Autorizzato",         href: "/dashboard/compliance-ops/authorized-rep", art: "Art. 22" },
@@ -267,7 +291,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 : pillar.children?.some((c) => pathname.startsWith(c.href)) ?? false;
 
               if (!pillar.children) {
-                return (
+                const leafLink = (
                   <Link
                     key={pillar.id}
                     href={pillar.href!}
@@ -290,6 +314,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     )}
                   </Link>
                 );
+                return !collapsed && pillar.tooltip
+                  ? <SidebarTooltip key={pillar.id} text={pillar.tooltip}>{leafLink}</SidebarTooltip>
+                  : leafLink;
               }
 
               const visibleChildren = pillar.children.filter(isChildVisible);
@@ -329,7 +356,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <div className={collapsed ? "" : "ml-3 mt-0.5 space-y-0.5"}>
                       {visibleChildren.map((child) => {
                         const isActive = pathname.startsWith(child.href);
-                        return (
+                        const childLink = (
                           <Link
                             key={child.href}
                             href={child.href}
@@ -354,6 +381,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             )}
                           </Link>
                         );
+                        return !collapsed && child.tooltip
+                          ? <SidebarTooltip key={child.href} text={child.tooltip}>{childLink}</SidebarTooltip>
+                          : childLink;
                       })}
                     </div>
                   )}
