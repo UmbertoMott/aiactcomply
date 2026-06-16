@@ -107,8 +107,8 @@ const PILLARS: NavPillar[] = [
       { icon: CalendarClock,  label: "Scadenze",            href: "/dashboard/compliance-ops/deadlines",  art: "Timeline" },
       { icon: FileArchive,    label: "LogVault",            href: "/dashboard/tools/logvault",            art: "Art. 12" },
       { icon: TrendingUp,     label: "Post-Market",         href: "/dashboard/post-market",               art: "Art. 72-73" },
-      { icon: Database,       label: "Registrazione EUDB",  href: "/dashboard/compliance-ops/eudb",       art: "Art. 49" },
-      { icon: UserCheck,      label: "Authorized Representative", href: "/dashboard/compliance-ops/authorized-rep", art: "Art. 22" },
+      { icon: Database,       label: "EUDB",                href: "/dashboard/compliance-ops/eudb",       art: "Art. 49" },
+      { icon: UserCheck,      label: "Repr. Autorizzato",         href: "/dashboard/compliance-ops/authorized-rep", art: "Art. 22" },
       { icon: ArrowRightLeft, label: "Provider Transition", href: "/dashboard/compliance-ops/provider-transition", art: "Art. 28" },
       { icon: ShieldCheck,    label: "Trust Center",        href: "/dashboard/compliance-ops/trust-center", art: "Art. 13/50" },
       { icon: Scale,          label: "L.132/2025",          href: "/dashboard/tools/l132",                art: "PA Italy", flag: "paItaly" },
@@ -278,9 +278,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       ? { background: "rgba(255,255,255,0.12)", color: "#ffffff" }
                       : { color: "rgba(255,255,255,0.65)" }}
                   >
-                    <div className={`flex items-center ${collapsed ? "" : "gap-2"}`}>
+                    <div className={`flex items-center min-w-0 ${collapsed ? "" : "gap-2"}`}>
                       <pillar.icon className="h-3.5 w-3.5 flex-shrink-0" />
-                      {!collapsed && <span>{sanitizeSidebarLabel(pillar.label)}</span>}
+                      {!collapsed && <span className="truncate">{sanitizeSidebarLabel(pillar.label)}</span>}
                     </div>
                     {!collapsed && pillar.art && (
                       <span className="text-[9px] px-1.5 py-0.5 rounded"
@@ -305,9 +305,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       ? { background: "rgba(255,255,255,0.08)", color: "#ffffff" }
                       : { color: "rgba(255,255,255,0.65)" }}
                   >
-                    <div className={`flex items-center ${collapsed ? "" : "gap-2"}`}>
+                    <div className={`flex items-center min-w-0 ${collapsed ? "" : "gap-2"}`}>
                       <pillar.icon className="h-3.5 w-3.5 flex-shrink-0" />
-                      {!collapsed && <span className="font-medium">{sanitizeSidebarLabel(pillar.label)}</span>}
+                      {!collapsed && <span className="font-medium truncate">{sanitizeSidebarLabel(pillar.label)}</span>}
                     </div>
                     {!collapsed && (
                       <div className="flex items-center gap-1">
@@ -340,10 +340,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                               ? { background: "rgba(255,255,255,0.12)", color: "#ffffff" }
                               : { color: "rgba(255,255,255,0.5)" }}
                           >
-                            <div className={`flex items-center ${collapsed ? "" : "gap-2"}`}>
-                              {!collapsed && <div className="w-px h-3 rounded" style={{ background: "rgba(255,255,255,0.2)" }} />}
+                            <div className={`flex items-center min-w-0 ${collapsed ? "" : "gap-2"}`}>
+                              {!collapsed && <div className="w-px h-3 rounded flex-shrink-0" style={{ background: "rgba(255,255,255,0.2)" }} />}
                               <child.icon className="h-3 w-3 flex-shrink-0" />
-                              {!collapsed && <span>{sanitizeSidebarLabel(child.label)}</span>}
+                              {!collapsed && <span className="truncate">{sanitizeSidebarLabel(child.label)}</span>}
                             </div>
                             {!collapsed && (
                               child.href === "/dashboard/compliance-ops/trust-center" && trustCenterPublished

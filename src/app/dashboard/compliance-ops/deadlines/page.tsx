@@ -15,13 +15,13 @@ import type { PriorityGroup } from "@/lib/deadlines/deadline-actions";
 import { loadInventory } from "@/lib/inventory/ai-system";
 import type { AISystem } from "@/lib/inventory/ai-system";
 
-// ─── Design tokens (dark theme, coerente con sidebar AIComply) ─────────────────
-const BG   = "#0D1016";
-const BG2  = "#111827";
-const BG3  = "#1e2535";
-const TEXT = "#F1F5F9";
-const MUTED= "#94A3B8";
-const BORDER = "rgba(255,255,255,0.08)";
+// ─── Design tokens (light theme) ───────────────────────────────────────────────
+const BG   = "#FAFAF9";
+const BG2  = "#ffffff";
+const BG3  = "#F3F4F6";
+const TEXT = "#0D1016";
+const MUTED= "rgba(0,0,0,0.45)";
+const BORDER = "rgba(0,0,0,0.08)";
 const FONT: CSSProperties = { fontFamily: "Inter, system-ui, sans-serif" };
 
 const SEV: Record<string, { color: string; bg: string }> = {
@@ -67,7 +67,7 @@ function ArticleBadge({ article }: { article: string }) {
   const short = article.split(" ").slice(0, 2).join(" ");
   return (
     <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded-full flex-shrink-0"
-      style={{ background: "rgba(255,255,255,0.06)", color: MUTED, border: `1px solid ${BORDER}` }}>
+      style={{ background: "rgba(0,0,0,0.04)", color: MUTED, border: `1px solid ${BORDER}` }}>
       {short}
     </span>
   );
@@ -311,7 +311,7 @@ function CopilotPanel({
   }
 
   return (
-    <div className="rounded-xl p-5 mb-6" style={{ background: BG2, border: `1px solid rgba(124,58,237,0.25)` }}>
+    <div className="rounded-xl p-5 mb-6" style={{ background: BG2, border: `1px solid rgba(124,58,237,0.2)`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
       <div className="flex items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-2">
           <Sparkles size={16} style={{ color: "#a78bfa" }} />
@@ -320,7 +320,7 @@ function CopilotPanel({
         {!groups && (
           <button onClick={run} disabled={loading}
             className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-lg"
-            style={{ background: "#7c3aed", color: "#fff", border: "none", cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1 }}>
+            style={{ background: "#0D1016", color: "#fff", border: "none", cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1 }}>
             {loading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
             {loading ? "Analisi in corso..." : "Genera prioritizzazione AI"}
           </button>
