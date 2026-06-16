@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { ClassifierResult } from "@/lib/dossier/storage-schema";
+import { useScopedStorage } from "@/lib/hooks/useScopedStorage";
 import {
   ChevronRight, ChevronLeft, AlertTriangle, Shield,
   CheckCircle2, ArrowRight, FileText, Zap,
@@ -43,6 +44,21 @@ interface TriageReport {
   estimatedEffortDays: number;
   summary: string;
   prohibitedFlags: string[];
+}
+
+/** Entry immutabile di storico classificazione — append-only, mai sovrascritta (FIX 4). */
+interface TriageEntry {
+  id: string;
+  timestamp: string;           // ISO 8601
+  riskTier: RiskTier;
+  summary: string;
+  answersSnapshot: Answers;
+}
+
+type TriageHistory = TriageEntry[];
+
+function makeTriageId(): string {
+  return `triage-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 // ─── Macro-aree (4 step + result) ────────────────────────────────────────────
@@ -675,6 +691,58 @@ function TriageReportView({ report }: { report: TriageReport }) {
   );
 }
 
+// ─── Storico classificazioni — append-only, traccia ogni triage eseguito ──────
+
+const HISTORY_TIER_BADGE: Record<RiskTier, { bg: string; color: string }> = {
+  prohibited: { bg: "rgba(220,38,38,0.15)", color: "#f87171" },
+  high:       { bg: "rgba(245,158,11,0.12)", color: "#fbbf24" },
+  gpai:       { bg: "rgba(59,130,246,0.12)", color: "#60a5fa" },
+  limited:    { bg: "rgba(234,179,8,0.12)",  color: "#facc15" },
+  minimal:    { bg: "rgba(34,197,94,0.12)",  color: "#4ade80" },
+};
+
+function TriageHistoryPanel({ history }: { history: TriageEntry[] }) {
+  if (history.length <= 1) return null;
+  const sorted = [...history].reverse();
+  return (
+    <div className="mt-6 border-t border-slate-800 pt-4">
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-3">
+        Storico classificazioni ({history.length})
+      </p>
+      <div className="space-y-1.5">
+        {sorted.map((entry, i) => {
+          const badge = HISTORY_TIER_BADGE[entry.riskTier];
+          return (
+            <div
+              key={entry.id}
+              className={`flex items-center justify-between rounded-lg px-3 py-2 text-xs ${
+                i === 0
+                  ? "bg-slate-800/60 border border-slate-700/50"
+                  : "bg-slate-900/40 text-slate-500"
+              }`}
+            >
+              <span className="font-mono text-slate-400">
+                {new Date(entry.timestamp).toLocaleDateString("it-IT", {
+                  day: "2-digit", month: "short", year: "numeric",
+                })}{" "}
+                {new Date(entry.timestamp).toLocaleTimeString("it-IT", {
+                  hour: "2-digit", minute: "2-digit",
+                })}
+              </span>
+              <span
+                className="font-mono px-1.5 py-0.5 rounded text-[10px] font-semibold"
+                style={{ background: badge.bg, color: badge.color }}
+              >
+                {entry.riskTier}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ─── Area label component ─────────────────────────────────────────────────────
 
 function AreaStep({
@@ -702,6 +770,7 @@ export default function TriagePage() {
   const [area, setArea] = useState<AreaId>("context");
   const [report, setReport] = useState<TriageReport | null>(null);
   const [draftSaved, setDraftSaved] = useState(false);
+  const [triageHistory, setTriageHistory] = useScopedStorage<TriageHistory>("triage_history", []);
 
   // Area 1 — Contesto
   const [role, setRole] = useState<Role | null>(null);
@@ -755,6 +824,16 @@ export default function TriagePage() {
       if (next === "result") {
         syncToClassifier(newReport, answers);
       }
+      // Append-only history — ogni classificazione è un nuovo entry immutabile,
+      // non sovrascrive mai quelle precedenti per lo stesso sistema (FIX 4 / Art. 9)
+      const entry: TriageEntry = {
+        id: makeTriageId(),
+        timestamp: new Date().toISOString(),
+        riskTier: newReport.riskTier,
+        summary: newReport.summary,
+        answersSnapshot: answers,
+      };
+      setTriageHistory((prev) => [...prev, entry]);
     }
     setArea(next);
   }
@@ -1210,6 +1289,8 @@ export default function TriagePage() {
               ) : (
                 <TriageReportView report={report} />
               )}
+
+              <TriageHistoryPanel history={triageHistory} />
             </motion.div>
           )}
 

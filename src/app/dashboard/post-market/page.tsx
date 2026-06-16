@@ -19,6 +19,13 @@ import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { motion, AnimatePresence } from "framer-motion";
 import { readFromStorage } from "@/lib/dossier/storage-schema";
 import type { RiskManagerResult } from "@/lib/dossier/storage-schema";
+import {
+  NOTIFICATION_WINDOWS,
+  migrateNotificationTier,
+  computeNotificationDeadline,
+  daysUntilDeadline,
+  type NotificationTier,
+} from "@/lib/post-market/notification-tiers";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -31,6 +38,7 @@ type Incident = {
   system: string;
   date: string;
   severity: Severity;
+  notificationTier: NotificationTier;
   status: IncidentStatus;
   notified: boolean;
   notifiedAt?: string;
@@ -55,13 +63,12 @@ type MonitoringCheck = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function getDaysRemaining(dateStr: string, notified: boolean): number {
-  if (notified) return 0;
-  const reported = new Date(dateStr);
-  const deadline = new Date(reported.getTime() + 15 * 24 * 60 * 60 * 1000);
-  const today = new Date();
-  const diff = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  return Math.max(0, diff);
+function getDaysRemaining(inc: Pick<Incident, "date" | "notified" | "notificationTier">): number {
+  return daysUntilDeadline({
+    detectionDate: inc.date,
+    notificationTier: inc.notificationTier,
+    notified: inc.notified,
+  });
 }
 
 function generateNotificationText(inc: Incident): string {
@@ -87,8 +94,8 @@ AZIONI IMMEDIATE INTRAPRESE
 ${inc.actions || "Indagine avviata — aggiornamenti a seguire"}
 
 IMPEGNI
-La società si impegna a trasmettere un rapporto completo entro 15 giorni
-dalla data del presente atto (entro il ${new Date(new Date(inc.date).getTime() + 15 * 24 * 60 * 60 * 1000).toLocaleDateString("it-IT")}).
+La società si impegna a trasmettere un rapporto completo entro ${NOTIFICATION_WINDOWS[inc.notificationTier].label}
+dalla data del presente atto (entro il ${new Date(computeNotificationDeadline({ detectionDate: inc.date, notificationTier: inc.notificationTier })).toLocaleDateString("it-IT")}) — ${NOTIFICATION_WINDOWS[inc.notificationTier].artRef}.
 
 Firma: _______________________
 Ruolo: Responsabile Conformità AI
@@ -159,6 +166,7 @@ const SEED_INCIDENTS: Incident[] = [
     system: "FaceID-API v2.3",
     date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
     severity: "high",
+    notificationTier: "fundamental_rights_72h",
     status: "investigating",
     notified: false,
     description:
@@ -174,6 +182,7 @@ const SEED_INCIDENTS: Incident[] = [
     system: "HR-Assist LLM",
     date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
     severity: "critical",
+    notificationTier: "life_threat_24h",
     status: "pending",
     notified: false,
     description:
@@ -196,10 +205,23 @@ const DEFAULT_PLAN: MonitoringCheck[] = [
   { id: "m8", label: "Report post-market annuale all'autorità", article: "Art. 72(4)", frequency: "Annuale", done: false, notes: "" },
 ];
 
+/** Migra record salvati con lo schema a 2 tier (PROMPT_AR) o senza tier al nuovo schema Art.73 a 4 tier. */
+function migrateIncident(raw: Incident & { notificationTier?: string }): Incident {
+  return {
+    ...raw,
+    notificationTier: migrateNotificationTier(raw.notificationTier),
+  };
+}
+
 function loadIncidents(): Incident[] {
   if (typeof window === "undefined") return SEED_INCIDENTS;
   const raw = localStorage.getItem(INCIDENTS_KEY);
-  if (raw) return JSON.parse(raw);
+  if (raw) {
+    const parsed = JSON.parse(raw) as Incident[];
+    const migrated = parsed.map(migrateIncident);
+    localStorage.setItem(INCIDENTS_KEY, JSON.stringify(migrated));
+    return migrated;
+  }
   localStorage.setItem(INCIDENTS_KEY, JSON.stringify(SEED_INCIDENTS));
   return SEED_INCIDENTS;
 }
@@ -287,6 +309,7 @@ const EMPTY_FORM = {
   system: "",
   date: new Date().toISOString().slice(0, 10),
   severity: "high" as Severity,
+  notificationTier: "serious_standard_15d" as NotificationTier,
   description: "",
   authority: "AGID",
   affectedUsers: "",
@@ -322,9 +345,9 @@ export default function PostMarketPage() {
   const toNotify = incidents.filter((i) => !i.notified);
   const minDays =
     toNotify.length > 0
-      ? Math.min(...toNotify.map((i) => getDaysRemaining(i.date, false)))
+      ? Math.min(...toNotify.map((i) => getDaysRemaining(i)))
       : null;
-  const urgentCount = toNotify.filter((i) => getDaysRemaining(i.date, false) <= 3).length;
+  const urgentCount = toNotify.filter((i) => getDaysRemaining(i) <= 3).length;
 
   const planDone = plan.filter((c) => c.done).length;
   const planTotal = plan.length;
@@ -336,7 +359,7 @@ export default function PostMarketPage() {
     .filter((i) => filterStatus === "all" || i.status === filterStatus)
     .sort((a, b) => {
       if (!a.notified && !b.notified)
-        return getDaysRemaining(a.date, false) - getDaysRemaining(b.date, false);
+        return getDaysRemaining(a) - getDaysRemaining(b);
       if (!a.notified) return -1;
       if (!b.notified) return 1;
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -353,6 +376,7 @@ export default function PostMarketPage() {
       system: form.system,
       date: form.date,
       severity: form.severity,
+      notificationTier: form.notificationTier,
       status: "pending",
       notified: false,
       description: form.description,
@@ -847,6 +871,45 @@ export default function PostMarketPage() {
                     </div>
 
                     <div>
+                      <label className="block text-[10px] font-medium mb-2" style={{ color: "rgba(0,0,0,0.45)" }}>
+                        Finestra di notifica — Art. 73
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {(Object.entries(NOTIFICATION_WINDOWS) as [NotificationTier, typeof NOTIFICATION_WINDOWS[NotificationTier]][]).map(
+                          ([key, w]) => {
+                            const active = form.notificationTier === key;
+                            return (
+                              <button
+                                key={key}
+                                type="button"
+                                onClick={() => setForm((f) => ({ ...f, notificationTier: key }))}
+                                style={{
+                                  textAlign: "left",
+                                  borderRadius: "8px",
+                                  padding: "8px 10px",
+                                  cursor: "pointer",
+                                  border: active ? "1px solid rgba(220,38,38,0.3)" : "1px solid rgba(0,0,0,0.1)",
+                                  background: active ? "rgba(220,38,38,0.05)" : "#fff",
+                                  transition: "all 0.12s",
+                                }}
+                              >
+                                <div style={{ fontSize: "9px", fontFamily: "monospace", color: active ? "#b91c1c" : "rgba(0,0,0,0.35)" }}>
+                                  {w.artRef}
+                                </div>
+                                <div style={{ fontSize: "11px", fontWeight: 600, marginTop: 2, color: active ? "#b91c1c" : "#0D1016" }}>
+                                  {w.label}
+                                </div>
+                                <div style={{ fontSize: "9px", marginTop: 1, lineHeight: 1.3, color: active ? "#b91c1c" : "rgba(0,0,0,0.4)" }}>
+                                  {w.description}
+                                </div>
+                              </button>
+                            );
+                          }
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
                       <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
                         Utenti impattati (stima)
                       </label>
@@ -933,10 +996,12 @@ export default function PostMarketPage() {
               ) : (
                 <div className="divide-y" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
                   {filtered.map((inc) => {
-                    const days = getDaysRemaining(inc.date, inc.notified);
+                    const days = getDaysRemaining(inc);
                     const sev = SEV_STYLE[inc.severity];
+                    const tierWindow = NOTIFICATION_WINDOWS[inc.notificationTier];
+                    const totalDays = tierWindow.hoursFromDetection / 24;
                     const isSelected = selected?.id === inc.id;
-                    const progressPct = inc.notified ? 100 : ((15 - days) / 15) * 100;
+                    const progressPct = inc.notified ? 100 : ((totalDays - days) / totalDays) * 100;
                     return (
                       <div
                         key={inc.id}
@@ -988,7 +1053,7 @@ export default function PostMarketPage() {
                                 className="text-[10px] font-semibold"
                                 style={{ color: "#dc2626" }}
                               >
-                                ⚠ SCADUTO — notifica urgente
+                                ⚠ SCADUTO — notifica urgente ({tierWindow.artRef})
                               </p>
                             ) : (
                               <>
@@ -1001,7 +1066,7 @@ export default function PostMarketPage() {
                                     className="text-[10px] font-medium"
                                     style={{ color: "#dc2626" }}
                                   >
-                                    Notifica entro {days} giorn{days === 1 ? "o" : "i"} (Art. 73)
+                                    Notifica entro {days} giorn{days === 1 ? "o" : "i"} ({tierWindow.artRef})
                                   </span>
                                 </div>
                                 <div
@@ -1233,8 +1298,9 @@ export default function PostMarketPage() {
                             style={{ color: "#dc2626" }}
                           >
                             Notifica richiesta entro{" "}
-                            {getDaysRemaining(selected.date, false)} giorn
-                            {getDaysRemaining(selected.date, false) === 1 ? "o" : "i"} (Art. 73)
+                            {getDaysRemaining(selected)} giorn
+                            {getDaysRemaining(selected) === 1 ? "o" : "i"}{" "}
+                            ({NOTIFICATION_WINDOWS[selected.notificationTier].artRef})
                           </p>
                         </div>
                         <div className="flex flex-col gap-2">
@@ -1384,9 +1450,10 @@ export default function PostMarketPage() {
                 Scadenze Art. 73
               </p>
               {[
-                { label: "Notifica preliminare", time: "Prima possibile" },
-                { label: "Rapporto completo", time: "15 giorni" },
-                { label: "Aggiornamenti periodici", time: "30 giorni" },
+                { label: `${NOTIFICATION_WINDOWS.life_threat_24h.description}`, time: NOTIFICATION_WINDOWS.life_threat_24h.label },
+                { label: `${NOTIFICATION_WINDOWS.fundamental_rights_72h.description}`, time: NOTIFICATION_WINDOWS.fundamental_rights_72h.label },
+                { label: `${NOTIFICATION_WINDOWS.death_followup_10d.description}`, time: NOTIFICATION_WINDOWS.death_followup_10d.label },
+                { label: `${NOTIFICATION_WINDOWS.serious_standard_15d.description}`, time: NOTIFICATION_WINDOWS.serious_standard_15d.label },
               ].map((r) => (
                 <div
                   key={r.label}
