@@ -27,12 +27,12 @@ import {
 } from "@/lib/provider-transition/provider-transition-types";
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
-const BG = "#0D1016";
-const CARD = "rgba(17,24,39,0.8)";
-const BORDER = "rgba(255,255,255,0.08)";
-const TEXT = "#F1F5F9";
-const MUTED = "#94A3B8";
-const INDIGO = "#818cf8";
+const BG = "#FAFAF9";
+const CARD = "#ffffff";
+const BORDER = "rgba(0,0,0,0.07)";
+const TEXT = "#0D1016";
+const MUTED = "rgba(0,0,0,0.40)";
+const INDIGO = "#4f46e5";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -44,9 +44,9 @@ function RadioGroupDk({
   onChange: (v: TransitionAnswer) => void;
 }) {
   const opts: { v: TransitionAnswer; label: string; color: string }[] = [
-    { v: "yes",   label: "Sì",      color: "#f87171" },
-    { v: "no",    label: "No",      color: "#4ade80" },
-    { v: "unsure",label: "Incerto", color: "#fb923c" },
+    { v: "yes",   label: "Sì",      color: "#991b1b" },
+    { v: "no",    label: "No",      color: "#15803d" },
+    { v: "unsure",label: "Incerto", color: "#92400e" },
   ];
   return (
     <div className="flex gap-3 mt-2">
@@ -72,23 +72,23 @@ function VerdictBanner({ verdict }: { verdict: Verdict }) {
   if (verdict === "incomplete") return null;
   const cfg = {
     provider: {
-      bg: "rgba(239,68,68,0.12)",
-      border: "#ef4444",
-      icon: <AlertTriangle size={18} className="text-red-400" />,
+      bg: "rgba(239,68,68,0.06)",
+      border: "rgba(239,68,68,0.18)",
+      icon: <AlertTriangle size={18} className="text-red-700" />,
       title: "Obblighi da Provider rilevati (Art. 28)",
       text: "Le risposte indicate suggeriscono che la tua organizzazione potrebbe aver assunto il ruolo di provider. Completa le obbligazioni nella sezione 3 e verifica con il team legale. [verify against current AI Act text]",
     },
     risk: {
-      bg: "rgba(251,146,60,0.12)",
-      border: "#fb923c",
-      icon: <HelpCircle size={18} className="text-orange-400" />,
+      bg: "rgba(251,146,60,0.08)",
+      border: "rgba(251,146,60,0.25)",
+      icon: <HelpCircle size={18} className="text-orange-700" />,
       title: "Rischio potenziale — verifica necessaria",
       text: "Una o più risposte 'Incerto' richiedono una valutazione legale prima di determinare se scattano obblighi da provider (Art. 28). [verify against current AI Act text]",
     },
     deployer: {
-      bg: "rgba(74,222,128,0.08)",
-      border: "#4ade80",
-      icon: <CheckCircle2 size={18} className="text-green-400" />,
+      bg: "rgba(22,163,74,0.06)",
+      border: "rgba(22,163,74,0.15)",
+      icon: <CheckCircle2 size={18} className="text-green-700" />,
       title: "Nessun obbligo da provider rilevato",
       text: "Le risposte indicano che rimani nel ruolo di deployer senza obblighi aggiuntivi da provider. Documenta comunque le modifiche apportate. [verify against current AI Act text]",
     },
@@ -107,8 +107,8 @@ function VerdictBanner({ verdict }: { verdict: Verdict }) {
 
 function SubstantialBadge({ v }: { v: boolean | null }) {
   if (v === null) return <span style={{ color: MUTED, fontSize: 12 }}>Non valutata</span>;
-  if (v) return <span style={{ color: "#f87171", fontWeight: 600, fontSize: 12 }}>● Sostanziale</span>;
-  return <span style={{ color: "#4ade80", fontSize: 12 }}>○ Ordinaria</span>;
+  if (v) return <span style={{ color: "#991b1b", fontWeight: 600, fontSize: 12 }}>● Sostanziale</span>;
+  return <span style={{ color: "#15803d", fontSize: 12 }}>○ Ordinaria</span>;
 }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
@@ -168,7 +168,7 @@ export default function ProviderTransitionPage() {
   const isObligDone = (id: string) => derivedDone[id] || obligDone[id];
 
   return (
-    <div style={{ background: BG, minHeight: "100vh", padding: "24px 20px", maxWidth: 900, margin: "0 auto" }}>
+    <div style={{ maxWidth: 900, margin: "0 auto" }}>
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
@@ -177,8 +177,8 @@ export default function ProviderTransitionPage() {
           </span>
           {verdict !== "incomplete" && (
             <span style={{
-              background: verdict === "provider" ? "rgba(239,68,68,0.15)" : verdict === "risk" ? "rgba(251,146,60,0.15)" : "rgba(74,222,128,0.12)",
-              color: verdict === "provider" ? "#f87171" : verdict === "risk" ? "#fb923c" : "#4ade80",
+              background: verdict === "provider" ? "rgba(239,68,68,0.06)" : verdict === "risk" ? "rgba(251,146,60,0.08)" : "rgba(22,163,74,0.06)",
+              color: verdict === "provider" ? "#991b1b" : verdict === "risk" ? "#92400e" : "#15803d",
               borderRadius: 6, padding: "2px 10px", fontSize: 12, fontWeight: 600,
             }}>
               {verdict === "provider" ? "PROVIDER" : verdict === "risk" ? "VERIFICA" : "DEPLOYER"}
@@ -205,7 +205,7 @@ export default function ProviderTransitionPage() {
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {TRANSITION_CHECKS.map(check => (
             <div key={check.id} style={{
-              background: "rgba(255,255,255,0.03)",
+              background: "rgba(0,0,0,0.01)",
               border: `1px solid ${answers[check.id] === "yes" && check.is_trigger ? "rgba(239,68,68,0.4)" : BORDER}`,
               borderRadius: 8, padding: "14px 16px",
             }}>
@@ -213,8 +213,8 @@ export default function ProviderTransitionPage() {
                 <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                     {check.is_trigger
-                      ? <AlertTriangle size={14} style={{ color: "#fb923c", flexShrink: 0 }} />
-                      : <CheckCircle2 size={14} style={{ color: "#4ade80", flexShrink: 0 }} />
+                      ? <AlertTriangle size={14} style={{ color: "#92400e", flexShrink: 0 }} />
+                      : <CheckCircle2 size={14} style={{ color: "#15803d", flexShrink: 0 }} />
                     }
                     <span style={{ color: TEXT, fontSize: 14, fontWeight: 500 }}>{check.question}</span>
                   </div>
@@ -248,7 +248,7 @@ export default function ProviderTransitionPage() {
             <h2 style={{ color: TEXT, fontWeight: 600, fontSize: 16 }}>2. Registro Modifiche</h2>
             <p style={{ color: MUTED, fontSize: 13, marginTop: 2 }}>
               {mods.length} modifica/e registrata/e
-              {substantialCount > 0 && <span style={{ color: "#f87171", marginLeft: 8 }}>● {substantialCount} sostanziale/i</span>}
+              {substantialCount > 0 && <span style={{ color: "#991b1b", marginLeft: 8 }}>● {substantialCount} sostanziale/i</span>}
               {earliestSubst && <span style={{ color: MUTED, marginLeft: 8 }}>· prima: {earliestSubst}</span>}
             </p>
           </div>
@@ -272,7 +272,7 @@ export default function ProviderTransitionPage() {
               )}
               {mods.map(mod => (
                 <div key={mod.id} style={{
-                  background: "rgba(255,255,255,0.03)",
+                  background: "rgba(0,0,0,0.01)",
                   border: `1px solid ${mod.is_substantial === true ? "rgba(239,68,68,0.3)" : BORDER}`,
                   borderRadius: 8,
                 }}>
@@ -304,7 +304,7 @@ export default function ProviderTransitionPage() {
                         <select
                           value={mod.type}
                           onChange={e => patchMod(mod.id, { type: e.target.value as ModificationRecord["type"] })}
-                          style={{ width: "100%", background: "#1e2535", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "6px 8px", color: TEXT, fontSize: 13 }}
+                          style={{ width: "100%", background: "#f3f4f6", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "6px 8px", color: TEXT, fontSize: 13 }}
                         >
                           {(Object.entries(MOD_TYPE_LABELS) as [ModificationRecord["type"], string][]).map(([k, v]) => (
                             <option key={k} value={k}>{v}</option>
@@ -335,7 +335,7 @@ export default function ProviderTransitionPage() {
                           value={mod.description}
                           onChange={e => patchMod(mod.id, { description: e.target.value })}
                           rows={2}
-                          style={{ width: "100%", background: "#1e2535", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "8px", color: TEXT, fontSize: 13, resize: "vertical" }}
+                          style={{ width: "100%", background: "#f3f4f6", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "8px", color: TEXT, fontSize: 13, resize: "vertical" }}
                         />
                       </div>
                       <div>
@@ -343,7 +343,7 @@ export default function ProviderTransitionPage() {
                         <input
                           value={mod.assessed_by}
                           onChange={e => patchMod(mod.id, { assessed_by: e.target.value })}
-                          style={{ width: "100%", background: "#1e2535", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "6px 8px", color: TEXT, fontSize: 13 }}
+                          style={{ width: "100%", background: "#f3f4f6", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "6px 8px", color: TEXT, fontSize: 13 }}
                         />
                       </div>
                       <div>
@@ -352,7 +352,7 @@ export default function ProviderTransitionPage() {
                           type="date"
                           value={mod.assessed_date}
                           onChange={e => patchMod(mod.id, { assessed_date: e.target.value })}
-                          style={{ width: "100%", background: "#1e2535", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "6px 8px", color: TEXT, fontSize: 13 }}
+                          style={{ width: "100%", background: "#f3f4f6", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "6px 8px", color: TEXT, fontSize: 13 }}
                         />
                       </div>
                       <div style={{ gridColumn: "1/-1" }}>
@@ -361,7 +361,7 @@ export default function ProviderTransitionPage() {
                           value={mod.notes}
                           onChange={e => patchMod(mod.id, { notes: e.target.value })}
                           rows={2}
-                          style={{ width: "100%", background: "#1e2535", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "8px", color: TEXT, fontSize: 13, resize: "vertical" }}
+                          style={{ width: "100%", background: "#f3f4f6", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "8px", color: TEXT, fontSize: 13, resize: "vertical" }}
                         />
                       </div>
                     </div>
@@ -380,7 +380,7 @@ export default function ProviderTransitionPage() {
                       type="date"
                       value={newMod.date}
                       onChange={e => setNewMod(prev => prev ? { ...prev, date: e.target.value } : prev)}
-                      style={{ width: "100%", background: "#1e2535", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "6px 8px", color: TEXT, fontSize: 13 }}
+                      style={{ width: "100%", background: "#f3f4f6", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "6px 8px", color: TEXT, fontSize: 13 }}
                     />
                   </div>
                   <div>
@@ -388,7 +388,7 @@ export default function ProviderTransitionPage() {
                     <select
                       value={newMod.type}
                       onChange={e => setNewMod(prev => prev ? { ...prev, type: e.target.value as ModificationRecord["type"] } : prev)}
-                      style={{ width: "100%", background: "#1e2535", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "6px 8px", color: TEXT, fontSize: 13 }}
+                      style={{ width: "100%", background: "#f3f4f6", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "6px 8px", color: TEXT, fontSize: 13 }}
                     >
                       {(Object.entries(MOD_TYPE_LABELS) as [ModificationRecord["type"], string][]).map(([k, v]) => (
                         <option key={k} value={k}>{v}</option>
@@ -401,7 +401,7 @@ export default function ProviderTransitionPage() {
                       value={newMod.description}
                       onChange={e => setNewMod(prev => prev ? { ...prev, description: e.target.value } : prev)}
                       placeholder="es. Fine-tuning con dati interni Q1 2026"
-                      style={{ width: "100%", background: "#1e2535", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "6px 8px", color: TEXT, fontSize: 13 }}
+                      style={{ width: "100%", background: "#f3f4f6", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "6px 8px", color: TEXT, fontSize: 13 }}
                     />
                   </div>
                   <div>
@@ -409,7 +409,7 @@ export default function ProviderTransitionPage() {
                     <select
                       value={newMod.source}
                       onChange={e => setNewMod(prev => prev ? { ...prev, source: e.target.value as "manual" | "logvault_auto" } : prev)}
-                      style={{ width: "100%", background: "#1e2535", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "6px 8px", color: TEXT, fontSize: 13 }}
+                      style={{ width: "100%", background: "#f3f4f6", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "6px 8px", color: TEXT, fontSize: 13 }}
                     >
                       <option value="manual">Manuale</option>
                       <option value="logvault_auto">LogVault Auto</option>
@@ -437,13 +437,13 @@ export default function ProviderTransitionPage() {
                 <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
                   <button
                     onClick={addMod}
-                    style={{ background: INDIGO, color: "#fff", border: "none", borderRadius: 7, padding: "8px 18px", cursor: "pointer", fontSize: 13, fontWeight: 600 }}
+                    style={{ background: "#0D1016", color: "#fff", border: "none", borderRadius: 7, padding: "8px 18px", cursor: "pointer", fontSize: 13, fontWeight: 600 }}
                   >
                     Aggiungi
                   </button>
                   <button
                     onClick={() => setNewMod(null)}
-                    style={{ background: "rgba(255,255,255,0.06)", color: MUTED, border: `1px solid ${BORDER}`, borderRadius: 7, padding: "8px 18px", cursor: "pointer", fontSize: 13 }}
+                    style={{ background: "#ffffff", color: MUTED, border: `1px solid ${BORDER}`, borderRadius: 7, padding: "8px 18px", cursor: "pointer", fontSize: 13 }}
                   >
                     Annulla
                   </button>
@@ -463,7 +463,7 @@ export default function ProviderTransitionPage() {
 
       {/* ─── SEZIONE 3: Obbligazioni Provider ─────────────────────────────── */}
       {verdict === "provider" && (
-        <section style={{ background: CARD, border: `1px solid rgba(239,68,68,0.3)`, borderRadius: 12, padding: 24, marginBottom: 20 }}>
+        <section style={{ background: CARD, border: `1px solid rgba(239,68,68,0.18)`, borderRadius: 12, padding: 24, marginBottom: 20 }}>
           <h2 style={{ color: TEXT, fontWeight: 600, fontSize: 16, marginBottom: 6 }}>
             3. Obbligazioni da Provider (Art. 28)
           </h2>
@@ -476,8 +476,8 @@ export default function ProviderTransitionPage() {
               const isDerived = derivedDone[obl.id] !== undefined;
               return (
                 <div key={obl.id} style={{
-                  background: done ? "rgba(74,222,128,0.06)" : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${done ? "rgba(74,222,128,0.25)" : BORDER}`,
+                  background: done ? "rgba(22,163,74,0.06)" : "rgba(0,0,0,0.01)",
+                  border: `1px solid ${done ? "rgba(22,163,74,0.15)" : BORDER}`,
                   borderRadius: 8, padding: "12px 14px",
                   display: "flex", alignItems: "center", gap: 12,
                   opacity: obl.unavailable ? 0.6 : 1,
@@ -493,12 +493,12 @@ export default function ProviderTransitionPage() {
                     />
                   ) : (
                     done
-                      ? <CheckCircle2 size={16} style={{ color: "#4ade80", flexShrink: 0 }} />
+                      ? <CheckCircle2 size={16} style={{ color: "#15803d", flexShrink: 0 }} />
                       : <Clock size={16} style={{ color: MUTED, flexShrink: 0 }} />
                   )}
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ color: done ? "#4ade80" : TEXT, fontSize: 14, textDecoration: done ? "line-through" : "none" }}>
+                      <span style={{ color: done ? "#15803d" : TEXT, fontSize: 14, textDecoration: done ? "line-through" : "none" }}>
                         {obl.label}
                       </span>
                       {obl.unavailable && <span style={{ color: MUTED, fontSize: 11 }}>(non ancora disponibile)</span>}
@@ -522,13 +522,13 @@ export default function ProviderTransitionPage() {
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 8 }}>
         <button
           onClick={() => { setAnswers(loadAnswers()); setMods(loadMods()); setObligDone(loadObligDone()); }}
-          style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.05)", color: MUTED, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "9px 18px", cursor: "pointer", fontSize: 13 }}
+          style={{ display: "flex", alignItems: "center", gap: 6, background: "#ffffff", color: MUTED, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "9px 18px", cursor: "pointer", fontSize: 13 }}
         >
           <RefreshCw size={14} /> Ricarica
         </button>
         <button
           onClick={saveAll}
-          style={{ display: "flex", alignItems: "center", gap: 6, background: saved ? "rgba(74,222,128,0.2)" : INDIGO, color: saved ? "#4ade80" : "#fff", border: "none", borderRadius: 8, padding: "9px 22px", cursor: "pointer", fontSize: 13, fontWeight: 600, transition: "background 0.3s" }}
+          style={{ display: "flex", alignItems: "center", gap: 6, background: saved ? "rgba(22,163,74,0.1)" : "#0D1016", color: saved ? "#15803d" : "#fff", border: "none", borderRadius: 8, padding: "9px 22px", cursor: "pointer", fontSize: 13, fontWeight: 600, transition: "background 0.3s" }}
         >
           {saved ? <CheckCircle2 size={14} /> : <Save size={14} />}
           {saved ? "Salvato" : "Salva"}

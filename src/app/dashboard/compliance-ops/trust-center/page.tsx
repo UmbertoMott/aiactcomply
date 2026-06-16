@@ -20,13 +20,13 @@ import {
 } from "@/lib/trust-center/trust-center-types";
 import { generateTrustCenterSummary } from "@/app/actions/generateTrustCenterSummary";
 
-const BG     = "#0D1016";
-const CARD   = "rgba(17,24,39,0.8)";
-const BORDER = "rgba(255,255,255,0.08)";
-const TEXT   = "#F1F5F9";
-const MUTED  = "#94A3B8";
-const INDIGO = "#818cf8";
-const EMERAL = "#34d399";
+const BG     = "#FAFAF9";
+const CARD   = "#ffffff";
+const BORDER = "rgba(0,0,0,0.07)";
+const TEXT   = "#0D1016";
+const MUTED  = "rgba(0,0,0,0.40)";
+const INDIGO = "#4f46e5";
+const EMERAL = "#15803d";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -55,7 +55,7 @@ function IosSwitch({ on, onChange, disabled }: { on: boolean; onChange: (v: bool
       disabled={disabled}
       style={{
         width: 42, height: 24, borderRadius: 12, border: "none", cursor: disabled ? "not-allowed" : "pointer",
-        background: on ? "#059669" : "#374151",
+        background: on ? "#0D1016" : "#d1d5db",
         position: "relative", transition: "background 0.2s",
         opacity: disabled ? 0.45 : 1,
         flexShrink: 0,
@@ -82,9 +82,9 @@ function PublicPreview({
   const publicSections = ALL_SECTION_IDS.filter(id => page.sections[id].is_public);
 
   return (
-    <div style={{ background: "rgba(0,0,0,0.3)", border: `1px solid ${BORDER}`, borderRadius: 12, overflow: "hidden" }}>
+    <div style={{ background: "#f3f4f6", border: `1px solid ${BORDER}`, borderRadius: 12, overflow: "hidden" }}>
       {/* Browser chrome */}
-      <div style={{ background: "#1e2535", padding: "8px 14px", display: "flex", alignItems: "center", gap: 8, borderBottom: `1px solid ${BORDER}` }}>
+      <div style={{ background: "#e5e7eb", padding: "8px 14px", display: "flex", alignItems: "center", gap: 8, borderBottom: `1px solid ${BORDER}` }}>
         <div style={{ display: "flex", gap: 5 }}>
           {["#ef4444","#f59e0b","#22c55e"].map(c => (
             <div key={c} style={{ width: 10, height: 10, borderRadius: "50%", background: c }} />
@@ -96,7 +96,7 @@ function PublicPreview({
       </div>
 
       {/* Page content */}
-      <div style={{ padding: 24, minHeight: 200, background: BG }}>
+      <div style={{ padding: 24, minHeight: 200, background: "#ffffff" }}>
         {publicSections.length === 0 ? (
           <div style={{ textAlign: "center", padding: "40px 0" }}>
             <Globe size={28} style={{ color: MUTED, margin: "0 auto 12px" }} />
@@ -127,7 +127,7 @@ function PublicPreview({
                 <div key={id} style={{ marginBottom: 20, paddingBottom: 20, borderBottom: `1px solid ${BORDER}` }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
                     <h2 style={{ color: TEXT, fontSize: 15, fontWeight: 600, margin: 0 }}>{meta.label}</h2>
-                    <span style={{ color: MUTED, fontSize: 10, fontFamily: "monospace", background: "rgba(255,255,255,0.05)", borderRadius: 4, padding: "2px 6px", flexShrink: 0, marginLeft: 8 }}>
+                    <span style={{ color: MUTED, fontSize: 10, fontFamily: "monospace", background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "2px 6px", flexShrink: 0, marginLeft: 8 }}>
                       {meta.article}
                     </span>
                   </div>
@@ -136,7 +136,7 @@ function PublicPreview({
                       {section.summary.text}
                     </p>
                   ) : (
-                    <p style={{ color: "#4b5563", fontSize: 13, fontStyle: "italic" }}>Testo non ancora compilato.</p>
+                    <p style={{ color: "rgba(0,0,0,0.40)", fontSize: 13, fontStyle: "italic" }}>Testo non ancora compilato.</p>
                   )}
                 </div>
               );
@@ -144,7 +144,7 @@ function PublicPreview({
 
             {/* Footer */}
             <div style={{ paddingTop: 8 }}>
-              <p style={{ color: "#4b5563", fontSize: 11 }}>
+              <p style={{ color: "rgba(0,0,0,0.40)", fontSize: 11 }}>
                 Pagina generata da AIComply · Ultimo aggiornamento: {new Date(latestPublicSectionDate(page)).toLocaleDateString("it-IT")}
                 {page.noindex && " · Questa pagina non è indicizzata dai motori di ricerca."}
               </p>
@@ -190,7 +190,7 @@ function SectionCard({
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
         <div>
           <p style={{ color: TEXT, fontWeight: 600, fontSize: 14, margin: "0 0 2px" }}>{meta.label}</p>
-          <span style={{ color: MUTED, fontSize: 10, fontFamily: "monospace", background: "rgba(255,255,255,0.05)", borderRadius: 4, padding: "1px 6px" }}>
+          <span style={{ color: MUTED, fontSize: 10, fontFamily: "monospace", background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "1px 6px" }}>
             {meta.article}
           </span>
         </div>
@@ -202,14 +202,14 @@ function SectionCard({
       </div>
 
       {/* Source preview */}
-      <div style={{ background: "rgba(255,255,255,0.025)", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "8px 10px", marginBottom: 10 }}>
+      <div style={{ background: "rgba(0,0,0,0.02)", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "8px 10px", marginBottom: 10 }}>
         <p style={{ color: MUTED, fontSize: 11, marginBottom: 4 }}>
           Fonte: <em>{meta.sourceModule}</em>
         </p>
         {hasSource ? (
           <SourceSummary id={id} sourceData={sourceData} />
         ) : (
-          <p style={{ color: "#f59e0b", fontSize: 12 }}>
+          <p style={{ color: "#92400e", fontSize: 12 }}>
             Nessun dato disponibile — completa{" "}
             <Link href={sourceModuleHref(id)} style={{ color: INDIGO, textDecoration: "underline" }}>
               {meta.sourceModule}
@@ -240,7 +240,7 @@ function SectionCard({
           placeholder="Testo della sezione pubblica… (clicca 'Genera con AI' per una proposta)"
           rows={3}
           style={{
-            width: "100%", background: "#1e2535", border: `1px solid ${aiConfirmed ? "rgba(52,211,153,0.3)" : INDIGO + "40"}`,
+            width: "100%", background: "#f3f4f6", border: `1px solid ${aiConfirmed ? "rgba(52,211,153,0.3)" : INDIGO + "40"}`,
             borderRadius: 6, padding: 8, color: TEXT, fontSize: 13, resize: "vertical",
             boxSizing: "border-box",
           }}
@@ -428,7 +428,7 @@ export default function TrustCenterEditorPage() {
   const publicSectionCount = ALL_SECTION_IDS.filter(id => page.sections[id].is_public).length;
 
   return (
-    <div style={{ background: BG, minHeight: "100vh", padding: "24px 20px" }}>
+    <div style={{ padding: "24px 20px" }}>
       <div style={{ maxWidth: 1300, margin: "0 auto" }}>
 
         {/* ── Header ──────────────────────────────────────────────────── */}
@@ -449,7 +449,7 @@ export default function TrustCenterEditorPage() {
 
         {/* ── Published bar ──────────────────────────────────────────── */}
         {page.isPublished && (
-          <div style={{ background: "rgba(6,78,59,0.4)", border: "1px solid rgba(52,211,153,0.4)", borderRadius: 8, padding: "10px 16px", marginBottom: 16, display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)", borderRadius: 8, padding: "10px 16px", marginBottom: 16, display: "flex", alignItems: "center", gap: 12 }}>
             <CheckCircle2 size={15} style={{ color: EMERAL }} />
             <span style={{ color: EMERAL, fontSize: 13, fontWeight: 600 }}>Pagina pubblica attiva</span>
             <Link href={localUrl} target="_blank" style={{ color: INDIGO, fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
@@ -467,12 +467,12 @@ export default function TrustCenterEditorPage() {
 
         {/* ── Publish Warning ────────────────────────────────────────── */}
         {publishWarning && (
-          <div style={{ background: "rgba(120,53,15,0.3)", border: "1px solid rgba(217,119,6,0.5)", borderRadius: 8, padding: 16, marginBottom: 16 }}>
+          <div style={{ background: "rgba(251,146,60,0.08)", border: "1px solid rgba(251,146,60,0.25)", borderRadius: 8, padding: 16, marginBottom: 16 }}>
             <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
-              <AlertTriangle size={16} style={{ color: "#fbbf24", flexShrink: 0, marginTop: 2 }} />
+              <AlertTriangle size={16} style={{ color: "#92400e", flexShrink: 0, marginTop: 2 }} />
               <div>
-                <p style={{ color: "#fbbf24", fontWeight: 600, fontSize: 14, marginBottom: 4 }}>Conferma pubblicazione</p>
-                <p style={{ color: "#d97706", fontSize: 13, lineHeight: 1.5 }}>
+                <p style={{ color: "#92400e", fontWeight: 600, fontSize: 14, marginBottom: 4 }}>Conferma pubblicazione</p>
+                <p style={{ color: "#92400e", fontSize: 13, lineHeight: 1.5 }}>
                   Pubblicando questa pagina, le {publicSectionCount} sezioni attive saranno visibili a chiunque abbia il link.
                   Verifica che tutti i testi siano confermati (✦ AI risolto) prima di procedere.
                 </p>
@@ -481,13 +481,13 @@ export default function TrustCenterEditorPage() {
             <div style={{ display: "flex", gap: 10 }}>
               <button
                 onClick={confirmPublish}
-                style={{ background: "#d97706", color: "#fff", border: "none", borderRadius: 6, padding: "7px 18px", cursor: "pointer", fontSize: 13, fontWeight: 600 }}
+                style={{ background: "#0D1016", color: "#fff", border: "none", borderRadius: 6, padding: "7px 18px", cursor: "pointer", fontSize: 13, fontWeight: 600 }}
               >
                 Pubblica
               </button>
               <button
                 onClick={() => setPublishWarning(false)}
-                style={{ background: "rgba(255,255,255,0.05)", color: MUTED, border: `1px solid ${BORDER}`, borderRadius: 6, padding: "7px 18px", cursor: "pointer", fontSize: 13 }}
+                style={{ background: "rgba(0,0,0,0.04)", color: MUTED, border: `1px solid ${BORDER}`, borderRadius: 6, padding: "7px 18px", cursor: "pointer", fontSize: 13 }}
               >
                 Annulla
               </button>
@@ -511,7 +511,7 @@ export default function TrustCenterEditorPage() {
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <GlobeLock size={13} style={{ color: MUTED }} />
                 <p style={{ color: TEXT, fontWeight: 600, fontSize: 13, margin: 0 }}>Noindex</p>
-                <span style={{ color: MUTED, fontSize: 11, background: "rgba(255,255,255,0.05)", borderRadius: 4, padding: "1px 6px" }}>consigliato</span>
+                <span style={{ color: MUTED, fontSize: 11, background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "1px 6px" }}>consigliato</span>
               </div>
               <p style={{ color: MUTED, fontSize: 11, margin: 0 }}>La pagina non viene indicizzata dai motori di ricerca (§4.3)</p>
             </div>
@@ -525,7 +525,7 @@ export default function TrustCenterEditorPage() {
             )}
             <button
               onClick={handleSave}
-              style={{ background: saved ? "rgba(52,211,153,0.2)" : INDIGO, color: saved ? EMERAL : "#fff", border: "none", borderRadius: 8, padding: "8px 22px", cursor: "pointer", fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}
+              style={{ background: saved ? "rgba(22,163,74,0.1)" : "#0D1016", color: saved ? EMERAL : "#fff", border: "none", borderRadius: 8, padding: "8px 22px", cursor: "pointer", fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}
             >
               {saved ? <Check size={13} /> : null}
               {saved ? "Salvato" : "Salva"}

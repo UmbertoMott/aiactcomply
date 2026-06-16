@@ -16,38 +16,38 @@ import {
 } from "@/lib/authorized-rep/authorized-rep-types";
 import type { AuthRepDoc, AuthorizedRepresentativeRecord, ARChecklistItem } from "@/lib/authorized-rep/authorized-rep-types";
 
-// ── Dark-theme tokens ────────────────────────────────────────────────────────
+// ── Light-theme tokens ───────────────────────────────────────────────────────
 
 const DK = {
-  bg:        "#0D1016",
-  card:      "rgba(17,24,39,0.8)",
-  card2:     "rgba(15,23,42,0.6)",
-  border:    "#1e2535",
-  text:      "#F1F5F9",
-  muted:     "#94A3B8",
-  faint:     "#475569",
-  indigo:    "#818cf8",
-  indigoBg:  "rgba(99,102,241,0.1)",
-  indigoBdr: "rgba(99,102,241,0.3)",
-  red:       "#f87171",
-  redBg:     "rgba(248,113,113,0.08)",
-  redBdr:    "rgba(248,113,113,0.25)",
-  amber:     "#fbbf24",
-  amberBg:   "rgba(251,191,36,0.08)",
-  amberBdr:  "rgba(251,191,36,0.25)",
-  orange:    "#fb923c",
+  bg:        "#FAFAF9",
+  card:      "#ffffff",
+  card2:     "#f3f4f6",
+  border:    "rgba(0,0,0,0.07)",
+  text:      "#0D1016",
+  muted:     "rgba(0,0,0,0.40)",
+  faint:     "rgba(0,0,0,0.30)",
+  indigo:    "#4f46e5",
+  indigoBg:  "rgba(99,102,241,0.08)",
+  indigoBdr: "rgba(99,102,241,0.15)",
+  red:       "#991b1b",
+  redBg:     "rgba(239,68,68,0.06)",
+  redBdr:    "rgba(239,68,68,0.18)",
+  amber:     "#92400e",
+  amberBg:   "rgba(251,146,60,0.08)",
+  amberBdr:  "rgba(251,146,60,0.25)",
+  orange:    "#92400e",
   orangeBg:  "rgba(251,146,60,0.08)",
   orangeBdr: "rgba(251,146,60,0.25)",
-  green:     "#4ade80",
-  greenBg:   "rgba(74,222,128,0.08)",
-  greenBdr:  "rgba(74,222,128,0.25)",
-  emerald:   "#34d399",
+  green:     "#15803d",
+  greenBg:   "rgba(22,163,74,0.06)",
+  greenBdr:  "rgba(22,163,74,0.15)",
+  emerald:   "#15803d",
 } as const;
 
 const inputDk = {
   width: "100%", padding: "7px 10px", borderRadius: 8,
-  border: `1px solid ${DK.border}`, fontSize: 12,
-  color: DK.text, background: "rgba(0,0,0,0.3)", outline: "none",
+  border: `1px solid rgba(0,0,0,0.10)`, fontSize: 12,
+  color: DK.text, background: "#f3f4f6", outline: "none",
 };
 
 const taDk = { ...inputDk, resize: "vertical" as const };
@@ -86,7 +86,7 @@ function DkField({ label, article, aiBadge, children, span2 }: {
         <label style={{ fontSize: 11, color: DK.muted, fontWeight: 500 }}>{label}</label>
         {article && (
           <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint, borderRadius: 4,
-            padding: "1px 5px", border: `1px solid ${DK.border}`, background: "rgba(0,0,0,0.2)" }}>
+            padding: "1px 5px", border: `1px solid ${DK.border}`, background: "rgba(0,0,0,0.05)" }}>
             {article}
           </span>
         )}
@@ -156,7 +156,7 @@ function ChecklistRowDk({ item, eudbResult, docuGenCompleted, onChange }: {
         </span>
         <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint,
           border: `1px solid ${DK.border}`, borderRadius: 4, padding: "1px 5px",
-          background: "rgba(0,0,0,0.2)", flexShrink: 0, marginRight: 4 }}>
+          background: "rgba(0,0,0,0.05)", flexShrink: 0, marginRight: 4 }}>
           {item.article}
         </span>
         <ChevronDown size={12} style={{ color: DK.muted, flexShrink: 0,
@@ -454,7 +454,7 @@ export default function AuthorizedRepCompliancePage() {
           <Info size={13} style={{ color: DK.indigo }} />
           <p style={{ fontSize: 13, fontWeight: 600, color: DK.text, margin: 0 }}>Sezione 1 — Verifica applicabilità</p>
           <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint, border: `1px solid ${DK.border}`,
-            borderRadius: 4, padding: "1px 5px", background: "rgba(0,0,0,0.2)" }}>
+            borderRadius: 4, padding: "1px 5px", background: "rgba(0,0,0,0.05)" }}>
             Art. 22(1) [verify against current AI Act text]
           </span>
         </div>
@@ -548,7 +548,7 @@ export default function AuthorizedRepCompliancePage() {
         )}
         {bannerKind === "not_required" && (
           <div style={{ marginTop: 14, padding: 12, borderRadius: 8,
-            background: "rgba(71,85,105,0.12)", border: `1px solid ${DK.border}`,
+            background: "rgba(0,0,0,0.03)", border: `1px solid rgba(0,0,0,0.08)`,
             borderLeft: `4px solid ${DK.faint}`,
             display: "flex", alignItems: "center", gap: 8 }}>
             <Info size={14} style={{ color: DK.muted, flexShrink: 0 }} />
@@ -625,7 +625,7 @@ export default function AuthorizedRepCompliancePage() {
                     Provider (mandante)
                   </p>
                   <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint, border: `1px solid ${DK.border}`,
-                    borderRadius: 4, padding: "1px 5px", background: "rgba(0,0,0,0.2)" }}>
+                    borderRadius: 4, padding: "1px 5px", background: "rgba(0,0,0,0.05)" }}>
                     Art. 22(1)
                   </span>
                   {prefillSrc?.provider === "ai_inventory" && (
@@ -674,7 +674,7 @@ export default function AuthorizedRepCompliancePage() {
                     Authorized Representative
                   </p>
                   <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint, border: `1px solid ${DK.border}`,
-                    borderRadius: 4, padding: "1px 5px", background: "rgba(0,0,0,0.2)" }}>
+                    borderRadius: 4, padding: "1px 5px", background: "rgba(0,0,0,0.05)" }}>
                     Art. 22(1)+(3)
                   </span>
                   {syncBadge && (
@@ -694,7 +694,7 @@ export default function AuthorizedRepCompliancePage() {
                   </DkField>
                   <DkField label="Paese AR (deve essere SM UE) *" article="Art. 22(1)">
                     <select style={{ ...inputDk, borderColor: arCountryInvalid ? DK.red : DK.border,
-                      background: arCountryInvalid ? "rgba(248,113,113,0.06)" : "rgba(0,0,0,0.3)" }}
+                      background: arCountryInvalid ? "rgba(248,113,113,0.06)" : "#f3f4f6" }}
                       value={doc.representative.ar_country}
                       onChange={e => patchRep("ar_country", e.target.value)}>
                       <option value="">Seleziona paese UE...</option>
@@ -746,7 +746,7 @@ export default function AuthorizedRepCompliancePage() {
                 <Globe size={13} style={{ color: DK.indigo }} />
                 <p style={{ fontSize: 12, fontWeight: 600, color: DK.text, margin: 0 }}>Sistema coperto dal mandato</p>
                 <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint, border: `1px solid ${DK.border}`,
-                  borderRadius: 4, padding: "1px 5px", background: "rgba(0,0,0,0.2)" }}>
+                  borderRadius: 4, padding: "1px 5px", background: "rgba(0,0,0,0.05)" }}>
                   Annex VIII §4-5 [verify against current AI Act text]
                 </span>
                 {prefillSrc?.system === "risk_manager_docugen" && (
@@ -826,7 +826,7 @@ export default function AuthorizedRepCompliancePage() {
                 </div>
                 <button onClick={handleCopy} style={{ display: "flex", alignItems: "center", gap: 6,
                   padding: "5px 12px", borderRadius: 7, fontSize: 11, cursor: "pointer",
-                  background: copied ? DK.greenBg : "rgba(0,0,0,0.2)",
+                  background: copied ? DK.greenBg : "rgba(0,0,0,0.05)",
                   color: copied ? DK.green : DK.muted,
                   border: `1px solid ${copied ? DK.greenBdr : DK.border}` }}>
                   <Copy size={11} /> {copied ? "Copiato!" : "Copia mandato"}
@@ -835,14 +835,14 @@ export default function AuthorizedRepCompliancePage() {
               <textarea readOnly value={generateMandate(doc)}
                 style={{ ...taDk, height: 400, resize: "vertical",
                   fontFamily: "ui-monospace, 'Cascadia Code', monospace", fontSize: 11, lineHeight: 1.7,
-                  background: "rgba(0,0,0,0.3)",
+                  background: "#f3f4f6",
                   border: `1px solid ${mandateConfirmed ? DK.greenBdr : DK.indigoBdr}`,
                   color: DK.text }} />
               {!mandateConfirmed ? (
                 <button onClick={() => { setMandateConfirmed(true); showToast("✓ Testo del mandato confermato"); }}
                   style={{ marginTop: 8, width: "100%", padding: "8px", borderRadius: 8,
                     fontSize: 12, fontWeight: 600, cursor: "pointer",
-                    background: DK.indigoBg, color: DK.indigo, border: `1px solid ${DK.indigoBdr}` }}>
+                    background: "#0D1016", color: "#fff", border: "1px solid #0D1016" }}>
                   ✦ Confermo il testo del mandato (aiConfirmed)
                 </button>
               ) : (
@@ -886,12 +886,12 @@ export default function AuthorizedRepCompliancePage() {
                   </p>
                   <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint,
                     border: `1px solid ${DK.border}`, borderRadius: 4, padding: "1px 5px",
-                    background: "rgba(0,0,0,0.2)" }}>
+                    background: "rgba(0,0,0,0.05)" }}>
                     Art. 22(2)(a)-(f) [verify against current AI Act text]
                   </span>
                 </div>
                 <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 8, fontWeight: 500,
-                  background: doneCount === doc.checklist.length ? DK.greenBg : "rgba(0,0,0,0.2)",
+                  background: doneCount === doc.checklist.length ? DK.greenBg : "rgba(0,0,0,0.05)",
                   color: doneCount === doc.checklist.length ? DK.green : DK.muted,
                   border: `1px solid ${doneCount === doc.checklist.length ? DK.greenBdr : DK.border}` }}>
                   {doneCount}/{doc.checklist.length} completati
@@ -927,8 +927,8 @@ export default function AuthorizedRepCompliancePage() {
               </div>
               <button onClick={handleSave} style={{ display: "flex", alignItems: "center", gap: 6,
                 padding: "8px 16px", borderRadius: 9999, fontSize: 12, fontWeight: 500,
-                background: DK.indigoBg, color: DK.indigo,
-                border: `1px solid ${DK.indigoBdr}`, cursor: "pointer" }}>
+                background: "#0D1016", color: "#fff",
+                border: "1px solid #0D1016", cursor: "pointer" }}>
                 <Save size={13} /> Salva nel dossier
               </button>
             </div>
@@ -941,9 +941,9 @@ export default function AuthorizedRepCompliancePage() {
       {/* Toast */}
       {toast && (
         <div style={{ position: "fixed", bottom: 24, right: 24, zIndex: 9999,
-          padding: "10px 18px", borderRadius: 10, background: DK.card,
+          padding: "10px 18px", borderRadius: 10, background: "#ffffff",
           border: `1px solid ${DK.greenBdr}`, color: DK.green,
-          fontSize: 12, fontWeight: 500, boxShadow: "0 2px 12px rgba(0,0,0,0.3)" }}>
+          fontSize: 12, fontWeight: 500, boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
           {toast}
         </div>
       )}

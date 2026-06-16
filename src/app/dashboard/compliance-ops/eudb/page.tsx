@@ -21,35 +21,35 @@ import type {
   EligibilityAnswer, PrefillResult,
 } from "@/lib/eudb/eudb-prefill";
 
-// ── Dark-theme tokens ────────────────────────────────────────────────────────
+// ── Light-theme tokens ───────────────────────────────────────────────────────
 
 const DK = {
-  bg:       "#0D1016",
-  card:     "rgba(17,24,39,0.8)",
-  card2:    "rgba(15,23,42,0.6)",
-  border:   "#1e2535",
-  text:     "#F1F5F9",
-  muted:    "#94A3B8",
-  faint:    "#475569",
-  indigo:   "#818cf8",
-  indigoBg: "rgba(99,102,241,0.1)",
-  indigoBdr:"rgba(99,102,241,0.3)",
-  red:      "#f87171",
-  redBg:    "rgba(248,113,113,0.08)",
-  redBdr:   "rgba(248,113,113,0.25)",
-  amber:    "#fbbf24",
-  amberBg:  "rgba(251,191,36,0.08)",
-  amberBdr: "rgba(251,191,36,0.25)",
-  green:    "#4ade80",
-  greenBg:  "rgba(74,222,128,0.08)",
-  greenBdr: "rgba(74,222,128,0.25)",
-  emerald:  "#34d399",
+  bg:       "#FAFAF9",
+  card:     "#ffffff",
+  card2:    "#f3f4f6",
+  border:   "rgba(0,0,0,0.07)",
+  text:     "#0D1016",
+  muted:    "rgba(0,0,0,0.40)",
+  faint:    "rgba(0,0,0,0.30)",
+  indigo:   "#4f46e5",
+  indigoBg: "rgba(99,102,241,0.08)",
+  indigoBdr:"rgba(99,102,241,0.15)",
+  red:      "#991b1b",
+  redBg:    "rgba(239,68,68,0.06)",
+  redBdr:   "rgba(239,68,68,0.18)",
+  amber:    "#92400e",
+  amberBg:  "rgba(251,146,60,0.08)",
+  amberBdr: "rgba(251,146,60,0.25)",
+  green:    "#15803d",
+  greenBg:  "rgba(22,163,74,0.06)",
+  greenBdr: "rgba(22,163,74,0.15)",
+  emerald:  "#15803d",
 } as const;
 
 const inputDk = {
   width: "100%", padding: "7px 10px", borderRadius: 8,
-  border: `1px solid ${DK.border}`, fontSize: 12,
-  color: DK.text, background: "rgba(0,0,0,0.3)", outline: "none",
+  border: `1px solid rgba(0,0,0,0.10)`, fontSize: 12,
+  color: DK.text, background: "#f3f4f6", outline: "none",
 };
 
 const taDk = { ...inputDk, resize: "vertical" as const };
@@ -123,7 +123,7 @@ function MemberStatesSelectDark({ selected, onChange }: {
       {open && (
         <div style={{
           position: "absolute", top: "100%", left: 0, right: 0, zIndex: 50,
-          background: "#111827", border: `1px solid ${DK.border}`,
+          background: "#ffffff", border: `1px solid ${DK.border}`,
           borderRadius: 8, maxHeight: 220, overflowY: "auto", marginTop: 4,
         }}>
           {EU_MEMBER_STATES.map(sm => {
@@ -171,7 +171,7 @@ function DkField({ label, article, children, span2, aiBadge }: {
         <label style={{ fontSize: 11, color: DK.muted, fontWeight: 500 }}>{label}</label>
         {article && (
           <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint, borderRadius: 4,
-            padding: "1px 5px", border: `1px solid ${DK.border}`, background: "rgba(0,0,0,0.2)" }}>
+            padding: "1px 5px", border: `1px solid ${DK.border}`, background: "rgba(0,0,0,0.04)" }}>
             {article}
           </span>
         )}
@@ -199,7 +199,7 @@ function SectionCard({ title, article, aiBadge, children }: {
           {article && (
             <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint,
               border: `1px solid ${DK.border}`, borderRadius: 4, padding: "1px 6px",
-              background: "rgba(0,0,0,0.2)" }}>
+              background: "rgba(0,0,0,0.04)" }}>
               {article}
             </span>
           )}
@@ -327,7 +327,7 @@ export default function EUDBCompliancePage() {
   function renderStep1() {
     const bannerConfig = {
       required:     { bg: DK.greenBg,  bdr: DK.greenBdr, col: DK.green, Icon: CheckCircle2,   text: "Registrazione EUDB obbligatoria — Art. 49(1) [verify against current AI Act text]" },
-      not_required: { bg: "rgba(71,85,105,0.15)", bdr: DK.border, col: DK.muted, Icon: Info,  text: "La registrazione EUDB non è obbligatoria per questo sistema" },
+      not_required: { bg: "rgba(0,0,0,0.03)", bdr: DK.border, col: DK.muted, Icon: Info,  text: "La registrazione EUDB non è obbligatoria per questo sistema" },
       unsure:       { bg: DK.amberBg,  bdr: DK.amberBdr, col: DK.amber, Icon: AlertTriangle,  text: "Incertezza — consulta il Legal Assistant [verify against current AI Act text]" },
       incomplete:   null,
     };
@@ -637,8 +637,8 @@ export default function EUDBCompliancePage() {
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {/* Registered banner */}
         {isRegistered && (
-          <div style={{ padding: 14, borderRadius: 10, background: "rgba(52,211,153,0.08)",
-            border: `1px solid rgba(52,211,153,0.25)`, display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ padding: 14, borderRadius: 10, background: DK.greenBg,
+            border: `1px solid ${DK.greenBdr}`, display: "flex", alignItems: "center", gap: 10 }}>
             <CheckCircle size={15} style={{ color: DK.emerald, flexShrink: 0 }} />
             <div>
               <p style={{ fontSize: 12, color: DK.emerald, fontWeight: 600, margin: 0 }}>
@@ -657,7 +657,7 @@ export default function EUDBCompliancePage() {
             <span style={{ fontSize: 11, color: DK.muted }}>Dati identificativi del provider</span>
             <button onClick={() => copySection("a")} style={{ display: "flex", alignItems: "center", gap: 5,
               padding: "4px 10px", borderRadius: 6, fontSize: 10, cursor: "pointer",
-              background: copiedSection === "a" ? DK.greenBg : "rgba(0,0,0,0.2)",
+              background: copiedSection === "a" ? DK.greenBg : "rgba(0,0,0,0.05)",
               color: copiedSection === "a" ? DK.green : DK.muted,
               border: `1px solid ${copiedSection === "a" ? DK.greenBdr : DK.border}` }}>
               <Copy size={10} /> {copiedSection === "a" ? "Copiato!" : "Copia Sez. A"}
@@ -676,7 +676,7 @@ export default function EUDBCompliancePage() {
             <span style={{ fontSize: 11, color: DK.muted }}>Dati del sistema AI</span>
             <button onClick={() => copySection("b")} style={{ display: "flex", alignItems: "center", gap: 5,
               padding: "4px 10px", borderRadius: 6, fontSize: 10, cursor: "pointer",
-              background: copiedSection === "b" ? DK.greenBg : "rgba(0,0,0,0.2)",
+              background: copiedSection === "b" ? DK.greenBg : "rgba(0,0,0,0.05)",
               color: copiedSection === "b" ? DK.green : DK.muted,
               border: `1px solid ${copiedSection === "b" ? DK.greenBdr : DK.border}` }}>
               <Copy size={10} /> {copiedSection === "b" ? "Copiato!" : "Copia Sez. B"}
@@ -695,7 +695,7 @@ export default function EUDBCompliancePage() {
             <span style={{ fontSize: 11, color: DK.muted }}>Documentazione di conformità</span>
             <button onClick={() => copySection("c")} style={{ display: "flex", alignItems: "center", gap: 5,
               padding: "4px 10px", borderRadius: 6, fontSize: 10, cursor: "pointer",
-              background: copiedSection === "c" ? DK.greenBg : "rgba(0,0,0,0.2)",
+              background: copiedSection === "c" ? DK.greenBg : "rgba(0,0,0,0.05)",
               color: copiedSection === "c" ? DK.green : DK.muted,
               border: `1px solid ${copiedSection === "c" ? DK.greenBdr : DK.border}` }}>
               <Copy size={10} /> {copiedSection === "c" ? "Copiato!" : "Copia Sez. C"}
@@ -713,7 +713,7 @@ export default function EUDBCompliancePage() {
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <button onClick={() => copySection("all")} style={{ display: "flex", alignItems: "center", gap: 6,
             padding: "7px 16px", borderRadius: 8, fontSize: 12, cursor: "pointer",
-            background: copiedSection === "all" ? DK.greenBg : "rgba(0,0,0,0.3)",
+            background: copiedSection === "all" ? DK.greenBg : "rgba(0,0,0,0.05)",
             color: copiedSection === "all" ? DK.green : DK.muted,
             border: `1px solid ${copiedSection === "all" ? DK.greenBdr : DK.border}` }}>
             <Copy size={12} /> {copiedSection === "all" ? "Copiato!" : "Copia Annex VIII completo"}
@@ -762,7 +762,7 @@ export default function EUDBCompliancePage() {
               onClick={handleSaveRegistrationNumber}
               style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 16px",
                 borderRadius: 8, fontSize: 12, fontWeight: 600,
-                background: registrationNumber.trim() ? "rgba(74,222,128,0.15)" : "rgba(0,0,0,0.15)",
+                background: registrationNumber.trim() ? DK.greenBg : "rgba(0,0,0,0.05)",
                 color: registrationNumber.trim() ? DK.green : DK.faint,
                 border: `1px solid ${registrationNumber.trim() ? DK.greenBdr : DK.border}`,
                 cursor: registrationNumber.trim() ? "pointer" : "not-allowed" }}>
@@ -778,8 +778,8 @@ export default function EUDBCompliancePage() {
           </div>
           <button onClick={handleSaveDossier} style={{ display: "flex", alignItems: "center", gap: 6,
             padding: "8px 16px", borderRadius: 9999, fontSize: 12, fontWeight: 500,
-            background: DK.indigoBg, color: DK.indigo,
-            border: `1px solid ${DK.indigoBdr}`, cursor: "pointer" }}>
+            background: "#0D1016", color: "#fff",
+            border: "1px solid #0D1016", cursor: "pointer" }}>
             <Save size={13} /> Salva nel dossier
           </button>
         </div>
@@ -831,7 +831,7 @@ export default function EUDBCompliancePage() {
                   <div style={{ width: 22, height: 22, borderRadius: "50%",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: 10, fontWeight: 700,
-                    background: isDone ? DK.greenBg : isActive ? DK.indigoBg : "rgba(0,0,0,0.2)",
+                    background: isDone ? DK.greenBg : isActive ? DK.indigoBg : "rgba(0,0,0,0.05)",
                     color: isDone ? DK.green : isActive ? DK.indigo : DK.faint,
                     border: `1px solid ${isDone ? DK.greenBdr : isActive ? DK.indigoBdr : DK.border}` }}>
                     {isDone ? "✓" : sNum}
@@ -865,7 +865,7 @@ export default function EUDBCompliancePage() {
         <button onClick={() => setStep(s => Math.max(1, s - 1) as 1 | 2 | 3 | 4)} disabled={step === 1}
           style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px",
             borderRadius: 9999, fontSize: 12, cursor: step === 1 ? "not-allowed" : "pointer",
-            background: "rgba(0,0,0,0.2)", color: step === 1 ? DK.faint : DK.text,
+            background: "rgba(0,0,0,0.05)", color: step === 1 ? DK.faint : DK.text,
             border: `1px solid ${DK.border}` }}>
           <ChevronLeft size={13} /> Indietro
         </button>
@@ -874,9 +874,9 @@ export default function EUDBCompliancePage() {
             disabled={step === 1 && !canProceed1}
             style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px",
               borderRadius: 9999, fontSize: 12, fontWeight: 500,
-              background: step === 1 && !canProceed1 ? "rgba(0,0,0,0.1)" : DK.indigoBg,
-              color: step === 1 && !canProceed1 ? DK.faint : DK.indigo,
-              border: `1px solid ${step === 1 && !canProceed1 ? DK.border : DK.indigoBdr}`,
+              background: step === 1 && !canProceed1 ? "rgba(0,0,0,0.04)" : "#0D1016",
+              color: step === 1 && !canProceed1 ? DK.faint : "#fff",
+              border: `1px solid ${step === 1 && !canProceed1 ? DK.border : "#0D1016"}`,
               cursor: step === 1 && !canProceed1 ? "not-allowed" : "pointer" }}>
             Avanti <ChevronRight size={13} />
           </button>
@@ -886,9 +886,9 @@ export default function EUDBCompliancePage() {
       {/* Toast */}
       {toast && (
         <div style={{ position: "fixed", bottom: 24, right: 24, zIndex: 9999,
-          padding: "10px 18px", borderRadius: 10, background: DK.card,
+          padding: "10px 18px", borderRadius: 10, background: "#ffffff",
           border: `1px solid ${DK.greenBdr}`, color: DK.green,
-          fontSize: 12, fontWeight: 500, boxShadow: "0 2px 12px rgba(0,0,0,0.3)" }}>
+          fontSize: 12, fontWeight: 500, boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
           {toast}
         </div>
       )}
