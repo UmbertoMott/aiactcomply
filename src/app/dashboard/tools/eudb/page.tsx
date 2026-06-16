@@ -885,7 +885,7 @@ export default function EUDBPage() {
   }
 
   return (
-    <div style={{ maxWidth: 840, margin: "0 auto" }}>
+    <div style={{ width: "100%" }}>
       <SystemContextBanner checkProhibited={true} />
       {/* Header */}
       <div style={{ marginBottom: 20 }}>

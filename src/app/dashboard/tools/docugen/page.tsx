@@ -185,7 +185,118 @@ const ANNEX_IV = [
     autoSource: null,
     placeholder: "Monitoring continuo: drift detection settimanale su distribuzione input. Alert se accuracy scende sotto 82% su finestra mobile 30gg. Revisione umana obbligatoria se score < 40 o > 90 (casi limite)...",
   },
+  {
+    id: "s10", ref: "Art. 13", title: "Trasparenza verso gli utenti",
+    required: true,
+    hint: "Istruzioni per l'uso, metriche di performance comunicate, limitazioni note del sistema.",
+    autoSource: null,
+    placeholder: "Il sistema è accompagnato da istruzioni per l'uso in lingua italiana e inglese (v2.1, 2025-04-10). Le istruzioni includono: a) descrizione delle capacità e limitazioni; b) livello di accuratezza atteso; c) circostanze di rischio noto; d) modifiche sostanziali. Metriche di performance comunicate agli utenti: F1 score 86.8%, accuratezza 87.3%. Limitazioni dichiarate: il sistema non supporta curriculum in lingue diverse da IT/EN...",
+  },
+  {
+    id: "s11", ref: "Art. 14", title: "Supervisione umana",
+    required: true,
+    hint: "Meccanismi di override, interfacce di controllo, formazione degli operatori.",
+    autoSource: null,
+    placeholder: "Il sistema implementa supervisione umana ai sensi dell'Art. 14 EU AI Act tramite: a) override manuale obbligatorio per candidati con score borderline (40-60); b) interfaccia di revisione con spiegazione SHAP per ogni decisione; c) flag automatico per casi ad alto rischio (anziani, disabilità); d) audit trail di ogni intervento umano. Operatori formati con programma AI Literacy certificato (16h, cadenza annuale). Responsabile supervisione: [Nome Ruolo]...",
+  },
+  {
+    id: "s12", ref: "Art. 15", title: "Accuratezza, robustezza e sicurezza",
+    required: true,
+    hint: "Test di robustezza adversarial, accuracy su sottogruppi, resilienza agli errori.",
+    autoSource: null,
+    placeholder: "Test di robustezza eseguiti: a) adversarial testing con perturbazioni di input (typos, formati non standard) — degradazione max 3.2%; b) stress test su volume 10x — latenza p99 < 1.2s; c) test su sottogruppi demografici — gender gap accuracy < 2.1%, age gap < 1.8%; d) failsafe: in caso di errore critico il sistema restituisce output neutro e segnala all'operatore umano. Piano di test: quarterly su dataset aggiornato. Ultima esecuzione: 2025-04-10...",
+  },
+  {
+    id: "s13", ref: "Art. 50", title: "Obblighi di disclosure AI",
+    required: false,
+    hint: "Disclosure per chatbot, watermarking contenuti sintetici, labeling deepfake.",
+    autoSource: null,
+    placeholder: "Obblighi Art. 50 applicabili al sistema: [selezionare quelli pertinenti]\n\n□ Disclosure chatbot: il sistema include un'interfaccia conversazionale. L'utente è informato di interagire con un sistema AI tramite messaggio iniziale visibile. Testo disclosure: 'Stai interagendo con un assistente AI — le risposte sono generate automaticamente.'\n\n□ Labeling contenuti sintetici: i contenuti generati dal sistema sono etichettati con marker machine-readable [C2PA/ISO 21434] e indicazione visiva 'Generato da AI'.\n\n□ Watermarking: implementato tramite [fornitore/metodo], persistente dopo elaborazione standard.",
+  },
 ];
+
+// ─── AI Co-Writer ──────────────────────────────────────────────────────────────
+
+const CO_WRITER_TEMPLATES: Record<string, string> = {
+  s1: `Il sistema [NOME SISTEMA] è un sistema di intelligenza artificiale progettato per [SCOPO PRINCIPALE]. È destinato a essere utilizzato da [CATEGORIE UTENTI] nell'ambito di [CONTESTO OPERATIVO].\n\nL'uso previsto comprende: [LISTA USI]. L'uso non previsto comprende: [LISTA ESCLUSIONI].\n\nIl sistema opera in [DESCRIZIONE AMBIENTE]. I destinatari finali sono [DESTINATARI].`,
+  s2: `Architettura del sistema: [TIPO ARCHITETTURA, es. Transformer, CNN, GBM].\n\nPipeline di elaborazione:\n1. Preprocessing: [DESCRIZIONE]\n2. Feature extraction: [DESCRIZIONE]\n3. Inferenza: [DESCRIZIONE]\n4. Post-processing: [DESCRIZIONE]\n\nFramework e versioni: [LISTA FRAMEWORK].\nSoglia decisionale: [VALORE]. Motivazione: [MOTIVAZIONE].`,
+  s3: `Requisiti di input: [FORMATO, DIMENSIONE, TIPO].\nRequisiti di output: [FORMATO, RANGE, TIPO].\n\nVincoli di sistema:\n- Latenza massima: [X] ms (p99)\n- Disponibilità: [X]%\n- Capacità: [X] richieste/secondo\n- Lingue supportate: [LISTA]\n\nDipendenze esterne: [API, DATABASE, SERVIZI TERZI].`,
+  s4: `**Governance dei dati di addestramento — Art. 10**\n\nDataset utilizzati:\n- Nome: [NOME] | Fonte: [FONTE] | Dimensione: [N righe]\n- Periodo copertura: [DA] — [A]\n- Licenza: [LICENZA]\n\nAnalisi bias eseguita: [SÌ/NO]. Metodo: [METODO].\nProxy discriminatori rilevati: [LISTA o NESSUNO].\nMisure di debiasing adottate: [DESCRIZIONE].`,
+  s5: `Metriche di performance — valutazione su test set:\n\n| Metrica | Valore | Soglia minima |\n|---------|--------|---------------|\n| Accuracy | [X]% | [X]% |\n| Precision | [X]% | [X]% |\n| Recall | [X]% | [X]% |\n| F1 Score | [X]% | [X]% |\n\nTest set: [N] campioni, hold-out [X]%.\nData valutazione: [DATA]. Run ID: [ID].`,
+  s6: `**Gestione del rischio — Art. 9**\n\nRischi identificati:\n1. [RISCHIO 1] — Severità: ALTA — Probabilità: MEDIA\n   Mitigazione: [DESCRIZIONE]\n\n2. [RISCHIO 2] — Severità: MEDIA — Probabilità: ALTA\n   Mitigazione: [DESCRIZIONE]\n\nScore di rischio complessivo: [X]/10.\nProssima revisione: [DATA].`,
+  s7: `Modifiche sostanziali al sistema (Art. 3(23)):\n\n[DATA] — v[X.Y.Z] — [TIPO MODIFICA]: [DESCRIZIONE MODIFICA]\nClassificazione: [SOSTANZIALE / NON SOSTANZIALE]\nMotivazione: [MOTIVAZIONE]\nCommit: [HASH]\n\nConformity assessment ripetuto: [SÌ/NO]. Data: [DATA].`,
+  s8: `Norme armonizzate e standard applicati:\n\n- ISO/IEC 42001:2023 — AI Management Systems\n- ISO/IEC 27001:2022 — Information Security Management\n- [ALTRI STANDARD SETTORE-SPECIFICI]\n\nStato di conformità: [CERTIFICATO / IN CORSO / NON APPLICABILE]\nData prossimo audit: [DATA].`,
+  s9: `Piano di monitoraggio post-market — Art. 72:\n\nKPI monitorati:\n- Accuracy su produzione: alert se < [X]% su finestra mobile [N] giorni\n- Drift input: PSI settimanale, soglia [X]\n- Segnalazioni utenti: revisione mensile\n\nFrequenza report: [FREQUENZA]\nResponsabile: [RUOLO]\nEscalation: [PROCEDURA ESCALATION].`,
+  s10: `**Trasparenza verso gli utenti — Art. 13**\n\nIstruzioni per l'uso fornite in: [LINGUE].\n\nContenuto delle istruzioni:\na) Capacità e finalità del sistema: [DESCRIZIONE]\nb) Limitazioni note: [LISTA LIMITAZIONI]\nc) Livello di accuratezza atteso: [X]%\nd) Circostanze di rischio noto: [DESCRIZIONE]\ne) Misure di supervisione umana previste: [DESCRIZIONE]\n\nModifiche sostanziali comunicate: [SÌ/NO]. Modalità: [MODALITÀ].`,
+  s11: `**Supervisione umana — Art. 14**\n\nMeccanismi di supervisione implementati:\n- Override manuale: [DESCRIZIONE QUANDO E COME]\n- Interfaccia di controllo: [DESCRIZIONE]\n- Alert automatici: [CONDIZIONI TRIGGER]\n\nFormazione operatori:\n- Programma: [NOME PROGRAMMA]\n- Durata: [N] ore\n- Cadenza: [FREQUENZA]\n- Certificazione: [SÌ/NO]\n\nResponsabile supervisione: [NOME/RUOLO]\nAudit trail: ogni intervento umano è registrato con timestamp, utente, motivazione.`,
+  s12: `**Accuratezza, robustezza e sicurezza — Art. 15**\n\nTest di robustezza eseguiti:\n- Adversarial testing: [METODO, DEGRADAZIONE MAX]\n- Stress test: [CARICO, LATENZA]\n- Test su sottogruppi: [GRUPPI TESTATI, DELTA MAX]\n- Failsafe: [COMPORTAMENTO IN CASO DI ERRORE]\n\nRisultati:\n[TABELLA RISULTATI]\n\nPiano di test: cadenza [FREQUENZA].\nUltima esecuzione: [DATA]. Prossima: [DATA].`,
+  s13: `**Obblighi di disclosure AI — Art. 50**\n\n[Seleziona e compila gli obblighi applicabili]\n\n□ Disclosure chatbot (Art. 50(1)):\nTesto disclosure: "[TESTO DISCLOSURE]"\nPosizionamento: [DOVE È VISIBILE]\n\n□ Labeling contenuti sintetici (Art. 50(2)):\nMetodo di labeling: [METODO]\nMarker machine-readable: [SÌ/NO, STANDARD]\n\n□ Watermarking (Art. 50(5)):\nFornitore: [FORNITORE]\nPersistenza: [DESCRIZIONE].`,
+};
+
+function CoWriterBar({
+  sectionId,
+  sectionTitle,
+  currentText,
+  onExpand,
+}: {
+  sectionId: string;
+  sectionTitle: string;
+  currentText: string;
+  onExpand: (expanded: string) => void;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [applied, setApplied] = useState(false);
+
+  function expand() {
+    setLoading(true);
+    // Template-based expansion (no API key required)
+    const template = CO_WRITER_TEMPLATES[sectionId];
+    if (!template) {
+      setLoading(false);
+      return;
+    }
+    // Simulate async suggestion (200ms)
+    setTimeout(() => {
+      const base = currentText.trim();
+      const result = base
+        ? `${base}\n\n---\n*[Sezione espansa da AI Co-Writer — modifica il testo nei campi tra parentesi quadre]*\n\n${template}`
+        : template;
+      onExpand(result);
+      setApplied(true);
+      setLoading(false);
+      setTimeout(() => setApplied(false), 3000);
+    }, 200);
+  }
+
+  if (!CO_WRITER_TEMPLATES[sectionId]) return null;
+
+  return (
+    <div
+      className="mt-2 mb-1 flex items-center gap-2 px-3 py-2 rounded-lg"
+      style={{ background: "rgba(37,99,235,0.04)", border: "1px solid rgba(37,99,235,0.1)" }}
+    >
+      <span className="text-[10px] font-bold text-blue-500 flex-shrink-0">AI Co-Writer</span>
+      <p className="text-[11px] text-slate-500 flex-1">
+        Genera un template compilabile per la sezione &ldquo;{sectionTitle}&rdquo;
+      </p>
+      {applied ? (
+        <span className="text-[11px] text-green-600 font-medium flex-shrink-0">✓ Applicato</span>
+      ) : (
+        <button
+          onClick={expand}
+          disabled={loading}
+          className="flex-shrink-0 text-[11px] font-medium px-3 py-1.5 rounded-md transition-colors"
+          style={{
+            background: "#2563eb", color: "#fff", border: "none", cursor: loading ? "wait" : "pointer",
+            opacity: loading ? 0.6 : 1,
+          }}
+        >
+          {loading ? "…" : "Suggerisci testo →"}
+        </button>
+      )}
+    </div>
+  );
+}
 
 // ─── Simulated version history ────────────────────────────────────────────────
 const VERSIONS = [
@@ -769,6 +880,18 @@ export default function DocuGenPage() {
                 onFocus={(e) => (e.target.style.borderColor = "rgba(59,130,246,0.4)")}
                 onBlur={(e) => (e.target.style.borderColor = "rgba(0,0,0,0.09)")}
                 placeholder={activeS.placeholder || "Inserisci il contenuto della sezione..."}
+              />
+
+              {/* AI Co-Writer */}
+              <CoWriterBar
+                sectionId={activeSection}
+                sectionTitle={activeS.title}
+                currentText={getContent(activeSection)}
+                onExpand={(expanded) => {
+                  setContent((prev) => ({ ...prev, [activeSection]: expanded }));
+                  if (!status[activeSection])
+                    setStatus((prev) => ({ ...prev, [activeSection]: "draft" }));
+                }}
               />
 
               {/* Bottom actions */}

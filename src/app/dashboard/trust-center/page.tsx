@@ -418,7 +418,7 @@ export default function TrustCenterPage() {
   // ─── RENDER ─────────────────────────────────────────────────────────
 
   return (
-    <div className="max-w-5xl space-y-6">
+    <div className="w-full space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Trust Center</h1>

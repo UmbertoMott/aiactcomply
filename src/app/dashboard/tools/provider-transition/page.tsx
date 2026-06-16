@@ -501,7 +501,7 @@ export default function ProviderTransitionPage() {
   const vc = verdictConfig[verdict];
 
   return (
-    <div style={{ maxWidth: 860, margin: "0 auto" }}>
+    <div style={{ width: "100%" }}>
       <SystemContextBanner checkProhibited={true} />
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
