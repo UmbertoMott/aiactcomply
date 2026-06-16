@@ -579,7 +579,7 @@ export default function DataAuditPage() {
       <div className="mb-5">
         <div className="flex items-center gap-2 mb-1">
           <Database size={20} style={{ color: T.blue }} />
-          <h1 className="text-xl font-bold" style={{ color: T.text }}>Data Audit</h1>
+          <h1 className="text-xl font-bold" style={{ color: T.text }}>Qualità Dati</h1>
           <span className="text-[11px] font-medium px-2 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>Art. 10</span>
         </div>
         <p className="text-[12px]" style={{ color: T.muted }}>

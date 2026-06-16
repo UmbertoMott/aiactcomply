@@ -21,6 +21,7 @@ import UserMenu from "@/components/dashboard/UserMenu";
 import ChatAssistant from "@/components/ui/ChatAssistant";
 import SessionWarning from "@/components/auth/SessionWarning";
 import { ProjectSwitcher } from "@/components/layout/ProjectSwitcher";
+import { sanitizeSidebarLabel } from "@/lib/sidebar/sidebar-utils";
 
 
 type NavChild = {
@@ -85,7 +86,7 @@ const PILLARS: NavPillar[] = [
   {
     id: "data-audit",
     icon: ClipboardList,
-    label: "Data Audit",
+    label: "Qualità Dati",
     href: "/dashboard/tools/data-audit",
     art: "Art. 10",
   },
@@ -105,14 +106,13 @@ const PILLARS: NavPillar[] = [
     children: [
       { icon: CalendarClock,  label: "Scadenze",            href: "/dashboard/compliance-ops/deadlines",  art: "Timeline" },
       { icon: FileArchive,    label: "LogVault",            href: "/dashboard/tools/logvault",            art: "Art. 12" },
-      { icon: TrendingUp,     label: "Post-Market",         href: "/dashboard/post-market",               art: "Art. 72" },
+      { icon: TrendingUp,     label: "Post-Market",         href: "/dashboard/post-market",               art: "Art. 72-73" },
       { icon: Database,       label: "Registrazione EUDB",  href: "/dashboard/compliance-ops/eudb",       art: "Art. 49" },
-      { icon: UserCheck,      label: "Authorized Representative", href: "/dashboard/compliance-ops/authorized-rep", art: "Art. 22 [verify against current AI Act text]" },
+      { icon: UserCheck,      label: "Authorized Representative", href: "/dashboard/compliance-ops/authorized-rep", art: "Art. 22" },
       { icon: ArrowRightLeft, label: "Provider Transition", href: "/dashboard/compliance-ops/provider-transition", art: "Art. 28" },
-      { icon: ShieldCheck,    label: "Trust Center",        href: "/dashboard/compliance-ops/trust-center", art: "Trasparenza [verify against current AI Act text]" },
+      { icon: ShieldCheck,    label: "Trust Center",        href: "/dashboard/compliance-ops/trust-center", art: "Art. 13/50" },
       { icon: Scale,          label: "L.132/2025",          href: "/dashboard/tools/l132",                art: "PA Italy", flag: "paItaly" },
       { icon: Landmark,       label: "AGID/ACN",            href: "/dashboard/tools/agid-acn",            art: "PA Italy", flag: "paItaly" },
-      { icon: Siren,          label: "Incident Notification", href: "/dashboard/tools/incident",          art: "Art. 73", badge: "new" },
     ],
   },
 ];
@@ -280,12 +280,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   >
                     <div className={`flex items-center ${collapsed ? "" : "gap-2"}`}>
                       <pillar.icon className="h-3.5 w-3.5 flex-shrink-0" />
-                      {!collapsed && <span>{pillar.label}</span>}
+                      {!collapsed && <span>{sanitizeSidebarLabel(pillar.label)}</span>}
                     </div>
                     {!collapsed && pillar.art && (
                       <span className="text-[9px] px-1.5 py-0.5 rounded"
                         style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.55)" }}>
-                        {pillar.badge === "urgent" ? "⚡" : pillar.art}
+                        {pillar.badge === "urgent" ? "⚡" : sanitizeSidebarLabel(pillar.art)}
                       </span>
                     )}
                   </Link>
@@ -307,14 +307,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   >
                     <div className={`flex items-center ${collapsed ? "" : "gap-2"}`}>
                       <pillar.icon className="h-3.5 w-3.5 flex-shrink-0" />
-                      {!collapsed && <span className="font-medium">{pillar.label}</span>}
+                      {!collapsed && <span className="font-medium">{sanitizeSidebarLabel(pillar.label)}</span>}
                     </div>
                     {!collapsed && (
                       <div className="flex items-center gap-1">
                         {pillar.art && (
                           <span className="text-[9px] px-1.5 py-0.5 rounded"
                             style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.55)" }}>
-                            {pillar.art}
+                            {sanitizeSidebarLabel(pillar.art)}
                           </span>
                         )}
                         <ChevronDown
@@ -343,13 +343,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             <div className={`flex items-center ${collapsed ? "" : "gap-2"}`}>
                               {!collapsed && <div className="w-px h-3 rounded" style={{ background: "rgba(255,255,255,0.2)" }} />}
                               <child.icon className="h-3 w-3 flex-shrink-0" />
-                              {!collapsed && <span>{child.label}</span>}
+                              {!collapsed && <span>{sanitizeSidebarLabel(child.label)}</span>}
                             </div>
                             {!collapsed && (
                               child.href === "/dashboard/compliance-ops/trust-center" && trustCenterPublished
                                 ? <span className="text-[9px] px-1 py-0.5 rounded border" style={{ background: "rgba(6,78,59,0.4)", color: "#6ee7b7", borderColor: "rgba(52,211,153,0.3)" }}>Pubblicato</span>
                                 : child.art
-                                  ? <span className="text-[9px] px-1 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}>{child.art}</span>
+                                  ? <span className="text-[9px] px-1 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}>{sanitizeSidebarLabel(child.art)}</span>
                                   : null
                             )}
                           </Link>
