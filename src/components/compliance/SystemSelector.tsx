@@ -5,26 +5,30 @@ import { ChevronDown, Check, Plus, AlertTriangle } from "lucide-react";
 import { useActiveSystem } from "@/lib/hooks/useActiveSystem";
 import type { SystemTier } from "@/lib/inventory/ai-system";
 
-// ─── Tier badges ──────────────────────────────────────────────────────────────
+// ─── Tier badge ───────────────────────────────────────────────────────────────
 
-const TIER_META: Record<SystemTier, { label: string; color: string; bg: string }> = {
-  prohibited:    { label: "Vietato",       color: "#7F1D1D", bg: "#FEF2F2" },
-  high_risk:     { label: "Alto rischio",  color: "#9A3412", bg: "#FFF7ED" },
-  limited:       { label: "Limitato",      color: "#92400E", bg: "#FFFBEB" },
-  minimal:       { label: "Minimale",      color: "#14532D", bg: "#F0FDF4" },
-  gpai:          { label: "GPAI",          color: "#1E3A5F", bg: "#EFF6FF" },
-  gpai_systemic: { label: "GPAI Sist.",    color: "#312E81", bg: "#EEF2FF" },
-  unclassified:  { label: "Non class.",    color: "#374151", bg: "#F3F4F6" },
+const TIER_LABEL: Record<SystemTier, string> = {
+  prohibited:    "Vietato",
+  high_risk:     "Alto rischio",
+  limited:       "Limitato",
+  minimal:       "Minimale",
+  gpai:          "GPAI",
+  gpai_systemic: "GPAI Sist.",
+  unclassified:  "Non class.",
 };
 
 function TierBadge({ tier }: { tier: SystemTier }) {
-  const m = TIER_META[tier] ?? TIER_META.unclassified;
+  const isProhibited = tier === "prohibited";
   return (
     <span
-      className="text-[10px] font-medium px-1.5 py-0.5 rounded-full whitespace-nowrap"
-      style={{ background: m.bg, color: m.color }}
+      className="text-[10px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap"
+      style={{
+        background: isProhibited ? "rgba(220,38,38,0.06)" : "rgba(0,0,0,0.04)",
+        color: isProhibited ? "#DC2626" : "rgba(0,0,0,0.45)",
+        border: isProhibited ? "1px solid rgba(220,38,38,0.2)" : "1px solid rgba(0,0,0,0.08)",
+      }}
     >
-      {m.label}
+      {TIER_LABEL[tier] ?? tier}
     </span>
   );
 }
@@ -113,24 +117,13 @@ export function SystemSelector({ checkProhibited = true }: SystemSelectorProps) 
       >
         {/* Sistema attivo */}
         <div className="flex-1 flex items-center gap-2.5 min-w-0">
-          <div
-            className="w-2 h-2 rounded-full flex-shrink-0"
-            style={{
-              background:
-                active?.tier === "high_risk" ? "#EA580C"
-                : active?.tier === "prohibited" ? "#DC2626"
-                : active?.tier === "limited" ? "#D97706"
-                : active?.tier?.startsWith("gpai") ? "#2563EB"
-                : "#16A34A",
-            }}
-          />
           <span className="text-[13px] font-medium truncate" style={{ color: "#0D1016" }}>
             {active?.name ?? "—"}
           </span>
           {active && <TierBadge tier={active.tier} />}
           {active?.status && (
             <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>
-              {active.status === "in_production" ? "in produzione"
+              {active.status === "in_production" ? "in prod."
                 : active.status === "in_development" ? "in sviluppo"
                 : active.status === "planned" ? "pianificato"
                 : "deprecato"}
@@ -172,17 +165,6 @@ export function SystemSelector({ checkProhibited = true }: SystemSelectorProps) 
                 onClick={() => { setActiveSystem(sys.id); setOpen(false); }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-gray-50"
               >
-                <div
-                  className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                  style={{
-                    background:
-                      sys.tier === "high_risk" ? "#EA580C"
-                      : sys.tier === "prohibited" ? "#DC2626"
-                      : sys.tier === "limited" ? "#D97706"
-                      : sys.tier?.startsWith("gpai") ? "#2563EB"
-                      : "#16A34A",
-                  }}
-                />
                 <div className="flex-1 min-w-0">
                   <div className="text-[12px] font-medium truncate" style={{ color: "#0D1016" }}>
                     {sys.name}

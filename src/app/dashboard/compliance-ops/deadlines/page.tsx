@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useCallback, CSSProperties } from "react";
 import Link from "next/link";
 import {
-  CalendarClock, AlarmClock, ChevronRight, ChevronDown, Sparkles,
-  Loader2, Check, ExternalLink, Timer, Info,
+  CalendarClock, ChevronDown, Sparkles,
+  Loader2, Check, ExternalLink, Info,
 } from "lucide-react";
 import { AI_ACT_DEADLINES, DEADLINE_ACTIONS } from "@/lib/deadlines/deadline-constants";
 import { buildDynamicDeadlines, filterDeadlinesByTier } from "@/lib/deadlines/deadline-aggregator";
@@ -24,10 +24,10 @@ const MUTED= "rgba(0,0,0,0.45)";
 const BORDER = "rgba(0,0,0,0.08)";
 const FONT: CSSProperties = { fontFamily: "Inter, system-ui, sans-serif" };
 
-const SEV: Record<string, { color: string; bg: string }> = {
-  critical:      { color: "#DC2626", bg: "rgba(220,38,38,0.12)" },
-  important:     { color: "#D97706", bg: "rgba(217,119,6,0.1)"  },
-  informational: { color: "#3B82F6", bg: "rgba(59,130,246,0.08)"},
+const SEV: Record<string, { color: string; bg: string; border: string }> = {
+  critical:      { color: "#DC2626", bg: "rgba(220,38,38,0.06)", border: "rgba(220,38,38,0.2)" },
+  important:     { color: "rgba(0,0,0,0.65)", bg: "rgba(0,0,0,0.03)", border: "rgba(0,0,0,0.1)" },
+  informational: { color: "rgba(0,0,0,0.40)", bg: "transparent",      border: "transparent" },
 };
 
 const TIMELINE_PREFS_KEY      = "aicomply_timeline_prefs";
@@ -44,21 +44,14 @@ function savePrefs(p: { viewMode: "ai" | "chronological"; filterStatus?: Deadlin
 
 // ─── Dot component ─────────────────────────────────────────────────────────────
 function TimelineDot({ status }: { status: DeadlineStatus }) {
-  const c = STATUS_COLOR[status];
   const isImminent = status === "imminent";
   return (
-    <div className="relative flex-shrink-0" style={{ width: 14, height: 14 }}>
-      {isImminent && (
-        <div className="absolute inset-0 rounded-full animate-ping"
-          style={{ background: c.dot, opacity: 0.3, animationDuration: "2s" }} />
-      )}
-      <div className="rounded-full w-3.5 h-3.5 border-2"
-        style={{
-          background: status === "future" ? "transparent" : c.dot,
-          borderColor: c.dot,
-          boxShadow: isImminent ? `0 0 8px 2px ${c.dot}4d` : "none",
-        }} />
-    </div>
+    <div className="w-2 h-2 rounded-full flex-shrink-0 mt-1.5"
+      style={{
+        background: isImminent ? "#DC2626"
+          : status === "upcoming" ? "#0D1016"
+          : "rgba(0,0,0,0.18)",
+      }} />
   );
 }
 
@@ -85,14 +78,10 @@ function DeadlineCard({ deadline, isLast }: { deadline: AIActDeadline; isLast: b
   return (
     <div className="flex gap-4">
       {/* Left: dot + line */}
-      <div className="flex flex-col items-center" style={{ width: 14 }}>
+      <div className="flex flex-col items-center" style={{ width: 8 }}>
         <TimelineDot status={status} />
         {!isLast && (
-          <div className="flex-1 w-px mt-1"
-            style={{
-              background: BORDER,
-              borderLeft: status === "passed" ? "1px dashed rgba(255,255,255,0.1)" : `1px solid ${BORDER}`,
-            }} />
+          <div className="flex-1 w-px mt-1" style={{ background: BORDER }} />
         )}
       </div>
 
@@ -113,24 +102,19 @@ function DeadlineCard({ deadline, isLast }: { deadline: AIActDeadline; isLast: b
                   {deadline.label}
                 </p>
                 <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                  <span className="text-[11px]" style={{ color: sc.text }}>
+                  <span className="text-[11px]" style={{ color: status === "passed" ? MUTED : status === "imminent" ? "#DC2626" : MUTED }}>
                     {status === "passed"
                       ? `Passata ${Math.abs(days)} giorni fa`
-                      : status === "imminent"
-                      ? `⚠ ${days} giorni`
-                      : status === "upcoming"
-                      ? `${days} giorni`
                       : `${days} giorni`}
                   </span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full"
-                    style={{ background: sev.bg, color: sev.color }}>
-                    {deadline.severity}
-                  </span>
-                  {deadline.isDynamic && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full"
-                      style={{ background: "rgba(124,58,237,0.12)", color: "#a78bfa" }}>
-                      dinamica
+                  {deadline.severity === "critical" && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded"
+                      style={{ background: sev.bg, color: sev.color, border: `1px solid ${sev.border}` }}>
+                      critica
                     </span>
+                  )}
+                  {deadline.isDynamic && (
+                    <span className="text-[10px]" style={{ color: MUTED }}>dinamica</span>
                   )}
                 </div>
               </div>
@@ -138,13 +122,13 @@ function DeadlineCard({ deadline, isLast }: { deadline: AIActDeadline; isLast: b
             <div className="flex items-center gap-2">
               {deadline.tool_href && (
                 <Link href={deadline.tool_href}
-                  className="text-[11px] font-medium px-2.5 py-1 rounded-lg flex items-center gap-1 hover:opacity-90 transition-opacity"
-                  style={{ background: sev.bg, color: sev.color, textDecoration: "none" }}
+                  className="text-[11px] font-medium px-2.5 py-1 rounded-lg transition-opacity hover:opacity-70"
+                  style={{ background: "#0D1016", color: "#fff", textDecoration: "none" }}
                   onClick={e => e.stopPropagation()}>
-                  Vai <ExternalLink size={10} />
+                  Vai →
                 </Link>
               )}
-              <ChevronDown size={14} style={{ color: MUTED, transform: expanded ? "rotate(180deg)" : "none", transition: "transform 150ms" }} />
+              <ChevronDown size={13} style={{ color: MUTED, transform: expanded ? "rotate(180deg)" : "none", transition: "transform 150ms" }} />
             </div>
           </div>
         </button>
@@ -168,7 +152,7 @@ function DeadlineCard({ deadline, isLast }: { deadline: AIActDeadline; isLast: b
                   {actions.map((a, i) => (
                     <li key={i} className="flex items-start gap-2">
                       <div className="mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0"
-                        style={{ background: sev.color }} />
+                        style={{ background: "rgba(0,0,0,0.25)" }} />
                       {a.href
                         ? <Link href={a.href} className="text-[12px] hover:underline" style={{ color: TEXT }}>{a.label}</Link>
                         : <span className="text-[12px]" style={{ color: TEXT }}>{a.label}</span>
@@ -217,11 +201,12 @@ function SummaryCards({
             className="rounded-xl px-4 py-3 text-left transition-all duration-150"
             style={{
               background: BG2,
-              border: isActive ? `1px solid ${sc.dot}` : `1px solid ${BORDER}`,
-              opacity: activeFilter && !isActive ? 0.5 : 1,
+              border: isActive ? `1px solid #0D1016` : `1px solid ${BORDER}`,
+              opacity: activeFilter && !isActive ? 0.4 : 1,
               cursor: "pointer",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
             }}>
-            <p className="text-2xl font-bold" style={{ color: sc.dot }}>{counts[status]}</p>
+            <p className="text-2xl font-semibold" style={{ color: status === "imminent" && counts[status] > 0 ? "#DC2626" : TEXT }}>{counts[status]}</p>
             <p className="text-[11px] mt-0.5" style={{ color: MUTED }}>{label}</p>
           </button>
         );
@@ -238,41 +223,33 @@ function NextDeadlineBanner({ deadline }: { deadline: AIActDeadline }) {
   const isImminent = status === "imminent";
 
   return (
-    <div className="rounded-xl p-5 mb-6 flex items-start gap-5 relative overflow-hidden"
+    <div className="rounded-xl px-5 py-4 mb-6 flex items-center gap-5"
       style={{
         background: BG2,
-        borderLeft: `4px solid ${sev.color}`,
-        border: `1px solid ${sev.color}40`,
-        borderLeftWidth: 4,
+        border: isImminent ? `1px solid rgba(220,38,38,0.2)` : `1px solid ${BORDER}`,
+        boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
       }}>
-      <div className="flex-shrink-0">
-        {isImminent
-          ? <AlarmClock size={28} style={{ color: sev.color, animation: "pulse 2s ease-in-out infinite" }} />
-          : <Timer size={28} style={{ color: sev.color }} />
-        }
-      </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[11px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: MUTED }}>
+        <p className="text-[10px] font-semibold uppercase tracking-widest mb-1" style={{ color: MUTED }}>
           Prossima scadenza
         </p>
-        <p className="text-3xl font-bold mb-1" style={{ color: sev.color }}>
-          {days} giorni
-        </p>
-        <p className="text-sm font-medium" style={{ color: TEXT }}>{deadline.label}</p>
-        <ArticleBadge article={deadline.article} />
-        <p className="text-[12px] mt-2 leading-relaxed" style={{ color: MUTED }}>
+        <div className="flex items-baseline gap-2 mb-0.5">
+          <p className="text-2xl font-semibold" style={{ color: isImminent ? "#DC2626" : TEXT }}>
+            {days} giorni
+          </p>
+          <ArticleBadge article={deadline.article} />
+        </div>
+        <p className="text-[13px]" style={{ color: TEXT }}>{deadline.label}</p>
+        <p className="text-[11px] mt-0.5" style={{ color: MUTED }}>
           {new Date(deadline.date).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" })}
         </p>
       </div>
       {deadline.tool_href && (
         <Link href={deadline.tool_href}
-          className="flex-shrink-0 self-center flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold hover:opacity-90 transition-opacity"
-          style={{ background: sev.color, color: "#fff", textDecoration: "none" }}>
-          Vai al tool <ChevronRight size={14} />
+          className="flex-shrink-0 text-[12px] font-medium px-3 py-1.5 rounded-lg hover:opacity-80 transition-opacity"
+          style={{ background: "#0D1016", color: "#fff", textDecoration: "none" }}>
+          Vai →
         </Link>
-      )}
-      {isImminent && (
-        <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }`}</style>
       )}
     </div>
   );
@@ -436,7 +413,7 @@ export default function DeadlinesPage() {
         <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <CalendarClock size={24} style={{ color: "#3B82F6" }} />
+              <CalendarClock size={20} style={{ color: MUTED }} />
               <h1 className="text-2xl font-semibold" style={{ color: TEXT }}>Scadenze AI Act</h1>
             </div>
             <p className="text-sm" style={{ color: MUTED }}>
@@ -473,13 +450,13 @@ export default function DeadlinesPage() {
         {systems.length === 0 && (
           <div className="rounded-xl p-5 mb-6 flex items-start gap-3"
             style={{ background: BG2, border: `1px solid rgba(59,130,246,0.2)` }}>
-            <Info size={16} style={{ color: "#3B82F6", flexShrink: 0, marginTop: 2 }} />
+            <Info size={14} style={{ color: MUTED, flexShrink: 0, marginTop: 2 }} />
             <div>
               <p className="text-sm font-medium mb-1" style={{ color: TEXT }}>Scadenze personalizzate non disponibili</p>
               <p className="text-[12px] leading-relaxed" style={{ color: MUTED }}>
                 Stai visualizzando solo le scadenze che si applicano a tutti i sistemi AI.
-                Completa il <Link href="/dashboard/triage" className="underline" style={{ color: "#3B82F6" }}>Triage</Link> o
-                aggiungi sistemi all&apos;<Link href="/dashboard/tools/inventory" className="underline" style={{ color: "#3B82F6" }}>Inventario</Link> per scadenze filtrate per il tuo tier normativo.
+                Completa il <Link href="/dashboard/triage" className="underline" style={{ color: "#0D1016" }}>Triage</Link> o
+                aggiungi sistemi all&apos;<Link href="/dashboard/tools/inventory" className="underline" style={{ color: "#0D1016" }}>Inventario</Link> per scadenze filtrate per il tuo tier normativo.
               </p>
             </div>
           </div>
