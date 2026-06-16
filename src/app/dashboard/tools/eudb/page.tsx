@@ -8,7 +8,7 @@ import {
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { EUDBResult, ConformityResult, AuthRepResult } from "@/lib/dossier/storage-schema";
 import SignOffPanel from "@/components/ui/SignOffPanel";
-import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { SystemSelector } from "@/components/compliance/SystemSelector";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -886,7 +886,7 @@ export default function EUDBPage() {
 
   return (
     <div style={{ maxWidth: 840, margin: "0 auto" }}>
-      <SystemContextBanner checkProhibited={true} />
+      <SystemSelector checkProhibited={true} />
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>

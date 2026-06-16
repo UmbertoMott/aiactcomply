@@ -13,7 +13,7 @@ import type { LogvaultResult, ClassifierResult } from "@/lib/dossier/storage-sch
 import { suggestEventSeverity } from "@/app/actions/suggestEventSeverity";
 import { parseLogFile, analyzeLogCoverage } from "@/app/actions/logvaultActions";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
-import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { TRACEABILITY_PURPOSES, BIOMETRIC_LOG_REQUIREMENTS, FIELD_NAME_HINTS, MAX_LOG_FILE_SIZE_BYTES } from "@/lib/logvault/traceability-purposes";
 import {
   loadLogVaultRecord, saveLogVaultRecord, getAllDetectedFields, countCovered,
@@ -605,7 +605,7 @@ export default function LogVaultPage() {
 
   return (
     <div className="w-full max-w-4xl mx-auto" style={FONT}>
-      <SystemContextBanner checkProhibited={true} />
+      <SystemSelector checkProhibited={true} />
 
       {/* Dossier banner */}
       {savedAt ? (

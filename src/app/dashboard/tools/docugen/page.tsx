@@ -16,7 +16,7 @@ import { useAutoSave } from "@/hooks/useAutoSave";
 import { VersionHistoryPanel } from "@/components/compliance/VersionHistoryPanel";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { appendVersion, listVersions, type VersionSnapshot } from "@/lib/projects/version-history";
-import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { SystemSelector } from "@/components/compliance/SystemSelector";
 
 const STORAGE_KEY = "docugen_state";
 
@@ -640,7 +640,7 @@ export default function DocuGenPage() {
   return (
     <div className="w-full" style={{ fontFamily: "var(--font-inter, system-ui)" }}>
 
-      <SystemContextBanner checkProhibited={true} />
+      <SystemSelector checkProhibited={true} />
       <ProviderTransitionAlertBanner />
 
       {/* Dossier saved banner */}

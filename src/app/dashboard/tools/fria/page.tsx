@@ -16,7 +16,7 @@ import { VersionHistoryPanel } from "@/components/compliance/VersionHistoryPanel
 import { draftFria } from "@/app/actions/draftFria";
 import type { ClassifierResult, RiskManagerResult, DataAuditResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
-import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { SystemSelector } from "@/components/compliance/SystemSelector";
 import {
   type FRIADocument, type FRIAScenario, type FRIARightImpact,
   type FRIASeverityAssessment, type FRIAMitigationMeasure,
@@ -1162,7 +1162,7 @@ export default function FRIAPage() {
   return (
     <div className="w-full" style={{ display: "flex", flexDirection: "column", gap: 0, minHeight: 0, fontFamily: "var(--font-inter, system-ui)" }}>
 
-      <SystemContextBanner checkProhibited={true} />
+      <SystemSelector checkProhibited={true} />
 
       {/* ── AI Draft Generator Banner (Art. 27) ─────────────────────────────── */}
       <div style={{

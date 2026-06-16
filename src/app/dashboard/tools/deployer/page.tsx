@@ -9,7 +9,7 @@ import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { DeployerCheckResult, LogvaultResult, FRIAResult } from "@/lib/dossier/storage-schema";
 import SignOffPanel from "@/components/ui/SignOffPanel";
-import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { draftWorkerNotification, type WorkerNotificationResult } from "@/app/actions/draftWorkerNotification";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -507,7 +507,7 @@ export default function DeployerPage() {
   return (
     <div style={{ maxWidth: 820, margin: "0 auto", paddingBottom: 60 }}>
 
-      <SystemContextBanner checkProhibited={true} />
+      <SystemSelector checkProhibited={true} />
 
       {/* Role mismatch warning */}
       {isProviderRole && (

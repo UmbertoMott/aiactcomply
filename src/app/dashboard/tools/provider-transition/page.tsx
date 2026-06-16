@@ -9,7 +9,7 @@ import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { ProviderTransitionResult, ClassifierResult, DeployerCheckResult } from "@/lib/dossier/storage-schema";
 import SignOffPanel from "@/components/ui/SignOffPanel";
-import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { SystemSelector } from "@/components/compliance/SystemSelector";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -502,7 +502,7 @@ export default function ProviderTransitionPage() {
 
   return (
     <div style={{ maxWidth: 860, margin: "0 auto" }}>
-      <SystemContextBanner checkProhibited={true} />
+      <SystemSelector checkProhibited={true} />
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>

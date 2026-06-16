@@ -13,7 +13,7 @@ import { riskManagerChat, type ChatMessage, type RiskDocumentation, type RiskPha
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { RiskManagerResult, ClassifierResult } from "@/lib/dossier/storage-schema";
 import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
-import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { RiskRegisterViewer } from "./components/RiskRegisterViewer";
 import { buildRiskRegisterDocument, buildAnnexSections, shouldShowGpaiModule, type AnnexSection } from "@/lib/risk/risk-register-mapper";
 import type { RiskRegisterDocument } from "@/lib/risk/risk-register-types";
@@ -738,7 +738,7 @@ export default function RiskManagerPage() {
 
   return (
     <div style={{ fontFamily: "var(--font-inter, system-ui)", background: "#ffffff", height: "calc(100vh - 4rem)", display: "flex", flexDirection: "column" }}>
-      <SystemContextBanner />
+      <SystemSelector />
       <ProviderTransitionAlertBanner />
 
       {/* Header */}

@@ -9,7 +9,7 @@ import {
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { ClassifierResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
-import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { SystemSelector } from "@/components/compliance/SystemSelector";
 import {
   DATA_GOVERNANCE_PRACTICES,
   SPECIAL_CATEGORIES_MODULE,
@@ -560,7 +560,7 @@ export default function DataAuditPage() {
 
   return (
     <div className="w-full max-w-4xl mx-auto" style={FONT}>
-      <SystemContextBanner checkProhibited={false} />
+      <SystemSelector checkProhibited={false} />
 
       {/* Dossier banner */}
       {savedAt ? (

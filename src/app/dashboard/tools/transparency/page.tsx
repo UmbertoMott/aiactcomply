@@ -12,7 +12,7 @@ import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { TransparencyResult, ClassifierResult, OversightResult, ResilienceResult } from "@/lib/dossier/storage-schema";
 import { processTransparencyNotice, type TransparencyNoticeResult } from "@/app/actions/processTransparencyNotice";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
-import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { SystemSelector } from "@/components/compliance/SystemSelector";
 
 const card = { background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
 
@@ -551,7 +551,7 @@ export default function TransparencyPage() {
   return (
     <div className="w-full" style={{ fontFamily: "var(--font-inter, system-ui)" }}>
 
-      <SystemContextBanner checkProhibited={true} />
+      <SystemSelector checkProhibited={true} />
 
       {/* Dossier saved banner */}
       {savedAt ? (

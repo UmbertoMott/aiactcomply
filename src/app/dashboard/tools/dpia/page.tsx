@@ -18,7 +18,7 @@ import {
   ClassifierResult, DataAuditResult,
 } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
-import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { SystemSelector } from "@/components/compliance/SystemSelector";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -1464,7 +1464,7 @@ export default function DPIAPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: T.bg, padding: "24px 32px" }}>
-      <SystemContextBanner checkProhibited={true} />
+      <SystemSelector checkProhibited={true} />
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>

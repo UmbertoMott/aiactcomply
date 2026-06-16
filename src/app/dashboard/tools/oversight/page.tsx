@@ -9,7 +9,7 @@ import {
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { ClassifierResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
-import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { SystemSelector } from "@/components/compliance/SystemSelector";
 import {
   OVERSIGHT_REQUIREMENTS,
   FOUR_EYES_MODULE,
@@ -721,7 +721,7 @@ export default function OversightPage() {
 
   return (
     <div className="w-full max-w-4xl mx-auto" style={FONT}>
-      <SystemContextBanner checkProhibited={true} />
+      <SystemSelector checkProhibited={true} />
 
       {/* Dossier banner */}
       {savedAt ? (

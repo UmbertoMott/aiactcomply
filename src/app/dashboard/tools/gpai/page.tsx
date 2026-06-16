@@ -9,7 +9,7 @@ import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { GPAIResult } from "@/lib/dossier/storage-schema";
 import SignOffPanel from "@/components/ui/SignOffPanel";
-import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { SystemSelector } from "@/components/compliance/SystemSelector";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const T = {
@@ -562,7 +562,7 @@ export default function GPAIAssessmentPage() {
 
   return (
     <div style={{ maxWidth: 860, margin: "0 auto", paddingBottom: 60 }}>
-      <SystemContextBanner checkProhibited={true} />
+      <SystemSelector checkProhibited={true} />
 
       {/* Dossier saved */}
       {savedAt ? (
