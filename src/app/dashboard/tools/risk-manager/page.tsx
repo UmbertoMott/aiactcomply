@@ -62,6 +62,8 @@ import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
 import { writeToStorage } from "@/lib/dossier/storage-schema";
 import type { RiskManagerResult } from "@/lib/dossier/storage-schema";
+import { useScopedStorage } from "@/lib/hooks/useScopedStorage";
+import { RiskMatrix } from "@/components/risk-register/RiskMatrix";
 
 // ─── FIX 1 — Typed form state ─────────────────────────────────────────
 
@@ -93,21 +95,11 @@ type TempFormState = {
 
 // ─── FIX 5 — Persistence helpers ─────────────────────────────────────
 
-const STORAGE_KEY = "risk_manager_report";
+/** Fallback condiviso — stesse forma per ogni sistema, mai mutato in place. */
+const EMPTY_REPORT: RiskManagerReport = createEmptyRiskReport("Nuovo Sistema AI");
 
-function loadReport(): RiskManagerReport {
-  if (typeof window === "undefined") return createEmptyRiskReport("Nuovo Sistema AI");
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as RiskManagerReport) : createEmptyRiskReport("Nuovo Sistema AI");
-  } catch {
-    return createEmptyRiskReport("Nuovo Sistema AI");
-  }
-}
-
-function saveReport(r: RiskManagerReport) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(r));
-  // Sync to shared STORAGE_KEYS so Journey, DocuGen and NIST-RMF can read it
+/** Sincronizza con la chiave globale condivisa letta da Journey, DocuGen, NIST-RMF. */
+function syncSharedFormat(r: RiskManagerReport) {
   // nextReviewDate and reviewCycle are added dynamically on finalize (not in base type)
   const rAny = r as unknown as Record<string, unknown>;
   const normalized: RiskManagerResult = {
@@ -182,9 +174,11 @@ function cls(...args: (string | false | undefined | null)[]) {
 
 export default function RiskManagerPage() {
   const [phase, setPhase] = useState<Phase>("scoping");
+  const [matrixView, setMatrixView] = useState<"list" | "matrix">("list");
+  const [matrixFilter, setMatrixFilter] = useState<{ p: string; s: string } | null>(null);
 
-  // FIX 5 — load from localStorage
-  const [report, setReport] = useState<RiskManagerReport>(() => loadReport());
+  // Isolamento per sistema attivo — chiave aicomply_risk_manager_report_v2_[systemId] (PROMPT_AZ)
+  const [report, setReport] = useScopedStorage<RiskManagerReport>("risk_manager_report", EMPTY_REPORT);
   const [finalized, setFinalized] = useState(false);
   const [nextReviewDate, setNextReviewDate] = useState<string>("");
   const [reviewCycle, setReviewCycle] = useState<"monthly" | "quarterly" | "biannual" | "annual">("annual");
@@ -197,17 +191,17 @@ export default function RiskManagerPage() {
     setTimeout(() => setToast(null), 3500);
   }
 
-  // FIX 5 — updateReport helper persists every change
+  // updateReport helper — useScopedStorage persiste già ad ogni setReport
   function updateReport(updater: (prev: RiskManagerReport) => RiskManagerReport) {
     setReport((prev) => {
       const next = updater(prev);
-      saveReport(next);
+      syncSharedFormat(next);
       return next;
     });
   }
 
-  // FIX 5 — auto-save on systemName change (from ScopingPhase direct setReport call)
-  useEffect(() => { saveReport(report); }, [report.systemName]);
+  // Sync verso la chiave condivisa anche al primo mount / cambio sistema attivo
+  useEffect(() => { syncSharedFormat(report); }, [report.systemName, report.id]);
 
   // Pre-populate systemName from Classifier
   const classifierData = React.useMemo(() => {
@@ -381,8 +375,8 @@ export default function RiskManagerPage() {
   // ─── FIX 7 — FINALIZE with Evidence Layer ───────────────────────
   async function handleFinalize() {
     const final = await finalizeRiskReport({ ...report, sanctions });
-    setReport(final);
-    saveReport({ ...final, nextReviewDate, reviewCycle } as Parameters<typeof saveReport>[0]);
+    setReport({ ...final, nextReviewDate, reviewCycle } as RiskManagerReport);
+    syncSharedFormat({ ...final, nextReviewDate, reviewCycle } as RiskManagerReport);
     setFinalized(true);
 
     await appendEvidence("decision", {
@@ -421,7 +415,7 @@ export default function RiskManagerPage() {
   function resetAssessment() {
     const fresh = createEmptyRiskReport("Nuovo Sistema AI");
     setReport(fresh);
-    saveReport(fresh);
+    syncSharedFormat(fresh);
     setFinalized(false);
     setSanctions(getSanctionTracker());
     setMcResult(null);
@@ -501,29 +495,61 @@ export default function RiskManagerPage() {
       {/* Phase content */}
       <div style={{ ...cardSt, padding: 24 }}>
         {phase === "scoping" && (
-          <ScopingPhase
-            report={report}
-            setReport={setReport}
-            riskForm={riskForm}
-            setRiskForm={setRiskForm}
-            showRiskForm={showRiskForm}
-            setShowRiskForm={setShowRiskForm}
-            addRisk={addRisk}
-            removeRisk={removeRisk}
-            addPresetRisk={(preset: RiskFormState) => {
-              const newRisk: RiskItem = {
-                ...preset,
-                id: `risk-${Date.now()}`,
-                quantitativeScore: computeRiskScore(preset.severity, preset.probability),
-                createdAt: new Date().toISOString(),
-              };
-              updateReport((prev) => ({
-                ...prev,
-                risks: [...prev.risks, newRisk],
-                overallScore: computeOverallScore([...prev.risks, newRisk]),
-              }));
-            }}
-          />
+          <>
+            <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
+              {(["list", "matrix"] as const).map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setMatrixView(v)}
+                  style={{
+                    padding: "5px 14px",
+                    borderRadius: 8,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    border: matrixView === v ? "1px solid rgba(0,0,0,0.15)" : `1px solid ${T.border}`,
+                    background: matrixView === v ? "#0D1016" : "#fff",
+                    color: matrixView === v ? "#fff" : T.muted,
+                    transition: "all 0.12s",
+                  }}
+                >
+                  {v === "list" ? `Lista rischi (${report.risks.length})` : "Matrice 3×3 — ISO 42001"}
+                </button>
+              ))}
+            </div>
+
+            {matrixView === "matrix" ? (
+              <RiskMatrix
+                risks={report.risks}
+                onCellClick={(p, s) => setMatrixFilter({ p, s })}
+                activeFilter={matrixFilter}
+              />
+            ) : (
+              <ScopingPhase
+                report={report}
+                setReport={setReport}
+                riskForm={riskForm}
+                setRiskForm={setRiskForm}
+                showRiskForm={showRiskForm}
+                setShowRiskForm={setShowRiskForm}
+                addRisk={addRisk}
+                removeRisk={removeRisk}
+                addPresetRisk={(preset: RiskFormState) => {
+                  const newRisk: RiskItem = {
+                    ...preset,
+                    id: `risk-${Date.now()}`,
+                    quantitativeScore: computeRiskScore(preset.severity, preset.probability),
+                    createdAt: new Date().toISOString(),
+                  };
+                  updateReport((prev) => ({
+                    ...prev,
+                    risks: [...prev.risks, newRisk],
+                    overallScore: computeOverallScore([...prev.risks, newRisk]),
+                  }));
+                }}
+              />
+            )}
+          </>
         )}
 
         {phase === "quantitative" && (

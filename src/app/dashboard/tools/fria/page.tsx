@@ -21,6 +21,21 @@ import {
   createEmptyFRIA, computeSeverity, computePriority,
   generatePublicSummary, calculateFRIACompleteness, getOverallFRIARisk,
 } from "@/lib/simulation/fria-engine";
+import { useScopedStorage } from "@/lib/hooks/useScopedStorage";
+import {
+  createEmptyRiskReport,
+  type RiskManagerReport,
+  type Severity as RMSeverity,
+  type Probability as RMProbability,
+} from "@/lib/simulation/risk-manager-engine";
+import { importRiskFromAssessment, isDuplicateRisk } from "@/lib/risk-register/import-from-assessment";
+
+const EMPTY_RISK_REPORT: RiskManagerReport = createEmptyRiskReport("Nuovo Sistema AI");
+
+/** FRIA usa 4 livelli (incl. "critical"); il Risk Register ne usa 3 — "critical" confluisce in "high". */
+function toRMLevel(level: string): RMSeverity {
+  return level === "critical" ? "high" : (level as RMSeverity) || "medium";
+}
 
 // ─── Storage ─────────────────────────────────────────────────────────────────
 const FRIA_DOC_KEY = "aicomply_fria_document";
@@ -143,6 +158,7 @@ const DEFAULT_TRIGGERS = [
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function FRIAPage() {
   const [doc, setDoc] = useState<FRIADocument>(() => loadDoc());
+  const [riskReport, setRiskReport] = useScopedStorage<RiskManagerReport>("risk_manager_report", EMPTY_RISK_REPORT);
   const [phase, setPhase] = useState<Phase>("1");
   const [openAcc, setOpenAcc] = useState<Set<"A" | "B" | "C">>(new Set(["A"]));
   const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
@@ -362,6 +378,40 @@ export default function FRIAPage() {
     setDossierSavedAt(completedAt);
     showToast("FRIA salvata nel dossier di compliance");
   }
+
+  /** Importa nel Risk Register i rischi rilevanti emersi dalla FRIA (Art. 9(2)(b)) — vedi PROMPT_BA Parte 4. */
+  function handleImportRisksToRegister() {
+    const candidates = doc.scenarios.flatMap((scenario) =>
+      scenario.right_impacts
+        .filter(
+          (ri) =>
+            ri.severity.computed_severity === "high" ||
+            ri.severity.computed_severity === "critical" ||
+            ri.residual_risk === "review" ||
+            ri.residual_risk === "unacceptable"
+        )
+        .map((ri) => {
+          const rightLabel = FUNDAMENTAL_RIGHTS.find((f) => f.id === ri.right_id)?.name ?? ri.right_id;
+          return importRiskFromAssessment("fria", {
+            title: `${scenario.title} — ${rightLabel}`,
+            description: ri.notes || scenario.description || "Rischio rilevato in fase di valutazione FRIA",
+            category: "fundamental-rights",
+            severity: toRMLevel(ri.severity.computed_severity),
+            probability: toRMLevel(ri.likelihood.computed_priority) as RMProbability,
+            mitigation: ri.mitigations.map((m) => m.description).filter(Boolean).join("; "),
+          });
+        })
+    );
+
+    const newRisks = candidates.filter((c) => !isDuplicateRisk(riskReport.risks, c));
+    if (newRisks.length === 0) {
+      showToast(candidates.length > 0 ? "Nessun nuovo rischio da importare — già presenti" : "Nessun rischio significativo rilevato da importare");
+      return;
+    }
+    setRiskReport((prev) => ({ ...prev, risks: [...prev.risks, ...newRisks] }));
+    showToast(`${newRisks.length} rischio${newRisks.length > 1 ? "i" : ""} importato${newRisks.length > 1 ? "i" : "o"} nel Risk Register`);
+  }
+
   function exportReport() {
     const blob = new Blob([JSON.stringify({ export_type: "FRIA Art. 27 EU AI Act", exported_at: new Date().toISOString(), document: doc }, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -1115,6 +1165,12 @@ export default function FRIAPage() {
               <Download style={{ width: 12, height: 12, color: T.muted }} />
             </button>
           </div>
+          <button
+            onClick={handleImportRisksToRegister}
+            style={{ width: "100%", marginTop: 6, fontSize: 11, fontWeight: 500, padding: "6px 8px", borderRadius: 7, background: "#fff", color: T.muted, border: `1px solid ${T.border}`, cursor: "pointer" }}
+          >
+            Importa rischi nel Risk Register
+          </button>
         </div>
       </div>
 

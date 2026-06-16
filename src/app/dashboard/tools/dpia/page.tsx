@@ -15,6 +15,11 @@ import {
 } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { useScopedStorage } from "@/lib/hooks/useScopedStorage";
+import { createEmptyRiskReport, type RiskManagerReport } from "@/lib/simulation/risk-manager-engine";
+import { importRiskFromAssessment, isDuplicateRisk } from "@/lib/risk-register/import-from-assessment";
+
+const EMPTY_RISK_REPORT: RiskManagerReport = createEmptyRiskReport("Nuovo Sistema AI");
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -298,6 +303,8 @@ export default function DPIAPage() {
   const [doc, setDoc] = useState<DPIADoc>(createEmptyDPIA);
   const [step, setStep] = useState<Step>(0);
   const [saved, setSaved] = useState(false);
+  const [riskReport, setRiskReport] = useScopedStorage<RiskManagerReport>("risk_manager_report", EMPTY_RISK_REPORT);
+  const [importMsg, setImportMsg] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load from storage on mount
@@ -528,6 +535,31 @@ export default function DPIAPage() {
       conclusion: doc.conclusion.compliant,
     }, "dpia");
     setSaved(true);
+  }
+
+  /** Importa nel Risk Register le minacce DPIA con rischio medio/alto (Art. 9(2)(b)) — PROMPT_BA Parte 4. */
+  function handleImportRisksToRegister() {
+    const candidates = doc.risks.threats
+      .filter((t) => t.risk_level === "high" || t.risk_level === "medium")
+      .map((t) =>
+        importRiskFromAssessment("dpia", {
+          title: t.category.replace(/_/g, " "),
+          description: t.description || "Minaccia rilevata in fase di valutazione DPIA",
+          category: "privacy",
+          severity: t.severity,
+          probability: t.likelihood,
+          mitigation: t.mitigation,
+        })
+      );
+    const newRisks = candidates.filter((c) => !isDuplicateRisk(riskReport.risks, c));
+    if (newRisks.length === 0) {
+      setImportMsg(candidates.length > 0 ? "Nessun nuovo rischio da importare — già presenti" : "Nessuna minaccia media/alta da importare");
+      setTimeout(() => setImportMsg(null), 3000);
+      return;
+    }
+    setRiskReport((prev) => ({ ...prev, risks: [...prev.risks, ...newRisks] }));
+    setImportMsg(`${newRisks.length} rischio${newRisks.length > 1 ? "i" : ""} importato${newRisks.length > 1 ? "i" : "o"} nel Risk Register`);
+    setTimeout(() => setImportMsg(null), 3000);
   }
 
   // ── Download report ────────────────────────────────────────────────────────
@@ -1334,6 +1366,14 @@ export default function DPIAPage() {
               <Download className="h-3.5 w-3.5" />
               Scarica report (.txt)
             </button>
+            <button onClick={handleImportRisksToRegister}
+              style={{ ...navBtnSt(false), display: "flex", alignItems: "center", gap: 6 }}>
+              <AlertTriangle className="h-3.5 w-3.5" />
+              Importa rischi nel Risk Register
+            </button>
+            {importMsg && (
+              <span style={{ fontSize: 11, color: T.muted }}>{importMsg}</span>
+            )}
           </div>
         </div>
 
