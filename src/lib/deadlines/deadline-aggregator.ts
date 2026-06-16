@@ -51,6 +51,7 @@ export function buildEUDBDeadline(system: AISystem): AIActDeadline | null {
     tool_href: `/dashboard/compliance-ops/eudb`,
     severity: "important",
     isDynamic: true,
+    category: "registration",
     sourceSystemId: system.id,
     sourceSystemName: system.name,
   };
@@ -97,6 +98,7 @@ export function buildIncidentNotificationDeadline(system: AISystem, incident: In
     tool_href: `/dashboard/post-market?tab=incidents&incident=${incident.id}`,
     severity: "critical",
     isDynamic: true,
+    category: "incident",
     sourceSystemId: system.id,
     sourceSystemName: system.name,
   };
@@ -159,6 +161,7 @@ export function buildProviderTransitionDeadline(
     tool_href: "/dashboard/compliance-ops/provider-transition",
     severity: verdict === "provider" ? "critical" : "important",
     isDynamic: true,
+    category: "modification",
     sourceSystemId: system.id,
     sourceSystemName: system.name,
   };
@@ -186,6 +189,7 @@ export function buildDynamicDeadlines(systems: AISystem[]): AIActDeadline[] {
         tool_href: "/dashboard/post-market",
         severity: "important",
         isDynamic: true,
+        category: "general",
         sourceSystemId: system.id,
         sourceSystemName: system.name,
       });
@@ -224,6 +228,7 @@ export function buildDynamicDeadlines(systems: AISystem[]): AIActDeadline[] {
         tool_href: "/dashboard/tools/fria",
         severity: "informational",
         isDynamic: true,
+        category: "general",
         sourceSystemId: system.id,
         sourceSystemName: system.name,
       });

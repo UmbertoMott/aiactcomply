@@ -4,13 +4,15 @@ import React, { useState, useEffect, useCallback, CSSProperties } from "react";
 import Link from "next/link";
 import {
   CalendarClock, ChevronDown, Sparkles,
-  Loader2, Check, ExternalLink, Info,
+  Loader2, Check, ExternalLink, Info, AlertTriangle, Archive,
 } from "lucide-react";
 import { AI_ACT_DEADLINES, DEADLINE_ACTIONS } from "@/lib/deadlines/deadline-constants";
 import { buildDynamicDeadlines, filterDeadlinesByTier } from "@/lib/deadlines/deadline-aggregator";
 import { getDeadlineStatus, daysUntil, STATUS_COLOR } from "@/lib/deadlines/deadline-status";
 import { prioritizeDeadlines } from "@/lib/deadlines/deadline-actions";
-import type { AIActDeadline, AIActTier, DeadlineStatus } from "@/lib/deadlines/deadline-types";
+import { partitionDeadlines } from "@/lib/deadlines/partition-deadlines";
+import type { AIActDeadline, AIActTier, DeadlineStatus, UserRole } from "@/lib/deadlines/deadline-types";
+import { ROLE_PRIORITY, ROLE_LABEL } from "@/lib/deadlines/deadline-types";
 import type { PriorityGroup } from "@/lib/deadlines/deadline-actions";
 import { loadInventory } from "@/lib/inventory/ai-system";
 import type { AISystem } from "@/lib/inventory/ai-system";
@@ -32,6 +34,8 @@ const SEV: Record<string, { color: string; bg: string; border: string }> = {
 
 const TIMELINE_PREFS_KEY      = "aicomply_timeline_prefs";
 const TIMELINE_COPILOT_KEY    = "aicomply_timeline_copilot_confirmed";
+const TIMELINE_ROLE_KEY       = "aicomply_timeline_role";
+const TIMELINE_SYSTEM_KEY     = "aicomply_timeline_system_filter";
 
 function getPrefs(): { viewMode: "ai" | "chronological"; filterStatus?: DeadlineStatus } {
   if (typeof window === "undefined") return { viewMode: "chronological" };
@@ -40,6 +44,28 @@ function getPrefs(): { viewMode: "ai" | "chronological"; filterStatus?: Deadline
 }
 function savePrefs(p: { viewMode: "ai" | "chronological"; filterStatus?: DeadlineStatus }) {
   localStorage.setItem(TIMELINE_PREFS_KEY, JSON.stringify(p));
+}
+
+/**
+ * Ruolo e filtro-sistema sono preferenze dell'utente che naviga la pagina,
+ * non dati legati a un singolo sistema AI — restano globali (non scoped
+ * per systemId) per evitare che l'utente debba ri-selezionarli ad ogni
+ * cambio di sistema attivo.
+ */
+function getStoredRole(): UserRole {
+  if (typeof window === "undefined") return "compliance_officer";
+  const v = localStorage.getItem(TIMELINE_ROLE_KEY);
+  return (v as UserRole) ?? "compliance_officer";
+}
+function saveStoredRole(role: UserRole) {
+  localStorage.setItem(TIMELINE_ROLE_KEY, role);
+}
+function getStoredSystemFilter(): string {
+  if (typeof window === "undefined") return "all";
+  return localStorage.getItem(TIMELINE_SYSTEM_KEY) ?? "all";
+}
+function saveStoredSystemFilter(id: string) {
+  localStorage.setItem(TIMELINE_SYSTEM_KEY, id);
 }
 
 // ─── Dot component ─────────────────────────────────────────────────────────────
@@ -92,11 +118,9 @@ function DeadlineCard({ deadline, isLast }: { deadline: AIActDeadline; isLast: b
           style={{ background: expanded ? BG3 : "transparent", border: `1px solid ${expanded ? BORDER : "transparent"}`, cursor: "pointer" }}
           onClick={() => setExpanded(v => !v)}
         >
-          <div className="flex items-start justify-between gap-3 flex-wrap">
-            <div className="flex items-start gap-2 flex-1 min-w-0">
-              <div className="mt-0.5">
-                <ArticleBadge article={deadline.article} />
-              </div>
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <ArticleBadge article={deadline.article} />
               <div className="min-w-0">
                 <p className="text-sm font-medium leading-snug" style={{ color: status === "passed" ? MUTED : TEXT }}>
                   {deadline.label}
@@ -356,6 +380,9 @@ export default function DeadlinesPage() {
   const [showCopilot, setShowCopilot] = useState(false);
   const [aiGroups, setAiGroups] = useState<PriorityGroup[] | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [userRole, setUserRole] = useState<UserRole>("compliance_officer");
+  const [systemFilter, setSystemFilter] = useState<string>("all");
+  const [showArchived, setShowArchived] = useState(false);
 
   const buildDeadlines = useCallback((invSystems: AISystem[]) => {
     // Determina tier utente dall'inventory
@@ -386,16 +413,47 @@ export default function DeadlinesPage() {
     buildDeadlines(inv);
     const prefs = getPrefs();
     setViewMode(prefs.viewMode ?? "chronological");
+    setUserRole(getStoredRole());
+    setSystemFilter(getStoredSystemFilter());
     setLoaded(true);
   }, [buildDeadlines]);
 
-  const displayed = filterStatus
-    ? allDeadlines.filter(d => getDeadlineStatus(d.date) === filterStatus)
-    : allDeadlines;
+  // Isolamento per sistema — le scadenze statiche (senza sourceSystemId) restano sempre visibili,
+  // quelle dinamiche per-sistema vengono filtrate quando l'utente seleziona un sistema specifico.
+  const scopedDeadlines = systemFilter === "all"
+    ? allDeadlines
+    : allDeadlines.filter(d => !d.sourceSystemId || d.sourceSystemId === systemFilter);
 
-  const nextDeadline = allDeadlines.find(d => getDeadlineStatus(d.date) !== "passed");
+  const { active: activeDeadlines, archived: archivedDeadlines } = React.useMemo(
+    () => partitionDeadlines(scopedDeadlines),
+    [scopedDeadlines]
+  );
 
-  const primarySystem = systems[0];
+  const statusFiltered = filterStatus
+    ? activeDeadlines.filter(d => getDeadlineStatus(d.date) === filterStatus)
+    : activeDeadlines;
+
+  const displayed = React.useMemo(() => {
+    const priorityOrder = ROLE_PRIORITY[userRole];
+    return [...statusFiltered].sort((a, b) => {
+      const ai = priorityOrder.indexOf(a.category ?? "general");
+      const bi = priorityOrder.indexOf(b.category ?? "general");
+      if (ai !== bi) return ai - bi;
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    });
+  }, [statusFiltered, userRole]);
+
+  const nextDeadline = activeDeadlines.find(d => getDeadlineStatus(d.date) !== "passed");
+
+  const primarySystem = systemFilter === "all" ? systems[0] : systems.find(s => s.id === systemFilter);
+
+  // Alert Annex III — sistema high-risk + scadenza 2 agosto 2026 entro 60 giorni
+  const aug2026 = new Date("2026-08-02");
+  const daysToAnnexIII = Math.ceil((aug2026.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  const hasHighRiskInScope = systemFilter === "all"
+    ? systems.some(s => s.tier === "high_risk")
+    : primarySystem?.tier === "high_risk";
+  const showUrgentBanner = hasHighRiskInScope && daysToAnnexIII > 0 && daysToAnnexIII <= 60;
 
   if (!loaded) {
     return (
@@ -407,7 +465,7 @@ export default function DeadlinesPage() {
 
   return (
     <div className="min-h-screen w-full" style={{ background: BG, ...FONT }}>
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="w-full">
 
         {/* Header */}
         <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
@@ -418,7 +476,7 @@ export default function DeadlinesPage() {
             </div>
             <p className="text-sm" style={{ color: MUTED }}>
               {systems.length > 0
-                ? `${allDeadlines.length} scadenze per ${systems.length} sistema${systems.length !== 1 ? "i" : ""} nell'inventario`
+                ? `${activeDeadlines.length} scadenze attive${systemFilter === "all" ? ` per ${systems.length} sistema${systems.length !== 1 ? "i" : ""} nell'inventario` : ` — ${primarySystem?.name ?? ""}`}`
                 : "Dati statici — completa il Triage per scadenze personalizzate"}
             </p>
             <p className="text-[11px] mt-1" style={{ color: "#a78bfa" }}>
@@ -426,6 +484,36 @@ export default function DeadlinesPage() {
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
+            {systems.length > 0 && (
+              <select
+                value={systemFilter}
+                onChange={(e) => {
+                  setSystemFilter(e.target.value);
+                  saveStoredSystemFilter(e.target.value);
+                }}
+                className="text-[12px] font-medium rounded-lg px-2.5 py-1.5 outline-none"
+                style={{ background: BG2, border: `1px solid ${BORDER}`, color: TEXT }}
+              >
+                <option value="all">Tutti i sistemi</option>
+                {systems.map(s => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+            )}
+            <select
+              value={userRole}
+              onChange={(e) => {
+                const next = e.target.value as UserRole;
+                setUserRole(next);
+                saveStoredRole(next);
+              }}
+              className="text-[12px] font-medium rounded-lg px-2.5 py-1.5 outline-none"
+              style={{ background: BG2, border: `1px solid ${BORDER}`, color: TEXT }}
+            >
+              {(Object.keys(ROLE_LABEL) as UserRole[]).map(r => (
+                <option key={r} value={r}>{ROLE_LABEL[r]}</option>
+              ))}
+            </select>
             <button
               onClick={() => {
                 const next = viewMode === "chronological" ? "ai" : "chronological";
@@ -445,6 +533,28 @@ export default function DeadlinesPage() {
             </button>
           </div>
         </div>
+
+        {/* Alert prioritario Annex III */}
+        {showUrgentBanner && (
+          <div className="rounded-xl px-4 py-3 flex items-center justify-between gap-3 mb-6 flex-wrap"
+            style={{ background: "rgba(217,119,6,0.06)", border: "1px solid rgba(217,119,6,0.25)" }}>
+            <div className="flex items-center gap-3">
+              <AlertTriangle size={16} style={{ color: "#D97706", flexShrink: 0 }} />
+              <div>
+                <p className="text-sm font-medium" style={{ color: "#92400e" }}>
+                  Scadenza Annex III — {daysToAnnexIII} giorni
+                </p>
+                <p className="text-[12px] mt-0.5" style={{ color: MUTED }}>
+                  I sistemi ad alto rischio devono essere conformi entro il 2 agosto 2026. Verifica dossier, EUDB e documentazione tecnica.
+                </p>
+              </div>
+            </div>
+            <span className="font-mono text-[11px] px-2 py-1 rounded flex-shrink-0"
+              style={{ background: "rgba(217,119,6,0.1)", color: "#92400e", border: "1px solid rgba(217,119,6,0.25)" }}>
+              Art. 6–51
+            </span>
+          </div>
+        )}
 
         {/* Empty state — no inventory */}
         {systems.length === 0 && (
@@ -467,7 +577,7 @@ export default function DeadlinesPage() {
 
         {/* Summary cards */}
         <SummaryCards
-          deadlines={allDeadlines}
+          deadlines={activeDeadlines}
           activeFilter={filterStatus}
           onFilter={setFilterStatus}
         />
@@ -475,7 +585,7 @@ export default function DeadlinesPage() {
         {/* Copilot panel */}
         {(showCopilot || viewMode === "ai") && (
           <CopilotPanel
-            deadlines={allDeadlines}
+            deadlines={activeDeadlines}
             systemName={primarySystem?.name ?? "non specificato"}
             tier={primarySystem?.tier ?? "non specificato"}
           />
@@ -512,6 +622,32 @@ export default function DeadlinesPage() {
             </div>
           )}
         </div>
+
+        {/* Archivio scadenze passate */}
+        {archivedDeadlines.length > 0 && (
+          <div className="mt-8 pt-6" style={{ borderTop: `1px solid ${BORDER}` }}>
+            <button
+              onClick={() => setShowArchived(v => !v)}
+              className="flex items-center gap-2 text-[12px] transition-colors"
+              style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}
+            >
+              <Archive size={13} />
+              {archivedDeadlines.length} scadenze archiviate
+              <ChevronDown size={13} style={{ transform: showArchived ? "rotate(180deg)" : "none", transition: "transform 150ms" }} />
+            </button>
+            {showArchived && (
+              <div className="mt-4" style={{ opacity: 0.6 }}>
+                {archivedDeadlines.map((deadline, i) => (
+                  <DeadlineCard
+                    key={deadline.id}
+                    deadline={deadline}
+                    isLast={i === archivedDeadlines.length - 1}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Footer note */}
         <div className="mt-8 pt-4 text-[11px] leading-relaxed" style={{ borderTop: `1px solid ${BORDER}`, color: MUTED }}>
