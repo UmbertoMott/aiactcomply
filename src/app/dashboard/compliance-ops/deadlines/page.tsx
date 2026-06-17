@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, CSSProperties } from "react";
 import Link from "next/link";
 import {
   CalendarClock, ChevronDown, Sparkles,
-  Loader2, Check, ExternalLink, Info, AlertTriangle, Archive,
+  Loader2, Check, ExternalLink, Info, AlertTriangle, Archive, RotateCcw,
 } from "lucide-react";
 import { AI_ACT_DEADLINES, DEADLINE_ACTIONS } from "@/lib/deadlines/deadline-constants";
 import { buildDynamicDeadlines, filterDeadlinesByTier } from "@/lib/deadlines/deadline-aggregator";
@@ -36,6 +36,7 @@ const TIMELINE_PREFS_KEY      = "aicomply_timeline_prefs";
 const TIMELINE_COPILOT_KEY    = "aicomply_timeline_copilot_confirmed";
 const TIMELINE_ROLE_KEY       = "aicomply_timeline_role";
 const TIMELINE_SYSTEM_KEY     = "aicomply_timeline_system_filter";
+const TIMELINE_RESTORED_KEY   = "aicomply_timeline_restored_deadlines";
 
 function getPrefs(): { viewMode: "ai" | "chronological"; filterStatus?: DeadlineStatus } {
   if (typeof window === "undefined") return { viewMode: "chronological" };
@@ -93,7 +94,7 @@ function ArticleBadge({ article }: { article: string }) {
 }
 
 // ─── Single deadline card ──────────────────────────────────────────────────────
-function DeadlineCard({ deadline, isLast }: { deadline: AIActDeadline; isLast: boolean }) {
+function DeadlineCard({ deadline, isLast, onRestore }: { deadline: AIActDeadline; isLast: boolean; onRestore?: () => void }) {
   const [expanded, setExpanded] = useState(false);
   const status = getDeadlineStatus(deadline.date);
   const days = daysUntil(deadline.date);
@@ -144,6 +145,14 @@ function DeadlineCard({ deadline, isLast }: { deadline: AIActDeadline; isLast: b
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {onRestore && (
+                <button
+                  onClick={e => { e.stopPropagation(); onRestore(); }}
+                  className="flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-lg transition-opacity hover:opacity-80"
+                  style={{ background: "rgba(79,70,229,0.10)", color: "#4f46e5", border: "1px solid rgba(79,70,229,0.22)", cursor: "pointer" }}>
+                  <RotateCcw size={11} /> Ripristina
+                </button>
+              )}
               {deadline.tool_href && (
                 <Link href={deadline.tool_href}
                   className="text-[11px] font-medium px-2.5 py-1 rounded-lg transition-opacity hover:opacity-70"
@@ -383,6 +392,7 @@ export default function DeadlinesPage() {
   const [userRole, setUserRole] = useState<UserRole>("compliance_officer");
   const [systemFilter, setSystemFilter] = useState<string>("all");
   const [showArchived, setShowArchived] = useState(false);
+  const [restoredIds, setRestoredIds] = useState<string[]>([]);
 
   const buildDeadlines = useCallback((invSystems: AISystem[]) => {
     // Determina tier utente dall'inventory
@@ -415,6 +425,10 @@ export default function DeadlinesPage() {
     setViewMode(prefs.viewMode ?? "chronological");
     setUserRole(getStoredRole());
     setSystemFilter(getStoredSystemFilter());
+    try {
+      const raw = localStorage.getItem(TIMELINE_RESTORED_KEY);
+      if (raw) setRestoredIds(JSON.parse(raw));
+    } catch { /* ignore */ }
     setLoaded(true);
   }, [buildDeadlines]);
 
@@ -424,9 +438,26 @@ export default function DeadlinesPage() {
     ? allDeadlines
     : allDeadlines.filter(d => !d.sourceSystemId || d.sourceSystemId === systemFilter);
 
-  const { active: activeDeadlines, archived: archivedDeadlines } = React.useMemo(
+  function handleRestore(id: string) {
+    const next = restoredIds.includes(id) ? restoredIds : [...restoredIds, id];
+    setRestoredIds(next);
+    try { localStorage.setItem(TIMELINE_RESTORED_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+    setShowArchived(true); // rimane aperta per feedback visivo
+  }
+
+  const { active: _activeRaw, archived: _archivedRaw } = React.useMemo(
     () => partitionDeadlines(scopedDeadlines),
     [scopedDeadlines]
+  );
+
+  // Scadenze ripristinate manualmente: spostate dall'archivio alla lista attiva
+  const activeDeadlines  = React.useMemo(
+    () => [..._activeRaw, ..._archivedRaw.filter(d => restoredIds.includes(d.id))],
+    [_activeRaw, _archivedRaw, restoredIds]
+  );
+  const archivedDeadlines = React.useMemo(
+    () => _archivedRaw.filter(d => !restoredIds.includes(d.id)),
+    [_archivedRaw, restoredIds]
   );
 
   const statusFiltered = filterStatus
@@ -613,11 +644,14 @@ export default function DeadlinesPage() {
           ) : (
             <div>
               {displayed.map((deadline, i) => (
-                <DeadlineCard
-                  key={deadline.id}
-                  deadline={deadline}
-                  isLast={i === displayed.length - 1}
-                />
+                <div key={deadline.id}>
+                  {restoredIds.includes(deadline.id) && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4, marginLeft: 20, fontSize: 10, color: "#4f46e5" }}>
+                      <RotateCcw size={10} /> Ripristinata dall&apos;archivio
+                    </div>
+                  )}
+                  <DeadlineCard deadline={deadline} isLast={i === displayed.length - 1} />
+                </div>
               ))}
             </div>
           )}
@@ -636,12 +670,13 @@ export default function DeadlinesPage() {
               <ChevronDown size={13} style={{ transform: showArchived ? "rotate(180deg)" : "none", transition: "transform 150ms" }} />
             </button>
             {showArchived && (
-              <div className="mt-4" style={{ opacity: 0.6 }}>
+              <div className="mt-4" style={{ opacity: 0.7 }}>
                 {archivedDeadlines.map((deadline, i) => (
                   <DeadlineCard
                     key={deadline.id}
                     deadline={deadline}
                     isLast={i === archivedDeadlines.length - 1}
+                    onRestore={() => handleRestore(deadline.id)}
                   />
                 ))}
               </div>
