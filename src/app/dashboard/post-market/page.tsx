@@ -495,6 +495,20 @@ function PostMarketPageInner() {
     setIncidents(updated);
     saveIncidents(updated);
     setSelected((s) => (s?.id === id ? { ...s, status } : s));
+    // Sync to LogVault — mark linked events as resolved (PROMPT BE)
+    if (status === "resolved" || status === "closed") {
+      try {
+        const systemId = localStorage.getItem("aicomply_active_system_id") ?? "default";
+        const key = `aicomply_logvault_events_v2_[${systemId}]`;
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const evs = JSON.parse(raw) as Array<{ linkedIncidentId?: string; incidentResolved?: boolean }>;
+          const patched = evs.map(ev => ev.linkedIncidentId === id ? { ...ev, incidentResolved: true } : ev);
+          localStorage.setItem(key, JSON.stringify(patched));
+          window.dispatchEvent(new StorageEvent("storage", { key, newValue: JSON.stringify(patched) }));
+        }
+      } catch { /* non-blocking */ }
+    }
   }
 
   function updateIncidentField<K extends keyof Incident>(id: string, field: K, value: Incident[K]) {

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Download, Shield, RefreshCw, AlertTriangle, CheckCircle, Settings,
   ChevronDown, ChevronUp, Info, Upload, FileText, Sparkles, Loader2,
-  Check, ExternalLink, X,
+  Check, ExternalLink, X, Plus, Hash,
 } from "lucide-react";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
@@ -16,10 +16,16 @@ import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { TRACEABILITY_PURPOSES, BIOMETRIC_LOG_REQUIREMENTS, FIELD_NAME_HINTS, MAX_LOG_FILE_SIZE_BYTES } from "@/lib/logvault/traceability-purposes";
 import {
-  loadLogVaultRecord, saveLogVaultRecord, getAllDetectedFields, countCovered,
+  loadLogVaultRecord, getAllDetectedFields, countCovered,
   type LogVaultRecord, type ImportedLogSet, type CoverageStatus,
   type TraceabilityCoverageRecord, type BiometricLogRequirementCoverage,
 } from "@/lib/logvault/logvault-types";
+import { useScopedStorage } from "@/lib/hooks/useScopedStorage";
+import type { LogEvent, LogEventCategory, LogEventSeverity } from "@/types/logvault";
+import { createLogEvent } from "@/lib/logvault/create-event";
+import { analyzeLogDrift } from "./actions";
+import type { DriftAnalysis } from "./actions";
+import { VirtualLogGrid } from "@/components/logvault/VirtualLogGrid";
 // Note: logvault-engine.ts is preserved for chain-verification utilities used by other tools.
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
@@ -384,9 +390,36 @@ function LogSetCard({ logSet, onRemove }: { logSet: ImportedLogSet; onRemove: ()
   );
 }
 
+const EMPTY_RECORD: LogVaultRecord = {
+  loggingCapabilityConfirmed: "unspecified",
+  importedLogSets: [],
+  traceabilityCoverage: [],
+  biometricLogging: { applicable: "unspecified", requirementCoverage: [] },
+};
+
+function migrateRecord(): LogVaultRecord {
+  try {
+    const legacy = loadLogVaultRecord();
+    if (legacy.loggingCapabilityConfirmed !== "unspecified" || legacy.importedLogSets.length > 0) return legacy;
+  } catch { /* ignore */ }
+  return EMPTY_RECORD;
+}
+
+const CAT_LABELS: { value: LogEventCategory; label: string }[] = [
+  { value: "human_override", label: "Override umano" },
+  { value: "drift_alert", label: "Drift alert" },
+  { value: "anomaly", label: "Anomalia" },
+  { value: "system_restart", label: "Riavvio sistema" },
+  { value: "config_change", label: "Cambio config" },
+  { value: "incident_link", label: "Incidente collegato" },
+  { value: "maintenance", label: "Manutenzione" },
+  { value: "other", label: "Altro" },
+];
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function LogVaultPage() {
-  const [record, setRecord] = useState<LogVaultRecord>(() => loadLogVaultRecord());
+  const [record, setRecord] = useScopedStorage<LogVaultRecord>("logvault_config", EMPTY_RECORD);
+  const [events, setEvents] = useScopedStorage<LogEvent[]>("logvault_events", []);
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
   const [savedAt, setSavedAt] = useState<string | null>(() => readFromStorage<LogvaultResult>("logvault")?.completedAt ?? null);
   const [killActive, setKillActive] = useState(false);
@@ -402,6 +435,15 @@ export default function LogVaultPage() {
   const [analyzing, setAnalyzing] = useState(false);
   const [aiProposals, setAiProposals] = useState<Record<string, { proposedCovered: "yes" | "partial" | "no"; evidenceFields: string[]; rationale: string }>>({});
   const [aiSafeStateSuggestion, setAiSafeStateSuggestion] = useState<string | null>(null);
+
+  // Operational event log state (PROMPT BE)
+  const [newEventDesc, setNewEventDesc] = useState("");
+  const [newEventCategory, setNewEventCategory] = useState<LogEventCategory>("other");
+  const [newEventSeverity, setNewEventSeverity] = useState<LogEventSeverity>("info");
+  const [newEventOperator, setNewEventOperator] = useState("");
+  const [addingEvent, setAddingEvent] = useState(false);
+  const [driftAnalysis, setDriftAnalysis] = useState<DriftAnalysis | null>(null);
+  const [analyzingDrift, setAnalyzingDrift] = useState(false);
 
   // AI severity (preserved from original)
   const [eventDesc, setEventDesc] = useState("");
@@ -450,7 +492,7 @@ export default function LogVaultPage() {
   }
 
   function patchRecord(patch: Partial<LogVaultRecord>) {
-    setRecord(prev => { const next = { ...prev, ...patch, updatedAt: new Date().toISOString() }; saveLogVaultRecord(next); return next; });
+    setRecord(prev => ({ ...prev, ...patch, updatedAt: new Date().toISOString() }));
   }
 
   // ── Import handling ────────────────────────────────────────────────────────
@@ -526,6 +568,47 @@ export default function LogVaultPage() {
     if (!p) return;
     updateBiometric(id, { covered: p.proposedCovered, evidenceField: p.evidenceFields[0], aiConfirmed: true });
     setAiProposals(prev => { const n = { ...prev }; delete n[id]; return n; });
+  }
+
+  // ── Operational event log (PROMPT BE) ─────────────────────────────────────
+  async function handleAddEvent() {
+    if (!newEventDesc.trim()) return;
+    setAddingEvent(true);
+    try {
+      const ev = await createLogEvent({
+        category: newEventCategory,
+        severity: newEventSeverity,
+        description: newEventDesc.trim(),
+        operator: newEventOperator.trim() || undefined,
+      });
+      setEvents(prev => [ev, ...prev]);
+      setNewEventDesc("");
+      setNewEventOperator("");
+      showToast("Evento registrato con hash integrità");
+    } catch {
+      showToast("Errore durante la registrazione dell'evento", "error");
+    } finally {
+      setAddingEvent(false);
+    }
+  }
+
+  async function handleAnalyzeDrift() {
+    if (events.length === 0) return;
+    setAnalyzingDrift(true);
+    try {
+      const summaries = events.slice(0, 50).map(e => ({
+        timestamp: e.timestamp,
+        category: e.category,
+        severity: e.severity,
+        description: e.description,
+      }));
+      const result = await analyzeLogDrift(summaries, systemName);
+      setDriftAnalysis(result);
+    } catch {
+      showToast("Errore analisi drift", "error");
+    } finally {
+      setAnalyzingDrift(false);
+    }
   }
 
   // ── AI copilot ─────────────────────────────────────────────────────────────
@@ -604,7 +687,7 @@ export default function LogVaultPage() {
     : 0;
 
   return (
-    <div className="w-full max-w-4xl mx-auto" style={FONT}>
+    <div className="w-full" style={FONT}>
       <SystemSelector checkProhibited={true} />
 
       {/* Dossier banner */}
@@ -921,6 +1004,130 @@ export default function LogVaultPage() {
           </div>
         </>
       )}
+
+      {/* ── Operational Event Log (always visible) ─────────────────────────── */}
+      <section className="mt-6">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h2 className="text-[13px] font-semibold" style={{ color: T.text }}>
+              Registro eventi operativi
+            </h2>
+            <p className="text-[11px] mt-0.5" style={{ color: T.muted }}>
+              Art. 12 — Log immutabili con hash integrità SHA-256 · {events.length} eventi
+            </p>
+          </div>
+          <button
+            onClick={handleAnalyzeDrift}
+            disabled={analyzingDrift || events.length === 0}
+            className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg"
+            style={{ background: T.violetBg, border: `1px solid ${T.violetBdr}`, color: T.violet, cursor: events.length === 0 ? "not-allowed" : "pointer", opacity: events.length === 0 ? 0.5 : 1 }}>
+            {analyzingDrift ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
+            ✦ Analisi drift
+          </button>
+        </div>
+
+        {/* Drift banner */}
+        {driftAnalysis && (
+          <div className="rounded-xl p-4 mb-4" style={{
+            background: driftAnalysis.driftDetected ? T.amberBg : T.greenBg,
+            border: `1px solid ${driftAnalysis.driftDetected ? T.amberBdr : T.greenBdr}`,
+          }}>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-[12px] font-semibold mb-1" style={{ color: driftAnalysis.driftDetected ? T.amber : T.green }}>
+                  ✦ AI {driftAnalysis.driftDetected ? "— Drift rilevato" : "— Nessun drift rilevato"} [verify against current AI Act text]
+                </p>
+                <p className="text-[11px]" style={{ color: T.text }}>{driftAnalysis.summary}</p>
+                {driftAnalysis.signals.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {driftAnalysis.signals.map((s, i) => (
+                      <p key={i} className="text-[10px]" style={{ color: T.muted }}>
+                        · {s.pattern} ({s.count}×) — {s.severity}
+                      </p>
+                    ))}
+                  </div>
+                )}
+                <p className="text-[11px] mt-2 font-medium" style={{ color: T.text }}>{driftAnalysis.suggestedAction}</p>
+                {driftAnalysis.draftIncidentReason && (
+                  <Link
+                    href={`/dashboard/post-market?tab=incidents&draft=${encodeURIComponent(driftAnalysis.draftIncidentReason)}`}
+                    className="inline-flex items-center gap-1.5 mt-2 text-[11px] font-semibold"
+                    style={{ color: T.amber }}>
+                    <ExternalLink size={11} /> Apri bozza incidente in Post-Market
+                  </Link>
+                )}
+              </div>
+              <button onClick={() => setDriftAnalysis(null)} style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}>
+                <X size={13} style={{ color: T.muted }} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Add event form */}
+        <div className="rounded-xl p-4 mb-4" style={card}>
+          <p className="text-[10px] font-semibold uppercase mb-3" style={{ color: T.faint, letterSpacing: "1px" }}>
+            <Plus size={10} style={{ display: "inline", marginRight: 4 }} />
+            Registra nuovo evento
+          </p>
+          <div className="grid grid-cols-2 gap-2 mb-2">
+            <div>
+              <label className="text-[10px] block mb-1" style={{ color: T.muted }}>Categoria</label>
+              <select
+                value={newEventCategory}
+                onChange={e => setNewEventCategory(e.target.value as LogEventCategory)}
+                style={{ ...inp, fontSize: 11 }}>
+                {CAT_LABELS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[10px] block mb-1" style={{ color: T.muted }}>Severità</label>
+              <select
+                value={newEventSeverity}
+                onChange={e => setNewEventSeverity(e.target.value as LogEventSeverity)}
+                style={{ ...inp, fontSize: 11 }}>
+                <option value="info">Info</option>
+                <option value="warning">Warning</option>
+                <option value="critical">Critico</option>
+              </select>
+            </div>
+          </div>
+          <textarea
+            value={newEventDesc}
+            onChange={e => setNewEventDesc(e.target.value)}
+            placeholder="Descrizione dell'evento (es. 'Operatore ha effettuato override decisione ID-442')…"
+            rows={2}
+            style={{ ...ta, marginBottom: 6 }} />
+          <div className="flex gap-2 items-center">
+            <input
+              type="text"
+              value={newEventOperator}
+              onChange={e => setNewEventOperator(e.target.value)}
+              placeholder="Operatore (opzionale)"
+              style={{ ...inp, flex: 1 }} />
+            <button
+              onClick={handleAddEvent}
+              disabled={addingEvent || !newEventDesc.trim()}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[11px] font-medium"
+              style={{ background: T.text, color: "#fff", border: "none", cursor: !newEventDesc.trim() ? "not-allowed" : "pointer", opacity: !newEventDesc.trim() ? 0.5 : 1, whiteSpace: "nowrap" }}>
+              {addingEvent ? <Loader2 size={11} className="animate-spin" /> : <Hash size={11} />}
+              Registra + hash
+            </button>
+          </div>
+        </div>
+
+        {/* Virtual event grid */}
+        <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${T.border}`, background: T.card }}>
+          <div className="px-4 py-3 border-b" style={{ borderColor: T.border }}>
+            <p className="text-[11px] font-semibold" style={{ color: T.muted }}>
+              {events.length} eventi · immutabili · SHA-256
+            </p>
+          </div>
+          <div className="p-3">
+            <VirtualLogGrid events={events} height={320} />
+          </div>
+        </div>
+      </section>
 
       {/* Toast */}
       <AnimatePresence>
