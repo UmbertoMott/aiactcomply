@@ -37,7 +37,7 @@ const T = {
   amber:    "#92400e",
   amberBg:  "rgba(202,138,4,0.07)",
   amberBdr: "rgba(202,138,4,0.22)",
-  blue:     "#1d4ed8",
+  
   blueBg:   "rgba(29,78,216,0.06)",
   blueBdr:  "rgba(29,78,216,0.18)",
   green:    "#15803d",

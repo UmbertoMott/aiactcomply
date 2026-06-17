@@ -36,7 +36,7 @@ const T = {
   border: "rgba(0,0,0,0.08)", card: "#ffffff", bg: "#f8f8f7",
   red: "#dc2626", redBg: "rgba(220,38,38,0.06)", redBdr: "rgba(220,38,38,0.2)",
   amber: "#d97706", amberBg: "rgba(202,138,4,0.06)", amberBdr: "rgba(202,138,4,0.2)",
-  blue: "#2563eb", blueBg: "rgba(37,99,235,0.06)", blueBdr: "rgba(37,99,235,0.2)",
+  
   green: "#16a34a", greenBg: "rgba(22,163,74,0.06)", greenBdr: "rgba(22,163,74,0.2)",
 } as const;
 
@@ -1178,7 +1178,7 @@ export default function FRIAPage() {
       {/* ── AI Draft Generator Banner (Art. 27) ─────────────────────────────── */}
       <div style={{
         padding: "12px 16px", borderRadius: 10, marginBottom: 16,
-        background: "rgba(37,99,235,0.04)", border: "1px solid rgba(37,99,235,0.15)",
+        background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.10)",
       }}>
         <p style={{ fontSize: 13, margin: "0 0 8px", fontWeight: 500, color: "#0D1016" }}>
           {readFromStorage<ClassifierResult>("classifier")?.systemName && (
@@ -1191,7 +1191,7 @@ export default function FRIAPage() {
           disabled={loadingDraft}
           style={{
             padding: "7px 16px", borderRadius: 7, border: "none",
-            background: loadingDraft ? "#e5e7eb" : "#2563eb",
+            background: loadingDraft ? "#e5e7eb" : "#0D1016",
             color: loadingDraft ? "#9ca3af" : "white",
             fontSize: 13, fontWeight: 500, cursor: loadingDraft ? "default" : "pointer",
           }}
