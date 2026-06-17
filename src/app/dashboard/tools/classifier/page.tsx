@@ -32,6 +32,7 @@ import type { ClassifierResult } from "@/lib/dossier/storage-schema";
 import { loadOrgProfile, saveOrgProfile } from "@/lib/dossier/org-profile";
 import { parseBrainDump, type BrainDumpResult } from "@/app/actions/parseBrainDump";
 import { detectDualRole, type DualRoleResult } from "@/app/actions/detectDualRole";
+import { seedAssessmentFromClassifier } from "@/lib/assessment/assessment-helpers";
 
 // ─── ADDITION 1 — Persistence ────────────────────────────────────────
 
@@ -61,6 +62,18 @@ function saveResult(
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(record));
   writeToStorage<ClassifierResult>("classifier", {
+    systemName: systemName,
+    systemDescription: "",
+    riskLevel: (r.riskLevel?.toLowerCase() ?? "minimal") as ClassifierResult["riskLevel"],
+    annexIII: !!(r.annexCategory),
+    annexI: annexI,
+    applicableArticles: [
+      ...(r.annexCategory ? ["Annex III"] : []),
+      ...(r.isExemptedArt6_3 ? ["Art. 6(3)"] : []),
+    ],
+    completedAt: new Date().toISOString(),
+  });
+  seedAssessmentFromClassifier({
     systemName: systemName,
     systemDescription: "",
     riskLevel: (r.riskLevel?.toLowerCase() ?? "minimal") as ClassifierResult["riskLevel"],
@@ -694,13 +707,13 @@ export default function ClassifierPage() {
               <button
                 onClick={() => setInputMode("demo")}
                 style={{
-                  borderRadius: 9, border: `1px solid ${inputMode === "demo" ? T.blue : T.border}`,
-                  background: inputMode === "demo" ? T.blueBg : T.card,
+                  borderRadius: 9, border: `1px solid ${inputMode === "demo" ? T.text : T.border}`,
+                  background: inputMode === "demo" ? "rgba(0,0,0,0.04)" : T.card,
                   padding: 16, textAlign: "left", cursor: "pointer", transition: "border-color 0.15s",
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                  <Brain style={{ width: 15, height: 15, color: T.blue }} />
+                  <Brain style={{ width: 15, height: 15, color: T.text }} />
                   <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Progetto demo</span>
                 </div>
                 <p style={{ fontSize: 11, color: T.muted, lineHeight: 1.4 }}>
@@ -710,13 +723,13 @@ export default function ClassifierPage() {
               <button
                 onClick={() => setInputMode("manual")}
                 style={{
-                  borderRadius: 9, border: `1px solid ${inputMode === "manual" ? T.blue : T.border}`,
-                  background: inputMode === "manual" ? T.blueBg : T.card,
+                  borderRadius: 9, border: `1px solid ${inputMode === "manual" ? T.text : T.border}`,
+                  background: inputMode === "manual" ? "rgba(0,0,0,0.04)" : T.card,
                   padding: 16, textAlign: "left", cursor: "pointer", transition: "border-color 0.15s",
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                  <Code2 style={{ width: 15, height: 15, color: T.blue }} />
+                  <Code2 style={{ width: 15, height: 15, color: T.text }} />
                   <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Il mio sistema AI</span>
                 </div>
                 <p style={{ fontSize: 11, color: T.muted, lineHeight: 1.4 }}>
@@ -777,8 +790,8 @@ export default function ClassifierPage() {
                       <button key={opt.id} onClick={() => setOrgRole(opt.id)}
                         style={{
                           flex: 1, padding: "10px 12px", borderRadius: 9, textAlign: "left", cursor: "pointer",
-                          border: orgRole === opt.id ? `2px solid ${T.blue}` : `1px solid ${T.border}`,
-                          background: orgRole === opt.id ? T.blueBg : T.card, transition: "all 0.15s",
+                          border: orgRole === opt.id ? `2px solid ${T.text}` : `1px solid ${T.border}`,
+                          background: orgRole === opt.id ? "rgba(0,0,0,0.04)" : T.card, transition: "all 0.15s",
                         }}>
                         <div style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{opt.label}</div>
                         <div style={{ fontSize: 11, color: T.muted, marginTop: 2 }}>{opt.sub}</div>
@@ -790,10 +803,10 @@ export default function ClassifierPage() {
                 {/* Dual-role panel — solo se deployer */}
                 {orgRole === "deployer" && (
                   <div style={{
-                    background: T.blueBg, border: `1px solid rgba(37,99,235,0.2)`,
+                    background: "rgba(0,0,0,0.04)", border: `1px solid rgba(37,99,235,0.2)`,
                     borderRadius: 10, padding: 16, marginTop: 4,
                   }}>
-                    <p style={{ fontSize: 12, fontWeight: 600, color: T.blue, marginBottom: 12 }}>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>
                       ✦ Verifica ruolo Art. 25 — il deployer che modifica diventa provider?
                     </p>
                     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -827,7 +840,7 @@ export default function ClassifierPage() {
                         }}
                         style={{
                           padding: "8px 16px", borderRadius: 8, fontSize: 12, fontWeight: 600,
-                          background: dualRoleLoading || !vendorName.trim() ? "rgba(0,0,0,0.08)" : T.blue,
+                          background: dualRoleLoading || !vendorName.trim() ? "rgba(0,0,0,0.08)" : T.text,
                           color: dualRoleLoading || !vendorName.trim() ? T.muted : "#fff",
                           border: "none", cursor: dualRoleLoading || !vendorName.trim() ? "not-allowed" : "pointer",
                           alignSelf: "flex-start",
@@ -881,7 +894,7 @@ export default function ClassifierPage() {
           <div className="grid lg:grid-cols-2 gap-6">
             <div style={{ ...cardSt, padding: 24 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                <Code2 style={{ width: 16, height: 16, color: T.blue }} />
+                <Code2 style={{ width: 16, height: 16, color: T.text }} />
                 <h2 style={{ fontSize: 14, fontWeight: 600, color: T.text, margin: 0 }}>
                   {inputMode === "demo"
                     ? "Progetto: CV-Screener AI"
@@ -931,7 +944,7 @@ export default function ClassifierPage() {
                   { icon: Hash, text: "Genererà un certificato firmato SHA-256" },
                 ].map((s, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                    <s.icon style={{ width: 14, height: 14, color: T.blue, marginTop: 1, flexShrink: 0 }} />
+                    <s.icon style={{ width: 14, height: 14, color: T.text, marginTop: 1, flexShrink: 0 }} />
                     <span style={{ fontSize: 12, color: T.muted, lineHeight: 1.5 }}>{s.text}</span>
                   </div>
                 ))}
