@@ -17,6 +17,7 @@ import { draftFria } from "@/app/actions/draftFria";
 import type { ClassifierResult, RiskManagerResult, DataAuditResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
+import { getAssessment, patchFRIA, migrateLegacyFRIA } from "@/lib/assessment/assessment-helpers";
 import {
   type FRIADocument, type FRIAScenario, type FRIARightImpact,
   type FRIASeverityAssessment, type FRIAMitigationMeasure,
@@ -27,15 +28,6 @@ import {
 } from "@/lib/simulation/fria-engine";
 
 // ─── Storage ─────────────────────────────────────────────────────────────────
-const FRIA_DOC_KEY = "aicomply_fria_document";
-function loadDoc(): FRIADocument {
-  if (typeof window === "undefined") return createEmptyFRIA();
-  try {
-    const raw = localStorage.getItem(FRIA_DOC_KEY);
-    if (raw) return JSON.parse(raw) as FRIADocument;
-  } catch { /* ignore */ }
-  return createEmptyFRIA();
-}
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const T = {
@@ -73,7 +65,7 @@ function Badge({ label, color = "gray" }: { label: string; color?: RiskColor }) 
     red:   { bg: T.redBg,   bdr: T.redBdr,   text: T.red   },
     amber: { bg: T.amberBg, bdr: T.amberBdr, text: T.amber },
     green: { bg: T.greenBg, bdr: T.greenBdr, text: T.green },
-    blue:  { bg: T.blueBg,  bdr: T.blueBdr,  text: T.blue  },
+    blue:  { bg: "rgba(0,0,0,0.04)",  bdr: T.border,  text: T.text  },
     gray:  { bg: "rgba(0,0,0,0.04)", bdr: T.border, text: T.muted },
   };
   const c = map[color];
@@ -146,7 +138,7 @@ const DEFAULT_TRIGGERS = [
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function FRIAPage() {
-  const [doc, setDoc] = useState<FRIADocument>(() => loadDoc());
+  const [doc, setDoc] = useState<FRIADocument>(() => createEmptyFRIA());
   const [phase, setPhase] = useState<Phase>("1");
   const [openAcc, setOpenAcc] = useState<Set<"A" | "B" | "C">>(new Set(["A"]));
   const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
@@ -159,11 +151,17 @@ export default function FRIAPage() {
   );
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ── Load from Assessment storage on mount ─────────────────────────────────
+  useEffect(() => {
+    migrateLegacyFRIA();
+    setDoc(getAssessment().fria);
+  }, []);
+
   // ── Auto-save ogni 30s ────────────────────────────────────────────────────
   const { justSaved: friaSaved } = useAutoSave(
     "fria",
     doc,
-    (d) => localStorage.setItem(FRIA_DOC_KEY, JSON.stringify(d))
+    (d) => patchFRIA(() => d)
   );
 
   // ── AI draft generator ────────────────────────────────────────────────────
@@ -251,7 +249,7 @@ export default function FRIAPage() {
   function debounceSave(d: FRIADocument) {
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      localStorage.setItem(FRIA_DOC_KEY, JSON.stringify(d));
+      patchFRIA(() => d);
     }, 500);
   }
 
@@ -446,7 +444,7 @@ export default function FRIAPage() {
       totalScenarios: doc.scenarios.length, overallRisk,
       completeness: `${completeness}%`, recommendation: doc.deployment.recommendation, savedAt: completedAt,
     }, "fria");
-    localStorage.setItem(FRIA_DOC_KEY, JSON.stringify(doc));
+    patchFRIA(() => doc);
     setDossierSavedAt(completedAt);
     showToast("FRIA salvata nel dossier di compliance");
   }
@@ -722,7 +720,7 @@ export default function FRIAPage() {
                                       {right.is_absolute && <Badge label="assoluto" color="red" />}
                                       {checked && (
                                         <button onClick={() => setOpenRights((prev) => { const n = new Set(prev); n.has(right.id) ? n.delete(right.id) : n.add(right.id); return n; })}
-                                          style={{ fontSize: 10, color: T.blue, background: "none", border: "none", cursor: "pointer", padding: "2px 4px" }}>
+                                          style={{ fontSize: 10, color: T.text, background: "none", border: "none", cursor: "pointer", padding: "2px 4px" }}>
                                           {openAssess ? "chiudi ↑" : "valuta ↓"}
                                         </button>
                                       )}
@@ -739,14 +737,14 @@ export default function FRIAPage() {
                                             law_enforcement: "Forze dell'ordine", migration: "Migrazione", justice: "Giustizia",
                                           };
                                           return (
-                                            <div style={{ marginBottom: 14, padding: "10px 12px", borderRadius: 7, background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
-                                              <div style={{ fontSize: 10, fontWeight: 600, color: T.blue, textTransform: "uppercase" as const, letterSpacing: "0.5px", marginBottom: 7 }}>
+                                            <div style={{ marginBottom: 14, padding: "10px 12px", borderRadius: 7, background: "rgba(0,0,0,0.04)", border: `1px solid ${T.border}` }}>
+                                              <div style={{ fontSize: 10, fontWeight: 600, color: T.text, textTransform: "uppercase" as const, letterSpacing: "0.5px", marginBottom: 7 }}>
                                                 Rischi documentati ECNL/DIHR per settore
                                               </div>
                                               <div style={{ display: "flex", flexDirection: "column" as const, gap: 4 }}>
                                                 {sectorHints.map(([sector, desc]) => (
                                                   <div key={sector} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                                                    <span style={{ fontSize: 10, fontWeight: 600, color: T.blue, minWidth: 120, flexShrink: 0 }}>{sectorLabel[sector] ?? sector}</span>
+                                                    <span style={{ fontSize: 10, fontWeight: 600, color: T.text, minWidth: 120, flexShrink: 0 }}>{sectorLabel[sector] ?? sector}</span>
                                                     <span style={{ fontSize: 11, color: T.text, lineHeight: 1.4 }}>{desc}</span>
                                                   </div>
                                                 ))}
@@ -1035,7 +1033,7 @@ export default function FRIAPage() {
           <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 14px" }}>Trigger per aggiornamento FRIA</h3>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
             {DEFAULT_TRIGGERS.map((t) => (
-              <label key={t} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", borderRadius: 7, cursor: "pointer", background: mon.update_triggers.includes(t) ? T.blueBg : "none" }}>
+              <label key={t} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", borderRadius: 7, cursor: "pointer", background: mon.update_triggers.includes(t) ? "rgba(0,0,0,0.04)" : "none" }}>
                 <input type="checkbox" checked={mon.update_triggers.includes(t)} onChange={() => toggleTrigger(t)} style={{ cursor: "pointer" }} />
                 <span style={{ fontSize: 12, color: T.text }}>{t}</span>
               </label>
