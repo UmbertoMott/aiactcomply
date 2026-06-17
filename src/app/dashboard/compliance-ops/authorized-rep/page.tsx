@@ -98,8 +98,8 @@ function DkField({ label, article, aiBadge, children, span2 }: {
           </span>
         )}
         {aiBadge && (
-          <span style={{ fontSize: 9, fontWeight: 700, color: DK.indigo, background: DK.indigoBg,
-            border: `1px solid ${DK.indigoBdr}`, borderRadius: 4, padding: "1px 5px" }}>
+          <span style={{ fontSize: 9, fontWeight: 700, color: DK.muted, background: "rgba(0,0,0,0.04)",
+            border: `1px solid ${DK.border}`, borderRadius: 4, padding: "1px 5px" }}>
             ✦ AI
           </span>
         )}
@@ -185,7 +185,7 @@ function ChecklistRowDk({ item, eudbResult, docuGenCompleted, onChange }: {
                   </span>
                   <Link href="/dashboard/compliance-ops/eudb"
                     style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4,
-                      fontSize: 10, color: DK.indigo, textDecoration: "none" }}>
+                      fontSize: 10, color: DK.muted, textDecoration: "none" }}>
                     Apri EUDB <ExternalLink size={9} />
                   </Link>
                 </div>
@@ -200,9 +200,9 @@ function ChecklistRowDk({ item, eudbResult, docuGenCompleted, onChange }: {
                       placeholder="Es. EU-AIDB-2025-XXXXXX" />
                     <Link href="/dashboard/compliance-ops/eudb"
                       style={{ display: "flex", alignItems: "center", gap: 4,
-                        fontSize: 10, color: DK.indigo, textDecoration: "none",
+                        fontSize: 10, color: DK.muted, textDecoration: "none",
                         padding: "4px 10px", borderRadius: 6,
-                        border: `1px solid ${DK.indigoBdr}`, background: DK.indigoBg,
+                        border: `1px solid ${DK.border}`, background: "rgba(0,0,0,0.04)",
                         whiteSpace: "nowrap" }}>
                       Apri wizard EUDB <ExternalLink size={9} />
                     </Link>
@@ -484,7 +484,7 @@ export default function AuthorizedRepCompliancePage() {
               Il mandatario deve poter ricevere e conservare tale documentazione.
             </p>
             <Link href="/dashboard/tools/docugen"
-              style={{ fontSize: 11, color: DK.indigo, display: "inline-flex", alignItems: "center", gap: 4 }}>
+              style={{ fontSize: 11, color: DK.muted, display: "inline-flex", alignItems: "center", gap: 4 }}>
               → Vai a DocuGen AI per completare la documentazione
               <span style={{ fontFamily: "monospace", fontSize: 9, color: DK.faint }}>Art. 11</span>
             </Link>
@@ -495,13 +495,13 @@ export default function AuthorizedRepCompliancePage() {
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-          <UserCheck size={16} style={{ color: DK.indigo }} />
+          <UserCheck size={16} style={{ color: DK.muted }} />
           <h1 style={{ fontSize: 22, fontWeight: 400, letterSpacing: "-0.5px", color: DK.text, margin: 0 }}>
             Authorized Representative
           </h1>
           <span style={{ fontSize: 9, fontFamily: "monospace", padding: "2px 7px", borderRadius: 10,
-            background: DK.indigoBg, color: DK.indigo, border: `1px solid ${DK.indigoBdr}` }}>
-            Art. 22 [verify against current AI Act text]
+            background: "rgba(0,0,0,0.04)", color: DK.muted, border: `1px solid ${DK.border}` }}>
+            Art. 22
           </span>
         </div>
         <p style={{ fontSize: 12, color: DK.muted, margin: 0 }}>
@@ -511,9 +511,9 @@ export default function AuthorizedRepCompliancePage() {
 
       {/* AI disclaimer */}
       <div style={{ ...cardDk, padding: "10px 14px", marginBottom: 16,
-        background: DK.indigoBg, border: `1px solid ${DK.indigoBdr}` }}>
-        <p style={{ fontSize: 11, color: DK.indigo, margin: 0 }}>
-          ✦ AI — verifica e conferma: condizioni di applicabilità Art. 22(1), elenco poteri conferiti Art. 22(2)(a)-(f) e testo del mandato generato sono ricostruiti dalla memoria del modello. Validare contro testo consolidato Art. 22 Reg. (UE) 2024/1689 prima della firma del mandato. Durata minima conservazione mandato dichiarata: 10 anni. [verify against current AI Act text]
+        background: "rgba(0,0,0,0.04)", border: `1px solid ${DK.border}` }}>
+        <p style={{ fontSize: 11, color: DK.muted, margin: 0 }}>
+          ✦ AI — verifica e conferma: condizioni di applicabilità Art. 22(1), elenco poteri conferiti Art. 22(2)(a)-(f) e testo del mandato generato sono ricostruiti dalla memoria del modello. Validare contro testo consolidato Art. 22 Reg. (UE) 2024/1689 prima della firma del mandato. Durata minima conservazione mandato dichiarata: 10 anni.
         </p>
       </div>
 
@@ -521,24 +521,24 @@ export default function AuthorizedRepCompliancePage() {
 
       <div style={{ ...cardDk, padding: 20, marginBottom: 14 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 16 }}>
-          <Info size={13} style={{ color: DK.indigo }} />
+          <Info size={13} style={{ color: DK.muted }} />
           <p style={{ fontSize: 13, fontWeight: 600, color: DK.text, margin: 0 }}>Sezione 1 — Verifica applicabilità</p>
           <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint, border: `1px solid ${DK.border}`,
             borderRadius: 4, padding: "1px 5px", background: "rgba(0,0,0,0.05)" }}>
-            Art. 22(1) [verify against current AI Act text]
+            Art. 22(1)
           </span>
         </div>
 
         {prefillCount > 0 && (
           <div style={{ ...cardDk, padding: "10px 14px", marginBottom: 14,
-            background: DK.indigoBg, border: `1px solid ${DK.indigoBdr}` }}>
+            background: "rgba(0,0,0,0.04)", border: `1px solid ${DK.border}` }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Sparkles size={13} style={{ color: DK.indigo, flexShrink: 0 }} />
-              <p style={{ fontSize: 11, color: DK.indigo, fontWeight: 600, margin: 0, flex: 1 }}>
+              <Sparkles size={13} style={{ color: DK.muted, flexShrink: 0 }} />
+              <p style={{ fontSize: 11, color: DK.muted, fontWeight: 600, margin: 0, flex: 1 }}>
                 ✦ AI ha precompilato {prefillCount} campi da Triage e AI Inventory. Verifica e conferma.
               </p>
               <button onClick={() => setShowPrefillDetail(v => !v)}
-                style={{ fontSize: 10, color: DK.indigo, background: "none", border: "none",
+                style={{ fontSize: 10, color: DK.muted, background: "none", border: "none",
                   cursor: "pointer", textDecoration: "underline" }}>
                 {showPrefillDetail ? "Nascondi" : "Mostra fonti"}
               </button>
@@ -561,8 +561,8 @@ export default function AuthorizedRepCompliancePage() {
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                   <span style={{ fontSize: 10, color: DK.faint, fontWeight: 600 }}>Q1</span>
                   {prefillSrc?.applicability === "triage" && doc.eligibility.provider_non_eu && (
-                    <span style={{ fontSize: 9, color: DK.indigo, background: DK.indigoBg,
-                      border: `1px solid ${DK.indigoBdr}`, borderRadius: 4, padding: "1px 5px", fontWeight: 600 }}>
+                    <span style={{ fontSize: 9, color: DK.muted, background: "rgba(0,0,0,0.04)",
+                      border: `1px solid ${DK.border}`, borderRadius: 4, padding: "1px 5px", fontWeight: 600 }}>
                       ✦ AI — Precompilato dal profilo azienda
                     </span>
                   )}
@@ -584,8 +584,8 @@ export default function AuthorizedRepCompliancePage() {
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                   <span style={{ fontSize: 10, color: DK.faint, fontWeight: 600 }}>Q2</span>
                   {prefillSrc?.applicability === "triage" && doc.eligibility.high_risk && (
-                    <span style={{ fontSize: 9, color: DK.indigo, background: DK.indigoBg,
-                      border: `1px solid ${DK.indigoBdr}`, borderRadius: 4, padding: "1px 5px", fontWeight: 600 }}>
+                    <span style={{ fontSize: 9, color: DK.muted, background: "rgba(0,0,0,0.04)",
+                      border: `1px solid ${DK.border}`, borderRadius: 4, padding: "1px 5px", fontWeight: 600 }}>
                       ✦ AI — Precompilato da Triage: classificazione rilevata
                     </span>
                   )}
@@ -594,7 +594,7 @@ export default function AuthorizedRepCompliancePage() {
                   Il sistema AI è classificato come alto rischio (Annex III) o GPAI con rischio sistemico?
                 </p>
                 <p style={{ fontSize: 11, color: DK.muted, margin: "4px 0 0" }}>
-                  Art. 22(1) — si applica ai tier high_risk e gpai_systemic. [verify against current AI Act text]
+                  Art. 22(1) — si applica ai tier high_risk e gpai_systemic.
                 </p>
               </div>
               <RadioGroupDk value={doc.eligibility.high_risk}
@@ -612,7 +612,7 @@ export default function AuthorizedRepCompliancePage() {
             display: "flex", alignItems: "center", gap: 8 }}>
             <AlertTriangle size={14} style={{ color: DK.orange, flexShrink: 0 }} />
             <p style={{ fontSize: 12, color: DK.orange, fontWeight: 500, margin: 0 }}>
-              Authorized Representative obbligatorio — compila il mandato nelle sezioni sottostanti (Art. 22(1)) [verify against current AI Act text]
+              Authorized Representative obbligatorio — compila il mandato nelle sezioni sottostanti (Art. 22(1))
             </p>
           </div>
         )}
@@ -624,7 +624,7 @@ export default function AuthorizedRepCompliancePage() {
             <Info size={14} style={{ color: DK.muted, flexShrink: 0 }} />
             <p style={{ fontSize: 12, color: DK.muted, margin: 0 }}>
               Art. 22 non applicabile — il provider è stabilito nell&apos;UE.{" "}
-              <Link href="/dashboard/compliance-ops/eudb" style={{ color: DK.indigo }}>
+              <Link href="/dashboard/compliance-ops/eudb" style={{ color: DK.muted }}>
                 Vai alla Registrazione EUDB →
               </Link>
             </p>
@@ -653,7 +653,7 @@ export default function AuthorizedRepCompliancePage() {
           {/* Sezione 2 */}
           <div style={{ ...cardDk, padding: 20, marginBottom: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 18 }}>
-              <Building2 size={13} style={{ color: DK.indigo }} />
+              <Building2 size={13} style={{ color: DK.muted }} />
               <p style={{ fontSize: 13, fontWeight: 600, color: DK.text, margin: 0 }}>
                 Sezione 2 — Dati provider estero + AR designato
               </p>
@@ -662,10 +662,10 @@ export default function AuthorizedRepCompliancePage() {
             {/* Prefill banner for provider */}
             {prefillSrc?.provider === "ai_inventory" && (
               <div style={{ ...cardDk, padding: "8px 14px", marginBottom: 16,
-                background: DK.indigoBg, border: `1px solid ${DK.indigoBdr}` }}>
+                background: "rgba(0,0,0,0.04)", border: `1px solid ${DK.border}` }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <Sparkles size={12} style={{ color: DK.indigo, flexShrink: 0 }} />
-                  <p style={{ fontSize: 11, color: DK.indigo, margin: 0 }}>
+                  <Sparkles size={12} style={{ color: DK.muted, flexShrink: 0 }} />
+                  <p style={{ fontSize: 11, color: DK.muted, margin: 0 }}>
                     ✦ AI — Colonna Provider precompilata da AI Inventory / profilo azienda. Verifica e conferma.
                   </p>
                 </div>
@@ -679,7 +679,7 @@ export default function AuthorizedRepCompliancePage() {
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <AlertTriangle size={13} style={{ color: DK.red, flexShrink: 0 }} />
                   <p style={{ fontSize: 11, color: DK.red, margin: 0 }}>
-                    L&apos;Authorized Representative deve essere stabilito in uno Stato Membro dell&apos;UE (Art. 22(1) [verify against current AI Act text]). Il paese attualmente selezionato blocca la generazione del mandato.
+                    L&apos;Authorized Representative deve essere stabilito in uno Stato Membro dell&apos;UE (Art. 22(1)). Il paese attualmente selezionato blocca la generazione del mandato.
                   </p>
                 </div>
               </div>
@@ -700,8 +700,8 @@ export default function AuthorizedRepCompliancePage() {
                     Art. 22(1)
                   </span>
                   {prefillSrc?.provider === "ai_inventory" && (
-                    <span style={{ fontSize: 9, color: DK.indigo, background: DK.indigoBg,
-                      border: `1px solid ${DK.indigoBdr}`, borderRadius: 4, padding: "1px 5px", fontWeight: 600 }}>
+                    <span style={{ fontSize: 9, color: DK.muted, background: "rgba(0,0,0,0.04)",
+                      border: `1px solid ${DK.border}`, borderRadius: 4, padding: "1px 5px", fontWeight: 600 }}>
                       ✦ AI
                     </span>
                   )}
@@ -739,7 +739,7 @@ export default function AuthorizedRepCompliancePage() {
               {/* Right — AR */}
               <div style={{ paddingLeft: 24 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 14 }}>
-                  <UserCheck size={11} style={{ color: DK.indigo }} />
+                  <UserCheck size={11} style={{ color: DK.muted }} />
                   <p style={{ fontSize: 11, fontWeight: 700, color: DK.muted,
                     textTransform: "uppercase", letterSpacing: "0.6px", margin: 0 }}>
                     Authorized Representative
@@ -750,8 +750,8 @@ export default function AuthorizedRepCompliancePage() {
                   </span>
                   {syncBadge && (
                     <span title={`Ultima modifica: ${arRecordSource?.updatedAt}`}
-                      style={{ fontSize: 9, color: DK.indigo, background: DK.indigoBg,
-                        border: `1px solid ${DK.indigoBdr}`, borderRadius: 4, padding: "1px 6px",
+                      style={{ fontSize: 9, color: DK.muted, background: "rgba(0,0,0,0.04)",
+                        border: `1px solid ${DK.border}`, borderRadius: 4, padding: "1px 6px",
                         fontWeight: 600, cursor: "help" }}>
                       {syncBadge}
                     </span>
@@ -778,7 +778,7 @@ export default function AuthorizedRepCompliancePage() {
                       <p style={{ fontSize: 11, color: DK.red, margin: "4px 0 0",
                         display: "flex", alignItems: "center", gap: 4 }}>
                         <AlertTriangle size={11} />
-                        L&apos;AR deve essere in uno SM UE (Art. 22(1) [verify against current AI Act text])
+                        L&apos;AR deve essere in uno SM UE (Art. 22(1))
                       </p>
                     )}
                   </DkField>
@@ -814,15 +814,15 @@ export default function AuthorizedRepCompliancePage() {
             {/* Sistema coperto */}
             <div style={{ marginTop: 20, paddingTop: 18, borderTop: `1px solid ${DK.border}` }}>
               <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 14 }}>
-                <Globe size={13} style={{ color: DK.indigo }} />
+                <Globe size={13} style={{ color: DK.muted }} />
                 <p style={{ fontSize: 12, fontWeight: 600, color: DK.text, margin: 0 }}>Sistema coperto dal mandato</p>
                 <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint, border: `1px solid ${DK.border}`,
                   borderRadius: 4, padding: "1px 5px", background: "rgba(0,0,0,0.05)" }}>
-                  Annex VIII §4-5 [verify against current AI Act text]
+                  Annex VIII §4-5
                 </span>
                 {prefillSrc?.system === "risk_manager_docugen" && (
-                  <span style={{ fontSize: 9, color: DK.indigo, background: DK.indigoBg,
-                    border: `1px solid ${DK.indigoBdr}`, borderRadius: 4, padding: "1px 5px", fontWeight: 600 }}>
+                  <span style={{ fontSize: 9, color: DK.muted, background: "rgba(0,0,0,0.04)",
+                    border: `1px solid ${DK.border}`, borderRadius: 4, padding: "1px 5px", fontWeight: 600 }}>
                     ✦ AI — da DocuGen + Risk Manager
                   </span>
                 )}
@@ -867,7 +867,7 @@ export default function AuthorizedRepCompliancePage() {
           {/* Sezione 3 — Mandato + checklist */}
           <div style={{ ...cardDk, padding: 20, marginBottom: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 16 }}>
-              <FileText size={13} style={{ color: DK.indigo }} />
+              <FileText size={13} style={{ color: DK.muted }} />
               <p style={{ fontSize: 13, fontWeight: 600, color: DK.text, margin: 0 }}>Sezione 3 — Mandato scritto + checklist obblighi AR</p>
             </div>
 
@@ -878,7 +878,7 @@ export default function AuthorizedRepCompliancePage() {
                 display: "flex", alignItems: "center", gap: 8 }}>
                 <AlertTriangle size={13} style={{ color: DK.red, flexShrink: 0 }} />
                 <p style={{ fontSize: 11, color: DK.red, margin: 0 }}>
-                  Correggere il paese dell&apos;AR (Sezione 2) prima di procedere — l&apos;AR deve essere in uno SM UE (Art. 22(1) [verify against current AI Act text]).
+                  Correggere il paese dell&apos;AR (Sezione 2) prima di procedere — l&apos;AR deve essere in uno SM UE (Art. 22(1)).
                 </p>
               </div>
             )}
@@ -890,8 +890,8 @@ export default function AuthorizedRepCompliancePage() {
                   <p style={{ fontSize: 12, color: DK.muted, margin: 0 }}>
                     Testo generato automaticamente — revisiona prima della firma
                   </p>
-                  <span style={{ fontSize: 9, fontWeight: 700, color: DK.indigo, background: DK.indigoBg,
-                    border: `1px solid ${DK.indigoBdr}`, borderRadius: 4, padding: "1px 6px" }}>
+                  <span style={{ fontSize: 9, fontWeight: 700, color: DK.muted, background: "rgba(0,0,0,0.04)",
+                    border: `1px solid ${DK.border}`, borderRadius: 4, padding: "1px 6px" }}>
                     ✦ AI — verifica e conferma
                   </span>
                 </div>
@@ -907,7 +907,7 @@ export default function AuthorizedRepCompliancePage() {
                 style={{ ...taDk, height: 400, resize: "vertical",
                   fontFamily: "ui-monospace, 'Cascadia Code', monospace", fontSize: 11, lineHeight: 1.7,
                   background: "#f3f4f6",
-                  border: `1px solid ${mandateConfirmed ? DK.greenBdr : DK.indigoBdr}`,
+                  border: `1px solid ${mandateConfirmed ? DK.greenBdr : DK.border}`,
                   color: DK.text }} />
               {!mandateConfirmed ? (
                 <button onClick={() => { setMandateConfirmed(true); showToast("✓ Testo del mandato confermato"); }}
@@ -932,9 +932,9 @@ export default function AuthorizedRepCompliancePage() {
             <div style={{ ...cardDk, padding: 14, marginBottom: 14 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                  <Shield size={13} style={{ color: DK.indigo }} />
+                  <Shield size={13} style={{ color: DK.muted }} />
                   <p style={{ fontSize: 12, fontWeight: 600, color: DK.text, margin: 0 }}>
-                    Compiti obbligatori Art. 22(2-5) [verify against current AI Act text]
+                    Compiti obbligatori Art. 22(2-5)
                   </p>
                 </div>
                 <button
@@ -1021,7 +1021,7 @@ export default function AuthorizedRepCompliancePage() {
                   <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint,
                     border: `1px solid ${DK.border}`, borderRadius: 4, padding: "1px 5px",
                     background: "rgba(0,0,0,0.05)" }}>
-                    Art. 22(2)(a)-(f) [verify against current AI Act text]
+                    Art. 22(2)(a)-(f)
                   </span>
                 </div>
                 <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 8, fontWeight: 500,
@@ -1034,8 +1034,8 @@ export default function AuthorizedRepCompliancePage() {
 
               {doc.checklist.length === 0 && (
                 <button onClick={() => patch(d => ({ ...d, checklist: makeChecklist() }))}
-                  style={{ fontSize: 11, color: DK.indigo, background: DK.indigoBg,
-                    border: `1px solid ${DK.indigoBdr}`, borderRadius: 6, padding: "4px 10px",
+                  style={{ fontSize: 11, color: DK.muted, background: "rgba(0,0,0,0.04)",
+                    border: `1px solid ${DK.border}`, borderRadius: 6, padding: "4px 10px",
                     cursor: "pointer", marginBottom: 10 }}>
                   Inizializza checklist obblighi AR
                 </button>
@@ -1068,7 +1068,7 @@ export default function AuthorizedRepCompliancePage() {
             </div>
           </div>
 
-          <SignOffPanel toolKey="authorized-rep" toolLabel="Authorized Representative — Art. 22 [verify against current AI Act text]" />
+          <SignOffPanel toolKey="authorized-rep" toolLabel="Authorized Representative — Art. 22" />
         </>
         </fieldset>
       )}

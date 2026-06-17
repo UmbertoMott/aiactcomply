@@ -136,12 +136,12 @@ function MemberStatesSelectDark({ selected, onChange }: {
               <label key={sm} style={{
                 display: "flex", alignItems: "center", gap: 8, padding: "6px 12px",
                 cursor: "pointer", fontSize: 12, color: DK.text,
-                background: checked ? DK.indigoBg : "transparent",
+                background: checked ? "rgba(0,0,0,0.04)" : "transparent",
                 borderBottom: sm === "Tutti gli Stati Membri UE" ? `1px solid ${DK.border}` : undefined,
                 fontWeight: sm === "Tutti gli Stati Membri UE" ? 500 : 400,
               }}>
                 <input type="checkbox" checked={checked} onChange={() => toggle(sm)}
-                  style={{ accentColor: DK.indigo }} />
+                  style={{ accentColor: "#0D1016" }} />
                 {sm}
               </label>
             );
@@ -153,7 +153,7 @@ function MemberStatesSelectDark({ selected, onChange }: {
           {selected.map(sm => (
             <span key={sm} onClick={() => toggle(sm)} style={{
               fontSize: 10, padding: "2px 8px", borderRadius: 10,
-              background: DK.indigoBg, color: DK.indigo, border: `1px solid ${DK.indigoBdr}`,
+              background: "rgba(0,0,0,0.04)", color: DK.muted, border: `1px solid ${DK.border}`,
               cursor: "pointer",
             }}>
               {sm} ×
@@ -180,8 +180,8 @@ function DkField({ label, article, children, span2, aiBadge }: {
           </span>
         )}
         {aiBadge && (
-          <span style={{ fontSize: 9, fontWeight: 700, color: DK.indigo,
-            background: DK.indigoBg, border: `1px solid ${DK.indigoBdr}`,
+          <span style={{ fontSize: 9, fontWeight: 700, color: DK.muted,
+            background: "rgba(0,0,0,0.04)", border: `1px solid ${DK.border}`,
             borderRadius: 4, padding: "1px 5px" }}>
             ✦ AI
           </span>
@@ -209,8 +209,8 @@ function SectionCard({ title, article, aiBadge, children }: {
           )}
         </div>
         {aiBadge && (
-          <span style={{ fontSize: 9, fontWeight: 700, color: DK.indigo,
-            background: DK.indigoBg, border: `1px solid ${DK.indigoBdr}`,
+          <span style={{ fontSize: 9, fontWeight: 700, color: DK.muted,
+            background: "rgba(0,0,0,0.04)", border: `1px solid ${DK.border}`,
             borderRadius: 5, padding: "2px 7px" }}>
             ✦ AI — verifica e conferma
           </span>
@@ -343,14 +343,14 @@ export default function EUDBCompliancePage() {
     const banner = bannerConfig[eStatus];
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        <div style={{ ...cardDk, padding: 14, background: DK.indigoBg, border: `1px solid ${DK.indigoBdr}` }}>
+        <div style={{ ...cardDk, padding: 14, background: "rgba(0,0,0,0.04)", border: `1px solid ${DK.border}` }}>
           <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-            <Info size={13} style={{ color: DK.indigo, flexShrink: 0, marginTop: 1 }} />
+            <Info size={13} style={{ color: DK.muted, flexShrink: 0, marginTop: 1 }} />
             <div>
-              <p style={{ fontSize: 12, color: DK.indigo, fontWeight: 500, margin: 0 }}>
+              <p style={{ fontSize: 12, color: DK.muted, fontWeight: 500, margin: 0 }}>
                 Art. 49 AI Act — Chi deve registrarsi nel database UE?
               </p>
-              <p style={{ fontSize: 11, color: DK.indigo, opacity: 0.8, margin: "4px 0 0", lineHeight: 1.5 }}>
+              <p style={{ fontSize: 11, color: DK.muted, opacity: 0.8, margin: "4px 0 0", lineHeight: 1.5 }}>
                 Provider di sistemi Annex III, deployer pubblici (Annex III pt.1-6), provider di GPAI con rischio sistemico e authorized representative di provider non-UE devono registrarsi prima del deployment.
               </p>
             </div>
@@ -364,8 +364,8 @@ export default function EUDBCompliancePage() {
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                   <span style={{ fontSize: 10, color: DK.faint, fontWeight: 600 }}>Q{idx + 1}</span>
                   {q.prefillSource && (
-                    <span style={{ fontSize: 9, color: DK.indigo, background: DK.indigoBg,
-                      border: `1px solid ${DK.indigoBdr}`, borderRadius: 4, padding: "1px 5px", fontWeight: 600 }}>
+                    <span style={{ fontSize: 9, color: DK.muted, background: "rgba(0,0,0,0.04)",
+                      border: `1px solid ${DK.border}`, borderRadius: 4, padding: "1px 5px", fontWeight: 600 }}>
                       ✦ AI — {q.prefillSource}
                     </span>
                   )}
@@ -389,7 +389,7 @@ export default function EUDBCompliancePage() {
         {eStatus === "not_required" && (
           <p style={{ fontSize: 11, color: DK.muted, margin: 0 }}>
             Consulta il{" "}
-            <a href="/dashboard/tools/deployer-dashboard" style={{ color: DK.indigo, textDecoration: "none" }}>
+            <a href="/dashboard/tools/deployer-dashboard" style={{ color: DK.text, textDecoration: "none" }}>
               Deployer Dashboard
             </a>{" "}
             per gli obblighi pertinenti.
@@ -407,15 +407,15 @@ export default function EUDBCompliancePage() {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {isPrefilled && prefill && (
-          <div style={{ ...cardDk, padding: 12, background: DK.indigoBg, border: `1px solid ${DK.indigoBdr}` }}>
+          <div style={{ ...cardDk, padding: 12, background: "rgba(0,0,0,0.04)", border: `1px solid ${DK.border}` }}>
             <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-              <Sparkles size={13} style={{ color: DK.indigo, flexShrink: 0, marginTop: 1 }} />
+              <Sparkles size={13} style={{ color: DK.muted, flexShrink: 0, marginTop: 1 }} />
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 11, color: DK.indigo, fontWeight: 600, margin: 0 }}>
+                <p style={{ fontSize: 11, color: DK.muted, fontWeight: 600, margin: 0 }}>
                   ✦ AI ha precompilato {prefill.prefillCount} campi da AI Inventory / profilo azienda. Verifica e conferma prima di proseguire.
                 </p>
                 <button onClick={() => setShowPrefillDetail(v => !v)}
-                  style={{ fontSize: 10, color: DK.indigo, background: "none", border: "none",
+                  style={{ fontSize: 10, color: DK.muted, background: "none", border: "none",
                     cursor: "pointer", padding: 0, marginTop: 4, textDecoration: "underline" }}>
                   {showPrefillDetail ? "Nascondi dettagli" : "Mostra fonti"}
                 </button>
@@ -471,7 +471,7 @@ export default function EUDBCompliancePage() {
             <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: DK.muted, cursor: "pointer" }}>
               <input type="checkbox" checked={p.has_authorized_rep}
                 onChange={e => patchP("has_authorized_rep", e.target.checked)}
-                style={{ accentColor: DK.indigo }} />
+                style={{ accentColor: "#0D1016" }} />
               Il provider non è stabilito nell&apos;UE — è necessario un AR
             </label>
           </div>
@@ -495,7 +495,7 @@ export default function EUDBCompliancePage() {
         {!doc.aiConfirmed && prefill && prefill.prefillCount > 0 && (
           <button onClick={() => { patch(d => ({ ...d, aiConfirmed: true })); showToast("✓ Dati provider confermati"); }}
             style={{ width: "100%", padding: "9px", borderRadius: 8, fontSize: 12, fontWeight: 600,
-              background: DK.indigoBg, color: DK.indigo, border: `1px solid ${DK.indigoBdr}`, cursor: "pointer" }}>
+              background: "rgba(0,0,0,0.04)", color: DK.muted, border: `1px solid ${DK.border}`, cursor: "pointer" }}>
             ✦ Conferma dati precompilati da AI
           </button>
         )}
@@ -515,10 +515,10 @@ export default function EUDBCompliancePage() {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {isPrefilled && prefill && (
-          <div style={{ ...cardDk, padding: 12, background: DK.indigoBg, border: `1px solid ${DK.indigoBdr}` }}>
+          <div style={{ ...cardDk, padding: 12, background: "rgba(0,0,0,0.04)", border: `1px solid ${DK.border}` }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Sparkles size={13} style={{ color: DK.indigo, flexShrink: 0 }} />
-              <p style={{ fontSize: 11, color: DK.indigo, fontWeight: 600, margin: 0 }}>
+              <Sparkles size={13} style={{ color: DK.muted, flexShrink: 0 }} />
+              <p style={{ fontSize: 11, color: DK.muted, fontWeight: 600, margin: 0 }}>
                 ✦ AI ha precompilato i campi sistema da Risk Manager e DocuGen Annex IV. Verifica e conferma.
               </p>
             </div>
@@ -805,8 +805,8 @@ export default function EUDBCompliancePage() {
               <div key={ps.n} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                 <div style={{ flexShrink: 0, width: 22, height: 22, borderRadius: "50%",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 10, fontWeight: 700, color: DK.indigo,
-                  background: DK.indigoBg, border: `1px solid ${DK.indigoBdr}` }}>
+                  fontSize: 10, fontWeight: 700, color: DK.muted,
+                  background: "rgba(0,0,0,0.04)", border: `1px solid ${DK.border}` }}>
                   {ps.n}
                 </div>
                 <p style={{ fontSize: 12, color: DK.text, margin: 0, lineHeight: 1.5, paddingTop: 3 }}>
@@ -814,7 +814,7 @@ export default function EUDBCompliancePage() {
                   {ps.href && (
                     <> —{" "}
                       <a href={ps.href} target="_blank" rel="noopener noreferrer"
-                        style={{ color: DK.indigo, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 3 }}>
+                        style={{ color: DK.muted, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 3 }}>
                         ec.europa.eu/transparency/ai-register <ExternalLink size={10} />
                       </a>
                       <span style={{ fontSize: 9, color: DK.faint }}></span>
@@ -876,12 +876,12 @@ export default function EUDBCompliancePage() {
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-          <Database size={16} style={{ color: DK.indigo }} />
+          <Database size={16} style={{ color: DK.muted }} />
           <h1 style={{ fontSize: 22, fontWeight: 400, letterSpacing: "-0.5px", color: DK.text, margin: 0 }}>
             Registrazione EUDB
           </h1>
           <span style={{ fontSize: 9, fontFamily: "monospace", padding: "2px 7px", borderRadius: 10,
-            background: DK.indigoBg, color: DK.indigo, border: `1px solid ${DK.indigoBdr}` }}>
+            background: "rgba(0,0,0,0.04)", color: DK.muted, border: `1px solid ${DK.border}` }}>
             Art. 49
           </span>
         </div>
@@ -892,8 +892,8 @@ export default function EUDBCompliancePage() {
 
       {/* AI disclaimer */}
       <div style={{ ...cardDk, padding: "10px 14px", marginBottom: 16,
-        background: DK.indigoBg, border: `1px solid ${DK.indigoBdr}` }}>
-        <p style={{ fontSize: 11, color: DK.indigo, margin: 0 }}>
+        background: "rgba(0,0,0,0.04)", border: `1px solid ${DK.border}` }}>
+        <p style={{ fontSize: 11, color: DK.muted, margin: 0 }}>
           ✦ AI — verifica e conferma: mappatura campi Annex VIII, criteri Q1-Q4 e scadenza EUDB ricostruiti dalla memoria del modello. Validare contro testo consolidato Art. 49 e Annex VIII Reg. (UE) 2024/1689 prima della registrazione effettiva sul portale EC.
         </p>
       </div>
@@ -911,9 +911,9 @@ export default function EUDBCompliancePage() {
                   <div style={{ width: 22, height: 22, borderRadius: "50%",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: 10, fontWeight: 700,
-                    background: isDone ? DK.greenBg : isActive ? DK.indigoBg : "rgba(0,0,0,0.05)",
-                    color: isDone ? DK.green : isActive ? DK.indigo : DK.faint,
-                    border: `1px solid ${isDone ? DK.greenBdr : isActive ? DK.indigoBdr : DK.border}` }}>
+                    background: isDone ? DK.greenBg : isActive ? "rgba(0,0,0,0.06)" : "rgba(0,0,0,0.03)",
+                    color: isDone ? DK.green : isActive ? DK.text : DK.faint,
+                    border: `1px solid ${isDone ? DK.greenBdr : isActive ? DK.text : DK.border}` }}>
                     {isDone ? "✓" : sNum}
                   </div>
                   <span style={{ fontSize: 11, fontWeight: isActive ? 600 : 400,
