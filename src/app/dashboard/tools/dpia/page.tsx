@@ -20,6 +20,7 @@ import {
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { migrateLegacyFRIA, patchShared } from "@/lib/assessment/assessment-helpers";
+import { CorrelatedRisksPanel } from "@/components/assessment/CorrelatedRisksPanel";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -1478,6 +1479,17 @@ export default function DPIAPage() {
               Scarica report (.txt)
             </button>
           </div>
+        </div>
+
+        {/* Rischi correlati DPIA ⇄ FRIA */}
+        <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)", padding: 20, marginBottom: 16 }}>
+          <p style={{ fontSize: 13, fontWeight: 600, color: "#0D1016", margin: "0 0 6px" }}>
+            Rischi correlati DPIA ⇄ FRIA
+          </p>
+          <p style={{ fontSize: 11, color: "rgba(0,0,0,0.40)", margin: "0 0 14px" }}>
+            Rischi generati automaticamente dalla correlazione WP29 / DIHR. Applica le mitigazioni al Risk Manager.
+          </p>
+          <CorrelatedRisksPanel />
         </div>
 
         {/* Sign-off */}
