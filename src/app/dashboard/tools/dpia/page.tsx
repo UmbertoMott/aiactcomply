@@ -19,6 +19,7 @@ import {
 } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
+import { migrateLegacyFRIA, patchShared } from "@/lib/assessment/assessment-helpers";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -384,6 +385,7 @@ export default function DPIAPage() {
 
   // Auto-sync intake from storage on mount
   useEffect(() => {
+    migrateLegacyFRIA();
     const classifier = readFromStorage<ClassifierResult>("classifier");
     const dataAudit = readFromStorage<DataAuditResult>("dataAudit");
     setIntake(prev => {
@@ -451,6 +453,17 @@ export default function DPIAPage() {
 
       return next;
     });
+
+    // Seed assessment.shared dal Classifier
+    if (classifier) {
+      patchShared({
+        systemName: classifier.systemName,
+        riskLevel:  classifier.riskLevel,
+        annexIII:   classifier.annexIII,
+        role:       classifier.role,
+        isGPAI:     classifier.isGPAI,
+      });
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -568,6 +581,21 @@ export default function DPIAPage() {
     setDoc(withDate);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(withDate));
     writeToStorage("dpia", withDate);
+    // Sync shared dall'identità DPIA
+    patchShared({
+      systemName:   withDate.description.system_name,
+      organization: withDate.description.organization_name,
+      purpose:      withDate.description.processing_purposes,
+      personalDataCategories: withDate.description.personal_data_categories
+        ? withDate.description.personal_data_categories.split(",").map((s: string) => s.trim()).filter(Boolean)
+        : [],
+      specialCategories: withDate.description.special_categories
+        ? withDate.description.special_categories.split(",").map((s: string) => s.trim()).filter(Boolean)
+        : [],
+      dataSubjects: withDate.description.data_subjects_categories
+        ? withDate.description.data_subjects_categories.split(",").map((s: string) => s.trim()).filter(Boolean)
+        : [],
+    });
     appendEvidence("adr", {
       tool: "dpia",
       systemName: doc.description.system_name,
@@ -697,11 +725,11 @@ export default function DPIAPage() {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {/* Info box */}
-        <div style={{ ...cardSt, padding: 14, background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
+        <div style={{ ...cardSt, padding: 14, background: "rgba(0,0,0,0.04)", border: `1px solid ${T.border}` }}>
           <div className="flex items-start gap-2">
-            <Info className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: T.blue }} />
+            <Info className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: T.text }} />
             <div>
-              <p style={{ fontSize: 12, fontWeight: 600, color: T.blue, marginBottom: 4 }}>
+              <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 4 }}>
                 Screening WP248 rev.01 — 9 criteri
               </p>
               <p style={{ fontSize: 11, color: T.text, lineHeight: 1.6 }}>
@@ -1069,9 +1097,9 @@ export default function DPIAPage() {
         )}
 
         {/* Info */}
-        <div style={{ ...cardSt, padding: 14, background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
+        <div style={{ ...cardSt, padding: 14, background: "rgba(0,0,0,0.04)", border: `1px solid ${T.border}` }}>
           <div className="flex items-start gap-2">
-            <Info className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: T.blue }} />
+            <Info className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: T.text }} />
             <p style={{ fontSize: 11, color: T.text, lineHeight: 1.6 }}>
               <strong>WP248 §3:</strong> Identificare e valutare le fonti di rischio, gli impatti potenziali e le misure
               esistenti per le tre categorie standard WP248: accesso illegittimo, modifica indesiderata, scomparsa dei dati.
@@ -1285,7 +1313,7 @@ export default function DPIAPage() {
             {/* AG Part 6 — AI prior consultation check */}
             <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 12 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: T.blue }}>✦ Verifica requisiti Art. 36 GDPR</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>✦ Verifica requisiti Art. 36 GDPR</span>
                 <button
                   disabled={priorConsultAILoading}
                   onClick={async () => {
@@ -1306,7 +1334,7 @@ export default function DPIAPage() {
                   }}
                   style={{
                     padding: "6px 12px", borderRadius: 7, fontSize: 11, fontWeight: 600,
-                    background: priorConsultAILoading ? "rgba(0,0,0,0.07)" : T.blue,
+                    background: priorConsultAILoading ? "rgba(0,0,0,0.07)" : T.text,
                     color: priorConsultAILoading ? T.muted : "#fff", border: "none",
                     cursor: priorConsultAILoading ? "not-allowed" : "pointer",
                   }}>
@@ -1608,11 +1636,11 @@ export default function DPIAPage() {
           onClick={() => setIntakeOpen(o => !o)}
           style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: "none", border: "none", cursor: "pointer", borderBottom: intakeOpen ? `1px solid ${T.border}` : "none" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: T.blue }}>✦ Contesto sistema</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: T.text }}>✦ Contesto sistema</span>
             <span style={{ fontSize: 10, color: T.muted }}>— richiesto per la pre-compilazione AI fasi 2-3-4</span>
             {intakeParsed && <span style={{ fontSize: 10, padding: "1px 6px", borderRadius: 4, background: T.greenBg, color: T.green, border: `1px solid ${T.greenBdr}` }}>✓ estratto da AI</span>}
             {(intake.systemName || intake.processingPurpose) && !intakeParsed && (
-              <span style={{ fontSize: 10, padding: "1px 6px", borderRadius: 4, background: T.blueBg, color: T.blue, border: `1px solid ${T.blueBdr}` }}>✦ da storage</span>
+              <span style={{ fontSize: 10, padding: "1px 6px", borderRadius: 4, background: "rgba(0,0,0,0.04)", color: T.text, border: `1px solid ${T.border}` }}>✦ da storage</span>
             )}
           </div>
           <span style={{ fontSize: 14, color: T.muted }}>{intakeOpen ? "▲" : "▼"}</span>
@@ -1622,8 +1650,8 @@ export default function DPIAPage() {
           <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 14 }}>
 
             {/* Natural language parser */}
-            <div style={{ padding: 12, borderRadius: 8, background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
-              <p style={{ fontSize: 11, fontWeight: 600, color: T.blue, marginBottom: 6 }}>
+            <div style={{ padding: 12, borderRadius: 8, background: "rgba(0,0,0,0.04)", border: `1px solid ${T.border}` }}>
+              <p style={{ fontSize: 11, fontWeight: 600, color: T.text, marginBottom: 6 }}>
                 ✦ Descrivi il sistema in linguaggio naturale — l'AI compila i campi automaticamente
               </p>
               <div style={{ display: "flex", gap: 8 }}>
@@ -1632,7 +1660,7 @@ export default function DPIAPage() {
                   value={intakeFreeText}
                   onChange={e => setIntakeFreeText(e.target.value)}
                   placeholder="Es. «Sistema di selezione CV che usa ML per filtrare candidati in base a esperienze e competenze, tratta dati di 50.000 candidati l'anno tra cui minori…»"
-                  style={{ flex: 1, padding: "7px 10px", borderRadius: 6, border: `1px solid ${T.blueBdr}`, fontSize: 11, resize: "vertical", fontFamily: "inherit", background: "#fff" }}
+                  style={{ flex: 1, padding: "7px 10px", borderRadius: 6, border: `1px solid ${T.border}`, fontSize: 11, resize: "vertical", fontFamily: "inherit", background: "#fff" }}
                 />
                 <button
                   disabled={intakeParseLoading || !intakeFreeText.trim()}
@@ -1648,7 +1676,7 @@ export default function DPIAPage() {
                       setIntakeParseError("Impossibile estrarre il contesto. Compila i campi manualmente.");
                     }
                   }}
-                  style={{ padding: "0 14px", borderRadius: 7, background: intakeParseLoading || !intakeFreeText.trim() ? "rgba(0,0,0,0.06)" : T.blue, color: intakeParseLoading || !intakeFreeText.trim() ? T.muted : "#fff", border: "none", fontSize: 11, fontWeight: 600, cursor: intakeParseLoading || !intakeFreeText.trim() ? "default" : "pointer", whiteSpace: "nowrap" }}>
+                  style={{ padding: "0 14px", borderRadius: 7, background: intakeParseLoading || !intakeFreeText.trim() ? "rgba(0,0,0,0.06)" : T.text, color: intakeParseLoading || !intakeFreeText.trim() ? T.muted : "#fff", border: "none", fontSize: 11, fontWeight: 600, cursor: intakeParseLoading || !intakeFreeText.trim() ? "default" : "pointer", whiteSpace: "nowrap" }}>
                   {intakeParseLoading ? "✦ Parsing…" : "✦ Estrai"}
                 </button>
               </div>
@@ -1745,9 +1773,9 @@ export default function DPIAPage() {
                         : [...p.dataCategories, v],
                     }))} style={{
                       fontSize: 10, padding: "3px 8px", borderRadius: 4, cursor: "pointer", fontWeight: 500, border: "1px solid",
-                      background: active ? (v.startsWith("art9") ? T.redBg : T.blueBg) : "rgba(0,0,0,0.03)",
-                      color: active ? (v.startsWith("art9") ? T.red : T.blue) : T.muted,
-                      borderColor: active ? (v.startsWith("art9") ? T.redBdr : T.blueBdr) : T.border,
+                      background: active ? (v.startsWith("art9") ? T.redBg : "rgba(0,0,0,0.04)") : "rgba(0,0,0,0.03)",
+                      color: active ? (v.startsWith("art9") ? T.red : T.text) : T.muted,
+                      borderColor: active ? (v.startsWith("art9") ? T.redBdr : T.border) : T.border,
                     }}>
                       {active ? "✓ " : ""}{l}
                     </button>
