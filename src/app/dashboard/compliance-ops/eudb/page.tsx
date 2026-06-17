@@ -1,25 +1,29 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   Database, ChevronRight, ChevronLeft, CheckCircle, AlertTriangle,
   Info, Copy, Save, Globe, Building2, FileText, Sparkles,
-  ExternalLink, CheckCircle2,
+  ExternalLink, CheckCircle2, Download, X,
 } from "lucide-react";
 import { writeToStorage } from "@/lib/dossier/storage-schema";
 import type { EUDBResult } from "@/lib/dossier/storage-schema";
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import {
-  loadEUDBDraft, saveEUDBDraft, createEmptyDoc, prefillEUDBFromModules,
+  createEmptyDoc, prefillEUDBFromModules,
   mergePrefillIntoDoc, eligibilityStatus, generateAnnexVIII,
   markEUDBRegistrationComplete,
   EU_MEMBER_STATES, EU_COUNTRIES, RISK_CLASSIFICATIONS,
-  EUDB_DRAFT_KEY,
 } from "@/lib/eudb/eudb-prefill";
 import type {
   EUDBDoc, EUDBEligibility, EUDBProviderData, EUDBSystemData,
   EligibilityAnswer, PrefillResult,
 } from "@/lib/eudb/eudb-prefill";
+import { useScopedStorage } from "@/lib/hooks/useScopedStorage";
+import { SystemSelector } from "@/components/compliance/SystemSelector";
+import { toEudbDraft } from "@/types/eudb";
+import { validateEudbDraft, countErrorsBySection } from "@/lib/eudb/annex-viii-validator";
+import { downloadEudbXml, downloadEudbJson } from "@/lib/eudb/export-xml";
 
 // ── Light-theme tokens ───────────────────────────────────────────────────────
 
@@ -221,13 +225,12 @@ function SectionCard({ title, article, aiBadge, children }: {
 
 export default function EUDBCompliancePage() {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
-  const [doc, setDoc] = useState<EUDBDoc>(() => loadEUDBDraft());
+  const [doc, setDoc] = useScopedStorage<EUDBDoc>("eudb_draft", createEmptyDoc());
   const [prefill, setPrefill] = useState<PrefillResult | null>(null);
   const [showPrefillDetail, setShowPrefillDetail] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [copiedSection, setCopiedSection] = useState<"all" | "a" | "b" | "c" | null>(null);
   const [registrationNumber, setRegistrationNumber] = useState(doc.eudb_registration_number ?? "");
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Auto-prefill on mount
   useEffect(() => {
@@ -236,15 +239,16 @@ export default function EUDBCompliancePage() {
     if (result.prefillCount > 0) {
       setDoc(prev => mergePrefillIntoDoc(prev, result));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const scheduleSave = useCallback((d: EUDBDoc) => {
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => { saveEUDBDraft(d); }, 600);
-  }, []);
+  // Annex VIII validation (PROMPT BF)
+  const eudbDraft = useMemo(() => toEudbDraft(doc), [doc]);
+  const validation = useMemo(() => validateEudbDraft(eudbDraft), [eudbDraft]);
+  const sectionErrors = useMemo(() => countErrorsBySection(validation), [validation]);
 
   function patch(updater: (prev: EUDBDoc) => EUDBDoc) {
-    setDoc(prev => { const next = updater(prev); scheduleSave(next); return next; });
+    setDoc(prev => updater(prev));
   }
   function patchE(field: keyof EUDBEligibility, val: EligibilityAnswer) {
     patch(d => ({ ...d, eligibility: { ...d.eligibility, [field]: val }, aiConfirmed: false }));
@@ -296,7 +300,12 @@ export default function EUDBCompliancePage() {
   }
 
   const eStatus = eligibilityStatus(doc.eligibility);
-  const stepLabels = ["Eleggibilità", "Provider", "Sistema", "Pacchetto"];
+  const stepLabels = [
+    "Eleggibilità",
+    sectionErrors.sectionA > 0 ? `Provider (${sectionErrors.sectionA})` : "Provider",
+    sectionErrors.sectionB > 0 ? `Sistema (${sectionErrors.sectionB})` : "Sistema",
+    sectionErrors.allegati > 0 ? `Pacchetto (${sectionErrors.allegati})` : "Pacchetto",
+  ];
   const canProceed1 = eStatus !== "incomplete";
 
   // ── Step 1 ────────────────────────────────────────────────────────────────
@@ -709,6 +718,75 @@ export default function EUDBCompliancePage() {
           </pre>
         </SectionCard>
 
+        {/* Annex VIII Validation Banner (PROMPT BF) */}
+        {!validation.valid && (
+          <div style={{ borderRadius: 10, border: "1px solid rgba(220,38,38,0.30)",
+            background: "rgba(220,38,38,0.05)", padding: 16 }}>
+            <p style={{ fontSize: 12, fontWeight: 600, color: DK.red, margin: "0 0 10px" }}>
+              {validation.errors.length} campo{validation.errors.length > 1 ? "i" : ""} obbligatori mancanti — Allegato VIII
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+              {validation.errors.map((err, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11 }}>
+                  <span style={{ color: DK.red, fontWeight: 700 }}>×</span>
+                  <span style={{ color: DK.muted, flex: 1 }}>{err.message}</span>
+                  <span style={{ fontFamily: "monospace", fontSize: 9, color: DK.faint }}>{err.artRef}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {validation.valid && validation.warnings.length > 0 && (
+          <div style={{ borderRadius: 10, border: `1px solid ${DK.amberBdr}`, background: DK.amberBg, padding: 12 }}>
+            {validation.warnings.map((w, i) => (
+              <p key={i} style={{ fontSize: 11, color: DK.amber, margin: 0 }}>⚠ {w.message}</p>
+            ))}
+          </div>
+        )}
+
+        {validation.valid && (
+          <div style={{ borderRadius: 10, border: `1px solid ${DK.greenBdr}`, background: DK.greenBg, padding: 12 }}>
+            <p style={{ fontSize: 11, color: DK.green, margin: 0 }}>
+              ✓ Tutti i campi Allegato VIII compilati — pronto per l&apos;esportazione e upload al portale EC
+            </p>
+          </div>
+        )}
+
+        {/* Export XML / JSON (PROMPT BF) */}
+        <div style={{ ...cardDk, padding: 16, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <p style={{ fontSize: 12, fontWeight: 600, color: DK.text, margin: 0 }}>Esporta per upload EUDB</p>
+            <p style={{ fontSize: 11, color: DK.muted, margin: "2px 0 0" }}>
+              XML / JSON machine-readable — struttura Allegato VIII · Art. 49 [verify against current AI Act text]
+            </p>
+          </div>
+          <button
+            disabled={!validation.valid}
+            onClick={() => downloadEudbXml(eudbDraft)}
+            style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 14px",
+              borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: validation.valid ? "pointer" : "not-allowed",
+              background: validation.valid ? "#0D1016" : "rgba(0,0,0,0.05)",
+              color: validation.valid ? "#fff" : DK.faint,
+              border: `1px solid ${validation.valid ? "#0D1016" : DK.border}` }}>
+            <Download size={12} /> {validation.valid ? "Esporta XML" : `Completa ${validation.errors.length} campi`}
+          </button>
+          <button
+            disabled={!validation.valid}
+            onClick={() => downloadEudbJson(eudbDraft)}
+            style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 14px",
+              borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: validation.valid ? "pointer" : "not-allowed",
+              background: "rgba(0,0,0,0.05)", color: validation.valid ? DK.text : DK.faint,
+              border: `1px solid ${DK.border}` }}>
+            <Download size={12} /> Esporta JSON
+          </button>
+          {!validation.valid && (
+            <p style={{ fontSize: 10, color: DK.faint, width: "100%", margin: 0 }}>
+              Sez. A: {sectionErrors.sectionA} · Sez. B: {sectionErrors.sectionB} · Allegati: {sectionErrors.allegati}
+            </p>
+          )}
+        </div>
+
         {/* Copy all */}
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <button onClick={() => copySection("all")} style={{ display: "flex", alignItems: "center", gap: 6,
@@ -792,7 +870,9 @@ export default function EUDBCompliancePage() {
   // ── Layout ────────────────────────────────────────────────────────────────
 
   return (
-    <div style={{ maxWidth: 860, margin: "0 auto" }}>
+    <div style={{ width: "100%" }}>
+      <SystemSelector checkProhibited={false} />
+
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
