@@ -35,10 +35,12 @@ const T = {
   border:  "rgba(0,0,0,0.07)",
   bg:      "#FAFAF9",
   card:    "#ffffff",
+  // Indigo come accento primario (non più rosso per stati incompleti)
+  indigo:  "#4f46e5",   indigoBg: "rgba(79,70,229,0.06)",  indigoBdr:"rgba(79,70,229,0.18)",
   red:     "#dc2626",   redBg:   "rgba(220,38,38,0.06)",   redBdr:  "rgba(220,38,38,0.18)",
   amber:   "#b45309",   amberBg: "rgba(245,158,11,0.06)",  amberBdr:"rgba(245,158,11,0.2)",
   blue:    "#1d4ed8",   blueBg:  "rgba(29,78,216,0.05)",   blueBdr: "rgba(29,78,216,0.16)",
-  green:   "#15803d",   greenBg: "rgba(21,128,61,0.06)",   greenBdr:"rgba(21,128,61,0.18)",
+  green:   "#059669",   greenBg: "rgba(5,150,105,0.06)",   greenBdr:"rgba(5,150,105,0.18)",
   gray:    "#6b7280",   grayBg:  "rgba(0,0,0,0.04)",       grayBdr: "rgba(0,0,0,0.10)",
 } as const;
 
@@ -270,7 +272,7 @@ export default function DashboardPage() {
     } catch { /* ignore */ }
   }, []);
 
-  const pctColor = dossierPct >= 80 ? T.green : dossierPct >= 40 ? T.amber : T.red;
+  const pctColor = dossierPct >= 80 ? T.green : dossierPct >= 40 ? T.amber : T.indigo;
 
   const showDiscovery = newSystemCount > 0 || (!hasSources && !discoveryDismissed);
   const showDeadline  = !deadlineDismissed && alertDeadline !== null && alertDeadlineDays !== null;
@@ -293,6 +295,12 @@ export default function DashboardPage() {
           to   { opacity: 1; transform: translateY(0); }
         }
         .fade-up { animation: fadeUp 0.35s ease both; }
+        @media (max-width: 768px) {
+          .dash-main-grid  { grid-template-columns: 1fr !important; }
+          .dash-stats-grid { grid-template-columns: 1fr 1fr !important; }
+          .dash-bottom-grid { grid-template-columns: 1fr !important; }
+          .dash-quick-grid  { grid-template-columns: 1fr 1fr !important; }
+        }
       `}</style>
 
       <div className="w-full">
@@ -370,7 +378,7 @@ export default function DashboardPage() {
 
         {/* ── STATS ───────────────────────────────────────────────────── */}
         <div className="rounded-xl mb-6" style={{ ...cardSt }}>
-          <div className="grid grid-cols-4">
+          <div className="dash-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)" }}>
             {[
               { label: "Tool completati", value: String(dossierDone), sub: `/${totalSections}` },
               { label: "Sistemi AI",       value: systems.length > 0 ? String(systems.length) : showMainSystem ? "1" : "0", sub: "" },
@@ -389,10 +397,10 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* ── 2-COLUMN MAIN ───────────────────────────────────────────── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 20, alignItems: "start" }}>
+        {/* ── MAIN GRID: AI Systems + Radar ───────────────────────── */}
+        <div className="dash-main-grid" style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: 20, alignItems: "start", marginBottom: 20 }}>
 
-          {/* ── LEFT: AI Systems ─────────────────────────────────────── */}
+          {/* LEFT: AI Systems */}
           <div>
             <SectionHeader
               label="I tuoi sistemi AI"
@@ -401,7 +409,6 @@ export default function DashboardPage() {
               linkLabel="Aggiungi sistema"
             />
 
-            {/* Empty state */}
             {systems.length === 0 && !showMainSystem && (
               <div style={{ ...cardSt, padding: 40, textAlign: "center" }} className="fade-up">
                 <Layers className="h-8 w-8 mx-auto mb-3" style={{ color: T.faint }} />
@@ -419,7 +426,6 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* Main system from onboarding (fallback) */}
             {systems.length === 0 && showMainSystem && (
               <SystemCard
                 name={mainSystemName}
@@ -432,7 +438,6 @@ export default function DashboardPage() {
               />
             )}
 
-            {/* Discovered systems grid */}
             {systems.length > 0 && (
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 {systems.map((sys, i) => (
@@ -447,15 +452,9 @@ export default function DashboardPage() {
                     status={sys.status}
                   />
                 ))}
-                {/* Add system card */}
                 <Link href="/dashboard/discovery"
                   className="fade-up flex flex-col items-center justify-center gap-2 rounded-xl hover:opacity-70 transition-opacity"
-                  style={{
-                    border: `1.5px dashed ${T.border}`,
-                    background: "transparent",
-                    minHeight: 120,
-                    animationDelay: `${systems.length * 60}ms`,
-                  }}>
+                  style={{ border: `1.5px dashed ${T.border}`, background: "transparent", minHeight: 120, animationDelay: `${systems.length * 60}ms` }}>
                   <Plus className="h-5 w-5" style={{ color: T.faint }} />
                   <span style={{ fontSize: 11, color: T.faint }}>Aggiungi sistema</span>
                 </Link>
@@ -463,147 +462,113 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* ── RIGHT: Sidebar panel ────────────────────────────────── */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {/* RIGHT: Radar */}
+          <ComplianceRadarChart />
+        </div>
 
-            {/* Radar conformità */}
-            <ComplianceRadarChart />
+        {/* ── BOTTOM ROW: 3 sezioni a piena larghezza ─────────────── */}
+        <div className="dash-bottom-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 16 }}>
 
-            {/* Scadenze urgenti */}
-            {deadlines.length > 0 && (
-              <div style={{ ...cardSt, padding: 16 }}>
-                <SectionHeader label="Scadenze urgenti" href="/dashboard/notifications" linkLabel="Tutte" />
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {deadlines.map(({ deadline, days }, i) => {
-                    const color = days <= 30 ? T.red : days <= 90 ? T.amber : T.muted;
-                    const bg    = days <= 30 ? T.redBg : days <= 90 ? T.amberBg : T.grayBg;
-                    const bdr   = days <= 30 ? T.redBdr : days <= 90 ? T.amberBdr : T.grayBdr;
-                    return (
-                      <Link key={deadline.id} href="/dashboard/notifications"
-                        className="flex items-start justify-between gap-2 group hover:opacity-80 transition-opacity"
-                        style={{
-                          padding: "9px 10px",
-                          borderRadius: 8,
-                          border: `1px solid ${i === 0 ? bdr : T.border}`,
-                          background: i === 0 ? bg : "transparent",
-                        }}>
-                        <div className="flex-1 min-w-0">
-                          <p style={{ fontSize: 11, fontWeight: 600, color: T.text, marginBottom: 1 }}>
-                            {deadline.article}
-                          </p>
-                          <p style={{ fontSize: 11, color: T.muted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                            {deadline.title}
-                          </p>
-                        </div>
-                        <span style={{
-                          fontSize: 10, fontWeight: 700, flexShrink: 0,
-                          padding: "2px 7px", borderRadius: 4,
-                          background: bg, color: color, border: `1px solid ${bdr}`,
-                        }}>
-                          {days}g
-                        </span>
-                      </Link>
-                    );
-                  })}
-                </div>
+          {/* Scadenze urgenti */}
+          <div style={{ ...cardSt, padding: 16 }}>
+            <SectionHeader label="Scadenze urgenti" href="/dashboard/notifications" linkLabel="Tutte" />
+            {deadlines.length === 0 ? (
+              <p style={{ fontSize: 12, color: T.faint, padding: "6px 0" }}>Nessuna scadenza imminente.</p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {deadlines.map(({ deadline, days }, i) => {
+                  const color = days <= 30 ? T.red : days <= 90 ? T.amber : T.muted;
+                  const bg    = days <= 30 ? T.redBg : days <= 90 ? T.amberBg : T.grayBg;
+                  const bdr   = days <= 30 ? T.redBdr : days <= 90 ? T.amberBdr : T.grayBdr;
+                  return (
+                    <Link key={deadline.id} href="/dashboard/notifications"
+                      className="flex items-start justify-between gap-2 group hover:opacity-80 transition-opacity"
+                      style={{ padding: "9px 10px", borderRadius: 8, border: `1px solid ${i === 0 ? bdr : T.border}`, background: i === 0 ? bg : "transparent" }}>
+                      <div className="flex-1 min-w-0">
+                        <p style={{ fontSize: 11, fontWeight: 600, color: T.text, marginBottom: 1 }}>{deadline.article}</p>
+                        <p style={{ fontSize: 11, color: T.muted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{deadline.title}</p>
+                      </div>
+                      <span style={{ fontSize: 10, fontWeight: 700, flexShrink: 0, padding: "2px 7px", borderRadius: 4, background: bg, color, border: `1px solid ${bdr}` }}>
+                        {days}g
+                      </span>
+                    </Link>
+                  );
+                })}
               </div>
             )}
+          </div>
 
-            {/* Prossime azioni */}
-            <div style={{ ...cardSt, padding: 16 }}>
-              <SectionHeader label="Prossime azioni" count={nextActions.length} />
-              {nextActions.length === 0 ? (
-                <div className="flex items-center gap-2" style={{ padding: "8px 0" }}>
-                  <CheckCircle2 className="h-4 w-4 flex-shrink-0" style={{ color: T.green }} />
-                  <span style={{ fontSize: 12, color: T.green, fontWeight: 500 }}>Dossier completato</span>
-                </div>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  {nextActions.map((action, i) => (
-                    <Link key={action.id} href={action.href}
-                      className="flex items-center gap-2.5 group hover:opacity-70 transition-opacity"
-                      style={{
-                        padding: "7px 0",
-                        borderBottom: i < nextActions.length - 1 ? `1px solid ${T.border}` : "none",
-                      }}>
-                      <div style={{
-                        width: 6, height: 6, borderRadius: 3, flexShrink: 0,
-                        background: i === 0 ? T.red : T.faint,
-                      }} />
-                      <span style={{ flex: 1, fontSize: 12, color: T.text, fontWeight: i === 0 ? 500 : 400 }}>
-                        {action.title}
-                      </span>
-                      <span style={{
-                        fontSize: 9, color: T.faint,
-                        background: T.grayBg, padding: "1px 5px", borderRadius: 3,
-                        border: `1px solid ${T.border}`, flexShrink: 0,
-                      }}>
-                        {action.article}
-                      </span>
-                      <ArrowRight className="h-3 w-3 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                        style={{ color: T.faint }} />
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+          {/* Prossime azioni */}
+          <div style={{ ...cardSt, padding: 16 }}>
+            <SectionHeader label="Prossime azioni" count={nextActions.length} />
+            {nextActions.length === 0 ? (
+              <div className="flex items-center gap-2" style={{ padding: "8px 0" }}>
+                <CheckCircle2 className="h-4 w-4 flex-shrink-0" style={{ color: T.green }} />
+                <span style={{ fontSize: 12, color: T.green, fontWeight: 500 }}>Dossier completato</span>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {nextActions.map((action, i) => (
+                  <Link key={action.id} href={action.href}
+                    className="flex items-center gap-2.5 group hover:opacity-70 transition-opacity"
+                    style={{ padding: "7px 0", borderBottom: i < nextActions.length - 1 ? `1px solid ${T.border}` : "none" }}>
+                    <div style={{ width: 6, height: 6, borderRadius: 3, flexShrink: 0, background: i === 0 ? T.indigo : T.faint }} />
+                    <span style={{ flex: 1, fontSize: 12, color: T.text, fontWeight: i === 0 ? 500 : 400 }}>{action.title}</span>
+                    <span style={{ fontSize: 9, color: T.faint, background: T.grayBg, padding: "1px 5px", borderRadius: 3, border: `1px solid ${T.border}`, flexShrink: 0 }}>
+                      {action.article}
+                    </span>
+                    <ArrowRight className="h-3 w-3 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: T.faint }} />
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
 
-            {/* Attività recente */}
-            <div style={{ ...cardSt, padding: 16 }}>
-              <SectionHeader label="Attività recente" href="/dashboard/evidence-layer" linkLabel="Vedi tutto" />
-              {recentEvidence.length === 0 ? (
-                <p style={{ fontSize: 12, color: T.faint, padding: "6px 0" }}>
-                  Nessuna attività ancora.
-                </p>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  {recentEvidence.map((ev, i) => {
-                    const cfg = EV_LABELS[ev.type] ?? { label: ev.type, color: T.gray };
-                    return (
-                      <div key={ev.id} className="flex items-center gap-2.5"
-                        style={{
-                          padding: "7px 0",
-                          borderBottom: i < recentEvidence.length - 1 ? `1px solid ${T.border}` : "none",
-                        }}>
-                        <div style={{ width: 6, height: 6, borderRadius: 3, flexShrink: 0, background: cfg.color }} />
-                        <div className="flex-1 min-w-0">
-                          <span style={{
-                            fontSize: 11, fontWeight: 500, padding: "1px 5px", borderRadius: 3,
-                            background: T.grayBg, color: T.muted, marginRight: 4,
-                            border: `1px solid ${T.border}`,
-                          }}>{cfg.label}</span>
-                          <span style={{ fontSize: 11, color: T.text }}>
-                            {(ev.content as Record<string, unknown>)?.tool as string ?? ev.type}
-                          </span>
-                        </div>
-                        <span style={{ fontSize: 10, color: T.faint, flexShrink: 0 }}>
-                          {relTime(ev.timestamp)}
+          {/* Attività recente */}
+          <div style={{ ...cardSt, padding: 16 }}>
+            <SectionHeader label="Attività recente" href="/dashboard/evidence-layer" linkLabel="Vedi tutto" />
+            {recentEvidence.length === 0 ? (
+              <p style={{ fontSize: 12, color: T.faint, padding: "6px 0" }}>Nessuna attività ancora.</p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {recentEvidence.map((ev, i) => {
+                  const cfg = EV_LABELS[ev.type] ?? { label: ev.type, color: T.gray };
+                  return (
+                    <div key={ev.id} className="flex items-center gap-2.5"
+                      style={{ padding: "7px 0", borderBottom: i < recentEvidence.length - 1 ? `1px solid ${T.border}` : "none" }}>
+                      <div style={{ width: 6, height: 6, borderRadius: 3, flexShrink: 0, background: cfg.color }} />
+                      <div className="flex-1 min-w-0">
+                        <span style={{ fontSize: 11, fontWeight: 500, padding: "1px 5px", borderRadius: 3, background: T.grayBg, color: T.muted, marginRight: 4, border: `1px solid ${T.border}` }}>
+                          {cfg.label}
+                        </span>
+                        <span style={{ fontSize: 11, color: T.text }}>
+                          {(ev.content as Record<string, unknown>)?.tool as string ?? ev.type}
                         </span>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Quick links */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-              {[
-                { label: "Roadmap",     href: "/dashboard/journey",      Icon: TrendingUp },
-                { label: "Post-Market", href: "/dashboard/post-market",  Icon: Activity   },
-                { label: "Art. 5",      href: "/dashboard/tools/prohibited", Icon: Ban   },
-                { label: "Conformity",  href: "/dashboard/tools/conformity", Icon: Zap   },
-              ].map(({ label, href, Icon }) => (
-                <Link key={href} href={href}
-                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:opacity-75 transition-opacity"
-                  style={{ ...cardSt, fontSize: 11, fontWeight: 500, color: T.muted }}>
-                  <Icon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: T.faint }} />
-                  {label}
-                </Link>
-              ))}
-            </div>
-
+                      <span style={{ fontSize: 10, color: T.faint, flexShrink: 0 }}>{relTime(ev.timestamp)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
+        </div>
+
+        {/* ── QUICK LINKS ─────────────────────────────────────────── */}
+        <div className="dash-quick-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+          {[
+            { label: "Roadmap",     href: "/dashboard/journey",          Icon: TrendingUp },
+            { label: "Post-Market", href: "/dashboard/post-market",      Icon: Activity   },
+            { label: "Art. 5",      href: "/dashboard/tools/prohibited", Icon: Ban        },
+            { label: "Conformity",  href: "/dashboard/tools/conformity", Icon: Zap        },
+          ].map(({ label, href, Icon }) => (
+            <Link key={href} href={href}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:opacity-75 transition-opacity"
+              style={{ ...cardSt, fontSize: 11, fontWeight: 500, color: T.muted }}>
+              <Icon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: T.faint }} />
+              {label}
+            </Link>
+          ))}
         </div>
 
       </div>
@@ -676,7 +641,7 @@ function SystemCard({ name, riskLevel, dossierPct, nextAction, nextActionHref, i
       <div style={{ marginBottom: 8 }}>
         <div className="flex items-center justify-between mb-1">
           <span style={{ fontSize: 10, color: "rgba(0,0,0,0.35)" }}>Dossier</span>
-          <span style={{ fontSize: 10, fontWeight: 600, color: dossierPct >= 80 ? "#15803d" : dossierPct >= 40 ? "#b45309" : "#dc2626" }}>
+          <span style={{ fontSize: 10, fontWeight: 600, color: dossierPct >= 80 ? "#059669" : dossierPct >= 40 ? "#b45309" : "#4f46e5" }}>
             {dossierPct}%
           </span>
         </div>
