@@ -1,7 +1,7 @@
 // Provider Transition — tipi, costanti e logica di business (Art. 28 AI Act)
 // ✦ AI — verifica e conferma: TRANSITION_CHECKS, computeTransitionVerdict e PROVIDER_OBLIGATIONS
 // sono ricostruiti dalla memoria del modello a partire da PROMPT_J. Validare contro Art. 28
-// e Art. 3(23) del testo consolidato Reg. (UE) 2024/1689. [verify against current AI Act text]
+// e Art. 3(23) del testo consolidato Reg. (UE) 2024/1689.
 
 export const ANSWERS_KEY = "provider_transition_answers";
 export const MODS_KEY    = "provider_transition_modifications";
@@ -45,42 +45,42 @@ export const TRANSITION_CHECKS: ProviderTransitionCheck[] = [
     id: "own_name",
     question: "Hai immesso o intendi immettere il sistema sul mercato UE sotto il tuo nome commerciale o marchio?",
     explanation: "Se il prodotto viene presentato al mercato come tuo (es. con il tuo brand sul packaging, nel contratto o nell'interfaccia) anche se sviluppato da altri, sei considerato provider.",
-    trigger_article: "Art. 28(1)(a) [verify against current AI Act text]",
+    trigger_article: "Art. 28(1)(a)",
     is_trigger: true,
   },
   {
     id: "purpose_change",
     question: "Hai cambiato lo scopo d'uso del sistema rispetto a quello dichiarato dal provider originale nelle istruzioni operative?",
     explanation: "Se il provider ha dichiarato che il sistema serve per X (es. screening CV) e tu lo usi per Y (es. valutazione performance dipendenti), si tratta di una modifica dello scopo previsto.",
-    trigger_article: "Art. 28(1)(b) + Art. 3(23) [verify against current AI Act text]",
+    trigger_article: "Art. 28(1)(b) + Art. 3(23)",
     is_trigger: true,
   },
   {
     id: "retraining",
     question: "Hai ri-addestrato, fine-tunato o aggiornato il modello AI con nuovi dati o nuovi obiettivi?",
     explanation: "Qualsiasi retraining o fine-tuning che alteri le prestazioni o il comportamento del modello è considerato modifica sostanziale, anche se limitato a uno strato del modello.",
-    trigger_article: "Art. 28(1)(b) + Art. 3(23)(a) [verify against current AI Act text]",
+    trigger_article: "Art. 28(1)(b) + Art. 3(23)(a)",
     is_trigger: true,
   },
   {
     id: "performance_impact",
     question: "Hai integrato il sistema con altri moduli, API o database in modo da alterarne le prestazioni o l'accuratezza complessiva?",
     explanation: "L'integrazione con sistemi esterni che modifica significativamente l'output finale (es. aggiungere un layer di decisione automatica) può configurare una modifica sostanziale.",
-    trigger_article: "Art. 28(1)(b) + Art. 3(23)(b) [verify against current AI Act text]",
+    trigger_article: "Art. 28(1)(b) + Art. 3(23)(b)",
     is_trigger: true,
   },
   {
     id: "safety_degradation",
     question: "Hai apportato modifiche che potrebbero ridurre la conformità del sistema ai requisiti di sicurezza o accuratezza dichiarati dal provider?",
     explanation: "Disabilitare safety filter, modificare soglie di confidenza, rimuovere meccanismi di override umano: tutte modifiche che peggiorano la conformità configurano trigger Art. 28.",
-    trigger_article: "Art. 28(1)(b) + Art. 3(23)(c) [verify against current AI Act text]",
+    trigger_article: "Art. 28(1)(b) + Art. 3(23)(c)",
     is_trigger: true,
   },
   {
     id: "ordinary_maintenance",
     question: "Le modifiche apportate rientrano nella manutenzione ordinaria (patch di sicurezza, aggiornamenti UI, correzioni bug senza impatto funzionale) come definita dal provider?",
     explanation: "La manutenzione ordinaria esplicitamente prevista nelle istruzioni del provider non configura modifica sostanziale. Ma deve essere documentata.",
-    trigger_article: "Art. 3(23) — eccezione [verify against current AI Act text]",
+    trigger_article: "Art. 3(23) — eccezione",
     is_trigger: false,
   },
 ];
@@ -100,14 +100,14 @@ export const PROVIDER_OBLIGATIONS: {
   {
     id: "docugen",
     label: "Documentazione tecnica (Annex IV)",
-    art: "Art. 11 [verify against current AI Act text]",
+    art: "Art. 11",
     href: "/dashboard/tools/docugen",
     source: "derived",
   },
   {
     id: "qms",
     label: "Sistema di gestione qualità",
-    art: "Art. 17 [verify against current AI Act text]",
+    art: "Art. 17",
     href: "#",
     source: "manual",
     unavailable: true,
@@ -115,7 +115,7 @@ export const PROVIDER_OBLIGATIONS: {
   {
     id: "conformity",
     label: "Conformity Assessment",
-    art: "Art. 43 [verify against current AI Act text]",
+    art: "Art. 43",
     href: "#",
     source: "manual",
     unavailable: true,
@@ -123,21 +123,21 @@ export const PROVIDER_OBLIGATIONS: {
   {
     id: "declaration",
     label: "Dichiarazione di Conformità UE + Marcatura CE",
-    art: "Art. 47-48 [verify against current AI Act text]",
+    art: "Art. 47-48",
     href: "/dashboard/tools/docugen",
     source: "derived",
   },
   {
     id: "eudb",
     label: "Registrazione EUDB",
-    art: "Art. 49 [verify against current AI Act text]",
+    art: "Art. 49",
     href: "/dashboard/compliance-ops/eudb",
     source: "derived",
   },
   {
     id: "postmarket",
     label: "Piano di monitoraggio post-market",
-    art: "Art. 72 [verify against current AI Act text]",
+    art: "Art. 72",
     href: "/dashboard/post-market",
     source: "derived",
   },

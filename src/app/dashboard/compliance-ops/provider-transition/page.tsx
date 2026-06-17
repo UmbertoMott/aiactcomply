@@ -77,21 +77,21 @@ function VerdictBanner({ verdict }: { verdict: Verdict }) {
       border: "rgba(239,68,68,0.18)",
       icon: <AlertTriangle size={18} className="text-red-700" />,
       title: "Obblighi da Provider rilevati (Art. 28)",
-      text: "Le risposte indicate suggeriscono che la tua organizzazione potrebbe aver assunto il ruolo di provider. Completa le obbligazioni nella sezione 3 e verifica con il team legale. [verify against current AI Act text]",
+      text: "Le risposte indicate suggeriscono che la tua organizzazione potrebbe aver assunto il ruolo di provider. Completa le obbligazioni nella sezione 3 e verifica con il team legale.",
     },
     risk: {
       bg: "rgba(251,146,60,0.08)",
       border: "rgba(251,146,60,0.25)",
       icon: <HelpCircle size={18} className="text-orange-700" />,
       title: "Rischio potenziale — verifica necessaria",
-      text: "Una o più risposte 'Incerto' richiedono una valutazione legale prima di determinare se scattano obblighi da provider (Art. 28). [verify against current AI Act text]",
+      text: "Una o più risposte 'Incerto' richiedono una valutazione legale prima di determinare se scattano obblighi da provider (Art. 28).",
     },
     deployer: {
       bg: "rgba(22,163,74,0.06)",
       border: "rgba(22,163,74,0.15)",
       icon: <CheckCircle2 size={18} className="text-green-700" />,
       title: "Nessun obbligo da provider rilevato",
-      text: "Le risposte indicano che rimani nel ruolo di deployer senza obblighi aggiuntivi da provider. Documenta comunque le modifiche apportate. [verify against current AI Act text]",
+      text: "Le risposte indicano che rimani nel ruolo di deployer senza obblighi aggiuntivi da provider. Documenta comunque le modifiche apportate.",
     },
   } as const;
   const c = cfg[verdict];
