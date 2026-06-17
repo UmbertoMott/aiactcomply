@@ -720,7 +720,7 @@ export default function OversightPage() {
   const systemDescription = cls?.systemDescription ?? "";
 
   return (
-    <div className="w-full max-w-4xl mx-auto" style={FONT}>
+    <div className="w-full" style={FONT}>
       <SystemSelector checkProhibited={true} />
 
       {/* Dossier banner */}

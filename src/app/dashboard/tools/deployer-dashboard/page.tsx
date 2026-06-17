@@ -88,7 +88,7 @@ export default function DeployerDashboardPage() {
   const attention = items.filter((i) => i.record?.overallStatus === "attention").length;
 
   return (
-    <div className="min-h-screen p-6 max-w-5xl mx-auto" style={{ ...FONT, color: "#0D1016" }}>
+    <div className="w-full" style={{ ...FONT, color: "#0D1016" }}>
       <ProviderTransitionAlertBanner />
       {/* Header */}
       <div className="flex items-start justify-between mb-6">

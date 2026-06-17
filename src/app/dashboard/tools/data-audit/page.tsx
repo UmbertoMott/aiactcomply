@@ -559,7 +559,7 @@ export default function DataAuditPage() {
   const showSpecialCategories = record.specialCategories.applicable === "yes" || anyConfirmedSensitive;
 
   return (
-    <div className="w-full max-w-4xl mx-auto" style={FONT}>
+    <div className="w-full" style={FONT}>
       <SystemSelector checkProhibited={false} />
 
       {/* Dossier banner */}
