@@ -16,7 +16,7 @@ import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { TRACEABILITY_PURPOSES, BIOMETRIC_LOG_REQUIREMENTS, FIELD_NAME_HINTS, MAX_LOG_FILE_SIZE_BYTES } from "@/lib/logvault/traceability-purposes";
 import {
-  loadLogVaultRecord, getAllDetectedFields, countCovered,
+  getAllDetectedFields, countCovered,
   type LogVaultRecord, type ImportedLogSet, type CoverageStatus,
   type TraceabilityCoverageRecord, type BiometricLogRequirementCoverage,
 } from "@/lib/logvault/logvault-types";
@@ -397,13 +397,6 @@ const EMPTY_RECORD: LogVaultRecord = {
   biometricLogging: { applicable: "unspecified", requirementCoverage: [] },
 };
 
-function migrateRecord(): LogVaultRecord {
-  try {
-    const legacy = loadLogVaultRecord();
-    if (legacy.loggingCapabilityConfirmed !== "unspecified" || legacy.importedLogSets.length > 0) return legacy;
-  } catch { /* ignore */ }
-  return EMPTY_RECORD;
-}
 
 const CAT_LABELS: { value: LogEventCategory; label: string }[] = [
   { value: "human_override", label: "Override umano" },
