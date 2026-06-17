@@ -19,7 +19,7 @@ import {
 } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
-import { migrateLegacyFRIA, patchShared } from "@/lib/assessment/assessment-helpers";
+import { migrateLegacyFRIA, patchShared, syncCorrelatedRisksFromDPIA } from "@/lib/assessment/assessment-helpers";
 import { CorrelatedRisksPanel } from "@/components/assessment/CorrelatedRisksPanel";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -582,6 +582,7 @@ export default function DPIAPage() {
     setDoc(withDate);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(withDate));
     writeToStorage("dpia", withDate);
+    syncCorrelatedRisksFromDPIA();
     // Sync shared dall'identità DPIA
     patchShared({
       systemName:   withDate.description.system_name,

@@ -17,7 +17,7 @@ import { draftFria } from "@/app/actions/draftFria";
 import type { ClassifierResult, RiskManagerResult, DataAuditResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
-import { getAssessment, patchFRIA, migrateLegacyFRIA } from "@/lib/assessment/assessment-helpers";
+import { getAssessment, patchFRIA, migrateLegacyFRIA, syncCorrelatedRisksFromFRIA } from "@/lib/assessment/assessment-helpers";
 import { CorrelatedRisksPanel } from "@/components/assessment/CorrelatedRisksPanel";
 import {
   type FRIADocument, type FRIAScenario, type FRIARightImpact,
@@ -446,6 +446,7 @@ export default function FRIAPage() {
       completeness: `${completeness}%`, recommendation: doc.deployment.recommendation, savedAt: completedAt,
     }, "fria");
     patchFRIA(() => doc);
+    syncCorrelatedRisksFromFRIA();
     setDossierSavedAt(completedAt);
     showToast("FRIA salvata nel dossier di compliance");
   }
