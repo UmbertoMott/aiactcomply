@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   ShieldCheck, Copy, Check, ExternalLink, Sparkles, Globe, GlobeLock,
-  AlertTriangle, CheckCircle2, Info, Loader2, Share2, Mail,
+  AlertTriangle, CheckCircle2, Info, Loader2, Share2, Mail, Lock, Download, X as XIcon,
 } from "lucide-react";
 import {
   ALL_SECTION_IDS,
@@ -17,7 +17,9 @@ import {
   type TrustCenterPage,
   type TrustCenterSectionId,
   type TrustCenterSourceData,
+  type TrustCenterVisibility,
 } from "@/lib/trust-center/trust-center-types";
+import { generateConformityPacket } from "@/lib/trust-center/generate-conformity-packet";
 import { generateTrustCenterSummary } from "@/app/actions/generateTrustCenterSummary";
 
 const BG     = "#FAFAF9";
@@ -67,6 +69,71 @@ function IosSwitch({ on, onChange, disabled }: { on: boolean; onChange: (v: bool
         transition: "left 0.2s",
       }} />
     </button>
+  );
+}
+
+// ─── EmailTagInput ────────────────────────────────────────────────────────────
+
+function EmailTagInput({
+  values,
+  onChange,
+  placeholder,
+}: {
+  values: string[];
+  onChange: (vals: string[]) => void;
+  placeholder?: string;
+}) {
+  const [input, setInput] = useState("");
+
+  const add = (raw: string) => {
+    const val = raw.trim();
+    if (val && !values.includes(val)) onChange([...values, val]);
+    setInput("");
+  };
+
+  const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      add(input);
+    } else if (e.key === "Backspace" && !input && values.length > 0) {
+      onChange(values.slice(0, -1));
+    }
+  };
+
+  return (
+    <div style={{
+      display: "flex", flexWrap: "wrap", gap: 6, padding: "8px 10px",
+      background: "rgba(0,0,0,0.03)", border: `1px solid ${BORDER}`, borderRadius: 8,
+      minHeight: 40, alignItems: "center",
+    }}>
+      {values.map(v => (
+        <span key={v} style={{
+          display: "flex", alignItems: "center", gap: 4,
+          background: "rgba(0,0,0,0.07)", borderRadius: 5, padding: "2px 8px",
+          fontSize: 12, color: TEXT,
+        }}>
+          {v}
+          <button
+            type="button"
+            onClick={() => onChange(values.filter(x => x !== v))}
+            style={{ background: "none", border: "none", cursor: "pointer", padding: 0, lineHeight: 1, color: MUTED }}
+          >
+            <XIcon size={11} />
+          </button>
+        </span>
+      ))}
+      <input
+        value={input}
+        onChange={e => setInput(e.target.value)}
+        onKeyDown={handleKey}
+        onBlur={() => { if (input) add(input); }}
+        placeholder={values.length === 0 ? placeholder : ""}
+        style={{
+          border: "none", outline: "none", background: "transparent",
+          fontSize: 12, color: TEXT, minWidth: 160, flex: 1,
+        }}
+      />
+    </div>
   );
 }
 
@@ -426,6 +493,18 @@ export default function TrustCenterEditorPage() {
     setTimeout(() => setCopied(false), 2000);
   }, [publicUrl]);
 
+  const handleExportPacket = useCallback(() => {
+    const riskTier = sourceData.risk_tier.riskTier;
+    const packet = generateConformityPacket(systemId, page, systemName, riskTier);
+    const blob = new Blob([JSON.stringify(packet, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `aicomply_conformity_packet_${systemId}_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [systemId, page, systemName, sourceData.risk_tier.riskTier]);
+
   const shareText = `Scopri la pagina di trasparenza AI di ${systemName} — conforme al Regolamento UE sull'IA (AI Act).`;
 
   const SHARE_CHANNELS = [
@@ -663,6 +742,81 @@ export default function TrustCenterEditorPage() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* ── Visibility / Access Control ────────────────────────────── */}
+        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 16, marginBottom: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+            <Lock size={14} style={{ color: MUTED }} />
+            <span style={{ color: TEXT, fontWeight: 600, fontSize: 13 }}>Visibilità pubblica</span>
+            <span style={{ color: MUTED, fontFamily: "monospace", fontSize: 10, background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "1px 6px" }}>Art. 13</span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: page.accessConfig.visibility !== "public" ? 14 : 0 }}>
+            {(["public", "restricted", "invite_only"] as TrustCenterVisibility[]).map(v => (
+              <button
+                key={v}
+                onClick={() => patchPage({ accessConfig: { ...page.accessConfig, visibility: v } })}
+                style={{
+                  borderRadius: 8, border: `1px solid ${page.accessConfig.visibility === v ? "#4f46e5" : BORDER}`,
+                  padding: "10px 12px", textAlign: "left", cursor: "pointer", transition: "border-color 0.15s",
+                  background: page.accessConfig.visibility === v ? "rgba(79,70,229,0.06)" : "rgba(0,0,0,0.02)",
+                }}
+              >
+                <div style={{ fontWeight: 600, fontSize: 12, color: page.accessConfig.visibility === v ? INDIGO : TEXT, marginBottom: 2 }}>
+                  {v === "public" && "Pubblico"}
+                  {v === "restricted" && "Dominio aziendale"}
+                  {v === "invite_only" && "Solo invitati"}
+                </div>
+                <div style={{ fontSize: 11, color: MUTED, lineHeight: 1.3 }}>
+                  {v === "public" && "Accessibile a tutti"}
+                  {v === "restricted" && "Solo email/dominio autorizzati"}
+                  {v === "invite_only" && "Lista email esplicita"}
+                </div>
+              </button>
+            ))}
+          </div>
+          {page.accessConfig.visibility !== "public" && (
+            <div>
+              <p style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 6 }}>
+                {page.accessConfig.visibility === "restricted" ? "Domini autorizzati (es. @regulator.eu)" : "Email autorizzate"}
+              </p>
+              <EmailTagInput
+                values={page.accessConfig.visibility === "restricted" ? page.accessConfig.allowedDomains : page.accessConfig.allowedEmails}
+                onChange={vals =>
+                  patchPage({
+                    accessConfig: page.accessConfig.visibility === "restricted"
+                      ? { ...page.accessConfig, allowedDomains: vals }
+                      : { ...page.accessConfig, allowedEmails: vals },
+                  })
+                }
+                placeholder={page.accessConfig.visibility === "restricted" ? "@regulator.eu" : "auditor@partner.com"}
+              />
+              <p style={{ fontSize: 11, color: MUTED, marginTop: 6 }}>
+                Premi Invio o virgola per aggiungere. Il controllo avviene lato client al momento dell&apos;accesso.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* ── Export pacchetto conformità ─────────────────────────────── */}
+        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 16, marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <p style={{ color: TEXT, fontWeight: 600, fontSize: 13, margin: 0 }}>Pacchetto di conformità</p>
+            <p style={{ color: MUTED, fontSize: 11, margin: "2px 0 0" }}>
+              Esporta un JSON con Trust Center, documenti collegati e attestazioni — Art. 11, Annex IV
+            </p>
+          </div>
+          <button
+            onClick={handleExportPacket}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              background: "#0D1016", color: "#fff", border: "none",
+              borderRadius: 8, padding: "8px 18px", cursor: "pointer", fontSize: 13, fontWeight: 600,
+            }}
+          >
+            <Download size={14} />
+            Esporta pacchetto conformità
+          </button>
         </div>
 
         {/* ── Two-column layout ──────────────────────────────────────── */}

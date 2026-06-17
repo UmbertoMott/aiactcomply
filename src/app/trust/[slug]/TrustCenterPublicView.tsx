@@ -2,13 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { notFound } from "next/navigation";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, Lock } from "lucide-react";
 import {
   ALL_SECTION_IDS,
   SECTION_META,
   findPageBySlug,
   latestPublicSectionDate,
   type TrustCenterPage,
+  type TrustCenterAccessConfig,
 } from "@/lib/trust-center/trust-center-types";
 
 const BG     = "#0D1016";
@@ -18,11 +19,33 @@ const MUTED  = "#94A3B8";
 const EMERAL = "#34d399";
 const INDIGO = "#818cf8";
 
-type State = "loading" | "not_found" | "found";
+type State = "loading" | "not_found" | "restricted" | "found";
 
-export default function TrustCenterPublicView({ slug }: { slug: string }) {
-  const [state, setState] = useState<State>("loading");
-  const [page, setPage]   = useState<TrustCenterPage | null>(null);
+function checkClientAccess(
+  config: TrustCenterAccessConfig,
+  claimedEmail: string | null
+): boolean {
+  if (config.visibility === "public") return true;
+  if (!claimedEmail) return false;
+  const email = claimedEmail.toLowerCase().trim();
+  if (config.visibility === "invite_only") {
+    return config.allowedEmails.some(e => e.toLowerCase() === email);
+  }
+  // restricted — domain check
+  return config.allowedDomains.some(d => email.endsWith(d.replace(/^@/, "@")));
+}
+
+interface Props {
+  slug: string;
+  /** Access config passed from server (null while datastore is placeholder) */
+  serverAccessConfig: TrustCenterAccessConfig | null;
+}
+
+export default function TrustCenterPublicView({ slug, serverAccessConfig }: Props) {
+  const [state, setState]         = useState<State>("loading");
+  const [page, setPage]           = useState<TrustCenterPage | null>(null);
+  const [emailInput, setEmailInput] = useState("");
+  const [emailError, setEmailError] = useState("");
 
   useEffect(() => {
     const found = findPageBySlug(slug);
@@ -32,16 +55,40 @@ export default function TrustCenterPublicView({ slug }: { slug: string }) {
       return;
     }
 
-    // A published page with zero public sections is treated as 404
     const publicSections = ALL_SECTION_IDS.filter(id => found.sections[id].is_public);
     if (publicSections.length === 0) {
       setState("not_found");
       return;
     }
 
+    // Access check — use serverAccessConfig if available, else page's own config
+    const config = serverAccessConfig ?? found.accessConfig;
+    if (config && config.visibility !== "public") {
+      // Check sessionStorage for a previously granted email
+      const cached = sessionStorage.getItem(`tc_access_${slug}`);
+      if (!checkClientAccess(config, cached)) {
+        setPage(found);
+        setState("restricted");
+        return;
+      }
+    }
+
     setPage(found);
     setState("found");
-  }, [slug]);
+  }, [slug, serverAccessConfig]);
+
+  const handleAccessSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!page) return;
+    const config = serverAccessConfig ?? page.accessConfig;
+    if (checkClientAccess(config, emailInput)) {
+      sessionStorage.setItem(`tc_access_${slug}`, emailInput);
+      setState("found");
+      setEmailError("");
+    } else {
+      setEmailError("Accesso non autorizzato per questo indirizzo email.");
+    }
+  };
 
   if (state === "loading") {
     return (
@@ -52,8 +99,47 @@ export default function TrustCenterPublicView({ slug }: { slug: string }) {
   }
 
   if (state === "not_found" || !page) {
-    // Call notFound() to trigger Next.js 404
     notFound();
+  }
+
+  if (state === "restricted") {
+    const config = serverAccessConfig ?? page!.accessConfig;
+    return (
+      <div style={{ minHeight: "100vh", background: BG, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px" }}>
+        <div style={{ maxWidth: 420, width: "100%", textAlign: "center" }}>
+          <Lock size={32} style={{ color: MUTED, marginBottom: 16 }} />
+          <h1 style={{ color: TEXT, fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Accesso riservato</h1>
+          <p style={{ color: MUTED, fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
+            {config.visibility === "invite_only"
+              ? "Questa pagina è riservata agli utenti invitati. Inserisci il tuo indirizzo email per accedere."
+              : "Questa pagina è riservata agli utenti autorizzati. Inserisci il tuo indirizzo email aziendale."}
+          </p>
+          <form onSubmit={handleAccessSubmit} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <input
+              type="email"
+              value={emailInput}
+              onChange={e => setEmailInput(e.target.value)}
+              placeholder="tua@email.com"
+              required
+              style={{
+                background: "rgba(255,255,255,0.05)", border: `1px solid ${BORDER}`,
+                borderRadius: 8, padding: "10px 14px", color: TEXT, fontSize: 14,
+                outline: "none", width: "100%", boxSizing: "border-box",
+              }}
+            />
+            {emailError && (
+              <p style={{ color: "#f87171", fontSize: 13 }}>{emailError}</p>
+            )}
+            <button
+              type="submit"
+              style={{ background: EMERAL, color: "#0D1016", border: "none", borderRadius: 8, padding: "10px 20px", fontSize: 14, fontWeight: 700, cursor: "pointer" }}
+            >
+              Accedi
+            </button>
+          </form>
+        </div>
+      </div>
+    );
   }
 
   const publicSections = ALL_SECTION_IDS.filter(id => page!.sections[id].is_public);

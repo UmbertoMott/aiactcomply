@@ -1,7 +1,22 @@
-// Trust Center — tipi condivisi editor + pagina pubblica (PROMPT AV)
+// Trust Center — tipi condivisi editor + pagina pubblica (PROMPT AV + BC)
 // ✦ AI — verifica e conferma: tabella sezioni ricostruita dalla memoria del modello.
 // Validare contro Art. 6, Annex III/IV, Art. 14, Art. 22, Art. 47-50, Art. 72
 // del Reg. (UE) 2024/1689 prima della pubblicazione. [verify against current AI Act text]
+
+// ── Access control (PROMPT BC — Art. 13, Art. 50) ─────────────────────────────
+export type TrustCenterVisibility = "public" | "restricted" | "invite_only";
+
+export interface TrustCenterAccessConfig {
+  visibility: TrustCenterVisibility;
+  /** Email esplicite autorizzate (invite_only) */
+  allowedEmails: string[];
+  /** Domini autorizzati, es. "@regulator.eu" (restricted) */
+  allowedDomains: string[];
+}
+
+export function createDefaultAccessConfig(): TrustCenterAccessConfig {
+  return { visibility: "public", allowedEmails: [], allowedDomains: [] };
+}
 
 export type TrustCenterSectionId =
   | "risk_tier"
@@ -92,6 +107,8 @@ export interface TrustCenterPage {
   noindex: boolean;
   sections: Record<TrustCenterSectionId, TrustCenterSectionState>;
   updatedAt: string;
+  /** Access control — PROMPT BC */
+  accessConfig: TrustCenterAccessConfig;
 }
 
 export function makeEmptySection(): TrustCenterSectionState {
@@ -118,6 +135,7 @@ export function createEmptyPage(systemId: string): TrustCenterPage {
     noindex: true,
     sections,
     updatedAt: new Date().toISOString(),
+    accessConfig: createDefaultAccessConfig(),
   };
 }
 
@@ -134,11 +152,12 @@ export function loadTrustCenterPages(): Record<string, TrustCenterPage> {
 export function loadTrustCenterPage(systemId: string): TrustCenterPage {
   const pages = loadTrustCenterPages();
   if (pages[systemId]) {
-    // Ensure all sections exist (migration for pages created before new sections were added)
     const page = pages[systemId];
     for (const id of ALL_SECTION_IDS) {
       if (!page.sections[id]) page.sections[id] = makeEmptySection();
     }
+    // Migrate pages created before PROMPT BC
+    if (!page.accessConfig) page.accessConfig = createDefaultAccessConfig();
     return page;
   }
   return createEmptyPage(systemId);
