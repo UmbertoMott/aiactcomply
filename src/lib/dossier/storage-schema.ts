@@ -421,6 +421,7 @@ export const STORAGE_KEYS = {
   art50: "aicomply_art50_result",
   orgProfile: "aicomply_org_profile",
   incident: "aicomply_incident_result",
+  assessment: "aicomply_assessment",
 } as const;
 
 // ── Project-scoped storage key ───────────────────────────────────────────────
