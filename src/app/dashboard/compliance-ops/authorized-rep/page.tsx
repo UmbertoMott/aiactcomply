@@ -4,17 +4,24 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import {
   UserCheck, AlertTriangle, Info, CheckCircle2, Copy, Save,
   Building2, Globe, FileText, ChevronDown, Sparkles, HelpCircle, ExternalLink,
+  Shield,
 } from "lucide-react";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { AuthRepResult, EUDBResult } from "@/lib/dossier/storage-schema";
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import {
-  loadARDraft, saveARDraft, createEmptyDoc, prefillARFromModules,
+  createEmptyDoc, prefillARFromModules,
   generateMandate, loadARRecord, makeChecklist,
   AR_RECORD_KEY,
 } from "@/lib/authorized-rep/authorized-rep-types";
 import type { AuthRepDoc, AuthorizedRepresentativeRecord, ARChecklistItem } from "@/lib/authorized-rep/authorized-rep-types";
+import { useScopedStorage } from "@/lib/hooks/useScopedStorage";
+import { SystemSelector } from "@/components/compliance/SystemSelector";
+import { createDefaultArRecord } from "@/types/authorized-rep";
+import type { AuthorizedRepRecord } from "@/types/authorized-rep";
+import { DigitalSignaturePad, SignatureConfirmation } from "@/components/authorized-rep/DigitalSignaturePad";
+import { validateMandateContent } from "./actions";
 
 // ── Light-theme tokens ───────────────────────────────────────────────────────
 
@@ -252,7 +259,11 @@ function ChecklistRowDk({ item, eudbResult, docuGenCompleted, onChange }: {
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 export default function AuthorizedRepCompliancePage() {
-  const [doc, setDoc] = useState<AuthRepDoc>(() => loadARDraft());
+  const [doc, setDoc] = useScopedStorage<AuthRepDoc>("auth_rep_draft", createEmptyDoc());
+  const [arRecord, setArRecord] = useScopedStorage<AuthorizedRepRecord>(
+    "authorized_rep_record",
+    createDefaultArRecord()
+  );
   const [copied, setCopied] = useState(false);
   const [mandateConfirmed, setMandateConfirmed] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -260,7 +271,7 @@ export default function AuthorizedRepCompliancePage() {
   const [prefillCount, setPrefillCount] = useState(0);
   const [showPrefillDetail, setShowPrefillDetail] = useState(false);
   const [prefillSrc, setPrefillSrc] = useState<AuthRepDoc["prefillSources"] | null>(null);
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [validatingMandate, setValidatingMandate] = useState(false);
 
   // Cross-module data
   const [eudbResult, setEudbResult] = useState<EUDBResult | null>(null);
@@ -331,13 +342,8 @@ export default function AuthorizedRepCompliancePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const scheduleSave = useCallback((d: AuthRepDoc) => {
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => { saveARDraft(d); }, 600);
-  }, []);
-
   function patch(updater: (prev: AuthRepDoc) => AuthRepDoc) {
-    setDoc(prev => { const next = updater(prev); scheduleSave(next); return next; });
+    setDoc(prev => updater(prev));
   }
   function patchP<K extends keyof AuthRepDoc>(field: K, val: AuthRepDoc[K]) {
     patch(d => ({ ...d, [field]: val, aiConfirmed: false }));
@@ -362,6 +368,45 @@ export default function AuthorizedRepCompliancePage() {
   }
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(null), 3000); }
+
+  async function handleValidateMandate() {
+    const text = generateMandate(doc);
+    if (text.length < 50) { showToast("Genera prima il testo del mandato"); return; }
+    setValidatingMandate(true);
+    try {
+      const result = await validateMandateContent(text);
+      setArRecord(prev => ({
+        ...prev,
+        mandateValidationStatus: result.status,
+        mandateValidationIssues: result.missingDuties,
+        updatedAt: new Date().toISOString(),
+      }));
+      if (result.status === "valid") showToast("✓ Tutti i compiti obbligatori presenti");
+    } catch {
+      showToast("Errore durante la validazione", );
+    } finally {
+      setValidatingMandate(false);
+    }
+  }
+
+  function handleSign(sig: import("@/types/authorized-rep").DigitalSignature) {
+    setArRecord(prev => ({
+      ...prev,
+      signature: sig,
+      signatureStatus: "signed",
+      updatedAt: new Date().toISOString(),
+    }));
+    showToast("✓ Mandato firmato digitalmente");
+  }
+
+  function handleRevoke() {
+    setArRecord(prev => ({
+      ...prev,
+      signature: undefined,
+      signatureStatus: "revoked",
+      updatedAt: new Date().toISOString(),
+    }));
+  }
 
   function handleSave() {
     // If mandate signed, signal to AI Inventory
@@ -421,7 +466,32 @@ export default function AuthorizedRepCompliancePage() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div style={{ maxWidth: 880, margin: "0 auto" }}>
+    <div style={{ width: "100%" }}>
+      <SystemSelector checkProhibited={false} />
+
+      {/* DocuGen gate banner — PROMPT BG */}
+      {!docuGenCompleted && (
+        <div style={{ borderRadius: 10, border: `1px solid ${DK.amberBdr}`, background: DK.amberBg,
+          padding: 16, marginBottom: 16, display: "flex", alignItems: "flex-start", gap: 10 }}>
+          <AlertTriangle size={14} style={{ color: DK.amber, flexShrink: 0, marginTop: 2 }} />
+          <div>
+            <p style={{ fontSize: 12, fontWeight: 600, color: DK.amber, margin: "0 0 4px" }}>
+              Documentazione tecnica incompleta
+            </p>
+            <p style={{ fontSize: 11, color: DK.text, margin: "0 0 6px", lineHeight: 1.5 }}>
+              Il mandato di Rappresentante Autorizzato richiede che la documentazione tecnica
+              (Allegato IV) sia completata al 100% prima di procedere.
+              Il mandatario deve poter ricevere e conservare tale documentazione.
+            </p>
+            <Link href="/dashboard/tools/docugen"
+              style={{ fontSize: 11, color: DK.indigo, display: "inline-flex", alignItems: "center", gap: 4 }}>
+              → Vai a DocuGen AI per completare la documentazione
+              <span style={{ fontFamily: "monospace", fontSize: 9, color: DK.faint }}>Art. 11</span>
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
@@ -578,6 +648,7 @@ export default function AuthorizedRepCompliancePage() {
       {/* ── Sezioni 2 & 3 ───────────────────────────────────────────────────── */}
 
       {showForms && (
+        <fieldset disabled={!docuGenCompleted} style={{ border: "none", padding: 0, margin: 0 }}>
         <>
           {/* Sezione 2 */}
           <div style={{ ...cardDk, padding: 20, marginBottom: 14 }}>
@@ -857,23 +928,86 @@ export default function AuthorizedRepCompliancePage() {
               )}
             </div>
 
-            {/* Mandate signed */}
-            <div style={{ ...cardDk, padding: 14, marginBottom: 20 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12,
-                  color: DK.text, cursor: "pointer" }}>
-                  <input type="checkbox" checked={doc.mandate_signed}
-                    onChange={e => patchP("mandate_signed", e.target.checked)}
-                    style={{ accentColor: DK.green, width: 14, height: 14 }} />
-                  Mandato firmato da entrambe le parti
-                </label>
-                {doc.mandate_signed && (
-                  <DkField label="Data firma">
-                    <input style={inputDk} type="date" value={doc.mandate_signed_date ?? ""}
-                      onChange={e => patchP("mandate_signed_date", e.target.value)} />
-                  </DkField>
-                )}
+            {/* Mandate duties (Art. 22) + AI validator — PROMPT BG */}
+            <div style={{ ...cardDk, padding: 14, marginBottom: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                  <Shield size={13} style={{ color: DK.indigo }} />
+                  <p style={{ fontSize: 12, fontWeight: 600, color: DK.text, margin: 0 }}>
+                    Compiti obbligatori Art. 22(2-5) [verify against current AI Act text]
+                  </p>
+                </div>
+                <button
+                  onClick={handleValidateMandate}
+                  disabled={validatingMandate}
+                  style={{ display: "flex", alignItems: "center", gap: 6, padding: "5px 12px",
+                    borderRadius: 7, fontSize: 11, cursor: "pointer",
+                    background: "#0D1016", color: "#fff", border: "1px solid #0D1016" }}>
+                  <Sparkles size={11} />
+                  {validatingMandate ? "Analisi…" : "✦ Valida compiti obbligatori"}
+                </button>
               </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 10 }}>
+                {arRecord.mandateDuties.map((d, i) => (
+                  <label key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8,
+                    fontSize: 11, color: DK.text, cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={d.confirmed}
+                      onChange={() => setArRecord(prev => ({
+                        ...prev,
+                        mandateDuties: prev.mandateDuties.map((duty, j) =>
+                          j === i ? { ...duty, confirmed: !duty.confirmed, confirmedAt: new Date().toISOString() } : duty
+                        ),
+                        updatedAt: new Date().toISOString(),
+                      }))}
+                      style={{ accentColor: DK.green, marginTop: 1, flexShrink: 0 }}
+                    />
+                    <div>
+                      <span style={{ color: DK.text }}>{d.duty}</span>
+                      <span style={{ marginLeft: 6, fontFamily: "monospace", fontSize: 9, color: DK.faint }}>{d.artRef}</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+
+              {arRecord.mandateValidationStatus === "valid" && (
+                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: DK.green }}>
+                  <CheckCircle2 size={12} /> Tutti i compiti obbligatori presenti nel mandato ✦ AI
+                </div>
+              )}
+              {arRecord.mandateValidationStatus === "missing_duties" && arRecord.mandateValidationIssues.length > 0 && (
+                <div style={{ borderRadius: 8, border: `1px solid ${DK.redBdr}`, background: DK.redBg, padding: 10 }}>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: DK.red, margin: "0 0 6px" }}>
+                    {arRecord.mandateValidationIssues.length} compiti mancanti nel mandato ✦ AI
+                  </p>
+                  {arRecord.mandateValidationIssues.map((issue, i) => (
+                    <p key={i} style={{ fontSize: 11, color: DK.muted, margin: "2px 0 0" }}>× {issue}</p>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Digital signature — PROMPT BG */}
+            <div style={{ ...cardDk, padding: 14, marginBottom: 20 }}>
+              <p style={{ fontSize: 12, fontWeight: 600, color: DK.text, margin: "0 0 14px" }}>
+                Firma digitale mandato
+              </p>
+              {arRecord.signatureStatus === "signed" && arRecord.signature ? (
+                <SignatureConfirmation signature={arRecord.signature} onRevoke={handleRevoke} />
+              ) : (
+                <DigitalSignaturePad
+                  mandateId={arRecord.mandateId}
+                  onSign={handleSign}
+                  disabled={!docuGenCompleted || arRecord.mandateValidationStatus !== "valid"}
+                />
+              )}
+              {arRecord.mandateValidationStatus !== "valid" && arRecord.signatureStatus !== "signed" && (
+                <p style={{ fontSize: 10, color: DK.faint, marginTop: 8 }}>
+                  Firma disponibile dopo validazione compiti obbligatori ✦ AI
+                </p>
+              )}
             </div>
 
             {/* Checklist */}
@@ -936,6 +1070,7 @@ export default function AuthorizedRepCompliancePage() {
 
           <SignOffPanel toolKey="authorized-rep" toolLabel="Authorized Representative — Art. 22 [verify against current AI Act text]" />
         </>
+        </fieldset>
       )}
 
       {/* Toast */}
