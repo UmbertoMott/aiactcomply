@@ -49,17 +49,18 @@ function RadioGroupDk({
     { v: "unsure",label: "Incerto", color: "#92400e" },
   ];
   return (
-    <div className="flex gap-3 mt-2">
+    <div className="flex gap-2 mt-1.5">
       {opts.map(o => (
-        <label key={o.v} className="flex items-center gap-1.5 cursor-pointer">
+        <label key={o.v} className="flex items-center gap-1 cursor-pointer">
           <input
             type="radio"
             name={name}
             checked={value === o.v}
             onChange={() => onChange(o.v)}
             className="accent-indigo-400"
+            style={{ width: 12, height: 12 }}
           />
-          <span style={{ color: value === o.v ? o.color : MUTED, fontWeight: value === o.v ? 600 : 400 }}>
+          <span style={{ color: value === o.v ? o.color : MUTED, fontWeight: value === o.v ? 600 : 400, fontSize: 12 }}>
             {o.label}
           </span>
         </label>
@@ -173,7 +174,7 @@ export default function ProviderTransitionPage() {
       <div style={{ marginBottom: 28 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
           <span style={{ background: "rgba(129,140,248,0.15)", color: INDIGO, borderRadius: 6, padding: "2px 10px", fontSize: 12, fontWeight: 600 }}>
-            Art. 28 [verify against current AI Act text]
+            Art. 28
           </span>
           {verdict !== "incomplete" && (
             <span style={{
