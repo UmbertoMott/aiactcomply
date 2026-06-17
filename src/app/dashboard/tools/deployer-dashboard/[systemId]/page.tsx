@@ -22,8 +22,21 @@ import { assessDeployerApplicability, draftWorkerInformationNotice } from "@/app
 import {
   ChevronLeft, Sparkles, CheckCircle2, Clock, AlertTriangle,
   Minus, Info, UserCheck, Users, Database, ExternalLink,
-  Loader2, Copy, Check
+  Loader2, Copy, Check, ChevronDown, ChevronUp,
 } from "lucide-react";
+// ── Art. 26 Dettaglio Operativo — PROMPT BD ──────────────────────────────────
+import { loadDeployerRecord, saveDeployerRecord, type DeployerRecord } from "@/types/deployer";
+import { DeployerSection } from "@/components/deployer/DeployerSection";
+import { Art26_1 } from "@/components/deployer/Art26_1";
+import { Art26_2 } from "@/components/deployer/Art26_2";
+import { Art26_3 } from "@/components/deployer/Art26_3";
+import { Art26_4 } from "@/components/deployer/Art26_4";
+import { Art26_5 } from "@/components/deployer/Art26_5";
+import { Art26_6 } from "@/components/deployer/Art26_6";
+import { Art26_7 } from "@/components/deployer/Art26_7";
+import { Art26_8 } from "@/components/deployer/Art26_8";
+import { Art26_9 } from "@/components/deployer/Art26_9";
+import { Art26_10 } from "@/components/deployer/Art26_10";
 
 const FONT = { fontFamily: "Inter, system-ui, sans-serif" };
 
@@ -484,6 +497,18 @@ export default function DeployerSystemDetailPage() {
   const [aiError, setAiError] = useState<string | null>(null);
   const [aiRationale, setAiRationale] = useState<Record<string, string> | null>(null);
   const [saved, setSaved] = useState(false);
+  // Art. 26 Dettaglio Operativo
+  const [detailRec, setDetailRecState] = useState<DeployerRecord | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+
+  function setDetailRec(updater: (prev: DeployerRecord) => DeployerRecord) {
+    setDetailRecState(prev => {
+      if (!prev) return prev;
+      const next = updater(prev);
+      saveDeployerRecord(next);
+      return next;
+    });
+  }
 
   const load = useCallback(() => {
     const inv = loadInventory();
@@ -492,6 +517,7 @@ export default function DeployerSystemDetailPage() {
     if (sys) {
       const r = loadSystemRecord(systemId) ?? ensureSystemRecord(systemId, sys.name, sys.tier);
       setRecord(r);
+      setDetailRecState(loadDeployerRecord(systemId));
     }
   }, [systemId]);
 
@@ -626,6 +652,58 @@ export default function DeployerSystemDetailPage() {
         Sanzioni Art. 99–101: fino a 15 milioni € o 3% fatturato mondiale per inadempienza deployer.{" "}
         <span style={{ opacity: 0.8 }}>[verificare sul testo AI Act vigente]</span>
       </div>
+
+      {/* ── Art. 26 Dettaglio Operativo (PROMPT BD) ── */}
+      {detailRec && (
+        <section className="mb-6">
+          <button
+            onClick={() => setDetailOpen(v => !v)}
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-slate-700/50 bg-slate-900/60 mb-1 hover:bg-slate-900/80 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[10px] text-slate-500 bg-slate-800/60 px-1.5 py-0.5 rounded">Art. 26</span>
+              <span className="text-sm font-semibold text-slate-200">Checklist Operativa Deployer</span>
+              <span className="text-[10px] text-slate-500">10 paragrafi</span>
+            </div>
+            {detailOpen ? <ChevronUp size={14} className="text-slate-500" /> : <ChevronDown size={14} className="text-slate-500" />}
+          </button>
+
+          {detailOpen && (
+            <div className="space-y-2 mt-2">
+              <DeployerSection artRef="Art. 26(1)" title="Istruzioni d&apos;uso" status={detailRec.instructionsRead ? "ok" : "pending"}>
+                <Art26_1 record={detailRec} onChange={setDetailRec} />
+              </DeployerSection>
+              <DeployerSection artRef="Art. 26(2)" title="Supervisori assegnati" status={detailRec.overseers.length > 0 ? "ok" : "pending"}>
+                <Art26_2 record={detailRec} onChange={setDetailRec} />
+              </DeployerSection>
+              <DeployerSection artRef="Art. 26(3)" title="Conservazione log ≥ 6 mesi" status={detailRec.logRetentionStatus === "ok" ? "ok" : detailRec.logRetentionStatus === "not_configured" ? "pending" : detailRec.logRetentionStatus === "expired" ? "suspended" : "pending"}>
+                <Art26_3 record={detailRec} onChange={setDetailRec} />
+              </DeployerSection>
+              <DeployerSection artRef="Art. 26(4)" title="Notifiche al provider" status={detailRec.providerNotifications.length > 0 ? "ok" : "not_required"}>
+                <Art26_4 record={detailRec} onChange={setDetailRec} />
+              </DeployerSection>
+              <DeployerSection artRef="Art. 26(5)" title="Dichiarazione uso conforme" status={detailRec.conformingUseDeclaration ? "ok" : "pending"}>
+                <Art26_5 record={detailRec} onChange={setDetailRec} />
+              </DeployerSection>
+              <DeployerSection artRef="Art. 26(6)" title="Cooperazione autorità di vigilanza" status={detailRec.authorityContact.name && detailRec.authorityContact.email ? "ok" : "pending"}>
+                <Art26_6 record={detailRec} onChange={setDetailRec} />
+              </DeployerSection>
+              <DeployerSection artRef="Art. 26(7)" title="Notifiche utenti finali" status={detailRec.endUserNotificationsStatus === "compliant" ? "ok" : detailRec.endUserNotificationsStatus === "not_required" ? "not_required" : "pending"}>
+                <Art26_7 record={detailRec} onChange={setDetailRec} />
+              </DeployerSection>
+              <DeployerSection artRef="Art. 26(8)" title="FRIA — Valutazione diritti fondamentali" status={detailRec.friaStatus === "completed" ? "ok" : detailRec.friaStatus === "not_required" ? "not_required" : "pending"}>
+                <Art26_8 record={detailRec} onChange={setDetailRec} />
+              </DeployerSection>
+              <DeployerSection artRef="Art. 26(9)" title="Sospensione sistema" status={detailRec.systemSuspended ? "suspended" : "ok"} variant={detailRec.systemSuspended ? "critical" : "default"}>
+                <Art26_9 record={detailRec} onChange={setDetailRec} />
+              </DeployerSection>
+              <DeployerSection artRef="Art. 26(10)" title="Registrazione EUDB" status={detailRec.eudbRegistrationRequired ? (detailRec.eudbRegistrationStatus === "registered" ? "ok" : "pending") : "not_required"}>
+                <Art26_10 record={detailRec} onChange={setDetailRec} />
+              </DeployerSection>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* ── AI Applicability Assessment ── */}
       <section className="mb-6">
