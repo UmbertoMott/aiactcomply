@@ -329,15 +329,15 @@ export default function EUDBCompliancePage() {
     {
       key: "q4_gpai_systemic",
       text: "Il sistema è un GPAI model con rischio sistemico (Art. 51)?",
-      note: "Art. 51: modelli GPAI con capabilities > 10^25 FLOPs o con impatto sistemico accertato. [verify against current AI Act text]",
+      note: "Art. 51: modelli GPAI con capabilities > 10^25 FLOPs o con impatto sistemico accertato.",
     },
   ];
 
   function renderStep1() {
     const bannerConfig = {
-      required:     { bg: DK.greenBg,  bdr: DK.greenBdr, col: DK.green, Icon: CheckCircle2,   text: "Registrazione EUDB obbligatoria — Art. 49(1) [verify against current AI Act text]" },
+      required:     { bg: DK.greenBg,  bdr: DK.greenBdr, col: DK.green, Icon: CheckCircle2,   text: "Registrazione EUDB obbligatoria — Art. 49(1)" },
       not_required: { bg: "rgba(0,0,0,0.03)", bdr: DK.border, col: DK.muted, Icon: Info,  text: "La registrazione EUDB non è obbligatoria per questo sistema" },
-      unsure:       { bg: DK.amberBg,  bdr: DK.amberBdr, col: DK.amber, Icon: AlertTriangle,  text: "Incertezza — consulta il Legal Assistant [verify against current AI Act text]" },
+      unsure:       { bg: DK.amberBg,  bdr: DK.amberBdr, col: DK.amber, Icon: AlertTriangle,  text: "Incertezza — consulta il Legal Assistant" },
       incomplete:   null,
     };
     const banner = bannerConfig[eStatus];
@@ -348,7 +348,7 @@ export default function EUDBCompliancePage() {
             <Info size={13} style={{ color: DK.indigo, flexShrink: 0, marginTop: 1 }} />
             <div>
               <p style={{ fontSize: 12, color: DK.indigo, fontWeight: 500, margin: 0 }}>
-                Art. 49 AI Act — Chi deve registrarsi nel database UE? [verify against current AI Act text]
+                Art. 49 AI Act — Chi deve registrarsi nel database UE?
               </p>
               <p style={{ fontSize: 11, color: DK.indigo, opacity: 0.8, margin: "4px 0 0", lineHeight: 1.5 }}>
                 Provider di sistemi Annex III, deployer pubblici (Annex III pt.1-6), provider di GPAI con rischio sistemico e authorized representative di provider non-UE devono registrarsi prima del deployment.
@@ -430,7 +430,7 @@ export default function EUDBCompliancePage() {
           </div>
         )}
 
-        <SectionCard title="Dati del Provider" article="Annex VIII §1 [verify against current AI Act text]" aiBadge={isPrefilled}>
+        <SectionCard title="Dati del Provider" article="Annex VIII §1" aiBadge={isPrefilled}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <DkField label="Ragione sociale *" aiBadge={isPrefilled && !!p.provider_name}>
               <input style={inputDk} value={p.provider_name} placeholder="Es. Acme AI S.r.l."
@@ -449,7 +449,7 @@ export default function EUDBCompliancePage() {
           </div>
         </SectionCard>
 
-        <SectionCard title="Punto di contatto unico" article="Annex VIII §2 [verify against current AI Act text]" aiBadge={isPrefilled && !!(p.contact_name || p.contact_email)}>
+        <SectionCard title="Punto di contatto unico" article="Annex VIII §2" aiBadge={isPrefilled && !!(p.contact_name || p.contact_email)}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <DkField label="Nome referente *" aiBadge={isPrefilled && !!p.contact_name}>
               <input style={inputDk} value={p.contact_name} placeholder="Mario Rossi"
@@ -466,7 +466,7 @@ export default function EUDBCompliancePage() {
           </div>
         </SectionCard>
 
-        <SectionCard title="Authorized Representative (AR)" article="Annex VIII §3 [verify against current AI Act text]" aiBadge={p.has_authorized_rep && !!p.ar_name}>
+        <SectionCard title="Authorized Representative (AR)" article="Annex VIII §3" aiBadge={p.has_authorized_rep && !!p.ar_name}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
             <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: DK.muted, cursor: "pointer" }}>
               <input type="checkbox" checked={p.has_authorized_rep}
@@ -535,7 +535,7 @@ export default function EUDBCompliancePage() {
           </div>
         )}
 
-        <SectionCard title="Identificazione del sistema" article="Annex VIII §4-5 [verify against current AI Act text]" aiBadge={isPrefilled}>
+        <SectionCard title="Identificazione del sistema" article="Annex VIII §4-5" aiBadge={isPrefilled}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <DkField label="Denominazione commerciale *" aiBadge={isPrefilled && !!s.system_name}>
               <input style={inputDk} value={s.system_name} placeholder="Es. HireBot Pro" onChange={e => patchS("system_name", e.target.value)} />
@@ -551,7 +551,7 @@ export default function EUDBCompliancePage() {
           </div>
         </SectionCard>
 
-        <SectionCard title="Stato registrazione e Stati Membri" article="Annex VIII §6-7 [verify against current AI Act text]">
+        <SectionCard title="Stato registrazione e Stati Membri" article="Annex VIII §6-7">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <DkField label="Stato registrazione *">
               <select style={inputDk} value={s.registration_status} onChange={e => patchS("registration_status", e.target.value as "new"|"update"|"withdrawal")}>
@@ -566,7 +566,7 @@ export default function EUDBCompliancePage() {
           </div>
         </SectionCard>
 
-        <SectionCard title="Classificazione del rischio" article="Annex VIII §8 [verify against current AI Act text]" aiBadge={isPrefilled && !!s.risk_classification}>
+        <SectionCard title="Classificazione del rischio" article="Annex VIII §8" aiBadge={isPrefilled && !!s.risk_classification}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <DkField label="Classificazione rischio *" aiBadge={isPrefilled && !!s.risk_classification}>
               <select style={inputDk} value={s.risk_classification} onChange={e => patchS("risk_classification", e.target.value)}>
@@ -583,13 +583,13 @@ export default function EUDBCompliancePage() {
             <div style={{ marginTop: 12, padding: "8px 12px", borderRadius: 8,
               background: DK.amberBg, border: `1px solid ${DK.amberBdr}` }}>
               <p style={{ fontSize: 11, color: DK.amber, margin: 0 }}>
-                ⚠ Sistema law enforcement / migrazione rilevato — potrebbero applicarsi requisiti aggiuntivi di registrazione (Art. 49(4)). Verificare con il team legale. [verify against current AI Act text]
+                ⚠ Sistema law enforcement / migrazione rilevato — potrebbero applicarsi requisiti aggiuntivi di registrazione (Art. 49(4)). Verificare con il team legale.
               </p>
             </div>
           )}
         </SectionCard>
 
-        <SectionCard title="Documentazione di conformità" article="Annex VIII §9-11 [verify against current AI Act text]" aiBadge={isPrefilled && !!s.conformity_declaration_number}>
+        <SectionCard title="Documentazione di conformità" article="Annex VIII §9-11" aiBadge={isPrefilled && !!s.conformity_declaration_number}>
           {!s.conformity_declaration_number && (
             <div style={{ padding: "8px 12px", borderRadius: 8, background: DK.amberBg,
               border: `1px solid ${DK.amberBdr}`, marginBottom: 12 }}>
@@ -661,7 +661,7 @@ export default function EUDBCompliancePage() {
         )}
 
         {/* Annex VIII preview — 3 cards */}
-        <SectionCard title="Annex VIII — Sezione A: Provider / AR" article="Annex VIII §1-3 [verify against current AI Act text]">
+        <SectionCard title="Annex VIII — Sezione A: Provider / AR" article="Annex VIII §1-3">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <span style={{ fontSize: 11, color: DK.muted }}>Dati identificativi del provider</span>
             <button onClick={() => copySection("a")} style={{ display: "flex", alignItems: "center", gap: 5,
@@ -680,7 +680,7 @@ export default function EUDBCompliancePage() {
           </pre>
         </SectionCard>
 
-        <SectionCard title="Annex VIII — Sezione B: Sistema AI" article="Annex VIII §4-8 [verify against current AI Act text]">
+        <SectionCard title="Annex VIII — Sezione B: Sistema AI" article="Annex VIII §4-8">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <span style={{ fontSize: 11, color: DK.muted }}>Dati del sistema AI</span>
             <button onClick={() => copySection("b")} style={{ display: "flex", alignItems: "center", gap: 5,
@@ -699,7 +699,7 @@ export default function EUDBCompliancePage() {
           </pre>
         </SectionCard>
 
-        <SectionCard title="Annex VIII — Sezione C: Conformità" article="Annex VIII §9-11 [verify against current AI Act text]">
+        <SectionCard title="Annex VIII — Sezione C: Conformità" article="Annex VIII §9-11">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <span style={{ fontSize: 11, color: DK.muted }}>Documentazione di conformità</span>
             <button onClick={() => copySection("c")} style={{ display: "flex", alignItems: "center", gap: 5,
@@ -758,7 +758,7 @@ export default function EUDBCompliancePage() {
           <div style={{ flex: 1, minWidth: 200 }}>
             <p style={{ fontSize: 12, fontWeight: 600, color: DK.text, margin: 0 }}>Esporta per upload EUDB</p>
             <p style={{ fontSize: 11, color: DK.muted, margin: "2px 0 0" }}>
-              XML / JSON machine-readable — struttura Allegato VIII · Art. 49 [verify against current AI Act text]
+              XML / JSON machine-readable — struttura Allegato VIII · Art. 49
             </p>
           </div>
           <button
@@ -799,7 +799,7 @@ export default function EUDBCompliancePage() {
         </div>
 
         {/* Portal steps */}
-        <SectionCard title="Istruzioni — Portale EC" article="Art. 49 [verify against current AI Act text]">
+        <SectionCard title="Istruzioni — Portale EC" article="Art. 49">
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {PORTAL_STEPS.map(ps => (
               <div key={ps.n} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
@@ -817,7 +817,7 @@ export default function EUDBCompliancePage() {
                         style={{ color: DK.indigo, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 3 }}>
                         ec.europa.eu/transparency/ai-register <ExternalLink size={10} />
                       </a>
-                      <span style={{ fontSize: 9, color: DK.faint }}> [verify against current AI Act text]</span>
+                      <span style={{ fontSize: 9, color: DK.faint }}></span>
                     </>
                   )}
                 </p>
@@ -882,7 +882,7 @@ export default function EUDBCompliancePage() {
           </h1>
           <span style={{ fontSize: 9, fontFamily: "monospace", padding: "2px 7px", borderRadius: 10,
             background: DK.indigoBg, color: DK.indigo, border: `1px solid ${DK.indigoBdr}` }}>
-            Art. 49 [verify against current AI Act text]
+            Art. 49
           </span>
         </div>
         <p style={{ fontSize: 12, color: DK.muted, margin: 0 }}>
@@ -894,7 +894,7 @@ export default function EUDBCompliancePage() {
       <div style={{ ...cardDk, padding: "10px 14px", marginBottom: 16,
         background: DK.indigoBg, border: `1px solid ${DK.indigoBdr}` }}>
         <p style={{ fontSize: 11, color: DK.indigo, margin: 0 }}>
-          ✦ AI — verifica e conferma: mappatura campi Annex VIII, criteri Q1-Q4 e scadenza EUDB ricostruiti dalla memoria del modello. Validare contro testo consolidato Art. 49 e Annex VIII Reg. (UE) 2024/1689 prima della registrazione effettiva sul portale EC. [verify against current AI Act text]
+          ✦ AI — verifica e conferma: mappatura campi Annex VIII, criteri Q1-Q4 e scadenza EUDB ricostruiti dalla memoria del modello. Validare contro testo consolidato Art. 49 e Annex VIII Reg. (UE) 2024/1689 prima della registrazione effettiva sul portale EC.
         </p>
       </div>
 
