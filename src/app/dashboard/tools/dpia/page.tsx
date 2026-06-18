@@ -370,6 +370,11 @@ export default function DPIAPage() {
     }, 500);
   }, []);
 
+  // Cleanup timer on component unmount
+  useEffect(() => {
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, []);
+
   function upDoc(updater: (d: DPIADoc) => DPIADoc) {
     setDoc(prev => {
       const next = updater(prev);
