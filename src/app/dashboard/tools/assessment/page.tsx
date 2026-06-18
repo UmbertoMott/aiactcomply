@@ -74,7 +74,11 @@ export default function AssessmentPage() {
     const a = getAssessment();
     setShared(a.shared);
     if (a.shared.systemName) {
-      setIntake(p => ({ ...p, systemName: a.shared.systemName, processingPurpose: a.shared.purpose ?? "" }));
+      setIntake(p => ({
+        ...p,
+        systemName: p.systemName || a.shared.systemName,
+        processingPurpose: p.processingPurpose || a.shared.purpose ?? "",
+      }));
     }
   }, []);
 
@@ -99,7 +103,6 @@ export default function AssessmentPage() {
           color: isActive ? "#fff" : isPast ? T.green : T.muted,
           borderColor: isActive ? T.text : isPast ? T.greenBdr : T.border,
         };
-        void isFuture;
         return (
           <button key={key} style={style} onClick={() => setStage(key)}>
             {label}
