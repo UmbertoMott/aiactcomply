@@ -19,6 +19,8 @@ import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { getAssessment, patchFRIA, migrateLegacyFRIA, syncCorrelatedRisksFromFRIA } from "@/lib/assessment/assessment-helpers";
 import { CorrelatedRisksPanel } from "@/components/assessment/CorrelatedRisksPanel";
+import { AssessmentSharedHeader } from "@/components/assessment/AssessmentSharedHeader";
+import { AssessmentStepper } from "@/components/assessment/AssessmentStepper";
 import {
   type FRIADocument, type FRIAScenario, type FRIARightImpact,
   type FRIASeverityAssessment, type FRIAMitigationMeasure,
@@ -52,7 +54,7 @@ const inputSt: CSSProperties = {
 };
 
 // ─── Tiny helpers ─────────────────────────────────────────────────────────────
-type RiskColor = "red" | "amber" | "green" | "blue" | "gray";
+type RiskColor = "red" | "amber" | "green" | "gray";
 
 function riskColorFor(v: string): RiskColor {
   if (v === "high" || v === "critical") return "red";
@@ -66,7 +68,6 @@ function Badge({ label, color = "gray" }: { label: string; color?: RiskColor }) 
     red:   { bg: T.redBg,   bdr: T.redBdr,   text: T.red   },
     amber: { bg: T.amberBg, bdr: T.amberBdr, text: T.amber },
     green: { bg: T.greenBg, bdr: T.greenBdr, text: T.green },
-    blue:  { bg: "rgba(0,0,0,0.04)",  bdr: T.border,  text: T.text  },
     gray:  { bg: "rgba(0,0,0,0.04)", bdr: T.border, text: T.muted },
   };
   const c = map[color];
@@ -703,7 +704,7 @@ export default function FRIAPage() {
                             style={{ width: "100%", padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", background: openGrp ? T.bg : T.card, border: "none", cursor: "pointer" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                               <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{grp.label}</span>
-                              {selCount > 0 && <Badge label={`${selCount} sel.`} color="blue" />}
+                              {selCount > 0 && <Badge label={`${selCount} sel.`} color="gray" />}
                             </div>
                             {openGrp ? <ChevronDown style={{ width: 13, height: 13, color: T.muted }} /> : <ChevronRight style={{ width: 13, height: 13, color: T.muted }} />}
                           </button>
@@ -1174,6 +1175,8 @@ export default function FRIAPage() {
     <div className="w-full" style={{ display: "flex", flexDirection: "column", gap: 0, minHeight: 0, fontFamily: "var(--font-inter, system-ui)" }}>
 
       <SystemSelector checkProhibited={true} />
+      <AssessmentStepper currentTool="fria" />
+      <AssessmentSharedHeader />
 
       {/* ── AI Draft Generator Banner (Art. 27) ─────────────────────────────── */}
       <div style={{

@@ -21,6 +21,8 @@ import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { migrateLegacyFRIA, patchShared, syncCorrelatedRisksFromDPIA } from "@/lib/assessment/assessment-helpers";
 import { CorrelatedRisksPanel } from "@/components/assessment/CorrelatedRisksPanel";
+import { AssessmentSharedHeader } from "@/components/assessment/AssessmentSharedHeader";
+import { AssessmentStepper } from "@/components/assessment/AssessmentStepper";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -38,8 +40,6 @@ const T = {
   amberBg:  "rgba(202,138,4,0.07)",
   amberBdr: "rgba(202,138,4,0.22)",
   
-  blueBg:   "rgba(29,78,216,0.06)",
-  blueBdr:  "rgba(29,78,216,0.18)",
   green:    "#15803d",
   greenBg:  "rgba(21,128,61,0.06)",
   greenBdr: "rgba(21,128,61,0.18)",
@@ -1506,6 +1506,8 @@ export default function DPIAPage() {
   return (
     <div style={{ minHeight: "100vh", background: T.bg, padding: "24px 32px" }}>
       <SystemSelector checkProhibited={true} />
+      <AssessmentStepper currentTool="dpia" />
+      <AssessmentSharedHeader />
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
