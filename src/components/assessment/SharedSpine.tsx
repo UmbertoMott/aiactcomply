@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, CSSProperties } from "react";
+import React, { useState, useMemo, CSSProperties } from "react";
 import { readFromStorage, writeToStorage } from "@/lib/dossier/storage-schema";
 import type { DPIAResult } from "@/lib/dossier/storage-schema";
 import type { AssessmentShared } from "@/lib/assessment/assessment-schema";
@@ -97,7 +97,7 @@ export function SharedSpine({ shared, onSharedChange }: SharedSpineProps) {
   function addRisk() {
     if (!newRisk.description.trim()) return;
     const risk: SpineRisk = {
-      id: `SR-${Date.now()}`,
+      id: crypto.randomUUID(),
       description: newRisk.description.trim(),
       lens: newRisk.lens,
       severity: newRisk.severity,
@@ -110,10 +110,8 @@ export function SharedSpine({ shared, onSharedChange }: SharedSpineProps) {
     saveSpineRisks(spineRisks.filter(r => r.id !== id));
   }
 
-  const dpia = readFromStorage<DPIAResult>("dpia");
-  const assessment = readFromStorage<Assessment>("assessment");
-  const dpiaThreats = dpia?.risks?.threats ?? [];
-  const friaScenarios = assessment?.fria?.scenarios ?? [];
+  const dpiaThreats = useMemo(() => readFromStorage<DPIAResult>("dpia")?.risks?.threats ?? [], []);
+  const friaScenarios = useMemo(() => readFromStorage<Assessment>("assessment")?.fria?.scenarios ?? [], []);
 
   return (
     <div>
@@ -140,11 +138,11 @@ export function SharedSpine({ shared, onSharedChange }: SharedSpineProps) {
             />
           </div>
           <div>
-            <Lbl>Titolare del trattamento</Lbl>
+            <Lbl>Soggetti interessati</Lbl>
             <input
-              value={shared.purpose}
-              onChange={e => onSharedChange({ purpose: e.target.value })}
-              placeholder="Es. DPO / Responsabile Privacy"
+              value={shared.dataSubjects.join(", ")}
+              onChange={e => onSharedChange({ dataSubjects: e.target.value.split(",").map(s => s.trim()).filter(Boolean) })}
+              placeholder="Es. candidati, pazienti, utenti"
               style={inputSt}
             />
           </div>
