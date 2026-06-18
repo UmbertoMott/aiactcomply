@@ -244,10 +244,6 @@ function createEmptyDPIA(): DPIADoc {
   };
 }
 
-// ─── Storage key ──────────────────────────────────────────────────────────────
-
-const STORAGE_KEY = "aicomply_dpia_result";
-
 // ─── Step config ──────────────────────────────────────────────────────────────
 
 const STEPS = [
@@ -329,33 +325,48 @@ export default function DPIAPage() {
 
   // Load from storage on mount
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as Partial<DPIADoc>;
-        setDoc(d => ({
-          ...createEmptyDPIA(),
-          ...parsed,
-          screening: { ...createEmptyDPIA().screening, ...parsed.screening },
-          description: { ...createEmptyDPIA().description, ...parsed.description },
-          proportionality: { ...createEmptyDPIA().proportionality, ...parsed.proportionality },
-          risks: { ...createEmptyDPIA().risks, ...parsed.risks },
-          measures: { ...createEmptyDPIA().measures, ...parsed.measures },
-          conclusion: { ...createEmptyDPIA().conclusion, ...parsed.conclusion },
-        }));
-        setSaved(true);
+    if (typeof window !== "undefined") {
+      const legacyRaw = localStorage.getItem("aicomply_dpia_result");
+      if (legacyRaw) {
+        try {
+          const legacyParsed = JSON.parse(legacyRaw) as Partial<DPIADoc>;
+          const merged: DPIADoc = {
+            ...createEmptyDPIA(),
+            ...legacyParsed,
+            screening: { ...createEmptyDPIA().screening, ...legacyParsed.screening },
+            description: { ...createEmptyDPIA().description, ...legacyParsed.description },
+            proportionality: { ...createEmptyDPIA().proportionality, ...legacyParsed.proportionality },
+            risks: { ...createEmptyDPIA().risks, ...legacyParsed.risks },
+            measures: { ...createEmptyDPIA().measures, ...legacyParsed.measures },
+            conclusion: { ...createEmptyDPIA().conclusion, ...legacyParsed.conclusion },
+          };
+          writeToStorage("dpia", merged);
+          localStorage.removeItem("aicomply_dpia_result");
+        } catch { /* ignore */ }
       }
-    } catch { /* ignore */ }
+    }
+    const stored = readFromStorage<DPIADoc>("dpia");
+    if (stored) {
+      setDoc(d => ({
+        ...createEmptyDPIA(),
+        ...stored,
+        screening: { ...createEmptyDPIA().screening, ...stored.screening },
+        description: { ...createEmptyDPIA().description, ...stored.description },
+        proportionality: { ...createEmptyDPIA().proportionality, ...stored.proportionality },
+        risks: { ...createEmptyDPIA().risks, ...stored.risks },
+        measures: { ...createEmptyDPIA().measures, ...stored.measures },
+        conclusion: { ...createEmptyDPIA().conclusion, ...stored.conclusion },
+      }));
+      setSaved(true);
+    }
   }, []);
 
   // Debounced autosave
   const autosave = useCallback((nextDoc: DPIADoc) => {
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextDoc));
-        setSaved(true);
-      } catch { /* ignore */ }
+      writeToStorage("dpia", nextDoc);
+      setSaved(true);
     }, 500);
   }, []);
 
@@ -580,7 +591,6 @@ export default function DPIAPage() {
     const now = new Date().toISOString();
     const withDate = { ...doc, conclusion: { ...doc.conclusion, completedAt: now } };
     setDoc(withDate);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(withDate));
     writeToStorage("dpia", withDate);
     patchDPIA(() => withDate);
     syncCorrelatedRisksFromDPIA();
