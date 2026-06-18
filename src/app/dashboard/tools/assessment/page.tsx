@@ -77,7 +77,7 @@ export default function AssessmentPage() {
       setIntake(p => ({
         ...p,
         systemName: p.systemName || a.shared.systemName,
-        processingPurpose: p.processingPurpose || a.shared.purpose ?? "",
+        processingPurpose: p.processingPurpose || (a.shared.purpose ?? ""),
       }));
     }
   }, []);
