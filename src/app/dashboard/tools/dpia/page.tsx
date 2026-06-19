@@ -30,20 +30,19 @@ import { UnifiedIntake } from "@/components/assessment/UnifiedIntake";
 const T = {
   text:     "#0D1016",
   muted:    "rgba(0,0,0,0.42)",
-  faint:    "rgba(0,0,0,0.22)",
+  faint:    "rgba(0,0,0,0.28)",
   border:   "rgba(0,0,0,0.08)",
   card:     "#ffffff",
-  bg:       "#f9f9fb",
+  bg:       "#f8f8f7",
   red:      "#dc2626",
   redBg:    "rgba(220,38,38,0.06)",
   redBdr:   "rgba(220,38,38,0.18)",
-  amber:    "#92400e",
-  amberBg:  "rgba(202,138,4,0.07)",
-  amberBdr: "rgba(202,138,4,0.22)",
-  
-  green:    "#15803d",
-  greenBg:  "rgba(21,128,61,0.06)",
-  greenBdr: "rgba(21,128,61,0.18)",
+  amber:    "#d97706",
+  amberBg:  "rgba(202,138,4,0.06)",
+  amberBdr: "rgba(202,138,4,0.2)",
+  green:    "#16a34a",
+  greenBg:  "rgba(22,163,74,0.06)",
+  greenBdr: "rgba(22,163,74,0.2)",
 } as const;
 
 const cardSt: CSSProperties = {
@@ -859,11 +858,11 @@ export default function DPIAPage() {
           </div>
           {d.dpo_consulted === "no" && (
             <div style={{ marginTop: 8, padding: "10px 14px", borderRadius: 8,
-              background: "rgba(202,138,4,0.07)", border: "1px solid rgba(202,138,4,0.22)" }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: "#92400e", marginBottom: 3 }}>
+              background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: T.amber, marginBottom: 3 }}>
                 ⚠ DPO non consultato — verifica obbligatoria
               </div>
-              <div style={{ fontSize: 11, color: "#78350f", lineHeight: 1.5 }}>
+              <div style={{ fontSize: 11, color: T.muted, lineHeight: 1.5 }}>
                 L&apos;Art. 35(2) GDPR e il WP248 richiedono che il DPO, se nominato,
                 sia obbligatoriamente consultato nella redazione della DPIA.
                 La mancata consultazione è una non conformità formale.
@@ -1610,20 +1609,20 @@ export default function DPIAPage() {
             style={{
               padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: 600,
               background: aiPrefillDone
-                ? "rgba(21,128,61,0.08)"
+                ? T.greenBg
                 : (!intake.systemName.trim() || !intake.processingPurpose.trim())
                   ? "rgba(0,0,0,0.05)"
-                  : "rgba(245,158,11,0.1)",
+                  : T.amberBg,
               color: aiPrefillDone
-                ? "#15803d"
+                ? T.green
                 : (!intake.systemName.trim() || !intake.processingPurpose.trim())
                   ? "rgba(0,0,0,0.3)"
-                  : "#92400e",
+                  : T.amber,
               border: `1px solid ${aiPrefillDone
-                ? "rgba(21,128,61,0.2)"
+                ? T.greenBdr
                 : (!intake.systemName.trim() || !intake.processingPurpose.trim())
                   ? "rgba(0,0,0,0.1)"
-                  : "rgba(245,158,11,0.3)"}`,
+                  : T.amberBdr}`,
               cursor: (aiPrefillLoading || !intake.systemName.trim() || !intake.processingPurpose.trim()) ? "default" : "pointer",
               transition: "all 0.15s",
             }}
