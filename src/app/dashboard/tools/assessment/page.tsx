@@ -6,13 +6,17 @@ import { AssessmentSharedHeader } from "@/components/assessment/AssessmentShared
 import { UnifiedIntake } from "@/components/assessment/UnifiedIntake";
 import { SharedSpine } from "@/components/assessment/SharedSpine";
 import { CorrelatedRisksPanel } from "@/components/assessment/CorrelatedRisksPanel";
+import { DpiaBranch } from "@/components/assessment/DpiaBranch";
+import { FriaBranch } from "@/components/assessment/FriaBranch";
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import {
-  getAssessment, patchShared,
+  getAssessment, patchShared, patchDPIA, patchFRIA,
   syncCorrelatedRisksFromDPIA, syncCorrelatedRisksFromFRIA,
   migrateLegacyFRIA,
 } from "@/lib/assessment/assessment-helpers";
 import type { AssessmentShared } from "@/lib/assessment/assessment-schema";
+import type { DPIAResult } from "@/lib/dossier/storage-schema";
+import type { FRIADocument } from "@/lib/simulation/fria-engine";
 import type { IntakeContext } from "@/app/actions/parseIntakeContext";
 
 const T = {
@@ -62,6 +66,8 @@ function secondaryBtn(): CSSProperties {
 export default function AssessmentPage() {
   const [stage, setStage] = useState<AssessmentStage>("intake");
   const [shared, setShared] = useState<AssessmentShared>(() => getAssessment().shared);
+  const [dpia, setDpia] = useState<DPIAResult>(() => getAssessment().dpia);
+  const [fria, setFria] = useState<FRIADocument>(() => getAssessment().fria);
   const [intake, setIntake] = useState<IntakeContext>({
     systemName: "", systemScope: "other", processingPurpose: "",
     dataCategories: [], subjectScale: "large_scale_unknown",
@@ -73,6 +79,8 @@ export default function AssessmentPage() {
     migrateLegacyFRIA();
     const a = getAssessment();
     setShared(a.shared);
+    setDpia(a.dpia);
+    setFria(a.fria);
     if (a.shared.systemName) {
       setIntake(p => ({
         ...p,
@@ -86,6 +94,22 @@ export default function AssessmentPage() {
     const next = { ...shared, ...patch };
     setShared(next);
     patchShared(patch);
+  }
+
+  function handleDpiaChange(updater: (prev: DPIAResult) => DPIAResult) {
+    setDpia(prev => {
+      const next = updater(prev);
+      patchDPIA(() => next);
+      return next;
+    });
+  }
+
+  function handleFriaChange(updater: (prev: FRIADocument) => FRIADocument) {
+    setFria(prev => {
+      const next = updater(prev);
+      patchFRIA(() => next);
+      return next;
+    });
   }
 
   const currentIdx = stageIndex(stage);
@@ -152,20 +176,21 @@ export default function AssessmentPage() {
       case "branch":
         return (
           <div>
-            <div style={{ ...cardSt, padding: 32, textAlign: "center" }}>
-              <p style={{ fontSize: 14, fontWeight: 600, color: T.text }}>③ Rami di divergenza — in costruzione</p>
-              <p style={{ fontSize: 12, color: T.muted, marginTop: 8 }}>
-                DPIA (Art. 35 GDPR) e FRIA (Art. 27 AI Act) saranno disponibili nella prossima fase.
-              </p>
-              <p style={{ fontSize: 11, color: T.faint, marginTop: 6 }}>
-                Usa i tool separati{" "}
-                <a href="/dashboard/tools/dpia" style={{ color: T.text }}>DPIA</a>
-                {" "}e{" "}
-                <a href="/dashboard/tools/fria" style={{ color: T.text }}>FRIA</a>
-                {" "}nel frattempo.
-              </p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+              <div>
+                <p style={{ fontSize: 11, fontWeight: 700, color: T.text, marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  Atto 1 — DPIA Art.35 GDPR
+                </p>
+                <DpiaBranch dpia={dpia} onDpiaChange={handleDpiaChange} />
+              </div>
+              <div>
+                <p style={{ fontSize: 11, fontWeight: 700, color: T.text, marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  Atto 2 — FRIA Art.27 AI Act
+                </p>
+                <FriaBranch fria={fria} onFriaChange={handleFriaChange} />
+              </div>
             </div>
-            <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+            <div style={{ display: "flex", gap: 8, marginTop: 20 }}>
               <button onClick={() => setStage("spine")} style={secondaryBtn()}>← Indietro</button>
               <button onClick={() => setStage("draft")} style={primaryBtn()}>Avanti — Bozza AI →</button>
             </div>
