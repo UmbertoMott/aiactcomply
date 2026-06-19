@@ -13,6 +13,7 @@ import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import { RightsCatalog } from "@/components/fria/RightsCatalog";
 import { ContextCatalog } from "@/components/fria/ContextCatalog";
 import { NextStepGuide } from "@/components/fria/NextStepGuide";
+import { RightImpactAIDraft } from "@/components/fria/RightImpactAIDraft";
 import type { FRIAResult } from "@/lib/dossier/storage-schema";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { VersionHistoryPanel } from "@/components/compliance/VersionHistoryPanel";
@@ -730,6 +731,37 @@ export default function FRIAPage() {
                         onSelectRight={(rightId) => toggleRightImpact(activeScenario.id, rightId)}
                       />
                     )}
+                    {/* Prioritizzazione visibile */}
+                    {activeScenario.right_impacts.length > 1 && (() => {
+                      const sorted = [...activeScenario.right_impacts]
+                        .filter(ri => ri.likelihood.computed_priority)
+                        .sort((a, b) => {
+                          const rank: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
+                          return (rank[b.likelihood.computed_priority] ?? 0) - (rank[a.likelihood.computed_priority] ?? 0);
+                        });
+                      if (sorted.length === 0) return null;
+                      const sevColors: Record<string, string> = { critical: "#dc2626", high: "#d97706", medium: "#d97706", low: "#16a34a" };
+                      return (
+                        <div style={{ marginBottom: 16, padding: "10px 12px", background: T.bg, borderRadius: 8, border: `1px solid ${T.border}` }}>
+                          <p style={{ fontSize: 10, fontWeight: 700, color: T.text, textTransform: "uppercase" as const, letterSpacing: "0.5px", marginBottom: 8 }}>
+                            Prioritizzazione impatti — likelihood × severità
+                          </p>
+                          {sorted.map((ri, idx) => {
+                            const r = FUNDAMENTAL_RIGHTS.find(f => f.id === ri.right_id);
+                            const priority = ri.likelihood.computed_priority;
+                            return (
+                              <div key={ri.right_id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 0", borderBottom: idx < sorted.length - 1 ? `1px solid ${T.border}` : "none" }}>
+                                <span style={{ fontSize: 10, fontWeight: 700, color: T.faint, minWidth: 18 }}>#{idx + 1}</span>
+                                <span style={{ fontSize: 11, color: T.text, flex: 1 }}>{r?.name ?? ri.right_id}</span>
+                                <span style={{ fontSize: 10, fontWeight: 600, color: sevColors[priority] ?? T.muted, background: "rgba(0,0,0,0.04)", padding: "1px 6px", borderRadius: 9999 }}>
+                                  {priority?.toUpperCase()}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
                     {RIGHTS_GROUPS.map((grp) => {
                       const rights = FUNDAMENTAL_RIGHTS.filter((r) => grp.rightIds.includes(r.id));
                       const openGrp = openRightGroups.has(grp.id);
@@ -791,21 +823,61 @@ export default function FRIAPage() {
                                             </div>
                                           );
                                         })()}
+                                        <RightImpactAIDraft
+                                          systemName={doc.system_name || "Sistema AI"}
+                                          systemDescription={doc.context.technology_overview || ""}
+                                          riskLevel={""}
+                                          scenarioTitle={activeScenario.title}
+                                          scenarioDescription={activeScenario.description}
+                                          rightId={right.id}
+                                          rightName={right.name}
+                                          rightDescription={right.description}
+                                          triggerQuestions={right.triggerQuestions}
+                                          onApply={(sevPatch, likelihood, note) => {
+                                            upSeverity(activeScenario.id, right.id, sevPatch as Partial<FRIASeverityAssessment>);
+                                            upLikelihood(activeScenario.id, right.id, likelihood);
+                                            if (note) upRightImpact(activeScenario.id, right.id, { notes: note });
+                                          }}
+                                        />
                                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
                                           <Sel label="Entità interferenza" value={impact.severity.extent_of_interference}
-                                            options={[{ value: "core_violation", label: "Violazione del nucleo essenziale" }, { value: "significant", label: "Significativa" }, { value: "limited", label: "Limitata" }]}
+                                            options={[
+                                              { value: "very_serious", label: "Molto grave (nucleo del diritto)" },
+                                              { value: "serious", label: "Grave" },
+                                              { value: "moderate", label: "Moderata" },
+                                              { value: "minor", label: "Minore" },
+                                              { value: "none", label: "Nessuna" },
+                                            ]}
                                             onChange={(v) => upSeverity(activeScenario.id, right.id, { extent_of_interference: v as FRIASeverityAssessment["extent_of_interference"] })} />
-                                          <Sel label="Portata geografica" value={impact.severity.scope_of_impact}
-                                            options={[{ value: "multiple_countries", label: "Più paesi" }, { value: "one_country", label: "Un paese" }, { value: "region", label: "Regione/locale" }]}
+                                          <Sel label="Portata (scope)" value={impact.severity.scope_of_impact}
+                                            options={[
+                                              { value: "systemic", label: "Sistemico" },
+                                              { value: "large_group", label: "Gruppo esteso" },
+                                              { value: "group", label: "Gruppo" },
+                                              { value: "individual", label: "Individuale" },
+                                            ]}
                                             onChange={(v) => upSeverity(activeScenario.id, right.id, { scope_of_impact: v as FRIASeverityAssessment["scope_of_impact"] })} />
                                           <Sel label="Persone interessate" value={impact.severity.persons_affected}
-                                            options={[{ value: "most", label: "La maggior parte" }, { value: "some", label: "Alcune" }, { value: "few", label: "Poche" }]}
+                                            options={[
+                                              { value: "very_many", label: "Moltissime" },
+                                              { value: "many", label: "Molte" },
+                                              { value: "few", label: "Poche" },
+                                            ]}
                                             onChange={(v) => upSeverity(activeScenario.id, right.id, { persons_affected: v as FRIASeverityAssessment["persons_affected"] })} />
                                           <Sel label="Gravità" value={impact.severity.gravity}
-                                            options={[{ value: "high", label: "Alta" }, { value: "medium", label: "Media" }, { value: "low", label: "Bassa" }]}
+                                            options={[
+                                              { value: "critical", label: "Critica" },
+                                              { value: "high", label: "Alta" },
+                                              { value: "medium", label: "Media" },
+                                              { value: "low", label: "Bassa" },
+                                            ]}
                                             onChange={(v) => upSeverity(activeScenario.id, right.id, { gravity: v as FRIASeverityAssessment["gravity"] })} />
                                           <Sel label="Reversibilità" value={impact.severity.irreversibility}
-                                            options={[{ value: "none", label: "Irreversibile" }, { value: "complex", label: "Difficilmente reversibile" }, { value: "medium", label: "Parzialmente reversibile" }]}
+                                            options={[
+                                              { value: "irreversible", label: "Irreversibile" },
+                                              { value: "partially", label: "Parzialmente reversibile" },
+                                              { value: "reversible", label: "Reversibile" },
+                                            ]}
                                             onChange={(v) => upSeverity(activeScenario.id, right.id, { irreversibility: v as FRIASeverityAssessment["irreversibility"] })} />
                                           <div style={{ marginBottom: 12 }}>
                                             <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>Severità calcolata</label>
@@ -816,7 +888,12 @@ export default function FRIAPage() {
                                             </div>
                                           </div>
                                           <Sel label="Probabilità" value={impact.likelihood.likelihood}
-                                            options={[{ value: "high", label: "Alta" }, { value: "medium", label: "Media" }, { value: "low", label: "Bassa" }]}
+                                            options={[
+                                              { value: "almost_certain", label: "Quasi certa" },
+                                              { value: "likely", label: "Probabile" },
+                                              { value: "possible", label: "Possibile" },
+                                              { value: "negligible", label: "Trascurabile" },
+                                            ]}
                                             onChange={(v) => upLikelihood(activeScenario.id, right.id, v)} />
                                           <div style={{ marginBottom: 12 }}>
                                             <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>Priorità calcolata</label>
@@ -866,6 +943,38 @@ export default function FRIAPage() {
                                             </div>
                                           ))}
                                         </div>
+                                        {/* What-If residual panel */}
+                                        {impact.severity.computed_severity && (
+                                          <div style={{ marginTop: 8, padding: "8px 10px", background: T.bg, borderRadius: 6, border: `1px solid ${T.border}` }}>
+                                            <p style={{ fontSize: 10, fontWeight: 600, color: T.text, marginBottom: 4 }}>
+                                              What-If: impatto residuo stimato
+                                            </p>
+                                            {(() => {
+                                              const implemented = impact.mitigations.filter(m => m.status === "implemented" || m.status === "verified").length;
+                                              const sevOrder = ["critical","high","medium","low"] as const;
+                                              const currentIdx = sevOrder.indexOf(impact.severity.computed_severity as (typeof sevOrder)[number]);
+                                              const residualIdx = Math.min(sevOrder.length - 1, currentIdx + (implemented > 0 ? 1 : 0));
+                                              const residual = sevOrder[residualIdx] ?? impact.severity.computed_severity;
+                                              const improved = residualIdx > currentIdx;
+                                              const sevColors: Record<string, string> = { critical: "#dc2626", high: "#d97706", medium: "#d97706", low: "#16a34a" };
+                                              return (
+                                                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11 }}>
+                                                  <span style={{ color: sevColors[impact.severity.computed_severity] ?? T.muted, fontWeight: 600 }}>
+                                                    {impact.severity.computed_severity.toUpperCase()}
+                                                  </span>
+                                                  {improved && <>
+                                                    <span style={{ color: T.faint }}>→</span>
+                                                    <span style={{ color: sevColors[residual] ?? T.muted, fontWeight: 600 }}>{residual.toUpperCase()}</span>
+                                                    <span style={{ color: T.green, fontSize: 10 }}>({implemented} mitig. attive)</span>
+                                                  </>}
+                                                  {!improved && (
+                                                    <span style={{ color: T.faint, fontSize: 10 }}>Nessuna mitigazione attiva — severità invariata</span>
+                                                  )}
+                                                </div>
+                                              );
+                                            })()}
+                                          </div>
+                                        )}
                                       </div>
                                     )}
                                   </div>
