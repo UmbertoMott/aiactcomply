@@ -20,6 +20,7 @@ import type { FRIAResult } from "@/lib/dossier/storage-schema";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { VersionHistoryPanel } from "@/components/compliance/VersionHistoryPanel";
 import { draftFria } from "@/app/actions/draftFria";
+import { draftFriaPublicSummary } from "@/app/actions/draftFriaPublicSummary";
 import type { ClassifierResult, RiskManagerResult, DataAuditResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
@@ -125,6 +126,21 @@ function Inp({ label, value, onChange, ph }: {
   );
 }
 
+// ─── Hash utilities (staleness detection) ────────────────────────────────────
+function djb2(str: string): string {
+  let h = 5381;
+  for (let i = 0; i < str.length; i++) h = (((h << 5) + h) + str.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(16);
+}
+
+function computeFriaHash(doc: FRIADocument): string {
+  return djb2([
+    doc.system_name, doc.organization,
+    doc.context.technology_overview, doc.context.affected_persons,
+    doc.context.intended_purpose_explanation,
+  ].join("|"));
+}
+
 // ─── Phase nav config ─────────────────────────────────────────────────────────
 type Phase = "1" | "2" | "3" | "4" | "5";
 const PHASES: { id: Phase; label: string; sub: string; Icon: React.ComponentType<{ style?: CSSProperties }> }[] = [
@@ -178,7 +194,22 @@ export default function FRIAPage() {
     const friaDat = getAssessment().fria;
     setDoc(friaDat);
     syncFriaToShared(friaDat);
+    // Staleness check: compare current hash vs stored hash
+    const storedStaleness = readFromStorage<{ hash: string; savedAt: string }>("fria_staleness");
+    if (storedStaleness?.hash) {
+      const currentHash = computeFriaHash(friaDat);
+      if (currentHash !== storedStaleness.hash) setStalenessWarning(true);
+    }
   }, []);
+
+  // Save staleness hash when sign-off is completed
+  useEffect(() => {
+    if (doc.deployment.approved_at) {
+      const hash = computeFriaHash(doc);
+      writeToStorage("fria_staleness", { hash, savedAt: doc.deployment.approved_at });
+      setStalenessWarning(false);
+    }
+  }, [doc.deployment.approved_at]);
 
   // ── Auto-save ogni 30s ────────────────────────────────────────────────────
   const { justSaved: friaSaved } = useAutoSave(
@@ -191,6 +222,9 @@ export default function FRIAPage() {
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [draftGenerated, setDraftGenerated] = useState(false);
   const [draftError, setDraftError] = useState<string | null>(null);
+  const [loadingAiSummary, setLoadingAiSummary] = useState(false);
+  const [aiSummaryIsFromAI, setAiSummaryIsFromAI] = useState(false);
+  const [stalenessWarning, setStalenessWarning] = useState(false);
 
   // Leggi dati correlati per il banner contestuale
   const riskData   = useMemo(() => readFromStorage<RiskManagerResult>("riskManager"), []);
@@ -455,6 +489,16 @@ export default function FRIAPage() {
   function showToast(msg: string, type: "success" | "error" = "success") {
     setToast({ msg, type }); setTimeout(() => setToast(null), 3000);
   }
+
+  async function handleAiPublicSummary() {
+    setLoadingAiSummary(true);
+    const r = await draftFriaPublicSummary(doc);
+    setLoadingAiSummary(false);
+    if ("error" in r) { showToast(r.error, "error"); return; }
+    upDeploy({ public_summary: r.summary });
+    setAiSummaryIsFromAI(true);
+  }
+
   function saveToDossier() {
     const completedAt = new Date().toISOString();
     const overallRisk = getOverallFRIARisk(doc);
@@ -1126,16 +1170,51 @@ export default function FRIAPage() {
         {/* Public summary */}
         <div style={{ ...cardSt, padding: 20, marginBottom: 20 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>Sintesi pubblica obbligatoria (Art. 27)</h3>
-            <button onClick={() => { const s = generatePublicSummary(doc); upDeploy({ public_summary: s }); showToast("Sintesi pubblica generata"); }}
-              style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, background: T.text, color: "#fff", border: "none", borderRadius: 8, padding: "7px 14px", cursor: "pointer" }}>
-              <FileText style={{ width: 13, height: 13 }} /> Genera sintesi
-            </button>
+            <div>
+              <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 2px" }}>Sintesi pubblica obbligatoria (Art. 27)</h3>
+              {aiSummaryIsFromAI && (
+                <span style={{ fontSize: 10, fontWeight: 700, color: T.amber, background: T.amberBg, padding: "1px 7px", borderRadius: 9999 }}>
+                  ✦ AI — verifica e conferma
+                </span>
+              )}
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                onClick={() => { const s = generatePublicSummary(doc); upDeploy({ public_summary: s }); setAiSummaryIsFromAI(false); showToast("Sintesi generata"); }}
+                style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, background: T.bg, color: T.text, border: `1px solid ${T.border}`, borderRadius: 8, padding: "7px 14px", cursor: "pointer" }}
+              >
+                <FileText style={{ width: 13, height: 13 }} /> Genera sintesi
+              </button>
+              <button
+                onClick={handleAiPublicSummary}
+                disabled={loadingAiSummary}
+                style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, background: loadingAiSummary ? T.bg : T.text, color: loadingAiSummary ? T.muted : "#fff", border: "none", borderRadius: 8, padding: "7px 14px", cursor: loadingAiSummary ? "default" : "pointer" }}
+              >
+                {loadingAiSummary ? "⟳ Generazione AI…" : "✦ Bozza AI"}
+              </button>
+            </div>
           </div>
           <textarea value={d.public_summary} onChange={(e) => upDeploy({ public_summary: e.target.value })} rows={14}
             placeholder="Clicca 'Genera sintesi' per creare automaticamente il testo basato sui dati inseriti…"
             style={{ ...inputSt, resize: "vertical", fontFamily: "monospace", fontSize: 11, lineHeight: 1.6 }} />
         </div>
+
+        {/* Art. 27(2) — Notifica autorità di vigilanza */}
+        {(d.recommendation === "deploy_with_conditions" || d.recommendation === "do_not_deploy") && (
+          <div style={{ marginBottom: 16, padding: "12px 16px", borderRadius: 8, background: T.amberBg, border: `1px solid ${T.amberBdr}`, display: "flex", gap: 10, alignItems: "flex-start" }}>
+            <span style={{ fontSize: 16, flexShrink: 0 }}>⚠</span>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: T.amber, marginBottom: 4 }}>
+                Promemoria Art. 27(2) — Notifica all&apos;autorità di vigilanza
+              </div>
+              <div style={{ fontSize: 12, color: T.text, lineHeight: 1.5 }}>
+                La raccomandazione non è &quot;deploy&quot; incondizionato. Ai sensi dell&apos;Art. 27(2) AI Act, il deployer
+                ha l&apos;obbligo di notificare l&apos;autorità nazionale di vigilanza del mercato e documentare la notifica
+                nella FRIA. [verifica contro il testo vigente dell&apos;AI Act]
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Rischi correlati DPIA ⇄ FRIA */}
         <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)", padding: 20, marginBottom: 16 }}>
@@ -1163,6 +1242,33 @@ export default function FRIAPage() {
           <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 4 — Piano di monitoraggio</h2>
           <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Definisci cosa monitorare, i trigger per l&apos;aggiornamento e mantieni lo storico delle revisioni.</p>
         </div>
+
+        {/* Staleness warning */}
+        {stalenessWarning && (
+          <div style={{ marginBottom: 16, padding: "12px 16px", borderRadius: 8, background: T.amberBg, border: `1px solid ${T.amberBdr}`, display: "flex", alignItems: "flex-start", gap: 10 }}>
+            <span style={{ fontSize: 16, flexShrink: 0 }}>⚠</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: T.amber, marginBottom: 4 }}>
+                FRIA da rivedere — le circostanze iniziali sono cambiate
+              </div>
+              <div style={{ fontSize: 12, color: T.text, lineHeight: 1.5, marginBottom: 8 }}>
+                I dati di input (sistema, contesto, persone interessate) sono cambiati rispetto all&apos;ultima firma.
+                Verifica che la valutazione degli impatti e le misure di mitigazione siano ancora valide. [verifica contro il testo vigente dell&apos;AI Act]
+              </div>
+              <button
+                onClick={() => {
+                  const hash = computeFriaHash(doc);
+                  writeToStorage("fria_staleness", { hash, savedAt: new Date().toISOString() });
+                  setStalenessWarning(false);
+                  showToast("Baseline aggiornata");
+                }}
+                style={{ fontSize: 11, fontWeight: 600, padding: "4px 12px", borderRadius: 6, border: "none", background: T.text, color: "#fff", cursor: "pointer" }}
+              >
+                Segna come rivisto — salva nuova baseline
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Monitoring items */}
         <div style={{ ...cardSt, padding: 20, marginBottom: 16 }}>
@@ -1244,6 +1350,48 @@ export default function FRIAPage() {
           <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 5 — Stakeholder e coinvolgimento</h2>
           <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Mappa i portatori di interesse e documenta il processo di consultazione.</p>
         </div>
+
+        {/* Impatti ad alto rischio che richiedono validazione stakeholder */}
+        {(() => {
+          const highImpacts = doc.scenarios.flatMap(s =>
+            s.right_impacts
+              .filter(ri => ri.severity?.computed_severity === "high" || ri.severity?.computed_severity === "critical")
+              .map(ri => ({ scenarioTitle: s.title, rightId: ri.right_id, severity: ri.severity.computed_severity }))
+          );
+          if (highImpacts.length === 0) return null;
+          const hasEngagement = doc.engagement_log.some(e => e.findings?.trim());
+          return (
+            <div style={{ marginBottom: 16, padding: "14px 16px", borderRadius: 10, background: T.card, border: `1px solid ${T.border}`, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Impatti ad alto rischio — validazione stakeholder</span>
+                {hasEngagement
+                  ? <span style={{ fontSize: 10, fontWeight: 700, color: T.green, background: T.greenBg, padding: "2px 8px", borderRadius: 9999 }}>✓ Engagement documentato</span>
+                  : <span style={{ fontSize: 10, fontWeight: 700, color: T.amber, background: T.amberBg, padding: "2px 8px", borderRadius: 9999 }}>Consultazione raccomandata</span>
+                }
+              </div>
+              <p style={{ fontSize: 12, color: T.muted, margin: "0 0 10px", lineHeight: 1.4 }}>
+                {highImpacts.length} impatto/i ad alta severità identificati nella Fase 2. Documenta le consultazioni nel log qui sotto per validare queste valutazioni. [verifica contro il testo vigente dell&apos;AI Act]
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {highImpacts.slice(0, 5).map((imp, i) => {
+                  const rightName = FUNDAMENTAL_RIGHTS.find(r => r.id === imp.rightId)?.name ?? imp.rightId;
+                  return (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderRadius: 6, background: imp.severity === "critical" ? T.redBg : T.amberBg, border: `1px solid ${imp.severity === "critical" ? T.redBdr : T.amberBdr}` }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: imp.severity === "critical" ? T.red : T.amber, minWidth: 60 }}>
+                        {imp.severity === "critical" ? "CRITICO" : "ALTO"}
+                      </span>
+                      <span style={{ fontSize: 12, color: T.text }}>{rightName}</span>
+                      <span style={{ fontSize: 11, color: T.muted }}>— {imp.scenarioTitle || "Scenario"}</span>
+                    </div>
+                  );
+                })}
+                {highImpacts.length > 5 && (
+                  <p style={{ fontSize: 11, color: T.faint, margin: 0 }}>+ altri {highImpacts.length - 5} impatti</p>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Stakeholders */}
         <div style={{ ...cardSt, padding: 20, marginBottom: 16 }}>
