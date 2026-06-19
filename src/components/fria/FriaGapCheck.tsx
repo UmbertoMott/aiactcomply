@@ -15,9 +15,10 @@ const T = {
 interface FriaGapCheckProps {
   doc: FRIADocument;
   onNavigateToPhase: (phase: string) => void;
+  onResult?: (result: FriaGapCheck) => void;
 }
 
-export function FriaGapCheck({ doc, onNavigateToPhase }: FriaGapCheckProps) {
+export function FriaGapCheck({ doc, onNavigateToPhase, onResult }: FriaGapCheckProps) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<FriaGapCheck | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +29,7 @@ export function FriaGapCheck({ doc, onNavigateToPhase }: FriaGapCheckProps) {
     setLoading(false);
     if ("error" in r) { setError(r.error); return; }
     setResult(r);
+    onResult?.(r);
   }
 
   const statusIcon = (s: FriaGapItem["status"]) =>

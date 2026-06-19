@@ -15,6 +15,7 @@ import { ContextCatalog } from "@/components/fria/ContextCatalog";
 import { NextStepGuide } from "@/components/fria/NextStepGuide";
 import { RightImpactAIDraft } from "@/components/fria/RightImpactAIDraft";
 import { FriaGapCheck } from "@/components/fria/FriaGapCheck";
+import type { FriaGapCheck as FriaGapCheckResult } from "@/app/actions/checkFriaGaps";
 import type { FRIAResult } from "@/lib/dossier/storage-schema";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { VersionHistoryPanel } from "@/components/compliance/VersionHistoryPanel";
@@ -148,6 +149,7 @@ const DEFAULT_TRIGGERS = [
 export default function FRIAPage() {
   const [doc, setDoc] = useState<FRIADocument>(() => createEmptyFRIA());
   const [phase, setPhase] = useState<Phase>("1");
+  const [gapCheckResult, setGapCheckResult] = useState<FriaGapCheckResult | null>(null);
   const [openAcc, setOpenAcc] = useState<Set<"A" | "B" | "C">>(new Set(["A"]));
   const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
   const [p2Tab, setP2Tab] = useState<"rights" | "matrix">("rights");
@@ -1050,6 +1052,7 @@ export default function FRIAPage() {
         <FriaGapCheck
           doc={doc}
           onNavigateToPhase={(p) => setPhase(p as Phase)}
+          onResult={setGapCheckResult}
         />
         {/* Absolute rights alert — ECNL/DIHR: cannot be balanced by proportionality */}
         {(() => {
@@ -1469,7 +1472,7 @@ export default function FRIAPage() {
         {phase === "3" && renderPhase3()}
         {phase === "4" && renderPhase4()}
         {phase === "5" && renderPhase5()}
-        <NextStepGuide fria={doc} />
+        <NextStepGuide fria={doc} gapCheck={gapCheckResult} onNavigateToPhase={(p) => setPhase(p as Phase)} />
       </div>
 
       {/* Toast */}
