@@ -79,6 +79,16 @@ function ResidualRiskBadge({ risk }: { risk: string }) {
   return <ImpactBadge level={risk} />;
 }
 
+function BulletList({ items }: { items: string[] }) {
+  return (
+    <ul style={{ margin: 0, padding: "0 0 0 16px", listStyle: "disc" }}>
+      {items.map((item, i) => (
+        <li key={i} style={{ fontSize: 11, color: T.text, marginBottom: 3 }}>{item}</li>
+      ))}
+    </ul>
+  );
+}
+
 // ── Local style helpers ───────────────────────────────────────────────────────
 
 const cardSt: CSSProperties = {
@@ -316,16 +326,27 @@ export function UnifiedDraftPanel({
     }));
   }
 
-  // ── Bullet list renderer ─────────────────────────────────────────────────────
+  function applyDpiaConsultation(draft: DpiaDraft) {
+    onDpiaChange(prev => ({
+      ...prev,
+      measures: {
+        ...prev.measures,
+        prior_consultation_required: draft.priorConsultationRequired,
+      },
+    }));
+  }
 
-  function BulletList({ items }: { items: string[] }) {
-    return (
-      <ul style={{ margin: 0, padding: "0 0 0 16px", listStyle: "disc" }}>
-        {items.map((item, i) => (
-          <li key={i} style={{ fontSize: 11, color: T.text, marginBottom: 3 }}>{item}</li>
-        ))}
-      </ul>
-    );
+  function applyFriaRights(draft: FriaDraft) {
+    const text = draft.phase2_rights
+      .map(r => `${r.right} [${r.impactLevel}]: ${r.rationale}`)
+      .join("\n");
+    onFriaChange(prev => ({
+      ...prev,
+      deployment: {
+        ...prev.deployment,
+        qualified_rights_necessity_proportionality: text,
+      },
+    }));
   }
 
   // ── Render ────────────────────────────────────────────────────────────────────
@@ -458,7 +479,7 @@ export function UnifiedDraftPanel({
                   title="Consultazione preventiva Art.36"
                   confirmed={isConfirmed("dpia-consult")}
                   ignored={isIgnored("dpia-consult")}
-                  onConfirm={() => { applyDpiaMeasures(dpiaDraft); confirm("dpia-consult"); }}
+                  onConfirm={() => { applyDpiaConsultation(dpiaDraft); confirm("dpia-consult"); }}
                   onIgnore={() => ignore("dpia-consult")}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
@@ -509,7 +530,7 @@ export function UnifiedDraftPanel({
                   title="Impatto diritti fondamentali"
                   confirmed={isConfirmed("fria-rights")}
                   ignored={isIgnored("fria-rights")}
-                  onConfirm={() => confirm("fria-rights")}
+                  onConfirm={() => { applyFriaRights(friaDraft); confirm("fria-rights"); }}
                   onIgnore={() => ignore("fria-rights")}
                 >
                   <ul style={{ margin: 0, padding: "0 0 0 16px", listStyle: "disc" }}>
