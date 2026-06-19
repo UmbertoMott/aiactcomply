@@ -14,6 +14,7 @@ import { RightsCatalog } from "@/components/fria/RightsCatalog";
 import { ContextCatalog } from "@/components/fria/ContextCatalog";
 import { NextStepGuide } from "@/components/fria/NextStepGuide";
 import { RightImpactAIDraft } from "@/components/fria/RightImpactAIDraft";
+import { FriaGapCheck } from "@/components/fria/FriaGapCheck";
 import type { FRIAResult } from "@/lib/dossier/storage-schema";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { VersionHistoryPanel } from "@/components/compliance/VersionHistoryPanel";
@@ -1046,6 +1047,10 @@ export default function FRIAPage() {
           <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 3 — Decisione di deployment</h2>
           <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Valuta gli impatti residui, determina la raccomandazione e genera la sintesi pubblica.</p>
         </div>
+        <FriaGapCheck
+          doc={doc}
+          onNavigateToPhase={(p) => setPhase(p as Phase)}
+        />
         {/* Absolute rights alert — ECNL/DIHR: cannot be balanced by proportionality */}
         {(() => {
           const absoluteImpacted = doc.scenarios.flatMap((s) => s.right_impacts).filter((ri) => {
