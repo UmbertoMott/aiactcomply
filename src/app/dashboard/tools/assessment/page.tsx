@@ -18,14 +18,7 @@ import type { AssessmentShared } from "@/lib/assessment/assessment-schema";
 import type { DPIAResult } from "@/lib/dossier/storage-schema";
 import type { FRIADocument } from "@/lib/simulation/fria-engine";
 import type { IntakeContext } from "@/app/actions/parseIntakeContext";
-
-const T = {
-  text: "#0D1016", muted: "rgba(0,0,0,0.42)", faint: "rgba(0,0,0,0.28)",
-  border: "rgba(0,0,0,0.08)", card: "#ffffff", bg: "#f8f8f7",
-  red: "#dc2626", redBg: "rgba(220,38,38,0.06)", redBdr: "rgba(220,38,38,0.2)",
-  amber: "#d97706", amberBg: "rgba(202,138,4,0.06)", amberBdr: "rgba(202,138,4,0.2)",
-  green: "#16a34a", greenBg: "rgba(22,163,74,0.06)", greenBdr: "rgba(22,163,74,0.2)",
-} as const;
+import { T } from "@/components/assessment/tokens";
 
 const cardSt: CSSProperties = {
   background: T.card, border: `1px solid ${T.border}`,
@@ -119,7 +112,6 @@ export default function AssessmentPage() {
       {STAGES.map(({ key, label, idx }) => {
         const isActive = key === stage;
         const isPast = idx < currentIdx;
-        const isFuture = idx > currentIdx;
         const style: CSSProperties = {
           padding: "6px 14px", borderRadius: 20, fontSize: 11, fontWeight: 600,
           cursor: "pointer", border: "1px solid",
