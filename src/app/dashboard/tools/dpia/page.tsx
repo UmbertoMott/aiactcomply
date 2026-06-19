@@ -24,6 +24,9 @@ import { CorrelatedRisksPanel } from "@/components/assessment/CorrelatedRisksPan
 import { AssessmentSharedHeader } from "@/components/assessment/AssessmentSharedHeader";
 import { AssessmentStepper } from "@/components/assessment/AssessmentStepper";
 import { UnifiedIntake } from "@/components/assessment/UnifiedIntake";
+import { ScreeningCatalog } from "@/components/dpia/ScreeningCatalog";
+import { ThreatCatalog } from "@/components/dpia/ThreatCatalog";
+import { NextStepGuide } from "@/components/dpia/NextStepGuide";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -317,6 +320,9 @@ export default function DPIAPage() {
   const [priorConsultAILoading, setPriorConsultAILoading] = useState(false);
   const [priorConsultAIResult, setPriorConsultAIResult] = useState<PriorConsultationResult | null>(null);
   const [priorConsultAIError, setPriorConsultAIError] = useState<string | null>(null);
+  // Catalog toggles
+  const [showScreeningCatalog, setShowScreeningCatalog] = useState(false);
+  const [showThreatCatalog, setShowThreatCatalog] = useState(false);
 
   // Load from storage on mount
   useEffect(() => {
@@ -566,6 +572,14 @@ export default function DPIAPage() {
     });
   }
 
+  function addThreatFromCatalog(threat: Omit<DPIAThreat, "id">) {
+    const newThreat: DPIAThreat = { id: crypto.randomUUID(), ...threat };
+    upDoc(d => {
+      const threats = [...d.risks.threats, newThreat];
+      return { ...d, risks: { threats, overall_risk_before: computeWorstRisk(threats) } };
+    });
+  }
+
   // ── Measures helpers ───────────────────────────────────────────────────────
 
   function upMeasures(patch: Partial<DPIADoc["measures"]>) {
@@ -769,6 +783,30 @@ export default function DPIAPage() {
             <p style={{ fontSize: 11, color: T.muted }}>criteri soddisfatti</p>
           </div>
         </div>
+
+        {/* Catalog toggle */}
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <button
+            onClick={() => setShowScreeningCatalog(v => !v)}
+            style={{
+              padding: "6px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500,
+              cursor: "pointer", border: `1px solid ${T.border}`,
+              background: showScreeningCatalog ? T.text : T.card,
+              color: showScreeningCatalog ? "#fff" : T.muted,
+              transition: "all 0.15s",
+            }}
+          >
+            {showScreeningCatalog ? "Chiudi catalogo" : "Catalogo criteri WP248"}
+          </button>
+        </div>
+
+        {/* Screening catalog */}
+        {showScreeningCatalog && (
+          <ScreeningCatalog
+            criteria={doc.screening.criteria}
+            onToggle={(id, applies) => upCriterion(id, { applies })}
+          />
+        )}
 
         {/* Criteria list */}
         {criteria.map((c, idx) => (
@@ -1120,6 +1158,30 @@ export default function DPIAPage() {
             </p>
           </div>
         </div>
+
+        {/* Threat catalog toggle */}
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <button
+            onClick={() => setShowThreatCatalog(v => !v)}
+            style={{
+              padding: "6px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500,
+              cursor: "pointer", border: `1px solid ${T.border}`,
+              background: showThreatCatalog ? T.text : T.card,
+              color: showThreatCatalog ? "#fff" : T.muted,
+              transition: "all 0.15s",
+            }}
+          >
+            {showThreatCatalog ? "Chiudi catalogo" : "Seleziona da catalogo minacce"}
+          </button>
+        </div>
+
+        {/* Threat catalog */}
+        {showThreatCatalog && (
+          <ThreatCatalog
+            existingThreatIds={doc.risks.threats.map(t => t.id)}
+            onAddThreat={addThreatFromCatalog}
+          />
+        )}
 
         {/* Threats by category */}
         {categories.map(cat => {
@@ -1724,6 +1786,8 @@ export default function DPIAPage() {
             </button>
           )}
         </div>
+
+        <NextStepGuide dpia={doc} onNavigateToStep={(s) => setStep(s as Step)} />
       </div>
     </div>
   );
