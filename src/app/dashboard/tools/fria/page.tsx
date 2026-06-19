@@ -195,7 +195,7 @@ export default function FRIAPage() {
     setDoc(friaDat);
     syncFriaToShared(friaDat);
     // Staleness check: compare current hash vs stored hash
-    const storedStaleness = readFromStorage<{ hash: string; savedAt: string }>("fria_staleness");
+    const storedStaleness = readFromStorage<{ hash: string; savedAt: string }>("friaStaleness");
     if (storedStaleness?.hash) {
       const currentHash = computeFriaHash(friaDat);
       if (currentHash !== storedStaleness.hash) setStalenessWarning(true);
@@ -206,7 +206,7 @@ export default function FRIAPage() {
   useEffect(() => {
     if (doc.deployment.approved_at) {
       const hash = computeFriaHash(doc);
-      writeToStorage("fria_staleness", { hash, savedAt: doc.deployment.approved_at });
+      writeToStorage("friaStaleness", { hash, savedAt: doc.deployment.approved_at });
       setStalenessWarning(false);
     }
   }, [doc.deployment.approved_at]);
@@ -1258,7 +1258,7 @@ export default function FRIAPage() {
               <button
                 onClick={() => {
                   const hash = computeFriaHash(doc);
-                  writeToStorage("fria_staleness", { hash, savedAt: new Date().toISOString() });
+                  writeToStorage("friaStaleness", { hash, savedAt: new Date().toISOString() });
                   setStalenessWarning(false);
                   showToast("Baseline aggiornata");
                 }}

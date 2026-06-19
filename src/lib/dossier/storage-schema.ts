@@ -425,6 +425,7 @@ export const STORAGE_KEYS = {
   spineRisks: "aicomply_spine_risks",
   dpiaSignoff: "aicomply_dpia_signoff",
   friaSignoff: "aicomply_fria_signoff",
+  friaStaleness: "aicomply_fria_staleness",
 } as const;
 
 // ── Project-scoped storage key ───────────────────────────────────────────────
