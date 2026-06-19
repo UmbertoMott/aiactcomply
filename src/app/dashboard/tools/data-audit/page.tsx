@@ -597,7 +597,7 @@ export default function DataAuditPage() {
       <div className="rounded-xl p-4 mb-5" style={{ ...card }}>
         <div className="flex items-center gap-2 mb-2">
           <Info size={14} style={{ color: T.blue }} />
-          <span className="text-[12px] font-semibold" style={{ color: T.text }}>Approccio di sviluppo — Art. 10(6) [verify against current AI Act text]</span>
+          <span className="text-[12px] font-semibold" style={{ color: T.text }}>Approccio di sviluppo — Art. 10(6)</span>
         </div>
         <p className="text-[11px] mb-3" style={{ color: T.muted }}>
           Il sistema è stato sviluppato tramite addestramento di modelli (es. machine learning), o tramite altre tecniche (es. sistemi a regole)?
@@ -688,7 +688,7 @@ export default function DataAuditPage() {
       {/* ── 10 Governance practice cards ── */}
       <section className="mb-6">
         <h2 className="text-[13px] font-semibold mb-3" style={{ color: T.text }}>
-          Pratiche di governance — Art. 10(2)-(4) [verify against current AI Act text]
+          Pratiche di governance — Art. 10(2)-(4)
         </h2>
         <div className="space-y-2">
           {DATA_GOVERNANCE_PRACTICES.map(def => (
@@ -740,7 +740,7 @@ export default function DataAuditPage() {
             {/* Legal basis */}
             <div className="mb-3">
               <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>
-                Base giuridica e garanzie adottate — Art. 10(5) [verify against current AI Act text]
+                Base giuridica e garanzie adottate — Art. 10(5)
               </label>
               <textarea rows={3} value={record.specialCategories.legalBasisDocumentation ?? ""}
                 onChange={e => patchRecord({ specialCategories: { ...record.specialCategories, legalBasisDocumentation: e.target.value } })}
@@ -780,8 +780,7 @@ export default function DataAuditPage() {
       <div className="flex items-start gap-2 p-3 rounded-lg mb-4 text-xs" style={{ background: "#fef9c3", border: "1px solid #fde047", color: "#713f12" }}>
         <Info size={14} className="mt-0.5 flex-shrink-0" />
         <span>
-          <strong>Sanzioni Art. 99–101:</strong> Mancata conformità ai requisiti Art. 10 sui dati può comportare sanzioni fino a 15 milioni € o 3% del fatturato mondiale.{" "}
-          <span style={{ opacity: 0.75 }}>[verify against current AI Act text]</span>
+          <strong>Sanzioni Art. 99–101:</strong> Mancata conformità ai requisiti Art. 10 sui dati può comportare sanzioni fino a 15 milioni € o 3% del fatturato mondiale.
         </span>
       </div>
 

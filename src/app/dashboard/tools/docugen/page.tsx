@@ -638,24 +638,23 @@ export default function DocuGenPage() {
                 ? "Nota di Conformità"
                 : "Fascicolo Tecnico"}
           </h1>
-          {classifierTier && (
+          {classifierTier && classifierTier !== "unacceptable" && (
             <div className="flex items-center gap-2 mt-2 mb-1">
               <span style={{
                 fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 5,
-                background: classifierTier === "high" || classifierTier === "unacceptable"
+                background: classifierTier === "high"
                   ? "rgba(220,38,38,0.08)" : classifierTier === "limited"
                     ? "rgba(202,138,4,0.08)" : "rgba(22,163,74,0.08)",
-                color: classifierTier === "high" || classifierTier === "unacceptable"
+                color: classifierTier === "high"
                   ? "#dc2626" : classifierTier === "limited"
                     ? "#92400e" : "#15803d",
-                border: `1px solid ${classifierTier === "high" || classifierTier === "unacceptable"
+                border: `1px solid ${classifierTier === "high"
                   ? "rgba(220,38,38,0.2)" : classifierTier === "limited"
                     ? "rgba(202,138,4,0.22)" : "rgba(22,163,74,0.18)"}`,
                 textTransform: "uppercase" as const,
                 letterSpacing: "0.05em",
               }}>
                 {classifierTier === "high" ? "⬛ HIGH RISK — Allegato IV obbligatorio"
-                  : classifierTier === "unacceptable" ? "⬛ RISCHIO INACCETTABILE"
                   : classifierTier === "limited" ? "◻ LIMITED RISK — Art. 50 Transparency Doc"
                   : "◻ MINIMAL RISK — Codice condotta volontario"}
               </span>

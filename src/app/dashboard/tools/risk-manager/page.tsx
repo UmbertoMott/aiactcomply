@@ -12,7 +12,6 @@ import {
 import { riskManagerChat, type ChatMessage, type RiskDocumentation, type RiskPhaseId } from "@/app/actions/riskManagerChat";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { RiskManagerResult, ClassifierResult } from "@/lib/dossier/storage-schema";
-import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { RiskRegisterViewer } from "./components/RiskRegisterViewer";
 import { buildRiskRegisterDocument, buildAnnexSections, shouldShowGpaiModule, type AnnexSection } from "@/lib/risk/risk-register-mapper";
@@ -743,7 +742,6 @@ export default function RiskManagerPage() {
 
       {/* Header */}
       <div style={{ paddingBottom: 16 }}>
-        <AIOutputLabel documentType="Risk Manager · Art. 9 AI Act" />
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginTop: 12 }}>
           <div>
             <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.3)", letterSpacing: "1.2px", textTransform: "uppercase", marginBottom: 4 }}>
