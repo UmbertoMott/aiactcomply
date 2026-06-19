@@ -19,6 +19,7 @@ import type { DPIAResult } from "@/lib/dossier/storage-schema";
 import type { FRIADocument } from "@/lib/simulation/fria-engine";
 import type { IntakeContext } from "@/app/actions/parseIntakeContext";
 import { T } from "@/components/assessment/tokens";
+import { UnifiedDraftPanel } from "@/components/assessment/UnifiedDraftPanel";
 
 const cardSt: CSSProperties = {
   background: T.card, border: `1px solid ${T.border}`,
@@ -192,12 +193,14 @@ export default function AssessmentPage() {
       case "draft":
         return (
           <div>
-            <div style={{ ...cardSt, padding: 32, textAlign: "center" }}>
-              <p style={{ fontSize: 14, fontWeight: 600, color: T.text }}>④ Bozza AI + Validazione — in costruzione</p>
-              <p style={{ fontSize: 12, color: T.muted, marginTop: 8 }}>
-                La generazione AI parallela di DPIA e FRIA sarà disponibile nella prossima fase.
-              </p>
-            </div>
+            <UnifiedDraftPanel
+              shared={shared}
+              intake={intake}
+              dpia={dpia}
+              fria={fria}
+              onDpiaChange={handleDpiaChange}
+              onFriaChange={handleFriaChange}
+            />
             <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
               <button onClick={() => setStage("branch")} style={secondaryBtn()}>← Indietro</button>
               <button onClick={() => setStage("export")} style={primaryBtn()}>Avanti — Export →</button>
