@@ -224,10 +224,7 @@ export default function FRIAPage() {
   }
 
   // Pre-populate from Classifier
-  const classifierData = useMemo(() => {
-    try { const r = localStorage.getItem("aicomply_classifier_result"); return r ? JSON.parse(r) : null; }
-    catch { return null; }
-  }, []);
+  const classifierData = useMemo(() => readFromStorage<ClassifierResult>("classifier"), []);
   useEffect(() => {
     if (classifierData?.systemName && !doc.system_name) {
       upDoc({ system_name: classifierData.systemName });
