@@ -666,7 +666,7 @@ function TriageReportView({ report }: { report: TriageReport }) {
       <div className="flex gap-2 pt-1">
         <Link
           href="/dashboard/journey"
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#0D1016] hover:bg-[#2a2b31] text-white text-sm font-medium transition-colors"
         >
           Vai alla Roadmap
           <ArrowRight className="w-4 h-4" />
@@ -941,7 +941,7 @@ export default function TriagePage() {
               {role && sector && (
                 <button
                   onClick={() => goToArea("system")}
-                  className="w-full px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                  className="w-full px-4 py-3 rounded-xl bg-[#0D1016] hover:bg-[#2a2b31] text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
                 >
                   Continua <ChevronRight className="w-4 h-4" />
                 </button>
@@ -1013,7 +1013,7 @@ export default function TriagePage() {
               {outputType && isGPAI !== null && (
                 <button
                   onClick={() => goToArea(skipPeopleArea ? "deployment" : "people")}
-                  className="w-full px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                  className="w-full px-4 py-3 rounded-xl bg-[#0D1016] hover:bg-[#2a2b31] text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
                 >
                   Continua <ChevronRight className="w-4 h-4" />
                 </button>
@@ -1105,7 +1105,7 @@ export default function TriagePage() {
               {personalData && (skipAutomatedDecisions || automatedDecisions) && endUsers.length > 0 && (
                 <button
                   onClick={() => goToArea("deployment")}
-                  className="w-full px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                  className="w-full px-4 py-3 rounded-xl bg-[#0D1016] hover:bg-[#2a2b31] text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
                 >
                   Continua <ChevronRight className="w-4 h-4" />
                 </button>
@@ -1196,7 +1196,7 @@ export default function TriagePage() {
                   <button
                     onClick={() => goToArea("result")}
                     disabled={riskSignals.length === 0}
-                    className="w-full mt-3 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                    className="w-full mt-3 px-4 py-3 rounded-xl bg-[#0D1016] hover:bg-[#2a2b31] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
                   >
                     Genera report di triage <ChevronRight className="w-4 h-4" />
                   </button>
