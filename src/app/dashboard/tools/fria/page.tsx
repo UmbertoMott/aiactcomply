@@ -10,6 +10,9 @@ import {
 } from "lucide-react";
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
+import { RightsCatalog } from "@/components/fria/RightsCatalog";
+import { ContextCatalog } from "@/components/fria/ContextCatalog";
+import { NextStepGuide } from "@/components/fria/NextStepGuide";
 import type { FRIAResult } from "@/lib/dossier/storage-schema";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { VersionHistoryPanel } from "@/components/compliance/VersionHistoryPanel";
@@ -149,6 +152,7 @@ export default function FRIAPage() {
   const [openRights, setOpenRights] = useState<Set<string>>(new Set());
   const [openRightGroups, setOpenRightGroups] = useState<Set<string>>(new Set(["dignity_group", "freedom_group", "equality_group"]));
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
+  const [showCatalog, setShowCatalog] = useState(false);
   const [dossierSavedAt, setDossierSavedAt] = useState<string | null>(() =>
     readFromStorage<FRIAResult>("fria")?.completedAt ?? null
   );
@@ -505,6 +509,7 @@ export default function FRIAPage() {
           <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 1 — Analisi del contesto</h2>
           <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Cluster A: contesto di deployment · Cluster B: caratteristiche AI · Cluster C: governance</p>
         </div>
+        <ContextCatalog onApply={(patch) => upCtx(patch)} />
         {sections.map((sec) => {
           const open = openAcc.has(sec.id);
           const pct = Math.round((sec.filled / sec.fields) * 100);
@@ -713,6 +718,18 @@ export default function FRIAPage() {
 
                 {p2Tab === "rights" && (
                   <div style={{ padding: "16px 20px", maxHeight: 540, overflow: "auto" }}>
+                    {/* Catalog toggle */}
+                    <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+                      <button onClick={() => setShowCatalog(v => !v)} style={{ fontSize: 11, padding: "4px 10px", borderRadius: 6, border: `1px solid ${T.border}`, background: showCatalog ? T.text : T.card, color: showCatalog ? "#fff" : T.muted, cursor: "pointer" }}>
+                        {showCatalog ? "✕ Chiudi catalogo" : "📋 Seleziona da catalogo"}
+                      </button>
+                    </div>
+                    {showCatalog && (
+                      <RightsCatalog
+                        selectedRightIds={activeScenario.right_impacts.map((ri) => ri.right_id)}
+                        onSelectRight={(rightId) => toggleRightImpact(activeScenario.id, rightId)}
+                      />
+                    )}
                     {RIGHTS_GROUPS.map((grp) => {
                       const rights = FUNDAMENTAL_RIGHTS.filter((r) => grp.rightIds.includes(r.id));
                       const openGrp = openRightGroups.has(grp.id);
@@ -1338,6 +1355,7 @@ export default function FRIAPage() {
         {phase === "3" && renderPhase3()}
         {phase === "4" && renderPhase4()}
         {phase === "5" && renderPhase5()}
+        <NextStepGuide fria={doc} />
       </div>
 
       {/* Toast */}
