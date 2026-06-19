@@ -8,7 +8,7 @@ import { SharedSpine } from "@/components/assessment/SharedSpine";
 import { CorrelatedRisksPanel } from "@/components/assessment/CorrelatedRisksPanel";
 import { DpiaBranch } from "@/components/assessment/DpiaBranch";
 import { FriaBranch } from "@/components/assessment/FriaBranch";
-import SignOffPanel from "@/components/ui/SignOffPanel";
+import { AssessmentSignOff } from "@/components/assessment/AssessmentSignOff";
 import {
   getAssessment, patchShared, patchDPIA, patchFRIA,
   syncCorrelatedRisksFromDPIA, syncCorrelatedRisksFromFRIA,
@@ -221,7 +221,7 @@ export default function AssessmentPage() {
                   <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 8 }}>
                     Atto 1 — DPIA Art. 35 GDPR
                   </p>
-                  <SignOffPanel toolKey="dpia" toolLabel="DPIA Art. 35 GDPR" />
+                  <AssessmentSignOff toolKey="dpia" toolLabel="DPIA Art. 35 GDPR" shared={shared} />
                 </div>
               </div>
               <div style={cardSt}>
@@ -229,7 +229,7 @@ export default function AssessmentPage() {
                   <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 8 }}>
                     Atto 2 — FRIA Art. 27 AI Act
                   </p>
-                  <SignOffPanel toolKey="fria" toolLabel="FRIA Art. 27 AI Act" />
+                  <AssessmentSignOff toolKey="fria" toolLabel="FRIA Art. 27 AI Act" shared={shared} />
                 </div>
               </div>
             </div>
