@@ -10,14 +10,22 @@ import {
 } from "lucide-react";
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
+import { RightsCatalog } from "@/components/fria/RightsCatalog";
+import { ContextCatalog } from "@/components/fria/ContextCatalog";
+import { NextStepGuide } from "@/components/fria/NextStepGuide";
+import { RightImpactAIDraft } from "@/components/fria/RightImpactAIDraft";
+import { FriaGapCheck } from "@/components/fria/FriaGapCheck";
+import type { FriaGapCheck as FriaGapCheckResult } from "@/app/actions/checkFriaGaps";
 import type { FRIAResult } from "@/lib/dossier/storage-schema";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { VersionHistoryPanel } from "@/components/compliance/VersionHistoryPanel";
 import { draftFria } from "@/app/actions/draftFria";
+import { draftFriaPublicSummary } from "@/app/actions/draftFriaPublicSummary";
 import type { ClassifierResult, RiskManagerResult, DataAuditResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
-import { getAssessment, patchFRIA, migrateLegacyFRIA, syncCorrelatedRisksFromFRIA } from "@/lib/assessment/assessment-helpers";
+import { getAssessment, patchFRIA, patchShared, migrateLegacyFRIA, syncCorrelatedRisksFromFRIA } from "@/lib/assessment/assessment-helpers";
+import type { AssessmentShared } from "@/lib/assessment/assessment-schema";
 import { CorrelatedRisksPanel } from "@/components/assessment/CorrelatedRisksPanel";
 import { AssessmentSharedHeader } from "@/components/assessment/AssessmentSharedHeader";
 import { AssessmentStepper } from "@/components/assessment/AssessmentStepper";
@@ -118,6 +126,21 @@ function Inp({ label, value, onChange, ph }: {
   );
 }
 
+// ─── Hash utilities (staleness detection) ────────────────────────────────────
+function djb2(str: string): string {
+  let h = 5381;
+  for (let i = 0; i < str.length; i++) h = (((h << 5) + h) + str.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(16);
+}
+
+function computeFriaHash(doc: FRIADocument): string {
+  return djb2([
+    doc.system_name, doc.organization,
+    doc.context.technology_overview, doc.context.affected_persons,
+    doc.context.intended_purpose_explanation,
+  ].join("|"));
+}
+
 // ─── Phase nav config ─────────────────────────────────────────────────────────
 type Phase = "1" | "2" | "3" | "4" | "5";
 const PHASES: { id: Phase; label: string; sub: string; Icon: React.ComponentType<{ style?: CSSProperties }> }[] = [
@@ -142,22 +165,51 @@ const DEFAULT_TRIGGERS = [
 export default function FRIAPage() {
   const [doc, setDoc] = useState<FRIADocument>(() => createEmptyFRIA());
   const [phase, setPhase] = useState<Phase>("1");
+  const [gapCheckResult, setGapCheckResult] = useState<FriaGapCheckResult | null>(null);
   const [openAcc, setOpenAcc] = useState<Set<"A" | "B" | "C">>(new Set(["A"]));
   const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
   const [p2Tab, setP2Tab] = useState<"rights" | "matrix">("rights");
   const [openRights, setOpenRights] = useState<Set<string>>(new Set());
   const [openRightGroups, setOpenRightGroups] = useState<Set<string>>(new Set(["dignity_group", "freedom_group", "equality_group"]));
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
+  const [showCatalog, setShowCatalog] = useState(false);
   const [dossierSavedAt, setDossierSavedAt] = useState<string | null>(() =>
     readFromStorage<FRIAResult>("fria")?.completedAt ?? null
   );
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ── Sync FRIA fields → shared (idempotente, fire-and-forget) ─────────────
+  function syncFriaToShared(friaDoc: FRIADocument) {
+    const patch: Partial<AssessmentShared> = {};
+    if (friaDoc.system_name) patch.systemName = friaDoc.system_name;
+    if (friaDoc.organization) patch.organization = friaDoc.organization;
+    if (friaDoc.context.affected_persons) patch.dataSubjects = [friaDoc.context.affected_persons];
+    if (friaDoc.context.processes_personal_data === "yes") patch.processesPersonalData = true;
+    if (Object.keys(patch).length > 0) patchShared(patch);
+  }
+
   // ── Load from Assessment storage on mount ─────────────────────────────────
   useEffect(() => {
     migrateLegacyFRIA();
-    setDoc(getAssessment().fria);
+    const friaDat = getAssessment().fria;
+    setDoc(friaDat);
+    syncFriaToShared(friaDat);
+    // Staleness check: compare current hash vs stored hash
+    const storedStaleness = readFromStorage<{ hash: string; savedAt: string }>("fria_staleness");
+    if (storedStaleness?.hash) {
+      const currentHash = computeFriaHash(friaDat);
+      if (currentHash !== storedStaleness.hash) setStalenessWarning(true);
+    }
   }, []);
+
+  // Save staleness hash when sign-off is completed
+  useEffect(() => {
+    if (doc.deployment.approved_at) {
+      const hash = computeFriaHash(doc);
+      writeToStorage("fria_staleness", { hash, savedAt: doc.deployment.approved_at });
+      setStalenessWarning(false);
+    }
+  }, [doc.deployment.approved_at]);
 
   // ── Auto-save ogni 30s ────────────────────────────────────────────────────
   const { justSaved: friaSaved } = useAutoSave(
@@ -170,6 +222,9 @@ export default function FRIAPage() {
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [draftGenerated, setDraftGenerated] = useState(false);
   const [draftError, setDraftError] = useState<string | null>(null);
+  const [loadingAiSummary, setLoadingAiSummary] = useState(false);
+  const [aiSummaryIsFromAI, setAiSummaryIsFromAI] = useState(false);
+  const [stalenessWarning, setStalenessWarning] = useState(false);
 
   // Leggi dati correlati per il banner contestuale
   const riskData   = useMemo(() => readFromStorage<RiskManagerResult>("riskManager"), []);
@@ -254,7 +309,16 @@ export default function FRIAPage() {
 
   // ─── Update helpers ───────────────────────────────────────────────────────
   function upDoc(patch: Partial<Pick<FRIADocument, "system_name" | "organization" | "responsible_team" | "fria_start_date">>) {
-    setDoc((prev) => { const n = { ...prev, ...patch, updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
+    setDoc((prev) => {
+      const n = { ...prev, ...patch, updatedAt: new Date().toISOString() };
+      debounceSave(n);
+      // Sync shared fields that FRIA owns
+      const sharedPatch: Partial<AssessmentShared> = {};
+      if (patch.system_name !== undefined) sharedPatch.systemName = patch.system_name;
+      if (patch.organization !== undefined) sharedPatch.organization = patch.organization;
+      if (Object.keys(sharedPatch).length > 0) patchShared(sharedPatch);
+      return n;
+    });
   }
   function upCtx(patch: Record<string, unknown>) {
     setDoc((prev) => {
@@ -425,6 +489,16 @@ export default function FRIAPage() {
   function showToast(msg: string, type: "success" | "error" = "success") {
     setToast({ msg, type }); setTimeout(() => setToast(null), 3000);
   }
+
+  async function handleAiPublicSummary() {
+    setLoadingAiSummary(true);
+    const r = await draftFriaPublicSummary(doc);
+    setLoadingAiSummary(false);
+    if ("error" in r) { showToast(r.error, "error"); return; }
+    upDeploy({ public_summary: r.summary });
+    setAiSummaryIsFromAI(true);
+  }
+
   function saveToDossier() {
     const completedAt = new Date().toISOString();
     const overallRisk = getOverallFRIARisk(doc);
@@ -483,6 +557,7 @@ export default function FRIAPage() {
           <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 1 — Analisi del contesto</h2>
           <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Cluster A: contesto di deployment · Cluster B: caratteristiche AI · Cluster C: governance</p>
         </div>
+        <ContextCatalog onApply={(patch) => upCtx(patch)} />
         {sections.map((sec) => {
           const open = openAcc.has(sec.id);
           const pct = Math.round((sec.filled / sec.fields) * 100);
@@ -609,7 +684,7 @@ export default function FRIAPage() {
                   style={{
                     textAlign: "left", fontSize: 12, padding: "4px 10px",
                     borderRadius: 6, border: "1px solid rgba(217,119,6,0.3)",
-                    background: "white", cursor: "pointer", color: "#92400e",
+                    background: "white", cursor: "pointer", color: T.amber,
                   }}>
                   + Aggiungi scenario: {r.title}
                   <span style={{ marginLeft: 6, opacity: 0.6 }}>
@@ -691,6 +766,49 @@ export default function FRIAPage() {
 
                 {p2Tab === "rights" && (
                   <div style={{ padding: "16px 20px", maxHeight: 540, overflow: "auto" }}>
+                    {/* Catalog toggle */}
+                    <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+                      <button onClick={() => setShowCatalog(v => !v)} style={{ fontSize: 11, padding: "4px 10px", borderRadius: 6, border: `1px solid ${T.border}`, background: showCatalog ? T.text : T.card, color: showCatalog ? "#fff" : T.muted, cursor: "pointer" }}>
+                        {showCatalog ? "✕ Chiudi catalogo" : "📋 Seleziona da catalogo"}
+                      </button>
+                    </div>
+                    {showCatalog && (
+                      <RightsCatalog
+                        selectedRightIds={activeScenario.right_impacts.map((ri) => ri.right_id)}
+                        onSelectRight={(rightId) => toggleRightImpact(activeScenario.id, rightId)}
+                      />
+                    )}
+                    {/* Prioritizzazione visibile */}
+                    {activeScenario.right_impacts.length > 1 && (() => {
+                      const sorted = [...activeScenario.right_impacts]
+                        .filter(ri => ri.likelihood.computed_priority)
+                        .sort((a, b) => {
+                          const rank: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
+                          return (rank[b.likelihood.computed_priority] ?? 0) - (rank[a.likelihood.computed_priority] ?? 0);
+                        });
+                      if (sorted.length === 0) return null;
+                      const sevColors: Record<string, string> = { critical: "#dc2626", high: "#d97706", medium: "#d97706", low: "#16a34a" };
+                      return (
+                        <div style={{ marginBottom: 16, padding: "10px 12px", background: T.bg, borderRadius: 8, border: `1px solid ${T.border}` }}>
+                          <p style={{ fontSize: 10, fontWeight: 700, color: T.text, textTransform: "uppercase" as const, letterSpacing: "0.5px", marginBottom: 8 }}>
+                            Prioritizzazione impatti — likelihood × severità
+                          </p>
+                          {sorted.map((ri, idx) => {
+                            const r = FUNDAMENTAL_RIGHTS.find(f => f.id === ri.right_id);
+                            const priority = ri.likelihood.computed_priority;
+                            return (
+                              <div key={ri.right_id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 0", borderBottom: idx < sorted.length - 1 ? `1px solid ${T.border}` : "none" }}>
+                                <span style={{ fontSize: 10, fontWeight: 700, color: T.faint, minWidth: 18 }}>#{idx + 1}</span>
+                                <span style={{ fontSize: 11, color: T.text, flex: 1 }}>{r?.name ?? ri.right_id}</span>
+                                <span style={{ fontSize: 10, fontWeight: 600, color: sevColors[priority] ?? T.muted, background: "rgba(0,0,0,0.04)", padding: "1px 6px", borderRadius: 9999 }}>
+                                  {priority?.toUpperCase()}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
                     {RIGHTS_GROUPS.map((grp) => {
                       const rights = FUNDAMENTAL_RIGHTS.filter((r) => grp.rightIds.includes(r.id));
                       const openGrp = openRightGroups.has(grp.id);
@@ -752,21 +870,61 @@ export default function FRIAPage() {
                                             </div>
                                           );
                                         })()}
+                                        <RightImpactAIDraft
+                                          systemName={doc.system_name || "Sistema AI"}
+                                          systemDescription={doc.context.technology_overview || ""}
+                                          riskLevel={""}
+                                          scenarioTitle={activeScenario.title}
+                                          scenarioDescription={activeScenario.description}
+                                          rightId={right.id}
+                                          rightName={right.name}
+                                          rightDescription={right.description}
+                                          triggerQuestions={right.triggerQuestions}
+                                          onApply={(sevPatch, likelihood, note) => {
+                                            upSeverity(activeScenario.id, right.id, sevPatch as Partial<FRIASeverityAssessment>);
+                                            upLikelihood(activeScenario.id, right.id, likelihood);
+                                            if (note) upRightImpact(activeScenario.id, right.id, { notes: note });
+                                          }}
+                                        />
                                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
                                           <Sel label="Entità interferenza" value={impact.severity.extent_of_interference}
-                                            options={[{ value: "core_violation", label: "Violazione del nucleo essenziale" }, { value: "significant", label: "Significativa" }, { value: "limited", label: "Limitata" }]}
+                                            options={[
+                                              { value: "very_serious", label: "Molto grave (nucleo del diritto)" },
+                                              { value: "serious", label: "Grave" },
+                                              { value: "moderate", label: "Moderata" },
+                                              { value: "minor", label: "Minore" },
+                                              { value: "none", label: "Nessuna" },
+                                            ]}
                                             onChange={(v) => upSeverity(activeScenario.id, right.id, { extent_of_interference: v as FRIASeverityAssessment["extent_of_interference"] })} />
-                                          <Sel label="Portata geografica" value={impact.severity.scope_of_impact}
-                                            options={[{ value: "multiple_countries", label: "Più paesi" }, { value: "one_country", label: "Un paese" }, { value: "region", label: "Regione/locale" }]}
+                                          <Sel label="Portata (scope)" value={impact.severity.scope_of_impact}
+                                            options={[
+                                              { value: "systemic", label: "Sistemico" },
+                                              { value: "large_group", label: "Gruppo esteso" },
+                                              { value: "group", label: "Gruppo" },
+                                              { value: "individual", label: "Individuale" },
+                                            ]}
                                             onChange={(v) => upSeverity(activeScenario.id, right.id, { scope_of_impact: v as FRIASeverityAssessment["scope_of_impact"] })} />
                                           <Sel label="Persone interessate" value={impact.severity.persons_affected}
-                                            options={[{ value: "most", label: "La maggior parte" }, { value: "some", label: "Alcune" }, { value: "few", label: "Poche" }]}
+                                            options={[
+                                              { value: "very_many", label: "Moltissime" },
+                                              { value: "many", label: "Molte" },
+                                              { value: "few", label: "Poche" },
+                                            ]}
                                             onChange={(v) => upSeverity(activeScenario.id, right.id, { persons_affected: v as FRIASeverityAssessment["persons_affected"] })} />
                                           <Sel label="Gravità" value={impact.severity.gravity}
-                                            options={[{ value: "high", label: "Alta" }, { value: "medium", label: "Media" }, { value: "low", label: "Bassa" }]}
+                                            options={[
+                                              { value: "critical", label: "Critica" },
+                                              { value: "high", label: "Alta" },
+                                              { value: "medium", label: "Media" },
+                                              { value: "low", label: "Bassa" },
+                                            ]}
                                             onChange={(v) => upSeverity(activeScenario.id, right.id, { gravity: v as FRIASeverityAssessment["gravity"] })} />
                                           <Sel label="Reversibilità" value={impact.severity.irreversibility}
-                                            options={[{ value: "none", label: "Irreversibile" }, { value: "complex", label: "Difficilmente reversibile" }, { value: "medium", label: "Parzialmente reversibile" }]}
+                                            options={[
+                                              { value: "irreversible", label: "Irreversibile" },
+                                              { value: "partially", label: "Parzialmente reversibile" },
+                                              { value: "reversible", label: "Reversibile" },
+                                            ]}
                                             onChange={(v) => upSeverity(activeScenario.id, right.id, { irreversibility: v as FRIASeverityAssessment["irreversibility"] })} />
                                           <div style={{ marginBottom: 12 }}>
                                             <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>Severità calcolata</label>
@@ -777,7 +935,12 @@ export default function FRIAPage() {
                                             </div>
                                           </div>
                                           <Sel label="Probabilità" value={impact.likelihood.likelihood}
-                                            options={[{ value: "high", label: "Alta" }, { value: "medium", label: "Media" }, { value: "low", label: "Bassa" }]}
+                                            options={[
+                                              { value: "almost_certain", label: "Quasi certa" },
+                                              { value: "likely", label: "Probabile" },
+                                              { value: "possible", label: "Possibile" },
+                                              { value: "negligible", label: "Trascurabile" },
+                                            ]}
                                             onChange={(v) => upLikelihood(activeScenario.id, right.id, v)} />
                                           <div style={{ marginBottom: 12 }}>
                                             <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>Priorità calcolata</label>
@@ -827,6 +990,38 @@ export default function FRIAPage() {
                                             </div>
                                           ))}
                                         </div>
+                                        {/* What-If residual panel */}
+                                        {impact.severity.computed_severity && (
+                                          <div style={{ marginTop: 8, padding: "8px 10px", background: T.bg, borderRadius: 6, border: `1px solid ${T.border}` }}>
+                                            <p style={{ fontSize: 10, fontWeight: 600, color: T.text, marginBottom: 4 }}>
+                                              What-If: impatto residuo stimato
+                                            </p>
+                                            {(() => {
+                                              const implemented = impact.mitigations.filter(m => m.status === "implemented" || m.status === "verified").length;
+                                              const sevOrder = ["critical","high","medium","low"] as const;
+                                              const currentIdx = sevOrder.indexOf(impact.severity.computed_severity as (typeof sevOrder)[number]);
+                                              const residualIdx = Math.min(sevOrder.length - 1, currentIdx + (implemented > 0 ? 1 : 0));
+                                              const residual = sevOrder[residualIdx] ?? impact.severity.computed_severity;
+                                              const improved = residualIdx > currentIdx;
+                                              const sevColors: Record<string, string> = { critical: "#dc2626", high: "#d97706", medium: "#d97706", low: "#16a34a" };
+                                              return (
+                                                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11 }}>
+                                                  <span style={{ color: sevColors[impact.severity.computed_severity] ?? T.muted, fontWeight: 600 }}>
+                                                    {impact.severity.computed_severity.toUpperCase()}
+                                                  </span>
+                                                  {improved && <>
+                                                    <span style={{ color: T.faint }}>→</span>
+                                                    <span style={{ color: sevColors[residual] ?? T.muted, fontWeight: 600 }}>{residual.toUpperCase()}</span>
+                                                    <span style={{ color: T.green, fontSize: 10 }}>({implemented} mitig. attive)</span>
+                                                  </>}
+                                                  {!improved && (
+                                                    <span style={{ color: T.faint, fontSize: 10 }}>Nessuna mitigazione attiva — severità invariata</span>
+                                                  )}
+                                                </div>
+                                              );
+                                            })()}
+                                          </div>
+                                        )}
                                       </div>
                                     )}
                                   </div>
@@ -898,6 +1093,11 @@ export default function FRIAPage() {
           <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 3 — Decisione di deployment</h2>
           <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Valuta gli impatti residui, determina la raccomandazione e genera la sintesi pubblica.</p>
         </div>
+        <FriaGapCheck
+          doc={doc}
+          onNavigateToPhase={(p) => setPhase(p as Phase)}
+          onResult={setGapCheckResult}
+        />
         {/* Absolute rights alert — ECNL/DIHR: cannot be balanced by proportionality */}
         {(() => {
           const absoluteImpacted = doc.scenarios.flatMap((s) => s.right_impacts).filter((ri) => {
@@ -970,16 +1170,51 @@ export default function FRIAPage() {
         {/* Public summary */}
         <div style={{ ...cardSt, padding: 20, marginBottom: 20 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>Sintesi pubblica obbligatoria (Art. 27)</h3>
-            <button onClick={() => { const s = generatePublicSummary(doc); upDeploy({ public_summary: s }); showToast("Sintesi pubblica generata"); }}
-              style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, background: T.text, color: "#fff", border: "none", borderRadius: 8, padding: "7px 14px", cursor: "pointer" }}>
-              <FileText style={{ width: 13, height: 13 }} /> Genera sintesi
-            </button>
+            <div>
+              <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 2px" }}>Sintesi pubblica obbligatoria (Art. 27)</h3>
+              {aiSummaryIsFromAI && (
+                <span style={{ fontSize: 10, fontWeight: 700, color: T.amber, background: T.amberBg, padding: "1px 7px", borderRadius: 9999 }}>
+                  ✦ AI — verifica e conferma
+                </span>
+              )}
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                onClick={() => { const s = generatePublicSummary(doc); upDeploy({ public_summary: s }); setAiSummaryIsFromAI(false); showToast("Sintesi generata"); }}
+                style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, background: T.bg, color: T.text, border: `1px solid ${T.border}`, borderRadius: 8, padding: "7px 14px", cursor: "pointer" }}
+              >
+                <FileText style={{ width: 13, height: 13 }} /> Genera sintesi
+              </button>
+              <button
+                onClick={handleAiPublicSummary}
+                disabled={loadingAiSummary}
+                style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, background: loadingAiSummary ? T.bg : T.text, color: loadingAiSummary ? T.muted : "#fff", border: "none", borderRadius: 8, padding: "7px 14px", cursor: loadingAiSummary ? "default" : "pointer" }}
+              >
+                {loadingAiSummary ? "⟳ Generazione AI…" : "✦ Bozza AI"}
+              </button>
+            </div>
           </div>
           <textarea value={d.public_summary} onChange={(e) => upDeploy({ public_summary: e.target.value })} rows={14}
             placeholder="Clicca 'Genera sintesi' per creare automaticamente il testo basato sui dati inseriti…"
             style={{ ...inputSt, resize: "vertical", fontFamily: "monospace", fontSize: 11, lineHeight: 1.6 }} />
         </div>
+
+        {/* Art. 27(2) — Notifica autorità di vigilanza */}
+        {(d.recommendation === "deploy_with_conditions" || d.recommendation === "do_not_deploy") && (
+          <div style={{ marginBottom: 16, padding: "12px 16px", borderRadius: 8, background: T.amberBg, border: `1px solid ${T.amberBdr}`, display: "flex", gap: 10, alignItems: "flex-start" }}>
+            <span style={{ fontSize: 16, flexShrink: 0 }}>⚠</span>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: T.amber, marginBottom: 4 }}>
+                Promemoria Art. 27(2) — Notifica all&apos;autorità di vigilanza
+              </div>
+              <div style={{ fontSize: 12, color: T.text, lineHeight: 1.5 }}>
+                La raccomandazione non è &quot;deploy&quot; incondizionato. Ai sensi dell&apos;Art. 27(2) AI Act, il deployer
+                ha l&apos;obbligo di notificare l&apos;autorità nazionale di vigilanza del mercato e documentare la notifica
+                nella FRIA. [verifica contro il testo vigente dell&apos;AI Act]
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Rischi correlati DPIA ⇄ FRIA */}
         <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)", padding: 20, marginBottom: 16 }}>
@@ -1007,6 +1242,33 @@ export default function FRIAPage() {
           <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 4 — Piano di monitoraggio</h2>
           <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Definisci cosa monitorare, i trigger per l&apos;aggiornamento e mantieni lo storico delle revisioni.</p>
         </div>
+
+        {/* Staleness warning */}
+        {stalenessWarning && (
+          <div style={{ marginBottom: 16, padding: "12px 16px", borderRadius: 8, background: T.amberBg, border: `1px solid ${T.amberBdr}`, display: "flex", alignItems: "flex-start", gap: 10 }}>
+            <span style={{ fontSize: 16, flexShrink: 0 }}>⚠</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: T.amber, marginBottom: 4 }}>
+                FRIA da rivedere — le circostanze iniziali sono cambiate
+              </div>
+              <div style={{ fontSize: 12, color: T.text, lineHeight: 1.5, marginBottom: 8 }}>
+                I dati di input (sistema, contesto, persone interessate) sono cambiati rispetto all&apos;ultima firma.
+                Verifica che la valutazione degli impatti e le misure di mitigazione siano ancora valide. [verifica contro il testo vigente dell&apos;AI Act]
+              </div>
+              <button
+                onClick={() => {
+                  const hash = computeFriaHash(doc);
+                  writeToStorage("fria_staleness", { hash, savedAt: new Date().toISOString() });
+                  setStalenessWarning(false);
+                  showToast("Baseline aggiornata");
+                }}
+                style={{ fontSize: 11, fontWeight: 600, padding: "4px 12px", borderRadius: 6, border: "none", background: T.text, color: "#fff", cursor: "pointer" }}
+              >
+                Segna come rivisto — salva nuova baseline
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Monitoring items */}
         <div style={{ ...cardSt, padding: 20, marginBottom: 16 }}>
@@ -1088,6 +1350,48 @@ export default function FRIAPage() {
           <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 5 — Stakeholder e coinvolgimento</h2>
           <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Mappa i portatori di interesse e documenta il processo di consultazione.</p>
         </div>
+
+        {/* Impatti ad alto rischio che richiedono validazione stakeholder */}
+        {(() => {
+          const highImpacts = doc.scenarios.flatMap(s =>
+            s.right_impacts
+              .filter(ri => ri.severity?.computed_severity === "high" || ri.severity?.computed_severity === "critical")
+              .map(ri => ({ scenarioTitle: s.title, rightId: ri.right_id, severity: ri.severity.computed_severity }))
+          );
+          if (highImpacts.length === 0) return null;
+          const hasEngagement = doc.engagement_log.some(e => e.findings?.trim());
+          return (
+            <div style={{ marginBottom: 16, padding: "14px 16px", borderRadius: 10, background: T.card, border: `1px solid ${T.border}`, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Impatti ad alto rischio — validazione stakeholder</span>
+                {hasEngagement
+                  ? <span style={{ fontSize: 10, fontWeight: 700, color: T.green, background: T.greenBg, padding: "2px 8px", borderRadius: 9999 }}>✓ Engagement documentato</span>
+                  : <span style={{ fontSize: 10, fontWeight: 700, color: T.amber, background: T.amberBg, padding: "2px 8px", borderRadius: 9999 }}>Consultazione raccomandata</span>
+                }
+              </div>
+              <p style={{ fontSize: 12, color: T.muted, margin: "0 0 10px", lineHeight: 1.4 }}>
+                {highImpacts.length} impatto/i ad alta severità identificati nella Fase 2. Documenta le consultazioni nel log qui sotto per validare queste valutazioni. [verifica contro il testo vigente dell&apos;AI Act]
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {highImpacts.slice(0, 5).map((imp, i) => {
+                  const rightName = FUNDAMENTAL_RIGHTS.find(r => r.id === imp.rightId)?.name ?? imp.rightId;
+                  return (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderRadius: 6, background: imp.severity === "critical" ? T.redBg : T.amberBg, border: `1px solid ${imp.severity === "critical" ? T.redBdr : T.amberBdr}` }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: imp.severity === "critical" ? T.red : T.amber, minWidth: 60 }}>
+                        {imp.severity === "critical" ? "CRITICO" : "ALTO"}
+                      </span>
+                      <span style={{ fontSize: 12, color: T.text }}>{rightName}</span>
+                      <span style={{ fontSize: 11, color: T.muted }}>— {imp.scenarioTitle || "Scenario"}</span>
+                    </div>
+                  );
+                })}
+                {highImpacts.length > 5 && (
+                  <p style={{ fontSize: 11, color: T.faint, margin: 0 }}>+ altri {highImpacts.length - 5} impatti</p>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Stakeholders */}
         <div style={{ ...cardSt, padding: 20, marginBottom: 16 }}>
@@ -1316,6 +1620,7 @@ export default function FRIAPage() {
         {phase === "3" && renderPhase3()}
         {phase === "4" && renderPhase4()}
         {phase === "5" && renderPhase5()}
+        <NextStepGuide fria={doc} gapCheck={gapCheckResult} onNavigateToPhase={(p) => setPhase(p as Phase)} />
       </div>
 
       {/* Toast */}
