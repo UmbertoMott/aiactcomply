@@ -17,7 +17,8 @@ import { draftFria } from "@/app/actions/draftFria";
 import type { ClassifierResult, RiskManagerResult, DataAuditResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
-import { getAssessment, patchFRIA, migrateLegacyFRIA, syncCorrelatedRisksFromFRIA } from "@/lib/assessment/assessment-helpers";
+import { getAssessment, patchFRIA, patchShared, migrateLegacyFRIA, syncCorrelatedRisksFromFRIA } from "@/lib/assessment/assessment-helpers";
+import type { AssessmentShared } from "@/lib/assessment/assessment-schema";
 import { CorrelatedRisksPanel } from "@/components/assessment/CorrelatedRisksPanel";
 import { AssessmentSharedHeader } from "@/components/assessment/AssessmentSharedHeader";
 import { AssessmentStepper } from "@/components/assessment/AssessmentStepper";
@@ -153,10 +154,22 @@ export default function FRIAPage() {
   );
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ── Sync FRIA fields → shared (idempotente, fire-and-forget) ─────────────
+  function syncFriaToShared(friaDoc: FRIADocument) {
+    const patch: Partial<AssessmentShared> = {};
+    if (friaDoc.system_name) patch.systemName = friaDoc.system_name;
+    if (friaDoc.organization) patch.organization = friaDoc.organization;
+    if (friaDoc.context.affected_persons) patch.dataSubjects = [friaDoc.context.affected_persons];
+    if (friaDoc.context.processes_personal_data === "yes") patch.processesPersonalData = true;
+    if (Object.keys(patch).length > 0) patchShared(patch);
+  }
+
   // ── Load from Assessment storage on mount ─────────────────────────────────
   useEffect(() => {
     migrateLegacyFRIA();
-    setDoc(getAssessment().fria);
+    const friaDat = getAssessment().fria;
+    setDoc(friaDat);
+    syncFriaToShared(friaDat);
   }, []);
 
   // ── Auto-save ogni 30s ────────────────────────────────────────────────────
@@ -254,7 +267,16 @@ export default function FRIAPage() {
 
   // ─── Update helpers ───────────────────────────────────────────────────────
   function upDoc(patch: Partial<Pick<FRIADocument, "system_name" | "organization" | "responsible_team" | "fria_start_date">>) {
-    setDoc((prev) => { const n = { ...prev, ...patch, updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
+    setDoc((prev) => {
+      const n = { ...prev, ...patch, updatedAt: new Date().toISOString() };
+      debounceSave(n);
+      // Sync shared fields that FRIA owns
+      const sharedPatch: Partial<AssessmentShared> = {};
+      if (patch.system_name !== undefined) sharedPatch.systemName = patch.system_name;
+      if (patch.organization !== undefined) sharedPatch.organization = patch.organization;
+      if (Object.keys(sharedPatch).length > 0) patchShared(sharedPatch);
+      return n;
+    });
   }
   function upCtx(patch: Record<string, unknown>) {
     setDoc((prev) => {
@@ -609,7 +631,7 @@ export default function FRIAPage() {
                   style={{
                     textAlign: "left", fontSize: 12, padding: "4px 10px",
                     borderRadius: 6, border: "1px solid rgba(217,119,6,0.3)",
-                    background: "white", cursor: "pointer", color: "#92400e",
+                    background: "white", cursor: "pointer", color: T.amber,
                   }}>
                   + Aggiungi scenario: {r.title}
                   <span style={{ marginLeft: 6, opacity: 0.6 }}>
