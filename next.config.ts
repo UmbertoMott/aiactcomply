@@ -33,20 +33,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  async redirects() {
-    return [
-      {
-        source: "/dashboard/tools/dpia",
-        destination: "/dashboard/tools/assessment",
-        permanent: false,
-      },
-      {
-        source: "/dashboard/tools/fria",
-        destination: "/dashboard/tools/assessment",
-        permanent: false,
-      },
-    ];
-  },
 };
 
 export default nextConfig;
