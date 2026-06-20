@@ -426,6 +426,7 @@ export const STORAGE_KEYS = {
   dpiaSignoff: "aicomply_dpia_signoff",
   friaSignoff: "aicomply_fria_signoff",
   friaStaleness: "aicomply_fria_staleness",
+  dpiaStaleness: "aicomply_dpia_staleness",
 } as const;
 
 // ── Project-scoped storage key ───────────────────────────────────────────────
