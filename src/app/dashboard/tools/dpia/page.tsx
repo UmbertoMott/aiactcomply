@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef, useCallback, CSSProperties } from "react";
 import SignOffPanel from "@/components/ui/SignOffPanel";
+import { DPIATemplateViewer } from "@/components/dpia/DPIATemplateViewer";
+import { computeDpiaProgress } from "@/lib/dpia/dpia-progress";
 import { draftDpiaSections } from "@/app/actions/draftDpiaSections";
 import { buildComplianceContextFromStorage } from "@/hooks/useComplianceContext";
 import { checkPriorConsultation, type PriorConsultationResult } from "@/app/actions/checkPriorConsultation";
@@ -350,6 +352,8 @@ export default function DPIAPage() {
   // Fase 5: staleness
   const [stalenessDismissed, setStalenessDismissed] = useState(false);
   const [savedHash, setSavedHash] = useState<string | null>(null);
+  // Template viewer panel
+  const [showTemplateViewer, setShowTemplateViewer] = useState(false);
 
   // Load from storage on mount
   useEffect(() => {
@@ -1673,6 +1677,28 @@ export default function DPIAPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {/* Template viewer button */}
+          {(() => {
+            const progress = computeDpiaProgress(doc);
+            const color = progress.overallPercent >= 80 ? "#16a34a" : progress.overallPercent >= 40 ? "#d97706" : "rgba(0,0,0,0.5)";
+            return (
+              <button
+                onClick={() => setShowTemplateViewer(true)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 6,
+                  fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8,
+                  border: "1px solid rgba(0,0,0,0.10)", background: "#ffffff",
+                  color: T.text, cursor: "pointer",
+                }}
+              >
+                <FileText className="h-3.5 w-3.5" />
+                <span>Documento</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color, background: "rgba(0,0,0,0.04)", padding: "1px 6px", borderRadius: 9999 }}>
+                  {progress.overallPercent}%
+                </span>
+              </button>
+            );
+          })()}
           {/* Part 3 — AI pre-fill button */}
           <button
             disabled={aiPrefillLoading || !intake.systemName.trim() || !intake.processingPurpose.trim()}
@@ -1870,6 +1896,51 @@ export default function DPIAPage() {
 
         <NextStepGuide dpia={doc} gapCheck={gapCheckResult} onNavigateToStep={(s) => setStep(s as Step)} />
       </div>
+
+      {/* ── Template Viewer Panel (slide-in from right) ─────────────────────── */}
+      {showTemplateViewer && (
+        <>
+          {/* Backdrop */}
+          <div
+            onClick={() => setShowTemplateViewer(false)}
+            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.25)", zIndex: 40 }}
+          />
+          {/* Panel */}
+          <div style={{
+            position: "fixed", top: 0, right: 0, bottom: 0, zIndex: 50,
+            width: "min(520px, 90vw)",
+            background: "#f8f8f7",
+            boxShadow: "-4px 0 24px rgba(0,0,0,0.12)",
+            display: "flex", flexDirection: "column",
+            overflow: "hidden",
+          }}>
+            {/* Panel header */}
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "16px 20px",
+              background: "#ffffff", borderBottom: "1px solid rgba(0,0,0,0.08)",
+              flexShrink: 0,
+            }}>
+              <div>
+                <p style={{ fontSize: 13, fontWeight: 700, color: T.text, margin: 0 }}>Documento DPIA</p>
+                <p style={{ fontSize: 10, color: T.muted, margin: "2px 0 0" }}>
+                  Art. 35 GDPR · WP248 rev.01 — aggiornato in tempo reale
+                </p>
+              </div>
+              <button
+                onClick={() => setShowTemplateViewer(false)}
+                style={{ padding: 6, border: "none", background: "none", cursor: "pointer", color: T.muted, borderRadius: 6 }}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            {/* Scrollable content */}
+            <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>
+              <DPIATemplateViewer doc={doc} />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
