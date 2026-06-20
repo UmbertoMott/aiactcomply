@@ -27,6 +27,10 @@ import { UnifiedIntake } from "@/components/assessment/UnifiedIntake";
 import { ScreeningCatalog } from "@/components/dpia/ScreeningCatalog";
 import { ThreatCatalog } from "@/components/dpia/ThreatCatalog";
 import { NextStepGuide } from "@/components/dpia/NextStepGuide";
+import { ThreatImpactAIDraft } from "@/components/dpia/ThreatImpactAIDraft";
+import { ProportionalityBalance } from "@/components/dpia/ProportionalityBalance";
+import { DpiaGapCheck } from "@/components/dpia/DpiaGapCheck";
+import type { DpiaGapCheck as DpiaGapCheckType } from "@/app/actions/checkDpiaGaps";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -297,6 +301,24 @@ function statusBadge(status: string) {
   );
 }
 
+// ─── Staleness hash (djb2) ────────────────────────────────────────────────────
+
+function djb2(s: string): number {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h) ^ s.charCodeAt(i);
+  return h >>> 0;
+}
+
+function computeDpiaHash(doc: DPIADoc): string {
+  const d = doc.description;
+  const key = [
+    d.system_name, d.processing_purposes, d.personal_data_categories,
+    d.special_categories, d.data_subjects_categories, d.retention_period,
+    doc.screening.dpia_required,
+  ].join("|");
+  return String(djb2(key));
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function DPIAPage() {
@@ -323,6 +345,11 @@ export default function DPIAPage() {
   // Catalog toggles
   const [showScreeningCatalog, setShowScreeningCatalog] = useState(false);
   const [showThreatCatalog, setShowThreatCatalog] = useState(false);
+  // Fase 3: gap check
+  const [gapCheckResult, setGapCheckResult] = useState<DpiaGapCheckType | null>(null);
+  // Fase 5: staleness
+  const [stalenessDismissed, setStalenessDismissed] = useState(false);
+  const [savedHash, setSavedHash] = useState<string | null>(null);
 
   // Load from storage on mount
   useEffect(() => {
@@ -360,6 +387,9 @@ export default function DPIAPage() {
       }));
       setSaved(true);
     }
+    // Load saved staleness hash
+    const storedHash = readFromStorage<string>("dpiaStaleness");
+    if (storedHash) setSavedHash(storedHash);
   }, []);
 
   // Debounced autosave
@@ -631,6 +661,11 @@ export default function DPIAPage() {
       overallRiskAfter: doc.measures.overall_risk_after,
       conclusion: doc.conclusion.compliant,
     }, "dpia");
+    // Fase 5: save staleness hash at sign-off
+    const hash = computeDpiaHash(withDate);
+    writeToStorage("dpiaStaleness", hash);
+    setSavedHash(hash);
+    setStalenessDismissed(false);
     setSaved(true);
   }
 
@@ -1033,6 +1068,7 @@ export default function DPIAPage() {
     const p = doc.proportionality;
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <ProportionalityBalance dpia={doc} />
         {/* Necessity */}
         <div style={{ ...cardSt, padding: 16 }}>
           <Lbl required>Giustificazione della necessità del trattamento</Lbl>
@@ -1204,6 +1240,13 @@ export default function DPIAPage() {
               )}
               {catThreats.map(t => (
                 <div key={t.id} style={{ border: `1px solid ${T.border}`, borderRadius: 10, padding: 12, marginTop: 10 }}>
+                  <ThreatImpactAIDraft
+                    threat={t}
+                    systemName={doc.description.system_name || "Sistema"}
+                    systemDescription={doc.description.processing_purposes || ""}
+                    personalDataCategories={doc.description.personal_data_categories || ""}
+                    onApply={(patch) => upThreat(t.id, patch)}
+                  />
                   {/* Fonte + descrizione */}
                   <div className="flex items-start gap-2 mb-3">
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
@@ -1275,6 +1318,13 @@ export default function DPIAPage() {
                         {riskBadge(t.residual_risk)}
                       </div>
                     </div>
+                    {t.residual_likelihood && t.residual_severity && (
+                      <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 11, color: T.muted }}>Rischio residuo:</span>
+                        {riskBadge(computeRiskLevel(t.residual_likelihood, t.residual_severity))}
+                        <span style={{ fontSize: 10, color: T.faint }}>→ {t.residual_risk || "calcola"}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -1471,6 +1521,13 @@ export default function DPIAPage() {
                 style={inputSt} placeholder="es. violazione dati, cambio finalità, nuova tecnologia…" /></div>
           </div>
         </div>
+
+        {/* Fase 3: Gap-check Art. 35(7) */}
+        <DpiaGapCheck
+          doc={doc}
+          onNavigateToStep={(s) => setStep(s as Step)}
+          onResult={(r) => setGapCheckResult(r)}
+        />
       </div>
     );
   }
@@ -1479,6 +1536,10 @@ export default function DPIAPage() {
 
   function renderStep5() {
     const c = doc.conclusion;
+    // Fase 5: staleness detection
+    const currentHash = computeDpiaHash(doc);
+    const isStale = savedHash !== null && savedHash !== currentHash && !stalenessDismissed;
+
     const compliantOptions: { value: "yes"|"no"|"conditional"; label: string; color: string; bg: string; border: string }[] = [
       { value: "yes", label: "Conforme — si può procedere", color: T.green, bg: T.greenBg, border: T.greenBdr },
       { value: "conditional", label: "Condizionalmente conforme", color: T.amber, bg: T.amberBg, border: T.amberBdr },
@@ -1487,6 +1548,26 @@ export default function DPIAPage() {
 
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {/* Fase 5: Staleness banner */}
+        {isStale && (
+          <div style={{ ...cardSt, padding: "12px 16px", background: T.amberBg, border: `1px solid ${T.amberBdr}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+            <div>
+              <p style={{ fontSize: 12, fontWeight: 600, color: T.amber, margin: "0 0 2px" }}>
+                ⚠ La DPIA potrebbe essere da rivedere
+              </p>
+              <p style={{ fontSize: 11, color: T.muted, margin: 0 }}>
+                I dati del trattamento sono cambiati dall&apos;ultimo sign-off. Verifica se la valutazione è ancora valida (WP248: la DPIA è un processo continuo).
+              </p>
+            </div>
+            <button
+              onClick={() => { writeToStorage("dpiaStaleness", currentHash); setSavedHash(currentHash); setStalenessDismissed(true); }}
+              style={{ fontSize: 11, fontWeight: 500, padding: "5px 10px", borderRadius: 6, border: `1px solid ${T.amberBdr}`, background: T.card, color: T.amber, cursor: "pointer", whiteSpace: "nowrap" }}
+            >
+              Segna come rivisto
+            </button>
+          </div>
+        )}
+
         {/* Compliant */}
         <div style={{ ...cardSt, padding: 16 }}>
           <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>Conclusione DPIA</p>
@@ -1787,7 +1868,7 @@ export default function DPIAPage() {
           )}
         </div>
 
-        <NextStepGuide dpia={doc} onNavigateToStep={(s) => setStep(s as Step)} />
+        <NextStepGuide dpia={doc} gapCheck={gapCheckResult} onNavigateToStep={(s) => setStep(s as Step)} />
       </div>
     </div>
   );
