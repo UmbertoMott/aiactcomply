@@ -182,10 +182,10 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit }: DpiaGuidedMo
         </button>
       </div>
 
-      {/* ── Layout 3 colonne ── */}
-      <div style={{ flex: 1, display: "grid", gridTemplateColumns: "200px 1fr 280px", minHeight: 0, overflow: "hidden" }}>
-        {/* SINISTRA — Avanzamento */}
-        <div style={{ borderRight: `1px solid ${T.border}`, overflow: "hidden" }}>
+      {/* ── Layout 3 colonne (flex per stabilità cross-browser) ── */}
+      <div style={{ flex: 1, display: "flex", minHeight: 0 }}>
+        {/* SINISTRA — Avanzamento (220px fissi) */}
+        <div style={{ width: 220, flexShrink: 0, borderRight: `1px solid ${T.border}`, overflow: "hidden", display: "flex", flexDirection: "column" }}>
           <DpiaProgressRail
             progress={progress}
             activeSection={activeSection}
@@ -194,13 +194,13 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit }: DpiaGuidedMo
           />
         </div>
 
-        {/* CENTRO — Viewer */}
-        <div ref={viewerRef} style={{ overflowY: "auto", background: T.bg }}>
+        {/* CENTRO — Documento live (prende tutto lo spazio rimasto) */}
+        <div ref={viewerRef} style={{ flex: 1, overflowY: "auto", background: T.bg, minWidth: 0 }}>
           <DpiaLivePreview doc={doc} activeSection={activeSection} />
         </div>
 
-        {/* DESTRA — Chat */}
-        <div style={{ borderLeft: `1px solid ${T.border}`, overflow: "hidden" }}>
+        {/* DESTRA — Chat (340px fissi) */}
+        <div style={{ width: 340, flexShrink: 0, borderLeft: `1px solid ${T.border}`, overflow: "hidden", display: "flex", flexDirection: "column" }}>
           <DpiaGuidedChat
             doc={doc}
             ghostClassifier={ghostClassifier}

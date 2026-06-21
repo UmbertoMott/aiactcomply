@@ -1,51 +1,27 @@
 "use client";
-// Pannello di avanzamento sinistro (tipo Risk Register).
-// - Barra overallPercent + lista sezioni Allegato 2
-// - Clic su sezione → scrolla il viewer all'anchor + notifica onSectionClick
-// - Evidenzia sezione attiva; mostra sotto-punti mancanti della sezione attiva
-import React from "react";
+import React, { useState } from "react";
+import { ChevronRight, CheckCircle, Clock } from "lucide-react";
 import type { GuidedDpiaProgress } from "@/lib/dpia/dpia-guided-progress";
 
-// ─── Token ───────────────────────────────────────────────────────────────────
 const T = {
   text:     "#0D1016",
   muted:    "rgba(0,0,0,0.42)",
   faint:    "rgba(0,0,0,0.22)",
   border:   "rgba(0,0,0,0.08)",
-  card:     "#ffffff",
-  bg:       "#f8f8f7",
+  bg:       "#fafafa",
   green:    "#23403a",
-  greenBg:  "rgba(35,64,58,0.07)",
+  greenBg:  "rgba(35,64,58,0.06)",
   greenBdr: "rgba(35,64,58,0.20)",
   amber:    "#b45309",
-  amberBg:  "rgba(180,83,9,0.06)",
-  amberBdr: "rgba(180,83,9,0.20)",
-  red:      "#b91c1c",
-  redBg:    "rgba(185,28,28,0.06)",
-  redBdr:   "rgba(185,28,28,0.18)",
 } as const;
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function StatusDot({ percent, size = 10 }: { percent: number; size?: number }) {
-  const color = percent === 100 ? T.green : percent > 0 ? T.amber : T.faint;
-  return (
-    <div style={{
-      width: size, height: size, borderRadius: "50%",
-      background: color, flexShrink: 0,
-    }} />
-  );
-}
 
 function ProgressBar({ pct, color = T.green }: { pct: number; color?: string }) {
   return (
-    <div style={{ height: 4, background: "rgba(0,0,0,0.06)", borderRadius: 2, overflow: "hidden" }}>
+    <div style={{ height: 3, background: "rgba(0,0,0,0.06)", borderRadius: 2, overflow: "hidden", marginTop: 4 }}>
       <div style={{ height: "100%", width: `${pct}%`, background: color, borderRadius: 2, transition: "width 0.35s ease" }} />
     </div>
   );
 }
-
-// ─── Props ───────────────────────────────────────────────────────────────────
 
 export interface DpiaProgressRailProps {
   progress: GuidedDpiaProgress;
@@ -55,105 +31,102 @@ export interface DpiaProgressRailProps {
 }
 
 export function DpiaProgressRail({
-  progress, activeSection, onSectionClick, onSubPointClick,
+  progress, activeSection, onSectionClick,
 }: DpiaProgressRailProps) {
+  const [expanded, setExpanded] = useState<Set<string>>(new Set(["screening"]));
   const pct = progress.overallPercent;
   const globalColor = pct >= 80 ? T.green : pct >= 40 ? T.amber : T.faint;
 
+  const toggle = (key: string) =>
+    setExpanded(prev => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+
   return (
-    <div style={{
-      display: "flex", flexDirection: "column", gap: 0,
-      height: "100%", background: T.bg, overflowY: "auto",
-    }}>
-      {/* ── Header globale ── */}
-      <div style={{ padding: "16px 14px 10px", borderBottom: `1px solid ${T.border}` }}>
-        <p style={{ fontSize: 11, fontWeight: 700, color: T.text, margin: "0 0 6px" }}>
-          Avanzamento DPIA
-        </p>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-          <p style={{ fontSize: 10, color: T.muted, margin: 0 }}>Completamento complessivo</p>
-          <span style={{ fontSize: 14, fontWeight: 700, color: globalColor }}>{pct}%</span>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: T.bg }}>
+      {/* Header */}
+      <div style={{ padding: "14px 14px 10px", borderBottom: `1px solid ${T.border}` }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            Avanzamento
+          </span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: globalColor, fontFamily: "monospace" }}>
+            {pct}%
+          </span>
         </div>
         <ProgressBar pct={pct} color={globalColor} />
-        <p style={{ fontSize: 9, color: T.faint, margin: "5px 0 0" }}>
-          Pesi Allegato 2 WP248 — somma = 100
-        </p>
       </div>
 
-      {/* ── Lista sezioni ── */}
-      <div style={{ flex: 1, overflowY: "auto" }}>
+      {/* Sezioni */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "8px" }}>
         {progress.sections.map(sec => {
-          const isActive = activeSection === sec.key;
-          const secColor = sec.percent === 100 ? T.green : sec.percent > 0 ? T.amber : T.faint;
-          const missing  = sec.subPoints.filter(sp => sp.required && sp.status !== "done");
+          const isActive   = activeSection === sec.key;
+          const isExpanded = expanded.has(sec.key);
+          const doneCount  = sec.subPoints.filter(sp => sp.status === "done").length;
+          const totalCount = sec.subPoints.length;
+          const secColor   = sec.percent === 100 ? T.green : sec.percent > 0 ? T.amber : T.faint;
+
+          const borderColor = isActive
+            ? T.greenBdr
+            : sec.percent === 100
+            ? "rgba(35,64,58,0.12)"
+            : "rgba(0,0,0,0.07)";
+          const bg = isActive ? T.greenBg : "transparent";
 
           return (
             <div key={sec.key} style={{
-              borderBottom: `1px solid ${T.border}`,
-              background: isActive ? T.greenBg : "transparent",
-              transition: "background 0.15s ease",
+              border: `1px solid ${borderColor}`,
+              background: bg,
+              borderRadius: 8,
+              overflow: "hidden",
+              marginBottom: 4,
             }}>
-              {/* Riga sezione — cliccabile */}
               <button
-                onClick={() => onSectionClick(sec.key, sec.anchor)}
+                onClick={() => { onSectionClick(sec.key, sec.anchor); toggle(sec.key); }}
                 style={{
-                  width: "100%", textAlign: "left", border: "none", cursor: "pointer",
-                  background: "none", padding: "10px 14px",
-                  display: "flex", alignItems: "center", gap: 8,
+                  width: "100%", textAlign: "left", border: "none",
+                  background: "transparent", padding: "9px 10px",
+                  cursor: "pointer", display: "flex", alignItems: "center", gap: 8,
                 }}
+                onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "rgba(0,0,0,0.02)"; }}
+                onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
               >
-                <StatusDot percent={sec.percent} />
+                <div style={{ flexShrink: 0 }}>
+                  {sec.percent === 100
+                    ? <CheckCircle size={14} style={{ color: T.green }} />
+                    : sec.percent > 0
+                    ? <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${T.amber}` }} />
+                    : <Clock size={14} style={{ color: T.faint }} />
+                  }
+                </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-                    <p style={{ fontSize: 11, fontWeight: isActive ? 700 : 500, color: T.text, margin: 0, lineHeight: 1.3 }}>
-                      {sec.label}
-                    </p>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: secColor, flexShrink: 0, marginLeft: 4 }}>
-                      {sec.percent}%
-                    </span>
+                  <div style={{
+                    fontSize: 11.5,
+                    fontWeight: isActive ? 700 : 600,
+                    color: sec.percent === 100 ? T.green : T.text,
+                    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                  }}>
+                    {sec.label}
                   </div>
-                  <p style={{ fontSize: 9, color: T.faint, margin: "1px 0 3px" }}>
-                    {sec.legalRef} · peso {sec.weight}
-                  </p>
                   <ProgressBar pct={sec.percent} color={secColor} />
                 </div>
+                <ChevronRight size={11} style={{
+                  flexShrink: 0, color: "rgba(0,0,0,0.25)",
+                  transform: isExpanded ? "rotate(90deg)" : "none",
+                  transition: "transform 0.15s",
+                }} />
               </button>
 
-              {/* Sotto-punti mancanti — visibili solo se sezione attiva */}
-              {isActive && missing.length > 0 && (
-                <div style={{ padding: "0 14px 10px 32px" }}>
-                  <p style={{ fontSize: 9, color: T.muted, margin: "0 0 4px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>
-                    Da completare
-                  </p>
-                  {missing.slice(0, 6).map(sp => (
-                    <button
-                      key={sp.id}
-                      onClick={() => onSubPointClick(sp.id)}
-                      style={{
-                        display: "block", width: "100%", textAlign: "left",
-                        background: "none", border: "none", cursor: "pointer",
-                        padding: "3px 0",
-                        fontSize: 10, color: T.amber,
-                        textDecoration: "underline", textDecorationColor: "rgba(180,83,9,0.3)",
-                      }}
-                    >
-                      → {sp.label}
-                    </button>
-                  ))}
-                  {missing.length > 6 && (
-                    <p style={{ fontSize: 9, color: T.faint, margin: "2px 0 0" }}>
-                      e altri {missing.length - 6}…
-                    </p>
+              {isExpanded && (
+                <div style={{ padding: "0 10px 8px 34px" }}>
+                  <span style={{ fontSize: 10, color: sec.percent === 100 ? T.green : T.muted }}>
+                    {doneCount} / {totalCount} completati
+                  </span>
+                  {sec.legalRef && (
+                    <span style={{ fontSize: 9, color: T.faint, marginLeft: 5 }}>· {sec.legalRef}</span>
                   )}
-                </div>
-              )}
-
-              {/* Label stato sezione attiva */}
-              {isActive && missing.length === 0 && sec.status !== "not_started" && (
-                <div style={{ padding: "0 14px 8px 32px" }}>
-                  <p style={{ fontSize: 9, color: T.green, margin: 0, fontWeight: 600 }}>
-                    ✓ {sec.detail}
-                  </p>
                 </div>
               )}
             </div>
@@ -161,11 +134,10 @@ export function DpiaProgressRail({
         })}
       </div>
 
-      {/* ── Footer ── */}
-      <div style={{ padding: "10px 14px", borderTop: `1px solid ${T.border}` }}>
+      {/* Footer */}
+      <div style={{ padding: "8px 12px", borderTop: `1px solid ${T.border}` }}>
         <p style={{ fontSize: 9, color: T.faint, margin: 0, lineHeight: 1.4 }}>
-          Clic su una sezione → il viewer scorre all'ancora corrispondente.
-          I sotto-punti in arancione rimandano alla domanda nella chat.
+          WP248 Allegato 2 — pesi somma = 100
         </p>
       </div>
     </div>
