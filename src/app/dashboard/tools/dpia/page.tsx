@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback, CSSProperties } from "
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import { DPIATemplateViewer } from "@/components/dpia/DPIATemplateViewer";
 import { computeDpiaProgress } from "@/lib/dpia/dpia-progress";
+import { DpiaGuidedMode } from "@/components/dpia/DpiaGuidedMode";
 import { draftDpiaSections } from "@/app/actions/draftDpiaSections";
 import { buildComplianceContextFromStorage } from "@/hooks/useComplianceContext";
 import { checkPriorConsultation, type PriorConsultationResult } from "@/app/actions/checkPriorConsultation";
@@ -354,6 +355,8 @@ export default function DPIAPage() {
   const [savedHash, setSavedHash] = useState<string | null>(null);
   // Template viewer panel
   const [showTemplateViewer, setShowTemplateViewer] = useState(false);
+  // Modalità guidata vs form a 6 step
+  const [guidedMode, setGuidedMode] = useState(false);
 
   // Load from storage on mount
   useEffect(() => {
@@ -1661,6 +1664,54 @@ export default function DPIAPage() {
 
   const steps = [renderStep0, renderStep1, renderStep2, renderStep3, renderStep4, renderStep5];
 
+  // ── Ghost data per guided mode ─────────────────────────────────────────────
+  const ghostClassifier = readFromStorage<ClassifierResult>("classifier");
+  const ghostDataAudit  = readFromStorage<DataAuditResult>("dataAudit");
+
+  // ── Guided mode: layout dedicato (3 colonne, full-height) ─────────────────
+  if (guidedMode) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: T.bg }}>
+        {/* Shared headers sopra le 3 colonne */}
+        <div style={{ padding: "12px 20px 0", flexShrink: 0 }}>
+          <SystemSelector checkProhibited={true} />
+          <AssessmentStepper currentTool="dpia" />
+          <AssessmentSharedHeader />
+        </div>
+        {/* Toggle tra le due modalità */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 0,
+          padding: "0 20px 0", borderBottom: `1px solid ${T.border}`,
+          background: T.card, flexShrink: 0,
+        }}>
+          <button
+            onClick={() => setGuidedMode(false)}
+            style={{
+              padding: "8px 16px", fontSize: 11, fontWeight: 600,
+              border: "none", background: "none", cursor: "pointer",
+              color: T.muted, borderBottom: "2px solid transparent",
+            }}
+          >
+            Form a 6 step
+          </button>
+          <button
+            style={{
+              padding: "8px 16px", fontSize: 11, fontWeight: 700,
+              border: "none", background: "none", cursor: "pointer",
+              color: "#23403a", borderBottom: "2px solid #23403a",
+            }}
+          >
+            ✦ DPIA guidata
+          </button>
+        </div>
+        {/* Layout 3 colonne */}
+        <div style={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
+          <DpiaGuidedMode ghostClassifier={ghostClassifier} ghostDataAudit={ghostDataAudit} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ minHeight: "100vh", background: T.bg, padding: "24px 32px" }}>
       <SystemSelector checkProhibited={true} />
@@ -1677,6 +1728,19 @@ export default function DPIAPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {/* Guided mode toggle */}
+          <button
+            onClick={() => setGuidedMode(true)}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              fontSize: 11, fontWeight: 700, padding: "6px 12px", borderRadius: 8,
+              border: "1px solid rgba(35,64,58,0.25)", background: "rgba(35,64,58,0.06)",
+              color: "#23403a", cursor: "pointer",
+            }}
+          >
+            <span style={{ fontSize: 12 }}>✦</span>
+            <span>DPIA guidata</span>
+          </button>
           {/* Template viewer button */}
           {(() => {
             const progress = computeDpiaProgress(doc);
