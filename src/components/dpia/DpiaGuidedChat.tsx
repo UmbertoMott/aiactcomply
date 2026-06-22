@@ -31,6 +31,24 @@ function quickReplies(fieldType: string): string[] {
   return [];
 }
 
+// Estrae un esempio concreto per ogni opzione boolean dagli examples del sotto-punto.
+// Gli examples sono già strutturati come "Sì — ...", "No — ...", "Parzialmente — ...".
+function optionExamples(examples: string[], fieldType: string): Record<string, string> | null {
+  const opts = fieldType === "select_ynp" ? ["Sì", "No", "Parzialmente"]
+             : fieldType === "select_yn"  ? ["Sì", "No"]
+             : null;
+  if (!opts) return null;
+  const result: Record<string, string> = {};
+  for (const opt of opts) {
+    const ex = examples.find(e => e.toLowerCase().startsWith(opt.toLowerCase()));
+    if (ex) {
+      // Rimuove il prefisso "Sì — " o "No — " o "Parzialmente — "
+      result[opt] = ex.replace(new RegExp(`^${opt}\\s*[\\u2014\\-]\\s*`, "i"), "");
+    }
+  }
+  return Object.keys(result).length > 0 ? result : null;
+}
+
 export interface DpiaGuidedChatProps {
   doc: DpiaGuidedDoc;
   ghostClassifier?: ClassifierResult | null;
@@ -226,9 +244,45 @@ export function DpiaGuidedChat({
               {sp.question}
             </p>
 
+            {/* Esempi concreti per ogni opzione (solo boolean, sopra i pulsanti) */}
+            {!isDone && qr.length > 0 && (() => {
+              const opEx = optionExamples(sp.examples, sp.fieldType);
+              if (!opEx) return null;
+              return (
+                <div style={{
+                  marginTop: 10, padding: "9px 11px",
+                  background: "rgba(0,0,0,0.025)", borderRadius: 8,
+                  border: "1px solid rgba(0,0,0,0.06)",
+                  display: "flex", flexDirection: "column", gap: 5,
+                }}>
+                  <span style={{ fontSize: 9, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    Esempi
+                  </span>
+                  {qr.map(opt => {
+                    const ex = opEx[opt];
+                    if (!ex) return null;
+                    return (
+                      <div key={opt} style={{ display: "flex", gap: 7, alignItems: "flex-start" }}>
+                        <span style={{
+                          fontSize: 9.5, fontWeight: 700, color: T.text,
+                          flexShrink: 0, minWidth: 70,
+                          paddingTop: 1,
+                        }}>
+                          {opt}:
+                        </span>
+                        <span style={{ fontSize: 10.5, color: T.muted, lineHeight: 1.45, fontStyle: "italic" }}>
+                          {ex.length > 110 ? ex.slice(0, 107) + "…" : ex}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+
             {/* Quick replies Sì / No / Parzialmente */}
             {!isDone && qr.length > 0 && (
-              <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
+              <div style={{ marginTop: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
                 {qr.map(opt => (
                   <button
                     key={opt}
