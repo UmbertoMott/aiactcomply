@@ -1,8 +1,6 @@
 "use client";
-// Wrapper della modalità "DPIA guidata" — layout 3 colonne:
-//   [AVANZAMENTO 220px] [VIEWER ridimensionabile] [splitter 6px] [CHAT flex:1]
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Download } from "lucide-react";
+import { Download, X } from "lucide-react";
 import { readFromStorage, writeToStorage } from "@/lib/dossier/storage-schema";
 import type { ClassifierResult, DataAuditResult } from "@/lib/dossier/storage-schema";
 import { patchDPIA, patchShared } from "@/lib/assessment/assessment-helpers";
@@ -24,8 +22,8 @@ const T = {
   amber:  "#b45309",
 } as const;
 
-const RAIL_W    = 220;
-const SPLITTER  = 6;
+const RAIL_W   = 220;
+const SPLITTER = 6;
 
 function simpleHash(obj: unknown): string {
   const s = JSON.stringify(obj ?? "");
@@ -46,35 +44,39 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
     return saved ?? createEmptyGuidedDoc();
   });
 
-  const [activeSection, setActiveSection]     = useState<string | null>("screening");
+  const [activeSection, setActiveSection]       = useState<string | null>(null);
   const [forcedSubPointId, setForcedSubPointId] = useState<string | null>(null);
-  const [pdfLoading, setPdfLoading]           = useState(false);
-  const [stale, setStale]                     = useState(false);
-  const [lastSaved, setLastSaved]             = useState<Date | null>(null);
+  const [pdfLoading, setPdfLoading]             = useState(false);
+  const [stale, setStale]                       = useState(false);
+  const [lastSaved, setLastSaved]               = useState<Date | null>(null);
 
-  // ── Resize splitter ────────────────────────────────────────────────────────
-  const [previewWidth, setPreviewWidth] = useState(0); // 0 = non ancora misurato
-  const [isResizing, setIsResizing]     = useState(false);
+  // ── Documento: visibile solo se cliccato dal rail ─────────────────────────
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [docWidth, setDocWidth]     = useState(380);
+  const [isResizing, setIsResizing] = useState(false);
+
   const layoutRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<HTMLDivElement>(null);
 
-  // Al mount, divide lo spazio disponibile a metà tra viewer e chat
-  useEffect(() => {
-    const el = layoutRef.current;
-    if (!el) return;
-    const avail = el.clientWidth - RAIL_W - SPLITTER;
-    setPreviewWidth(Math.max(260, Math.floor(avail / 2)));
-  }, []);
+  // Al primo click apertura: divide lo spazio disponibile a metà
+  const openViewer = useCallback(() => {
+    if (!viewerOpen) {
+      const total = layoutRef.current?.clientWidth ?? 1200;
+      const avail = total - RAIL_W - SPLITTER;
+      setDocWidth(Math.max(280, Math.floor(avail / 2)));
+    }
+    setViewerOpen(true);
+  }, [viewerOpen]);
 
   const startResize = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     setIsResizing(true);
     const startX     = e.clientX;
-    const startWidth = previewWidth;
+    const startWidth = docWidth;
     const onMove = (ev: MouseEvent) => {
       const total = layoutRef.current?.clientWidth ?? 1200;
-      const max   = (total - RAIL_W - SPLITTER) * 0.72;
-      setPreviewWidth(Math.min(Math.max(startWidth + (ev.clientX - startX), 220), max));
+      const max   = (total - RAIL_W - SPLITTER) * 0.70;
+      setDocWidth(Math.min(Math.max(startWidth + (ev.clientX - startX), 260), max));
     };
     const onUp = () => {
       setIsResizing(false);
@@ -83,7 +85,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
     };
     document.addEventListener("mousemove", onMove);
     document.addEventListener("mouseup", onUp);
-  }, [previewWidth]);
+  }, [docWidth]);
 
   const progress = computeGuidedDpiaProgress(doc);
 
@@ -126,11 +128,15 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
 
   const handleSectionClick = useCallback((sectionKey: string, anchor: string) => {
     setActiveSection(sectionKey);
-    if (viewerRef.current) {
-      const el = viewerRef.current.querySelector(`#${anchor}`);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, []);
+    openViewer();
+    // scroll al anchor dopo che il viewer è montato
+    setTimeout(() => {
+      if (viewerRef.current) {
+        const el = viewerRef.current.querySelector(`#${anchor}`);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 50);
+  }, [openViewer]);
 
   const handleSubPointClick = useCallback((subPointId: string) => {
     setForcedSubPointId(subPointId);
@@ -163,6 +169,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
+
       {/* ── Toolbar ── */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -172,7 +179,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <p style={{ fontSize: 12, fontWeight: 700, color: T.text, margin: 0 }}>DPIA guidata</p>
           <span style={{ fontSize: 10, color: T.muted }}>
-            Allegato 2 WP248 · {progress.overallPercent}% completata
+            WP248 Allegato 2 · {progress.overallPercent}% completata
           </span>
           {lastSaved && (
             <span style={{ fontSize: 9, color: T.green }}>✓ Salvato automaticamente</span>
@@ -219,14 +226,18 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
         </div>
       </div>
 
-      {/* ── Layout 3 colonne con splitter trascinabile ── */}
-      <div ref={layoutRef} style={{ flex: 1, display: "flex", minHeight: 0, userSelect: isResizing ? "none" : "auto" }}>
+      {/* ── Layout: [Rail] [Doc?] [Splitter?] [Chat] ── */}
+      <div
+        ref={layoutRef}
+        style={{ flex: 1, display: "flex", minHeight: 0, userSelect: isResizing ? "none" : "auto" }}
+      >
 
-        {/* SINISTRA — Rail (220px fissi) */}
+        {/* SINISTRA — Avanzamento (220px fissi) */}
         <div style={{
           width: RAIL_W, flexShrink: 0,
           borderRight: `1px solid ${T.border}`,
           overflow: "hidden", display: "flex", flexDirection: "column",
+          background: "#fafafa",
         }}>
           <DpiaProgressRail
             progress={progress}
@@ -236,33 +247,67 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
           />
         </div>
 
-        {/* CENTRO — Documento live (larghezza uguale alla chat all'avvio, poi ridimensionabile) */}
-        <div ref={viewerRef} style={{
-          width: previewWidth || undefined,
-          flex: previewWidth ? undefined : 1,
-          flexShrink: 0,
-          overflowY: "auto", background: T.bg,
-          minWidth: 220,
-        }}>
-          <DpiaLivePreview doc={doc} activeSection={activeSection} />
-        </div>
+        {/* CENTRO — Documento live (solo se viewerOpen) */}
+        {viewerOpen && (
+          <>
+            <div style={{
+              width: docWidth, flexShrink: 0, minWidth: 260, maxWidth: "65%",
+              display: "flex", flexDirection: "column",
+              border: "none", borderLeft: `1px solid ${T.border}`,
+              overflow: "hidden", background: T.card,
+            }}>
+              {/* Header stile Risk Register */}
+              <div style={{
+                padding: "8px 12px", borderBottom: `1px solid rgba(0,0,0,0.07)`,
+                background: "#fafafa", display: "flex", alignItems: "center", gap: 8, flexShrink: 0,
+              }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 9, fontWeight: 600, color: "rgba(0,0,0,0.35)", letterSpacing: "0.8px", textTransform: "uppercase", margin: 0 }}>
+                    Art. 35 GDPR · Documento
+                  </p>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: T.text, margin: "1px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    DPIA — WP248 rev.01
+                  </p>
+                </div>
+                <button
+                  onClick={() => setViewerOpen(false)}
+                  title="Chiudi documento"
+                  style={{
+                    flexShrink: 0, width: 24, height: 24, borderRadius: 12,
+                    background: "rgba(0,0,0,0.05)", border: "none", cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: "rgba(0,0,0,0.45)",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.10)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "rgba(0,0,0,0.05)")}
+                >
+                  <X size={12} />
+                </button>
+              </div>
+              {/* Contenuto scrollabile */}
+              <div ref={viewerRef} style={{ flex: 1, overflowY: "auto", padding: "16px 20px", background: T.bg }}>
+                <DpiaLivePreview doc={doc} activeSection={activeSection} />
+              </div>
+            </div>
 
-        {/* SPLITTER trascinabile */}
-        <div
-          onMouseDown={startResize}
-          style={{
-            width: SPLITTER, flexShrink: 0, cursor: "col-resize",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            background: isResizing ? "rgba(0,0,0,0.10)" : "transparent",
-            transition: isResizing ? "none" : "background 0.15s",
-          }}
-          onMouseEnter={e => { if (!isResizing) e.currentTarget.style.background = "rgba(0,0,0,0.06)"; }}
-          onMouseLeave={e => { if (!isResizing) e.currentTarget.style.background = "transparent"; }}
-        >
-          <div style={{ width: 2, height: 28, borderRadius: 1, background: "rgba(0,0,0,0.18)" }} />
-        </div>
+            {/* Splitter trascinabile */}
+            <div
+              onMouseDown={startResize}
+              style={{
+                width: SPLITTER, flexShrink: 0, cursor: "col-resize",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                background: isResizing ? "rgba(0,0,0,0.10)" : "transparent",
+                transition: isResizing ? "none" : "background 0.15s",
+              }}
+              onMouseEnter={e => { if (!isResizing) e.currentTarget.style.background = "rgba(0,0,0,0.06)"; }}
+              onMouseLeave={e => { if (!isResizing) e.currentTarget.style.background = "transparent"; }}
+            >
+              <div style={{ width: 2, height: 28, borderRadius: 1, background: "rgba(0,0,0,0.18)" }} />
+            </div>
+          </>
+        )}
 
-        {/* DESTRA — Chat (flex:1 — prende lo spazio rimanente) */}
+        {/* DESTRA — Chat (flex:1 — prende tutto se documento chiuso) */}
         <div style={{
           flex: 1, minWidth: 0,
           borderLeft: `1px solid ${T.border}`,
@@ -277,6 +322,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
             forcedSubPointId={forcedSubPointId}
           />
         </div>
+
       </div>
     </div>
   );
