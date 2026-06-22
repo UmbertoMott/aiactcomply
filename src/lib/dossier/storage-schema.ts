@@ -428,6 +428,7 @@ export const STORAGE_KEYS = {
   friaStaleness: "aicomply_fria_staleness",
   dpiaStaleness: "aicomply_dpia_staleness",
   dpiaGuided:    "aicomply_dpia_guided",
+  friaGuided:    "aicomply_fria_guided",
 } as const;
 
 // ── Project-scoped storage key ───────────────────────────────────────────────

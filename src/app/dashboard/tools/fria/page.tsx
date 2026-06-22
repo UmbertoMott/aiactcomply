@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
+import { FriaGuidedMode } from "@/components/fria/FriaGuidedMode";
 import { RightsCatalog } from "@/components/fria/RightsCatalog";
 import { ContextCatalog } from "@/components/fria/ContextCatalog";
 import { NextStepGuide } from "@/components/fria/NextStepGuide";
@@ -225,6 +226,7 @@ export default function FRIAPage() {
   const [loadingAiSummary, setLoadingAiSummary] = useState(false);
   const [aiSummaryIsFromAI, setAiSummaryIsFromAI] = useState(false);
   const [stalenessWarning, setStalenessWarning] = useState(false);
+  const [guidedMode, setGuidedMode] = useState(false);
 
   // Leggi dati correlati per il banner contestuale
   const riskData   = useMemo(() => readFromStorage<RiskManagerResult>("riskManager"), []);
@@ -1471,6 +1473,15 @@ export default function FRIAPage() {
     );
   }
 
+  // ─── Guided mode early return ─────────────────────────────────────────────
+  if (guidedMode) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
+        <FriaGuidedMode onExitGuidedMode={() => setGuidedMode(false)} />
+      </div>
+    );
+  }
+
   // ─── Main render ──────────────────────────────────────────────────────────
   return (
     <div className="w-full" style={{ display: "flex", flexDirection: "column", gap: 0, minHeight: 0, fontFamily: "var(--font-inter, system-ui)" }}>
@@ -1478,6 +1489,46 @@ export default function FRIAPage() {
       <SystemSelector checkProhibited={true} />
       <AssessmentStepper currentTool="fria" />
       <AssessmentSharedHeader />
+
+      {/* ── Mode selector ────────────────────────────────────────────────────── */}
+      <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+        {([
+          {
+            key: "form",
+            title: "Form strutturato",
+            desc: "Modulo completo Art. 27 — scenari, diritti, deployment, stakeholder.",
+            active: !guidedMode,
+            onClick: () => setGuidedMode(false),
+          },
+          {
+            key: "guided",
+            title: "FRIA guidata",
+            desc: "Modalità conversazionale DIHR/ECNL · 36 domande · documento live.",
+            active: guidedMode,
+            onClick: () => setGuidedMode(true),
+          },
+        ] as { key: string; title: string; desc: string; active: boolean; onClick: () => void }[]).map((m) => (
+          <button
+            key={m.key}
+            onClick={m.onClick}
+            style={{
+              flex: 1, textAlign: "left", padding: "12px 14px", borderRadius: 10,
+              border: m.active ? "1.5px solid #23403a" : "1px solid rgba(0,0,0,0.10)",
+              background: m.active ? "rgba(35,64,58,0.05)" : "#fff",
+              cursor: m.active ? "default" : "pointer",
+              transition: "border-color 0.15s, background 0.15s",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 3 }}>
+              {m.active && (
+                <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#23403a", flexShrink: 0 }} />
+              )}
+              <p style={{ fontSize: 12, fontWeight: 700, color: "#0D1016", margin: 0 }}>{m.title}</p>
+            </div>
+            <p style={{ fontSize: 10, color: "rgba(0,0,0,0.45)", margin: 0 }}>{m.desc}</p>
+          </button>
+        ))}
+      </div>
 
       {/* ── AI Draft Generator Banner (Art. 27) ─────────────────────────────── */}
       <div style={{
