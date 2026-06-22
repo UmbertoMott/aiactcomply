@@ -44,11 +44,21 @@ const TIER_LABELS: Record<string, string> = {
   minimal: "Minimal", limited: "Limited", high_risk: "High-risk", gpai: "GPAI", unclassified: "Non classificato",
 };
 
-function SectionTitle({ num, title }: { num: string; title: string }) {
+function SectionTitle({ sectionId, num, title, article }: { sectionId?: string; num: string; title: string; article?: string }) {
   return (
-    <h4 style={{ fontSize: 14, fontWeight: 700, color: "#0D1016", margin: "22px 0 10px", borderBottom: "1px solid rgba(0,0,0,0.15)", paddingBottom: 5 }}>
-      {num}. {title}
-    </h4>
+    <div id={sectionId} style={{
+      background: "#0D1016", color: "#ffffff",
+      borderRadius: 6, padding: "11px 18px",
+      margin: "20px 0 12px",
+      display: "flex", alignItems: "center", justifyContent: "space-between",
+    }}>
+      <span style={{ fontSize: 13, fontWeight: 700, fontFamily: SANS }}>{num}. {title}</span>
+      {article && (
+        <span style={{ fontSize: 9.5, opacity: 0.5, letterSpacing: "0.05em", fontFamily: SANS, whiteSpace: "nowrap", marginLeft: 12 }}>
+          {article}
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -135,7 +145,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
       {/* ── Sezione 3 — Identificazione ── */}
       {hasIdentification && (
         <>
-          <SectionTitle num="3" title="Identificazione del sistema AI e del contesto di conformità" />
+          <SectionTitle sectionId="sec-identification" num="3" title="Identificazione del sistema AI e del contesto di conformità" article="Art. 9(1) · AI Act" />
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
             <tbody>
               {idRows.map(([label, v]) => (
@@ -152,7 +162,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
       {/* ── Sezione 5 — Registro dei rischi ── */}
       {hasRisks && (
         <>
-          <SectionTitle num="5" title="Registro dei rischi" />
+          <SectionTitle sectionId="sec-risks" num="5" title="Registro dei rischi" article="Art. 9(2)(a)-(b)" />
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, fontFamily: SANS }}>
               <thead>
@@ -215,7 +225,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
       {/* ── Sezione 6 — Gap check ── */}
       {hasGap && doc.gapCheck && (
         <>
-          <SectionTitle num="6" title="Verifica di copertura Art. 9 (gap check)" />
+          <SectionTitle sectionId="sec-gap" num="6" title="Verifica di copertura Art. 9 (gap check)" article="Art. 9(2)(a)-(d)" />
           {doc.gapCheck.coverageScore !== undefined && (
             <p style={{ fontSize: 13, margin: "0 0 6px" }}>
               <strong>Punteggio di copertura:</strong>{" "}
@@ -262,7 +272,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
       {/* ── Sezione 7 — Monitoraggio ── */}
       {hasReview && (
         <>
-          <SectionTitle num="7" title="Monitoraggio continuo e ciclo di revisione" />
+          <SectionTitle sectionId="sec-review" num="7" title="Monitoraggio continuo e ciclo di revisione" article="Art. 9(2)(c) · Art. 72" />
           {alerts.length > 0 && (
             <div style={{ marginBottom: 10, fontFamily: SANS }}>
               {alerts.map((a, i) => (
@@ -308,7 +318,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
       {/* ── Sezione 8 — Sign-off ── */}
       {hasSignOff && doc.signOff && (
         <>
-          <SectionTitle num="8" title="Approvazione e firme" />
+          <SectionTitle sectionId="sec-signoff" num="8" title="Approvazione e firme" article="Art. 9(1)" />
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
             <tbody>
               {([
@@ -339,7 +349,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
       {/* ── Allegati tecnici (fasi extra-template, solo se compilate) ── */}
       {annexes.map((annex, i) => (
         <div key={annex.title}>
-          <SectionTitle num={`A${i + 1}`} title={`Allegato — ${annex.title} (${annex.article})`} />
+          <SectionTitle sectionId={`sec-annex-${i}`} num={`A${i + 1}`} title={`Allegato — ${annex.title} (${annex.article})`} />
           {Object.entries(annex.fields).map(([k, v]) => {
             const displayVal = Array.isArray(v) ? (v as string[]).join(", ") : typeof v === "boolean" ? (v ? "Sì" : "No") : String(v);
             const label = k.replace(/([A-Z])/g, " $1").replace(/_/g, " ").replace(/^./, c => c.toUpperCase());

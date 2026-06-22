@@ -16,6 +16,7 @@ import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { RiskRegisterViewer } from "./components/RiskRegisterViewer";
 import { buildRiskRegisterDocument, buildAnnexSections, shouldShowGpaiModule, type AnnexSection } from "@/lib/risk/risk-register-mapper";
 import type { RiskRegisterDocument } from "@/lib/risk/risk-register-types";
+import { computeRegisterProgress, type SectionProgress } from "@/lib/risk/risk-register-progress";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -187,6 +188,71 @@ function PhaseRow({
   );
 }
 
+// ─── Document section row (mappa sezione documento → click → scroll nel PDF) ──
+
+const SECTION_ANCHORS: Record<string, string> = {
+  identification: "sec-identification",
+  risks:          "sec-risks",
+  gapCheck:       "sec-gap",
+  reviewLog:      "sec-review",
+  signOff:        "sec-signoff",
+};
+
+function SectionRow({ section, onOpen }: { section: SectionProgress; onOpen: (anchor: string) => void }) {
+  const anchor = SECTION_ANCHORS[section.key] ?? "";
+  const isComplete = section.percent === 100;
+  const hasProgress = section.percent > 0 && !isComplete;
+
+  return (
+    <div style={{
+      border: `1px solid ${isComplete ? "rgba(22,163,74,0.2)" : hasProgress ? "rgba(180,83,9,0.2)" : "rgba(0,0,0,0.07)"}`,
+      borderRadius: 8, overflow: "hidden", marginBottom: 4,
+      background: isComplete ? "rgba(22,163,74,0.04)" : "transparent",
+    }}>
+      <button
+        onClick={() => onOpen(anchor)}
+        className="w-full flex items-center gap-2.5 text-left"
+        style={{ padding: "8px 10px", cursor: "pointer", background: "transparent", width: "100%", border: "none" }}
+        onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.02)")}
+        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+      >
+        <div style={{ flexShrink: 0 }}>
+          {isComplete ? (
+            <CheckCircle size={14} style={{ color: "#16a34a" }} />
+          ) : hasProgress ? (
+            <div style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid #b45309", background: "rgba(180,83,9,0.12)" }} />
+          ) : (
+            <Clock size={14} style={{ color: "rgba(0,0,0,0.2)" }} />
+          )}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            fontSize: 11.5, fontWeight: 600,
+            fontFamily: "var(--font-inter, system-ui)",
+            color: isComplete ? "#15803d" : "#0D1016",
+            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          }}>
+            {section.label}
+          </div>
+          <div style={{
+            fontSize: 10, fontFamily: "var(--font-inter, system-ui)",
+            color: "rgba(0,0,0,0.4)",
+            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          }}>
+            {section.detail}
+          </div>
+        </div>
+        <ChevronRight size={11} style={{ flexShrink: 0, color: "rgba(0,0,0,0.25)" }} />
+      </button>
+      {hasProgress && (
+        <div style={{ height: 2, background: "rgba(0,0,0,0.04)" }}>
+          <div style={{ height: "100%", width: `${section.percent}%`, background: "#b45309", transition: "width 0.4s" }} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Error boundary ──────────────────────────────────────────────────────────
 
 class ViewerErrorBoundary extends React.Component<
@@ -246,15 +312,22 @@ function ToolbarBtn({ icon, title, onClick, active }: {
 }
 
 function PhaseDocColumn({
-  registerDoc, annexes, editedHtml, onSaveEdit, onClose,
+  registerDoc, annexes, editedHtml, onSaveEdit, onClose, scrollToAnchor,
 }: {
   registerDoc: RiskRegisterDocument; annexes: AnnexSection[];
   editedHtml?: string; onSaveEdit: (html: string) => void;
-  onClose: () => void;
+  onClose: () => void; scrollToAnchor?: string | null;
 }) {
   const [editing, setEditing] = useState(false);
   const editRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!scrollToAnchor || !scrollContainerRef.current) return;
+    const el = scrollContainerRef.current.querySelector(`#${scrollToAnchor}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [scrollToAnchor]);
 
   const exec = (cmd: string, value?: string) => {
     document.execCommand(cmd, false, value);
@@ -362,7 +435,7 @@ function PhaseDocColumn({
       </div>
 
       {/* Corpo — pagina stile documento */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#f0f0ef", display: "flex", flexDirection: "column" }}>
+      <div ref={scrollContainerRef} style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#f0f0ef", display: "flex", flexDirection: "column" }}>
         {editing ? (
           /* Modalità modifica: contentEditable puro, nessun componente React dentro */
           <div style={docStyle}>
@@ -563,19 +636,23 @@ export default function RiskManagerPage() {
   const [completedPhases, setCompletedPhases] = useState<RiskPhaseId[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [viewerPhase, setViewerPhase] = useState<Phase | null>(null);
   const [docEdits, setDocEdits] = useState<Partial<Record<RiskPhaseId, string>>>({});
   const [docWidth, setDocWidth] = useState(420);
   const [isResizing, setIsResizing] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerAnchor, setViewerAnchor] = useState<string | null>(null);
   const layoutRef = useRef<HTMLDivElement>(null);
 
-  // All'apertura, documento e chat si dividono lo spazio a metà
-  const openViewer = useCallback((phase: Phase) => {
-    const total = layoutRef.current?.clientWidth ?? 1200;
-    const available = total - 256 - 12 * 3 - 6; // sinistra fissa + gap + splitter
-    setDocWidth(Math.max(280, Math.floor(available / 2)));
-    setViewerPhase(phase);
-  }, []);
+  // Apre il documento e scrolla alla sezione richiesta
+  const openSection = useCallback((anchor: string) => {
+    if (!viewerOpen) {
+      const total = layoutRef.current?.clientWidth ?? 1200;
+      const available = total - 256 - 12 * 3 - 6;
+      setDocWidth(Math.max(280, Math.floor(available / 2)));
+    }
+    setViewerOpen(true);
+    setViewerAnchor(anchor);
+  }, [viewerOpen]);
 
   const startResize = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -617,6 +694,8 @@ export default function RiskManagerPage() {
   );
   // Modulo condizionale GPAI — visibile se riskTier=gpai o incorporatesGpaiModel=yes
   const showGpaiModule = useMemo(() => shouldShowGpaiModule(documentation), [documentation]);
+  // Avanzamento documento per sezione (usato nel rail sinistro)
+  const registerProgress = useMemo(() => computeRegisterProgress(registerDoc), [registerDoc]);
 
   useEffect(() => {
     const saved = loadChatState();
@@ -726,13 +805,14 @@ export default function RiskManagerPage() {
     setCurrentPhaseIndex(0);
     setCompletedPhases([]);
     setDocEdits({});
-    setViewerPhase(null);
+    setViewerOpen(false);
+    setViewerAnchor(null);
     setInput("");
   };
 
   if (!hydrated) return null;
 
-  const progressPct = Math.round((completedPhases.length / PHASES.length) * 100);
+  const progressPct = registerProgress.overallPercent;
   const hasContent = completedPhases.length > 0 || Object.keys(documentation).length > 0;
 
   return (
@@ -774,48 +854,22 @@ export default function RiskManagerPage() {
           <div style={{ padding: "12px 12px 10px", borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
               <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                Stato Avanzamento
+                Documento
               </span>
               <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", fontFamily: "monospace" }}>
-                {completedPhases.length}/{PHASES.length}
+                {progressPct}%
               </span>
             </div>
             <div style={{ width: "100%", height: 4, background: "rgba(0,0,0,0.07)", borderRadius: 2, overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${progressPct}%`, background: "linear-gradient(to right, #2563eb, #16a34a)", borderRadius: 2, transition: "width 0.5s ease" }} />
+              <div style={{ height: "100%", width: `${progressPct}%`, background: "#0D1016", borderRadius: 2, transition: "width 0.5s ease" }} />
             </div>
           </div>
 
           <div style={{ flex: 1, overflowY: "auto", padding: "10px" }}>
-            {/* 9 step numerati */}
-            {PHASES.map((phase, idx) => {
-              const status: PhaseStatus = completedPhases.includes(phase.id) ? "complete" : idx === currentPhaseIndex ? "active" : "pending";
-              return (
-                <PhaseRow
-                  key={phase.id} phase={phase} status={status}
-                  onOpen={() => openViewer(phase)}
-                  hasData={!!documentation[phase.id as keyof RiskDocumentation]}
-                />
-              );
-            })}
-
-            {/* Modulo condizionale GPAI — solo se tier=gpai o incorporatesGpaiModel=yes */}
-            {showGpaiModule && (
-              <>
-                <div style={{ margin: "8px 0 6px", display: "flex", alignItems: "center", gap: 6 }}>
-                  <div style={{ flex: 1, height: 1, background: "rgba(0,0,0,0.09)" }} />
-                  <span style={{ fontSize: 8.5, fontWeight: 700, color: "rgba(0,0,0,0.3)", textTransform: "uppercase", letterSpacing: "0.07em", whiteSpace: "nowrap" }}>
-                    Moduli aggiuntivi
-                  </span>
-                  <div style={{ flex: 1, height: 1, background: "rgba(0,0,0,0.09)" }} />
-                </div>
-                <PhaseRow
-                  phase={GPAI_MODULE}
-                  status={completedPhases.includes("gpai_systemic_risk") ? "complete" : currentPhaseIndex === PHASES.length && !completedPhases.includes("gpai_systemic_risk") ? "active" : "pending"}
-                  onOpen={() => openViewer(GPAI_MODULE)}
-                  hasData={!!documentation.gpai_systemic_risk}
-                />
-              </>
-            )}
+            {/* Sezioni del documento — click apre il PDF e scrolla alla sezione */}
+            {registerProgress.sections.map(section => (
+              <SectionRow key={section.key} section={section} onOpen={openSection} />
+            ))}
           </div>
 
           {/* Footer sidebar: verifica legale + nota Art. 99-101 (non interattiva) */}
@@ -831,16 +885,17 @@ export default function RiskManagerPage() {
         </div>
 
         {/* CENTER — documento (apribile, ridimensionabile) */}
-        {viewerPhase && (
+        {viewerOpen && (
           <>
             <div style={{ width: docWidth, flexShrink: 0, minWidth: 280, maxWidth: "60%" }}>
-              <ViewerErrorBoundary onClose={() => setViewerPhase(null)}>
+              <ViewerErrorBoundary onClose={() => setViewerOpen(false)}>
                 <PhaseDocColumn
                   registerDoc={registerDoc}
                   annexes={annexes}
                   editedHtml={docEdits["scoping"]}
                   onSaveEdit={html => saveDocEdit("scoping", html)}
-                  onClose={() => setViewerPhase(null)}
+                  onClose={() => setViewerOpen(false)}
+                  scrollToAnchor={viewerAnchor}
                 />
               </ViewerErrorBoundary>
             </div>
