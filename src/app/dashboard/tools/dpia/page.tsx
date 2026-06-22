@@ -1680,29 +1680,33 @@ export default function DPIAPage() {
         </div>
         {/* Toggle tra le due modalità */}
         <div style={{
-          display: "flex", alignItems: "center", gap: 0,
-          padding: "0 20px 0", borderBottom: `1px solid ${T.border}`,
+          display: "flex", alignItems: "center", gap: 6,
+          padding: "10px 20px", borderBottom: `1px solid ${T.border}`,
           background: T.card, flexShrink: 0,
         }}>
           <button
             onClick={() => setGuidedMode(false)}
             style={{
-              padding: "8px 16px", fontSize: 11, fontWeight: 600,
-              border: "none", background: "none", cursor: "pointer",
-              color: T.muted, borderBottom: "2px solid transparent",
+              display: "flex", flexDirection: "column", gap: 2,
+              padding: "9px 16px", borderRadius: 8, cursor: "pointer",
+              border: `1px solid rgba(0,0,0,0.08)`, background: "none",
+              textAlign: "left", transition: "border-color 0.15s",
             }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(35,64,58,0.22)"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(0,0,0,0.08)"; }}
           >
-            Form a 6 step
+            <span style={{ fontSize: 11, fontWeight: 600, color: T.muted }}>Form strutturato</span>
+            <span style={{ fontSize: 9, color: T.faint }}>6 step · compilazione diretta</span>
           </button>
-          <button
-            style={{
-              padding: "8px 16px", fontSize: 11, fontWeight: 700,
-              border: "none", background: "none", cursor: "pointer",
-              color: "#23403a", borderBottom: "2px solid #23403a",
-            }}
-          >
-            ✦ DPIA guidata
-          </button>
+          <div style={{
+            display: "flex", flexDirection: "column", gap: 2,
+            padding: "9px 16px", borderRadius: 8,
+            border: `1px solid rgba(35,64,58,0.22)`,
+            background: "rgba(35,64,58,0.05)",
+          }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: T.green }}>✦ DPIA guidata</span>
+            <span style={{ fontSize: 9, color: T.muted }}>Domande guidate · AI compila per te</span>
+          </div>
         </div>
         {/* Layout 3 colonne */}
         <div style={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
@@ -1718,29 +1722,17 @@ export default function DPIAPage() {
       <AssessmentStepper currentTool="dpia" />
       <AssessmentSharedHeader />
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 style={{ fontSize: 18, fontWeight: 700, color: T.text, marginBottom: 4 }}>
-            Valutazione d&apos;Impatto sulla Protezione dei Dati
-          </h1>
-          <p style={{ fontSize: 12, color: T.muted }}>
-            Art. 35 GDPR · Metodologia WP248 rev.01 (Gruppo di Lavoro Art. 29, ottobre 2017)
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          {/* Guided mode toggle */}
-          <button
-            onClick={() => setGuidedMode(true)}
-            style={{
-              display: "flex", alignItems: "center", gap: 6,
-              fontSize: 11, fontWeight: 700, padding: "6px 12px", borderRadius: 8,
-              border: "1px solid rgba(35,64,58,0.25)", background: "rgba(35,64,58,0.06)",
-              color: "#23403a", cursor: "pointer",
-            }}
-          >
-            <span style={{ fontSize: 12 }}>✦</span>
-            <span>DPIA guidata</span>
-          </button>
+      <div style={{ marginBottom: 20 }}>
+        <div className="flex items-start justify-between" style={{ marginBottom: 16 }}>
+          <div>
+            <h1 style={{ fontSize: 18, fontWeight: 700, color: T.text, marginBottom: 4 }}>
+              Valutazione d&apos;Impatto sulla Protezione dei Dati
+            </h1>
+            <p style={{ fontSize: 12, color: T.muted }}>
+              Art. 35 GDPR · Metodologia WP248 rev.01 (Gruppo di Lavoro Art. 29, ottobre 2017)
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
           {/* Template viewer button */}
           {(() => {
             const progress = computeDpiaProgress(doc);
@@ -1885,6 +1877,45 @@ export default function DPIAPage() {
           }}>
             {priorConsultation ? "Consultazione preventiva" : doc.screening.dpia_required === "yes" ? "DPIA richiesta" : doc.screening.dpia_required === "uncertain" ? "Incerto" : "Screening in corso"}
           </span>
+        </div>
+        </div>
+
+        {/* ── Mode selector ── */}
+        <div style={{ display: "flex", gap: 6 }}>
+          {/* Form strutturato — active */}
+          <div style={{
+            display: "flex", flexDirection: "column", gap: 3,
+            padding: "12px 18px", borderRadius: 10,
+            border: `1px solid rgba(35,64,58,0.22)`,
+            background: "rgba(35,64,58,0.05)",
+            minWidth: 190,
+          }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: T.text }}>Form strutturato</span>
+            <span style={{ fontSize: 10, color: T.muted, lineHeight: 1.4 }}>6 step · compilazione diretta</span>
+          </div>
+          {/* DPIA guidata — inactive, clickable */}
+          <button
+            onClick={() => setGuidedMode(true)}
+            style={{
+              display: "flex", flexDirection: "column", gap: 3,
+              padding: "12px 18px", borderRadius: 10, cursor: "pointer",
+              border: `1px solid rgba(0,0,0,0.08)`,
+              background: T.card, textAlign: "left",
+              transition: "border-color 0.15s, background 0.15s",
+              minWidth: 190,
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.borderColor = "rgba(35,64,58,0.22)";
+              e.currentTarget.style.background = "rgba(35,64,58,0.03)";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.borderColor = "rgba(0,0,0,0.08)";
+              e.currentTarget.style.background = T.card;
+            }}
+          >
+            <span style={{ fontSize: 11, fontWeight: 700, color: T.green }}>✦ DPIA guidata</span>
+            <span style={{ fontSize: 10, color: T.muted, lineHeight: 1.4 }}>Domande guidate · AI compila per te</span>
+          </button>
         </div>
       </div>
 
