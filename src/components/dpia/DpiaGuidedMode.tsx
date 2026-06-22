@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Download, X } from "lucide-react";
+import { Download, X, Pencil, Check, Bold, Italic, Underline, Highlighter } from "lucide-react";
 import { readFromStorage, writeToStorage } from "@/lib/dossier/storage-schema";
 import type { ClassifierResult, DataAuditResult } from "@/lib/dossier/storage-schema";
 import { patchDPIA, patchShared } from "@/lib/assessment/assessment-helpers";
@@ -54,9 +54,34 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
   const [viewerOpen, setViewerOpen] = useState(false);
   const [docWidth, setDocWidth]     = useState(380);
   const [isResizing, setIsResizing] = useState(false);
+  const [editing, setEditing]       = useState(false);
+  const [editedHtml, setEditedHtml] = useState<string | null>(null);
 
   const layoutRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
+  const editRef   = useRef<HTMLDivElement>(null);
+
+  const exec = (cmd: string, value?: string) => {
+    document.execCommand(cmd, false, value);
+    editRef.current?.focus();
+  };
+
+  const enterEdit = () => {
+    const source = editedHtml ?? previewRef.current?.innerHTML ?? "";
+    setEditing(true);
+    setTimeout(() => {
+      if (editRef.current) {
+        editRef.current.innerHTML = source;
+        editRef.current.focus();
+      }
+    }, 0);
+  };
+
+  const confirmEdit = () => {
+    if (editRef.current) setEditedHtml(editRef.current.innerHTML);
+    setEditing(false);
+  };
 
   // Al primo click apertura: divide lo spazio disponibile a metà
   const openViewer = useCallback(() => {
@@ -259,7 +284,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
               {/* Header stile Risk Register */}
               <div style={{
                 padding: "8px 12px", borderBottom: `1px solid rgba(0,0,0,0.07)`,
-                background: "#fafafa", display: "flex", alignItems: "center", gap: 8, flexShrink: 0,
+                background: "#fafafa", display: "flex", alignItems: "center", gap: 6, flexShrink: 0,
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: 9, fontWeight: 600, color: "rgba(0,0,0,0.35)", letterSpacing: "0.8px", textTransform: "uppercase", margin: 0 }}>
@@ -269,8 +294,55 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
                     DPIA — WP248 rev.01
                   </p>
                 </div>
+
+                {/* Toolbar formattazione (solo in edit) */}
+                {editing && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 2, padding: "2px 4px", background: T.card, border: `1px solid ${T.border}`, borderRadius: 8 }}>
+                    {([
+                      { icon: <Bold size={12} />,        cmd: "bold",        title: "Grassetto" },
+                      { icon: <Italic size={12} />,      cmd: "italic",      title: "Corsivo" },
+                      { icon: <Underline size={12} />,   cmd: "underline",   title: "Sottolineato" },
+                      { icon: <Highlighter size={12} />, cmd: "hiliteColor", title: "Evidenzia", val: "#fef08a" },
+                    ] as { icon: React.ReactNode; cmd: string; title: string; val?: string }[]).map(b => (
+                      <button
+                        key={b.cmd}
+                        onMouseDown={e => { e.preventDefault(); exec(b.cmd, b.val); }}
+                        title={b.title}
+                        style={{
+                          width: 24, height: 24, borderRadius: 5, border: "none",
+                          background: "transparent", cursor: "pointer",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          color: "rgba(0,0,0,0.55)",
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.07)")}
+                        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                      >
+                        {b.icon}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Matita / conferma */}
                 <button
-                  onClick={() => setViewerOpen(false)}
+                  onClick={editing ? confirmEdit : enterEdit}
+                  title={editing ? "Salva modifiche" : "Modifica documento"}
+                  style={{
+                    flexShrink: 0, width: 26, height: 26, borderRadius: 6,
+                    background: editing ? T.text : "transparent",
+                    color: editing ? "#fff" : "rgba(0,0,0,0.45)",
+                    border: "none", cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    transition: "background 0.12s",
+                  }}
+                  onMouseEnter={e => { if (!editing) e.currentTarget.style.background = "rgba(0,0,0,0.07)"; }}
+                  onMouseLeave={e => { if (!editing) e.currentTarget.style.background = "transparent"; }}
+                >
+                  {editing ? <Check size={12} /> : <Pencil size={12} />}
+                </button>
+
+                <button
+                  onClick={() => { setViewerOpen(false); setEditing(false); }}
                   title="Chiudi documento"
                   style={{
                     flexShrink: 0, width: 24, height: 24, borderRadius: 12,
@@ -284,9 +356,40 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
                   <X size={12} />
                 </button>
               </div>
+
               {/* Contenuto scrollabile */}
               <div ref={viewerRef} style={{ flex: 1, overflowY: "auto", padding: "16px 20px", background: T.bg }}>
-                <DpiaLivePreview doc={doc} activeSection={activeSection} />
+                {editing ? (
+                  /* Modalità modifica — contentEditable */
+                  <div
+                    ref={editRef}
+                    contentEditable
+                    suppressContentEditableWarning
+                    style={{
+                      outline: "none", minHeight: 400,
+                      fontFamily: "Georgia, 'Times New Roman', serif",
+                      fontSize: 13, color: T.text, lineHeight: 1.7,
+                      background: T.card, borderRadius: 6, padding: "20px 24px",
+                      border: `1px solid rgba(13,16,22,0.25)`,
+                    }}
+                  />
+                ) : editedHtml ? (
+                  /* HTML salvato dall'utente */
+                  <div
+                    ref={previewRef}
+                    dangerouslySetInnerHTML={{ __html: editedHtml }}
+                    style={{
+                      fontFamily: "Georgia, 'Times New Roman', serif",
+                      fontSize: 13, color: T.text, lineHeight: 1.7,
+                      background: T.card, borderRadius: 6, padding: "20px 24px",
+                    }}
+                  />
+                ) : (
+                  /* Preview React live */
+                  <div ref={previewRef}>
+                    <DpiaLivePreview doc={doc} activeSection={activeSection} />
+                  </div>
+                )}
               </div>
             </div>
 

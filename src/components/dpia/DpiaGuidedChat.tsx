@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { Send, Check, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import { DPIA_SUBPOINTS } from "@/lib/dpia/dpia-template";
 import type { DpiaGuidedDoc, DpiaAnswer } from "@/lib/dpia/dpia-guided-types";
 import { nextSubPointId } from "@/lib/dpia/dpia-guided-progress";
@@ -23,6 +23,13 @@ const T = {
 } as const;
 
 const AI_BADGE = "✦ AI — verifica e conferma";
+
+// Quick-reply options per tipo di campo
+function quickReplies(fieldType: string): string[] {
+  if (fieldType === "select_ynp") return ["Sì", "No", "Parzialmente"];
+  if (fieldType === "select_yn")  return ["Sì", "No"];
+  return [];
+}
 
 export interface DpiaGuidedChatProps {
   doc: DpiaGuidedDoc;
@@ -52,6 +59,7 @@ export function DpiaGuidedChat({
   const [aiDraft, setAiDraft]     = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError]     = useState<string | null>(null);
+  const [hoveredHistId, setHoveredHistId] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -115,7 +123,7 @@ export function DpiaGuidedChat({
   const handlePrev = () => { if (currentIdx > 0) onNavigateToSubPoint?.(allIds[currentIdx - 1]); };
   const handleNext = () => { if (currentIdx < allIds.length - 1) onNavigateToSubPoint?.(allIds[currentIdx + 1]); };
 
-  // Conversazione passata: ultime 6 risposte confermate (esclusa quella corrente)
+  // Storico: ultime 6 risposte confermate (esclusa quella corrente)
   const history = DPIA_SUBPOINTS
     .filter(s => s.id !== currentId && doc.answers[s.id]?.status === "done")
     .slice(-6);
@@ -129,6 +137,7 @@ export function DpiaGuidedChat({
   }
 
   const isDone = existing?.status === "done";
+  const qr = quickReplies(sp.fieldType);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", background: T.bg }}>
@@ -156,32 +165,46 @@ export function DpiaGuidedChat({
       {/* Messaggi */}
       <div style={{ flex: 1, overflowY: "auto", padding: "12px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
 
-        {/* Storico Q&A */}
+        {/* Storico Q&A con pulsante modifica */}
         {history.map(s => {
           const a = doc.answers[s.id];
+          const isHovered = hoveredHistId === s.id;
           return (
             <React.Fragment key={s.id}>
               {/* Domanda (sistema, sinistra) */}
               <div style={{ display: "flex" }}>
                 <div style={{
-                  maxWidth: "82%",
-                  background: T.card,
-                  border: `1px solid ${T.border}`,
-                  borderRadius: "12px 12px 12px 3px",
-                  padding: "7px 11px",
-                  fontSize: 11, color: T.muted,
+                  maxWidth: "82%", background: T.card,
+                  border: `1px solid ${T.border}`, borderRadius: "12px 12px 12px 3px",
+                  padding: "7px 11px", fontSize: 11, color: T.muted,
                 }}>
                   <span style={{ fontWeight: 600, color: T.text }}>{s.label}</span>
                 </div>
               </div>
-              {/* Risposta (utente, destra) */}
-              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              {/* Risposta (utente, destra) con hover → pulsante modifica */}
+              <div
+                style={{ display: "flex", justifyContent: "flex-end", alignItems: "flex-end", gap: 6 }}
+                onMouseEnter={() => setHoveredHistId(s.id)}
+                onMouseLeave={() => setHoveredHistId(null)}
+              >
+                {isHovered && (
+                  <button
+                    onClick={() => onNavigateToSubPoint?.(s.id)}
+                    title="Modifica risposta"
+                    style={{
+                      display: "flex", alignItems: "center", gap: 4,
+                      fontSize: 9, fontWeight: 600, padding: "3px 8px", borderRadius: 6,
+                      border: `1px solid ${T.border}`, background: T.card,
+                      color: T.muted, cursor: "pointer",
+                    }}
+                  >
+                    <Pencil size={9} /> Modifica
+                  </button>
+                )}
                 <div style={{
-                  maxWidth: "82%",
-                  background: T.text,
+                  maxWidth: "82%", background: T.text,
                   borderRadius: "12px 12px 3px 12px",
-                  padding: "7px 11px",
-                  fontSize: 11, color: "#ffffff", lineHeight: 1.45,
+                  padding: "7px 11px", fontSize: 11, color: "#ffffff", lineHeight: 1.45,
                 }}>
                   {(a?.value.length ?? 0) > 90 ? a?.value.slice(0, 87) + "…" : a?.value}
                 </div>
@@ -193,11 +216,8 @@ export function DpiaGuidedChat({
         {/* Domanda corrente (sistema, sinistra) */}
         <div style={{ display: "flex" }}>
           <div style={{
-            background: T.card,
-            border: `1px solid ${T.border}`,
-            borderRadius: "12px 12px 12px 3px",
-            padding: "10px 14px",
-            maxWidth: "90%",
+            background: T.card, border: `1px solid ${T.border}`,
+            borderRadius: "12px 12px 12px 3px", padding: "10px 14px", maxWidth: "90%",
           }}>
             <div style={{ fontSize: 9, fontWeight: 700, color: T.green, marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.04em" }}>
               {sp.ref}
@@ -205,14 +225,44 @@ export function DpiaGuidedChat({
             <p style={{ fontSize: 13, fontWeight: 500, color: T.text, margin: 0, lineHeight: 1.5 }}>
               {sp.question}
             </p>
-            {/* Esempi come chip cliccabili */}
-            {!isDone && sp.examples.length > 0 && (
+
+            {/* Quick replies Sì / No / Parzialmente */}
+            {!isDone && qr.length > 0 && (
+              <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {qr.map(opt => (
+                  <button
+                    key={opt}
+                    onClick={() => handleSend(opt)}
+                    style={{
+                      padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 600,
+                      border: `1px solid ${T.border}`, background: T.card,
+                      color: T.text, cursor: "pointer",
+                      transition: "background 0.12s, border-color 0.12s",
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.background = T.text;
+                      e.currentTarget.style.color = "#fff";
+                      e.currentTarget.style.borderColor = T.text;
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.background = T.card;
+                      e.currentTarget.style.color = T.text;
+                      e.currentTarget.style.borderColor = T.border;
+                    }}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Esempi come chip (solo per testo libero) */}
+            {!isDone && qr.length === 0 && sp.examples.length > 0 && (
               <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 5 }}>
                 <span style={{ fontSize: 9, color: T.muted, textTransform: "uppercase", letterSpacing: "0.04em" }}>Esempi:</span>
                 {sp.examples.slice(0, 2).map((ex, i) => (
                   <button
-                    key={i}
-                    onClick={() => setInput(ex)}
+                    key={i} onClick={() => setInput(ex)}
                     style={{
                       textAlign: "left", border: `1px solid ${T.border}`,
                       borderRadius: 7, padding: "6px 9px",
@@ -228,15 +278,17 @@ export function DpiaGuidedChat({
           </div>
         </div>
 
-        {/* Risposta confermata (utente, destra) */}
+        {/* Risposta confermata (utente, destra) con pulsante modifica */}
         {isDone && (
-          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "flex-end", gap: 6 }}>
+            <button
+              onClick={() => { /* già nella domanda corrente, basta toccare il textarea */ }}
+              style={{ display: "none" }}
+            />
             <div style={{
-              maxWidth: "85%",
-              background: T.text,
+              maxWidth: "85%", background: T.text,
               borderRadius: "12px 12px 3px 12px",
-              padding: "10px 14px",
-              fontSize: 12, color: "#ffffff", lineHeight: 1.5, whiteSpace: "pre-wrap",
+              padding: "10px 14px", fontSize: 12, color: "#ffffff", lineHeight: 1.5, whiteSpace: "pre-wrap",
             }}>
               {existing!.value}
               <div style={{ marginTop: 5, display: "flex", alignItems: "center", gap: 4 }}>
@@ -247,15 +299,12 @@ export function DpiaGuidedChat({
           </div>
         )}
 
-        {/* Bozza AI (sistema, sinistra) */}
+        {/* Bozza AI */}
         {aiDraft && (
           <div style={{ display: "flex" }}>
             <div style={{
-              maxWidth: "92%",
-              background: T.amberBg,
-              border: `1px solid ${T.amberBdr}`,
-              borderRadius: "12px 12px 12px 3px",
-              padding: "10px 14px",
+              maxWidth: "92%", background: T.amberBg,
+              border: `1px solid ${T.amberBdr}`, borderRadius: "12px 12px 12px 3px", padding: "10px 14px",
             }}>
               <div style={{ fontSize: 9, fontWeight: 700, color: T.amber, marginBottom: 6 }}>{AI_BADGE}</div>
               <p style={{ fontSize: 12, color: T.text, margin: "0 0 10px", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
@@ -264,20 +313,13 @@ export function DpiaGuidedChat({
               <div style={{ display: "flex", gap: 6 }}>
                 <button
                   onClick={() => handleSend(aiDraft)}
-                  style={{
-                    flex: 1, padding: "6px 0", borderRadius: 7, border: "none",
-                    background: T.green, color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer",
-                  }}
+                  style={{ flex: 1, padding: "6px 0", borderRadius: 7, border: "none", background: T.green, color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer" }}
                 >
                   ✓ Usa
                 </button>
                 <button
                   onClick={() => { setAiDraft(null); }}
-                  style={{
-                    padding: "6px 10px", borderRadius: 7,
-                    border: `1px solid ${T.border}`, background: "none",
-                    color: T.muted, fontSize: 11, cursor: "pointer",
-                  }}
+                  style={{ padding: "6px 10px", borderRadius: 7, border: `1px solid ${T.border}`, background: "none", color: T.muted, fontSize: 11, cursor: "pointer" }}
                 >
                   ✕
                 </button>
@@ -287,10 +329,7 @@ export function DpiaGuidedChat({
         )}
 
         {aiError && (
-          <p style={{
-            fontSize: 10, color: "#b91c1c", margin: 0,
-            padding: "6px 10px", background: "rgba(185,28,28,0.06)", borderRadius: 6,
-          }}>
+          <p style={{ fontSize: 10, color: "#b91c1c", margin: 0, padding: "6px 10px", background: "rgba(185,28,28,0.06)", borderRadius: 6 }}>
             {aiError}
           </p>
         )}
@@ -333,7 +372,7 @@ export function DpiaGuidedChat({
           </button>
         </div>
 
-        {/* Controlli footer */}
+        {/* Navigazione prev/next */}
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
           <button
             onClick={handlePrev}
