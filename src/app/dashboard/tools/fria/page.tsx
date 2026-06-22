@@ -177,7 +177,51 @@ export default function FRIAPage() {
   const [dossierSavedAt, setDossierSavedAt] = useState<string | null>(() =>
     readFromStorage<FRIAResult>("fria")?.completedAt ?? null
   );
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saveTimer   = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const contentRef  = useRef<HTMLDivElement>(null);
+  const [expandedPhases, setExpandedPhases] = useState<Set<string>>(new Set(["1"]));
+
+  function scrollToPhase(id: string) {
+    setPhase(id as Phase);
+    const el = contentRef.current?.querySelector(`#fase-${id}`) as HTMLElement | null;
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  const phaseProgress = useMemo(() => {
+    const ctx = doc.context;
+    const f = (v: string | undefined) => !!(v?.trim());
+    const phases = [
+      { id: "1", label: "Contesto", legalRef: "Art. 27(2)(a)", subPoints: [
+        { label: "Nome sistema",        done: f(doc.system_name) },
+        { label: "Organizzazione",      done: f(doc.organization) },
+        { label: "Scopo previsto",      done: f(ctx.intended_purpose_explanation) },
+        { label: "Persone interessate", done: f(ctx.affected_persons) },
+        { label: "Tecnologia",          done: f(ctx.technology_overview) },
+      ]},
+      { id: "2", label: "Scenari", legalRef: "Art. 27(2)(b)", subPoints: [
+        { label: "Almeno uno scenario", done: doc.scenarios.length > 0 },
+        { label: "Impatti sui diritti", done: doc.scenarios.some(s => s.right_impacts.length > 0) },
+      ]},
+      { id: "3", label: "Decisione", legalRef: "Art. 27(2)(c)", subPoints: [
+        { label: "Raccomandazione",  done: f(doc.deployment.recommendation) },
+        { label: "Responsabile",     done: f(doc.deployment.approver_name) },
+        { label: "Motivazione",      done: f(doc.deployment.decision_justification) },
+      ]},
+      { id: "4", label: "Monitoraggio", legalRef: "Art. 27(2)(d)", subPoints: [
+        { label: "Elementi monitoraggio",  done: doc.monitoring.items.length > 0 },
+        { label: "Trigger aggiornamento",  done: doc.monitoring.update_triggers.length > 0 },
+      ]},
+      { id: "5", label: "Stakeholder", legalRef: "Art. 27(2)(e)", subPoints: [
+        { label: "Stakeholder mappati", done: doc.stakeholders.length > 0 },
+        { label: "Log engagement",      done: doc.engagement_log.length > 0 },
+      ]},
+    ];
+    return phases.map(p => {
+      const done  = p.subPoints.filter(sp => sp.done).length;
+      const total = p.subPoints.length;
+      return { ...p, done, total, percent: Math.round((done / total) * 100) };
+    });
+  }, [doc]);
 
   // ── Sync FRIA fields → shared (idempotente, fire-and-forget) ─────────────
   function syncFriaToShared(friaDoc: FRIADocument) {
@@ -1581,37 +1625,61 @@ export default function FRIAPage() {
           </div>
         </div>
 
-        {/* Phase nav */}
-        <div style={{ padding: "10px 8px", flex: 1 }}>
+        {/* Phase nav — FriaProgressRail style */}
+        <div style={{ padding: "8px 8px", flex: 1, overflowY: "auto" as const }}>
           <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", padding: "0 6px", marginBottom: 6 }}>Fasi FRIA</div>
-          {PHASES.map((p) => {
-            const isActive = phase === p.id;
-            const { Icon } = p;
-            const phaseComplete = ((): boolean => {
-              if (p.id === "1") return !!(doc.system_name?.trim() && doc.context.intended_purpose_explanation?.trim());
-              if (p.id === "2") return doc.scenarios.length > 0;
-              if (p.id === "3") return !!doc.deployment.recommendation;
-              if (p.id === "4") return doc.monitoring.items.length > 0;
-              if (p.id === "5") return doc.stakeholders.length > 0;
-              return false;
-            })();
+          {phaseProgress.map((p) => {
+            const isActive   = phase === p.id;
+            const isExpanded = expandedPhases.has(p.id);
+            const borderColor = isActive ? "rgba(35,64,58,0.20)" : p.percent === 100 ? "rgba(35,64,58,0.12)" : "rgba(0,0,0,0.07)";
+            const bgColor     = isActive ? "rgba(35,64,58,0.06)" : "transparent";
+            const circleColor = p.percent === 100 ? "#23403a" : "#dc2626";
+            const pctColor    = p.percent === 100 ? T.green : p.percent > 0 ? T.amber : T.faint;
             return (
-              <button key={p.id} onClick={() => setPhase(p.id)}
-                style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 10px", borderRadius: 8, border: "none", marginBottom: 2, cursor: "pointer", background: isActive ? T.text : "none", textAlign: "left" as const }}>
-                <span style={{ width: 22, height: 22, borderRadius: 6, background: isActive ? "rgba(255,255,255,0.15)" : T.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Icon style={{ width: 12, height: 12, color: isActive ? "#fff" : T.muted }} />
-                </span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: isActive ? "#fff" : T.text }}>{p.id}. {p.label}</div>
-                  <div style={{ fontSize: 10, color: isActive ? "rgba(255,255,255,0.6)" : T.faint }}>{p.sub}</div>
+              <div key={p.id} style={{ border: `1px solid ${borderColor}`, background: bgColor, borderRadius: 8, overflow: "hidden", marginBottom: 4 }}>
+                <button
+                  onClick={() => {
+                    scrollToPhase(p.id);
+                    setExpandedPhases(prev => { const n = new Set(prev); n.has(p.id) ? n.delete(p.id) : n.add(p.id); return n; });
+                  }}
+                  style={{ width: "100%", textAlign: "left" as const, border: "none", background: "transparent", padding: "9px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}
+                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "rgba(0,0,0,0.02)"; }}
+                  onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
+                >
+                  <div style={{ flexShrink: 0 }}>
+                    <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${circleColor}` }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 11, fontWeight: 600, color: T.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
+                      {p.id}. {p.label}
+                    </p>
+                    <p style={{ fontSize: 9, color: T.muted, margin: 0, marginTop: 1 }}>
+                      {p.done}/{p.total} · {p.legalRef}
+                    </p>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    <span style={{ fontSize: 9.5, fontWeight: 700, color: pctColor, fontFamily: "monospace" }}>{p.percent}%</span>
+                    <ChevronRight size={10} style={{ color: T.faint, transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                  </div>
+                </button>
+                <div style={{ height: 2, background: "rgba(0,0,0,0.04)" }}>
+                  <div style={{ height: "100%", width: `${p.percent}%`, background: circleColor, transition: "width 0.35s" }} />
                 </div>
-                <div style={{
-                  width: 10, height: 10, borderRadius: "50%", flexShrink: 0,
-                  border: phaseComplete
-                    ? "1.5px solid #23403a"
-                    : `1.5px solid ${isActive ? "rgba(220,38,38,0.5)" : "#dc2626"}`,
-                }} />
-              </button>
+                {isExpanded && (
+                  <div style={{ borderTop: "1px solid rgba(0,0,0,0.05)", padding: "4px 6px 6px" }}>
+                    {p.subPoints.map(sp => (
+                      <div key={sp.label} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 4px", borderRadius: 5 }}>
+                        <div style={{ flexShrink: 0 }}>
+                          <div style={{ width: 10, height: 10, borderRadius: "50%", border: `1.5px solid ${sp.done ? "#23403a" : "#dc2626"}` }} />
+                        </div>
+                        <p style={{ fontSize: 10, color: sp.done ? T.muted : T.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const, textDecoration: sp.done ? "line-through" : "none", opacity: sp.done ? 0.55 : 1 }}>
+                          {sp.label}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
@@ -1665,7 +1733,7 @@ export default function FRIAPage() {
       </div>
 
       {/* ── Main content ── */}
-      <div style={{ flex: 1, minWidth: 0, padding: "0 4px 40px 28px", overflowY: "auto" as const }}>
+      <div ref={contentRef} style={{ flex: 1, minWidth: 0, padding: "0 4px 40px 28px", overflowY: "auto" as const }}>
         {/* Dossier save banner */}
         {dossierSavedAt ? (
           <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 8, padding: "10px 14px", marginBottom: 20, background: T.greenBg, border: `1px solid ${T.greenBdr}`, fontSize: 12 }}>
@@ -1680,12 +1748,12 @@ export default function FRIAPage() {
           </div>
         )}
 
-        {phase === "1" && renderPhase1()}
-        {phase === "2" && renderPhase2()}
-        {phase === "3" && renderPhase3()}
-        {phase === "4" && renderPhase4()}
-        {phase === "5" && renderPhase5()}
-        <NextStepGuide fria={doc} gapCheck={gapCheckResult} onNavigateToPhase={(p) => setPhase(p as Phase)} />
+        <div id="fase-1">{renderPhase1()}</div>
+        <div id="fase-2" style={{ marginTop: 48 }}>{renderPhase2()}</div>
+        <div id="fase-3" style={{ marginTop: 48 }}>{renderPhase3()}</div>
+        <div id="fase-4" style={{ marginTop: 48 }}>{renderPhase4()}</div>
+        <div id="fase-5" style={{ marginTop: 48 }}>{renderPhase5()}</div>
+        <NextStepGuide fria={doc} gapCheck={gapCheckResult} onNavigateToPhase={(p) => scrollToPhase(p)} />
       </div>
 
       {/* Toast */}

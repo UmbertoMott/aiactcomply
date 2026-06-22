@@ -195,54 +195,50 @@ const SECTION_ANCHORS: Record<string, string> = {
   signOff:        "sec-signoff",
 };
 
+const SECTION_LEGAL_REFS: Record<string, string> = {
+  identification: "Art. 9(2)(a)",
+  risks:          "Art. 9(2)(b)",
+  gapCheck:       "Art. 9(2)(c)",
+  reviewLog:      "Art. 9(7)",
+  signOff:        "Art. 9(9)",
+};
+
 function SectionRow({ section, onOpen }: { section: SectionProgress; onOpen: (anchor: string) => void }) {
-  const anchor = SECTION_ANCHORS[section.key] ?? "";
-  const isComplete = section.percent === 100;
-  const hasProgress = section.percent > 0 && !isComplete;
+  const [expanded, setExpanded] = useState(false);
+  const anchor      = SECTION_ANCHORS[section.key] ?? "";
+  const legalRef    = SECTION_LEGAL_REFS[section.key] ?? "";
+  const isComplete  = section.percent === 100;
+  const circleColor = isComplete ? "#23403a" : "#dc2626";
+  const pctColor    = isComplete ? "#23403a" : section.percent > 0 ? "#b45309" : "rgba(0,0,0,0.28)";
+  const borderColor = isComplete ? "rgba(35,64,58,0.12)" : "rgba(0,0,0,0.07)";
 
   return (
-    <div style={{
-      border: `1px solid ${isComplete ? "rgba(22,163,74,0.2)" : hasProgress ? "rgba(180,83,9,0.2)" : "rgba(0,0,0,0.07)"}`,
-      borderRadius: 8, overflow: "hidden", marginBottom: 4,
-      background: isComplete ? "rgba(22,163,74,0.04)" : "transparent",
-    }}>
+    <div style={{ border: `1px solid ${borderColor}`, borderRadius: 8, overflow: "hidden", marginBottom: 4, background: "transparent" }}>
       <button
-        onClick={() => onOpen(anchor)}
-        className="w-full flex items-center gap-2.5 text-left"
-        style={{ padding: "8px 10px", cursor: "pointer", background: "transparent", width: "100%", border: "none" }}
+        onClick={() => { onOpen(anchor); setExpanded(e => !e); }}
+        style={{ padding: "9px 10px", cursor: "pointer", background: "transparent", width: "100%", border: "none", display: "flex", alignItems: "center", gap: 8, textAlign: "left" }}
         onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.02)")}
         onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
       >
         <div style={{ flexShrink: 0 }}>
-          {isComplete
-            ? <div style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid #23403a" }} />
-            : <div style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid #dc2626" }} />
-          }
+          <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${circleColor}` }} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontSize: 11.5, fontWeight: 600,
-            fontFamily: "var(--font-inter, system-ui)",
-            color: isComplete ? "#15803d" : "#0D1016",
-            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-          }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {section.label}
-          </div>
-          <div style={{
-            fontSize: 10, fontFamily: "var(--font-inter, system-ui)",
-            color: "rgba(0,0,0,0.4)",
-            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-          }}>
-            {section.detail}
-          </div>
+          </p>
+          <p style={{ fontSize: 9, color: "rgba(0,0,0,0.42)", margin: 0, marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {section.detail} · {legalRef}
+          </p>
         </div>
-        <ChevronRight size={11} style={{ flexShrink: 0, color: "rgba(0,0,0,0.25)" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <span style={{ fontSize: 9.5, fontWeight: 700, color: pctColor, fontFamily: "monospace" }}>{section.percent}%</span>
+          <ChevronRight size={10} style={{ color: "rgba(0,0,0,0.22)", transform: expanded ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+        </div>
       </button>
-      {hasProgress && (
-        <div style={{ height: 2, background: "rgba(0,0,0,0.04)" }}>
-          <div style={{ height: "100%", width: `${section.percent}%`, background: "#b45309", transition: "width 0.4s" }} />
-        </div>
-      )}
+      <div style={{ height: 2, background: "rgba(0,0,0,0.04)" }}>
+        <div style={{ height: "100%", width: `${section.percent}%`, background: circleColor, transition: "width 0.4s" }} />
+      </div>
     </div>
   );
 }
