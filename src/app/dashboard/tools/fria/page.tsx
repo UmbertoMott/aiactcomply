@@ -1587,16 +1587,30 @@ export default function FRIAPage() {
           {PHASES.map((p) => {
             const isActive = phase === p.id;
             const { Icon } = p;
+            const phaseComplete = ((): boolean => {
+              if (p.id === "1") return !!(doc.system_name?.trim() && doc.context.intended_purpose_explanation?.trim());
+              if (p.id === "2") return doc.scenarios.length > 0;
+              if (p.id === "3") return !!doc.deployment.recommendation;
+              if (p.id === "4") return doc.monitoring.items.length > 0;
+              if (p.id === "5") return doc.stakeholders.length > 0;
+              return false;
+            })();
             return (
               <button key={p.id} onClick={() => setPhase(p.id)}
                 style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 10px", borderRadius: 8, border: "none", marginBottom: 2, cursor: "pointer", background: isActive ? T.text : "none", textAlign: "left" as const }}>
                 <span style={{ width: 22, height: 22, borderRadius: 6, background: isActive ? "rgba(255,255,255,0.15)" : T.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <Icon style={{ width: 12, height: 12, color: isActive ? "#fff" : T.muted }} />
                 </span>
-                <div>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 12, fontWeight: 600, color: isActive ? "#fff" : T.text }}>{p.id}. {p.label}</div>
                   <div style={{ fontSize: 10, color: isActive ? "rgba(255,255,255,0.6)" : T.faint }}>{p.sub}</div>
                 </div>
+                <div style={{
+                  width: 10, height: 10, borderRadius: "50%", flexShrink: 0,
+                  border: phaseComplete
+                    ? "1.5px solid #23403a"
+                    : `1.5px solid ${isActive ? "rgba(220,38,38,0.5)" : "#dc2626"}`,
+                }} />
               </button>
             );
           })}

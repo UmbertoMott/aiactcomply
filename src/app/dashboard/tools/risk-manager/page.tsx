@@ -4,7 +4,7 @@ export const maxDuration = 60;
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import ProviderTransitionAlertBanner from "@/components/shared/provider-transition-alert-banner";
 import {
-  Shield, CheckCircle, Clock, Send, Download, RotateCcw,
+  Shield, Send, Download, RotateCcw,
   ChevronRight, AlertTriangle, Loader2, Play, Pause,
   FileText, ChevronDown, Bold, Italic, Underline, Highlighter,
   Pencil, Check,
@@ -155,13 +155,10 @@ function PhaseRow({
         onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
       >
         <div style={{ flexShrink: 0 }}>
-          {status === "complete" ? (
-            <CheckCircle size={14} style={{ color: "#16a34a" }} />
-          ) : status === "active" ? (
-            <div style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid #0D1016" }} />
-          ) : (
-            <Clock size={14} style={{ color: "rgba(0,0,0,0.2)" }} />
-          )}
+          {status === "complete"
+            ? <div style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid #23403a" }} />
+            : <div style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid #dc2626" }} />
+          }
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
@@ -217,13 +214,10 @@ function SectionRow({ section, onOpen }: { section: SectionProgress; onOpen: (an
         onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
       >
         <div style={{ flexShrink: 0 }}>
-          {isComplete ? (
-            <CheckCircle size={14} style={{ color: "#16a34a" }} />
-          ) : hasProgress ? (
-            <div style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid #b45309", background: "rgba(180,83,9,0.12)" }} />
-          ) : (
-            <Clock size={14} style={{ color: "rgba(0,0,0,0.2)" }} />
-          )}
+          {isComplete
+            ? <div style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid #23403a" }} />
+            : <div style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid #dc2626" }} />
+          }
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { ChevronRight, CheckCircle, Clock } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import type { GuidedFriaProgress } from "@/lib/fria/fria-guided-progress";
 
 const T = {
@@ -96,10 +96,8 @@ export function FriaProgressRail({
               >
                 <div style={{ flexShrink: 0 }}>
                   {sec.percent === 100
-                    ? <CheckCircle size={14} style={{ color: T.green }} />
-                    : sec.percent > 0
-                    ? <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${T.amber}` }} />
-                    : <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid rgba(0,0,0,0.15)` }} />
+                    ? <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${T.green}` }} />
+                    : <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid #dc2626` }} />
                   }
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -135,10 +133,8 @@ export function FriaProgressRail({
                     }}>
                       <div style={{ flexShrink: 0 }}>
                         {sp.status === "done"
-                          ? <CheckCircle size={10} style={{ color: T.green }} />
-                          : sp.status === "draft"
-                          ? <Clock size={10} style={{ color: T.amber }} />
-                          : <div style={{ width: 10, height: 10, borderRadius: "50%", border: `1.5px solid rgba(0,0,0,0.15)` }} />
+                          ? <div style={{ width: 10, height: 10, borderRadius: "50%", border: `1.5px solid ${T.green}` }} />
+                          : <div style={{ width: 10, height: 10, borderRadius: "50%", border: `1.5px solid #dc2626` }} />
                         }
                       </div>
                       <p style={{
