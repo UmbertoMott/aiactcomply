@@ -197,11 +197,13 @@ export async function POST(req: NextRequest) {
   // ── COPERTINA ───────────────────────────────────────────────────────────────
   drawFooter()
 
+  const GREEN = rgb(0.137, 0.251, 0.227) // #23403a brand green
+
   // Barra colorata in alto
   page.drawRectangle({
     x: 0, y: PAGE_HEIGHT - 6,
     width: PAGE_WIDTH, height: 6,
-    color: rgb(0.145, 0.063, 0.086),
+    color: GREEN,
   })
 
   y = PAGE_HEIGHT - MARGIN - 10
@@ -209,7 +211,7 @@ export async function POST(req: NextRequest) {
   drawText(sanitize(systemName), { size: H1_SIZE, font: fontBold })
   y -= 6
   drawText(sanitize(templateLabel), {
-    size: 12, font: fontBold, color: rgb(0.145, 0.063, 0.086)
+    size: 12, font: fontBold, color: GREEN
   })
   y -= 2
   drawText(sanitize(regulationRef), {
@@ -226,7 +228,7 @@ export async function POST(req: NextRequest) {
   if (!isHighRisk) {
     y -= 8
     const tierLabel = isLimited ? "LIMITED RISK — Art. 50" : "MINIMAL RISK"
-    drawText(`⬛ ${tierLabel}`, { size: 9, font: fontBold, color: rgb(0.57, 0.27, 0.05) })
+    drawText(`⬛ ${tierLabel}`, { size: 9, font: fontBold, color: GREEN })
     y -= 4
     if (isLimited) {
       drawText(
