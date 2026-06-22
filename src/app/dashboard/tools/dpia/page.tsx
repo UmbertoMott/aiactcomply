@@ -1704,7 +1704,7 @@ export default function DPIAPage() {
             border: `1px solid rgba(35,64,58,0.22)`,
             background: "rgba(35,64,58,0.05)",
           }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: T.green }}>✦ DPIA guidata</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: T.text }}>DPIA guidata</span>
             <span style={{ fontSize: 9, color: T.muted }}>Domande guidate · AI compila per te</span>
           </div>
         </div>
@@ -1913,7 +1913,7 @@ export default function DPIAPage() {
               e.currentTarget.style.background = T.card;
             }}
           >
-            <span style={{ fontSize: 11, fontWeight: 700, color: T.green }}>✦ DPIA guidata</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: T.text }}>DPIA guidata</span>
             <span style={{ fontSize: 10, color: T.muted, lineHeight: 1.4 }}>Domande guidate · AI compila per te</span>
           </button>
         </div>
