@@ -40,9 +40,10 @@ function simpleHash(obj: unknown): string {
 interface DpiaGuidedModeProps {
   ghostClassifier?: ClassifierResult | null;
   ghostDataAudit?: DataAuditResult | null;
+  onExitGuidedMode?: () => void;
 }
 
-export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit }: DpiaGuidedModeProps) {
+export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMode }: DpiaGuidedModeProps) {
   const [doc, setDoc] = useState<DpiaGuidedDoc>(() => {
     const saved = readFromStorage<DpiaGuidedDoc>("dpiaGuided");
     return saved ?? createEmptyGuidedDoc();
@@ -52,6 +53,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit }: DpiaGuidedMo
   const [forcedSubPointId, setForcedSubPointId] = useState<string | null>(null);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [stale, setStale] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
   const viewerRef = useRef<HTMLDivElement>(null);
 
@@ -62,6 +64,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit }: DpiaGuidedMo
   const saveDoc = useCallback((next: DpiaGuidedDoc) => {
     writeToStorage("dpiaGuided", next);
     setDoc(next);
+    setLastSaved(new Date());
 
     // Sync su DPIAResult per DocuGen / form a 6 step
     const partial = mapGuidedToDPIA(next);
@@ -156,6 +159,11 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit }: DpiaGuidedMo
           <span style={{ fontSize: 10, color: T.muted }}>
             Allegato 2 WP248 · {progress.overallPercent}% completata
           </span>
+          {lastSaved && (
+            <span style={{ fontSize: 9, color: T.green, display: "flex", alignItems: "center", gap: 3 }}>
+              ✓ Salvato automaticamente
+            </span>
+          )}
           {stale && (
             <span style={{
               fontSize: 9, fontWeight: 700, color: T.amber,
@@ -166,20 +174,35 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit }: DpiaGuidedMo
             </span>
           )}
         </div>
-        <button
-          onClick={handleExportPDF}
-          disabled={pdfLoading || progress.overallPercent < 20}
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            padding: "6px 12px", borderRadius: 7,
-            border: `1px solid rgba(0,0,0,0.10)`, background: T.card,
-            cursor: progress.overallPercent < 20 ? "default" : "pointer",
-            fontSize: 11, fontWeight: 600, color: progress.overallPercent < 20 ? "rgba(0,0,0,0.28)" : T.text,
-          }}
-        >
-          <Download style={{ width: 13, height: 13 }} />
-          {pdfLoading ? "Generazione…" : "Genera PDF"}
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {onExitGuidedMode && (
+            <button
+              onClick={onExitGuidedMode}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                padding: "6px 12px", borderRadius: 7,
+                border: `1px solid ${T.green}`, background: T.green,
+                cursor: "pointer", fontSize: 11, fontWeight: 700, color: "#fff",
+              }}
+            >
+              Vai al Form completo →
+            </button>
+          )}
+          <button
+            onClick={handleExportPDF}
+            disabled={pdfLoading || progress.overallPercent < 5}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "6px 12px", borderRadius: 7,
+              border: `1px solid rgba(0,0,0,0.10)`, background: T.card,
+              cursor: progress.overallPercent < 5 ? "default" : "pointer",
+              fontSize: 11, fontWeight: 600, color: progress.overallPercent < 5 ? "rgba(0,0,0,0.28)" : T.text,
+            }}
+          >
+            <Download style={{ width: 13, height: 13 }} />
+            {pdfLoading ? "Generazione…" : "Genera PDF"}
+          </button>
+        </div>
       </div>
 
       {/* ── Layout 3 colonne (flex per stabilità cross-browser) ── */}

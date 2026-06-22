@@ -1706,7 +1706,7 @@ export default function DPIAPage() {
         </div>
         {/* Layout 3 colonne */}
         <div style={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
-          <DpiaGuidedMode ghostClassifier={ghostClassifier} ghostDataAudit={ghostDataAudit} />
+          <DpiaGuidedMode ghostClassifier={ghostClassifier} ghostDataAudit={ghostDataAudit} onExitGuidedMode={() => setGuidedMode(false)} />
         </div>
       </div>
     );
