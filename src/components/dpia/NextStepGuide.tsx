@@ -54,79 +54,79 @@ const STEP_DEFS: Record<StepKey, NextStepDef> = {
     key: "0_screening", targetStep: 0,
     title: "Completa lo screening WP248",
     description: "Nessun criterio di screening valutato. Indica quali criteri WP248 si applicano al tuo trattamento.",
-    ctaLabel: "Vai a Step 0 — Screening",
+    ctaLabel: "Vai a Step 1 — Screening",
   },
   "1_description": {
     key: "1_description", targetStep: 1,
     title: "Descrivi il trattamento",
     description: "Nome sistema, finalità e categorie di dati sono obbligatori per procedere alla valutazione.",
-    ctaLabel: "Vai a Step 1 — Descrizione",
+    ctaLabel: "Vai a Step 2 — Descrizione",
   },
   "1_dpo": {
     key: "1_dpo", targetStep: 1,
     title: "Documenta la consultazione del DPO",
     description: "Indica se il DPO è stato consultato (Art. 35(2) GDPR). La consultazione è obbligatoria dove designato.",
-    ctaLabel: "Vai a Step 1 — Descrizione",
+    ctaLabel: "Vai a Step 2 — Descrizione",
   },
   "2_necessity": {
     key: "2_necessity", targetStep: 2,
     title: "Documenta la necessità del trattamento",
     description: "Nessuna giustificazione di necessità/proporzionalità inserita (Art. 35(7)(b) GDPR).",
-    ctaLabel: "Vai a Step 2 — Necessità",
+    ctaLabel: "Vai a Step 3 — Necessità",
   },
   "2_proportionality": {
     key: "2_proportionality", targetStep: 2,
     title: "Verifica i principi di proporzionalità",
     description: "Alcuni principi GDPR Art. 5 non sono ancora stati valutati. Completa i check di proporzionalità.",
-    ctaLabel: "Vai a Step 2 — Necessità",
+    ctaLabel: "Vai a Step 3 — Necessità",
   },
   "3_threats": {
     key: "3_threats", targetStep: 3,
     title: "Identifica le minacce al trattamento",
     description: "Nessuna minaccia WP248 definita. Usa il catalogo per selezionare le minacce applicabili (Art. 35(7)(c)).",
-    ctaLabel: "Vai a Step 3 — Rischi",
+    ctaLabel: "Vai a Step 4 — Rischi",
   },
   "3_mitigations": {
     key: "3_mitigations", targetStep: 3,
     title: "Definisci le misure di mitigazione per le minacce ad alto rischio",
     description: "Alcune minacce ad alto rischio non hanno ancora una misura di mitigazione associata.",
-    ctaLabel: "Vai a Step 3 — Rischi",
+    ctaLabel: "Vai a Step 4 — Rischi",
   },
   "3_gap_check": {
     key: "3_gap_check", targetStep: 4,
     title: "Esegui il gap-check Art. 35(7)",
     description: "Verifica la copertura di tutti gli elementi obbligatori prima di definire le misure finali.",
-    ctaLabel: "Vai a Step 4 — Misure",
+    ctaLabel: "Vai a Step 5 — Misure",
   },
   "3_gap_fix": {
     key: "3_gap_fix", targetStep: 3,
     title: "Colma i gap normativi rilevati",
     description: "Il gap-check ha trovato elementi incompleti o mancanti rispetto all'Art. 35(7) GDPR.",
-    ctaLabel: "Vai a Step 3 — Rischi",
+    ctaLabel: "Vai a Step 4 — Rischi",
   },
   "4_measures": {
     key: "4_measures", targetStep: 4,
     title: "Documenta le misure di sicurezza",
     description: "Nessuna misura tecnica o organizzativa documentata (Art. 35(7)(d) GDPR).",
-    ctaLabel: "Vai a Step 4 — Misure",
+    ctaLabel: "Vai a Step 5 — Misure",
   },
   "4_prior_consultation": {
     key: "4_prior_consultation", targetStep: 4,
     title: "Pianifica la consultazione preventiva (Art. 36)",
     description: "Il rischio residuo rimane alto. La consultazione preventiva dell'autorità di controllo è obbligatoria.",
-    ctaLabel: "Vai a Step 4 — Misure",
+    ctaLabel: "Vai a Step 5 — Misure",
   },
   "5_conclusion": {
     key: "5_conclusion", targetStep: 5,
     title: "Prendi la decisione finale di compliance",
     description: "Documenta la conclusione DPIA (conforme / condizionalmente conforme / non conforme) e la sintesi esecutiva.",
-    ctaLabel: "Vai a Step 5 — Conclusione",
+    ctaLabel: "Vai a Step 6 — Conclusione",
   },
   "complete": {
     key: "complete", targetStep: 5,
     title: "DPIA completata",
     description: "Tutti i passi obbligatori sono stati completati. Puoi procedere con firma e archiviazione.",
-    ctaLabel: "Vai a Step 5 — Conclusione",
+    ctaLabel: "Vai a Step 6 — Conclusione",
   },
 };
 
@@ -279,7 +279,7 @@ export function NextStepGuide({ dpia, gapCheck, onNavigateToStep }: NextStepGuid
           fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 9999,
           background: T.amberBg, border: `1px solid ${T.amberBdr}`, color: T.amber,
         }}>
-          Step {step.targetStep}
+          Step {step.targetStep + 1}
         </span>
       </div>
 
