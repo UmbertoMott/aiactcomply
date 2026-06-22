@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Sparkles, RotateCcw, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { Send, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { DPIA_SUBPOINTS } from "@/lib/dpia/dpia-template";
 import type { DpiaGuidedDoc, DpiaAnswer } from "@/lib/dpia/dpia-guided-types";
 import { nextSubPointId } from "@/lib/dpia/dpia-guided-progress";
@@ -347,23 +347,7 @@ export function DpiaGuidedChat({
           >
             <ChevronLeft size={13} />
           </button>
-          <button
-            onClick={handleRequestAI}
-            disabled={aiLoading}
-            style={{
-              flex: 1, padding: "6px 0", borderRadius: 7,
-              border: `1px solid ${T.amberBdr}`, background: T.amberBg,
-              color: T.amber, fontSize: 10.5, fontWeight: 700,
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 4,
-              cursor: aiLoading ? "default" : "pointer",
-            }}
-          >
-            {aiLoading
-              ? <RotateCcw size={11} style={{ animation: "spin 1s linear infinite" }} />
-              : <Sparkles size={11} />
-            }
-            {aiLoading ? "Elaborazione…" : "✦ Bozza AI"}
-          </button>
+          <div style={{ flex: 1 }} />
           <button
             onClick={handleNext}
             disabled={currentIdx === allIds.length - 1}
