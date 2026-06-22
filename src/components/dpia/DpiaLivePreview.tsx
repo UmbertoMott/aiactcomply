@@ -17,7 +17,7 @@ const DOC = {
   text:      "#1a1a1a",
   muted:     "rgba(0,0,0,0.38)",
   border:    "rgba(0,0,0,0.10)",
-  headerBg:  "#23403a",
+  headerBg:  "#0D1016",
   headerFg:  "#ffffff",
   sectionBg: "#f0eeea",
   labelFg:   "rgba(0,0,0,0.50)",
