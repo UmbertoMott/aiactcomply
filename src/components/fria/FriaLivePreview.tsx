@@ -83,7 +83,9 @@ export function FriaLivePreview({ doc }: FriaLivePreviewProps) {
 
   return (
     <div style={{
-      background: DOC.bg, borderRadius: 6, padding: "20px 24px",
+      background: DOC.bg, borderRadius: 8, padding: "28px 32px",
+      border: "1px solid rgba(0,0,0,0.08)",
+      boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
       fontFamily: "Georgia, 'Times New Roman', serif",
       fontSize: 13, color: DOC.text, lineHeight: 1.7,
     }}>

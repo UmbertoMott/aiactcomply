@@ -362,27 +362,27 @@ export interface DpiaLivePreviewProps {
 
 export function DpiaLivePreview({ doc, activeSection }: DpiaLivePreviewProps) {
   return (
-    <div style={{
-      background: DOC.pageBg,
-      minHeight: "100%",
-      padding: "16px 20px",
-      fontFamily: "Georgia, 'Times New Roman', serif",
-    }}>
-      {/* Intestazione documento */}
-      <div data-noedit="true" style={{ marginBottom: 20, paddingBottom: 14, borderBottom: `2px solid ${DOC.headerBg}` }}>
-        <p style={{ fontSize: 9, fontWeight: 700, color: DOC.muted, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px", fontFamily: SANS }}>
-          {DPIA_TEMPLATE_META.legalBasis}
-        </p>
-        <h1 style={{ fontSize: 17, fontWeight: 700, color: DOC.text, margin: "0 0 6px", fontFamily: SANS }}>
-          {DPIA_TEMPLATE_META.title}
-        </h1>
-        <p style={{ fontSize: 10, color: DOC.muted, margin: 0, fontFamily: SANS }}>
-          Metodologia: {DPIA_TEMPLATE_META.methodology}
-        </p>
-      </div>
+    <div style={{ background: "#f0f0ef", minHeight: "100%", padding: "16px" }}>
+      <div style={{
+        background: DOC.bg, borderRadius: 8, padding: "28px 32px",
+        border: "1px solid rgba(0,0,0,0.08)",
+        boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+        fontFamily: "Georgia, 'Times New Roman', serif",
+        fontSize: 13, color: DOC.text, lineHeight: 1.7,
+      }}>
+        {/* Intestazione documento — dentro la card, come Risk Register */}
+        <div data-noedit="true" style={{ marginBottom: 20, paddingBottom: 14, borderBottom: `2px solid ${DOC.headerBg}` }}>
+          <p style={{ fontSize: 9, fontWeight: 700, color: DOC.muted, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px", fontFamily: SANS }}>
+            {DPIA_TEMPLATE_META.legalBasis}
+          </p>
+          <h1 style={{ fontSize: 17, fontWeight: 700, color: DOC.text, margin: "0 0 6px", fontFamily: SANS }}>
+            {DPIA_TEMPLATE_META.title}
+          </h1>
+          <p style={{ fontSize: 10, color: DOC.muted, margin: 0, fontFamily: SANS }}>
+            Metodologia: {DPIA_TEMPLATE_META.methodology}
+          </p>
+        </div>
 
-      {/* Sezioni documento */}
-      <div style={{ background: DOC.bg, borderRadius: 6, padding: "14px 18px", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
         <ScreeningSection  doc={doc} />
         <DescrSection      doc={doc} />
         <NecessitySection  doc={doc} />

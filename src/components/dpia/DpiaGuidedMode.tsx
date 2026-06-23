@@ -367,7 +367,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
               </div>
 
               {/* Contenuto scrollabile */}
-              <div ref={viewerRef} style={{ flex: 1, overflowY: "auto", padding: "16px 20px", background: T.bg }}>
+              <div ref={viewerRef} style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#f0f0ef" }}>
                 {editing ? (
                   /* Modalità modifica — contentEditable */
                   <div
@@ -378,8 +378,9 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
                       outline: "none", minHeight: 400,
                       fontFamily: "Georgia, 'Times New Roman', serif",
                       fontSize: 13, color: T.text, lineHeight: 1.7,
-                      background: T.card, borderRadius: 6, padding: "20px 24px",
-                      border: `1px solid rgba(13,16,22,0.25)`,
+                      background: T.card, borderRadius: 8, padding: "28px 32px",
+                      border: "1px solid rgba(13,16,22,0.25)",
+                      boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
                     }}
                   />
                 ) : editedHtml ? (
@@ -390,7 +391,9 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
                     style={{
                       fontFamily: "Georgia, 'Times New Roman', serif",
                       fontSize: 13, color: T.text, lineHeight: 1.7,
-                      background: T.card, borderRadius: 6, padding: "20px 24px",
+                      background: T.card, borderRadius: 8, padding: "28px 32px",
+                      border: "1px solid rgba(0,0,0,0.08)",
+                      boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
                     }}
                   />
                 ) : (
