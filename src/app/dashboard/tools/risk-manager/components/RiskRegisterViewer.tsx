@@ -46,7 +46,7 @@ const TIER_LABELS: Record<string, string> = {
 
 function SectionTitle({ sectionId, num, title, article }: { sectionId?: string; num: string; title: string; article?: string }) {
   return (
-    <div id={sectionId} style={{
+    <div id={sectionId} data-noedit="true" style={{
       background: "#0D1016", color: "#ffffff",
       borderRadius: 6, padding: "11px 18px",
       margin: "20px 0 12px",
@@ -101,7 +101,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
   return (
     <div>
       {/* ── Avanzamento compilazione (sans-serif, header del documento) ── */}
-      <div style={{ fontFamily: SANS, marginBottom: 18 }}>
+      <div data-noedit="true" style={{ fontFamily: SANS, marginBottom: 18 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
           <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.45)", textTransform: "uppercase", letterSpacing: "0.07em" }}>
             Avanzamento compilazione
@@ -150,7 +150,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
             <tbody>
               {idRows.map(([label, v]) => (
                 <tr key={label} style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
-                  <td style={{ padding: "5px 8px 5px 0", fontWeight: 700, color: "#0D1016", width: "42%", verticalAlign: "top" }}>{label}</td>
+                  <td data-noedit="true" style={{ padding: "5px 8px 5px 0", fontWeight: 700, color: "#0D1016", width: "42%", verticalAlign: "top" }}>{label}</td>
                   <td style={{ padding: "5px 0", color: "#1a1a1a", lineHeight: 1.5 }}>{String(v)}</td>
                 </tr>
               ))}
@@ -165,7 +165,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
           <SectionTitle sectionId="sec-risks" num="5" title="Registro dei rischi" article="Art. 9(2)(a)-(b)" />
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, fontFamily: SANS }}>
-              <thead>
+              <thead data-noedit="true">
                 <tr style={{ borderBottom: "2px solid #0D1016" }}>
                   {["ID", "Rischio", "Rif. Art. 9", "P", "S", "R", "Fascia", "Mitigazioni", "Owner", "Stato", "Prox. rev."].map(h => (
                     <th key={h} style={{ padding: "4px 6px", textAlign: "left", fontWeight: 700, color: "#0D1016", whiteSpace: "nowrap" }}>{h}</th>

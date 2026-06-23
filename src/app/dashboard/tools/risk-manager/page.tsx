@@ -345,13 +345,14 @@ function PhaseDocColumn({
   };
 
   const enterEdit = () => {
-    // Cattura l'HTML del viewer (o dell'html salvato) e passa a modalità edit
     const source = editedHtml ?? viewerRef.current?.innerHTML ?? "";
     setEditing(true);
-    // Dopo il re-render, popola il div editabile
     setTimeout(() => {
       if (editRef.current) {
         editRef.current.innerHTML = source;
+        editRef.current.querySelectorAll("[data-noedit]").forEach(el => {
+          (el as HTMLElement).contentEditable = "false";
+        });
         editRef.current.focus();
       }
     }, 0);
@@ -375,13 +376,13 @@ function PhaseDocColumn({
   };
 
   const docHeader = (
-    <div style={{ borderBottom: "2px solid #0D1016", paddingBottom: 10, marginBottom: 18 }}>
-      <p style={{ fontSize: 9, color: "rgba(0,0,0,0.45)", letterSpacing: "1px", textTransform: "uppercase", margin: 0, fontFamily: "var(--font-inter, system-ui)" }}>
+    <div data-noedit="true" style={{ marginBottom: 20, paddingBottom: 14, borderBottom: "2px solid #0D1016", fontFamily: "var(--font-inter, system-ui, sans-serif)" }}>
+      <p style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.38)", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px" }}>
         Art. 9 · Reg. UE 2024/1689 — Sistema di gestione dei rischi
       </p>
-      <h3 style={{ fontSize: 17, fontWeight: 700, color: "#0D1016", margin: "5px 0 0" }}>
+      <h1 style={{ fontSize: 17, fontWeight: 700, color: "#0D1016", margin: "0 0 6px", fontFamily: "inherit" }}>
         Registro dei Rischi{registerDoc.identification.systemName ? ` — ${registerDoc.identification.systemName}` : ""}
-      </h3>
+      </h1>
     </div>
   );
 

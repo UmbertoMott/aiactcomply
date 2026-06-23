@@ -60,6 +60,9 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
     setTimeout(() => {
       if (editRef.current) {
         editRef.current.innerHTML = source;
+        editRef.current.querySelectorAll("[data-noedit]").forEach(el => {
+          (el as HTMLElement).contentEditable = "false";
+        });
         editRef.current.focus();
       }
     }, 0);

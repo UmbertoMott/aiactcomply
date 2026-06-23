@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { FRIA_GUIDED_SECTIONS, FRIA_SUBPOINTS, FRIA_TEMPLATE_META } from "@/lib/fria/fria-template";
 import type { FriaGuidedDoc } from "@/lib/fria/fria-guided-types";
 
@@ -43,7 +43,7 @@ function Placeholder({ label }: { label: string }) {
 function Field({ label, value, placeholder, ref: refText }: { label: string; value: string | null; placeholder: string; ref?: string }) {
   return (
     <div style={{ marginBottom: 12 }}>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 3 }}>
+      <div data-noedit="true" style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 3 }}>
         <p style={{ fontSize: 9, fontWeight: 700, color: DOC.labelFg, letterSpacing: "0.06em", textTransform: "uppercase", margin: 0 }}>
           {label}
         </p>
@@ -61,7 +61,7 @@ function Field({ label, value, placeholder, ref: refText }: { label: string; val
 
 function SectionHeader({ id, title, legalRef }: { id: string; title: string; legalRef: string }) {
   return (
-    <div id={id} style={{
+    <div id={id} data-noedit="true" style={{
       background: DOC.headerBg, padding: "8px 14px", margin: "20px 0 10px",
       borderRadius: 4,
     }}>
@@ -79,6 +79,8 @@ interface FriaLivePreviewProps {
 }
 
 export function FriaLivePreview({ doc }: FriaLivePreviewProps) {
+  const [showAvvertenza, setShowAvvertenza] = useState(true);
+
   return (
     <div style={{
       background: DOC.bg, borderRadius: 6, padding: "20px 24px",
@@ -86,7 +88,7 @@ export function FriaLivePreview({ doc }: FriaLivePreviewProps) {
       fontSize: 13, color: DOC.text, lineHeight: 1.7,
     }}>
       {/* Intestazione documento */}
-      <div style={{ marginBottom: 20, paddingBottom: 14, borderBottom: `2px solid ${DOC.headerBg}` }}>
+      <div data-noedit="true" style={{ marginBottom: 20, paddingBottom: 14, borderBottom: `2px solid ${DOC.headerBg}` }}>
         <p style={{ fontSize: 9, fontWeight: 700, color: DOC.muted, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px", fontFamily: SANS }}>
           {FRIA_TEMPLATE_META.legalBasis}
         </p>
@@ -99,14 +101,28 @@ export function FriaLivePreview({ doc }: FriaLivePreviewProps) {
       </div>
 
       {/* Avvertenza */}
-      <div style={{
-        background: DOC.amberBg, border: `1px solid ${DOC.amberBdr}`,
-        borderRadius: 5, padding: "8px 12px", marginBottom: 18,
-      }}>
-        <p style={{ fontSize: 10, color: DOC.amber, margin: 0, fontFamily: SANS, lineHeight: 1.5 }}>
-          <strong>Avvertenza:</strong> {FRIA_TEMPLATE_META.disclaimer}
-        </p>
-      </div>
+      {showAvvertenza && (
+        <div data-noedit="true" style={{
+          position: "relative",
+          background: DOC.amberBg, border: `1px solid ${DOC.amberBdr}`,
+          borderRadius: 5, padding: "8px 12px 8px 12px", marginBottom: 18,
+        }}>
+          <p style={{ fontSize: 10, color: DOC.amber, margin: 0, fontFamily: SANS, lineHeight: 1.5, paddingRight: 20 }}>
+            <strong>Avvertenza:</strong> {FRIA_TEMPLATE_META.disclaimer}
+          </p>
+          <button
+            onClick={() => setShowAvvertenza(false)}
+            style={{
+              position: "absolute", top: 5, right: 7,
+              background: "none", border: "none", cursor: "pointer",
+              fontSize: 14, lineHeight: 1, color: DOC.amber, opacity: 0.7, padding: "1px 3px",
+            }}
+            title="Chiudi avvertenza"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       {/* Sezioni */}
       {FRIA_GUIDED_SECTIONS.map(sec => {
@@ -128,7 +144,7 @@ export function FriaLivePreview({ doc }: FriaLivePreviewProps) {
       })}
 
       {/* Footer */}
-      <div style={{
+      <div data-noedit="true" style={{
         marginTop: 28, paddingTop: 14, borderTop: `1px solid ${DOC.border}`,
         display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16,
         fontFamily: SANS,

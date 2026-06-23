@@ -34,6 +34,8 @@ const DOC = {
   redBdr:    "rgba(185,28,28,0.18)",
 } as const;
 
+const SANS = "var(--font-inter, system-ui, sans-serif)";
+
 // ─── Helper ───────────────────────────────────────────────────────────────────
 
 function doneValue(doc: DpiaGuidedDoc, id: string): string | null {
@@ -54,7 +56,7 @@ function Placeholder({ label }: { label: string }) {
 function Field({ label, value, placeholder }: { label: string; value: string | null; placeholder: string }) {
   return (
     <div style={{ marginBottom: 10 }}>
-      <p style={{ fontSize: 9, fontWeight: 700, color: DOC.labelFg, letterSpacing: "0.06em", textTransform: "uppercase", margin: "0 0 3px" }}>
+      <p data-noedit="true" style={{ fontSize: 9, fontWeight: 700, color: DOC.labelFg, letterSpacing: "0.06em", textTransform: "uppercase", margin: "0 0 3px" }}>
         {label}
       </p>
       {value
@@ -67,7 +69,7 @@ function Field({ label, value, placeholder }: { label: string; value: string | n
 
 function SectionHeader({ id, title, legalRef }: { id: string; title: string; legalRef: string }) {
   return (
-    <div id={id} style={{
+    <div id={id} data-noedit="true" style={{
       background: DOC.headerBg, padding: "8px 14px", margin: "20px 0 10px",
       borderRadius: 4,
     }}>
@@ -342,8 +344,6 @@ export interface DpiaLivePreviewProps {
 }
 
 export function DpiaLivePreview({ doc, activeSection }: DpiaLivePreviewProps) {
-  const answeredCount = Object.values(doc.answers).filter(a => a.status === "done").length;
-
   return (
     <div style={{
       background: DOC.pageBg,
@@ -352,21 +352,16 @@ export function DpiaLivePreview({ doc, activeSection }: DpiaLivePreviewProps) {
       fontFamily: "Georgia, 'Times New Roman', serif",
     }}>
       {/* Intestazione documento */}
-      <div style={{
-        background: DOC.headerBg, borderRadius: 6, padding: "14px 18px", marginBottom: 18,
-        textAlign: "center",
-      }}>
-        <p style={{ fontSize: 14, fontWeight: 700, color: "#ffffff", margin: "0 0 2px", letterSpacing: "0.02em" }}>
+      <div data-noedit="true" style={{ marginBottom: 20, paddingBottom: 14, borderBottom: `2px solid ${DOC.headerBg}` }}>
+        <p style={{ fontSize: 9, fontWeight: 700, color: DOC.muted, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px", fontFamily: SANS }}>
+          {DPIA_TEMPLATE_META.legalBasis}
+        </p>
+        <h1 style={{ fontSize: 17, fontWeight: 700, color: DOC.text, margin: "0 0 6px", fontFamily: SANS }}>
           {DPIA_TEMPLATE_META.title}
+        </h1>
+        <p style={{ fontSize: 10, color: DOC.muted, margin: 0, fontFamily: SANS }}>
+          Metodologia: {DPIA_TEMPLATE_META.methodology}
         </p>
-        <p style={{ fontSize: 9, color: "rgba(255,255,255,0.55)", margin: 0 }}>
-          {DPIA_TEMPLATE_META.legalBasis} · {DPIA_TEMPLATE_META.methodology}
-        </p>
-        {answeredCount > 0 && (
-          <p style={{ fontSize: 9, color: "rgba(255,255,255,0.40)", margin: "4px 0 0" }}>
-            {answeredCount} sezioni compilate — documento in elaborazione
-          </p>
-        )}
       </div>
 
       {/* Sezioni documento */}

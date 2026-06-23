@@ -73,6 +73,9 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
     setTimeout(() => {
       if (editRef.current) {
         editRef.current.innerHTML = source;
+        editRef.current.querySelectorAll("[data-noedit]").forEach(el => {
+          (el as HTMLElement).contentEditable = "false";
+        });
         editRef.current.focus();
       }
     }, 0);
