@@ -6,7 +6,7 @@
 // Regola n. 1: le sezioni senza dati NON vengono mostrate.
 
 import React from "react";
-import { AlertTriangle, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import {
   VERIFY_NOTE_IT,
   type RiskRegisterDocument,
@@ -14,7 +14,7 @@ import {
 import {
   computeRiskScore, riskBand, BAND_COLORS,
   entryCompleteness, missingFields,
-  computeRegisterProgress, computeReviewAlerts,
+  computeReviewAlerts,
 } from "@/lib/risk/risk-register-progress";
 import type { AnnexSection } from "@/lib/risk/risk-register-mapper";
 
@@ -76,7 +76,6 @@ function AiBadge() {
 }
 
 export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument; annexes: AnnexSection[] }) {
-  const progress = computeRegisterProgress(doc);
   const alerts = computeReviewAlerts(doc);
 
   const id = doc.identification;
@@ -100,39 +99,6 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
 
   return (
     <div>
-      {/* ── Avanzamento compilazione (sans-serif, header del documento) ── */}
-      <div data-noedit="true" style={{ fontFamily: SANS, marginBottom: 18 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
-          <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.45)", textTransform: "uppercase", letterSpacing: "0.07em" }}>
-            Avanzamento compilazione
-          </span>
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#0D1016" }}>{progress.overallPercent}%</span>
-        </div>
-        <div style={{ width: "100%", height: 5, background: "rgba(0,0,0,0.07)", borderRadius: 3, overflow: "hidden", marginBottom: 8 }}>
-          <div style={{ height: "100%", width: `${progress.overallPercent}%`, background: "#0D1016", borderRadius: 3, transition: "width 0.4s" }} />
-        </div>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {progress.sections.map(s => (
-            <div key={s.key} style={{ flex: "1 1 90px", minWidth: 90 }}>
-              <div style={{ fontSize: 8.5, color: "rgba(0,0,0,0.4)", marginBottom: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                {s.label} · {s.detail}
-              </div>
-              <div style={{ width: "100%", height: 3, background: "rgba(0,0,0,0.06)", borderRadius: 2 }}>
-                <div style={{ height: "100%", width: `${s.percent}%`, background: s.percent === 100 ? "#16a34a" : "rgba(0,0,0,0.4)", borderRadius: 2 }} />
-              </div>
-            </div>
-          ))}
-        </div>
-        {progress.blockingGaps.length > 0 && (
-          <div style={{ marginTop: 10, padding: "8px 10px", background: "#FEF3C7", border: "1px solid rgba(217,119,6,0.25)", borderRadius: 6, display: "flex", gap: 6 }}>
-            <AlertTriangle size={12} style={{ color: "#b45309", flexShrink: 0, marginTop: 1 }} />
-            <span style={{ fontSize: 10.5, color: "#92400e" }}>
-              Gap obbligatori non risolti: {progress.blockingGaps.join("; ")}
-            </span>
-          </div>
-        )}
-      </div>
-
       {isEmpty && (
         <div style={{ textAlign: "center", padding: "40px 0", fontFamily: SANS }}>
           <Clock size={24} style={{ color: "rgba(0,0,0,0.15)", margin: "0 auto 10px" }} />
@@ -319,30 +285,23 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
       {hasSignOff && doc.signOff && (
         <>
           <SectionTitle sectionId="sec-signoff" num="8" title="Approvazione e firme" article="Art. 9(1)" />
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-            <tbody>
-              {([
-                ["Risk owner", doc.signOff.riskOwner],
-                ["Responsabile compliance/legale", doc.signOff.complianceLegal],
-                ["Rappresentante legale", doc.signOff.legalRepresentative],
-              ] as const).map(([role, s]) => (
-                <tr key={role} style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
-                  <td style={{ padding: "6px 8px 6px 0", fontWeight: 700, width: "40%" }}>{role}</td>
-                  <td style={{ padding: "6px 0" }}>{s.name ?? "—"}</td>
-                  <td style={{ padding: "6px 0", whiteSpace: "nowrap" }}>{s.date ?? ""}</td>
-                  <td style={{ padding: "6px 0", textAlign: "right", fontFamily: SANS }}>
-                    <span style={{
-                      fontSize: 9.5, fontWeight: 700, padding: "1px 8px", borderRadius: 4,
-                      background: s.signed ? "#D1FAE5" : "#f3f4f6",
-                      color: s.signed ? "#065f46" : "#6b7280",
-                    }}>
-                      {s.signed ? "FIRMATO" : "NON FIRMATO"}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20, marginBottom: 16 }}>
+            {([
+              ["Risk owner", doc.signOff.riskOwner],
+              ["Responsabile compliance/legale", doc.signOff.complianceLegal],
+              ["Rappresentante legale", doc.signOff.legalRepresentative],
+            ] as const).map(([role, s]) => (
+              <div key={role}>
+                <p style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.50)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px", fontFamily: SANS }}>
+                  {role}
+                </p>
+                {s.name && <p style={{ fontSize: 11, color: "#1a1a1a", margin: "0 0 10px" }}>{s.name}</p>}
+                {!s.name && <div style={{ height: 10 }} />}
+                <div style={{ borderBottom: "1px solid rgba(0,0,0,0.10)", height: 24, marginBottom: 4 }} />
+                {s.date && <p style={{ fontSize: 9, color: "rgba(0,0,0,0.40)", margin: "4px 0 0", fontFamily: SANS }}>{s.date}</p>}
+              </div>
+            ))}
+          </div>
         </>
       )}
 
@@ -362,6 +321,23 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
           })}
         </div>
       ))}
+
+      {/* ── Firma (sempre visibile, come FRIA/DPIA) ── */}
+      {!hasSignOff && !isEmpty && (
+        <>
+          <SectionTitle sectionId="sec-signoff" num="8" title="Approvazione e firme" article="Art. 9(1)" />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20, marginBottom: 16 }}>
+            {["Risk owner", "Responsabile compliance/legale", "Rappresentante legale"].map(label => (
+              <div key={label}>
+                <p style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.50)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 16px", fontFamily: SANS }}>
+                  {label}
+                </p>
+                <div style={{ borderBottom: "1px solid rgba(0,0,0,0.10)", height: 24 }} />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       {/* Nota di verifica — sempre visibile in coda, mai troncata */}
       {!isEmpty && (

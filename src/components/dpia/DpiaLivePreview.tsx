@@ -327,7 +327,24 @@ function SignoffSection({ doc }: { doc: DpiaGuidedDoc }) {
       <Field label="Condizioni / misure aggiuntive" value={doneValue(doc, "e_conditions")}     placeholder="condizioni" />
       <Field label="Sintesi esecutiva"              value={doneValue(doc, "e_summary")}         placeholder="sintesi" />
       <Field label="Prossimo riesame"               value={doneValue(doc, "e_next_review_date")} placeholder="data riesame" />
-      <div style={{ marginTop: 16, paddingTop: 10, borderTop: `1px solid ${DOC.border}` }}>
+
+      {/* Linee firma */}
+      <div style={{ marginTop: 24, paddingTop: 14, borderTop: `1px solid ${DOC.border}`, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, fontFamily: SANS }}>
+        {[
+          "Titolare del trattamento / DPO",
+          "Referente GDPR",
+          "Data",
+        ].map(label => (
+          <div key={label}>
+            <p style={{ fontSize: 9, fontWeight: 700, color: DOC.labelFg, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 16px" }}>
+              {label}
+            </p>
+            <div style={{ borderBottom: `1px solid ${DOC.border}`, height: 24 }} />
+          </div>
+        ))}
+      </div>
+
+      <div style={{ marginTop: 12 }}>
         <p style={{ fontSize: 9, color: DOC.muted, margin: 0 }}>
           {DPIA_TEMPLATE_META.disclaimer}
         </p>
