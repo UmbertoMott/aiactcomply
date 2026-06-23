@@ -357,6 +357,8 @@ export default function DPIAPage() {
   const [showTemplateViewer, setShowTemplateViewer] = useState(false);
   // Modalità guidata vs form a 6 step
   const [guidedMode, setGuidedMode] = useState(false);
+  // Rail: sezioni espanse
+  const [railExpanded, setRailExpanded] = useState<Set<number>>(new Set([0, 1, 2, 3, 4, 5]));
 
   // Load from storage on mount
   useEffect(() => {
@@ -1925,71 +1927,173 @@ export default function DPIAPage() {
         onParsed={() => { setAiPrefillDone(false); }}
       />
 
-      {/* Step nav */}
-      <div style={{ display: "flex", gap: 4, marginBottom: 24, overflowX: "auto" }}>
-        {STEPS.map((s, i) => {
-          const isActive = step === i;
-          const isDone = step > i;
-          return (
-            <button key={i} onClick={() => setStep(i as Step)}
-              style={{
-                display: "flex", alignItems: "center", gap: 6,
-                padding: "8px 14px", borderRadius: 8, cursor: "pointer",
-                border: `1px solid ${isActive ? T.text : T.border}`,
-                background: isActive ? T.text : isDone ? T.greenBg : T.card,
-                color: isActive ? "#fff" : isDone ? T.green : T.muted,
-                fontSize: 12, fontWeight: isActive ? 600 : 400,
-                whiteSpace: "nowrap", transition: "all 0.15s",
-              }}>
-              <s.Icon className="h-3.5 w-3.5" />
-              <span>{s.label}</span>
-              {isDone && <Check className="h-3 w-3" />}
-            </button>
-          );
-        })}
-      </div>
+      {/* ── Two-column layout: Rail + Content ── */}
+      <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
 
-      {/* Step content */}
-      <div style={{ maxWidth: 860, margin: "0 auto" }}>
-        {/* Step header */}
-        <div style={{ marginBottom: 16 }}>
-          <p style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-            Step {step} / 5
-          </p>
-          <h2 style={{ fontSize: 15, fontWeight: 700, color: T.text }}>
-            {STEPS[step].label}
-            <span style={{ fontSize: 12, fontWeight: 400, color: T.muted, marginLeft: 8 }}>
-              {STEPS[step].sub}
+        {/* LEFT — Progress Rail */}
+        <div style={{
+          width: 220, flexShrink: 0,
+          background: "#fafafa",
+          borderRadius: 10,
+          border: "1px solid rgba(0,0,0,0.08)",
+          display: "flex", flexDirection: "column",
+          overflow: "hidden",
+          position: "sticky", top: 16,
+        }}>
+          {/* Rail header */}
+          <div style={{ padding: "10px 14px 8px", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+            <span style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.42)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              Fasi DPIA
             </span>
-          </h2>
+          </div>
+          {/* Step list */}
+          <div style={{ padding: 8 }}>
+            {computeDpiaProgress(doc).steps.map((s, idx) => {
+              const isActive   = step === idx;
+              const isExpanded = railExpanded.has(idx);
+              const circleColor = s.percent === 100 ? "#23403a" : "#dc2626";
+              const pctColor    = s.percent === 100 ? "#23403a" : s.percent > 0 ? "#b45309" : "rgba(0,0,0,0.22)";
+              const borderColor = isActive ? "rgba(35,64,58,0.20)" : s.percent === 100 ? "rgba(35,64,58,0.12)" : "rgba(0,0,0,0.07)";
+              const bg          = isActive ? "rgba(35,64,58,0.06)" : "transparent";
+              const subPoints   = s.fields.filter(f => f.required);
+              const doneCount   = subPoints.filter(f => f.filled).length;
+
+              return (
+                <div key={idx} style={{
+                  border: `1px solid ${borderColor}`,
+                  background: bg,
+                  borderRadius: 8,
+                  overflow: "hidden",
+                  marginBottom: 4,
+                }}>
+                  <button
+                    onClick={() => {
+                      setStep(idx as Step);
+                      setRailExpanded(prev => {
+                        const next = new Set(prev);
+                        next.has(idx) ? next.delete(idx) : next.add(idx);
+                        return next;
+                      });
+                    }}
+                    style={{
+                      width: "100%", textAlign: "left", border: "none",
+                      background: "transparent", padding: "9px 10px",
+                      cursor: "pointer", display: "flex", alignItems: "center", gap: 8,
+                    }}
+                    onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "rgba(0,0,0,0.02)"; }}
+                    onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
+                  >
+                    <div style={{ flexShrink: 0 }}>
+                      <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${circleColor}` }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {idx + 1}. {s.label}
+                      </p>
+                      <p style={{ fontSize: 9, color: "rgba(0,0,0,0.42)", margin: 0, marginTop: 1 }}>
+                        {doneCount}/{subPoints.length} · {s.legalRef}
+                      </p>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      <span style={{ fontSize: 9.5, fontWeight: 700, color: pctColor, fontFamily: "monospace" }}>
+                        {s.percent}%
+                      </span>
+                      <ChevronRight
+                        size={10}
+                        style={{
+                          color: "rgba(0,0,0,0.22)",
+                          transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
+                          transition: "transform 0.2s",
+                        }}
+                      />
+                    </div>
+                  </button>
+
+                  {/* Progress bar */}
+                  <div style={{ height: 2, background: "rgba(0,0,0,0.04)" }}>
+                    <div style={{ height: "100%", width: `${s.percent}%`, background: circleColor, transition: "width 0.35s" }} />
+                  </div>
+
+                  {/* Sub-points */}
+                  {isExpanded && subPoints.length > 0 && (
+                    <div style={{ borderTop: "1px solid rgba(0,0,0,0.05)", padding: "4px 6px 6px 6px" }}>
+                      {subPoints.map((f, fi) => (
+                        <div
+                          key={fi}
+                          onClick={() => setStep(idx as Step)}
+                          style={{
+                            display: "flex", alignItems: "center", gap: 6,
+                            padding: "4px 4px", borderRadius: 5, cursor: "pointer",
+                          }}
+                          onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.03)")}
+                          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                        >
+                          <div style={{ flexShrink: 0 }}>
+                            {f.filled
+                              ? <div style={{ width: 10, height: 10, borderRadius: "50%", border: "1.5px solid #23403a" }} />
+                              : <div style={{ width: 10, height: 10, borderRadius: "50%", border: "1.5px solid #dc2626" }} />
+                            }
+                          </div>
+                          <p style={{
+                            fontSize: 10, color: f.filled ? "rgba(0,0,0,0.42)" : "#0D1016",
+                            margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                            textDecoration: f.filled ? "line-through" : "none",
+                            opacity: f.filled ? 0.55 : 1,
+                          }}>
+                            {f.label}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        {steps[step]()}
+        {/* RIGHT — Step content */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Step header */}
+          <div style={{ marginBottom: 16 }}>
+            <p style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              Step {step} / 5
+            </p>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: T.text }}>
+              {STEPS[step].label}
+              <span style={{ fontSize: 12, fontWeight: 400, color: T.muted, marginLeft: 8 }}>
+                {STEPS[step].sub}
+              </span>
+            </h2>
+          </div>
 
-        {/* Navigation */}
-        <div className="flex items-center justify-between mt-6">
-          <button
-            onClick={() => setStep(s => Math.max(0, s - 1) as Step)}
-            disabled={step === 0}
-            style={{ ...navBtnSt(false), display: "flex", alignItems: "center", gap: 4, opacity: step === 0 ? 0.35 : 1 }}>
-            <ChevronLeft className="h-4 w-4" /> Precedente
-          </button>
-          <span style={{ fontSize: 11, color: T.faint }}>{step + 1} / {STEPS.length}</span>
-          {step < STEPS.length - 1 ? (
+          {steps[step]()}
+
+          {/* Navigation */}
+          <div className="flex items-center justify-between mt-6">
             <button
-              onClick={() => setStep(s => Math.min(STEPS.length - 1, s + 1) as Step)}
-              style={{ ...navBtnSt(true), display: "flex", alignItems: "center", gap: 4 }}>
-              Avanti <ChevronRight className="h-4 w-4" />
+              onClick={() => setStep(s => Math.max(0, s - 1) as Step)}
+              disabled={step === 0}
+              style={{ ...navBtnSt(false), display: "flex", alignItems: "center", gap: 4, opacity: step === 0 ? 0.35 : 1 }}>
+              <ChevronLeft className="h-4 w-4" /> Precedente
             </button>
-          ) : (
-            <button onClick={saveToDossier}
-              style={{ ...navBtnSt(true), display: "flex", alignItems: "center", gap: 4 }}>
-              <CheckCircle2 className="h-4 w-4" /> Completa DPIA
-            </button>
-          )}
-        </div>
+            <span style={{ fontSize: 11, color: T.faint }}>{step + 1} / {STEPS.length}</span>
+            {step < STEPS.length - 1 ? (
+              <button
+                onClick={() => setStep(s => Math.min(STEPS.length - 1, s + 1) as Step)}
+                style={{ ...navBtnSt(true), display: "flex", alignItems: "center", gap: 4 }}>
+                Avanti <ChevronRight className="h-4 w-4" />
+              </button>
+            ) : (
+              <button onClick={saveToDossier}
+                style={{ ...navBtnSt(true), display: "flex", alignItems: "center", gap: 4 }}>
+                <CheckCircle2 className="h-4 w-4" /> Completa DPIA
+              </button>
+            )}
+          </div>
 
-        <NextStepGuide dpia={doc} gapCheck={gapCheckResult} onNavigateToStep={(s) => setStep(s as Step)} />
+          <NextStepGuide dpia={doc} gapCheck={gapCheckResult} onNavigateToStep={(s) => setStep(s as Step)} />
+        </div>
       </div>
 
       {/* ── Template Viewer Panel (slide-in from right) ─────────────────────── */}
