@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { ChevronRight, CheckCircle, Clock } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import type { GuidedDpiaProgress } from "@/lib/dpia/dpia-guided-progress";
 
 const T = {
@@ -17,7 +17,7 @@ const T = {
 
 function ProgressBar({ pct, color = T.green }: { pct: number; color?: string }) {
   return (
-    <div style={{ height: 3, background: "rgba(0,0,0,0.06)", borderRadius: 2, overflow: "hidden", marginTop: 4 }}>
+    <div style={{ height: 2, background: "rgba(0,0,0,0.04)", borderRadius: 2, overflow: "hidden" }}>
       <div style={{ height: "100%", width: `${pct}%`, background: color, borderRadius: 2, transition: "width 0.35s ease" }} />
     </div>
   );
@@ -31,7 +31,7 @@ export interface DpiaProgressRailProps {
 }
 
 export function DpiaProgressRail({
-  progress, activeSection, onSectionClick,
+  progress, activeSection, onSectionClick, onSubPointClick,
 }: DpiaProgressRailProps) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set(["screening"]));
   const pct = progress.overallPercent;
@@ -57,6 +57,7 @@ export function DpiaProgressRail({
           </span>
         </div>
         <ProgressBar pct={pct} color={globalColor} />
+        <p style={{ fontSize: 9, color: T.faint, margin: "5px 0 0" }}>Art. 35 GDPR · WP248</p>
       </div>
 
       {/* Sezioni */}
@@ -95,50 +96,70 @@ export function DpiaProgressRail({
               >
                 <div style={{ flexShrink: 0 }}>
                   {sec.percent === 100
-                    ? <CheckCircle size={14} style={{ color: T.green }} />
-                    : sec.percent > 0
-                    ? <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${T.amber}` }} />
-                    : <Clock size={14} style={{ color: T.faint }} />
+                    ? <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${T.green}` }} />
+                    : <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid #dc2626` }} />
                   }
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{
-                    fontSize: 11.5,
-                    fontWeight: isActive ? 700 : 600,
-                    color: sec.percent === 100 ? T.green : T.text,
-                    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                  }}>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: T.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {sec.label}
-                  </div>
-                  <ProgressBar pct={sec.percent} color={secColor} />
+                  </p>
+                  <p style={{ fontSize: 9, color: T.muted, margin: 0, marginTop: 1 }}>
+                    {doneCount}/{totalCount} · {sec.legalRef}
+                  </p>
                 </div>
-                <ChevronRight size={11} style={{
-                  flexShrink: 0, color: "rgba(0,0,0,0.25)",
-                  transform: isExpanded ? "rotate(90deg)" : "none",
-                  transition: "transform 0.15s",
-                }} />
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <span style={{ fontSize: 9.5, fontWeight: 700, color: secColor, fontFamily: "monospace" }}>
+                    {sec.percent}%
+                  </span>
+                  <ChevronRight
+                    size={10}
+                    style={{
+                      color: T.faint,
+                      transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
+                      transition: "transform 0.2s",
+                    }}
+                  />
+                </div>
               </button>
 
-              {isExpanded && (
-                <div style={{ padding: "0 10px 8px 34px" }}>
-                  <span style={{ fontSize: 10, color: sec.percent === 100 ? T.green : T.muted }}>
-                    {doneCount} / {totalCount} completati
-                  </span>
-                  {sec.legalRef && (
-                    <span style={{ fontSize: 9, color: T.faint, marginLeft: 5 }}>· {sec.legalRef}</span>
-                  )}
+              <ProgressBar pct={sec.percent} color={secColor} />
+
+              {/* Sotto-punti espansi */}
+              {isExpanded && sec.subPoints.length > 0 && (
+                <div style={{ borderTop: "1px solid rgba(0,0,0,0.05)", padding: "4px 6px 6px 6px" }}>
+                  {sec.subPoints.map(sp => (
+                    <div
+                      key={sp.id}
+                      onClick={() => onSubPointClick(sp.id)}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 6,
+                        padding: "4px 4px", borderRadius: 5, cursor: "pointer",
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.03)")}
+                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                    >
+                      <div style={{ flexShrink: 0 }}>
+                        {sp.status === "done"
+                          ? <div style={{ width: 10, height: 10, borderRadius: "50%", border: `1.5px solid ${T.green}` }} />
+                          : <div style={{ width: 10, height: 10, borderRadius: "50%", border: `1.5px solid #dc2626` }} />
+                        }
+                      </div>
+                      <p style={{
+                        fontSize: 10, color: sp.status === "done" ? T.muted : T.text,
+                        margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                        textDecoration: sp.status === "done" ? "line-through" : "none",
+                        opacity: sp.status === "done" ? 0.55 : 1,
+                      }}>
+                        {sp.label}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
           );
         })}
-      </div>
-
-      {/* Footer */}
-      <div style={{ padding: "8px 12px", borderTop: `1px solid ${T.border}` }}>
-        <p style={{ fontSize: 9, color: T.faint, margin: 0, lineHeight: 1.4 }}>
-          WP248 Allegato 2 — pesi somma = 100
-        </p>
       </div>
     </div>
   );

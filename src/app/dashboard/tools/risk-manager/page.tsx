@@ -211,6 +211,7 @@ function SectionRow({ section, onOpen }: { section: SectionProgress; onOpen: (an
   const circleColor = isComplete ? "#23403a" : "#dc2626";
   const pctColor    = isComplete ? "#23403a" : section.percent > 0 ? "#b45309" : "rgba(0,0,0,0.28)";
   const borderColor = isComplete ? "rgba(35,64,58,0.12)" : "rgba(0,0,0,0.07)";
+  const doneCount   = section.subPoints.filter(sp => sp.done).length;
 
   return (
     <div style={{ border: `1px solid ${borderColor}`, borderRadius: 8, overflow: "hidden", marginBottom: 4, background: "transparent" }}>
@@ -228,7 +229,7 @@ function SectionRow({ section, onOpen }: { section: SectionProgress; onOpen: (an
             {section.label}
           </p>
           <p style={{ fontSize: 9, color: "rgba(0,0,0,0.42)", margin: 0, marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {section.detail} · {legalRef}
+            {doneCount}/{section.subPoints.length} · {legalRef}
           </p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -239,6 +240,25 @@ function SectionRow({ section, onOpen }: { section: SectionProgress; onOpen: (an
       <div style={{ height: 2, background: "rgba(0,0,0,0.04)" }}>
         <div style={{ height: "100%", width: `${section.percent}%`, background: circleColor, transition: "width 0.4s" }} />
       </div>
+      {expanded && section.subPoints.length > 0 && (
+        <div style={{ borderTop: "1px solid rgba(0,0,0,0.05)", padding: "4px 6px 6px 6px" }}>
+          {section.subPoints.map((sp, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 4px", borderRadius: 5 }}>
+              <div style={{ flexShrink: 0 }}>
+                <div style={{ width: 10, height: 10, borderRadius: "50%", border: `1.5px solid ${sp.done ? "#23403a" : "#dc2626"}` }} />
+              </div>
+              <p style={{
+                fontSize: 10, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                color: sp.done ? "rgba(0,0,0,0.42)" : "#0D1016",
+                textDecoration: sp.done ? "line-through" : "none",
+                opacity: sp.done ? 0.55 : 1,
+              }}>
+                {sp.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

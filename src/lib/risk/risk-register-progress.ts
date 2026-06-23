@@ -55,12 +55,18 @@ export function missingFields(entry: RiskRegisterEntry): string[] {
   return checks.filter(([, v]) => v === undefined || v === "").map(([label]) => label);
 }
 
+export interface SectionSubPoint {
+  label: string;
+  done: boolean;
+}
+
 export interface SectionProgress {
   key: "identification" | "risks" | "gapCheck" | "reviewLog" | "signOff";
   label: string;
   weight: number;
   percent: number;
   detail: string;
+  subPoints: SectionSubPoint[];
 }
 
 export interface RegisterProgress {
@@ -87,18 +93,34 @@ export function computeRegisterProgress(doc: RiskRegisterDocument): RegisterProg
   if (id.personalDataProcessed !== "no") idFields.push(id.legalBasis);
   const idFilled = idFields.filter(v => v !== undefined && v !== "").length;
   const idPercent = idFields.length === 0 ? 0 : Math.round((idFilled / idFields.length) * 100);
+  const idSubPoints: SectionSubPoint[] = [
+    { label: "Nome sistema",         done: !!(id.systemName) },
+    { label: "Ruolo provider/deployer", done: !!(id.providerDeployerRole) },
+    { label: "Descrizione e scopo",  done: !!(id.descriptionAndPurpose) },
+    { label: "Livello di rischio",   done: id.riskTier !== "unclassified" },
+    { label: "Area Allegato III",    done: !!(id.annexIIIArea) },
+    { label: "Articoli applicabili", done: id.applicableArticles.length > 0 },
+    { label: "Dati personali",       done: id.personalDataProcessed !== "unspecified" },
+    { label: "Supervisione umana",   done: id.humanOversightRequired !== undefined },
+    { label: "Responsabile registro", done: !!(id.registerOwner) },
+  ];
   sections.push({
     key: "identification", label: "Identificazione sistema", weight: 15,
     percent: idPercent, detail: `${idFilled}/${idFields.length} campi compilati`,
+    subPoints: idSubPoints,
   });
 
   // — Registro rischi (peso 45) —
   const total = doc.risks.length;
   const complete = doc.risks.filter(r => entryCompleteness(r) === "complete").length;
   const risksPercent = total === 0 ? 0 : Math.round((complete / total) * 100);
+  const risksSubPoints: SectionSubPoint[] = total === 0
+    ? [{ label: "Nessun rischio inserito", done: false }]
+    : doc.risks.map(r => ({ label: r.category || r.id, done: entryCompleteness(r) === "complete" }));
   sections.push({
     key: "risks", label: "Registro rischi", weight: 45,
     percent: risksPercent, detail: `${complete}/${total} rischi completi`,
+    subPoints: risksSubPoints,
   });
 
   // — Gap check (peso 15) —
@@ -117,28 +139,45 @@ export function computeRegisterProgress(doc: RiskRegisterDocument): RegisterProg
     unresolved.forEach(a => blockingGaps.push(a.area));
     gapPercent = unresolved.length === 0 ? 100 : 50;
   }
+  const gapSubPoints: SectionSubPoint[] = gc
+    ? gc.missingAreas.slice(0, 8).map(a => ({ label: a.area, done: !blockingGaps.includes(a.area) }))
+    : [{ label: "Gap check non ancora eseguito", done: false }];
   sections.push({
     key: "gapCheck", label: "Copertura Art. 9", weight: 15,
     percent: gapPercent,
     detail: gc?.coverageScore !== undefined ? `score ${gc.coverageScore}/100` : "non eseguito",
+    subPoints: gapSubPoints,
   });
 
   // — Monitoraggio (peso 10) —
   const now = Date.now();
   const hasFutureReview = doc.reviewLog.some(e => e.nextReviewDate && Date.parse(e.nextReviewDate) > now);
+  const reviewSubPoints: SectionSubPoint[] = doc.reviewLog.length === 0
+    ? [{ label: "Nessuna revisione registrata", done: false }]
+    : [
+        { label: "Revisioni registrate",    done: doc.reviewLog.length > 0 },
+        { label: "Prossima revisione futura", done: hasFutureReview },
+      ];
   sections.push({
     key: "reviewLog", label: "Monitoraggio", weight: 10,
     percent: hasFutureReview ? 100 : 0,
     detail: doc.reviewLog.length > 0 ? `${doc.reviewLog.length} revisioni registrate` : "nessuna revisione",
+    subPoints: reviewSubPoints,
   });
 
   // — Sign-off (peso 15) —
   const so = doc.signOff;
   const signedCount = so ? [so.riskOwner, so.complianceLegal, so.legalRepresentative].filter(r => r.signed).length : 0;
+  const signOffSubPoints: SectionSubPoint[] = [
+    { label: "Risk Owner",           done: !!(so?.riskOwner.signed) },
+    { label: "Compliance / Legal",   done: !!(so?.complianceLegal.signed) },
+    { label: "Rappresentante legale", done: !!(so?.legalRepresentative.signed) },
+  ];
   sections.push({
     key: "signOff", label: "Sign-off", weight: 15,
     percent: Math.round((signedCount / 3) * 100),
     detail: `${signedCount}/3 firme`,
+    subPoints: signOffSubPoints,
   });
 
   const overallPercent = Math.round(
