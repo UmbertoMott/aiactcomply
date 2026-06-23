@@ -1,16 +1,10 @@
 "use client";
 // Viewer centrale della DPIA guidata — anteprima HTML in stile documento PDF.
-// Regole:
-//  - Solo i sotto-punti con status "done" appaiono compilati.
-//  - I valori "ai_suggested" non confermati NON compaiono nel documento.
-//  - I sotto-punti empty/draft mostrano un placeholder grigio.
-//  - Ogni sezione ha un id (anchor) per lo scroll dal rail di avanzamento.
 import React from "react";
 import { DPIA_GUIDED_SECTIONS, DPIA_SUBPOINTS, DPIA_TEMPLATE_META } from "@/lib/dpia/dpia-template";
 import type { DpiaGuidedDoc } from "@/lib/dpia/dpia-guided-types";
 import { WP248_CRITERIA } from "@/lib/dpia/dpia-template";
 
-// ─── Token stilistici ─────────────────────────────────────────────────────────
 const DOC = {
   bg:        "#ffffff",
   pageBg:    "#f5f4f0",
@@ -36,8 +30,6 @@ const DOC = {
 
 const SANS = "var(--font-inter, system-ui, sans-serif)";
 
-// ─── Helper ───────────────────────────────────────────────────────────────────
-
 function doneValue(doc: DpiaGuidedDoc, id: string): string | null {
   const a = doc.answers[id];
   if (!a) return null;
@@ -53,36 +45,54 @@ function Placeholder({ label }: { label: string }) {
   );
 }
 
+// Layout tabellare identico al Risk Register: label bold sinistra | valore destra
 function Field({ label, value, placeholder }: { label: string; value: string | null; placeholder: string }) {
   return (
-    <div style={{ marginBottom: 10 }}>
-      <p data-noedit="true" style={{ fontSize: 9, fontWeight: 700, color: DOC.labelFg, letterSpacing: "0.06em", textTransform: "uppercase", margin: "0 0 3px" }}>
+    <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+      <td data-noedit="true" style={{
+        padding: "8px 12px 8px 0",
+        fontWeight: 700, color: "#0D1016",
+        width: "40%", verticalAlign: "top",
+        fontSize: 12.5, lineHeight: 1.5,
+      }}>
         {label}
-      </p>
-      {value
-        ? <p style={{ fontSize: 12, color: DOC.text, margin: 0, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{value}</p>
-        : <Placeholder label={placeholder} />
-      }
-    </div>
+      </td>
+      <td style={{ padding: "8px 0", color: DOC.text, lineHeight: 1.6, fontSize: 12.5, verticalAlign: "top" }}>
+        {value
+          ? <span style={{ whiteSpace: "pre-wrap" }}>{value}</span>
+          : <Placeholder label={placeholder} />
+        }
+      </td>
+    </tr>
   );
 }
 
+// Divisore orizzontale usabile dentro <tbody>
+function TrDivider() {
+  return (
+    <tr>
+      <td colSpan={2} style={{ padding: "4px 0" }}>
+        <div style={{ height: 1, background: DOC.border }} />
+      </td>
+    </tr>
+  );
+}
+
+// Header sezione identico al SectionTitle del Risk Register
 function SectionHeader({ id, title, legalRef }: { id: string; title: string; legalRef: string }) {
   return (
     <div id={id} data-noedit="true" style={{
-      background: DOC.headerBg, padding: "8px 14px", margin: "20px 0 10px",
-      borderRadius: 4,
+      background: DOC.headerBg, color: "#ffffff",
+      borderRadius: 6, padding: "11px 18px",
+      margin: "20px 0 12px",
+      display: "flex", alignItems: "center", justifyContent: "space-between",
     }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <p style={{ fontSize: 12, fontWeight: 700, color: DOC.headerFg, margin: 0 }}>{title}</p>
-        <p style={{ fontSize: 9, color: "rgba(255,255,255,0.55)", margin: 0 }}>{legalRef}</p>
-      </div>
+      <span style={{ fontSize: 13, fontWeight: 700, fontFamily: SANS }}>{title}</span>
+      <span style={{ fontSize: 9.5, opacity: 0.5, letterSpacing: "0.05em", fontFamily: SANS, whiteSpace: "nowrap", marginLeft: 12 }}>
+        {legalRef}
+      </span>
     </div>
   );
-}
-
-function Divider() {
-  return <div style={{ height: 1, background: DOC.border, margin: "10px 0" }} />;
 }
 
 // ─── SEZIONE SCREENING ────────────────────────────────────────────────────────
@@ -113,7 +123,7 @@ function ScreeningSection({ doc }: { doc: DpiaGuidedDoc }) {
         </thead>
         <tbody>
           {rows.map(r => (
-            <tr key={r.id} style={{ background: r.applies === "yes" ? DOC.amberBg : r.applies === "no" ? "transparent" : "transparent" }}>
+            <tr key={r.id} style={{ background: r.applies === "yes" ? DOC.amberBg : "transparent" }}>
               <td style={{ padding: "4px 8px", border: `1px solid ${DOC.border}`, color: DOC.muted }}>{r.idx + 1}</td>
               <td style={{ padding: "4px 8px", border: `1px solid ${DOC.border}` }}>
                 <span style={{ fontWeight: r.applies === "yes" ? 600 : 400 }}>{criterionLabel(r.idx)}</span>
@@ -147,22 +157,22 @@ function DescrSection({ doc }: { doc: DpiaGuidedDoc }) {
   return (
     <>
       <SectionHeader id="sec-descr" title="A — Descrizione sistematica del trattamento" legalRef="GDPR Art. 35(7)(a)" />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 20px" }}>
-        <Field label="Sistema / Titolare"       value={doneValue(doc, "a_system_name")}              placeholder="nome sistema + titolare" />
-        <Field label="Organizzazione"           value={doneValue(doc, "a_organization")}             placeholder="organizzazione" />
-        <Field label="DPO"                      value={doneValue(doc, "a_dpo")}                      placeholder="DPO e data consultazione" />
-        <Field label="Responsabili (Art. 28)"   value={doneValue(doc, "a_processor")}               placeholder="responsabili del trattamento" />
-      </div>
-      <Divider />
-      <Field label="Finalità del trattamento"         value={doneValue(doc, "a_processing_purposes")}          placeholder="finalità" />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 20px" }}>
-        <Field label="Categorie di dati personali"    value={doneValue(doc, "a_personal_data_categories")}     placeholder="categorie dati" />
-        <Field label="Categorie particolari (Art. 9)" value={doneValue(doc, "a_special_categories")}           placeholder="dati particolari" />
-        <Field label="Categorie di interessati"       value={doneValue(doc, "a_data_subjects_categories")}     placeholder="interessati" />
-        <Field label="Destinatari"                    value={doneValue(doc, "a_recipients")}                  placeholder="destinatari" />
-        <Field label="Periodo di conservazione"       value={doneValue(doc, "a_retention_period")}            placeholder="retention" />
-        <Field label="Archivi e sistemi"              value={doneValue(doc, "a_assets")}                      placeholder="asset informativi" />
-      </div>
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <tbody>
+          <Field label="Sistema / Titolare"       value={doneValue(doc, "a_system_name")}              placeholder="nome sistema + titolare" />
+          <Field label="Organizzazione"           value={doneValue(doc, "a_organization")}             placeholder="organizzazione" />
+          <Field label="DPO"                      value={doneValue(doc, "a_dpo")}                      placeholder="DPO e data consultazione" />
+          <Field label="Responsabili (Art. 28)"   value={doneValue(doc, "a_processor")}               placeholder="responsabili del trattamento" />
+          <TrDivider />
+          <Field label="Finalità del trattamento"         value={doneValue(doc, "a_processing_purposes")}          placeholder="finalità" />
+          <Field label="Categorie di dati personali"      value={doneValue(doc, "a_personal_data_categories")}     placeholder="categorie dati" />
+          <Field label="Categorie particolari (Art. 9)"   value={doneValue(doc, "a_special_categories")}           placeholder="dati particolari" />
+          <Field label="Categorie di interessati"         value={doneValue(doc, "a_data_subjects_categories")}     placeholder="interessati" />
+          <Field label="Destinatari"                      value={doneValue(doc, "a_recipients")}                  placeholder="destinatari" />
+          <Field label="Periodo di conservazione"         value={doneValue(doc, "a_retention_period")}            placeholder="retention" />
+          <Field label="Archivi e sistemi"                value={doneValue(doc, "a_assets")}                      placeholder="asset informativi" />
+        </tbody>
+      </table>
     </>
   );
 }
@@ -171,19 +181,23 @@ function DescrSection({ doc }: { doc: DpiaGuidedDoc }) {
 
 function NecessitySection({ doc }: { doc: DpiaGuidedDoc }) {
   const checks = [
-    { id: "b_lawful_basis",         label: "Base giuridica" },
-    { id: "b_data_minimisation",    label: "Minimizzazione" },
-    { id: "b_storage_limitation",   label: "Limitazione conservazione" },
-    { id: "b_proportionality",      label: "Proporzionalità" },
-    { id: "b_processor_clauses",    label: "Clausole responsabili (Art. 28)" },
+    { id: "b_lawful_basis",           label: "Base giuridica" },
+    { id: "b_data_minimisation",      label: "Minimizzazione" },
+    { id: "b_storage_limitation",     label: "Limitazione conservazione" },
+    { id: "b_proportionality",        label: "Proporzionalità" },
+    { id: "b_processor_clauses",      label: "Clausole responsabili (Art. 28)" },
     { id: "b_international_transfers", label: "Trasferimenti extra-UE" },
   ];
   return (
     <>
       <SectionHeader id="sec-necessity" title="B — Necessità e proporzionalità" legalRef="GDPR Art. 35(7)(b)" />
-      <Field label="Giustificazione di necessità"    value={doneValue(doc, "b_necessity")} placeholder="necessità" />
-      <Field label="Diritti degli interessati"       value={doneValue(doc, "b_data_subject_rights")} placeholder="garanzie Artt. 12–22" />
-      <Divider />
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <tbody>
+          <Field label="Giustificazione di necessità"  value={doneValue(doc, "b_necessity")} placeholder="necessità" />
+          <Field label="Diritti degli interessati"     value={doneValue(doc, "b_data_subject_rights")} placeholder="garanzie Artt. 12–22" />
+        </tbody>
+      </table>
+      <div style={{ height: 1, background: DOC.border, margin: "10px 0" }} />
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 10 }}>
         <thead>
           <tr style={{ background: DOC.sectionBg }}>
@@ -210,9 +224,9 @@ function NecessitySection({ doc }: { doc: DpiaGuidedDoc }) {
 
 function RisksSection({ doc }: { doc: DpiaGuidedDoc }) {
   const threats = [
-    { id: "c_threat_access",        label: "Accesso illegittimo ai dati",  cat: "WP248 §1" },
+    { id: "c_threat_access",        label: "Accesso illegittimo ai dati",    cat: "WP248 §1" },
     { id: "c_threat_modification",  label: "Modifica indesiderata dei dati", cat: "WP248 §2" },
-    { id: "c_threat_disappearance", label: "Scomparsa / perdita dei dati", cat: "WP248 §3" },
+    { id: "c_threat_disappearance", label: "Scomparsa / perdita dei dati",   cat: "WP248 §3" },
   ];
   const riskBefore = doneValue(doc, "c_overall_risk_before");
   const riskColor  = riskBefore?.toLowerCase().includes("alto") ? DOC.red
@@ -241,14 +255,12 @@ function RisksSection({ doc }: { doc: DpiaGuidedDoc }) {
           ))}
         </tbody>
       </table>
-      <div style={{ display: "flex", gap: 16, marginBottom: 10 }}>
-        <div style={{ flex: 1 }}>
-          <Field label="Misure tecniche" value={doneValue(doc, "c_technical_measures")} placeholder="misure tecniche" />
-        </div>
-        <div style={{ flex: 1 }}>
-          <Field label="Misure organizzative" value={doneValue(doc, "c_organizational_measures")} placeholder="misure organizzative" />
-        </div>
-      </div>
+      <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 10 }}>
+        <tbody>
+          <Field label="Misure tecniche"       value={doneValue(doc, "c_technical_measures")}     placeholder="misure tecniche" />
+          <Field label="Misure organizzative"  value={doneValue(doc, "c_organizational_measures")} placeholder="misure organizzative" />
+        </tbody>
+      </table>
       <div style={{
         padding: "6px 10px", borderRadius: 4, fontSize: 11, fontWeight: 700,
         color: riskBefore ? riskColor : DOC.empty,
@@ -273,11 +285,13 @@ function PartiesSection({ doc }: { doc: DpiaGuidedDoc }) {
   return (
     <>
       <SectionHeader id="sec-parties" title="D — Parti interessate e misure residue" legalRef="WP248 Allegato 2 §D / GDPR Art. 36" />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 20px" }}>
-        <Field label="Parere del DPO"            value={doneValue(doc, "d_dpo_opinion")}          placeholder="parere DPO" />
-        <Field label="Opinioni degli interessati" value={doneValue(doc, "d_data_subjects_opinions")} placeholder="consultazione interessati" />
-      </div>
-      <Divider />
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <tbody>
+          <Field label="Parere del DPO"             value={doneValue(doc, "d_dpo_opinion")}           placeholder="parere DPO" />
+          <Field label="Opinioni degli interessati"  value={doneValue(doc, "d_data_subjects_opinions")} placeholder="consultazione interessati" />
+        </tbody>
+      </table>
+      <div style={{ height: 1, background: DOC.border, margin: "10px 0" }} />
       <div style={{
         padding: "6px 10px", borderRadius: 4, fontSize: 11, fontWeight: 700, marginBottom: 8,
         color: riskAfter ? riskColor : DOC.empty,
@@ -298,7 +312,11 @@ function PartiesSection({ doc }: { doc: DpiaGuidedDoc }) {
           </p>
         </div>
       )}
-      <Field label="Pianificazione riesame" value={doneValue(doc, "d_review_schedule")} placeholder="cadenza revisione" />
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <tbody>
+          <Field label="Pianificazione riesame" value={doneValue(doc, "d_review_schedule")} placeholder="cadenza revisione" />
+        </tbody>
+      </table>
     </>
   );
 }
@@ -324,9 +342,13 @@ function SignoffSection({ doc }: { doc: DpiaGuidedDoc }) {
         Decisione di conformità:{" "}
         {compliant ? compliant : <Placeholder label="conforme / condizionalmente conforme / non conforme" />}
       </div>
-      <Field label="Condizioni / misure aggiuntive" value={doneValue(doc, "e_conditions")}     placeholder="condizioni" />
-      <Field label="Sintesi esecutiva"              value={doneValue(doc, "e_summary")}         placeholder="sintesi" />
-      <Field label="Prossimo riesame"               value={doneValue(doc, "e_next_review_date")} placeholder="data riesame" />
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <tbody>
+          <Field label="Condizioni / misure aggiuntive" value={doneValue(doc, "e_conditions")}      placeholder="condizioni" />
+          <Field label="Sintesi esecutiva"              value={doneValue(doc, "e_summary")}          placeholder="sintesi" />
+          <Field label="Prossimo riesame"               value={doneValue(doc, "e_next_review_date")} placeholder="data riesame" />
+        </tbody>
+      </table>
 
       {/* Linee firma */}
       <div style={{ marginTop: 24, paddingTop: 14, borderTop: `1px solid ${DOC.border}`, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, fontFamily: SANS }}>
@@ -361,6 +383,7 @@ export interface DpiaLivePreviewProps {
 }
 
 export function DpiaLivePreview({ doc, activeSection }: DpiaLivePreviewProps) {
+  void activeSection;
   return (
     <div style={{ background: "#f0f0ef", minHeight: "100%", padding: "16px" }}>
       <div style={{
@@ -370,7 +393,7 @@ export function DpiaLivePreview({ doc, activeSection }: DpiaLivePreviewProps) {
         fontFamily: "Georgia, 'Times New Roman', serif",
         fontSize: 13, color: DOC.text, lineHeight: 1.7,
       }}>
-        {/* Intestazione documento — dentro la card, come Risk Register */}
+        {/* Intestazione documento */}
         <div data-noedit="true" style={{ marginBottom: 20, paddingBottom: 14, borderBottom: `2px solid ${DOC.headerBg}` }}>
           <p style={{ fontSize: 9, fontWeight: 700, color: DOC.muted, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px", fontFamily: SANS }}>
             {DPIA_TEMPLATE_META.legalBasis}

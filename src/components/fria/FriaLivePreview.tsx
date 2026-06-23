@@ -40,35 +40,46 @@ function Placeholder({ label }: { label: string }) {
   );
 }
 
+// Layout tabellare identico al Risk Register: label bold sinistra | valore destra
 function Field({ label, value, placeholder, ref: refText }: { label: string; value: string | null; placeholder: string; ref?: string }) {
   return (
-    <div style={{ marginBottom: 12 }}>
-      <div data-noedit="true" style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 3 }}>
-        <p style={{ fontSize: 9, fontWeight: 700, color: DOC.labelFg, letterSpacing: "0.06em", textTransform: "uppercase", margin: 0 }}>
-          {label}
-        </p>
+    <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+      <td data-noedit="true" style={{
+        padding: "8px 12px 8px 0",
+        fontWeight: 700, color: "#0D1016",
+        width: "40%", verticalAlign: "top",
+        fontSize: 12.5, lineHeight: 1.5,
+      }}>
+        {label}
         {refText && (
-          <p style={{ fontSize: 8, color: DOC.muted, margin: 0 }}>{refText}</p>
+          <span style={{ display: "block", fontSize: 8.5, color: DOC.muted, fontWeight: 400, marginTop: 2, fontFamily: SANS }}>
+            {refText}
+          </span>
         )}
-      </div>
-      {value
-        ? <p style={{ fontSize: 12, color: DOC.text, margin: 0, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{value}</p>
-        : <Placeholder label={placeholder} />
-      }
-    </div>
+      </td>
+      <td style={{ padding: "8px 0", color: DOC.text, lineHeight: 1.6, fontSize: 12.5, verticalAlign: "top" }}>
+        {value
+          ? <span style={{ whiteSpace: "pre-wrap" }}>{value}</span>
+          : <Placeholder label={placeholder} />
+        }
+      </td>
+    </tr>
   );
 }
 
+// Header sezione identico al SectionTitle del Risk Register
 function SectionHeader({ id, title, legalRef }: { id: string; title: string; legalRef: string }) {
   return (
     <div id={id} data-noedit="true" style={{
-      background: DOC.headerBg, padding: "8px 14px", margin: "20px 0 10px",
-      borderRadius: 4,
+      background: DOC.headerBg, color: "#ffffff",
+      borderRadius: 6, padding: "11px 18px",
+      margin: "20px 0 12px",
+      display: "flex", alignItems: "center", justifyContent: "space-between",
     }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <p style={{ fontSize: 12, fontWeight: 700, color: DOC.headerFg, margin: 0, fontFamily: SANS }}>{title}</p>
-        <p style={{ fontSize: 9, color: "rgba(255,255,255,0.55)", margin: 0, fontFamily: SANS }}>{legalRef}</p>
-      </div>
+      <span style={{ fontSize: 13, fontWeight: 700, fontFamily: SANS }}>{title}</span>
+      <span style={{ fontSize: 9.5, opacity: 0.5, letterSpacing: "0.05em", fontFamily: SANS, whiteSpace: "nowrap", marginLeft: 12 }}>
+        {legalRef}
+      </span>
     </div>
   );
 }
@@ -126,26 +137,30 @@ export function FriaLivePreview({ doc }: FriaLivePreviewProps) {
         </div>
       )}
 
-      {/* Sezioni */}
+      {/* Sezioni — layout tabellare come Risk Register */}
       {FRIA_GUIDED_SECTIONS.map(sec => {
         const subPoints = FRIA_SUBPOINTS.filter(sp => sp.sectionKey === sec.key);
         return (
           <div key={sec.key}>
             <SectionHeader id={sec.anchor} title={sec.label} legalRef={sec.legalRef} />
-            {subPoints.map(sp => (
-              <Field
-                key={sp.id}
-                label={sp.label}
-                value={doneValue(doc, sp.id)}
-                placeholder={sp.label}
-                ref={sp.ref}
-              />
-            ))}
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <tbody>
+                {subPoints.map(sp => (
+                  <Field
+                    key={sp.id}
+                    label={sp.label}
+                    value={doneValue(doc, sp.id)}
+                    placeholder={sp.label}
+                    ref={sp.ref}
+                  />
+                ))}
+              </tbody>
+            </table>
           </div>
         );
       })}
 
-      {/* Footer */}
+      {/* Footer firma */}
       <div data-noedit="true" style={{
         marginTop: 28, paddingTop: 14, borderTop: `1px solid ${DOC.border}`,
         display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16,
