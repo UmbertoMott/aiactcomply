@@ -452,7 +452,7 @@ function PhaseDocColumn({
       </div>
 
       {/* Corpo — pagina stile documento */}
-      <div ref={scrollContainerRef} style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#f0f0ef", display: "flex", flexDirection: "column" }}>
+      <div ref={scrollContainerRef} style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#FAFAFA", display: "flex", flexDirection: "column" }}>
         {editing ? (
           /* Modalità modifica: contentEditable puro, nessun componente React dentro */
           <div style={docStyle}>

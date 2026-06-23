@@ -10,7 +10,7 @@
   --secondary-foreground: #0D1016;
   --muted: #f5f5f4;
   --muted-foreground: rgba(0,0,0,0.42);
-  --accent: #6366f1;
+  --accent: #0D1016;
   --border: rgba(0,0,0,0.08);
   --card: #ffffff;
   --card-foreground: #0D1016;
@@ -39,8 +39,8 @@
   --color-danger: var(--danger);
   --color-surface: var(--surface);
   --color-hero: var(--hero);
-  --font-sans: var(--font-inter);
-  --font-mono: ui-monospace, monospace;
+  --font-sans: var(--font-dm-sans, var(--font-inter));
+  --font-mono: var(--font-dm-mono, ui-monospace, monospace);
 }
 
 html {
@@ -50,7 +50,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter, system-ui, sans-serif);
+  font-family: var(--font-dm-sans, var(--font-inter, system-ui, sans-serif));
   -webkit-font-smoothing: antialiased;
 }
 

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, DM_Sans, DM_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 
@@ -7,6 +7,20 @@ const inter = Inter({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-inter",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-dm-sans",
+  weight: ["300", "400", "500", "600"],
+});
+
+const dmMono = DM_Mono({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-dm-mono",
+  weight: ["300", "400", "500"],
 });
 
 export const metadata: Metadata = {
@@ -23,7 +37,7 @@ export default function RootLayout({
   return (
     <html
       lang="it"
-      className={`${inter.variable} h-full antialiased`}
+      className={`${inter.variable} ${dmSans.variable} ${dmMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full">

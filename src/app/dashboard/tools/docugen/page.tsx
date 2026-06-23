@@ -1388,7 +1388,7 @@ export default function DocuGenPage() {
           </div>
 
           {/* Document preview — editable */}
-          <div style={{ background: "#f0f0ef", padding: "16px", borderRadius: 8 }}>
+          <div style={{ background: "#FAFAFA", padding: "16px", borderRadius: 8 }}>
             {/* Toolbar */}
             <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
               {docEditing ? (

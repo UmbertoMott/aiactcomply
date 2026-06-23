@@ -205,7 +205,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const sidebarW = collapsed ? "w-[52px]" : "w-56";
 
   return (
-    <div className="flex flex-col h-screen w-full overflow-hidden" style={{ background: "#FAFAF9" }}>
+    <div className="flex flex-col h-screen w-full overflow-hidden" style={{ background: "#FFFFFF" }}>
       {/* Art. 50 — machine-readable markers (meta tags + JSON-LD) */}
       <MachineMarkers />
       {/* Art. 50 — first-session blocking modal */}
@@ -262,7 +262,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 className={`flex items-center ${collapsed ? "justify-center px-0 py-2" : "justify-between px-2 py-2"} rounded-md text-[11px] transition-all`}
                 style={
                   pathname.startsWith("/dashboard/dossier")
-                    ? { background: "rgba(255,255,255,0.12)", color: "#ffffff" }
+                    ? { background: "rgba(255,255,255,0.06)", color: "#ffffff", boxShadow: "inset 2px 0 0 0 rgba(255,255,255,0.55)" }
                     : { color: "rgba(255,255,255,0.7)" }
                 }
               >
@@ -274,8 +274,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <span
                     className="text-[9px] px-1.5 py-0.5 rounded font-semibold"
                     style={{
-                      background: dossierPct >= 80 ? "rgba(22,163,74,0.3)" : dossierPct >= 40 ? "rgba(202,138,4,0.3)" : "rgba(220,38,38,0.3)",
-                      color: dossierPct >= 80 ? "#86efac" : dossierPct >= 40 ? "#fde68a" : "#fca5a5",
+                      background: "rgba(255,255,255,0.1)",
+                      color: "rgba(255,255,255,0.65)",
                     }}
                   >
                     {dossierPct}%
@@ -300,7 +300,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     title={collapsed ? pillar.label : undefined}
                     className={`flex items-center ${collapsed ? "justify-center px-0 py-2" : "justify-between px-2 py-1.5"} rounded-md text-[11px] mb-0.5 transition-all`}
                     style={isPillarActive
-                      ? { background: "rgba(255,255,255,0.12)", color: "#ffffff" }
+                      ? { background: "rgba(255,255,255,0.06)", color: "#ffffff", boxShadow: "inset 2px 0 0 0 rgba(255,255,255,0.55)" }
                       : { color: "rgba(255,255,255,0.65)" }}
                   >
                     <div className={`flex items-center min-w-0 ${collapsed ? "" : "gap-2"}`}>
@@ -330,7 +330,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     title={collapsed ? pillar.label : undefined}
                     className={`w-full flex items-center ${collapsed ? "justify-center px-0 py-2" : "justify-between px-2 py-1.5"} rounded-md text-[11px] transition-all`}
                     style={isPillarActive
-                      ? { background: "rgba(255,255,255,0.08)", color: "#ffffff" }
+                      ? { background: "rgba(255,255,255,0.05)", color: "#ffffff" }
                       : { color: "rgba(255,255,255,0.65)" }}
                   >
                     <div className={`flex items-center min-w-0 ${collapsed ? "" : "gap-2"}`}>
@@ -365,7 +365,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             title={collapsed ? child.label : undefined}
                             className={`flex items-center ${collapsed ? "justify-center px-0 py-1.5" : "justify-between px-2 py-1"} rounded-md text-[11px] transition-all`}
                             style={isActive
-                              ? { background: "rgba(255,255,255,0.12)", color: "#ffffff" }
+                              ? { background: "rgba(255,255,255,0.06)", color: "#ffffff", boxShadow: "inset 2px 0 0 0 rgba(255,255,255,0.5)" }
                               : { color: "rgba(255,255,255,0.5)" }}
                           >
                             <div className={`flex items-center min-w-0 ${collapsed ? "" : "gap-2"}`}>
@@ -400,7 +400,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 title={collapsed ? "Settings" : undefined}
                 className={`flex items-center ${collapsed ? "justify-center px-0 py-2" : "gap-2 px-2 py-1.5"} rounded-md text-[11px] transition-all`}
                 style={pathname.startsWith("/dashboard/account")
-                  ? { background: "rgba(255,255,255,0.12)", color: "#ffffff" }
+                  ? { background: "rgba(255,255,255,0.06)", color: "#ffffff", boxShadow: "inset 2px 0 0 0 rgba(255,255,255,0.55)" }
                   : { color: "rgba(255,255,255,0.5)" }}
               >
                 <Settings className="h-3.5 w-3.5" />
@@ -496,7 +496,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6 w-full">{children}</main>
+        <main className="flex-1 overflow-y-auto p-6 w-full" style={{ background: "#FFFFFF" }}>{children}</main>
       </div>
       </div>
 

@@ -367,7 +367,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
               </div>
 
               {/* Contenuto scrollabile */}
-              <div ref={viewerRef} style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#f0f0ef" }}>
+              <div ref={viewerRef} style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#FAFAFA" }}>
                 {editing ? (
                   /* Modalità modifica — contentEditable */
                   <div

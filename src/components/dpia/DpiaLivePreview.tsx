@@ -385,7 +385,7 @@ export interface DpiaLivePreviewProps {
 export function DpiaLivePreview({ doc, activeSection }: DpiaLivePreviewProps) {
   void activeSection;
   return (
-    <div style={{ background: "#f0f0ef", minHeight: "100%", padding: "16px" }}>
+    <div style={{ background: "#FAFAFA", minHeight: "100%", padding: "16px" }}>
       <div style={{
         background: DOC.bg, borderRadius: 8, padding: "28px 32px",
         border: "1px solid rgba(0,0,0,0.08)",
