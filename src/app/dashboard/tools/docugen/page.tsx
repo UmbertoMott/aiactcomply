@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import ProviderTransitionAlertBanner from "@/components/shared/provider-transition-alert-banner";
 import { motion, AnimatePresence } from "framer-motion";
 import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
-import { GitBranch, Download, AlertTriangle, CheckCircle, Clock, History, ChevronDown, ChevronUp } from "lucide-react";
+import { GitBranch, Download, AlertTriangle, CheckCircle, Clock, History, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { DocugenResult, DataAuditResult, RiskManagerResult, ClassifierResult, DPIAResult } from "@/lib/dossier/storage-schema";
@@ -236,6 +236,13 @@ const AUTO_CONTENT: Record<string, string> = {
   "mlflow": `**[Auto-estratto da MLflow]**\n\nRun ID: mlf-2025-04-10-001 · Experiment: hr-screener-v2\nAccuracy: 87.3% | Precision: 84.1% | Recall: 89.7% | F1: 86.8%\nTest set: 12.400 record, hold-out 20% · Date: 2025-04-10\n\nHyperparameters: lr=2e-5, batch=32, epochs=4, max_seq=512\nArtifact: s3://mlflow-artifacts/hr-screener/v2.1.0/model.pt`,
 };
 
+// ─── Strip markdown asterisks for document display ────────────────────────────
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*([^*]*)\*\*/g, "$1")
+    .replace(/\*([^*]*)\*/g, "$1");
+}
+
 // ─── Source badges ─────────────────────────────────────────────────────────────
 const SOURCE_BADGES: Record<string, string> = {
   "s1": "Annex IV §1",
@@ -316,6 +323,12 @@ export default function DocuGenPage() {
   const [dbSynced, setDbSynced] = useState(false);
   const [dbSyncing, setDbSyncing] = useState(false);
 
+  // ── Document editor (Step 4 preview) ────────────────────────────────────────
+  const [docEditing, setDocEditing] = useState(false);
+  const [editedDocHtml, setEditedDocHtml] = useState<string | null>(null);
+  const previewDocRef = useRef<HTMLDivElement>(null);
+  const editDocRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     loadAISystems().then(setAiSystems);
     loadFromDB().then(({ technicalFileId: tfId, aiSystemId: asId }) => {
@@ -381,6 +394,32 @@ export default function DocuGenPage() {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
   }
+
+  const enterDocEdit = () => {
+    const source = editedDocHtml ?? previewDocRef.current?.innerHTML ?? "";
+    setDocEditing(true);
+    setTimeout(() => {
+      if (editDocRef.current) {
+        editDocRef.current.innerHTML = source;
+        editDocRef.current.querySelectorAll("[data-noedit]").forEach(el => {
+          (el as HTMLElement).contentEditable = "false";
+        });
+        editDocRef.current.querySelectorAll("p, span, em, i, b, strong").forEach(el => {
+          const htmlEl = el as HTMLElement;
+          if (!htmlEl.closest("[data-noedit]")) {
+            htmlEl.style.color = "";
+            htmlEl.style.fontStyle = "";
+          }
+        });
+        editDocRef.current.focus();
+      }
+    }, 0);
+  };
+
+  const confirmDocEdit = () => {
+    if (editDocRef.current) setEditedDocHtml(editDocRef.current.innerHTML);
+    setDocEditing(false);
+  };
 
   const version = versionSnapshots[0] ?? { tag: "bozza", status: "draft" as const, savedAt: "", sectionsChanged: [] as string[] };
 
@@ -941,7 +980,7 @@ export default function DocuGenPage() {
                       fontFamily: "Georgia, 'Times New Roman', serif",
                       overflow: "hidden", display: "-webkit-box",
                       WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const }}>
-                      {getContent(s.id)?.slice(0, 120) || ""}
+                      {stripMarkdown(getContent(s.id) ?? "").slice(0, 120) || ""}
                     </p>
                   )}
 
@@ -1356,32 +1395,93 @@ export default function DocuGenPage() {
             />
           </div>
 
-          {/* Document preview */}
-          <div style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8,
-            padding: "48px 64px", maxWidth: 700, margin: "0 auto",
-            fontFamily: "Georgia, 'Times New Roman', serif" }}>
-            <h1 style={{ fontSize: 22, fontWeight: 600, color: "#0D1016", marginBottom: 4, letterSpacing: "-0.5px" }}>
-              {systemName || "Sistema AI"}
-            </h1>
-            <p style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", marginBottom: 32, fontFamily: "system-ui, sans-serif" }}>
-              Fascicolo Tecnico · Art. 11 AI Act (Allegato IV) · {new Date().toLocaleDateString("it-IT")}
-            </p>
+          {/* Document preview — editable */}
+          <div style={{ background: "#f0f0ef", padding: "16px", borderRadius: 8 }}>
+            {/* Toolbar */}
+            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+              {docEditing ? (
+                <button onClick={confirmDocEdit}
+                  style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, padding: "5px 12px",
+                    borderRadius: 6, background: "#0D1016", color: "#fff", border: "none", cursor: "pointer" }}>
+                  <CheckCircle className="h-3 w-3" /> Salva modifiche
+                </button>
+              ) : (
+                <button onClick={enterDocEdit}
+                  style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, padding: "5px 12px",
+                    borderRadius: 6, background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.6)",
+                    border: "1px solid rgba(0,0,0,0.10)", cursor: "pointer" }}>
+                  <Pencil className="h-3 w-3" /> Modifica documento
+                </button>
+              )}
+            </div>
 
-            {ANNEX_IV.map((s) => (
-              <div key={s.id} style={{ marginBottom: 28, paddingBottom: 28, borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                  <span style={{ fontSize: 10, fontFamily: "system-ui, sans-serif",
-                    color: "rgba(0,0,0,0.38)", fontWeight: 600 }}>{s.ref}</span>
-                  <span style={{ fontSize: 10, fontFamily: "system-ui, sans-serif",
-                    padding: "1px 6px", borderRadius: 4, background: "rgba(0,0,0,0.05)",
-                    color: "rgba(0,0,0,0.45)" }}>{SOURCE_BADGES[s.id]}</span>
-                </div>
-                <h2 style={{ fontSize: 14, fontWeight: 600, color: "#0D1016", marginBottom: 8 }}>{s.title}</h2>
-                <p style={{ fontSize: 13, lineHeight: 1.8, color: "rgba(0,0,0,0.75)", whiteSpace: "pre-wrap", margin: 0 }}>
-                  {getContent(s.id) || <span style={{ color: "rgba(0,0,0,0.28)", fontStyle: "italic" }}>Da compilare</span>}
+            {/* Edit mode — contentEditable */}
+            {docEditing && (
+              <div
+                ref={editDocRef}
+                contentEditable
+                suppressContentEditableWarning
+                style={{
+                  background: "#ffffff", borderRadius: 8, padding: "28px 32px",
+                  border: "1px solid rgba(13,16,22,0.25)",
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                  outline: "none", minHeight: 400,
+                  fontFamily: "Georgia, 'Times New Roman', serif",
+                  fontSize: 13, color: "#0D1016", lineHeight: 1.7,
+                }}
+              />
+            )}
+
+            {/* Preview: edited HTML */}
+            {!docEditing && editedDocHtml && (
+              <div
+                dangerouslySetInnerHTML={{ __html: editedDocHtml }}
+                style={{
+                  background: "#ffffff", borderRadius: 8, padding: "28px 32px",
+                  border: "1px solid rgba(0,0,0,0.08)",
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                  fontFamily: "Georgia, 'Times New Roman', serif",
+                  fontSize: 13, color: "#0D1016", lineHeight: 1.7,
+                }}
+              />
+            )}
+
+            {/* Preview: live JSX (sezioni modificabili sono solo i testi, non gli header) */}
+            {!docEditing && !editedDocHtml && (
+              <div
+                ref={previewDocRef}
+                style={{
+                  background: "#ffffff", borderRadius: 8, padding: "28px 32px",
+                  border: "1px solid rgba(0,0,0,0.08)",
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                  fontFamily: "Georgia, 'Times New Roman', serif",
+                  fontSize: 13, color: "#0D1016", lineHeight: 1.7,
+                }}
+              >
+                <h1 data-noedit="true" style={{ fontSize: 22, fontWeight: 600, color: "#0D1016", marginBottom: 4, letterSpacing: "-0.5px" }}>
+                  {systemName || "Sistema AI"}
+                </h1>
+                <p data-noedit="true" style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", marginBottom: 32, fontFamily: "system-ui, sans-serif" }}>
+                  Fascicolo Tecnico · Art. 11 AI Act (Allegato IV) · {new Date().toLocaleDateString("it-IT")}
                 </p>
+
+                {ANNEX_IV.map((s) => (
+                  <div key={s.id} style={{ marginBottom: 28, paddingBottom: 28, borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+                    <div data-noedit="true" style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                      <span style={{ fontSize: 10, fontFamily: "system-ui, sans-serif",
+                        color: "rgba(0,0,0,0.38)", fontWeight: 600 }}>{s.ref}</span>
+                      <span style={{ fontSize: 10, fontFamily: "system-ui, sans-serif",
+                        padding: "1px 6px", borderRadius: 4, background: "rgba(0,0,0,0.05)",
+                        color: "rgba(0,0,0,0.45)" }}>{SOURCE_BADGES[s.id]}</span>
+                    </div>
+                    <h2 data-noedit="true" style={{ fontSize: 14, fontWeight: 600, color: "#0D1016", marginBottom: 8 }}>{s.title}</h2>
+                    <p style={{ fontSize: 13, lineHeight: 1.8, color: "rgba(0,0,0,0.75)", whiteSpace: "pre-wrap", margin: 0 }}>
+                      {stripMarkdown(getContent(s.id)) || <span style={{ color: "rgba(0,0,0,0.28)", fontStyle: "italic" }}>Da compilare</span>}
+                    </p>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         </div>
       )}
