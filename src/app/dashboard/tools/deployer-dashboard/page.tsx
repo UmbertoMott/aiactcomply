@@ -13,7 +13,7 @@ import {
 import { getApplicableObligations, DEPLOYER_OBLIGATIONS } from "@/lib/deployer/deployer-obligations";
 import {
   UserCheck, ChevronRight, AlertTriangle, CheckCircle2,
-  Clock, RefreshCw, Plus, Info
+  Clock, RefreshCw, Plus, Info, X
 } from "lucide-react";
 
 const FONT = "var(--font-inter, system-ui)";
@@ -63,6 +63,7 @@ function progressBar(done: number, total: number) {
 export default function DeployerDashboardPage() {
   const router = useRouter();
   const [items, setItems] = useState<SystemWithRecord[]>([]);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
 
   const load = useCallback(() => {
     const inventory = loadInventory();
@@ -122,19 +123,32 @@ export default function DeployerDashboardPage() {
       </div>
 
       {/* Sanctions note */}
-      <div style={{
-        display: "flex", alignItems: "flex-start", gap: 10,
-        padding: "10px 14px", borderRadius: 8, marginBottom: 20,
-        background: "#fef9c3", border: "1px solid #fde047",
-        color: "#713f12", fontSize: 11,
-      }}>
-        <Info size={13} style={{ flexShrink: 0, marginTop: 1 }} />
-        <span>
-          <strong>Sanzioni Art. 99–101:</strong> Il mancato rispetto degli obblighi del deployer può comportare
-          sanzioni fino a 15 milioni di euro o il 3% del fatturato mondiale annuo.{" "}
-          <span style={{ opacity: 0.7 }}>[verificare sul testo AI Act vigente]</span>
-        </span>
-      </div>
+      {!bannerDismissed && (
+        <div style={{
+          display: "flex", alignItems: "flex-start", gap: 10,
+          padding: "10px 14px", borderRadius: 8, marginBottom: 20,
+          background: "#fef9c3", border: "1px solid #fde047",
+          color: "#713f12", fontSize: 11, position: "relative",
+        }}>
+          <Info size={13} style={{ flexShrink: 0, marginTop: 1 }} />
+          <span style={{ flex: 1 }}>
+            <strong>Sanzioni Art. 99–101:</strong> Il mancato rispetto degli obblighi del deployer può comportare
+            sanzioni fino a 15 milioni di euro o il 3% del fatturato mondiale annuo.{" "}
+            <span style={{ opacity: 0.7 }}>[verificare sul testo AI Act vigente]</span>
+          </span>
+          <button
+            onClick={() => setBannerDismissed(true)}
+            style={{
+              flexShrink: 0, background: "none", border: "none", cursor: "pointer",
+              padding: 2, color: "#713f12", opacity: 0.6, lineHeight: 1,
+              display: "flex", alignItems: "center",
+            }}
+            aria-label="Chiudi"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
 
       {/* KPI strip */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
