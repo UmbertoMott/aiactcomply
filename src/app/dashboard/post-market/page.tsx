@@ -691,8 +691,13 @@ function PostMarketPageInner() {
           <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#dc2626" }} />
           <p className="text-[11px] font-medium flex-1" style={{ color: "#dc2626" }}>
             ⚠ {urgentCount} incident{urgentCount > 1 ? "i" : "e"} richiede
-            {urgentCount > 1 ? "ono" : ""} notifica entro {minDays} giorn
-            {minDays === 1 ? "o" : "i"} (Art. 73)
+            {urgentCount > 1 ? "ono" : ""}{" "}
+            {minDays !== null && minDays <= 0
+              ? "notifica urgente — scadenza già superata"
+              : minDays === 1
+                ? "notifica entro oggi"
+                : `notifica entro ${minDays} giorni`}{" "}
+            (Art. 73)
           </p>
         </div>
       )}
@@ -714,8 +719,8 @@ function PostMarketPageInner() {
           },
           {
             label: "Scadenza più vicina",
-            value: minDays !== null ? String(minDays) : "—",
-            sub: minDays !== null ? " giorni" : "",
+            value: minDays === null ? "—" : minDays <= 0 ? "SCADUTA" : String(minDays),
+            sub: minDays !== null && minDays > 0 ? " giorni" : "",
             color: minDays !== null && minDays <= 3 ? "#dc2626" : "#0D1016",
           },
           {

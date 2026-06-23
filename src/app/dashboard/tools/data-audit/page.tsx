@@ -358,6 +358,7 @@ export default function DataAuditPage() {
   const [biasAnalyzing, setBiasAnalyzing] = useState(false);
   const [biasAnalyses, setBiasAnalyses] = useState<Array<{ columnName: string; analysis: string }>>([]);
   const [biasAnalysisAccepted, setBiasAnalysisAccepted] = useState(false);
+  const [sanctionsBannerDismissed, setSanctionsBannerDismissed] = useState(false);
 
   const cls = typeof window !== "undefined" ? readFromStorage<ClassifierResult>("classifier") : null;
   const systemName = cls?.systemName ?? "Sistema AI";
@@ -777,12 +778,21 @@ export default function DataAuditPage() {
       )}
 
       {/* Sanctions note */}
-      <div className="flex items-start gap-2 p-3 rounded-lg mb-4 text-xs" style={{ background: "#fef9c3", border: "1px solid #fde047", color: "#713f12" }}>
-        <Info size={14} className="mt-0.5 flex-shrink-0" />
-        <span>
-          <strong>Sanzioni Art. 99–101:</strong> Mancata conformità ai requisiti Art. 10 sui dati può comportare sanzioni fino a 15 milioni € o 3% del fatturato mondiale.
-        </span>
-      </div>
+      {!sanctionsBannerDismissed && (
+        <div className="flex items-start gap-2 p-3 rounded-lg mb-4 text-xs" style={{ background: "#fef9c3", border: "1px solid #fde047", color: "#713f12" }}>
+          <Info size={14} className="mt-0.5 flex-shrink-0" />
+          <span style={{ flex: 1 }}>
+            <strong>Sanzioni Art. 99–101:</strong> Mancata conformità ai requisiti Art. 10 sui dati può comportare sanzioni fino a 15 milioni € o 3% del fatturato mondiale.
+          </span>
+          <button
+            onClick={() => setSanctionsBannerDismissed(true)}
+            style={{ flexShrink: 0, background: "none", border: "none", cursor: "pointer", padding: 2, color: "#713f12", opacity: 0.6, lineHeight: 1, display: "flex", alignItems: "center" }}
+            aria-label="Chiudi"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
 
       {/* Save */}
       <div className="flex justify-end">

@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import {
   UserCheck, AlertTriangle, Info, CheckCircle2, Copy, Save,
   Building2, Globe, FileText, ChevronDown, Sparkles, HelpCircle, ExternalLink,
-  Shield,
+  Shield, X,
 } from "lucide-react";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
@@ -276,6 +276,7 @@ export default function AuthorizedRepCompliancePage() {
   // Cross-module data
   const [eudbResult, setEudbResult] = useState<EUDBResult | null>(null);
   const [docuGenCompleted, setDocuGenCompleted] = useState(false);
+  const [docGateBannerDismissed, setDocGateBannerDismissed] = useState(false);
 
   useEffect(() => {
     // Load EUDB result
@@ -470,11 +471,11 @@ export default function AuthorizedRepCompliancePage() {
       <SystemSelector checkProhibited={false} />
 
       {/* DocuGen gate banner — PROMPT BG */}
-      {!docuGenCompleted && (
+      {!docuGenCompleted && !docGateBannerDismissed && (
         <div style={{ borderRadius: 10, border: `1px solid ${DK.amberBdr}`, background: DK.amberBg,
           padding: 16, marginBottom: 16, display: "flex", alignItems: "flex-start", gap: 10 }}>
           <AlertTriangle size={14} style={{ color: DK.amber, flexShrink: 0, marginTop: 2 }} />
-          <div>
+          <div style={{ flex: 1 }}>
             <p style={{ fontSize: 12, fontWeight: 600, color: DK.amber, margin: "0 0 4px" }}>
               Documentazione tecnica incompleta
             </p>
@@ -489,6 +490,13 @@ export default function AuthorizedRepCompliancePage() {
               <span style={{ fontFamily: "monospace", fontSize: 9, color: DK.faint }}>Art. 11</span>
             </Link>
           </div>
+          <button
+            onClick={() => setDocGateBannerDismissed(true)}
+            style={{ flexShrink: 0, background: "none", border: "none", cursor: "pointer", padding: 2, color: DK.amber, opacity: 0.6, lineHeight: 1, display: "flex", alignItems: "center" }}
+            aria-label="Chiudi"
+          >
+            <X size={14} />
+          </button>
         </div>
       )}
 
