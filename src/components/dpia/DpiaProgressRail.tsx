@@ -15,14 +15,6 @@ const T = {
   amber:    "#b45309",
 } as const;
 
-function ProgressBar({ pct, color = T.green }: { pct: number; color?: string }) {
-  return (
-    <div style={{ height: 2, background: "rgba(0,0,0,0.04)", borderRadius: 2, overflow: "hidden" }}>
-      <div style={{ height: "100%", width: `${pct}%`, background: color, borderRadius: 2, transition: "width 0.35s ease" }} />
-    </div>
-  );
-}
-
 export interface DpiaProgressRailProps {
   progress: GuidedDpiaProgress;
   activeSection: string | null;
@@ -34,8 +26,6 @@ export function DpiaProgressRail({
   progress, activeSection, onSectionClick, onSubPointClick,
 }: DpiaProgressRailProps) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set(["screening"]));
-  const pct = progress.overallPercent;
-  const globalColor = pct >= 80 ? T.green : pct >= 40 ? T.amber : T.faint;
 
   const toggle = (key: string) =>
     setExpanded(prev => {
@@ -47,27 +37,21 @@ export function DpiaProgressRail({
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", background: T.bg }}>
       {/* Header */}
-      <div style={{ padding: "14px 14px 10px", borderBottom: `1px solid ${T.border}` }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-          <span style={{ fontSize: 10, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-            Avanzamento
-          </span>
-          <span style={{ fontSize: 13, fontWeight: 700, color: globalColor, fontFamily: "monospace" }}>
-            {pct}%
-          </span>
-        </div>
-        <ProgressBar pct={pct} color={globalColor} />
-        <p style={{ fontSize: 9, color: T.faint, margin: "5px 0 0" }}>Art. 35 GDPR · WP248</p>
+      <div style={{ padding: "10px 14px 8px", borderBottom: `1px solid ${T.border}` }}>
+        <span style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+          Fasi DPIA
+        </span>
       </div>
 
       {/* Sezioni */}
       <div style={{ flex: 1, overflowY: "auto", padding: "8px" }}>
-        {progress.sections.map(sec => {
+        {progress.sections.map((sec, idx) => {
           const isActive   = activeSection === sec.key;
           const isExpanded = expanded.has(sec.key);
           const doneCount  = sec.subPoints.filter(sp => sp.status === "done").length;
           const totalCount = sec.subPoints.length;
-          const secColor   = sec.percent === 100 ? T.green : sec.percent > 0 ? T.amber : T.faint;
+          const circleColor = sec.percent === 100 ? T.green : "#dc2626";
+          const pctColor    = sec.percent === 100 ? T.green : sec.percent > 0 ? T.amber : T.faint;
 
           const borderColor = isActive
             ? T.greenBdr
@@ -95,21 +79,18 @@ export function DpiaProgressRail({
                 onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
               >
                 <div style={{ flexShrink: 0 }}>
-                  {sec.percent === 100
-                    ? <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${T.green}` }} />
-                    : <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid #dc2626` }} />
-                  }
+                  <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${circleColor}` }} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: 11, fontWeight: 600, color: T.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {sec.label}
+                    {idx + 1}. {sec.label}
                   </p>
                   <p style={{ fontSize: 9, color: T.muted, margin: 0, marginTop: 1 }}>
                     {doneCount}/{totalCount} · {sec.legalRef}
                   </p>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ fontSize: 9.5, fontWeight: 700, color: secColor, fontFamily: "monospace" }}>
+                  <span style={{ fontSize: 9.5, fontWeight: 700, color: pctColor, fontFamily: "monospace" }}>
                     {sec.percent}%
                   </span>
                   <ChevronRight
@@ -123,7 +104,10 @@ export function DpiaProgressRail({
                 </div>
               </button>
 
-              <ProgressBar pct={sec.percent} color={secColor} />
+              {/* Progress bar */}
+              <div style={{ height: 2, background: "rgba(0,0,0,0.04)" }}>
+                <div style={{ height: "100%", width: `${sec.percent}%`, background: circleColor, transition: "width 0.35s" }} />
+              </div>
 
               {/* Sotto-punti espansi */}
               {isExpanded && sec.subPoints.length > 0 && (
