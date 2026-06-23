@@ -137,6 +137,7 @@ const PILLARS: NavPillar[] = [
       { icon: ShieldCheck,    label: "Trust Center",        href: "/dashboard/compliance-ops/trust-center", art: "Art. 13/50" },
       { icon: Scale,          label: "L.132/2025",          href: "/dashboard/tools/l132",                art: "PA Italy", flag: "paItaly" },
       { icon: Landmark,       label: "AGID/ACN",            href: "/dashboard/tools/agid-acn",            art: "PA Italy", flag: "paItaly" },
+      { icon: Map,            label: "NIST AI RMF",         href: "/dashboard/tools/nist-ai-rmf",         art: "NIST", flag: "nistEnabled" },
     ],
   },
 ];
