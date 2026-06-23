@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import ProviderTransitionAlertBanner from "@/components/shared/provider-transition-alert-banner";
 import { motion, AnimatePresence } from "framer-motion";
-import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
 import { GitBranch, Download, AlertTriangle, CheckCircle, Clock, History, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
@@ -655,13 +654,6 @@ export default function DocuGenPage() {
         </div>
       )}
 
-      {/* Art. 50 — AI Output Label */}
-      <div className="mb-4">
-        <AIOutputLabel
-          documentType="Documentazione Tecnica · Art. 11 AI Act (Allegato IV)"
-          outputType="DOC"
-        />
-      </div>
 
       {/* ── Header ── */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
