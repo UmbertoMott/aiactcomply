@@ -63,6 +63,12 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
         editRef.current.querySelectorAll("[data-noedit]").forEach(el => {
           (el as HTMLElement).contentEditable = "false";
         });
+        // Strip inline color from editable elements — prevents cursor inheriting
+        // stale color (e.g. red) from a previously styled value element
+        editRef.current.querySelectorAll("p, span, em, i, b, strong").forEach(el => {
+          const htmlEl = el as HTMLElement;
+          if (!htmlEl.closest("[data-noedit]")) htmlEl.style.color = "";
+        });
         editRef.current.focus();
       }
     }, 0);
