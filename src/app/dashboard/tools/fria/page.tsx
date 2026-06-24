@@ -1718,10 +1718,10 @@ export default function FRIAPage() {
         );
       })()}
 
-      <div style={{ display: "flex", gap: 0, minHeight: 0 }}>
+      <div style={{ display: "flex", gap: 12, minHeight: 0 }}>
 
       {/* ── Left sidebar ── */}
-      <div style={{ width: 232, flexShrink: 0, borderRight: `1px solid ${T.border}`, background: T.card, display: "flex", flexDirection: "column", minHeight: "100%" }}>
+      <div style={{ width: 232, flexShrink: 0, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, overflow: "hidden", background: "#fafafa", display: "flex", flexDirection: "column", minHeight: "100%" }}>
         {/* System name + org */}
         <div style={{ padding: "16px 14px 12px", borderBottom: `1px solid ${T.border}` }}>
           <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", marginBottom: 8 }}>Sistema AI</div>
@@ -1844,7 +1844,7 @@ export default function FRIAPage() {
       </div>
 
       {/* ── Main content ── */}
-      <div ref={contentRef} style={{ flex: 1, minWidth: 0, padding: "0 4px 40px 28px", overflowY: "auto" as const }}>
+      <div ref={contentRef} style={{ flex: 1, minWidth: 0, padding: "0 4px 40px 28px", overflowY: "auto" as const, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, background: "#fafafa" }}>
         {/* Dossier save banner */}
         {dossierSavedAt ? (
           <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 8, padding: "10px 14px", marginBottom: 20, background: T.greenBg, border: `1px solid ${T.greenBdr}`, fontSize: 12 }}>
@@ -1880,3 +1880,4 @@ export default function FRIAPage() {
     </div>
   );
 }
+
