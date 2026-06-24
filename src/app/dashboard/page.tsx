@@ -16,6 +16,8 @@ import { REGULATORY_DEADLINES, daysUntil, type RegulatoryDeadline } from "@/lib/
 import { getAllEvidence, type EvidenceRecord } from "@/lib/evidence/evidence-layer";
 import { useUserRole } from "@/lib/hooks/useUserRole";
 import { readFromStorage, type ClassifierResult } from "@/lib/dossier/storage-schema";
+import { loadInventory, computeObligationCount } from "@/lib/inventory/ai-system";
+import type { AISystem } from "@/lib/inventory/ai-system";
 
 const OnboardingWizard = dynamic(
   () => import("@/components/onboarding/OnboardingWizard"),
@@ -163,6 +165,7 @@ export default function DashboardPage() {
   const [newSystemCount, setNewSystemCount] = useState(0);
 
   const [systems, setSystems]               = useState<DiscoveredSystem[]>([]);
+  const [inventorySystems, setInventorySystems] = useState<AISystem[]>([]);
   const [onboardingSystem, setOnboardingSystem] = useState<string>("");
   const [nextActions, setNextActions]       = useState<{ id: string; title: string; article: string; href: string }[]>([]);
   const [deadlines, setDeadlines]           = useState<{ deadline: RegulatoryDeadline; days: number }[]>([]);
@@ -197,6 +200,7 @@ export default function DashboardPage() {
           ? classifier.riskLevel : s.riskLevel,
       })));
     } catch { /* ignore */ }
+    try { setInventorySystems(loadInventory()); } catch { /* ignore */ }
 
     const today = new Date();
     setDeadlines(
@@ -256,8 +260,16 @@ export default function DashboardPage() {
   const showArt73     = art73Count > 0 && !art73Dismissed;
   const mainSysName   = onboardingSystem || "Sistema AI principale";
   const classifier    = typeof window !== "undefined" ? readFromStorage<ClassifierResult>("classifier") : null;
-  const showMainSys   = systems.length === 0 && isOnboardingDone();
-  const totalSystems  = systems.length > 0 ? systems.length : showMainSys ? 1 : 0;
+  const hasInventory  = inventorySystems.length > 0;
+  const showMainSys   = !hasInventory && systems.length === 0 && isOnboardingDone();
+  const totalSystems  = hasInventory ? inventorySystems.length
+    : systems.length > 0 ? systems.length : showMainSys ? 1 : 0;
+  // Tier → RISK_CFG key adapter
+  const TIER_RISK: Record<string, string> = {
+    prohibited: "unacceptable", high_risk: "high",
+    limited: "limited", minimal: "minimal",
+    gpai: "limited", gpai_systemic: "high", unclassified: "minimal",
+  };
   const showBanner    = nextActions[0] || showDeadline || showArt73 || showDiscovery;
   const criticalDeadlines = deadlines.filter(d => d.days <= 90);
 
@@ -462,7 +474,36 @@ export default function DashboardPage() {
               </div>
             ) : (
               <>
-                {showMainSys && systems.length === 0 && (
+                {/* Inventory systems (primary source) */}
+                {hasInventory && inventorySystems.slice(0, 4).map((sys, i) => {
+                  const { total: oblTotal, done: oblDone } = computeObligationCount(sys);
+                  const invPct = oblTotal > 0 ? Math.round(oblDone / oblTotal * 100) : dossierPct;
+                  const invStatus = sys.status === "in_production" && oblDone === oblTotal ? "compliant"
+                    : sys.status === "deprecated" ? "review" : "active";
+                  return (
+                    <Link key={sys.id} href={`/dashboard/tools/inventory/${sys.id}`} style={{ textDecoration: "none" }}>
+                      <div className="sys-row" style={{
+                        display: "grid", gridTemplateColumns: "1fr 140px 120px 160px", columnGap: 24,
+                        padding: "13px 18px", alignItems: "center",
+                        borderBottom: i < Math.min(3, inventorySystems.length - 1) ? `1px solid ${T.border}` : "none",
+                        transition: "background 0.15s", cursor: "pointer",
+                      }}>
+                        <div>
+                          <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 2 }}>{sys.name}</p>
+                          <p style={{ fontSize: 10, color: T.faint }}>
+                            {sys.tier !== "unclassified" ? (TIER_RISK[sys.tier] === "unacceptable" ? "Vietato" : TIER_RISK[sys.tier] === "high" ? "Alto rischio" : sys.tier === "gpai" ? "GPAI" : "Rischio limitato") : "Da classificare"}
+                            {(sys.tier === "high_risk" || sys.tier === "prohibited") ? " · All.III §4" : " · Art. 50"}
+                          </p>
+                        </div>
+                        <RiskBadge level={TIER_RISK[sys.tier]} />
+                        <StatusBadge status={invStatus} />
+                        <ScoreBar pct={invPct > 0 ? invPct : dossierPct} />
+                      </div>
+                    </Link>
+                  );
+                })}
+                {/* Discovery fallback (when no inventory) */}
+                {!hasInventory && showMainSys && systems.length === 0 && (
                   <div className="sys-row" style={{ display: "grid", gridTemplateColumns: "1fr 140px 120px 160px", columnGap: 24, padding: "13px 18px", alignItems: "center", borderBottom: `1px solid ${T.border}`, transition: "background 0.15s" }}>
                     <div>
                       <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 2 }}>{mainSysName}</p>
@@ -476,7 +517,7 @@ export default function DashboardPage() {
                     <ScoreBar pct={dossierPct} />
                   </div>
                 )}
-                {systems.slice(0, 4).map((sys, i) => (
+                {!hasInventory && systems.slice(0, 4).map((sys, i) => (
                   <div key={sys.id} className="sys-row" style={{
                     display: "grid", gridTemplateColumns: "1fr 140px 120px 160px", columnGap: 24,
                     padding: "13px 18px", alignItems: "center",
