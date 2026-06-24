@@ -1928,7 +1928,7 @@ export default function DPIAPage() {
       />
 
       {/* ── Two-column layout: Rail + Content ── */}
-      <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+      <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
 
         {/* LEFT — Progress Rail */}
         <div style={{
@@ -2053,7 +2053,7 @@ export default function DPIAPage() {
         </div>
 
         {/* RIGHT — Step content */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ flex: 1, minWidth: 0, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, background: "#fafafa", padding: "20px 24px" }}>
           {/* Step header */}
           <div style={{ marginBottom: 16 }}>
             <p style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>
@@ -2143,3 +2143,4 @@ export default function DPIAPage() {
     </div>
   );
 }
+
