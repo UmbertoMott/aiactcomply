@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useInView } from "framer-motion";
 
-function useCountUp(target: number, duration = 1500, inView = false) {
+const SERIF = "Georgia, 'Times New Roman', serif";
+
+function useCountUp(target: number, duration = 1400, inView = false) {
   const [count, setCount] = useState(0);
   useEffect(() => {
     if (!inView) return;
@@ -24,28 +26,71 @@ function useCountUp(target: number, duration = 1500, inView = false) {
 }
 
 const stats = [
-  { raw: 50, display: (n: number) => `${n}+`, label: "aziende europee conformi con AIComply" },
-  { raw: 300, display: (n: number) => `${n}+`, label: "sistemi AI classificati e documentati" },
-  { raw: 48, display: () => "<48h", label: "dal primo accesso al primo assessment completo" },
+  {
+    raw: 30,
+    display: () => "30%",
+    sectionLabel: "Riduzione tempi audit",
+    label: "delle ore non fatturabili eliminate grazie all'automazione AI",
+  },
+  {
+    raw: 300,
+    display: (n: number) => `${n}+`,
+    sectionLabel: "Sistemi AI mappati",
+    label: "sistemi classificati e documentati in Europa",
+  },
+  {
+    raw: 48,
+    display: () => "<48h",
+    sectionLabel: "Dal primo accesso all'assessment",
+    label: "primo risk assessment completo e certificabile",
+  },
 ];
 
-function StatItem({ raw, display, label, inView }: typeof stats[0] & { inView: boolean }) {
-  const count = useCountUp(raw, 1200, inView);
+function StatCol({
+  stat,
+  inView,
+  isLast,
+}: {
+  stat: (typeof stats)[0];
+  inView: boolean;
+  isLast: boolean;
+}) {
+  const count = useCountUp(stat.raw, 1200, inView);
   return (
-    <div className="pt-12" style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
-      <div
+    <div
+      style={{
+        flex: 1,
+        padding: "36px 40px",
+        borderRight: isLast ? "none" : "1px solid rgba(0,0,0,0.07)",
+      }}
+    >
+      <p
         style={{
-          fontSize: "44px",
-          fontWeight: 300,
-          letterSpacing: "-2px",
-          color: "#0D1016",
-          marginBottom: "6px",
+          fontSize: 10,
+          fontWeight: 500,
+          letterSpacing: "0.09em",
+          textTransform: "uppercase",
+          color: "rgba(0,0,0,0.28)",
+          marginBottom: 16,
         }}
       >
-        {display(count)}
+        {stat.sectionLabel}
+      </p>
+      <div
+        style={{
+          fontFamily: SERIF,
+          fontSize: "clamp(44px, 5vw, 60px)",
+          fontWeight: 300,
+          letterSpacing: "-3px",
+          color: "#0D1016",
+          lineHeight: 1,
+          marginBottom: 14,
+        }}
+      >
+        {stat.display(count)}
       </div>
-      <p className="text-[13px] leading-relaxed" style={{ color: "rgba(0,0,0,0.4)" }}>
-        {label}
+      <p style={{ fontSize: 13, color: "rgba(0,0,0,0.42)", lineHeight: 1.6 }}>
+        {stat.label}
       </p>
     </div>
   );
@@ -56,17 +101,18 @@ export default function Stats() {
   const inView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section className="px-12 py-24" style={{ background: "#FAFAF9" }}>
-      <div className="max-w-5xl mx-auto" ref={ref}>
-        <p
-          className="text-[12px] font-medium uppercase mb-12"
-          style={{ letterSpacing: "1.5px", color: "rgba(0,0,0,0.3)" }}
-        >
-          Adottato in Europa
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          {stats.map((stat) => (
-            <StatItem key={stat.label} {...stat} inView={inView} />
+    <section
+      style={{ background: "#ffffff", borderTop: "1px solid rgba(0,0,0,0.07)" }}
+    >
+      <div className="max-w-5xl mx-auto px-8" ref={ref}>
+        <div style={{ display: "flex" }}>
+          {stats.map((stat, i) => (
+            <StatCol
+              key={stat.label}
+              stat={stat}
+              inView={inView}
+              isLast={i === stats.length - 1}
+            />
           ))}
         </div>
       </div>
