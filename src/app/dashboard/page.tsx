@@ -79,33 +79,38 @@ function relTime(iso: string): string {
 
 function RiskBadge({ level }: { level?: string }) {
   const cfg = level ? RISK_CFG[level] : null;
-  if (!cfg) return <span style={{ fontSize: 10, color: T.faint, padding: "2px 0" }}>—</span>;
+  if (!cfg) return <span style={{ fontSize: 10, color: T.faint }}>—</span>;
   return (
     <span style={{
-      display: "inline-flex", alignItems: "center", gap: 4,
-      fontSize: 10, fontWeight: 600, padding: "3px 8px", borderRadius: 4,
+      display: "inline-flex", alignItems: "center", gap: 5,
+      fontSize: 10, fontWeight: 700, padding: "4px 10px", borderRadius: 100,
       background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.bdr}`,
-    }}>{cfg.label}</span>
+      letterSpacing: "0.1px",
+    }}>
+      <span style={{ width: 5, height: 5, borderRadius: "50%", background: cfg.color, flexShrink: 0 }} />
+      {cfg.label}
+    </span>
   );
 }
 
 function StatusBadge({ status }: { status?: string }) {
-  const isGood = status === "compliant";
-  const label  = status === "active" ? "In corso"
-    : status === "compliant" ? "Conforme"
-    : status === "review"    ? "In revisione"
-    : status ?? "—";
+  const isGood   = status === "compliant";
+  const isActive = status === "active";
+  const isReview = status === "review";
+  const label  = isActive ? "In corso" : isGood ? "Conforme" : isReview ? "Revisione" : status ?? "—";
+  const color  = isGood ? T.green : isActive ? T.amber : T.gray;
+  const bg     = isGood ? T.greenBg : isActive ? T.amberBg : T.grayBg;
+  const bdr    = isGood ? T.greenBdr : isActive ? T.amberBdr : "rgba(0,0,0,0.10)";
   return (
     <span style={{
-      display: "inline-flex", alignItems: "center", gap: 4,
-      fontSize: 10, fontWeight: 600, padding: "3px 8px", borderRadius: 4,
-      background: isGood ? T.greenBg : T.amberBg,
-      color: isGood ? T.green : T.amber,
-      border: `1px solid ${isGood ? T.greenBdr : T.amberBdr}`,
+      display: "inline-flex", alignItems: "center", gap: 5,
+      fontSize: 10, fontWeight: 600, padding: "4px 10px", borderRadius: 100,
+      background: bg, color, border: `1px solid ${bdr}`,
     }}>
-      {isGood
-        ? <CheckCircle2 size={9} />
-        : <AlertCircle size={9} />}
+      <span style={{
+        width: 5, height: 5, borderRadius: "50%", background: color, flexShrink: 0,
+        animation: isActive ? "pulse-dot 2s ease-in-out infinite" : "none",
+      }} />
       {label}
     </span>
   );
@@ -114,11 +119,19 @@ function StatusBadge({ status }: { status?: string }) {
 function ScoreBar({ pct }: { pct: number }) {
   const color = pct >= 80 ? T.green : pct >= 40 ? T.amber : T.text;
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <div style={{ flex: 1, height: 2, borderRadius: 1, background: "rgba(0,0,0,0.07)", overflow: "hidden" }}>
-        <div style={{ height: "100%", width: `${pct}%`, background: color, borderRadius: 1, transition: "width 0.7s ease" }} />
+    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <div style={{ flex: 1, height: 5, borderRadius: 3, background: "rgba(0,0,0,0.06)", overflow: "hidden" }}>
+        <div style={{
+          height: "100%", borderRadius: 3, background: color,
+          width: `${pct > 0 ? Math.max(pct, 4) : 0}%`,
+          transition: "width 0.8s ease",
+        }} />
       </div>
-      <span style={{ fontSize: 11, fontWeight: 600, color, minWidth: 28, textAlign: "right" }}>{pct}%</span>
+      <span style={{
+        fontSize: 12, fontWeight: 700, color: T.text,
+        minWidth: 34, textAlign: "right",
+        letterSpacing: "-0.5px", fontVariantNumeric: "tabular-nums",
+      }}>{pct}%</span>
     </div>
   );
 }
@@ -273,6 +286,10 @@ export default function DashboardPage() {
           .main-grid  { grid-template-columns: 1fr !important; }
           .stats-grid { grid-template-columns: 1fr 1fr !important; }
           .bot-grid   { grid-template-columns: 1fr !important; }
+        }
+        @keyframes pulse-dot {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.35; }
         }
       `}</style>
 
@@ -430,7 +447,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Col headers */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 105px 100px 140px", padding: "8px 18px", background: "rgba(0,0,0,0.015)", borderBottom: `1px solid ${T.border}` }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 120px 110px 150px", padding: "8px 18px", background: "rgba(0,0,0,0.015)", borderBottom: `1px solid ${T.border}` }}>
               {["SISTEMA", "RISCHIO", "STATO", "DOSSIER"].map(h => (
                 <span key={h} style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase", color: T.faint }}>
                   {h}
@@ -451,7 +468,7 @@ export default function DashboardPage() {
             ) : (
               <>
                 {showMainSys && systems.length === 0 && (
-                  <div className="sys-row" style={{ display: "grid", gridTemplateColumns: "1fr 105px 100px 140px", padding: "13px 18px", alignItems: "center", borderBottom: `1px solid ${T.border}`, transition: "background 0.15s" }}>
+                  <div className="sys-row" style={{ display: "grid", gridTemplateColumns: "1fr 120px 110px 150px", padding: "13px 18px", alignItems: "center", borderBottom: `1px solid ${T.border}`, transition: "background 0.15s" }}>
                     <div>
                       <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 2 }}>{mainSysName}</p>
                       <p style={{ fontSize: 10, color: T.faint }}>
@@ -466,7 +483,7 @@ export default function DashboardPage() {
                 )}
                 {systems.slice(0, 4).map((sys, i) => (
                   <div key={sys.id} className="sys-row" style={{
-                    display: "grid", gridTemplateColumns: "1fr 105px 100px 140px",
+                    display: "grid", gridTemplateColumns: "1fr 120px 110px 150px",
                     padding: "13px 18px", alignItems: "center",
                     borderBottom: i < Math.min(3, systems.length - 1) ? `1px solid ${T.border}` : "none",
                     transition: "background 0.15s",
