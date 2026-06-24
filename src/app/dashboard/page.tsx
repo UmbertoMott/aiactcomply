@@ -36,10 +36,10 @@ const T = {
   bg:      "#FAFAF9",
   card:    "#ffffff",
   // Indigo come accento primario (non più rosso per stati incompleti)
-  indigo:  "#4f46e5",   indigoBg: "rgba(79,70,229,0.06)",  indigoBdr:"rgba(79,70,229,0.18)",
+  indigo:  "#0D1016",   indigoBg: "rgba(13,16,22,0.06)",   indigoBdr:"rgba(13,16,22,0.12)",
   red:     "#dc2626",   redBg:   "rgba(220,38,38,0.06)",   redBdr:  "rgba(220,38,38,0.18)",
   amber:   "#b45309",   amberBg: "rgba(245,158,11,0.06)",  amberBdr:"rgba(245,158,11,0.2)",
-  blue:    "#1d4ed8",   blueBg:  "rgba(29,78,216,0.05)",   blueBdr: "rgba(29,78,216,0.16)",
+  blue:    "#475569",   blueBg:  "rgba(71,85,105,0.06)",   blueBdr: "rgba(71,85,105,0.15)",
   green:   "#059669",   greenBg: "rgba(5,150,105,0.06)",   greenBdr:"rgba(5,150,105,0.18)",
   gray:    "#6b7280",   grayBg:  "rgba(0,0,0,0.04)",       grayBdr: "rgba(0,0,0,0.10)",
 } as const;
@@ -641,7 +641,7 @@ function SystemCard({ name, riskLevel, dossierPct, nextAction, nextActionHref, i
       <div style={{ marginBottom: 8 }}>
         <div className="flex items-center justify-between mb-1">
           <span style={{ fontSize: 10, color: "rgba(0,0,0,0.35)" }}>Dossier</span>
-          <span style={{ fontSize: 10, fontWeight: 600, color: dossierPct >= 80 ? "#059669" : dossierPct >= 40 ? "#b45309" : "#4f46e5" }}>
+          <span style={{ fontSize: 10, fontWeight: 600, color: dossierPct >= 80 ? "#059669" : dossierPct >= 40 ? "#b45309" : "#0D1016" }}>
             {dossierPct}%
           </span>
         </div>
