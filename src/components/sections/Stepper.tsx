@@ -71,11 +71,11 @@ const visualPanels = [
     <div
       className="mt-4 rounded-lg p-3"
       style={{
-        background: "rgba(59,130,246,0.08)",
-        border: "1px solid rgba(59,130,246,0.15)",
+        background: "rgba(0,0,0,0.06)",
+        border: "1px solid rgba(255,255,255,0.09)",
       }}
     >
-      <div className="text-[11px] font-medium text-blue-300 mb-1">
+      <div className="text-[11px] font-medium text-white/60 mb-1">
         Assessment completato
       </div>
       <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>
@@ -108,11 +108,11 @@ const visualPanels = [
         >
           <div
             className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
-            style={{ background: "rgba(59,130,246,0.15)" }}
+            style={{ background: "rgba(255,255,255,0.09)" }}
           >
             <div
               className="w-2.5 h-3 rounded-sm"
-              style={{ background: "rgba(147,197,253,0.6)" }}
+              style={{ background: "rgba(255,255,255,0.55)" }}
             />
           </div>
           <div className="flex-1">
@@ -150,7 +150,7 @@ const visualPanels = [
     </div>
     <div className="flex flex-col gap-2">
       {[
-        { name: "Jira", status: "Connesso", on: true, bg: "rgba(59,130,246,0.2)" },
+        { name: "Jira", status: "Connesso", on: true, bg: "rgba(255,255,255,0.12)" },
         { name: "Confluence", status: "Connesso", on: true, bg: "rgba(99,102,241,0.2)" },
         { name: "GitHub", status: "Configura", on: false, bg: "rgba(255,255,255,0.08)" },
       ].map(({ name, status, on, bg }) => (
@@ -188,11 +188,11 @@ const visualPanels = [
     <div
       className="mt-4 rounded-lg p-3"
       style={{
-        background: "rgba(59,130,246,0.08)",
-        border: "1px solid rgba(59,130,246,0.15)",
+        background: "rgba(0,0,0,0.06)",
+        border: "1px solid rgba(255,255,255,0.09)",
       }}
     >
-      <div className="text-[11px] font-medium text-blue-300 mb-1">
+      <div className="text-[11px] font-medium text-white/60 mb-1">
         8 task creati in Jira
       </div>
       <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>
@@ -258,7 +258,7 @@ export default function Stepper() {
                 <div
                   className="text-[11px] font-medium w-6 flex-shrink-0 pt-0.5"
                   style={{
-                    color: activeStep === i ? "#3b82f6" : "rgba(255,255,255,0.2)",
+                    color: activeStep === i ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.2)",
                   }}
                 >
                   {step.num}
@@ -322,8 +322,8 @@ export default function Stepper() {
                 }}
               >
                 <span
-                  className="block w-1.5 h-1.5 rounded-full bg-blue-500"
-                  style={{ boxShadow: "0 0 8px rgba(59,130,246,0.8)" }}
+                  className="block w-1.5 h-1.5 rounded-full bg-white"
+                  style={{ boxShadow: "0 0 8px rgba(255,255,255,0.35)" }}
                 />
                 {activeStep === 0 && "Risk Assessment — Sistema CRM AI"}
                 {activeStep === 1 && "DocuGen AI — Allegato IV"}
