@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Nav from "@/components/Nav";
 import Hero from "@/components/sections/Hero";
+import MarqueeTicker from "@/components/sections/MarqueeTicker";
 import PlatformSection from "@/components/sections/PlatformSection";
 import Pain from "@/components/sections/Pain";
 import Stepper from "@/components/sections/Stepper";
@@ -151,6 +152,7 @@ export default function Home() {
       <Nav />
       <main>
         <Hero />
+        <MarqueeTicker />
         <PlatformSection />
         <Pain />
         <Stepper />
