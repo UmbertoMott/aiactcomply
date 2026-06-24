@@ -2,8 +2,11 @@
 
 import React, { useState, useEffect, CSSProperties } from "react";
 import {
-  ArrowRight, X, ChevronRight,
-  Clock, CheckCircle2, AlertCircle, Activity, Shield,
+  ArrowRight, X,
+  FileCheck2, CalendarClock, BadgeCheck,
+  AlertTriangle, Scale, ClipboardList, Activity, Zap, BarChart3,
+  Cpu, History, ChevronRight, Server,
+  AlertCircle, CheckCircle2, TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -25,19 +28,19 @@ const T = {
   text:    "#0D1016",
   muted:   "rgba(0,0,0,0.40)",
   faint:   "rgba(0,0,0,0.22)",
-  border:  "rgba(0,0,0,0.07)",
+  border:  "rgba(0,0,0,0.08)",
   card:    "#ffffff",
   red:     "#dc2626",   redBg:   "rgba(220,38,38,0.06)",   redBdr:  "rgba(220,38,38,0.18)",
   amber:   "#b45309",   amberBg: "rgba(245,158,11,0.06)",  amberBdr:"rgba(245,158,11,0.2)",
   green:   "#059669",   greenBg: "rgba(5,150,105,0.06)",   greenBdr:"rgba(5,150,105,0.18)",
-  gray:    "#6b7280",   grayBg:  "rgba(0,0,0,0.04)",       grayBdr: "rgba(0,0,0,0.10)",
+  gray:    "#6b7280",   grayBg:  "rgba(0,0,0,0.04)",
 } as const;
 
-const cardSt: CSSProperties = {
+const card: CSSProperties = {
   background: T.card,
   border: `1px solid ${T.border}`,
   borderRadius: 10,
-  boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+  boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.015)",
 };
 
 // ── Risk config ───────────────────────────────────────────────────────────────
@@ -49,16 +52,18 @@ const RISK_CFG: Record<string, { label: string; color: string; bg: string; bdr: 
   minimal:      { label: "Minimale",      color: T.green, bg: T.greenBg, bdr: T.greenBdr },
 };
 
-// ── Evidence type labels ──────────────────────────────────────────────────────
+// ── Evidence config ───────────────────────────────────────────────────────────
 
-const EV_LABELS: Record<string, { label: string; color: string }> = {
-  adr:        { label: "Decisione",    color: T.gray  },
-  decision:   { label: "Decisione",    color: T.gray  },
-  audit:      { label: "Audit",        color: T.amber },
-  log:        { label: "Log",          color: T.gray  },
-  test:       { label: "Test",         color: T.green },
-  incident:   { label: "Incidente",    color: T.red   },
-  monitoring: { label: "Monitoraggio", color: T.gray  },
+type EvIcon = React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
+
+const EV_CFG: Record<string, { label: string; color: string; Icon: EvIcon }> = {
+  adr:        { label: "Decisione",    color: T.text,  Icon: Scale         },
+  decision:   { label: "Decisione",    color: T.text,  Icon: Scale         },
+  audit:      { label: "Audit",        color: T.amber, Icon: ClipboardList },
+  log:        { label: "Log",          color: T.gray,  Icon: Activity      },
+  test:       { label: "Test",         color: T.green, Icon: Zap           },
+  incident:   { label: "Incidente",    color: T.red,   Icon: AlertTriangle },
+  monitoring: { label: "Monitoraggio", color: T.gray,  Icon: BarChart3     },
 };
 
 function relTime(iso: string): string {
@@ -70,44 +75,50 @@ function relTime(iso: string): string {
   return `${Math.floor(diff / 86400)} gg fa`;
 }
 
-// ── Inline helpers ────────────────────────────────────────────────────────────
+// ── Badge components ──────────────────────────────────────────────────────────
 
 function RiskBadge({ level }: { level?: string }) {
   const cfg = level ? RISK_CFG[level] : null;
-  if (!cfg) return <span style={{ fontSize: 10, color: T.faint }}>—</span>;
+  if (!cfg) return <span style={{ fontSize: 10, color: T.faint, padding: "2px 0" }}>—</span>;
   return (
     <span style={{
-      display: "inline-block", fontSize: 10, fontWeight: 600,
-      padding: "2px 8px", borderRadius: 4,
+      display: "inline-flex", alignItems: "center", gap: 4,
+      fontSize: 10, fontWeight: 600, padding: "3px 8px", borderRadius: 4,
       background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.bdr}`,
     }}>{cfg.label}</span>
   );
 }
 
 function StatusBadge({ status }: { status?: string }) {
-  const label = status === "active" ? "In corso"
+  const isGood = status === "compliant";
+  const label  = status === "active" ? "In corso"
     : status === "compliant" ? "Conforme"
-    : status === "review" ? "Revisione"
+    : status === "review"    ? "In revisione"
     : status ?? "—";
-  const color = status === "compliant" ? T.green : T.amber;
   return (
     <span style={{
-      display: "inline-block", fontSize: 10, fontWeight: 600,
-      padding: "2px 8px", borderRadius: 4,
-      background: status === "compliant" ? T.greenBg : T.amberBg,
-      color, border: `1px solid ${status === "compliant" ? T.greenBdr : T.amberBdr}`,
-    }}>{label}</span>
+      display: "inline-flex", alignItems: "center", gap: 4,
+      fontSize: 10, fontWeight: 600, padding: "3px 8px", borderRadius: 4,
+      background: isGood ? T.greenBg : T.amberBg,
+      color: isGood ? T.green : T.amber,
+      border: `1px solid ${isGood ? T.greenBdr : T.amberBdr}`,
+    }}>
+      {isGood
+        ? <CheckCircle2 size={9} />
+        : <AlertCircle size={9} />}
+      {label}
+    </span>
   );
 }
 
 function ScoreBar({ pct }: { pct: number }) {
   const color = pct >= 80 ? T.green : pct >= 40 ? T.amber : T.text;
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-      <div style={{ flex: 1, height: 3, borderRadius: 2, background: "rgba(0,0,0,0.07)" }}>
-        <div style={{ height: 3, borderRadius: 2, width: `${pct}%`, background: color, transition: "width 0.7s" }} />
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div style={{ flex: 1, height: 2, borderRadius: 1, background: "rgba(0,0,0,0.07)", overflow: "hidden" }}>
+        <div style={{ height: "100%", width: `${pct}%`, background: color, borderRadius: 1, transition: "width 0.7s ease" }} />
       </div>
-      <span style={{ fontSize: 11, fontWeight: 600, color, minWidth: 30 }}>{pct}%</span>
+      <span style={{ fontSize: 11, fontWeight: 600, color, minWidth: 28, textAlign: "right" }}>{pct}%</span>
     </div>
   );
 }
@@ -126,11 +137,8 @@ export default function DashboardPage() {
   const [showWizard, setShowWizard]         = useState(false);
   const [dossierPct, setDossierPct]         = useState(0);
   const [dossierDone, setDossierDone]       = useState(0);
-  const [totalSections, setTotalSections]   = useState(0);
   const [mounted, setMounted]               = useState(false);
 
-  // Alert state
-  const [newSystemCount, setNewSystemCount] = useState(0);
   const [hasSources, setHasSources]         = useState(true);
   const [discoveryDismissed, setDiscoveryDismissed] = useState(false);
   const [deadlineDismissed, setDeadlineDismissed]   = useState(true);
@@ -140,8 +148,8 @@ export default function DashboardPage() {
   const [art73Count, setArt73Count]         = useState(0);
   const [art73Dismissed, setArt73Dismissed] = useState(false);
   const [gpaiDismissed, setGpaiDismissed]   = useState(true);
+  const [newSystemCount, setNewSystemCount] = useState(0);
 
-  // Main data
   const [systems, setSystems]               = useState<DiscoveredSystem[]>([]);
   const [onboardingSystem, setOnboardingSystem] = useState<string>("");
   const [nextActions, setNextActions]       = useState<{ id: string; title: string; article: string; href: string }[]>([]);
@@ -156,7 +164,6 @@ export default function DashboardPage() {
     const sections = getDossierSections(data);
     setDossierPct(getCompletionPercentage(sections));
     setDossierDone(getCompletedCount(sections));
-    setTotalSections(sections.length);
 
     setNextActions(
       sections.filter(s => s.status !== "complete").slice(0, 5)
@@ -221,27 +228,26 @@ export default function DashboardPage() {
       if (raw) {
         const incidents = JSON.parse(raw) as Array<{ date: string; notified: boolean }>;
         const urgent = incidents.filter(i => !i.notified).map(i => {
-          const deadline = new Date(new Date(i.date).getTime() + 15 * 24 * 60 * 60 * 1000);
-          return Math.ceil((deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+          const d = new Date(new Date(i.date).getTime() + 15 * 24 * 60 * 60 * 1000);
+          return Math.ceil((d.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
         }).filter(d => d <= 15 && d > 0);
         if (urgent.length > 0) { setArt73Count(urgent.length); setArt73MinDays(Math.min(...urgent)); }
       }
     } catch { /* ignore */ }
   }, []);
 
-  const pctColor       = dossierPct >= 80 ? T.green : dossierPct >= 40 ? T.amber : T.text;
-  const scoreLabel     = dossierPct >= 80 ? "LIVELLO ALTO · OTTIMO" : dossierPct >= 40 ? "LIVELLO MEDIO · IN MIGLIORAMENTO" : "LIVELLO BASSO · AZIONE RICHIESTA";
-  const showDiscovery  = newSystemCount > 0 || (!hasSources && !discoveryDismissed);
-  const showDeadline   = !deadlineDismissed && alertDeadline !== null;
-  const showArt73      = art73Count > 0 && !art73Dismissed;
-  const mainSystemName = onboardingSystem || "Sistema AI principale";
-  const classifier     = typeof window !== "undefined" ? readFromStorage<ClassifierResult>("classifier") : null;
-  const showMainSystem = systems.length === 0 && isOnboardingDone();
-  const totalSystems   = systems.length > 0 ? systems.length : showMainSystem ? 1 : 0;
-
-  // Most urgent alert for banner
-  const bannerAction = nextActions[0] ?? null;
-  const showBanner   = bannerAction || showDeadline || showArt73 || showDiscovery;
+  const pctColor      = dossierPct >= 80 ? T.green : dossierPct >= 40 ? T.amber : T.text;
+  const scoreLabel    = dossierPct >= 80 ? "OTTIMO" : dossierPct >= 40 ? "IN MIGLIORAMENTO" : "AZIONE RICHIESTA";
+  const levelLabel    = dossierPct >= 80 ? "LIVELLO ALTO" : dossierPct >= 40 ? "LIVELLO MEDIO" : "LIVELLO BASSO";
+  const showDiscovery = newSystemCount > 0 || (!hasSources && !discoveryDismissed);
+  const showDeadline  = !deadlineDismissed && alertDeadline !== null;
+  const showArt73     = art73Count > 0 && !art73Dismissed;
+  const mainSysName   = onboardingSystem || "Sistema AI principale";
+  const classifier    = typeof window !== "undefined" ? readFromStorage<ClassifierResult>("classifier") : null;
+  const showMainSys   = systems.length === 0 && isOnboardingDone();
+  const totalSystems  = systems.length > 0 ? systems.length : showMainSys ? 1 : 0;
+  const showBanner    = nextActions[0] || showDeadline || showArt73 || showDiscovery;
+  const criticalDeadlines = deadlines.filter(d => d.days <= 90);
 
   const nowStr = mounted ? new Date().toLocaleString("it-IT", {
     weekday: "short", day: "2-digit", month: "short", year: "numeric",
@@ -254,26 +260,31 @@ export default function DashboardPage() {
 
       <style>{`
         @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(8px); }
+          from { opacity: 0; transform: translateY(6px); }
           to   { opacity: 1; transform: translateY(0); }
         }
-        .fade-up { animation: fadeUp 0.3s ease both; }
+        .fu { animation: fadeUp 0.3s ease both; }
+        .fu-1 { animation: fadeUp 0.3s 0.05s ease both; }
+        .fu-2 { animation: fadeUp 0.3s 0.10s ease both; }
+        .fu-3 { animation: fadeUp 0.3s 0.15s ease both; }
+        .sys-row:hover { background: rgba(0,0,0,0.015) !important; }
+        .bottom-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04) !important; }
         @media (max-width: 900px) {
-          .dash-main-grid  { grid-template-columns: 1fr !important; }
-          .dash-stats-grid { grid-template-columns: 1fr 1fr !important; }
-          .dash-bottom-grid { grid-template-columns: 1fr !important; }
+          .main-grid  { grid-template-columns: 1fr !important; }
+          .stats-grid { grid-template-columns: 1fr 1fr !important; }
+          .bot-grid   { grid-template-columns: 1fr !important; }
         }
       `}</style>
 
-      <div className="w-full fade-up">
+      <div className="w-full">
 
         {/* ── HEADER ──────────────────────────────────────────────── */}
-        <div className="flex items-start justify-between" style={{ marginBottom: 20 }}>
+        <div className="fu" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 22 }}>
           <div>
-            <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase", color: T.faint, marginBottom: 6 }}>
+            <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.8px", textTransform: "uppercase", color: T.faint, marginBottom: 7 }}>
               {nowStr}
             </p>
-            <h1 style={{ fontSize: 28, fontWeight: 400, letterSpacing: "-1px", color: T.text, lineHeight: 1.1, marginBottom: 4 }}>
+            <h1 style={{ fontSize: 27, fontWeight: 400, letterSpacing: "-0.9px", color: T.text, lineHeight: 1.1, marginBottom: 5 }}>
               Compliance Overview
             </h1>
             <p style={{ fontSize: 12, color: T.muted }}>
@@ -285,125 +296,143 @@ export default function DashboardPage() {
 
           {/* Score */}
           <div style={{ textAlign: "right", flexShrink: 0 }}>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 2, justifyContent: "flex-end" }}>
-              <span style={{ fontSize: 56, fontWeight: 300, letterSpacing: "-3px", color: T.text, lineHeight: 1 }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 1, justifyContent: "flex-end" }}>
+              <span style={{ fontSize: 58, fontWeight: 200, letterSpacing: "-4px", color: T.text, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
                 {dossierPct}
               </span>
-              <span style={{ fontSize: 26, fontWeight: 300, color: T.faint, lineHeight: 1 }}>/100</span>
+              <span style={{ fontSize: 24, fontWeight: 300, color: "rgba(0,0,0,0.18)", letterSpacing: "-1px" }}>/100</span>
             </div>
-            <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1.2px", textTransform: "uppercase", color: T.muted, marginTop: 4 }}>
-              {scoreLabel}
-            </p>
-            <div style={{ height: 2, width: 110, background: "rgba(0,0,0,0.07)", borderRadius: 1, marginTop: 6, marginLeft: "auto" }}>
-              <div style={{ height: 2, width: `${dossierPct * 1.1}px`, maxWidth: 110, background: pctColor, borderRadius: 1, transition: "width 0.7s" }} />
+            <div style={{ display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end", marginTop: 5 }}>
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: T.faint }}>{levelLabel}</span>
+              <span style={{ width: 3, height: 3, borderRadius: "50%", background: T.faint, display: "inline-block" }} />
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: pctColor }}>{scoreLabel}</span>
+            </div>
+            <div style={{ height: 2, width: 100, background: "rgba(0,0,0,0.06)", borderRadius: 1, marginTop: 7, marginLeft: "auto" }}>
+              <div style={{ height: 2, width: `${dossierPct}%`, maxWidth: 100, background: pctColor, borderRadius: 1, transition: "width 0.8s ease" }} />
             </div>
           </div>
         </div>
 
         {/* ── ALERT BANNER ────────────────────────────────────────── */}
         {showBanner && (
-          <div className="fade-up" style={{
+          <div className="fu-1" style={{
             display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16,
-            padding: "14px 20px", borderRadius: 8, marginBottom: 18,
-            background: "rgba(0,0,0,0.02)", border: `1px solid rgba(0,0,0,0.08)`,
+            padding: "13px 18px", borderRadius: 8, marginBottom: 16,
+            background: "rgba(0,0,0,0.025)",
+            border: `1px solid rgba(0,0,0,0.07)`,
+            borderLeft: `3px solid ${T.text}`,
           }}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 3 }}>
+              <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 3 }}>
                 {showArt73 ? `Art. 73 · Notifica entro ${art73MinDays} giorni`
-                  : showDeadline ? `${alertDeadline!.article} — ${alertDeadline!.title}`
+                  : showDeadline ? alertDeadline!.title
                   : showDiscovery ? "Sistemi AI rilevati — classificazione richiesta"
-                  : bannerAction?.title}
+                  : nextActions[0]?.title}
               </p>
               <p style={{ fontSize: 11, color: T.muted }}>
-                {showArt73 ? `${art73Count} incidente/i da segnalare all'autorità competente · Art. 73`
-                  : showDeadline ? `Scadenza: ${new Date(alertDeadline!.date).toLocaleDateString("it-IT", { day:"2-digit", month:"short", year:"numeric" })} — ${alertDeadlineDays} giorni rimanenti`
-                  : showDiscovery ? "Vai a Discovery per classificare i sistemi rilevati"
-                  : bannerAction ? `Art. ${bannerAction.article} · Allegato III §4 · Valutazione impatto obbligatoria` : ""}
+                {showArt73 ? `${art73Count} incidente/i non segnalato/i · Art. 73`
+                  : showDeadline ? `${alertDeadline!.article} · Scadenza ${new Date(alertDeadline!.date).toLocaleDateString("it-IT", { day:"2-digit", month:"short", year:"numeric" })} — ${alertDeadlineDays} giorni rimanenti`
+                  : showDiscovery ? "Discovery per classificare automaticamente i sistemi AI"
+                  : nextActions[0] ? `Art. ${nextActions[0].article} · Allegato III` : ""}
               </p>
             </div>
             <Link
               href={showArt73 ? "/dashboard/post-market"
                 : showDeadline ? "/dashboard/notifications"
                 : showDiscovery ? "/dashboard/discovery"
-                : bannerAction?.href ?? "/dashboard/journey"}
+                : nextActions[0]?.href ?? "/dashboard/journey"}
               style={{
-                padding: "9px 18px", background: T.text, color: "#fff", borderRadius: 6,
-                fontSize: 12, fontWeight: 500, whiteSpace: "nowrap",
-                display: "flex", alignItems: "center", gap: 6, flexShrink: 0,
+                padding: "8px 16px", background: T.text, color: "#fff", borderRadius: 6,
+                fontSize: 11.5, fontWeight: 500, whiteSpace: "nowrap",
+                display: "inline-flex", alignItems: "center", gap: 6, flexShrink: 0,
+                letterSpacing: "-0.1px",
               }}>
-              {showArt73 ? "Notifica ora" : showDeadline ? "Vedi timeline" : showDiscovery ? "Avvia Discovery" : "Vai alla sezione"}
-              <ArrowRight size={13} />
+              {showArt73 ? "Notifica ora"
+                : showDeadline ? "Vedi timeline"
+                : showDiscovery ? "Avvia Discovery"
+                : "Vai alla sezione"}
+              <ArrowRight size={12} />
             </Link>
           </div>
         )}
 
-        {/* ── STATS ROW ───────────────────────────────────────────── */}
-        <div className="dash-stats-grid fade-up" style={{ ...cardSt, display: "grid", gridTemplateColumns: "repeat(4, 1fr)", marginBottom: 16, overflow: "hidden" }}>
+        {/* ── STATS ───────────────────────────────────────────────── */}
+        <div className="stats-grid fu-1" style={{ ...card, display: "grid", gridTemplateColumns: "repeat(4, 1fr)", marginBottom: 14, overflow: "hidden" }}>
           {[
             {
+              Icon: Server,
               label: "SISTEMI AI",
-              value: String(totalSystems),
+              value: totalSystems,
               sub: totalSystems > 0
                 ? `${systems.filter(s => s.riskLevel === "high" || s.riskLevel === "unacceptable").length} alto rischio · All. III`
                 : "Avvia Discovery",
             },
             {
+              Icon: AlertCircle,
               label: "OBBLIGHI APERTI",
-              value: String(nextActions.length),
-              sub: nextActions.length > 0 ? `${Math.min(nextActions.length, 2)} urgenti · entro 7 giorni` : "tutti risolti",
+              value: nextActions.length,
+              sub: nextActions.length > 0 ? `${Math.min(nextActions.length, 2)} urgenti · entro 7 giorni` : "tutti adempiuti",
             },
             {
-              label: "DOCUMENTI FIRMATI",
-              value: String(dossierDone),
-              sub: "eIDAS SES · hash-chain",
+              Icon: FileCheck2,
+              label: "DOC. FIRMATI",
+              value: dossierDone,
+              sub: "eIDAS SES · hash-chain verificata",
             },
             {
+              Icon: CalendarClock,
               label: "PROSSIMA SCADENZA",
-              value: deadlines[0] ? String(deadlines[0].days) : "—",
+              value: deadlines[0] ? `${deadlines[0].days}` : "—",
+              unit: deadlines[0] ? "gg" : undefined,
               sub: deadlines[0] ? `${deadlines[0].deadline.article} · notifica incidente` : "nessuna scadenza",
-              unit: deadlines[0] ? "giorni" : undefined,
             },
-          ].map((s, i) => (
-            <div key={s.label} style={{ padding: "18px 22px", borderRight: i < 3 ? `1px solid ${T.border}` : "none" }}>
-              <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: T.faint, marginBottom: 8 }}>
-                {s.label}
-              </p>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 4 }}>
-                <span style={{ fontSize: 36, fontWeight: 300, letterSpacing: "-1.5px", color: T.text, lineHeight: 1 }}>
-                  {s.value}
+          ].map(({ Icon, label, value, unit, sub }, i) => (
+            <div key={label} style={{
+              padding: "16px 20px",
+              borderRight: i < 3 ? `1px solid ${T.border}` : "none",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 10 }}>
+                <Icon size={11} style={{ color: T.faint }} />
+                <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.9px", textTransform: "uppercase", color: T.faint }}>
+                  {label}
                 </span>
-                {"unit" in s && s.unit && (
-                  <span style={{ fontSize: 14, fontWeight: 400, color: T.muted }}>{s.unit}</span>
-                )}
               </div>
-              <p style={{ fontSize: 10, color: T.faint }}>{s.sub}</p>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 3, marginBottom: 4 }}>
+                <span style={{ fontSize: 34, fontWeight: 200, letterSpacing: "-1.5px", color: T.text, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+                  {value}
+                </span>
+                {unit && <span style={{ fontSize: 14, fontWeight: 400, color: T.muted }}>{unit}</span>}
+              </div>
+              <p style={{ fontSize: 10, color: T.faint, lineHeight: 1.4 }}>{sub}</p>
             </div>
           ))}
         </div>
 
-        {/* ── MAIN GRID: Systems Table + Activity ─────────────────── */}
-        <div className="dash-main-grid" style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 14, marginBottom: 14, alignItems: "start" }}>
+        {/* ── MAIN GRID ───────────────────────────────────────────── */}
+        <div className="main-grid fu-2" style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 12, marginBottom: 12, alignItems: "start" }}>
 
-          {/* ── AI Systems Table ── */}
-          <div style={{ ...cardSt, overflow: "hidden" }} className="fade-up">
-            {/* Table header */}
-            <div style={{ padding: "13px 20px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div>
-                <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: T.faint }}>
-                  INVENTARIO SISTEMI AI
-                </p>
-                {totalSystems > 0 && (
-                  <p style={{ fontSize: 10, color: T.faint, marginTop: 2 }}>
-                    {Math.min(4, totalSystems)} DI {totalSystems} MOSTRATI
-                  </p>
-                )}
+          {/* Systems Table */}
+          <div style={{ ...card, overflow: "hidden" }}>
+            <div style={{ padding: "12px 18px 10px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <Cpu size={13} style={{ color: T.faint }} />
+                <div>
+                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.9px", textTransform: "uppercase", color: T.faint }}>
+                    INVENTARIO SISTEMI AI
+                  </span>
+                  {totalSystems > 0 && (
+                    <span style={{ fontSize: 9, color: T.faint, marginLeft: 8 }}>
+                      {Math.min(4, totalSystems)} / {totalSystems}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Column headers */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 100px 90px 160px", padding: "9px 20px", borderBottom: `1px solid ${T.border}`, background: "rgba(0,0,0,0.015)" }}>
-              {["SISTEMA", "RISCHIO", "STATO", "SCORE"].map(h => (
-                <span key={h} style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.9px", textTransform: "uppercase", color: T.faint }}>
+            {/* Col headers */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 105px 100px 140px", padding: "8px 18px", background: "rgba(0,0,0,0.015)", borderBottom: `1px solid ${T.border}` }}>
+              {["SISTEMA", "RISCHIO", "STATO", "DOSSIER"].map(h => (
+                <span key={h} style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase", color: T.faint }}>
                   {h}
                 </span>
               ))}
@@ -411,8 +440,9 @@ export default function DashboardPage() {
 
             {/* Rows */}
             {totalSystems === 0 ? (
-              <div style={{ padding: "36px 20px", textAlign: "center" }}>
-                <p style={{ fontSize: 13, color: T.muted, marginBottom: 10 }}>Nessun sistema AI registrato</p>
+              <div style={{ padding: "32px 18px", textAlign: "center" }}>
+                <Server size={28} style={{ color: "rgba(0,0,0,0.08)", margin: "0 auto 10px" }} />
+                <p style={{ fontSize: 13, color: T.muted, marginBottom: 12 }}>Nessun sistema AI registrato</p>
                 <Link href="/dashboard/discovery"
                   style={{ fontSize: 12, fontWeight: 500, color: "#fff", background: T.text, padding: "8px 16px", borderRadius: 6, display: "inline-flex", alignItems: "center", gap: 6 }}>
                   Avvia Discovery <ArrowRight size={12} />
@@ -420,12 +450,13 @@ export default function DashboardPage() {
               </div>
             ) : (
               <>
-                {showMainSystem && systems.length === 0 && (
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 100px 90px 160px", padding: "14px 20px", alignItems: "center", borderBottom: `1px solid ${T.border}` }}>
+                {showMainSys && systems.length === 0 && (
+                  <div className="sys-row" style={{ display: "grid", gridTemplateColumns: "1fr 105px 100px 140px", padding: "13px 18px", alignItems: "center", borderBottom: `1px solid ${T.border}`, transition: "background 0.15s" }}>
                     <div>
-                      <p style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 2 }}>{mainSystemName}</p>
+                      <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 2 }}>{mainSysName}</p>
                       <p style={{ fontSize: 10, color: T.faint }}>
-                        {classifier?.riskLevel === "high" ? "Alto rischio · All.III §4" : "Classificato"}
+                        {classifier?.riskLevel ? RISK_CFG[classifier.riskLevel]?.label ?? "Classificato" : "Classificato"}
+                        {(classifier?.riskLevel === "high" || classifier?.riskLevel === "unacceptable") ? " · All.III §4" : " · Art. 50"}
                       </p>
                     </div>
                     <RiskBadge level={classifier?.riskLevel} />
@@ -434,13 +465,14 @@ export default function DashboardPage() {
                   </div>
                 )}
                 {systems.slice(0, 4).map((sys, i) => (
-                  <div key={sys.id} style={{
-                    display: "grid", gridTemplateColumns: "1fr 100px 90px 160px",
-                    padding: "14px 20px", alignItems: "center",
+                  <div key={sys.id} className="sys-row" style={{
+                    display: "grid", gridTemplateColumns: "1fr 105px 100px 140px",
+                    padding: "13px 18px", alignItems: "center",
                     borderBottom: i < Math.min(3, systems.length - 1) ? `1px solid ${T.border}` : "none",
+                    transition: "background 0.15s",
                   }}>
                     <div>
-                      <p style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 2 }}>{sys.name}</p>
+                      <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 2 }}>{sys.name}</p>
                       <p style={{ fontSize: 10, color: T.faint }}>
                         {sys.riskLevel ? RISK_CFG[sys.riskLevel]?.label ?? "—" : "Da classificare"}
                         {(sys.riskLevel === "high" || sys.riskLevel === "unacceptable") ? " · All.III §4" : " · Art. 50"}
@@ -454,45 +486,58 @@ export default function DashboardPage() {
               </>
             )}
 
-            {/* Footer */}
-            <div style={{ padding: "12px 20px", borderTop: totalSystems > 0 ? `1px solid ${T.border}` : "none" }}>
+            <div style={{ padding: "11px 18px", borderTop: totalSystems > 0 ? `1px solid ${T.border}` : "none" }}>
               <Link href="/dashboard/discovery"
                 style={{
-                  fontSize: 12, fontWeight: 500, color: T.text,
-                  display: "inline-flex", alignItems: "center", gap: 8,
-                  padding: "8px 14px", borderRadius: 6,
+                  fontSize: 11.5, fontWeight: 500, color: T.text,
+                  display: "inline-flex", alignItems: "center", gap: 7,
+                  padding: "7px 12px", borderRadius: 6,
                   border: `1px solid ${T.border}`, background: "rgba(0,0,0,0.01)",
+                  transition: "opacity 0.15s",
                 }}>
-                🤖 Tutti i sistemi →
+                <Server size={12} style={{ color: T.faint }} />
+                Tutti i sistemi
+                <ArrowRight size={11} style={{ color: T.faint }} />
               </Link>
             </div>
           </div>
 
-          {/* ── Recent Activity ── */}
-          <div style={{ ...cardSt, overflow: "hidden" }} className="fade-up">
-            <div style={{ padding: "13px 20px", borderBottom: `1px solid ${T.border}` }}>
-              <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: T.faint }}>
+          {/* Activity */}
+          <div style={{ ...card, overflow: "hidden" }}>
+            <div style={{ padding: "12px 18px 10px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", gap: 7 }}>
+              <History size={12} style={{ color: T.faint }} />
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.9px", textTransform: "uppercase", color: T.faint }}>
                 ATTIVITÀ RECENTE
-              </p>
+              </span>
             </div>
 
             {recentEvidence.length === 0 ? (
-              <div style={{ padding: "24px 20px" }}>
+              <div style={{ padding: "24px 18px" }}>
                 <p style={{ fontSize: 12, color: T.faint }}>Nessuna attività ancora.</p>
               </div>
             ) : (
               recentEvidence.map((ev, i) => {
-                const cfg = EV_LABELS[ev.type] ?? { label: ev.type, color: T.gray };
+                const cfg = EV_CFG[ev.type] ?? { label: ev.type, color: T.gray, Icon: Activity };
+                const { Icon } = cfg;
                 const toolName = (ev.content as Record<string, unknown>)?.tool as string
-                  ?? (ev.content as Record<string, unknown>)?.title as string
-                  ?? ev.type;
+                  || (ev.content as Record<string, unknown>)?.title as string
+                  || cfg.label;
                 const artLabel = (ev.content as Record<string, unknown>)?.article as string ?? "";
                 return (
-                  <div key={ev.id} style={{ padding: "11px 20px", borderBottom: i < recentEvidence.length - 1 ? `1px solid ${T.border}` : "none" }}>
-                    <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                      <div style={{ width: 7, height: 7, borderRadius: "50%", background: cfg.color, flexShrink: 0, marginTop: 3 }} />
+                  <div key={ev.id} style={{
+                    padding: "11px 18px",
+                    borderBottom: i < recentEvidence.length - 1 ? `1px solid ${T.border}` : "none",
+                  }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: 9 }}>
+                      <div style={{
+                        width: 26, height: 26, borderRadius: 6, flexShrink: 0,
+                        background: T.grayBg, border: `1px solid ${T.border}`,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                      }}>
+                        <Icon size={12} style={{ color: cfg.color }} />
+                      </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <p style={{ fontSize: 11.5, fontWeight: 600, color: T.text, marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           {toolName}
                         </p>
                         <p style={{ fontSize: 10, color: T.faint }}>
@@ -505,55 +550,64 @@ export default function DashboardPage() {
               })
             )}
 
-            <div style={{ padding: "12px 20px", borderTop: recentEvidence.length > 0 ? `1px solid ${T.border}` : "none" }}>
+            <div style={{ padding: "11px 18px", borderTop: recentEvidence.length > 0 ? `1px solid ${T.border}` : "none" }}>
               <Link href="/dashboard/evidence-layer"
-                style={{ fontSize: 12, fontWeight: 500, color: T.text, display: "inline-flex", alignItems: "center", gap: 6 }}>
-                🔁 Log completo →
+                style={{ fontSize: 11.5, fontWeight: 500, color: T.text, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <History size={11} style={{ color: T.faint }} />
+                Log completo
+                <ArrowRight size={11} style={{ color: T.faint }} />
               </Link>
             </div>
           </div>
         </div>
 
         {/* ── BOTTOM CARDS ─────────────────────────────────────────── */}
-        <div className="dash-bottom-grid fade-up" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+        <div className="bot-grid fu-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
 
-          <Link href="/dashboard/dossier" style={{ ...cardSt, padding: "16px 20px", display: "block", textDecoration: "none" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-              <div style={{ width: 34, height: 34, borderRadius: 8, background: "rgba(0,0,0,0.04)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <CheckCircle2 size={16} style={{ color: T.text }} />
-              </div>
-              <p style={{ fontSize: 18, fontWeight: 300, letterSpacing: "-0.5px", color: T.text }}>
-                {dossierDone} documenti firmati
-              </p>
-            </div>
-            <p style={{ fontSize: 10, color: T.faint }}>hash-chain verificata · Art. 18</p>
-          </Link>
-
-          <Link href="/dashboard/notifications" style={{ ...cardSt, padding: "16px 20px", display: "block", textDecoration: "none" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-              <div style={{ width: 34, height: 34, borderRadius: 8, background: "rgba(0,0,0,0.04)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <Clock size={16} style={{ color: T.text }} />
-              </div>
-              <p style={{ fontSize: 18, fontWeight: 300, letterSpacing: "-0.5px", color: T.text }}>
-                {deadlines.filter(d => d.days <= 90).length} scadenze critiche
-              </p>
-            </div>
-            <p style={{ fontSize: 10, color: T.faint }}>
-              {deadlines[0]
+          {[
+            {
+              href:  "/dashboard/dossier",
+              Icon:  FileCheck2,
+              title: `${dossierDone} documenti firmati`,
+              sub:   "hash-chain verificata · Art. 18",
+              accent: T.green,
+            },
+            {
+              href:  "/dashboard/notifications",
+              Icon:  CalendarClock,
+              title: `${criticalDeadlines.length} scadenze critiche`,
+              sub:   deadlines[0]
                 ? `${deadlines[0].deadline.article}${deadlines[1] ? " · " + deadlines[1].deadline.article : ""} · entro ${deadlines[0].days} giorni`
-                : "Nessuna scadenza imminente"}
-            </p>
-          </Link>
-
-          <Link href="/dashboard/tools/trust-center" style={{ ...cardSt, padding: "16px 20px", display: "block", textDecoration: "none" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-              <div style={{ width: 34, height: 34, borderRadius: 8, background: "rgba(0,0,0,0.04)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <Shield size={16} style={{ color: T.text }} />
+                : "Nessuna scadenza imminente",
+              accent: criticalDeadlines.length > 0 ? T.amber : T.text,
+            },
+            {
+              href:  "/dashboard/tools/trust-center",
+              Icon:  BadgeCheck,
+              title: "Trust Center",
+              sub:   "bozza · non pubblicato · Art. 13",
+              accent: T.text,
+            },
+          ].map(({ href, Icon, title, sub, accent }) => (
+            <Link key={href} href={href} className="bottom-card" style={{
+              ...card, padding: "15px 18px", display: "block", textDecoration: "none",
+              transition: "box-shadow 0.15s",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 7 }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                  background: T.grayBg, border: `1px solid ${T.border}`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <Icon size={15} style={{ color: accent }} />
+                </div>
+                <p style={{ fontSize: 15, fontWeight: 400, letterSpacing: "-0.3px", color: T.text, lineHeight: 1.2 }}>
+                  {title}
+                </p>
               </div>
-              <p style={{ fontSize: 18, fontWeight: 300, letterSpacing: "-0.5px", color: T.text }}>Trust Center</p>
-            </div>
-            <p style={{ fontSize: 10, color: T.faint }}>bozza · non pubblicato · Art. 13</p>
-          </Link>
+              <p style={{ fontSize: 10, color: T.faint, paddingLeft: 43 }}>{sub}</p>
+            </Link>
+          ))}
 
         </div>
 
