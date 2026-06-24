@@ -83,9 +83,9 @@ function RiskBadge({ level }: { level?: string }) {
   return (
     <span style={{
       display: "inline-flex", alignItems: "center", gap: 5,
-      fontSize: 10, fontWeight: 700, padding: "4px 10px", borderRadius: 100,
+      fontSize: 11, fontWeight: 600, padding: "5px 12px", borderRadius: 100,
       background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.bdr}`,
-      letterSpacing: "0.1px",
+      letterSpacing: "0.05px",
     }}>
       <span style={{ width: 5, height: 5, borderRadius: "50%", background: cfg.color, flexShrink: 0 }} />
       {cfg.label}
@@ -104,12 +104,11 @@ function StatusBadge({ status }: { status?: string }) {
   return (
     <span style={{
       display: "inline-flex", alignItems: "center", gap: 5,
-      fontSize: 10, fontWeight: 600, padding: "4px 10px", borderRadius: 100,
+      fontSize: 11, fontWeight: 500, padding: "5px 12px", borderRadius: 100,
       background: bg, color, border: `1px solid ${bdr}`,
     }}>
       <span style={{
         width: 5, height: 5, borderRadius: "50%", background: color, flexShrink: 0,
-        animation: isActive ? "pulse-dot 2s ease-in-out infinite" : "none",
       }} />
       {label}
     </span>
@@ -117,7 +116,7 @@ function StatusBadge({ status }: { status?: string }) {
 }
 
 function ScoreBar({ pct }: { pct: number }) {
-  const color = pct >= 80 ? T.green : pct >= 40 ? T.amber : T.text;
+  const color = pct >= 80 ? T.green : pct >= 40 ? T.amber : T.red;
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
       <div style={{ flex: 1, height: 5, borderRadius: 3, background: "rgba(0,0,0,0.06)", overflow: "hidden" }}>
@@ -287,10 +286,6 @@ export default function DashboardPage() {
           .stats-grid { grid-template-columns: 1fr 1fr !important; }
           .bot-grid   { grid-template-columns: 1fr !important; }
         }
-        @keyframes pulse-dot {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.35; }
-        }
       `}</style>
 
       <div className="w-full">
@@ -447,7 +442,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Col headers */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 120px 110px 150px", padding: "8px 18px", background: "rgba(0,0,0,0.015)", borderBottom: `1px solid ${T.border}` }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 140px 120px 160px", padding: "8px 18px", background: "rgba(0,0,0,0.015)", borderBottom: `1px solid ${T.border}` }}>
               {["SISTEMA", "RISCHIO", "STATO", "DOSSIER"].map(h => (
                 <span key={h} style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase", color: T.faint }}>
                   {h}
@@ -468,7 +463,7 @@ export default function DashboardPage() {
             ) : (
               <>
                 {showMainSys && systems.length === 0 && (
-                  <div className="sys-row" style={{ display: "grid", gridTemplateColumns: "1fr 120px 110px 150px", padding: "13px 18px", alignItems: "center", borderBottom: `1px solid ${T.border}`, transition: "background 0.15s" }}>
+                  <div className="sys-row" style={{ display: "grid", gridTemplateColumns: "1fr 140px 120px 160px", padding: "13px 18px", alignItems: "center", borderBottom: `1px solid ${T.border}`, transition: "background 0.15s" }}>
                     <div>
                       <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 2 }}>{mainSysName}</p>
                       <p style={{ fontSize: 10, color: T.faint }}>
@@ -483,7 +478,7 @@ export default function DashboardPage() {
                 )}
                 {systems.slice(0, 4).map((sys, i) => (
                   <div key={sys.id} className="sys-row" style={{
-                    display: "grid", gridTemplateColumns: "1fr 120px 110px 150px",
+                    display: "grid", gridTemplateColumns: "1fr 140px 120px 160px",
                     padding: "13px 18px", alignItems: "center",
                     borderBottom: i < Math.min(3, systems.length - 1) ? `1px solid ${T.border}` : "none",
                     transition: "background 0.15s",
