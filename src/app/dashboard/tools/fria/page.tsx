@@ -1574,38 +1574,149 @@ export default function FRIAPage() {
         ))}
       </div>
 
-      {/* ── AI Draft Generator Banner (Art. 27) ─────────────────────────────── */}
-      <div style={{
-        padding: "12px 16px", borderRadius: 10, marginBottom: 16,
-        background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.10)",
-      }}>
-        <p style={{ fontSize: 13, margin: "0 0 8px", fontWeight: 500, color: "#0D1016" }}>
-          {readFromStorage<ClassifierResult>("classifier")?.systemName && (
-            <>Hai già completato il Classifier{riskData ? ", Risk Manager" : ""}{dataAudit ? " e Data Audit" : ""}.{" "}</>
-          )}
-          Genera una bozza delle prime 3 fasi della FRIA da quei dati.
-        </p>
-        <button
-          onClick={handleDraftFria}
-          disabled={loadingDraft}
-          style={{
-            padding: "7px 16px", borderRadius: 7, border: "none",
-            background: loadingDraft ? "#e5e7eb" : "#0D1016",
-            color: loadingDraft ? "#9ca3af" : "white",
-            fontSize: 13, fontWeight: 500, cursor: loadingDraft ? "default" : "pointer",
-          }}
-        >
-          {loadingDraft ? "Generazione bozza…" : "✦ Genera bozza AI da dati esistenti"}
-        </button>
-        {draftGenerated && (
-          <p style={{ fontSize: 12, color: "#d97706", margin: "6px 0 0" }}>
-            ✦ Bozza applicata — verifica ogni campo prima di salvare
-          </p>
-        )}
-        {draftError && (
-          <p style={{ fontSize: 12, color: "#dc2626", margin: "6px 0 0" }}>{draftError}</p>
-        )}
-      </div>
+      {/* ── Prerequisiti + AI Draft Banner (Art. 27) ───────────────────────── */}
+      {(() => {
+        const clf  = readFromStorage<ClassifierResult>("classifier");
+        const hasClassifier = !!(clf?.systemName || clf?.riskLevel);
+        const hasRiskMgr    = !!(riskData);
+        const hasDataAudit  = !!(dataAudit);
+
+        const steps = [
+          {
+            key: "classifier",
+            label: "Classifier",
+            art: "Art. 6",
+            done: hasClassifier,
+            href: "/dashboard/tools/classifier",
+            required: true,
+            why: "Determina il livello di rischio del sistema AI",
+          },
+          {
+            key: "risk",
+            label: "Risk Manager",
+            art: "Art. 9",
+            done: hasRiskMgr,
+            href: "/dashboard/modules/risk-manager",
+            required: false,
+            why: "Pre-carica scenari di rischio nelle fasi 2–3 della FRIA",
+          },
+          {
+            key: "data",
+            label: "Qualità Dati",
+            art: "Art. 10",
+            done: hasDataAudit,
+            href: "/dashboard/tools/data-audit",
+            required: false,
+            why: "Arricchisce l'analisi con dati di governance",
+          },
+        ];
+
+        return (
+          <div style={{
+            borderRadius: 10, marginBottom: 16, overflow: "hidden",
+            border: "1px solid rgba(0,0,0,0.09)",
+          }}>
+            {/* Header */}
+            <div style={{ padding: "12px 16px", background: "rgba(0,0,0,0.025)", borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: "#0D1016", margin: 0, letterSpacing: "0.03em" }}>
+                SORGENTI DATI PER LA BOZZA AI
+              </p>
+            </div>
+
+            {/* Steps */}
+            <div style={{ background: "white" }}>
+              {steps.map((s, i) => (
+                <div key={s.key} style={{
+                  display: "flex", alignItems: "center", gap: 12,
+                  padding: "11px 16px",
+                  borderBottom: i < steps.length - 1 ? "1px solid rgba(0,0,0,0.06)" : "none",
+                }}>
+                  {/* Status dot */}
+                  <div style={{
+                    width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: s.done ? "rgba(22,163,74,0.10)" : s.required ? "rgba(220,38,38,0.08)" : "rgba(0,0,0,0.04)",
+                    border: `1.5px solid ${s.done ? "rgba(22,163,74,0.30)" : s.required ? "rgba(220,38,38,0.25)" : "rgba(0,0,0,0.12)"}`,
+                  }}>
+                    {s.done
+                      ? <span style={{ fontSize: 10, color: "#16a34a" }}>✓</span>
+                      : <span style={{ fontSize: 9, color: s.required ? "#dc2626" : "rgba(0,0,0,0.30)" }}>○</span>
+                    }
+                  </div>
+
+                  {/* Info */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: "#0D1016" }}>{s.label}</span>
+                      <span style={{
+                        fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
+                        background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.40)",
+                      }}>{s.art}</span>
+                      {s.required && !s.done && (
+                        <span style={{
+                          fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
+                          background: "rgba(220,38,38,0.08)", color: "#dc2626",
+                        }}>RICHIESTO</span>
+                      )}
+                    </div>
+                    <p style={{ fontSize: 11, color: "rgba(0,0,0,0.40)", margin: "1px 0 0", lineHeight: 1.3 }}>{s.why}</p>
+                  </div>
+
+                  {/* Action */}
+                  {s.done ? (
+                    <Link href={s.href} style={{
+                      fontSize: 11, fontWeight: 500, color: "rgba(0,0,0,0.40)",
+                      textDecoration: "none", whiteSpace: "nowrap",
+                    }}>
+                      Modifica →
+                    </Link>
+                  ) : (
+                    <Link href={s.href} style={{
+                      fontSize: 11, fontWeight: 600, padding: "5px 11px", borderRadius: 7,
+                      border: s.required ? "1px solid rgba(220,38,38,0.25)" : "1px solid rgba(0,0,0,0.12)",
+                      background: s.required ? "rgba(220,38,38,0.06)" : "rgba(0,0,0,0.02)",
+                      color: s.required ? "#dc2626" : "#374151",
+                      textDecoration: "none", whiteSpace: "nowrap",
+                    }}>
+                      {s.required ? "Completa prima →" : "Migliora bozza →"}
+                    </Link>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Draft button footer */}
+            <div style={{ padding: "11px 16px", background: "rgba(0,0,0,0.015)", borderTop: "1px solid rgba(0,0,0,0.07)", display: "flex", alignItems: "center", gap: 10 }}>
+              <button
+                onClick={handleDraftFria}
+                disabled={loadingDraft || !hasClassifier}
+                style={{
+                  padding: "7px 16px", borderRadius: 7, border: "none",
+                  background: (!hasClassifier || loadingDraft) ? "#e5e7eb" : "#0D1016",
+                  color: (!hasClassifier || loadingDraft) ? "#9ca3af" : "white",
+                  fontSize: 13, fontWeight: 500,
+                  cursor: (!hasClassifier || loadingDraft) ? "not-allowed" : "pointer",
+                }}
+              >
+                {loadingDraft ? "Generazione bozza…" : "✦ Genera bozza AI da dati esistenti"}
+              </button>
+              {!hasClassifier && (
+                <span style={{ fontSize: 11, color: "#dc2626", fontWeight: 500 }}>
+                  Completa il Classifier per sbloccare la generazione automatica
+                </span>
+              )}
+              {draftGenerated && (
+                <span style={{ fontSize: 11, color: "#d97706", fontWeight: 500 }}>
+                  ✦ Bozza applicata — verifica ogni campo prima di salvare
+                </span>
+              )}
+              {draftError && (
+                <span style={{ fontSize: 11, color: "#dc2626" }}>{draftError}</span>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       <div style={{ display: "flex", gap: 0, minHeight: 0 }}>
 
