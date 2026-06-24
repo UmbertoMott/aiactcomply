@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Nav from "@/components/Nav";
 import Hero from "@/components/sections/Hero";
+import PlatformSection from "@/components/sections/PlatformSection";
 import Pain from "@/components/sections/Pain";
 import Stepper from "@/components/sections/Stepper";
 import Stats from "@/components/sections/Stats";
 import ToolGallery from "@/components/sections/ToolGallery";
+import Quote from "@/components/sections/Quote";
 import CtaFinal from "@/components/sections/CtaFinal";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aicomply-omega.vercel.app";
@@ -149,10 +151,12 @@ export default function Home() {
       <Nav />
       <main>
         <Hero />
+        <PlatformSection />
         <Pain />
         <Stepper />
         <Stats />
         <ToolGallery />
+        <Quote />
         <CtaFinal />
       </main>
     </>
