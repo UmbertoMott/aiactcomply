@@ -1,19 +1,86 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
 
 const modules = [
-  { art: "Art. 6",  name: "AI Classifier",  desc: "Classificazione rischio automatica AI Act" },
-  { art: "Art. 9",  name: "Risk Manager",   desc: "Risk register, gap analysis, Art. 9" },
-  { art: "Art. 11", name: "Documentazione", desc: "AIA, FRIA e DPIA generate automaticamente" },
-  { art: "Art. 10", name: "Data Audit",     desc: "Qualità dati, bias detection e data lineage" },
+  { art: "Art. 6",  name: "AI Classifier",  desc: "Classificazione rischio automatica secondo gli allegati EU AI Act" },
+  { art: "Art. 9",  name: "Risk Manager",   desc: "Risk register, gap analysis e copertura Art. 9" },
+  { art: "Art. 11", name: "Documentazione", desc: "AIA, FRIA e DPIA generate automaticamente con AI" },
+  { art: "Art. 10", name: "Data Audit",     desc: "Qualità dati, bias detection e data lineage traceability" },
   { art: "Art. 12", name: "LogVault",       desc: "Logging hash-chained e audit trail immutabile" },
-  { art: "Art. 27", name: "FRIA",           desc: "Fundamental Rights Impact Assessment guidato" },
-  { art: "Art. 72", name: "Post-Market",    desc: "Monitoraggio continuo e drift detection" },
+  { art: "Art. 27", name: "FRIA",           desc: "Fundamental Rights Impact Assessment guidato passo-passo" },
+  { art: "Art. 72", name: "Post-Market",    desc: "Monitoraggio continuo e drift detection AI" },
   { art: "Art. 50", name: "Scanner",        desc: "Verifica trasparenza AI gratuita e anonima" },
 ];
+
+function ModuleCard({ m, i }: { m: (typeof modules)[0]; i: number }) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.35, delay: i * 0.04 }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: hovered ? "#0D1016" : "#FAFAF9",
+        padding: "20px 18px",
+        transition: "background 0.22s ease",
+        cursor: "default",
+        minHeight: 90,
+      }}
+    >
+      <p
+        style={{
+          fontSize: 10,
+          fontWeight: 500,
+          color: hovered ? "rgba(255,255,255,0.28)" : "rgba(0,0,0,0.28)",
+          letterSpacing: "0.06em",
+          marginBottom: 8,
+          textTransform: "uppercase",
+          transition: "color 0.22s ease",
+        }}
+      >
+        {m.art}
+      </p>
+      <p
+        style={{
+          fontSize: 14,
+          fontWeight: 500,
+          color: hovered ? "rgba(255,255,255,0.92)" : "#0D1016",
+          marginBottom: hovered ? 6 : 0,
+          letterSpacing: "-0.3px",
+          transition: "color 0.22s ease, margin-bottom 0.22s ease",
+        }}
+      >
+        {m.name}
+      </p>
+      <AnimatePresence>
+        {hovered && (
+          <motion.p
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              fontSize: 12,
+              color: "rgba(255,255,255,0.45)",
+              lineHeight: 1.55,
+              margin: 0,
+            }}
+          >
+            {m.desc}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
 
 export default function PlatformSection() {
   return (
@@ -45,8 +112,10 @@ export default function PlatformSection() {
           className="mb-12 max-w-lg"
           style={{ fontSize: 14, color: "rgba(0,0,0,0.42)", lineHeight: 1.65 }}
         >
-          Un unico sistema che connette classificazione, documentazione ed esecuzione degli obblighi
-          normativi EU AI Act — con tutti i moduli integrati.
+          Un unico sistema che connette classificazione, documentazione ed esecuzione degli obblighi normativi EU AI Act.
+          <span style={{ color: "rgba(0,0,0,0.28)", fontStyle: "italic", marginLeft: 6 }}>
+            Passa il mouse sui moduli.
+          </span>
         </p>
 
         <div
@@ -61,41 +130,7 @@ export default function PlatformSection() {
           }}
         >
           {modules.map((m, i) => (
-            <motion.div
-              key={m.name}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.4, delay: i * 0.04 }}
-              style={{ background: "#FAFAF9", padding: "20px 18px" }}
-            >
-              <p
-                style={{
-                  fontSize: 10,
-                  fontWeight: 500,
-                  color: "rgba(0,0,0,0.28)",
-                  letterSpacing: "0.06em",
-                  marginBottom: 8,
-                  textTransform: "uppercase",
-                }}
-              >
-                {m.art}
-              </p>
-              <p
-                style={{
-                  fontSize: 14,
-                  fontWeight: 500,
-                  color: "#0D1016",
-                  marginBottom: 6,
-                  letterSpacing: "-0.3px",
-                }}
-              >
-                {m.name}
-              </p>
-              <p style={{ fontSize: 12, color: "rgba(0,0,0,0.40)", lineHeight: 1.55 }}>
-                {m.desc}
-              </p>
-            </motion.div>
+            <ModuleCard key={m.name} m={m} i={i} />
           ))}
         </div>
       </div>
