@@ -1,53 +1,48 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Button from "@/components/ui/Button";
+import Link from "next/link";
+
+const SERIF = "Georgia, 'Times New Roman', serif";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0 },
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] as const } },
 };
 
 const stagger = {
-  show: { transition: { staggerChildren: 0.1 } },
+  show: { transition: { staggerChildren: 0.09 } },
 };
+
+const TRUST_LOGOS = [
+  "Fintech Group",
+  "LegalCo EU",
+  "HealthAI Systems",
+  "Manifattura Srl",
+  "Studio Legale XYZ",
+];
 
 export default function Hero() {
   return (
     <section
-      className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden text-center px-6 pb-24 pt-20"
-      style={{ background: "#0D1016" }}
+      className="relative overflow-hidden text-center px-6 pt-24 pb-0"
+      style={{ background: "#ffffff" }}
     >
-      {/* Mesh gradient */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 60% at 20% 10%, rgba(30,58,138,0.35) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 80% 90%, rgba(17,24,83,0.4) 0%, transparent 60%)",
-        }}
-      />
-      {/* Subtle grid */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)",
-          backgroundSize: "64px 64px",
-        }}
-      />
-
       <motion.div
         variants={stagger}
         initial="hidden"
         animate="show"
-        className="relative z-10 flex flex-col items-center max-w-4xl"
+        className="relative z-10 flex flex-col items-center max-w-4xl mx-auto"
       >
         {/* Badge */}
         <motion.div variants={fadeUp}>
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 py-1.5 text-[12px] text-white/55 mb-9">
+          <div
+            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-8"
+            style={{ border: "1px solid rgba(0,0,0,0.10)", fontSize: 12, color: "rgba(0,0,0,0.45)" }}
+          >
             <span
-              className="block w-1.5 h-1.5 rounded-full bg-blue-500"
-              style={{ boxShadow: "0 0 8px rgba(59,130,246,0.8)" }}
+              className="block w-1.5 h-1.5 rounded-full flex-shrink-0"
+              style={{ background: "#0D1016" }}
             />
             EU AI Act — In vigore agosto 2026
           </div>
@@ -56,193 +51,94 @@ export default function Hero() {
         {/* H1 */}
         <motion.h1
           variants={fadeUp}
-          className="text-white mb-6"
+          className="mb-6"
           style={{
-            fontSize: "clamp(40px, 5vw, 68px)",
+            fontFamily: SERIF,
+            fontSize: "clamp(44px, 6.5vw, 80px)",
             fontWeight: 400,
-            letterSpacing: "-3px",
+            letterSpacing: "-3.5px",
             lineHeight: 1.0,
+            color: "#0D1016",
           }}
         >
           AI Act compliance,{" "}
-          <em
-            className="not-italic"
-            style={{
-              background:
-                "linear-gradient(135deg, #93c5fd 0%, #6366f1 50%, #818cf8 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            senza compromessi.
-          </em>
+          <em style={{ fontStyle: "italic", fontWeight: 300 }}>senza compromessi.</em>
         </motion.h1>
 
         {/* Subtitle */}
         <motion.p
           variants={fadeUp}
-          className="mb-11 max-w-lg text-white/45"
-          style={{ fontSize: "18px", fontWeight: 300, letterSpacing: "-0.2px", lineHeight: 1.6 }}
+          className="mb-10 max-w-md"
+          style={{
+            fontSize: 17,
+            fontWeight: 300,
+            color: "rgba(0,0,0,0.45)",
+            letterSpacing: "-0.2px",
+            lineHeight: 1.65,
+          }}
         >
-          AIComply automatizza risk assessment, documentazione e integrazione
-          nei tuoi workflow. Dal caos normativo alla conformità certificata.
+          AIComply automatizza risk assessment, documentazione e integrazione nei tuoi workflow.
+          Dal caos normativo alla conformità certificata.
         </motion.p>
 
         {/* CTAs */}
-        <motion.div variants={fadeUp} className="flex gap-3 mb-18">
-          <Button href="/register" variant="primary">
+        <motion.div variants={fadeUp} className="flex gap-3 mb-20">
+          <Link
+            href="/register"
+            className="text-[13px] font-medium rounded-full px-6 py-3 transition-opacity hover:opacity-80"
+            style={{ background: "#0D1016", color: "#ffffff", letterSpacing: "-0.2px" }}
+          >
             Inizia gratis
-          </Button>
-          <Button variant="ghost">Scopri come funziona</Button>
-        </motion.div>
-
-        {/* Product mockup */}
-        <motion.div
-          variants={fadeUp}
-          transition={{ delay: 0.15 }}
-          className="w-full max-w-4xl rounded-2xl overflow-hidden"
-          style={{
-            border: "1px solid rgba(255,255,255,0.1)",
-            background: "rgba(255,255,255,0.04)",
-            boxShadow:
-              "0 40px 80px rgba(0,0,0,0.6), 0 0 120px rgba(59,130,246,0.08)",
-          }}
-        >
-          {/* Browser chrome */}
-          <div
-            className="flex items-center gap-1.5 px-4 py-3"
+          </Link>
+          <Link
+            href="/pricing"
+            className="text-[13px] rounded-full px-6 py-3 transition-colors hover:border-black"
             style={{
-              background: "rgba(255,255,255,0.05)",
-              borderBottom: "1px solid rgba(255,255,255,0.08)",
+              border: "1px solid rgba(0,0,0,0.14)",
+              color: "rgba(0,0,0,0.55)",
+              background: "transparent",
             }}
           >
-            {["rgba(255,255,255,0.12)", "rgba(255,255,255,0.12)", "rgba(255,255,255,0.12)"].map(
-              (bg, i) => (
-                <span
-                  key={i}
-                  className="block w-2.5 h-2.5 rounded-full"
-                  style={{ background: bg }}
-                />
-              )
-            )}
-            <span
-              className="mx-auto rounded px-4 py-1 text-[11px] text-white/25"
-              style={{ background: "rgba(255,255,255,0.05)" }}
-            >
-              app.aicomply.eu
-            </span>
-          </div>
+            Scopri i prezzi
+          </Link>
+        </motion.div>
+      </motion.div>
 
-          {/* Dashboard content */}
-          <div className="grid p-6 gap-4" style={{ gridTemplateColumns: "180px 1fr" }}>
-            {/* Sidebar */}
-            <div
-              className="rounded-xl p-4"
+      {/* Trust logos row */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.7 }}
+        className="max-w-4xl mx-auto"
+        style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}
+      >
+        <p
+          className="text-center mt-6 mb-5"
+          style={{
+            fontSize: 11,
+            fontWeight: 500,
+            letterSpacing: "0.09em",
+            textTransform: "uppercase",
+            color: "rgba(0,0,0,0.28)",
+          }}
+        >
+          Utilizzato da team compliance di
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 pb-14">
+          {TRUST_LOGOS.map((name) => (
+            <span
+              key={name}
               style={{
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(255,255,255,0.07)",
+                fontSize: 14,
+                fontWeight: 500,
+                color: "rgba(0,0,0,0.20)",
+                letterSpacing: "-0.3px",
               }}
             >
-              <div
-                className="text-[13px] font-semibold text-white/75 mb-5"
-                style={{ letterSpacing: "-0.3px" }}
-              >
-                AIComply
-              </div>
-              {["Dashboard", "Risk Assessment", "Documenti", "Integrazioni"].map(
-                (item, i) => (
-                  <div
-                    key={item}
-                    className="text-[11px] px-2.5 py-2 rounded-md mb-0.5"
-                    style={
-                      i === 0
-                        ? {
-                            background: "rgba(59,130,246,0.15)",
-                            color: "rgba(255,255,255,0.8)",
-                          }
-                        : { color: "rgba(255,255,255,0.3)" }
-                    }
-                  >
-                    {item}
-                  </div>
-                )
-              )}
-            </div>
-
-            {/* Main */}
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <span
-                  className="text-[15px] font-semibold text-white/85"
-                  style={{ letterSpacing: "-0.4px" }}
-                >
-                  Compliance Overview
-                </span>
-                <span
-                  className="text-[10px] font-semibold rounded-full px-2.5 py-0.5"
-                  style={{
-                    background: "rgba(34,197,94,0.15)",
-                    color: "#4ade80",
-                    border: "1px solid rgba(74,222,128,0.2)",
-                  }}
-                >
-                  Compliant
-                </span>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2.5">
-                {[
-                  { label: "Sistemi mappati", value: "12", sub: "3 alto rischio" },
-                  { label: "Documenti generati", value: "47", sub: "Aggiornati auto" },
-                  { label: "Prossima scadenza", value: "14d", sub: "Review Q2 2026" },
-                ].map(({ label, value, sub }) => (
-                  <div
-                    key={label}
-                    className="rounded-lg p-3"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                    }}
-                  >
-                    <div className="text-[10px] text-white/30 mb-1">{label}</div>
-                    <div
-                      className="text-[20px] font-semibold text-white/85"
-                      style={{ letterSpacing: "-0.8px" }}
-                    >
-                      {value}
-                    </div>
-                    <div className="text-[10px] text-white/25 mt-0.5">{sub}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div
-                className="rounded-lg p-3"
-                style={{
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                }}
-              >
-                <div className="flex justify-between text-[10px] text-white/30 mb-2">
-                  <span>Completamento requisiti AI Act</span>
-                  <span className="text-white/60 font-medium">84%</span>
-                </div>
-                <div
-                  className="h-[3px] rounded-full overflow-hidden"
-                  style={{ background: "rgba(255,255,255,0.08)" }}
-                >
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: "84%",
-                      background: "linear-gradient(90deg, #3b82f6, #6366f1)",
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+              {name}
+            </span>
+          ))}
+        </div>
       </motion.div>
     </section>
   );
