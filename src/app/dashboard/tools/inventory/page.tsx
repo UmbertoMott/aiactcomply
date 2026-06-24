@@ -1,4 +1,5 @@
 "use client"
+import Link from "next/link"
 import React from "react"
 import {
   loadInventory, addSystem, updateSystem, deleteSystem,
@@ -178,16 +179,24 @@ function SystemCard({ system, onEdit, onClassify, onDelete }: {
         )}
         {/* Azioni */}
         <div style={{ display: "flex", gap: 6, borderTop: "1px solid rgba(0,0,0,0.06)", paddingTop: 12 }}>
+          <Link href={`/dashboard/tools/inventory/${system.id}`} style={{
+            flex: 1, padding: "6px", borderRadius: 7, textAlign: "center",
+            fontSize: 12, fontWeight: 600, textDecoration: "none",
+            border: "none", background: "#111", color: "white", cursor: "pointer",
+            display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4,
+          }}>
+            Analisi 360° →
+          </Link>
           {system.tier === "unclassified" ? (
-            <button onClick={onClassify} style={{ flex: 1, padding: "6px", borderRadius: 7, border: "none", background: "#111", color: "white", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
-              Classifica →
+            <button onClick={onClassify} style={{ padding: "6px 10px", borderRadius: 7, border: "none", background: "rgba(0,0,0,0.06)", color: "#374151", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+              Classifica
             </button>
           ) : (
-            <button onClick={onClassify} style={{ flex: 1, padding: "6px", borderRadius: 7, fontSize: 12, border: "1px solid rgba(0,0,0,0.1)", background: "white", color: "#374151", cursor: "pointer" }}>
+            <button onClick={onClassify} style={{ padding: "6px 10px", borderRadius: 7, fontSize: 12, border: "1px solid rgba(0,0,0,0.1)", background: "white", color: "#374151", cursor: "pointer" }}>
               Riclassifica
             </button>
           )}
-          <button onClick={onEdit} style={{ padding: "6px 12px", borderRadius: 7, fontSize: 12, border: "1px solid rgba(0,0,0,0.1)", background: "white", color: "#374151", cursor: "pointer" }}>
+          <button onClick={onEdit} style={{ padding: "6px 10px", borderRadius: 7, fontSize: 12, border: "1px solid rgba(0,0,0,0.1)", background: "white", color: "#374151", cursor: "pointer" }}>
             Modifica
           </button>
           <button
