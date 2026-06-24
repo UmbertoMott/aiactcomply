@@ -9,6 +9,8 @@ import {
   type RiskResult, type ToolPathItem,
   calculateRisk,
 } from "@/lib/onboarding/risk-calculator";
+import { addSystem, loadInventory, nextSystemId } from "@/lib/inventory/ai-system";
+import type { SystemTier, SystemStatus } from "@/lib/inventory/ai-system";
 
 // ─── Storage ──────────────────────────────────────────────────────────────────
 const STORAGE_DONE = "aicomply_onboarding_done";
@@ -164,11 +166,52 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
     }
   }, [currentStep]);
 
+  // ── Auto-seed helpers ────────────────────────────────────────────────────
+  const SECTOR_NAMES: Record<Sector, string> = {
+    hr: "Sistema AI - Risorse Umane", credit: "Sistema AI - Credito",
+    education: "Sistema AI - Istruzione", critical_infra: "Sistema AI - Infrastrutture critiche",
+    law_enforcement: "Sistema AI - Sicurezza pubblica", migration: "Sistema AI - Migrazione",
+    justice: "Sistema AI - Giustizia", health: "Sistema AI - Sanità",
+    other: "Sistema AI principale",
+  };
+  const RISK_TIER: Record<string, SystemTier> = {
+    unacceptable: "prohibited", high: "high_risk", limited: "limited", minimal: "minimal",
+  };
+  const PHASE_STATUS: Record<DevPhase, SystemStatus> = {
+    concept: "planned", development: "in_development", testing: "in_development",
+    production: "in_development", deployed: "in_production",
+  };
+
   const handleComplete = useCallback(() => {
     localStorage.setItem(STORAGE_DONE, "true");
     localStorage.setItem(STORAGE_DATA, JSON.stringify(answers));
+    // Auto-seed inventory with data from onboarding (only if inventory is empty)
+    if (result && loadInventory().length === 0) {
+      const data = answers as OnboardingData;
+      addSystem({
+        id:                  nextSystemId(),
+        name:                SECTOR_NAMES[data.sector] ?? "Sistema AI principale",
+        owner:               "",
+        description:         result.summary?.slice(0, 200) ?? "",
+        status:              PHASE_STATUS[data.devPhase] ?? "planned",
+        euNexus:             true,
+        role:                "provider",
+        roleBasis:           "Ipotizzato da onboarding — verificare [verify against current AI Act text]",
+        tier:                RISK_TIER[result.level] ?? "unclassified",
+        tierBasis:           `${result.articleRef} — ${result.riskLabel} (calcolato da onboarding)`,
+        dualRoleFlag:        false,
+        obligationsAssessed: true,
+        obligationsNote:     result.obligations?.join("; ") ?? "",
+        nextReview:          result.deadline ?? "",
+        reviewTrigger:       "Scadenza derivata dalla classificazione iniziale",
+        completedObligations: [],
+        createdAt:           new Date().toISOString(),
+        updatedAt:           new Date().toISOString(),
+        source:              "ai_draft",
+      });
+    }
     onComplete();
-  }, [answers, onComplete]);
+  }, [answers, onComplete, result, SECTOR_NAMES, RISK_TIER, PHASE_STATUS]);
 
   // Slide variants
   const variants = {
