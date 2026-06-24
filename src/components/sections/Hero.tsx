@@ -5,14 +5,22 @@ import Link from "next/link";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] as const } },
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
 };
 
-const stagger = {
-  show: { transition: { staggerChildren: 0.09 } },
+const wordVariant = {
+  hidden: { opacity: 0, y: 22 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.52, ease: [0.25, 0.46, 0.45, 0.94] as const },
+  },
 };
+
+const LINE1 = ["AI", "Act", "compliance,"];
+const LINE2 = ["senza", "compromessi."];
 
 const TRUST_LOGOS = [
   "Fintech Group",
@@ -29,13 +37,12 @@ export default function Hero() {
       style={{ background: "#ffffff" }}
     >
       <motion.div
-        variants={stagger}
         initial="hidden"
         animate="show"
         className="relative z-10 flex flex-col items-center max-w-4xl mx-auto"
       >
         {/* Badge */}
-        <motion.div variants={fadeUp}>
+        <motion.div variants={wordVariant}>
           <div
             className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-8"
             style={{ border: "1px solid rgba(0,0,0,0.10)", fontSize: 12, color: "rgba(0,0,0,0.45)" }}
@@ -48,9 +55,9 @@ export default function Hero() {
           </div>
         </motion.div>
 
-        {/* H1 */}
+        {/* H1 — word-by-word stagger */}
         <motion.h1
-          variants={fadeUp}
+          variants={container}
           className="mb-6"
           style={{
             fontFamily: SERIF,
@@ -61,13 +68,35 @@ export default function Hero() {
             color: "#0D1016",
           }}
         >
-          AI Act compliance,{" "}
-          <em style={{ fontStyle: "italic", fontWeight: 300 }}>senza compromessi.</em>
+          {LINE1.map((word) => (
+            <motion.span
+              key={word}
+              variants={wordVariant}
+              style={{ display: "inline-block", marginRight: "0.22em" }}
+            >
+              {word}
+            </motion.span>
+          ))}
+          <br />
+          {LINE2.map((word, i) => (
+            <motion.span
+              key={word}
+              variants={wordVariant}
+              style={{
+                display: "inline-block",
+                marginRight: i < LINE2.length - 1 ? "0.22em" : 0,
+                fontStyle: "italic",
+                fontWeight: 300,
+              }}
+            >
+              {word}
+            </motion.span>
+          ))}
         </motion.h1>
 
         {/* Subtitle */}
         <motion.p
-          variants={fadeUp}
+          variants={wordVariant}
           className="mb-10 max-w-md"
           style={{
             fontSize: 17,
@@ -82,7 +111,7 @@ export default function Hero() {
         </motion.p>
 
         {/* CTAs */}
-        <motion.div variants={fadeUp} className="flex gap-3 mb-20">
+        <motion.div variants={wordVariant} className="flex gap-3 mb-20">
           <Link
             href="/register"
             className="text-[13px] font-medium rounded-full px-6 py-3 transition-opacity hover:opacity-80"
@@ -92,7 +121,7 @@ export default function Hero() {
           </Link>
           <Link
             href="/pricing"
-            className="text-[13px] rounded-full px-6 py-3 transition-colors hover:border-black"
+            className="text-[13px] rounded-full px-6 py-3 transition-colors"
             style={{
               border: "1px solid rgba(0,0,0,0.14)",
               color: "rgba(0,0,0,0.55)",
@@ -108,7 +137,7 @@ export default function Hero() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.5, duration: 0.7 }}
+        transition={{ delay: 0.7, duration: 0.7 }}
         className="max-w-4xl mx-auto"
         style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}
       >
@@ -131,7 +160,7 @@ export default function Hero() {
               style={{
                 fontSize: 14,
                 fontWeight: 500,
-                color: "rgba(0,0,0,0.20)",
+                color: "rgba(0,0,0,0.18)",
                 letterSpacing: "-0.3px",
               }}
             >
