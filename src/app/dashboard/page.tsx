@@ -442,7 +442,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Col headers */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 140px 120px 160px", padding: "8px 18px", background: "rgba(0,0,0,0.015)", borderBottom: `1px solid ${T.border}` }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 140px 120px 160px", columnGap: 24, padding: "8px 18px", background: "rgba(0,0,0,0.015)", borderBottom: `1px solid ${T.border}` }}>
               {["SISTEMA", "RISCHIO", "STATO", "DOSSIER"].map(h => (
                 <span key={h} style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase", color: T.faint }}>
                   {h}
@@ -463,7 +463,7 @@ export default function DashboardPage() {
             ) : (
               <>
                 {showMainSys && systems.length === 0 && (
-                  <div className="sys-row" style={{ display: "grid", gridTemplateColumns: "1fr 140px 120px 160px", padding: "13px 18px", alignItems: "center", borderBottom: `1px solid ${T.border}`, transition: "background 0.15s" }}>
+                  <div className="sys-row" style={{ display: "grid", gridTemplateColumns: "1fr 140px 120px 160px", columnGap: 24, padding: "13px 18px", alignItems: "center", borderBottom: `1px solid ${T.border}`, transition: "background 0.15s" }}>
                     <div>
                       <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 2 }}>{mainSysName}</p>
                       <p style={{ fontSize: 10, color: T.faint }}>
@@ -478,7 +478,7 @@ export default function DashboardPage() {
                 )}
                 {systems.slice(0, 4).map((sys, i) => (
                   <div key={sys.id} className="sys-row" style={{
-                    display: "grid", gridTemplateColumns: "1fr 140px 120px 160px",
+                    display: "grid", gridTemplateColumns: "1fr 140px 120px 160px", columnGap: 24,
                     padding: "13px 18px", alignItems: "center",
                     borderBottom: i < Math.min(3, systems.length - 1) ? `1px solid ${T.border}` : "none",
                     transition: "background 0.15s",
