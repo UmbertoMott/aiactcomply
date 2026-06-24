@@ -27,60 +27,75 @@ export default function Quote() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.6 }}
-            style={{ flex: "1 1 360px" }}
+            style={{ flex: "1 1 360px", position: "relative" }}
           >
-            <p
+            {/* Decorative large quotation mark */}
+            <span
+              aria-hidden="true"
               style={{
                 fontFamily: SERIF,
-                fontSize: "clamp(22px, 2.8vw, 34px)",
+                fontSize: 140,
                 fontWeight: 300,
-                letterSpacing: "-1px",
-                lineHeight: 1.3,
-                color: "#0D1016",
-                marginBottom: 32,
+                color: "rgba(0,0,0,0.06)",
+                position: "absolute",
+                top: -28,
+                left: -12,
+                lineHeight: 1,
+                userSelect: "none",
+                pointerEvents: "none",
               }}
             >
-              &ldquo;La conformità all&rsquo;AI Act non è un audit una tantum.
-              È un sistema di gestione continuo — e va costruito adesso.&rdquo;
-            </p>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div
+              &ldquo;
+            </span>
+            <div style={{ paddingLeft: 52 }}>
+              <p
                 style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: "50%",
-                  background: "rgba(0,0,0,0.07)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: "rgba(0,0,0,0.40)",
-                  flexShrink: 0,
+                  fontFamily: SERIF,
+                  fontSize: "clamp(20px, 2.5vw, 32px)",
+                  fontWeight: 300,
+                  letterSpacing: "-0.8px",
+                  lineHeight: 1.3,
+                  color: "#0D1016",
+                  marginBottom: 32,
                 }}
               >
-                AC
-              </div>
-              <div>
-                <p
+                &ldquo;La conformità all&rsquo;AI Act non è un audit una tantum.
+                È un sistema di gestione continuo — e va costruito adesso.&rdquo;
+              </p>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div
                   style={{
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color: "#0D1016",
-                    lineHeight: 1.3,
+                    width: 38,
+                    height: 38,
+                    borderRadius: "50%",
+                    background: "rgba(0,0,0,0.07)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "rgba(0,0,0,0.38)",
+                    flexShrink: 0,
                   }}
                 >
-                  Team AIComply
-                </p>
-                <p style={{ fontSize: 12, color: "rgba(0,0,0,0.38)" }}>
-                  Co-fondatori
-                </p>
+                  AC
+                </div>
+                <div>
+                  <p style={{ fontSize: 13, fontWeight: 500, color: "#0D1016", lineHeight: 1.3 }}>
+                    Team AIComply
+                  </p>
+                  <p style={{ fontSize: 12, color: "rgba(0,0,0,0.38)" }}>Co-fondatori</p>
+                </div>
               </div>
             </div>
           </motion.div>
 
           {/* Certifications */}
-          <div
+          <motion.div
+            initial={{ opacity: 0, x: 16 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.5, delay: 0.15 }}
             style={{
               minWidth: 200,
               borderLeft: "1px solid rgba(0,0,0,0.08)",
@@ -100,9 +115,13 @@ export default function Quote() {
               Certificazioni
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {certs.map((cert) => (
-                <div
+              {certs.map((cert, i) => (
+                <motion.div
                   key={cert}
+                  initial={{ opacity: 0, x: 8 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: 0.2 + i * 0.07 }}
                   style={{
                     border: "1px solid rgba(0,0,0,0.09)",
                     borderRadius: 8,
@@ -115,10 +134,10 @@ export default function Quote() {
                   }}
                 >
                   {cert}
-                </div>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
