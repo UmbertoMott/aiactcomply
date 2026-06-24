@@ -19,7 +19,7 @@ const T = {
   card:    "#ffffff",
   red:     "#dc2626",   redBg:   "rgba(220,38,38,0.06)",   redBdr:  "rgba(220,38,38,0.18)",
   amber:   "#b45309",   amberBg: "rgba(245,158,11,0.06)",  amberBdr:"rgba(245,158,11,0.2)",
-  blue:    "#1d4ed8",   blueBg:  "rgba(29,78,216,0.05)",   blueBdr: "rgba(29,78,216,0.16)",
+  blue:    "#475569",   blueBg:  "rgba(71,85,105,0.06)",   blueBdr: "rgba(71,85,105,0.15)",
   green:   "#15803d",   greenBg: "rgba(21,128,61,0.06)",   greenBdr:"rgba(21,128,61,0.18)",
 } as const;
 
