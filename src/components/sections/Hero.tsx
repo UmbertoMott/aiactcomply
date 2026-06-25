@@ -259,6 +259,19 @@ export default function Hero() {
           0%, 100% { opacity: 1 }
           50%       { opacity: 0 }
         }
+        @keyframes frameworkTicker {
+          from { transform: translateX(0) }
+          to   { transform: translateX(-50%) }
+        }
+        .framework-ticker {
+          display: flex;
+          gap: 12px;
+          width: max-content;
+          animation: frameworkTicker 34s linear infinite;
+        }
+        .framework-ticker:hover {
+          animation-play-state: paused;
+        }
       `}</style>
 
       <motion.div
@@ -333,40 +346,23 @@ export default function Hero() {
         </motion.div>
       </motion.div>
 
-      {/* Framework trust row */}
+      {/* Framework ticker */}
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.85, duration: 0.6 }}
-        className="max-w-5xl mx-auto"
-        style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.85, duration: 0.8 }}
+        style={{
+          borderTop: "1px solid rgba(0,0,0,0.07)",
+          overflow: "hidden",
+          paddingTop: 28,
+          paddingBottom: 52,
+          maskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
+          WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
+        }}
       >
-        <p
-          className="text-center mt-7 mb-6"
-          style={{
-            fontSize: 10,
-            fontWeight: 500,
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            color: "rgba(0,0,0,0.25)",
-            fontFamily: MONO,
-          }}
-        >
-          Framework supportati nativamente
-        </p>
-        <div
-          className="flex flex-wrap items-center justify-center pb-14"
-          style={{ gap: 10 }}
-        >
-          {FRAMEWORKS.map((fw, i) => (
-            <motion.div
-              key={fw.name}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.9 + i * 0.07, duration: 0.4 }}
-            >
-              <FrameworkBadge {...fw} />
-            </motion.div>
+        <div className="framework-ticker">
+          {[...FRAMEWORKS, ...FRAMEWORKS, ...FRAMEWORKS].map((fw, i) => (
+            <FrameworkBadge key={i} {...fw} />
           ))}
         </div>
       </motion.div>
