@@ -1,5 +1,5 @@
 "use client";
-
+// Art. 99 Reg. UE 2024/1689 — trust section
 import { AlertTriangle, Shield, Zap, Lock, CheckCircle, ArrowRight } from "lucide-react";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
