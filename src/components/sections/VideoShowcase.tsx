@@ -51,7 +51,7 @@ function VideoRow({ badge, title, desc, chips, videoSrc, zoom = 1, zoomX = 50, p
   const fadeUp2 = { opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(24px)", transition: "opacity .6s .1s ease, transform .6s .1s ease" };
 
   const textCol = (
-    <div style={{ flex: "1 1 0", minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center", paddingLeft: reverse ? 56 : 0, paddingRight: reverse ? 0 : 56, ...fadeUp }}>
+    <div style={{ flex: "0 0 38%", minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center", paddingLeft: reverse ? 40 : 0, paddingRight: reverse ? 0 : 40, ...fadeUp }}>
       <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 500, color: "rgba(0,0,0,0.38)", letterSpacing: "0.07em", textTransform: "uppercase" as const, marginBottom: 18, display: "block" }}>
         {badge}
       </span>
@@ -72,7 +72,7 @@ function VideoRow({ badge, title, desc, chips, videoSrc, zoom = 1, zoomX = 50, p
   );
 
   const videoCol = (
-    <div style={{ flex: "1 1 0", minWidth: 0, ...fadeUp2 }}>
+    <div style={{ flex: "0 0 58%", minWidth: 0, ...fadeUp2 }}>
       <div style={{ borderRadius: 12, border: "1px solid rgba(0,0,0,0.09)", overflow: "hidden", boxShadow: "0 4px 32px rgba(0,0,0,0.08)", background: "#1a1a1a" }}>
         <div style={{ background: "#f3f3f2", borderBottom: "1px solid rgba(0,0,0,0.09)", padding: "9px 14px", display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{ display: "flex", gap: 5 }}>
@@ -92,7 +92,7 @@ function VideoRow({ badge, title, desc, chips, videoSrc, zoom = 1, zoomX = 50, p
   );
 
   return (
-    <div ref={ref} style={{ display: "flex", alignItems: "center", gap: 0 }} className="showcase-row">
+    <div ref={ref} style={{ display: "flex", alignItems: "center", gap: "4%" }} className="showcase-row">
       {reverse ? <>{videoCol}{textCol}</> : <>{textCol}{videoCol}</>}
     </div>
   );
