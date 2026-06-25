@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, useRef, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Nav from "@/components/Nav";
+import ScannerTrustSection from "@/components/scanner/ScannerTrustSection";
 import type { Art50ScanResult, Art50Signal, CriterionKey } from "@/lib/scanner/art50-detector";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
@@ -412,8 +413,14 @@ export default function ScannerPage() {
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState<string | null>(null);
   const [result,  setResult]  = useState<Art50ScanResult | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   function reset() { setResult(null); setUrl(""); setError(null); }
+
+  function scrollToInput() {
+    inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    inputRef.current?.focus({ preventScroll: true });
+  }
 
   async function handleScan(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -478,6 +485,7 @@ export default function ScannerPage() {
               border: "1px solid rgba(0,0,0,0.09)",
               boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
               <input
+                ref={inputRef}
                 type="url"
                 value={url}
                 onChange={e => setUrl(e.target.value)}
@@ -543,6 +551,10 @@ export default function ScannerPage() {
           {loading  && <ScanLoading  key="load" url={url} />}
           {!loading && result && <ScanResults key="res" result={result} onReset={reset} />}
         </AnimatePresence>
+
+        {!loading && !result && (
+          <ScannerTrustSection onScanRequest={scrollToInput} />
+        )}
       </main>
     </>
   );
