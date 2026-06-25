@@ -251,7 +251,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Link href="/" className="text-[15px] font-semibold" style={{ color: "#ffffff", letterSpacing: "-0.4px" }}>
                 AI<span style={{ color: "rgba(255,255,255,0.35)", fontWeight: 300 }}>Comply</span>
               </Link>
-              <button onClick={() => setSidebarOpen(false)} className="lg:hidden" style={{ color: "rgba(255,255,255,0.5)" }}>
+              <button onClick={() => setSidebarOpen(false)} className="lg:hidden" style={{ color: "rgba(255,255,255,0.5)", cursor: "pointer" }}>
                 <X className="h-4 w-4" />
               </button>
             </>
