@@ -2,399 +2,552 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 import Nav from "@/components/Nav";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
-const MONO = "'DM Mono', monospace";
+const MONO  = "'DM Mono', monospace";
 
-function useInView(threshold = 0.12) {
-  const ref = useRef<HTMLDivElement>(null);
+// ─── Scrollspy TOC ────────────────────────────────────────────────────────────
+const TOC_ITEMS = [
+  { id: "mod-triage",   label: "Triage" },
+  { id: "mod-legal",    label: "Legal AI" },
+  { id: "mod-risk",     label: "Risk Manager" },
+  { id: "mod-eudb",     label: "EUDB" },
+  { id: "mod-trust",    label: "Trust Center" },
+  { id: "mod-scanner",  label: "Scanner" },
+];
+
+function StickyTOC() {
+  const [active, setActive] = useState("mod-triage");
   const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [threshold]);
-  return { ref, visible };
-}
-
-interface CardProps {
-  badge: string;
-  title: string;
-  desc: string;
-  videoSrc?: string;
-  href?: string;
-  index: number;
-  highlight?: boolean;
-}
-
-function ProductCard({ badge, title, desc, videoSrc, href, index, highlight }: CardProps) {
-  const { ref, visible } = useInView(0.08);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [hovered, setHovered] = useState(false);
 
   useEffect(() => {
-    if (!visible) return;
-    videoRef.current?.play().catch(() => {});
-  }, [visible]);
+    const onScroll = () => {
+      setVisible(window.scrollY > 320);
+      for (let i = TOC_ITEMS.length - 1; i >= 0; i--) {
+        const el = document.getElementById(TOC_ITEMS[i].id);
+        if (el && el.getBoundingClientRect().top < 160) {
+          setActive(TOC_ITEMS[i].id);
+          break;
+        }
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-  const delay = (index % 2) * 0.08;
-
-  const card = (
-    <div
-      ref={ref}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="product-card"
-      style={{
-        background: "#ffffff",
-        border: `1px solid ${hovered ? "rgba(0,0,0,0.18)" : "rgba(0,0,0,0.09)"}`,
-        borderRadius: 12,
-        overflow: "hidden",
-        transition: `opacity .55s ${delay}s ease, transform .55s ${delay}s ease, box-shadow .22s ease, border-color .22s ease`,
-        opacity: visible ? 1 : 0,
-        transform: visible ? "none" : "translateY(24px)",
-        boxShadow: hovered
-          ? "0 8px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06)"
-          : "0 1px 6px rgba(0,0,0,0.04)",
-        display: "flex",
-        flexDirection: "column" as const,
-        cursor: href ? "pointer" : "default",
-      }}
-    >
-      {/* Video / placeholder */}
-      <div
-        style={{
-          position: "relative",
-          aspectRatio: "16/9",
-          background: "#111",
-          overflow: "hidden",
-        }}
-      >
-        {videoSrc ? (
-          <video
-            ref={videoRef}
-            src={videoSrc}
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              display: "block",
-              transition: "transform .35s ease",
-              transform: hovered ? "scale(1.03)" : "scale(1)",
+  return (
+    <div style={{
+      position: "fixed", top: 57, left: 0, right: 0, zIndex: 40,
+      background: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)",
+      borderBottom: "1px solid rgba(0,0,0,0.07)",
+      transition: "opacity .3s ease, transform .3s ease",
+      opacity: visible ? 1 : 0,
+      transform: visible ? "none" : "translateY(-8px)",
+      pointerEvents: visible ? "auto" : "none",
+    }}>
+      <div style={{
+        maxWidth: 1100, margin: "0 auto",
+        display: "flex", alignItems: "center", gap: 0,
+        padding: "0 24px",
+        overflowX: "auto",
+      }}>
+        {TOC_ITEMS.map((item, i) => (
+          <a
+            key={item.id}
+            href={`#${item.id}`}
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById(item.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
             }}
-          />
-        ) : (
-          <div
             style={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "#f5f5f5",
+              fontFamily: MONO, fontSize: 11, fontWeight: 500,
+              letterSpacing: "0.04em", padding: "14px 20px",
+              color: active === item.id ? "#0D1016" : "rgba(0,0,0,0.30)",
+              borderBottom: active === item.id ? "2px solid #0D1016" : "2px solid transparent",
+              textDecoration: "none", whiteSpace: "nowrap",
+              transition: "color .2s ease, border-color .2s ease",
             }}
           >
-            <span style={{ fontFamily: MONO, fontSize: 11, color: "rgba(0,0,0,0.25)", letterSpacing: "0.08em", textTransform: "uppercase" as const }}>
-              Coming soon
+            <span style={{ color: "rgba(0,0,0,0.20)", marginRight: 6 }}>
+              {String(i + 1).padStart(2, "0")}
             </span>
-          </div>
-        )}
-      </div>
-
-      {/* Content */}
-      <div style={{ padding: "20px 24px 24px" }}>
-        <span
-          style={{
-            fontFamily: MONO,
-            fontSize: 10,
-            fontWeight: 500,
-            color: "rgba(0,0,0,0.36)",
-            letterSpacing: "0.08em",
-            textTransform: "uppercase" as const,
-            display: "block",
-            marginBottom: 10,
-          }}
-        >
-          {badge}
-        </span>
-        <h3
-          style={{
-            fontFamily: SERIF,
-            fontSize: 20,
-            fontWeight: 400,
-            letterSpacing: "-0.6px",
-            color: "#0D1016",
-            marginBottom: 10,
-            lineHeight: 1.2,
-          }}
-        >
-          {title}
-        </h3>
-        <p
-          style={{
-            fontSize: 13.5,
-            fontWeight: 300,
-            color: "rgba(0,0,0,0.50)",
-            lineHeight: 1.65,
-          }}
-        >
-          {desc}
-        </p>
+            {item.label}
+          </a>
+        ))}
       </div>
     </div>
   );
-
-  if (href) return <Link href={href} style={{ textDecoration: "none" }}>{card}</Link>;
-  return card;
 }
 
-// "E altro ancora" card
-function ComingSoonCard({ index }: { index: number }) {
-  const { ref, visible } = useInView(0.08);
-  const delay = (index % 2) * 0.08;
+// ─── Module section ────────────────────────────────────────────────────────────
+interface ModuleProps {
+  id: string;
+  num: string;
+  badge: string;
+  title: string;
+  desc: string;
+  capabilities: string[];
+  videoSrc: string;
+  videoScale?: number;
+  videoPosition?: string;
+  reverse?: boolean;
+}
 
+function ModuleSection({
+  id, num, badge, title, desc, capabilities,
+  videoSrc, videoScale = 1, videoPosition = "center center", reverse,
+}: ModuleProps) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const videoRef   = useRef<HTMLVideoElement>(null);
+  const textRef    = useRef<HTMLDivElement>(null);
+  const videoBoxRef = useRef<HTMLDivElement>(null);
+
+  const textInView  = useInView(textRef,    { once: true, margin: "-80px" });
+  const videoInView = useInView(videoBoxRef, { once: true, margin: "-60px" });
+
+  useEffect(() => {
+    if (!videoInView) return;
+    videoRef.current?.play().catch(() => {});
+  }, [videoInView]);
+
+  return (
+    <section
+      id={id}
+      ref={sectionRef}
+      style={{
+        borderTop: "1px solid rgba(0,0,0,0.07)",
+        padding: "80px 24px 96px",
+        position: "relative", overflow: "hidden",
+        scrollMarginTop: 96,
+      }}
+    >
+      {/* Giant chapter number — typographic watermark */}
+      <div aria-hidden="true" style={{
+        position: "absolute",
+        top: -20,
+        [reverse ? "right" : "left"]: -12,
+        fontFamily: SERIF,
+        fontSize: "clamp(120px, 16vw, 200px)",
+        fontWeight: 300,
+        lineHeight: 1,
+        color: "rgba(0,0,0,0.04)",
+        userSelect: "none",
+        pointerEvents: "none",
+        letterSpacing: "-8px",
+      }}>
+        {num}
+      </div>
+
+      <div style={{
+        maxWidth: 1100, margin: "0 auto",
+        display: "flex",
+        flexDirection: reverse ? "row-reverse" : "row",
+        alignItems: "center",
+        gap: "clamp(40px, 6vw, 88px)",
+      }}
+        className="module-flex"
+      >
+        {/* ── Text column ── */}
+        <div ref={textRef} style={{ flex: "0 0 38%", minWidth: 0 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 28 }}
+            animate={textInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+              <span style={{
+                fontFamily: MONO, fontSize: 10, fontWeight: 600,
+                letterSpacing: "0.12em", color: "rgba(0,0,0,0.28)",
+              }}>
+                {num}
+              </span>
+              <span style={{ width: 20, height: 1, background: "rgba(0,0,0,0.15)" }} />
+              <span style={{
+                fontFamily: MONO, fontSize: 10, fontWeight: 500,
+                letterSpacing: "0.07em", textTransform: "uppercase",
+                color: "rgba(0,0,0,0.36)",
+              }}>
+                {badge}
+              </span>
+            </div>
+
+            <h2 style={{
+              fontFamily: SERIF,
+              fontSize: "clamp(26px, 3vw, 38px)",
+              fontWeight: 400, letterSpacing: "-1.5px",
+              lineHeight: 1.1, color: "#0D1016", marginBottom: 20,
+            }}>
+              {title}
+            </h2>
+
+            <p style={{
+              fontSize: 15, fontWeight: 300,
+              color: "rgba(0,0,0,0.50)", lineHeight: 1.78,
+              marginBottom: 28,
+            }}>
+              {desc}
+            </p>
+
+            {/* Capability tags */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {capabilities.map((cap) => (
+                <span key={cap} style={{
+                  fontFamily: MONO, fontSize: 10, fontWeight: 500,
+                  color: "rgba(0,0,0,0.40)",
+                  border: "1px solid rgba(0,0,0,0.10)",
+                  borderRadius: 4, padding: "4px 10px",
+                  letterSpacing: "0.04em",
+                }}>
+                  {cap}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* ── Video column ── */}
+        <div ref={videoBoxRef} style={{ flex: "1 1 0", minWidth: 0 }}>
+          <motion.div
+            initial={{ opacity: 0, clipPath: "inset(0 100% 0 0 round 14px)" }}
+            animate={videoInView
+              ? { opacity: 1, clipPath: "inset(0 0% 0 0 round 14px)" }
+              : {}}
+            transition={{ duration: 0.80, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {/* Device frame */}
+            <div style={{
+              borderRadius: 14,
+              border: "1px solid rgba(0,0,0,0.09)",
+              overflow: "hidden",
+              background: "#111",
+              boxShadow: "0 8px 48px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.07)",
+            }}>
+              {/* Browser chrome bar */}
+              <div style={{
+                background: "#f3f3f2",
+                borderBottom: "1px solid rgba(0,0,0,0.09)",
+                padding: "9px 14px",
+                display: "flex", alignItems: "center", gap: 8,
+              }}>
+                <div style={{ display: "flex", gap: 5 }}>
+                  {["#E5534B","#DCA228","#57A64E"].map((c, i) => (
+                    <div key={i} style={{ width: 10, height: 10, borderRadius: "50%", background: "rgba(0,0,0,0.15)" }} />
+                  ))}
+                </div>
+                <div style={{
+                  flex: 1, height: 20, borderRadius: 4,
+                  background: "rgba(0,0,0,0.06)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.25)" }}>
+                    aicomply.it
+                  </span>
+                </div>
+              </div>
+              {/* Video */}
+              <div style={{ aspectRatio: "16/9", overflow: "hidden", background: "#1a1a1a" }}>
+                <video
+                  ref={videoRef}
+                  src={videoSrc}
+                  muted loop playsInline preload="metadata"
+                  style={{
+                    width: "100%", height: "100%",
+                    objectFit: "cover",
+                    objectPosition: videoPosition,
+                    display: "block",
+                    transform: `scale(${videoScale})`,
+                    transformOrigin: "center top",
+                    transition: "transform .3s ease",
+                  }}
+                />
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Scanner banner ───────────────────────────────────────────────────────────
+function ScannerBanner() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (!inView) return;
+    videoRef.current?.play().catch(() => {});
+  }, [inView]);
+
+  return (
+    <section id="mod-scanner" style={{
+      borderTop: "1px solid rgba(0,0,0,0.07)",
+      padding: "80px 24px",
+      scrollMarginTop: 96,
+    }}>
+      <div ref={ref} style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          style={{
+            background: "#0D1016", borderRadius: 16,
+            padding: "40px 48px",
+            display: "flex", alignItems: "center",
+            justifyContent: "space-between", gap: 32,
+            flexWrap: "wrap",
+          }}
+        >
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+              <span style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.30)", letterSpacing: "0.12em" }}>06</span>
+              <span style={{ width: 20, height: 1, background: "rgba(255,255,255,0.15)" }} />
+              <span style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.35)", letterSpacing: "0.07em", textTransform: "uppercase" }}>
+                SCANNER · ART. 6
+              </span>
+            </div>
+            <h2 style={{
+              fontFamily: SERIF, fontSize: "clamp(22px, 2.5vw, 32px)",
+              fontWeight: 400, letterSpacing: "-1px", color: "#ffffff",
+              marginBottom: 12, lineHeight: 1.15,
+            }}>
+              Analisi automatica del codice.<br />Zero configurazione.
+            </h2>
+            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.42)", lineHeight: 1.65, maxWidth: 440 }}>
+              AST analysis in tempo reale: ogni componente AI mappato agli articoli dell&apos;AI Act. Scansione pubblica, nessuna registrazione.
+            </p>
+          </div>
+          <Link href="/scanner" style={{
+            display: "inline-flex", alignItems: "center", gap: 10,
+            fontFamily: MONO, fontSize: 12, fontWeight: 500,
+            color: "#0D1016", background: "#ffffff",
+            borderRadius: 8, padding: "13px 28px",
+            textDecoration: "none", whiteSpace: "nowrap",
+            transition: "opacity .18s ease", flexShrink: 0,
+          }}
+            onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
+            onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+          >
+            Prova lo Scanner →
+          </Link>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Coming soon ──────────────────────────────────────────────────────────────
+function ComingSoon() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-40px" });
   const ITEMS = [
     { label: "Qualità Dati", art: "Art. 10" },
-    { label: "LogVault", art: "Art. 12" },
-    { label: "Post-Market", art: "Art. 72–73" },
+    { label: "LogVault",     art: "Art. 12" },
+    { label: "Post-Market",  art: "Art. 72–73" },
     { label: "Deployer Dashboard", art: "Art. 26" },
   ];
 
   return (
-    <div
-      ref={ref}
-      className="product-card"
-      style={{
-        background: "#FAFAF9",
-        border: "1px solid rgba(0,0,0,0.07)",
-        borderRadius: 12,
-        padding: "28px 28px 32px",
-        display: "flex",
-        flexDirection: "column" as const,
-        transition: `opacity .55s ${delay}s ease, transform .55s ${delay}s ease`,
-        opacity: visible ? 1 : 0,
-        transform: visible ? "none" : "translateY(24px)",
-        gridColumn: "span 2",
-      }}
-    >
-      <p
-        style={{
-          fontFamily: MONO,
-          fontSize: 10,
-          fontWeight: 500,
-          color: "rgba(0,0,0,0.32)",
-          letterSpacing: "0.08em",
-          textTransform: "uppercase" as const,
-          marginBottom: 14,
-        }}
-      >
-        In arrivo
-      </p>
-      <h3
-        style={{
-          fontFamily: SERIF,
-          fontSize: 22,
-          fontWeight: 400,
-          letterSpacing: "-0.6px",
-          color: "#0D1016",
-          marginBottom: 18,
-          lineHeight: 1.2,
-        }}
-      >
-        E molto altro ancora.
-      </h3>
-      <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 10, marginBottom: 28 }}>
-        {ITEMS.map((item) => (
-          <span
-            key={item.label}
-            style={{
-              fontFamily: MONO,
-              fontSize: 11,
-              fontWeight: 400,
-              color: "rgba(0,0,0,0.55)",
-              background: "rgba(0,0,0,0.05)",
-              borderRadius: 4,
-              padding: "4px 10px",
-              letterSpacing: "0.03em",
-            }}
-          >
-            {item.label} <span style={{ opacity: 0.5 }}>{item.art}</span>
-          </span>
-        ))}
-      </div>
-      <div>
-        <Link
-          href="/pricing"
-          style={{
-            display: "inline-block",
-            background: "#0D1016",
-            color: "#fff",
-            fontFamily: MONO,
-            fontSize: 12,
-            fontWeight: 500,
-            letterSpacing: "0.04em",
-            padding: "10px 22px",
-            borderRadius: 6,
-            textDecoration: "none",
-            transition: "opacity .18s ease",
-          }}
+    <section style={{ borderTop: "1px solid rgba(0,0,0,0.07)", padding: "64px 24px" }}>
+      <div ref={ref} style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.5 }}
         >
-          Vedi i piani →
-        </Link>
+          <p style={{ fontFamily: MONO, fontSize: 10, fontWeight: 500, letterSpacing: "1.5px",
+            textTransform: "uppercase", color: "rgba(0,0,0,0.25)", marginBottom: 24 }}>
+            In arrivo
+          </p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 32 }}>
+            {ITEMS.map((item, i) => (
+              <motion.span
+                key={item.label}
+                initial={{ opacity: 0, y: 10 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ delay: i * 0.07, duration: 0.4 }}
+                style={{
+                  fontFamily: MONO, fontSize: 12, fontWeight: 400,
+                  color: "rgba(0,0,0,0.40)",
+                  border: "1px solid rgba(0,0,0,0.08)",
+                  borderRadius: 6, padding: "8px 16px",
+                  display: "inline-flex", alignItems: "center", gap: 8,
+                }}
+              >
+                {item.label}
+                <span style={{ color: "rgba(0,0,0,0.22)", fontSize: 10 }}>{item.art}</span>
+              </motion.span>
+            ))}
+          </div>
+          <Link href="/pricing" style={{
+            fontFamily: MONO, fontSize: 12, fontWeight: 500,
+            color: "#0D1016", textDecoration: "none",
+            borderBottom: "1px solid rgba(0,0,0,0.25)",
+            paddingBottom: 2,
+          }}>
+            Vedi i piani →
+          </Link>
+        </motion.div>
       </div>
-    </div>
+    </section>
   );
 }
 
-const CARDS: Omit<CardProps, "index">[] = [
+// ─── Modules data ─────────────────────────────────────────────────────────────
+const MODULES: ModuleProps[] = [
   {
-    badge: "TRIAGE · ART. 5 · 6 · 51",
-    title: "Analisi rapida di conformità",
-    desc: "Quattro aree tematiche per capire, in poche domande, quali obblighi si applicano al tuo sistema AI.",
+    id: "mod-triage",
+    num: "01",
+    badge: "Triage · Art. 5 · 6 · 51",
+    title: "Capisci quali obblighi ti riguardano.",
+    desc: "Quattro aree tematiche, poche domande guidate, e AIComply classifica il tuo sistema — rischio inaccettabile, alto, limitato o minimo — mappandolo agli articoli e agli allegati che contano.",
+    capabilities: ["Classificazione 4 livelli", "Mapping Art. 6 + Annex III", "Export PDF", "Storico sessioni"],
     videoSrc: "/videos/triage.mp4",
-    href: "/dashboard/triage",
+    reverse: false,
   },
   {
-    badge: "PRATICHE VIETATE · ART. 5",
-    title: "Rilevamento del rischio inaccettabile",
-    desc: "Identificazione biometrica in tempo reale, riconoscimento delle emozioni, social scoring: segnalati subito.",
-    videoSrc: "/videos/prohibited.mp4",
-    href: "/dashboard/tools/prohibited",
-  },
-  {
-    badge: "LEGAL ASSISTANT · 2024/1689",
-    title: "Risposte con fonti citate",
-    desc: "Domande sull'AI Act, ISO 22989 e Guidelines, con la fonte esatta a fianco — articolo, comma e chunk sorgente.",
+    id: "mod-legal",
+    num: "02",
+    badge: "Legal Assistant · 2024/1689",
+    title: "Risposte con le fonti, non opinioni.",
+    desc: "Fai una domanda sull'AI Act, su ISO 22989 o sulle Guidelines: il Legal Assistant cita il testo esatto, articolo per articolo, con il chunk sorgente sempre verificabile a fianco.",
+    capabilities: ["RAG su EU AI Act", "ISO 22989 + Guidelines", "Chunk sorgente verificabile", "Badge articolo per risposta"],
     videoSrc: "/videos/legal.mp4",
-    href: "/dashboard/tools/legal-assistant",
+    videoScale: 1.45,
+    videoPosition: "center 15%",
+    reverse: true,
   },
   {
-    badge: "RISK MANAGER · ART. 9 · 27 · 35",
-    title: "Risk Register, FRIA & DPIA",
-    desc: "Valutazioni d'impatto pre-compilate dai dati degli altri moduli. Tu validi, AIComply documenta.",
+    id: "mod-risk",
+    num: "03",
+    badge: "Risk Manager · Art. 9 · 27 · 35",
+    title: "Valutazioni d'impatto che si scrivono da sole.",
+    desc: "Risk Register, FRIA e DPIA prendono forma dai dati già raccolti negli altri moduli. AIComply pre-compila le sezioni e tu validi.",
+    capabilities: ["Risk Register", "FRIA + DPIA integrate", "Pre-compilazione automatica", "Export firmato"],
     videoSrc: "/videos/fria.mp4",
-    href: "/dashboard/risk",
+    reverse: false,
   },
   {
-    badge: "REGISTRAZIONE EUDB · ART. 49",
-    title: "Wizard per il database UE",
-    desc: "Campi Annex VIII e criteri di eleggibilità pre-compilati dal Triage, da verificare contro il testo consolidato.",
+    id: "mod-eudb",
+    num: "04",
+    badge: "Registrazione EUDB · Art. 49",
+    title: "Pronto per il database UE, senza copia-incolla.",
+    desc: "Mappatura dei campi Annex VIII e criteri di eleggibilità pre-compilati dal Triage, da verificare contro il testo consolidato del Regolamento.",
+    capabilities: ["Annex VIII mapping", "Criteri eleggibilità", "Pre-fill da Triage", "Testo consolidato"],
     videoSrc: "/videos/eudb.mp4",
-    href: "/dashboard/tools/eudb",
+    reverse: true,
   },
   {
-    badge: "TRUST CENTER · ART. 13 · 50",
-    title: "Pagina pubblica di conformità",
-    desc: "Classificazione del rischio, finalità d'uso e pacchetto di conformità esportabile, confermati prima della pubblicazione.",
+    id: "mod-trust",
+    num: "05",
+    badge: "Trust Center · Art. 13 · 50",
+    title: "Dimostra la conformità in pubblico.",
+    desc: "Pubblica una pagina di trasparenza verificabile: classificazione del rischio, finalità d'uso e pacchetto di conformità esportabile, confermati prima di andare online.",
+    capabilities: ["Pagina pubblica verificabile", "Classificazione rischio", "Export pacchetto conformità", "Controllo pre-pubblicazione"],
     videoSrc: "/videos/trust.mp4",
-    href: "/dashboard/trust",
-  },
-  {
-    badge: "SCANNER · ART. 6",
-    title: "AI Classifier",
-    desc: "Analisi automatica del codice: mappa ogni componente AI agli articoli dell'AI Act. Zero configurazione manuale.",
-    href: "/scanner",
-    videoSrc: "/videos/scanner.mp4",
+    reverse: false,
   },
 ];
 
+// ─── Page ──────────────────────────────────────────────────────────────────────
 export default function ProductsPage() {
   return (
     <div style={{ background: "#ffffff", minHeight: "100vh" }}>
       <style>{`
-        @media (max-width: 768px) {
-          .products-grid { grid-template-columns: 1fr !important; }
-          .product-card[style*="span 2"] { grid-column: span 1 !important; }
+        @media (max-width: 800px) {
+          .module-flex { flex-direction: column !important; }
         }
         @media (prefers-reduced-motion: reduce) {
-          .product-card { opacity: 1 !important; transform: none !important; transition: none !important; }
+          * { animation: none !important; transition: none !important; }
         }
       `}</style>
+
       <Nav />
-      <main style={{ paddingTop: 96 }}>
-        {/* Header */}
-        <div
-          className="px-12"
-          style={{
-            maxWidth: 720,
-            margin: "0 auto",
-            padding: "80px 24px 64px",
-            textAlign: "center" as const,
-          }}
+      <StickyTOC />
+
+      {/* ── Hero ── */}
+      <section style={{ maxWidth: 1100, margin: "0 auto", padding: "100px 24px 72px" }}>
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         >
-          <p
-            style={{
-              fontFamily: MONO,
-              fontSize: 11,
-              fontWeight: 500,
-              letterSpacing: "1.5px",
-              textTransform: "uppercase" as const,
-              color: "rgba(0,0,0,0.28)",
-              marginBottom: 16,
-            }}
-          >
+          <p style={{
+            fontFamily: MONO, fontSize: 11, fontWeight: 500,
+            letterSpacing: "1.5px", textTransform: "uppercase",
+            color: "rgba(0,0,0,0.25)", marginBottom: 20,
+          }}>
             Il prodotto
           </p>
-          <h1
-            style={{
-              fontFamily: SERIF,
-              fontSize: "clamp(32px, 5vw, 56px)",
-              fontWeight: 400,
-              letterSpacing: "-2.5px",
-              lineHeight: 1.04,
-              color: "#0D1016",
-              marginBottom: 24,
-            }}
-          >
-            Ogni modulo, un obbligo coperto.
+          <h1 style={{
+            fontFamily: SERIF,
+            fontSize: "clamp(40px, 6vw, 72px)",
+            fontWeight: 400, letterSpacing: "-3px",
+            lineHeight: 1.02, color: "#0D1016",
+            marginBottom: 24, maxWidth: 700,
+          }}>
+            Ogni obbligo EU AI Act.<br />Uno strumento.
           </h1>
-          <p
-            style={{
-              fontSize: 16,
-              fontWeight: 300,
-              color: "rgba(0,0,0,0.48)",
-              lineHeight: 1.75,
-              maxWidth: 500,
-              margin: "0 auto",
-            }}
-          >
-            AIComply copre l'intero ciclo di vita della conformità AI Act — dalla classificazione del rischio alla pubblicazione della pagina di trasparenza.
+          <p style={{
+            fontSize: 16, fontWeight: 300,
+            color: "rgba(0,0,0,0.45)", lineHeight: 1.78,
+            maxWidth: 480,
+          }}>
+            Sei moduli integrati che coprono l&apos;intero ciclo di vita della conformità — dalla classificazione del rischio alla pagina di trasparenza pubblica.
           </p>
-        </div>
+        </motion.div>
+      </section>
 
-        {/* Grid */}
-        <div
-          style={{
-            maxWidth: 1100,
-            margin: "0 auto",
-            padding: "0 24px 80px",
-          }}
-        >
-          <div
-            className="products-grid"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, 1fr)",
-              gap: 20,
-            }}
-          >
-            {CARDS.map((card, i) => (
-              <ProductCard key={card.badge} {...card} index={i} />
-            ))}
-            <ComingSoonCard index={CARDS.length} />
-          </div>
+      {/* ── Module sections ── */}
+      {MODULES.map((mod) => (
+        <ModuleSection key={mod.id} {...mod} />
+      ))}
+
+      {/* ── Scanner ── */}
+      <ScannerBanner />
+
+      {/* ── Coming soon ── */}
+      <ComingSoon />
+
+      {/* ── Final CTA ── */}
+      <section style={{
+        borderTop: "1px solid rgba(0,0,0,0.07)",
+        padding: "80px 24px",
+        textAlign: "center",
+      }}>
+        <p style={{
+          fontFamily: SERIF, fontSize: "clamp(22px, 3vw, 36px)",
+          fontWeight: 400, letterSpacing: "-1.2px",
+          color: "#0D1016", marginBottom: 12,
+        }}>
+          Pronto a iniziare?
+        </p>
+        <p style={{ fontSize: 15, color: "rgba(0,0,0,0.40)", marginBottom: 28 }}>
+          Nessuna carta di credito. Setup in 5 minuti.
+        </p>
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+          <Link href="/register" style={{
+            display: "inline-block", fontFamily: MONO, fontSize: 12, fontWeight: 500,
+            color: "#ffffff", background: "#0D1016",
+            borderRadius: 8, padding: "13px 32px",
+            textDecoration: "none",
+          }}>
+            Inizia gratis →
+          </Link>
+          <Link href="/pricing" style={{
+            display: "inline-block", fontFamily: MONO, fontSize: 12, fontWeight: 500,
+            color: "#0D1016", background: "transparent",
+            border: "1px solid rgba(0,0,0,0.14)",
+            borderRadius: 8, padding: "13px 28px",
+            textDecoration: "none",
+          }}>
+            Vedi i piani
+          </Link>
         </div>
-      </main>
+      </section>
     </div>
   );
 }
