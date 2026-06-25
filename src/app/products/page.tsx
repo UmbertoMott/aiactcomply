@@ -418,7 +418,7 @@ const MODULES: ModuleProps[] = [
     videoSrc: "/videos/legal.mp4",
     videoScale: 2.5,
     videoPosition: "center 15%",
-    zoomX: 40,
+    zoomX: 0,
     reverse: true,
   },
   {
