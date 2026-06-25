@@ -27,11 +27,12 @@ interface RowProps {
   desc: string;
   videoSrc: string;
   zoom?: number;
+  zoomX?: number;
   reverse?: boolean;
   delay: number;
 }
 
-function VideoRow({ badge, title, desc, videoSrc, zoom = 1, reverse, delay }: RowProps) {
+function VideoRow({ badge, title, desc, videoSrc, zoom = 1, zoomX = 50, reverse, delay }: RowProps) {
   const { ref, visible } = useInView(0.1);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -133,8 +134,8 @@ function VideoRow({ badge, title, desc, videoSrc, zoom = 1, reverse, delay }: Ro
             height: `${zoom * 100}%`,
             objectFit: "cover",
             display: "block",
-            marginLeft: zoom > 1 ? `-${(zoom - 1) / 2 * 100}%` : "0",
-            marginTop: zoom > 1 ? `-${(zoom - 1) * 18}%` : "0",
+            marginLeft: zoom > 1 ? `-${(zoom - 1) * (zoomX / 100) * 100}%` : "0",
+            marginTop: zoom > 1 ? `-${(zoom - 1) * 10}%` : "0",
           }}
         />
       </div>
@@ -165,7 +166,8 @@ const ROWS: Omit<RowProps, "delay">[] = [
     title: "Risposte con le fonti, non opinioni.",
     desc: "Fai una domanda sull'AI Act, su ISO 22989 o sulle Guidelines: il Legal Assistant cita il testo esatto, articolo per articolo, con il chunk sorgente sempre verificabile a fianco.",
     videoSrc: "/videos/legal.mp4",
-    zoom: 1.4,
+    zoom: 1.85,
+    zoomX: 5,
     reverse: true,
   },
   {
