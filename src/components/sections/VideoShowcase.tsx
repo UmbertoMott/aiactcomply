@@ -166,8 +166,8 @@ const ROWS: Omit<RowProps, "delay">[] = [
     title: "Risposte con le fonti, non opinioni.",
     desc: "Fai una domanda sull'AI Act, su ISO 22989 o sulle Guidelines: il Legal Assistant cita il testo esatto, articolo per articolo, con il chunk sorgente sempre verificabile a fianco.",
     videoSrc: "/videos/legal.mp4",
-    zoom: 1.0,
-    
+    zoom: 1.85,
+    zoomX: 5,
     reverse: true,
   },
   {
