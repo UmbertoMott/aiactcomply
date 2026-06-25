@@ -360,13 +360,13 @@ export default function LegalAssistantPage() {
                           <div
                             key={bi}
                             onClick={() => b.artRef && handleBadgeClick(b.artRef, msgIdx)}
-                            className={`flex items-start gap-1.5 px-1.5 py-1 rounded-md transition-colors${b.artRef && !isActive ? " hover:bg-[rgba(99,102,241,0.05)] hover:border-[rgba(99,102,241,0.15)]" : ""}`}
+                            className={`flex items-start gap-1.5 px-1.5 py-1 rounded-md transition-colors${b.artRef && !isActive ? " hover:bg-[rgba(0,0,0,0.03)] hover:border-[rgba(0,0,0,0.08)]" : ""}`}
                             style={{
                               cursor: b.artRef ? "pointer" : "default",
                               border: isActive
-                                ? "1px solid rgba(99,102,241,0.2)"
+                                ? "1px solid rgba(0,0,0,0.10)"
                                 : "1px solid transparent",
-                              background: isActive ? "rgba(99,102,241,0.07)" : "transparent",
+                              background: isActive ? "rgba(0,0,0,0.05)" : "transparent",
                             }}
                           >
                             <span className="text-[10px] text-muted-foreground mt-0.5 flex-shrink-0">•</span>
@@ -374,7 +374,7 @@ export default function LegalAssistantPage() {
                             {b.artRef && (
                               <span
                                 className="text-[9px] font-semibold rounded px-1.5 py-0.5 flex-shrink-0"
-                                style={{ background: "rgba(99,102,241,0.1)", color: "#4f46e5" }}
+                                style={{ background: "rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.55)" }}
                               >
                                 {b.artRef} ↗
                               </span>
@@ -402,7 +402,7 @@ export default function LegalAssistantPage() {
                           <span
                             key={i}
                             className="text-[9px] font-medium rounded px-1.5 py-0.5"
-                            style={{ background: "rgba(99,102,241,0.08)", color: "#4f46e5" }}
+                            style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.55)" }}
                           >
                             {ref}
                           </span>
@@ -440,7 +440,7 @@ export default function LegalAssistantPage() {
                     key={i}
                     className="w-1.5 h-1.5 rounded-full"
                     style={{
-                      background: "rgba(99,102,241,0.5)",
+                      background: "rgba(0,0,0,0.35)",
                       animation: `pulse 1.2s ${delay}s infinite`,
                     }}
                   />
@@ -485,7 +485,7 @@ export default function LegalAssistantPage() {
             <button
               key={i}
               onClick={() => { sendMessage(s.query); }}
-              className="text-[9px] text-muted-foreground px-2 py-0.5 rounded transition-colors hover:text-accent"
+              className="text-[9px] text-muted-foreground px-2 py-0.5 rounded transition-colors hover:text-foreground"
               style={{ background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.08)" }}
             >
               {s.label}
@@ -525,7 +525,7 @@ export default function LegalAssistantPage() {
         {activeSource && (
           <span
             className="text-[9px] font-semibold rounded px-1.5 py-0.5 flex-shrink-0"
-            style={{ background: "rgba(99,102,241,0.1)", color: "#4f46e5" }}
+            style={{ background: "rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.55)", fontFamily: "'DM Mono', monospace", letterSpacing: "0.02em" }}
           >
             {activeSource.sectionRef}
           </span>
@@ -543,9 +543,9 @@ export default function LegalAssistantPage() {
           <div className="flex flex-col items-center justify-center h-full gap-2 text-center">
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: "rgba(99,102,241,0.08)" }}
+              style={{ background: "rgba(0,0,0,0.05)" }}
             >
-              <BookOpen className="h-4 w-4" style={{ color: "#4f46e5" }} />
+              <BookOpen className="h-4 w-4" style={{ color: "rgba(0,0,0,0.55)" }} />
             </div>
             <p className="text-xs text-muted-foreground max-w-[180px]">
               Fai una domanda per vedere le fonti
@@ -555,20 +555,21 @@ export default function LegalAssistantPage() {
           <div
             className="rounded-md p-3 my-2"
             style={{
-              background: "rgba(99,102,241,0.06)",
-              border: "1px solid rgba(99,102,241,0.18)",
+              background: "#FAFAF9",
+              border: "1px solid rgba(0,0,0,0.08)",
+              borderLeft: "3px solid rgba(0,0,0,0.15)",
             }}
           >
             <div className="flex items-center justify-between mb-2">
               <span
                 className="text-[9px] font-semibold uppercase tracking-wider"
-                style={{ color: "#4f46e5", letterSpacing: "0.06em" }}
+                style={{ color: "rgba(0,0,0,0.55)", letterSpacing: "0.06em" }}
               >
                 Chunk selezionato
               </span>
               <span
                 className="text-[8px] font-semibold rounded px-1 py-0.5"
-                style={{ background: "rgba(99,102,241,0.1)", color: "#4f46e5" }}
+                style={{ background: "rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.55)" }}
               >
                 rilevanza {activeSource.similarity.toFixed(2)}
               </span>
@@ -596,19 +597,19 @@ export default function LegalAssistantPage() {
               <div
                 key={i}
                 onClick={() => handleSourceRowClick(i, activeMsgIndex)}
-                className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer transition-colors${activeChunkIndex !== i ? " hover:bg-[rgba(99,102,241,0.05)] hover:border-[rgba(99,102,241,0.1)]" : ""}`}
+                className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer transition-colors${activeChunkIndex !== i ? " hover:bg-[rgba(0,0,0,0.03)] hover:border-[rgba(0,0,0,0.07)]" : ""}`}
                 style={{
                   border:
                     activeChunkIndex === i
-                      ? "1px solid rgba(99,102,241,0.2)"
+                      ? "1px solid rgba(0,0,0,0.10)"
                       : "1px solid transparent",
                   background:
-                    activeChunkIndex === i ? "rgba(99,102,241,0.07)" : "transparent",
+                    activeChunkIndex === i ? "rgba(0,0,0,0.05)" : "transparent",
                 }}
               >
                 <span
                   className="text-[9px] font-semibold rounded px-1.5 py-0.5 flex-shrink-0"
-                  style={{ background: "rgba(99,102,241,0.1)", color: "#4f46e5" }}
+                  style={{ background: "rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.55)", fontFamily: "'DM Mono', monospace", fontSize: 8 }}
                 >
                   {src.sectionRef ?? "—"}
                 </span>
