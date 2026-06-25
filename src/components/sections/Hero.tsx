@@ -25,7 +25,7 @@ const CYCLING_WORDS = ["compromessi.", "burocrazia.", "ritardi.", "rischi.", "ec
 const DELETE_SPEED = 48;
 const TYPE_SPEED = 60;
 const IDLE_MS = 2400;
-const START_DELAY = 2000; // wait for entrance anim
+const START_DELAY = 2000;
 
 function TypewriterWord() {
   const [wordIdx, setWordIdx] = useState(0);
@@ -33,7 +33,6 @@ function TypewriterWord() {
   const [phase, setPhase] = useState<"idle" | "deleting" | "typing" | "waiting">("idle");
   const [started, setStarted] = useState(false);
 
-  // Delay start until entrance animation finishes
   useEffect(() => {
     const t = setTimeout(() => setStarted(true), START_DELAY);
     return () => clearTimeout(t);
@@ -42,7 +41,6 @@ function TypewriterWord() {
   useEffect(() => {
     if (!started) return;
     let t: ReturnType<typeof setTimeout>;
-
     if (phase === "idle") {
       t = setTimeout(() => setPhase("deleting"), IDLE_MS);
     } else if (phase === "deleting") {
@@ -65,7 +63,6 @@ function TypewriterWord() {
         setPhase("idle");
       }
     }
-
     return () => clearTimeout(t);
   }, [started, phase, displayed, wordIdx]);
 
@@ -74,33 +71,182 @@ function TypewriterWord() {
   return (
     <span style={{ position: "relative", fontStyle: "italic", fontWeight: 300 }}>
       {displayed}
-      <span
-        style={{
-          display: "inline-block",
-          width: 2,
-          height: "0.8em",
-          background: "#0D1016",
-          marginLeft: 3,
-          verticalAlign: "middle",
-          animation: showCursor ? "none" : "cursorBlink 1.1s ease-in-out infinite",
-          opacity: showCursor ? 1 : undefined,
-          borderRadius: 1,
-        }}
-      />
+      <span style={{
+        display: "inline-block", width: 2, height: "0.8em", background: "#0D1016",
+        marginLeft: 3, verticalAlign: "middle",
+        animation: showCursor ? "none" : "cursorBlink 1.1s ease-in-out infinite",
+        opacity: showCursor ? 1 : undefined, borderRadius: 1,
+      }} />
     </span>
   );
 }
 
-const LINE1 = ["AI", "Act", "compliance,"];
+// ─── FRAMEWORK BADGE ICONS (original SVG, no trademarks) ─────────────────────
+
+function EuStarsIcon({ color }: { color: string }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      {Array.from({ length: 12 }).map((_, i) => {
+        const angle = (i * 30 - 90) * (Math.PI / 180);
+        const x = 12 + 7.5 * Math.cos(angle);
+        const y = 12 + 7.5 * Math.sin(angle);
+        return <circle key={i} cx={x} cy={y} r="1.55" fill={color} />;
+      })}
+    </svg>
+  );
+}
+
+function IsoGridIcon({ color }: { color: string }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="3" width="18" height="18" stroke={color} strokeWidth="1.6" fill="none" />
+      <line x1="3" y1="9"  x2="21" y2="9"  stroke={color} strokeWidth="1"   opacity="0.45" />
+      <line x1="3" y1="15" x2="21" y2="15" stroke={color} strokeWidth="1"   opacity="0.45" />
+      <line x1="9"  y1="3" x2="9"  y2="21" stroke={color} strokeWidth="1"   opacity="0.45" />
+      <line x1="15" y1="3" x2="15" y2="21" stroke={color} strokeWidth="1"   opacity="0.45" />
+    </svg>
+  );
+}
+
+function NistDotsIcon({ color }: { color: string }) {
+  const pts = [4, 12, 20];
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      {pts.flatMap(x => pts.map(y => (
+        <circle key={`${x}${y}`} cx={x} cy={y} r={x === 12 && y === 12 ? 2.8 : 2} fill={color}
+          opacity={x === 12 && y === 12 ? 1 : 0.55} />
+      )))}
+    </svg>
+  );
+}
+
+function GdprShieldIcon({ color }: { color: string }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M12 2.5L3 6.5v5.5c0 4.9 3.8 9.4 9 10.5 5.2-1.1 9-5.6 9-10.5V6.5L12 2.5z"
+        stroke={color} strokeWidth="1.6" fill="none" strokeLinejoin="round" />
+      <path d="M8.5 12l2.5 2.5 4.5-5" stroke={color} strokeWidth="1.6"
+        strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function LockIcon({ color }: { color: string }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <rect x="4" y="11" width="16" height="11" rx="2.5" stroke={color} strokeWidth="1.6" fill="none" />
+      <path d="M7.5 11V7.5a4.5 4.5 0 0 1 9 0V11" stroke={color} strokeWidth="1.6"
+        fill="none" strokeLinecap="round" />
+      <circle cx="12" cy="17" r="1.6" fill={color} />
+      <line x1="12" y1="17" x2="12" y2="19.5" stroke={color} strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function EdpbIcon({ color }: { color: string }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="9" stroke={color} strokeWidth="1.6" fill="none" />
+      {Array.from({ length: 8 }).map((_, i) => {
+        const angle = (i * 45 - 90) * (Math.PI / 180);
+        return <circle key={i} cx={12 + 5 * Math.cos(angle)} cy={12 + 5 * Math.sin(angle)}
+          r="1.3" fill={color} opacity={i % 2 === 0 ? 1 : 0.45} />;
+      })}
+    </svg>
+  );
+}
+
+function FrameworkIcon({ type, color }: { type: string; color: string }) {
+  switch (type) {
+    case "eu":   return <EuStarsIcon color={color} />;
+    case "iso":  return <IsoGridIcon color={color} />;
+    case "nist": return <NistDotsIcon color={color} />;
+    case "gdpr": return <GdprShieldIcon color={color} />;
+    case "lock": return <LockIcon color={color} />;
+    case "edpb": return <EdpbIcon color={color} />;
+    default:     return null;
+  }
+}
+
+// ─── FRAMEWORK BADGE COMPONENT ────────────────────────────────────────────────
 
 const FRAMEWORKS = [
-  { name: "EU AI Act",    sub: "Reg. 2024/1689",      dot: "#003399" },
-  { name: "ISO 42001",    sub: "AI Management System", dot: "#1a1a1a" },
-  { name: "NIST AI RMF",  sub: "v1.0",                dot: "#0B3D2E" },
-  { name: "GDPR",         sub: "Reg. 2016/679",        dot: "#003399" },
-  { name: "ISO 27001",    sub: "Information Security", dot: "#1a1a1a" },
-  { name: "EDPB · WP29",  sub: "AI Guidelines",        dot: "#003399" },
+  { name: "EU AI Act",   sub: "Reg. 2024/1689",      color: "#003399", icon: "eu"   },
+  { name: "ISO 42001",   sub: "AI Management",        color: "#111111", icon: "iso"  },
+  { name: "NIST AI RMF", sub: "v1.0 · 2023",          color: "#0B3D2E", icon: "nist" },
+  { name: "GDPR",        sub: "Reg. 2016/679",        color: "#003399", icon: "gdpr" },
+  { name: "ISO 27001",   sub: "Info Security",        color: "#111111", icon: "lock" },
+  { name: "EDPB · WP29", sub: "AI Guidelines",        color: "#003399", icon: "edpb" },
 ];
+
+function FrameworkBadge({ name, sub, color, icon }: typeof FRAMEWORKS[0]) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 12,
+        padding: "11px 18px 11px 12px",
+        border: `1.5px solid ${hovered ? color : "rgba(0,0,0,0.10)"}`,
+        borderRadius: 10,
+        background: hovered ? `${color}08` : "#ffffff",
+        boxShadow: hovered
+          ? `0 6px 20px ${color}22, 0 1px 4px rgba(0,0,0,0.06)`
+          : "0 1px 4px rgba(0,0,0,0.05), 0 0 0 0.5px rgba(0,0,0,0.04)",
+        transform: hovered ? "translateY(-2px)" : "translateY(0)",
+        transition: "all 0.22s cubic-bezier(0.34,1.56,0.64,1)",
+        cursor: "default",
+        userSelect: "none",
+      }}
+    >
+      {/* Icon container */}
+      <div style={{
+        width: 36, height: 36,
+        borderRadius: 7,
+        background: hovered ? `${color}14` : `${color}0d`,
+        border: `1px solid ${color}22`,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        flexShrink: 0,
+        transition: "all 0.22s ease",
+      }}>
+        <FrameworkIcon type={icon} color={color} />
+      </div>
+
+      {/* Text */}
+      <div>
+        <div style={{
+          fontFamily: MONO,
+          fontSize: 12,
+          fontWeight: 700,
+          color: hovered ? color : "#0D1016",
+          letterSpacing: "0.01em",
+          lineHeight: 1.2,
+          marginBottom: 3,
+          transition: "color 0.2s ease",
+        }}>
+          {name}
+        </div>
+        <div style={{
+          fontFamily: MONO,
+          fontSize: 9,
+          color: hovered ? `${color}99` : "rgba(0,0,0,0.35)",
+          letterSpacing: "0.04em",
+          transition: "color 0.2s ease",
+        }}>
+          {sub}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── HERO ─────────────────────────────────────────────────────────────────────
+
+const LINE1 = ["AI", "Act", "compliance,"];
 
 export default function Hero() {
   return (
@@ -111,13 +257,14 @@ export default function Hero() {
       <style>{`
         @keyframes cursorBlink {
           0%, 100% { opacity: 1 }
-          50% { opacity: 0 }
+          50%       { opacity: 0 }
         }
       `}</style>
 
       <motion.div
         initial="hidden"
         animate="show"
+        variants={container}
         className="relative z-10 flex flex-col items-center max-w-4xl mx-auto"
       >
         {/* Badge */}
@@ -126,15 +273,12 @@ export default function Hero() {
             className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-8"
             style={{ border: "1px solid rgba(0,0,0,0.10)", fontSize: 12, color: "rgba(0,0,0,0.45)" }}
           >
-            <span
-              className="block w-1.5 h-1.5 rounded-full flex-shrink-0"
-              style={{ background: "#0D1016" }}
-            />
+            <span className="block w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "#0D1016" }} />
             EU AI Act — In vigore agosto 2026
           </div>
         </motion.div>
 
-        {/* H1 — word-by-word stagger + cycling second line */}
+        {/* H1 */}
         <motion.h1
           variants={container}
           className="mb-6"
@@ -148,11 +292,8 @@ export default function Hero() {
           }}
         >
           {LINE1.map((word) => (
-            <motion.span
-              key={word}
-              variants={wordVariant}
-              style={{ display: "inline-block", marginRight: "0.22em" }}
-            >
+            <motion.span key={word} variants={wordVariant}
+              style={{ display: "inline-block", marginRight: "0.22em" }}>
               {word}
             </motion.span>
           ))}
@@ -169,13 +310,7 @@ export default function Hero() {
         <motion.p
           variants={wordVariant}
           className="mb-10 max-w-md"
-          style={{
-            fontSize: 17,
-            fontWeight: 300,
-            color: "rgba(0,0,0,0.45)",
-            letterSpacing: "-0.2px",
-            lineHeight: 1.65,
-          }}
+          style={{ fontSize: 17, fontWeight: 300, color: "rgba(0,0,0,0.45)", letterSpacing: "-0.2px", lineHeight: 1.65 }}
         >
           AIComply automatizza risk assessment, documentazione e integrazione nei tuoi workflow.
           Dal caos normativo alla conformità certificata.
@@ -183,21 +318,15 @@ export default function Hero() {
 
         {/* CTAs */}
         <motion.div variants={wordVariant} className="flex gap-3 mb-20">
-          <Link
-            href="/register"
+          <Link href="/register"
             className="text-[13px] font-medium rounded-full px-6 py-3 transition-opacity hover:opacity-80"
             style={{ background: "#0D1016", color: "#ffffff", letterSpacing: "-0.2px" }}
           >
             Inizia gratis
           </Link>
-          <Link
-            href="/pricing"
+          <Link href="/pricing"
             className="text-[13px] rounded-full px-6 py-3 transition-colors"
-            style={{
-              border: "1px solid rgba(0,0,0,0.14)",
-              color: "rgba(0,0,0,0.55)",
-              background: "transparent",
-            }}
+            style={{ border: "1px solid rgba(0,0,0,0.14)", color: "rgba(0,0,0,0.55)", background: "transparent" }}
           >
             Scopri i prezzi
           </Link>
@@ -206,50 +335,38 @@ export default function Hero() {
 
       {/* Framework trust row */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.7, duration: 0.7 }}
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.85, duration: 0.6 }}
         className="max-w-5xl mx-auto"
         style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}
       >
         <p
           className="text-center mt-7 mb-6"
           style={{
-            fontSize: 11,
+            fontSize: 10,
             fontWeight: 500,
-            letterSpacing: "0.09em",
+            letterSpacing: "0.12em",
             textTransform: "uppercase",
-            color: "rgba(0,0,0,0.28)",
+            color: "rgba(0,0,0,0.25)",
             fontFamily: MONO,
           }}
         >
           Framework supportati nativamente
         </p>
-        <div className="flex flex-wrap items-center justify-center gap-3 pb-14">
-          {FRAMEWORKS.map((fw) => (
-            <div
+        <div
+          className="flex flex-wrap items-center justify-center pb-14"
+          style={{ gap: 10 }}
+        >
+          {FRAMEWORKS.map((fw, i) => (
+            <motion.div
               key={fw.name}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "8px 14px",
-                border: "1px solid rgba(0,0,0,0.09)",
-                borderRadius: 8,
-                background: "#ffffff",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-              }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9 + i * 0.07, duration: 0.4 }}
             >
-              <div style={{ width: 7, height: 7, borderRadius: "50%", background: fw.dot, flexShrink: 0 }} />
-              <div>
-                <div style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, color: "#0D1016", letterSpacing: "-0.1px", lineHeight: 1.2 }}>
-                  {fw.name}
-                </div>
-                <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.35)", letterSpacing: "0.02em", marginTop: 1 }}>
-                  {fw.sub}
-                </div>
-              </div>
-            </div>
+              <FrameworkBadge {...fw} />
+            </motion.div>
           ))}
         </div>
       </motion.div>
