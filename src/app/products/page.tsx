@@ -247,19 +247,18 @@ function ModuleSection({
                 </div>
               </div>
               {/* Video */}
-              <div style={{ aspectRatio: "16/9", overflow: "hidden", background: "#1a1a1a" }}>
+              <div style={{ aspectRatio: "16/9", overflow: "hidden", background: "#1a1a1a", position: "relative" }}>
                 <video
                   ref={videoRef}
                   src={videoSrc}
                   muted loop playsInline preload="metadata"
                   style={{
-                    width: "100%", height: "100%",
+                    width: `${videoScale * 100}%`,
+                    height: `${videoScale * 100}%`,
                     objectFit: "cover",
-                    objectPosition: videoPosition,
                     display: "block",
-                    transform: `scale(${videoScale})`,
-                    transformOrigin: "center top",
-                    transition: "transform .3s ease",
+                    marginLeft: `-${(videoScale - 1) / 2 * 100}%`,
+                    marginTop: videoScale > 1 ? `-${(videoScale - 1) * 18}%` : "0",
                   }}
                 />
               </div>
