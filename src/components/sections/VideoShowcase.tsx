@@ -28,18 +28,22 @@ interface RowProps {
   videoSrc: string;
   zoom?: number;
   zoomX?: number;
+  playbackRate?: number;
   reverse?: boolean;
   delay: number;
 }
 
-function VideoRow({ badge, title, desc, videoSrc, zoom = 1, zoomX = 50, reverse, delay }: RowProps) {
+function VideoRow({ badge, title, desc, videoSrc, zoom = 1, zoomX = 50, playbackRate = 1, reverse, delay }: RowProps) {
   const { ref, visible } = useInView(0.1);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     if (!visible) return;
-    videoRef.current?.play().catch(() => {});
-  }, [visible]);
+    const v = videoRef.current;
+    if (!v) return;
+    v.playbackRate = playbackRate;
+    v.play().catch(() => {});
+  }, [visible, playbackRate]);
 
   const base = `opacity .65s ${delay}s ease, transform .65s ${delay}s ease`;
   const base2 = `opacity .65s ${delay + 0.08}s ease, transform .65s ${delay + 0.08}s ease`;
@@ -112,32 +116,57 @@ function VideoRow({ badge, title, desc, videoSrc, zoom = 1, zoomX = 50, reverse,
         transform: visible ? "none" : "translateY(24px)",
       }}
     >
+      {/* Browser chrome mockup */}
       <div
         style={{
-          borderRadius: 16,
+          borderRadius: 12,
           border: "1px solid rgba(0,0,0,0.09)",
           overflow: "hidden",
           boxShadow: "0 2px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.05)",
           background: "#1a1a1a",
-          aspectRatio: "16 / 9",
         }}
       >
-        <video
-          ref={videoRef}
-          src={videoSrc}
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          style={{
-            width: `${zoom * 100}%`,
-            height: `${zoom * 100}%`,
-            objectFit: "cover",
-            display: "block",
-            marginLeft: zoom > 1 ? `-${(zoom - 1) * (zoomX / 100) * 100}%` : "0",
-            marginTop: zoom > 1 ? `-${(zoom - 1) * 10}%` : "0",
-          }}
-        />
+        {/* Title bar */}
+        <div style={{
+          background: "#f3f3f2",
+          borderBottom: "1px solid rgba(0,0,0,0.09)",
+          padding: "9px 14px",
+          display: "flex", alignItems: "center", gap: 8,
+        }}>
+          <div style={{ display: "flex", gap: 5 }}>
+            {[0,1,2].map((i) => (
+              <div key={i} style={{ width: 10, height: 10, borderRadius: "50%", background: "rgba(0,0,0,0.15)" }} />
+            ))}
+          </div>
+          <div style={{
+            flex: 1, height: 20, borderRadius: 4,
+            background: "rgba(0,0,0,0.06)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.25)" }}>
+              aicomply.it
+            </span>
+          </div>
+        </div>
+        {/* Video */}
+        <div style={{ aspectRatio: "16 / 9", overflow: "hidden", position: "relative" }}>
+          <video
+            ref={videoRef}
+            src={videoSrc}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            style={{
+              width: `${zoom * 100}%`,
+              height: `${zoom * 100}%`,
+              objectFit: "cover",
+              display: "block",
+              marginLeft: zoom > 1 ? `-${(zoom - 1) * (zoomX / 100) * 100}%` : "0",
+              marginTop: zoom > 1 ? `-${(zoom - 1) * 10}%` : "0",
+            }}
+          />
+        </div>
       </div>
     </div>
   );
@@ -166,8 +195,9 @@ const ROWS: Omit<RowProps, "delay">[] = [
     title: "Risposte con le fonti, non opinioni.",
     desc: "Fai una domanda sull'AI Act, su ISO 22989 o sulle Guidelines: il Legal Assistant cita il testo esatto, articolo per articolo, con il chunk sorgente sempre verificabile a fianco.",
     videoSrc: "/videos/legal.mp4",
-    zoom: 1.85,
-    zoomX: 5,
+    zoom: 2.5,
+    zoomX: 40,
+    playbackRate: 1.5,
     reverse: true,
   },
   {
