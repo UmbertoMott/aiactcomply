@@ -92,12 +92,13 @@ interface ModuleProps {
   videoSrc: string;
   videoScale?: number;
   videoPosition?: string;
+  zoomX?: number;
   reverse?: boolean;
 }
 
 function ModuleSection({
   id, num, badge, title, desc, capabilities,
-  videoSrc, videoScale = 1, videoPosition = "center center", reverse,
+  videoSrc, videoScale = 1, videoPosition = "center center", zoomX = 50, reverse,
 }: ModuleProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef   = useRef<HTMLVideoElement>(null);
@@ -257,8 +258,8 @@ function ModuleSection({
                     height: `${videoScale * 100}%`,
                     objectFit: "cover",
                     display: "block",
-                    marginLeft: `-${(videoScale - 1) / 2 * 100}%`,
-                    marginTop: videoScale > 1 ? `-${(videoScale - 1) * 18}%` : "0",
+                    marginLeft: videoScale > 1 ? `-${(videoScale - 1) * (zoomX / 100) * 100}%` : "0",
+                    marginTop: videoScale > 1 ? `-${(videoScale - 1) * 10}%` : "0",
                   }}
                 />
               </div>
@@ -415,8 +416,9 @@ const MODULES: ModuleProps[] = [
     desc: "Fai una domanda sull'AI Act, su ISO 22989 o sulle Guidelines: il Legal Assistant cita il testo esatto, articolo per articolo, con il chunk sorgente sempre verificabile a fianco.",
     capabilities: ["RAG su EU AI Act", "ISO 22989 + Guidelines", "Chunk sorgente verificabile", "Badge articolo per risposta"],
     videoSrc: "/videos/legal.mp4",
-    videoScale: 1.45,
+    videoScale: 1.85,
     videoPosition: "center 15%",
+    zoomX: 5,
     reverse: true,
   },
   {
