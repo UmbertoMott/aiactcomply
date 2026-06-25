@@ -6,7 +6,7 @@ import PlatformSection from "@/components/sections/PlatformSection";
 import Pain from "@/components/sections/Pain";
 import Stepper from "@/components/sections/Stepper";
 import Stats from "@/components/sections/Stats";
-import ToolGallery from "@/components/sections/ToolGallery";
+import VideoShowcase from "@/components/sections/VideoShowcase";
 import Quote from "@/components/sections/Quote";
 import CtaFinal from "@/components/sections/CtaFinal";
 
@@ -157,7 +157,7 @@ export default function Home() {
         <Pain />
         <Stepper />
         <Stats />
-        <ToolGallery />
+        <VideoShowcase />
         <Quote />
         <CtaFinal />
       </main>
