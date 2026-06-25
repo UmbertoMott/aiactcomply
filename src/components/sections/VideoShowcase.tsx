@@ -310,7 +310,7 @@ export default function VideoShowcase() {
       </div>
 
       {/* ① Triage video */}
-      <div className="px-12 pb-24" style={{ maxWidth: 960, margin: "0 auto" }}>
+      <div className="px-12 pb-24" style={{ maxWidth: 1280, margin: "0 auto" }}>
         <VideoRow {...ROW1} />
       </div>
 
@@ -318,7 +318,7 @@ export default function VideoShowcase() {
       <StepStrip />
 
       {/* ③ Legal video */}
-      <div className="px-12 py-24" style={{ maxWidth: 960, margin: "0 auto" }}>
+      <div className="px-12 py-24" style={{ maxWidth: 1280, margin: "0 auto" }}>
         <VideoRow {...ROW2} />
       </div>
 
@@ -326,7 +326,7 @@ export default function VideoShowcase() {
       <FeatureHighlight />
 
       {/* ⑤ FRIA/Risk video */}
-      <div className="px-12 py-24" style={{ maxWidth: 960, margin: "0 auto" }}>
+      <div className="px-12 py-24" style={{ maxWidth: 1280, margin: "0 auto" }}>
         <VideoRow {...ROW3} />
       </div>
 
@@ -334,12 +334,12 @@ export default function VideoShowcase() {
       <StatsRow />
 
       {/* ⑦ EUDB video */}
-      <div className="px-12 py-24" style={{ maxWidth: 960, margin: "0 auto" }}>
+      <div className="px-12 py-24" style={{ maxWidth: 1280, margin: "0 auto" }}>
         <VideoRow {...ROW4} />
       </div>
 
       {/* ⑧ Trust video */}
-      <div className="px-12 pb-24" style={{ maxWidth: 960, margin: "0 auto" }}>
+      <div className="px-12 pb-24" style={{ maxWidth: 1280, margin: "0 auto" }}>
         <VideoRow {...ROW5} />
       </div>
     </section>
