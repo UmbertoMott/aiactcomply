@@ -30,7 +30,7 @@ export default function Nav() {
       </Link>
 
       <div className="hidden md:flex items-center gap-8 text-[13px]" style={{ color: "rgba(0,0,0,0.42)" }}>
-        <Link href="#" className="hover:text-[#0D1016] transition-colors">Prodotto</Link>
+        <Link href="/products" className="hover:text-[#0D1016] transition-colors">Prodotto</Link>
         <Link href="/pricing" className="hover:text-[#0D1016] transition-colors">Prezzi</Link>
         <Link href="/scanner" className="hover:text-[#0D1016] transition-colors">Scanner Art. 50</Link>
         <Link href="/risorse" className="hover:text-[#0D1016] transition-colors">Risorse</Link>
