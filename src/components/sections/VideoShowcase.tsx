@@ -220,7 +220,7 @@ function levelStyle(level: string): React.CSSProperties {
 
 function RiskMockup() {
   return (
-    <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.22)", background: "#0e0e0e", boxShadow: "0 24px 80px rgba(0,0,0,0.6)" }}>
+    <div className="risk-card" style={{ borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.30)", background: "#0e0e0e", boxShadow: "0 24px 80px rgba(0,0,0,0.6)" }}>
       <div style={{ background: "#1a1a1a", padding: "10px 14px", display: "flex", alignItems: "center", gap: 8, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div style={{ display: "flex", gap: 5 }}>
           {[0,1,2].map(i => <div key={i} style={{ width: 9, height: 9, borderRadius: "50%", background: "rgba(255,255,255,0.12)" }} />)}
@@ -294,7 +294,7 @@ function FlowTrio() {
   const { ref, visible } = useInView(0.12);
 
   const triageMini = (
-    <div style={{ background: "#111", borderRadius: 10, border: "1px solid rgba(255,255,255,0.08)", overflow: "hidden" }}>
+    <div style={{ background: "#1c1c1c", borderRadius: 10, border: "1px solid rgba(255,255,255,0.20)", overflow: "hidden" }}>
       <div style={{ padding: "7px 10px", borderBottom: "1px solid rgba(255,255,255,0.04)", display: "flex", gap: 4 }}>
         {[0,1,2].map(i => <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(255,255,255,0.1)" }} />)}
       </div>
@@ -317,7 +317,7 @@ function FlowTrio() {
   );
 
   const docMini = (
-    <div style={{ background: "#111", borderRadius: 10, border: "1px solid rgba(255,255,255,0.08)", overflow: "hidden" }}>
+    <div style={{ background: "#1c1c1c", borderRadius: 10, border: "1px solid rgba(255,255,255,0.20)", overflow: "hidden" }}>
       <div style={{ padding: "7px 10px", borderBottom: "1px solid rgba(255,255,255,0.04)", display: "flex", gap: 4 }}>
         {[0,1,2].map(i => <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(255,255,255,0.1)" }} />)}
       </div>
@@ -344,7 +344,7 @@ function FlowTrio() {
   );
 
   const monitorMini = (
-    <div style={{ background: "#111", borderRadius: 10, border: "1px solid rgba(255,255,255,0.08)", overflow: "hidden" }}>
+    <div style={{ background: "#1c1c1c", borderRadius: 10, border: "1px solid rgba(255,255,255,0.20)", overflow: "hidden" }}>
       <div style={{ padding: "7px 10px", borderBottom: "1px solid rgba(255,255,255,0.04)", display: "flex", gap: 4 }}>
         {[0,1,2].map(i => <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(255,255,255,0.1)" }} />)}
       </div>
@@ -475,6 +475,19 @@ export default function VideoShowcase() {
           box-shadow: 0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.18) !important;
         }
         .triage-card:active {
+          transform: scale(0.978);
+          transition: transform 0.1s ease;
+          box-shadow: 0 12px 40px rgba(0,0,0,0.5) !important;
+        }
+        .risk-card {
+          cursor: pointer;
+          transition: transform 0.22s ease, box-shadow 0.22s ease;
+        }
+        .risk-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.22) !important;
+        }
+        .risk-card:active {
           transform: scale(0.978);
           transition: transform 0.1s ease;
           box-shadow: 0 12px 40px rgba(0,0,0,0.5) !important;
