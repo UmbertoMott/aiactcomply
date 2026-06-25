@@ -7,7 +7,7 @@ import {
   FileCode, Scale, ShieldAlert, BookMarked, ClipboardList, Crosshair,
   FileArchive, TrendingUp, Database, UserCheck, ArrowRightLeft, Map, Building2,
   Landmark, Zap, Menu, X, ChevronRight, ChevronLeft, ChevronDown,
-  LogOut, Settings, LayoutGrid, Siren, Home, CalendarClock, ShieldCheck,
+  LogOut, Settings, LayoutGrid, Siren, Home, CalendarClock, ShieldCheck, Bot,
 } from "lucide-react";
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { useUserRole, ROLE_LABELS } from "@/lib/hooks/useUserRole";
@@ -121,6 +121,15 @@ const PILLARS: NavPillar[] = [
     href: "/dashboard/tools/deployer-dashboard",
     art: "Art. 26",
     badge: "new" as const,
+  },
+  {
+    id: "legal-assistant",
+    icon: Bot,
+    label: "Legal AI Assistant",
+    href: "/dashboard/tools/legal-assistant",
+    art: "RAG",
+    badge: "new" as const,
+    tooltip: "Assistente AI con RAG sull'EU AI Act — domande in linguaggio naturale",
   },
   {
     id: "compliance",
