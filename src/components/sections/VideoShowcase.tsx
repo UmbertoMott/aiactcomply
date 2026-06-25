@@ -112,7 +112,7 @@ function TriageMockup() {
     "Registrare nel database EU (EUDB) prima dell'immissione",
   ];
   return (
-    <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)", background: "#0a0a0a", boxShadow: "0 24px 80px rgba(0,0,0,0.6)" }}>
+    <div className="triage-card" style={{ borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.28)", background: "#0e0e0e", boxShadow: "0 24px 80px rgba(0,0,0,0.6)" }}>
       <div style={{ background: "#1a1a1a", padding: "10px 14px", display: "flex", alignItems: "center", gap: 8, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div style={{ display: "flex", gap: 5 }}>
           {[0,1,2].map(i => <div key={i} style={{ width: 9, height: 9, borderRadius: "50%", background: "rgba(255,255,255,0.12)" }} />)}
@@ -220,7 +220,7 @@ function levelStyle(level: string): React.CSSProperties {
 
 function RiskMockup() {
   return (
-    <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.07)", background: "#0a0a0a", boxShadow: "0 24px 80px rgba(0,0,0,0.6)" }}>
+    <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.22)", background: "#0e0e0e", boxShadow: "0 24px 80px rgba(0,0,0,0.6)" }}>
       <div style={{ background: "#1a1a1a", padding: "10px 14px", display: "flex", alignItems: "center", gap: 8, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div style={{ display: "flex", gap: 5 }}>
           {[0,1,2].map(i => <div key={i} style={{ width: 9, height: 9, borderRadius: "50%", background: "rgba(255,255,255,0.12)" }} />)}
@@ -465,6 +465,19 @@ export default function VideoShowcase() {
           .showcase-row { flex-direction: column !important; gap: 32px !important; }
           .interstitial-row { flex-direction: column !important; }
           .trio-grid { grid-template-columns: 1fr !important; }
+        }
+        .triage-card {
+          cursor: pointer;
+          transition: transform 0.22s ease, box-shadow 0.22s ease;
+        }
+        .triage-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.18) !important;
+        }
+        .triage-card:active {
+          transform: scale(0.978);
+          transition: transform 0.1s ease;
+          box-shadow: 0 12px 40px rgba(0,0,0,0.5) !important;
         }
       `}</style>
 
