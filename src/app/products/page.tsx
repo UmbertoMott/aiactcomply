@@ -304,6 +304,7 @@ const CARDS: Omit<CardProps, "index">[] = [
     title: "AI Classifier",
     desc: "Analisi automatica del codice: mappa ogni componente AI agli articoli dell'AI Act. Zero configurazione manuale.",
     href: "/scanner",
+    videoSrc: "/videos/scanner.mp4",
   },
 ];
 
