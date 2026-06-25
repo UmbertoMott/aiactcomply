@@ -416,7 +416,7 @@ const MODULES: ModuleProps[] = [
     desc: "Fai una domanda sull'AI Act, su ISO 22989 o sulle Guidelines: il Legal Assistant cita il testo esatto, articolo per articolo, con il chunk sorgente sempre verificabile a fianco.",
     capabilities: ["RAG su EU AI Act", "ISO 22989 + Guidelines", "Chunk sorgente verificabile", "Badge articolo per risposta"],
     videoSrc: "/videos/legal.mp4",
-    videoScale: 2.5,
+    videoScale: 1.5,
     videoPosition: "center 15%",
     zoomX: 0,
     reverse: true,
