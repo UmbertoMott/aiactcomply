@@ -93,12 +93,13 @@ function TypewriterWord() {
 
 const LINE1 = ["AI", "Act", "compliance,"];
 
-const TRUST_LOGOS = [
-  "Fintech Group",
-  "LegalCo EU",
-  "HealthAI Systems",
-  "Manifattura Srl",
-  "Studio Legale XYZ",
+const FRAMEWORKS = [
+  { name: "EU AI Act",    sub: "Reg. 2024/1689",      dot: "#003399" },
+  { name: "ISO 42001",    sub: "AI Management System", dot: "#1a1a1a" },
+  { name: "NIST AI RMF",  sub: "v1.0",                dot: "#0B3D2E" },
+  { name: "GDPR",         sub: "Reg. 2016/679",        dot: "#003399" },
+  { name: "ISO 27001",    sub: "Information Security", dot: "#1a1a1a" },
+  { name: "EDPB · WP29",  sub: "AI Guidelines",        dot: "#003399" },
 ];
 
 export default function Hero() {
@@ -203,39 +204,52 @@ export default function Hero() {
         </motion.div>
       </motion.div>
 
-      {/* Trust logos row */}
+      {/* Framework trust row */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.7, duration: 0.7 }}
-        className="max-w-4xl mx-auto"
+        className="max-w-5xl mx-auto"
         style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}
       >
         <p
-          className="text-center mt-6 mb-5"
+          className="text-center mt-7 mb-6"
           style={{
             fontSize: 11,
             fontWeight: 500,
             letterSpacing: "0.09em",
             textTransform: "uppercase",
             color: "rgba(0,0,0,0.28)",
+            fontFamily: MONO,
           }}
         >
-          Utilizzato da team compliance di
+          Framework supportati nativamente
         </p>
-        <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 pb-14">
-          {TRUST_LOGOS.map((name) => (
-            <span
-              key={name}
+        <div className="flex flex-wrap items-center justify-center gap-3 pb-14">
+          {FRAMEWORKS.map((fw) => (
+            <div
+              key={fw.name}
               style={{
-                fontSize: 14,
-                fontWeight: 500,
-                color: "rgba(0,0,0,0.18)",
-                letterSpacing: "-0.3px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "8px 14px",
+                border: "1px solid rgba(0,0,0,0.09)",
+                borderRadius: 8,
+                background: "#ffffff",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
               }}
             >
-              {name}
-            </span>
+              <div style={{ width: 7, height: 7, borderRadius: "50%", background: fw.dot, flexShrink: 0 }} />
+              <div>
+                <div style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, color: "#0D1016", letterSpacing: "-0.1px", lineHeight: 1.2 }}>
+                  {fw.name}
+                </div>
+                <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.35)", letterSpacing: "0.02em", marginTop: 1 }}>
+                  {fw.sub}
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </motion.div>
