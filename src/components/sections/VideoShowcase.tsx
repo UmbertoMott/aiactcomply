@@ -26,11 +26,12 @@ interface RowProps {
   title: string;
   desc: string;
   videoSrc: string;
+  zoom?: number;
   reverse?: boolean;
   delay: number;
 }
 
-function VideoRow({ badge, title, desc, videoSrc, reverse, delay }: RowProps) {
+function VideoRow({ badge, title, desc, videoSrc, zoom = 1, reverse, delay }: RowProps) {
   const { ref, visible } = useInView(0.1);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -127,7 +128,14 @@ function VideoRow({ badge, title, desc, videoSrc, reverse, delay }: RowProps) {
           loop
           playsInline
           preload="metadata"
-          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+          style={{
+            width: `${zoom * 100}%`,
+            height: `${zoom * 100}%`,
+            objectFit: "cover",
+            display: "block",
+            marginLeft: zoom > 1 ? `-${(zoom - 1) / 2 * 100}%` : "0",
+            marginTop: zoom > 1 ? `-${(zoom - 1) * 18}%` : "0",
+          }}
         />
       </div>
     </div>
@@ -157,6 +165,7 @@ const ROWS: Omit<RowProps, "delay">[] = [
     title: "Risposte con le fonti, non opinioni.",
     desc: "Fai una domanda sull'AI Act, su ISO 22989 o sulle Guidelines: il Legal Assistant cita il testo esatto, articolo per articolo, con il chunk sorgente sempre verificabile a fianco.",
     videoSrc: "/videos/legal.mp4",
+    zoom: 1.4,
     reverse: true,
   },
   {
@@ -228,7 +237,7 @@ export default function VideoShowcase() {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 96 }}>
           {ROWS.map((row, i) => (
-            <VideoRow key={row.badge} {...row} delay={0} />
+            <VideoRow key={row.badge} {...row} delay={0} zoom={row.zoom} />
           ))}
         </div>
       </div>
