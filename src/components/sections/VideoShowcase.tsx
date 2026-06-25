@@ -294,12 +294,12 @@ function FlowTrio() {
   const { ref, visible } = useInView(0.12);
 
   const triageMini = (
-    <div style={{ background: "#111", borderRadius: 8, border: "1px solid rgba(255,255,255,0.06)", overflow: "hidden" }}>
+    <div style={{ background: "#111", borderRadius: 10, border: "1px solid rgba(255,255,255,0.08)", overflow: "hidden" }}>
       <div style={{ padding: "7px 10px", borderBottom: "1px solid rgba(255,255,255,0.04)", display: "flex", gap: 4 }}>
         {[0,1,2].map(i => <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(255,255,255,0.1)" }} />)}
       </div>
-      <div style={{ padding: "12px 12px 10px" }}>
-        <div style={{ fontFamily: MONO, fontSize: 7, color: "rgba(255,255,255,0.2)", marginBottom: 10 }}>Classificazione sistema AI</div>
+      <div style={{ padding: "18px 16px 16px" }}>
+        <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.25)", marginBottom: 12 }}>Classificazione sistema AI</div>
         <div style={{ background: "rgba(255,255,255,0.07)", borderRadius: 5, padding: "8px 10px", marginBottom: 8, border: "1px solid rgba(255,255,255,0.1)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
             <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff" }} />
@@ -309,7 +309,7 @@ function FlowTrio() {
         </div>
         <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4 }}>
           {["Art. 9", "Art. 11", "Art. 13", "Annex IV", "Art. 49"].map(a => (
-            <span key={a} style={{ fontFamily: MONO, fontSize: 7, color: "rgba(255,255,255,0.3)", padding: "2px 6px", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 3 }}>{a}</span>
+            <span key={a} style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.35)", padding: "3px 7px", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 3 }}>{a}</span>
           ))}
         </div>
       </div>
@@ -317,12 +317,12 @@ function FlowTrio() {
   );
 
   const docMini = (
-    <div style={{ background: "#111", borderRadius: 8, border: "1px solid rgba(255,255,255,0.06)", overflow: "hidden" }}>
+    <div style={{ background: "#111", borderRadius: 10, border: "1px solid rgba(255,255,255,0.08)", overflow: "hidden" }}>
       <div style={{ padding: "7px 10px", borderBottom: "1px solid rgba(255,255,255,0.04)", display: "flex", gap: 4 }}>
         {[0,1,2].map(i => <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(255,255,255,0.1)" }} />)}
       </div>
-      <div style={{ padding: "12px 12px 10px" }}>
-        <div style={{ fontFamily: MONO, fontSize: 7, color: "rgba(255,255,255,0.2)", marginBottom: 10 }}>Annex IV — Fascicolo tecnico</div>
+      <div style={{ padding: "18px 16px 16px" }}>
+        <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.25)", marginBottom: 12 }}>Annex IV — Fascicolo tecnico</div>
         {[
           { label: "Descrizione sistema AI", pct: 100 },
           { label: "Misure di conformità",   pct: 82 },
@@ -331,8 +331,8 @@ function FlowTrio() {
         ].map(row => (
           <div key={row.label} style={{ marginBottom: 7 }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-              <span style={{ fontFamily: MONO, fontSize: 7, color: "rgba(255,255,255,0.35)" }}>{row.label}</span>
-              <span style={{ fontFamily: MONO, fontSize: 7, color: "rgba(255,255,255,0.25)" }}>{row.pct}%</span>
+              <span style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.4)" }}>{row.label}</span>
+              <span style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.28)" }}>{row.pct}%</span>
             </div>
             <div style={{ height: 3, background: "rgba(255,255,255,0.06)", borderRadius: 2, overflow: "hidden" }}>
               <div style={{ width: `${row.pct}%`, height: "100%", background: row.pct === 100 ? "rgba(11,61,46,0.9)" : "rgba(255,255,255,0.3)", borderRadius: 2 }} />
@@ -344,12 +344,12 @@ function FlowTrio() {
   );
 
   const monitorMini = (
-    <div style={{ background: "#111", borderRadius: 8, border: "1px solid rgba(255,255,255,0.06)", overflow: "hidden" }}>
+    <div style={{ background: "#111", borderRadius: 10, border: "1px solid rgba(255,255,255,0.08)", overflow: "hidden" }}>
       <div style={{ padding: "7px 10px", borderBottom: "1px solid rgba(255,255,255,0.04)", display: "flex", gap: 4 }}>
         {[0,1,2].map(i => <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(255,255,255,0.1)" }} />)}
       </div>
-      <div style={{ padding: "12px 12px 10px" }}>
-        <div style={{ fontFamily: MONO, fontSize: 7, color: "rgba(255,255,255,0.2)", marginBottom: 10 }}>Post-Market — Dashboard</div>
+      <div style={{ padding: "18px 16px 16px" }}>
+        <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.25)", marginBottom: 12 }}>Post-Market — Dashboard</div>
         <div style={{ display: "flex", gap: 6, marginBottom: 10 }}>
           {[
             { label: "Uptime", val: "99.8%" },
@@ -358,7 +358,7 @@ function FlowTrio() {
           ].map(m => (
             <div key={m.label} style={{ flex: 1, background: "rgba(11,61,46,0.35)", borderRadius: 4, padding: "6px 7px", border: "1px solid rgba(30,120,80,0.25)" }}>
               <div style={{ fontFamily: MONO, fontSize: 9, color: "#fff", fontWeight: 500 }}>{m.val}</div>
-              <div style={{ fontFamily: MONO, fontSize: 7, color: "rgba(255,255,255,0.25)", marginTop: 2 }}>{m.label}</div>
+              <div style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.28)", marginTop: 2 }}>{m.label}</div>
             </div>
           ))}
         </div>
@@ -369,7 +369,7 @@ function FlowTrio() {
         ].map((log, i) => (
           <div key={i} style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 5 }}>
             <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#2D7A50", flexShrink: 0 }} />
-            <span style={{ fontFamily: MONO, fontSize: 7, color: "rgba(255,255,255,0.3)" }}>{log}</span>
+            <span style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.38)" }}>{log}</span>
           </div>
         ))}
       </div>
@@ -383,21 +383,21 @@ function FlowTrio() {
   ];
 
   return (
-    <div ref={ref} style={{ background: DARK, padding: "80px 48px" }}>
-      <div style={{ maxWidth: 1040, margin: "0 auto" }}>
-        <p style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.22)", letterSpacing: "0.12em", textTransform: "uppercase" as const, marginBottom: 48 }}>
+    <div ref={ref} style={{ background: DARK, padding: "80px 56px" }}>
+      <div>
+        <p style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.22)", letterSpacing: "0.12em", textTransform: "uppercase" as const, marginBottom: 56 }}>
           Il flusso completo
         </p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 40 }} className="trio-grid">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 56 }} className="trio-grid">
           {panels.map((p, i) => (
             <div key={p.num} style={{ opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(24px)", transition: `opacity .55s ${i*0.14}s ease, transform .55s ${i*0.14}s ease` }}>
-              <div style={{ marginBottom: 20 }}>{p.mini}</div>
+              <div style={{ marginBottom: 24 }}>{p.mini}</div>
               <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 18 }}>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10 }}>
-                  <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.22)", letterSpacing: "0.1em" }}>{p.num}</span>
-                  <span style={{ fontFamily: SERIF, fontSize: 22, fontWeight: 400, color: "#fff", letterSpacing: "-0.5px" }}>{p.title}</span>
+                  <span style={{ fontFamily: MONO, fontSize: 11, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em" }}>{p.num}</span>
+                  <span style={{ fontFamily: SERIF, fontSize: 30, fontWeight: 400, color: "#fff", letterSpacing: "-1px" }}>{p.title}</span>
                 </div>
-                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.38)", lineHeight: 1.72 }}>{p.desc}</p>
+                <p style={{ fontSize: 15, color: "rgba(255,255,255,0.42)", lineHeight: 1.72 }}>{p.desc}</p>
               </div>
             </div>
           ))}
