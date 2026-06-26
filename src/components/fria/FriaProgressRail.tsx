@@ -46,18 +46,15 @@ export function FriaProgressRail({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", background: T.bg }}>
-      {/* Header */}
-      <div style={{ padding: "14px 14px 10px", borderBottom: `1px solid ${T.border}` }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-          <span style={{ fontSize: 10, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-            Avanzamento
-          </span>
-          <span style={{ fontSize: 13, fontWeight: 700, color: globalColor, fontFamily: "monospace" }}>
-            {pct}%
-          </span>
+      {/* Header — stile Risk Manager */}
+      <div style={{ padding: "12px 12px 10px", borderBottom: `1px solid ${T.border}` }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Documento</span>
+          <span style={{ fontSize: 11, fontWeight: 600, color: T.text, fontFamily: "monospace" }}>{pct}%</span>
         </div>
-        <ProgressBar pct={pct} color={globalColor} />
-        <p style={{ fontSize: 9, color: T.faint, margin: "5px 0 0" }}>Art. 27 AI Act · DIHR/ECNL</p>
+        <div style={{ width: "100%", height: 4, background: "rgba(0,0,0,0.07)", borderRadius: 2, overflow: "hidden" }}>
+          <div style={{ height: "100%", width: `${pct}%`, background: T.text, borderRadius: 2, transition: "width 0.5s ease" }} />
+        </div>
       </div>
 
       {/* Sezioni */}
