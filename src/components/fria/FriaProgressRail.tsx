@@ -58,7 +58,7 @@ export function FriaProgressRail({
       </div>
 
       {/* Sezioni */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "8px" }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: "10px" }}>
         {progress.sections.map(sec => {
           const isActive   = activeSection === sec.key;
           const isExpanded = expanded.has(sec.key);
@@ -79,7 +79,7 @@ export function FriaProgressRail({
               background: bg,
               borderRadius: 8,
               overflow: "hidden",
-              marginBottom: 4,
+              marginBottom: 6,
             }}>
               <button
                 onClick={() => { onSectionClick(sec.key, sec.anchor); toggle(sec.key); }}
