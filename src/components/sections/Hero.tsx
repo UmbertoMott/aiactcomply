@@ -256,19 +256,6 @@ export default function Hero() {
           0%, 100% { opacity: 1 }
           50%       { opacity: 0 }
         }
-        @keyframes frameworkTicker {
-          from { transform: translateX(0) }
-          to   { transform: translateX(-50%) }
-        }
-        .framework-ticker {
-          display: flex;
-          gap: 12px;
-          width: max-content;
-          animation: frameworkTicker 34s linear infinite;
-        }
-        .framework-ticker:hover {
-          animation-play-state: paused;
-        }
       `}</style>
 
       {/* ── Full-bleed video hero ── */}
@@ -385,7 +372,7 @@ export default function Hero() {
         </motion.div>
       </section>
 
-      {/* Framework ticker — on white, below the video section */}
+      {/* Framework badges — 6 fissi, centrati */}
       <section style={{ background: "#ffffff" }}>
         <motion.div
           initial={{ opacity: 0 }}
@@ -393,18 +380,19 @@ export default function Hero() {
           transition={{ delay: 0.85, duration: 0.8 }}
           style={{
             borderBottom: "1px solid rgba(0,0,0,0.07)",
-            overflow: "hidden",
             paddingTop: 28,
             paddingBottom: 28,
-            maskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
-            WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
+            display: "flex",
+            justifyContent: "center",
+            flexWrap: "wrap",
+            gap: 12,
+            paddingLeft: 24,
+            paddingRight: 24,
           }}
         >
-          <div className="framework-ticker">
-            {[...FRAMEWORKS, ...FRAMEWORKS, ...FRAMEWORKS].map((fw, i) => (
-              <FrameworkBadge key={i} {...fw} />
-            ))}
-          </div>
+          {FRAMEWORKS.map((fw) => (
+            <FrameworkBadge key={fw.name} {...fw} />
+          ))}
         </motion.div>
       </section>
     </>
