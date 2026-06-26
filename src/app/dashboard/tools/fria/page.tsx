@@ -1722,8 +1722,18 @@ export default function FRIAPage() {
 
       {/* ── Left sidebar ── */}
       <div style={{ width: 232, flexShrink: 0, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, overflow: "hidden", background: "#fafafa", display: "flex", flexDirection: "column", minHeight: "100%" }}>
+        {/* DOCUMENTO header */}
+        <div style={{ padding: "12px 12px 10px", borderBottom: `1px solid ${T.border}` }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>Documento</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", fontFamily: "monospace" }}>{completeness}%</span>
+          </div>
+          <div style={{ width: "100%", height: 4, background: "rgba(0,0,0,0.07)", borderRadius: 2, overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${completeness}%`, background: "#0D1016", borderRadius: 2, transition: "width 0.5s ease" }} />
+          </div>
+        </div>
         {/* System name + org */}
-        <div style={{ padding: "16px 14px 12px", borderBottom: `1px solid ${T.border}` }}>
+        <div style={{ padding: "12px 14px 12px", borderBottom: `1px solid ${T.border}` }}>
           <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", marginBottom: 8 }}>Sistema AI</div>
           <input value={doc.system_name} onChange={(e) => upDoc({ system_name: e.target.value })} placeholder="Nome del sistema AI"
             style={{ ...inputSt, marginBottom: 6, fontSize: 13, fontWeight: 500 }} />

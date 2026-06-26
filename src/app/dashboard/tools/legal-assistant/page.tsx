@@ -145,6 +145,21 @@ const SUGGESTIONS: { label: string; query: string }[] = [
   },
 ];
 
+// ─── EU AI Act navigation sections ───────────────────────────────
+
+const EU_ACT_SECTIONS: { label: string; ref: string; query: string }[] = [
+  { label: "Pratiche proibite", ref: "Art. 5", query: "Quali pratiche AI sono vietate dall'Art. 5 dell'EU AI Act?" },
+  { label: "Classificazione alto rischio", ref: "Art. 6–7", query: "Come si classificano i sistemi AI ad alto rischio secondo l'EU AI Act?" },
+  { label: "Requisiti tecnici", ref: "Art. 8–15", query: "Quali requisiti tecnici devono rispettare i sistemi AI ad alto rischio?" },
+  { label: "Obblighi fornitori", ref: "Art. 16", query: "Quali sono gli obblighi dei fornitori di sistemi AI ad alto rischio?" },
+  { label: "Obblighi deployer", ref: "Art. 26", query: "Quali sono gli obblighi dei deployer di sistemi AI?" },
+  { label: "FRIA", ref: "Art. 27", query: "Quando è obbligatoria la Fundamental Rights Impact Assessment (FRIA) ai sensi dell'Art. 27?" },
+  { label: "Conformità e certificazione", ref: "Art. 43–49", query: "Come funziona la procedura di valutazione della conformità per sistemi AI ad alto rischio?" },
+  { label: "Modelli GPAI", ref: "Art. 51–56", query: "Quali obblighi hanno i fornitori di modelli AI general purpose (GPAI)?" },
+  { label: "Governance e vigilanza", ref: "Art. 64–70", query: "Come funziona la governance dell'EU AI Act e le strutture di vigilanza nazionale?" },
+  { label: "Sanzioni", ref: "Art. 99–101", query: "Quali sanzioni prevede l'EU AI Act per la non conformità?" },
+];
+
 // ─── Toggle button (outside component to avoid remount on render) ─
 
 function ToggleBtn({
@@ -674,47 +689,77 @@ export default function LegalAssistantPage() {
       </div>
 
       <div
-        ref={containerRef}
-        className="rounded-xl mt-4 overflow-hidden flex"
-        style={{
-          border: "1px solid rgba(0,0,0,0.08)",
-          height: "calc(100vh - 200px)",
-          minHeight: "500px",
-        }}
+        className="mt-4 flex gap-3"
+        style={{ height: "calc(100vh - 200px)", minHeight: "500px" }}
       >
-        {layout !== "source" && chatPanel}
-        {layout === "split" && (
-          <div
-            style={{
-              flex: "0 0 5px",
-              cursor: "col-resize",
-              background: "transparent",
-              position: "relative",
-              zIndex: 10,
-            }}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              isDragging.current = true;
-              document.body.style.cursor = "col-resize";
-              document.body.style.userSelect = "none";
-            }}
-          >
+        {/* ── Left sidebar: EU AI Act sections ── */}
+        <div style={{ width: 220, flexShrink: 0, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, overflow: "hidden", background: "#fafafa", display: "flex", flexDirection: "column" }}>
+          <div style={{ padding: "12px 12px 10px", borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>Documento</span>
+            <p style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", margin: "4px 0 0", lineHeight: 1.3 }}>Reg. UE 2024/1689 · EU AI Act</p>
+          </div>
+          <div style={{ flex: 1, overflowY: "auto" as const, padding: "10px" }}>
+            {EU_ACT_SECTIONS.map((s) => (
+              <button
+                key={s.ref}
+                onClick={() => { sendMessage(s.query); setInput(""); }}
+                style={{ width: "100%", textAlign: "left" as const, border: "1px solid rgba(0,0,0,0.07)", background: "transparent", padding: "9px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, borderRadius: 8, marginBottom: 4 }}
+                onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,0,0,0.03)"; e.currentTarget.style.borderColor = "rgba(0,0,0,0.12)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(0,0,0,0.07)"; }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>{s.label}</p>
+                  <p style={{ fontSize: 9, color: "rgba(0,0,0,0.42)", margin: 0, marginTop: 2, fontFamily: "monospace" }}>{s.ref}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Existing chat + source panels ── */}
+        <div
+          ref={containerRef}
+          className="rounded-xl overflow-hidden flex"
+          style={{
+            border: "1px solid rgba(0,0,0,0.08)",
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
+          {layout !== "source" && chatPanel}
+          {layout === "split" && (
             <div
               style={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: "3px",
-                height: "36px",
-                borderRadius: "2px",
-                background: "rgba(0,0,0,0.12)",
-                transition: "background 0.15s",
+                flex: "0 0 5px",
+                cursor: "col-resize",
+                background: "transparent",
+                position: "relative",
+                zIndex: 10,
               }}
-            />
-          </div>
-        )}
-        {layout !== "chat" && sourcePanel}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                isDragging.current = true;
+                document.body.style.cursor = "col-resize";
+                document.body.style.userSelect = "none";
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: "3px",
+                  height: "36px",
+                  borderRadius: "2px",
+                  background: "rgba(0,0,0,0.12)",
+                  transition: "background 0.15s",
+                }}
+              />
+            </div>
+          )}
+          {layout !== "chat" && sourcePanel}
+        </div>
       </div>
 
       <style>{`

@@ -1941,10 +1941,14 @@ export default function DPIAPage() {
           position: "sticky", top: 16,
         }}>
           {/* Rail header */}
-          <div style={{ padding: "10px 14px 8px", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
-            <span style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.42)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-              Fasi DPIA
-            </span>
+          <div style={{ padding: "12px 12px 10px", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Documento</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", fontFamily: "monospace" }}>{computeDpiaProgress(doc).overallPercent}%</span>
+            </div>
+            <div style={{ width: "100%", height: 4, background: "rgba(0,0,0,0.07)", borderRadius: 2, overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${computeDpiaProgress(doc).overallPercent}%`, background: "#0D1016", borderRadius: 2, transition: "width 0.5s ease" }} />
+            </div>
           </div>
           {/* Step list */}
           <div style={{ padding: 8 }}>
