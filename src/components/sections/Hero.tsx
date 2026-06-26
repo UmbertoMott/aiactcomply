@@ -330,7 +330,7 @@ export default function Hero() {
         </motion.p>
 
         {/* CTAs */}
-        <motion.div variants={wordVariant} className="flex gap-3 mb-20">
+        <motion.div variants={wordVariant} className="flex gap-3 mb-14">
           <Link href="/register"
             className="text-[13px] font-medium rounded-full px-6 py-3 transition-opacity hover:opacity-80"
             style={{ background: "#0D1016", color: "#ffffff", letterSpacing: "-0.2px" }}
@@ -343,6 +343,60 @@ export default function Hero() {
           >
             Scopri i prezzi
           </Link>
+        </motion.div>
+
+        {/* Hero video */}
+        <motion.div
+          variants={wordVariant}
+          className="w-full mb-0"
+          style={{ maxWidth: 960 }}
+        >
+          <div
+            style={{
+              position: "relative",
+              borderRadius: 16,
+              overflow: "hidden",
+              boxShadow: "0 40px 100px rgba(0,0,0,0.22), 0 8px 24px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.08)",
+            }}
+          >
+            {/* Dark overlay for the "imbrunito" effect */}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "rgba(0,0,0,0.18)",
+                zIndex: 1,
+                pointerEvents: "none",
+                borderRadius: 16,
+              }}
+            />
+            {/* Bottom gradient vignette */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: "30%",
+                background: "linear-gradient(to bottom, transparent, rgba(0,0,0,0.32))",
+                zIndex: 2,
+                pointerEvents: "none",
+              }}
+            />
+            <video
+              src="/videos/hero-demo.mp4"
+              autoPlay
+              muted
+              loop
+              playsInline
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+                filter: "brightness(0.80) contrast(1.04) saturate(0.88)",
+              }}
+            />
+          </div>
         </motion.div>
       </motion.div>
 
