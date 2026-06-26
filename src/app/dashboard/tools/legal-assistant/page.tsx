@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { BookOpen, Scale, Send } from "lucide-react";
+import HighlightedSourceText from "@/components/legal/HighlightedSourceText";
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -33,6 +34,7 @@ interface ChatMessage {
   confidence?: string;
   latencyMs?: number;
   chunksFound?: number;
+  userQuery?: string; // domanda che ha prodotto la risposta — usata per l'highlight Tier 2
 }
 
 // ─── Answer parsing ───────────────────────────────────────────
@@ -232,6 +234,7 @@ export default function LegalAssistantPage() {
         confidence: data.confidence,
         latencyMs: data.latencyMs,
         chunksFound: data.chunksFound ?? 0,
+        userQuery: text.trim(),
       };
 
       setMessages((prev) => {
@@ -574,9 +577,10 @@ export default function LegalAssistantPage() {
                 rilevanza {activeSource.similarity.toFixed(2)}
               </span>
             </div>
-            <p className="text-[11px] text-foreground leading-[1.7]">
-              {activeSource.chunkText}
-            </p>
+            <HighlightedSourceText
+              text={activeSource.chunkText}
+              query={activeMsg?.userQuery}
+            />
           </div>
         )}
       </div>
