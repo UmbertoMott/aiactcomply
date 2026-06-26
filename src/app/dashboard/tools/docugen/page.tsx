@@ -819,36 +819,44 @@ export default function DocuGenPage() {
       {/* ── Step 1: Data Aggregation ── */}
       {timelineStep === "aggregate" && (
         <div>
-          <p className="text-[13px] mb-4" style={{ color: "rgba(0,0,0,0.55)" }}>
-            Sorgenti dati rilevate dagli altri tool. I dati importati pre-popoleranno automaticamente le sezioni del fascicolo.
-          </p>
-
-          {/* Ghost sources */}
-          {([
-            { label: "Classifier", present: !!ghost.systemName, preview: ghost.systemName ? `Sistema: ${ghost.systemName} · Risk: ${ghost.riskLevel ?? "N/D"}` : null },
-            { label: "Data Audit", present: !!ghost.datasetsSummary, preview: ghost.datasetsSummary },
-            { label: "Risk Manager", present: !!ghost.risksSummary, preview: ghost.risksSummary },
-            { label: "DPIA", present: !!ghost.legalBasis, preview: ghost.legalBasis ? `Base giuridica: ${ghost.legalBasis?.slice(0, 80)}…` : null },
-          ] as { label: string; present: boolean; preview: string | null }[]).map((src) => (
-            <div key={src.label} style={{ border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, padding: "12px 16px", marginBottom: 8 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016" }}>{src.label}</span>
-                <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 99,
-                  background: src.present ? "rgba(0,0,0,0.07)" : "rgba(0,0,0,0.04)",
-                  color: src.present ? "#0D1016" : "rgba(0,0,0,0.35)" }}>
-                  {src.present ? "✓ Importato" : "Mancante"}
-                </span>
-              </div>
-              {src.preview && (
-                <p style={{ fontSize: 12, color: "rgba(0,0,0,0.55)", margin: 0 }}>{src.preview}</p>
-              )}
-              {!src.present && (
-                <p style={{ fontSize: 11, color: "rgba(0,0,0,0.32)", margin: 0, fontStyle: "italic" }}>
-                  Nessun dato — completa {src.label} prima di aggregare
-                </p>
-              )}
+          {/* Ghost sources — FRIA style */}
+          <div style={{ border: "1px solid rgba(0,0,0,0.08)", borderRadius: 10, overflow: "hidden", marginBottom: 24 }}>
+            <div style={{ padding: "10px 16px", borderBottom: "1px solid rgba(0,0,0,0.06)", background: "#fafafa" }}>
+              <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.35)", textTransform: "uppercase" as const, letterSpacing: "0.08em", margin: 0 }}>
+                Sorgenti dati per la bozza AI
+              </p>
             </div>
-          ))}
+            {([
+              { label: "Classifier", art: "Art. 6", desc: "Determina il livello di rischio e la categoria del sistema AI", href: "/dashboard/tools/classifier", present: !!ghost.systemName, preview: ghost.systemName ? `Sistema: ${ghost.systemName} · Risk: ${ghost.riskLevel ?? "N/D"}` : null },
+              { label: "Risk Manager", art: "Art. 9", desc: "Pre-carica scenari di rischio nelle sezioni gestione rischi", href: "/dashboard/tools/risk-manager", present: !!ghost.risksSummary, preview: ghost.risksSummary },
+              { label: "Data Audit", art: "Art. 10", desc: "Governance dataset di addestramento e analisi bias", href: "/dashboard/tools/data-audit", present: !!ghost.datasetsSummary, preview: ghost.datasetsSummary },
+              { label: "DPIA", art: "Art. 35", desc: "Importa base giuridica e categorie di dati personali trattati", href: "/dashboard/tools/dpia", present: !!ghost.legalBasis, preview: ghost.legalBasis ? `Base giuridica: ${ghost.legalBasis?.slice(0, 80)}…` : null },
+            ] as { label: string; art: string; desc: string; href: string; present: boolean; preview: string | null }[]).map((src, i, arr) => (
+              <div key={src.label} style={{ display: "flex", alignItems: "center", gap: 14, padding: "13px 16px", borderBottom: i < arr.length - 1 ? "1px solid rgba(0,0,0,0.05)" : "none", background: "#fff" }}>
+                <div style={{ flexShrink: 0, width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+                  background: src.present ? "rgba(22,163,74,0.08)" : "transparent",
+                  border: src.present ? "1.5px solid rgba(22,163,74,0.35)" : "1.5px solid rgba(0,0,0,0.18)" }}>
+                  {src.present && <span style={{ fontSize: 10, color: "#16a34a", fontWeight: 700 }}>✓</span>}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "#0D1016" }}>{src.label}</span>
+                    <span style={{ fontSize: 9, fontWeight: 600, padding: "1px 6px", borderRadius: 4, background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.45)" }}>{src.art}</span>
+                  </div>
+                  <p style={{ fontSize: 11, color: "rgba(0,0,0,0.42)", margin: 0 }}>
+                    {src.present && src.preview ? src.preview : src.desc}
+                  </p>
+                </div>
+                <a href={src.href} style={{ flexShrink: 0, fontSize: 11, fontWeight: 500, padding: "5px 12px", borderRadius: 7,
+                  background: src.present ? "transparent" : "#0D1016",
+                  color: src.present ? "rgba(0,0,0,0.45)" : "#fff",
+                  border: src.present ? "1px solid rgba(0,0,0,0.10)" : "none",
+                  cursor: "pointer", textDecoration: "none", whiteSpace: "nowrap" as const }}>
+                  {src.present ? "Modifica →" : "Migliora bozza →"}
+                </a>
+              </div>
+            ))}
+          </div>
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6 mb-4">

@@ -1012,10 +1012,9 @@ export default function LogVaultPage() {
           <button
             onClick={handleAnalyzeDrift}
             disabled={analyzingDrift || events.length === 0}
-            className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg"
-            style={{ background: T.violetBg, border: `1px solid ${T.violetBdr}`, color: T.violet, cursor: events.length === 0 ? "not-allowed" : "pointer", opacity: events.length === 0 ? 0.5 : 1 }}>
-            {analyzingDrift ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
-            ✦ Analisi drift
+            title="Analisi drift"
+            style={{ background: "none", border: "none", padding: 4, cursor: events.length === 0 ? "not-allowed" : "pointer", opacity: events.length === 0 ? 0.25 : 0.7, display: "flex", alignItems: "center" }}>
+            {analyzingDrift ? <Loader2 size={15} style={{ color: "#0D1016" }} className="animate-spin" /> : <Sparkles size={15} style={{ color: "#0D1016" }} />}
           </button>
         </div>
 
