@@ -186,9 +186,32 @@ export default function LegalAssistantPage() {
   const [activeChunkIndex, setActiveChunkIndex] = useState<number>(-1);
   const [activeMsgIndex, setActiveMsgIndex] = useState<number>(-1);
 
+  const [splitRatio, setSplitRatio] = useState(58); // % width for chat panel in split mode
+  const isDragging = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    function onMouseMove(e: MouseEvent) {
+      if (!isDragging.current || !containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const ratio = ((e.clientX - rect.left) / rect.width) * 100;
+      setSplitRatio(Math.min(75, Math.max(25, ratio)));
+    }
+    function onMouseUp() {
+      isDragging.current = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    }
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -279,8 +302,8 @@ export default function LegalAssistantPage() {
     <div
       className="flex flex-col min-w-0"
       style={{
-        flex: 1,
-        borderRight: layout === "split" ? "1px solid rgba(0,0,0,0.06)" : "none",
+        flex: layout === "split" ? `0 0 ${splitRatio}%` : "1 1 auto",
+        minWidth: 0,
       }}
     >
       <div
@@ -503,10 +526,9 @@ export default function LegalAssistantPage() {
     <div
       className="flex flex-col min-w-0"
       style={{
-        width: layout === "source" ? "100%" : "42%",
+        flex: "1 1 auto",
+        minWidth: 0,
         background: "#ffffff",
-        flexShrink: 0,
-        borderLeft: layout === "split" ? "1px solid rgba(0,0,0,0.06)" : "none",
       }}
     >
       <div
@@ -652,6 +674,7 @@ export default function LegalAssistantPage() {
       </div>
 
       <div
+        ref={containerRef}
         className="rounded-xl mt-4 overflow-hidden flex"
         style={{
           border: "1px solid rgba(0,0,0,0.08)",
@@ -660,6 +683,37 @@ export default function LegalAssistantPage() {
         }}
       >
         {layout !== "source" && chatPanel}
+        {layout === "split" && (
+          <div
+            style={{
+              flex: "0 0 5px",
+              cursor: "col-resize",
+              background: "transparent",
+              position: "relative",
+              zIndex: 10,
+            }}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              isDragging.current = true;
+              document.body.style.cursor = "col-resize";
+              document.body.style.userSelect = "none";
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: "3px",
+                height: "36px",
+                borderRadius: "2px",
+                background: "rgba(0,0,0,0.12)",
+                transition: "background 0.15s",
+              }}
+            />
+          </div>
+        )}
         {layout !== "chat" && sourcePanel}
       </div>
 

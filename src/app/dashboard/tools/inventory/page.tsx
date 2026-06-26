@@ -1,6 +1,7 @@
 "use client"
 import Link from "next/link"
 import React from "react"
+import { Bot, ScanSearch, PenLine, FileDown } from "lucide-react"
 import {
   loadInventory, addSystem, updateSystem, deleteSystem,
   nextSystemId, computeObligationCount,
@@ -250,10 +251,13 @@ const RISK_TIER_MAP: Record<string, SystemTier> = {
   unacceptable: "prohibited", high: "high_risk", limited: "limited", minimal: "minimal",
 }
 
-function AddSystemModal({ onClose, onSave, existingSystems }: {
+type AddStep = "channel" | "describe" | "discovery" | "review"
+
+function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "channel" }: {
   onClose: () => void; onSave: () => void; existingSystems: AISystem[]
+  initialStep?: AddStep
 }) {
-  const [step, setStep] = React.useState<"channel" | "describe" | "discovery" | "review">("channel")
+  const [step, setStep] = React.useState<AddStep>(initialStep)
   const [freeText, setFreeText] = React.useState("")
   const [loading, setLoading] = React.useState(false)
   const [draft, setDraft] = React.useState<AiSystemDraft | null>(null)
@@ -1004,7 +1008,7 @@ export default function InventoryPage() {
   const [systems, setSystems] = React.useState<AISystem[]>([])
   const [filterTier, setFilterTier] = React.useState<SystemTier | "all">("all")
   const [modal, setModal] = React.useState<
-    | { type: "add" }
+    | { type: "add"; initialStep?: AddStep }
     | { type: "edit"; system: AISystem }
     | { type: "classify"; system: AISystem }
     | { type: "import" }
@@ -1023,21 +1027,55 @@ export default function InventoryPage() {
     <div style={{ width: "100%", paddingBottom: 40 }}>
       {/* HEADER */}
       <div style={{ marginBottom: 24 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
           <div>
             <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>Inventario Sistemi AI</h1>
             <p style={{ fontSize: 13, color: "#6b7280", margin: "4px 0 0" }}>
               {systems.length} sistema{systems.length !== 1 ? "i" : ""} registrat{systems.length !== 1 ? "i" : "o"} · Registro EU AI Act Art. 6 + Annex III
             </p>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={() => setModal({ type: "import" })} style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.12)", background: "white", fontSize: 13, cursor: "pointer", color: "#374151" }}>
-              Importa CSV
-            </button>
-            <button onClick={() => setModal({ type: "add" })} style={{ padding: "8px 16px", borderRadius: 8, border: "none", background: "#111", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-              + Aggiungi sistema
-            </button>
-          </div>
+          <button
+            onClick={() => setModal({ type: "import" })}
+            style={{ display: "flex", alignItems: "center", gap: 5, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.10)", background: "white", fontSize: 12, cursor: "pointer", color: "#6b7280", flexShrink: 0 }}
+          >
+            <FileDown size={12} /> CSV
+          </button>
+        </div>
+
+        {/* 3 channel cards */}
+        <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+          {([
+            { icon: Bot, label: "Con AI", badge: "✦ Consigliato", desc: "Descrivi il sistema in italiano — l'AI pre-compila tier, ruolo e obblighi", step: "describe" as AddStep, primary: true },
+            { icon: ScanSearch, label: "Discovery", badge: "⟳ Automatico", desc: "Collega GitHub, npm, HuggingFace e rileva sistemi AI automaticamente", step: "discovery" as AddStep, primary: false },
+            { icon: PenLine, label: "Manuale", badge: "✎ Form", desc: "Compila tutti i campi con la tua classificazione e base normativa", step: "review" as AddStep, primary: false },
+          ] as const).map((ch) => {
+            const Icon = ch.icon
+            return (
+              <button
+                key={ch.step}
+                onClick={() => setModal({ type: "add", initialStep: ch.step })}
+                style={{
+                  flex: 1, textAlign: "left", padding: "12px 14px", borderRadius: 10, cursor: "pointer",
+                  border: ch.primary ? "1.5px solid #0D1016" : "1px solid rgba(0,0,0,0.10)",
+                  background: ch.primary ? "#0D1016" : "white",
+                  transition: "opacity 0.15s",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 5 }}>
+                  <Icon size={14} color={ch.primary ? "rgba(255,255,255,0.9)" : "#374151"} style={{ flexShrink: 0 }} />
+                  <span style={{ fontSize: 13, fontWeight: 700, color: ch.primary ? "white" : "#0D1016" }}>{ch.label}</span>
+                  <span style={{
+                    fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 4, flexShrink: 0,
+                    background: ch.primary ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.06)",
+                    color: ch.primary ? "rgba(255,255,255,0.75)" : "rgba(0,0,0,0.40)",
+                  }}>{ch.badge}</span>
+                </div>
+                <p style={{ fontSize: 11, color: ch.primary ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.45)", margin: 0, lineHeight: 1.45 }}>
+                  {ch.desc}
+                </p>
+              </button>
+            )
+          })}
         </div>
         {/* Filtri tier */}
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -1087,7 +1125,7 @@ export default function InventoryPage() {
 
       {/* MODAL */}
       {modal?.type === "add" && (
-        <AddSystemModal onClose={() => setModal(null)} onSave={() => { refresh(); setModal(null) }} existingSystems={systems} />
+        <AddSystemModal onClose={() => setModal(null)} onSave={() => { refresh(); setModal(null) }} existingSystems={systems} initialStep={modal.initialStep} />
       )}
       {modal?.type === "edit" && (
         <EditSystemModal system={modal.system} onClose={() => setModal(null)} onSave={() => { refresh(); setModal(null) }} />
