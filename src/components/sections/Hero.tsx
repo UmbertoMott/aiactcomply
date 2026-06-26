@@ -72,7 +72,7 @@ function TypewriterWord() {
     <span style={{ position: "relative", fontStyle: "italic", fontWeight: 300 }}>
       {displayed}
       <span style={{
-        display: "inline-block", width: 2, height: "0.8em", background: "#0D1016",
+        display: "inline-block", width: 2, height: "0.8em", background: "#ffffff",
         marginLeft: 3, verticalAlign: "middle",
         animation: showCursor ? "none" : "cursorBlink 1.1s ease-in-out infinite",
         opacity: showCursor ? 1 : undefined, borderRadius: 1,
@@ -250,10 +250,7 @@ const LINE1 = ["AI", "Act", "compliance,"];
 
 export default function Hero() {
   return (
-    <section
-      className="relative overflow-hidden text-center px-6 pt-24 pb-0"
-      style={{ background: "#ffffff" }}
-    >
+    <>
       <style>{`
         @keyframes cursorBlink {
           0%, 100% { opacity: 1 }
@@ -274,152 +271,142 @@ export default function Hero() {
         }
       `}</style>
 
-      <motion.div
-        initial="hidden"
-        animate="show"
-        variants={container}
-        className="relative z-10 flex flex-col items-center max-w-4xl mx-auto"
+      {/* ── Full-bleed video hero ── */}
+      <section
+        className="relative overflow-hidden"
+        style={{ minHeight: "88vh", display: "flex", flexDirection: "column" }}
       >
-        {/* Badge */}
-        <motion.div variants={wordVariant}>
-          <div
-            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-8"
-            style={{ border: "1px solid rgba(0,0,0,0.10)", fontSize: 12, color: "rgba(0,0,0,0.45)" }}
-          >
-            <span className="block w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "#0D1016" }} />
-            EU AI Act — In vigore agosto 2026
-          </div>
-        </motion.div>
-
-        {/* H1 */}
-        <motion.h1
-          variants={container}
-          className="mb-6"
+        {/* Background video */}
+        <video
+          src="/videos/hero-demo.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
           style={{
-            fontFamily: SERIF,
-            fontSize: "clamp(44px, 6.5vw, 80px)",
-            fontWeight: 400,
-            letterSpacing: "-3.5px",
-            lineHeight: 1.0,
-            color: "#0D1016",
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center",
+            filter: "brightness(0.55) contrast(1.05) saturate(0.80)",
           }}
-        >
-          {LINE1.map((word) => (
-            <motion.span key={word} variants={wordVariant}
-              style={{ display: "inline-block", marginRight: "0.22em" }}>
-              {word}
-            </motion.span>
-          ))}
-          <br />
-          <motion.span variants={wordVariant} style={{ display: "inline-block", marginRight: "0.22em" }}>
-            senza
-          </motion.span>
-          <motion.span variants={wordVariant} style={{ display: "inline-block" }}>
-            <TypewriterWord />
-          </motion.span>
-        </motion.h1>
+        />
 
-        {/* Subtitle */}
-        <motion.p
-          variants={wordVariant}
-          className="mb-10 max-w-md"
-          style={{ fontSize: 17, fontWeight: 300, color: "rgba(0,0,0,0.45)", letterSpacing: "-0.2px", lineHeight: 1.65 }}
-        >
-          AIComply automatizza risk assessment, documentazione e integrazione nei tuoi workflow.
-          Dal caos normativo alla conformità certificata.
-        </motion.p>
+        {/* Dark overlay gradient */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(to bottom, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.52) 60%, rgba(0,0,0,0.72) 100%)",
+            zIndex: 1,
+          }}
+        />
 
-        {/* CTAs */}
-        <motion.div variants={wordVariant} className="flex gap-3 mb-14">
-          <Link href="/register"
-            className="text-[13px] font-medium rounded-full px-6 py-3 transition-opacity hover:opacity-80"
-            style={{ background: "#0D1016", color: "#ffffff", letterSpacing: "-0.2px" }}
-          >
-            Inizia gratis
-          </Link>
-          <Link href="/pricing"
-            className="text-[13px] rounded-full px-6 py-3 transition-colors"
-            style={{ border: "1px solid rgba(0,0,0,0.14)", color: "rgba(0,0,0,0.55)", background: "transparent" }}
-          >
-            Scopri i prezzi
-          </Link>
-        </motion.div>
-
-        {/* Hero video */}
+        {/* Content */}
         <motion.div
-          variants={wordVariant}
-          className="w-full mb-0"
-          style={{ maxWidth: 960 }}
+          initial="hidden"
+          animate="show"
+          variants={container}
+          className="relative flex flex-col items-center justify-center text-center px-6 flex-1"
+          style={{ zIndex: 2, paddingTop: 120, paddingBottom: 100 }}
         >
-          <div
+          {/* Badge */}
+          <motion.div variants={wordVariant}>
+            <div
+              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-8"
+              style={{
+                border: "1px solid rgba(255,255,255,0.22)",
+                fontSize: 12,
+                color: "rgba(255,255,255,0.70)",
+                background: "rgba(255,255,255,0.08)",
+                backdropFilter: "blur(8px)",
+              }}
+            >
+              <span className="block w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "#ffffff" }} />
+              EU AI Act — In vigore agosto 2026
+            </div>
+          </motion.div>
+
+          {/* H1 */}
+          <motion.h1
+            variants={container}
+            className="mb-6 max-w-4xl mx-auto"
             style={{
-              position: "relative",
-              borderRadius: 16,
-              overflow: "hidden",
-              boxShadow: "0 40px 100px rgba(0,0,0,0.22), 0 8px 24px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.08)",
+              fontFamily: SERIF,
+              fontSize: "clamp(44px, 6.5vw, 82px)",
+              fontWeight: 400,
+              letterSpacing: "-3.5px",
+              lineHeight: 1.0,
+              color: "#ffffff",
             }}
           >
-            {/* Dark overlay for the "imbrunito" effect */}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: "rgba(0,0,0,0.18)",
-                zIndex: 1,
-                pointerEvents: "none",
-                borderRadius: 16,
-              }}
-            />
-            {/* Bottom gradient vignette */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: "30%",
-                background: "linear-gradient(to bottom, transparent, rgba(0,0,0,0.32))",
-                zIndex: 2,
-                pointerEvents: "none",
-              }}
-            />
-            <video
-              src="/videos/hero-demo.mp4"
-              autoPlay
-              muted
-              loop
-              playsInline
-              style={{
-                width: "100%",
-                height: "auto",
-                display: "block",
-                filter: "brightness(0.80) contrast(1.04) saturate(0.88)",
-              }}
-            />
+            {LINE1.map((word) => (
+              <motion.span key={word} variants={wordVariant}
+                style={{ display: "inline-block", marginRight: "0.22em" }}>
+                {word}
+              </motion.span>
+            ))}
+            <br />
+            <motion.span variants={wordVariant} style={{ display: "inline-block", marginRight: "0.22em" }}>
+              senza
+            </motion.span>
+            <motion.span variants={wordVariant} style={{ display: "inline-block" }}>
+              <TypewriterWord />
+            </motion.span>
+          </motion.h1>
+
+          {/* Subtitle */}
+          <motion.p
+            variants={wordVariant}
+            className="mb-10 max-w-md"
+            style={{ fontSize: 17, fontWeight: 300, color: "rgba(255,255,255,0.62)", letterSpacing: "-0.2px", lineHeight: 1.65 }}
+          >
+            AIComply automatizza risk assessment, documentazione e integrazione nei tuoi workflow.
+            Dal caos normativo alla conformità certificata.
+          </motion.p>
+
+          {/* CTAs */}
+          <motion.div variants={wordVariant} className="flex gap-3">
+            <Link href="/register"
+              className="text-[13px] font-medium rounded-full px-6 py-3 transition-opacity hover:opacity-85"
+              style={{ background: "#ffffff", color: "#0D1016", letterSpacing: "-0.2px" }}
+            >
+              Inizia gratis
+            </Link>
+            <Link href="/pricing"
+              className="text-[13px] rounded-full px-6 py-3 transition-colors hover:bg-white/10"
+              style={{ border: "1px solid rgba(255,255,255,0.30)", color: "rgba(255,255,255,0.80)", background: "transparent" }}
+            >
+              Scopri i prezzi
+            </Link>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* Framework ticker — on white, below the video section */}
+      <section style={{ background: "#ffffff" }}>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.85, duration: 0.8 }}
+          style={{
+            borderBottom: "1px solid rgba(0,0,0,0.07)",
+            overflow: "hidden",
+            paddingTop: 28,
+            paddingBottom: 28,
+            maskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
+          }}
+        >
+          <div className="framework-ticker">
+            {[...FRAMEWORKS, ...FRAMEWORKS, ...FRAMEWORKS].map((fw, i) => (
+              <FrameworkBadge key={i} {...fw} />
+            ))}
           </div>
         </motion.div>
-      </motion.div>
-
-      {/* Framework ticker */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.85, duration: 0.8 }}
-        style={{
-          borderTop: "1px solid rgba(0,0,0,0.07)",
-          overflow: "hidden",
-          paddingTop: 28,
-          paddingBottom: 52,
-          maskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
-          WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
-        }}
-      >
-        <div className="framework-ticker">
-          {[...FRAMEWORKS, ...FRAMEWORKS, ...FRAMEWORKS].map((fw, i) => (
-            <FrameworkBadge key={i} {...fw} />
-          ))}
-        </div>
-      </motion.div>
-    </section>
+      </section>
+    </>
   );
 }
