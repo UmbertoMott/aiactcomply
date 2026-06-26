@@ -552,15 +552,18 @@ export default function DeadlinesPage() {
                 savePrefs({ viewMode: next });
                 if (next === "ai") setShowCopilot(true);
               }}
-              className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg transition-all"
+              title={viewMode === "ai" ? "Disattiva vista AI" : "Attiva vista AI"}
               style={{
-                background: viewMode === "ai" ? "rgba(124,58,237,0.15)" : BG2,
-                border: viewMode === "ai" ? "1px solid rgba(124,58,237,0.4)" : `1px solid ${BORDER}`,
-                color: viewMode === "ai" ? "#a78bfa" : MUTED,
+                background: "none",
+                border: "none",
                 cursor: "pointer",
+                padding: 4,
+                display: "flex",
+                alignItems: "center",
+                opacity: viewMode === "ai" ? 1 : 0.35,
+                transition: "opacity 0.15s",
               }}>
-              <Sparkles size={12} />
-              {viewMode === "ai" ? "Vista AI attiva" : "Vista AI"}
+              <Sparkles size={16} style={{ color: "#0D1016" }} />
             </button>
           </div>
         </div>
@@ -613,14 +616,6 @@ export default function DeadlinesPage() {
           onFilter={setFilterStatus}
         />
 
-        {/* Copilot panel */}
-        {(showCopilot || viewMode === "ai") && (
-          <CopilotPanel
-            deadlines={activeDeadlines}
-            systemName={primarySystem?.name ?? "non specificato"}
-            tier={primarySystem?.tier ?? "non specificato"}
-          />
-        )}
 
         {/* Timeline */}
         <div>
