@@ -67,10 +67,10 @@ export function DpiaProgressRail({
           return (
             <div key={sec.key} style={{
               border: `1px solid ${borderColor}`,
-              background: bg,
+              background: isActive ? T.greenBg : "#fff",
               borderRadius: 8,
               overflow: "hidden",
-              marginBottom: 6,
+              marginBottom: 10,
             }}>
               <button
                 onClick={() => { onSectionClick(sec.key, sec.anchor); toggle(sec.key); }}
