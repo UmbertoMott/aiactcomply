@@ -22,7 +22,7 @@ const T = {
   amber:  "#b45309",
 } as const;
 
-const RAIL_W   = 220;
+const RAIL_W   = 256;
 const SPLITTER = 6;
 
 function simpleHash(obj: unknown): string {
@@ -263,13 +263,14 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
       {/* ── Layout: [Rail] [Doc?] [Splitter?] [Chat] ── */}
       <div
         ref={layoutRef}
-        style={{ flex: 1, display: "flex", minHeight: 0, userSelect: isResizing ? "none" : "auto" }}
+        style={{ flex: 1, display: "flex", minHeight: 0, gap: 12, padding: "12px", userSelect: isResizing ? "none" : "auto" }}
       >
 
-        {/* SINISTRA — Avanzamento (220px fissi) */}
+        {/* SINISTRA — Avanzamento (256px fissi) */}
         <div style={{
           width: RAIL_W, flexShrink: 0,
-          borderRight: `1px solid ${T.border}`,
+          border: `1px solid rgba(0,0,0,0.07)`,
+          borderRadius: 10,
           overflow: "hidden", display: "flex", flexDirection: "column",
           background: "#fafafa",
         }}>
