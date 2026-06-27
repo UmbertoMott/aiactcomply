@@ -33,7 +33,7 @@ export interface FriaProgressRailProps {
 export function FriaProgressRail({
   progress, activeSection, onSectionClick,
 }: FriaProgressRailProps) {
-  const [expanded, setExpanded] = useState<Set<string>>(new Set(["fase1a"]));
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const pct = progress.overallPercent;
   const globalColor = pct >= 80 ? T.green : pct >= 40 ? T.amber : T.faint;
 

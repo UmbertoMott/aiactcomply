@@ -25,7 +25,7 @@ export interface DpiaProgressRailProps {
 export function DpiaProgressRail({
   progress, activeSection, onSectionClick, onSubPointClick,
 }: DpiaProgressRailProps) {
-  const [expanded, setExpanded] = useState<Set<string>>(new Set(["screening"]));
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const toggle = (key: string) =>
     setExpanded(prev => {
