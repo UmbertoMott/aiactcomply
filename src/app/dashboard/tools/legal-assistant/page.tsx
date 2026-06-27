@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { BookOpen, Scale, Send } from "lucide-react";
+import { BookOpen, Scale, Send, Menu, Plus, Pencil, Trash2 } from "lucide-react";
 import HighlightedSourceText from "@/components/legal/HighlightedSourceText";
 
 // ─── Types ────────────────────────────────────────────────────
@@ -35,6 +35,42 @@ interface ChatMessage {
   latencyMs?: number;
   chunksFound?: number;
   userQuery?: string; // domanda che ha prodotto la risposta — usata per l'highlight Tier 2
+}
+
+// ─── Chat session persistence ──────────────────────────────────
+
+const LEGAL_CHATS_KEY = "aicomply_legal_chats_v1";
+
+interface LegalChatSession {
+  id: string;
+  name: string;
+  messages: ChatMessage[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+function loadSessions(): LegalChatSession[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(LEGAL_CHATS_KEY);
+    return raw ? (JSON.parse(raw) as LegalChatSession[]) : [];
+  } catch { return []; }
+}
+
+function saveSessions(ss: LegalChatSession[]): void {
+  try { localStorage.setItem(LEGAL_CHATS_KEY, JSON.stringify(ss)); } catch {}
+}
+
+function genId(): string {
+  return `lc_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+}
+
+function relTime(ts: number): string {
+  const diff = Date.now() - ts;
+  if (diff < 60_000) return "ora";
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)} min fa`;
+  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)} h fa`;
+  return `${Math.floor(diff / 86_400_000)} gg fa`;
 }
 
 // ─── Answer parsing ───────────────────────────────────────────
@@ -201,6 +237,13 @@ export default function LegalAssistantPage() {
   const [activeChunkIndex, setActiveChunkIndex] = useState<number>(-1);
   const [activeMsgIndex, setActiveMsgIndex] = useState<number>(-1);
 
+  // Chat session state
+  const [sessions, setSessions] = useState<LegalChatSession[]>([]);
+  const [currentSid, setCurrentSid] = useState<string>(() => genId());
+  const [showChatList, setShowChatList] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
+
   const [splitRatio, setSplitRatio] = useState(58); // % width for chat panel in split mode
   const isDragging = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -231,6 +274,29 @@ export default function LegalAssistantPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  // Load sessions on mount
+  useEffect(() => { setSessions(loadSessions()); }, []);
+
+  // Persist current session whenever messages change
+  useEffect(() => {
+    if (messages.length === 0) return;
+    setSessions(prev => {
+      const existing = prev.find(s => s.id === currentSid);
+      const firstName = messages.find(m => m.role === "user")?.content.slice(0, 55) ?? "Nuova chat";
+      const now = Date.now();
+      const updated: LegalChatSession = {
+        id: currentSid,
+        name: existing?.name ?? firstName,
+        messages,
+        createdAt: existing?.createdAt ?? now,
+        updatedAt: now,
+      };
+      const next = [updated, ...prev.filter(s => s.id !== currentSid)];
+      saveSessions(next);
+      return next;
+    });
+  }, [messages, currentSid]);
 
   async function sendMessage(text: string) {
     if (!text.trim() || loading) return;
@@ -300,6 +366,46 @@ export default function LegalAssistantPage() {
     setActiveMsgIndex(msgIdx);
     setActiveChunkIndex(findChunkIndex(artRef, msg.sources));
     if (layout === "chat") setLayout("split");
+  }
+
+  function startNewChat() {
+    setMessages([]);
+    setCurrentSid(genId());
+    setActiveChunkIndex(-1);
+    setActiveMsgIndex(-1);
+    setInput("");
+    setShowChatList(false);
+  }
+
+  function loadSession(s: LegalChatSession) {
+    setMessages(s.messages);
+    setCurrentSid(s.id);
+    setActiveChunkIndex(-1);
+    setActiveMsgIndex(s.messages.length - 1);
+    setShowChatList(false);
+  }
+
+  function deleteSession(id: string) {
+    setSessions(prev => {
+      const next = prev.filter(s => s.id !== id);
+      saveSessions(next);
+      return next;
+    });
+    if (id === currentSid) {
+      setMessages([]);
+      setCurrentSid(genId());
+      setActiveChunkIndex(-1);
+      setActiveMsgIndex(-1);
+    }
+  }
+
+  function renameSession(id: string, name: string) {
+    setSessions(prev => {
+      const next = prev.map(s => s.id === id ? { ...s, name: name.trim() || s.name } : s);
+      saveSessions(next);
+      return next;
+    });
+    setEditingId(null);
   }
 
   function handleSourceRowClick(chunkIdx: number, msgIdx: number) {
@@ -692,27 +798,107 @@ export default function LegalAssistantPage() {
         className="mt-4 flex gap-3"
         style={{ height: "calc(100vh - 200px)", minHeight: "500px" }}
       >
-        {/* ── Left sidebar: EU AI Act sections ── */}
+        {/* ── Left sidebar: EU AI Act sections / Chat history ── */}
         <div style={{ width: 220, flexShrink: 0, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, overflow: "hidden", background: "#fafafa", display: "flex", flexDirection: "column" }}>
-          <div style={{ padding: "12px 12px 10px", borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
-            <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>Documento</span>
-            <p style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", margin: "4px 0 0", lineHeight: 1.3 }}>Reg. UE 2024/1689 · EU AI Act</p>
-          </div>
-          <div style={{ flex: 1, overflowY: "auto" as const, padding: "10px" }}>
-            {EU_ACT_SECTIONS.map((s) => (
+          {/* Header */}
+          <div style={{ padding: "10px 10px 8px", borderBottom: "1px solid rgba(0,0,0,0.07)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>
+                {showChatList ? "Cronologia" : "Documento"}
+              </span>
+              {!showChatList && (
+                <p style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", margin: "2px 0 0", lineHeight: 1.3 }}>Reg. UE 2024/1689 · EU AI Act</p>
+              )}
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+              {showChatList && (
+                <button
+                  onClick={startNewChat}
+                  title="Nuova chat"
+                  style={{ width: 22, height: 22, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 5, color: "rgba(0,0,0,0.45)" }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.06)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                ><Plus size={13} /></button>
+              )}
               <button
-                key={s.ref}
-                onClick={() => { sendMessage(s.query); setInput(""); }}
-                style={{ width: "100%", textAlign: "left" as const, border: "1px solid rgba(0,0,0,0.07)", background: "transparent", padding: "9px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, borderRadius: 8, marginBottom: 4 }}
-                onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,0,0,0.03)"; e.currentTarget.style.borderColor = "rgba(0,0,0,0.12)"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(0,0,0,0.07)"; }}
-              >
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>{s.label}</p>
-                  <p style={{ fontSize: 9, color: "rgba(0,0,0,0.42)", margin: 0, marginTop: 2, fontFamily: "monospace" }}>{s.ref}</p>
-                </div>
-              </button>
-            ))}
+                onClick={() => setShowChatList(p => !p)}
+                title={showChatList ? "Sezioni EU AI Act" : "Cronologia chat"}
+                style={{ width: 22, height: 22, border: "none", background: showChatList ? "rgba(0,0,0,0.08)" : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 5, color: "rgba(0,0,0,0.5)" }}
+                onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.06)")}
+                onMouseLeave={e => (e.currentTarget.style.background = showChatList ? "rgba(0,0,0,0.08)" : "transparent")}
+              ><Menu size={13} /></button>
+            </div>
+          </div>
+
+          {/* Body */}
+          <div style={{ flex: 1, overflowY: "auto" as const, padding: "8px" }}>
+            {showChatList ? (
+              sessions.length === 0 ? (
+                <p style={{ fontSize: 10, color: "rgba(0,0,0,0.3)", padding: "12px 4px", margin: 0 }}>Nessuna chat salvata.</p>
+              ) : (
+                sessions.map(s => (
+                  <div key={s.id} style={{
+                    borderRadius: 7, marginBottom: 3, overflow: "hidden",
+                    border: `1px solid ${s.id === currentSid ? "rgba(0,0,0,0.14)" : "rgba(0,0,0,0.06)"}`,
+                    background: s.id === currentSid ? "rgba(0,0,0,0.03)" : "transparent",
+                  }}>
+                    {editingId === s.id ? (
+                      <div style={{ padding: "6px 8px" }}>
+                        <input
+                          value={editingName}
+                          onChange={e => setEditingName(e.target.value)}
+                          onBlur={() => renameSession(s.id, editingName)}
+                          onKeyDown={e => { if (e.key === "Enter") renameSession(s.id, editingName); if (e.key === "Escape") setEditingId(null); }}
+                          autoFocus
+                          style={{ width: "100%", fontSize: 11, border: "1px solid rgba(0,0,0,0.15)", borderRadius: 4, padding: "2px 5px", background: "#fff", outline: "none", boxSizing: "border-box" as const }}
+                        />
+                      </div>
+                    ) : (
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <button
+                          onClick={() => loadSession(s)}
+                          style={{ flex: 1, textAlign: "left" as const, background: "none", border: "none", padding: "7px 8px", cursor: "pointer", minWidth: 0 }}
+                        >
+                          <p style={{ fontSize: 11, fontWeight: s.id === currentSid ? 600 : 400, color: "#0D1016", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>{s.name}</p>
+                          <p style={{ fontSize: 9, color: "rgba(0,0,0,0.35)", margin: 0, marginTop: 1 }}>{relTime(s.updatedAt)}</p>
+                        </button>
+                        <div style={{ display: "flex", gap: 1, paddingRight: 4, flexShrink: 0 }}>
+                          <button
+                            onClick={() => { setEditingId(s.id); setEditingName(s.name); }}
+                            title="Rinomina"
+                            style={{ width: 20, height: 20, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, color: "rgba(0,0,0,0.35)" }}
+                            onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.06)")}
+                            onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                          ><Pencil size={10} /></button>
+                          <button
+                            onClick={() => deleteSession(s.id)}
+                            title="Elimina"
+                            style={{ width: 20, height: 20, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, color: "rgba(0,0,0,0.35)" }}
+                            onMouseEnter={e => { e.currentTarget.style.background = "rgba(220,38,38,0.08)"; e.currentTarget.style.color = "#dc2626"; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "rgba(0,0,0,0.35)"; }}
+                          ><Trash2 size={10} /></button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )
+            ) : (
+              EU_ACT_SECTIONS.map((s) => (
+                <button
+                  key={s.ref}
+                  onClick={() => { sendMessage(s.query); setInput(""); }}
+                  style={{ width: "100%", textAlign: "left" as const, border: "1px solid rgba(0,0,0,0.07)", background: "transparent", padding: "9px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, borderRadius: 8, marginBottom: 4 }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,0,0,0.03)"; e.currentTarget.style.borderColor = "rgba(0,0,0,0.12)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(0,0,0,0.07)"; }}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>{s.label}</p>
+                    <p style={{ fontSize: 9, color: "rgba(0,0,0,0.42)", margin: 0, marginTop: 2, fontFamily: "monospace" }}>{s.ref}</p>
+                  </div>
+                </button>
+              ))
+            )}
           </div>
         </div>
 

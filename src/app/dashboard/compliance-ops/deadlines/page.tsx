@@ -510,7 +510,7 @@ export default function DeadlinesPage() {
                 ? `${activeDeadlines.length} scadenze attive${systemFilter === "all" ? ` per ${systems.length} sistema${systems.length !== 1 ? "i" : ""} nell'inventario` : ` — ${primarySystem?.name ?? ""}`}`
                 : "Dati statici — completa il Triage per scadenze personalizzate"}
             </p>
-            <p className="text-[11px] mt-1" style={{ color: "#a78bfa" }}>
+            <p className="text-[11px] mt-1" style={{ color: MUTED }}>
               ✦ AI — verifica e conferma: date e articoli richiedono validazione legale contro Reg. (UE) 2024/1689.
             </p>
           </div>

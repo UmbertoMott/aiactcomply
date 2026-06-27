@@ -144,6 +144,14 @@ interface DiscoveredSystem {
   addedToCompliance: boolean; riskLevel?: string;
 }
 
+interface InProgressActivity {
+  id: string;
+  title: string;
+  sub: string;
+  href: string;
+  pct: number; // -1 = unknown
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
@@ -170,6 +178,7 @@ export default function DashboardPage() {
   const [nextActions, setNextActions]       = useState<{ id: string; title: string; article: string; href: string }[]>([]);
   const [deadlines, setDeadlines]           = useState<{ deadline: RegulatoryDeadline; days: number }[]>([]);
   const [recentEvidence, setRecentEvidence] = useState<EvidenceRecord[]>([]);
+  const [inProgress, setInProgress]         = useState<InProgressActivity[]>([]);
 
   useEffect(() => {
     setMounted(true);
@@ -249,6 +258,28 @@ export default function DashboardPage() {
         }).filter(d => d <= 15 && d > 0);
         if (urgent.length > 0) { setArt73Count(urgent.length); setArt73MinDays(Math.min(...urgent)); }
       }
+    } catch { /* ignore */ }
+
+    // ── In-progress activity detection ──────────────────────────
+    try {
+      const acts: InProgressActivity[] = [];
+      const friaG = readFromStorage<{ overallPercent: number }>("friaGuided");
+      if (friaG && friaG.overallPercent > 0 && friaG.overallPercent < 100) {
+        acts.push({ id: "fria", title: "FRIA guidata", sub: "Valutazione impatto diritti fondamentali · Art. 27", href: "/dashboard/tools/fria", pct: friaG.overallPercent });
+      }
+      const dpiaG = readFromStorage<{ overallPercent: number }>("dpiaGuided");
+      if (dpiaG && dpiaG.overallPercent > 0 && dpiaG.overallPercent < 100) {
+        acts.push({ id: "dpia", title: "DPIA guidata", sub: "Data Protection Impact Assessment · Art. 35", href: "/dashboard/tools/dpia", pct: dpiaG.overallPercent });
+      }
+      const assessment = readFromStorage<object>("assessment");
+      if (assessment && Object.keys(assessment).length > 0) {
+        acts.push({ id: "assessment", title: "Valutazione conformità", sub: "Assessment AI Act · Art. 9", href: "/dashboard/tools/assessment", pct: -1 });
+      }
+      const rrKeys = Object.keys(localStorage).filter(k => k.includes("risk_register") && !k.includes("signoff"));
+      if (rrKeys.length > 0) {
+        acts.push({ id: "risk", title: "Risk Register", sub: "Registro rischi AI · Art. 9(9)", href: "/dashboard/tools/risk-manager", pct: -1 });
+      }
+      setInProgress(acts);
     } catch { /* ignore */ }
   }, []);
 
@@ -663,6 +694,37 @@ export default function DashboardPage() {
           ))}
 
         </div>
+
+        {/* ── ATTIVITÀ IN CORSO ─────────────────────────────────── */}
+        {inProgress.length > 0 && (
+          <div style={{ marginTop: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>Attività in corso</span>
+              <span style={{ fontSize: 10, color: T.faint }}>{inProgress.length} {inProgress.length === 1 ? "attività" : "attività"}</span>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(inProgress.length, 4)}, 1fr)`, gap: 10 }}>
+              {inProgress.map(act => (
+                <Link key={act.id} href={act.href} style={{ ...card, padding: "14px 16px", display: "block", textDecoration: "none", transition: "box-shadow 0.15s" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                    <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, margin: 0 }}>{act.title}</p>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: T.muted, fontFamily: "monospace" }}>
+                      {act.pct >= 0 ? `${act.pct}%` : "in corso"}
+                    </span>
+                  </div>
+                  {act.pct >= 0 && (
+                    <div style={{ height: 3, background: "rgba(0,0,0,0.07)", borderRadius: 2, overflow: "hidden", marginBottom: 8 }}>
+                      <div style={{ height: "100%", background: T.text, borderRadius: 2, width: `${act.pct}%`, transition: "width 0.5s" }} />
+                    </div>
+                  )}
+                  <p style={{ fontSize: 10, color: T.faint, margin: 0, marginBottom: 10 }}>{act.sub}</p>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 10.5, fontWeight: 500, color: T.text }}>
+                    Riprendi <ArrowRight size={10} />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
       </div>
     </>
