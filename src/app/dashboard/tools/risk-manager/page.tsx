@@ -203,7 +203,7 @@ const SECTION_LEGAL_REFS: Record<string, string> = {
   signOff:        "Art. 9(9)",
 };
 
-function SectionRow({ section, onOpen }: { section: SectionProgress; onOpen: (anchor: string) => void }) {
+function SectionRow({ section, onOpen, index }: { section: SectionProgress; onOpen: (anchor: string) => void; index: number }) {
   const [expanded, setExpanded] = useState(false);
   const anchor      = SECTION_ANCHORS[section.key] ?? "";
   const legalRef    = SECTION_LEGAL_REFS[section.key] ?? "";
@@ -226,7 +226,7 @@ function SectionRow({ section, onOpen }: { section: SectionProgress; onOpen: (an
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {section.label}
+            {index + 1}. {section.label}
           </p>
           <p style={{ fontSize: 9, color: "rgba(0,0,0,0.42)", margin: 0, marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {doneCount}/{section.subPoints.length} · {legalRef}
@@ -871,7 +871,7 @@ export default function RiskManagerPage() {
           <div style={{ padding: "12px 12px 10px", borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
               <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                Documento
+                Avanzamento
               </span>
               <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", fontFamily: "monospace" }}>
                 {progressPct}%
@@ -884,8 +884,8 @@ export default function RiskManagerPage() {
 
           <div style={{ flex: 1, overflowY: "auto", padding: "10px" }}>
             {/* Sezioni del documento — click apre il PDF e scrolla alla sezione */}
-            {registerProgress.sections.map(section => (
-              <SectionRow key={section.key} section={section} onOpen={openSection} />
+            {registerProgress.sections.map((section, idx) => (
+              <SectionRow key={section.key} section={section} onOpen={openSection} index={idx} />
             ))}
           </div>
 

@@ -49,7 +49,7 @@ export function FriaProgressRail({
       {/* Header — stile Risk Manager */}
       <div style={{ padding: "12px 12px 10px", borderBottom: `1px solid ${T.border}` }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-          <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Documento</span>
+          <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Avanzamento</span>
           <span style={{ fontSize: 11, fontWeight: 600, color: T.text, fontFamily: "monospace" }}>{pct}%</span>
         </div>
         <div style={{ width: "100%", height: 4, background: "rgba(0,0,0,0.07)", borderRadius: 2, overflow: "hidden" }}>
@@ -59,7 +59,7 @@ export function FriaProgressRail({
 
       {/* Sezioni */}
       <div style={{ flex: 1, overflowY: "auto", padding: "10px" }}>
-        {progress.sections.map(sec => {
+        {progress.sections.map((sec, idx) => {
           const isActive   = activeSection === sec.key;
           const isExpanded = expanded.has(sec.key);
           const doneCount  = sec.subPoints.filter(sp => sp.status === "done").length;
@@ -99,7 +99,7 @@ export function FriaProgressRail({
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: 11, fontWeight: 600, color: T.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {sec.label}
+                    {idx + 1}. {sec.label}
                   </p>
                   <p style={{ fontSize: 9, color: T.muted, margin: 0, marginTop: 1 }}>
                     {doneCount}/{totalCount} · {sec.legalRef}

@@ -466,21 +466,19 @@ export default function DossierPage() {
             </div>
             <div
               className="rounded-xl overflow-hidden"
-              style={{ background: "#e5e7eb", padding: 16, minHeight: 640 }}
+              style={{ background: "#e5e7eb", padding: 16 }}
             >
-              {/* Scaled document */}
+              {/* Scaled document — zoom affects layout so no grey overflow */}
               <div
                 style={{
                   background: "#ffffff",
                   borderRadius: 4,
                   boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
-                  transformOrigin: "top left",
-                  transform: "scale(0.58)",
-                  width: "172%",   // 100/0.58 ≈ 172 — compensate for scale
                   pointerEvents: "none",
                   userSelect: "none",
                   overflow: "hidden",
-                }}
+                  zoom: 0.58,
+                } as React.CSSProperties}
               >
                 <DossierPreview data={data} />
               </div>

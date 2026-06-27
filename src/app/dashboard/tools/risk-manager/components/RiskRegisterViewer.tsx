@@ -108,10 +108,10 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
         </div>
       )}
 
-      {/* ── Sezione 3 — Identificazione ── */}
+      {/* ── Sezione 1 — Identificazione ── */}
       {hasIdentification && (
         <>
-          <SectionTitle sectionId="sec-identification" num="3" title="Identificazione del sistema AI e del contesto di conformità" article="Art. 9(1) · AI Act" />
+          <SectionTitle sectionId="sec-identification" num="1" title="Identificazione del sistema AI e del contesto di conformità" article="Art. 9(1) · AI Act" />
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
             <tbody>
               {idRows.map(([label, v]) => (
@@ -128,7 +128,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
       {/* ── Sezione 5 — Registro dei rischi ── */}
       {hasRisks && (
         <>
-          <SectionTitle sectionId="sec-risks" num="5" title="Registro dei rischi" article="Art. 9(2)(a)-(b)" />
+          <SectionTitle sectionId="sec-risks" num="2" title="Registro dei rischi" article="Art. 9(2)(a)-(b)" />
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, fontFamily: SANS }}>
               <thead data-noedit="true">
@@ -188,10 +188,10 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
         </>
       )}
 
-      {/* ── Sezione 6 — Gap check ── */}
+      {/* ── Sezione 3 — Gap check ── */}
       {hasGap && doc.gapCheck && (
         <>
-          <SectionTitle sectionId="sec-gap" num="6" title="Verifica di copertura Art. 9 (gap check)" article="Art. 9(2)(a)-(d)" />
+          <SectionTitle sectionId="sec-gap" num="3" title="Verifica di copertura Art. 9 (gap check)" article="Art. 9(2)(a)-(d)" />
           {doc.gapCheck.coverageScore !== undefined && (
             <p style={{ fontSize: 13, margin: "0 0 6px" }}>
               <strong>Punteggio di copertura:</strong>{" "}
@@ -235,10 +235,10 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
         </>
       )}
 
-      {/* ── Sezione 7 — Monitoraggio ── */}
+      {/* ── Sezione 4 — Monitoraggio ── */}
       {hasReview && (
         <>
-          <SectionTitle sectionId="sec-review" num="7" title="Monitoraggio continuo e ciclo di revisione" article="Art. 9(2)(c) · Art. 72" />
+          <SectionTitle sectionId="sec-review" num="4" title="Monitoraggio continuo e ciclo di revisione" article="Art. 9(2)(c) · Art. 72" />
           {alerts.length > 0 && (
             <div style={{ marginBottom: 10, fontFamily: SANS }}>
               {alerts.map((a, i) => (
@@ -284,7 +284,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
       {/* ── Sezione 8 — Sign-off ── */}
       {hasSignOff && doc.signOff && (
         <>
-          <SectionTitle sectionId="sec-signoff" num="8" title="Approvazione e firme" article="Art. 9(1)" />
+          <SectionTitle sectionId="sec-signoff" num="5" title="Approvazione e firme" article="Art. 9(1)" />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20, marginBottom: 16 }}>
             {([
               ["Risk owner", doc.signOff.riskOwner],
@@ -325,7 +325,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
       {/* ── Firma (sempre visibile, come FRIA/DPIA) ── */}
       {!hasSignOff && !isEmpty && (
         <>
-          <SectionTitle sectionId="sec-signoff" num="8" title="Approvazione e firme" article="Art. 9(1)" />
+          <SectionTitle sectionId="sec-signoff" num="5" title="Approvazione e firme" article="Art. 9(1)" />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20, marginBottom: 16 }}>
             {["Risk owner", "Responsabile compliance/legale", "Rappresentante legale"].map(label => (
               <div key={label}>
