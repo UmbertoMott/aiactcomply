@@ -758,7 +758,7 @@ export default function LogVaultPage() {
         <div className="flex-1 min-w-0 rounded-xl p-4" style={card}>
           <div className="flex items-center gap-2 mb-2">
             <Info size={14} style={{ color: T.blue }} />
-            <span className="text-[12px] font-semibold" style={{ color: T.text }}>Triage iniziale — Art. 12(1) [verify against current AI Act text]</span>
+            <span className="text-[12px] font-semibold" style={{ color: T.text }}>Triage iniziale — Art. 12(1)</span>
           </div>
           <p className="text-[11px] mb-3 leading-relaxed" style={{ color: T.muted }}>
             Il sistema dispone di funzionalità di registrazione automatica degli eventi (log) durante il suo ciclo di vita operativo?
