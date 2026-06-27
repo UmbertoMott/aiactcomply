@@ -427,32 +427,33 @@ export function DpiaGuidedChat({
         </div>
 
         {/* Navigazione prev/next */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 8 }}>
           <button
             onClick={handlePrev}
             disabled={currentIdx === 0}
             style={{
-              padding: "5px 8px", borderRadius: 7, border: `1px solid ${T.border}`,
-              background: "none", cursor: currentIdx === 0 ? "default" : "pointer",
-              color: currentIdx === 0 ? T.faint : T.muted,
-              display: "flex", alignItems: "center",
+              display: "flex", alignItems: "center", gap: 4,
+              fontSize: 10, color: currentIdx === 0 ? T.faint : T.muted,
+              background: "none", border: "none", cursor: currentIdx === 0 ? "default" : "pointer",
+              padding: "3px 6px", borderRadius: 5,
             }}
           >
-            <ChevronLeft size={13} />
+            <ChevronLeft size={12} /> Precedente
           </button>
-          <div style={{ flex: 1 }} />
+          <span style={{ fontSize: 9, color: T.faint, maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "center" }}>
+            {sp?.label}
+          </span>
           <button
             onClick={handleNext}
             disabled={currentIdx === allIds.length - 1}
             style={{
-              padding: "5px 8px", borderRadius: 7, border: `1px solid ${T.border}`,
-              background: "none",
-              cursor: currentIdx === allIds.length - 1 ? "default" : "pointer",
-              color: currentIdx === allIds.length - 1 ? T.faint : T.muted,
-              display: "flex", alignItems: "center",
+              display: "flex", alignItems: "center", gap: 4,
+              fontSize: 10, color: currentIdx === allIds.length - 1 ? T.faint : T.muted,
+              background: "none", border: "none", cursor: currentIdx === allIds.length - 1 ? "default" : "pointer",
+              padding: "3px 6px", borderRadius: 5,
             }}
           >
-            <ChevronRight size={13} />
+            Successiva <ChevronRight size={12} />
           </button>
         </div>
         <p style={{ fontSize: 9, color: T.faint, marginTop: 5, textAlign: "center", marginBottom: 0 }}>

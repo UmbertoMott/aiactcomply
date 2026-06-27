@@ -35,7 +35,7 @@ const T = {
   red: "#dc2626", redBg: "rgba(220,38,38,0.06)", redBdr: "rgba(220,38,38,0.18)",
   amber: "#d97706", amberBg: "rgba(202,138,4,0.07)", amberBdr: "rgba(202,138,4,0.22)",
   green: "#15803d", greenBg: "rgba(22,163,74,0.06)", greenBdr: "rgba(22,163,74,0.18)",
-  blue: "#1d4ed8", blueBg: "rgba(29,78,216,0.05)", blueBdr: "rgba(29,78,216,0.16)",
+  blue: "#0D1016", blueBg: "rgba(0,0,0,0.05)", blueBdr: "rgba(0,0,0,0.12)",
   violet: "#7c3aed", violetBg: "rgba(124,58,237,0.05)", violetBdr: "rgba(124,58,237,0.16)",
 } as const;
 const FONT: CSSProperties = { fontFamily: "Inter, system-ui, sans-serif" };

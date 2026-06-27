@@ -355,6 +355,7 @@ function PostMarketPageInner() {
   const [filterStatus, setFilterStatus] = useState<IncidentStatus | "all">("all");
   const [toast, setToast] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [urgentBannerDismissed, setUrgentBannerDismissed] = useState(false);
   // Plan: expanded rows
   const [expandedChecks, setExpandedChecks] = useState<Set<string>>(new Set());
 
@@ -680,7 +681,7 @@ function PostMarketPageInner() {
       </div>
 
       {/* Urgent banner */}
-      {urgentCount > 0 && minDays !== null && (
+      {urgentCount > 0 && minDays !== null && !urgentBannerDismissed && (
         <div
           className="flex items-center gap-2.5 rounded-lg px-3 py-2 mb-4"
           style={{
@@ -699,6 +700,20 @@ function PostMarketPageInner() {
                 : `notifica entro ${minDays} giorni`}{" "}
             (Art. 73)
           </p>
+          <button
+            onClick={() => setUrgentBannerDismissed(true)}
+            title="Chiudi"
+            style={{
+              flexShrink: 0, width: 18, height: 18, borderRadius: 9,
+              background: "rgba(220,38,38,0.12)", border: "none", cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              color: "#dc2626", fontSize: 11, lineHeight: 1,
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = "rgba(220,38,38,0.22)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "rgba(220,38,38,0.12)")}
+          >
+            ✕
+          </button>
         </div>
       )}
 
