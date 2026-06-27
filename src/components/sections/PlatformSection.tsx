@@ -7,15 +7,18 @@ const SERIF = "Georgia, 'Times New Roman', serif";
 const MONO = "'DM Mono', monospace";
 const CYCLE_MS = 2800;
 
+const GREEN = "#1D3B2C";
+const RUST  = "#7A2F1C";
+
 const modules = [
-  { art: "Art. 6",  num: "6",  name: "AI Classifier",  desc: "Classificazione rischio automatica secondo gli allegati EU AI Act. Mappa il sistema agli articoli applicabili e genera le prime azioni da intraprendere in pochi minuti." },
-  { art: "Art. 9",  num: "9",  name: "Risk Manager",   desc: "Risk register, gap analysis e copertura Art. 9. Ogni rischio tracciato con misure di mitigazione, probabilità di impatto e responsabili assegnati." },
-  { art: "Art. 11", num: "11", name: "Documentazione", desc: "Fascicolo tecnico Annex IV generato automaticamente. FRIA e DPIA pre-compilate dai dati già inseriti — nessun copia-incolla tra moduli." },
-  { art: "Art. 10", num: "10", name: "Data Audit",     desc: "Qualità dati, bias detection e data lineage traceability. Metriche di conformità in tempo reale su dataset di training e inferenza." },
-  { art: "Art. 12", num: "12", name: "LogVault",       desc: "Logging hash-chained e audit trail immutabile. Ogni operazione firmata crittograficamente e verificabile dagli ispettori dell'autorità di vigilanza." },
-  { art: "Art. 27", num: "27", name: "FRIA",           desc: "Fundamental Rights Impact Assessment guidato passo-passo. Sincronizzato in tempo reale con Risk Manager e DPIA — i dati comuni non si inseriscono due volte." },
-  { art: "Art. 72", num: "72", name: "Post-Market",    desc: "Monitoraggio continuo con drift detection automatica. Soglie pre-configurate inviano alert all'autorità notificante secondo Art. 73 senza intervento manuale." },
-  { art: "Art. 50", num: "50", name: "Scanner",        desc: "Verifica trasparenza AI gratuita e anonima. Report completo in 30 secondi con valutazione Art. 50: nessuna registrazione richiesta." },
+  { art: "Art. 6",  num: "6",  name: "AI Classifier",  color: GREEN, desc: "Classificazione rischio automatica secondo gli allegati EU AI Act. Mappa il sistema agli articoli applicabili e genera le prime azioni da intraprendere in pochi minuti." },
+  { art: "Art. 9",  num: "9",  name: "Risk Manager",   color: RUST,  desc: "Risk register, gap analysis e copertura Art. 9. Ogni rischio tracciato con misure di mitigazione, probabilità di impatto e responsabili assegnati." },
+  { art: "Art. 11", num: "11", name: "Documentazione", color: GREEN, desc: "Fascicolo tecnico Annex IV generato automaticamente. FRIA e DPIA pre-compilate dai dati già inseriti — nessun copia-incolla tra moduli." },
+  { art: "Art. 10", num: "10", name: "Data Audit",     color: RUST,  desc: "Qualità dati, bias detection e data lineage traceability. Metriche di conformità in tempo reale su dataset di training e inferenza." },
+  { art: "Art. 12", num: "12", name: "LogVault",       color: GREEN, desc: "Logging hash-chained e audit trail immutabile. Ogni operazione firmata crittograficamente e verificabile dagli ispettori dell'autorità di vigilanza." },
+  { art: "Art. 27", num: "27", name: "FRIA",           color: RUST,  desc: "Fundamental Rights Impact Assessment guidato passo-passo. Sincronizzato in tempo reale con Risk Manager e DPIA — i dati comuni non si inseriscono due volte." },
+  { art: "Art. 72", num: "72", name: "Post-Market",    color: RUST,  desc: "Monitoraggio continuo con drift detection automatica. Soglie pre-configurate inviano alert all'autorità notificante secondo Art. 73 senza intervento manuale." },
+  { art: "Art. 50", num: "50", name: "Scanner",        color: GREEN, desc: "Verifica trasparenza AI gratuita e anonima. Report completo in 30 secondi con valutazione Art. 50: nessuna registrazione richiesta." },
 ];
 
 // diagonal cascade stagger: top-left → bottom-right wave
@@ -212,7 +215,7 @@ export default function PlatformSection() {
                   setPaused(true);
                 }}
                 style={{
-                  background: isActive ? "#0D1016" : "#FAFAF9",
+                  background: isActive ? m.color : "#FAFAF9",
                   padding: "22px 18px 20px",
                   transition: "background 0.28s ease",
                   cursor: "pointer",
@@ -325,7 +328,7 @@ export default function PlatformSection() {
               <div
                 style={{
                   width: 2, height: 36, borderRadius: 1,
-                  background: "#0D1016",
+                  background: active.color,
                   flexShrink: 0,
                 }}
               />
