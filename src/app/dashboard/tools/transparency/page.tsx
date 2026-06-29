@@ -638,10 +638,10 @@ export default function TransparencyPage() {
       {/* XAI Center promo */}
       <div
         className="mt-8 rounded-xl p-4 flex items-center gap-3"
-        style={{ background: "rgba(99,102,241,0.04)", border: "1px solid rgba(99,102,241,0.18)" }}
+        style={{ background: "rgba(13,16,22,0.03)", border: "1px solid rgba(13,16,22,0.10)" }}
       >
-        <div className="rounded-lg p-2 flex-shrink-0" style={{ background: "rgba(99,102,241,0.1)" }}>
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: "#6366f1" }}>
+        <div className="rounded-lg p-2 flex-shrink-0" style={{ background: "rgba(13,16,22,0.07)" }}>
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: "#0D1016" }}>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
         </div>
@@ -654,7 +654,7 @@ export default function TransparencyPage() {
         <a
           href="/dashboard/modules/xai"
           className="flex-shrink-0 flex items-center gap-1 text-[11px] font-medium rounded-full px-3 py-1.5"
-          style={{ background: "#6366f1", color: "#ffffff" }}
+          style={{ background: "#0D1016", color: "#ffffff" }}
         >
           Vai al modulo →
         </a>
