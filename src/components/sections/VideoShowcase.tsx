@@ -512,25 +512,12 @@ function ProductHero() {
             <span style={{ fontFamily: MONO, fontSize: 10, color: "#6EE7A0", fontWeight: 600, letterSpacing: "0.06em" }}>ART. 27 AI ACT · FRIA GUIDATA</span>
           </div>
 
-          {/* Browser frame + screenshot */}
+          {/* Screenshot reale — include già il browser */}
           <div style={{
             borderRadius: 16,
             overflow: "hidden",
-            border: "1px solid rgba(0,0,0,0.09)",
-            boxShadow: "0 40px 100px rgba(0,0,0,0.14), 0 8px 32px rgba(0,0,0,0.08)",
+            boxShadow: "0 48px 120px rgba(0,0,0,0.18), 0 8px 32px rgba(0,0,0,0.10)",
           }}>
-            {/* Chrome bar */}
-            <div style={{ background: "#EBEBEA", borderBottom: "1px solid rgba(0,0,0,0.09)", padding: "11px 16px", display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ display: "flex", gap: 6 }}>
-                {(["#FF5F57","#FFBD2E","#28C840"] as const).map((c,i) => (
-                  <div key={i} style={{ width: 12, height: 12, borderRadius: "50%", background: c }} />
-                ))}
-              </div>
-              <div style={{ flex: 1, height: 24, borderRadius: 6, background: "rgba(0,0,0,0.07)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ fontFamily: MONO, fontSize: 10, color: "rgba(0,0,0,0.28)" }}>regulaeos.it / dashboard / fria-guidata</span>
-              </div>
-            </div>
-            {/* Real screenshot */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/screenshots/fria.png"
