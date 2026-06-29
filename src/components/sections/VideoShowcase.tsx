@@ -457,7 +457,7 @@ function LegalVideoRow({ badge, title, desc, chips, videoSrc, reverse }: Omit<Ro
             <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.25)" }}>aicomply.it / legal-assistant</span>
           </div>
         </div>
-        {/* Video with CSS pan animation — video is physically large (250%) to stay crisp */}
+        {/* Video at 250% width — crisp native pixels, clipped by overflow:hidden, panned via left/top */}
         <div style={{ aspectRatio: "16/9", overflow: "hidden", position: "relative" }}>
           <video
             ref={videoRef}
@@ -465,12 +465,15 @@ function LegalVideoRow({ badge, title, desc, chips, videoSrc, reverse }: Omit<Ro
             muted
             loop
             playsInline
-            preload="metadata"
+            preload="auto"
             style={{
               width: "250%",
-              height: "auto",
+              aspectRatio: "16/9",
+              objectFit: "cover",
               position: "absolute",
               display: "block",
+              left: "-50%",
+              top: "-12%",
               animation: visible ? "legalZoomPan 11s ease-in-out infinite" : "none",
             }}
           />
