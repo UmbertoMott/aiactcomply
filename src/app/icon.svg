@@ -1,13 +1,42 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <rect width="32" height="32" rx="7" fill="#0D1016"/>
-  <text
-    x="16"
-    y="23"
-    font-family="Georgia, 'Times New Roman', serif"
-    font-size="20"
-    font-weight="400"
-    fill="#ffffff"
-    text-anchor="middle"
-    letter-spacing="-0.5"
-  >R</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="5.5" fill="#0D1016"/>
+
+  <!-- Top serif cap -->
+  <rect x="4.5" y="5" width="10" height="1.9" rx="0.5" fill="white"/>
+
+  <!-- Bottom serif cap -->
+  <rect x="4.5" y="25.1" width="10" height="1.9" rx="0.5" fill="white"/>
+
+  <!-- Vertical stem -->
+  <rect x="5.5" y="5" width="4.5" height="22" fill="white"/>
+
+  <!-- Bowl outer (D-shape, white filled) -->
+  <path fill="white" d="
+    M 10 6.8
+    L 18.5 6.8
+    C 25.5 6.8 26.5 10.5 26.5 13
+    C 26.5 15.5 25.5 19.2 18.5 19.2
+    L 10 19.2
+    Z
+  "/>
+
+  <!-- Bowl inner counter (punched out in bg color) -->
+  <path fill="#0D1016" d="
+    M 10 10
+    L 17 10
+    C 21.5 10 22.5 11.5 22.5 13
+    C 22.5 14.5 21.5 16.5 17 16.5
+    L 10 16.5
+    Z
+  "/>
+
+  <!-- Diagonal leg — slightly curved kick, Georgia-style -->
+  <path fill="white" d="
+    M 13.5 19.8
+    C 15 19.8 16.2 20.2 17 21
+    L 24.5 26.8
+    L 22 26.8
+    L 12 19.8
+    Z
+  "/>
 </svg>
