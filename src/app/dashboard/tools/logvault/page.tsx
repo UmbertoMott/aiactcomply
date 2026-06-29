@@ -873,7 +873,7 @@ export default function LogVaultPage() {
               </div>
               <button onClick={runAiAnalysis} disabled={analyzing}
                 className="flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-lg"
-                style={{ background: T.violet, color: "#fff", border: "none", cursor: "pointer", opacity: analyzing ? 0.7 : 1 }}>
+                style={{ background: "#0D1016", color: "#fff", border: "none", cursor: "pointer", opacity: analyzing ? 0.7 : 1 }}>
                 {analyzing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
                 Analisi AI copertura
               </button>
