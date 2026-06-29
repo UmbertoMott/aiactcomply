@@ -407,6 +407,86 @@ function FlowTrio() {
   );
 }
 
+// ─── LEGAL VIDEO ROW (animated pan: left → right) ────────────────────────────
+
+function LegalVideoRow({ badge, title, desc, chips, videoSrc, reverse }: Omit<RowProps, "zoom" | "zoomX" | "playbackRate">) {
+  const { ref, visible } = useInView(0.1);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (!visible) return;
+    const v = videoRef.current;
+    if (!v) return;
+    v.playbackRate = 1;
+    v.play().catch(() => {});
+  }, [visible]);
+
+  const fadeUp  = { opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(24px)", transition: "opacity .6s ease, transform .6s ease" };
+  const fadeUp2 = { opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(24px)", transition: "opacity .6s .1s ease, transform .6s .1s ease" };
+
+  const textCol = (
+    <div style={{ flex: "0 0 38%", minWidth: 0, display: "flex", flexDirection: "column" as const, justifyContent: "center", paddingLeft: reverse ? 40 : 0, paddingRight: reverse ? 0 : 40, ...fadeUp }}>
+      <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 500, color: "rgba(0,0,0,0.38)", letterSpacing: "0.07em", textTransform: "uppercase" as const, marginBottom: 18, display: "block" }}>
+        {badge}
+      </span>
+      <h3 style={{ fontFamily: SERIF, fontSize: "clamp(24px, 3.2vw, 40px)", fontWeight: 400, letterSpacing: "-1.5px", lineHeight: 1.08, color: DARK, marginBottom: 16 }}>
+        {title}
+      </h3>
+      <p style={{ fontSize: 15, fontWeight: 300, color: "rgba(0,0,0,0.48)", lineHeight: 1.75, maxWidth: 420, marginBottom: chips ? 20 : 0 }}>
+        {desc}
+      </p>
+      {chips && (
+        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8 }}>
+          {chips.map(c => (
+            <span key={c} style={{ fontFamily: MONO, fontSize: 11, padding: "5px 12px", border: "1px solid rgba(0,0,0,0.12)", borderRadius: 20, color: "rgba(0,0,0,0.45)" }}>{c}</span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const videoCol = (
+    <div style={{ flex: "0 0 58%", minWidth: 0, ...fadeUp2 }}>
+      <div style={{ borderRadius: 12, border: "1px solid rgba(0,0,0,0.09)", overflow: "hidden", boxShadow: "0 4px 32px rgba(0,0,0,0.08)", background: "#1a1a1a" }}>
+        {/* Browser chrome */}
+        <div style={{ background: "#f3f3f2", borderBottom: "1px solid rgba(0,0,0,0.09)", padding: "9px 14px", display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ display: "flex", gap: 5 }}>
+            {[0,1,2].map(i => <div key={i} style={{ width: 10, height: 10, borderRadius: "50%", background: "rgba(0,0,0,0.15)" }} />)}
+          </div>
+          <div style={{ flex: 1, height: 20, borderRadius: 4, background: "rgba(0,0,0,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.25)" }}>aicomply.it / legal-assistant</span>
+          </div>
+        </div>
+        {/* Video with CSS pan animation */}
+        <div style={{ aspectRatio: "16/9", overflow: "hidden", position: "relative" }}>
+          <video
+            ref={videoRef}
+            src={videoSrc}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+              animation: visible ? "legalZoomPan 11s ease-in-out infinite" : "none",
+              transformOrigin: "center center",
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div ref={ref} style={{ display: "flex", alignItems: "center", gap: "4%" }} className="showcase-row">
+      {reverse ? <>{videoCol}{textCol}</> : <>{textCol}{videoCol}</>}
+    </div>
+  );
+}
+
 // ─── ROW DATA ─────────────────────────────────────────────────────────────────
 
 const ROW1: RowProps = {
@@ -418,13 +498,12 @@ const ROW1: RowProps = {
   reverse: false,
 };
 
-const ROW2: RowProps = {
+const ROW2: Omit<RowProps, "zoom" | "zoomX" | "playbackRate"> = {
   badge: "Legal Assistant · 2024/1689",
   title: "Risposte con le fonti, non opinioni.",
   desc: "Fai una domanda sull'AI Act, su ISO 22989 o sulle Guidelines: il Legal Assistant cita il testo esatto, articolo per articolo, con il chunk sorgente sempre verificabile a fianco.",
   chips: ["RAG su EU AI Act", "ISO 22989 + Guidelines", "Chunk sorgente verificabile", "Badge articolo per risposta"],
-  videoSrc: "/videos/legal.mp4",
-  playbackRate: 1.5,
+  videoSrc: "/videos/legal-assistant.mp4",
   reverse: true,
 };
 
@@ -465,6 +544,14 @@ export default function VideoShowcase() {
           .showcase-row { flex-direction: column !important; gap: 32px !important; }
           .interstitial-row { flex-direction: column !important; }
           .trio-grid { grid-template-columns: 1fr !important; }
+        }
+        /* Legal Assistant: zoom in on left (input), pan to right (output) */
+        @keyframes legalZoomPan {
+          0%   { transform: scale(1.62) translateX(18%);  }  /* zoomed left — chat input */
+          28%  { transform: scale(1.62) translateX(18%);  }  /* hold left */
+          52%  { transform: scale(1.62) translateX(-18%); }  /* smooth pan to right */
+          80%  { transform: scale(1.62) translateX(-18%); }  /* hold right — source output */
+          100% { transform: scale(1.62) translateX(18%);  }  /* loop back */
         }
         .triage-card {
           cursor: pointer;
@@ -514,7 +601,7 @@ export default function VideoShowcase() {
 
       {/* ③ Legal video */}
       <div className="px-12 py-24" style={{ maxWidth: 1280, margin: "0 auto" }}>
-        <VideoRow {...ROW2} />
+        <LegalVideoRow {...ROW2} />
       </div>
 
       {/* ④ Risk Register interstitial — fullbleed */}
