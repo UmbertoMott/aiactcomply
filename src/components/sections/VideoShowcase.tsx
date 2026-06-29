@@ -111,6 +111,8 @@ function TriageMockup() {
     "Completare la FRIA prima della messa in opera",
     "Registrare nel database EU (EUDB) prima dell'immissione",
   ];
+  const [checked, setChecked] = useState<boolean[]>([false, false, false]);
+  const toggle = (i: number) => setChecked(prev => prev.map((v, idx) => idx === i ? !v : v));
   return (
     <div className="triage-card" style={{ borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.28)", background: "#0e0e0e", boxShadow: "0 24px 80px rgba(0,0,0,0.6)" }}>
       <div style={{ background: "#1a1a1a", padding: "10px 14px", display: "flex", alignItems: "center", gap: 8, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
@@ -142,9 +144,32 @@ function TriageMockup() {
           <p style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.22)", letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 10 }}>3 obblighi immediati identificati</p>
           <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
             {steps.map((s, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                <div style={{ width: 13, height: 13, border: "1px solid rgba(255,255,255,0.2)", borderRadius: 2, flexShrink: 0, marginTop: 1 }} />
-                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.42)", lineHeight: 1.5 }}>{s}</span>
+              <div
+                key={i}
+                onClick={() => toggle(i)}
+                style={{ display: "flex", alignItems: "flex-start", gap: 8, cursor: "pointer", userSelect: "none" }}
+              >
+                <div style={{
+                  width: 13, height: 13, flexShrink: 0, marginTop: 1, borderRadius: 2,
+                  border: checked[i] ? "1px solid rgba(255,255,255,0.7)" : "1px solid rgba(255,255,255,0.2)",
+                  background: checked[i] ? "rgba(255,255,255,0.90)" : "transparent",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  transition: "background 0.15s ease, border-color 0.15s ease",
+                }}>
+                  {checked[i] && (
+                    <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
+                      <path d="M1 3L3 5L7 1" stroke="#0D1016" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </div>
+                <span style={{
+                  fontSize: 11, lineHeight: 1.5,
+                  color: checked[i] ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.42)",
+                  textDecoration: checked[i] ? "line-through" : "none",
+                  transition: "color 0.15s ease",
+                }}>
+                  {s}
+                </span>
               </div>
             ))}
           </div>
