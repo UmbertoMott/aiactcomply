@@ -394,7 +394,7 @@ export default function DashboardPage() {
             <Link
               href={showArt73 ? "/dashboard/post-market"
                 : showDeadline ? "/dashboard/notifications"
-                : showDiscovery ? "/dashboard/discovery"
+                : showDiscovery ? "/dashboard/tools/inventory"
                 : nextActions[0]?.href ?? "/dashboard/journey"}
               style={{
                 padding: "8px 16px", background: T.text, color: "#fff", borderRadius: 6,
@@ -498,9 +498,9 @@ export default function DashboardPage() {
               <div style={{ padding: "32px 18px", textAlign: "center" }}>
                 <Server size={28} style={{ color: "rgba(0,0,0,0.08)", margin: "0 auto 10px" }} />
                 <p style={{ fontSize: 13, color: T.muted, marginBottom: 12 }}>Nessun sistema AI registrato</p>
-                <Link href="/dashboard/discovery"
+                <Link href="/dashboard/tools/inventory"
                   style={{ fontSize: 12, fontWeight: 500, color: "#fff", background: T.text, padding: "8px 16px", borderRadius: 6, display: "inline-flex", alignItems: "center", gap: 6 }}>
-                  Avvia Discovery <ArrowRight size={12} />
+                  Vai all&apos;inventario <ArrowRight size={12} />
                 </Link>
               </div>
             ) : (
@@ -571,7 +571,7 @@ export default function DashboardPage() {
             )}
 
             <div style={{ padding: "11px 18px", borderTop: totalSystems > 0 ? `1px solid ${T.border}` : "none" }}>
-              <Link href="/dashboard/discovery"
+              <Link href="/dashboard/tools/inventory"
                 style={{
                   fontSize: 11.5, fontWeight: 500, color: T.text,
                   display: "inline-flex", alignItems: "center", gap: 7,
