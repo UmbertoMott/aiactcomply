@@ -15,7 +15,7 @@ export default function Nav() {
 
   return (
     <nav
-      className="sticky top-0 z-50 flex items-center justify-between px-12 py-[18px] transition-all duration-300"
+      className="sticky top-0 z-50 flex items-center justify-between px-4 md:px-12 py-[18px] transition-all duration-300"
       style={{
         background: scrolled ? "rgba(255,255,255,0.92)" : "#ffffff",
         backdropFilter: scrolled ? "blur(16px)" : "none",

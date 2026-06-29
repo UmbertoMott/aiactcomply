@@ -519,7 +519,7 @@ function ProductHero() {
 
   return (
     <div ref={ref} style={{ background: "#ffffff", borderTop: "1px solid rgba(0,0,0,0.07)", borderBottom: "1px solid rgba(0,0,0,0.07)", overflow: "hidden" }}>
-      <div style={{ maxWidth: 1380, margin: "0 auto", padding: "96px 56px", display: "flex", alignItems: "center", gap: 72 }} className="showcase-row">
+      <div style={{ maxWidth: 1380, margin: "0 auto", padding: "96px 56px", display: "flex", alignItems: "center", gap: 72 }} className="showcase-row ph-inner">
 
         {/* ─── LEFT: screenshot grande + floating cards ─────────────────── */}
         <div style={{ flex: "0 0 58%", position: "relative", ...fadeLeft }}>
@@ -558,7 +558,7 @@ function ProductHero() {
             </div>
 
             {/* Floating card: progress (top-right) — strato Z più alto */}
-            <div style={{
+            <div className="ph-card-float" style={{
               position: "absolute", top: 56, right: -28, zIndex: 10,
               background: "#fff",
               borderRadius: 12,
@@ -591,7 +591,7 @@ function ProductHero() {
             </div>
 
             {/* Floating card: articoli (bottom-left) — strato Z intermedio */}
-            <div style={{
+            <div className="ph-card-float" style={{
               position: "absolute", bottom: 40, left: -20, zIndex: 10,
               background: DARK,
               borderRadius: 12,
@@ -713,9 +713,32 @@ export default function VideoShowcase() {
     <section style={{ background: "#ffffff", borderTop: "1px solid rgba(0,0,0,0.07)" }}>
       <style>{`
         @media (max-width: 768px) {
-          .showcase-row { flex-direction: column !important; gap: 32px !important; }
+          /* VideoRow / LegalVideoRow: stack, ogni colonna full-width */
+          .showcase-row { flex-direction: column !important; gap: 24px !important; }
+          .showcase-row > div {
+            flex: 0 0 100% !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            min-width: 0 !important;
+            width: 100% !important;
+          }
+          /* Interstitial: stack vertically */
           .interstitial-row { flex-direction: column !important; }
+          .interstitial-row > div {
+            flex: 0 0 100% !important;
+            width: 100% !important;
+            padding: 40px 20px !important;
+            min-height: 0 !important;
+          }
+          /* FlowTrio */
           .trio-grid { grid-template-columns: 1fr !important; }
+          /* ProductHero: padding ridotto */
+          .ph-inner {
+            padding: 40px 20px !important;
+            gap: 32px !important;
+          }
+          /* Floating cards: nascoste su mobile per evitare overflow */
+          .ph-card-float { display: none !important; }
         }
         /* Legal Assistant: pan professionale sx→dx (scale 1.1 invisibile, abilita lo scorrimento) */
         @keyframes legalZoomPan {
@@ -754,7 +777,7 @@ export default function VideoShowcase() {
       `}</style>
 
       {/* Header */}
-      <div className="px-12 py-24" style={{ maxWidth: 960, margin: "0 auto" }}>
+      <div className="px-4 sm:px-8 md:px-12 py-16 md:py-24" style={{ maxWidth: 960, margin: "0 auto" }}>
         <p style={{ fontFamily: MONO, fontSize: 11, fontWeight: 500, letterSpacing: "1.5px", textTransform: "uppercase", color: "rgba(0,0,0,0.28)", marginBottom: 14 }}>
           Il prodotto in movimento
         </p>
@@ -764,7 +787,7 @@ export default function VideoShowcase() {
       </div>
 
       {/* ① Triage video */}
-      <div className="px-12 pb-24" style={{ maxWidth: 1280, margin: "0 auto" }}>
+      <div className="px-4 sm:px-8 md:px-12 pb-16 md:pb-24" style={{ maxWidth: 1280, margin: "0 auto" }}>
         <VideoRow {...ROW1} />
       </div>
 
@@ -772,7 +795,7 @@ export default function VideoShowcase() {
       <ClassificationInterstitial />
 
       {/* ③ Legal video */}
-      <div className="px-12 py-24" style={{ maxWidth: 1280, margin: "0 auto" }}>
+      <div className="px-4 sm:px-8 md:px-12 py-16 md:py-24" style={{ maxWidth: 1280, margin: "0 auto" }}>
         <LegalVideoRow {...ROW2} />
       </div>
 
@@ -780,7 +803,7 @@ export default function VideoShowcase() {
       <RiskInterstitial />
 
       {/* ⑤ FRIA/Risk Manager video */}
-      <div className="px-12 py-24" style={{ maxWidth: 1280, margin: "0 auto" }}>
+      <div className="px-4 sm:px-8 md:px-12 py-16 md:py-24" style={{ maxWidth: 1280, margin: "0 auto" }}>
         <VideoRow {...ROW3} />
       </div>
 
@@ -788,7 +811,7 @@ export default function VideoShowcase() {
       <FlowTrio />
 
       {/* ⑦ EUDB video */}
-      <div className="px-12 py-24" style={{ maxWidth: 1280, margin: "0 auto" }}>
+      <div className="px-4 sm:px-8 md:px-12 py-16 md:py-24" style={{ maxWidth: 1280, margin: "0 auto" }}>
         <VideoRow {...ROW4} />
       </div>
 
@@ -796,7 +819,7 @@ export default function VideoShowcase() {
       <ProductHero />
 
       {/* ⑨ Trust Center video */}
-      <div className="px-12 pb-24" style={{ maxWidth: 1280, margin: "0 auto" }}>
+      <div className="px-4 sm:px-8 md:px-12 pb-16 md:pb-24" style={{ maxWidth: 1280, margin: "0 auto" }}>
         <VideoRow {...ROW5} />
       </div>
     </section>
