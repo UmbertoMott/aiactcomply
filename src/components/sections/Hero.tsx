@@ -311,7 +311,6 @@ export default function Hero() {
                 backdropFilter: "blur(8px)",
               }}
             >
-              <span className="block w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "#ffffff" }} />
               EU AI Act — In vigore agosto 2026
             </div>
           </motion.div>
