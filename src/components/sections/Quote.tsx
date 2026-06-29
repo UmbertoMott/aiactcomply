@@ -54,29 +54,25 @@ export default function Quote() {
               non solo per evitare sanzioni salate.&rdquo;
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/founder.jpg"
+                alt="Umberto Mottola"
                 style={{
-                  width: 38,
-                  height: 38,
+                  width: 44,
+                  height: 44,
                   borderRadius: "50%",
-                  background: "#0D1016",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: "#ffffff",
+                  objectFit: "cover",
                   flexShrink: 0,
-                  letterSpacing: "0.02em",
+                  filter: "grayscale(100%)",
+                  border: "1.5px solid rgba(0,0,0,0.10)",
                 }}
-              >
-                UM
-              </div>
+              />
               <div>
                 <p style={{ fontSize: 13, fontWeight: 500, color: "#0D1016", lineHeight: 1.3 }}>
                   Umberto Mottola
                 </p>
-                <p style={{ fontSize: 12, color: "rgba(0,0,0,0.38)" }}>Co-fondatore, AIComply</p>
+                <p style={{ fontSize: 12, color: "rgba(0,0,0,0.38)" }}>Co-fondatore, RegulaeOS</p>
               </div>
             </div>
           </div>
