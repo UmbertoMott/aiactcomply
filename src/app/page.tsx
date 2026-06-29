@@ -13,9 +13,9 @@ import Footer from "@/components/sections/Footer";
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aicomply-omega.vercel.app";
 
 export const metadata: Metadata = {
-  title: "AIComply — Software Conformità EU AI Act | Classificazione e Documentazione",
+  title: "RegulaeOS — Conformità EU AI Act | Classificazione Rischio e Documentazione",
   description:
-    "AIComply è la piattaforma SaaS per la conformità al Regolamento EU AI Act (2024/1689). Classifica il rischio del tuo sistema AI, genera documentazione tecnica e gestisci gli obblighi normativi. Scadenza agosto 2026.",
+    "RegulaeOS è la piattaforma SaaS per la conformità al Regolamento EU AI Act (2024/1689). Classifica il rischio del tuo sistema AI, genera documentazione tecnica e gestisci gli obblighi normativi. Scadenza agosto 2026.",
   keywords: [
     "EU AI Act compliance",
     "conformità AI Act",
@@ -25,19 +25,20 @@ export const metadata: Metadata = {
     "AI Act obblighi",
     "AI governance platform",
     "AI Act Italia",
+    "RegulaeOS",
   ],
   openGraph: {
-    title: "AIComply — Software Conformità EU AI Act",
+    title: "RegulaeOS — Conformità EU AI Act",
     description:
       "Classifica il rischio del tuo sistema AI, genera documentazione tecnica e gestisci gli obblighi EU AI Act. Scadenza agosto 2026.",
     url: BASE_URL,
-    siteName: "AIComply",
+    siteName: "RegulaeOS",
     images: [
       {
         url: `${BASE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: "AIComply — Conformità EU AI Act",
+        alt: "RegulaeOS — Conformità EU AI Act",
       },
     ],
     locale: "it_IT",
@@ -45,7 +46,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "AIComply — Software Conformità EU AI Act",
+    title: "RegulaeOS — Conformità EU AI Act",
     description:
       "Classifica il rischio del tuo sistema AI e gestisci gli obblighi EU AI Act. Scadenza agosto 2026.",
     images: [`${BASE_URL}/og-image.png`],

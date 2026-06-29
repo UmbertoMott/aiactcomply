@@ -8,11 +8,11 @@ const SERIF = "Georgia, 'Times New Roman', serif";
 const MONO  = "'DM Mono', monospace";
 
 export const metadata: Metadata = {
-  title: "Risorse AI Act — Guide, Normativa e Aggiornamenti | AIComply",
+  title: "Risorse AI Act — Guide, Normativa e Aggiornamenti | RegulaeOS",
   description:
     "Guide pratiche sull'EU AI Act, aggiornamenti normativi e risorse per la compliance AI in Italia. Scadenze, obblighi, Annex III, GPAI e molto altro.",
   openGraph: {
-    title: "Risorse AI Act | AIComply",
+    title: "Risorse AI Act | RegulaeOS",
     description:
       "Guide pratiche sull'EU AI Act, aggiornamenti normativi e risorse per la compliance AI in Italia.",
     type: "website",
