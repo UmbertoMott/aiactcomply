@@ -667,17 +667,6 @@ function PostMarketPageInner() {
         <p className="text-[12px] mt-0.5" style={{ color: "rgba(0,0,0,0.42)" }}>
           Sorveglianza continua post-immissione sul mercato.
         </p>
-        <div className="flex gap-2 mt-2">
-          {["Art. 72", "Art. 73"].map((art) => (
-            <span
-              key={art}
-              className="text-[10px] rounded-full px-2 py-0.5"
-              style={{ background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.45)" }}
-            >
-              {art}
-            </span>
-          ))}
-        </div>
       </div>
 
       {/* Urgent banner */}
