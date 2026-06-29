@@ -457,8 +457,8 @@ function LegalVideoRow({ badge, title, desc, chips, videoSrc, reverse }: Omit<Ro
             <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.25)" }}>aicomply.it / legal-assistant</span>
           </div>
         </div>
-        {/* Video at 250% width — crisp native pixels, clipped by overflow:hidden, panned via left/top */}
-        <div style={{ aspectRatio: "16/9", overflow: "hidden", position: "relative" }}>
+        {/* Video con pan leggero sinistra→destra: scale 1.08 (impercettibile, testo nitido) */}
+        <div style={{ aspectRatio: "16/9", overflow: "hidden" }}>
           <video
             ref={videoRef}
             src={videoSrc}
@@ -467,13 +467,10 @@ function LegalVideoRow({ badge, title, desc, chips, videoSrc, reverse }: Omit<Ro
             playsInline
             preload="auto"
             style={{
-              width: "250%",
-              aspectRatio: "16/9",
+              width: "100%",
+              height: "100%",
               objectFit: "cover",
-              position: "absolute",
               display: "block",
-              left: "-50%",
-              top: "-12%",
               animation: visible ? "legalZoomPan 11s ease-in-out infinite" : "none",
             }}
           />
@@ -547,13 +544,13 @@ export default function VideoShowcase() {
           .interstitial-row { flex-direction: column !important; }
           .trio-grid { grid-template-columns: 1fr !important; }
         }
-        /* Legal Assistant: video resa 250% per pixel nativi, pan con left/top (no upscaling blur) */
+        /* Legal Assistant: pan leggero sx→dx, scale 1.08 per abilitare il pan senza blur */
         @keyframes legalZoomPan {
-          0%   { left: -50%;  top: -12%; }   /* mostra chat input (20-60% del video) */
-          30%  { left: -50%;  top: -12%; }   /* hold sinistra */
-          54%  { left: -150%; top: -12%; }   /* pan verso source panel (60-100%) */
-          82%  { left: -150%; top: -12%; }   /* hold destra */
-          100% { left: -50%;  top: -12%; }   /* rientro loop */
+          0%   { transform: scale(1.08) translateX(3%);  }  /* sinistra — chat/risposta */
+          25%  { transform: scale(1.08) translateX(3%);  }  /* hold sx ~2.75s */
+          55%  { transform: scale(1.08) translateX(-3%); }  /* pan verso destra */
+          80%  { transform: scale(1.08) translateX(-3%); }  /* hold dx — sorgente */
+          100% { transform: scale(1.08) translateX(3%);  }  /* rientro loop */
         }
         .triage-card {
           cursor: pointer;
