@@ -21,7 +21,7 @@ const wordVariant = {
   },
 };
 
-const CYCLING_WORDS = ["compromessi.", "burocrazia.", "ritardi.", "rischi.", "eccezioni."];
+const CYCLING_WORDS = ["compromessi", "burocrazia", "ritardi", "rischi", "eccezioni"];
 const DELETE_SPEED = 48;
 const TYPE_SPEED = 60;
 const IDLE_MS = 2400;
