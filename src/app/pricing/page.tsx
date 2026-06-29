@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Nav from "@/components/Nav";
+import Footer from "@/components/sections/Footer";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
 const MONO = "'DM Mono', monospace";
@@ -536,6 +537,7 @@ export default function PricingPage() {
         {/* Final CTA */}
         <FinalCTA />
       </main>
+      <Footer />
     </div>
   );
 }
