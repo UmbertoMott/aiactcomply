@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, DM_Sans, DM_Mono } from "next/font/google";
 import Script from "next/script";
+import CookieBanner from "@/components/CookieBanner";
 import "./globals.css";
 
 const inter = Inter({
@@ -45,6 +46,7 @@ export default function RootLayout({
           {`(function(){var t=localStorage.getItem('theme');if(t==='light')document.documentElement.classList.add('light')})()`}
         </Script>
         {children}
+        <CookieBanner />
       </body>
     </html>
   );

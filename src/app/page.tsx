@@ -8,6 +8,7 @@ import Stats from "@/components/sections/Stats";
 import VideoShowcase from "@/components/sections/VideoShowcase";
 import Quote from "@/components/sections/Quote";
 import CtaFinal from "@/components/sections/CtaFinal";
+import Footer from "@/components/sections/Footer";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aicomply-omega.vercel.app";
 
@@ -159,6 +160,7 @@ export default function Home() {
         <Quote />
         <CtaFinal />
       </main>
+      <Footer />
     </>
   );
 }
