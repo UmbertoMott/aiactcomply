@@ -457,7 +457,7 @@ function LegalVideoRow({ badge, title, desc, chips, videoSrc, reverse }: Omit<Ro
             <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.25)" }}>aicomply.it / legal-assistant</span>
           </div>
         </div>
-        {/* Video with CSS pan animation */}
+        {/* Video with CSS pan animation — video is physically large (250%) to stay crisp */}
         <div style={{ aspectRatio: "16/9", overflow: "hidden", position: "relative" }}>
           <video
             ref={videoRef}
@@ -467,12 +467,11 @@ function LegalVideoRow({ badge, title, desc, chips, videoSrc, reverse }: Omit<Ro
             playsInline
             preload="metadata"
             style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
+              width: "250%",
+              height: "auto",
+              position: "absolute",
               display: "block",
               animation: visible ? "legalZoomPan 11s ease-in-out infinite" : "none",
-              transformOrigin: "center center",
             }}
           />
         </div>
@@ -545,13 +544,13 @@ export default function VideoShowcase() {
           .interstitial-row { flex-direction: column !important; }
           .trio-grid { grid-template-columns: 1fr !important; }
         }
-        /* Legal Assistant: zoom in on left (input), pan to right (output) */
+        /* Legal Assistant: video resa 250% per pixel nativi, pan con left/top (no upscaling blur) */
         @keyframes legalZoomPan {
-          0%   { transform: scale(2.2) translateX(15%);  }  /* zoomed left — chat input */
-          30%  { transform: scale(2.2) translateX(15%);  }  /* hold left */
-          54%  { transform: scale(2.2) translateX(-28%); }  /* smooth pan to right */
-          82%  { transform: scale(2.2) translateX(-28%); }  /* hold right — source output */
-          100% { transform: scale(2.2) translateX(15%);  }  /* loop back */
+          0%   { left: -50%;  top: -12%; }   /* mostra chat input (20-60% del video) */
+          30%  { left: -50%;  top: -12%; }   /* hold sinistra */
+          54%  { left: -150%; top: -12%; }   /* pan verso source panel (60-100%) */
+          82%  { left: -150%; top: -12%; }   /* hold destra */
+          100% { left: -50%;  top: -12%; }   /* rientro loop */
         }
         .triage-card {
           cursor: pointer;
