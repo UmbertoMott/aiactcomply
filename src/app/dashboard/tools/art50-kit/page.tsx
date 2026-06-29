@@ -25,7 +25,7 @@ const T = {
   red: "#dc2626", redBg: "rgba(220,38,38,0.06)", redBdr: "rgba(220,38,38,0.18)",
   amber: "#d97706", amberBg: "rgba(202,138,4,0.07)", amberBdr: "rgba(202,138,4,0.22)",
   green: "#15803d", greenBg: "rgba(22,163,74,0.06)", greenBdr: "rgba(22,163,74,0.18)",
-  blue: "#1d4ed8", blueBg: "rgba(29,78,216,0.05)", blueBdr: "rgba(29,78,216,0.16)",
+  blue: "#0D1016", blueBg: "rgba(13,16,22,0.05)", blueBdr: "rgba(13,16,22,0.16)",
   violet: "#7c3aed", violetBg: "rgba(124,58,237,0.05)", violetBdr: "rgba(124,58,237,0.16)",
 } as const;
 const FONT: CSSProperties = { fontFamily: "Inter, system-ui, sans-serif" };
@@ -55,7 +55,7 @@ function makeRegistroId(): string {
 function gradeFromScore(score: number): string {
   if (score >= 90) return "A"; if (score >= 70) return "B"; if (score >= 50) return "C"; if (score >= 30) return "D"; return "F";
 }
-const GRADE_COLOR: Record<string, string> = { A: "#16a34a", B: "#2563eb", C: "#ca8a04", D: "#ea580c", F: "#dc2626" };
+const GRADE_COLOR: Record<string, string> = { A: "#16a34a", B: "#0D1016", C: "#ca8a04", D: "#ea580c", F: "#dc2626" };
 const TYPE_LABELS: Record<Art50System["type"], string> = { chatbot: "Chatbot / Assistente", content: "Generazione contenuti", recommendation: "Raccomandazioni", other: "Altro" };
 
 const DEADLINE = new Date("2026-12-02");
@@ -133,7 +133,7 @@ export default function Art50KitPage() {
         evidence: undefined,
         remediationNotes: i.obligationId === "direct_interaction_disclosure"
           ? "Art. 50(1)/(5) [verify against current AI Act text]: aggiungere banner/header persistente nel componente chat che identifichi l'interlocutore come sistema IA. Il badge ✦ AI sui singoli campi è necessario ma non sufficiente per le interfacce conversazionali."
-          : "Art. 50(2) [verify against current AI Act text]: i badge ✦ AI — verifica e conferma sui campi sono human-readable ma non machine-readable. Remediation minima: aggiungere footer standardizzato 'Documento generato con assistenza IA — AIComply' negli export, e valutare metadati XMP/IPTC per PDF.",
+          : "Art. 50(2) [verify against current AI Act text]: i badge ✦ AI — verifica e conferma sui campi sono human-readable ma non machine-readable. Remediation minima: aggiungere footer standardizzato 'Documento generato con assistenza IA — RegulaeOS' negli export, e valutare metadati XMP/IPTC per PDF.",
       }));
       setSelfItems(initial);
     } else {
@@ -193,7 +193,7 @@ export default function Art50KitPage() {
       "  - Banner disclosure AI visibile agli utenti", "  - Meta tag machine-readable (ai-disclosure)", "  - Markup strutturato JSON-LD", "",
       "RIFERIMENTO NORMATIVO:", "  Art. 50(1)-(5) Regolamento (UE) 2024/1689 (AI Act) [verify against current AI Act text]", "  Deadline: 2 dicembre 2026", "",
       "NOTA LEGALE:", "  AI Comply non rilascia attestazioni di conformità legale.", "  Questo documento costituisce esclusivamente un registro interno.", "=".repeat(60),
-      `Generato da AIComply — ${new Date().toISOString()}`,
+      `Generato da RegulaeOS — ${new Date().toISOString()}`,
     ];
     const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `${system.registroId}.txt`; a.click(); URL.revokeObjectURL(url);
@@ -283,7 +283,7 @@ export default function Art50KitPage() {
                 <p className="text-[10px]" style={{ color: T.faint }}>{obl.reference}</p>
               </div>
               {obl.appliesToSelf && (
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: T.violetBg, color: T.violet }}>AIComply</span>
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: T.violetBg, color: T.violet }}>RegulaeOS</span>
               )}
             </div>
           ))}
@@ -294,7 +294,7 @@ export default function Art50KitPage() {
       <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: "rgba(0,0,0,0.04)" }}>
         {([
           { v: "client" as const, l: "Sistemi del cliente" },
-          { v: "self" as const, l: `Autoconformità AIComply${selfGaps > 0 ? ` · ${selfGaps} gap` : ""}` },
+          { v: "self" as const, l: `Autoconformità RegulaeOS${selfGaps > 0 ? ` · ${selfGaps} gap` : ""}` },
         ]).map(t => (
           <button key={t.v} onClick={() => setSelfTab(t.v)}
             className="text-[12px] font-medium px-4 py-1.5 rounded-lg transition-all"
@@ -645,7 +645,7 @@ export default function Art50KitPage() {
                                   <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>Meccanismo di disclosure all&apos;utente finale</label>
                                   <textarea rows={2} value={rec.deepfakeDisclosure?.disclosureMechanism ?? ""}
                                     onChange={e => patchSystemRec(system.id, { deepfakeDisclosure: { ...rec.deepfakeDisclosure, systemId: system.id, disclosureMechanism: e.target.value } as typeof rec.deepfakeDisclosure })}
-                                    placeholder="es. 'Etichetta visibile in sovraimpressione: Immagine generata artificialmente — AIComply'" style={ta} />
+                                    placeholder="es. 'Etichetta visibile in sovraimpressione: Immagine generata artificialmente — RegulaeOS'" style={ta} />
                                 </div>
                                 <div>
                                   <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>Eccezione Art. 50(4) [verify against current AI Act text]</label>
@@ -711,14 +711,14 @@ export default function Art50KitPage() {
       )}
 
       {/* ══════════════════════════════════════════════════════════════════════
-          SELF-COMPLIANCE TAB — autoconformità AIComply
+          SELF-COMPLIANCE TAB — autoconformità RegulaeOS
       ══════════════════════════════════════════════════════════════════════ */}
       {selfTab === "self" && (
         <div className="space-y-5">
           <div>
-            <h2 className="text-xl font-semibold" style={{ color: T.text }}>Autoconformità AIComply — Art. 50</h2>
+            <h2 className="text-xl font-semibold" style={{ color: T.text }}>Autoconformità RegulaeOS — Art. 50</h2>
             <p className="text-sm mt-1" style={{ color: T.muted }}>
-              AIComply è essa stessa provider di funzionalità IA (i suggerimenti ✦ AI) soggette ad Art. 50.
+              RegulaeOS è essa stessa provider di funzionalità IA (i suggerimenti ✦ AI) soggette ad Art. 50.
               Questa sezione documenta lo stato di conformità delle proprie interazioni AI. [verify against current AI Act text]
             </p>
           </div>
@@ -768,7 +768,7 @@ export default function Art50KitPage() {
               <p className="text-[11px] leading-relaxed" style={{ color: T.muted }}>
                 I documenti generati con assistenza AI (DPIA, FRIA, Risk Manager, DocuGen, ecc.) devono includere marcatura leggibile da macchina.
                 Stato attuale: export PDF/JSON via Blob senza metadati strutturati — metodo attuale è <strong>disclosure_statement_only</strong> (badge ✦ AI visibile nel testo, non machine-readable).
-                Remediation minima: footer standardizzato &quot;Documento generato con assistenza di intelligenza artificiale — AIComply&quot; su ogni export, e valutazione metadati XMP/IPTC per PDF.
+                Remediation minima: footer standardizzato &quot;Documento generato con assistenza di intelligenza artificiale — RegulaeOS&quot; su ogni export, e valutazione metadati XMP/IPTC per PDF.
                 [verify against current AI Act text]
               </p>
             </div>
@@ -827,7 +827,7 @@ function SelfComplianceCard({ item, onUpdate }: { item: SelfComplianceItem; onUp
               const l = { compliant: "Conforme", partial: "Parziale", gap: "Gap", "n/a": "N/A" };
               const active = item.status === s;
               return <button key={s} onClick={() => onUpdate(item.id, { status: s })} className="text-[11px] px-2.5 py-1 rounded-lg border"
-                style={{ borderColor: active ? "#1d4ed8" : "rgba(0,0,0,0.08)", background: active ? "rgba(29,78,216,0.05)" : "transparent", color: active ? "#1d4ed8" : "rgba(0,0,0,0.42)", cursor: "pointer", fontWeight: active ? 600 : 400 }}>
+                style={{ borderColor: active ? "#0D1016" : "rgba(0,0,0,0.08)", background: active ? "rgba(13,16,22,0.05)" : "transparent", color: active ? "#0D1016" : "rgba(0,0,0,0.42)", cursor: "pointer", fontWeight: active ? 600 : 400 }}>
                 {l[s]}
               </button>;
             })}
