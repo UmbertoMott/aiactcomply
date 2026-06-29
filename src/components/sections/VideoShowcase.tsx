@@ -713,19 +713,22 @@ export default function VideoShowcase() {
     <section style={{ background: "#ffffff", borderTop: "1px solid rgba(0,0,0,0.07)" }}>
       <style>{`
         @media (max-width: 768px) {
-          /* VideoRow / LegalVideoRow: stack, ogni colonna full-width */
+          /* VideoRow / LegalVideoRow: stack, ogni colonna full-width.
+             In flex column, flex-basis = altezza (non larghezza!),
+             quindi usiamo width:100% per la larghezza e flex:0 0 auto per l'altezza */
           .showcase-row { flex-direction: column !important; gap: 24px !important; }
           .showcase-row > div {
-            flex: 0 0 100% !important;
+            flex: 0 0 auto !important;
+            width: 100% !important;
+            max-width: 100% !important;
             padding-left: 0 !important;
             padding-right: 0 !important;
             min-width: 0 !important;
-            width: 100% !important;
           }
           /* Interstitial: stack vertically */
           .interstitial-row { flex-direction: column !important; }
           .interstitial-row > div {
-            flex: 0 0 100% !important;
+            flex: 0 0 auto !important;
             width: 100% !important;
             padding: 40px 20px !important;
             min-height: 0 !important;
