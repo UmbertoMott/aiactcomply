@@ -15,10 +15,10 @@ const T = {
   faint:    "rgba(0,0,0,0.28)",
   border:   "rgba(0,0,0,0.07)",
   card:     "#ffffff",
-  red:      "#dc2626", redBg:   "rgba(220,38,38,0.06)",  redBdr:   "rgba(220,38,38,0.18)",
-  amber:    "#d97706", amberBg: "rgba(245,158,11,0.06)", amberBdr: "rgba(245,158,11,0.2)",
-  blue:     "#2563eb", blueBg:  "rgba(37,99,235,0.06)",  blueBdr:  "rgba(37,99,235,0.18)",
-  green:    "#15803d", greenBg: "rgba(22,163,74,0.06)",  greenBdr: "rgba(22,163,74,0.2)",
+  red:      "#0D1016", redBg:   "rgba(13,16,22,0.04)",   redBdr:   "rgba(13,16,22,0.12)",
+  amber:    "#0D1016", amberBg: "rgba(13,16,22,0.04)",   amberBdr: "rgba(13,16,22,0.12)",
+  blue:     "#0D1016", blueBg:  "rgba(13,16,22,0.04)",   blueBdr:  "rgba(13,16,22,0.12)",
+  green:    "#0D1016", greenBg: "rgba(13,16,22,0.04)",   greenBdr: "rgba(13,16,22,0.12)",
 };
 
 const card = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 12 };
@@ -61,9 +61,9 @@ const AUTHORITIES = [
     name: "ACN",
     fullName: "Agenzia per la Cybersicurezza Nazionale",
     icon: Shield,
-    color: "#7c3aed",
-    colorBg: "rgba(124,58,237,0.06)",
-    colorBdr: "rgba(124,58,237,0.2)",
+    color: "#0D1016",
+    colorBg: "rgba(13,16,22,0.04)",
+    colorBdr: "rgba(13,16,22,0.12)",
     role: "Autorità nazionale per la cybersicurezza — supervisione requisiti Art. 15 EU AI Act (robustezza e sicurezza informatica)",
     website: "https://www.acn.gov.it",
     contact: "info@acn.gov.it / acn@pec.acn.gov.it",
@@ -242,7 +242,7 @@ function AuthorityCard({ auth }: { auth: typeof AUTHORITIES[number] }) {
                 <div className="space-y-2">
                   {auth.when_to_notify.map((n, i) => (
                     <div key={i} className="rounded-lg px-3 py-2.5" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-                      <div className="text-xs font-medium mb-1" style={{ color: "#92400e" }}>{n.trigger}</div>
+                      <div className="text-xs font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>{n.trigger}</div>
                       <div className="flex items-center gap-3 text-[11px]" style={{ color: "rgba(0,0,0,0.45)" }}>
                         <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {n.deadline}</span>
                         <span style={{ color: T.blue }}>{n.article}</span>
@@ -421,7 +421,7 @@ export default function AgidAcnPage() {
       {tab === "criminal" && (
         <div className="space-y-3">
           <div className="rounded-xl px-4 py-3" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-            <p className="text-xs leading-relaxed" style={{ color: "#92400e" }}>
+            <p className="text-xs leading-relaxed" style={{ color: "rgba(0,0,0,0.45)" }}>
               <strong>Nota:</strong> Le sanzioni penali si applicano indipendentemente dall&apos;eventuale conformità
               all&apos;EU AI Act. Un sistema tecnicamente conforme può comunque esporre a responsabilità penale se usato
               in violazione della L.132/2025.
