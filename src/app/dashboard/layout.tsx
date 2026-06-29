@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   FileCode, Scale, ShieldAlert, BookMarked, ClipboardList, Crosshair,
   FileArchive, TrendingUp, Database, UserCheck, ArrowRightLeft, Map, Building2,
   Landmark, Zap, Menu, X, ChevronRight, ChevronLeft, ChevronDown,
   LogOut, Settings, LayoutGrid, Siren, Home, CalendarClock, ShieldCheck, Bot,
+  Monitor,
 } from "lucide-react";
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { useUserRole, ROLE_LABELS } from "@/lib/hooks/useUserRole";
@@ -44,6 +45,64 @@ type NavPillar = {
   children?: NavChild[];
   tooltip?: string;
 };
+
+function MobileGate() {
+  const router = useRouter();
+  async function handleLogout() {
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
+    if (supabase) await supabase.auth.signOut();
+    router.push("/login");
+  }
+  return (
+    <div
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center px-8"
+      style={{ background: "#0D1016" }}
+    >
+      <div className="flex flex-col items-center text-center max-w-xs">
+        {/* Logo */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.svg" alt="RegulaeOS" style={{ height: 28, width: "auto", filter: "invert(1)", marginBottom: 40, opacity: 0.9 }} />
+
+        {/* Icon */}
+        <div
+          className="flex items-center justify-center w-16 h-16 rounded-2xl mb-6"
+          style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+        >
+          <Monitor className="w-7 h-7" style={{ color: "rgba(255,255,255,0.7)" }} />
+        </div>
+
+        {/* Headline */}
+        <h1 style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 22, fontWeight: 700, color: "#ffffff", lineHeight: 1.3, marginBottom: 14 }}>
+          Apri dal computer
+        </h1>
+
+        {/* Body */}
+        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.65, marginBottom: 36 }}>
+          RegulaeOS è progettato per essere usato su desktop. Accedi dal tuo computer per utilizzare tutti gli strumenti di compliance.
+        </p>
+
+        {/* Links */}
+        <div className="flex flex-col gap-3 w-full">
+          <a
+            href="/dashboard/billing"
+            className="w-full flex items-center justify-center rounded-xl text-sm font-medium transition-opacity hover:opacity-80"
+            style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.75)", padding: "12px 0" }}
+          >
+            Vai alla fatturazione
+          </a>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center rounded-xl text-sm transition-opacity hover:opacity-80"
+            style={{ color: "rgba(255,255,255,0.35)", padding: "10px 0" }}
+          >
+            Esci dall&apos;account
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function SidebarTooltip({ text, children }: { text: string; children: React.ReactNode }) {
   const [show, setShow] = useState(false);
@@ -153,6 +212,8 @@ const PILLARS: NavPillar[] = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [isMobile, setIsMobile] = useState(false);
+  const [layoutMounted, setLayoutMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -160,6 +221,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   });
   const [dossierPct, setDossierPct] = useState(0);
   const [trustCenterPublished, setTrustCenterPublished] = useState(false);
+
+  useEffect(() => {
+    setLayoutMounted(true);
+    const check = () => setIsMobile(window.innerWidth < 1024);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
   const { role } = useUserRole();
   const { profile: orgProfile } = useOrgProfile();
 
@@ -206,6 +275,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       }
     } catch { /* silent */ }
   }, [pathname]);
+
+  if (!layoutMounted) return null;
+  if (isMobile) return <MobileGate />;
 
   const currentItem = PILLARS.flatMap((p) =>
     p.href ? [{ label: p.label, href: p.href }] : (p.children ?? [])
