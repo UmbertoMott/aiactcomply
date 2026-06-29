@@ -471,7 +471,7 @@ function LegalVideoRow({ badge, title, desc, chips, videoSrc, reverse }: Omit<Ro
               height: "100%",
               objectFit: "cover",
               display: "block",
-              animation: visible ? "legalZoomPan 11s ease-in-out infinite" : "none",
+              animation: visible ? "legalZoomPan 13s ease-in-out infinite" : "none",
             }}
           />
         </div>
@@ -544,13 +544,13 @@ export default function VideoShowcase() {
           .interstitial-row { flex-direction: column !important; }
           .trio-grid { grid-template-columns: 1fr !important; }
         }
-        /* Legal Assistant: pan leggero sx→dx, scale 1.08 per abilitare il pan senza blur */
+        /* Legal Assistant: pan professionale sx→dx (scale 1.1 invisibile, abilita lo scorrimento) */
         @keyframes legalZoomPan {
-          0%   { transform: scale(1.08) translateX(3%);  }  /* sinistra — chat/risposta */
-          25%  { transform: scale(1.08) translateX(3%);  }  /* hold sx ~2.75s */
-          55%  { transform: scale(1.08) translateX(-3%); }  /* pan verso destra */
-          80%  { transform: scale(1.08) translateX(-3%); }  /* hold dx — sorgente */
-          100% { transform: scale(1.08) translateX(3%);  }  /* rientro loop */
+          0%   { transform: scale(1.1) translateX(5%);   }
+          35%  { transform: scale(1.1) translateX(5%);   }
+          62%  { transform: scale(1.1) translateX(-5%);  }
+          88%  { transform: scale(1.1) translateX(-5%);  }
+          100% { transform: scale(1.1) translateX(5%);   }
         }
         .triage-card {
           cursor: pointer;
