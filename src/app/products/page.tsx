@@ -271,6 +271,265 @@ function ModuleSection({
   );
 }
 
+// ─── Conversion Block ─────────────────────────────────────────────────────────
+
+interface Metric { val: string; label: string; note?: string; }
+
+interface ConversionData {
+  metrics: [Metric, Metric, Metric];
+  before: string;
+  after:  string;
+  articles: string[];
+  ctaLabel: string;
+  ctaHref?: string;
+}
+
+function ConversionBlock({ data }: { data: ConversionData }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        background: "#F7F7F6",
+        borderTop: "1px solid rgba(0,0,0,0.07)",
+        borderBottom: "1px solid rgba(0,0,0,0.07)",
+        padding: "40px 24px",
+      }}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        style={{ maxWidth: 1100, margin: "0 auto" }}
+      >
+        {/* ── Top row: 3 metrics + articles + CTA ── */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr 1fr 1fr auto",
+          gap: "0",
+          alignItems: "stretch",
+          borderRadius: 12,
+          border: "1px solid rgba(0,0,0,0.09)",
+          background: "#ffffff",
+          overflow: "hidden",
+        }} className="conv-grid">
+          {/* Metric cells */}
+          {data.metrics.map((m, i) => (
+            <div
+              key={i}
+              style={{
+                padding: "22px 24px",
+                borderRight: "1px solid rgba(0,0,0,0.07)",
+              }}
+            >
+              <div style={{
+                fontFamily: SERIF,
+                fontSize: "clamp(28px, 3vw, 36px)",
+                fontWeight: 400,
+                letterSpacing: "-1.5px",
+                color: "#0D1016",
+                lineHeight: 1,
+                marginBottom: 6,
+              }}>
+                {m.val}
+              </div>
+              <div style={{
+                fontFamily: MONO,
+                fontSize: 11,
+                fontWeight: 500,
+                color: "rgba(0,0,0,0.45)",
+                lineHeight: 1.4,
+                marginBottom: m.note ? 4 : 0,
+              }}>
+                {m.label}
+              </div>
+              {m.note && (
+                <div style={{ fontFamily: MONO, fontSize: 10, color: "rgba(0,0,0,0.28)", lineHeight: 1.3 }}>
+                  {m.note}
+                </div>
+              )}
+            </div>
+          ))}
+
+          {/* Articles covered */}
+          <div style={{
+            padding: "22px 24px",
+            borderRight: "1px solid rgba(0,0,0,0.07)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            gap: 6,
+            minWidth: 140,
+          }}>
+            <div style={{ fontFamily: MONO, fontSize: 9, fontWeight: 600, color: "rgba(0,0,0,0.28)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
+              Copre
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+              {data.articles.map(a => (
+                <span key={a} style={{
+                  fontFamily: MONO, fontSize: 10,
+                  color: "#0B3D2E",
+                  background: "rgba(11,61,46,0.07)",
+                  border: "1px solid rgba(11,61,46,0.15)",
+                  borderRadius: 4, padding: "2px 7px",
+                  whiteSpace: "nowrap",
+                }}>
+                  {a}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div style={{
+            padding: "22px 28px",
+            display: "flex",
+            alignItems: "center",
+            background: "#0D1016",
+          }}>
+            <Link
+              href={data.ctaHref ?? "/register"}
+              style={{
+                fontFamily: MONO, fontSize: 12, fontWeight: 500,
+                color: "#ffffff",
+                textDecoration: "none",
+                whiteSpace: "nowrap",
+                display: "flex", alignItems: "center", gap: 8,
+              }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = "0.7"; }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
+            >
+              {data.ctaLabel}
+              <span style={{ fontSize: 14, lineHeight: 1 }}>→</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* ── Before / After strip ── */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 0,
+          marginTop: 12,
+          borderRadius: 10,
+          border: "1px solid rgba(0,0,0,0.08)",
+          overflow: "hidden",
+        }} className="conv-contrast">
+          {/* Before */}
+          <div style={{
+            padding: "16px 22px",
+            background: "rgba(0,0,0,0.02)",
+            borderRight: "1px solid rgba(0,0,0,0.07)",
+            display: "flex", alignItems: "flex-start", gap: 10,
+          }}>
+            <span style={{
+              fontFamily: MONO, fontSize: 10, fontWeight: 600,
+              color: "rgba(0,0,0,0.25)",
+              background: "rgba(0,0,0,0.06)",
+              padding: "2px 8px", borderRadius: 4, flexShrink: 0, marginTop: 1,
+            }}>
+              SENZA
+            </span>
+            <span style={{ fontSize: 13, color: "rgba(0,0,0,0.45)", lineHeight: 1.6, textDecoration: "line-through", textDecorationColor: "rgba(0,0,0,0.18)" }}>
+              {data.before}
+            </span>
+          </div>
+          {/* After */}
+          <div style={{
+            padding: "16px 22px",
+            background: "#ffffff",
+            display: "flex", alignItems: "flex-start", gap: 10,
+          }}>
+            <span style={{
+              fontFamily: MONO, fontSize: 10, fontWeight: 600,
+              color: "#0B3D2E",
+              background: "rgba(11,61,46,0.08)",
+              padding: "2px 8px", borderRadius: 4, flexShrink: 0, marginTop: 1,
+            }}>
+              CON
+            </span>
+            <span style={{ fontSize: 13, color: "rgba(0,0,0,0.68)", lineHeight: 1.6 }}>
+              {data.after}
+            </span>
+          </div>
+        </div>
+      </motion.div>
+
+      <style>{`
+        @media (max-width: 860px) {
+          .conv-grid { grid-template-columns: 1fr 1fr !important; }
+          .conv-contrast { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 540px) {
+          .conv-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// ─── Conversion data per module ────────────────────────────────────────────────
+
+const CONVERSION: Record<string, ConversionData> = {
+  "mod-triage": {
+    metrics: [
+      { val: "4 min",  label: "tempo medio di classificazione", note: "vs 3–6 sett. con consulenza" },
+      { val: "47+",    label: "articoli mappati in automatico" },
+      { val: "€30M",   label: "sanzione max evitabile", note: "Art. 5 — sistemi vietati" },
+    ],
+    before: "3–6 settimane di analisi legale esterna, costo €3.000–€12.000 per parere, nessuna certezza sul risultato.",
+    after:  "Classificazione in 4 minuti, mapping completo agli allegati dell'AI Act, export PDF firmato pronto per l'audit.",
+    articles: ["Art. 5", "Art. 6", "Art. 51", "Annex III"],
+    ctaLabel: "Prova il Triage gratis",
+  },
+  "mod-legal": {
+    metrics: [
+      { val: "8",      label: "fonti normative indicizzate", note: "EU AI Act, ISO 22989, EDPB…" },
+      { val: "< 3s",   label: "risposta con citazione precisa" },
+      { val: "100%",   label: "risposte con chunk sorgente", note: "nessuna risposta senza fonte" },
+    ],
+    before: "Ora di consulenza legale a €250–€350, testo normativo non verificabile, rischio di interpretazioni non aggiornate.",
+    after:  "Risposta istantanea con numero di articolo esatto e chunk verificabile. Nessuna allucinazione senza fonte.",
+    articles: ["EU AI Act", "ISO 22989", "EDPB GL", "Cons. 47"],
+    ctaLabel: "Prova il Legal Assistant",
+  },
+  "mod-risk": {
+    metrics: [
+      { val: "3-in-1",  label: "FRIA + DPIA + Risk Register unificati" },
+      { val: "70%",     label: "sezioni pre-compilate dall'AI", note: "tu validi, non scrivi da zero" },
+      { val: "SHA-256", label: "export firmato con hash", note: "immodificabile per audit" },
+    ],
+    before: "40+ ore di lavoro manuale per FRIA, DPIA e Risk Register separati, dati duplicati, nessuna firma digitale.",
+    after:  "Un unico workspace: FRIA, DPIA e Risk Register si alimentano a vicenda. Export firmato in 1 clic.",
+    articles: ["Art. 9", "Art. 27", "Art. 35", "WP29"],
+    ctaLabel: "Avvia il Risk Manager",
+  },
+  "mod-eudb": {
+    metrics: [
+      { val: "Aug 2026", label: "scadenza obbligatoria EUDB", note: "sanzione fino al 3% fatturato" },
+      { val: "Annex VIII", label: "campi pre-mappati dal Triage" },
+      { val: "0",         label: "copia-incolla necessari", note: "dati sincronizzati dal Triage" },
+    ],
+    before: "Form EU lungo e complesso, dati da inserire a mano, rischio di errori nei campi obbligatori, deadline che si avvicina.",
+    after:  "Campi Annex VIII già compilati dai dati del Triage. Verifica, firma e invia. Deadline rispettata senza stress.",
+    articles: ["Art. 49", "Annex VIII", "Art. 6", "Rec. 85"],
+    ctaLabel: "Registra il tuo sistema",
+  },
+  "mod-trust": {
+    metrics: [
+      { val: "< 5 min", label: "per pubblicare la pagina", note: "da zero a live" },
+      { val: "URL",     label: "pubblica verificabile da chiunque" },
+      { val: "Badge",   label: "embeddabile su sito e app", note: "con link alla pagina" },
+    ],
+    before: "Nessuna prova pubblica di conformità, clienti e partner non hanno modo di verificare il rispetto dell'AI Act.",
+    after:  "Pagina pubblica con classificazione, articoli coperti e pacchetto compliance scaricabile. Fiducia misurabile.",
+    articles: ["Art. 13", "Art. 50", "Art. 27", "Rec. 66"],
+    ctaLabel: "Crea il tuo Trust Center",
+  },
+};
+
 // ─── Scanner banner ───────────────────────────────────────────────────────────
 function ScannerBanner() {
   const ref = useRef<HTMLDivElement>(null);
@@ -501,9 +760,12 @@ export default function ProductsPage() {
         </motion.div>
       </section>
 
-      {/* ── Module sections ── */}
+      {/* ── Module sections + conversion blocks ── */}
       {MODULES.map((mod) => (
-        <ModuleSection key={mod.id} {...mod} />
+        <div key={mod.id}>
+          <ModuleSection {...mod} />
+          <ConversionBlock data={CONVERSION[mod.id]} />
+        </div>
       ))}
 
       {/* ── Scanner ── */}
