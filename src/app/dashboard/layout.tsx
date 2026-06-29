@@ -243,13 +243,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
         >
           {collapsed ? (
-            <Link href="/" className="w-full flex items-center justify-center text-[13px] font-bold" style={{ color: "#ffffff" }}>
-              AI
+            <Link href="/" className="w-full flex items-center justify-center" style={{ color: "#ffffff" }}>
+              <span style={{ fontFamily: "Georgia, serif", fontWeight: 700, fontSize: 13, color: "#fff" }}>R</span>
             </Link>
           ) : (
             <>
-              <Link href="/" className="text-[15px] font-semibold" style={{ color: "#ffffff", letterSpacing: "-0.4px" }}>
-                AI<span style={{ color: "rgba(255,255,255,0.35)", fontWeight: 300 }}>Comply</span>
+              <Link href="/" style={{ display: "flex", alignItems: "center" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/logo-white.svg" alt="RegulaeOS" style={{ height: 22, width: "auto" }} />
               </Link>
               <button onClick={() => setSidebarOpen(false)} className="lg:hidden" style={{ color: "rgba(255,255,255,0.5)", cursor: "pointer" }}>
                 <X className="h-4 w-4" />

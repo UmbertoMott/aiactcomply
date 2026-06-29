@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
@@ -21,12 +22,8 @@ export default function Nav() {
         borderBottom: "1px solid rgba(0,0,0,0.07)",
       }}
     >
-      <Link
-        href="/"
-        className="font-semibold text-[17px]"
-        style={{ letterSpacing: "-0.5px", color: "#0D1016", textDecoration: "none" }}
-      >
-        AI<span style={{ opacity: 0.32, fontWeight: 400 }}>Comply</span>
+      <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
+        <Image src="/logo.svg" alt="RegulaeOS" width={140} height={32} priority />
       </Link>
 
       <div className="hidden md:flex items-center gap-8 text-[13px]" style={{ color: "rgba(0,0,0,0.42)" }}>
