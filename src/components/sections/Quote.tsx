@@ -72,7 +72,7 @@ export default function Quote() {
                 <p style={{ fontSize: 13, fontWeight: 500, color: "#0D1016", lineHeight: 1.3 }}>
                   Umberto Mottola
                 </p>
-                <p style={{ fontSize: 12, color: "rgba(0,0,0,0.38)" }}>Co-fondatore, RegulaeOS</p>
+                <p style={{ fontSize: 12, color: "rgba(0,0,0,0.38)" }}>Founder, RegulaeOS</p>
               </div>
             </div>
           </div>
