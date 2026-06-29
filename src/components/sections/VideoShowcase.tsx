@@ -547,11 +547,11 @@ export default function VideoShowcase() {
         }
         /* Legal Assistant: zoom in on left (input), pan to right (output) */
         @keyframes legalZoomPan {
-          0%   { transform: scale(1.62) translateX(18%);  }  /* zoomed left — chat input */
-          28%  { transform: scale(1.62) translateX(18%);  }  /* hold left */
-          52%  { transform: scale(1.62) translateX(-18%); }  /* smooth pan to right */
-          80%  { transform: scale(1.62) translateX(-18%); }  /* hold right — source output */
-          100% { transform: scale(1.62) translateX(18%);  }  /* loop back */
+          0%   { transform: scale(2.2) translateX(15%);  }  /* zoomed left — chat input */
+          30%  { transform: scale(2.2) translateX(15%);  }  /* hold left */
+          54%  { transform: scale(2.2) translateX(-28%); }  /* smooth pan to right */
+          82%  { transform: scale(2.2) translateX(-28%); }  /* hold right — source output */
+          100% { transform: scale(2.2) translateX(15%);  }  /* loop back */
         }
         .triage-card {
           cursor: pointer;
