@@ -486,191 +486,144 @@ function LegalVideoRow({ badge, title, desc, chips, videoSrc, reverse }: Omit<Ro
   );
 }
 
-// ─── STEPS TRIO (Spellbook-style) ────────────────────────────────────────────
+// ─── PRODUCT HERO (Spellbook-style — foto reale + floating cards) ────────────
 
-function StepsTrio() {
-  const { ref, visible } = useInView(0.08);
+function ProductHero() {
+  const { ref, visible } = useInView(0.06);
 
-  const sidebarItems = (activeIndex: number) =>
-    [
-      { name: "Triage",       art: "Art.5·6"  },
-      { name: "Risk Manager", art: "Art.27"   },
-      { name: "DocuGen AI",   art: "Art.11"   },
-      { name: "EUDB",         art: "Art.49"   },
-      { name: "Trust Center", art: "Art.13"   },
-    ].map((item, i) => (
-      <div key={item.name} style={{ padding: "5px 10px", background: i === activeIndex ? "rgba(255,255,255,0.07)" : "transparent" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontFamily: MONO, fontSize: 8, color: i === activeIndex ? "#fff" : "rgba(255,255,255,0.28)" }}>{item.name}</span>
-          <span style={{ fontFamily: MONO, fontSize: 7, color: "rgba(255,255,255,0.15)" }}>{item.art}</span>
-        </div>
-      </div>
-    ));
-
-  const browserChrome = (url: string) => (
-    <div style={{ background: "#1E2028", padding: "8px 12px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-      <div style={{ display: "flex", gap: 4 }}>
-        {(["rgba(255,95,87,0.7)", "rgba(255,189,46,0.7)", "rgba(40,200,64,0.7)"] as const).map((c, i) => (
-          <div key={i} style={{ width: 8, height: 8, borderRadius: "50%", background: c }} />
-        ))}
-      </div>
-      <div style={{ flex: 1, height: 18, borderRadius: 3, background: "rgba(255,255,255,0.06)", marginLeft: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <span style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.22)" }}>{url}</span>
-      </div>
-    </div>
-  );
-
-  const sidebar = (activeIndex: number) => (
-    <div style={{ width: 128, background: "#0D1016", borderRight: "1px solid rgba(255,255,255,0.05)", padding: "10px 0", flexShrink: 0 }}>
-      <div style={{ padding: "0 10px 10px", marginBottom: 6, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-        <span style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.22)", fontWeight: 700 }}>RegulaeOS</span>
-      </div>
-      {sidebarItems(activeIndex)}
-    </div>
-  );
-
-  // ── Panel 1: Triage ──────────────────────────────────────────────────────────
-  const triagePanel = (
-    <div style={{ height: 310, background: "#0F1117", borderRadius: 10, overflow: "hidden", border: "1px solid rgba(255,255,255,0.10)", display: "flex", flexDirection: "column" }}>
-      {browserChrome("regulaeos.it / triage")}
-      <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
-        {sidebar(0)}
-        <div style={{ flex: 1, padding: "14px 13px", background: "#12141A", overflowY: "hidden" }}>
-          <div style={{ fontFamily: MONO, fontSize: 7, color: "rgba(255,255,255,0.18)", marginBottom: 9, letterSpacing: "0.12em", textTransform: "uppercase" as const }}>Classificazione sistema AI</div>
-          <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 7, padding: "10px 12px", border: "1px solid rgba(255,255,255,0.1)", marginBottom: 9 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 3 }}>
-              <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#fff" }} />
-              <span style={{ fontFamily: MONO, fontSize: 9, color: "#fff", fontWeight: 700, letterSpacing: "0.1em" }}>ALTO RISCHIO</span>
-            </div>
-            <span style={{ fontFamily: MONO, fontSize: 7, color: "rgba(255,255,255,0.3)" }}>Art. 6 · Allegato III, cat. 5(a)</span>
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 3, marginBottom: 9 }}>
-            {["Art. 9", "Art. 11", "Art. 13", "Annex IV", "Art. 49"].map(a => (
-              <span key={a} style={{ fontFamily: MONO, fontSize: 7, color: "rgba(255,255,255,0.4)", padding: "2px 6px", border: "1px solid rgba(255,255,255,0.09)", borderRadius: 3 }}>{a}</span>
-            ))}
-          </div>
-          {["Documentazione tecnica Annex IV", "Quality Management System Art.9", "Registrazione EUDB obbligatoria"].map((s, i) => (
-            <div key={i} style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 5 }}>
-              <div style={{ width: 13, height: 13, borderRadius: "50%", background: "rgba(11,61,46,0.7)", border: "1px solid rgba(30,120,80,0.4)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ fontFamily: MONO, fontSize: 6, color: "#6EE7A0" }}>✓</span>
-              </div>
-              <span style={{ fontFamily: MONO, fontSize: 7, color: "rgba(255,255,255,0.32)", lineHeight: 1.4 }}>{s}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  // ── Panel 2: Risk Manager ────────────────────────────────────────────────────
-  const riskPanel = (
-    <div style={{ height: 310, background: "#0F1117", borderRadius: 10, overflow: "hidden", border: "1px solid rgba(255,255,255,0.10)", display: "flex", flexDirection: "column" }}>
-      {browserChrome("regulaeos.it / risk-manager")}
-      <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
-        {sidebar(1)}
-        <div style={{ flex: 1, padding: "14px 13px", background: "#12141A", overflowY: "hidden" }}>
-          <div style={{ fontFamily: MONO, fontSize: 7, color: "rgba(255,255,255,0.18)", marginBottom: 9, letterSpacing: "0.12em", textTransform: "uppercase" as const }}>Risk Register · Matrice P×S</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 4, marginBottom: 10 }}>
-            {[
-              { label: "Discriminazione", color: "#C0392B", score: "P4×S5" },
-              { label: "Bias dati",       color: "#E67E22", score: "P3×S4" },
-              { label: "Privacy",         color: "#E67E22", score: "P2×S4" },
-              { label: "Opacità",         color: "#F1C40F", score: "P3×S3" },
-              { label: "Deriva",          color: "#F1C40F", score: "P2×S3" },
-              { label: "Sicurezza",       color: "#2ECC71", score: "P1×S3" },
-            ].map(r => (
-              <div key={r.label} style={{ background: `${r.color}18`, borderRadius: 4, padding: "5px 6px", border: `1px solid ${r.color}30` }}>
-                <div style={{ fontFamily: MONO, fontSize: 7, color: "rgba(255,255,255,0.55)", marginBottom: 2 }}>{r.label}</div>
-                <div style={{ fontFamily: MONO, fontSize: 7, color: r.color, fontWeight: 600 }}>{r.score}</div>
-              </div>
-            ))}
-          </div>
-          {[{ label: "FRIA completata", pct: 87 }, { label: "DPIA validata", pct: 64 }, { label: "Rischi mitigati", pct: 72 }].map(row => (
-            <div key={row.label} style={{ marginBottom: 7 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
-                <span style={{ fontFamily: MONO, fontSize: 7, color: "rgba(255,255,255,0.32)" }}>{row.label}</span>
-                <span style={{ fontFamily: MONO, fontSize: 7, color: "rgba(255,255,255,0.22)" }}>{row.pct}%</span>
-              </div>
-              <div style={{ height: 3, background: "rgba(255,255,255,0.05)", borderRadius: 2 }}>
-                <div style={{ width: `${row.pct}%`, height: "100%", background: "rgba(46,204,113,0.55)", borderRadius: 2 }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  // ── Panel 3: Trust Center public page ───────────────────────────────────────
-  const trustPanel = (
-    <div style={{ height: 310, background: "#0F1117", borderRadius: 10, overflow: "hidden", border: "1px solid rgba(255,255,255,0.10)", display: "flex", flexDirection: "column" }}>
-      {browserChrome("trust.regulaeos.it / acme-corp")}
-      <div style={{ flex: 1, background: "#FAFAF9", padding: "14px 16px", overflowY: "hidden" }}>
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-          <div style={{ width: 30, height: 30, borderRadius: "50%", background: "#0D1016", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <span style={{ fontFamily: MONO, fontSize: 8, color: "#fff", fontWeight: 700 }}>AC</span>
-          </div>
-          <div>
-            <div style={{ fontFamily: MONO, fontSize: 9, fontWeight: 600, color: "#0D1016" }}>Acme Corp S.r.l.</div>
-            <div style={{ fontFamily: MONO, fontSize: 7, color: "rgba(0,0,0,0.38)" }}>Pagina di trasparenza AI · Art. 13</div>
-          </div>
-          <div style={{ marginLeft: "auto", background: "#0B3D2E", borderRadius: 4, padding: "3px 9px", flexShrink: 0 }}>
-            <span style={{ fontFamily: MONO, fontSize: 7, color: "#6EE7A0", fontWeight: 600 }}>✓ VERIFICATO</span>
-          </div>
-        </div>
-        {/* Risk badge */}
-        <div style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.09)", borderRadius: 7, padding: "10px 12px", marginBottom: 8, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-          <div style={{ fontFamily: MONO, fontSize: 7, color: "rgba(0,0,0,0.28)", marginBottom: 4 }}>LIVELLO DI RISCHIO · Art. 6</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#0D1016", flexShrink: 0 }} />
-            <span style={{ fontFamily: MONO, fontSize: 9, fontWeight: 700, color: "#0D1016" }}>ALTO RISCHIO</span>
-            <span style={{ fontFamily: MONO, fontSize: 7, color: "rgba(0,0,0,0.28)", marginLeft: 2 }}>Allegato III, cat. 5(a)</span>
-          </div>
-        </div>
-        {/* Documents */}
-        <div style={{ fontFamily: MONO, fontSize: 7, color: "rgba(0,0,0,0.25)", marginBottom: 6, letterSpacing: "0.1em", textTransform: "uppercase" as const }}>Pacchetto conformità</div>
-        {[
-          { name: "Fascicolo Tecnico Annex IV", ok: true },
-          { name: "FRIA — Valutazione d'impatto", ok: true },
-          { name: "Dichiarazione EU di conformità", ok: false },
-        ].map((doc, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "5px 8px", background: "#fff", borderRadius: 5, marginBottom: 4, border: "1px solid rgba(0,0,0,0.07)" }}>
-            <span style={{ fontFamily: MONO, fontSize: 7, color: "rgba(0,0,0,0.52)" }}>{doc.name}</span>
-            <div style={{ display: "flex", gap: 4, alignItems: "center", flexShrink: 0 }}>
-              {doc.ok && <span style={{ fontFamily: MONO, fontSize: 7, color: "#2D7A50" }}>✓</span>}
-              <span style={{ fontFamily: MONO, fontSize: 6, color: "rgba(0,0,0,0.28)", padding: "1px 5px", border: "1px solid rgba(0,0,0,0.09)", borderRadius: 3 }}>PDF</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const steps = [
-    { num: "01", title: "Classifica",  desc: "Il sistema AI viene classificato per livello di rischio e mappato automaticamente agli articoli e agli allegati applicabili.", panel: triagePanel  },
-    { num: "02", title: "Valuta",      desc: "Risk Register, FRIA e DPIA si pre-compilano dai dati del Triage. La matrice P×S evidenzia le priorità di mitigazione.",       panel: riskPanel    },
-    { num: "03", title: "Certifica",   desc: "Pubblica la pagina di trasparenza verificabile con badge di conformità, documenti firmati SHA-256 e pacchetto esportabile.",    panel: trustPanel   },
-  ];
+  const fadeLeft  = { opacity: visible ? 1 : 0, transform: visible ? "none" : "translateX(-28px)", transition: "opacity .75s ease, transform .75s ease" };
+  const fadeRight = { opacity: visible ? 1 : 0, transform: visible ? "none" : "translateX(28px)",  transition: "opacity .75s .18s ease, transform .75s .18s ease" };
 
   return (
-    <div ref={ref} style={{ background: DARK, padding: "80px 56px" }}>
-      <p style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.22)", letterSpacing: "0.12em", textTransform: "uppercase" as const, marginBottom: 56 }}>
-        In tre passi
-      </p>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 40 }} className="trio-grid">
-        {steps.map((s, i) => (
-          <div key={s.num} style={{ opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(28px)", transition: `opacity .55s ${i * 0.14}s ease, transform .55s ${i * 0.14}s ease` }}>
-            {s.panel}
-            <div style={{ marginTop: 22 }}>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10 }}>
-                <span style={{ fontFamily: MONO, fontSize: 11, color: "rgba(255,255,255,0.22)", letterSpacing: "0.1em" }}>{s.num}</span>
-                <span style={{ fontFamily: SERIF, fontSize: 28, fontWeight: 400, color: "#fff", letterSpacing: "-1px" }}>{s.title}</span>
+    <div ref={ref} style={{ background: "#ffffff", borderTop: "1px solid rgba(0,0,0,0.07)", borderBottom: "1px solid rgba(0,0,0,0.07)", overflow: "hidden" }}>
+      <div style={{ maxWidth: 1380, margin: "0 auto", padding: "96px 56px", display: "flex", alignItems: "center", gap: 72 }} className="showcase-row">
+
+        {/* ─── LEFT: screenshot grande + floating cards ─────────────────── */}
+        <div style={{ flex: "0 0 58%", position: "relative", ...fadeLeft }}>
+
+          {/* Floating pill — sopra lo screenshot */}
+          <div style={{
+            position: "absolute", top: -18, left: 24, zIndex: 10,
+            background: GREEN, borderRadius: 20, padding: "6px 14px",
+            display: "inline-flex", alignItems: "center", gap: 7,
+            boxShadow: "0 4px 16px rgba(11,61,46,0.35)",
+          }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#6EE7A0" }} />
+            <span style={{ fontFamily: MONO, fontSize: 10, color: "#6EE7A0", fontWeight: 600, letterSpacing: "0.06em" }}>ART. 27 AI ACT · FRIA GUIDATA</span>
+          </div>
+
+          {/* Browser frame + screenshot */}
+          <div style={{
+            borderRadius: 16,
+            overflow: "hidden",
+            border: "1px solid rgba(0,0,0,0.09)",
+            boxShadow: "0 40px 100px rgba(0,0,0,0.14), 0 8px 32px rgba(0,0,0,0.08)",
+          }}>
+            {/* Chrome bar */}
+            <div style={{ background: "#EBEBEA", borderBottom: "1px solid rgba(0,0,0,0.09)", padding: "11px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ display: "flex", gap: 6 }}>
+                {(["#FF5F57","#FFBD2E","#28C840"] as const).map((c,i) => (
+                  <div key={i} style={{ width: 12, height: 12, borderRadius: "50%", background: c }} />
+                ))}
               </div>
-              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.42)", lineHeight: 1.72 }}>{s.desc}</p>
+              <div style={{ flex: 1, height: 24, borderRadius: 6, background: "rgba(0,0,0,0.07)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ fontFamily: MONO, fontSize: 10, color: "rgba(0,0,0,0.28)" }}>regulaeos.it / dashboard / fria-guidata</span>
+              </div>
+            </div>
+            {/* Real screenshot */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/screenshots/fria.png"
+              alt="FRIA Guidata — RegulaeOS"
+              style={{ width: "100%", display: "block" }}
+            />
+          </div>
+
+          {/* Floating card: progress (top-right, sopra il frame) */}
+          <div style={{
+            position: "absolute", top: 56, right: -28, zIndex: 10,
+            background: "#fff",
+            borderRadius: 12,
+            padding: "14px 18px",
+            boxShadow: "0 12px 40px rgba(0,0,0,0.13), 0 1px 6px rgba(0,0,0,0.06)",
+            border: "1px solid rgba(0,0,0,0.08)",
+            minWidth: 176,
+          }}>
+            <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.32)", marginBottom: 10, letterSpacing: "0.08em" }}>AVANZAMENTO FRIA</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+              <div style={{ position: "relative", width: 40, height: 40, flexShrink: 0 }}>
+                <svg viewBox="0 0 40 40" style={{ transform: "rotate(-90deg)", width: 40, height: 40 }}>
+                  <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(0,0,0,0.07)" strokeWidth="4" />
+                  <circle cx="20" cy="20" r="16" fill="none" stroke={GREEN} strokeWidth="4"
+                    strokeDasharray={`${0.38 * 100.5} 100.5`} strokeLinecap="round" />
+                </svg>
+                <span style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: MONO, fontSize: 9, fontWeight: 700, color: DARK }}>38%</span>
+              </div>
+              <div>
+                <div style={{ fontFamily: MONO, fontSize: 10, fontWeight: 600, color: DARK }}>15 / 48</div>
+                <div style={{ fontFamily: MONO, fontSize: 8, color: "rgba(0,0,0,0.38)", marginTop: 1 }}>risposte completate</div>
+              </div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#2ECC71" }} />
+              <span style={{ fontFamily: MONO, fontSize: 8, color: "rgba(0,0,0,0.45)" }}>Sezione 1A · 100% ✓</span>
             </div>
           </div>
-        ))}
+
+          {/* Floating card: articoli (bottom-left) */}
+          <div style={{
+            position: "absolute", bottom: 40, left: -20, zIndex: 10,
+            background: DARK,
+            borderRadius: 12,
+            padding: "14px 16px",
+            boxShadow: "0 16px 48px rgba(0,0,0,0.28)",
+            border: "1px solid rgba(255,255,255,0.07)",
+          }}>
+            <div style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.28)", marginBottom: 8, letterSpacing: "0.1em" }}>COPERTURA NORMATIVA</div>
+            <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 5, maxWidth: 220 }}>
+              {["Art. 27", "Art. 9", "Art. 13", "Art. 26", "WP29", "DIHR", "ECNL", "CFR"].map(a => (
+                <span key={a} style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.72)", padding: "3px 8px", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 4 }}>{a}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ─── RIGHT: testo ─────────────────────────────────────────────── */}
+        <div style={{ flex: "0 0 36%", ...fadeRight }}>
+          <p style={{ fontFamily: MONO, fontSize: 11, fontWeight: 500, color: "rgba(0,0,0,0.32)", letterSpacing: "0.07em", textTransform: "uppercase" as const, marginBottom: 20 }}>
+            Risk Manager · Art. 27
+          </p>
+          <h2 style={{
+            fontFamily: SERIF,
+            fontSize: "clamp(28px, 3.2vw, 46px)",
+            fontWeight: 400,
+            letterSpacing: "-2px",
+            lineHeight: 1.05,
+            color: DARK,
+            marginBottom: 20,
+          }}>
+            Valutazioni d&apos;impatto che si scrivono da sole.
+          </h2>
+          <p style={{ fontSize: 15, fontWeight: 300, color: "rgba(0,0,0,0.48)", lineHeight: 1.8, marginBottom: 28 }}>
+            L&apos;assistente AI guida la FRIA sezione per sezione, citando ogni articolo applicabile.
+            WP29, DIHR e framework CFR integrati — le risposte precedenti pre-compilano le sezioni successive, azzerando il copia-incolla.
+          </p>
+          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 7, marginBottom: 36 }}>
+            {["FRIA Art. 27", "DPIA collegata", "AI pre-compila", "Export firmato SHA-256", "WP29 · DIHR"].map(c => (
+              <span key={c} style={{ fontFamily: MONO, fontSize: 11, padding: "5px 13px", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 20, color: "rgba(0,0,0,0.42)" }}>{c}</span>
+            ))}
+          </div>
+          <div style={{ height: 1, background: "rgba(0,0,0,0.07)", marginBottom: 28 }} />
+          <div style={{ display: "flex", gap: 32 }}>
+            {[{ v: "48", l: "sezioni guidate" }, { v: "7", l: "framework coperti" }, { v: "100%", l: "pre-compilazione AI" }].map(stat => (
+              <div key={stat.l}>
+                <div style={{ fontFamily: SERIF, fontSize: 28, fontWeight: 400, letterSpacing: "-1px", color: DARK }}>{stat.v}</div>
+                <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.35)", marginTop: 2 }}>{stat.l}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
       </div>
     </div>
   );
@@ -809,8 +762,8 @@ export default function VideoShowcase() {
         <VideoRow {...ROW4} />
       </div>
 
-      {/* ⑧ Steps Trio — Spellbook-style 3-col */}
-      <StepsTrio />
+      {/* ⑧ Product Hero — Spellbook-style foto reale */}
+      <ProductHero />
 
       {/* ⑨ Trust Center video */}
       <div className="px-12 pb-24" style={{ maxWidth: 1280, margin: "0 auto" }}>
