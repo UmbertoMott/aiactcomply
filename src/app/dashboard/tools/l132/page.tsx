@@ -577,6 +577,7 @@ export default function L132Page() {
   const [aiSystems, setAiSystems] = useState<{ id: string; name: string; risk_tier: string }[]>([]);
   const [dbSynced, setDbSynced] = useState(false);
   const [dbSyncing, setDbSyncing] = useState(false);
+  const [showLegalNote, setShowLegalNote] = useState(true);
 
   // Load saved state (localStorage + DB)
   useEffect(() => {
@@ -1172,13 +1173,32 @@ export default function L132Page() {
         </div>
 
         {/* Legal note */}
+        {showLegalNote && (
         <div
           className="mt-6 rounded-lg p-4"
           style={{
             background: "rgba(245,158,11,0.06)",
             border: "1px solid rgba(245,158,11,0.25)",
+            position: "relative",
           }}
         >
+          <button
+            onClick={() => setShowLegalNote(false)}
+            style={{
+              position: "absolute", top: 10, right: 10,
+              width: 20, height: 20,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              color: "rgba(146,64,14,0.5)",
+              fontSize: 16,
+              lineHeight: 1,
+              padding: 0,
+              borderRadius: 4,
+            }}
+            aria-label="Chiudi nota legale"
+          >×</button>
           <p
             className="text-[12px] font-semibold mb-1"
             style={{ color: "#92400e" }}
@@ -1200,6 +1220,7 @@ export default function L132Page() {
             informativo e non sostituisce la consulenza legale specializzata.
           </p>
         </div>
+        )}
       </div>
 
       {/* Toast */}
