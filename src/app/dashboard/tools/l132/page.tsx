@@ -710,9 +710,9 @@ export default function L132Page() {
         <div className="flex items-start gap-3">
           <div
             className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: "rgba(220,38,38,0.07)" }}
+            style={{ background: "rgba(13,16,22,0.06)" }}
           >
-            <Scale className="h-5 w-5" style={{ color: "#dc2626" }} />
+            <Scale className="h-5 w-5" style={{ color: "#0D1016" }} />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
