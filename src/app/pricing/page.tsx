@@ -291,10 +291,10 @@ function CompareBlock() {
   });
 
   const before = [
-    { icon: "⏳", label: "4–8 settimane", sub: "per una valutazione d'impatto completa" },
-    { icon: "💸", label: "€8.000–40.000", sub: "costo medio di consulenza legale AI" },
-    { icon: "📋", label: "Copia-incolla", sub: "da template Word senza collegamento ai dati" },
-    { icon: "⚠️", label: "Rischio silenzioso", sub: "senza alert su nuovi obblighi normativi" },
+    { label: "4–8 settimane", sub: "per una valutazione d'impatto completa" },
+    { label: "€8.000–40.000", sub: "costo medio di consulenza legale AI" },
+    { label: "Copia-incolla", sub: "da template Word senza collegamento ai dati" },
+    { label: "Rischio silenzioso", sub: "senza alert su nuovi obblighi normativi" },
   ];
   const after = [
     { label: "< 1 ora", sub: "per completare FRIA + DPIA con AI" },
@@ -316,15 +316,15 @@ function CompareBlock() {
         <div ref={ref} style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 0, alignItems: "stretch" }} className="compare-grid">
 
           {/* BEFORE */}
-          <div style={{ ...fade(1), background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.07)", borderRadius: "14px 0 0 14px", padding: "32px 28px" }}>
-            <p style={{ fontFamily: MONO, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase" as const, color: "rgba(0,0,0,0.30)", marginBottom: 20 }}>Senza RegulaeOS</p>
-            <div style={{ display: "flex", flexDirection: "column" as const, gap: 18 }}>
+          <div style={{ ...fade(1), background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.09)", borderRadius: "14px 0 0 14px", padding: "32px 28px" }}>
+            <p style={{ fontFamily: MONO, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase" as const, color: "rgba(0,0,0,0.38)", marginBottom: 20 }}>Senza RegulaeOS</p>
+            <div style={{ display: "flex", flexDirection: "column" as const, gap: 20 }}>
               {before.map((b) => (
-                <div key={b.label} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-                  <span style={{ fontSize: 18, lineHeight: 1, marginTop: 2 }}>{b.icon}</span>
+                <div key={b.label} style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(0,0,0,0.22)", marginTop: 8, flexShrink: 0 }} />
                   <div>
-                    <div style={{ fontFamily: "Georgia, serif", fontSize: 18, fontWeight: 400, letterSpacing: "-0.5px", color: "rgba(0,0,0,0.55)" }}>{b.label}</div>
-                    <div style={{ fontFamily: MONO, fontSize: 10, color: "rgba(0,0,0,0.30)", marginTop: 3, lineHeight: 1.5 }}>{b.sub}</div>
+                    <div style={{ fontFamily: "Georgia, serif", fontSize: 19, fontWeight: 400, letterSpacing: "-0.5px", color: "#0D1016" }}>{b.label}</div>
+                    <div style={{ fontFamily: MONO, fontSize: 11, color: "rgba(0,0,0,0.48)", marginTop: 4, lineHeight: 1.55 }}>{b.sub}</div>
                   </div>
                 </div>
               ))}
@@ -342,14 +342,14 @@ function CompareBlock() {
 
           {/* AFTER */}
           <div style={{ ...fade(3), background: "#0D1016", border: "1px solid #0D1016", borderRadius: "0 14px 14px 0", padding: "32px 28px" }}>
-            <p style={{ fontFamily: MONO, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.28)", marginBottom: 20 }}>Con RegulaeOS</p>
-            <div style={{ display: "flex", flexDirection: "column" as const, gap: 18 }}>
+            <p style={{ fontFamily: MONO, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.40)", marginBottom: 20 }}>Con RegulaeOS</p>
+            <div style={{ display: "flex", flexDirection: "column" as const, gap: 20 }}>
               {after.map((a) => (
-                <div key={a.label} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#6EE7A0", marginTop: 7, flexShrink: 0 }} />
+                <div key={a.label} style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#6EE7A0", marginTop: 8, flexShrink: 0 }} />
                   <div>
-                    <div style={{ fontFamily: "Georgia, serif", fontSize: 18, fontWeight: 400, letterSpacing: "-0.5px", color: "#ffffff" }}>{a.label}</div>
-                    <div style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.35)", marginTop: 3, lineHeight: 1.5 }}>{a.sub}</div>
+                    <div style={{ fontFamily: "Georgia, serif", fontSize: 19, fontWeight: 400, letterSpacing: "-0.5px", color: "#ffffff" }}>{a.label}</div>
+                    <div style={{ fontFamily: MONO, fontSize: 11, color: "rgba(255,255,255,0.55)", marginTop: 4, lineHeight: 1.55 }}>{a.sub}</div>
                   </div>
                 </div>
               ))}
