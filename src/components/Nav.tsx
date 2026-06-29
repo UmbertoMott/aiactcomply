@@ -23,7 +23,7 @@ export default function Nav() {
       }}
     >
       <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
-        <Image src="/logo.svg" alt="RegulaeOS" width={140} height={32} priority />
+        <Image src="/logo.png" alt="RegulaeOS" width={140} height={36} priority />
       </Link>
 
       <div className="hidden md:flex items-center gap-8 text-[13px]" style={{ color: "rgba(0,0,0,0.42)" }}>

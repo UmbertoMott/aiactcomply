@@ -250,7 +250,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <>
               <Link href="/" style={{ display: "flex", alignItems: "center" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo-white.svg" alt="RegulaeOS" style={{ height: 22, width: "auto" }} />
+                <img src="/logo.png" alt="RegulaeOS" style={{ height: 22, width: "auto", filter: "invert(1)" }} />
               </Link>
               <button onClick={() => setSidebarOpen(false)} className="lg:hidden" style={{ color: "rgba(255,255,255,0.5)", cursor: "pointer" }}>
                 <X className="h-4 w-4" />

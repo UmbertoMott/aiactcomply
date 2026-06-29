@@ -9,7 +9,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         style={{ background: "#0D1016" }}
       >
         <a href="/" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
-          <img src="/logo-white.svg" alt="RegulaeOS" style={{ height: 26, width: "auto" }} />
+          <img src="/logo.png" alt="RegulaeOS" style={{ height: 26, width: "auto", filter: "invert(1)" }} />
         </a>
 
         <div>
@@ -63,7 +63,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             className="lg:hidden text-[18px] font-semibold mb-10 block hover:opacity-70 transition-opacity"
             style={{ color: "#0D1016", letterSpacing: "-0.5px", textDecoration: "none" }}
           >
-            <img src="/logo.svg" alt="RegulaeOS" style={{ height: 24, width: "auto" }} />
+            <img src="/logo.png" alt="RegulaeOS" style={{ height: 24, width: "auto" }} />
           </a>
           {children}
         </div>
