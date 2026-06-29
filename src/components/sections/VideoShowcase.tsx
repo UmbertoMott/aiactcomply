@@ -490,6 +490,29 @@ function LegalVideoRow({ badge, title, desc, chips, videoSrc, reverse }: Omit<Ro
 
 function ProductHero() {
   const { ref, visible } = useInView(0.06);
+  const tiltRef = useRef<HTMLDivElement>(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [hovering, setHovering] = useState(false);
+  const rafRef = useRef<number | null>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = tiltRef.current;
+    if (!el) return;
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      const r = el.getBoundingClientRect();
+      const dx = (e.clientX - (r.left + r.width  / 2)) / (r.width  / 2);
+      const dy = (e.clientY - (r.top  + r.height / 2)) / (r.height / 2);
+      setTilt({ x: dy * -5, y: dx * 6 });
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setHovering(false);
+    setTilt({ x: 0, y: 0 });
+  };
+
+  const tiltTransition = hovering ? "transform 0.08s linear" : "transform 0.65s cubic-bezier(.23,1,.32,1)";
 
   const fadeLeft  = { opacity: visible ? 1 : 0, transform: visible ? "none" : "translateX(-28px)", transition: "opacity .75s ease, transform .75s ease" };
   const fadeRight = { opacity: visible ? 1 : 0, transform: visible ? "none" : "translateX(28px)",  transition: "opacity .75s .18s ease, transform .75s .18s ease" };
@@ -501,66 +524,97 @@ function ProductHero() {
         {/* ─── LEFT: screenshot grande + floating cards ─────────────────── */}
         <div style={{ flex: "0 0 58%", position: "relative", ...fadeLeft }}>
 
-          {/* Screenshot reale — include già il browser */}
-          <div style={{
-            borderRadius: 16,
-            overflow: "hidden",
-            boxShadow: "0 48px 120px rgba(0,0,0,0.18), 0 8px 32px rgba(0,0,0,0.10)",
-          }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/screenshots/fria.png"
-              alt="FRIA Guidata — RegulaeOS"
-              style={{ width: "100%", display: "block" }}
-            />
-          </div>
+          {/* 3D tilt wrapper */}
+          <div
+            ref={tiltRef}
+            onMouseMove={handleMouseMove}
+            onMouseEnter={() => setHovering(true)}
+            onMouseLeave={handleMouseLeave}
+            style={{
+              position: "relative",
+              transformStyle: "preserve-3d",
+              transform: `perspective(1100px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+              transition: tiltTransition,
+              willChange: "transform",
+              cursor: "default",
+            }}
+          >
+            {/* Screenshot reale */}
+            <div style={{
+              borderRadius: 16,
+              overflow: "hidden",
+              boxShadow: hovering
+                ? `0 ${60 + tilt.x * -2}px 140px rgba(0,0,0,0.26), 0 12px 40px rgba(0,0,0,0.14)`
+                : "0 48px 120px rgba(0,0,0,0.18), 0 8px 32px rgba(0,0,0,0.10)",
+              transition: "box-shadow 0.4s ease",
+              transform: "translateZ(0px)",
+            }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/screenshots/fria.png"
+                alt="FRIA Guidata — RegulaeOS"
+                style={{ width: "100%", display: "block" }}
+              />
+            </div>
 
-          {/* Floating card: progress (top-right, sopra il frame) */}
-          <div style={{
-            position: "absolute", top: 56, right: -28, zIndex: 10,
-            background: "#fff",
-            borderRadius: 12,
-            padding: "14px 18px",
-            boxShadow: "0 12px 40px rgba(0,0,0,0.13), 0 1px 6px rgba(0,0,0,0.06)",
-            border: "1px solid rgba(0,0,0,0.08)",
-            minWidth: 176,
-          }}>
-            <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.32)", marginBottom: 10, letterSpacing: "0.08em" }}>AVANZAMENTO FRIA</div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-              <div style={{ position: "relative", width: 40, height: 40, flexShrink: 0 }}>
-                <svg viewBox="0 0 40 40" style={{ transform: "rotate(-90deg)", width: 40, height: 40 }}>
-                  <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(0,0,0,0.07)" strokeWidth="4" />
-                  <circle cx="20" cy="20" r="16" fill="none" stroke={GREEN} strokeWidth="4"
-                    strokeDasharray={`${0.38 * 100.5} 100.5`} strokeLinecap="round" />
-                </svg>
-                <span style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: MONO, fontSize: 9, fontWeight: 700, color: DARK }}>38%</span>
+            {/* Floating card: progress (top-right) — strato Z più alto */}
+            <div style={{
+              position: "absolute", top: 56, right: -28, zIndex: 10,
+              background: "#fff",
+              borderRadius: 12,
+              padding: "14px 18px",
+              boxShadow: "0 16px 48px rgba(0,0,0,0.16), 0 1px 6px rgba(0,0,0,0.06)",
+              border: "1px solid rgba(0,0,0,0.08)",
+              minWidth: 176,
+              transform: "translateZ(48px)",
+              transition: tiltTransition,
+            }}>
+              <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.32)", marginBottom: 10, letterSpacing: "0.08em" }}>AVANZAMENTO FRIA</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                <div style={{ position: "relative", width: 40, height: 40, flexShrink: 0 }}>
+                  <svg viewBox="0 0 40 40" style={{ transform: "rotate(-90deg)", width: 40, height: 40 }}>
+                    <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(0,0,0,0.07)" strokeWidth="4" />
+                    <circle cx="20" cy="20" r="16" fill="none" stroke={GREEN} strokeWidth="4"
+                      strokeDasharray={`${0.38 * 100.5} 100.5`} strokeLinecap="round" />
+                  </svg>
+                  <span style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: MONO, fontSize: 9, fontWeight: 700, color: DARK }}>38%</span>
+                </div>
+                <div>
+                  <div style={{ fontFamily: MONO, fontSize: 10, fontWeight: 600, color: DARK }}>15 / 48</div>
+                  <div style={{ fontFamily: MONO, fontSize: 8, color: "rgba(0,0,0,0.38)", marginTop: 1 }}>risposte completate</div>
+                </div>
               </div>
-              <div>
-                <div style={{ fontFamily: MONO, fontSize: 10, fontWeight: 600, color: DARK }}>15 / 48</div>
-                <div style={{ fontFamily: MONO, fontSize: 8, color: "rgba(0,0,0,0.38)", marginTop: 1 }}>risposte completate</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#2ECC71" }} />
+                <span style={{ fontFamily: MONO, fontSize: 8, color: "rgba(0,0,0,0.45)" }}>Sezione 1A · 100% ✓</span>
               </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#2ECC71" }} />
-              <span style={{ fontFamily: MONO, fontSize: 8, color: "rgba(0,0,0,0.45)" }}>Sezione 1A · 100% ✓</span>
-            </div>
-          </div>
 
-          {/* Floating card: articoli (bottom-left) */}
-          <div style={{
-            position: "absolute", bottom: 40, left: -20, zIndex: 10,
-            background: DARK,
-            borderRadius: 12,
-            padding: "14px 16px",
-            boxShadow: "0 16px 48px rgba(0,0,0,0.28)",
-            border: "1px solid rgba(255,255,255,0.07)",
-          }}>
-            <div style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.28)", marginBottom: 8, letterSpacing: "0.1em" }}>COPERTURA NORMATIVA</div>
-            <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 5, maxWidth: 220 }}>
-              {["Art. 27", "Art. 9", "Art. 13", "Art. 26", "WP29", "DIHR", "ECNL", "CFR"].map(a => (
-                <span key={a} style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.72)", padding: "3px 8px", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 4 }}>{a}</span>
-              ))}
+            {/* Floating card: articoli (bottom-left) — strato Z intermedio */}
+            <div style={{
+              position: "absolute", bottom: 40, left: -20, zIndex: 10,
+              background: DARK,
+              borderRadius: 12,
+              padding: "14px 16px",
+              boxShadow: "0 20px 56px rgba(0,0,0,0.36)",
+              border: "1px solid rgba(255,255,255,0.07)",
+              transform: "translateZ(32px)",
+              transition: tiltTransition,
+            }}>
+              <div style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.28)", marginBottom: 8, letterSpacing: "0.1em" }}>COPERTURA NORMATIVA</div>
+              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 5, maxWidth: 220 }}>
+                {["Art. 27", "Art. 9", "Art. 13", "Art. 26", "WP29", "DIHR", "ECNL", "CFR"].map(a => (
+                  <span key={a} style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.72)", padding: "3px 8px", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 4 }}>{a}</span>
+                ))}
+              </div>
             </div>
+
+            {/* Shimmer highlight che segue il tilt */}
+            <div style={{
+              position: "absolute", inset: 0, borderRadius: 16, pointerEvents: "none", zIndex: 20,
+              background: `radial-gradient(ellipse 60% 40% at ${50 + tilt.y * 5}% ${50 + tilt.x * -5}%, rgba(255,255,255,${hovering ? 0.09 : 0}) 0%, transparent 70%)`,
+              transition: hovering ? "background 0.08s linear" : "background 0.65s ease",
+            }} />
           </div>
         </div>
 
