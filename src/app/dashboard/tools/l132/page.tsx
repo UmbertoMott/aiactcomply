@@ -485,36 +485,49 @@ function CheckItem({
             : "1px solid rgba(0,0,0,0.06)",
       }}
     >
-      <div className="flex items-center gap-2 mt-0.5 flex-shrink-0">
-        <button
-          onClick={() => onChange(true)}
-          className="w-5 h-5 rounded-full flex items-center justify-center transition-all"
-          style={{
-            background:
-              value === true ? "#15803d" : "rgba(0,0,0,0.06)",
-            border: value === true ? "none" : "1.5px solid rgba(0,0,0,0.18)",
-          }}
-          title="Conforme"
-        >
-          {value === true && (
-            <CheckCircle className="h-3 w-3" style={{ color: "#fff" }} />
-          )}
-        </button>
-        <button
-          onClick={() => onChange(false)}
-          className="w-5 h-5 rounded-full flex items-center justify-center transition-all"
-          style={{
-            background:
-              value === false ? "#dc2626" : "rgba(0,0,0,0.06)",
-            border:
-              value === false ? "none" : "1.5px solid rgba(0,0,0,0.18)",
-          }}
-          title="Non conforme"
-        >
-          {value === false && (
-            <XCircle className="h-3 w-3" style={{ color: "#fff" }} />
-          )}
-        </button>
+      <div className="flex items-end gap-2 mt-0.5 flex-shrink-0">
+        {/* Sì */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+          <span style={{
+            fontSize: 9, fontWeight: 600, letterSpacing: "0.05em",
+            color: value === true ? "#15803d" : "rgba(0,0,0,0.28)",
+            transition: "color 0.15s",
+          }}>Sì</span>
+          <button
+            onClick={() => onChange(true)}
+            className="w-5 h-5 rounded-full flex items-center justify-center transition-all"
+            style={{
+              background: value === true ? "#15803d" : "rgba(0,0,0,0.06)",
+              border: value === true ? "none" : "1.5px solid rgba(0,0,0,0.18)",
+            }}
+            title="Conforme"
+          >
+            {value === true && (
+              <CheckCircle className="h-3 w-3" style={{ color: "#fff" }} />
+            )}
+          </button>
+        </div>
+        {/* No */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+          <span style={{
+            fontSize: 9, fontWeight: 600, letterSpacing: "0.05em",
+            color: value === false ? "#dc2626" : "rgba(0,0,0,0.28)",
+            transition: "color 0.15s",
+          }}>No</span>
+          <button
+            onClick={() => onChange(false)}
+            className="w-5 h-5 rounded-full flex items-center justify-center transition-all"
+            style={{
+              background: value === false ? "#dc2626" : "rgba(0,0,0,0.06)",
+              border: value === false ? "none" : "1.5px solid rgba(0,0,0,0.18)",
+            }}
+            title="Non conforme"
+          >
+            {value === false && (
+              <XCircle className="h-3 w-3" style={{ color: "#fff" }} />
+            )}
+          </button>
+        </div>
       </div>
       <p className="text-[12px] leading-relaxed" style={{ color: "#0D1016" }}>
         {label}
