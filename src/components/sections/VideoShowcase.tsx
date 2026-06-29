@@ -85,7 +85,7 @@ function VideoRow({ badge, title, desc, chips, videoSrc, zoom = 1, zoomX = 50, p
           </div>
         </div>
         <div style={{ aspectRatio: "16/9", overflow: "hidden" }}>
-          <video ref={videoRef} src={videoSrc} muted loop playsInline preload="metadata"
+          <video ref={videoRef} src={videoSrc} muted loop playsInline preload="auto"
             style={{ width: `${zoom*100}%`, height: `${zoom*100}%`, objectFit: "cover", display: "block", marginLeft: zoom>1 ? `-${(zoom-1)*(zoomX/100)*100}%` : "0", marginTop: zoom>1 ? `-${(zoom-1)*10}%` : "0" }}
           />
         </div>
