@@ -204,7 +204,7 @@ export default function ProviderTransitionPage() {
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {TRANSITION_CHECKS.map(check => (
+          {TRANSITION_CHECKS.map((check, idx) => (
             <div key={check.id} style={{
               background: "rgba(0,0,0,0.01)",
               border: `1px solid ${answers[check.id] === "yes" && check.is_trigger ? "rgba(239,68,68,0.4)" : BORDER}`,
@@ -212,18 +212,20 @@ export default function ProviderTransitionPage() {
             }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                    {check.is_trigger
-                      ? <AlertTriangle size={14} style={{ color: "#92400e", flexShrink: 0 }} />
-                      : <CheckCircle2 size={14} style={{ color: "#15803d", flexShrink: 0 }} />
-                    }
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 4 }}>
+                    <span style={{
+                      flexShrink: 0, fontSize: 11, fontWeight: 700, color: MUTED,
+                      marginTop: 2, minWidth: 18, lineHeight: 1,
+                    }}>
+                      {String.fromCharCode(97 + idx)})
+                    </span>
                     <span style={{ color: TEXT, fontSize: 14, fontWeight: 500 }}>{check.question}</span>
                   </div>
-                  <p style={{ color: MUTED, fontSize: 12, lineHeight: 1.5, marginLeft: 22 }}>{check.explanation}</p>
-                  <p style={{ color: INDIGO, fontSize: 11, marginLeft: 22, marginTop: 4 }}>{check.trigger_article}</p>
+                  <p style={{ color: MUTED, fontSize: 12, lineHeight: 1.5, marginLeft: 26 }}>{check.explanation}</p>
+                  <p style={{ color: INDIGO, fontSize: 11, marginLeft: 26, marginTop: 4 }}>{check.trigger_article}</p>
                 </div>
               </div>
-              <div style={{ marginLeft: 22 }}>
+              <div style={{ marginLeft: 26 }}>
                 <RadioGroupDk
                   name={`check_${check.id}`}
                   value={answers[check.id]}
