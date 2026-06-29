@@ -501,17 +501,6 @@ function ProductHero() {
         {/* ─── LEFT: screenshot grande + floating cards ─────────────────── */}
         <div style={{ flex: "0 0 58%", position: "relative", ...fadeLeft }}>
 
-          {/* Floating pill — sopra lo screenshot */}
-          <div style={{
-            position: "absolute", top: -18, left: 24, zIndex: 10,
-            background: GREEN, borderRadius: 20, padding: "6px 14px",
-            display: "inline-flex", alignItems: "center", gap: 7,
-            boxShadow: "0 4px 16px rgba(11,61,46,0.35)",
-          }}>
-            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#6EE7A0" }} />
-            <span style={{ fontFamily: MONO, fontSize: 10, color: "#6EE7A0", fontWeight: 600, letterSpacing: "0.06em" }}>ART. 27 AI ACT · FRIA GUIDATA</span>
-          </div>
-
           {/* Screenshot reale — include già il browser */}
           <div style={{
             borderRadius: 16,
@@ -578,31 +567,31 @@ function ProductHero() {
         {/* ─── RIGHT: testo ─────────────────────────────────────────────── */}
         <div style={{ flex: "0 0 36%", ...fadeRight }}>
           <p style={{ fontFamily: MONO, fontSize: 11, fontWeight: 500, color: "rgba(0,0,0,0.32)", letterSpacing: "0.07em", textTransform: "uppercase" as const, marginBottom: 20 }}>
-            Risk Manager · Art. 27
+            Valutazione d&apos;impatto · Art. 27 AI Act
           </p>
           <h2 style={{
             fontFamily: SERIF,
-            fontSize: "clamp(28px, 3.2vw, 46px)",
+            fontSize: "clamp(26px, 3vw, 42px)",
             fontWeight: 400,
-            letterSpacing: "-2px",
-            lineHeight: 1.05,
+            letterSpacing: "-1.8px",
+            lineHeight: 1.08,
             color: DARK,
-            marginBottom: 20,
+            marginBottom: 22,
           }}>
-            Valutazioni d&apos;impatto che si scrivono da sole.
+            Il fascicolo che l&apos;autorità si aspetta. Pronto prima che te lo chieda.
           </h2>
-          <p style={{ fontSize: 15, fontWeight: 300, color: "rgba(0,0,0,0.48)", lineHeight: 1.8, marginBottom: 28 }}>
-            L&apos;assistente AI guida la FRIA sezione per sezione, citando ogni articolo applicabile.
-            WP29, DIHR e framework CFR integrati — le risposte precedenti pre-compilano le sezioni successive, azzerando il copia-incolla.
+          <p style={{ fontSize: 15, fontWeight: 300, color: "rgba(0,0,0,0.48)", lineHeight: 1.85, marginBottom: 28 }}>
+            Ogni azienda che utilizza sistemi AI ad alto rischio ha obblighi documentali precisi — e sanzioni fino al 3% del fatturato globale per chi non li rispetta.
+            RegulaeOS guida ogni sezione, cita ogni articolo applicabile e genera il dossier conforme in ore, non in mesi di consulenza.
           </p>
           <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 7, marginBottom: 36 }}>
-            {["FRIA Art. 27", "DPIA collegata", "AI pre-compila", "Export firmato SHA-256", "WP29 · DIHR"].map(c => (
+            {["FRIA Art. 27", "DPIA integrata", "Pre-compilazione AI", "Export SHA-256", "WP29 · DIHR · CFR"].map(c => (
               <span key={c} style={{ fontFamily: MONO, fontSize: 11, padding: "5px 13px", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 20, color: "rgba(0,0,0,0.42)" }}>{c}</span>
             ))}
           </div>
           <div style={{ height: 1, background: "rgba(0,0,0,0.07)", marginBottom: 28 }} />
           <div style={{ display: "flex", gap: 32 }}>
-            {[{ v: "48", l: "sezioni guidate" }, { v: "7", l: "framework coperti" }, { v: "100%", l: "pre-compilazione AI" }].map(stat => (
+            {[{ v: "48", l: "sezioni guidate" }, { v: "7", l: "framework coperti" }, { v: "3%", l: "sanzione max fatturato" }].map(stat => (
               <div key={stat.l}>
                 <div style={{ fontFamily: SERIF, fontSize: 28, fontWeight: 400, letterSpacing: "-1px", color: DARK }}>{stat.v}</div>
                 <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.35)", marginTop: 2 }}>{stat.l}</div>
