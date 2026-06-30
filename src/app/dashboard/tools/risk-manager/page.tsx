@@ -40,18 +40,20 @@ interface Phase {
   docSection?: string;    // sezione del template docx
 }
 
-// 9 step numerati 1-9 (fonte: PARTE 0 del prompt di refactoring).
+// 11 step numerati 1-11 (allineamento template Art. 9 §0-§9 + trasversale Comunicazione).
 // Il modulo condizionale gpai_systemic_risk NON è in questo array.
 const PHASES: Phase[] = [
-  { id: "scoping",        label: "1. Scoping",                  subtitle: "Ambito e contesto",          article: "Art. 9(1) [verify against current AI Act text]",               supportRef: "Art. 6, Allegato III [verify against current AI Act text]",   docSection: "Sez. 3" },
-  { id: "identification", label: "2. Identificazione Rischi",   subtitle: "incl. minori e vulnerabili", article: "Art. 9(2)(a) [verify against current AI Act text]",            supportRef: "Art. 9(9) [verify against current AI Act text]",              docSection: "Sez. 5" },
-  { id: "estimation",     label: "3. Stima e Valutazione",      subtitle: "uso previsto / improprio",   article: "Art. 9(2)(b) [verify against current AI Act text]",            docSection: "Sez. 5" },
-  { id: "testing",        label: "4. Test e Validazione",       subtitle: "metriche e soglie",          article: "Art. 9(6)-(8) [verify against current AI Act text]",           docSection: "Sez. 4" },
-  { id: "mitigation",     label: "5. Misure di Gestione",       subtitle: "rischio residuo",            article: "Art. 9(2)(d), 9(4)-(5) [verify against current AI Act text]", supportRef: "Art. 13 [verify against current AI Act text]",                docSection: "Sez. 5 + 6" },
-  { id: "monitoring",     label: "6. Monitoraggio Post-Market", subtitle: "drift detection",            article: "Art. 9(2)(c) [verify against current AI Act text]",            supportRef: "Art. 72 [verify against current AI Act text]",                docSection: "Sez. 7" },
-  { id: "gap_check",      label: "7. Gap Check Art. 9",         subtitle: "verifica di copertura",      article: "Art. 9(2)(a)-(d), 9(6)-(9) [verify against current AI Act text]", docSection: "Sez. 6" },
-  { id: "traceability",   label: "8. Tracciabilità",            subtitle: "versionamento e audit log",  article: "Art. 9(1)-(2) [verify against current AI Act text]",           supportRef: "Art. 12, 17 [verify against current AI Act text]",            docSection: "(trasversale)" },
-  { id: "signoff",        label: "9. Approvazione e Firme",     subtitle: "sign-off finale",            article: "Art. 9(1) [verify against current AI Act text]",               docSection: "Sez. 8" },
+  { id: "scoping",        label: "1. Scoping",                   subtitle: "§0 Ambito e criteri rischio",    article: "Art. 9(1) [verify against current AI Act text]",               supportRef: "Art. 6, Allegato III [verify against current AI Act text]",   docSection: "§0" },
+  { id: "identification", label: "2. Identificazione Rischi",    subtitle: "§1 incl. minori e vulnerabili",  article: "Art. 9(2)(a) [verify against current AI Act text]",            supportRef: "Art. 9(9) [verify against current AI Act text]",              docSection: "§1" },
+  { id: "estimation",     label: "3. Stima e Valutazione",       subtitle: "§2 uso previsto / improprio",    article: "Art. 9(2)(b) [verify against current AI Act text]",            docSection: "§2" },
+  { id: "testing",        label: "4. Test e Validazione",        subtitle: "§3 metriche e soglie",           article: "Art. 9(6)-(8) [verify against current AI Act text]",           supportRef: "Art. 60 [verify against current AI Act text]",                docSection: "§3" },
+  { id: "mitigation",     label: "5. Trattamento Rischio",       subtitle: "§4 rischio residuo",             article: "Art. 9(2)(d), 9(4)-(5) [verify against current AI Act text]", supportRef: "Art. 13 [verify against current AI Act text]",                docSection: "§4" },
+  { id: "monitoring",     label: "6. Monitoraggio Post-Market",  subtitle: "§5 drift detection",             article: "Art. 9(2)(c) [verify against current AI Act text]",            supportRef: "Art. 72 [verify against current AI Act text]",                docSection: "§5" },
+  { id: "gap_check",      label: "7. Gap Check Art. 9",          subtitle: "§6 verifica di copertura",       article: "Art. 9(2)(a)-(d), 9(6)-(9) [verify against current AI Act text]", docSection: "§6" },
+  { id: "traceability",   label: "8. Tracciabilità",             subtitle: "§7 versionamento e QMS",         article: "Art. 9(1)-(2) [verify against current AI Act text]",           supportRef: "Art. 12, 17 [verify against current AI Act text]",            docSection: "§7" },
+  { id: "dismissal",      label: "9. Dismissione / Ritiro",      subtitle: "§8 rischi di fine vita",         article: "Art. 9 [verify against current AI Act text]",                  supportRef: "ISO 23894 Annex C",                                           docSection: "§8" },
+  { id: "signoff",        label: "10. Approvazione e Firme",     subtitle: "§9 sign-off finale",             article: "Art. 9(1) + 9(10) [verify against current AI Act text]",      docSection: "§9" },
+  { id: "communication",  label: "11. Comunicazione",            subtitle: "Trasversale — ISO 23894 §6.2",  article: "ISO 23894 §6.2",                                               docSection: "Trasversale" },
 ];
 
 // Modulo condizionale separato (non numerato, non in PHASES)

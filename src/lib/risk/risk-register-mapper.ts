@@ -1,5 +1,5 @@
 // Mapper: stato chat del Risk Manager → RiskRegisterDocument (sola lettura).
-// Legge i nuovi campi post-refactor 9-step: gap_check, monitoring.reviewLog, signoff.signOff
+// Allineato al Template Risk Register Guidato Art. 9 (§0-§9 + trasversale Comunicazione).
 import type { RiskDocumentation } from "@/app/actions/riskManagerChat";
 import {
   VERIFY_NOTE_IT,
@@ -11,6 +11,13 @@ import {
 function withVerifyNote(ref: string | undefined): string {
   if (!ref) return VERIFY_NOTE_IT;
   return ref.includes(VERIFY_NOTE_IT) ? ref : `${ref} ${VERIFY_NOTE_IT}`;
+}
+
+/** Genera fingerprint leggero del documento (non crittografico — per audit trail base) */
+function simpleHash(s: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = (h * 0x01000193) >>> 0; }
+  return "RR-" + h.toString(16).toUpperCase().padStart(8, "0");
 }
 
 export function buildRiskRegisterDocument(
@@ -39,9 +46,13 @@ export function buildRiskRegisterDocument(
     documentVersion: "1.0",
     incorporatesGpaiModel: idData.incorporatesGpaiModel ?? "unspecified",
     vulnerableGroupsImpactAssessment: chatDoc.identification?.vulnerableGroupsImpactAssessment,
+    // §0 — nuovi campi
+    riskAppetite: idData.riskAppetite,
+    usageContext: idData.usageContext,
+    lifeCyclePhase: idData.lifeCyclePhase,
   };
 
-  // Sezione 5 — voci strutturate; fallback dai rischi liberi (solo descrizione)
+  // §1/§5 — voci strutturate del catalogo rischi
   const structured = chatDoc.identification?.riskEntries ?? [];
   const freeRisks = structured.length === 0 ? (chatDoc.identification?.risks ?? []) : [];
 
@@ -71,25 +82,63 @@ export function buildRiskRegisterDocument(
     })),
   ];
 
-  // Sezione 6 — gap check (step 7 nuova sequenza)
-  const gc = chatDoc.gap_check;
-  const gapCheck = gc
-    ? {
-        coverageScore: gc.coverageScore,
-        assessment: gc.assessment,
-        missingAreas: (gc.missingAreas ?? [])
-          .filter(a => a.area)
-          .map(a => ({
-            area: a.area ?? "",
-            art9Requirement: withVerifyNote(a.art9Requirement),
-            suggestedRiskTitle: a.suggestedRiskTitle,
-            priority: a.priority ?? "raccomandato" as const,
-          })),
-      }
-    : undefined;
+  // §2 — Stima e valutazione
+  const est = chatDoc.estimation;
+  const estimation = est ? {
+    intendedUseCases: est.intendedUseCases ?? [],
+    foreseenMisuse: est.foreseenMisuse ?? [],
+    impactAssessment: est.impactAssessment,
+    affectedPersonsCount: est.affectedPersonsCount,
+    evaluationAgainstCriteria: est.evaluationAgainstCriteria,
+  } : undefined;
 
-  // Sezione 7 — log di revisione (da monitoring.reviewLog)
-  const reviewLog = (chatDoc.monitoring?.reviewLog ?? [])
+  // §3 — Test e validazione
+  const test = chatDoc.testing;
+  const testValidation = test ? {
+    testMetrics: test.testMetrics ?? [],
+    thresholds: test.thresholds,
+    validationOutcome: test.validationOutcome,
+    worstCase: test.worstCase,
+    confidenceLevel: test.confidenceLevel,
+  } : undefined;
+
+  // §4 — Trattamento del rischio e rischio residuo
+  const mit = chatDoc.mitigation;
+  const treatment = mit ? {
+    treatmentOption: mit.treatmentOption,
+    measures: mit.measures ?? [],
+    residualRisk: mit.residualRisk,
+    responsiblePerson: mit.responsiblePerson,
+    reviewCycle: mit.reviewCycle,
+  } : undefined;
+
+  // §5 — Monitoraggio post-market (dettagli extra oltre al reviewLog)
+  const mon = chatDoc.monitoring;
+  const monitoringDetails = mon ? {
+    monitoringFrequency: mon.monitoringFrequency,
+    alertThreshold: mon.alertThreshold,
+    postMarketPlan: mon.postMarketPlan,
+    psiScore: mon.psiScore,
+    driftDetected: mon.driftDetected,
+  } : undefined;
+
+  // §6 — gap check
+  const gc = chatDoc.gap_check;
+  const gapCheck = gc ? {
+    coverageScore: gc.coverageScore,
+    assessment: gc.assessment,
+    missingAreas: (gc.missingAreas ?? [])
+      .filter(a => a.area)
+      .map(a => ({
+        area: a.area ?? "",
+        art9Requirement: withVerifyNote(a.art9Requirement),
+        suggestedRiskTitle: a.suggestedRiskTitle,
+        priority: a.priority ?? "raccomandato" as const,
+      })),
+  } : undefined;
+
+  // §5/§7 — log di revisione
+  const reviewLog = (mon?.reviewLog ?? [])
     .filter(e => e.date || e.trigger)
     .map(e => ({
       date: e.date ?? "",
@@ -99,17 +148,50 @@ export function buildRiskRegisterDocument(
       nextReviewDate: e.nextReviewDate,
     }));
 
-  // Sezione 8 — sign-off (da signoff.signOff)
-  const so = chatDoc.signoff?.signOff;
-  const signOff = so
-    ? {
-        riskOwner:           { name: so.riskOwner?.name,           date: so.riskOwner?.date,           signed: so.riskOwner?.signed ?? false },
-        complianceLegal:     { name: so.complianceLegal?.name,     date: so.complianceLegal?.date,     signed: so.complianceLegal?.signed ?? false },
-        legalRepresentative: { name: so.legalRepresentative?.name, date: so.legalRepresentative?.date, signed: so.legalRepresentative?.signed ?? false },
-      }
-    : undefined;
+  // §7 — Tracciabilità e mantenimento continuo
+  const tr = chatDoc.traceability;
+  const traceability = tr ? {
+    versionsTracked: tr.versionsTracked,
+    lastAuditDate: tr.lastAuditDate,
+    changes: tr.changes ?? [],
+    retentionPolicy: tr.retentionPolicy,
+    qmsIntegration: tr.qmsIntegration,
+  } : undefined;
 
-  return { identification, risks, gapCheck, reviewLog, signOff };
+  // §8 — Dismissione / ritiro
+  const dis = chatDoc.dismissal;
+  const dismissal = dis ? {
+    dismissalRisks: dis.dismissalRisks,
+    dataDeletion: dis.dataDeletion,
+    downstreamDependencies: dis.downstreamDependencies,
+    communicationToDeployers: dis.communicationToDeployers,
+  } : undefined;
+
+  // §9 — Sign-off
+  const so = chatDoc.signoff?.signOff;
+  const signOff = so ? {
+    riskOwner:           { name: so.riskOwner?.name,           date: so.riskOwner?.date,           signed: so.riskOwner?.signed ?? false },
+    complianceLegal:     { name: so.complianceLegal?.name,     date: so.complianceLegal?.date,     signed: so.complianceLegal?.signed ?? false },
+    legalRepresentative: { name: so.legalRepresentative?.name, date: so.legalRepresentative?.date, signed: so.legalRepresentative?.signed ?? false },
+    otherRegimesIntegration: chatDoc.signoff?.otherRegimesIntegration,
+    documentHash: simpleHash(JSON.stringify({ risks, identification, gapCheck })),
+  } : undefined;
+
+  // Trasversale — Comunicazione e consultazione
+  const comm = chatDoc.communication;
+  const communication = comm ? {
+    stakeholdersInvolved: comm.stakeholdersInvolved,
+    friaLink: comm.friaLink,
+    externalConsultees: comm.externalConsultees,
+    consultationDocumented: comm.consultationDocumented,
+  } : undefined;
+
+  return {
+    identification, risks,
+    estimation, testValidation, treatment,
+    monitoringDetails, gapCheck, reviewLog,
+    traceability, dismissal, signOff, communication,
+  };
 }
 
 export interface AnnexSection {
@@ -119,16 +201,15 @@ export interface AnnexSection {
 }
 
 export function buildAnnexSections(chatDoc: RiskDocumentation): AnnexSection[] {
+  // Solo il modulo condizionale GPAI rimane come annex generico.
+  // Tutti gli altri dati (estimation, testing, mitigation, traceability) ora
+  // sono sezioni tipizzate nel documento principale.
   const annexes: AnnexSection[] = [];
   const push = (title: string, article: string, data?: Record<string, unknown>) => {
     if (!data) return;
     const fields = Object.fromEntries(Object.entries(data).filter(([, v]) => v !== undefined && v !== null && v !== ""));
     if (Object.keys(fields).length > 0) annexes.push({ title, article, fields });
   };
-  push("Stima e Valutazione (uso previsto e uso improprio)", "Art. 9(2)(b) [verify against current AI Act text]", chatDoc.estimation as Record<string, unknown> | undefined);
-  push("Test e Validazione", "Art. 9(6)-(8) [verify against current AI Act text]", chatDoc.testing as Record<string, unknown> | undefined);
-  push("Misure di Gestione del Rischio", "Art. 9(2)(d), 9(4)-(5) [verify against current AI Act text]", chatDoc.mitigation as Record<string, unknown> | undefined);
-  push("Tracciabilità e Mantenimento Continuo", "Art. 9(1)-(2) [verify against current AI Act text]", chatDoc.traceability as Record<string, unknown> | undefined);
   push("GPAI e Rischio Sistemico", "Art. 51-55 [verify against current AI Act text]", chatDoc.gpai_systemic_risk as Record<string, unknown> | undefined);
   return annexes;
 }

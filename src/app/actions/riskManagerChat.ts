@@ -1,7 +1,7 @@
 "use server";
 import { generateText } from "@/lib/rag/rag-vertex";
 
-// 9 step numerati (1-9) + 1 modulo condizionale (gpai_systemic_risk, non numerato)
+// 11 step numerati (1-11) + 1 modulo condizionale (gpai_systemic_risk, non numerato)
 export type RiskPhaseId =
   | "scoping"
   | "identification"
@@ -11,7 +11,9 @@ export type RiskPhaseId =
   | "monitoring"
   | "gap_check"
   | "traceability"
+  | "dismissal"
   | "signoff"
+  | "communication"
   | "gpai_systemic_risk"; // modulo condizionale
 
 export interface ChatMessage {
@@ -52,6 +54,9 @@ export interface RiskDocumentation {
       humanOversightRequired?: boolean;
       registerOwner?: string;
       incorporatesGpaiModel?: "yes" | "no" | "unspecified";
+      riskAppetite?: string;
+      usageContext?: string;
+      lifeCyclePhase?: string;
     };
   };
   // Step 2 — Identification (Sez. 5)
@@ -69,6 +74,7 @@ export interface RiskDocumentation {
     foreseenMisuse?: string[];
     impactAssessment?: string;
     affectedPersonsCount?: string;
+    evaluationAgainstCriteria?: string;
   };
   // Step 4 — Testing (Sez. 4) — era montecarlo
   testing?: {
@@ -83,6 +89,7 @@ export interface RiskDocumentation {
   };
   // Step 5 — Mitigation (Sez. 5 + 6) — era governance
   mitigation?: {
+    treatmentOption?: string; // Modifica/Evitamento/Condivisione/Ritenzione
     measures?: string[];
     residualRisk?: string;
     responsiblePerson?: string;
@@ -120,19 +127,35 @@ export interface RiskDocumentation {
     lastAuditDate?: string;
     changes?: string[];
     retentionPolicy?: string;
+    qmsIntegration?: string; // integrazione QMS — Art. 17
   };
-  // Step 9 — Sign-off (Sez. 8) — era final
+  // Step 9 — Dismissione / ritiro (ISO 23894 Annex C)
+  dismissal?: {
+    dismissalRisks?: string;
+    dataDeletion?: string;
+    downstreamDependencies?: string;
+    communicationToDeployers?: string;
+  };
+  // Step 10 — Sign-off (Sez. 8) — era final
   signoff?: {
     overallRisk?: string;
     score?: number;
     recommendation?: string;
     nextReviewDate?: string;
     completedAt?: string;
+    otherRegimesIntegration?: string; // Art. 9(10)
     signOff?: {
       riskOwner?: { name?: string; date?: string; signed?: boolean };
       complianceLegal?: { name?: string; date?: string; signed?: boolean };
       legalRepresentative?: { name?: string; date?: string; signed?: boolean };
     };
+  };
+  // Step 11 — Comunicazione e consultazione (ISO 23894 §6.2)
+  communication?: {
+    stakeholdersInvolved?: string;
+    friaLink?: string;
+    externalConsultees?: string;
+    consultationDocumented?: boolean;
   };
   // Modulo condizionale (non numerato) — era gpai
   gpai_systemic_risk?: {
@@ -152,10 +175,11 @@ interface ChatResponse {
 
 const PHASE_PROMPTS: Record<RiskPhaseId, string> = {
   scoping: `Stai guidando lo STEP 1 — SCOPING (Art. 9(1) AI Act [verify against current AI Act text]; supporto Art. 6, Allegato III).
-Obiettivi (Sezione 3): nome sistema, ruolo (provider/deployer), descrizione e finalità, tier di rischio, area Allegato III, articoli applicabili, dati personali trattati (e base giuridica se sì), supervisione umana richiesta (Art. 14), risk owner del registro.
-Aggiungi anche la domanda di triage GPAI: "Il sistema è, o incorpora, un modello GPAI con rischio sistemico (Art. 51 [verify against current AI Act text])?" — salva in incorporatesGpaiModel.
+Obiettivi (§0 Template): nome sistema, ruolo (provider/deployer), descrizione e finalità, tier di rischio, area Allegato III, articoli applicabili, dati personali trattati (e base giuridica se sì), supervisione umana richiesta (Art. 14), risk owner del registro.
+Chiedi anche: (a) criteri di accettabilità del rischio (risk appetite): es. "nessun rischio alto sui diritti fondamentali è accettabile senza misure"; (b) ambito e contesto d'uso: deployment, utenti finali, ambiente operativo; (c) fase del ciclo di vita attuale (design/sviluppo/deployment/monitoraggio/dismissione).
+Aggiungi anche il triage GPAI: "Il sistema incorpora un modello GPAI con rischio sistemico (Art. 51)?" — salva in incorporatesGpaiModel.
 Quando hai sufficienti informazioni includi <extract> (compila SOLO i campi comunicati):
-{ "scoping": { "systemName": "...", "context": "...", "identification": { "systemName": "...", "providerDeployerRole": "provider|deployer", "descriptionAndPurpose": "...", "riskTier": "minimal|limited|high_risk|gpai", "annexIIIArea": "...", "applicableArticles": ["Art. 9(1) [verify against current AI Act text]"], "personalDataProcessed": "yes|no", "legalBasis": "...", "humanOversightRequired": true, "registerOwner": "...", "incorporatesGpaiModel": "yes|no|unspecified" } } }`,
+{ "scoping": { "systemName": "...", "context": "...", "identification": { "systemName": "...", "providerDeployerRole": "provider|deployer", "descriptionAndPurpose": "...", "riskTier": "minimal|limited|high_risk|gpai", "annexIIIArea": "...", "applicableArticles": ["Art. 9(1) [verify against current AI Act text]"], "personalDataProcessed": "yes|no", "legalBasis": "...", "humanOversightRequired": true, "registerOwner": "...", "incorporatesGpaiModel": "yes|no|unspecified", "riskAppetite": "...", "usageContext": "...", "lifeCyclePhase": "design|sviluppo|deployment|monitoraggio|dismissione" } } }`,
 
   identification: `Stai guidando lo STEP 2 — IDENTIFICAZIONE RISCHI (Art. 9(2)(a) AI Act [verify against current AI Act text]; supporto Art. 9(9) [verify against current AI Act text]).
 Obiettivi (Sezione 5): identificare rischi per diritti fondamentali, bias algoritmico, opacità, perdita di controllo umano, dipendenze tecnologiche. Includi anche la valutazione Art. 9(9): impatto su minori (<18 anni) e altri gruppi vulnerabili — salva in vulnerableGroupsImpactAssessment.
@@ -165,10 +189,9 @@ Aiuta l'utente a elencare almeno 3-5 rischi concreti. Quando ha sufficienti risc
 REGOLA: ogni art9Reference DEVE terminare con "[verify against current AI Act text]".`,
 
   estimation: `Stai guidando lo STEP 3 — STIMA E VALUTAZIONE (Art. 9(2)(b) AI Act [verify against current AI Act text]).
-Obiettivi: definire tutti gli usi previsti del sistema, identificare usi impropri ragionevolmente prevedibili, stimare numero e tipologia di persone coinvolte, valutare la probabilità di danno e la sua reversibilità.
-Guida l'utente a documentare: casi d'uso previsti, scenari di misuso (es. abuso per discriminazione), popolazione impattata (numero persone, categorie, vulnerabilità).
+Obiettivi (§2 Template): definire tutti gli usi previsti del sistema, identificare usi impropri ragionevolmente prevedibili (non solo uso conforme, ma anche misuso prevedibile), stimare numero e tipologia di persone coinvolte, valutare la probabilità di danno e la sua reversibilità. Chiedi infine: come il rischio stimato si confronta con i criteri di accettabilità definiti al §0 (risk appetite)? — salva in evaluationAgainstCriteria.
 Includi <extract> quando i principali casi sono coperti:
-{ "estimation": { "intendedUseCases": ["..."], "foreseenMisuse": ["..."], "impactAssessment": "...", "affectedPersonsCount": "..." } }`,
+{ "estimation": { "intendedUseCases": ["..."], "foreseenMisuse": ["..."], "impactAssessment": "...", "affectedPersonsCount": "...", "evaluationAgainstCriteria": "..." } }`,
 
   testing: `Stai guidando lo STEP 4 — TEST E VALIDAZIONE (Art. 9(6)-(8) AI Act [verify against current AI Act text]).
 Obiettivi: definire le metriche di validazione, le soglie di accettabilità, i metodi di test, i criteri per il rilascio in produzione (Art. 9(8)). Nota metodologica: le linee guida ENISA possono essere usate come riferimento per i parametri probabilistici.
@@ -176,11 +199,10 @@ Guida l'utente su: metriche di accuratezza/fairness/robustezza, soglie accettabi
 Includi <extract> quando le metriche sono definite:
 { "testing": { "testMetrics": ["accuratezza >90%", "..."], "thresholds": "...", "validationOutcome": "...", "worstCase": "...", "confidenceLevel": "..." } }`,
 
-  mitigation: `Stai guidando lo STEP 5 — MISURE DI GESTIONE DEL RISCHIO E RISCHIO RESIDUO (Art. 9(2)(d), 9(4)-(5) AI Act [verify against current AI Act text]; supporto Art. 13 [verify against current AI Act text]).
-Obiettivi (Sezione 5 + 6): definire misure di mitigazione concrete per ogni rischio identificato, valutare il rischio residuo dopo le misure, identificare responsabile AI e ciclo di revisione.
-Guida l'utente su: misure tecniche (validazione input, spiegabilità, logging), misure organizzative (formazione, procedure escalation), rischio residuo accettabile, responsabile compliance.
+  mitigation: `Stai guidando lo STEP 5 — TRATTAMENTO DEL RISCHIO E RISCHIO RESIDUO (Art. 9(2)(d), 9(4)-(5) AI Act [verify against current AI Act text]; supporto Art. 13 [verify against current AI Act text]).
+Obiettivi (§4 Template): definire l'opzione di trattamento scelta (Modifica/design-mitigazione · Evitamento/non distribuire · Condivisione/contrattuale-assicurativa · Ritenzione/accettazione consapevole), le misure concrete secondo la gerarchia Art. 9(5): 1) eliminazione/riduzione tramite progettazione, 2) controllo per rischi non eliminabili, 3) informazione e formazione ai deployer (Art. 13). Valutare poi il rischio residuo accettabile e il responsabile compliance.
 Includi <extract> quando le misure sono definite:
-{ "mitigation": { "measures": ["..."], "residualRisk": "...", "responsiblePerson": "...", "reviewCycle": "..." } }`,
+{ "mitigation": { "treatmentOption": "Modifica|Evitamento|Condivisione|Ritenzione", "measures": ["..."], "residualRisk": "...", "responsiblePerson": "...", "reviewCycle": "..." } }`,
 
   monitoring: `Stai guidando lo STEP 6 — MONITORAGGIO POST-MARKET E DRIFT DETECTION (Art. 9(2)(c) AI Act [verify against current AI Act text]; supporto Art. 72 [verify against current AI Act text]).
 Obiettivi (Sezione 7): definire soglie PSI (Population Stability Index), frequenza controllo deriva, trigger di alert, procedure di risposta, log di revisione del Risk Register.
@@ -196,14 +218,24 @@ Includi <extract>:
 REGOLA: ogni art9Requirement DEVE terminare con "[verify against current AI Act text]".`,
 
   traceability: `Stai guidando lo STEP 8 — TRACCIABILITÀ E MANTENIMENTO CONTINUO (Art. 9(1)-(2) AI Act [verify against current AI Act text]; supporto Art. 12, 17 [verify against current AI Act text]).
-Obiettivi: definire la policy di versionamento del Risk Register, frequenza audit, periodo di retention dei log, responsabili della tracciabilità. Assicura copertura di: versioni software, dati di training, configurazioni, incidenti.
+Obiettivi (§7 Template): definire la policy di versionamento del Risk Register (storico versioni, log generati automaticamente per Art. 12), periodo di retention dei log, responsabili della tracciabilità. Chiedi anche: il sistema di gestione dei rischi è incorporato nel QMS aziendale (Art. 17)? — salva in qmsIntegration.
 Includi <extract> quando completo:
-{ "traceability": { "versionsTracked": 3, "lastAuditDate": "2026-06-13", "changes": ["..."], "retentionPolicy": "5 anni" } }`,
+{ "traceability": { "versionsTracked": 3, "lastAuditDate": "2026-06-13", "changes": ["..."], "retentionPolicy": "5 anni", "qmsIntegration": "..." } }`,
 
-  signoff: `Stai guidando lo STEP 9 — APPROVAZIONE, FIRME E FINALIZZAZIONE (Art. 9(1) AI Act [verify against current AI Act text]).
-Obiettivi (Sezione 8): raccogliere nominativi per il sign-off (risk owner, responsabile compliance/legale, rappresentante legale), valutazione complessiva del rischio, data prossima revisione. Se personalDataProcessed === "yes", cita anche Art. 9(10) [verify against current AI Act text].
+  dismissal: `Stai guidando lo STEP 9 — DISMISSIONE E RITIRO (ISO 23894 Annex C; Art. 9 AI Act [verify against current AI Act text]).
+Obiettivi (§8 Template): identificare i rischi specifici della fase di dismissione del sistema AI. Guida l'utente su: (a) rischi da cancellazione/anonimizzazione dei dati residui; (b) dipendenze a valle verso altri sistemi o clienti che usano gli output; (c) procedure di migrazione dati se necessario; (d) obblighi di comunicazione del ritiro ai deployer e agli interessati.
+Includi <extract> quando i rischi di dismissione sono definiti:
+{ "dismissal": { "dismissalRisks": "...", "dataDeletion": "...", "downstreamDependencies": "...", "communicationToDeployers": "..." } }`,
+
+  signoff: `Stai guidando lo STEP 10 — APPROVAZIONE, FIRME E FINALIZZAZIONE (Art. 9(1) + Art. 9(10) AI Act [verify against current AI Act text]).
+Obiettivi (§9 Template): raccogliere nominativi per il sign-off (risk owner, responsabile compliance/legale, rappresentante legale), valutazione complessiva del rischio, data prossima revisione. Se il provider è già soggetto ad altri obblighi di risk management (es. dispositivi medici, macchine), documentare come i processi si integrano/combinano — salva in otherRegimesIntegration.
 Presenta un sommario strutturato. Includi <extract>:
-{ "signoff": { "overallRisk": "...", "recommendation": "...", "nextReviewDate": "...", "signOff": { "riskOwner": { "name": "...", "signed": false }, "complianceLegal": { "name": "...", "signed": false }, "legalRepresentative": { "name": "...", "signed": false } } } }`,
+{ "signoff": { "overallRisk": "...", "recommendation": "...", "nextReviewDate": "...", "otherRegimesIntegration": "...", "signOff": { "riskOwner": { "name": "...", "signed": false }, "complianceLegal": { "name": "...", "signed": false }, "legalRepresentative": { "name": "...", "signed": false } } } }`,
+
+  communication: `Stai guidando lo STEP 11 — COMUNICAZIONE E CONSULTAZIONE (ISO 23894 §6.2 — trasversale all'intero processo).
+Obiettivi (Template trasversale): documentare chi è stato coinvolto o consultato lungo tutto il processo di risk management. Guida l'utente su: (a) interni: risk owner, legale, DPO, team prodotto/engineering; (b) esterni dove rilevante: clienti deployer, autorità di vigilanza, organismi notificati; (c) se la FRIA (Fundamental Rights Impact Assessment) ha informato la parte sui diritti fondamentali — salva in friaLink; (d) documentare come l'input degli stakeholder è stato considerato nel registro.
+Includi <extract>:
+{ "communication": { "stakeholdersInvolved": "...", "friaLink": "FRIA compilata / non applicabile / link", "externalConsultees": "...", "consultationDocumented": true } }`,
 
   gpai_systemic_risk: `Stai guidando il MODULO CONDIZIONALE — GPAI & RISCHIO SISTEMICO (Art. 51-55 Capo V AI Act [verify against current AI Act text]).
 ATTENZIONE: questo modulo riguarda obblighi specifici del fornitore del modello GPAI — un regime distinto dal Risk Register Art. 9. Può applicarsi anche se il sistema non è classificato ad alto rischio.
