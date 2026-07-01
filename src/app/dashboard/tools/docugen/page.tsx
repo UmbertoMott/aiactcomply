@@ -275,6 +275,7 @@ export default function DocuGenPage() {
   const [versionSnapshots, setVersionSnapshots] = useState<VersionSnapshot[]>([]);
   const [saveNote, setSaveNote] = useState("");
   const [showSaveNote, setShowSaveNote] = useState(false);
+  const [workName, setWorkName] = useState("");
   const [showVersionPanel, setShowVersionPanel] = useState(false);
   const [crossContent] = useState<Record<string, string>>(() => readCrossToolContent());
 
@@ -420,7 +421,7 @@ export default function DocuGenPage() {
     setDocEditing(false);
   };
 
-  const version = versionSnapshots[0] ?? { tag: "bozza", status: "draft" as const, savedAt: "", sectionsChanged: [] as string[] };
+  const version = versionSnapshots[0] ?? { tag: "lavoro", status: "draft" as const, savedAt: "", sectionsChanged: [] as string[] };
 
   function getContent(sectionId: string): string {
     const sec = ANNEX_IV.find((s) => s.id === sectionId)!;
@@ -465,8 +466,10 @@ export default function DocuGenPage() {
     ANNEX_IV.forEach(s => { sectionsSnapshot[s.id] = getSectionStatus(s.id); });
 
     const isSubstantial = changeImpactReport?.isSubstantialModification ?? false;
+    const resolvedTag = workName.trim() || undefined;
     appendVersion("docugen", persisted, {
       label: asFinalized ? "Versione finalizzata" : "Salvataggio manuale",
+      tag: resolvedTag,
       note: saveNote.trim() || undefined,
       status: asFinalized ? "finalized" : "draft",
       isSubstantialModification: isSubstantial,
@@ -477,6 +480,7 @@ export default function DocuGenPage() {
 
     setVersionSnapshots(listVersions("docugen"));
     setSaveNote("");
+    setWorkName("");
     setShowSaveNote(false);
 
     await appendEvidence("adr", {
@@ -605,11 +609,12 @@ export default function DocuGenPage() {
               <button onClick={() => setShowSaveNote(v => !v)}
                 className="text-[11px] rounded-full px-3 py-1 transition-opacity hover:opacity-80"
                 style={{ background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer" }}>
-                {showSaveNote ? "▲" : "+ nota"}
+                {showSaveNote ? "▲" : "Nomina e salva"}
               </button>
-              <button onClick={() => saveToDossier(false)} className="text-[11px] font-medium rounded-full px-3 py-1 transition-opacity hover:opacity-80"
-                style={{ background: "rgba(0,0,0,0.08)", color: "#0D1016", border: "none", cursor: "pointer" }}>
-                Salva bozza
+              <button onClick={() => { setShowSaveNote(true); }} className="text-[11px] font-medium rounded-full px-3 py-1 transition-opacity hover:opacity-80"
+                style={{ background: "rgba(0,0,0,0.08)", color: "#0D1016", border: "none", cursor: "pointer" }}
+                onDoubleClick={() => saveToDossier(false)}>
+                Salva lavoro
               </button>
               <button onClick={() => saveToDossier(true)} disabled={!canFinalize}
                 className="text-[11px] font-medium rounded-full px-3 py-1 transition-opacity hover:opacity-80 disabled:opacity-40"
@@ -619,14 +624,31 @@ export default function DocuGenPage() {
             </div>
           </div>
           {showSaveNote && (
-            <div className="mb-5 rounded-lg" style={{ padding: "8px 16px 10px", background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", display: "flex", gap: 8, alignItems: "center" }}>
-              <Clock size={12} style={{ color: "rgba(0,0,0,0.3)", flexShrink: 0 }} />
-              <input
-                value={saveNote}
-                onChange={e => setSaveNote(e.target.value)}
-                placeholder="Nota opzionale — es. «Aggiornato dopo audit DPO del 10/06»"
-                style={{ flex: 1, fontSize: 11, padding: "5px 10px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016" }}
-              />
+            <div className="mb-5 rounded-lg" style={{ padding: "10px 16px 12px", background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", gap: 8 }}>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", minWidth: 80, textTransform: "uppercase", letterSpacing: "0.04em" }}>Nome lavoro</span>
+                <input
+                  value={workName}
+                  onChange={e => setWorkName(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter" && workName.trim()) saveToDossier(false); }}
+                  placeholder="Es. «Prima bozza post-audit DPO»"
+                  style={{ flex: 1, fontSize: 11, padding: "6px 10px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", outline: "none" }}
+                  autoFocus
+                />
+                <button onClick={() => saveToDossier(false)}
+                  style={{ fontSize: 11, fontWeight: 700, padding: "6px 14px", borderRadius: 6, background: "#0D1016", color: "#fff", border: "none", cursor: "pointer", flexShrink: 0 }}>
+                  Salva
+                </button>
+              </div>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <Clock size={11} style={{ color: "rgba(0,0,0,0.3)", flexShrink: 0, marginLeft: 80 }} />
+                <input
+                  value={saveNote}
+                  onChange={e => setSaveNote(e.target.value)}
+                  placeholder="Nota opzionale — es. «Aggiornato dopo audit DPO del 10/06»"
+                  style={{ flex: 1, fontSize: 11, padding: "5px 10px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016" }}
+                />
+              </div>
             </div>
           )}
         </>
@@ -711,7 +733,7 @@ export default function DocuGenPage() {
             <GitBranch className="h-3.5 w-3.5" style={{ color: "rgba(0,0,0,0.35)" }} />
             <span style={{ color: "#0D1016", fontSize: 11 }}>
               {versionSnapshots.length > 0
-                ? `${versionSnapshots[0].tag ?? "bozza"} · ${versionSnapshots.length} snapshot`
+                ? `${versionSnapshots[0].tag ?? "lavoro"} · ${versionSnapshots.length} snapshot`
                 : "Nessuna versione salvata"}
             </span>
           </div>
@@ -862,7 +884,7 @@ export default function DocuGenPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6 mb-4">
             {[
               { label: "Sezioni completate", value: `${doneCount}/9`, color: "#16a34a" },
-              { label: "In bozza", value: draftCount, color: "#0D1016" },
+              { label: "In lavoro", value: draftCount, color: "#0D1016" },
               { label: "Obbligatorie vuote", value: emptyRequired.length, color: emptyRequired.length > 0 ? "#dc2626" : "#16a34a" },
               { label: "Versioni salvate", value: versionSnapshots.length || "—", color: "rgba(0,0,0,0.5)" },
             ].map((c) => (
@@ -1100,7 +1122,7 @@ export default function DocuGenPage() {
                               ? (st === "done" ? "#16a34a" : st === "draft" ? "#0D1016" : "rgba(0,0,0,0.45)")
                               : "rgba(0,0,0,0.3)",
                             fontWeight: getSectionStatus(activeSection) === st ? 600 : 400 }}>
-                          {st === "done" ? "Completata" : st === "draft" ? "In bozza" : "Vuota"}
+                          {st === "done" ? "Completata" : st === "draft" ? "In lavoro" : "Vuota"}
                         </button>
                       ))}
                     </div>
@@ -1347,7 +1369,7 @@ export default function DocuGenPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             {[
               { label: "Sezioni completate", value: `${doneCount}/9`, color: "#16a34a" },
-              { label: "In bozza", value: draftCount, color: "#0D1016" },
+              { label: "In lavoro", value: draftCount, color: "#0D1016" },
               { label: "Obbligatorie vuote", value: emptyRequired.length, color: emptyRequired.length > 0 ? "#dc2626" : "#16a34a" },
               { label: "Versioni salvate", value: versionSnapshots.length || "—", color: "rgba(0,0,0,0.5)" },
             ].map((c) => (

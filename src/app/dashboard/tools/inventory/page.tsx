@@ -2,7 +2,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import React, { useRef, useEffect, useCallback } from "react"
-import { Bot, ScanSearch, PenLine, FileDown, Send } from "lucide-react"
+import { Bot, ScanSearch, PenLine, FileDown, Send, Trash2 } from "lucide-react"
 import { classifyChat, type ChatMessage as ClassifyChatMsg } from "@/app/actions/classifyChat"
 import {
   loadInventory, addSystem, updateSystem, deleteSystem,
@@ -267,8 +267,8 @@ function SystemCard({ system, onEdit, onClassify, onDelete }: {
           </button>
           <button
             onClick={() => { if (confirm(`Eliminare "${system.name}"?`)) onDelete() }}
-            style={{ padding: "6px 10px", borderRadius: 7, fontSize: 12, border: "1px solid rgba(220,38,38,0.2)", background: "rgba(220,38,38,0.04)", color: "#dc2626", cursor: "pointer" }}
-          >✕</button>
+            style={{ padding: "6px 8px", borderRadius: 7, border: "1px solid rgba(220,38,38,0.2)", background: "rgba(220,38,38,0.04)", color: "#dc2626", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+          ><Trash2 size={13} /></button>
         </div>
       </div>
     </div>

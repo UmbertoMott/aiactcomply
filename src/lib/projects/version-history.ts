@@ -58,7 +58,7 @@ function autoTag(versions: VersionSnapshot[], status: "draft" | "finalized" | un
     return `v${finalized + 1}.0`;
   }
   const draftNum = versions.filter(v => v.status === "draft").length;
-  return `bozza-${draftNum + 1}`;
+  return `lavoro-${draftNum + 1}`;
 }
 
 /** Aggiunge uno snapshot per un tool. Mantiene max 20 versioni (FIFO). */

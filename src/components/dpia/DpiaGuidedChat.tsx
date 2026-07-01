@@ -78,6 +78,7 @@ export function DpiaGuidedChat({
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError]     = useState<string | null>(null);
   const [hoveredHistId, setHoveredHistId] = useState<string | null>(null);
+  const [customPhrase, setCustomPhrase] = useState("");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -85,6 +86,7 @@ export function DpiaGuidedChat({
     setInput(existing?.value ?? "");
     setAiDraft(null);
     setAiError(null);
+    setCustomPhrase("");
   }, [currentId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -307,6 +309,43 @@ export function DpiaGuidedChat({
                     {opt}
                   </button>
                 ))}
+              </div>
+            )}
+
+            {/* Frase personalizzata */}
+            {!isDone && qr.length > 0 && (
+              <div style={{ marginTop: 8 }}>
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <input
+                    value={customPhrase}
+                    onChange={e => setCustomPhrase(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === "Enter" && customPhrase.trim()) {
+                        handleSend(customPhrase.trim());
+                        setCustomPhrase("");
+                      }
+                    }}
+                    placeholder="Oppure scrivi una risposta personalizzata…"
+                    style={{
+                      flex: 1, fontSize: 11, padding: "6px 10px", borderRadius: 8,
+                      border: "1px solid rgba(0,0,0,0.10)", color: T.text,
+                      outline: "none", background: "#fafaf9",
+                    }}
+                    onFocus={e => (e.target.style.borderColor = "rgba(35,64,58,0.35)")}
+                    onBlur={e => (e.target.style.borderColor = "rgba(0,0,0,0.10)")}
+                  />
+                  {customPhrase.trim() && (
+                    <button
+                      onClick={() => { handleSend(customPhrase.trim()); setCustomPhrase(""); }}
+                      style={{
+                        fontSize: 10, fontWeight: 700, padding: "5px 10px", borderRadius: 8,
+                        background: T.green, color: "#fff", border: "none", cursor: "pointer", flexShrink: 0,
+                      }}
+                    >
+                      Invia →
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 

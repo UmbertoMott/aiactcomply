@@ -356,6 +356,7 @@ function PostMarketPageInner() {
   const [toast, setToast] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [urgentBannerDismissed, setUrgentBannerDismissed] = useState(false);
+  const [showSeverityGuide, setShowSeverityGuide] = useState(false);
   // Plan: expanded rows
   const [expandedChecks, setExpandedChecks] = useState<Set<string>>(new Set());
 
@@ -977,9 +978,18 @@ function PostMarketPageInner() {
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-medium mb-2" style={{ color: "rgba(0,0,0,0.45)" }}>
-                        Gravità
-                      </label>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-[10px] font-medium" style={{ color: "rgba(0,0,0,0.45)" }}>
+                          Gravità
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setShowSeverityGuide(v => !v)}
+                          style={{ fontSize: 9, color: "rgba(0,0,0,0.4)", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}
+                        >
+                          {showSeverityGuide ? "Nascondi guida" : "Come scelgo?"}
+                        </button>
+                      </div>
                       <div className="flex gap-2">
                         {(["critical", "high", "medium", "low"] as Severity[]).map((s) => {
                           const active = form.severity === s;
@@ -1006,6 +1016,25 @@ function PostMarketPageInner() {
                           );
                         })}
                       </div>
+                      {showSeverityGuide && (
+                        <div style={{ marginTop: 8, padding: "10px 12px", borderRadius: 8, background: "rgba(0,0,0,0.025)", border: "1px solid rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", gap: 7 }}>
+                          <p style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.05em", margin: 0 }}>
+                            Criteri Art. 73 AI Act — Art. 3(49)
+                          </p>
+                          {[
+                            { sev: "Critical", color: "#dc2626", bg: "rgba(220,38,38,0.06)", desc: "Morte di una persona o rischio imminente. Interruzione grave/irreversibile di infrastruttura critica (energia, trasporti, acqua).", deadline: "2 gg lavorativi" },
+                            { sev: "High", color: "#ea580c", bg: "rgba(234,88,12,0.05)", desc: "Danno grave e irreversibile alla salute. Violazione grave di diritti fondamentali. Danno grave a proprietà o ambiente.", deadline: "15 gg lavorativi" },
+                            { sev: "Medium", color: "#d97706", bg: "rgba(217,119,6,0.05)", desc: "Danno moderato o potenziale violazione in corso di accertamento. Malfunzionamento significativo senza danni immediati.", deadline: "In indagine" },
+                            { sev: "Low", color: "#16a34a", bg: "rgba(22,163,74,0.05)", desc: "Anomalia minore, near-miss, segnalazione precauzionale senza danno diretto a persone o sistemi critici.", deadline: "Monitoraggio" },
+                          ].map(row => (
+                            <div key={row.sev} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                              <span style={{ fontSize: 9, fontWeight: 700, color: row.color, background: row.bg, padding: "2px 7px", borderRadius: 10, flexShrink: 0, marginTop: 1 }}>{row.sev}</span>
+                              <span style={{ fontSize: 10, color: "rgba(0,0,0,0.55)", lineHeight: 1.45, flex: 1 }}>{row.desc}</span>
+                              <span style={{ fontSize: 9, color: "rgba(0,0,0,0.35)", flexShrink: 0, marginTop: 1 }}>{row.deadline}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     <div>
