@@ -1063,22 +1063,132 @@ function PostMarketPageInner() {
                         })}
                       </div>
                       {showSeverityGuide && (
-                        <div style={{ marginTop: 8, padding: "10px 12px", borderRadius: 8, background: "rgba(0,0,0,0.025)", border: "1px solid rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", gap: 7 }}>
-                          <p style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.05em", margin: 0 }}>
-                            Criteri Art. 73 AI Act — Art. 3(49)
-                          </p>
+                        <div style={{ marginTop: 10, borderRadius: 10, border: "1px solid rgba(0,0,0,0.08)", overflow: "hidden" }}>
+                          {/* Header */}
+                          <div style={{ padding: "8px 14px", background: "rgba(0,0,0,0.03)", borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+                            <p style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>
+                              Guida classificazione — Art. 73 + Art. 3(49) Reg. UE 2024/1689
+                            </p>
+                            <p style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", margin: "3px 0 0" }}>
+                              Solo gli incidenti <strong>Critical</strong> e <strong>High</strong> sono "incidenti gravi" ai sensi dell&apos;Art. 3(49) e richiedono notifica formale all&apos;autorità.
+                            </p>
+                          </div>
+
+                          {/* Rows */}
                           {[
-                            { sev: "Critical", color: "#dc2626", bg: "rgba(220,38,38,0.06)", desc: "Morte di una persona o rischio imminente. Interruzione grave/irreversibile di infrastruttura critica (energia, trasporti, acqua).", deadline: "2 gg lavorativi" },
-                            { sev: "High", color: "#ea580c", bg: "rgba(234,88,12,0.05)", desc: "Danno grave e irreversibile alla salute. Violazione grave di diritti fondamentali. Danno grave a proprietà o ambiente.", deadline: "15 gg lavorativi" },
-                            { sev: "Medium", color: "#d97706", bg: "rgba(217,119,6,0.05)", desc: "Danno moderato o potenziale violazione in corso di accertamento. Malfunzionamento significativo senza danni immediati.", deadline: "In indagine" },
-                            { sev: "Low", color: "#16a34a", bg: "rgba(22,163,74,0.05)", desc: "Anomalia minore, near-miss, segnalazione precauzionale senza danno diretto a persone o sistemi critici.", deadline: "Monitoraggio" },
-                          ].map(row => (
-                            <div key={row.sev} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                              <span style={{ fontSize: 9, fontWeight: 700, color: row.color, background: row.bg, padding: "2px 7px", borderRadius: 10, flexShrink: 0, marginTop: 1 }}>{row.sev}</span>
-                              <span style={{ fontSize: 10, color: "rgba(0,0,0,0.55)", lineHeight: 1.45, flex: 1 }}>{row.desc}</span>
-                              <span style={{ fontSize: 9, color: "rgba(0,0,0,0.35)", flexShrink: 0, marginTop: 1 }}>{row.deadline}</span>
+                            {
+                              sev: "Critical",
+                              color: "#dc2626",
+                              bg: "rgba(220,38,38,0.06)",
+                              border: "rgba(220,38,38,0.12)",
+                              ref: "Art. 73(3) + Art. 3(49)",
+                              criteria: [
+                                "Morte di una persona o rischio imminente di morte",
+                                "Lesioni personali gravi o irreversibili",
+                                "Interruzione grave di infrastruttura critica: energia, acqua, trasporti, finanza, sanità",
+                                "Danni gravi e irreversibili all'ambiente",
+                                "Violazioni gravi dei diritti fondamentali con impatto sistemico",
+                              ],
+                              examples: "Es. sistema di triage ospedaliero che non rileva un'emergenza cardiaca; AI per la gestione della rete elettrica che provoca blackout; sistema di riconoscimento biometrico che autorizza l'accesso a soggetti non autorizzati in strutture critiche.",
+                              deadline: "Notifica IMMEDIATA",
+                              deadlineSub: "max 2 giorni lavorativi dal rilevamento (Art. 73(3))",
+                              deadlineColor: "#dc2626",
+                              action: "Notifica urgente + sospensione sistema raccomandata",
+                            },
+                            {
+                              sev: "High",
+                              color: "#ea580c",
+                              bg: "rgba(234,88,12,0.05)",
+                              border: "rgba(234,88,12,0.12)",
+                              ref: "Art. 73(2) + Art. 3(49)(a)(b)(c)",
+                              criteria: [
+                                "Danno grave ma non immediato alla salute fisica o mentale",
+                                "Violazione grave di diritti fondamentali (es. discriminazione sistematica, profilazione illecita)",
+                                "Danno significativo a proprietà o ambiente senza carattere di emergenza",
+                                "Malfunzionamento che impatta numerosi utenti con danni individuali rilevanti",
+                                "Perdita significativa e non autorizzata di dati personali sensibili causata dall'AI",
+                              ],
+                              examples: "Es. sistema AI HR che esclude sistematicamente candidati per origine etnica; chatbot medico che fornisce indicazioni farmacologiche errate con danni ai pazienti; sistema di scoring creditizio che nega accesso al credito a causa di bias documentato.",
+                              deadline: "Notifica entro 15 giorni lavorativi",
+                              deadlineSub: "dal momento in cui il provider viene a conoscenza dell'incidente (Art. 73(2))",
+                              deadlineColor: "#ea580c",
+                              action: "Apertura fascicolo + notifica all'autorità competente",
+                            },
+                            {
+                              sev: "Medium",
+                              color: "#d97706",
+                              bg: "rgba(217,119,6,0.04)",
+                              border: "rgba(217,119,6,0.12)",
+                              ref: "Art. 9 — monitoraggio post-market",
+                              criteria: [
+                                "Malfunzionamento significativo senza danno immediato a persone",
+                                "Potenziale violazione normativa in corso di accertamento",
+                                "Comportamento dell'AI significativamente difforme dalle specifiche tecniche",
+                                "Errori sistematici su sottogruppi di utenti non ancora quantificati",
+                                "Incidente che potrebbe evolvere in High se non gestito",
+                              ],
+                              examples: "Es. sistema di riconoscimento vocale che fallisce sistematicamente su accenti regionali specifici; AI per la selezione dei curricula con tasso di falsi negativi anormalmente elevato su un genere; modello di previsione della domanda con drift significativo non ancora causante perdite.",
+                              deadline: "Indagine interna obbligatoria",
+                              deadlineSub: "nessuna notifica esterna obbligatoria — documentare nel registro interno",
+                              deadlineColor: "#d97706",
+                              action: "Apertura indagine interna + aggiornamento Risk Register",
+                            },
+                            {
+                              sev: "Low",
+                              color: "#16a34a",
+                              bg: "rgba(22,163,74,0.04)",
+                              border: "rgba(22,163,74,0.12)",
+                              ref: "Art. 72 — sorveglianza post-market",
+                              criteria: [
+                                "Near-miss: malfunzionamento rilevato prima di causare danno",
+                                "Anomalia tecnica minore senza impatto su utenti finali",
+                                "Segnalazione precauzionale da parte di un deployer o utente",
+                                "Comportamento inatteso dell'AI senza conseguenze documentate",
+                                "Feedback negativo ricorrente senza danno identificabile",
+                              ],
+                              examples: "Es. sistema di chatbot che fornisce risposta ambigua senza conseguenze; AI di routing logistico che suggerisce percorsi non ottimali senza impatti sulla sicurezza; modello di scoring che produce output incoerente in <0,1% dei casi senza impatto su decisioni reali.",
+                              deadline: "Monitoraggio continuo",
+                              deadlineSub: "registrare nel log interno — nessun obbligo di notifica esterna",
+                              deadlineColor: "#16a34a",
+                              action: "Registrazione nel log eventi + revisione al prossimo ciclo PMM",
+                            },
+                          ].map((row, idx) => (
+                            <div key={row.sev} style={{ borderBottom: idx < 3 ? "1px solid rgba(0,0,0,0.06)" : "none", padding: "12px 14px" }}>
+                              {/* Severity badge + deadline */}
+                              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                  <span style={{ fontSize: 10, fontWeight: 700, color: row.color, background: row.bg, border: `1px solid ${row.border}`, padding: "2px 10px", borderRadius: 20 }}>{row.sev}</span>
+                                  <span style={{ fontSize: 9, color: "rgba(0,0,0,0.35)" }}>{row.ref}</span>
+                                </div>
+                                <div style={{ textAlign: "right" }}>
+                                  <span style={{ fontSize: 10, fontWeight: 700, color: row.deadlineColor }}>{row.deadline}</span>
+                                  <p style={{ fontSize: 9, color: "rgba(0,0,0,0.35)", margin: "2px 0 0", maxWidth: 200 }}>{row.deadlineSub}</p>
+                                </div>
+                              </div>
+
+                              {/* Criteria list */}
+                              <ul style={{ margin: "0 0 6px", padding: "0 0 0 14px", listStyleType: "disc" }}>
+                                {row.criteria.map((c, i) => (
+                                  <li key={i} style={{ fontSize: 10, color: "rgba(0,0,0,0.6)", lineHeight: 1.5, marginBottom: 2 }}>{c}</li>
+                                ))}
+                              </ul>
+
+                              {/* Example */}
+                              <p style={{ fontSize: 10, color: "rgba(0,0,0,0.42)", lineHeight: 1.45, margin: "4px 0 5px", fontStyle: "italic" }}>{row.examples}</p>
+
+                              {/* Action */}
+                              <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 20, background: row.bg, border: `1px solid ${row.border}` }}>
+                                <span style={{ fontSize: 9, fontWeight: 600, color: row.color }}>→ {row.action}</span>
+                              </div>
                             </div>
                           ))}
+
+                          {/* Footer note */}
+                          <div style={{ padding: "8px 14px", background: "rgba(0,0,0,0.02)", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
+                            <p style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", margin: 0, lineHeight: 1.5 }}>
+                              ⚠ In caso di dubbio tra Critical e High, classificare sempre come Critical e notificare entro 2 gg. La riclassificazione può avvenire dopo la notifica iniziale (Art. 73(5)). [verify against current AI Act text]
+                            </p>
+                          </div>
                         </div>
                       )}
                     </div>
