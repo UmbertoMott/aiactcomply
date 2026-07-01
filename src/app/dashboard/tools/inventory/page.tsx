@@ -16,15 +16,74 @@ import {
   type SourceType, type DiscoverySource, type DiscoveredSystem,
 } from "@/lib/simulation/discovery-engine"
 
-// ─── Palette colori tier ───────────────────────────────────────────────────────
-const TIER_CONFIG: Record<SystemTier, { label: string; bg: string; border: string; text: string; dot: string }> = {
-  prohibited:    { label: "Vietato",           bg: "rgba(220,38,38,0.07)",   border: "rgba(220,38,38,0.25)",   text: "#dc2626", dot: "#dc2626" },
-  high_risk:     { label: "Alto rischio",      bg: "rgba(234,88,12,0.07)",   border: "rgba(234,88,12,0.25)",   text: "#ea580c", dot: "#ea580c" },
-  limited:       { label: "Limitato",          bg: "rgba(217,119,6,0.07)",   border: "rgba(217,119,6,0.25)",   text: "#d97706", dot: "#d97706" },
-  minimal:       { label: "Minimale",          bg: "rgba(22,163,74,0.07)",   border: "rgba(22,163,74,0.25)",   text: "#16a34a", dot: "#16a34a" },
-  gpai:          { label: "GPAI",              bg: "rgba(99,102,241,0.07)",  border: "rgba(99,102,241,0.25)",  text: "#6366f1", dot: "#6366f1" },
-  gpai_systemic: { label: "GPAI Sistemico",    bg: "rgba(139,92,246,0.07)", border: "rgba(139,92,246,0.25)", text: "#7c3aed", dot: "#7c3aed" },
-  unclassified:  { label: "Non classificato",  bg: "rgba(0,0,0,0.04)",       border: "rgba(0,0,0,0.12)",       text: "#6b7280", dot: "#9ca3af" },
+// ─── Palette + guida tier ─────────────────────────────────────────────────────
+type TierCfg = {
+  label: string; bg: string; border: string; text: string; dot: string;
+  article: string;
+  what: string;
+  examples: string[];
+  obligations: string[];
+}
+const TIER_CONFIG: Record<SystemTier, TierCfg> = {
+  prohibited: {
+    label: "Vietato", bg: "rgba(220,38,38,0.07)", border: "rgba(220,38,38,0.25)", text: "#dc2626", dot: "#dc2626",
+    article: "Art. 5 AI Act",
+    what: "Il sistema utilizza tecniche proibite: manipolazione subliminale, sfruttamento delle vulnerabilità, social scoring governativo, identificazione biometrica in tempo reale in spazi pubblici (con eccezioni limitate), sistemi di inferenza delle emozioni sul lavoro/scuola.",
+    examples: ["Sistema di scoring della fiducia cittadina per la PA", "Riconoscimento facciale live in piazze o strade", "AI che deduce lo stato emotivo degli studenti durante gli esami", "Chatbot che manipola l'utente sfruttandone la solitudine"],
+    obligations: ["Non puoi deploiarlo — punto.", "Verifica se il tuo sistema rientra nelle eccezioni molto limitate (es. ricerca di persone scomparse)", "In caso di dubbio, consulta immediatamente un legale specializzato in AI Act"],
+  },
+  high_risk: {
+    label: "Alto rischio", bg: "rgba(234,88,12,0.07)", border: "rgba(234,88,12,0.25)", text: "#ea580c", dot: "#ea580c",
+    article: "Art. 6 + Allegato III AI Act",
+    what: "Il sistema prende o influenza decisioni che impattano significativamente persone fisiche in settori sensibili elencati nell'Allegato III (occupazione, istruzione, servizi essenziali, forze dell'ordine, migrazione, giustizia, infrastrutture critiche).",
+    examples: ["AI per la pre-selezione dei CV", "Sistema di scoring del credito bancario", "AI per l'assegnazione di sussidi di disoccupazione", "Diagnosi medica assistita da AI", "AI per la valutazione del rischio di recidiva penale"],
+    obligations: ["Documentazione tecnica completa (Art. 11 + Allegato IV)", "FRIA — Valutazione impatto diritti fondamentali (Art. 27)", "Risk Register Art. 9", "Supervisione umana obbligatoria (Art. 14)", "Registrazione nel database EU (Art. 49)", "Conformità assessment prima del deployment"],
+  },
+  limited: {
+    label: "Limitato", bg: "rgba(217,119,6,0.07)", border: "rgba(217,119,6,0.25)", text: "#d97706", dot: "#d97706",
+    article: "Art. 50 AI Act",
+    what: "Il sistema interagisce con persone o genera contenuti, ma non prende decisioni ad alto impatto. L'obbligo principale è la trasparenza: l'utente deve sempre sapere che sta interagendo con un AI.",
+    examples: ["Chatbot di assistenza clienti", "AI che genera testi o immagini su richiesta", "Deepfake o contenuti sintetici (audio/video)", "Assistente virtuale sul sito web", "AI che risponde a email in modo automatico"],
+    obligations: ["Dichiarazione esplicita all'utente che sta interagendo con un AI (Art. 50(1))", "Etichettatura dei contenuti generati da AI (Art. 50(2))", "Nessuna conformity assessment, nessuna registrazione obbligatoria"],
+  },
+  minimal: {
+    label: "Minimale", bg: "rgba(22,163,74,0.07)", border: "rgba(22,163,74,0.25)", text: "#16a34a", dot: "#16a34a",
+    article: "Art. 69 AI Act",
+    what: "Il sistema non rientra nelle categorie proibite, ad alto rischio o a rischio limitato. Nessun obbligo legale obbligatorio — si applica solo un regime volontario di buone pratiche.",
+    examples: ["Filtro antispam nella posta elettronica", "Algoritmo di raccomandazione prodotti in e-commerce", "AI per il riconoscimento di immagini in un'app fotografica", "Assistente per la scrittura di email interne", "Ottimizzazione logistica aziendale"],
+    obligations: ["Nessun obbligo obbligatorio per legge", "Volontario: adesione a codici di condotta (Art. 69)", "Raccomandato: documentazione interna minima e governance AI di base"],
+  },
+  gpai: {
+    label: "GPAI", bg: "rgba(99,102,241,0.07)", border: "rgba(99,102,241,0.25)", text: "#6366f1", dot: "#6366f1",
+    article: "Art. 51–55 AI Act",
+    what: "Stai usando (come deployer) o distribuendo (come provider) un modello di IA per uso generale — un modello fondazionale come GPT, Claude, Gemini, Llama — che può essere usato per molteplici scopi. Gli obblighi variano a seconda del ruolo.",
+    examples: ["GPT-4 integrato nel tuo prodotto via API", "Claude usato per generare report automatici", "Llama 3 fine-tuned su dati aziendali", "Gemini integrato in un assistente HR interno", "Modello open source adattato per uso in produzione"],
+    obligations: ["Se sei provider del modello GPAI: documentazione tecnica, diritti d'autore, politica d'uso accettabile (Art. 53)", "Se sei deployer: verifica dei termini d'uso del provider, trasparenza verso utenti", "Valutazione se il modello supera la soglia di rischio sistemico (10²⁵ FLOP)"],
+  },
+  gpai_systemic: {
+    label: "GPAI Sistemico", bg: "rgba(139,92,246,0.07)", border: "rgba(139,92,246,0.25)", text: "#7c3aed", dot: "#7c3aed",
+    article: "Art. 55 AI Act",
+    what: "Modello GPAI con capacità computazionale di addestramento superiore a 10²⁵ FLOP — classificato come modello con rischio sistemico potenziale per la società. Si applicano obblighi aggiuntivi rispetto al GPAI standard.",
+    examples: ["GPT-4 (OpenAI) — provider", "Gemini Ultra (Google) — provider", "Claude 3 Opus (Anthropic) — provider", "Llama 3.1 405B — provider o deployer che lo ridistribuisce"],
+    obligations: ["Tutti gli obblighi GPAI base (Art. 53)", "Valutazione e mitigazione rischi sistemici (Art. 55(1)(a))", "Test avversariali red-team obbligatori (Art. 55(1)(b))", "Segnalazione incidenti gravi alla Commissione EU (Art. 55(1)(c))", "Misure di cybersecurity (Art. 55(1)(d))"],
+  },
+  unclassified: {
+    label: "Non classificato", bg: "rgba(0,0,0,0.04)", border: "rgba(0,0,0,0.12)", text: "#6b7280", dot: "#9ca3af",
+    article: "Da determinare",
+    what: "Non hai ancora completato la classificazione di questo sistema. Finché rimane non classificato, non puoi generare documentazione di conformità per esso.",
+    examples: ["Sistema in fase di valutazione iniziale", "Sistema appena aggiunto all'inventario", "Sistema per cui è in corso una consulenza legale sulla classificazione"],
+    obligations: ["Nessun obbligo specifico fino alla classificazione", "Raccomandato: completare la classificazione prima del deployment"],
+  },
+}
+
+// ─── Guida ruolo ──────────────────────────────────────────────────────────────
+const ROLE_GUIDE: Record<string, { what: string; example: string; article: string }> = {
+  provider:             { article: "Art. 3(3)", what: "Hai sviluppato o fatto sviluppare il sistema AI e lo metti a disposizione sul mercato o in servizio — anche per uso proprio.", example: "Hai addestrato o customizzato il modello; sei il titolare del sistema." },
+  deployer:             { article: "Art. 3(4)", what: "Usi un sistema AI sviluppato da altri nell'ambito della tua attività professionale, per produrre effetti su persone fisiche.", example: "Hai acquistato o integrato un sistema AI di un fornitore terzo nel tuo processo aziendale." },
+  importer:             { article: "Art. 3(6)", what: "Stabilito nell'UE, metti a disposizione sul mercato UE un sistema AI sviluppato fuori UE.", example: "Rivenditore europeo di un sistema AI di un'azienda americana o asiatica." },
+  distributor:          { article: "Art. 3(7)", what: "Rendi disponibile sul mercato un sistema AI sviluppato da altri, senza modificarlo (altrimenti diventi provider).", example: "Marketplace o rivenditore che distribuisce AI senza modificarne il funzionamento." },
+  authorized_rep:       { article: "Art. 3(5)", what: "Persona fisica o giuridica stabilita nell'UE che agisce per conto di un provider extra-UE.", example: "Ufficio europeo di un'azienda AI americana, nominato come rappresentante ufficiale UE." },
+  product_manufacturer: { article: "Art. 25(1)(b)", what: "Produttore di un prodotto che incorpora un sistema AI come componente, che mette a disposizione il prodotto finale.", example: "Casa automobilistica che integra AI nel sistema di guida assistita." },
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -761,8 +820,11 @@ function ClassifyModal({ system, onClose, onSave }: {
   const [tierBasis, setTierBasis] = React.useState(system.tierBasis)
   const [dualRoleFlag, setDualRoleFlag] = React.useState(system.dualRoleFlag)
   const [obligationsNote, setObligationsNote] = React.useState(system.obligationsNote)
+  const [showTierGuide, setShowTierGuide] = React.useState(true)
+  const [showRoleGuide, setShowRoleGuide] = React.useState(false)
 
   const tierCfg = TIER_CONFIG[tier as SystemTier] ?? TIER_CONFIG.unclassified
+  const roleGuide = role ? ROLE_GUIDE[role] : null
 
   function handleSave() {
     updateSystem(system.id, {
@@ -777,7 +839,6 @@ function ClassifyModal({ system, onClose, onSave }: {
     onSave()
   }
 
-  // Guardrail: non permettere save se tier non unclassified ma basis mancante
   const canSave = tier !== "unclassified"
     ? (tierBasis.trim().length > 0 && tierBasis.includes("[verify"))
     : true
@@ -785,20 +846,28 @@ function ClassifyModal({ system, onClose, onSave }: {
   return (
     <ModalShell title={`Classifica — ${system.name}`} subtitle="Seleziona ruolo e tier di rischio EU AI Act. Tutti i campi sono sotto tua responsabilità." onClose={onClose}>
       {/* Banner guardrail */}
-      <div style={{ padding: "10px 14px", borderRadius: 8, marginBottom: 20, background: "rgba(37,99,235,0.04)", border: "1px solid rgba(37,99,235,0.15)" }}>
-        <p style={{ fontSize: 12, color: "#1d4ed8", margin: 0 }}>
+      <div style={{ padding: "10px 14px", borderRadius: 8, marginBottom: 20, background: "rgba(13,16,22,0.04)", border: "1px solid rgba(13,16,22,0.12)" }}>
+        <p style={{ fontSize: 12, color: "#0D1016", margin: 0 }}>
           <strong>Principio "never classify silently"</strong> — ogni classificazione richiede una base normativa esplicita nel campo [verify]. La classificazione è responsabilità dell'utente, non dell'AI.
         </p>
       </div>
 
       {/* Tier selector visivo */}
-      <div style={{ marginBottom: 20 }}>
-        <FieldLabel label="Tier di rischio EU AI Act *" showAi={false} />
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 8 }}>
-          {(Object.entries(TIER_CONFIG) as [SystemTier, typeof TIER_CONFIG[SystemTier]][]).map(([key, cfg]) => (
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+          <FieldLabel label="Tier di rischio EU AI Act *" showAi={false} />
+          <button
+            onClick={() => setShowTierGuide(v => !v)}
+            style={{ fontSize: 11, color: "#6b7280", background: "none", border: "none", cursor: "pointer", padding: "2px 6px", borderRadius: 4, textDecoration: "underline" }}
+          >
+            {showTierGuide ? "Nascondi guida" : "Mostra guida"}
+          </button>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 8 }}>
+          {(Object.entries(TIER_CONFIG) as [SystemTier, TierCfg][]).map(([key, cfg]) => (
             <button
               key={key}
-              onClick={() => setTier(key)}
+              onClick={() => { setTier(key); setShowTierGuide(true); }}
               style={{
                 padding: "10px 8px", borderRadius: 8, cursor: "pointer", textAlign: "center",
                 border: `2px solid ${tier === key ? cfg.border : "rgba(0,0,0,0.08)"}`,
@@ -813,10 +882,52 @@ function ClassifyModal({ system, onClose, onSave }: {
         </div>
       </div>
 
+      {/* Guida tier contestuale */}
+      {showTierGuide && (
+        <div style={{
+          marginBottom: 20, padding: "14px 16px", borderRadius: 10,
+          background: `${tierCfg.bg}`, border: `1px solid ${tierCfg.border}`,
+        }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 8 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: tierCfg.text }}>{tierCfg.label}</span>
+            <span style={{ fontSize: 10, color: "#9ca3af", fontFamily: "monospace" }}>{tierCfg.article}</span>
+          </div>
+          <p style={{ fontSize: 12, color: "#374151", margin: "0 0 10px", lineHeight: 1.55 }}>
+            {tierCfg.what}
+          </p>
+          <div style={{ marginBottom: 10 }}>
+            <p style={{ fontSize: 10, fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 5px" }}>Esempi tipici</p>
+            <ul style={{ margin: 0, paddingLeft: 18, display: "flex", flexDirection: "column", gap: 3 }}>
+              {tierCfg.examples.map((ex, i) => (
+                <li key={i} style={{ fontSize: 12, color: "#374151", lineHeight: 1.45 }}>{ex}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p style={{ fontSize: 10, fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 5px" }}>Obblighi principali</p>
+            <ul style={{ margin: 0, paddingLeft: 18, display: "flex", flexDirection: "column", gap: 3 }}>
+              {tierCfg.obligations.map((ob, i) => (
+                <li key={i} style={{ fontSize: 12, color: "#374151", lineHeight: 1.45 }}>{ob}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
         <div>
-          <FieldLabel label="Ruolo (Art. 2)" showAi={false} />
-          <select value={role} onChange={e => setRole(e.target.value)} style={INPUT_STYLE}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <FieldLabel label="Ruolo (Art. 2)" showAi={false} />
+            {role && (
+              <button
+                onClick={() => setShowRoleGuide(v => !v)}
+                style={{ fontSize: 10, color: "#6b7280", background: "none", border: "none", cursor: "pointer", padding: "1px 4px", textDecoration: "underline", marginBottom: 6 }}
+              >
+                {showRoleGuide ? "Nascondi" : "Cos'è?"}
+              </button>
+            )}
+          </div>
+          <select value={role} onChange={e => { setRole(e.target.value); setShowRoleGuide(true); }} style={INPUT_STYLE}>
             <option value="">Da definire</option>
             <option value="provider">Provider</option>
             <option value="deployer">Deployer</option>
@@ -825,10 +936,24 @@ function ClassifyModal({ system, onClose, onSave }: {
             <option value="authorized_rep">Rappresentante autorizzato</option>
             <option value="product_manufacturer">Produttore prodotto</option>
           </select>
+          {showRoleGuide && roleGuide && (
+            <div style={{ marginTop: 8, padding: "10px 12px", background: "rgba(0,0,0,0.03)", borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)" }}>
+              <p style={{ fontSize: 10, fontWeight: 700, color: "#6b7280", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.04em" }}>{roleGuide.article}</p>
+              <p style={{ fontSize: 12, color: "#374151", margin: "0 0 5px", lineHeight: 1.5 }}>{roleGuide.what}</p>
+              <p style={{ fontSize: 11, color: "#6b7280", margin: 0, fontStyle: "italic", lineHeight: 1.4 }}>{roleGuide.example}</p>
+            </div>
+          )}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, paddingTop: 22 }}>
-          <input type="checkbox" id="dualRoleClassify" checked={dualRoleFlag} onChange={e => setDualRoleFlag(e.target.checked)} style={{ width: 16, height: 16 }} />
-          <label htmlFor="dualRoleClassify" style={{ fontSize: 13, color: "#374151" }}>Dual-role (Art. 25)</label>
+        <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", paddingBottom: 4 }}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 10, paddingTop: 22 }}>
+            <input type="checkbox" id="dualRoleClassify" checked={dualRoleFlag} onChange={e => setDualRoleFlag(e.target.checked)} style={{ width: 16, height: 16, marginTop: 1, flexShrink: 0 }} />
+            <div>
+              <label htmlFor="dualRoleClassify" style={{ fontSize: 13, color: "#374151", cursor: "pointer" }}>Dual-role (Art. 25)</label>
+              <p style={{ fontSize: 11, color: "#9ca3af", margin: "2px 0 0", lineHeight: 1.4 }}>
+                L'organizzazione ha due ruoli sullo stesso sistema — es. ha sviluppato il modello (provider) ma lo usa anche internamente (deployer).
+              </p>
+            </div>
+          </div>
         </div>
         <div style={{ gridColumn: "1 / -1" }}>
           <FieldLabel label="Base ruolo — articolo di riferimento [verify] *" showAi={false} />
@@ -859,7 +984,21 @@ function ClassifyModal({ system, onClose, onSave }: {
         </div>
         <div style={{ gridColumn: "1 / -1" }}>
           <FieldLabel label="Note obblighi applicabili [verify]" showAi={false} />
-          <textarea value={obligationsNote} onChange={e => setObligationsNote(e.target.value)} rows={2} style={{ ...INPUT_STYLE, resize: "vertical", fontFamily: "inherit" }} placeholder="Descrivi i principali obblighi EU AI Act applicabili [verify against current AI Act text]" />
+          <textarea
+            value={obligationsNote}
+            onChange={e => setObligationsNote(e.target.value)}
+            rows={2}
+            style={{ ...INPUT_STYLE, resize: "vertical", fontFamily: "inherit" }}
+            placeholder="Descrivi i principali obblighi EU AI Act applicabili [verify against current AI Act text]"
+          />
+          {tier !== "unclassified" && !obligationsNote.trim() && tierCfg.obligations.length > 0 && (
+            <button
+              onClick={() => setObligationsNote(tierCfg.obligations.join("\n"))}
+              style={{ marginTop: 5, fontSize: 11, color: "#6b7280", background: "none", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 5, padding: "3px 10px", cursor: "pointer" }}
+            >
+              Compila dalla guida tier
+            </button>
+          )}
         </div>
       </div>
 
