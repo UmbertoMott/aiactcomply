@@ -43,6 +43,9 @@ import type {
   LogVaultMetricsSnapshot,
 } from "@/lib/post-market/post-market-types";
 import { proposePMMPlan, draftPostMarketReport } from "@/app/actions/postMarketActions";
+import { incidentFormChat } from "@/app/actions/incidentFormChat";
+import type { IncidentChatMessage } from "@/app/actions/incidentFormChat";
+import { Loader2 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -357,6 +360,12 @@ function PostMarketPageInner() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [urgentBannerDismissed, setUrgentBannerDismissed] = useState(false);
   const [showSeverityGuide, setShowSeverityGuide] = useState(false);
+  // Incident form AI chat
+  const [incidentChatMessages, setIncidentChatMessages] = useState<IncidentChatMessage[]>([
+    { role: "assistant", content: "Ciao! Descrivi l'evento che vuoi segnalare e ti aiuto a capire se rientra nell'Art. 73, quale gravità assegnare e la scadenza di notifica." }
+  ]);
+  const [incidentChatInput, setIncidentChatInput] = useState("");
+  const [incidentChatLoading, setIncidentChatLoading] = useState(false);
   // Plan: expanded rows
   const [expandedChecks, setExpandedChecks] = useState<Set<string>>(new Set());
 
@@ -885,7 +894,7 @@ function PostMarketPageInner() {
                   Registro Incidenti
                 </span>
                 <button
-                  onClick={() => setShowForm((v) => !v)}
+                  onClick={() => { setShowForm((v) => !v); if (showForm) { setIncidentChatMessages([{ role: "assistant", content: "Ciao! Descrivi l'evento che vuoi segnalare e ti aiuto a capire se rientra nell'Art. 73, quale gravità assegnare e la scadenza di notifica." }]); setIncidentChatInput(""); } }}
                   className="flex items-center gap-1 text-[11px] font-semibold rounded-lg px-3 py-1.5"
                   style={{
                     background: "#0D1016",
@@ -896,6 +905,7 @@ function PostMarketPageInner() {
                 >
                   {showForm ? <X className="h-3 w-3" /> : <Bell className="h-3 w-3" />}
                   {showForm ? "Annulla" : "+ Nuovo incidente"}
+
                 </button>
               </div>
 
@@ -1244,9 +1254,116 @@ function PostMarketPageInner() {
             </div>
           </div>
 
-          {/* Right: detail */}
+          {/* Right: AI chat (during form) or incident detail */}
           <div className="lg:col-span-1 space-y-4">
-            {!selected ? (
+            {showForm ? (
+              /* ── Incident form AI chat ── */
+              <div
+                className="rounded-xl overflow-hidden flex flex-col"
+                style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#fff", height: "calc(100vh - 280px)", minHeight: 400 }}
+              >
+                {/* Header */}
+                <div style={{ padding: "10px 16px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "#fafafa", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#0D1016" }} />
+                  <span style={{ fontSize: 11, fontWeight: 700, color: "#0D1016" }}>Assistente Art. 73</span>
+                  <span style={{ fontSize: 10, color: "rgba(0,0,0,0.35)", marginLeft: 2 }}>— guida normativa AI Act</span>
+                </div>
+
+                {/* Messages */}
+                <div style={{ flex: 1, overflowY: "auto", padding: "14px 16px 8px" }}>
+                  {incidentChatMessages.map((msg, i) => {
+                    const isUser = msg.role === "user";
+                    return (
+                      <div key={i} style={{ display: "flex", justifyContent: isUser ? "flex-end" : "flex-start", marginBottom: 10 }}>
+                        <div style={{
+                          maxWidth: "88%",
+                          borderRadius: isUser ? "14px 14px 4px 14px" : "14px 14px 14px 4px",
+                          padding: "9px 13px",
+                          fontSize: 12, lineHeight: 1.55,
+                          background: isUser ? "#0D1016" : "#f5f5f4",
+                          color: isUser ? "#fff" : "#0D1016",
+                          border: isUser ? "none" : "1px solid rgba(0,0,0,0.07)",
+                          whiteSpace: "pre-wrap",
+                        }}>
+                          {!isUser && (
+                            <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 5 }}>
+                              <span style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.35)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Art. 73 AI</span>
+                            </div>
+                          )}
+                          {msg.content}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {incidentChatLoading && (
+                    <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10 }}>
+                      <div style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)", borderRadius: "14px 14px 14px 4px", padding: "9px 13px", display: "flex", alignItems: "center", gap: 7 }}>
+                        <Loader2 size={12} style={{ color: "#0D1016", animation: "spin 1s linear infinite" }} />
+                        <span style={{ fontSize: 11, color: "rgba(0,0,0,0.4)" }}>Analisi in corso…</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Input */}
+                <div style={{ padding: "10px 14px", borderTop: "1px solid rgba(0,0,0,0.07)", flexShrink: 0 }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+                    <textarea
+                      value={incidentChatInput}
+                      onChange={(e) => setIncidentChatInput(e.target.value)}
+                      onKeyDown={async (e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          const text = incidentChatInput.trim();
+                          if (!text || incidentChatLoading) return;
+                          const userMsg: IncidentChatMessage = { role: "user", content: text };
+                          const newMsgs = [...incidentChatMessages, userMsg];
+                          setIncidentChatMessages(newMsgs);
+                          setIncidentChatInput("");
+                          setIncidentChatLoading(true);
+                          const { reply } = await incidentFormChat(newMsgs, {
+                            title: form.title, system: form.system, date: form.date,
+                            severity: form.severity, authority: form.authority,
+                            affectedUsers: form.affectedUsers, description: form.description,
+                            actions: form.actions,
+                          });
+                          setIncidentChatMessages([...newMsgs, { role: "assistant", content: reply || "Errore nella risposta AI — riprova." }]);
+                          setIncidentChatLoading(false);
+                        }
+                      }}
+                      placeholder="Es. Il sistema ha generato un output errato che ha causato..."
+                      rows={2}
+                      disabled={incidentChatLoading}
+                      style={{ flex: 1, fontSize: 12, padding: "8px 12px", borderRadius: 10, border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", resize: "none", outline: "none", fontFamily: "var(--font-inter, system-ui)", background: "#fff", lineHeight: 1.5, opacity: incidentChatLoading ? 0.5 : 1 }}
+                    />
+                    <button
+                      disabled={!incidentChatInput.trim() || incidentChatLoading}
+                      onClick={async () => {
+                        const text = incidentChatInput.trim();
+                        if (!text || incidentChatLoading) return;
+                        const userMsg: IncidentChatMessage = { role: "user", content: text };
+                        const newMsgs = [...incidentChatMessages, userMsg];
+                        setIncidentChatMessages(newMsgs);
+                        setIncidentChatInput("");
+                        setIncidentChatLoading(true);
+                        const { reply } = await incidentFormChat(newMsgs, {
+                          title: form.title, system: form.system, date: form.date,
+                          severity: form.severity, authority: form.authority,
+                          affectedUsers: form.affectedUsers, description: form.description,
+                          actions: form.actions,
+                        });
+                        setIncidentChatMessages([...newMsgs, { role: "assistant", content: reply || "Errore nella risposta AI — riprova." }]);
+                        setIncidentChatLoading(false);
+                      }}
+                      style={{ flexShrink: 0, width: 36, height: 36, background: (!incidentChatInput.trim() || incidentChatLoading) ? "rgba(0,0,0,0.06)" : "#0D1016", color: (!incidentChatInput.trim() || incidentChatLoading) ? "rgba(0,0,0,0.25)" : "#fff", border: "none", borderRadius: 9, cursor: (!incidentChatInput.trim() || incidentChatLoading) ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                    >
+                      <Send size={13} />
+                    </button>
+                  </div>
+                  <p style={{ fontSize: 9, color: "rgba(0,0,0,0.25)", marginTop: 5 }}>Enter per inviare · Shift+Enter per andare a capo</p>
+                </div>
+              </div>
+            ) : !selected ? (
               <div
                 className="rounded-xl p-6 text-center"
                 style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#fff" }}
