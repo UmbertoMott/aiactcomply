@@ -121,6 +121,7 @@ export default function Art50KitPage() {
   const [pendingProposals, setPendingProposals] = useState<Record<string, { contentType: ContentType; suggestedMethod: LabellingMethod; rationale: string; exemptionId?: string; exemptionJustification?: string }[]>>({});
 
   const [toast, setToast] = useState<string | null>(null);
+  const [selfBannerDismissed, setSelfBannerDismissed] = useState(false);
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(null), 3000); }
 
@@ -780,16 +781,25 @@ export default function Art50KitPage() {
             <h3 className="text-[12px] font-semibold mb-3" style={{ color: T.text }}>
               Art. 50(1)/(5) — Disclosure interazione con IA [verify against current AI Act text]
             </h3>
-            <div className="rounded-xl p-4 mb-4" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-              <div className="flex items-start gap-2">
-                <Info size={13} className="mt-0.5 flex-shrink-0" style={{ color: T.amber }} />
-                <p className="text-[11px] leading-relaxed" style={{ color: T.text }}>
-                  Art. 50(1) richiede che le interfacce conversazionali identifichino il sistema AI al primo contatto, in modo chiaro e distinguibile (Art. 50(5)).
-                  Il badge ✦ AI sui singoli campi è necessario ma non sufficiente per le interfacce chat — serve un banner/header persistente.
-                  [verify against current AI Act text]
-                </p>
+            {!selfBannerDismissed && (
+              <div className="rounded-xl p-4 mb-4 relative" style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.09)" }}>
+                <button
+                  onClick={() => setSelfBannerDismissed(true)}
+                  style={{ position: "absolute", top: 10, right: 10, background: "none", border: "none", cursor: "pointer", color: "rgba(0,0,0,0.28)", padding: 2, display: "flex", alignItems: "center", justifyContent: "center" }}
+                  aria-label="Chiudi"
+                >
+                  <X size={13} />
+                </button>
+                <div className="flex items-start gap-2 pr-5">
+                  <Info size={13} className="mt-0.5 flex-shrink-0" style={{ color: "rgba(0,0,0,0.38)" }} />
+                  <p className="text-[11px] leading-relaxed" style={{ color: T.muted }}>
+                    Art. 50(1) richiede che le interfacce conversazionali identifichino il sistema AI al primo contatto, in modo chiaro e distinguibile (Art. 50(5)).
+                    Il badge ✦ AI sui singoli campi è necessario ma non sufficiente per le interfacce chat — serve un banner/header persistente.
+                    [verify against current AI Act text]
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
             <div className="space-y-2">
               {selfItems.filter(i => i.obligationId === "direct_interaction_disclosure").map(item => (
                 <SelfComplianceCard key={item.id} item={item} onUpdate={updateSelfItem} />
@@ -833,7 +843,7 @@ export default function Art50KitPage() {
 function SelfComplianceCard({ item, onUpdate }: { item: SelfComplianceItem; onUpdate: (id: string, patch: Partial<SelfComplianceItem>) => void }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="rounded-xl border" style={{ background: "#fff", borderColor: item.status === "compliant" ? "#86efac" : item.status === "gap" ? "#fca5a5" : "#e5e7eb" }}>
+    <div className="rounded-xl border" style={{ background: "#fff", borderColor: "rgba(0,0,0,0.08)" }}>
       <button className="w-full flex items-center gap-3 p-3 text-left" onClick={() => setOpen(v => !v)}>
         <div className="flex-shrink-0">
           {item.status === "compliant" ? <CheckCircle size={14} style={{ color: "#15803d" }} /> :
@@ -852,8 +862,8 @@ function SelfComplianceCard({ item, onUpdate }: { item: SelfComplianceItem; onUp
       {open && (
         <div className="px-3 pb-3 border-t" style={{ borderColor: "#f3f4f6" }}>
           {item.remediationNotes && !item.evidence && (
-            <div className="mt-2 rounded-lg p-2.5 mb-2" style={{ background: "#fef9c3", border: "1px solid #fde047" }}>
-              <p className="text-[11px] leading-relaxed" style={{ color: "#713f12" }}>{item.remediationNotes}</p>
+            <div className="mt-2 rounded-lg p-2.5 mb-2" style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.08)" }}>
+              <p className="text-[11px] leading-relaxed" style={{ color: "rgba(0,0,0,0.55)" }}>{item.remediationNotes}</p>
             </div>
           )}
           <div className="mt-2 mb-2">

@@ -54,7 +54,7 @@ function ShapBar({ value, max }: { value: number; max: number }) {
             <motion.div className="h-full rounded-r"
               initial={{ width: 0 }} animate={{ width: `${pct * 100}%` }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              style={{ background: "#3b82f6" }} />
+              style={{ background: "#0D1016" }} />
           )}
         </div>
       </div>
@@ -65,7 +65,7 @@ function ShapBar({ value, max }: { value: number; max: number }) {
 // ─── Confidence gauge ─────────────────────────────────────────────────────────
 function ConfidenceGauge({ value, uncertain }: { value: number; uncertain: boolean }) {
   const pct = value * 100;
-  const color = uncertain ? "#ca8a04" : value > 0.8 ? "#16a34a" : value > 0.65 ? "#3b82f6" : "#ca8a04";
+  const color = uncertain ? "#ca8a04" : value > 0.8 ? "#16a34a" : value > 0.65 ? "#0D1016" : "#ca8a04";
   return (
     <div>
       <div className="flex justify-between mb-1">
@@ -96,7 +96,7 @@ function DecisionCard({ dec, active, onClick }: { dec: DecisionExplanation; acti
   const c = colors[dec.output];
   return (
     <button onClick={onClick} className="w-full text-left rounded-xl p-3.5 transition-all"
-      style={{ ...card, border: active ? "1px solid rgba(59,130,246,0.3)" : "1px solid rgba(0,0,0,0.07)", background: active ? "rgba(59,130,246,0.03)" : "#fff" }}>
+      style={{ ...card, border: active ? "1px solid rgba(13,16,22,0.25)" : "1px solid rgba(0,0,0,0.07)", background: active ? "rgba(13,16,22,0.04)" : "#fff" }}>
       <div className="flex items-start justify-between mb-1.5">
         <span className="text-[11px] font-medium" style={{ color: "#0D1016" }}>{dec.inferenceId}</span>
         <span className="text-[10px] px-2 py-0.5 rounded font-semibold"
@@ -154,7 +154,7 @@ function ExplainView({ dec, confirmed, onConfirm }: {
 
         <button onClick={() => setExpanded(!expanded)}
           className="flex items-center gap-1 mt-3 text-[11px] transition-opacity hover:opacity-70"
-          style={{ color: "#3b82f6" }}>
+          style={{ color: "rgba(0,0,0,0.45)" }}>
           {expanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
           {expanded ? "Nascondi dettagli tecnici" : "Espandi per auditor"}
         </button>
@@ -181,7 +181,7 @@ function ExplainView({ dec, confirmed, onConfirm }: {
           </p>
           <div className="flex items-center gap-3 text-[9px]" style={{ color: "rgba(0,0,0,0.35)" }}>
             <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-red-400 inline-block" />Negativo</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-blue-400 inline-block" />Positivo</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm inline-block" style={{ background: "#0D1016" }} />Positivo</span>
           </div>
         </div>
 
@@ -199,7 +199,7 @@ function ExplainView({ dec, confirmed, onConfirm }: {
                   )}
                 </div>
                 <span className="text-[10px] font-mono font-semibold"
-                  style={{ color: f.direction === "positive" ? "#3b82f6" : f.direction === "negative" ? "#dc2626" : "rgba(0,0,0,0.4)" }}>
+                  style={{ color: f.direction === "positive" ? "#0D1016" : f.direction === "negative" ? "#dc2626" : "rgba(0,0,0,0.4)" }}>
                   {f.shapValue >= 0 ? "+" : ""}{f.shapValue.toFixed(3)}
                 </span>
               </div>
@@ -334,7 +334,7 @@ function NutritionView({ onDownload }: { onDownload: () => void }) {
           </p>
           {nl.inputRequirements.map((r) => (
             <div key={r} className="flex items-start gap-2 mb-2">
-              <CheckCircle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" style={{ color: "#3b82f6" }} />
+              <CheckCircle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" style={{ color: "#0D1016" }} />
               <span className="text-[11px]" style={{ color: "#0D1016" }}>{r}</span>
             </div>
           ))}
@@ -689,10 +689,10 @@ export default function TransparencyPage() {
 
       {/* AG Part 4 — Art. 13 Notice Evaluator */}
       {(classifierData?.riskLevel === "high" || classifierData?.riskLevel === "High") && Object.keys(art13Fields).length > 1 && (
-        <div style={{ marginTop: 20, padding: 18, borderRadius: 10, border: "1px solid rgba(37,99,235,0.2)", background: "rgba(37,99,235,0.03)" }}>
+        <div style={{ marginTop: 20, padding: 18, borderRadius: 10, border: "1px solid rgba(0,0,0,0.09)", background: "rgba(0,0,0,0.02)" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <FileSearch size={15} style={{ color: "#2563eb" }} />
+              <FileSearch size={15} style={{ color: "rgba(0,0,0,0.4)" }} />
               <span style={{ fontSize: 13, fontWeight: 600, color: "#0D1016" }}>✦ Valuta conformità Art. 13 — Notice Analyzer</span>
             </div>
             <button
@@ -708,7 +708,7 @@ export default function TransparencyPage() {
               }}
               style={{
                 padding: "7px 14px", borderRadius: 8, fontSize: 12, fontWeight: 600,
-                background: noticeLoading ? "rgba(0,0,0,0.07)" : "#2563eb",
+                background: noticeLoading ? "rgba(0,0,0,0.07)" : "#0D1016",
                 color: noticeLoading ? "rgba(0,0,0,0.4)" : "#fff",
                 border: "none", cursor: noticeLoading ? "not-allowed" : "pointer",
               }}
