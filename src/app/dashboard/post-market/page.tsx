@@ -1255,12 +1255,12 @@ function PostMarketPageInner() {
           </div>
 
           {/* Right: AI chat (during form) or incident detail */}
-          <div className="lg:col-span-1 space-y-4">
+          <div className="lg:col-span-1 space-y-4" style={showForm ? { position: "sticky", top: 16, alignSelf: "flex-start" } : {}}>
             {showForm ? (
               /* ── Incident form AI chat ── */
               <div
                 className="rounded-xl overflow-hidden flex flex-col"
-                style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#fff", height: "calc(100vh - 280px)", minHeight: 400 }}
+                style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#fff", height: "calc(100vh - 140px)" }}
               >
                 {/* Header */}
                 <div style={{ padding: "10px 16px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "#fafafa", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
