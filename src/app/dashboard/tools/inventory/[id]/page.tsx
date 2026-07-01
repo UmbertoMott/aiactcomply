@@ -543,6 +543,19 @@ export default function SystemDetailPage() {
             </div>
           ))}
         </div>
+
+        {/* Classify CTA */}
+        <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", justifyContent: "flex-end" }}>
+          <Link href={`/dashboard/tools/inventory/${system.id}/classify`} style={{
+            fontSize: 12, fontWeight: 600, padding: "7px 18px", borderRadius: 8,
+            background: system.tier === "unclassified" ? T.text : "rgba(0,0,0,0.06)",
+            color: system.tier === "unclassified" ? "white" : "#374151",
+            border: `1px solid ${system.tier === "unclassified" ? T.text : "rgba(0,0,0,0.1)"}`,
+            textDecoration: "none", display: "inline-block",
+          }}>
+            {system.tier === "unclassified" ? "Classifica sistema →" : "Riclassifica →"}
+          </Link>
+        </div>
       </div>
 
       {/* ── Filter tabs ── */}

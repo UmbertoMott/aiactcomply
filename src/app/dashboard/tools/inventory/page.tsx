@@ -1,5 +1,6 @@
 "use client"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import React, { useRef, useEffect, useCallback } from "react"
 import { Bot, ScanSearch, PenLine, FileDown, Send } from "lucide-react"
 import { classifyChat, type ChatMessage as ClassifyChatMsg } from "@/app/actions/classifyChat"
@@ -1249,11 +1250,11 @@ Chatbot Supporto Clienti,Customer Care,Assistente virtuale basato su GPT-4 per i
 // ─── InventoryPage (root export) ──────────────────────────────────────────────
 export default function InventoryPage() {
   const [systems, setSystems] = React.useState<AISystem[]>([])
+  const router = useRouter()
   const [filterTier, setFilterTier] = React.useState<SystemTier | "all">("all")
   const [modal, setModal] = React.useState<
     | { type: "add"; initialStep?: AddStep }
     | { type: "edit"; system: AISystem }
-    | { type: "classify"; system: AISystem }
     | { type: "import" }
     | null
   >(null)
@@ -1359,7 +1360,7 @@ export default function InventoryPage() {
               key={system.id}
               system={system}
               onEdit={() => setModal({ type: "edit", system })}
-              onClassify={() => setModal({ type: "classify", system })}
+              onClassify={() => router.push(`/dashboard/tools/inventory/${system.id}/classify`)}
               onDelete={() => { deleteSystem(system.id); refresh() }}
             />
           ))}
@@ -1372,9 +1373,6 @@ export default function InventoryPage() {
       )}
       {modal?.type === "edit" && (
         <EditSystemModal system={modal.system} onClose={() => setModal(null)} onSave={() => { refresh(); setModal(null) }} />
-      )}
-      {modal?.type === "classify" && (
-        <ClassifyModal system={modal.system} onClose={() => setModal(null)} onSave={() => { refresh(); setModal(null) }} />
       )}
       {modal?.type === "import" && (
         <ImportCsvModal onClose={() => setModal(null)} onSave={() => { refresh(); setModal(null) }} />
