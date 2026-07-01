@@ -1,7 +1,8 @@
 "use client"
 import Link from "next/link"
-import React from "react"
-import { Bot, ScanSearch, PenLine, FileDown } from "lucide-react"
+import React, { useRef, useEffect, useCallback } from "react"
+import { Bot, ScanSearch, PenLine, FileDown, Send } from "lucide-react"
+import { classifyChat, type ChatMessage as ClassifyChatMsg } from "@/app/actions/classifyChat"
 import {
   loadInventory, addSystem, updateSystem, deleteSystem,
   nextSystemId, computeObligationCount,
@@ -814,17 +815,59 @@ function EditSystemModal({ system, onClose, onSave }: {
 function ClassifyModal({ system, onClose, onSave }: {
   system: AISystem; onClose: () => void; onSave: () => void
 }) {
+  // Form state — valori vuoti all'apertura (placeholder guida l'utente)
   const [role, setRole] = React.useState(system.role ?? "")
-  const [roleBasis, setRoleBasis] = React.useState(system.roleBasis)
+  const [roleBasis, setRoleBasis] = React.useState("")
   const [tier, setTier] = React.useState(system.tier)
-  const [tierBasis, setTierBasis] = React.useState(system.tierBasis)
+  const [tierBasis, setTierBasis] = React.useState("")
   const [dualRoleFlag, setDualRoleFlag] = React.useState(system.dualRoleFlag)
-  const [obligationsNote, setObligationsNote] = React.useState(system.obligationsNote)
+  const [obligationsNote, setObligationsNote] = React.useState("")
   const [showTierGuide, setShowTierGuide] = React.useState(true)
   const [showRoleGuide, setShowRoleGuide] = React.useState(false)
 
+  // Chat AI state
+  const initMsg: ClassifyChatMsg = {
+    role: "assistant",
+    content: `Ciao! Sono qui per aiutarti a classificare correttamente "${system.name}" ai sensi dell'EU AI Act.\n\nPer iniziare: puoi descrivermi cosa fa questo sistema AI e in quale contesto viene utilizzato?`,
+  }
+  const [chatMessages, setChatMessages] = React.useState<ClassifyChatMsg[]>([initMsg])
+  const [chatInput, setChatInput] = React.useState("")
+  const [chatLoading, setChatLoading] = React.useState(false)
+  const chatEndRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [chatMessages])
+
   const tierCfg = TIER_CONFIG[tier as SystemTier] ?? TIER_CONFIG.unclassified
   const roleGuide = role ? ROLE_GUIDE[role] : null
+
+  const sendChat = useCallback(async () => {
+    const text = chatInput.trim()
+    if (!text || chatLoading) return
+    const userMsg: ClassifyChatMsg = { role: "user", content: text }
+    const updated = [...chatMessages, userMsg]
+    setChatMessages(updated)
+    setChatInput("")
+    setChatLoading(true)
+    const result = await classifyChat(updated, system.name)
+    setChatLoading(false)
+    if (result.error) {
+      setChatMessages([...updated, { role: "assistant", content: result.error }])
+      return
+    }
+    const aiMsg: ClassifyChatMsg = { role: "assistant", content: result.reply ?? "" }
+    setChatMessages([...updated, aiMsg])
+    // Auto-applica suggerimento dal campo <suggest>
+    if (result.suggestion) {
+      const s = result.suggestion
+      if (s.tier && TIER_CONFIG[s.tier as SystemTier]) setTier(s.tier as SystemTier)
+      if (s.role) setRole(s.role)
+      if (s.roleBasis) setRoleBasis(s.roleBasis)
+      if (s.tierBasis) setTierBasis(s.tierBasis)
+      if (s.obligationsNote) setObligationsNote(s.obligationsNote)
+    }
+  }, [chatInput, chatLoading, chatMessages, system.name])
 
   function handleSave() {
     updateSystem(system.id, {
@@ -844,175 +887,236 @@ function ClassifyModal({ system, onClose, onSave }: {
     : true
 
   return (
-    <ModalShell title={`Classifica — ${system.name}`} subtitle="Seleziona ruolo e tier di rischio EU AI Act. Tutti i campi sono sotto tua responsabilità." onClose={onClose}>
-      {/* Banner guardrail */}
-      <div style={{ padding: "10px 14px", borderRadius: 8, marginBottom: 20, background: "rgba(13,16,22,0.04)", border: "1px solid rgba(13,16,22,0.12)" }}>
-        <p style={{ fontSize: 12, color: "#0D1016", margin: 0, lineHeight: 1.55 }}>
-          <strong>Attenzione:</strong> La classificazione è una responsabilità legale tua, non dell'AI. Devi indicare quale articolo dell'EU AI Act giustifica la tua scelta — questo ti protegge in caso di audit o ispezione.
-        </p>
-      </div>
-
-      {/* Tier selector visivo */}
-      <div style={{ marginBottom: 12 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-          <FieldLabel label="Tier di rischio EU AI Act *" showAi={false} />
-          <button
-            onClick={() => setShowTierGuide(v => !v)}
-            style={{ fontSize: 11, color: "#6b7280", background: "none", border: "none", cursor: "pointer", padding: "2px 6px", borderRadius: 4, textDecoration: "underline" }}
-          >
-            {showTierGuide ? "Nascondi guida" : "Mostra guida"}
-          </button>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 8 }}>
-          {(Object.entries(TIER_CONFIG) as [SystemTier, TierCfg][]).map(([key, cfg]) => (
-            <button
-              key={key}
-              onClick={() => { setTier(key); setShowTierGuide(true); }}
-              style={{
-                padding: "10px 8px", borderRadius: 8, cursor: "pointer", textAlign: "center",
-                border: `2px solid ${tier === key ? cfg.border : "rgba(0,0,0,0.08)"}`,
-                background: tier === key ? cfg.bg : "white",
-                transition: "all 0.1s",
-              }}
-            >
-              <div style={{ width: 8, height: 8, borderRadius: "50%", background: cfg.dot, margin: "0 auto 6px" }} />
-              <p style={{ fontSize: 11, fontWeight: 700, color: tier === key ? cfg.text : "#6b7280", margin: 0 }}>{cfg.label}</p>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Guida tier contestuale */}
-      {showTierGuide && (
-        <div style={{
-          marginBottom: 20, padding: "14px 16px", borderRadius: 10,
-          background: `${tierCfg.bg}`, border: `1px solid ${tierCfg.border}`,
-        }}>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 8 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: tierCfg.text }}>{tierCfg.label}</span>
-            <span style={{ fontSize: 10, color: "#9ca3af", fontFamily: "monospace" }}>{tierCfg.article}</span>
-          </div>
-          <p style={{ fontSize: 12, color: "#374151", margin: "0 0 10px", lineHeight: 1.55 }}>
-            {tierCfg.what}
-          </p>
-          <div style={{ marginBottom: 10 }}>
-            <p style={{ fontSize: 10, fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 5px" }}>Esempi tipici</p>
-            <ul style={{ margin: 0, paddingLeft: 18, display: "flex", flexDirection: "column", gap: 3 }}>
-              {tierCfg.examples.map((ex, i) => (
-                <li key={i} style={{ fontSize: 12, color: "#374151", lineHeight: 1.45 }}>{ex}</li>
-              ))}
-            </ul>
-          </div>
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center",
+      background: "rgba(0,0,0,0.45)", padding: 16,
+    }}>
+      <div style={{
+        background: "white", borderRadius: 16, width: "min(95vw, 1060px)", maxHeight: "90vh",
+        display: "flex", flexDirection: "column", overflow: "hidden",
+        boxShadow: "0 20px 60px rgba(0,0,0,0.18)",
+      }}>
+        {/* Header */}
+        <div style={{ padding: "18px 24px 14px", borderBottom: "1px solid rgba(0,0,0,0.08)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexShrink: 0 }}>
           <div>
-            <p style={{ fontSize: 10, fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 5px" }}>Obblighi principali</p>
-            <ul style={{ margin: 0, paddingLeft: 18, display: "flex", flexDirection: "column", gap: 3 }}>
-              {tierCfg.obligations.map((ob, i) => (
-                <li key={i} style={{ fontSize: 12, color: "#374151", lineHeight: 1.45 }}>{ob}</li>
-              ))}
-            </ul>
+            <h2 style={{ fontSize: 17, fontWeight: 700, color: "#0D1016", margin: 0 }}>Classifica — {system.name}</h2>
+            <p style={{ fontSize: 12, color: "#6b7280", margin: "3px 0 0" }}>Seleziona ruolo e tier di rischio EU AI Act. Tutti i campi sono sotto tua responsabilità.</p>
           </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", padding: 4, marginTop: 2 }}>✕</button>
         </div>
-      )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <FieldLabel label="Ruolo (Art. 2)" showAi={false} />
-            {role && (
-              <button
-                onClick={() => setShowRoleGuide(v => !v)}
-                style={{ fontSize: 10, color: "#6b7280", background: "none", border: "none", cursor: "pointer", padding: "1px 4px", textDecoration: "underline", marginBottom: 6 }}
-              >
-                {showRoleGuide ? "Nascondi" : "Cos'è?"}
-              </button>
-            )}
-          </div>
-          <select value={role} onChange={e => { setRole(e.target.value); setShowRoleGuide(true); }} style={INPUT_STYLE}>
-            <option value="">Da definire</option>
-            <option value="provider">Provider</option>
-            <option value="deployer">Deployer</option>
-            <option value="importer">Importatore</option>
-            <option value="distributor">Distributore</option>
-            <option value="authorized_rep">Rappresentante autorizzato</option>
-            <option value="product_manufacturer">Produttore prodotto</option>
-          </select>
-          {showRoleGuide && roleGuide && (
-            <div style={{ marginTop: 8, padding: "10px 12px", background: "rgba(0,0,0,0.03)", borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)" }}>
-              <p style={{ fontSize: 10, fontWeight: 700, color: "#6b7280", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.04em" }}>{roleGuide.article}</p>
-              <p style={{ fontSize: 12, color: "#374151", margin: "0 0 5px", lineHeight: 1.5 }}>{roleGuide.what}</p>
-              <p style={{ fontSize: 11, color: "#6b7280", margin: 0, fontStyle: "italic", lineHeight: 1.4 }}>{roleGuide.example}</p>
+        {/* Body — split layout */}
+        <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+
+          {/* ─── SINISTRA: form ─────────────────────────────────────── */}
+          <div style={{ flex: "0 0 56%", overflowY: "auto", padding: "18px 20px", borderRight: "1px solid rgba(0,0,0,0.06)" }}>
+
+            {/* Banner */}
+            <div style={{ padding: "10px 14px", borderRadius: 8, marginBottom: 16, background: "rgba(13,16,22,0.04)", border: "1px solid rgba(13,16,22,0.10)" }}>
+              <p style={{ fontSize: 12, color: "#0D1016", margin: 0, lineHeight: 1.55 }}>
+                <strong>Attenzione:</strong> La classificazione è una responsabilità legale tua, non dell'AI. Indica l'articolo EU AI Act che giustifica la tua scelta — ti protegge in caso di audit.
+              </p>
             </div>
-          )}
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", paddingBottom: 4 }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 10, paddingTop: 22 }}>
-            <input type="checkbox" id="dualRoleClassify" checked={dualRoleFlag} onChange={e => setDualRoleFlag(e.target.checked)} style={{ width: 16, height: 16, marginTop: 1, flexShrink: 0 }} />
-            <div>
-              <label htmlFor="dualRoleClassify" style={{ fontSize: 13, color: "#374151", cursor: "pointer" }}>Dual-role (Art. 25)</label>
-              <p style={{ fontSize: 11, color: "#9ca3af", margin: "2px 0 0", lineHeight: 1.4 }}>
-                L'organizzazione ha due ruoli sullo stesso sistema — es. ha sviluppato il modello (provider) ma lo usa anche internamente (deployer).
+
+            {/* Tier buttons */}
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 7 }}>
+                <FieldLabel label="Tier di rischio EU AI Act *" showAi={false} />
+                <button onClick={() => setShowTierGuide(v => !v)} style={{ fontSize: 11, color: "#6b7280", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
+                  {showTierGuide ? "Nascondi guida" : "Mostra guida"}
+                </button>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(115px, 1fr))", gap: 6 }}>
+                {(Object.entries(TIER_CONFIG) as [SystemTier, TierCfg][]).map(([key, cfg]) => (
+                  <button key={key} onClick={() => { setTier(key); setShowTierGuide(true); }}
+                    style={{ padding: "8px 6px", borderRadius: 7, cursor: "pointer", textAlign: "center", border: `2px solid ${tier === key ? cfg.border : "rgba(0,0,0,0.08)"}`, background: tier === key ? cfg.bg : "white", transition: "all 0.1s" }}>
+                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: cfg.dot, margin: "0 auto 5px" }} />
+                    <p style={{ fontSize: 10, fontWeight: 700, color: tier === key ? cfg.text : "#6b7280", margin: 0 }}>{cfg.label}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Guida tier */}
+            {showTierGuide && (
+              <div style={{ marginBottom: 14, padding: "12px 14px", borderRadius: 9, background: tierCfg.bg, border: `1px solid ${tierCfg.border}` }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 7, marginBottom: 6 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: tierCfg.text }}>{tierCfg.label}</span>
+                  <span style={{ fontSize: 9, color: "#9ca3af", fontFamily: "monospace" }}>{tierCfg.article}</span>
+                </div>
+                <p style={{ fontSize: 11.5, color: "#374151", margin: "0 0 8px", lineHeight: 1.5 }}>{tierCfg.what}</p>
+                <p style={{ fontSize: 9.5, fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 4px" }}>Esempi tipici</p>
+                <ul style={{ margin: "0 0 8px", paddingLeft: 16, display: "flex", flexDirection: "column", gap: 2 }}>
+                  {tierCfg.examples.map((ex, i) => <li key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.4 }}>{ex}</li>)}
+                </ul>
+                <p style={{ fontSize: 9.5, fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 4px" }}>Obblighi principali</p>
+                <ul style={{ margin: 0, paddingLeft: 16, display: "flex", flexDirection: "column", gap: 2 }}>
+                  {tierCfg.obligations.map((ob, i) => <li key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.4 }}>{ob}</li>)}
+                </ul>
+              </div>
+            )}
+
+            {/* Ruolo */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <FieldLabel label="Ruolo (Art. 2)" showAi={false} />
+                  {role && <button onClick={() => setShowRoleGuide(v => !v)} style={{ fontSize: 10, color: "#6b7280", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", marginBottom: 6 }}>{showRoleGuide ? "Nascondi" : "Cos'è?"}</button>}
+                </div>
+                <select value={role} onChange={e => { setRole(e.target.value); setShowRoleGuide(true); }} style={INPUT_STYLE}>
+                  <option value="">Da definire</option>
+                  <option value="provider">Provider</option>
+                  <option value="deployer">Deployer</option>
+                  <option value="importer">Importatore</option>
+                  <option value="distributor">Distributore</option>
+                  <option value="authorized_rep">Rappresentante autorizzato</option>
+                  <option value="product_manufacturer">Produttore prodotto</option>
+                </select>
+                {showRoleGuide && roleGuide && (
+                  <div style={{ marginTop: 7, padding: "9px 11px", background: "rgba(0,0,0,0.03)", borderRadius: 7, border: "1px solid rgba(0,0,0,0.07)" }}>
+                    <p style={{ fontSize: 9.5, fontWeight: 700, color: "#6b7280", margin: "0 0 3px", textTransform: "uppercase", letterSpacing: "0.04em" }}>{roleGuide.article}</p>
+                    <p style={{ fontSize: 11.5, color: "#374151", margin: "0 0 4px", lineHeight: 1.45 }}>{roleGuide.what}</p>
+                    <p style={{ fontSize: 11, color: "#6b7280", margin: 0, fontStyle: "italic", lineHeight: 1.35 }}>{roleGuide.example}</p>
+                  </div>
+                )}
+              </div>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 9, paddingTop: 26 }}>
+                <input type="checkbox" id="dualRoleClassify" checked={dualRoleFlag} onChange={e => setDualRoleFlag(e.target.checked)} style={{ width: 15, height: 15, marginTop: 2, flexShrink: 0 }} />
+                <div>
+                  <label htmlFor="dualRoleClassify" style={{ fontSize: 12.5, color: "#374151", cursor: "pointer" }}>Dual-role (Art. 25)</label>
+                  <p style={{ fontSize: 10.5, color: "#9ca3af", margin: "2px 0 0", lineHeight: 1.4 }}>Sviluppatore del modello e allo stesso tempo utente interno del sistema.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Campi testo con PLACEHOLDER (non precompilati) */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div>
+                <FieldLabel label="Base ruolo — articolo di riferimento [verify] *" showAi={false} />
+                <input
+                  value={roleBasis}
+                  onChange={e => setRoleBasis(e.target.value)}
+                  style={INPUT_STYLE}
+                  placeholder="Es. Art. 3(4) — usiamo un sistema AI sviluppato da un fornitore terzo in contesto professionale HR [verify against current AI Act text]"
+                />
+              </div>
+              <div>
+                <FieldLabel label="Base classificazione tier — articolo o Annex entry [verify] *" showAi={false} />
+                <input
+                  value={tierBasis}
+                  onChange={e => setTierBasis(e.target.value)}
+                  style={{ ...INPUT_STYLE, borderColor: tier !== "unclassified" && tierBasis.trim().length > 0 && !tierBasis.includes("[verify") ? "#dc2626" : "rgba(0,0,0,0.12)" }}
+                  placeholder="Es. Allegato III(4)(a) — sistema di pre-selezione CV, ambito occupazione [verify against current AI Act text]"
+                />
+                {tier !== "unclassified" && tierBasis.trim().length > 0 && !tierBasis.includes("[verify") && (
+                  <p style={{ fontSize: 11, color: "#dc2626", margin: "3px 0 0" }}>Il campo deve contenere "[verify against current AI Act text]" per confermare consapevolezza normativa.</p>
+                )}
+              </div>
+              <div>
+                <FieldLabel label="Note obblighi applicabili [verify]" showAi={false} />
+                <textarea
+                  value={obligationsNote}
+                  onChange={e => setObligationsNote(e.target.value)}
+                  rows={3}
+                  style={{ ...INPUT_STYLE, resize: "vertical", fontFamily: "inherit" }}
+                  placeholder="Es. Documentazione tecnica (Art. 11), supervisione umana obbligatoria (Art. 14), registrazione EU DB (Art. 49) [verify against current AI Act text]"
+                />
+                {tier !== "unclassified" && !obligationsNote.trim() && (
+                  <button onClick={() => setObligationsNote(tierCfg.obligations.join("\n"))}
+                    style={{ marginTop: 4, fontSize: 11, color: "#6b7280", background: "none", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 5, padding: "3px 10px", cursor: "pointer" }}>
+                    Compila dalla guida tier
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 18, gap: 8 }}>
+              <button onClick={onClose} style={{ padding: "8px 14px", borderRadius: 8, fontSize: 13, border: "1px solid rgba(0,0,0,0.12)", background: "white", color: "#374151", cursor: "pointer" }}>Annulla</button>
+              <button onClick={handleSave} disabled={!canSave}
+                style={{ padding: "8px 18px", borderRadius: 8, border: "none", background: canSave ? "#111" : "#e5e7eb", color: canSave ? "white" : "#9ca3af", fontSize: 13, fontWeight: 600, cursor: canSave ? "pointer" : "default" }}>
+                Conferma classificazione
+              </button>
+            </div>
+          </div>
+
+          {/* ─── DESTRA: chat AI ────────────────────────────────────── */}
+          <div style={{ flex: "0 0 44%", display: "flex", flexDirection: "column", background: "#f9f9f8" }}>
+            {/* Chat header */}
+            <div style={{ padding: "12px 16px 10px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "white", flexShrink: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a" }} />
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#0D1016" }}>Assistente Classificazione AI Act</span>
+              </div>
+              <p style={{ fontSize: 10.5, color: "#9ca3af", margin: "2px 0 0" }}>Guidato su Art. 3, 5, 6, 50, 51-55, 69 e Allegato III</p>
+            </div>
+
+            {/* Messaggi */}
+            <div style={{ flex: 1, overflowY: "auto", padding: "12px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
+              {chatMessages.map((msg, i) => (
+                <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}>
+                  <div style={{
+                    maxWidth: "86%", padding: "9px 13px", borderRadius: msg.role === "user" ? "14px 14px 3px 14px" : "14px 14px 14px 3px",
+                    background: msg.role === "user" ? "#0D1016" : "white",
+                    border: msg.role === "assistant" ? "1px solid rgba(0,0,0,0.08)" : "none",
+                    fontSize: 12, color: msg.role === "user" ? "#fff" : "#374151", lineHeight: 1.55, whiteSpace: "pre-wrap",
+                  }}>
+                    {msg.content}
+                  </div>
+                </div>
+              ))}
+              {chatLoading && (
+                <div style={{ display: "flex" }}>
+                  <div style={{ padding: "9px 13px", borderRadius: "14px 14px 14px 3px", background: "white", border: "1px solid rgba(0,0,0,0.08)" }}>
+                    <span style={{ fontSize: 18, letterSpacing: 2, color: "#9ca3af" }}>···</span>
+                  </div>
+                </div>
+              )}
+              <div ref={chatEndRef} />
+            </div>
+
+            {/* Input chat */}
+            <div style={{ padding: "10px 14px", borderTop: "1px solid rgba(0,0,0,0.07)", background: "white", flexShrink: 0 }}>
+              {/* Suggerimento quick reply */}
+              {chatMessages.length <= 1 && (
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
+                  {[
+                    "È un chatbot di assistenza clienti",
+                    "Usa GPT-4 per analizzare i CV",
+                    "Sistema di scoring del credito",
+                    "Ottimizzazione logistica interna",
+                  ].map(q => (
+                    <button key={q} onClick={() => setChatInput(q)}
+                      style={{ fontSize: 10.5, padding: "4px 10px", borderRadius: 12, border: "1px solid rgba(0,0,0,0.1)", background: "rgba(0,0,0,0.03)", color: "#374151", cursor: "pointer" }}>
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+                <textarea
+                  value={chatInput}
+                  onChange={e => setChatInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } }}
+                  placeholder="Descrivi il sistema AI o fai una domanda…"
+                  rows={2}
+                  style={{ flex: 1, resize: "none", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 9, padding: "8px 11px", fontSize: 12, color: "#0D1016", background: "#f9f9f8", outline: "none", lineHeight: 1.5, fontFamily: "inherit" }}
+                />
+                <button
+                  onClick={sendChat}
+                  disabled={!chatInput.trim() || chatLoading}
+                  style={{ width: 34, height: 34, borderRadius: 9, border: "none", background: chatInput.trim() && !chatLoading ? "#0D1016" : "rgba(0,0,0,0.08)", color: chatInput.trim() && !chatLoading ? "#fff" : "rgba(0,0,0,0.28)", cursor: chatInput.trim() && !chatLoading ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Send size={13} />
+                </button>
+              </div>
+              <p style={{ fontSize: 9.5, color: "#9ca3af", margin: "5px 0 0", lineHeight: 1.4 }}>
+                Le risposte AI sono suggerimenti. Verifica sempre con fonti normative aggiornate.
               </p>
             </div>
           </div>
         </div>
-        <div style={{ gridColumn: "1 / -1" }}>
-          <FieldLabel label="Base ruolo — articolo di riferimento [verify] *" showAi={false} />
-          <input
-            value={roleBasis}
-            onChange={e => setRoleBasis(e.target.value)}
-            style={INPUT_STYLE}
-            placeholder="Es. Art. 3(3) — deployer: usa il sistema in contesto professionale [verify against current AI Act text]"
-          />
-        </div>
-        <div style={{ gridColumn: "1 / -1" }}>
-          <FieldLabel label="Base classificazione tier — articolo o Annex entry [verify] *" showAi={false} />
-          <input
-            value={tierBasis}
-            onChange={e => setTierBasis(e.target.value)}
-            style={{
-              ...INPUT_STYLE,
-              borderColor: tier !== "unclassified" && tierBasis.trim().length > 0 && !tierBasis.includes("[verify")
-                ? "#dc2626" : "rgba(0,0,0,0.12)",
-            }}
-            placeholder="Es. Annex III(4)(a) — employment, recruitment [verify against current AI Act text]"
-          />
-          {tier !== "unclassified" && tierBasis.trim().length > 0 && !tierBasis.includes("[verify") && (
-            <p style={{ fontSize: 11, color: "#dc2626", margin: "4px 0 0" }}>
-              Il campo deve contenere "[verify against current AI Act text]" per confermare consapevolezza normativa.
-            </p>
-          )}
-        </div>
-        <div style={{ gridColumn: "1 / -1" }}>
-          <FieldLabel label="Note obblighi applicabili [verify]" showAi={false} />
-          <textarea
-            value={obligationsNote}
-            onChange={e => setObligationsNote(e.target.value)}
-            rows={2}
-            style={{ ...INPUT_STYLE, resize: "vertical", fontFamily: "inherit" }}
-            placeholder="Descrivi i principali obblighi EU AI Act applicabili [verify against current AI Act text]"
-          />
-          {tier !== "unclassified" && !obligationsNote.trim() && tierCfg.obligations.length > 0 && (
-            <button
-              onClick={() => setObligationsNote(tierCfg.obligations.join("\n"))}
-              style={{ marginTop: 5, fontSize: 11, color: "#6b7280", background: "none", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 5, padding: "3px 10px", cursor: "pointer" }}
-            >
-              Compila dalla guida tier
-            </button>
-          )}
-        </div>
       </div>
-
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20, gap: 8 }}>
-        <button onClick={onClose} style={{ padding: "9px 16px", borderRadius: 8, fontSize: 13, border: "1px solid rgba(0,0,0,0.12)", background: "white", color: "#374151", cursor: "pointer" }}>Annulla</button>
-        <button
-          onClick={handleSave}
-          disabled={!canSave}
-          style={{ padding: "9px 20px", borderRadius: 8, border: "none", background: canSave ? "#111" : "#e5e7eb", color: canSave ? "white" : "#9ca3af", fontSize: 13, fontWeight: 600, cursor: canSave ? "pointer" : "default" }}
-        >
-          Conferma classificazione
-        </button>
-      </div>
-    </ModalShell>
+    </div>
   )
 }
 
