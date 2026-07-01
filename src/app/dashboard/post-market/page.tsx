@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   AlertTriangle,
@@ -44,7 +44,7 @@ import type {
 } from "@/lib/post-market/post-market-types";
 import { proposePMMPlan, draftPostMarketReport } from "@/app/actions/postMarketActions";
 import { incidentFormChat } from "@/app/actions/incidentFormChat";
-import type { IncidentChatMessage } from "@/app/actions/incidentFormChat";
+import type { IncidentChatMessage, IncidentFieldSuggestion } from "@/app/actions/incidentFormChat";
 import { Loader2 } from "lucide-react";
 import { loadInventory } from "@/lib/inventory/ai-system";
 import type { AISystem } from "@/lib/inventory/ai-system";
@@ -369,10 +369,15 @@ function PostMarketPageInner() {
 
   // Incident form AI chat
   const [incidentChatMessages, setIncidentChatMessages] = useState<IncidentChatMessage[]>([
-    { role: "assistant", content: "Ciao! Descrivi l'evento che vuoi segnalare e ti aiuto a capire se rientra nell'Art. 73, quale gravità assegnare e la scadenza di notifica." }
+    { role: "assistant", content: "Ciao! Sono qui per guidarti nella segnalazione.\n\nCominciamo dalla cosa più importante: cosa è successo esattamente? Descrivi in 2-3 frasi cosa ha fatto il sistema AI, quando e quale conseguenza ha causato." }
   ]);
   const [incidentChatInput, setIncidentChatInput] = useState("");
   const [incidentChatLoading, setIncidentChatLoading] = useState(false);
+  const [pendingSuggestion, setPendingSuggestion] = useState<IncidentFieldSuggestion | null>(null);
+  // Form–chat resizer
+  const formLayoutRef = useRef<HTMLDivElement>(null);
+  const [formChatWidth, setFormChatWidth] = useState(400);
+  const [isFormResizing, setIsFormResizing] = useState(false);
   // Plan: expanded rows
   const [expandedChecks, setExpandedChecks] = useState<Set<string>>(new Set());
 
@@ -670,6 +675,41 @@ function PostMarketPageInner() {
     showToastMsg("CSV esportato");
   }
 
+  // ── Form-chat resizer ─────────────────────────────────────────────────────
+
+  const startFormResize = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsFormResizing(true);
+    const startX = e.clientX;
+    const startW = formChatWidth;
+    const onMove = (ev: MouseEvent) => {
+      const totalW = formLayoutRef.current?.clientWidth ?? 1200;
+      const delta = startX - ev.clientX; // drag left = wider chat
+      setFormChatWidth(Math.min(Math.max(startW + delta, 300), totalW * 0.6));
+    };
+    const onUp = () => {
+      setIsFormResizing(false);
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+    };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  }, [formChatWidth]);
+
+  // ── Apply field suggestion from chat ──────────────────────────────────────
+
+  const applyFieldSuggestion = useCallback((s: IncidentFieldSuggestion) => {
+    setForm((f) => ({
+      ...f,
+      [s.field]: s.value,
+    }));
+    setPendingSuggestion(null);
+    setIncidentChatMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: `✓ Ho aggiornato il campo "${s.label}" con: "${s.value}".` },
+    ]);
+  }, []);
+
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
@@ -827,9 +867,15 @@ function PostMarketPageInner() {
 
       {/* ── TAB 1: Incidenti ── */}
       {tab === "incidents" && (
-        <div className="grid lg:grid-cols-3 gap-5">
+        <div
+          ref={formLayoutRef}
+          style={showForm
+            ? { display: "flex", gap: 0, alignItems: "flex-start" }
+            : { display: "grid", gridTemplateColumns: "2fr 1fr", gap: 20 }
+          }
+        >
           {/* Left: list + form */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="space-y-4" style={showForm ? { flex: 1, minWidth: 0 } : {}}>
             {/* Filters */}
             <div className="flex flex-wrap gap-3">
               <div className="flex gap-1.5">
@@ -1400,8 +1446,33 @@ function PostMarketPageInner() {
             </div>
           </div>
 
+          {/* Draggable divider (only during form) */}
+          {showForm && (
+            <div
+              onMouseDown={startFormResize}
+              style={{
+                width: 8, flexShrink: 0, cursor: "col-resize",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                margin: "0 4px",
+                borderRadius: 4,
+                background: isFormResizing ? "rgba(0,0,0,0.10)" : "transparent",
+                transition: isFormResizing ? "none" : "background 0.15s",
+              }}
+              onMouseEnter={e => { if (!isFormResizing) e.currentTarget.style.background = "rgba(0,0,0,0.07)"; }}
+              onMouseLeave={e => { if (!isFormResizing) e.currentTarget.style.background = "transparent"; }}
+            >
+              <div style={{ width: 2, height: 36, borderRadius: 1, background: "rgba(0,0,0,0.18)" }} />
+            </div>
+          )}
+
           {/* Right: AI chat (during form) or incident detail */}
-          <div className="lg:col-span-1 space-y-4" style={showForm ? { position: "sticky", top: 16, alignSelf: "flex-start" } : {}}>
+          <div
+            className="space-y-4"
+            style={showForm
+              ? { width: formChatWidth, flexShrink: 0, position: "sticky", top: 16, alignSelf: "flex-start" }
+              : {}
+            }
+          >
             {showForm ? (
               /* ── Incident form AI chat ── */
               <div
@@ -1422,7 +1493,7 @@ function PostMarketPageInner() {
                     return (
                       <div key={i} style={{ display: "flex", justifyContent: isUser ? "flex-end" : "flex-start", marginBottom: 10 }}>
                         <div style={{
-                          maxWidth: "88%",
+                          maxWidth: "90%",
                           borderRadius: isUser ? "14px 14px 4px 14px" : "14px 14px 14px 4px",
                           padding: "9px 13px",
                           fontSize: 12, lineHeight: 1.55,
@@ -1441,6 +1512,35 @@ function PostMarketPageInner() {
                       </div>
                     );
                   })}
+
+                  {/* Pending field suggestion chip */}
+                  {pendingSuggestion && !incidentChatLoading && (
+                    <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10 }}>
+                      <div style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.10)", borderRadius: 12, padding: "10px 14px", maxWidth: "90%" }}>
+                        <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.45)", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.07em" }}>
+                          Proposta per: {pendingSuggestion.label}
+                        </p>
+                        <p style={{ fontSize: 12, color: "#0D1016", margin: "0 0 10px", lineHeight: 1.5, fontStyle: "italic" }}>
+                          &ldquo;{pendingSuggestion.value}&rdquo;
+                        </p>
+                        <div style={{ display: "flex", gap: 6 }}>
+                          <button
+                            onClick={() => applyFieldSuggestion(pendingSuggestion)}
+                            style={{ fontSize: 11, fontWeight: 700, padding: "5px 14px", borderRadius: 20, background: "#0D1016", color: "#fff", border: "none", cursor: "pointer" }}
+                          >
+                            ✓ Applica nel form
+                          </button>
+                          <button
+                            onClick={() => setPendingSuggestion(null)}
+                            style={{ fontSize: 11, padding: "5px 12px", borderRadius: 20, background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.5)", border: "1px solid rgba(0,0,0,0.08)", cursor: "pointer" }}
+                          >
+                            Ignora
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {incidentChatLoading && (
                     <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10 }}>
                       <div style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)", borderRadius: "14px 14px 14px 4px", padding: "9px 13px", display: "flex", alignItems: "center", gap: 7 }}>
@@ -1466,18 +1566,20 @@ function PostMarketPageInner() {
                           const newMsgs = [...incidentChatMessages, userMsg];
                           setIncidentChatMessages(newMsgs);
                           setIncidentChatInput("");
+                          setPendingSuggestion(null);
                           setIncidentChatLoading(true);
-                          const { reply } = await incidentFormChat(newMsgs, {
+                          const { reply, suggestion } = await incidentFormChat(newMsgs, {
                             title: form.title, system: form.system, date: form.date,
                             severity: form.severity, authority: form.authority,
                             affectedUsers: form.affectedUsers, description: form.description,
                             actions: form.actions,
                           });
                           setIncidentChatMessages([...newMsgs, { role: "assistant", content: reply || "Errore nella risposta AI — riprova." }]);
+                          if (suggestion) setPendingSuggestion(suggestion);
                           setIncidentChatLoading(false);
                         }
                       }}
-                      placeholder="Es. Il sistema ha generato un output errato che ha causato..."
+                      placeholder="Descrivi cosa è successo…"
                       rows={2}
                       disabled={incidentChatLoading}
                       style={{ flex: 1, fontSize: 12, padding: "8px 12px", borderRadius: 10, border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", resize: "none", outline: "none", fontFamily: "var(--font-inter, system-ui)", background: "#fff", lineHeight: 1.5, opacity: incidentChatLoading ? 0.5 : 1 }}
@@ -1491,14 +1593,16 @@ function PostMarketPageInner() {
                         const newMsgs = [...incidentChatMessages, userMsg];
                         setIncidentChatMessages(newMsgs);
                         setIncidentChatInput("");
+                        setPendingSuggestion(null);
                         setIncidentChatLoading(true);
-                        const { reply } = await incidentFormChat(newMsgs, {
+                        const { reply, suggestion } = await incidentFormChat(newMsgs, {
                           title: form.title, system: form.system, date: form.date,
                           severity: form.severity, authority: form.authority,
                           affectedUsers: form.affectedUsers, description: form.description,
                           actions: form.actions,
                         });
                         setIncidentChatMessages([...newMsgs, { role: "assistant", content: reply || "Errore nella risposta AI — riprova." }]);
+                        if (suggestion) setPendingSuggestion(suggestion);
                         setIncidentChatLoading(false);
                       }}
                       style={{ flexShrink: 0, width: 36, height: 36, background: (!incidentChatInput.trim() || incidentChatLoading) ? "rgba(0,0,0,0.06)" : "#0D1016", color: (!incidentChatInput.trim() || incidentChatLoading) ? "rgba(0,0,0,0.25)" : "#fff", border: "none", borderRadius: 9, cursor: (!incidentChatInput.trim() || incidentChatLoading) ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
