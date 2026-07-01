@@ -67,6 +67,105 @@ const GPAI_MODULE: Phase = {
 
 type PhaseStatus = "pending" | "active" | "complete";
 
+// ─── Phase guide cards ────────────────────────────────────────────────────────
+
+interface PhaseGuide {
+  goal: string;
+  examples: { label: string; text: string }[];
+  starters: string[];
+}
+
+const PHASE_GUIDES: Partial<Record<RiskPhaseId, PhaseGuide>> = {
+  scoping: {
+    goal: "Definisci il sistema AI, il suo scopo, chi lo usa e in quale contesto. Indica il tier di rischio e se tratta dati personali.",
+    examples: [
+      { label: "Sì — dati personali", text: "Il sistema elabora dati personali di candidati HR (nome, CV, esperienza) su base contrattuale Art. 6(1)(b) GDPR." },
+      { label: "No — dati anonimi", text: "Il sistema ottimizza routing logistico su dati di veicoli anonimizzati, nessun dato personale trattato." },
+    ],
+    starters: ["Il sistema tratta dati personali?", "È richiesta supervisione umana (Art. 14)?", "Qual è il tier di rischio classificato?", "Il sistema incorpora modelli GPAI?"],
+  },
+  identification: {
+    goal: "Elenca almeno 3-5 rischi concreti: bias algoritmico, opacità, perdita controllo umano. Valuta l'impatto su minori e gruppi vulnerabili (Art. 9(9)).",
+    examples: [
+      { label: "Bias algoritmico", text: "R-01: Il modello penalizza sistematicamente candidati con gap occupazionali. Probabilità: alta. Impatto: alto (discriminazione)." },
+      { label: "Opacità decisionale", text: "R-02: Gli utenti non ricevono spiegazione del motivo di esclusione. Probabilità: media. Impatto: medio (mancanza trasparenza)." },
+    ],
+    starters: ["Descrivere il rischio principale", "Il sistema impatta minori o persone vulnerabili?", "Ci sono rischi di bias algoritmico?", "Quali dati di addestramento sono stati usati?"],
+  },
+  estimation: {
+    goal: "Stima gli usi previsti e gli usi impropri prevedibili. Quantifica le persone coinvolte e valuta se il rischio è accettabile rispetto al risk appetite.",
+    examples: [
+      { label: "Uso previsto", text: "Pre-selezione CV per ~200 candidature/mese in ambito HR. Decisione finale sempre umana." },
+      { label: "Uso improprio", text: "Utilizzo per profilazione estesa oltre la selezione iniziale (contrario alla finalità dichiarata)." },
+    ],
+    starters: ["Quante persone sono impattate mensilmente?", "Quali usi impropri sono prevedibili?", "Il rischio rientra nel risk appetite aziendale?"],
+  },
+  testing: {
+    goal: "Definisci metriche di accuratezza/fairness, soglie accettabili e criteri di rilascio in produzione (Art. 9(8)).",
+    examples: [
+      { label: "Metriche definite", text: "Accuratezza ≥90%, Disparate Impact ≥0.8, test su dataset validation set hold-out 20%." },
+      { label: "Soglia non rispettata", text: "Il DI score è 0.72 — sotto soglia. Il modello non può essere rilasciato senza debiasing." },
+    ],
+    starters: ["Quali metriche di fairness sono state usate?", "Il modello ha superato il test su dataset di validazione?", "Qual è la soglia di accuratezza minima accettabile?"],
+  },
+  mitigation: {
+    goal: "Scegli l'opzione di trattamento (Modifica/Evitamento/Condivisione/Ritenzione) e definisci le misure concrete seguendo la gerarchia Art. 9(5).",
+    examples: [
+      { label: "Design-mitigation", text: "Eliminazione feature proxy (cap_residenza) dal dataset. Retraining con CTGAN debiasing. Testing fairness post-modifica." },
+      { label: "Controllo", text: "Revisione umana obbligatoria per i 20 candidati con score più vicino alla soglia di esclusione." },
+    ],
+    starters: ["Quale opzione di trattamento è stata scelta?", "Quali misure tecniche sono state adottate?", "Chi è il responsabile delle misure di mitigazione?"],
+  },
+  monitoring: {
+    goal: "Definisci frequenza monitoraggio, soglia PSI per drift detection e trigger di revisione del risk register.",
+    examples: [
+      { label: "PSI stabile", text: "PSI < 0.1 — modello stabile. Monitoraggio mensile automatico via pipeline Airflow." },
+      { label: "Trigger revisione", text: "PSI > 0.2 rilevato dopo aggiornamento dataset: revisione urgente avviata, modello sospeso temporaneamente." },
+    ],
+    starters: ["Qual è la frequenza di monitoraggio pianificata?", "È stato definito il PSI threshold?", "Cosa scatena una revisione straordinaria del risk register?"],
+  },
+  gap_check: {
+    goal: "Verifica che tutti i requisiti Art. 9(2)(a)-(d) + (6)-(9) siano coperti. Assegna un coverage score 0-100 e identifica le aree mancanti.",
+    examples: [
+      { label: "Copertura alta", text: "Coverage score: 85/100. Area mancante: Art. 9(9) impatto gruppi vulnerabili non ancora documentato." },
+      { label: "Gap critico", text: "Art. 9(2)(c) monitoraggio post-market non definito — gap obbligatorio da colmare prima del deployment." },
+    ],
+    starters: ["Qual è il coverage score stimato?", "Quali requisiti Art. 9 non sono ancora coperti?", "Ci sono gap obbligatori da colmare prima del rilascio?"],
+  },
+  traceability: {
+    goal: "Definisci la policy di versionamento del risk register, il periodo di retention dei log (Art. 12) e l'integrazione con il QMS aziendale (Art. 17).",
+    examples: [
+      { label: "Versionamento attivo", text: "Versione v1.0 approvata. Log automatici via Git. Retention 5 anni. Integrato nel QMS ISO 9001." },
+      { label: "Nessun QMS", text: "Il sistema di gestione rischi è standalone — non integrato in un QMS formale. Raccomandato allineamento Art. 17." },
+    ],
+    starters: ["Il risk register è integrato nel QMS aziendale?", "Qual è la policy di retention dei log?", "Come vengono tracciate le versioni del registro?"],
+  },
+  dismissal: {
+    goal: "Identifica i rischi specifici della fase di fine vita: cancellazione dati, dipendenze downstream, comunicazione ai deployer.",
+    examples: [
+      { label: "Dipendenza downstream", text: "3 sistemi esterni usano gli output del modello — necessaria migrazione dati prima della dismissione." },
+      { label: "Cancellazione dati", text: "Dataset di addestramento da anonimizzare entro 30 giorni dal ritiro, con log di cancellazione certificato." },
+    ],
+    starters: ["Ci sono sistemi downstream che dipendono dagli output?", "Come vengono gestiti i dati al momento del ritiro?", "I deployer sono stati informati del piano di dismissione?"],
+  },
+  signoff: {
+    goal: "Raccogli i nominativi per il sign-off (risk owner, compliance/legale, rappresentante legale) e la valutazione complessiva del rischio.",
+    examples: [
+      { label: "Approvazione completa", text: "Risk owner: Mario Rossi (CTO). Compliance: Avv. Anna Bianchi. Overall risk: MEDIO — accettabile con misure in vigore." },
+      { label: "Approvazione condizionata", text: "Approvazione condizionata: deployment autorizzato solo dopo completamento del debiasing (entro 30/09/2026)." },
+    ],
+    starters: ["Chi è il risk owner del sistema?", "Qual è la valutazione complessiva del rischio (overall risk)?", "C'è un'approvazione condizionata con azioni pendenti?"],
+  },
+  communication: {
+    goal: "Documenta chi è stato consultato: interni (DPO, legale, engineering), esterni (deployer, autorità), e se la FRIA ha informato questa sezione.",
+    examples: [
+      { label: "Consultazione interna", text: "Coinvolti: DPO (parere GDPR), Engineering (risk tecnico), Legale (compliance AI Act). Nessuna consultazione esterna richiesta." },
+      { label: "FRIA collegata", text: "FRIA completata il 15/06/2026 — risultati integrati nella sezione Identificazione Rischi (impatto diritti fondamentali)." },
+    ],
+    starters: ["Chi è stato coinvolto internamente nel processo di risk management?", "La FRIA è stata completata e collegata?", "Ci sono stakeholder esterni da coinvolgere (deployer, autorità)?"],
+  },
+};
+
 // ─── Persistence ──────────────────────────────────────────────────────────────
 
 const CHAT_STORAGE_KEY = "aicomply_risk_manager_chat_v3";
@@ -660,6 +759,8 @@ export default function RiskManagerPage() {
   const [isResizing, setIsResizing] = useState(false);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerAnchor, setViewerAnchor] = useState<string | null>(null);
+  const [showPhaseGuide, setShowPhaseGuide] = useState(true);
+  const [customPhrase, setCustomPhrase] = useState("");
   const layoutRef = useRef<HTMLDivElement>(null);
 
   // Apre il documento e scrolla alla sezione richiesta
@@ -734,6 +835,7 @@ export default function RiskManagerPage() {
   }, []);
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  useEffect(() => { setShowPhaseGuide(true); setCustomPhrase(""); }, [currentPhaseIndex]);
 
   const persistState = useCallback((msgs: ChatMessage[], doc: RiskDocumentation, phaseIdx: number, completed: RiskPhaseId[]) => {
     saveChatState({ messages: msgs, documentation: doc, currentPhaseIndex: phaseIdx, completedPhases: completed, docEdits });
@@ -952,6 +1054,97 @@ export default function RiskManagerPage() {
             </div>
           </div>
 
+          {/* Phase guide card */}
+          {(() => {
+            const guide = PHASE_GUIDES[PHASES[currentPhaseIndex]?.id as RiskPhaseId];
+            if (!guide) return null;
+            return (
+              <div style={{ borderBottom: "1px solid rgba(0,0,0,0.06)", background: "#fafafa", flexShrink: 0 }}>
+                <button
+                  onClick={() => setShowPhaseGuide(v => !v)}
+                  style={{
+                    width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                    padding: "8px 16px", background: "transparent", border: "none", cursor: "pointer",
+                    fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.45)",
+                  }}
+                >
+                  <span>Guida fase · {PHASES[currentPhaseIndex]?.label}</span>
+                  <span style={{ fontSize: 10 }}>{showPhaseGuide ? "▲" : "▼"}</span>
+                </button>
+                {showPhaseGuide && (
+                  <div style={{ padding: "0 16px 12px" }}>
+                    <p style={{ fontSize: 11, color: "rgba(0,0,0,0.55)", margin: "0 0 8px", lineHeight: 1.5 }}>
+                      {guide.goal}
+                    </p>
+                    {/* Starter questions */}
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
+                      {guide.starters.map((s, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setInput(s)}
+                          style={{
+                            fontSize: 10, padding: "4px 10px", borderRadius: 20,
+                            background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.08)",
+                            color: "#0D1016", cursor: "pointer", fontWeight: 500,
+                          }}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                    {/* Example answer chips */}
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
+                      {guide.examples.map((ex, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setInput(ex.text)}
+                          style={{
+                            fontSize: 10, padding: "4px 10px", borderRadius: 20,
+                            background: "rgba(13,16,22,0.06)", border: "1px solid rgba(0,0,0,0.10)",
+                            color: "#0D1016", cursor: "pointer", textAlign: "left", fontWeight: 500,
+                          }}
+                          title={ex.text}
+                        >
+                          Esempio: {ex.label}
+                        </button>
+                      ))}
+                    </div>
+                    {/* Custom phrase input */}
+                    <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                      <input
+                        value={customPhrase}
+                        onChange={e => setCustomPhrase(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === "Enter" && customPhrase.trim()) {
+                            setInput(customPhrase.trim());
+                            setCustomPhrase("");
+                          }
+                        }}
+                        placeholder="Oppure scrivi una risposta personalizzata…"
+                        style={{
+                          flex: 1, fontSize: 11, padding: "6px 10px", borderRadius: 8,
+                          border: "1px solid rgba(0,0,0,0.10)", outline: "none",
+                          background: "#fff", color: "#0D1016",
+                        }}
+                      />
+                      {customPhrase.trim() && (
+                        <button
+                          onClick={() => { setInput(customPhrase.trim()); setCustomPhrase(""); }}
+                          style={{
+                            fontSize: 10, fontWeight: 700, padding: "5px 10px", borderRadius: 8,
+                            background: "#0D1016", color: "#fff", border: "none", cursor: "pointer",
+                          }}
+                        >
+                          Inserisci →
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
           <div style={{ flex: 1, overflowY: "auto", padding: "16px 16px 8px" }}>
             {messages.map((msg, i) => (
               <ChatBubble
@@ -962,7 +1155,7 @@ export default function RiskManagerPage() {
             {isLoading && (
               <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10 }}>
                 <div style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)", borderRadius: "14px 14px 14px 4px", padding: "10px 14px", display: "flex", alignItems: "center", gap: 8 }}>
-                  <Loader2 size={13} style={{ color: "#2563eb", animation: "spin 1s linear infinite" }} />
+                  <Loader2 size={13} style={{ color: "#0D1016", animation: "spin 1s linear infinite" }} />
                   <span style={{ fontSize: 12, color: "rgba(0,0,0,0.4)" }}>Analisi in corso…</span>
                 </div>
               </div>
@@ -986,7 +1179,7 @@ export default function RiskManagerPage() {
                   background: "#ffffff", lineHeight: 1.5,
                   opacity: isLoading ? 0.5 : 1,
                 }}
-                onFocus={e => (e.target.style.borderColor = "rgba(37,99,235,0.5)")}
+                onFocus={e => (e.target.style.borderColor = "rgba(0,0,0,0.25)")}
                 onBlur={e => (e.target.style.borderColor = "rgba(0,0,0,0.12)")}
               />
               <button
