@@ -861,7 +861,7 @@ function PostMarketPageInner() {
                     }}
                   >
                     {s === "all"
-                      ? "Tutti"
+                      ? "Tutti gli stati"
                       : s === "pending"
                       ? "Pending"
                       : s === "investigating"
@@ -1555,17 +1555,17 @@ function PostMarketPageInner() {
                     </div>
                   )}
 
-                  {/* Sub-tab: Rapporto Art. 73(4) — dark-theme restyled */}
+                  {/* Sub-tab: Rapporto Art. 73(4) */}
                   {selectedDetailTab === "rapporto" && (
                     <div className="p-4">
-                      <div className="rounded-lg border p-4 mb-3" style={{ borderColor: "#334155", background: "rgba(15,23,42,0.6)" }}>
-                        <p className="text-[10px] font-semibold uppercase tracking-wide mb-3" style={{ color: "#94a3b8" }}>
+                      <div className="rounded-lg border p-4 mb-3" style={{ borderColor: "rgba(0,0,0,0.08)", background: "rgba(0,0,0,0.02)" }}>
+                        <p className="text-[10px] font-semibold uppercase tracking-wide mb-3" style={{ color: "rgba(0,0,0,0.4)", letterSpacing: "0.08em" }}>
                           Sezioni obbligatorie — Rapporto completo Art. 73(4){" "}
-                          <span className="font-mono" style={{ color: "#64748b" }}>[verify against current AI Act text]</span>
+                          <span className="font-mono" style={{ color: "rgba(0,0,0,0.3)" }}>[verify against current AI Act text]</span>
                         </p>
                         <div className="mb-3">
-                          <label className="block text-[11px] font-medium mb-1" style={{ color: "#94a3b8" }}>
-                            Sezione 4 — Analisi causa radice <span style={{ color: "#f87171" }}>*</span>
+                          <label className="block text-[11px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.55)" }}>
+                            Sezione 4 — Analisi causa radice <span style={{ color: "#dc2626" }}>*</span>
                           </label>
                           <textarea
                             value={selected.rootCause ?? ""}
@@ -1573,12 +1573,12 @@ function PostMarketPageInner() {
                             rows={4}
                             placeholder="Causa radice: errore sistema, gap nel training data, failure deployment, errore operativo…"
                             className="w-full rounded-md px-3 py-2 text-sm outline-none resize-vertical"
-                            style={{ border: "1px solid #334155", background: "#020617", color: "#f1f5f9", fontSize: 12 }}
+                            style={{ border: "1px solid rgba(0,0,0,0.10)", background: "#fff", color: "#0D1016", fontSize: 12 }}
                           />
                         </div>
                         <div>
-                          <label className="block text-[11px] font-medium mb-1" style={{ color: "#94a3b8" }}>
-                            Sezione 6 — Misure definitive adottate <span style={{ color: "#f87171" }}>*</span>
+                          <label className="block text-[11px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.55)" }}>
+                            Sezione 6 — Misure definitive adottate <span style={{ color: "#dc2626" }}>*</span>
                           </label>
                           <textarea
                             value={selected.finalMeasures ?? ""}
@@ -1586,7 +1586,7 @@ function PostMarketPageInner() {
                             rows={4}
                             placeholder="Misure permanenti: patch, retraining, modifica processo, nuovi controlli…"
                             className="w-full rounded-md px-3 py-2 text-sm outline-none resize-vertical"
-                            style={{ border: "1px solid #334155", background: "#020617", color: "#f1f5f9", fontSize: 12 }}
+                            style={{ border: "1px solid rgba(0,0,0,0.10)", background: "#fff", color: "#0D1016", fontSize: 12 }}
                           />
                         </div>
                       </div>
