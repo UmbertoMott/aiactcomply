@@ -46,6 +46,8 @@ import { proposePMMPlan, draftPostMarketReport } from "@/app/actions/postMarketA
 import { incidentFormChat } from "@/app/actions/incidentFormChat";
 import type { IncidentChatMessage } from "@/app/actions/incidentFormChat";
 import { Loader2 } from "lucide-react";
+import { loadInventory } from "@/lib/inventory/ai-system";
+import type { AISystem } from "@/lib/inventory/ai-system";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -360,6 +362,11 @@ function PostMarketPageInner() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [urgentBannerDismissed, setUrgentBannerDismissed] = useState(false);
   const [showSeverityGuide, setShowSeverityGuide] = useState(false);
+  // Sistemi dall'inventario (caricati lato client)
+  const [inventorySystems, setInventorySystems] = useState<AISystem[]>([]);
+  const [systemFreeText, setSystemFreeText] = useState("");
+  useEffect(() => { setInventorySystems(loadInventory()); }, []);
+
   // Incident form AI chat
   const [incidentChatMessages, setIncidentChatMessages] = useState<IncidentChatMessage[]>([
     { role: "assistant", content: "Ciao! Descrivi l'evento che vuoi segnalare e ti aiuto a capire se rientra nell'Art. 73, quale gravità assegnare e la scadenza di notifica." }
@@ -937,12 +944,43 @@ function PostMarketPageInner() {
                         <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
                           Sistema coinvolto <span style={{ color: "#dc2626" }}>*</span>
                         </label>
-                        <input
-                          style={INPUT_STYLE}
-                          placeholder="Es. FaceID-API v2.3"
-                          value={form.system}
-                          onChange={(e) => setForm((f) => ({ ...f, system: e.target.value }))}
-                        />
+                        <select
+                          style={{ ...INPUT_STYLE, cursor: "pointer" }}
+                          value={inventorySystems.find(s => s.name === form.system)?.id ?? (form.system === "__altro__" ? "__altro__" : form.system ? "__altro__" : "")}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === "") {
+                              setForm((f) => ({ ...f, system: "", systemId: undefined }));
+                              setSystemFreeText("");
+                            } else if (val === "__altro__") {
+                              setForm((f) => ({ ...f, system: systemFreeText, systemId: undefined }));
+                            } else {
+                              const sys = inventorySystems.find(s => s.id === val);
+                              if (sys) setForm((f) => ({ ...f, system: sys.name, systemId: sys.id }));
+                              setSystemFreeText("");
+                            }
+                          }}
+                        >
+                          <option value="">— Seleziona sistema —</option>
+                          {inventorySystems.map(sys => (
+                            <option key={sys.id} value={sys.id}>
+                              {sys.name}
+                              {sys.tier !== "unclassified" ? ` · ${sys.tier.replace("_", " ")}` : ""}
+                            </option>
+                          ))}
+                          <option value="__altro__">Altro (non in inventario)</option>
+                        </select>
+                        {(form.system === "__altro__" || (form.system && !inventorySystems.find(s => s.name === form.system))) && (
+                          <input
+                            style={{ ...INPUT_STYLE, marginTop: 6 }}
+                            placeholder="Nome sistema non inventariato…"
+                            value={systemFreeText}
+                            onChange={(e) => {
+                              setSystemFreeText(e.target.value);
+                              setForm((f) => ({ ...f, system: e.target.value, systemId: undefined }));
+                            }}
+                          />
+                        )}
                       </div>
                     </div>
 
