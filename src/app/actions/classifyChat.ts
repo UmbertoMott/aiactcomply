@@ -1,5 +1,6 @@
 "use server";
 import { generateText } from "@/lib/rag/rag-vertex";
+import { retrieveContext } from "@/lib/rag/rag-retrieve";
 
 export interface ChatMessage {
   role: "user" | "assistant";
@@ -49,8 +50,9 @@ ISTRUZIONI:
 - Rispondi in italiano, massimo 4-5 frasi per turno
 - Fai UNA domanda alla volta, non sovraccaricare l'utente
 - Cita gli articoli AI Act rilevanti in modo naturale nella conversazione
+- Basa le tue risposte SUI DOCUMENTI forniti nel CONTESTO NORMATIVO qui sotto — non inventare riferimenti
 - Quando hai abbastanza informazioni per determinare tier e ruolo, proponi la classificazione e chiedi conferma
-- Quando l'utente conferma o hai consenso esplicito, includi alla FINE della risposta un blocco <suggest> con i dati (NON visibile all'utente come testo normale):
+- Quando l'utente conferma, includi alla FINE della risposta un blocco <suggest> con i dati (NON visibile all'utente):
 
 <suggest>
 {
@@ -63,7 +65,7 @@ ISTRUZIONI:
 </suggest>
 
 Il blocco <suggest> NON deve apparire nel testo mostrato all'utente.
-Non inventare dati — usa solo ciò che l'utente ha comunicato.`;
+Non inventare dati — usa solo ciò che l'utente ha comunicato e ciò che i documenti confermano.`;
 
 function parseSuggestion(raw: string): { reply: string; suggestion?: ClassifySuggestion } {
   const suggestMatch = raw.match(/<suggest>([\s\S]*?)<\/suggest>/i);
@@ -83,12 +85,36 @@ export async function classifyChat(
   messages: ChatMessage[],
   systemName: string,
 ): Promise<ClassifyChatResponse> {
+  // Estrai la query dalla conversazione recente per il recupero RAG
+  const lastUserMessages = messages.filter(m => m.role === "user").slice(-3).map(m => m.content).join(" ");
+  const ragQuery = lastUserMessages || `classificazione sistema AI AI Act tier ruolo ${systemName}`;
+
+  // Recupera contesto normativo dal corpus indicizzato
+  let normativeContext = "";
+  try {
+    const { chunks } = await retrieveContext({
+      query: ragQuery,
+      topK: 5,
+      minSimilarity: 0.28,
+    });
+    if (chunks.length > 0) {
+      normativeContext = "\n\nCONTESTO NORMATIVO DAL CORPUS INDEXATO:\n" +
+        chunks.map((c, i) => {
+          const ref = c.sectionRef ?? "sezione sconosciuta";
+          const page = c.pageNumber ?? "?";
+          return `[DOC ${i + 1}] ${c.documentTitle} — ${ref} (p. ${page}):\n${c.chunkText}`;
+        }).join("\n\n");
+    }
+  } catch {
+    // RAG non disponibile — continua senza contesto
+  }
+
   const conversation = messages
     .slice(-10)
     .map(m => `${m.role === "user" ? "Utente" : "Assistente"}: ${m.content}`)
     .join("\n\n");
 
-  const fullPrompt = `${SYSTEM_PROMPT}
+  const fullPrompt = `${SYSTEM_PROMPT}${normativeContext}
 
 SISTEMA IN ESAME: "${systemName || "non specificato"}"
 
