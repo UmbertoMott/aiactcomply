@@ -850,10 +850,10 @@ function PostMarketPageInner() {
                 ))}
               </div>
               <div className="flex gap-1.5">
-                {(["all", "pending", "investigating", "resolved"] as const).map((s) => (
+                {(["pending", "investigating", "resolved"] as const).map((s) => (
                   <button
                     key={s}
-                    onClick={() => setFilterStatus(s)}
+                    onClick={() => setFilterStatus(filterStatus === s ? "all" : s)}
                     style={{
                       padding: "3px 10px",
                       borderRadius: "999px",
@@ -869,9 +869,7 @@ function PostMarketPageInner() {
                       transition: "all 0.12s",
                     }}
                   >
-                    {s === "all"
-                      ? "Tutti gli stati"
-                      : s === "pending"
+                    {s === "pending"
                       ? "Pending"
                       : s === "investigating"
                       ? "In indagine"
