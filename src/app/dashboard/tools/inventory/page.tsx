@@ -847,8 +847,8 @@ function ClassifyModal({ system, onClose, onSave }: {
     <ModalShell title={`Classifica — ${system.name}`} subtitle="Seleziona ruolo e tier di rischio EU AI Act. Tutti i campi sono sotto tua responsabilità." onClose={onClose}>
       {/* Banner guardrail */}
       <div style={{ padding: "10px 14px", borderRadius: 8, marginBottom: 20, background: "rgba(13,16,22,0.04)", border: "1px solid rgba(13,16,22,0.12)" }}>
-        <p style={{ fontSize: 12, color: "#0D1016", margin: 0 }}>
-          <strong>Principio "never classify silently"</strong> — ogni classificazione richiede una base normativa esplicita nel campo [verify]. La classificazione è responsabilità dell'utente, non dell'AI.
+        <p style={{ fontSize: 12, color: "#0D1016", margin: 0, lineHeight: 1.55 }}>
+          <strong>Attenzione:</strong> La classificazione è una responsabilità legale tua, non dell'AI. Devi indicare quale articolo dell'EU AI Act giustifica la tua scelta — questo ti protegge in caso di audit o ispezione.
         </p>
       </div>
 
