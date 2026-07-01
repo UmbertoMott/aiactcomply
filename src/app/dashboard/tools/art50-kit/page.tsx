@@ -8,6 +8,7 @@ import {
   Trash2, Wand2, Sparkles, Loader2, Check, ChevronDown, X, Info,
 } from "lucide-react";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
+import { loadInventory, AISystem } from "@/lib/inventory/ai-system";
 import type { ClassifierResult } from "@/lib/dossier/storage-schema";
 import { ART50_OBLIGATIONS, SYNTHETIC_CONTENT_EXEMPTIONS, DEEPFAKE_EXEMPTIONS, AICOMPLY_AI_INTERACTIONS } from "@/lib/art50/art50-reference";
 import {
@@ -105,6 +106,8 @@ export default function Art50KitPage() {
   const [formName, setFormName] = useState("");
   const [formType, setFormType] = useState<Art50System["type"]>("chatbot");
   const [formUrl, setFormUrl] = useState("");
+  const [inventorySystems, setInventorySystems] = useState<AISystem[]>([]);
+  const [formInventoryId, setFormInventoryId] = useState<string>("");
 
   // Art50 compliance record state
   const [art50Record, setArt50Record] = useState<Art50Record>(() => ({ systemRecords: {}, selfCompliance: [] }));
@@ -123,6 +126,7 @@ export default function Art50KitPage() {
 
   useEffect(() => {
     setSystems(loadSystems());
+    setInventorySystems(loadInventory());
     const rec = loadArt50Record();
     setArt50Record(rec);
     // Initialize self-compliance from AICOMPLY_AI_INTERACTIONS if empty
@@ -171,7 +175,7 @@ export default function Art50KitPage() {
     if (!formName || !formType) return;
     const sys: Art50System = { id: crypto.randomUUID(), name: formName, type: formType, url: formUrl, registroId: makeRegistroId(), lastScore: null, lastScannedAt: null, createdAt: new Date().toISOString(), signals: [] };
     const updated = [...systems, sys]; setSystems(updated); saveSystems(updated);
-    setShowForm(false); setFormName(""); setFormType("chatbot"); setFormUrl("");
+    setShowForm(false); setFormName(""); setFormType("chatbot"); setFormUrl(""); setFormInventoryId("");
     if (formUrl) setTimeout(() => scanSystem(sys), 100);
   }
 
@@ -333,8 +337,42 @@ export default function Art50KitPage() {
               <h3 className="text-sm font-semibold mb-4" style={{ color: T.text }}>Nuovo sistema AI</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium mb-1.5" style={{ color: T.muted }}>Nome sistema *</label>
-                  <input type="text" placeholder="es. Chatbot sito web" value={formName} onChange={e => setFormName(e.target.value)} style={inp} />
+                  <label className="block text-xs font-medium mb-1.5" style={{ color: T.muted }}>Sistema AI *</label>
+                  <select
+                    value={formInventoryId}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setFormInventoryId(val);
+                      if (val && val !== "__other__") {
+                        const s = inventorySystems.find(s => s.id === val);
+                        if (s) setFormName(s.name);
+                      } else {
+                        setFormName("");
+                      }
+                    }}
+                    style={inp}
+                  >
+                    <option value="">— Seleziona dall&apos;inventario —</option>
+                    {inventorySystems.map(s => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                    <option value="__other__">Altro (non in inventario)</option>
+                  </select>
+                  {formInventoryId === "__other__" && (
+                    <input
+                      type="text"
+                      placeholder="Nome sistema (es. Chatbot sito web)"
+                      value={formName}
+                      onChange={e => setFormName(e.target.value)}
+                      style={{ ...inp, marginTop: 6 }}
+                    />
+                  )}
+                  {inventorySystems.length === 0 && (
+                    <p className="text-[10px] mt-1" style={{ color: T.faint }}>
+                      Nessun sistema in inventario —{" "}
+                      <a href="/dashboard/tools/inventory" className="underline" style={{ color: T.muted }}>aggiungilo all&apos;inventario</a> prima.
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-medium mb-1.5" style={{ color: T.muted }}>URL sito</label>
@@ -353,7 +391,7 @@ export default function Art50KitPage() {
                 </div>
               </div>
               <div className="flex gap-3 mt-4">
-                <button type="button" onClick={() => { setShowForm(false); setFormName(""); setFormUrl(""); setFormType("chatbot"); }} style={{ border: `1px solid ${T.border}`, background: T.card, color: T.muted, padding: "6px 16px", borderRadius: 8, fontSize: 13, cursor: "pointer" }}>Annulla</button>
+                <button type="button" onClick={() => { setShowForm(false); setFormName(""); setFormUrl(""); setFormType("chatbot"); setFormInventoryId(""); }} style={{ border: `1px solid ${T.border}`, background: T.card, color: T.muted, padding: "6px 16px", borderRadius: 8, fontSize: 13, cursor: "pointer" }}>Annulla</button>
                 <button type="button" onClick={addSystem} disabled={!formName} style={{ background: T.blue, color: "#fff", padding: "6px 20px", borderRadius: 8, fontSize: 13, cursor: "pointer", border: "none", opacity: !formName ? 0.4 : 1 }}>
                   {formUrl ? "Aggiungi e avvia scan →" : "Aggiungi sistema →"}
                 </button>
