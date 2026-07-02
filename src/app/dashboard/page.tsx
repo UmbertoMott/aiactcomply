@@ -14,6 +14,7 @@ import { REGULATORY_DEADLINES, daysUntil, type RegulatoryDeadline } from "@/lib/
 import { getAllEvidence, type EvidenceRecord } from "@/lib/evidence/evidence-layer";
 import { useUserRole } from "@/lib/hooks/useUserRole";
 import { readFromStorage, type ClassifierResult } from "@/lib/dossier/storage-schema";
+import { ActivityQueue } from "@/components/dashboard/ActivityQueue";
 
 const OnboardingWizard = dynamic(
   () => import("@/components/onboarding/OnboardingWizard"),
@@ -31,7 +32,7 @@ const T = {
   card:    "#ffffff",
   red:     "#dc2626",   redBg:   "rgba(220,38,38,0.06)",   redBdr:  "rgba(220,38,38,0.18)",
   amber:   "#b45309",   amberBg: "rgba(245,158,11,0.06)",  amberBdr:"rgba(245,158,11,0.2)",
-  blue:    "#1d4ed8",   blueBg:  "rgba(29,78,216,0.05)",   blueBdr: "rgba(29,78,216,0.16)",
+  blue:    "#0D1016",   blueBg:  "rgba(13,16,22,0.04)",    blueBdr: "rgba(13,16,22,0.12)",
   green:   "#15803d",   greenBg: "rgba(21,128,61,0.06)",   greenBdr:"rgba(21,128,61,0.18)",
   gray:    "#6b7280",   grayBg:  "rgba(0,0,0,0.04)",       grayBdr: "rgba(0,0,0,0.10)",
 } as const;
@@ -327,6 +328,9 @@ export default function DashboardPage() {
             )}
           </div>
         )}
+
+        {/* ── ACTIVITY QUEUE ──────────────────────────────────────────── */}
+        <ActivityQueue />
 
         {/* ── HEADER + DOSSIER ────────────────────────────────────────── */}
         <div className="flex items-start justify-between mb-6">
