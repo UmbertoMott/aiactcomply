@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, CSSProperties } from "react";
 import SignOffPanel from "@/components/ui/SignOffPanel";
+import DpiaGuidedMode, { type DpiaGuidedAnswers } from "@/components/dpia/DpiaGuidedMode";
 import {
   Search, Database, Scale, AlertTriangle, Shield, CheckCircle2,
   ChevronLeft, ChevronRight, Plus, Trash2, Download, FileText,
@@ -36,9 +37,9 @@ const T = {
   amber:    "#92400e",
   amberBg:  "rgba(202,138,4,0.07)",
   amberBdr: "rgba(202,138,4,0.22)",
-  blue:     "#1d4ed8",
-  blueBg:   "rgba(29,78,216,0.06)",
-  blueBdr:  "rgba(29,78,216,0.18)",
+  neutral:    "#0D1016",
+  neutralBg:  "rgba(13,16,22,0.04)",
+  neutralBdr: "rgba(13,16,22,0.1)",
   green:    "#15803d",
   greenBg:  "rgba(21,128,61,0.06)",
   greenBdr: "rgba(21,128,61,0.18)",
@@ -303,6 +304,7 @@ export default function DPIAPage() {
   const [doc, setDoc] = useState<DPIADoc>(createEmptyDPIA);
   const [step, setStep] = useState<Step>(0);
   const [saved, setSaved] = useState(false);
+  const [guidedMode, setGuidedMode] = useState(false);
   const [riskReport, setRiskReport] = useScopedStorage<RiskManagerReport>("risk_manager_report", EMPTY_RISK_REPORT);
   const [importMsg, setImportMsg] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -677,14 +679,76 @@ export default function DPIAPage() {
     const dpiaBg = dpia_required === "yes" ? T.redBg : dpia_required === "uncertain" ? T.amberBg : T.greenBg;
     const dpiaBdr = dpia_required === "yes" ? T.redBdr : dpia_required === "uncertain" ? T.amberBdr : T.greenBdr;
 
+    function applyGuidedAnswers(answers: DpiaGuidedAnswers) {
+      const patch: Record<string, unknown> = {};
+      const criteriaMap: Record<string, string> = {
+        "screening.criteria[c1]": "c1", "screening.criteria[c2]": "c2",
+        "screening.criteria[c3]": "c3", "screening.criteria[c4]": "c4",
+        "screening.criteria[c5]": "c5", "screening.criteria[c6]": "c6",
+        "screening.criteria[c7]": "c7", "screening.criteria[c8]": "c8",
+        "screening.criteria[c9]": "c9",
+      };
+      const updatedCriteria = [...criteria];
+      for (const [fieldPath, val] of Object.entries(answers)) {
+        const criterionId = criteriaMap[fieldPath];
+        if (criterionId) {
+          const idx = updatedCriteria.findIndex((c) => c.id === criterionId);
+          if (idx >= 0) {
+            const mapped = val === "Sì" ? "yes" : val === "No" ? "no" : val === "Parzialmente" ? "partial" : val;
+            updatedCriteria[idx] = { ...updatedCriteria[idx], applies: mapped as "yes" | "no" | "partial" | "" };
+          }
+        }
+      }
+      patch.criteria = updatedCriteria;
+      patch.dpia_required = computeDPIARequired(updatedCriteria);
+      setDoc((prev) => ({ ...prev, screening: { ...prev.screening, ...patch as typeof prev.screening } }));
+      setGuidedMode(false);
+    }
+
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {/* Step header with Guided/Free toggle */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.6px" }}>
+            Step 0 — Screening WP248
+          </div>
+          <div style={{ display: "flex", gap: 4, background: "rgba(13,16,22,0.04)", borderRadius: 8, padding: 3 }}>
+            {(["Guidata", "Libera"] as const).map((mode) => {
+              const isActive = (mode === "Guidata") === guidedMode;
+              return (
+                <button key={mode} onClick={() => setGuidedMode(mode === "Guidata")}
+                  style={{ padding: "4px 12px", borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: "pointer",
+                    background: isActive ? T.text : "none", color: isActive ? "#fff" : T.muted, border: "none" }}>
+                  {mode}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Guided mode panel */}
+        {guidedMode && (
+          <div style={{ ...cardSt, padding: 24 }}>
+            <DpiaGuidedMode
+              sectionFilter={["screening"]}
+              onApply={applyGuidedAnswers}
+              onClose={() => setGuidedMode(false)}
+              initialAnswers={Object.fromEntries(
+                criteria.map((c) => [
+                  `screening.criteria[${c.id}]`,
+                  c.applies === "yes" ? "Sì" : c.applies === "no" ? "No" : c.applies === "partial" ? "Parzialmente" : "",
+                ])
+              )}
+            />
+          </div>
+        )}
+
         {/* Info box */}
-        <div style={{ ...cardSt, padding: 14, background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
+        <div style={{ ...cardSt, padding: 14, background: T.neutralBg, border: `1px solid ${T.neutralBdr}` }}>
           <div className="flex items-start gap-2">
-            <Info className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: T.blue }} />
+            <Info className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: T.neutral }} />
             <div>
-              <p style={{ fontSize: 12, fontWeight: 600, color: T.blue, marginBottom: 4 }}>
+              <p style={{ fontSize: 12, fontWeight: 600, color: T.neutral, marginBottom: 4 }}>
                 Screening WP248 rev.01 — 9 criteri
               </p>
               <p style={{ fontSize: 11, color: T.text, lineHeight: 1.6 }}>
@@ -1052,9 +1116,9 @@ export default function DPIAPage() {
         )}
 
         {/* Info */}
-        <div style={{ ...cardSt, padding: 14, background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
+        <div style={{ ...cardSt, padding: 14, background: T.neutralBg, border: `1px solid ${T.neutralBdr}` }}>
           <div className="flex items-start gap-2">
-            <Info className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: T.blue }} />
+            <Info className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: T.neutral }} />
             <p style={{ fontSize: 11, color: T.text, lineHeight: 1.6 }}>
               <strong>WP248 §3:</strong> Identificare e valutare le fonti di rischio, gli impatti potenziali e le misure
               esistenti per le tre categorie standard WP248: accesso illegittimo, modifica indesiderata, scomparsa dei dati.

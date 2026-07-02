@@ -64,6 +64,7 @@ import { writeToStorage } from "@/lib/dossier/storage-schema";
 import type { RiskManagerResult } from "@/lib/dossier/storage-schema";
 import { useScopedStorage } from "@/lib/hooks/useScopedStorage";
 import { RiskMatrix } from "@/components/risk-register/RiskMatrix";
+import { RISK_PHASE_GUIDES } from "@/lib/risk-register/risk-register-template";
 
 // ─── FIX 1 — Typed form state ─────────────────────────────────────────
 
@@ -148,8 +149,9 @@ const T = {
   redBdr:  "rgba(220,38,38,0.18)",
   amber:   "#d97706",
   amberBg: "rgba(245,158,11,0.06)",
-  blue:    "#2563eb",
-  blueBg:  "rgba(37,99,235,0.06)",
+  neutral:    "#0D1016",
+  neutralBg:  "rgba(13,16,22,0.04)",
+  neutralBdr: "rgba(13,16,22,0.1)",
   green:   "#15803d",
   greenBg: "rgba(22,163,74,0.06)",
 };
@@ -964,9 +966,9 @@ function ScopingPhase({
           style={{
             display: "flex", alignItems: "center", gap: 6, borderRadius: 7,
             padding: "5px 10px", fontSize: 12, fontWeight: 500, cursor: "pointer",
-            background: showGuide ? T.blueBg : "transparent",
-            color: showGuide ? T.blue : T.muted,
-            border: `1px solid ${showGuide ? "rgba(37,99,235,0.2)" : T.border}`,
+            background: showGuide ? T.neutralBg : "transparent",
+            color: showGuide ? T.neutral : T.muted,
+            border: `1px solid ${showGuide ? T.neutralBdr : T.border}`,
           }}
         >
           <Eye style={{ width: 13, height: 13 }} />
@@ -985,61 +987,63 @@ function ScopingPhase({
         />
       </p>
 
-      {showGuide && (
-        <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 mb-6">
-          <h4 className="text-sm font-semibold text-foreground mb-3">Criteri di valutazione AI Act</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-            <div className="rounded-lg border border-danger/30 bg-danger/5 p-3">
-              <div className="flex items-center gap-1.5 mb-2">
-                <div className="w-3 h-3 rounded-full bg-danger" />
-                <span className="font-semibold text-danger">Impatto Alto</span>
-              </div>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>· Biometria e riconoscimento facciale</li>
-                <li>· Infrastrutture critiche</li>
-                <li>· Selezione lavorativa (HR)</li>
-                <li>· Accesso al credito / finanza</li>
-                <li>· Diagnosi medica e sanità</li>
-                <li>· Sorveglianza e giustizia</li>
-                <li>· Controllo migratorio</li>
-                <li>· Istruzione e formazione</li>
-                <li>· Tutela minori</li>
-              </ul>
+      {showGuide && (() => {
+        const guide = RISK_PHASE_GUIDES["scoping"];
+        return (
+          <div style={{ background: "rgba(13,16,22,0.03)", border: "1px solid rgba(13,16,22,0.08)", borderRadius: 12, padding: 18, marginBottom: 20 }}>
+            {/* Ref badge + goal */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+              <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 9999,
+                background: "rgba(13,16,22,0.06)", border: "1px solid rgba(13,16,22,0.1)", color: T.muted, letterSpacing: "0.3px" }}>
+                {guide.ref}
+              </span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: T.text }}>Obiettivo della fase</span>
             </div>
-            <div className="rounded-lg border border-warning/30 bg-warning/5 p-3">
-              <div className="flex items-center gap-1.5 mb-2">
-                <div className="w-3 h-3 rounded-full bg-warning" />
-                <span className="font-semibold text-warning">Impatto Medio</span>
+            <p style={{ fontSize: 12, color: T.muted, marginBottom: 14, lineHeight: 1.55 }}>{guide.goal}</p>
+
+            {/* ESEMPI box */}
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", marginBottom: 8 }}>ESEMPI</div>
+              <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
+                {guide.examples.map((ex, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setRiskForm((prev: RiskFormState) => ({ ...prev, description: ex.text }))}
+                    style={{
+                      textAlign: "left" as const, padding: "8px 10px", borderRadius: 8, cursor: "pointer",
+                      background: T.card, border: "1px solid rgba(13,16,22,0.08)", fontSize: 12, color: T.muted,
+                      lineHeight: 1.5, transition: "border-color 0.1s",
+                    }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(13,16,22,0.2)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(13,16,22,0.08)"; }}
+                  >
+                    <span style={{ fontWeight: 600, color: T.text, marginRight: 4 }}>{ex.label}</span>{ex.text}
+                  </button>
+                ))}
               </div>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>· Raccomandazioni commerciali</li>
-                <li>· Profilazione e targeting</li>
-                <li>· Chatbot e assistenti virtuali</li>
-                <li>· Manutenzione predittiva</li>
-                <li>· Formazione e apprendimento</li>
-                <li>· Ambito assicurativo</li>
-              </ul>
             </div>
-            <div className="rounded-lg border border-success/30 bg-success/5 p-3">
-              <div className="flex items-center gap-1.5 mb-2">
-                <div className="w-3 h-3 rounded-full bg-success" />
-                <span className="font-semibold text-success">Impatto Basso</span>
+
+            {/* Starter phrases */}
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", marginBottom: 8 }}>INIZIA CON</div>
+              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
+                {guide.starters.map((s, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setRiskForm((prev: RiskFormState) => ({ ...prev, description: s }))}
+                    style={{
+                      padding: "4px 12px", borderRadius: 20, fontSize: 11, cursor: "pointer",
+                      background: "rgba(13,16,22,0.04)", border: "1px solid rgba(13,16,22,0.1)", color: T.muted,
+                    }}
+                  >
+                    {s}
+                  </button>
+                ))}
               </div>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>· Intrattenimento e giochi</li>
-                <li>· Previsioni meteorologiche</li>
-                <li>· Organizzazione personale</li>
-                <li>· Traduzione linguistica</li>
-                <li>· Ricerca accademica</li>
-              </ul>
             </div>
           </div>
-          <p className="mt-3 text-[10px] text-muted-foreground">
-            Riferimento: EU AI Act Allegato III — La probabilità dipende da: elaborazione in tempo reale,
-            scala di utenti, grado di automazione, frequenza di aggiornamento.
-          </p>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Stats strip */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 8, marginBottom: 24 }}>
@@ -1047,7 +1051,7 @@ function ScopingPhase({
           { label: "Rischi totali", value: report.risks.length, valueColor: T.text },
           { label: "Alta severità", value: highCount, valueColor: T.red },
           { label: "Score medio", value: score.toFixed(2), valueColor: T.amber },
-          { label: "Rating", value: computeOverallRating(score), valueColor: T.blue },
+          { label: "Rating", value: computeOverallRating(score), valueColor: T.neutral },
         ].map((c, i) => (
           <div key={c.label} style={{
             background: T.card, border: `1px solid ${T.border}`, borderRadius: 10,

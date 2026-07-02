@@ -9,6 +9,8 @@ import {
   AlertTriangle, Shield, Users, Activity, FileText, Download,
 } from "lucide-react";
 import SignOffPanel from "@/components/ui/SignOffPanel";
+import FriaGuidedMode from "@/components/fria/FriaGuidedMode";
+import type { GuidedAnswers } from "@/lib/guided/guided-types";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { FRIAResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
@@ -54,7 +56,7 @@ const T = {
   border: "rgba(0,0,0,0.08)", card: "#ffffff", bg: "#f8f8f7",
   red: "#dc2626", redBg: "rgba(220,38,38,0.06)", redBdr: "rgba(220,38,38,0.2)",
   amber: "#d97706", amberBg: "rgba(202,138,4,0.06)", amberBdr: "rgba(202,138,4,0.2)",
-  blue: "#2563eb", blueBg: "rgba(37,99,235,0.06)", blueBdr: "rgba(37,99,235,0.2)",
+  neutral: "#0D1016", neutralBg: "rgba(13,16,22,0.04)", neutralBdr: "rgba(13,16,22,0.1)",
   green: "#16a34a", greenBg: "rgba(22,163,74,0.06)", greenBdr: "rgba(22,163,74,0.2)",
 } as const;
 
@@ -70,7 +72,7 @@ const inputSt: CSSProperties = {
 };
 
 // ─── Tiny helpers ─────────────────────────────────────────────────────────────
-type RiskColor = "red" | "amber" | "green" | "blue" | "gray";
+type RiskColor = "red" | "amber" | "green" | "neutral" | "gray";
 
 function riskColorFor(v: string): RiskColor {
   if (v === "high" || v === "critical") return "red";
@@ -84,7 +86,7 @@ function Badge({ label, color = "gray" }: { label: string; color?: RiskColor }) 
     red:   { bg: T.redBg,   bdr: T.redBdr,   text: T.red   },
     amber: { bg: T.amberBg, bdr: T.amberBdr, text: T.amber },
     green: { bg: T.greenBg, bdr: T.greenBdr, text: T.green },
-    blue:  { bg: T.blueBg,  bdr: T.blueBdr,  text: T.blue  },
+    neutral: { bg: T.neutralBg, bdr: T.neutralBdr, text: T.neutral },
     gray:  { bg: "rgba(0,0,0,0.04)", bdr: T.border, text: T.muted },
   };
   const c = map[color];
@@ -166,6 +168,7 @@ export default function FRIAPage() {
   const [openRights, setOpenRights] = useState<Set<string>>(new Set());
   const [openRightGroups, setOpenRightGroups] = useState<Set<string>>(new Set(["dignity_group", "freedom_group", "equality_group"]));
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
+  const [guidedMode, setGuidedMode] = useState(false);
   const [dossierSavedAt, setDossierSavedAt] = useState<string | null>(() =>
     readFromStorage<FRIAResult>("fria")?.completedAt ?? null
   );
@@ -441,12 +444,94 @@ export default function FRIAPage() {
     const yN  = [{ value: "yes", label: "Sì" }, { value: "no", label: "No" }];
     const hml = [{ value: "high", label: "Alto" }, { value: "medium", label: "Medio" }, { value: "low", label: "Basso" }];
 
+    // Map GuidedAnswers → context fields when user applies guided mode
+    function applyGuidedAnswers(answers: GuidedAnswers) {
+      const fieldMap: Record<string, string> = {
+        f_intended_purpose_match: "intended_purpose_match",
+        f_intended_purpose_explanation: "intended_purpose_explanation",
+        f_timeframe: "timeframe",
+        f_frequency: "frequency",
+        f_legal_basis: "legal_basis",
+        f_dpia_done: "dpia_done",
+        f_main_users: "main_users",
+        f_affected_persons: "affected_persons",
+        f_legal_framework: "legal_framework",
+        f_complaint_mechanisms: "complaint_mechanisms",
+        f_technology_overview: "technology_overview",
+        f_has_generative_component: "has_generative_component",
+        f_training_data_types: "training_data_types",
+        f_bias_assessed: "bias_assessed",
+        f_processes_personal_data: "processes_personal_data",
+        f_gdpr_processing_compliant: "gdpr_processing_compliant",
+        f_accuracy_acceptable: "accuracy_acceptable",
+        f_human_oversight_assigned: "human_oversight_assigned",
+        f_oversight_persons_trained: "oversight_persons_trained",
+        f_workers_informed: "workers_informed",
+        f_affected_persons_informed: "affected_persons_informed",
+      };
+      const patch: Record<string, string> = {};
+      for (const [qid, ctxKey] of Object.entries(fieldMap)) {
+        if (answers[qid]) patch[ctxKey] = answers[qid];
+      }
+      if (Object.keys(patch).length > 0) upCtx(patch);
+      setGuidedMode(false);
+    }
+
     return (
       <div>
-        <div style={{ marginBottom: 24 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 1 — Analisi del contesto</h2>
-          <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Cluster A: contesto di deployment · Cluster B: caratteristiche AI · Cluster C: governance</p>
+        <div style={{ marginBottom: 24, display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+          <div>
+            <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 1 — Analisi del contesto</h2>
+            <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Cluster A: contesto di deployment · Cluster B: caratteristiche AI · Cluster C: governance</p>
+          </div>
+          {/* Guided / Free toggle */}
+          <div style={{ display: "flex", gap: 4, background: "rgba(13,16,22,0.04)", borderRadius: 8, padding: 3 }}>
+            {(["Guidata", "Libera"] as const).map((mode) => {
+              const isActive = (mode === "Guidata") === guidedMode;
+              return (
+                <button key={mode} onClick={() => setGuidedMode(mode === "Guidata")}
+                  style={{ padding: "4px 12px", borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: "pointer",
+                    background: isActive ? T.text : "none", color: isActive ? "#fff" : T.muted, border: "none" }}>
+                  {mode}
+                </button>
+              );
+            })}
+          </div>
         </div>
+
+        {/* Guided mode overlay */}
+        {guidedMode && (
+          <div style={{ ...cardSt, padding: 24, marginBottom: 24 }}>
+            <FriaGuidedMode
+              onApply={applyGuidedAnswers}
+              onClose={() => setGuidedMode(false)}
+              initialAnswers={{
+                f_intended_purpose_match: c.intended_purpose_match,
+                f_intended_purpose_explanation: c.intended_purpose_explanation ?? "",
+                f_timeframe: c.timeframe,
+                f_frequency: c.frequency,
+                f_legal_basis: c.legal_basis,
+                f_dpia_done: c.dpia_done,
+                f_main_users: c.main_users,
+                f_affected_persons: c.affected_persons,
+                f_legal_framework: c.legal_framework,
+                f_complaint_mechanisms: c.complaint_mechanisms,
+                f_technology_overview: c.technology_overview,
+                f_has_generative_component: c.has_generative_component,
+                f_training_data_types: c.training_data_types,
+                f_bias_assessed: c.bias_assessed,
+                f_processes_personal_data: c.processes_personal_data,
+                f_gdpr_processing_compliant: c.gdpr_processing_compliant,
+                f_accuracy_acceptable: c.accuracy_acceptable,
+                f_human_oversight_assigned: c.human_oversight_assigned,
+                f_oversight_persons_trained: c.oversight_persons_trained,
+                f_workers_informed: c.workers_informed,
+                f_affected_persons_informed: c.affected_persons_informed,
+              }}
+            />
+          </div>
+        )}
+
         {sections.map((sec) => {
           const open = openAcc.has(sec.id);
           const pct = Math.round((sec.filled / sec.fields) * 100);
@@ -633,7 +718,7 @@ export default function FRIAPage() {
                             style={{ width: "100%", padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", background: openGrp ? T.bg : T.card, border: "none", cursor: "pointer" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                               <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{grp.label}</span>
-                              {selCount > 0 && <Badge label={`${selCount} sel.`} color="blue" />}
+                              {selCount > 0 && <Badge label={`${selCount} sel.`} color="neutral" />}
                             </div>
                             {openGrp ? <ChevronDown style={{ width: 13, height: 13, color: T.muted }} /> : <ChevronRight style={{ width: 13, height: 13, color: T.muted }} />}
                           </button>
@@ -652,7 +737,7 @@ export default function FRIAPage() {
                                       {right.is_absolute && <Badge label="assoluto" color="red" />}
                                       {checked && (
                                         <button onClick={() => setOpenRights((prev) => { const n = new Set(prev); n.has(right.id) ? n.delete(right.id) : n.add(right.id); return n; })}
-                                          style={{ fontSize: 10, color: T.blue, background: "none", border: "none", cursor: "pointer", padding: "2px 4px" }}>
+                                          style={{ fontSize: 10, color: T.neutral, background: "none", border: "none", cursor: "pointer", padding: "2px 4px" }}>
                                           {openAssess ? "chiudi ↑" : "valuta ↓"}
                                         </button>
                                       )}
@@ -669,14 +754,14 @@ export default function FRIAPage() {
                                             law_enforcement: "Forze dell'ordine", migration: "Migrazione", justice: "Giustizia",
                                           };
                                           return (
-                                            <div style={{ marginBottom: 14, padding: "10px 12px", borderRadius: 7, background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
-                                              <div style={{ fontSize: 10, fontWeight: 600, color: T.blue, textTransform: "uppercase" as const, letterSpacing: "0.5px", marginBottom: 7 }}>
+                                            <div style={{ marginBottom: 14, padding: "10px 12px", borderRadius: 7, background: T.neutralBg, border: `1px solid ${T.neutralBdr}` }}>
+                                              <div style={{ fontSize: 10, fontWeight: 600, color: T.neutral, textTransform: "uppercase" as const, letterSpacing: "0.5px", marginBottom: 7 }}>
                                                 Rischi documentati ECNL/DIHR per settore
                                               </div>
                                               <div style={{ display: "flex", flexDirection: "column" as const, gap: 4 }}>
                                                 {sectorHints.map(([sector, desc]) => (
                                                   <div key={sector} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                                                    <span style={{ fontSize: 10, fontWeight: 600, color: T.blue, minWidth: 120, flexShrink: 0 }}>{sectorLabel[sector] ?? sector}</span>
+                                                    <span style={{ fontSize: 10, fontWeight: 600, color: T.neutral, minWidth: 120, flexShrink: 0 }}>{sectorLabel[sector] ?? sector}</span>
                                                     <span style={{ fontSize: 11, color: T.text, lineHeight: 1.4 }}>{desc}</span>
                                                   </div>
                                                 ))}
@@ -965,7 +1050,7 @@ export default function FRIAPage() {
           <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 14px" }}>Trigger per aggiornamento FRIA</h3>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
             {DEFAULT_TRIGGERS.map((t) => (
-              <label key={t} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", borderRadius: 7, cursor: "pointer", background: mon.update_triggers.includes(t) ? T.blueBg : "none" }}>
+              <label key={t} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", borderRadius: 7, cursor: "pointer", background: mon.update_triggers.includes(t) ? T.neutralBg : "none" }}>
                 <input type="checkbox" checked={mon.update_triggers.includes(t)} onChange={() => toggleTrigger(t)} style={{ cursor: "pointer" }} />
                 <span style={{ fontSize: 12, color: T.text }}>{t}</span>
               </label>
