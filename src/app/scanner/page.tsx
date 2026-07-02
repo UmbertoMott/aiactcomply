@@ -89,16 +89,16 @@ function RadarChart({ signals }: { signals: Art50Signal[] }) {
       {/* Max area */}
       <polygon
         points={maxPolygon(R_MAX)}
-        fill="rgba(59,130,246,0.07)"
-        stroke="rgba(59,130,246,0.2)"
+        fill="rgba(255,255,255,0.04)"
+        stroke="rgba(255,255,255,0.10)"
         strokeWidth={1}
       />
 
       {/* Actual score area */}
       <polygon
         points={actualPts}
-        fill="rgba(99,102,241,0.35)"
-        stroke="#818cf8"
+        fill="rgba(255,255,255,0.12)"
+        stroke="rgba(255,255,255,0.55)"
         strokeWidth={1.5}
         strokeLinejoin="round"
       />
@@ -129,7 +129,7 @@ function RadarChart({ signals }: { signals: Art50Signal[] }) {
             dominantBaseline="middle"
             fontSize={9}
             fill="rgba(255,255,255,0.45)"
-            fontFamily="ui-monospace, monospace"
+            fontFamily="'DM Mono', monospace"
           >
             {lines.map((line, li) => (
               <tspan key={li} x={x} dy={li === 0 ? (lines.length > 1 ? "-0.5em" : "0") : "1.2em"}>
@@ -251,13 +251,13 @@ function ScanLoading({ url }: { url: string }) {
       <div className="relative inline-flex items-center justify-center mb-5">
         <div
           className="absolute w-20 h-20 rounded-full"
-          style={{ border: "1px solid rgba(99,102,241,0.12)", animation: "ping 2s cubic-bezier(0,0,0.2,1) infinite" }}
+          style={{ border: "1px solid rgba(255,255,255,0.08)", animation: "ping 2s cubic-bezier(0,0,0.2,1) infinite" }}
         />
         <div
           className="w-14 h-14 rounded-full border-2"
-          style={{ borderColor: "rgba(99,102,241,0.15)", borderTopColor: "#818cf8", animation: "spin 0.9s linear infinite" }}
+          style={{ borderColor: "rgba(255,255,255,0.10)", borderTopColor: "rgba(255,255,255,0.75)", animation: "spin 0.9s linear infinite" }}
         />
-        <div className="absolute w-3 h-3 rounded-full" style={{ background: "#818cf8", boxShadow: "0 0 12px rgba(129,140,248,0.7)" }} />
+        <div className="absolute w-3 h-3 rounded-full" style={{ background: "rgba(255,255,255,0.85)", boxShadow: "0 0 12px rgba(255,255,255,0.35)" }} />
       </div>
       <p className="text-[14px] font-medium mb-1" style={{ color: "rgba(255,255,255,0.65)", letterSpacing: "-0.3px" }}>
         Analisi in corso…
@@ -277,7 +277,7 @@ function ScanLoading({ url }: { url: string }) {
           >
             <span
               className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-              style={{ background: "rgba(129,140,248,0.55)", animation: `pulse 1.5s ${i * 0.3}s infinite` }}
+              style={{ background: "rgba(255,255,255,0.25)", animation: `pulse 1.5s ${i * 0.3}s infinite` }}
             />
             {label}
           </motion.div>
@@ -380,7 +380,7 @@ function ScanResults({ result, onReset }: { result: Art50ScanResult; onReset: ()
       {result.criticalCount > 0 && (
         <div
           className="relative rounded-2xl border p-6 mb-6 overflow-hidden"
-          style={{ borderColor: "rgba(99,102,241,0.3)", background: "rgba(30,27,75,0.4)" }}
+          style={{ borderColor: "rgba(255,255,255,0.10)", background: "rgba(13,16,22,0.5)" }}
         >
           {/* Blurred fake report lines */}
           <div className="blur-sm select-none pointer-events-none space-y-2.5 mb-4" aria-hidden="true">
@@ -398,7 +398,7 @@ function ScanResults({ result, onReset }: { result: Art50ScanResult; onReset: ()
           >
             <div
               className="w-10 h-10 rounded-full flex items-center justify-center mb-3 text-xl"
-              style={{ background: "rgba(99,102,241,0.2)", border: "1px solid rgba(99,102,241,0.4)" }}
+              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.18)" }}
             >
               🔒
             </div>
@@ -417,12 +417,12 @@ function ScanResults({ result, onReset }: { result: Art50ScanResult; onReset: ()
       <div
         className="rounded-2xl p-8 text-center mb-6"
         style={{
-          background: "linear-gradient(135deg, rgba(30,58,138,0.55) 0%, rgba(29,78,216,0.35) 100%)",
-          border: "1px solid rgba(59,130,246,0.35)",
+          background: "rgba(255,255,255,0.04)",
+          border: "1px solid rgba(255,255,255,0.10)",
         }}
       >
         <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3.5 py-1 text-[11px] text-white/45 mb-4">
-          <span className="block w-1.5 h-1.5 rounded-full bg-blue-500" style={{ boxShadow: "0 0 6px rgba(59,130,246,0.8)" }} />
+          <span className="block w-1.5 h-1.5 rounded-full bg-white/40" />
           Piano Starter · €49/mese
         </div>
         <h3 className="text-[20px] font-medium text-white mb-2" style={{ letterSpacing: "-0.8px" }}>
@@ -529,10 +529,10 @@ export default function ScannerPage() {
               EU AI Act — Art. 50 · Deadline: 2 dicembre 2026
             </div>
 
-            <h1 className="text-white mb-5" style={{ fontSize: "clamp(32px, 4.5vw, 56px)", fontWeight: 400, letterSpacing: "-2.5px", lineHeight: 1.05 }}>
+            <h1 className="text-white mb-5" style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "clamp(32px, 4.5vw, 56px)", fontWeight: 400, letterSpacing: "-2.5px", lineHeight: 1.05 }}>
               Il tuo sito è conforme
               <br />
-              <em className="not-italic" style={{ background: "linear-gradient(135deg, #93c5fd 0%, #6366f1 50%, #818cf8 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              <em className="not-italic" style={{ color: "rgba(255,255,255,0.72)" }}>
                 alla disclosure AI?
               </em>
             </h1>

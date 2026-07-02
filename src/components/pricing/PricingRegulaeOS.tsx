@@ -14,9 +14,8 @@ const C = {
   bg:        "#ffffff",
 } as const;
 
-// Font reali del sito (iniettati da layout.tsx via next/font/google)
-const SERIF = "var(--font-playfair, Georgia, 'Times New Roman', serif)";
-const MONO  = "ui-monospace, 'SFMono-Regular', monospace";
+const SERIF = "Georgia, 'Times New Roman', serif";
+const MONO  = "'DM Mono', monospace";
 
 type Tier = {
   eyebrow: string;
