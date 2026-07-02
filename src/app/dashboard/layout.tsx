@@ -22,6 +22,7 @@ import UserMenu from "@/components/dashboard/UserMenu";
 import ChatAssistant from "@/components/ui/ChatAssistant";
 import SessionWarning from "@/components/auth/SessionWarning";
 import { ProjectSwitcher } from "@/components/layout/ProjectSwitcher";
+import { ProjectMembersMenu } from "@/components/dashboard/ProjectMembersMenu";
 import { sanitizeSidebarLabel } from "@/lib/sidebar/sidebar-utils";
 
 
@@ -572,6 +573,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           )}
           <div className="ml-auto flex items-center gap-2">
+            <ProjectMembersMenu />
             <ProjectSwitcher />
             <NotificationBell />
             <UserMenu />
