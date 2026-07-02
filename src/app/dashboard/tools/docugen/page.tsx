@@ -1,14 +1,21 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
+import ProviderTransitionAlertBanner from "@/components/shared/provider-transition-alert-banner";
 import { motion, AnimatePresence } from "framer-motion";
-import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
-import { GitBranch, Download, ChevronRight, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { GitBranch, Download, AlertTriangle, CheckCircle, Clock, History, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
-import type { DocugenResult, DataAuditResult, RiskManagerResult } from "@/lib/dossier/storage-schema";
+import type { DocugenResult, DataAuditResult, RiskManagerResult, ClassifierResult, DPIAResult } from "@/lib/dossier/storage-schema";
+import { checkAnnexIVGaps, type AnnexIVGapsResult } from "@/app/actions/checkAnnexIVGaps";
+import { validateDocuGenCoherence, type CoherenceReport } from "@/app/actions/validateDocuGenCoherence";
+import { assessChangeImpact, type ChangeImpactReport } from "@/app/actions/assessChangeImpact";
+import { buildComplianceContextFromStorage } from "@/hooks/useComplianceContext";
+import { useAutoSave } from "@/hooks/useAutoSave";
+import { VersionHistoryPanel } from "@/components/compliance/VersionHistoryPanel";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
-import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { appendVersion, listVersions, type VersionSnapshot } from "@/lib/projects/version-history";
+import { SystemSelector } from "@/components/compliance/SystemSelector";
 
 const STORAGE_KEY = "docugen_state";
 
@@ -89,7 +96,6 @@ function readCrossToolContent(): Record<string, string> {
   if (typeof window === "undefined") return AUTO_CONTENT;
   const overrides: Record<string, string> = { ...AUTO_CONTENT };
 
-  // Data Audit result (from storage-schema)
   try {
     const dataAudit = readFromStorage<DataAuditResult>("dataAudit");
     if (dataAudit) {
@@ -103,7 +109,6 @@ function readCrossToolContent(): Record<string, string> {
     }
   } catch { /* fallback to AUTO_CONTENT */ }
 
-  // Risk Manager result (from storage-schema)
   try {
     const riskData = readFromStorage<RiskManagerResult>("riskManager");
     if (riskData) {
@@ -118,6 +123,40 @@ function readCrossToolContent(): Record<string, string> {
   } catch { /* fallback to AUTO_CONTENT */ }
 
   return overrides;
+}
+
+// ─── Ghost Summarizer ─────────────────────────────────────────────────────────
+interface GhostData {
+  systemName: string | null;
+  purpose: string | null;
+  riskLevel: string | null;
+  annexIII: boolean;
+  datasetsSummary: string | null;
+  risksSummary: string | null;
+  legalBasis: string | null;
+  personalDataCategories: string | null;
+}
+
+function buildGhostData(): GhostData {
+  const classifier = readFromStorage<ClassifierResult>("classifier");
+  const dataAudit  = readFromStorage<DataAuditResult>("dataAudit");
+  const riskMgr    = readFromStorage<RiskManagerResult>("riskManager");
+  const dpia       = readFromStorage<DPIAResult>("dpia");
+
+  return {
+    systemName: classifier?.systemName ?? null,
+    purpose: classifier?.systemDescription ?? null,
+    riskLevel: classifier?.riskLevel ?? null,
+    annexIII: classifier?.annexIII ?? false,
+    datasetsSummary: dataAudit
+      ? `Dataset: ${dataAudit.datasets?.map(d => d.name).join(", ") || "N/D"} · Qualità: ${dataAudit.overallQuality || "N/D"} · Dati personali: ${dataAudit.datasets?.some(d => d.personalData) ? "Sì" : "No"}`
+      : null,
+    risksSummary: riskMgr
+      ? `${riskMgr.risks?.length || 0} rischi · Livello: ${riskMgr.overallRiskLevel || "N/D"}`
+      : null,
+    legalBasis: dpia?.description?.processing_purposes ?? null,
+    personalDataCategories: dpia?.description?.personal_data_categories ?? null,
+  };
 }
 
 // ─── Annex IV — 9 sections ────────────────────────────────────────────────────
@@ -185,146 +224,46 @@ const ANNEX_IV = [
     autoSource: null,
     placeholder: "Monitoring continuo: drift detection settimanale su distribuzione input. Alert se accuracy scende sotto 82% su finestra mobile 30gg. Revisione umana obbligatoria se score < 40 o > 90 (casi limite)...",
   },
-  {
-    id: "s10", ref: "Art. 13", title: "Trasparenza verso gli utenti",
-    required: true,
-    hint: "Istruzioni per l'uso, metriche di performance comunicate, limitazioni note del sistema.",
-    autoSource: null,
-    placeholder: "Il sistema è accompagnato da istruzioni per l'uso in lingua italiana e inglese (v2.1, 2025-04-10). Le istruzioni includono: a) descrizione delle capacità e limitazioni; b) livello di accuratezza atteso; c) circostanze di rischio noto; d) modifiche sostanziali. Metriche di performance comunicate agli utenti: F1 score 86.8%, accuratezza 87.3%. Limitazioni dichiarate: il sistema non supporta curriculum in lingue diverse da IT/EN...",
-  },
-  {
-    id: "s11", ref: "Art. 14", title: "Supervisione umana",
-    required: true,
-    hint: "Meccanismi di override, interfacce di controllo, formazione degli operatori.",
-    autoSource: null,
-    placeholder: "Il sistema implementa supervisione umana ai sensi dell'Art. 14 EU AI Act tramite: a) override manuale obbligatorio per candidati con score borderline (40-60); b) interfaccia di revisione con spiegazione SHAP per ogni decisione; c) flag automatico per casi ad alto rischio (anziani, disabilità); d) audit trail di ogni intervento umano. Operatori formati con programma AI Literacy certificato (16h, cadenza annuale). Responsabile supervisione: [Nome Ruolo]...",
-  },
-  {
-    id: "s12", ref: "Art. 15", title: "Accuratezza, robustezza e sicurezza",
-    required: true,
-    hint: "Test di robustezza adversarial, accuracy su sottogruppi, resilienza agli errori.",
-    autoSource: null,
-    placeholder: "Test di robustezza eseguiti: a) adversarial testing con perturbazioni di input (typos, formati non standard) — degradazione max 3.2%; b) stress test su volume 10x — latenza p99 < 1.2s; c) test su sottogruppi demografici — gender gap accuracy < 2.1%, age gap < 1.8%; d) failsafe: in caso di errore critico il sistema restituisce output neutro e segnala all'operatore umano. Piano di test: quarterly su dataset aggiornato. Ultima esecuzione: 2025-04-10...",
-  },
-  {
-    id: "s13", ref: "Art. 50", title: "Obblighi di disclosure AI",
-    required: false,
-    hint: "Disclosure per chatbot, watermarking contenuti sintetici, labeling deepfake.",
-    autoSource: null,
-    placeholder: "Obblighi Art. 50 applicabili al sistema: [selezionare quelli pertinenti]\n\n□ Disclosure chatbot: il sistema include un'interfaccia conversazionale. L'utente è informato di interagire con un sistema AI tramite messaggio iniziale visibile. Testo disclosure: 'Stai interagendo con un assistente AI — le risposte sono generate automaticamente.'\n\n□ Labeling contenuti sintetici: i contenuti generati dal sistema sono etichettati con marker machine-readable [C2PA/ISO 21434] e indicazione visiva 'Generato da AI'.\n\n□ Watermarking: implementato tramite [fornitore/metodo], persistente dopo elaborazione standard.",
-  },
 ];
 
-// ─── AI Co-Writer ──────────────────────────────────────────────────────────────
-
-const CO_WRITER_TEMPLATES: Record<string, string> = {
-  s1: `Il sistema [NOME SISTEMA] è un sistema di intelligenza artificiale progettato per [SCOPO PRINCIPALE]. È destinato a essere utilizzato da [CATEGORIE UTENTI] nell'ambito di [CONTESTO OPERATIVO].\n\nL'uso previsto comprende: [LISTA USI]. L'uso non previsto comprende: [LISTA ESCLUSIONI].\n\nIl sistema opera in [DESCRIZIONE AMBIENTE]. I destinatari finali sono [DESTINATARI].`,
-  s2: `Architettura del sistema: [TIPO ARCHITETTURA, es. Transformer, CNN, GBM].\n\nPipeline di elaborazione:\n1. Preprocessing: [DESCRIZIONE]\n2. Feature extraction: [DESCRIZIONE]\n3. Inferenza: [DESCRIZIONE]\n4. Post-processing: [DESCRIZIONE]\n\nFramework e versioni: [LISTA FRAMEWORK].\nSoglia decisionale: [VALORE]. Motivazione: [MOTIVAZIONE].`,
-  s3: `Requisiti di input: [FORMATO, DIMENSIONE, TIPO].\nRequisiti di output: [FORMATO, RANGE, TIPO].\n\nVincoli di sistema:\n- Latenza massima: [X] ms (p99)\n- Disponibilità: [X]%\n- Capacità: [X] richieste/secondo\n- Lingue supportate: [LISTA]\n\nDipendenze esterne: [API, DATABASE, SERVIZI TERZI].`,
-  s4: `**Governance dei dati di addestramento — Art. 10**\n\nDataset utilizzati:\n- Nome: [NOME] | Fonte: [FONTE] | Dimensione: [N righe]\n- Periodo copertura: [DA] — [A]\n- Licenza: [LICENZA]\n\nAnalisi bias eseguita: [SÌ/NO]. Metodo: [METODO].\nProxy discriminatori rilevati: [LISTA o NESSUNO].\nMisure di debiasing adottate: [DESCRIZIONE].`,
-  s5: `Metriche di performance — valutazione su test set:\n\n| Metrica | Valore | Soglia minima |\n|---------|--------|---------------|\n| Accuracy | [X]% | [X]% |\n| Precision | [X]% | [X]% |\n| Recall | [X]% | [X]% |\n| F1 Score | [X]% | [X]% |\n\nTest set: [N] campioni, hold-out [X]%.\nData valutazione: [DATA]. Run ID: [ID].`,
-  s6: `**Gestione del rischio — Art. 9**\n\nRischi identificati:\n1. [RISCHIO 1] — Severità: ALTA — Probabilità: MEDIA\n   Mitigazione: [DESCRIZIONE]\n\n2. [RISCHIO 2] — Severità: MEDIA — Probabilità: ALTA\n   Mitigazione: [DESCRIZIONE]\n\nScore di rischio complessivo: [X]/10.\nProssima revisione: [DATA].`,
-  s7: `Modifiche sostanziali al sistema (Art. 3(23)):\n\n[DATA] — v[X.Y.Z] — [TIPO MODIFICA]: [DESCRIZIONE MODIFICA]\nClassificazione: [SOSTANZIALE / NON SOSTANZIALE]\nMotivazione: [MOTIVAZIONE]\nCommit: [HASH]\n\nConformity assessment ripetuto: [SÌ/NO]. Data: [DATA].`,
-  s8: `Norme armonizzate e standard applicati:\n\n- ISO/IEC 42001:2023 — AI Management Systems\n- ISO/IEC 27001:2022 — Information Security Management\n- [ALTRI STANDARD SETTORE-SPECIFICI]\n\nStato di conformità: [CERTIFICATO / IN CORSO / NON APPLICABILE]\nData prossimo audit: [DATA].`,
-  s9: `Piano di monitoraggio post-market — Art. 72:\n\nKPI monitorati:\n- Accuracy su produzione: alert se < [X]% su finestra mobile [N] giorni\n- Drift input: PSI settimanale, soglia [X]\n- Segnalazioni utenti: revisione mensile\n\nFrequenza report: [FREQUENZA]\nResponsabile: [RUOLO]\nEscalation: [PROCEDURA ESCALATION].`,
-  s10: `**Trasparenza verso gli utenti — Art. 13**\n\nIstruzioni per l'uso fornite in: [LINGUE].\n\nContenuto delle istruzioni:\na) Capacità e finalità del sistema: [DESCRIZIONE]\nb) Limitazioni note: [LISTA LIMITAZIONI]\nc) Livello di accuratezza atteso: [X]%\nd) Circostanze di rischio noto: [DESCRIZIONE]\ne) Misure di supervisione umana previste: [DESCRIZIONE]\n\nModifiche sostanziali comunicate: [SÌ/NO]. Modalità: [MODALITÀ].`,
-  s11: `**Supervisione umana — Art. 14**\n\nMeccanismi di supervisione implementati:\n- Override manuale: [DESCRIZIONE QUANDO E COME]\n- Interfaccia di controllo: [DESCRIZIONE]\n- Alert automatici: [CONDIZIONI TRIGGER]\n\nFormazione operatori:\n- Programma: [NOME PROGRAMMA]\n- Durata: [N] ore\n- Cadenza: [FREQUENZA]\n- Certificazione: [SÌ/NO]\n\nResponsabile supervisione: [NOME/RUOLO]\nAudit trail: ogni intervento umano è registrato con timestamp, utente, motivazione.`,
-  s12: `**Accuratezza, robustezza e sicurezza — Art. 15**\n\nTest di robustezza eseguiti:\n- Adversarial testing: [METODO, DEGRADAZIONE MAX]\n- Stress test: [CARICO, LATENZA]\n- Test su sottogruppi: [GRUPPI TESTATI, DELTA MAX]\n- Failsafe: [COMPORTAMENTO IN CASO DI ERRORE]\n\nRisultati:\n[TABELLA RISULTATI]\n\nPiano di test: cadenza [FREQUENZA].\nUltima esecuzione: [DATA]. Prossima: [DATA].`,
-  s13: `**Obblighi di disclosure AI — Art. 50**\n\n[Seleziona e compila gli obblighi applicabili]\n\n□ Disclosure chatbot (Art. 50(1)):\nTesto disclosure: "[TESTO DISCLOSURE]"\nPosizionamento: [DOVE È VISIBILE]\n\n□ Labeling contenuti sintetici (Art. 50(2)):\nMetodo di labeling: [METODO]\nMarker machine-readable: [SÌ/NO, STANDARD]\n\n□ Watermarking (Art. 50(5)):\nFornitore: [FORNITORE]\nPersistenza: [DESCRIZIONE].`,
-};
-
-function CoWriterBar({
-  sectionId,
-  sectionTitle,
-  currentText,
-  onExpand,
-}: {
-  sectionId: string;
-  sectionTitle: string;
-  currentText: string;
-  onExpand: (expanded: string) => void;
-}) {
-  const [loading, setLoading] = useState(false);
-  const [applied, setApplied] = useState(false);
-
-  function expand() {
-    setLoading(true);
-    // Template-based expansion (no API key required)
-    const template = CO_WRITER_TEMPLATES[sectionId];
-    if (!template) {
-      setLoading(false);
-      return;
-    }
-    // Simulate async suggestion (200ms)
-    setTimeout(() => {
-      const base = currentText.trim();
-      const result = base
-        ? `${base}\n\n---\n*[Sezione espansa da AI Co-Writer — modifica il testo nei campi tra parentesi quadre]*\n\n${template}`
-        : template;
-      onExpand(result);
-      setApplied(true);
-      setLoading(false);
-      setTimeout(() => setApplied(false), 3000);
-    }, 200);
-  }
-
-  if (!CO_WRITER_TEMPLATES[sectionId]) return null;
-
-  return (
-    <div
-      className="mt-2 mb-1 flex items-center gap-2 px-3 py-2 rounded-lg"
-      style={{ background: "rgba(37,99,235,0.04)", border: "1px solid rgba(37,99,235,0.1)" }}
-    >
-      <span className="text-[10px] font-bold text-blue-500 flex-shrink-0">AI Co-Writer</span>
-      <p className="text-[11px] text-slate-500 flex-1">
-        Genera un template compilabile per la sezione &ldquo;{sectionTitle}&rdquo;
-      </p>
-      {applied ? (
-        <span className="text-[11px] text-green-600 font-medium flex-shrink-0">✓ Applicato</span>
-      ) : (
-        <button
-          onClick={expand}
-          disabled={loading}
-          className="flex-shrink-0 text-[11px] font-medium px-3 py-1.5 rounded-md transition-colors"
-          style={{
-            background: "#2563eb", color: "#fff", border: "none", cursor: loading ? "wait" : "pointer",
-            opacity: loading ? 0.6 : 1,
-          }}
-        >
-          {loading ? "…" : "Suggerisci testo →"}
-        </button>
-      )}
-    </div>
-  );
-}
-
-// ─── Simulated version history ────────────────────────────────────────────────
-const VERSIONS = [
-  { tag: "v2.1.0", commit: "a3f9c2d", date: "2025-04-10", status: "Finalized", changes: 3 },
-  { tag: "v2.0.1", commit: "b7e1a4c", date: "2025-02-28", status: "Finalized", changes: 1 },
-  { tag: "v2.0.0", commit: "c4d2f18", date: "2025-01-15", status: "Expired",   changes: 9 },
-  { tag: "v1.3.2", commit: "d9a5e31", date: "2024-11-20", status: "Expired",   changes: 2 },
-];
-
-// ─── Auto-populated content (simulates cross-tool aggregation) ────────────────
+// ─── Auto-populated content ────────────────────────────────────────────────────
 const AUTO_CONTENT: Record<string, string> = {
   "data-audit": `**[Auto-importato da Data Audit — Art. 10]**\n\nDataset: HR Screening Dataset (84.320 righe)\nFonte: Snowflake.prod / HR_DATA · Valido dal: 15/01/2024\n\nMetriche bias (snapshot Mag 2025):\n• Disparate Impact (DI): 0.61 ⚠ — sotto soglia 0.8 (Regola 4/5)\n• Statistical Parity Diff. (SPD): 0.32\n• Equalized Odds Diff. (EOD): 0.19\n\nProxy detector: cap_residenza → proxy etnia (67%), cod_settore → proxy genere (52%)\n\nStato: CTGAN Debiasing richiesto prima del deployment.`,
-
   "risk-manager": `**[Auto-importato da Risk Manager — Art. 9]**\n\nClassificazione: Sistema ad Alto Rischio (Allegato III, punto 4 — Occupazione)\nRisk score: 7.4/10\n\nRischi identificati:\n1. Discriminazione algoritmica (CRITICO) — DI < 0.8 su genere/etnia\n2. Opacità decisionale (ALTO) — Explainability index: 0.42\n3. Data drift post-deploy (MEDIO) — Rilevato drift su distribuzione input Q1 2025\n\nMisure di mitigazione:\n• CTGAN debiasing attivo dalla v2.1.0\n• SHAP values esposti per ogni predizione\n• Sentinel agent attivo con alert settimanale`,
-
   "code": `**[Auto-estratto da Repository — GitHub]**\n\nUltimo commit analizzato: a3f9c2d (main, 2025-04-10)\nFile chiave: src/models/screener.py, src/api/main.py\n\nArchitettura rilevata: BERT-large classifier\nDipendenze critiche: torch==2.1.0, transformers==4.35.3, scikit-learn==1.3.2\n\nAST Analysis: 3 endpoint AI-critical identificati\nCompliance signals: 4 (2 critici, 2 warning)`,
-
   "git": `**[Auto-estratto da Git History]**\n\nv2.1.0 (a3f9c2d, 2025-04-10): Aggiornamento soglia 0.68→0.72, CTGAN integration — MODIFICA SOSTANZIALE ex Art. 3(23)\nv2.0.1 (b7e1a4c, 2025-02-28): Hotfix preprocessing multilingua — modifica non sostanziale\nv2.0.0 (c4d2f18, 2025-01-15): Major release, nuovo training set — MODIFICA SOSTANZIALE`,
-
   "mlflow": `**[Auto-estratto da MLflow]**\n\nRun ID: mlf-2025-04-10-001 · Experiment: hr-screener-v2\nAccuracy: 87.3% | Precision: 84.1% | Recall: 89.7% | F1: 86.8%\nTest set: 12.400 record, hold-out 20% · Date: 2025-04-10\n\nHyperparameters: lr=2e-5, batch=32, epochs=4, max_seq=512\nArtifact: s3://mlflow-artifacts/hr-screener/v2.1.0/model.pt`,
 };
 
-// ─── Status styling ───────────────────────────────────────────────────────────
-const STATUS_STYLE: Record<string, { bg: string; text: string; border: string }> = {
-  Finalized: { bg: "rgba(22,163,74,0.08)",  text: "#16a34a", border: "rgba(22,163,74,0.2)"  },
-  Draft:     { bg: "rgba(59,130,246,0.08)", text: "#2563eb", border: "rgba(59,130,246,0.2)" },
-  Expired:   { bg: "rgba(0,0,0,0.04)",      text: "rgba(0,0,0,0.35)", border: "rgba(0,0,0,0.1)" },
+// ─── Strip markdown asterisks for document display ────────────────────────────
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*([^*]*)\*\*/g, "$1")
+    .replace(/\*([^*]*)\*/g, "$1");
+}
+
+// ─── Source badges ─────────────────────────────────────────────────────────────
+const SOURCE_BADGES: Record<string, string> = {
+  "s1": "Annex IV §1",
+  "s2": "Annex IV §2a",
+  "s3": "Annex IV §2b",
+  "s4": "Art. 10 — WP248",
+  "s5": "Annex IV §2d",
+  "s6": "Art. 9 — Risk",
+  "s7": "Art. 3(23)",
+  "s8": "CEN/ISO",
+  "s9": "Art. 72 PMSS",
 };
+
+// ─── Timeline step type ───────────────────────────────────────────────────────
+type TimelineStep = "aggregate" | "draft" | "validate" | "export";
+
+const TIMELINE_STEPS = [
+  { id: "aggregate" as TimelineStep, label: "Data Aggregation" },
+  { id: "draft"     as TimelineStep, label: "Intelligent Drafting" },
+  { id: "validate"  as TimelineStep, label: "Human Validation" },
+  { id: "export"    as TimelineStep, label: "Audit-Ready Export" },
+];
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function DocuGenPage() {
@@ -333,16 +272,63 @@ export default function DocuGenPage() {
   const [compareMode, setCompareMode] = useState(false);
   const [compareIdx, setCompareIdx] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
+  const [versionSnapshots, setVersionSnapshots] = useState<VersionSnapshot[]>([]);
+  const [saveNote, setSaveNote] = useState("");
+  const [showSaveNote, setShowSaveNote] = useState(false);
+  const [workName, setWorkName] = useState("");
+  const [showVersionPanel, setShowVersionPanel] = useState(false);
   const [crossContent] = useState<Record<string, string>>(() => readCrossToolContent());
 
-  // ─── DB Sync State ──────────────────────────────────────────────────────────
+  // Timeline state
+  const [timelineStep, setTimelineStep] = useState<TimelineStep>("aggregate");
+  const [focusMode, setFocusMode] = useState(false);
+  const [ghost, setGhost] = useState<GhostData>(() => ({
+    systemName: null, purpose: null, riskLevel: null, annexIII: false,
+    datasetsSummary: null, risksSummary: null, legalBasis: null, personalDataCategories: null,
+  }));
+
+  const classifierTier = useMemo<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = localStorage.getItem("aicomply_classifier_result");
+      if (!raw) return null;
+      return (JSON.parse(raw) as { riskLevel?: string })?.riskLevel?.toLowerCase() ?? null;
+    } catch { return null; }
+  }, []);
+
+  const { justSaved: docugenSaved } = useAutoSave("docugen", persisted, saveState);
+
+  useEffect(() => {
+    setVersionSnapshots(listVersions("docugen"));
+  }, []);
+
+  // Ghost Summarizer mount
+  useEffect(() => {
+    const g = buildGhostData();
+    setGhost(g);
+    if (g.systemName && !persisted.systemName) setSystemName(g.systemName);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const [technicalFileId, setTechnicalFileId] = useState<string | null>(null);
+  const [annexIVReport, setAnnexIVReport] = useState<AnnexIVGapsResult | null>(null);
+  const [annexIVLoading, setAnnexIVLoading] = useState(false);
+  const [coherenceReport, setCoherenceReport] = useState<CoherenceReport | null>(null);
+  const [coherenceLoading, setCoherenceLoading] = useState(false);
+  const [changeDesc, setChangeDesc] = useState("");
+  const [changeImpactReport, setChangeImpactReport] = useState<ChangeImpactReport | null>(null);
+  const [changeImpactLoading, setChangeImpactLoading] = useState(false);
   const [aiSystemId, setAiSystemId] = useState<string | null>(null);
   const [aiSystems, setAiSystems] = useState<{ id: string; name: string; risk_tier: string }[]>([]);
   const [dbSynced, setDbSynced] = useState(false);
   const [dbSyncing, setDbSyncing] = useState(false);
 
-  // Carica sistemi AI e stato DB al mount
+  // ── Document editor (Step 4 preview) ────────────────────────────────────────
+  const [docEditing, setDocEditing] = useState(false);
+  const [editedDocHtml, setEditedDocHtml] = useState<string | null>(null);
+  const previewDocRef = useRef<HTMLDivElement>(null);
+  const editDocRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     loadAISystems().then(setAiSystems);
     loadFromDB().then(({ technicalFileId: tfId, aiSystemId: asId }) => {
@@ -352,17 +338,14 @@ export default function DocuGenPage() {
     });
   }, []);
 
-  // Auto-save su DB quando cambia il contenuto (debounced 2s)
   useEffect(() => {
     if (!aiSystemId || !persisted.content || Object.keys(persisted.content).length === 0) return;
     const timer = setTimeout(async () => {
       setDbSyncing(true);
-      // Mappa sezioni locali → sezioni DB
       const sectionMap: Record<string, string> = {
         s1: "s1_general", s2: "s2_components", s3: "s3_data_governance",
         s4: "s4_monitoring", s5: "s5_transparency", s6: "s6_performance", s7: "s7_declaration",
       };
-      // Salva la sezione attiva
       const dbSection = sectionMap[activeSection];
       if (dbSection && persisted.content[activeSection]) {
         const newId = await saveToDBSection(
@@ -377,21 +360,11 @@ export default function DocuGenPage() {
       setDbSyncing(false);
     }, 2000);
     return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [persisted.content, activeSection, aiSystemId]);
 
-
-  const classifierData = useMemo(() => {
-    try { const r = localStorage.getItem("aicomply_classifier_result"); return r ? JSON.parse(r) : null; }
-    catch { return null; }
-  }, []);
-  useEffect(() => {
-    if (classifierData?.systemName && !persisted.systemName) {
-      setSystemName(classifierData.systemName);
-    }
-  }, [classifierData]);
-
-  // Destructure for easy access
-  const { content, status, systemName, activeVersion } = persisted;
+  const { content, status, systemName, activeVersion: _activeVersion } = persisted;
+  void _activeVersion;
 
   function setPersisted(updater: (prev: DocuGenState) => DocuGenState) {
     setPersistedRaw((prev) => {
@@ -401,7 +374,6 @@ export default function DocuGenPage() {
     });
   }
 
-  // Helpers that update the persisted state
   function setContent(upd: Record<string, string> | ((p: Record<string, string>) => Record<string, string>)) {
     setPersisted((prev) => ({
       ...prev,
@@ -414,9 +386,6 @@ export default function DocuGenPage() {
       status: typeof upd === "function" ? upd(prev.status) : upd,
     }));
   }
-  function setActiveVersion(v: number) {
-    setPersisted((prev) => ({ ...prev, activeVersion: v }));
-  }
   function setSystemName(v: string) {
     setPersisted((prev) => ({ ...prev, systemName: v }));
   }
@@ -426,7 +395,33 @@ export default function DocuGenPage() {
     setTimeout(() => setToast(null), 3000);
   }
 
-  const version = VERSIONS[activeVersion];
+  const enterDocEdit = () => {
+    const source = editedDocHtml ?? previewDocRef.current?.innerHTML ?? "";
+    setDocEditing(true);
+    setTimeout(() => {
+      if (editDocRef.current) {
+        editDocRef.current.innerHTML = source;
+        editDocRef.current.querySelectorAll("[data-noedit]").forEach(el => {
+          (el as HTMLElement).contentEditable = "false";
+        });
+        editDocRef.current.querySelectorAll("p, span, em, i, b, strong").forEach(el => {
+          const htmlEl = el as HTMLElement;
+          if (!htmlEl.closest("[data-noedit]")) {
+            htmlEl.style.color = "";
+            htmlEl.style.fontStyle = "";
+          }
+        });
+        editDocRef.current.focus();
+      }
+    }, 0);
+  };
+
+  const confirmDocEdit = () => {
+    if (editDocRef.current) setEditedDocHtml(editDocRef.current.innerHTML);
+    setDocEditing(false);
+  };
+
+  const version = versionSnapshots[0] ?? { tag: "lavoro", status: "draft" as const, savedAt: "", sectionsChanged: [] as string[] };
 
   function getContent(sectionId: string): string {
     const sec = ANNEX_IV.find((s) => s.id === sectionId)!;
@@ -443,11 +438,15 @@ export default function DocuGenPage() {
   }
 
   const doneCount  = ANNEX_IV.filter((s) => getSectionStatus(s.id) === "done").length;
+  const draftCount = ANNEX_IV.filter((s) => getSectionStatus(s.id) === "draft").length;
   const [savedAt, setSavedAt] = useState<string | null>(() =>
     readFromStorage<DocugenResult>("docugen")?.completedAt ?? null
   );
 
-  async function saveToDossier() {
+  const emptyRequired = ANNEX_IV.filter((s) => s.required && getSectionStatus(s.id) === "empty");
+  const canFinalize = emptyRequired.length === 0;
+
+  async function saveToDossier(asFinalized = false) {
     const completedAt = new Date().toISOString();
     const resolvedName = systemName.trim() || "Sistema AI (non specificato)";
 
@@ -463,22 +462,75 @@ export default function DocuGenPage() {
       completedAt,
     });
 
+    const sectionsSnapshot: Record<string, "empty" | "draft" | "done"> = {};
+    ANNEX_IV.forEach(s => { sectionsSnapshot[s.id] = getSectionStatus(s.id); });
+
+    const isSubstantial = changeImpactReport?.isSubstantialModification ?? false;
+    const resolvedTag = workName.trim() || undefined;
+    appendVersion("docugen", persisted, {
+      label: asFinalized ? "Versione finalizzata" : "Salvataggio manuale",
+      tag: resolvedTag,
+      note: saveNote.trim() || undefined,
+      status: asFinalized ? "finalized" : "draft",
+      isSubstantialModification: isSubstantial,
+      substModificationBasis: isSubstantial ? (changeImpactReport?.substModificationBasis ?? undefined) : undefined,
+      sectionsSnapshot,
+      systemName: resolvedName,
+    });
+
+    setVersionSnapshots(listVersions("docugen"));
+    setSaveNote("");
+    setWorkName("");
+    setShowSaveNote(false);
+
     await appendEvidence("adr", {
       type: "Fascicolo Tecnico Annex IV — Art. 11",
       systemName: resolvedName,
       sectionsCompleted: doneCount,
       sectionsTotal: ANNEX_IV.length,
       requiredRemaining: emptyRequired.length,
-      version: VERSIONS[activeVersion]?.tag ?? "draft",
-      commit: VERSIONS[activeVersion]?.commit ?? "—",
+      status: asFinalized ? "finalized" : "draft",
     }, "docugen-ai");
 
     setSavedAt(completedAt);
-    showToast("Fascicolo salvato nel dossier e registrato su Evidence Layer ✓");
+    showToast(asFinalized ? "✓ Versione finalizzata salvata nel dossier" : "Fascicolo salvato nel dossier ✓");
   }
-  const draftCount = ANNEX_IV.filter((s) => getSectionStatus(s.id) === "draft").length;
-  const emptyRequired = ANNEX_IV.filter((s) => s.required && getSectionStatus(s.id) === "empty");
-  const canFinalize = emptyRequired.length === 0;
+
+  async function exportPdf() {
+    const resolvedName = systemName.trim() || "Sistema AI";
+    const isLimitedOrMinimal = classifierTier === "limited" || classifierTier === "minimal";
+
+    const sections = isLimitedOrMinimal
+      ? []
+      : ANNEX_IV.map(s => ({
+          title: s.title,
+          article: s.ref,
+          content: getContent(s.id),
+          status: (getSectionStatus(s.id) === "done" ? "complete"
+            : getSectionStatus(s.id) === "draft" ? "partial" : "empty") as "complete" | "partial" | "empty",
+        }));
+
+    const payload = { systemName: resolvedName, systemId: `docugen-${Date.now()}`, tier: classifierTier, sections };
+    showToast("Generazione PDF in corso…");
+    try {
+      const res = await fetch("/api/compliance/export-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) { showToast("Errore export PDF"); return; }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `AIComply_${resolvedName.replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("PDF esportato ✓");
+    } catch {
+      showToast("Errore durante l'export PDF");
+    }
+  }
 
   function exportFullDocument() {
     const resolvedName = systemName.trim() || "sistema-ai";
@@ -487,19 +539,14 @@ export default function DocuGenPage() {
         format: "AIComply Fascicolo Tecnico — Annex IV",
         regulation: "Regolamento UE 2024/1689 — Art. 11",
         systemName: resolvedName,
-        version: VERSIONS[activeVersion]?.tag ?? "draft",
-        commit: VERSIONS[activeVersion]?.commit ?? "",
+        version: versionSnapshots[0]?.tag ?? "draft",
+        commit: versionSnapshots[0]?.id?.slice(0, 7) ?? "—",
         exportedAt: new Date().toISOString(),
         completionPct: Math.round((doneCount / 9) * 100),
       },
       sections: ANNEX_IV.map((s) => ({
-        id: s.id,
-        ref: s.ref,
-        title: s.title,
-        required: s.required,
-        status: getSectionStatus(s.id),
-        autoSource: s.autoSource ?? null,
-        content: getContent(s.id),
+        id: s.id, ref: s.ref, title: s.title, required: s.required,
+        status: getSectionStatus(s.id), autoSource: s.autoSource ?? null, content: getContent(s.id),
       })),
     };
     const filename = `annex-iv-${resolvedName.replace(/\s+/g, "-").toLowerCase()}-${new Date().toISOString().slice(0, 10)}.json`;
@@ -516,7 +563,7 @@ export default function DocuGenPage() {
     const lines: string[] = [
       `# Fascicolo Tecnico — ${resolvedName}`,
       `**Regolamento UE 2024/1689 — Art. 11, Allegato IV**`,
-      `Versione: ${VERSIONS[activeVersion]?.tag ?? "draft"} · Esportato: ${new Date().toLocaleDateString("it-IT")}`,
+      `Versione: ${versionSnapshots[0]?.tag ?? "draft"} · Esportato: ${new Date().toLocaleDateString("it-IT")}`,
       "",
     ];
     ANNEX_IV.forEach((s) => {
@@ -535,33 +582,82 @@ export default function DocuGenPage() {
 
   const activeS = ANNEX_IV.find((s) => s.id === activeSection)!;
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="w-full" style={{ fontFamily: "var(--font-inter, system-ui)" }}>
+    <div className="w-full" style={{ fontFamily: "system-ui, sans-serif" }}>
 
-      <SystemContextBanner checkProhibited={true} />
+      <SystemSelector checkProhibited={true} />
+      <ProviderTransitionAlertBanner />
 
       {/* Dossier saved banner */}
       {savedAt ? (
         <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
           style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)" }}>
           <span style={{ color: "#15803d" }}>✓ Risultati salvati nel dossier · Aggiornato il {new Date(savedAt).toLocaleDateString("it-IT")}</span>
+          {docugenSaved && <span className="text-[10px]" style={{ color: "#15803d" }}>· Salvato automaticamente</span>}
           <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>Vedi dossier →</Link>
         </div>
       ) : (
-        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[12px]"
-          style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}>
-          <span style={{ color: "rgba(0,0,0,0.45)" }}>Salva il Fascicolo Tecnico nel dossier di compliance</span>
-          <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1 transition-opacity hover:opacity-80"
-            style={{ background: "#0D1016", color: "#ffffff", border: "none", cursor: "pointer" }}>
-            Salva nel dossier
-          </button>
-        </div>
+        <>
+          <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-1 text-[12px]"
+            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}>
+            <span style={{ color: "rgba(0,0,0,0.45)" }}>
+              Salva il Fascicolo Tecnico nel dossier di compliance
+              {docugenSaved && <span className="ml-2 text-[10px]" style={{ color: "#16a34a" }}>✓ Auto-salvato</span>}
+            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <button onClick={() => setShowSaveNote(v => !v)}
+                className="text-[11px] rounded-full px-3 py-1 transition-opacity hover:opacity-80"
+                style={{ background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer" }}>
+                {showSaveNote ? "▲" : "Nomina e salva"}
+              </button>
+              <button onClick={() => { setShowSaveNote(true); }} className="text-[11px] font-medium rounded-full px-3 py-1 transition-opacity hover:opacity-80"
+                style={{ background: "rgba(0,0,0,0.08)", color: "#0D1016", border: "none", cursor: "pointer" }}
+                onDoubleClick={() => saveToDossier(false)}>
+                Salva lavoro
+              </button>
+              <button onClick={() => saveToDossier(true)} disabled={!canFinalize}
+                className="text-[11px] font-medium rounded-full px-3 py-1 transition-opacity hover:opacity-80 disabled:opacity-40"
+                style={{ background: "#0D1016", color: "#ffffff", border: "none", cursor: canFinalize ? "pointer" : "not-allowed" }}>
+                ✓ Finalizza versione
+              </button>
+            </div>
+          </div>
+          {showSaveNote && (
+            <div className="mb-5 rounded-lg" style={{ padding: "10px 16px 12px", background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", gap: 8 }}>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", minWidth: 80, textTransform: "uppercase", letterSpacing: "0.04em" }}>Nome lavoro</span>
+                <input
+                  value={workName}
+                  onChange={e => setWorkName(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter" && workName.trim()) saveToDossier(false); }}
+                  placeholder="Es. «Prima bozza post-audit DPO»"
+                  style={{ flex: 1, fontSize: 11, padding: "6px 10px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", outline: "none" }}
+                  autoFocus
+                />
+                <button onClick={() => saveToDossier(false)}
+                  style={{ fontSize: 11, fontWeight: 700, padding: "6px 14px", borderRadius: 6, background: "#0D1016", color: "#fff", border: "none", cursor: "pointer", flexShrink: 0 }}>
+                  Salva
+                </button>
+              </div>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <Clock size={11} style={{ color: "rgba(0,0,0,0.3)", flexShrink: 0, marginLeft: 80 }} />
+                <input
+                  value={saveNote}
+                  onChange={e => setSaveNote(e.target.value)}
+                  placeholder="Nota opzionale — es. «Aggiornato dopo audit DPO del 10/06»"
+                  style={{ flex: 1, fontSize: 11, padding: "5px 10px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016" }}
+                />
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* DB Sync Banner */}
       {aiSystems.length > 0 && (
         <div className="flex items-center gap-3 rounded-lg px-4 py-2.5 mb-4 text-[12px]"
-          style={{ background: "rgba(59,130,246,0.05)", border: "1px solid rgba(59,130,246,0.12)" }}>
+          style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.08)" }}>
           <span style={{ color: "rgba(0,0,0,0.45)" }}>Sistema AI:</span>
           <select
             value={aiSystemId || ""}
@@ -574,19 +670,12 @@ export default function DocuGenPage() {
               <option key={s.id} value={s.id}>{s.name} ({s.risk_tier})</option>
             ))}
           </select>
-          <span className="ml-auto text-[11px]" style={{ color: dbSyncing ? "#2563eb" : dbSynced ? "#16a34a" : "rgba(0,0,0,0.3)" }}>
+          <span className="ml-auto text-[11px]" style={{ color: dbSyncing ? "rgba(0,0,0,0.55)" : dbSynced ? "#16a34a" : "rgba(0,0,0,0.3)" }}>
             {dbSyncing ? "⟳ Sincronizzando..." : dbSynced ? "✓ Salvato su DB" : "○ Non sincronizzato"}
           </span>
         </div>
       )}
 
-      {/* Art. 50 — AI Output Label */}
-      <div className="mb-4">
-        <AIOutputLabel
-          documentType="Documentazione Tecnica · Art. 11 AI Act (Allegato IV)"
-          outputType="DOC"
-        />
-      </div>
 
       {/* ── Header ── */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
@@ -596,8 +685,34 @@ export default function DocuGenPage() {
             Art. 11 · Allegato IV
           </p>
           <h1 className="text-[24px] font-medium" style={{ color: "#0D1016", letterSpacing: "-0.8px" }}>
-            DocuGen AI — Fascicolo Tecnico
+            DocuGen AI — {classifierTier === "limited"
+              ? "Dichiarazione Art. 50"
+              : classifierTier === "minimal"
+                ? "Nota di Conformità"
+                : "Fascicolo Tecnico"}
           </h1>
+          {classifierTier && classifierTier !== "unacceptable" && (
+            <div className="flex items-center gap-2 mt-2 mb-1">
+              <span style={{
+                fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 5,
+                background: classifierTier === "high"
+                  ? "rgba(220,38,38,0.08)" : classifierTier === "limited"
+                    ? "rgba(202,138,4,0.08)" : "rgba(22,163,74,0.08)",
+                color: classifierTier === "high"
+                  ? "#dc2626" : classifierTier === "limited"
+                    ? "#92400e" : "#15803d",
+                border: `1px solid ${classifierTier === "high"
+                  ? "rgba(220,38,38,0.2)" : classifierTier === "limited"
+                    ? "rgba(202,138,4,0.22)" : "rgba(22,163,74,0.18)"}`,
+                textTransform: "uppercase" as const,
+                letterSpacing: "0.05em",
+              }}>
+                {classifierTier === "high" ? "⬛ HIGH RISK — Allegato IV obbligatorio"
+                  : classifierTier === "limited" ? "◻ LIMITED RISK — Art. 50 Transparency Doc"
+                  : "◻ MINIMAL RISK — Codice condotta volontario"}
+              </span>
+            </div>
+          )}
           <div className="flex items-center gap-2 mt-1">
             <span className="text-[11px]" style={{ color: "rgba(0,0,0,0.38)" }}>Sistema:</span>
             <input
@@ -605,97 +720,99 @@ export default function DocuGenPage() {
               onChange={(e) => setSystemName(e.target.value)}
               placeholder="Nome del sistema AI documentato..."
               className="text-[12px] bg-transparent outline-none border-b"
-              style={{
-                color: "#0D1016",
-                borderBottomColor: "rgba(0,0,0,0.15)",
-                minWidth: "220px",
-              }}
-              onFocus={(e) => (e.target.style.borderBottomColor = "rgba(59,130,246,0.5)")}
+              style={{ color: "#0D1016", borderBottomColor: "rgba(0,0,0,0.15)", minWidth: "220px" }}
+              onFocus={(e) => (e.target.style.borderBottomColor = "rgba(0,0,0,0.4)")}
               onBlur={(e) => (e.target.style.borderBottomColor = "rgba(0,0,0,0.15)")}
             />
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {/* Version selector */}
           <div className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-[12px]"
             style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)" }}>
             <GitBranch className="h-3.5 w-3.5" style={{ color: "rgba(0,0,0,0.35)" }} />
-            <select
-              value={activeVersion}
-              onChange={(e) => setActiveVersion(Number(e.target.value))}
-              className="bg-transparent outline-none text-[12px]"
-              style={{ color: "#0D1016" }}
-            >
-              {VERSIONS.map((v, i) => (
-                <option key={v.tag} value={i}>{v.tag} — {v.commit.slice(0, 7)}</option>
-              ))}
-            </select>
+            <span style={{ color: "#0D1016", fontSize: 11 }}>
+              {versionSnapshots.length > 0
+                ? `${versionSnapshots[0].tag ?? "lavoro"} · ${versionSnapshots.length} snapshot`
+                : "Nessuna versione salvata"}
+            </span>
           </div>
 
-          {/* Status badge */}
-          <div className="text-[11px] font-medium px-3 py-2 rounded-lg"
-            style={STATUS_STYLE[version.status]}>
-            {version.status}
-          </div>
+          {versionSnapshots[0]?.status === "finalized" && (
+            <span className="text-[11px] font-medium px-3 py-2 rounded-lg"
+              style={{ background: "rgba(21,128,61,0.08)", color: "#15803d", border: "1px solid rgba(21,128,61,0.2)" }}>
+              ✓ Finalizzata
+            </span>
+          )}
 
-          {/* Compare toggle */}
+          {versionSnapshots[0]?.isSubstantialModification && (
+            <span className="flex items-center gap-1 text-[11px] font-medium px-3 py-2 rounded-lg"
+              style={{ background: "rgba(220,38,38,0.07)", color: "#dc2626", border: "1px solid rgba(220,38,38,0.15)" }}>
+              <AlertTriangle className="h-3 w-3" /> Modifica sostanziale
+            </span>
+          )}
+
           <button
-            onClick={() => setCompareMode(!compareMode)}
-            className="text-[11px] px-3 py-2 rounded-lg transition-all"
-            style={compareMode
-              ? { background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.25)", color: "#4338ca" }
-              : { background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.45)" }}
+            onClick={() => setShowVersionPanel(v => !v)}
+            className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-colors"
+            style={{ background: showVersionPanel ? "rgba(0,0,0,0.07)" : "#fff",
+              border: "1px solid rgba(0,0,0,0.12)", color: "rgba(0,0,0,0.6)", cursor: "pointer" }}
           >
-            Confronta versioni
+            <History className="h-3.5 w-3.5" />
+            Storico versioni
+            {showVersionPanel ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
           </button>
 
-          {/* Export */}
-          <button
-            onClick={exportFullDocument}
-            className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-opacity hover:opacity-80"
-            style={{ background: "#0D1016", color: "#fff", cursor: "pointer" }}
-          >
-            <Download className="h-3.5 w-3.5" />
-            Esporta JSON
-          </button>
+          {(classifierTier === "limited" || classifierTier === "minimal") ? (
+            <button onClick={exportPdf}
+              className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-opacity hover:opacity-80"
+              style={{ background: "#0D1016", color: "#fff", cursor: "pointer" }}>
+              <Download className="h-3.5 w-3.5" />
+              Esporta {classifierTier === "limited" ? "Art. 50 PDF" : "Nota Conformità PDF"}
+            </button>
+          ) : (
+            <button onClick={exportFullDocument}
+              className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-opacity hover:opacity-80"
+              style={{ background: "#0D1016", color: "#fff", cursor: "pointer" }}>
+              <Download className="h-3.5 w-3.5" />
+              Esporta JSON
+            </button>
+          )}
         </div>
       </div>
 
-      {/* ── Stats row ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        {[
-          { label: "Sezioni completate", value: `${doneCount}/9`,  color: "#16a34a" },
-          { label: "In bozza",           value: draftCount,         color: "#2563eb" },
-          { label: "Obbligatorie vuote", value: emptyRequired.length, color: emptyRequired.length > 0 ? "#dc2626" : "#16a34a" },
-          { label: "Commit collegato",   value: version.commit,     color: "rgba(0,0,0,0.5)" },
-        ].map((c) => (
-          <div key={c.label} className="rounded-xl p-4"
-            style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
-            <div className="text-[20px] font-semibold" style={{ color: c.color, letterSpacing: "-0.5px" }}>
-              {c.value}
-            </div>
-            <div className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.38)" }}>{c.label}</div>
-          </div>
-        ))}
-      </div>
+      {/* ── Version History panel ── */}
+      {showVersionPanel && (
+        <div className="mb-6">
+          <VersionHistoryPanel
+            toolId="docugen"
+            onRestore={(data) => {
+              const d = data as DocuGenState;
+              if (d && typeof d === "object") setPersistedRaw({ ...DEFAULT_STATE, ...d });
+              setVersionSnapshots(listVersions("docugen"));
+              setShowVersionPanel(false);
+              showToast("Versione ripristinata ✓");
+            }}
+            sectionLabels={Object.fromEntries(ANNEX_IV.map(s => [s.id, s.title]))}
+          />
+        </div>
+      )}
 
       {/* ── Compare mode banner ── */}
       {compareMode && (
         <div className="rounded-xl p-3 mb-4 flex items-center gap-3"
-          style={{ background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.15)" }}>
-          <span className="text-[12px]" style={{ color: "#4338ca" }}>
-            Confronto: <strong>{VERSIONS[activeVersion].tag}</strong> vs
+          style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.12)" }}>
+          <span className="text-[12px]" style={{ color: "#0D1016" }}>
+            Confronto: <strong>{versionSnapshots[0]?.tag ?? "corrente"}</strong> vs
           </span>
           <select
             value={compareIdx}
             onChange={(e) => setCompareIdx(Number(e.target.value))}
             className="text-[12px] rounded px-2 py-1 outline-none"
-            style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", color: "#4338ca" }}
-          >
-            {VERSIONS.map((v, i) =>
-              i !== activeVersion ? <option key={v.tag} value={i}>{v.tag}</option> : null
-            )}
+            style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016" }}>
+            {versionSnapshots.slice(1).map((v, i) => (
+              <option key={v.id} value={i + 1}>{v.tag ?? `snapshot ${i + 1}`}</option>
+            ))}
           </select>
           <span className="text-[11px]" style={{ color: "rgba(0,0,0,0.35)" }}>
             Le variazioni sostanziali sono evidenziate in rosso
@@ -703,288 +820,699 @@ export default function DocuGenPage() {
         </div>
       )}
 
-      {/* ── Main: sidebar + editor ── */}
-      <div className="flex gap-4">
+      {/* ── Timeline Step Bar ── */}
+      <div style={{ display: "flex", gap: 0, marginBottom: 24 }}>
+        {TIMELINE_STEPS.map((step, i) => (
+          <button key={step.id} onClick={() => setTimelineStep(step.id)} style={{
+            flex: 1, padding: "12px 16px",
+            background: timelineStep === step.id ? "#0D1016" : "transparent",
+            color: timelineStep === step.id ? "#fff" : "rgba(0,0,0,0.42)",
+            border: "1px solid rgba(0,0,0,0.08)",
+            borderLeft: i > 0 ? "none" : "1px solid rgba(0,0,0,0.08)",
+            borderRadius: i === 0 ? "8px 0 0 8px" : i === 3 ? "0 8px 8px 0" : 0,
+            cursor: "pointer", fontSize: 12, fontWeight: 500, textAlign: "left" as const,
+          }}>
+            <span style={{ display: "block", fontSize: 10, opacity: 0.6, marginBottom: 2 }}>Step {i + 1}</span>
+            {step.label}
+          </button>
+        ))}
+      </div>
 
-        {/* Left: Annex IV navigator + radar */}
-        <div className="flex-shrink-0 w-56">
-
-          {/* Compliance radar */}
-          <div className="rounded-xl p-4 mb-3"
-            style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
-            <p className="text-[10px] font-semibold uppercase mb-3"
-              style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "1px" }}>
-              Allegato IV — Completamento
-            </p>
-            <div className="space-y-1.5">
-              {ANNEX_IV.map((s) => {
-                const st = getSectionStatus(s.id);
-                return (
-                  <div key={s.id} className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full flex-shrink-0"
-                      style={{ background: st === "done" ? "#16a34a" : st === "draft" ? "#3b82f6" : s.required ? "#dc2626" : "rgba(0,0,0,0.15)" }} />
-                    <span className="text-[10px] truncate" style={{ color: "rgba(0,0,0,0.5)" }}>{s.title}</span>
-                  </div>
-                );
-              })}
-            </div>
-            {/* Progress bar */}
-            <div className="mt-3">
-              <div className="flex justify-between mb-1">
-                <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>Completamento</span>
-                <span className="text-[10px] font-semibold" style={{ color: "#0D1016" }}>
-                  {Math.round((doneCount / 9) * 100)}%
-                </span>
-              </div>
-              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.07)" }}>
-                <motion.div
-                  className="h-full rounded-full"
-                  animate={{ width: `${(doneCount / 9) * 100}%` }}
-                  transition={{ duration: 0.5 }}
-                  style={{ background: "#0D1016" }}
-                />
-              </div>
-            </div>
-            {!canFinalize && (
-              <p className="text-[10px] mt-2" style={{ color: "#dc2626" }}>
-                ⚠ {emptyRequired.length} sezione{emptyRequired.length > 1 ? "i" : "e"} obbligatoria{emptyRequired.length > 1 ? "e" : ""} vuota{emptyRequired.length > 1 ? "e" : ""} — Finalizzazione bloccata
+      {/* ── Step 1: Data Aggregation ── */}
+      {timelineStep === "aggregate" && (
+        <div>
+          {/* Ghost sources — FRIA style */}
+          <div style={{ border: "1px solid rgba(0,0,0,0.08)", borderRadius: 10, overflow: "hidden", marginBottom: 24 }}>
+            <div style={{ padding: "10px 16px", borderBottom: "1px solid rgba(0,0,0,0.06)", background: "#fafafa" }}>
+              <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.35)", textTransform: "uppercase" as const, letterSpacing: "0.08em", margin: 0 }}>
+                Sorgenti dati per la bozza AI
               </p>
-            )}
+            </div>
+            {([
+              { label: "Classifier", art: "Art. 6", desc: "Determina il livello di rischio e la categoria del sistema AI", href: "/dashboard/tools/classifier", present: !!ghost.systemName, preview: ghost.systemName ? `Sistema: ${ghost.systemName} · Risk: ${ghost.riskLevel ?? "N/D"}` : null },
+              { label: "Risk Manager", art: "Art. 9", desc: "Pre-carica scenari di rischio nelle sezioni gestione rischi", href: "/dashboard/tools/risk-manager", present: !!ghost.risksSummary, preview: ghost.risksSummary },
+              { label: "Data Audit", art: "Art. 10", desc: "Governance dataset di addestramento e analisi bias", href: "/dashboard/tools/data-audit", present: !!ghost.datasetsSummary, preview: ghost.datasetsSummary },
+              { label: "DPIA", art: "Art. 35", desc: "Importa base giuridica e categorie di dati personali trattati", href: "/dashboard/tools/dpia", present: !!ghost.legalBasis, preview: ghost.legalBasis ? `Base giuridica: ${ghost.legalBasis?.slice(0, 80)}…` : null },
+            ] as { label: string; art: string; desc: string; href: string; present: boolean; preview: string | null }[]).map((src, i, arr) => (
+              <div key={src.label} style={{ display: "flex", alignItems: "center", gap: 14, padding: "13px 16px", borderBottom: i < arr.length - 1 ? "1px solid rgba(0,0,0,0.05)" : "none", background: "#fff" }}>
+                <div style={{ flexShrink: 0, width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+                  background: src.present ? "rgba(22,163,74,0.08)" : "transparent",
+                  border: src.present ? "1.5px solid rgba(22,163,74,0.35)" : "1.5px solid rgba(0,0,0,0.18)" }}>
+                  {src.present && <span style={{ fontSize: 10, color: "#16a34a", fontWeight: 700 }}>✓</span>}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "#0D1016" }}>{src.label}</span>
+                    <span style={{ fontSize: 9, fontWeight: 600, padding: "1px 6px", borderRadius: 4, background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.45)" }}>{src.art}</span>
+                  </div>
+                  <p style={{ fontSize: 11, color: "rgba(0,0,0,0.42)", margin: 0 }}>
+                    {src.present && src.preview ? src.preview : src.desc}
+                  </p>
+                </div>
+                <a href={src.href} style={{ flexShrink: 0, fontSize: 11, fontWeight: 500, padding: "5px 12px", borderRadius: 7,
+                  background: src.present ? "transparent" : "#0D1016",
+                  color: src.present ? "rgba(0,0,0,0.45)" : "#fff",
+                  border: src.present ? "1px solid rgba(0,0,0,0.10)" : "none",
+                  cursor: "pointer", textDecoration: "none", whiteSpace: "nowrap" as const }}>
+                  {src.present ? "Modifica →" : "Migliora bozza →"}
+                </a>
+              </div>
+            ))}
           </div>
 
-          {/* Section list */}
-          <div className="rounded-xl overflow-hidden"
-            style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6 mb-4">
+            {[
+              { label: "Sezioni completate", value: `${doneCount}/9`, color: "#16a34a" },
+              { label: "In lavoro", value: draftCount, color: "#0D1016" },
+              { label: "Obbligatorie vuote", value: emptyRequired.length, color: emptyRequired.length > 0 ? "#dc2626" : "#16a34a" },
+              { label: "Versioni salvate", value: versionSnapshots.length || "—", color: "rgba(0,0,0,0.5)" },
+            ].map((c) => (
+              <div key={c.label} className="rounded-xl p-4"
+                style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+                <div className="text-[20px] font-semibold" style={{ color: c.color, letterSpacing: "-0.5px" }}>{c.value}</div>
+                <div className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.38)" }}>{c.label}</div>
+              </div>
+            ))}
+          </div>
+
+          <button onClick={() => setTimelineStep("draft")}
+            style={{ marginTop: 8, padding: "10px 20px", borderRadius: 8, background: "#0D1016",
+              color: "#fff", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500 }}>
+            Aggrega dati →
+          </button>
+        </div>
+      )}
+
+      {/* ── Step 2: Intelligent Drafting ── */}
+      {timelineStep === "draft" && (
+        <div>
+          <p className="text-[13px] mb-4" style={{ color: "rgba(0,0,0,0.55)" }}>
+            Sezioni Allegato IV. Le sezioni auto-popolate o con dati inferiti sono pronte per la conferma.
+          </p>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
             {ANNEX_IV.map((s) => {
               const st = getSectionStatus(s.id);
-              const active = activeSection === s.id;
+              const hasGhostForS1 = s.id === "s1" && ghost.purpose && !content["s1"];
+              const hasGhostForS4 = s.id === "s4" && ghost.datasetsSummary && !content["s4"];
+
               return (
-                <button
-                  key={s.id}
-                  onClick={() => setActiveSection(s.id)}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-left transition-all"
-                  style={{
-                    background: active ? "rgba(59,130,246,0.07)" : "transparent",
-                    borderBottom: "1px solid rgba(0,0,0,0.04)",
-                  }}
-                >
-                  {st === "done"  && <CheckCircle className="h-3 w-3 flex-shrink-0" style={{ color: "#16a34a" }} />}
-                  {st === "draft" && <Clock        className="h-3 w-3 flex-shrink-0" style={{ color: "#3b82f6" }} />}
-                  {st === "empty" && <div className="w-3 h-3 rounded-full flex-shrink-0 border" style={{ borderColor: s.required ? "#dc2626" : "rgba(0,0,0,0.2)" }} />}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] truncate font-medium"
-                      style={{ color: active ? "#2563eb" : "#0D1016" }}>{s.title}</p>
-                    <p className="text-[9px]" style={{ color: "rgba(0,0,0,0.28)" }}>{s.ref}</p>
+                <div key={s.id} style={{ border: "1px solid rgba(0,0,0,0.08)", borderRadius: 10, padding: "14px 16px",
+                  background: st === "done" ? "#FAFAF9" : "#fff" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+                    <div>
+                      <span style={{ fontSize: 9, fontWeight: 600, padding: "2px 6px", borderRadius: 4,
+                        background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.45)" }}>{SOURCE_BADGES[s.id] ?? s.ref}</span>
+                      {s.autoSource && (
+                        <span style={{ marginLeft: 4, fontSize: 9, padding: "2px 6px", borderRadius: 4,
+                          background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.45)" }}>Auto-popolata</span>
+                      )}
+                    </div>
+                    <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 99,
+                      background: st === "done" ? "rgba(0,0,0,0.07)" : st === "draft" ? "rgba(0,0,0,0.05)" : "rgba(0,0,0,0.04)",
+                      color: st === "done" ? "#0D1016" : st === "draft" ? "rgba(0,0,0,0.55)" : "rgba(0,0,0,0.3)" }}>
+                      {st === "done" ? "✓ Completata" : st === "draft" ? "Bozza" : "Vuota"}
+                    </span>
                   </div>
-                  {active && <ChevronRight className="h-3 w-3 flex-shrink-0" style={{ color: "#3b82f6" }} />}
-                </button>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: "#0D1016", margin: "6px 0 2px" }}>{s.title}</p>
+                  <p style={{ fontSize: 11, color: "rgba(0,0,0,0.42)", margin: "0 0 8px" }}>{s.hint}</p>
+
+                  {/* Ghost inference for s1 */}
+                  {hasGhostForS1 && (
+                    <div style={{ background: "rgba(0,0,0,0.03)", borderRadius: 6, padding: 10, marginTop: 8 }}>
+                      <p style={{ fontSize: 10, color: "rgba(0,0,0,0.4)", marginBottom: 4 }}>
+                        Il sistema ha inferito questa descrizione da Classifier:
+                      </p>
+                      <p style={{ fontSize: 12, color: "#0D1016", margin: "0 0 8px",
+                        fontFamily: "Georgia, 'Times New Roman', serif" }}>
+                        {ghost.purpose}
+                      </p>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button onClick={() => {
+                            setContent(p => ({ ...p, s1: ghost.purpose! }));
+                            setStatus(p => ({ ...p, s1: "done" }));
+                          }}
+                          style={{ fontSize: 11, padding: "4px 12px", borderRadius: 6,
+                            background: "#0D1016", color: "#fff", border: "none", cursor: "pointer" }}>
+                          ✓ Conferma
+                        </button>
+                        <button onClick={() => { setActiveSection("s1"); setTimelineStep("validate"); }}
+                          style={{ fontSize: 11, padding: "4px 12px", borderRadius: 6,
+                            background: "transparent", color: "rgba(0,0,0,0.5)",
+                            border: "1px solid rgba(0,0,0,0.12)", cursor: "pointer" }}>
+                          Modifica
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Ghost inference for s4 */}
+                  {hasGhostForS4 && (
+                    <div style={{ background: "rgba(0,0,0,0.03)", borderRadius: 6, padding: 10, marginTop: 8 }}>
+                      <p style={{ fontSize: 10, color: "rgba(0,0,0,0.4)", marginBottom: 4 }}>
+                        Il sistema ha inferito da Data Audit:
+                      </p>
+                      <p style={{ fontSize: 12, color: "#0D1016", margin: "0 0 8px",
+                        fontFamily: "Georgia, 'Times New Roman', serif" }}>
+                        {ghost.datasetsSummary}
+                      </p>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button onClick={() => {
+                            setContent(p => ({ ...p, s4: ghost.datasetsSummary! }));
+                            setStatus(p => ({ ...p, s4: "done" }));
+                          }}
+                          style={{ fontSize: 11, padding: "4px 12px", borderRadius: 6,
+                            background: "#0D1016", color: "#fff", border: "none", cursor: "pointer" }}>
+                          ✓ Conferma
+                        </button>
+                        <button onClick={() => { setActiveSection("s4"); setTimelineStep("validate"); }}
+                          style={{ fontSize: 11, padding: "4px 12px", borderRadius: 6,
+                            background: "transparent", color: "rgba(0,0,0,0.5)",
+                            border: "1px solid rgba(0,0,0,0.12)", cursor: "pointer" }}>
+                          Modifica
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Preview content if done */}
+                  {st !== "empty" && !hasGhostForS1 && !hasGhostForS4 && (
+                    <p style={{ fontSize: 11, color: "rgba(0,0,0,0.45)", margin: "6px 0 0",
+                      fontFamily: "Georgia, 'Times New Roman', serif",
+                      overflow: "hidden", display: "-webkit-box",
+                      WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const }}>
+                      {stripMarkdown(getContent(s.id) ?? "").slice(0, 120) || ""}
+                    </p>
+                  )}
+
+                  <button onClick={() => { setActiveSection(s.id); setTimelineStep("validate"); }}
+                    style={{ marginTop: 10, fontSize: 10, padding: "3px 10px", borderRadius: 5,
+                      background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.5)",
+                      border: "none", cursor: "pointer" }}>
+                    Apri editor →
+                  </button>
+                </div>
               );
             })}
           </div>
+
+          <button onClick={() => setTimelineStep("validate")}
+            style={{ marginTop: 20, padding: "10px 20px", borderRadius: 8, background: "#0D1016",
+              color: "#fff", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500 }}>
+            Vai alla validazione →
+          </button>
         </div>
+      )}
 
-        {/* Right: Editor */}
-        <div className="flex-1 min-w-0">
-          <AnimatePresence mode="wait">
-            <motion.div key={activeSection}
-              initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }} transition={{ duration: 0.18 }}
-              className="rounded-xl p-5"
-              style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
-
-              {/* Section header */}
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded"
-                      style={{ background: "rgba(59,130,246,0.08)", color: "#2563eb" }}>
-                      {activeS.ref}
-                    </span>
-                    {activeS.required && (
-                      <span className="text-[10px] px-2 py-0.5 rounded"
-                        style={{ background: "rgba(239,68,68,0.07)", color: "#dc2626" }}>
-                        Obbligatoria
-                      </span>
-                    )}
-                    {activeS.autoSource && (
-                      <span className="text-[10px] px-2 py-0.5 rounded"
-                        style={{ background: "rgba(22,163,74,0.08)", color: "#16a34a" }}>
-                        Auto-popolata ✦
-                      </span>
-                    )}
-                  </div>
-                  <h2 className="text-[15px] font-medium" style={{ color: "#0D1016" }}>
-                    {activeS.title}
-                  </h2>
-                  <p className="text-[12px] mt-0.5" style={{ color: "rgba(0,0,0,0.42)" }}>{activeS.hint}</p>
-                </div>
-
-                <div className="flex items-center gap-2 ml-4">
-                  {["empty", "draft", "done"].map((st) => (
-                    <button key={st} onClick={() => setStatus((prev) => ({ ...prev, [activeSection]: st as "empty" | "draft" | "done" }))}
-                      className="text-[10px] px-2.5 py-1 rounded-full transition-all"
-                      style={getSectionStatus(activeSection) === st
-                        ? { background: st === "done" ? "rgba(22,163,74,0.12)" : st === "draft" ? "rgba(59,130,246,0.12)" : "rgba(0,0,0,0.07)", color: st === "done" ? "#16a34a" : st === "draft" ? "#2563eb" : "rgba(0,0,0,0.45)", fontWeight: 600 }
-                        : { background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.3)" }}>
-                      {st === "done" ? "Completata" : st === "draft" ? "In bozza" : "Vuota"}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Compare diff banner */}
-              {compareMode && VERSIONS[compareIdx] && (
-                <div className="rounded-lg px-3 py-2 mb-3 text-[11px]"
-                  style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)", color: "#dc2626" }}>
-                  ∆ Variazioni rilevate rispetto a {VERSIONS[compareIdx].tag}: logica algoritmica modificata (commit {VERSIONS[compareIdx].commit})
-                </div>
-              )}
-
-              {/* Auto-source notice */}
-              {activeS.autoSource && (
-                <div className="flex items-center gap-2 rounded-lg px-3 py-2 mb-3 text-[11px]"
-                  style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)" }}>
-                  <CheckCircle className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#16a34a" }} />
-                  <span style={{ color: "#16a34a" }}>
-                    Contenuto auto-importato da{" "}
-                    <strong>
-                      {activeS.autoSource === "data-audit" ? "Data Audit (Art. 10)" :
-                       activeS.autoSource === "risk-manager" ? "Risk Manager (Art. 9)" :
-                       activeS.autoSource === "code" ? "Repository GitHub" :
-                       activeS.autoSource === "git" ? "Git History" :
-                       "MLflow"}
-                    </strong>
-                    {" "}— sincronizzato con commit {version.commit}
-                  </span>
-                </div>
-              )}
-
-              {/* Editor */}
-              <textarea
-                value={getContent(activeSection)}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setContent((prev) => ({ ...prev, [activeSection]: val }));
-                  if (!status[activeSection])
-                    setStatus((prev) => ({ ...prev, [activeSection]: "draft" }));
-                }}
-                className="w-full rounded-lg px-4 py-3 text-[13px] outline-none resize-none transition-all"
-                style={{
-                  background: "#FAFAF9",
-                  border: "1px solid rgba(0,0,0,0.09)",
-                  color: "#0D1016",
-                  minHeight: "220px",
-                  lineHeight: 1.7,
-                  fontFamily: "var(--font-inter, system-ui)",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = "rgba(59,130,246,0.4)")}
-                onBlur={(e) => (e.target.style.borderColor = "rgba(0,0,0,0.09)")}
-                placeholder={activeS.placeholder || "Inserisci il contenuto della sezione..."}
-              />
-
-              {/* AI Co-Writer */}
-              <CoWriterBar
-                sectionId={activeSection}
-                sectionTitle={activeS.title}
-                currentText={getContent(activeSection)}
-                onExpand={(expanded) => {
-                  setContent((prev) => ({ ...prev, [activeSection]: expanded }));
-                  if (!status[activeSection])
-                    setStatus((prev) => ({ ...prev, [activeSection]: "draft" }));
-                }}
-              />
-
-              {/* Bottom actions */}
-              <div className="flex items-center justify-between mt-3">
-                <div className="flex gap-2">
-                  {[
-                    { label: "Markdown", action: exportMarkdown },
-                    { label: "JSON", action: exportFullDocument },
-                    { label: "PDF firmato", action: () => showToast("Export PDF disponibile nella versione Enterprise") },
-                  ].map(({ label, action }) => (
-                    <button
-                      key={label}
-                      onClick={action}
-                      className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded transition-opacity hover:opacity-70"
-                      style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.45)", cursor: "pointer" }}
-                    >
-                      <Download className="h-3 w-3" /> {label}
-                    </button>
-                  ))}
-                </div>
-                {canFinalize && version.status !== "Finalized" && (
-                  <button
-                    onClick={async () => {
-                      await saveToDossier();
-                      showToast("Fascicolo finalizzato e salvato ✓");
-                    }}
-                    className="text-[12px] font-medium px-4 py-1.5 rounded-full transition-opacity hover:opacity-80"
-                    style={{ background: "#0D1016", color: "#fff", cursor: "pointer" }}
-                  >
-                    Finalizza fascicolo →
-                  </button>
-                )}
-              </div>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* ── Version timeline ── */}
-          <div className="mt-4 rounded-xl p-4"
-            style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
-            <p className="text-[10px] font-semibold uppercase mb-3"
-              style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "1px" }}>
-              Storico versioni — collegato a Git commit
-            </p>
-            <div className="flex items-center gap-0">
-              {VERSIONS.map((v, i) => {
-                const style = STATUS_STYLE[v.status];
-                const active = i === activeVersion;
-                return (
-                  <button key={v.tag} onClick={() => setActiveVersion(i)}
-                    className="flex-1 flex flex-col items-center gap-1 relative group">
-                    {i < VERSIONS.length - 1 && (
-                      <div className="absolute left-1/2 right-0 top-2 h-px" style={{ background: "rgba(0,0,0,0.08)" }} />
-                    )}
-                    <div className="w-4 h-4 rounded-full z-10 flex items-center justify-center"
-                      style={{
-                        background: active ? "#0D1016" : style.bg,
-                        border: `2px solid ${active ? "#0D1016" : style.border}`,
-                        boxShadow: active ? "0 0 0 3px rgba(13,16,22,0.1)" : "none",
-                      }}>
-                      {active && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                    </div>
-                    <span className="text-[10px] font-medium" style={{ color: active ? "#0D1016" : "rgba(0,0,0,0.45)" }}>
-                      {v.tag}
-                    </span>
-                    <span className="text-[9px]" style={{ color: "rgba(0,0,0,0.28)" }}>{v.date}</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded"
-                      style={{ background: style.bg, color: style.text, border: `1px solid ${style.border}` }}>
-                      {v.status}
-                    </span>
-                  </button>
-                );
-              })}
+      {/* ── Step 3: Human Validation ── */}
+      {timelineStep === "validate" && (
+        <div>
+          {/* Progress bar */}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+              <span style={{ fontSize: 11, color: "rgba(0,0,0,0.42)" }}>Completamento Allegato IV</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016" }}>{Math.round((doneCount / 9) * 100)}%</span>
+            </div>
+            <div style={{ height: 4, borderRadius: 99, background: "rgba(0,0,0,0.07)", overflow: "hidden" }}>
+              <motion.div style={{ height: "100%", background: "#0D1016", borderRadius: 99 }}
+                animate={{ width: `${(doneCount / 9) * 100}%` }} transition={{ duration: 0.5 }} />
             </div>
           </div>
 
-          {/* ── Finalize blocker ── */}
-          {!canFinalize && (
-            <div className="mt-3 rounded-xl px-4 py-3 flex items-start gap-2"
-              style={{ background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.15)" }}>
-              <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#dc2626" }} />
-              <p className="text-[12px]" style={{ color: "#dc2626" }}>
-                Finalizzazione bloccata: completa le sezioni obbligatorie{" "}
-                <strong>{emptyRequired.map((s) => s.ref).join(", ")}</strong>{" "}
-                prima di passare allo stato Finalized.
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
+          <div style={{ display: "flex", gap: 16 }}>
+            {/* Sidebar sezioni */}
+            {!focusMode && (
+              <div style={{ width: 200, flexShrink: 0 }}>
+                <div style={{ borderRadius: 10, overflow: "hidden", border: "1px solid rgba(0,0,0,0.07)" }}>
+                  {ANNEX_IV.map((s) => {
+                    const st = getSectionStatus(s.id);
+                    const active = activeSection === s.id;
+                    return (
+                      <button key={s.id} onClick={() => setActiveSection(s.id)}
+                        className="w-full flex items-center gap-2 px-3 py-2.5 text-left transition-all"
+                        style={{
+                          background: active ? "rgba(0,0,0,0.07)" : "transparent",
+                          borderBottom: "1px solid rgba(0,0,0,0.04)",
+                          border: "none",
+                          cursor: "pointer",
+                          borderBottomColor: "rgba(0,0,0,0.04)",
+                          outline: "none",
+                        }}>
+                        {st === "done"  && <CheckCircle className="h-3 w-3 flex-shrink-0" style={{ color: "#16a34a" }} />}
+                        {st === "draft" && <Clock className="h-3 w-3 flex-shrink-0" style={{ color: "rgba(0,0,0,0.4)" }} />}
+                        {st === "empty" && <div className="w-3 h-3 rounded-full flex-shrink-0 border"
+                          style={{ borderColor: s.required ? "#dc2626" : "rgba(0,0,0,0.2)" }} />}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] truncate font-medium"
+                            style={{ color: active ? "#0D1016" : "rgba(0,0,0,0.6)" }}>{s.title}</p>
+                          <p className="text-[9px]" style={{ color: "rgba(0,0,0,0.28)" }}>{s.ref}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
+            {/* Editor */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <AnimatePresence mode="wait">
+                <motion.div key={activeSection}
+                  initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }} transition={{ duration: 0.18 }}
+                  style={{ borderRadius: 12, padding: 20, background: "#fff",
+                    border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+
+                  {/* Section header */}
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                        <span style={{ fontSize: 9, fontWeight: 600, padding: "2px 7px", borderRadius: 99,
+                          background: "rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.55)" }}>
+                          {SOURCE_BADGES[activeSection] ?? activeS.ref}
+                        </span>
+                        {activeS.required && (
+                          <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4,
+                            background: "rgba(239,68,68,0.07)", color: "#dc2626" }}>Obbligatoria</span>
+                        )}
+                        {activeS.autoSource && (
+                          <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4,
+                            background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.45)" }}>Auto-popolata ✦</span>
+                        )}
+                      </div>
+                      <h2 style={{ fontSize: 15, fontWeight: 600, color: "#0D1016", margin: "0 0 2px" }}>{activeS.title}</h2>
+                      <p style={{ fontSize: 12, color: "rgba(0,0,0,0.42)", margin: 0 }}>{activeS.hint}</p>
+                    </div>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0, marginLeft: 12 }}>
+                      <button onClick={() => setFocusMode(f => !f)}
+                        style={{ fontSize: 10, padding: "4px 10px", borderRadius: 5, cursor: "pointer",
+                          background: focusMode ? "#0D1016" : "rgba(0,0,0,0.05)",
+                          color: focusMode ? "#fff" : "rgba(0,0,0,0.5)", border: "none" }}>
+                        {focusMode ? "⤡ Esci focus" : "⤢ Focus mode"}
+                      </button>
+                      {["empty", "draft", "done"].map((st) => (
+                        <button key={st} onClick={() => setStatus((prev) => ({ ...prev, [activeSection]: st as "empty" | "draft" | "done" }))}
+                          style={{ fontSize: 10, padding: "4px 10px", borderRadius: 20, cursor: "pointer", border: "none",
+                            background: getSectionStatus(activeSection) === st
+                              ? (st === "done" ? "rgba(22,163,74,0.12)" : st === "draft" ? "rgba(0,0,0,0.10)" : "rgba(0,0,0,0.07)")
+                              : "rgba(0,0,0,0.04)",
+                            color: getSectionStatus(activeSection) === st
+                              ? (st === "done" ? "#16a34a" : st === "draft" ? "#0D1016" : "rgba(0,0,0,0.45)")
+                              : "rgba(0,0,0,0.3)",
+                            fontWeight: getSectionStatus(activeSection) === st ? 600 : 400 }}>
+                          {st === "done" ? "Completata" : st === "draft" ? "In lavoro" : "Vuota"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Compare diff banner */}
+                  {compareMode && versionSnapshots[compareIdx] && (
+                    <div style={{ borderRadius: 8, padding: "8px 12px", marginBottom: 12,
+                      background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)",
+                      color: "#dc2626", fontSize: 11 }}>
+                      ∆ Confronto con {versionSnapshots[compareIdx].tag ?? `snapshot ${compareIdx}`} del {new Date(versionSnapshots[compareIdx].savedAt).toLocaleDateString("it-IT")}
+                      {versionSnapshots[compareIdx].sectionsChanged?.includes(activeSection) && " — questa sezione è stata modificata"}
+                    </div>
+                  )}
+
+                  {/* Auto-source notice */}
+                  {activeS.autoSource && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 8,
+                      padding: "8px 12px", marginBottom: 12, fontSize: 11,
+                      background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)" }}>
+                      <CheckCircle className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#16a34a" }} />
+                      <span style={{ color: "#16a34a" }}>
+                        Contenuto auto-importato da{" "}
+                        <strong>
+                          {activeS.autoSource === "data-audit" ? "Data Audit (Art. 10)" :
+                           activeS.autoSource === "risk-manager" ? "Risk Manager (Art. 9)" :
+                           activeS.autoSource === "code" ? "Repository GitHub" :
+                           activeS.autoSource === "git" ? "Git History" : "MLflow"}
+                        </strong>
+                        {versionSnapshots.length > 0 && ` — versione ${version.tag}`}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Editor */}
+                  <textarea
+                    value={getContent(activeSection)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setContent((prev) => ({ ...prev, [activeSection]: val }));
+                      if (!status[activeSection])
+                        setStatus((prev) => ({ ...prev, [activeSection]: "draft" }));
+                    }}
+                    style={{
+                      width: "100%", borderRadius: 8, padding: "12px 16px",
+                      fontSize: focusMode ? 16 : 13, lineHeight: 1.8,
+                      outline: "none", resize: "none",
+                      background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.09)",
+                      color: "#0D1016", minHeight: focusMode ? "400px" : "220px",
+                      fontFamily: "Georgia, 'Times New Roman', serif",
+                      boxSizing: "border-box",
+                    }}
+                    onFocus={(e) => (e.target.style.borderColor = "rgba(0,0,0,0.2)")}
+                    onBlur={(e) => (e.target.style.borderColor = "rgba(0,0,0,0.09)")}
+                    placeholder={activeS.placeholder || "Inserisci il contenuto della sezione..."}
+                  />
+
+                  {/* Bottom actions */}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 12 }}>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      {[
+                        { label: "Markdown", action: exportMarkdown },
+                        { label: "JSON", action: exportFullDocument },
+                        { label: "PDF firmato", action: exportPdf },
+                      ].map(({ label, action }) => (
+                        <button key={label} onClick={action}
+                          style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, padding: "6px 10px",
+                            borderRadius: 6, background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)",
+                            color: "rgba(0,0,0,0.45)", cursor: "pointer" }}>
+                          <Download className="h-3 w-3" /> {label}
+                        </button>
+                      ))}
+                    </div>
+                    {canFinalize && version.status !== "finalized" && (
+                      <button onClick={async () => { await saveToDossier(); showToast("Fascicolo finalizzato e salvato ✓"); }}
+                        style={{ fontSize: 12, fontWeight: 500, padding: "6px 16px", borderRadius: 20,
+                          background: "#0D1016", color: "#fff", border: "none", cursor: "pointer" }}>
+                        Finalizza fascicolo →
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+
+              {/* ── AI Analysis Panels (collapsable) ── */}
+              <div style={{ marginTop: 16, borderRadius: 12, padding: 16, background: "#fff", border: "1px solid rgba(0,0,0,0.07)" }}>
+                <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.3)", letterSpacing: "1px", textTransform: "uppercase", marginBottom: 12 }}>
+                  ✦ Analisi AI — Art. 11 / Annex IV
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12, paddingBottom: 12, borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+                  <button disabled={annexIVLoading} onClick={async () => {
+                      setAnnexIVLoading(true); setAnnexIVReport(null);
+                      const c = persisted.content;
+                      const res = await checkAnnexIVGaps({
+                        systemName: persisted.systemName || c["s1"] || "",
+                        provider: c["s2"] || "", purpose: c["s3"] || "",
+                        capabilities: c["s4"] || "", limitations: c["s5"] || "",
+                        humanOversight: c["s6"] || "", performanceMetrics: c["s7"] || "",
+                        trainingData: c["s8"] || "",
+                      });
+                      setAnnexIVLoading(false);
+                      if (res.result) setAnnexIVReport(res.result);
+                    }}
+                    style={{ fontSize: 11, color: "#0D1016", background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.12)", borderRadius: 5, padding: "5px 12px", cursor: "pointer" }}>
+                    {annexIVLoading ? "✦ Analisi…" : "✦ Verifica copertura Annex IV"}
+                  </button>
+                  <button disabled={coherenceLoading} onClick={async () => {
+                      setCoherenceLoading(true); setCoherenceReport(null);
+                      const ctx = buildComplianceContextFromStorage();
+                      const c = persisted.content;
+                      const res = await validateDocuGenCoherence({
+                        systemName: persisted.systemName, purpose: c["s3"] || "",
+                        capabilities: c["s4"] || "", limitations: c["s5"] || "",
+                        humanOversight: c["s6"] || "",
+                      }, ctx);
+                      setCoherenceLoading(false);
+                      if (res.report) setCoherenceReport(res.report);
+                    }}
+                    style={{ fontSize: 11, color: "#0D1016", background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.12)", borderRadius: 5, padding: "5px 12px", cursor: "pointer" }}>
+                    {coherenceLoading ? "✦ Analisi…" : "✦ Verifica coerenza inter-tool"}
+                  </button>
+                </div>
+
+                {/* Annex IV Report */}
+                {annexIVReport && (
+                  <div style={{ marginBottom: 12, padding: 12, borderRadius: 8,
+                    background: annexIVReport.coverageScore >= 80 ? "rgba(22,163,74,0.04)" : "rgba(245,158,11,0.05)",
+                    border: `1px solid ${annexIVReport.coverageScore >= 80 ? "rgba(22,163,74,0.2)" : "rgba(245,158,11,0.2)"}` }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.5)", background: "rgba(0,0,0,0.06)", borderRadius: 4, padding: "2px 6px" }}>✦ AI — verifica e conferma</span>
+                    <p style={{ fontSize: 12, fontWeight: 700, margin: "6px 0 2px", color: "#0D1016" }}>
+                      Copertura Annex IV: <span style={{ color: annexIVReport.coverageScore >= 80 ? "#15803d" : "#d97706" }}>{annexIVReport.coverageScore}%</span>
+                    </p>
+                    <p style={{ fontSize: 11, color: "rgba(0,0,0,0.42)", marginBottom: 8 }}>{annexIVReport.summary}</p>
+                    {annexIVReport.missingSections.map((ms, i) => (
+                      <div key={i} style={{ display: "flex", gap: 6, marginBottom: 4, padding: "4px 8px", borderRadius: 5,
+                        background: ms.priority === "obbligatorio" ? "rgba(220,38,38,0.04)" : "rgba(245,158,11,0.04)",
+                        border: `1px solid ${ms.priority === "obbligatorio" ? "rgba(220,38,38,0.15)" : "rgba(245,158,11,0.15)"}` }}>
+                        <span style={{ fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 3,
+                          background: ms.priority === "obbligatorio" ? "#dc2626" : "#d97706",
+                          color: "#fff", whiteSpace: "nowrap", alignSelf: "flex-start" }}>
+                          {ms.priority === "obbligatorio" ? "OBB" : "RAC"}
+                        </span>
+                        <div>
+                          <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0 }}>{ms.section}</p>
+                          <p style={{ fontSize: 10, color: "rgba(0,0,0,0.42)", margin: "1px 0 0", fontStyle: "italic" }}>{ms.annexIVRef}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Coherence Report */}
+                {coherenceReport && (
+                  <div style={{ marginBottom: 12, padding: 12, borderRadius: 8,
+                    background: coherenceReport.coherenceScore >= 80 ? "rgba(22,163,74,0.04)" : "rgba(220,38,38,0.04)",
+                    border: `1px solid ${coherenceReport.coherenceScore >= 80 ? "rgba(22,163,74,0.2)" : "rgba(220,38,38,0.2)"}` }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.5)", background: "rgba(0,0,0,0.06)", borderRadius: 4, padding: "2px 6px" }}>✦ AI — verifica e conferma</span>
+                    <p style={{ fontSize: 12, fontWeight: 700, margin: "6px 0 2px", color: "#0D1016" }}>
+                      Coerenza inter-tool: <span style={{ color: coherenceReport.coherenceScore >= 80 ? "#15803d" : "#dc2626" }}>{coherenceReport.coherenceScore}%</span> — {coherenceReport.overallStatus.replace(/_/g, " ")}
+                    </p>
+                    {coherenceReport.inconsistencies.map((inc, i) => (
+                      <div key={i} style={{ display: "flex", gap: 6, marginBottom: 4, padding: "4px 8px", borderRadius: 5,
+                        background: inc.severity === "critical" ? "rgba(220,38,38,0.04)" : "rgba(245,158,11,0.04)",
+                        border: `1px solid ${inc.severity === "critical" ? "rgba(220,38,38,0.15)" : "rgba(245,158,11,0.15)"}` }}>
+                        <span style={{ fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 3,
+                          background: inc.severity === "critical" ? "#dc2626" : inc.severity === "warning" ? "#d97706" : "#6b7280",
+                          color: "#fff", whiteSpace: "nowrap", alignSelf: "flex-start" }}>{inc.severity}</span>
+                        <div>
+                          <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0 }}>
+                            {inc.field}: <span style={{ color: "#dc2626" }}>{inc.docuGenValue}</span> vs <span style={{ color: "rgba(0,0,0,0.55)" }}>{inc.sourceContext}: {inc.contextValue}</span>
+                          </p>
+                          <p style={{ fontSize: 10, color: "rgba(0,0,0,0.42)", margin: "1px 0 0", fontStyle: "italic" }}>{inc.art11Reference}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Change Impact */}
+                <div style={{ borderTop: "1px solid rgba(0,0,0,0.06)", paddingTop: 10 }}>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.5)", marginBottom: 6 }}>Hai modificato il sistema? Descrivi il cambiamento:</p>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input value={changeDesc} onChange={e => setChangeDesc(e.target.value)}
+                      placeholder="Es. 'Aggiornato il modello con nuovi dati HR Q2 2026'"
+                      style={{ flex: 1, padding: "6px 10px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.12)", fontSize: 12 }} />
+                    <button disabled={changeImpactLoading || !changeDesc.trim()} onClick={async () => {
+                        setChangeImpactLoading(true); setChangeImpactReport(null);
+                        const ctx = buildComplianceContextFromStorage();
+                        const res = await assessChangeImpact(changeDesc, ctx.riskTier ?? null, ctx.annexIII ?? null);
+                        setChangeImpactLoading(false);
+                        if (res.report) setChangeImpactReport(res.report);
+                      }}
+                      style={{ fontSize: 11, color: "#059669", background: "rgba(5,150,105,0.06)", border: "1px solid rgba(5,150,105,0.2)", borderRadius: 5, padding: "5px 12px", cursor: "pointer", whiteSpace: "nowrap" }}>
+                      {changeImpactLoading ? "✦ Analisi…" : "✦ Analizza impatto"}
+                    </button>
+                  </div>
+                  {changeImpactReport && (
+                    <div style={{ marginTop: 8, padding: 10, borderRadius: 8,
+                      background: changeImpactReport.isSubstantialModification ? "rgba(220,38,38,0.04)" : "rgba(22,163,74,0.04)",
+                      border: `1px solid ${changeImpactReport.isSubstantialModification ? "rgba(220,38,38,0.2)" : "rgba(22,163,74,0.2)"}` }}>
+                      <span style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.5)", background: "rgba(0,0,0,0.06)", borderRadius: 4, padding: "2px 6px" }}>✦ AI — verifica e conferma</span>
+                      <p style={{ fontSize: 12, fontWeight: 700, margin: "6px 0 2px", color: changeImpactReport.isSubstantialModification ? "#dc2626" : "#15803d" }}>
+                        {changeImpactReport.isSubstantialModification ? "⚠ Modifica sostanziale rilevata" : "✓ Modifica non sostanziale"}
+                        {changeImpactReport.requiresNewConformityAssessment && " — richiede nuovo Conformity Assessment"}
+                      </p>
+                      <p style={{ fontSize: 10, color: "rgba(0,0,0,0.42)", fontStyle: "italic", marginBottom: 6 }}>{changeImpactReport.substModificationBasis}</p>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                        {changeImpactReport.affectedAnnexIVSections.filter(s => s.updateRequired === "obbligatorio").map((s, i) => (
+                          <span key={i} style={{ fontSize: 10, padding: "2px 7px", borderRadius: 99, background: "rgba(220,38,38,0.1)", color: "#dc2626", border: "1px solid rgba(220,38,38,0.2)" }}>Aggiorna: {s.sectionLabel}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Finalize blocker */}
+              {!canFinalize && (
+                <div style={{ marginTop: 12, borderRadius: 12, padding: "12px 16px", display: "flex", alignItems: "flex-start", gap: 8,
+                  background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.15)" }}>
+                  <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#dc2626" }} />
+                  <p style={{ fontSize: 12, color: "#dc2626", margin: 0 }}>
+                    Finalizzazione bloccata: completa le sezioni obbligatorie{" "}
+                    <strong>{emptyRequired.map((s) => s.ref).join(", ")}</strong>{" "}
+                    prima di passare allo stato Finalized.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <button onClick={() => setTimelineStep("export")}
+            style={{ marginTop: 20, padding: "10px 20px", borderRadius: 8, background: "#0D1016",
+              color: "#fff", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500 }}>
+            Pronto per l&apos;export →
+          </button>
+        </div>
+      )}
+
+      {/* ── Step 4: Audit-Ready Export ── */}
+      {timelineStep === "export" && (
+        <div>
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            {[
+              { label: "Sezioni completate", value: `${doneCount}/9`, color: "#16a34a" },
+              { label: "In lavoro", value: draftCount, color: "#0D1016" },
+              { label: "Obbligatorie vuote", value: emptyRequired.length, color: emptyRequired.length > 0 ? "#dc2626" : "#16a34a" },
+              { label: "Versioni salvate", value: versionSnapshots.length || "—", color: "rgba(0,0,0,0.5)" },
+            ].map((c) => (
+              <div key={c.label} style={{ borderRadius: 12, padding: 16, background: "#fff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+                <div style={{ fontSize: 20, fontWeight: 600, color: c.color, letterSpacing: "-0.5px" }}>{c.value}</div>
+                <div style={{ fontSize: 11, marginTop: 2, color: "rgba(0,0,0,0.38)" }}>{c.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Export buttons */}
+          <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap" }}>
+            {[
+              { label: "Esporta Markdown", action: exportMarkdown },
+              { label: "Esporta JSON", action: exportFullDocument },
+              { label: "Esporta PDF firmato", action: exportPdf },
+            ].map(({ label, action }) => (
+              <button key={label} onClick={action}
+                style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, padding: "10px 18px",
+                  borderRadius: 8, background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.1)",
+                  color: "#0D1016", cursor: "pointer", fontWeight: 500 }}>
+                <Download className="h-3.5 w-3.5" /> {label}
+              </button>
+            ))}
+            <button onClick={() => saveToDossier(true)} disabled={!canFinalize}
+              style={{ fontSize: 12, padding: "10px 18px", borderRadius: 8,
+                background: canFinalize ? "#0D1016" : "rgba(0,0,0,0.1)",
+                color: canFinalize ? "#fff" : "rgba(0,0,0,0.3)", border: "none",
+                cursor: canFinalize ? "pointer" : "not-allowed", fontWeight: 500 }}>
+              ✓ Finalizza versione
+            </button>
+          </div>
+
+          {/* Version history */}
+          <div style={{ marginBottom: 24 }}>
+            <VersionHistoryPanel
+              toolId="docugen"
+              onRestore={(data) => {
+                const d = data as DocuGenState;
+                if (d && typeof d === "object") setPersistedRaw({ ...DEFAULT_STATE, ...d });
+                setVersionSnapshots(listVersions("docugen"));
+                showToast("Versione ripristinata ✓");
+              }}
+              sectionLabels={Object.fromEntries(ANNEX_IV.map(s => [s.id, s.title]))}
+            />
+          </div>
+
+          {/* Document preview — editable */}
+          <div style={{ background: "#FAFAFA", padding: "16px", borderRadius: 8 }}>
+            {/* Toolbar */}
+            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+              {docEditing ? (
+                <button onClick={confirmDocEdit}
+                  style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, padding: "5px 12px",
+                    borderRadius: 6, background: "#0D1016", color: "#fff", border: "none", cursor: "pointer" }}>
+                  <CheckCircle className="h-3 w-3" /> Salva modifiche
+                </button>
+              ) : (
+                <button onClick={enterDocEdit}
+                  style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, padding: "5px 12px",
+                    borderRadius: 6, background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.6)",
+                    border: "1px solid rgba(0,0,0,0.10)", cursor: "pointer" }}>
+                  <Pencil className="h-3 w-3" /> Modifica documento
+                </button>
+              )}
+            </div>
+
+            {/* Edit mode — contentEditable */}
+            {docEditing && (
+              <div
+                ref={editDocRef}
+                contentEditable
+                suppressContentEditableWarning
+                style={{
+                  background: "#ffffff", borderRadius: 8, padding: "28px 32px",
+                  border: "1px solid rgba(13,16,22,0.25)",
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                  outline: "none", minHeight: 400,
+                  fontFamily: "Georgia, 'Times New Roman', serif",
+                  fontSize: 13, color: "#0D1016", lineHeight: 1.7,
+                }}
+              />
+            )}
+
+            {/* Preview: edited HTML */}
+            {!docEditing && editedDocHtml && (
+              <div
+                dangerouslySetInnerHTML={{ __html: editedDocHtml }}
+                style={{
+                  background: "#ffffff", borderRadius: 8, padding: "28px 32px",
+                  border: "1px solid rgba(0,0,0,0.08)",
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                  fontFamily: "Georgia, 'Times New Roman', serif",
+                  fontSize: 13, color: "#0D1016", lineHeight: 1.7,
+                }}
+              />
+            )}
+
+            {/* Preview: live JSX (sezioni modificabili sono solo i testi, non gli header) */}
+            {!docEditing && !editedDocHtml && (
+              <div
+                ref={previewDocRef}
+                style={{
+                  background: "#ffffff", borderRadius: 8, padding: "28px 32px",
+                  border: "1px solid rgba(0,0,0,0.08)",
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                  fontFamily: "Georgia, 'Times New Roman', serif",
+                  fontSize: 13, color: "#0D1016", lineHeight: 1.7,
+                }}
+              >
+                <h1 data-noedit="true" style={{ fontSize: 22, fontWeight: 600, color: "#0D1016", marginBottom: 4, letterSpacing: "-0.5px" }}>
+                  {systemName || "Sistema AI"}
+                </h1>
+                <p data-noedit="true" style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", marginBottom: 32, fontFamily: "system-ui, sans-serif" }}>
+                  Fascicolo Tecnico · Art. 11 AI Act (Allegato IV) · {new Date().toLocaleDateString("it-IT")}
+                </p>
+
+                {ANNEX_IV.map((s) => (
+                  <div key={s.id} style={{ marginBottom: 28, paddingBottom: 28, borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+                    <div data-noedit="true" style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                      <span style={{ fontSize: 10, fontFamily: "system-ui, sans-serif",
+                        color: "rgba(0,0,0,0.38)", fontWeight: 600 }}>{s.ref}</span>
+                      <span style={{ fontSize: 10, fontFamily: "system-ui, sans-serif",
+                        padding: "1px 6px", borderRadius: 4, background: "rgba(0,0,0,0.05)",
+                        color: "rgba(0,0,0,0.45)" }}>{SOURCE_BADGES[s.id]}</span>
+                    </div>
+                    <h2 data-noedit="true" style={{ fontSize: 14, fontWeight: 600, color: "#0D1016", marginBottom: 8 }}>{s.title}</h2>
+                    <p style={{ fontSize: 13, lineHeight: 1.8, color: "rgba(0,0,0,0.75)", whiteSpace: "pre-wrap", margin: 0 }}>
+                      {stripMarkdown(getContent(s.id)) || <span style={{ color: "rgba(0,0,0,0.28)", fontStyle: "italic" }}>Da compilare</span>}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Toast ── */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 rounded-xl px-4 py-3 text-[13px] shadow-xl"
-          style={{ background: "#0D1016", color: "#fff", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <div style={{ position: "fixed", bottom: 24, right: 24, zIndex: 50, borderRadius: 12,
+          padding: "12px 16px", fontSize: 13, boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+          background: "#0D1016", color: "#fff", border: "1px solid rgba(255,255,255,0.08)" }}>
           {toast}
         </div>
       )}
