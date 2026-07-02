@@ -41,6 +41,7 @@
   --color-hero: var(--hero);
   --font-sans: var(--font-inter);
   --font-mono: ui-monospace, monospace;
+  --font-serif: var(--font-playfair), Georgia, "Times New Roman", serif;
 }
 
 html {
