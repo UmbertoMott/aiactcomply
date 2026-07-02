@@ -3,23 +3,23 @@ import type { Metadata } from "next";
 const BASE_URL = "https://aicomply-omega.vercel.app";
 
 export const metadata: Metadata = {
-  title: "Prezzi RegulaeOS — Piani per la Conformità EU AI Act",
+  title: "Assistenza EU AI Act — Piani Essenziale, Studio, Su misura | AIComply",
   description:
-    "Scegli il piano RegulaeOS adatto alla tua azienda. Dal piano gratuito per PMI al piano Enterprise per provider di sistemi AI ad alto rischio. Conformità EU AI Act a partire da 0€.",
+    "Assistenza professionale in abbonamento per la conformità EU AI Act. Tre piani: Essenziale €49/mese, Studio €149/mese, Su misura. Ogni valutazione validata da un avvocato.",
   openGraph: {
-    title: "Prezzi RegulaeOS — Conformità EU AI Act",
+    title: "Assistenza EU AI Act in abbonamento | AIComply",
     description:
-      "Piani flessibili per la conformità EU AI Act. Gratis per iniziare, Enterprise per chi sviluppa sistemi AI ad alto rischio.",
+      "Piani di assistenza professionale per la conformità EU AI Act. Essenziale €49/mese · Studio €149/mese · Su misura. Validato da avvocato.",
     url: `${BASE_URL}/pricing`,
-    siteName: "RegulaeOS",
+    siteName: "AIComply",
     locale: "it_IT",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Prezzi RegulaeOS — Conformità EU AI Act",
+    title: "Prezzi AIComply — Conformità EU AI Act",
     description:
-      "Piani flessibili per la conformità EU AI Act. Gratis per iniziare.",
+      "Assistenza in abbonamento per la conformità EU AI Act, validata da avvocato.",
   },
   alternates: {
     canonical: `${BASE_URL}/pricing`,
