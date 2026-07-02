@@ -12,6 +12,13 @@ export interface AIProject {
 const PROJECTS_KEY     = "aicomply_projects";
 const ACTIVE_KEY       = "aicomply_active_project_id";
 
+/** Evento emesso quando cambia il progetto attivo (per aggiornare la UI live). */
+export const PROJECT_CHANGED_EVENT = "aicomply:projectchanged";
+
+function emitProjectChanged(): void {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(PROJECT_CHANGED_EVENT));
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function safeRead<T>(key: string, fallback: T): T {
@@ -118,10 +125,12 @@ export function setActiveProject(id: string): void {
       p.id === id ? { ...p, updatedAt: new Date().toISOString() } : p
     )
   );
+  emitProjectChanged();
 }
 
 /** Deseleziona il progetto attivo (modalità "nessun progetto") */
 export function clearActiveProject(): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(ACTIVE_KEY);
+  emitProjectChanged();
 }

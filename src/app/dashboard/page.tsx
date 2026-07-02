@@ -18,6 +18,7 @@ import { useUserRole } from "@/lib/hooks/useUserRole";
 import { readFromStorage, type ClassifierResult } from "@/lib/dossier/storage-schema";
 import { loadInventory, computeObligationCount } from "@/lib/inventory/ai-system";
 import type { AISystem } from "@/lib/inventory/ai-system";
+import { ProjectMembers } from "@/components/dashboard/ProjectMembers";
 
 const OnboardingWizard = dynamic(
   () => import("@/components/onboarding/OnboardingWizard"),
@@ -644,6 +645,9 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* ── MEMBRI DEL PROGETTO (visibile solo con progetto attivo) ── */}
+        <ProjectMembers />
 
         {/* ── BOTTOM CARDS ─────────────────────────────────────────── */}
         <div className="bot-grid fu-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>

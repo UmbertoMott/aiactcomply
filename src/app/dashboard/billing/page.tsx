@@ -1,3 +1,5 @@
+import { PlanSelector } from "@/components/billing/PlanSelector";
+
 export default function BillingPage() {
   return (
     <div className="max-w-xl mx-auto py-10 px-4">
@@ -11,12 +13,17 @@ export default function BillingPage() {
         Gestisci abbonamento, metodi di pagamento e fatture.
       </p>
 
+      <div className="rounded-xl p-5 mb-4" style={{ border: "1px solid rgba(0,0,0,0.1)" }}>
+        <h2 className="text-[14px] font-semibold mb-3" style={{ color: "#0D1016" }}>Piano attivo</h2>
+        <PlanSelector />
+      </div>
+
       <div
         className="rounded-xl p-5 space-y-4"
         style={{ border: "1px solid rgba(0,0,0,0.1)" }}
       >
         <p className="text-[13px]" style={{ color: "rgba(0,0,0,0.5)" }}>
-          Questa sezione è in fase di sviluppo. Presto potrai gestire il tuo piano e visualizzare le fatture.
+          Metodi di pagamento e fatture: in fase di sviluppo. Presto potrai gestirli da qui.
         </p>
       </div>
     </div>
