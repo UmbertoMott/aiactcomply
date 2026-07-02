@@ -8,7 +8,7 @@ import {
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { EUDBResult, ConformityResult, AuthRepResult } from "@/lib/dossier/storage-schema";
 import SignOffPanel from "@/components/ui/SignOffPanel";
-import { SystemSelector } from "@/components/compliance/SystemSelector";
+import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -350,7 +350,7 @@ function MemberStatesSelect({
                   display: "flex", alignItems: "center", gap: 8,
                   padding: "6px 12px", cursor: "pointer", fontSize: 12,
                   color: T.text,
-                  background: checked ? "rgba(0,0,0,0.04)" : "transparent",
+                  background: checked ? T.blueBg : "transparent",
                   borderBottom: isAll ? `1px solid ${T.border}` : undefined,
                   fontWeight: isAll ? 500 : 400,
                 }}
@@ -359,7 +359,7 @@ function MemberStatesSelect({
                   type="checkbox"
                   checked={checked}
                   onChange={() => toggle(sm)}
-                  style={{ accentColor: T.text }}
+                  style={{ accentColor: T.blue }}
                 />
                 {sm}
               </label>
@@ -377,7 +377,7 @@ function MemberStatesSelect({
               onClick={() => toggle(sm)}
               style={{
                 fontSize: 10, padding: "2px 8px", borderRadius: 10,
-                background: "rgba(0,0,0,0.04)", color: T.text, border: `1px solid ${T.border}`,
+                background: T.blueBg, color: T.blue, border: `1px solid ${T.blueBdr}`,
                 cursor: "pointer",
               }}
             >
@@ -521,12 +521,12 @@ export default function EUDBPage() {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {/* Intro */}
-        <div style={{ ...cardSt, padding: 16, background: "rgba(0,0,0,0.04)", border: `1px solid ${T.border}` }}>
+        <div style={{ ...cardSt, padding: 16, background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
           <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-            <Info size={14} style={{ color: T.muted, flexShrink: 0, marginTop: 1 }} />
+            <Info size={14} style={{ color: T.blue, flexShrink: 0, marginTop: 1 }} />
             <div>
-              <p style={{ fontSize: 12, color: T.text, fontWeight: 500, margin: 0 }}>Art. 49 AI Act — Chi deve registrarsi?</p>
-              <p style={{ fontSize: 11, color: T.text, opacity: 0.8, margin: "4px 0 0", lineHeight: 1.5 }}>
+              <p style={{ fontSize: 12, color: T.blue, fontWeight: 500, margin: 0 }}>Art. 49 AI Act — Chi deve registrarsi?</p>
+              <p style={{ fontSize: 11, color: T.blue, opacity: 0.8, margin: "4px 0 0", lineHeight: 1.5 }}>
                 Provider di sistemi Annex III, deployer pubblici (Annex III pt.1-6), provider di GPAI con rischio sistemico e authorized representative di provider non-UE devono registrarsi nel database UE prima del deployment.
               </p>
             </div>
@@ -584,7 +584,7 @@ export default function EUDBPage() {
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ ...cardSt, padding: 20 }}>
           <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 16 }}>
-            <Building2 size={14} style={{ color: T.muted }} />
+            <Building2 size={14} style={{ color: T.blue }} />
             <p style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>Dati del Provider (Annex VIII §1-2)</p>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -625,7 +625,7 @@ export default function EUDBPage() {
                 type="checkbox"
                 checked={p.has_authorized_rep}
                 onChange={e => patchProvider("has_authorized_rep", e.target.checked)}
-                style={{ accentColor: T.text }}
+                style={{ accentColor: T.blue }}
               />
               Il provider non è stabilito nell&apos;UE
             </label>
@@ -666,7 +666,7 @@ export default function EUDBPage() {
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ ...cardSt, padding: 20 }}>
           <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 16 }}>
-            <Database size={14} style={{ color: T.muted }} />
+            <Database size={14} style={{ color: T.blue }} />
             <p style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>Identificazione del Sistema (Annex VIII §4-6)</p>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -696,7 +696,7 @@ export default function EUDBPage() {
 
         <div style={{ ...cardSt, padding: 20 }}>
           <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 16 }}>
-            <Globe size={14} style={{ color: T.muted }} />
+            <Globe size={14} style={{ color: T.blue }} />
             <p style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>Classificazione e copertura (Annex VIII §7-8)</p>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -717,7 +717,7 @@ export default function EUDBPage() {
 
         <div style={{ ...cardSt, padding: 20 }}>
           <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 16 }}>
-            <FileText size={14} style={{ color: T.muted }} />
+            <FileText size={14} style={{ color: T.blue }} />
             <p style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>Documentazione di conformità (Annex VIII §9-11)</p>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -800,9 +800,9 @@ export default function EUDBPage() {
                 <span
                   style={{
                     flexShrink: 0, width: 20, height: 20, borderRadius: "50%",
-                    background: "rgba(0,0,0,0.04)", border: `1px solid ${T.border}`,
+                    background: T.blueBg, border: `1px solid ${T.blueBdr}`,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 10, fontWeight: 700, color: T.text,
+                    fontSize: 10, fontWeight: 700, color: T.blue,
                   }}
                 >
                   {ps.n}
@@ -816,7 +816,7 @@ export default function EUDBPage() {
                         href={ps.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{ color: T.text, textDecoration: "none" }}
+                        style={{ color: T.blue, textDecoration: "none" }}
                       >
                         {ps.linkLabel}
                       </a>
@@ -858,7 +858,7 @@ export default function EUDBPage() {
               style={{
                 display: "flex", alignItems: "center", gap: 6,
                 padding: "8px 16px", borderRadius: 9999, fontSize: 12,
-                background: T.text, color: "#ffffff",
+                background: T.blue, color: "#ffffff",
                 border: "none", cursor: "pointer", fontWeight: 500,
               }}
             >
@@ -886,16 +886,16 @@ export default function EUDBPage() {
 
   return (
     <div style={{ width: "100%" }}>
-      <SystemSelector checkProhibited={true} />
+      <SystemContextBanner checkProhibited={true} />
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-          <Database size={16} style={{ color: T.text }} />
+          <Database size={16} style={{ color: T.blue }} />
           <h1 style={{ fontSize: 24, fontWeight: 500, letterSpacing: "-0.8px", color: "#0D1016", margin: 0 }}>EUDB Registration Wizard</h1>
           <span
             style={{
               fontSize: 10, padding: "2px 7px", borderRadius: 10, fontWeight: 600,
-              background: "rgba(0,0,0,0.04)", color: T.text, border: `1px solid ${T.border}`,
+              background: T.blueBg, color: T.blue, border: `1px solid ${T.blueBdr}`,
             }}
           >
             Art. 49
@@ -921,9 +921,9 @@ export default function EUDBPage() {
                       width: 22, height: 22, borderRadius: "50%",
                       display: "flex", alignItems: "center", justifyContent: "center",
                       fontSize: 10, fontWeight: 700,
-                      background: isDone ? T.green : isActive ? T.text : T.bg,
+                      background: isDone ? T.green : isActive ? T.blue : T.bg,
                       color: isDone || isActive ? "#fff" : T.muted,
-                      border: `1px solid ${isDone ? T.greenBdr : isActive ? T.text : T.border}`,
+                      border: `1px solid ${isDone ? T.greenBdr : isActive ? T.blue : T.border}`,
                     }}
                   >
                     {isDone ? "✓" : sNum}
@@ -986,9 +986,9 @@ export default function EUDBPage() {
             style={{
               display: "flex", alignItems: "center", gap: 6,
               padding: "8px 16px", borderRadius: 9999, fontSize: 12,
-              background: step === 1 && !canProceed1 ? T.bg : T.text,
+              background: step === 1 && !canProceed1 ? T.bg : T.blue,
               color: step === 1 && !canProceed1 ? T.faint : "#ffffff",
-              border: `1px solid ${step === 1 && !canProceed1 ? T.border : T.text}`,
+              border: `1px solid ${step === 1 && !canProceed1 ? T.border : T.blue}`,
               cursor: step === 1 && !canProceed1 ? "not-allowed" : "pointer",
               fontWeight: 500,
             }}

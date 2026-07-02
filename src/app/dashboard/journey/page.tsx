@@ -6,6 +6,8 @@ import { CheckCircle2, Circle, ArrowRight, AlertTriangle } from "lucide-react";
 
 // ─── Tool definition ──────────────────────────────────────────────────────────
 
+type JourneyRole = "provider" | "deployer" | "importer" | "distributor" | "all";
+
 interface JourneyTool {
   label: string;
   href: string;
@@ -14,6 +16,7 @@ interface JourneyTool {
   storageKey: string | null;   // null = non tracciato via localStorage
   urgent?: boolean;
   optional?: boolean;
+  roles?: JourneyRole[];        // se assente → tutti i ruoli
 }
 
 interface Phase {
@@ -47,6 +50,7 @@ const PHASES: Phase[] = [
         art: "",
         desc: "Mappa i sistemi AI presenti nella tua infrastruttura (GitHub, AWS, Azure).",
         storageKey: "aicomply_discovery_sources",
+        roles: ["provider", "deployer"],
       },
       {
         label: "AI Literacy",
@@ -55,6 +59,7 @@ const PHASES: Phase[] = [
         desc: "Forma il personale: obbligo in vigore dal 2 febbraio 2025.",
         storageKey: "ai_literacy_store",
         urgent: true,
+        roles: ["provider", "deployer", "importer", "distributor"],
       },
       {
         label: "Art. 5 Checker",
@@ -63,6 +68,7 @@ const PHASES: Phase[] = [
         desc: "Verifica che nessuna pratica AI sia vietata. Obbligatorio e immediato.",
         storageKey: "aicomply_prohibited_result",
         urgent: true,
+        roles: ["provider", "deployer", "importer", "distributor"],
       },
       {
         label: "AI Classifier",
@@ -70,6 +76,7 @@ const PHASES: Phase[] = [
         art: "Art. 6",
         desc: "Determina il livello di rischio del sistema (minimo / limitato / alto).",
         storageKey: "aicomply_classifier_result",
+        roles: ["provider", "deployer", "importer"],
       },
     ],
   },
@@ -84,6 +91,7 @@ const PHASES: Phase[] = [
         art: "Art. 9",
         desc: "Sistema di gestione del rischio continuo durante tutto il ciclo di vita.",
         storageKey: "aicomply_risk_manager_result",
+        roles: ["provider", "deployer"],
       },
       {
         label: "Data Audit",
@@ -91,6 +99,7 @@ const PHASES: Phase[] = [
         art: "Art. 10",
         desc: "Qualità, provenienza e bias dei dataset usati nel training.",
         storageKey: "aicomply_data_audit_result",
+        roles: ["provider"],
       },
       {
         label: "DPIA",
@@ -98,6 +107,7 @@ const PHASES: Phase[] = [
         art: "GDPR 35",
         desc: "Valutazione d'impatto GDPR obbligatoria per trattamenti ad alto rischio.",
         storageKey: "aicomply_dpia_result",
+        roles: ["provider", "deployer"],
       },
       {
         label: "FRIA",
@@ -106,6 +116,7 @@ const PHASES: Phase[] = [
         desc: "Valutazione impatto diritti fondamentali (obbligatoria per enti pubblici).",
         storageKey: "aicomply_fria_result",
         optional: true,
+        roles: ["deployer"],
       },
     ],
   },
@@ -120,6 +131,7 @@ const PHASES: Phase[] = [
         art: "Art. 11",
         desc: "Genera la documentazione tecnica strutturata del sistema AI.",
         storageKey: "aicomply_docugen_result",
+        roles: ["provider", "importer"],
       },
       {
         label: "LogVault",
@@ -127,6 +139,7 @@ const PHASES: Phase[] = [
         art: "Art. 12",
         desc: "Configura la registrazione automatica degli eventi (log audit-proof).",
         storageKey: "aicomply_logvault_result",
+        roles: ["provider", "deployer"],
       },
       {
         label: "QMS Builder",
@@ -134,6 +147,7 @@ const PHASES: Phase[] = [
         art: "Art. 17",
         desc: "Sistema di gestione della qualità: policy, cicli di revisione, certificazioni.",
         storageKey: "aicomply_qms_result",
+        roles: ["provider"],
       },
     ],
   },
@@ -148,6 +162,7 @@ const PHASES: Phase[] = [
         art: "Art. 13",
         desc: "Informativa agli utenti: cosa sa, come funziona, come contattare il provider.",
         storageKey: "aicomply_transparency_result",
+        roles: ["provider"],
       },
       {
         label: "Oversight",
@@ -155,6 +170,7 @@ const PHASES: Phase[] = [
         art: "Art. 14",
         desc: "Definisci i meccanismi di sorveglianza umana e i punti di intervento.",
         storageKey: "aicomply_oversight_result",
+        roles: ["provider", "deployer"],
       },
       {
         label: "Resilience",
@@ -162,6 +178,7 @@ const PHASES: Phase[] = [
         art: "Art. 15",
         desc: "Accuratezza, robustezza e misure di cybersecurity del sistema.",
         storageKey: "aicomply_resilience_result",
+        roles: ["provider"],
       },
       {
         label: "Art. 50 Kit",
@@ -170,6 +187,7 @@ const PHASES: Phase[] = [
         desc: "Disclosure AI per utenti finali — banner, modal, metadati machine-readable.",
         storageKey: null,
         urgent: true,
+        roles: ["provider", "deployer"],
       },
       {
         label: "L.132/2025",
@@ -178,6 +196,7 @@ const PHASES: Phase[] = [
         desc: "Conformità alla legge AI italiana: HR transparency, deepfake, accessibilità.",
         storageKey: "aicomply_l132_result",
         urgent: true,
+        roles: ["provider", "deployer", "importer"],
       },
     ],
   },
@@ -193,6 +212,7 @@ const PHASES: Phase[] = [
         desc: "Analisi di spiegabilità (SHAP, LIME) e bias detection tecnico.",
         storageKey: "aicomply_xai_result",
         optional: true,
+        roles: ["provider"],
       },
       {
         label: "Conformity",
@@ -200,6 +220,7 @@ const PHASES: Phase[] = [
         art: "Art. 43",
         desc: "Dichiarazione di Conformità UE e riferimento registro EUDB.",
         storageKey: "aicomply_conformity_assessment",
+        roles: ["provider", "importer"],
       },
       {
         label: "Post-Market",
@@ -207,6 +228,7 @@ const PHASES: Phase[] = [
         art: "Art. 72",
         desc: "Piano e monitoraggio post-mercato: incidenti, feedback, aggiornamenti.",
         storageKey: null,
+        roles: ["provider", "deployer"],
       },
       {
         label: "Compliance Hub",
@@ -214,6 +236,7 @@ const PHASES: Phase[] = [
         art: "Art. 71",
         desc: "Cruscotto scadenze, stato complessivo e linea del tempo normativa.",
         storageKey: null,
+        roles: ["provider", "deployer", "importer", "distributor"],
       },
     ],
   },
@@ -246,8 +269,23 @@ function phaseStatus(tools: RichTool[]) {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
+const ROLE_LABELS: Record<JourneyRole, string> = {
+  all: "Tutti i ruoli",
+  provider: "Provider",
+  deployer: "Deployer",
+  importer: "Importatore",
+  distributor: "Distributore",
+};
+
+function isToolRelevant(tool: JourneyTool, role: JourneyRole): boolean {
+  if (role === "all") return true;
+  if (!tool.roles || tool.roles.length === 0) return true;
+  return tool.roles.includes(role);
+}
+
 export default function JourneyPage() {
   const [phases, setPhases] = useState<RichPhase[]>([]);
+  const [selectedRole, setSelectedRole] = useState<JourneyRole>("all");
 
   useEffect(() => {
     const built: RichPhase[] = PHASES.map((phase) => {
@@ -278,7 +316,7 @@ export default function JourneyPage() {
     <div className="max-w-2xl mx-auto">
 
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6">
         <h1
           style={{ fontSize: "26px", fontWeight: 400, letterSpacing: "-0.8px", color: "#0D1016" }}
           className="mb-1"
@@ -289,6 +327,36 @@ export default function JourneyPage() {
           Segui le 5 fasi in ordine. Ogni fase sblocca quella successiva. I tool facoltativi
           sono indicati — salta solo se non applicabili al tuo caso.
         </p>
+
+        {/* Role filter */}
+        <div className="mt-4">
+          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide mb-2">
+            Filtra per il tuo ruolo
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {(Object.keys(ROLE_LABELS) as JourneyRole[]).map((role) => (
+              <button
+                key={role}
+                onClick={() => setSelectedRole(role)}
+                className="text-[12px] font-medium px-3 py-1.5 rounded-full transition-all"
+                style={{
+                  background: selectedRole === role ? "#0D1016" : "rgba(0,0,0,0.04)",
+                  color: selectedRole === role ? "#ffffff" : "rgba(0,0,0,0.5)",
+                  border: `1px solid ${selectedRole === role ? "#0D1016" : "rgba(0,0,0,0.1)"}`,
+                  cursor: "pointer",
+                }}
+              >
+                {ROLE_LABELS[role]}
+              </button>
+            ))}
+          </div>
+          {selectedRole !== "all" && (
+            <p className="text-[11px] text-slate-400 mt-2">
+              I tool <span className="font-semibold text-slate-600">evidenziati in blu</span> sono obbligatori per{" "}
+              <strong>{ROLE_LABELS[selectedRole]}</strong>. Quelli in grigio non si applicano al tuo ruolo.
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Global progress */}
@@ -381,11 +449,15 @@ export default function JourneyPage() {
 
               {/* Tool list */}
               <div className="divide-y" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
-                {phase.tools.map((tool) => (
+                {phase.tools.map((tool) => {
+                  const relevant = isToolRelevant(tool, selectedRole);
+                  const mandatoryForRole = selectedRole !== "all" && relevant && !tool.optional;
+                  return (
                   <Link
                     key={tool.href}
                     href={tool.href}
                     className="flex items-center gap-3 px-5 py-3 hover:bg-black/[0.015] transition-colors group"
+                    style={{ opacity: selectedRole !== "all" && !relevant ? 0.38 : 1 }}
                   >
                     {/* Completion dot */}
                     <div className="flex-shrink-0">
@@ -394,7 +466,7 @@ export default function JourneyPage() {
                       ) : (
                         <Circle
                           className="h-4 w-4"
-                          style={{ color: tool.urgent ? "#dc2626" : "rgba(0,0,0,0.2)" }}
+                          style={{ color: tool.urgent ? "#dc2626" : mandatoryForRole ? "#2563eb" : "rgba(0,0,0,0.2)" }}
                         />
                       )}
                     </div>
@@ -413,8 +485,8 @@ export default function JourneyPage() {
                           <span
                             className="text-[9px] px-1.5 py-0.5 rounded font-medium"
                             style={{
-                              background: tool.urgent ? "rgba(220,38,38,0.08)" : "rgba(0,0,0,0.05)",
-                              color: tool.urgent ? "#dc2626" : "rgba(0,0,0,0.4)",
+                              background: tool.urgent ? "rgba(220,38,38,0.08)" : mandatoryForRole ? "rgba(37,99,235,0.07)" : "rgba(0,0,0,0.05)",
+                              color: tool.urgent ? "#dc2626" : mandatoryForRole ? "#2563eb" : "rgba(0,0,0,0.4)",
                             }}
                           >
                             {tool.art}
@@ -428,9 +500,21 @@ export default function JourneyPage() {
                           </span>
                         )}
 
+                        {mandatoryForRole && !tool.done && !tool.urgent && (
+                          <span className="text-[9px] font-semibold" style={{ color: "#2563eb" }}>
+                            obbligatorio per te
+                          </span>
+                        )}
+
                         {tool.optional && (
                           <span className="text-[9px]" style={{ color: "rgba(0,0,0,0.3)" }}>
                             facoltativo
+                          </span>
+                        )}
+
+                        {selectedRole !== "all" && !relevant && (
+                          <span className="text-[9px]" style={{ color: "rgba(0,0,0,0.25)" }}>
+                            non applicabile al tuo ruolo
                           </span>
                         )}
                       </div>
@@ -445,7 +529,8 @@ export default function JourneyPage() {
                       style={{ color: "rgba(0,0,0,0.3)" }}
                     />
                   </Link>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Phase connector — last phase has no connector */}

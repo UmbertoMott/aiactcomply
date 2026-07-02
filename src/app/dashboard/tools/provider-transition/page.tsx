@@ -9,7 +9,7 @@ import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { ProviderTransitionResult, ClassifierResult, DeployerCheckResult } from "@/lib/dossier/storage-schema";
 import SignOffPanel from "@/components/ui/SignOffPanel";
-import { SystemSelector } from "@/components/compliance/SystemSelector";
+import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -107,8 +107,8 @@ const TRANSITION_CHECKS: ProviderTransitionCheck[] = [
   },
   {
     id: "safety_degradation",
-    question: "Hai apportato modifiche che potrebbero ridurre la conformità del sistema ai requisiti di sicurezza o accuratezza dichiarati dal provider?",
-    explanation: "Disabilitare safety filter, modificare soglie di confidenza, rimuovere meccanismi di override umano: tutte modifiche che peggiorano la conformità configurano trigger Art. 28.",
+    question: "Hai apportato modifiche che potrebbero ridurre la conformita' del sistema ai requisiti di sicurezza o accuratezza dichiarati dal provider?",
+    explanation: "Disabilitare safety filter, modificare soglie di confidenza, rimuovere meccanismi di override umano: tutte modifiche che peggiorano la conformita' configurano trigger Art. 28.",
     trigger_article: "Art. 28(1)(b) + Art. 3(23)(c)",
     is_trigger: true,
   },
@@ -252,14 +252,12 @@ function AnswerRadio({
 
 function CheckQuestion({
   check,
-  index,
   answer,
   expanded,
   onAnswer,
   onToggle,
 }: {
   check: ProviderTransitionCheck;
-  index: number;
   answer: TransitionAnswer;
   expanded: boolean;
   onAnswer: (v: TransitionAnswer) => void;
@@ -282,14 +280,17 @@ function CheckQuestion({
       {/* Header row */}
       <div style={{ padding: "12px 14px" }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-          {/* Progressive letter label */}
+          {/* Article tag */}
           <span
             style={{
-              flexShrink: 0, fontSize: 11, fontWeight: 700, color: T.muted,
-              marginTop: 1, minWidth: 18,
+              flexShrink: 0, fontSize: 9, padding: "2px 6px", borderRadius: 4, fontWeight: 600,
+              marginTop: 2,
+              background: check.is_trigger ? T.redBg : T.grayBg,
+              color: check.is_trigger ? T.red : T.gray,
+              border: `1px solid ${check.is_trigger ? T.redBdr : T.grayBdr}`,
             }}
           >
-            {String.fromCharCode(97 + index)})
+            {check.trigger_article}
           </span>
 
           {/* Question text */}
@@ -500,8 +501,8 @@ export default function ProviderTransitionPage() {
   const vc = verdictConfig[verdict];
 
   return (
-    <div style={{ maxWidth: 860, margin: "0 auto" }}>
-      <SystemSelector checkProhibited={true} />
+    <div style={{ width: "100%" }}>
+      <SystemContextBanner checkProhibited={true} />
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
@@ -531,11 +532,10 @@ export default function ProviderTransitionPage() {
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
-          {TRANSITION_CHECKS.map((check, idx) => (
+          {TRANSITION_CHECKS.map(check => (
             <CheckQuestion
               key={check.id}
               check={check}
-              index={idx}
               answer={answers[check.id] ?? null}
               expanded={expandedQs.has(check.id)}
               onAnswer={v => setAnswer(check.id, v)}

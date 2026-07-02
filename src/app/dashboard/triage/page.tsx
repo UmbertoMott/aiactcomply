@@ -4,7 +4,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
-import type { ClassifierResult, OrgProfile } from "@/lib/dossier/storage-schema";
+import type { ClassifierResult } from "@/lib/dossier/storage-schema";
+import { useScopedStorage } from "@/lib/hooks/useScopedStorage";
 import {
   ChevronRight, ChevronLeft, AlertTriangle, Shield,
   CheckCircle2, ArrowRight, FileText, Zap,
@@ -43,6 +44,21 @@ interface TriageReport {
   estimatedEffortDays: number;
   summary: string;
   prohibitedFlags: string[];
+}
+
+/** Entry immutabile di storico classificazione — append-only, mai sovrascritta (FIX 4). */
+interface TriageEntry {
+  id: string;
+  timestamp: string;           // ISO 8601
+  riskTier: RiskTier;
+  summary: string;
+  answersSnapshot: Answers;
+}
+
+type TriageHistory = TriageEntry[];
+
+function makeTriageId(): string {
+  return `triage-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 // ─── Macro-aree (4 step + result) ────────────────────────────────────────────
@@ -365,13 +381,13 @@ const RISK_CONFIG: Record<
 function ProgressBar({ current, total }: { current: number; total: number }) {
   return (
     <div className="flex items-center gap-3">
-      <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.07)" }}>
+      <div className="flex-1 h-1 rounded-full bg-slate-800 overflow-hidden">
         <div
-          className="h-full rounded-full bg-[#0D1016] transition-all duration-500"
+          className="h-full rounded-full bg-blue-500 transition-all duration-500"
           style={{ width: `${(current / total) * 100}%` }}
         />
       </div>
-      <span className="text-xs tabular-nums" style={{ color: "rgba(0,0,0,0.40)" }}>
+      <span className="text-xs text-slate-500 tabular-nums">
         {current}/{total}
       </span>
     </div>
@@ -380,7 +396,7 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[11px] font-semibold uppercase tracking-widest mb-2" style={{ color: "rgba(0,0,0,0.40)" }}>
+    <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-2">
       {children}
     </p>
   );
@@ -394,23 +410,23 @@ function OptionButton({
   return (
     <button
       onClick={onClick}
-      style={selected
-        ? { border: "1px solid #0D1016", background: "rgba(0,0,0,0.04)", borderRadius: 12 }
-        : { border: "1px solid rgba(0,0,0,0.07)", background: "#ffffff", borderRadius: 12 }
-      }
-      className="w-full text-left px-4 py-3 transition-all duration-150 hover:shadow-sm"
+      className={`w-full text-left px-4 py-3 rounded-xl border transition-all duration-150 ${
+        selected
+          ? "border-blue-500 bg-blue-500/10"
+          : "border-slate-700 bg-slate-800/50 hover:border-slate-600 hover:bg-slate-800"
+      }`}
     >
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-medium" style={{ color: "#0D1016" }}>
+          <p className={`text-sm font-medium ${selected ? "text-blue-300" : "text-white"}`}>
             {label}
           </p>
           {description && (
-            <p className="text-xs mt-0.5" style={{ color: "rgba(0,0,0,0.40)" }}>{description}</p>
+            <p className="text-xs text-slate-400 mt-0.5">{description}</p>
           )}
         </div>
         {selected && (
-          <div className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center" style={{ background: "#0D1016" }}>
+          <div className="w-4 h-4 rounded-full bg-blue-500 flex-shrink-0 flex items-center justify-center">
             <div className="w-2 h-2 rounded-full bg-white" />
           </div>
         )}
@@ -427,19 +443,17 @@ function MultiOptionButton({
   return (
     <button
       onClick={onClick}
-      style={selected
-        ? { border: "1px solid #0D1016", background: "rgba(0,0,0,0.04)", borderRadius: 12 }
-        : { border: "1px solid rgba(0,0,0,0.07)", background: "#ffffff", borderRadius: 12 }
-      }
-      className="w-full text-left px-4 py-3 transition-all duration-150 hover:shadow-sm"
+      className={`w-full text-left px-4 py-3 rounded-xl border transition-all duration-150 ${
+        selected
+          ? "border-blue-500 bg-blue-500/10"
+          : "border-slate-700 bg-slate-800/50 hover:border-slate-600 hover:bg-slate-800"
+      }`}
     >
       <div className="flex items-center gap-3">
         <div
-          className="w-4 h-4 rounded flex-shrink-0 flex items-center justify-center transition-colors"
-          style={selected
-            ? { background: "#0D1016", border: "1px solid #0D1016" }
-            : { border: "1px solid rgba(0,0,0,0.20)", background: "white" }
-          }
+          className={`w-4 h-4 rounded flex-shrink-0 border flex items-center justify-center transition-colors ${
+            selected ? "bg-blue-500 border-blue-500" : "border-slate-600"
+          }`}
         >
           {selected && (
             <svg viewBox="0 0 10 10" className="w-2.5 h-2.5 text-white" fill="currentColor">
@@ -448,11 +462,11 @@ function MultiOptionButton({
           )}
         </div>
         <div>
-          <p className="text-sm font-medium" style={{ color: "#0D1016" }}>
+          <p className={`text-sm font-medium ${selected ? "text-blue-300" : "text-white"}`}>
             {label}
           </p>
           {description && (
-            <p className="text-xs mt-0.5" style={{ color: "rgba(0,0,0,0.40)" }}>{description}</p>
+            <p className="text-xs text-slate-400 mt-0.5">{description}</p>
           )}
         </div>
       </div>
@@ -487,9 +501,9 @@ function ProhibitedDraftView({
             <p className="text-sm font-semibold text-red-400 mb-1">
               PRATICA VIETATA — Art. 5 EU AI Act
             </p>
-            <p className="text-xs leading-relaxed" style={{ color: "rgba(0,0,0,0.65)" }}>
+            <p className="text-xs text-slate-300 leading-relaxed">
               Il sistema presenta caratteristiche incompatibili con il Regolamento UE 2024/1689.
-              <strong style={{ color: "#0D1016" }}> Non può essere messo in opera nell'UE nella forma attuale.</strong>
+              <strong className="text-white"> Non può essere messo in opera nell'UE nella forma attuale.</strong>
             </p>
           </div>
         </div>
@@ -497,7 +511,7 @@ function ProhibitedDraftView({
 
       {/* Punti di violazione evidenziati */}
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-widest mb-2" style={{ color: "rgba(0,0,0,0.40)" }}>
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-2">
           Violazioni rilevate
         </p>
         <div className="space-y-2">
@@ -511,7 +525,7 @@ function ProhibitedDraftView({
               }}
             >
               <div className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0 mt-1.5" />
-              <p className="text-xs" style={{ color: "rgba(0,0,0,0.65)" }}>{flag}</p>
+              <p className="text-xs text-slate-300">{flag}</p>
             </div>
           ))}
         </div>
@@ -519,7 +533,7 @@ function ProhibitedDraftView({
 
       {/* Cosa fare */}
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-widest mb-2" style={{ color: "rgba(0,0,0,0.40)" }}>
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-2">
           Prossimi passi consigliati
         </p>
         <div className="space-y-2">
@@ -527,14 +541,13 @@ function ProhibitedDraftView({
             <Link
               key={i}
               href={action.href}
-              className="flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:shadow-sm"
-              style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#ffffff" }}
+              className="flex items-center justify-between rounded-lg px-3 py-2.5 border border-slate-700 hover:border-slate-600 bg-slate-800/40 transition-colors"
             >
               <div>
-                <p className="text-xs font-medium" style={{ color: "#0D1016" }}>{action.label}</p>
-                <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.40)" }}>{action.article} · {action.deadline}</p>
+                <p className="text-xs font-medium text-white">{action.label}</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">{action.article} · {action.deadline}</p>
               </div>
-              <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "rgba(0,0,0,0.30)" }} />
+              <ChevronRight className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
             </Link>
           ))}
         </div>
@@ -544,31 +557,29 @@ function ProhibitedDraftView({
       <div
         className="rounded-xl p-4"
         style={{
-          background: "#ffffff",
-          border: "1px solid rgba(0,0,0,0.07)",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+          background: "rgba(0,0,0,0.2)",
+          border: "1px solid rgba(255,255,255,0.06)",
         }}
       >
         <div className="flex items-start gap-3">
-          <BookOpen className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "rgba(0,0,0,0.40)" }} />
+          <BookOpen className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="text-xs font-medium mb-1" style={{ color: "#0D1016" }}>
+            <p className="text-xs font-medium text-slate-300 mb-1">
               Salva come bozza per revisione legale
             </p>
-            <p className="text-[11px] mb-3" style={{ color: "rgba(0,0,0,0.40)" }}>
+            <p className="text-[11px] text-slate-500 mb-3">
               Puoi salvare questo report come bozza con le violazioni evidenziate
               e condividerlo con il tuo consulente legale prima di qualunque modifica al sistema.
             </p>
             {draftSaved ? (
-              <div className="flex items-center gap-2 text-xs text-green-600">
+              <div className="flex items-center gap-2 text-xs text-green-400">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 Bozza salvata localmente
               </div>
             ) : (
               <button
                 onClick={onSaveDraft}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-white text-xs font-medium transition-colors hover:opacity-90"
-                style={{ background: "#0D1016" }}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-xs font-medium transition-colors"
               >
                 <Save className="w-3.5 h-3.5" />
                 Salva bozza
@@ -597,16 +608,16 @@ function TriageReportView({ report }: { report: TriageReport }) {
             {cfg.label}
           </span>
         </div>
-        <p className="text-xs leading-relaxed" style={{ color: "rgba(0,0,0,0.65)" }}>{report.summary}</p>
+        <p className="text-xs text-slate-300 leading-relaxed">{report.summary}</p>
       </div>
 
       {/* Effort */}
       {report.estimatedEffortDays > 0 && (
-        <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg" style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}>
-          <FileText className="w-3.5 h-3.5" style={{ color: "rgba(0,0,0,0.40)" }} />
-          <p className="text-xs" style={{ color: "rgba(0,0,0,0.40)" }}>
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-800/60 border border-slate-700">
+          <FileText className="w-3.5 h-3.5 text-slate-400" />
+          <p className="text-xs text-slate-400">
             Effort stimato:
-            <span className="ml-1 font-semibold" style={{ color: "#0D1016" }}>
+            <span className="ml-1 font-semibold text-white">
               ~{report.estimatedEffortDays} giorni lavorativi
             </span>
           </p>
@@ -615,7 +626,7 @@ function TriageReportView({ report }: { report: TriageReport }) {
 
       {/* Azioni urgenti */}
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-widest mb-2" style={{ color: "rgba(0,0,0,0.40)" }}>
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-2">
           Azioni prioritarie
         </p>
         <div className="space-y-2">
@@ -623,16 +634,15 @@ function TriageReportView({ report }: { report: TriageReport }) {
             <Link
               key={i}
               href={action.href}
-              className="flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:shadow-sm"
-              style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#ffffff" }}
+              className="flex items-center justify-between rounded-lg px-3 py-2.5 border border-slate-700 hover:border-slate-600 bg-slate-800/40 transition-colors"
             >
               <div>
-                <p className="text-xs font-medium" style={{ color: "#0D1016" }}>{action.label}</p>
-                <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.40)" }}>
+                <p className="text-xs font-medium text-white">{action.label}</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">
                   {action.article} · {action.deadline}
                 </p>
               </div>
-              <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "rgba(0,0,0,0.30)" }} />
+              <ChevronRight className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
             </Link>
           ))}
         </div>
@@ -640,23 +650,22 @@ function TriageReportView({ report }: { report: TriageReport }) {
 
       {/* Articoli applicabili */}
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-widest mb-2" style={{ color: "rgba(0,0,0,0.40)" }}>
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-2">
           Articoli applicabili
         </p>
         <div className="space-y-1.5">
           {report.applicableArticles.map((a, i) => (
             <div
               key={i}
-              className="rounded-lg px-3 py-2"
-              style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}
+              className="rounded-lg px-3 py-2 bg-slate-800/40 border border-slate-700/60"
             >
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono font-bold" style={{ color: "#0D1016" }}>
+                <span className="text-[10px] font-mono font-bold text-blue-400">
                   {a.article}
                 </span>
-                <span className="text-xs" style={{ color: "rgba(0,0,0,0.65)" }}>{a.description}</span>
+                <span className="text-xs text-slate-300">{a.description}</span>
               </div>
-              <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.40)" }}>{a.obligation}</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">{a.obligation}</p>
             </div>
           ))}
         </div>
@@ -666,18 +675,69 @@ function TriageReportView({ report }: { report: TriageReport }) {
       <div className="flex gap-2 pt-1">
         <Link
           href="/dashboard/journey"
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#0D1016] hover:bg-[#2a2b31] text-white text-sm font-medium transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
         >
           Vai alla Roadmap
           <ArrowRight className="w-4 h-4" />
         </Link>
         <Link
           href="/dashboard/tools/classifier"
-          className="px-4 py-3 rounded-xl text-sm transition-colors flex items-center justify-center hover:shadow-sm"
-          style={{ border: "1px solid rgba(0,0,0,0.08)", background: "rgba(0,0,0,0.04)", color: "#0D1016" }}
+          className="px-4 py-3 rounded-xl border border-slate-700 bg-slate-800/50 text-slate-300 text-sm hover:border-slate-600 transition-colors flex items-center justify-center"
         >
           <FileText className="w-4 h-4" />
         </Link>
+      </div>
+    </div>
+  );
+}
+
+// ─── Storico classificazioni — append-only, traccia ogni triage eseguito ──────
+
+const HISTORY_TIER_BADGE: Record<RiskTier, { bg: string; color: string }> = {
+  prohibited: { bg: "rgba(220,38,38,0.15)", color: "#f87171" },
+  high:       { bg: "rgba(245,158,11,0.12)", color: "#fbbf24" },
+  gpai:       { bg: "rgba(59,130,246,0.12)", color: "#60a5fa" },
+  limited:    { bg: "rgba(234,179,8,0.12)",  color: "#facc15" },
+  minimal:    { bg: "rgba(34,197,94,0.12)",  color: "#4ade80" },
+};
+
+function TriageHistoryPanel({ history }: { history: TriageEntry[] }) {
+  if (history.length <= 1) return null;
+  const sorted = [...history].reverse();
+  return (
+    <div className="mt-6 border-t border-slate-800 pt-4">
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-3">
+        Storico classificazioni ({history.length})
+      </p>
+      <div className="space-y-1.5">
+        {sorted.map((entry, i) => {
+          const badge = HISTORY_TIER_BADGE[entry.riskTier];
+          return (
+            <div
+              key={entry.id}
+              className={`flex items-center justify-between rounded-lg px-3 py-2 text-xs ${
+                i === 0
+                  ? "bg-slate-800/60 border border-slate-700/50"
+                  : "bg-slate-900/40 text-slate-500"
+              }`}
+            >
+              <span className="font-mono text-slate-400">
+                {new Date(entry.timestamp).toLocaleDateString("it-IT", {
+                  day: "2-digit", month: "short", year: "numeric",
+                })}{" "}
+                {new Date(entry.timestamp).toLocaleTimeString("it-IT", {
+                  hour: "2-digit", minute: "2-digit",
+                })}
+              </span>
+              <span
+                className="font-mono px-1.5 py-0.5 rounded text-[10px] font-semibold"
+                style={{ background: badge.bg, color: badge.color }}
+              >
+                {entry.riskTier}
+              </span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -691,13 +751,11 @@ function AreaStep({
   index: number; label: string; active: boolean;
 }) {
   return (
-    <div className="flex items-center gap-2 text-xs" style={{ color: active ? "#0D1016" : "rgba(0,0,0,0.35)" }}>
+    <div className={`flex items-center gap-2 text-xs ${active ? "text-white" : "text-slate-600"}`}>
       <div
-        className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-        style={active
-          ? { background: "#0D1016", color: "white" }
-          : { background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.35)" }
-        }
+        className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${
+          active ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-600"
+        }`}
       >
         {index}
       </div>
@@ -712,6 +770,7 @@ export default function TriagePage() {
   const [area, setArea] = useState<AreaId>("context");
   const [report, setReport] = useState<TriageReport | null>(null);
   const [draftSaved, setDraftSaved] = useState(false);
+  const [triageHistory, setTriageHistory] = useScopedStorage<TriageHistory>("triage_history", []);
 
   // Area 1 — Contesto
   const [role, setRole] = useState<Role | null>(null);
@@ -765,6 +824,16 @@ export default function TriagePage() {
       if (next === "result") {
         syncToClassifier(newReport, answers);
       }
+      // Append-only history — ogni classificazione è un nuovo entry immutabile,
+      // non sovrascrive mai quelle precedenti per lo stesso sistema (FIX 4 / Art. 9)
+      const entry: TriageEntry = {
+        id: makeTriageId(),
+        timestamp: new Date().toISOString(),
+        riskTier: newReport.riskTier,
+        summary: newReport.summary,
+        answersSnapshot: answers,
+      };
+      setTriageHistory((prev) => [...prev, entry]);
     }
     setArea(next);
   }
@@ -807,13 +876,6 @@ export default function TriagePage() {
         completedAt: new Date().toISOString(),
       };
       writeToStorage<ClassifierResult>("classifier", classifierData);
-      // Aggiorna gpaiDetected in OrgProfile se il tier è GPAI
-      if (r.riskTier === "gpai") {
-        const orgProfile = readFromStorage<OrgProfile>("orgProfile") ?? {
-          paItaly: false, gpaiDetected: false, nistEnabled: false
-        };
-        writeToStorage<OrgProfile>("orgProfile", { ...orgProfile, gpaiDetected: true });
-      }
     } catch {}
   }
 
@@ -850,17 +912,17 @@ export default function TriagePage() {
     : ["Ruolo & settore", "Il sistema", "Persone & dati", "Deployment"];
 
   return (
-    <div className="min-h-screen" style={{ background: "#FAFAF9", color: "#0D1016" }}>
+    <div className="min-h-screen bg-[#0D1016] text-white">
       <div className="max-w-xl mx-auto px-4 py-10">
 
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2">
-            <Shield className="w-5 h-5" style={{ color: "#0D1016" }} />
-            <span className="text-sm font-medium" style={{ color: "rgba(0,0,0,0.40)" }}>Triage EU AI Act</span>
+            <Shield className="w-5 h-5 text-blue-400" />
+            <span className="text-sm font-medium text-slate-400">Triage EU AI Act</span>
           </div>
-          <h1 className="text-2xl font-bold mb-1" style={{ color: "#0D1016" }}>Analisi rapida di conformità</h1>
-          <p className="text-sm" style={{ color: "rgba(0,0,0,0.40)" }}>
+          <h1 className="text-2xl font-bold text-white mb-1">Analisi rapida di conformità</h1>
+          <p className="text-sm text-slate-400">
             4 aree tematiche per capire quali obblighi si applicano al tuo sistema AI.
           </p>
 
@@ -941,7 +1003,7 @@ export default function TriagePage() {
               {role && sector && (
                 <button
                   onClick={() => goToArea("system")}
-                  className="w-full px-4 py-3 rounded-xl bg-[#0D1016] hover:bg-[#2a2b31] text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                  className="w-full px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
                 >
                   Continua <ChevronRight className="w-4 h-4" />
                 </button>
@@ -953,8 +1015,8 @@ export default function TriagePage() {
                   style={{ background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.15)" }}
                 >
                   <Info className="w-3.5 h-3.5 text-blue-400 flex-shrink-0 mt-0.5" />
-                  <p className="text-[11px]" style={{ color: "rgba(0,0,0,0.50)" }}>
-                    Come <strong style={{ color: "#0D1016" }}>{role === "distributor" ? "Distributore" : "Importatore"}</strong>, le domande sui dati di addestramento e sui soggetti impattati non si applicano — saranno saltate automaticamente.
+                  <p className="text-[11px] text-slate-400">
+                    Come <strong className="text-slate-300">{role === "distributor" ? "Distributore" : "Importatore"}</strong>, le domande sui dati di addestramento e sui soggetti impattati non si applicano — saranno saltate automaticamente.
                   </p>
                 </div>
               )}
@@ -1013,7 +1075,7 @@ export default function TriagePage() {
               {outputType && isGPAI !== null && (
                 <button
                   onClick={() => goToArea(skipPeopleArea ? "deployment" : "people")}
-                  className="w-full px-4 py-3 rounded-xl bg-[#0D1016] hover:bg-[#2a2b31] text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                  className="w-full px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
                 >
                   Continua <ChevronRight className="w-4 h-4" />
                 </button>
@@ -1076,7 +1138,7 @@ export default function TriagePage() {
                 >
                   <SectionLabel>
                     Chi sono gli utenti finali?{" "}
-                    <span className="normal-case font-normal" style={{color:"rgba(0,0,0,0.35)"}}>(seleziona tutti)</span>
+                    <span className="normal-case font-normal text-slate-500">(seleziona tutti)</span>
                   </SectionLabel>
                   <div className="space-y-2">
                     {[
@@ -1105,7 +1167,7 @@ export default function TriagePage() {
               {personalData && (skipAutomatedDecisions || automatedDecisions) && endUsers.length > 0 && (
                 <button
                   onClick={() => goToArea("deployment")}
-                  className="w-full px-4 py-3 rounded-xl bg-[#0D1016] hover:bg-[#2a2b31] text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                  className="w-full px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
                 >
                   Continua <ChevronRight className="w-4 h-4" />
                 </button>
@@ -1168,7 +1230,7 @@ export default function TriagePage() {
                 >
                   <SectionLabel>
                     Segnali di rischio{" "}
-                    <span className="normal-case font-normal" style={{color:"rgba(0,0,0,0.35)"}}>(seleziona tutti i pertinenti)</span>
+                    <span className="normal-case font-normal text-slate-500">(seleziona tutti i pertinenti)</span>
                   </SectionLabel>
                   <div className="space-y-2">
                     {[
@@ -1196,7 +1258,7 @@ export default function TriagePage() {
                   <button
                     onClick={() => goToArea("result")}
                     disabled={riskSignals.length === 0}
-                    className="w-full mt-3 px-4 py-3 rounded-xl bg-[#0D1016] hover:bg-[#2a2b31] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                    className="w-full mt-3 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
                   >
                     Genera report di triage <ChevronRight className="w-4 h-4" />
                   </button>
@@ -1209,11 +1271,10 @@ export default function TriagePage() {
           {area === "result" && report && (
             <motion.div key="result" {...slide}>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-base font-semibold" style={{ color: "#0D1016" }}>Report di triage</h2>
+                <h2 className="text-base font-semibold text-white">Report di triage</h2>
                 <button
                   onClick={reset}
-                  className="text-xs transition-colors"
-                  style={{ color: "rgba(0,0,0,0.40)" }}
+                  className="text-xs text-slate-400 hover:text-slate-200 transition-colors"
                 >
                   Ricomincia
                 </button>
@@ -1228,6 +1289,8 @@ export default function TriagePage() {
               ) : (
                 <TriageReportView report={report} />
               )}
+
+              <TriageHistoryPanel history={triageHistory} />
             </motion.div>
           )}
 
@@ -1241,8 +1304,7 @@ export default function TriagePage() {
               else if (area === "people") setArea("system");
               else if (area === "deployment") setArea(skipPeopleArea ? "system" : "people");
             }}
-            className="mt-6 flex items-center gap-1.5 text-xs transition-colors"
-            style={{ color: "rgba(0,0,0,0.40)" }}
+            className="mt-6 flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
             Indietro

@@ -9,7 +9,7 @@ import Link from "next/link";
 import { writeToStorage } from "@/lib/dossier/storage-schema";
 import type { AuthRepResult } from "@/lib/dossier/storage-schema";
 import SignOffPanel from "@/components/ui/SignOffPanel";
-import { SystemSelector } from "@/components/compliance/SystemSelector";
+import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -529,8 +529,8 @@ export default function AuthorizedRepPage() {
   const doneCount = doc.checklist.filter(i => i.completed).length;
 
   return (
-    <div style={{ maxWidth: 860, margin: "0 auto" }}>
-      <SystemSelector checkProhibited={true} />
+    <div style={{ width: "100%" }}>
+      <SystemContextBanner checkProhibited={true} />
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
