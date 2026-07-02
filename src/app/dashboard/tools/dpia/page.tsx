@@ -2,7 +2,13 @@
 
 import React, { useState, useEffect, useRef, useCallback, CSSProperties } from "react";
 import SignOffPanel from "@/components/ui/SignOffPanel";
-import DpiaGuidedMode, { type DpiaGuidedAnswers } from "@/components/dpia/DpiaGuidedMode";
+import { DPIATemplateViewer } from "@/components/dpia/DPIATemplateViewer";
+import { computeDpiaProgress } from "@/lib/dpia/dpia-progress";
+import { DpiaGuidedMode } from "@/components/dpia/DpiaGuidedMode";
+import { draftDpiaSections } from "@/app/actions/draftDpiaSections";
+import { buildComplianceContextFromStorage } from "@/hooks/useComplianceContext";
+import { checkPriorConsultation, type PriorConsultationResult } from "@/app/actions/checkPriorConsultation";
+import type { IntakeContext } from "@/app/actions/parseIntakeContext";
 import {
   Search, Database, Scale, AlertTriangle, Shield, CheckCircle2,
   ChevronLeft, ChevronRight, Plus, Trash2, Download, FileText,
@@ -15,34 +21,38 @@ import {
   ClassifierResult, DataAuditResult,
 } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
-import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
-import { useScopedStorage } from "@/lib/hooks/useScopedStorage";
-import { createEmptyRiskReport, type RiskManagerReport } from "@/lib/simulation/risk-manager-engine";
-import { importRiskFromAssessment, isDuplicateRisk } from "@/lib/risk-register/import-from-assessment";
-
-const EMPTY_RISK_REPORT: RiskManagerReport = createEmptyRiskReport("Nuovo Sistema AI");
+import { SystemSelector } from "@/components/compliance/SystemSelector";
+import { migrateLegacyFRIA, patchDPIA, patchShared, syncCorrelatedRisksFromDPIA } from "@/lib/assessment/assessment-helpers";
+import { CorrelatedRisksPanel } from "@/components/assessment/CorrelatedRisksPanel";
+import { AssessmentSharedHeader } from "@/components/assessment/AssessmentSharedHeader";
+import { AssessmentStepper } from "@/components/assessment/AssessmentStepper";
+import { UnifiedIntake } from "@/components/assessment/UnifiedIntake";
+import { ScreeningCatalog } from "@/components/dpia/ScreeningCatalog";
+import { ThreatCatalog } from "@/components/dpia/ThreatCatalog";
+import { NextStepGuide } from "@/components/dpia/NextStepGuide";
+import { ThreatImpactAIDraft } from "@/components/dpia/ThreatImpactAIDraft";
+import { ProportionalityBalance } from "@/components/dpia/ProportionalityBalance";
+import { DpiaGapCheck } from "@/components/dpia/DpiaGapCheck";
+import type { DpiaGapCheck as DpiaGapCheckType } from "@/app/actions/checkDpiaGaps";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
 const T = {
   text:     "#0D1016",
   muted:    "rgba(0,0,0,0.42)",
-  faint:    "rgba(0,0,0,0.22)",
+  faint:    "rgba(0,0,0,0.28)",
   border:   "rgba(0,0,0,0.08)",
   card:     "#ffffff",
-  bg:       "#f9f9fb",
+  bg:       "#f8f8f7",
   red:      "#dc2626",
   redBg:    "rgba(220,38,38,0.06)",
   redBdr:   "rgba(220,38,38,0.18)",
-  amber:    "#92400e",
-  amberBg:  "rgba(202,138,4,0.07)",
-  amberBdr: "rgba(202,138,4,0.22)",
-  neutral:    "#0D1016",
-  neutralBg:  "rgba(13,16,22,0.04)",
-  neutralBdr: "rgba(13,16,22,0.1)",
-  green:    "#15803d",
-  greenBg:  "rgba(21,128,61,0.06)",
-  greenBdr: "rgba(21,128,61,0.18)",
+  amber:    "#d97706",
+  amberBg:  "rgba(202,138,4,0.06)",
+  amberBdr: "rgba(202,138,4,0.2)",
+  green:    "#16a34a",
+  greenBg:  "rgba(22,163,74,0.06)",
+  greenBdr: "rgba(22,163,74,0.2)",
 } as const;
 
 const cardSt: CSSProperties = {
@@ -244,10 +254,6 @@ function createEmptyDPIA(): DPIADoc {
   };
 }
 
-// ─── Storage key ──────────────────────────────────────────────────────────────
-
-const STORAGE_KEY = "aicomply_dpia_result";
-
 // ─── Step config ──────────────────────────────────────────────────────────────
 
 const STEPS = [
@@ -298,47 +304,115 @@ function statusBadge(status: string) {
   );
 }
 
+// ─── Staleness hash (djb2) ────────────────────────────────────────────────────
+
+function djb2(s: string): number {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h) ^ s.charCodeAt(i);
+  return h >>> 0;
+}
+
+function computeDpiaHash(doc: DPIADoc): string {
+  const d = doc.description;
+  const key = [
+    d.system_name, d.processing_purposes, d.personal_data_categories,
+    d.special_categories, d.data_subjects_categories, d.retention_period,
+    doc.screening.dpia_required,
+  ].join("|");
+  return String(djb2(key));
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function DPIAPage() {
   const [doc, setDoc] = useState<DPIADoc>(createEmptyDPIA);
   const [step, setStep] = useState<Step>(0);
   const [saved, setSaved] = useState(false);
-  const [guidedMode, setGuidedMode] = useState(false);
-  const [riskReport, setRiskReport] = useScopedStorage<RiskManagerReport>("risk_manager_report", EMPTY_RISK_REPORT);
-  const [importMsg, setImportMsg] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Intake context
+  const [intake, setIntake] = useState<IntakeContext>({
+    systemName: "", systemScope: "other", processingPurpose: "",
+    dataCategories: [], subjectScale: "large_scale_unknown",
+    automatedDecisions: "no", highRiskAIAct: "unknown",
+    crossBorderTransfer: false, vulnerableSubjects: false, dpiaJustification: "",
+  });
+  // Part 3 — AI pre-fill
+  const [aiPrefillLoading, setAiPrefillLoading] = useState(false);
+  const [aiPrefillDone, setAiPrefillDone]       = useState(false);
+  const [aiPrefillError, setAiPrefillError]     = useState<string | null>(null);
+  // AG Part 6 — Prior consultation Art. 36
+  const [priorConsultAILoading, setPriorConsultAILoading] = useState(false);
+  const [priorConsultAIResult, setPriorConsultAIResult] = useState<PriorConsultationResult | null>(null);
+  const [priorConsultAIError, setPriorConsultAIError] = useState<string | null>(null);
+  // Catalog toggles
+  const [showScreeningCatalog, setShowScreeningCatalog] = useState(false);
+  const [showThreatCatalog, setShowThreatCatalog] = useState(false);
+  // Fase 3: gap check
+  const [gapCheckResult, setGapCheckResult] = useState<DpiaGapCheckType | null>(null);
+  // Fase 5: staleness
+  const [stalenessDismissed, setStalenessDismissed] = useState(false);
+  const [savedHash, setSavedHash] = useState<string | null>(null);
+  // Template viewer panel
+  const [showTemplateViewer, setShowTemplateViewer] = useState(false);
+  // Modalità guidata vs form a 6 step
+  const [guidedMode, setGuidedMode] = useState(false);
+  // Rail: sezioni espanse
+  const [railExpanded, setRailExpanded] = useState<Set<number>>(new Set([0, 1, 2, 3, 4, 5]));
 
   // Load from storage on mount
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as Partial<DPIADoc>;
-        setDoc(d => ({
-          ...createEmptyDPIA(),
-          ...parsed,
-          screening: { ...createEmptyDPIA().screening, ...parsed.screening },
-          description: { ...createEmptyDPIA().description, ...parsed.description },
-          proportionality: { ...createEmptyDPIA().proportionality, ...parsed.proportionality },
-          risks: { ...createEmptyDPIA().risks, ...parsed.risks },
-          measures: { ...createEmptyDPIA().measures, ...parsed.measures },
-          conclusion: { ...createEmptyDPIA().conclusion, ...parsed.conclusion },
-        }));
-        setSaved(true);
+    if (typeof window !== "undefined") {
+      const legacyRaw = localStorage.getItem("aicomply_dpia_result");
+      if (legacyRaw) {
+        try {
+          const legacyParsed = JSON.parse(legacyRaw) as Partial<DPIADoc>;
+          const merged: DPIADoc = {
+            ...createEmptyDPIA(),
+            ...legacyParsed,
+            screening: { ...createEmptyDPIA().screening, ...legacyParsed.screening },
+            description: { ...createEmptyDPIA().description, ...legacyParsed.description },
+            proportionality: { ...createEmptyDPIA().proportionality, ...legacyParsed.proportionality },
+            risks: { ...createEmptyDPIA().risks, ...legacyParsed.risks },
+            measures: { ...createEmptyDPIA().measures, ...legacyParsed.measures },
+            conclusion: { ...createEmptyDPIA().conclusion, ...legacyParsed.conclusion },
+          };
+          writeToStorage("dpia", merged);
+          localStorage.removeItem("aicomply_dpia_result");
+        } catch { /* ignore */ }
       }
-    } catch { /* ignore */ }
+    }
+    const stored = readFromStorage<DPIADoc>("dpia");
+    if (stored) {
+      setDoc(d => ({
+        ...createEmptyDPIA(),
+        ...stored,
+        screening: { ...createEmptyDPIA().screening, ...stored.screening },
+        description: { ...createEmptyDPIA().description, ...stored.description },
+        proportionality: { ...createEmptyDPIA().proportionality, ...stored.proportionality },
+        risks: { ...createEmptyDPIA().risks, ...stored.risks },
+        measures: { ...createEmptyDPIA().measures, ...stored.measures },
+        conclusion: { ...createEmptyDPIA().conclusion, ...stored.conclusion },
+      }));
+      setSaved(true);
+    }
+    // Load saved staleness hash
+    const storedHash = readFromStorage<string>("dpiaStaleness");
+    if (storedHash) setSavedHash(storedHash);
   }, []);
 
   // Debounced autosave
   const autosave = useCallback((nextDoc: DPIADoc) => {
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextDoc));
-        setSaved(true);
-      } catch { /* ignore */ }
+      writeToStorage("dpia", nextDoc);
+      setSaved(true);
     }, 500);
+  }, []);
+
+  // Cleanup timer on component unmount
+  useEffect(() => {
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, []);
 
   function upDoc(updater: (d: DPIADoc) => DPIADoc) {
@@ -365,6 +439,31 @@ export default function DPIAPage() {
   function upDesc(patch: Partial<DPIADoc["description"]>) {
     upDoc(d => ({ ...d, description: { ...d.description, ...patch } }));
   }
+
+  // Auto-sync intake from storage on mount
+  useEffect(() => {
+    migrateLegacyFRIA();
+    const classifier = readFromStorage<ClassifierResult>("classifier");
+    const dataAudit = readFromStorage<DataAuditResult>("dataAudit");
+    setIntake(prev => {
+      const next = { ...prev };
+      if (classifier?.systemName) { next.systemName = classifier.systemName; }
+      if (classifier?.riskLevel === "high") { next.highRiskAIAct = "yes"; }
+      if (dataAudit?.datasets?.some((d: DataAuditResult["datasets"][number]) => d.personalData)) {
+        if (!next.dataCategories.includes("comuni")) next.dataCategories = [...next.dataCategories, "comuni"];
+      }
+      if (dataAudit?.datasets?.some((d: DataAuditResult["datasets"][number]) => {
+        const sf = (d as Record<string, unknown>).sensitiveFeatures;
+        return Array.isArray(sf) && sf.some((f: unknown) =>
+          typeof f === "string" && ["salute","biometrici","genetici"].some(k => f.toLowerCase().includes(k))
+        );
+      })) {
+        if (!next.dataCategories.includes("art9_salute")) next.dataCategories = [...next.dataCategories, "art9_salute"];
+      }
+      return next;
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Pre-populate from Classifier, DataAudit on mount
   useEffect(() => {
@@ -411,6 +510,17 @@ export default function DPIAPage() {
 
       return next;
     });
+
+    // Seed assessment.shared dal Classifier
+    if (classifier) {
+      patchShared({
+        systemName: classifier.systemName,
+        riskLevel:  classifier.riskLevel,
+        annexIII:   classifier.annexIII,
+        role:       classifier.role,
+        isGPAI:     classifier.isGPAI,
+      });
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -501,6 +611,14 @@ export default function DPIAPage() {
     });
   }
 
+  function addThreatFromCatalog(threat: Omit<DPIAThreat, "id">) {
+    const newThreat: DPIAThreat = { id: crypto.randomUUID(), ...threat };
+    upDoc(d => {
+      const threats = [...d.risks.threats, newThreat];
+      return { ...d, risks: { threats, overall_risk_before: computeWorstRisk(threats) } };
+    });
+  }
+
   // ── Measures helpers ───────────────────────────────────────────────────────
 
   function upMeasures(patch: Partial<DPIADoc["measures"]>) {
@@ -526,8 +644,24 @@ export default function DPIAPage() {
     const now = new Date().toISOString();
     const withDate = { ...doc, conclusion: { ...doc.conclusion, completedAt: now } };
     setDoc(withDate);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(withDate));
     writeToStorage("dpia", withDate);
+    patchDPIA(() => withDate);
+    syncCorrelatedRisksFromDPIA();
+    // Sync shared dall'identità DPIA
+    patchShared({
+      systemName:   withDate.description.system_name,
+      organization: withDate.description.organization_name,
+      purpose:      withDate.description.processing_purposes,
+      personalDataCategories: withDate.description.personal_data_categories
+        ? withDate.description.personal_data_categories.split(",").map((s: string) => s.trim()).filter(Boolean)
+        : [],
+      specialCategories: withDate.description.special_categories
+        ? withDate.description.special_categories.split(",").map((s: string) => s.trim()).filter(Boolean)
+        : [],
+      dataSubjects: withDate.description.data_subjects_categories
+        ? withDate.description.data_subjects_categories.split(",").map((s: string) => s.trim()).filter(Boolean)
+        : [],
+    });
     appendEvidence("adr", {
       tool: "dpia",
       systemName: doc.description.system_name,
@@ -536,32 +670,12 @@ export default function DPIAPage() {
       overallRiskAfter: doc.measures.overall_risk_after,
       conclusion: doc.conclusion.compliant,
     }, "dpia");
+    // Fase 5: save staleness hash at sign-off
+    const hash = computeDpiaHash(withDate);
+    writeToStorage("dpiaStaleness", hash);
+    setSavedHash(hash);
+    setStalenessDismissed(false);
     setSaved(true);
-  }
-
-  /** Importa nel Risk Register le minacce DPIA con rischio medio/alto (Art. 9(2)(b)) — PROMPT_BA Parte 4. */
-  function handleImportRisksToRegister() {
-    const candidates = doc.risks.threats
-      .filter((t) => t.risk_level === "high" || t.risk_level === "medium")
-      .map((t) =>
-        importRiskFromAssessment("dpia", {
-          title: t.category.replace(/_/g, " "),
-          description: t.description || "Minaccia rilevata in fase di valutazione DPIA",
-          category: "privacy",
-          severity: t.severity,
-          probability: t.likelihood,
-          mitigation: t.mitigation,
-        })
-      );
-    const newRisks = candidates.filter((c) => !isDuplicateRisk(riskReport.risks, c));
-    if (newRisks.length === 0) {
-      setImportMsg(candidates.length > 0 ? "Nessun nuovo rischio da importare — già presenti" : "Nessuna minaccia media/alta da importare");
-      setTimeout(() => setImportMsg(null), 3000);
-      return;
-    }
-    setRiskReport((prev) => ({ ...prev, risks: [...prev.risks, ...newRisks] }));
-    setImportMsg(`${newRisks.length} rischio${newRisks.length > 1 ? "i" : ""} importato${newRisks.length > 1 ? "i" : "o"} nel Risk Register`);
-    setTimeout(() => setImportMsg(null), 3000);
   }
 
   // ── Download report ────────────────────────────────────────────────────────
@@ -679,76 +793,14 @@ export default function DPIAPage() {
     const dpiaBg = dpia_required === "yes" ? T.redBg : dpia_required === "uncertain" ? T.amberBg : T.greenBg;
     const dpiaBdr = dpia_required === "yes" ? T.redBdr : dpia_required === "uncertain" ? T.amberBdr : T.greenBdr;
 
-    function applyGuidedAnswers(answers: DpiaGuidedAnswers) {
-      const patch: Record<string, unknown> = {};
-      const criteriaMap: Record<string, string> = {
-        "screening.criteria[c1]": "c1", "screening.criteria[c2]": "c2",
-        "screening.criteria[c3]": "c3", "screening.criteria[c4]": "c4",
-        "screening.criteria[c5]": "c5", "screening.criteria[c6]": "c6",
-        "screening.criteria[c7]": "c7", "screening.criteria[c8]": "c8",
-        "screening.criteria[c9]": "c9",
-      };
-      const updatedCriteria = [...criteria];
-      for (const [fieldPath, val] of Object.entries(answers)) {
-        const criterionId = criteriaMap[fieldPath];
-        if (criterionId) {
-          const idx = updatedCriteria.findIndex((c) => c.id === criterionId);
-          if (idx >= 0) {
-            const mapped = val === "Sì" ? "yes" : val === "No" ? "no" : val === "Parzialmente" ? "partial" : val;
-            updatedCriteria[idx] = { ...updatedCriteria[idx], applies: mapped as "yes" | "no" | "partial" | "" };
-          }
-        }
-      }
-      patch.criteria = updatedCriteria;
-      patch.dpia_required = computeDPIARequired(updatedCriteria);
-      setDoc((prev) => ({ ...prev, screening: { ...prev.screening, ...patch as typeof prev.screening } }));
-      setGuidedMode(false);
-    }
-
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        {/* Step header with Guided/Free toggle */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.6px" }}>
-            Step 0 — Screening WP248
-          </div>
-          <div style={{ display: "flex", gap: 4, background: "rgba(13,16,22,0.04)", borderRadius: 8, padding: 3 }}>
-            {(["Guidata", "Libera"] as const).map((mode) => {
-              const isActive = (mode === "Guidata") === guidedMode;
-              return (
-                <button key={mode} onClick={() => setGuidedMode(mode === "Guidata")}
-                  style={{ padding: "4px 12px", borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: "pointer",
-                    background: isActive ? T.text : "none", color: isActive ? "#fff" : T.muted, border: "none" }}>
-                  {mode}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Guided mode panel */}
-        {guidedMode && (
-          <div style={{ ...cardSt, padding: 24 }}>
-            <DpiaGuidedMode
-              sectionFilter={["screening"]}
-              onApply={applyGuidedAnswers}
-              onClose={() => setGuidedMode(false)}
-              initialAnswers={Object.fromEntries(
-                criteria.map((c) => [
-                  `screening.criteria[${c.id}]`,
-                  c.applies === "yes" ? "Sì" : c.applies === "no" ? "No" : c.applies === "partial" ? "Parzialmente" : "",
-                ])
-              )}
-            />
-          </div>
-        )}
-
         {/* Info box */}
-        <div style={{ ...cardSt, padding: 14, background: T.neutralBg, border: `1px solid ${T.neutralBdr}` }}>
+        <div style={{ ...cardSt, padding: 14, background: "rgba(0,0,0,0.04)", border: `1px solid ${T.border}` }}>
           <div className="flex items-start gap-2">
-            <Info className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: T.neutral }} />
+            <Info className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: T.text }} />
             <div>
-              <p style={{ fontSize: 12, fontWeight: 600, color: T.neutral, marginBottom: 4 }}>
+              <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 4 }}>
                 Screening WP248 rev.01 — 9 criteri
               </p>
               <p style={{ fontSize: 11, color: T.text, lineHeight: 1.6 }}>
@@ -775,6 +827,30 @@ export default function DPIAPage() {
             <p style={{ fontSize: 11, color: T.muted }}>criteri soddisfatti</p>
           </div>
         </div>
+
+        {/* Catalog toggle */}
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <button
+            onClick={() => setShowScreeningCatalog(v => !v)}
+            style={{
+              padding: "6px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500,
+              cursor: "pointer", border: `1px solid ${T.border}`,
+              background: showScreeningCatalog ? T.text : T.card,
+              color: showScreeningCatalog ? "#fff" : T.muted,
+              transition: "all 0.15s",
+            }}
+          >
+            {showScreeningCatalog ? "Chiudi catalogo" : "Catalogo criteri WP248"}
+          </button>
+        </div>
+
+        {/* Screening catalog */}
+        {showScreeningCatalog && (
+          <ScreeningCatalog
+            criteria={doc.screening.criteria}
+            onToggle={(id, applies) => upCriterion(id, { applies })}
+          />
+        )}
 
         {/* Criteria list */}
         {criteria.map((c, idx) => (
@@ -864,11 +940,11 @@ export default function DPIAPage() {
           </div>
           {d.dpo_consulted === "no" && (
             <div style={{ marginTop: 8, padding: "10px 14px", borderRadius: 8,
-              background: "rgba(202,138,4,0.07)", border: "1px solid rgba(202,138,4,0.22)" }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: "#92400e", marginBottom: 3 }}>
+              background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: T.amber, marginBottom: 3 }}>
                 ⚠ DPO non consultato — verifica obbligatoria
               </div>
-              <div style={{ fontSize: 11, color: "#78350f", lineHeight: 1.5 }}>
+              <div style={{ fontSize: 11, color: T.muted, lineHeight: 1.5 }}>
                 L&apos;Art. 35(2) GDPR e il WP248 richiedono che il DPO, se nominato,
                 sia obbligatoriamente consultato nella redazione della DPIA.
                 La mancata consultazione è una non conformità formale.
@@ -1001,6 +1077,7 @@ export default function DPIAPage() {
     const p = doc.proportionality;
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <ProportionalityBalance dpia={doc} />
         {/* Necessity */}
         <div style={{ ...cardSt, padding: 16 }}>
           <Lbl required>Giustificazione della necessità del trattamento</Lbl>
@@ -1116,9 +1193,9 @@ export default function DPIAPage() {
         )}
 
         {/* Info */}
-        <div style={{ ...cardSt, padding: 14, background: T.neutralBg, border: `1px solid ${T.neutralBdr}` }}>
+        <div style={{ ...cardSt, padding: 14, background: "rgba(0,0,0,0.04)", border: `1px solid ${T.border}` }}>
           <div className="flex items-start gap-2">
-            <Info className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: T.neutral }} />
+            <Info className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: T.text }} />
             <p style={{ fontSize: 11, color: T.text, lineHeight: 1.6 }}>
               <strong>WP248 §3:</strong> Identificare e valutare le fonti di rischio, gli impatti potenziali e le misure
               esistenti per le tre categorie standard WP248: accesso illegittimo, modifica indesiderata, scomparsa dei dati.
@@ -1126,6 +1203,30 @@ export default function DPIAPage() {
             </p>
           </div>
         </div>
+
+        {/* Threat catalog toggle */}
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <button
+            onClick={() => setShowThreatCatalog(v => !v)}
+            style={{
+              padding: "6px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500,
+              cursor: "pointer", border: `1px solid ${T.border}`,
+              background: showThreatCatalog ? T.text : T.card,
+              color: showThreatCatalog ? "#fff" : T.muted,
+              transition: "all 0.15s",
+            }}
+          >
+            {showThreatCatalog ? "Chiudi catalogo" : "Seleziona da catalogo minacce"}
+          </button>
+        </div>
+
+        {/* Threat catalog */}
+        {showThreatCatalog && (
+          <ThreatCatalog
+            existingThreatIds={doc.risks.threats.map(t => t.id)}
+            onAddThreat={addThreatFromCatalog}
+          />
+        )}
 
         {/* Threats by category */}
         {categories.map(cat => {
@@ -1148,6 +1249,13 @@ export default function DPIAPage() {
               )}
               {catThreats.map(t => (
                 <div key={t.id} style={{ border: `1px solid ${T.border}`, borderRadius: 10, padding: 12, marginTop: 10 }}>
+                  <ThreatImpactAIDraft
+                    threat={t}
+                    systemName={doc.description.system_name || "Sistema"}
+                    systemDescription={doc.description.processing_purposes || ""}
+                    personalDataCategories={doc.description.personal_data_categories || ""}
+                    onApply={(patch) => upThreat(t.id, patch)}
+                  />
                   {/* Fonte + descrizione */}
                   <div className="flex items-start gap-2 mb-3">
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
@@ -1219,6 +1327,13 @@ export default function DPIAPage() {
                         {riskBadge(t.residual_risk)}
                       </div>
                     </div>
+                    {t.residual_likelihood && t.residual_severity && (
+                      <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 11, color: T.muted }}>Rischio residuo:</span>
+                        {riskBadge(computeRiskLevel(t.residual_likelihood, t.residual_severity))}
+                        <span style={{ fontSize: 10, color: T.faint }}>→ {t.residual_risk || "calcola"}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -1321,13 +1436,79 @@ export default function DPIAPage() {
             <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>
               Consultazione preventiva — Art. 36 GDPR
             </p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
               <div><Lbl required>Autorità di controllo competente</Lbl>
                 <input value={m.prior_consultation_authority} onChange={e => upMeasures({ prior_consultation_authority: e.target.value })}
                   style={inputSt} placeholder="es. Garante Privacy (IT), CNIL (FR), ICO (UK)…" /></div>
               <div><Lbl>Data prevista di consultazione</Lbl>
                 <input type="date" value={m.prior_consultation_date} onChange={e => upMeasures({ prior_consultation_date: e.target.value })}
                   style={inputSt} /></div>
+            </div>
+            {/* AG Part 6 — AI prior consultation check */}
+            <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>✦ Verifica requisiti Art. 36 GDPR</span>
+                <button
+                  disabled={priorConsultAILoading}
+                  onClick={async () => {
+                    setPriorConsultAILoading(true);
+                    setPriorConsultAIError(null);
+                    setPriorConsultAIResult(null);
+                    const res = await checkPriorConsultation({
+                      overallRiskAfter: m.overall_risk_after as "high" | "medium" | "low" | "",
+                      technicalMeasures: m.technical_measures,
+                      organizationalMeasures: m.organizational_measures,
+                      systemName: doc.description.system_name,
+                      processingPurposes: doc.description.processing_purposes,
+                      specialCategories: doc.description.special_categories,
+                    });
+                    setPriorConsultAILoading(false);
+                    if (res.error) setPriorConsultAIError(res.error);
+                    else setPriorConsultAIResult(res.result);
+                  }}
+                  style={{
+                    padding: "6px 12px", borderRadius: 7, fontSize: 11, fontWeight: 600,
+                    background: priorConsultAILoading ? "rgba(0,0,0,0.07)" : T.text,
+                    color: priorConsultAILoading ? T.muted : "#fff", border: "none",
+                    cursor: priorConsultAILoading ? "not-allowed" : "pointer",
+                  }}>
+                  {priorConsultAILoading ? "Analisi…" : "✦ Analizza obblighi"}
+                </button>
+              </div>
+              {priorConsultAIError && <p style={{ fontSize: 11, color: T.red }}>Errore. Riprova.</p>}
+              {priorConsultAIResult && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <p style={{ fontSize: 12, color: T.text }}>{priorConsultAIResult.gdprArticle36Assessment}</p>
+                  {priorConsultAIResult.requiredActions.length > 0 && (
+                    <div>
+                      {priorConsultAIResult.requiredActions.map((a, i) => (
+                        <div key={i} style={{ display: "flex", gap: 6, marginBottom: 5, padding: "5px 8px", borderRadius: 6,
+                          background: a.priority === "obbligatorio" ? T.redBg : T.amberBg,
+                          border: `1px solid ${a.priority === "obbligatorio" ? T.redBdr : T.amberBdr}` }}>
+                          <span style={{ fontSize: 10, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
+                            background: a.priority === "obbligatorio" ? "rgba(220,38,38,0.2)" : "rgba(202,138,4,0.2)",
+                            color: a.priority === "obbligatorio" ? T.red : T.amber, whiteSpace: "nowrap" }}>
+                            {a.priority === "obbligatorio" ? "OBB" : "RAC"}
+                          </span>
+                          <div>
+                            <p style={{ fontSize: 11, fontWeight: 500, color: T.text, margin: 0 }}>{a.action}</p>
+                            <p style={{ fontSize: 10, color: T.muted, margin: 0 }}>{a.article} — scadenza: {a.deadline}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {priorConsultAIResult.submissionChecklist.length > 0 && (
+                    <div>
+                      <p style={{ fontSize: 11, fontWeight: 600, color: T.text, marginBottom: 4 }}>Checklist invio:</p>
+                      <ul style={{ margin: 0, paddingLeft: 16, fontSize: 11, color: T.muted }}>
+                        {priorConsultAIResult.submissionChecklist.map((item, i) => <li key={i}>{item}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  <p style={{ fontSize: 10, color: T.faint }}>✦ AI — verifica e conferma</p>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -1349,6 +1530,13 @@ export default function DPIAPage() {
                 style={inputSt} placeholder="es. violazione dati, cambio finalità, nuova tecnologia…" /></div>
           </div>
         </div>
+
+        {/* Fase 3: Gap-check Art. 35(7) */}
+        <DpiaGapCheck
+          doc={doc}
+          onNavigateToStep={(s) => setStep(s as Step)}
+          onResult={(r) => setGapCheckResult(r)}
+        />
       </div>
     );
   }
@@ -1357,6 +1545,10 @@ export default function DPIAPage() {
 
   function renderStep5() {
     const c = doc.conclusion;
+    // Fase 5: staleness detection
+    const currentHash = computeDpiaHash(doc);
+    const isStale = savedHash !== null && savedHash !== currentHash && !stalenessDismissed;
+
     const compliantOptions: { value: "yes"|"no"|"conditional"; label: string; color: string; bg: string; border: string }[] = [
       { value: "yes", label: "Conforme — si può procedere", color: T.green, bg: T.greenBg, border: T.greenBdr },
       { value: "conditional", label: "Condizionalmente conforme", color: T.amber, bg: T.amberBg, border: T.amberBdr },
@@ -1365,6 +1557,26 @@ export default function DPIAPage() {
 
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {/* Fase 5: Staleness banner */}
+        {isStale && (
+          <div style={{ ...cardSt, padding: "12px 16px", background: T.amberBg, border: `1px solid ${T.amberBdr}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+            <div>
+              <p style={{ fontSize: 12, fontWeight: 600, color: T.amber, margin: "0 0 2px" }}>
+                ⚠ La DPIA potrebbe essere da rivedere
+              </p>
+              <p style={{ fontSize: 11, color: T.muted, margin: 0 }}>
+                I dati del trattamento sono cambiati dall&apos;ultimo sign-off. Verifica se la valutazione è ancora valida (WP248: la DPIA è un processo continuo).
+              </p>
+            </div>
+            <button
+              onClick={() => { writeToStorage("dpiaStaleness", currentHash); setSavedHash(currentHash); setStalenessDismissed(true); }}
+              style={{ fontSize: 11, fontWeight: 500, padding: "5px 10px", borderRadius: 6, border: `1px solid ${T.amberBdr}`, background: T.card, color: T.amber, cursor: "pointer", whiteSpace: "nowrap" }}
+            >
+              Segna come rivisto
+            </button>
+          </div>
+        )}
+
         {/* Compliant */}
         <div style={{ ...cardSt, padding: 16 }}>
           <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>Conclusione DPIA</p>
@@ -1430,15 +1642,18 @@ export default function DPIAPage() {
               <Download className="h-3.5 w-3.5" />
               Scarica report (.txt)
             </button>
-            <button onClick={handleImportRisksToRegister}
-              style={{ ...navBtnSt(false), display: "flex", alignItems: "center", gap: 6 }}>
-              <AlertTriangle className="h-3.5 w-3.5" />
-              Importa rischi nel Risk Register
-            </button>
-            {importMsg && (
-              <span style={{ fontSize: 11, color: T.muted }}>{importMsg}</span>
-            )}
           </div>
+        </div>
+
+        {/* Rischi correlati DPIA ⇄ FRIA */}
+        <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)", padding: 20, marginBottom: 16 }}>
+          <p style={{ fontSize: 13, fontWeight: 600, color: "#0D1016", margin: "0 0 6px" }}>
+            Rischi correlati DPIA ⇄ FRIA
+          </p>
+          <p style={{ fontSize: 11, color: "rgba(0,0,0,0.40)", margin: "0 0 14px" }}>
+            Rischi generati automaticamente dalla correlazione WP29 / DIHR. Applica le mitigazioni al Risk Manager.
+          </p>
+          <CorrelatedRisksPanel />
         </div>
 
         {/* Sign-off */}
@@ -1451,20 +1666,205 @@ export default function DPIAPage() {
 
   const steps = [renderStep0, renderStep1, renderStep2, renderStep3, renderStep4, renderStep5];
 
+  // ── Ghost data per guided mode ─────────────────────────────────────────────
+  const ghostClassifier = readFromStorage<ClassifierResult>("classifier");
+  const ghostDataAudit  = readFromStorage<DataAuditResult>("dataAudit");
+
+  // ── Guided mode: layout dedicato (3 colonne, full-height) ─────────────────
+  if (guidedMode) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: T.bg }}>
+        {/* Shared headers sopra le 3 colonne */}
+        <div style={{ padding: "12px 20px 0", flexShrink: 0 }}>
+          <SystemSelector checkProhibited={true} />
+          <AssessmentStepper currentTool="dpia" />
+          <AssessmentSharedHeader />
+        </div>
+        {/* Toggle tra le due modalità */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 6,
+          padding: "10px 20px", borderBottom: `1px solid ${T.border}`,
+          background: T.card, flexShrink: 0,
+        }}>
+          <button
+            onClick={() => setGuidedMode(false)}
+            style={{
+              display: "flex", flexDirection: "column", gap: 2,
+              padding: "9px 16px", borderRadius: 8, cursor: "pointer",
+              border: `1px solid rgba(0,0,0,0.08)`, background: "none",
+              textAlign: "left", transition: "border-color 0.15s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(35,64,58,0.22)"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(0,0,0,0.08)"; }}
+          >
+            <span style={{ fontSize: 11, fontWeight: 600, color: T.muted }}>Form strutturato</span>
+            <span style={{ fontSize: 9, color: T.faint }}>6 step · compilazione diretta</span>
+          </button>
+          <div style={{
+            display: "flex", flexDirection: "column", gap: 2,
+            padding: "9px 16px", borderRadius: 8,
+            border: `1px solid rgba(35,64,58,0.22)`,
+            background: "rgba(35,64,58,0.05)",
+          }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: T.text }}>DPIA guidata</span>
+            <span style={{ fontSize: 9, color: T.muted }}>Domande guidate · AI compila per te</span>
+          </div>
+        </div>
+        {/* Layout 3 colonne */}
+        <div style={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
+          <DpiaGuidedMode ghostClassifier={ghostClassifier} ghostDataAudit={ghostDataAudit} onExitGuidedMode={() => setGuidedMode(false)} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ minHeight: "100vh", background: T.bg, padding: "24px 32px" }}>
-      <SystemContextBanner checkProhibited={true} />
+      <SystemSelector checkProhibited={true} />
+      <AssessmentStepper currentTool="dpia" />
+      <AssessmentSharedHeader />
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 style={{ fontSize: 18, fontWeight: 700, color: T.text, marginBottom: 4 }}>
-            Valutazione d&apos;Impatto sulla Protezione dei Dati
-          </h1>
-          <p style={{ fontSize: 12, color: T.muted }}>
-            Art. 35 GDPR · Metodologia WP248 rev.01 (Gruppo di Lavoro Art. 29, ottobre 2017)
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
+      <div style={{ marginBottom: 20 }}>
+        <div className="flex items-start justify-between" style={{ marginBottom: 16 }}>
+          <div>
+            <h1 style={{ fontSize: 18, fontWeight: 700, color: T.text, marginBottom: 4 }}>
+              Valutazione d&apos;Impatto sulla Protezione dei Dati
+            </h1>
+            <p style={{ fontSize: 12, color: T.muted }}>
+              Art. 35 GDPR · Metodologia WP248 rev.01 (Gruppo di Lavoro Art. 29, ottobre 2017)
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+          {/* Template viewer button */}
+          {(() => {
+            const progress = computeDpiaProgress(doc);
+            const color = progress.overallPercent >= 80 ? "#16a34a" : progress.overallPercent >= 40 ? "#d97706" : "rgba(0,0,0,0.5)";
+            return (
+              <button
+                onClick={() => setShowTemplateViewer(true)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 6,
+                  fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8,
+                  border: "1px solid rgba(0,0,0,0.10)", background: "#ffffff",
+                  color: T.text, cursor: "pointer",
+                }}
+              >
+                <FileText className="h-3.5 w-3.5" />
+                <span>Documento</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color, background: "rgba(0,0,0,0.04)", padding: "1px 6px", borderRadius: 9999 }}>
+                  {progress.overallPercent}%
+                </span>
+              </button>
+            );
+          })()}
+          {/* Part 3 — AI pre-fill button */}
+          <button
+            disabled={aiPrefillLoading || !intake.systemName.trim() || !intake.processingPurpose.trim()}
+            onClick={async () => {
+              setAiPrefillLoading(true);
+              setAiPrefillError(null);
+              try {
+                const ctx = buildComplianceContextFromStorage();
+                const res = await draftDpiaSections(ctx, intake);
+                if ("error" in res) {
+                  setAiPrefillError(res.error);
+                } else {
+                  // Apply assets (DPIAAsset shape from storage-schema)
+                  if (res.assets && res.assets.length > 0) {
+                    upDoc(d => ({
+                      ...d,
+                      description: {
+                        ...d.description,
+                        assets: res.assets.map((a: {
+                          assetName: string; dataCategory: string; legalBasis: string;
+                          retentionPeriod: string; sensitivityLevel: string
+                        }) => ({
+                          id: `ai_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+                          name: a.assetName ?? "",
+                          type: "database" as const,
+                          description: `${a.dataCategory} — ${a.legalBasis} · ✦ AI — verifica`,
+                          personal_data: true,
+                        })),
+                      }
+                    }));
+                  }
+                  // Apply threats (DPIAThreat shape from storage-schema)
+                  if (res.threats && res.threats.length > 0) {
+                    const toLevel = (n: number): "low" | "medium" | "high" =>
+                      n >= 4 ? "high" : n >= 3 ? "medium" : "low";
+                    upDoc(d => ({
+                      ...d,
+                      risks: {
+                        ...d.risks,
+                        threats: res.threats.map((t: {
+                          threatName: string; description: string;
+                          likelihood: number; impact: number;
+                          mitigation: string; residualRisk: string
+                        }) => ({
+                          id: `ai_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+                          category: "illegitimate_access" as const,
+                          source: "✦ AI — verifica",
+                          description: `${t.threatName}: ${t.description}`,
+                          likelihood: toLevel(t.likelihood),
+                          severity: toLevel(t.impact),
+                          risk_level: toLevel(Math.max(t.likelihood, t.impact)),
+                          mitigation: t.mitigation ?? "",
+                          residual_likelihood: "low" as const,
+                          residual_severity: "low" as const,
+                          residual_risk: (t.residualRisk as "low" | "medium" | "high") ?? "low" as const,
+                        })),
+                      }
+                    }));
+                  }
+                  // Apply measures
+                  if (res.technicalMeasures?.length || res.organizationalMeasures?.length) {
+                    upMeasures({
+                      technical_measures: Array.isArray(res.technicalMeasures)
+                        ? res.technicalMeasures.join("\n") : "",
+                      organizational_measures: Array.isArray(res.organizationalMeasures)
+                        ? res.organizationalMeasures.join("\n") : "",
+                      prior_consultation_required: res.priorConsultationRequired ?? false,
+                    });
+                  }
+                  setAiPrefillDone(true);
+                }
+              } catch {
+                setAiPrefillError("Errore durante la pre-compilazione AI.");
+              }
+              setAiPrefillLoading(false);
+            }}
+            style={{
+              padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+              background: aiPrefillDone
+                ? T.greenBg
+                : (!intake.systemName.trim() || !intake.processingPurpose.trim())
+                  ? "rgba(0,0,0,0.05)"
+                  : T.amberBg,
+              color: aiPrefillDone
+                ? T.green
+                : (!intake.systemName.trim() || !intake.processingPurpose.trim())
+                  ? "rgba(0,0,0,0.3)"
+                  : T.amber,
+              border: `1px solid ${aiPrefillDone
+                ? T.greenBdr
+                : (!intake.systemName.trim() || !intake.processingPurpose.trim())
+                  ? "rgba(0,0,0,0.1)"
+                  : T.amberBdr}`,
+              cursor: (aiPrefillLoading || !intake.systemName.trim() || !intake.processingPurpose.trim()) ? "default" : "pointer",
+              transition: "all 0.15s",
+            }}
+          >
+            {aiPrefillLoading
+              ? "⏳ Pre-compilazione…"
+              : aiPrefillDone
+                ? "✓ AI applicata"
+                : (!intake.systemName.trim() || !intake.processingPurpose.trim())
+                  ? "✦ Pre-compila fasi 2-3-4 (compila contesto ↓)"
+                  : "✦ Pre-compila fasi 2-3-4 con AI"}
+          </button>
+          {aiPrefillError && (
+            <span style={{ fontSize: 11, color: "#b91c1c" }}>⚠ {aiPrefillError}</span>
+          )}
           {saved && (
             <span style={{ fontSize: 11, color: T.green, display: "flex", alignItems: "center", gap: 4 }}>
               <Check className="h-3.5 w-3.5" /> Salvato
@@ -1480,72 +1880,271 @@ export default function DPIAPage() {
             {priorConsultation ? "Consultazione preventiva" : doc.screening.dpia_required === "yes" ? "DPIA richiesta" : doc.screening.dpia_required === "uncertain" ? "Incerto" : "Screening in corso"}
           </span>
         </div>
-      </div>
-
-      {/* Step nav */}
-      <div style={{ display: "flex", gap: 4, marginBottom: 24, overflowX: "auto" }}>
-        {STEPS.map((s, i) => {
-          const isActive = step === i;
-          const isDone = step > i;
-          return (
-            <button key={i} onClick={() => setStep(i as Step)}
-              style={{
-                display: "flex", alignItems: "center", gap: 6,
-                padding: "8px 14px", borderRadius: 8, cursor: "pointer",
-                border: `1px solid ${isActive ? T.text : T.border}`,
-                background: isActive ? T.text : isDone ? T.greenBg : T.card,
-                color: isActive ? "#fff" : isDone ? T.green : T.muted,
-                fontSize: 12, fontWeight: isActive ? 600 : 400,
-                whiteSpace: "nowrap", transition: "all 0.15s",
-              }}>
-              <s.Icon className="h-3.5 w-3.5" />
-              <span>{s.label}</span>
-              {isDone && <Check className="h-3 w-3" />}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Step content */}
-      <div style={{ maxWidth: 860, margin: "0 auto" }}>
-        {/* Step header */}
-        <div style={{ marginBottom: 16 }}>
-          <p style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-            Step {step} / 5
-          </p>
-          <h2 style={{ fontSize: 15, fontWeight: 700, color: T.text }}>
-            {STEPS[step].label}
-            <span style={{ fontSize: 12, fontWeight: 400, color: T.muted, marginLeft: 8 }}>
-              {STEPS[step].sub}
-            </span>
-          </h2>
         </div>
 
-        {steps[step]()}
-
-        {/* Navigation */}
-        <div className="flex items-center justify-between mt-6">
+        {/* ── Mode selector ── */}
+        <div style={{ display: "flex", gap: 6 }}>
+          {/* Form strutturato — active */}
+          <div style={{
+            display: "flex", flexDirection: "column", gap: 3,
+            padding: "12px 18px", borderRadius: 10,
+            border: `1px solid rgba(35,64,58,0.22)`,
+            background: "rgba(35,64,58,0.05)",
+            minWidth: 190,
+          }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: T.text }}>Form strutturato</span>
+            <span style={{ fontSize: 10, color: T.muted, lineHeight: 1.4 }}>6 step · compilazione diretta</span>
+          </div>
+          {/* DPIA guidata — inactive, clickable */}
           <button
-            onClick={() => setStep(s => Math.max(0, s - 1) as Step)}
-            disabled={step === 0}
-            style={{ ...navBtnSt(false), display: "flex", alignItems: "center", gap: 4, opacity: step === 0 ? 0.35 : 1 }}>
-            <ChevronLeft className="h-4 w-4" /> Precedente
+            onClick={() => setGuidedMode(true)}
+            style={{
+              display: "flex", flexDirection: "column", gap: 3,
+              padding: "12px 18px", borderRadius: 10, cursor: "pointer",
+              border: `1px solid rgba(0,0,0,0.08)`,
+              background: T.card, textAlign: "left",
+              transition: "border-color 0.15s, background 0.15s",
+              minWidth: 190,
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.borderColor = "rgba(35,64,58,0.22)";
+              e.currentTarget.style.background = "rgba(35,64,58,0.03)";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.borderColor = "rgba(0,0,0,0.08)";
+              e.currentTarget.style.background = T.card;
+            }}
+          >
+            <span style={{ fontSize: 11, fontWeight: 700, color: T.text }}>DPIA guidata</span>
+            <span style={{ fontSize: 10, color: T.muted, lineHeight: 1.4 }}>Domande guidate · AI compila per te</span>
           </button>
-          <span style={{ fontSize: 11, color: T.faint }}>{step + 1} / {STEPS.length}</span>
-          {step < STEPS.length - 1 ? (
-            <button
-              onClick={() => setStep(s => Math.min(STEPS.length - 1, s + 1) as Step)}
-              style={{ ...navBtnSt(true), display: "flex", alignItems: "center", gap: 4 }}>
-              Avanti <ChevronRight className="h-4 w-4" />
-            </button>
-          ) : (
-            <button onClick={saveToDossier}
-              style={{ ...navBtnSt(true), display: "flex", alignItems: "center", gap: 4 }}>
-              <CheckCircle2 className="h-4 w-4" /> Completa DPIA
-            </button>
-          )}
         </div>
       </div>
+
+      <UnifiedIntake
+        intake={intake}
+        setIntake={setIntake}
+        onParsed={() => { setAiPrefillDone(false); }}
+      />
+
+      {/* ── Two-column layout: Rail + Content ── */}
+      <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+
+        {/* LEFT — Progress Rail */}
+        <div style={{
+          width: 220, flexShrink: 0,
+          background: "#fafafa",
+          borderRadius: 10,
+          border: "1px solid rgba(0,0,0,0.08)",
+          display: "flex", flexDirection: "column",
+          overflow: "hidden",
+          position: "sticky", top: 16,
+        }}>
+          {/* Rail header */}
+          <div style={{ padding: "12px 12px 10px", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Documento</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", fontFamily: "monospace" }}>{computeDpiaProgress(doc).overallPercent}%</span>
+            </div>
+            <div style={{ width: "100%", height: 4, background: "rgba(0,0,0,0.07)", borderRadius: 2, overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${computeDpiaProgress(doc).overallPercent}%`, background: "#0D1016", borderRadius: 2, transition: "width 0.5s ease" }} />
+            </div>
+          </div>
+          {/* Step list */}
+          <div style={{ padding: 8 }}>
+            {computeDpiaProgress(doc).steps.map((s, idx) => {
+              const isActive   = step === idx;
+              const isExpanded = railExpanded.has(idx);
+              const circleColor = s.percent === 100 ? "#23403a" : "#dc2626";
+              const pctColor    = s.percent === 100 ? "#23403a" : s.percent > 0 ? "#b45309" : "rgba(0,0,0,0.22)";
+              const borderColor = isActive ? "rgba(35,64,58,0.20)" : s.percent === 100 ? "rgba(35,64,58,0.12)" : "rgba(0,0,0,0.07)";
+              const bg          = isActive ? "rgba(35,64,58,0.06)" : "transparent";
+              const subPoints   = s.fields.filter(f => f.required);
+              const doneCount   = subPoints.filter(f => f.filled).length;
+
+              return (
+                <div key={idx} style={{
+                  border: `1px solid ${borderColor}`,
+                  background: bg,
+                  borderRadius: 8,
+                  overflow: "hidden",
+                  marginBottom: 4,
+                }}>
+                  <button
+                    onClick={() => {
+                      setStep(idx as Step);
+                      setRailExpanded(prev => {
+                        const next = new Set(prev);
+                        next.has(idx) ? next.delete(idx) : next.add(idx);
+                        return next;
+                      });
+                    }}
+                    style={{
+                      width: "100%", textAlign: "left", border: "none",
+                      background: "transparent", padding: "9px 10px",
+                      cursor: "pointer", display: "flex", alignItems: "center", gap: 8,
+                    }}
+                    onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "rgba(0,0,0,0.02)"; }}
+                    onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
+                  >
+                    <div style={{ flexShrink: 0 }}>
+                      <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${circleColor}` }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {idx + 1}. {s.label}
+                      </p>
+                      <p style={{ fontSize: 9, color: "rgba(0,0,0,0.42)", margin: 0, marginTop: 1 }}>
+                        {doneCount}/{subPoints.length} · {s.legalRef}
+                      </p>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      <span style={{ fontSize: 9.5, fontWeight: 700, color: pctColor, fontFamily: "monospace" }}>
+                        {s.percent}%
+                      </span>
+                      <ChevronRight
+                        size={10}
+                        style={{
+                          color: "rgba(0,0,0,0.22)",
+                          transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
+                          transition: "transform 0.2s",
+                        }}
+                      />
+                    </div>
+                  </button>
+
+                  {/* Progress bar */}
+                  <div style={{ height: 2, background: "rgba(0,0,0,0.04)" }}>
+                    <div style={{ height: "100%", width: `${s.percent}%`, background: circleColor, transition: "width 0.35s" }} />
+                  </div>
+
+                  {/* Sub-points */}
+                  {isExpanded && subPoints.length > 0 && (
+                    <div style={{ borderTop: "1px solid rgba(0,0,0,0.05)", padding: "4px 6px 6px 6px" }}>
+                      {subPoints.map((f, fi) => (
+                        <div
+                          key={fi}
+                          onClick={() => setStep(idx as Step)}
+                          style={{
+                            display: "flex", alignItems: "center", gap: 6,
+                            padding: "4px 4px", borderRadius: 5, cursor: "pointer",
+                          }}
+                          onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.03)")}
+                          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                        >
+                          <div style={{ flexShrink: 0 }}>
+                            {f.filled
+                              ? <div style={{ width: 10, height: 10, borderRadius: "50%", border: "1.5px solid #23403a" }} />
+                              : <div style={{ width: 10, height: 10, borderRadius: "50%", border: "1.5px solid #dc2626" }} />
+                            }
+                          </div>
+                          <p style={{
+                            fontSize: 10, color: f.filled ? "rgba(0,0,0,0.42)" : "#0D1016",
+                            margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                            textDecoration: f.filled ? "line-through" : "none",
+                            opacity: f.filled ? 0.55 : 1,
+                          }}>
+                            {f.label}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* RIGHT — Step content */}
+        <div style={{ flex: 1, minWidth: 0, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, background: "#fafafa", padding: "20px 24px" }}>
+          {/* Step header */}
+          <div style={{ marginBottom: 16 }}>
+            <p style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              Step {step} / 5
+            </p>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: T.text }}>
+              {STEPS[step].label}
+              <span style={{ fontSize: 12, fontWeight: 400, color: T.muted, marginLeft: 8 }}>
+                {STEPS[step].sub}
+              </span>
+            </h2>
+          </div>
+
+          {steps[step]()}
+
+          {/* Navigation */}
+          <div className="flex items-center justify-between mt-6">
+            <button
+              onClick={() => setStep(s => Math.max(0, s - 1) as Step)}
+              disabled={step === 0}
+              style={{ ...navBtnSt(false), display: "flex", alignItems: "center", gap: 4, opacity: step === 0 ? 0.35 : 1 }}>
+              <ChevronLeft className="h-4 w-4" /> Precedente
+            </button>
+            <span style={{ fontSize: 11, color: T.faint }}>{step + 1} / {STEPS.length}</span>
+            {step < STEPS.length - 1 ? (
+              <button
+                onClick={() => setStep(s => Math.min(STEPS.length - 1, s + 1) as Step)}
+                style={{ ...navBtnSt(true), display: "flex", alignItems: "center", gap: 4 }}>
+                Avanti <ChevronRight className="h-4 w-4" />
+              </button>
+            ) : (
+              <button onClick={saveToDossier}
+                style={{ ...navBtnSt(true), display: "flex", alignItems: "center", gap: 4 }}>
+                <CheckCircle2 className="h-4 w-4" /> Completa DPIA
+              </button>
+            )}
+          </div>
+
+          <NextStepGuide dpia={doc} gapCheck={gapCheckResult} onNavigateToStep={(s) => setStep(s as Step)} />
+        </div>
+      </div>
+
+      {/* ── Template Viewer Panel (slide-in from right) ─────────────────────── */}
+      {showTemplateViewer && (
+        <>
+          {/* Backdrop */}
+          <div
+            onClick={() => setShowTemplateViewer(false)}
+            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.25)", zIndex: 40 }}
+          />
+          {/* Panel */}
+          <div style={{
+            position: "fixed", top: 0, right: 0, bottom: 0, zIndex: 50,
+            width: "min(520px, 90vw)",
+            background: "#f8f8f7",
+            boxShadow: "-4px 0 24px rgba(0,0,0,0.12)",
+            display: "flex", flexDirection: "column",
+            overflow: "hidden",
+          }}>
+            {/* Panel header */}
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "16px 20px",
+              background: "#ffffff", borderBottom: "1px solid rgba(0,0,0,0.08)",
+              flexShrink: 0,
+            }}>
+              <div>
+                <p style={{ fontSize: 13, fontWeight: 700, color: T.text, margin: 0 }}>Documento DPIA</p>
+                <p style={{ fontSize: 10, color: T.muted, margin: "2px 0 0" }}>
+                  Art. 35 GDPR · WP248 rev.01 — aggiornato in tempo reale
+                </p>
+              </div>
+              <button
+                onClick={() => setShowTemplateViewer(false)}
+                style={{ padding: 6, border: "none", background: "none", cursor: "pointer", color: T.muted, borderRadius: 6 }}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            {/* Scrollable content */}
+            <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>
+              <DPIATemplateViewer doc={doc} />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
+

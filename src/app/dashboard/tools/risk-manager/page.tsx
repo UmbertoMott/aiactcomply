@@ -1,1930 +1,1209 @@
 "use client";
+export const maxDuration = 60;
 
-import SignOffPanel from "@/components/ui/SignOffPanel";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import ProviderTransitionAlertBanner from "@/components/shared/provider-transition-alert-banner";
 import {
-  AlertTriangle,
-  Shield,
-  Plus,
-  Trash2,
-  TrendingUp,
-  Calculator,
-  Database,
-  BarChart3,
-  Activity,
-  Zap,
-  Gauge,
-  FileWarning,
-  CheckCircle,
-  XCircle,
-  ArrowRight,
-  ArrowLeft,
-  Save,
-  Download,
-  RefreshCw,
-  Search,
-  Eye,
+  Shield, Send, Download, RotateCcw,
+  ChevronRight, AlertTriangle, Loader2, Play, Pause,
+  FileText, ChevronDown, Bold, Italic, Underline, Highlighter,
+  Pencil, Check,
 } from "lucide-react";
-import React, { useState, useEffect, useRef, useCallback, type Dispatch, type SetStateAction } from "react";
-import {
-  RiskItem,
-  RiskCategory,
-  Severity,
-  Probability,
-  ResidualRisk,
-  MonteCarloInput,
-  MonteCarloResult,
-  DriftWindow,
-  TemporalRecord,
-  GPAIRiskAssessment,
-  SanctionTracker,
-  RiskManagerReport,
-  computeRiskScore,
-  computeOverallScore,
-  computeOverallRating,
-  runMonteCarlo,
-  computePSI,
-  detectDrift,
-  createTemporalRecord,
-  assessGPAI,
-  getSanctionTracker,
-  getSanctionSeverityColor,
-  RISK_CATEGORY_LABELS,
-  RESIDUAL_LABEL,
-  createEmptyRiskReport,
-  finalizeRiskReport,
-  analyzeRiskDescription,
-  validateResidualRisk,
-  type RiskSuggestion,
-  type ResidualWarning,
-} from "@/lib/simulation/risk-manager-engine";
-import { appendEvidence } from "@/lib/evidence/evidence-layer";
-import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
-import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
-import { writeToStorage } from "@/lib/dossier/storage-schema";
-import type { RiskManagerResult } from "@/lib/dossier/storage-schema";
-import { useScopedStorage } from "@/lib/hooks/useScopedStorage";
-import { RiskMatrix } from "@/components/risk-register/RiskMatrix";
-import { RISK_PHASE_GUIDES } from "@/lib/risk-register/risk-register-template";
+import { riskManagerChat, type ChatMessage, type RiskDocumentation, type RiskPhaseId } from "@/app/actions/riskManagerChat";
+import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
+import type { RiskManagerResult, ClassifierResult } from "@/lib/dossier/storage-schema";
+import { SystemSelector } from "@/components/compliance/SystemSelector";
+import { RiskRegisterViewer } from "./components/RiskRegisterViewer";
+import { buildRiskRegisterDocument, buildAnnexSections, shouldShowGpaiModule, type AnnexSection } from "@/lib/risk/risk-register-mapper";
+import type { RiskRegisterDocument } from "@/lib/risk/risk-register-types";
+import { computeRegisterProgress, type SectionProgress } from "@/lib/risk/risk-register-progress";
 
-// ─── FIX 1 — Typed form state ─────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-type RiskFormState = {
-  description: string;
-  category: RiskCategory;
-  severity: Severity;
-  probability: Probability;
-  mitigation: string;
-  residual: ResidualRisk;
-};
-
-type GPAIFormState = {
-  modelName: string;
-  providerName: string;
-  computeFlops: string;
-  trainingDataSize: string;
-  openSource: boolean;
-  energyKwh: string;
-  hasModelCard: boolean;
-};
-
-type TempFormState = {
-  entityType: string;
-  entityId: string;
-  dataJson: string;
-  validTime: string;
-};
-
-// ─── FIX 5 — Persistence helpers ─────────────────────────────────────
-
-/** Fallback condiviso — stesse forma per ogni sistema, mai mutato in place. */
-const EMPTY_REPORT: RiskManagerReport = createEmptyRiskReport("Nuovo Sistema AI");
-
-/** Sincronizza con la chiave globale condivisa letta da Journey, DocuGen, NIST-RMF. */
-function syncSharedFormat(r: RiskManagerReport) {
-  // nextReviewDate and reviewCycle are added dynamically on finalize (not in base type)
-  const rAny = r as unknown as Record<string, unknown>;
-  const normalized: RiskManagerResult = {
-    risks: r.risks.map((item) => ({
-      id: item.id,
-      title: item.description,
-      likelihood: item.probability as "low" | "medium" | "high",
-      impact: item.severity as "low" | "medium" | "high",
-      mitigation: item.mitigation,
-      residualRisk: item.residual as "acceptable" | "review" | "unacceptable",
-    })),
-    overallRiskLevel: (r.overallRating ?? "low") as "low" | "medium" | "high" | "critical",
-    completedAt: new Date().toISOString(),
-    nextReviewDate: typeof rAny.nextReviewDate === "string" ? rAny.nextReviewDate : undefined,
-    reviewCycle: (rAny.reviewCycle as RiskManagerResult["reviewCycle"]) ?? undefined,
-  };
-  writeToStorage<RiskManagerResult>("riskManager", normalized);
+/** Rimuove la formattazione markdown (**, *, __, _) dal testo */
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
+    .replace(/__(.+?)__/g, "$1")
+    .replace(/_(.+?)_/g, "$1");
 }
 
-// ─── SEZIONI ──────────────────────────────────────────────────────────
+// ─── Phase definitions ────────────────────────────────────────────────────────
 
-const PHASES = [
-  { id: "scoping", label: "Scoping & Identificazione", icon: Search },
-  { id: "quantitative", label: "Monte Carlo", icon: Calculator },
-  { id: "temporal", label: "Audit Bitemporale", icon: Database },
-  { id: "drift", label: "Drift Detection", icon: Activity },
-  { id: "gpai", label: "GPAI & Rischio Sistemico", icon: Zap },
-  { id: "sanctions", label: "Governance & Sanzioni", icon: FileWarning },
-  { id: "output", label: "Report Finale", icon: CheckCircle },
-] as const;
-
-type Phase = (typeof PHASES)[number]["id"];
-
-// ─── STILI ────────────────────────────────────────────────────────────
-
-// ─── Design tokens ────────────────────────────────────────────────────
-const T = {
-  text:    "#0D1016",
-  muted:   "rgba(0,0,0,0.42)",
-  faint:   "rgba(0,0,0,0.28)",
-  border:  "rgba(0,0,0,0.07)",
-  card:    "#ffffff",
-  bg:      "#FAFAF9",
-  red:     "#dc2626",
-  redBg:   "rgba(220,38,38,0.06)",
-  redBdr:  "rgba(220,38,38,0.18)",
-  amber:   "#d97706",
-  amberBg: "rgba(245,158,11,0.06)",
-  neutral:    "#0D1016",
-  neutralBg:  "rgba(13,16,22,0.04)",
-  neutralBdr: "rgba(13,16,22,0.1)",
-  green:   "#15803d",
-  greenBg: "rgba(22,163,74,0.06)",
-};
-const cardSt = {
-  background: T.card,
-  border: `1px solid ${T.border}`,
-  borderRadius: 12,
-  boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-};
-
-const severityColor: Record<string, string> = {
-  high: "bg-danger/10 text-danger border-danger/30",
-  medium: "bg-warning/10 text-warning border-warning/30",
-  low: "bg-success/10 text-success border-success/30",
-};
-
-function cls(...args: (string | false | undefined | null)[]) {
-  return args.filter(Boolean).join(" ");
+interface Phase {
+  id: RiskPhaseId;
+  label: string;
+  subtitle: string;
+  article: string;        // citazione primaria
+  supportRef?: string;    // citazione di supporto (opzionale)
+  docSection?: string;    // sezione del template docx
 }
 
-// ─── PAGINA ───────────────────────────────────────────────────────────
+// 11 step numerati 1-11 (allineamento template Art. 9 §0-§9 + trasversale Comunicazione).
+// Il modulo condizionale gpai_systemic_risk NON è in questo array.
+const PHASES: Phase[] = [
+  { id: "scoping",        label: "1. Scoping",                   subtitle: "§0 Ambito e criteri rischio",    article: "Art. 9(1) [verify against current AI Act text]",               supportRef: "Art. 6, Allegato III [verify against current AI Act text]",   docSection: "§0" },
+  { id: "identification", label: "2. Identificazione Rischi",    subtitle: "§1 incl. minori e vulnerabili",  article: "Art. 9(2)(a) [verify against current AI Act text]",            supportRef: "Art. 9(9) [verify against current AI Act text]",              docSection: "§1" },
+  { id: "estimation",     label: "3. Stima e Valutazione",       subtitle: "§2 uso previsto / improprio",    article: "Art. 9(2)(b) [verify against current AI Act text]",            docSection: "§2" },
+  { id: "testing",        label: "4. Test e Validazione",        subtitle: "§3 metriche e soglie",           article: "Art. 9(6)-(8) [verify against current AI Act text]",           supportRef: "Art. 60 [verify against current AI Act text]",                docSection: "§3" },
+  { id: "mitigation",     label: "5. Trattamento Rischio",       subtitle: "§4 rischio residuo",             article: "Art. 9(2)(d), 9(4)-(5) [verify against current AI Act text]", supportRef: "Art. 13 [verify against current AI Act text]",                docSection: "§4" },
+  { id: "monitoring",     label: "6. Monitoraggio Post-Market",  subtitle: "§5 drift detection",             article: "Art. 9(2)(c) [verify against current AI Act text]",            supportRef: "Art. 72 [verify against current AI Act text]",                docSection: "§5" },
+  { id: "gap_check",      label: "7. Gap Check Art. 9",          subtitle: "§6 verifica di copertura",       article: "Art. 9(2)(a)-(d), 9(6)-(9) [verify against current AI Act text]", docSection: "§6" },
+  { id: "traceability",   label: "8. Tracciabilità",             subtitle: "§7 versionamento e QMS",         article: "Art. 9(1)-(2) [verify against current AI Act text]",           supportRef: "Art. 12, 17 [verify against current AI Act text]",            docSection: "§7" },
+  { id: "dismissal",      label: "9. Dismissione / Ritiro",      subtitle: "§8 rischi di fine vita",         article: "Art. 9 [verify against current AI Act text]",                  supportRef: "ISO 23894 Annex C",                                           docSection: "§8" },
+  { id: "signoff",        label: "10. Approvazione e Firme",     subtitle: "§9 sign-off finale",             article: "Art. 9(1) + 9(10) [verify against current AI Act text]",      docSection: "§9" },
+  { id: "communication",  label: "11. Comunicazione",            subtitle: "Trasversale — ISO 23894 §6.2",  article: "ISO 23894 §6.2",                                               docSection: "Trasversale" },
+];
 
-export default function RiskManagerPage() {
-  const [phase, setPhase] = useState<Phase>("scoping");
-  const [matrixView, setMatrixView] = useState<"list" | "matrix">("list");
-  const [matrixFilter, setMatrixFilter] = useState<{ p: string; s: string } | null>(null);
+// Modulo condizionale separato (non numerato, non in PHASES)
+const GPAI_MODULE: Phase = {
+  id: "gpai_systemic_risk",
+  label: "GPAI & Rischio Sistemico",
+  subtitle: "Modulo condizionale",
+  article: "Art. 51-55 (Capo V) [verify against current AI Act text]",
+  docSection: "(condizionale)",
+};
 
-  // Isolamento per sistema attivo — chiave aicomply_risk_manager_report_v2_[systemId] (PROMPT_AZ)
-  const [report, setReport] = useScopedStorage<RiskManagerReport>("risk_manager_report", EMPTY_REPORT);
-  const [finalized, setFinalized] = useState(false);
-  const [nextReviewDate, setNextReviewDate] = useState<string>("");
-  const [reviewCycle, setReviewCycle] = useState<"monthly" | "quarterly" | "biannual" | "annual">("annual");
+type PhaseStatus = "pending" | "active" | "complete";
 
-  // FIX 6 — Toast
-  const [toast, setToast] = useState<{ msg: string; type: "error" | "success" } | null>(null);
+// ─── Phase guide cards ────────────────────────────────────────────────────────
 
-  function showToast(msg: string, type: "error" | "success" = "success") {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
-  }
+interface PhaseGuide {
+  goal: string;
+  examples: { label: string; text: string }[];
+  starters: string[];
+}
 
-  // updateReport helper — useScopedStorage persiste già ad ogni setReport
-  function updateReport(updater: (prev: RiskManagerReport) => RiskManagerReport) {
-    setReport((prev) => {
-      const next = updater(prev);
-      syncSharedFormat(next);
-      return next;
-    });
-  }
+const PHASE_GUIDES: Partial<Record<RiskPhaseId, PhaseGuide>> = {
+  scoping: {
+    goal: "Definisci il sistema AI, il suo scopo, chi lo usa e in quale contesto. Indica il tier di rischio e se tratta dati personali.",
+    examples: [
+      { label: "Sì — dati personali", text: "Il sistema elabora dati personali di candidati HR (nome, CV, esperienza) su base contrattuale Art. 6(1)(b) GDPR." },
+      { label: "No — dati anonimi", text: "Il sistema ottimizza routing logistico su dati di veicoli anonimizzati, nessun dato personale trattato." },
+    ],
+    starters: ["Il sistema tratta dati personali?", "È richiesta supervisione umana (Art. 14)?", "Qual è il tier di rischio classificato?", "Il sistema incorpora modelli GPAI?"],
+  },
+  identification: {
+    goal: "Elenca almeno 3-5 rischi concreti: bias algoritmico, opacità, perdita controllo umano. Valuta l'impatto su minori e gruppi vulnerabili (Art. 9(9)).",
+    examples: [
+      { label: "Bias algoritmico", text: "R-01: Il modello penalizza sistematicamente candidati con gap occupazionali. Probabilità: alta. Impatto: alto (discriminazione)." },
+      { label: "Opacità decisionale", text: "R-02: Gli utenti non ricevono spiegazione del motivo di esclusione. Probabilità: media. Impatto: medio (mancanza trasparenza)." },
+    ],
+    starters: ["Descrivere il rischio principale", "Il sistema impatta minori o persone vulnerabili?", "Ci sono rischi di bias algoritmico?", "Quali dati di addestramento sono stati usati?"],
+  },
+  estimation: {
+    goal: "Stima gli usi previsti e gli usi impropri prevedibili. Quantifica le persone coinvolte e valuta se il rischio è accettabile rispetto al risk appetite.",
+    examples: [
+      { label: "Uso previsto", text: "Pre-selezione CV per ~200 candidature/mese in ambito HR. Decisione finale sempre umana." },
+      { label: "Uso improprio", text: "Utilizzo per profilazione estesa oltre la selezione iniziale (contrario alla finalità dichiarata)." },
+    ],
+    starters: ["Quante persone sono impattate mensilmente?", "Quali usi impropri sono prevedibili?", "Il rischio rientra nel risk appetite aziendale?"],
+  },
+  testing: {
+    goal: "Definisci metriche di accuratezza/fairness, soglie accettabili e criteri di rilascio in produzione (Art. 9(8)).",
+    examples: [
+      { label: "Metriche definite", text: "Accuratezza ≥90%, Disparate Impact ≥0.8, test su dataset validation set hold-out 20%." },
+      { label: "Soglia non rispettata", text: "Il DI score è 0.72 — sotto soglia. Il modello non può essere rilasciato senza debiasing." },
+    ],
+    starters: ["Quali metriche di fairness sono state usate?", "Il modello ha superato il test su dataset di validazione?", "Qual è la soglia di accuratezza minima accettabile?"],
+  },
+  mitigation: {
+    goal: "Scegli l'opzione di trattamento (Modifica/Evitamento/Condivisione/Ritenzione) e definisci le misure concrete seguendo la gerarchia Art. 9(5).",
+    examples: [
+      { label: "Design-mitigation", text: "Eliminazione feature proxy (cap_residenza) dal dataset. Retraining con CTGAN debiasing. Testing fairness post-modifica." },
+      { label: "Controllo", text: "Revisione umana obbligatoria per i 20 candidati con score più vicino alla soglia di esclusione." },
+    ],
+    starters: ["Quale opzione di trattamento è stata scelta?", "Quali misure tecniche sono state adottate?", "Chi è il responsabile delle misure di mitigazione?"],
+  },
+  monitoring: {
+    goal: "Definisci frequenza monitoraggio, soglia PSI per drift detection e trigger di revisione del risk register.",
+    examples: [
+      { label: "PSI stabile", text: "PSI < 0.1 — modello stabile. Monitoraggio mensile automatico via pipeline Airflow." },
+      { label: "Trigger revisione", text: "PSI > 0.2 rilevato dopo aggiornamento dataset: revisione urgente avviata, modello sospeso temporaneamente." },
+    ],
+    starters: ["Qual è la frequenza di monitoraggio pianificata?", "È stato definito il PSI threshold?", "Cosa scatena una revisione straordinaria del risk register?"],
+  },
+  gap_check: {
+    goal: "Verifica che tutti i requisiti Art. 9(2)(a)-(d) + (6)-(9) siano coperti. Assegna un coverage score 0-100 e identifica le aree mancanti.",
+    examples: [
+      { label: "Copertura alta", text: "Coverage score: 85/100. Area mancante: Art. 9(9) impatto gruppi vulnerabili non ancora documentato." },
+      { label: "Gap critico", text: "Art. 9(2)(c) monitoraggio post-market non definito — gap obbligatorio da colmare prima del deployment." },
+    ],
+    starters: ["Qual è il coverage score stimato?", "Quali requisiti Art. 9 non sono ancora coperti?", "Ci sono gap obbligatori da colmare prima del rilascio?"],
+  },
+  traceability: {
+    goal: "Definisci la policy di versionamento del risk register, il periodo di retention dei log (Art. 12) e l'integrazione con il QMS aziendale (Art. 17).",
+    examples: [
+      { label: "Versionamento attivo", text: "Versione v1.0 approvata. Log automatici via Git. Retention 5 anni. Integrato nel QMS ISO 9001." },
+      { label: "Nessun QMS", text: "Il sistema di gestione rischi è standalone — non integrato in un QMS formale. Raccomandato allineamento Art. 17." },
+    ],
+    starters: ["Il risk register è integrato nel QMS aziendale?", "Qual è la policy di retention dei log?", "Come vengono tracciate le versioni del registro?"],
+  },
+  dismissal: {
+    goal: "Identifica i rischi specifici della fase di fine vita: cancellazione dati, dipendenze downstream, comunicazione ai deployer.",
+    examples: [
+      { label: "Dipendenza downstream", text: "3 sistemi esterni usano gli output del modello — necessaria migrazione dati prima della dismissione." },
+      { label: "Cancellazione dati", text: "Dataset di addestramento da anonimizzare entro 30 giorni dal ritiro, con log di cancellazione certificato." },
+    ],
+    starters: ["Ci sono sistemi downstream che dipendono dagli output?", "Come vengono gestiti i dati al momento del ritiro?", "I deployer sono stati informati del piano di dismissione?"],
+  },
+  signoff: {
+    goal: "Raccogli i nominativi per il sign-off (risk owner, compliance/legale, rappresentante legale) e la valutazione complessiva del rischio.",
+    examples: [
+      { label: "Approvazione completa", text: "Risk owner: Mario Rossi (CTO). Compliance: Avv. Anna Bianchi. Overall risk: MEDIO — accettabile con misure in vigore." },
+      { label: "Approvazione condizionata", text: "Approvazione condizionata: deployment autorizzato solo dopo completamento del debiasing (entro 30/09/2026)." },
+    ],
+    starters: ["Chi è il risk owner del sistema?", "Qual è la valutazione complessiva del rischio (overall risk)?", "C'è un'approvazione condizionata con azioni pendenti?"],
+  },
+  communication: {
+    goal: "Documenta chi è stato consultato: interni (DPO, legale, engineering), esterni (deployer, autorità), e se la FRIA ha informato questa sezione.",
+    examples: [
+      { label: "Consultazione interna", text: "Coinvolti: DPO (parere GDPR), Engineering (risk tecnico), Legale (compliance AI Act). Nessuna consultazione esterna richiesta." },
+      { label: "FRIA collegata", text: "FRIA completata il 15/06/2026 — risultati integrati nella sezione Identificazione Rischi (impatto diritti fondamentali)." },
+    ],
+    starters: ["Chi è stato coinvolto internamente nel processo di risk management?", "La FRIA è stata completata e collegata?", "Ci sono stakeholder esterni da coinvolgere (deployer, autorità)?"],
+  },
+};
 
-  // Sync verso la chiave condivisa anche al primo mount / cambio sistema attivo
-  useEffect(() => { syncSharedFormat(report); }, [report.systemName, report.id]);
+// ─── Persistence ──────────────────────────────────────────────────────────────
 
-  // Pre-populate systemName from Classifier
-  const classifierData = React.useMemo(() => {
-    try { const r = localStorage.getItem("aicomply_classifier_result"); return r ? JSON.parse(r) : null; }
-    catch { return null; }
-  }, []);
-  useEffect(() => {
-    if (classifierData?.systemName && !report.systemName) {
-      updateReport((prev) => ({ ...prev, systemName: classifierData.systemName }));
-    }
-  }, [classifierData]);
+const CHAT_STORAGE_KEY = "aicomply_risk_manager_chat_v3";
 
-  // ─── SCOPING STATE ──────────────────────────────────────────────
-  const [showRiskForm, setShowRiskForm] = useState(false);
+interface PersistedChatState {
+  messages: ChatMessage[];
+  documentation: RiskDocumentation;
+  currentPhaseIndex: number;
+  completedPhases: RiskPhaseId[];
+  docEdits?: Partial<Record<RiskPhaseId, string>>;
+}
 
-  // FIX 1/2 — typed riskForm
-  const [riskForm, setRiskForm] = useState<RiskFormState>({
-    description: "",
-    category: "health-safety",
-    severity: "medium",
-    probability: "medium",
-    mitigation: "",
-    residual: "monitor",
-  });
+function loadChatState(): PersistedChatState | null {
+  try {
+    const raw = localStorage.getItem(CHAT_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as PersistedChatState) : null;
+  } catch { return null; }
+}
 
-  function addRisk() {
-    if (!riskForm.description || !riskForm.mitigation) return;
-    const newRisk: RiskItem = {
-      ...riskForm,
-      id: `risk-${Date.now()}`,
-      quantitativeScore: computeRiskScore(riskForm.severity, riskForm.probability),
-      createdAt: new Date().toISOString(),
-    };
-    // FIX 5
-    updateReport((prev) => ({
-      ...prev,
-      risks: [...prev.risks, newRisk],
-      overallScore: computeOverallScore([...prev.risks, newRisk]),
-    }));
-    setRiskForm({
-      description: "",
-      category: "health-safety",
-      severity: "medium",
-      probability: "medium",
-      mitigation: "",
-      residual: "monitor",
-    });
-    setShowRiskForm(false);
-  }
+function saveChatState(s: PersistedChatState) {
+  try { localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(s)); } catch { /* ignore */ }
+}
 
-  function removeRisk(id: string) {
-    const updated = report.risks.filter((r) => r.id !== id);
-    // FIX 5
-    updateReport((prev) => ({ ...prev, risks: updated, overallScore: computeOverallScore(updated) }));
-  }
+// ─── TTS hook ────────────────────────────────────────────────────────────────
 
-  // ─── MONTE CARLO STATE ──────────────────────────────────────────
-  const [mcInput, setMcInput] = useState<MonteCarloInput>({
-    likelihoodMean: 0.4,
-    likelihoodStdDev: 0.15,
-    severityMean: 0.5,
-    severityStdDev: 0.2,
-    iterations: 10000,
-  });
-  const [mcResult, setMcResult] = useState<MonteCarloResult | null>(null);
+function useTTS() {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioIdRef = useRef<number | null>(null);
+  const [playingId, setPlayingId] = useState<number | null>(null);
 
-  function handleRunMC() {
-    const result = runMonteCarlo(mcInput);
-    setMcResult(result);
-    // FIX 5
-    updateReport((prev) => ({ ...prev, monteCarloResults: result }));
-  }
-
-  // ─── TEMPORAL STATE ─────────────────────────────────────────────
-  const [temporalRecords, setTemporalRecords] = useState<TemporalRecord[]>([]);
-  const [tempForm, setTempForm] = useState<TempFormState>({
-    entityType: "",
-    entityId: "",
-    dataJson: "",
-    validTime: "",
-  });
-
-  async function addTemporal() {
-    if (!tempForm.entityType || !tempForm.dataJson) return;
-    try {
-      const data = JSON.parse(tempForm.dataJson) as Record<string, unknown>;
-      const record = await createTemporalRecord(
-        tempForm.entityType,
-        tempForm.entityId,
-        data,
-        tempForm.validTime || new Date().toISOString()
-      );
-      const updated = [...temporalRecords, record];
-      setTemporalRecords(updated);
-      // FIX 5
-      updateReport((prev) => ({ ...prev, temporalLedger: updated }));
-      setTempForm({ entityType: "", entityId: "", dataJson: "", validTime: "" });
-    } catch {
-      // FIX 6
-      showToast("JSON non valido — verifica la sintassi", "error");
+  const speak = useCallback(async (text: string, id: number) => {
+    // Stesso messaggio in riproduzione → pausa
+    if (playingId === id && audioRef.current) {
+      audioRef.current.pause();
+      setPlayingId(null);
       return;
     }
-  }
-
-  // ─── DRIFT STATE ────────────────────────────────────────────────
-  const [driftBaselineStr, setDriftBaselineStr] = useState("");
-  const [driftCurrentStr, setDriftCurrentStr] = useState("");
-  const [driftResults, setDriftResults] = useState<DriftWindow[]>([]);
-
-  function handleDetectDrift() {
-    try {
-      const baseline = driftBaselineStr.split(",").map(Number);
-      const current = driftCurrentStr.split(",").map(Number);
-      if (baseline.some(isNaN) || current.some(isNaN)) {
-        // FIX 6
-        showToast("Inserisci valori numerici separati da virgola", "error");
-        return;
-      }
-      const result = detectDrift(baseline, current);
-      const updated = [...driftResults, result];
-      setDriftResults(updated);
-      // FIX 5
-      updateReport((prev) => ({ ...prev, driftWindows: updated }));
-    } catch {
-      // FIX 6
-      showToast("Errore nel calcolo PSI", "error");
+    // Stesso messaggio in pausa → riprendi
+    if (audioIdRef.current === id && audioRef.current) {
+      audioRef.current.play();
+      setPlayingId(id);
       return;
     }
-  }
+    // Messaggio diverso → ferma il precedente e scarica il nuovo audio
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; audioIdRef.current = null; }
 
-  // ─── GPAI STATE ─────────────────────────────────────────────────
-  // FIX 3 — typed gpaiForm
-  const [gpaiForm, setGpaiForm] = useState<GPAIFormState>({
-    modelName: "",
-    providerName: "",
-    computeFlops: "",
-    trainingDataSize: "",
-    openSource: false,
-    energyKwh: "",
-    hasModelCard: false,
-  });
-  const [gpaiResult, setGpaiResult] = useState<GPAIRiskAssessment | null>(null);
+    setPlayingId(id);
+    try {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: stripMarkdown(text) }),
+      });
+      if (!res.ok) { setPlayingId(null); return; }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audioIdRef.current = id;
+      audio.onended = () => { setPlayingId(null); audioIdRef.current = null; URL.revokeObjectURL(url); };
+      audio.onerror = () => { setPlayingId(null); audioIdRef.current = null; };
+      audio.play();
+    } catch {
+      setPlayingId(null);
+    }
+  }, [playingId]);
 
-  function handleAssessGPAI() {
-    const result = assessGPAI({
-      modelName: gpaiForm.modelName || "Modello GPAI",
-      providerName: gpaiForm.providerName || "Provider sconosciuto",
-      computeFlops: Number(gpaiForm.computeFlops) || 0,
-      trainingDataSize: Number(gpaiForm.trainingDataSize) || 0,
-      openSource: gpaiForm.openSource,
-      energyConsumptionKwh: Number(gpaiForm.energyKwh) || 0,
-      hasModelCard: gpaiForm.hasModelCard,
-    });
-    setGpaiResult(result);
-    updateReport((prev) => ({ ...prev, gpaiAssessment: result }));
-  }
+  return { speak, playingId };
+}
 
-  // ─── SANCTIONS STATE ────────────────────────────────────────────
-  const [sanctions, setSanctions] = useState<SanctionTracker[]>(() => getSanctionTracker());
+// ─── Phase row ────────────────────────────────────────────────────────────────
 
-  function toggleSanction(index: number) {
-    setSanctions((prev) =>
-      prev.map((s, i) =>
-        i === index
-          ? { ...s, status: s.status === "resolved" ? "pending" : "resolved" }
-          : s
-      )
-    );
-  }
-
-  // ─── FIX 7 — FINALIZE with Evidence Layer ───────────────────────
-  async function handleFinalize() {
-    const final = await finalizeRiskReport({ ...report, sanctions });
-    setReport({ ...final, nextReviewDate, reviewCycle } as RiskManagerReport);
-    syncSharedFormat({ ...final, nextReviewDate, reviewCycle } as RiskManagerReport);
-    setFinalized(true);
-
-    await appendEvidence("decision", {
-      type: "Risk Assessment Finalizzato",
-      system: final.systemName,
-      overallScore: final.overallScore,
-      overallRating: final.overallRating,
-      totalRisks: final.risks.length,
-      highRisks: final.risks.filter((r) => r.severity === "high").length,
-      evidenceHash: final.evidenceHash,
-      monteCarloRun: !!final.monteCarloResults,
-      driftWindows: final.driftWindows.length,
-      gpaiAssessed: !!final.gpaiAssessment,
-      sanctionsResolved: final.sanctions.filter((s) => s.status === "resolved").length,
-    }, "risk-manager");
-
-    showToast("Report finalizzato e registrato su Evidence Layer ✓");
-  }
-
-  // ─── FIX 8 — Download report ────────────────────────────────────
-  function downloadReport() {
-    const blob = new Blob(
-      [JSON.stringify({ ...report, sanctions }, null, 2)],
-      { type: "application/json" }
-    );
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `risk-report-${report.systemName.replace(/\s+/g, "-").toLowerCase()}-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast("Report scaricato");
-  }
-
-  // ─── FIX 9 — Reset assessment ───────────────────────────────────
-  function resetAssessment() {
-    const fresh = createEmptyRiskReport("Nuovo Sistema AI");
-    setReport(fresh);
-    syncSharedFormat(fresh);
-    setFinalized(false);
-    setSanctions(getSanctionTracker());
-    setMcResult(null);
-    setTemporalRecords([]);
-    setDriftResults([]);
-    setGpaiResult(null);
-    setPhase("scoping");
-    showToast("Nuovo assessment avviato");
-  }
-
-  // ─── NAVIGATION ─────────────────────────────────────────────────
-  const currentIdx = PHASES.findIndex((p) => p.id === phase);
-
-  function nextPhase() {
-    if (currentIdx < PHASES.length - 1) setPhase(PHASES[currentIdx + 1].id);
-  }
-  function prevPhase() {
-    if (currentIdx > 0) setPhase(PHASES[currentIdx - 1].id);
-  }
-
-  // ─── RENDER ─────────────────────────────────────────────────────
+function PhaseRow({
+  phase, status, onOpen, hasData,
+}: {
+  phase: Phase; status: PhaseStatus; onOpen: () => void; hasData: boolean;
+}) {
+  const borderColor = status === "active" ? "rgba(0,0,0,0.2)" : status === "complete" ? "rgba(22,163,74,0.2)" : "rgba(0,0,0,0.07)";
+  const bg = status === "active" ? "rgba(0,0,0,0.03)" : status === "complete" ? "rgba(22,163,74,0.04)" : "transparent";
 
   return (
-    <div className="w-full">
-      <SystemContextBanner checkProhibited={true} />
+    <div style={{ border: `1px solid ${borderColor}`, background: bg, borderRadius: 8, overflow: "hidden", marginBottom: 4 }}>
+      <button
+        onClick={onOpen}
+        className="w-full flex items-center gap-2.5 text-left transition-colors"
+        style={{ padding: "8px 10px", cursor: "pointer", background: "transparent" }}
+        onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.02)")}
+        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+      >
+        <div style={{ flexShrink: 0 }}>
+          {status === "complete"
+            ? <div style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid #23403a" }} />
+            : <div style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid #dc2626" }} />
+          }
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            fontSize: 11.5, fontWeight: 600,
+            fontFamily: "var(--font-inter, system-ui)",
+            color: status === "complete" ? "#15803d" : "#0D1016",
+            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          }}>
+            {phase.label}
+          </div>
+          <div style={{
+            fontSize: 10, fontFamily: "var(--font-inter, system-ui)",
+            color: "rgba(0,0,0,0.4)",
+            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          }}>
+            {phase.subtitle}
+          </div>
+        </div>
+        {hasData && (
+          <ChevronRight size={11} style={{ flexShrink: 0, color: "rgba(0,0,0,0.25)" }} />
+        )}
+      </button>
+    </div>
+  );
+}
 
-      {/* Art. 50 — AI Output Label */}
-      <div className="mb-4">
-        <AIOutputLabel
-          documentType="Gestione del Rischio — Drift Detection · Art. 9 AI Act"
-          outputType="RSK"
-        />
+// ─── Document section row (mappa sezione documento → click → scroll nel PDF) ──
+
+const SECTION_ANCHORS: Record<string, string> = {
+  identification: "sec-identification",
+  risks:          "sec-risks",
+  gapCheck:       "sec-gap",
+  reviewLog:      "sec-review",
+  signOff:        "sec-signoff",
+};
+
+const SECTION_LEGAL_REFS: Record<string, string> = {
+  identification: "Art. 9(2)(a)",
+  risks:          "Art. 9(2)(b)",
+  gapCheck:       "Art. 9(2)(c)",
+  reviewLog:      "Art. 9(7)",
+  signOff:        "Art. 9(9)",
+};
+
+function SectionRow({ section, onOpen, index }: { section: SectionProgress; onOpen: (anchor: string) => void; index: number }) {
+  const [expanded, setExpanded] = useState(false);
+  const anchor      = SECTION_ANCHORS[section.key] ?? "";
+  const legalRef    = SECTION_LEGAL_REFS[section.key] ?? "";
+  const isComplete  = section.percent === 100;
+  const circleColor = isComplete ? "#23403a" : "#dc2626";
+  const pctColor    = isComplete ? "#23403a" : section.percent > 0 ? "#b45309" : "rgba(0,0,0,0.28)";
+  const borderColor = isComplete ? "rgba(35,64,58,0.12)" : "rgba(0,0,0,0.07)";
+  const doneCount   = section.subPoints.filter(sp => sp.done).length;
+
+  return (
+    <div style={{ border: `1px solid ${borderColor}`, borderRadius: 8, overflow: "hidden", marginBottom: 4, background: "transparent" }}>
+      <button
+        onClick={() => { onOpen(anchor); setExpanded(e => !e); }}
+        style={{ padding: "9px 10px", cursor: "pointer", background: "transparent", width: "100%", border: "none", display: "flex", alignItems: "center", gap: 8, textAlign: "left" }}
+        onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.02)")}
+        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+      >
+        <div style={{ flexShrink: 0 }}>
+          <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${circleColor}` }} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {index + 1}. {section.label}
+          </p>
+          <p style={{ fontSize: 9, color: "rgba(0,0,0,0.42)", margin: 0, marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {doneCount}/{section.subPoints.length} · {legalRef}
+          </p>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <span style={{ fontSize: 9.5, fontWeight: 700, color: pctColor, fontFamily: "monospace" }}>{section.percent}%</span>
+          <ChevronRight size={10} style={{ color: "rgba(0,0,0,0.22)", transform: expanded ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+        </div>
+      </button>
+      <div style={{ height: 2, background: "rgba(0,0,0,0.04)" }}>
+        <div style={{ height: "100%", width: `${section.percent}%`, background: circleColor, transition: "width 0.4s" }} />
       </div>
-
-      {/* ── Header ── */}
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.4px", color: T.text, margin: 0 }}>
-          AI Act Risk Manager
-        </h1>
-        <p style={{ marginTop: 4, fontSize: 13, color: T.muted, lineHeight: 1.5 }}>
-          Framework completo di gestione quantitativa del rischio — Art. 9
-          Regolamento UE 2024/1689. Monte Carlo, bitemporal audit, drift detection, GPAI systemic risk, sanzioni.
-        </p>
-      </div>
-
-      {/* ── Phase stepper ── */}
-      <div style={{ display: "flex", alignItems: "center", gap: 0, marginBottom: 28, overflowX: "auto", paddingBottom: 2 }}>
-        <div style={{ display: "flex", alignItems: "center", background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: 5, gap: 2 }}>
-          {PHASES.map((p, i) => {
-            const isActive = p.id === phase;
-            const isDone = PHASES.findIndex((x) => x.id === phase) > i;
-            return (
-              <div key={p.id} style={{ display: "flex", alignItems: "center" }}>
-                <button
-                  onClick={() => setPhase(p.id)}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 6,
-                    borderRadius: 7, padding: "5px 10px", fontSize: 12, fontWeight: 500,
-                    background: isActive ? T.text : "transparent",
-                    color: isActive ? "#fff" : isDone ? T.green : T.muted,
-                    border: "none", cursor: "pointer", transition: "all 0.15s", whiteSpace: "nowrap",
-                  }}
-                >
-                  <p.icon style={{ width: 13, height: 13 }} />
-                  <span>{p.label}</span>
-                  {isDone && <span style={{ fontSize: 10, color: T.green }}>✓</span>}
-                </button>
-                {i < PHASES.length - 1 && (
-                  <div style={{ width: 1, height: 16, background: T.border, margin: "0 2px" }} />
-                )}
+      {expanded && section.subPoints.length > 0 && (
+        <div style={{ borderTop: "1px solid rgba(0,0,0,0.05)", padding: "4px 6px 6px 6px" }}>
+          {section.subPoints.map((sp, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 4px", borderRadius: 5 }}>
+              <div style={{ flexShrink: 0 }}>
+                <div style={{ width: 10, height: 10, borderRadius: "50%", border: `1.5px solid ${sp.done ? "#23403a" : "#dc2626"}` }} />
               </div>
-            );
-          })}
+              <p style={{
+                fontSize: 10, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                color: sp.done ? "rgba(0,0,0,0.42)" : "#0D1016",
+                textDecoration: sp.done ? "line-through" : "none",
+                opacity: sp.done ? 0.55 : 1,
+              }}>
+                {sp.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Error boundary ──────────────────────────────────────────────────────────
+
+class ViewerErrorBoundary extends React.Component<
+  { children: React.ReactNode; onClose: () => void },
+  { error: string | null }
+> {
+  constructor(props: { children: React.ReactNode; onClose: () => void }) {
+    super(props);
+    this.state = { error: null };
+  }
+  static getDerivedStateFromError(err: unknown) {
+    return { error: err instanceof Error ? err.message : String(err) };
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ height: "100%", display: "flex", flexDirection: "column", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, overflow: "hidden", background: "#ffffff" }}>
+          <div style={{ padding: "8px 12px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "#fafafa", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#991b1b" }}>Errore visualizzazione documento</span>
+            <button onClick={this.props.onClose} style={{ fontSize: 12, background: "none", border: "none", cursor: "pointer", color: "rgba(0,0,0,0.4)" }}>✕</button>
+          </div>
+          <div style={{ flex: 1, padding: 20, display: "flex", flexDirection: "column", gap: 8 }}>
+            <p style={{ fontSize: 12, color: "#991b1b", margin: 0, fontFamily: "monospace", background: "#FEE2E2", padding: "8px 12px", borderRadius: 6 }}>{this.state.error}</p>
+            <p style={{ fontSize: 11, color: "rgba(0,0,0,0.45)", margin: 0 }}>Ricarica la pagina o resetta la conversazione per ripristinare.</p>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// ─── Phase viewer modal ───────────────────────────────────────────────────────
+
+function ToolbarBtn({ icon, title, onClick, active }: {
+  icon: React.ReactNode; title: string; onClick: () => void; active?: boolean;
+}) {
+  return (
+    <button
+      onMouseDown={e => e.preventDefault()} // non perdere la selezione di testo
+      onClick={onClick}
+      title={title}
+      style={{
+        width: 26, height: 26, borderRadius: 6,
+        background: active ? "#0D1016" : "transparent",
+        color: active ? "#ffffff" : "rgba(0,0,0,0.55)",
+        border: "none", cursor: "pointer",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        transition: "background 0.12s",
+      }}
+      onMouseEnter={e => { if (!active) e.currentTarget.style.background = "rgba(0,0,0,0.07)"; }}
+      onMouseLeave={e => { if (!active) e.currentTarget.style.background = "transparent"; }}
+    >
+      {icon}
+    </button>
+  );
+}
+
+function PhaseDocColumn({
+  registerDoc, annexes, editedHtml, onSaveEdit, onClose, scrollToAnchor,
+}: {
+  registerDoc: RiskRegisterDocument; annexes: AnnexSection[];
+  editedHtml?: string; onSaveEdit: (html: string) => void;
+  onClose: () => void; scrollToAnchor?: string | null;
+}) {
+  const [editing, setEditing] = useState(false);
+  const editRef = useRef<HTMLDivElement>(null);
+  const viewerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!scrollToAnchor || !scrollContainerRef.current) return;
+    const el = scrollContainerRef.current.querySelector(`#${scrollToAnchor}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [scrollToAnchor]);
+
+  const exec = (cmd: string, value?: string) => {
+    document.execCommand(cmd, false, value);
+    editRef.current?.focus();
+  };
+
+  const enterEdit = () => {
+    const source = editedHtml ?? viewerRef.current?.innerHTML ?? "";
+    setEditing(true);
+    setTimeout(() => {
+      if (editRef.current) {
+        editRef.current.innerHTML = source;
+        editRef.current.querySelectorAll("[data-noedit]").forEach(el => {
+          (el as HTMLElement).contentEditable = "false";
+        });
+        // Strip inline color from editable elements — prevents cursor inheriting
+        // stale color (e.g. red) from a previously styled value element
+        editRef.current.querySelectorAll("p, span, em, i, b, strong").forEach(el => {
+          const htmlEl = el as HTMLElement;
+          if (!htmlEl.closest("[data-noedit]")) htmlEl.style.color = "";
+        });
+        editRef.current.focus();
+      }
+    }, 0);
+  };
+
+  const confirmEdit = () => {
+    if (editRef.current) onSaveEdit(editRef.current.innerHTML);
+    setEditing(false);
+  };
+
+  const docStyle: React.CSSProperties = {
+    background: "#ffffff",
+    borderRadius: 4,
+    border: editing ? "1px solid rgba(13,16,22,0.35)" : "1px solid rgba(0,0,0,0.08)",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
+    padding: "28px 32px",
+    fontFamily: "Georgia, 'Times New Roman', serif",
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+  };
+
+  const docHeader = (
+    <div data-noedit="true" style={{ marginBottom: 20, paddingBottom: 14, borderBottom: "2px solid #0D1016", fontFamily: "var(--font-inter, system-ui, sans-serif)" }}>
+      <p style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.38)", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px" }}>
+        Art. 9 · Reg. UE 2024/1689 — Sistema di gestione dei rischi
+      </p>
+      <h1 style={{ fontSize: 17, fontWeight: 700, color: "#0D1016", margin: "0 0 6px", fontFamily: "inherit" }}>
+        Registro dei Rischi{registerDoc.identification.systemName ? ` — ${registerDoc.identification.systemName}` : ""}
+      </h1>
+    </div>
+  );
+
+  const docFooter = (
+    <div style={{ borderTop: "1px solid rgba(0,0,0,0.12)", marginTop: 20, paddingTop: 8 }}>
+      <p style={{ fontSize: 9, color: "rgba(0,0,0,0.4)", fontStyle: "italic", margin: 0 }}>
+        Generato da AIComply · {new Date().toLocaleDateString("it-IT")} · [verificare sul testo AI Act vigente]
+      </p>
+    </div>
+  );
+
+  return (
+    <div style={{
+      height: "100%", display: "flex", flexDirection: "column",
+      border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10,
+      overflow: "hidden", background: "#ffffff", minWidth: 0,
+    }}>
+      {/* Header colonna */}
+      <div style={{ padding: "8px 12px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "#fafafa", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <p style={{ fontSize: 9, fontWeight: 600, color: "rgba(0,0,0,0.35)", letterSpacing: "0.8px", textTransform: "uppercase", margin: 0 }}>
+            Art. 9 · Documento
+          </p>
+          <p style={{ fontSize: 12, fontWeight: 700, color: "#0D1016", margin: "1px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            Registro dei Rischi
+          </p>
+        </div>
+
+        {/* Toolbar formattazione — visibile solo in modifica */}
+        {editing && (
+          <div style={{ display: "flex", alignItems: "center", gap: 2, padding: "2px 4px", background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8 }}>
+            <ToolbarBtn icon={<Bold size={13} />}        title="Grassetto"    onClick={() => exec("bold")} />
+            <ToolbarBtn icon={<Italic size={13} />}      title="Corsivo"      onClick={() => exec("italic")} />
+            <ToolbarBtn icon={<Underline size={13} />}   title="Sottolineato" onClick={() => exec("underline")} />
+            <ToolbarBtn icon={<Highlighter size={13} />} title="Evidenzia"    onClick={() => exec("hiliteColor", "#fef08a")} />
+          </div>
+        )}
+
+        {/* Matita / conferma modifica */}
+        <ToolbarBtn
+          icon={editing ? <Check size={13} /> : <Pencil size={13} />}
+          title={editing ? "Salva modifiche" : "Modifica documento"}
+          onClick={editing ? confirmEdit : enterEdit}
+          active={editing}
+        />
+
+        <button
+          onClick={onClose}
+          title="Chiudi documento"
+          style={{
+            flexShrink: 0, width: 24, height: 24, borderRadius: 12,
+            background: "rgba(0,0,0,0.05)", border: "none", cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "rgba(0,0,0,0.45)", fontSize: 12,
+          }}
+          onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.1)")}
+          onMouseLeave={e => (e.currentTarget.style.background = "rgba(0,0,0,0.05)")}
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Corpo — pagina stile documento */}
+      <div ref={scrollContainerRef} style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#FAFAFA", display: "flex", flexDirection: "column" }}>
+        {editing ? (
+          /* Modalità modifica: contentEditable puro, nessun componente React dentro */
+          <div style={docStyle}>
+            {docHeader}
+            <div
+              ref={editRef}
+              contentEditable
+              suppressContentEditableWarning
+              style={{ outline: "none", cursor: "text", flex: 1 }}
+            />
+            {docFooter}
+          </div>
+        ) : (
+          /* Modalità lettura: RiskRegisterViewer come normale componente React */
+          <div style={docStyle}>
+            {docHeader}
+            <div ref={viewerRef} style={{ flex: 1 }}>
+              {editedHtml
+                ? <div dangerouslySetInnerHTML={{ __html: editedHtml }} />
+                : <RiskRegisterViewer doc={registerDoc} annexes={annexes} />
+              }
+            </div>
+            {docFooter}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Chat bubble ──────────────────────────────────────────────────────────────
+
+function ChatBubble({ message, index, onSpeak, isPlaying }: {
+  message: ChatMessage; index: number;
+  onSpeak: (text: string, id: number) => void; isPlaying: boolean;
+}) {
+  const isUser = message.role === "user";
+  const clean = stripMarkdown(message.content);
+
+  return (
+    <div style={{ display: "flex", justifyContent: isUser ? "flex-end" : "flex-start", marginBottom: 10 }}>
+      <div style={{ maxWidth: "82%", position: "relative" }}>
+        <div style={{
+          borderRadius: isUser ? "14px 14px 4px 14px" : "14px 14px 14px 4px",
+          padding: "10px 14px",
+          fontSize: 13, lineHeight: 1.55,
+          background: isUser ? "#0D1016" : "#f5f5f4",
+          color: isUser ? "#ffffff" : "#0D1016",
+          border: isUser ? "none" : "1px solid rgba(0,0,0,0.07)",
+        }}>
+          {!isUser && (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <Shield size={10} style={{ color: "#0D1016" }} />
+                <span style={{ fontSize: 9, color: "#0D1016", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                  Risk Manager AI
+                </span>
+              </div>
+              <button
+                onClick={() => onSpeak(clean, index)}
+                title={isPlaying ? "Pausa" : "Ascolta"}
+                style={{
+                  display: "flex", alignItems: "center", gap: 5,
+                  padding: "3px 10px", marginLeft: 8,
+                  fontSize: 10, fontWeight: 500,
+                  borderRadius: 20, cursor: "pointer",
+                  background: isPlaying ? "#0D1016" : "rgba(0,0,0,0.05)",
+                  color: isPlaying ? "#ffffff" : "rgba(0,0,0,0.45)",
+                  border: "1px solid " + (isPlaying ? "#0D1016" : "rgba(0,0,0,0.08)"),
+                  transition: "all 0.15s ease",
+                }}
+                onMouseEnter={e => { if (!isPlaying) e.currentTarget.style.background = "rgba(0,0,0,0.08)"; }}
+                onMouseLeave={e => { if (!isPlaying) e.currentTarget.style.background = "rgba(0,0,0,0.05)"; }}
+              >
+                {isPlaying ? <Pause size={10} /> : <Play size={10} />}
+                {isPlaying ? "Pausa" : "Ascolta"}
+              </button>
+            </div>
+          )}
+          <p style={{ whiteSpace: "pre-wrap", margin: 0 }}>{clean}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Export dropdown ──────────────────────────────────────────────────────────
+
+function ExportMenu({ documentation, systemName }: { documentation: RiskDocumentation; systemName?: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const name = systemName ?? "sistema";
+  const date = new Date().toISOString().slice(0, 10);
+
+  const buildSections = () => PHASES.map(p => {
+    const data = documentation[p.id as keyof RiskDocumentation];
+    return {
+      title: `${p.label} (${p.article})`,
+      content: data && Object.keys(data).length > 0
+        ? Object.entries(data as Record<string, unknown>).map(([k, v]) => `${k}: ${Array.isArray(v) ? (v as string[]).join(", ") : String(v ?? "")}`).join("\n")
+        : "Non completata",
+    };
+  });
+
+  function exportMarkdown() {
+    const lines = ["# Risk Register — AI Act Art. 9", `**Sistema**: ${name}`, `**Data**: ${date}`, ""];
+    buildSections().forEach(s => { lines.push(`## ${s.title}`, s.content, ""); });
+    lines.push("---\n*[verify against current AI Act text] — Generato da AIComply*");
+    const blob = new Blob([lines.join("\n")], { type: "text/markdown" });
+    const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `RiskRegister_${name}_${date}.md` });
+    a.click(); URL.revokeObjectURL(a.href);
+    setOpen(false);
+  }
+
+  async function exportPDF() {
+    const sections = buildSections().map(s => ({ title: s.title, content: s.content, status: s.content === "Non completata" ? "empty" as const : "complete" as const }));
+    try {
+      const res = await fetch("/api/compliance/export-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ systemName: name, tier: "high", sections }),
+      });
+      if (!res.ok) return;
+      const blob = await res.blob();
+      const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `RiskRegister_${name}_${date}.pdf` });
+      a.click(); URL.revokeObjectURL(a.href);
+    } catch { /* silent */ }
+    setOpen(false);
+  }
+
+  function exportWord() {
+    const sections = buildSections();
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1a1a1a;margin:2cm}
+h1{font-size:18pt;font-weight:600;margin-bottom:4pt}
+h2{font-size:13pt;font-weight:600;margin-top:18pt;margin-bottom:4pt;color:#1d4ed8;border-bottom:1px solid #e0e0e0;padding-bottom:4pt}
+p{margin:4pt 0;line-height:1.5}
+.meta{font-size:9pt;color:#666;margin-bottom:16pt}
+.footer{font-size:8pt;color:#999;margin-top:24pt;border-top:1px solid #ddd;padding-top:8pt}
+</style></head><body>
+<h1>Risk Register — AI Act Art. 9</h1>
+<p class="meta">Sistema: ${name} &nbsp;·&nbsp; Data: ${date} &nbsp;·&nbsp; Generato da AIComply</p>
+${sections.map(s => `<h2>${s.title}</h2><p>${s.content.replace(/\n/g, "<br>")}</p>`).join("\n")}
+<p class="footer">[verify against current AI Act text] — Documento generato da AIComply. Richiedere verifica legale professionale prima dell&apos;utilizzo.</p>
+</body></html>`;
+    const blob = new Blob([html], { type: "application/msword" });
+    const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `RiskRegister_${name}_${date}.doc` });
+    a.click(); URL.revokeObjectURL(a.href);
+    setOpen(false);
+  }
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, padding: "6px 12px", borderRadius: 20, background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.6)", border: "none", cursor: "pointer" }}
+      >
+        <Download size={12} /> Esporta <ChevronDown size={10} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
+      </button>
+      {open && (
+        <div style={{ position: "absolute", right: 0, top: "calc(100% + 4px)", background: "#ffffff", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.08)", zIndex: 50, minWidth: 160, overflow: "hidden" }}>
+          {[
+            { label: "PDF", icon: "📄", action: exportPDF },
+            { label: "Word (.doc)", icon: "📝", action: exportWord },
+            { label: "Markdown", icon: "📋", action: exportMarkdown },
+          ].map(item => (
+            <button
+              key={item.label}
+              onClick={item.action}
+              style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "9px 14px", fontSize: 12, color: "#0D1016", background: "transparent", border: "none", cursor: "pointer", textAlign: "left" }}
+              onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.04)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+            >
+              <span>{item.icon}</span> {item.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main page ────────────────────────────────────────────────────────────────
+
+export default function RiskManagerPage() {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [documentation, setDocumentation] = useState<RiskDocumentation>({});
+  const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
+  const [completedPhases, setCompletedPhases] = useState<RiskPhaseId[]>([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [docEdits, setDocEdits] = useState<Partial<Record<RiskPhaseId, string>>>({});
+  const [docWidth, setDocWidth] = useState(420);
+  const [isResizing, setIsResizing] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerAnchor, setViewerAnchor] = useState<string | null>(null);
+  const [showPhaseGuide, setShowPhaseGuide] = useState(true);
+  const [customPhrase, setCustomPhrase] = useState("");
+  const layoutRef = useRef<HTMLDivElement>(null);
+
+  // Apre il documento e scrolla alla sezione richiesta
+  const openSection = useCallback((anchor: string) => {
+    if (!viewerOpen) {
+      const total = layoutRef.current?.clientWidth ?? 1200;
+      const available = total - 256 - 12 * 3 - 6;
+      setDocWidth(Math.max(280, Math.floor(available / 2)));
+    }
+    setViewerOpen(true);
+    setViewerAnchor(anchor);
+  }, [viewerOpen]);
+
+  const startResize = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+    const startX = e.clientX;
+    const startWidth = docWidth;
+    const onMove = (ev: MouseEvent) => {
+      const max = (layoutRef.current?.clientWidth ?? 1200) * 0.6;
+      setDocWidth(Math.min(Math.max(startWidth + (ev.clientX - startX), 280), max));
+    };
+    const onUp = () => {
+      setIsResizing(false);
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+    };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  }, [docWidth]);
+  const [hydrated, setHydrated] = useState(false);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { speak, playingId } = useTTS();
+
+  const classifierData = readFromStorage<ClassifierResult>("classifier");
+  const systemContext = {
+    systemName: classifierData?.systemName,
+    riskLevel: classifierData?.riskLevel,
+    isGPAI: classifierData?.isGPAI,
+  };
+
+  // Registro dei Rischi derivato (sola lettura) dallo stato chat
+  const registerDoc: RiskRegisterDocument = useMemo(
+    () => buildRiskRegisterDocument(documentation, classifierData),
+    [documentation, classifierData]
+  );
+  const annexes: AnnexSection[] = useMemo(
+    () => buildAnnexSections(documentation),
+    [documentation]
+  );
+  // Modulo condizionale GPAI — visibile se riskTier=gpai o incorporatesGpaiModel=yes
+  const showGpaiModule = useMemo(() => shouldShowGpaiModule(documentation), [documentation]);
+  // Avanzamento documento per sezione (usato nel rail sinistro)
+  const registerProgress = useMemo(() => computeRegisterProgress(registerDoc), [registerDoc]);
+
+  useEffect(() => {
+    const saved = loadChatState();
+    if (saved) {
+      setMessages(saved.messages);
+      setDocumentation(saved.documentation);
+      setCurrentPhaseIndex(saved.currentPhaseIndex);
+      setCompletedPhases(saved.completedPhases);
+      setDocEdits(saved.docEdits ?? {});
+    } else {
+      setMessages([{
+        role: "assistant",
+        content: `Benvenuto nel Risk Manager AI Act di AIComply.\n\nTi guiderò attraverso 8 fasi per costruire un Risk Register completo ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema AI e il contesto in cui viene utilizzato (settore, uso previsto, categorie di utenti coinvolti).`,
+      }]);
+    }
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  useEffect(() => { setShowPhaseGuide(true); setCustomPhrase(""); }, [currentPhaseIndex]);
+
+  const persistState = useCallback((msgs: ChatMessage[], doc: RiskDocumentation, phaseIdx: number, completed: RiskPhaseId[]) => {
+    saveChatState({ messages: msgs, documentation: doc, currentPhaseIndex: phaseIdx, completedPhases: completed, docEdits });
+  }, [docEdits]);
+
+  const saveDocEdit = useCallback((phaseId: RiskPhaseId, html: string) => {
+    setDocEdits(prev => {
+      const next = { ...prev, [phaseId]: html };
+      const saved = loadChatState();
+      if (saved) saveChatState({ ...saved, docEdits: next });
+      return next;
+    });
+  }, []);
+
+  const sendMessage = useCallback(async () => {
+    const text = input.trim();
+    if (!text || isLoading) return;
+
+    const userMsg: ChatMessage = { role: "user", content: text };
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
+    setInput("");
+    setIsLoading(true);
+
+    const currentPhase = PHASES[currentPhaseIndex];
+    const result = await Promise.race([
+      riskManagerChat(newMessages, currentPhase.id, documentation, systemContext),
+      new Promise<Awaited<ReturnType<typeof riskManagerChat>>>(resolve =>
+        setTimeout(() => resolve({ error: "Timeout: risposta AI troppo lenta. Riprova." }), 55000)
+      ),
+    ]);
+
+    if (result.error) {
+      const updated = [...newMessages, { role: "assistant" as const, content: result.error }];
+      setMessages(updated);
+      persistState(updated, documentation, currentPhaseIndex, completedPhases);
+      setIsLoading(false);
+      return;
+    }
+
+    const assistantMsg: ChatMessage = { role: "assistant", content: result.reply ?? "" };
+    const updatedMessages = [...newMessages, assistantMsg];
+    let newDoc = documentation;
+    let newPhaseIndex = currentPhaseIndex;
+    let newCompleted = completedPhases;
+
+    if (result.patch) {
+      newDoc = { ...documentation, ...result.patch };
+      setDocumentation(newDoc);
+    }
+
+    if (result.stepComplete && currentPhaseIndex < PHASES.length - 1) {
+      newCompleted = [...completedPhases, currentPhase.id];
+      setCompletedPhases(newCompleted);
+      newPhaseIndex = currentPhaseIndex + 1;
+      setCurrentPhaseIndex(newPhaseIndex);
+      updatedMessages.push({
+        role: "assistant",
+        content: `Fase "${currentPhase.label}" completata e documentata.\n\nProcediamo con la fase "${PHASES[newPhaseIndex].label}" (${PHASES[newPhaseIndex].article}).`,
+      });
+    } else if (result.stepComplete && currentPhaseIndex === PHASES.length - 1) {
+      newCompleted = [...completedPhases, currentPhase.id];
+      setCompletedPhases(newCompleted);
+      writeToStorage<RiskManagerResult>("riskManager", {
+        risks: [],
+        overallRiskLevel: newDoc.signoff?.overallRisk === "alto" ? "high" : newDoc.signoff?.overallRisk === "critico" ? "critical" : "medium",
+        completedAt: new Date().toISOString(),
+        nextReviewDate: newDoc.signoff?.nextReviewDate,
+      });
+    }
+
+    setMessages(updatedMessages);
+    persistState(updatedMessages, newDoc, newPhaseIndex, newCompleted);
+    setIsLoading(false);
+  }, [input, isLoading, messages, currentPhaseIndex, documentation, completedPhases, systemContext, persistState]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  };
+
+  const resetChat = () => {
+    localStorage.removeItem(CHAT_STORAGE_KEY);
+    setMessages([{
+      role: "assistant",
+      content: `Benvenuto nel Risk Manager AI Act di AIComply.\n\nTi guiderò attraverso 8 fasi per costruire un Risk Register completo ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema AI e il contesto in cui viene utilizzato.`,
+    }]);
+    setDocumentation({});
+    setCurrentPhaseIndex(0);
+    setCompletedPhases([]);
+    setDocEdits({});
+    setViewerOpen(false);
+    setViewerAnchor(null);
+    setInput("");
+  };
+
+  if (!hydrated) return null;
+
+  const progressPct = registerProgress.overallPercent;
+  const hasContent = completedPhases.length > 0 || Object.keys(documentation).length > 0;
+
+  return (
+    <div style={{ fontFamily: "var(--font-inter, system-ui)", background: "#ffffff", height: "calc(100vh - 4rem)", display: "flex", flexDirection: "column" }}>
+      <SystemSelector />
+      <ProviderTransitionAlertBanner />
+
+      {/* Header */}
+      <div style={{ paddingBottom: 16 }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginTop: 12 }}>
+          <div>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.3)", letterSpacing: "1.2px", textTransform: "uppercase", marginBottom: 4 }}>
+              Art. 9 · Reg. UE 2024/1689
+            </p>
+            <h1 style={{ fontSize: 24, fontWeight: 500, color: "#0D1016", letterSpacing: "-0.8px", margin: 0 }}>
+              Risk Manager
+            </h1>
+            <p style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", marginTop: 4 }}>
+              Framework guidato AI — Monte Carlo, audit bitemporale, drift detection, GPAI. Ogni risposta AI include audio con voce Chirp3-HD.
+            </p>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+            {hasContent && <ExportMenu documentation={documentation} systemName={systemContext.systemName} />}
+            <button
+              onClick={resetChat}
+              style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, padding: "6px 12px", borderRadius: 20, background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.4)", border: "1px solid rgba(0,0,0,0.07)", cursor: "pointer" }}
+            >
+              <RotateCcw size={12} /> Reset
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Phase content */}
-      <div style={{ ...cardSt, padding: 24 }}>
-        {phase === "scoping" && (
-          <>
-            <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
-              {(["list", "matrix"] as const).map((v) => (
-                <button
-                  key={v}
-                  onClick={() => setMatrixView(v)}
-                  style={{
-                    padding: "5px 14px",
-                    borderRadius: 8,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    border: matrixView === v ? "1px solid rgba(0,0,0,0.15)" : `1px solid ${T.border}`,
-                    background: matrixView === v ? "#0D1016" : "#fff",
-                    color: matrixView === v ? "#fff" : T.muted,
-                    transition: "all 0.12s",
-                  }}
-                >
-                  {v === "list" ? `Lista rischi (${report.risks.length})` : "Matrice 3×3 — ISO 42001"}
-                </button>
-              ))}
-            </div>
+      {/* Split layout: sinistra fissa · documento (ridimensionabile) · chat */}
+      <div ref={layoutRef} style={{ display: "flex", flex: 1, minHeight: 0, gap: 12, overflow: "hidden" }}>
 
-            {matrixView === "matrix" ? (
-              <RiskMatrix
-                risks={report.risks}
-                onCellClick={(p, s) => setMatrixFilter({ p, s })}
-                activeFilter={matrixFilter}
-              />
-            ) : (
-              <ScopingPhase
-                report={report}
-                setReport={setReport}
-                riskForm={riskForm}
-                setRiskForm={setRiskForm}
-                showRiskForm={showRiskForm}
-                setShowRiskForm={setShowRiskForm}
-                addRisk={addRisk}
-                removeRisk={removeRisk}
-                addPresetRisk={(preset: RiskFormState) => {
-                  const newRisk: RiskItem = {
-                    ...preset,
-                    id: `risk-${Date.now()}`,
-                    quantitativeScore: computeRiskScore(preset.severity, preset.probability),
-                    createdAt: new Date().toISOString(),
-                  };
-                  updateReport((prev) => ({
-                    ...prev,
-                    risks: [...prev.risks, newRisk],
-                    overallScore: computeOverallScore([...prev.risks, newRisk]),
-                  }));
-                }}
-              />
-            )}
+        {/* LEFT — progress */}
+        <div style={{ width: 256, flexShrink: 0, display: "flex", flexDirection: "column", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, overflow: "hidden", background: "#fafafa" }}>
+          <div style={{ padding: "12px 12px 10px", borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                Avanzamento
+              </span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", fontFamily: "monospace" }}>
+                {progressPct}%
+              </span>
+            </div>
+            <div style={{ width: "100%", height: 4, background: "rgba(0,0,0,0.07)", borderRadius: 2, overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${progressPct}%`, background: "#0D1016", borderRadius: 2, transition: "width 0.5s ease" }} />
+            </div>
+          </div>
+
+          <div style={{ flex: 1, overflowY: "auto", padding: "10px" }}>
+            {/* Sezioni del documento — click apre il PDF e scrolla alla sezione */}
+            {registerProgress.sections.map((section, idx) => (
+              <SectionRow key={section.key} section={section} onOpen={openSection} index={idx} />
+            ))}
+          </div>
+
+          {/* Footer sidebar: verifica legale + nota Art. 99-101 (non interattiva) */}
+          <div style={{ padding: "8px 12px", borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", gap: 5 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 6, fontSize: 9, color: "rgba(0,0,0,0.35)" }}>
+              <AlertTriangle size={10} style={{ flexShrink: 0, marginTop: 1, color: "#b45309" }} />
+              <span>I campi estratti dall&apos;AI richiedono verifica legale professionale.</span>
+            </div>
+            <div style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", lineHeight: 1.4, paddingTop: 3, borderTop: "1px solid rgba(0,0,0,0.05)" }}>
+              La mancata conformità all&apos;Art. 9 può comportare sanzioni ai sensi degli artt. 99-101 [verify against current AI Act text].
+            </div>
+          </div>
+        </div>
+
+        {/* CENTER — documento (apribile, ridimensionabile) */}
+        {viewerOpen && (
+          <>
+            <div style={{ width: docWidth, flexShrink: 0, minWidth: 280, maxWidth: "60%" }}>
+              <ViewerErrorBoundary onClose={() => setViewerOpen(false)}>
+                <PhaseDocColumn
+                  registerDoc={registerDoc}
+                  annexes={annexes}
+                  editedHtml={docEdits["scoping"]}
+                  onSaveEdit={html => saveDocEdit("scoping", html)}
+                  onClose={() => setViewerOpen(false)}
+                  scrollToAnchor={viewerAnchor}
+                />
+              </ViewerErrorBoundary>
+            </div>
+            {/* Splitter trascinabile */}
+            <div
+              onMouseDown={startResize}
+              style={{
+                width: 6, flexShrink: 0, cursor: "col-resize",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                borderRadius: 3,
+                background: isResizing ? "rgba(0,0,0,0.12)" : "transparent",
+                transition: isResizing ? "none" : "background 0.15s",
+              }}
+              onMouseEnter={e => { if (!isResizing) e.currentTarget.style.background = "rgba(0,0,0,0.08)"; }}
+              onMouseLeave={e => { if (!isResizing) e.currentTarget.style.background = "transparent"; }}
+            >
+              <div style={{ width: 2, height: 32, borderRadius: 1, background: "rgba(0,0,0,0.2)" }} />
+            </div>
           </>
         )}
 
-        {phase === "quantitative" && (
-          <QuantitativePhase
-            mcInput={mcInput}
-            setMcInput={setMcInput}
-            mcResult={mcResult}
-            handleRunMC={handleRunMC}
-            risks={report.risks}
-          />
-        )}
-
-        {phase === "temporal" && (
-          <TemporalPhase
-            temporalRecords={temporalRecords}
-            tempForm={tempForm}
-            setTempForm={setTempForm}
-            addTemporal={addTemporal}
-          />
-        )}
-
-        {phase === "drift" && (
-          <DriftPhase
-            driftBaselineStr={driftBaselineStr}
-            setDriftBaselineStr={setDriftBaselineStr}
-            driftCurrentStr={driftCurrentStr}
-            setDriftCurrentStr={setDriftCurrentStr}
-            driftResults={driftResults}
-            handleDetectDrift={handleDetectDrift}
-          />
-        )}
-
-        {phase === "gpai" && (
-          <GPAIPhase
-            gpaiForm={gpaiForm}
-            setGpaiForm={setGpaiForm}
-            gpaiResult={gpaiResult}
-            handleAssessGPAI={handleAssessGPAI}
-          />
-        )}
-
-        {phase === "sanctions" && (
-          <SanctionsPhase
-            sanctions={sanctions}
-            toggleSanction={toggleSanction}
-          />
-        )}
-
-        {phase === "output" && (
-          // FIX 8 + 9 — add onDownload and onReset
-          <OutputPhase
-            report={{ ...report, sanctions }}
-            finalized={finalized}
-            handleFinalize={handleFinalize}
-            onDownload={downloadReport}
-            onReset={resetAssessment}
-            nextReviewDate={nextReviewDate}
-            setNextReviewDate={setNextReviewDate}
-            reviewCycle={reviewCycle}
-            setReviewCycle={setReviewCycle}
-          />
-        )}
-      </div>
-
-      {/* Navigation */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 20 }}>
-        <button
-          onClick={prevPhase}
-          disabled={currentIdx === 0}
-          style={{
-            display: "flex", alignItems: "center", gap: 8,
-            borderRadius: 8, border: `1px solid ${T.border}`,
-            padding: "8px 16px", fontSize: 13, color: T.text,
-            background: T.card, cursor: "pointer",
-            opacity: currentIdx === 0 ? 0.3 : 1,
-          }}
-        >
-          <ArrowLeft style={{ width: 14, height: 14 }} />
-          Precedente
-        </button>
-
-        {phase !== "output" && (
-          <button
-            onClick={nextPhase}
-            disabled={currentIdx === PHASES.length - 1}
-            style={{
-              display: "flex", alignItems: "center", gap: 8,
-              borderRadius: 8, background: T.text, color: "#fff",
-              padding: "8px 16px", fontSize: 13, fontWeight: 500,
-              border: "none", cursor: "pointer",
-              opacity: currentIdx === PHASES.length - 1 ? 0.3 : 1,
-            }}
-          >
-            Prossimo
-            <ArrowRight style={{ width: 14, height: 14 }} />
-          </button>
-        )}
-      </div>
-
-      {/* FIX 6 — Toast */}
-      {toast && (
-        <div style={{
-          position: "fixed", bottom: 24, right: 24, zIndex: 50,
-          borderRadius: 12, padding: "12px 16px", fontSize: 13, fontWeight: 500,
-          boxShadow: "0 4px 24px rgba(0,0,0,0.15)",
-          background: toast.type === "error" ? T.redBg : T.text,
-          border: `1px solid ${toast.type === "error" ? T.redBdr : T.border}`,
-          color: toast.type === "error" ? T.red : "#fff",
-        }}>
-          {toast.msg}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── PHASE COMPONENTS ──────────────────────────────────────────────────
-
-// ─── Catalogo predefinito AI Act ──────────────────────────────────────────────
-
-const RISK_CATALOG: Array<{
-  id: string;
-  label: string;
-  description: string;
-  category: RiskCategory;
-  severity: Severity;
-  probability: Probability;
-  mitigation: string;
-  residual: ResidualRisk;
-  article: string;
-  color: string;
-}> = [
-  {
-    id: "cat-hallucinations",
-    label: "Allucinazioni e output incorretti",
-    description: "Il modello genera informazioni false, fuorvianti o inventate presentandole come fatti certi.",
-    category: "health-safety",
-    severity: "high",
-    probability: "high",
-    mitigation: "Implementare human-in-the-loop per decisioni critiche. Aggiungere disclaimer sull'affidabilità degli output. Validazione incrociata con fonti autorevoli.",
-    residual: "monitor",
-    article: "Art. 9 + Art. 13",
-    color: "#dc2626",
-  },
-  {
-    id: "cat-data-leakage",
-    label: "Data leakage e memorizzazione dati",
-    description: "Il modello espone dati personali o sensibili contenuti nei dati di training o in sessioni precedenti.",
-    category: "privacy",
-    severity: "high",
-    probability: "medium",
-    mitigation: "Differential privacy durante il training. Audit periodici del modello. Implementare guardrail per filtrare PII negli output. Privacy by design.",
-    residual: "monitor",
-    article: "Art. 10 + Art. 9",
-    color: "#dc2626",
-  },
-  {
-    id: "cat-discriminatory-bias",
-    label: "Bias discriminatorio sistematico",
-    description: "Il sistema produce output sistematicamente sfavorevoli verso gruppi protetti (genere, etnia, età, disabilità).",
-    category: "discrimination",
-    severity: "high",
-    probability: "medium",
-    mitigation: "Bias testing su dataset rappresentativi. Fairness metrics (equalized odds, demographic parity). Audit esterno periodico. Monitoraggio continuo post-deploy.",
-    residual: "monitor",
-    article: "Art. 10 + Annex III",
-    color: "#dc2626",
-  },
-  {
-    id: "cat-model-inversion",
-    label: "Attacchi adversarial / model inversion",
-    description: "Attori malintenzionati manipolano input per estrarre informazioni riservate o compromettere il comportamento del modello.",
-    category: "security",
-    severity: "high",
-    probability: "low",
-    mitigation: "Adversarial robustness testing. Rate limiting sulle query. Input sanitization. Monitoraggio anomalie comportamentali.",
-    residual: "monitor",
-    article: "Art. 15",
-    color: "#d97706",
-  },
-  {
-    id: "cat-drift",
-    label: "Concept drift e degrado delle performance",
-    description: "La distribuzione dei dati in produzione si discosta dai dati di training, degradando l'accuratezza nel tempo.",
-    category: "health-safety",
-    severity: "medium",
-    probability: "high",
-    mitigation: "Pipeline di monitoring con PSI/KL divergence. Alert automatici per degrado KPI. Retraining periodico. Ciclo post-market Art. 72.",
-    residual: "monitor",
-    article: "Art. 72 + Art. 15",
-    color: "#d97706",
-  },
-  {
-    id: "cat-lack-explainability",
-    label: "Mancanza di spiegabilità (black box)",
-    description: "Il sistema prende decisioni che impattano persone fisiche senza poter fornire spiegazioni comprensibili.",
-    category: "transparency",
-    severity: "medium",
-    probability: "medium",
-    mitigation: "Implementare SHAP/LIME per spiegazioni locali. Documentare feature importance. Generare explanation sheet per utenti finali (XAI Lab).",
-    residual: "monitor",
-    article: "Art. 13 + Art. 14",
-    color: "#d97706",
-  },
-  {
-    id: "cat-overreliance",
-    label: "Over-reliance e automation bias",
-    description: "Gli operatori umani si affidano eccessivamente alle raccomandazioni del sistema senza esercitare supervisione critica.",
-    category: "autonomy",
-    severity: "medium",
-    probability: "high",
-    mitigation: "Formazione obbligatoria degli operatori (AI Literacy). Progettare UI con friction intenzionale. Audit periodici delle decisioni umane vs AI.",
-    residual: "monitor",
-    article: "Art. 14 + Art. 26",
-    color: "#d97706",
-  },
-  {
-    id: "cat-supply-chain",
-    label: "Rischi catena di fornitura del modello",
-    description: "Dipendenza da modelli o dataset di terze parti non verificati che possono introdurre vulnerabilità o bias non noti.",
-    category: "privacy",
-    severity: "medium",
-    probability: "medium",
-    mitigation: "Due diligence sui fornitori. Contractual obligations per provenance dei dati. Software Bill of Materials (SBOM) per componenti AI.",
-    residual: "monitor",
-    article: "Art. 10 + Art. 25",
-    color: "#d97706",
-  },
-];
-
-function CatalogSection({
-  addPresetRisk,
-}: {
-  addPresetRisk: (preset: RiskFormState) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [added, setAdded] = useState<Set<string>>(new Set());
-
-  function applyPreset(preset: typeof RISK_CATALOG[0]) {
-    addPresetRisk({
-      description: preset.description,
-      category: preset.category,
-      severity: preset.severity,
-      probability: preset.probability,
-      mitigation: preset.mitigation,
-      residual: preset.residual,
-    });
-    setAdded(prev => new Set(prev).add(preset.id));
-  }
-
-  return (
-    <div style={{ marginBottom: 20 }}>
-      <button
-        onClick={() => setOpen(!open)}
-        style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          width: "100%", padding: "10px 14px", borderRadius: 10,
-          background: open ? "rgba(37,99,235,0.05)" : "rgba(0,0,0,0.02)",
-          border: `1px solid ${open ? "rgba(37,99,235,0.2)" : "rgba(0,0,0,0.08)"}`,
-          cursor: "pointer",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Database style={{ width: 14, height: 14, color: open ? "#2563eb" : "rgba(0,0,0,0.4)" }} />
-          <span style={{ fontSize: 12, fontWeight: 600, color: open ? "#2563eb" : T.text }}>
-            Catalogo AI Act — Aggiungi con un click
-          </span>
-          <span style={{
-            fontSize: 10, fontWeight: 600, padding: "1px 7px", borderRadius: 20,
-            background: "rgba(37,99,235,0.08)", color: "#2563eb",
-          }}>
-            {RISK_CATALOG.length} rischi
-          </span>
-        </div>
-        <span style={{ fontSize: 12, color: T.muted }}>{open ? "▲" : "▼"}</span>
-      </button>
-
-      {open && (
-        <div style={{
-          marginTop: 8, padding: "12px",
-          background: "rgba(0,0,0,0.015)",
-          border: "1px solid rgba(0,0,0,0.07)",
-          borderRadius: 10,
-        }}>
-          <p style={{ fontSize: 11, color: T.muted, marginBottom: 10 }}>
-            Rischi standard EU AI Act precompilati. Clicca su un rischio per aggiungerlo immediatamente alla matrice.
-          </p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 8 }}>
-            {RISK_CATALOG.map(preset => (
-              <button
-                key={preset.id}
-                onClick={() => !added.has(preset.id) && applyPreset(preset)}
-                disabled={added.has(preset.id)}
-                style={{
-                  textAlign: "left", padding: "10px 12px", borderRadius: 8, cursor: added.has(preset.id) ? "default" : "pointer",
-                  background: added.has(preset.id) ? "rgba(22,163,74,0.05)" : T.card,
-                  border: `1px solid ${added.has(preset.id) ? "rgba(22,163,74,0.25)" : "rgba(0,0,0,0.08)"}`,
-                  opacity: added.has(preset.id) ? 0.7 : 1,
-                  transition: "all 0.15s",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: 4 }}>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: T.text, lineHeight: 1.3 }}>
-                    {preset.label}
-                  </span>
-                  {added.has(preset.id) ? (
-                    <CheckCircle style={{ width: 13, height: 13, color: "#15803d", flexShrink: 0 }} />
-                  ) : (
-                    <Plus style={{ width: 13, height: 13, color: T.muted, flexShrink: 0 }} />
-                  )}
-                </div>
-                <p style={{ fontSize: 10, color: T.muted, marginBottom: 6, lineHeight: 1.4 }}>
-                  {preset.description.slice(0, 80)}…
-                </p>
-                <div style={{ display: "flex", gap: 5 }}>
-                  <span style={{
-                    fontSize: 10, fontWeight: 600, padding: "1px 6px", borderRadius: 4,
-                    background: preset.color === "#dc2626" ? "rgba(220,38,38,0.08)" : "rgba(217,119,6,0.08)",
-                    color: preset.color,
-                  }}>
-                    {preset.severity.toUpperCase()}
-                  </span>
-                  <span style={{ fontSize: 10, color: T.muted, padding: "1px 0" }}>{preset.article}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// FIX 2 — Proper types in ScopingPhase props
-function ScopingPhase({
-  report,
-  setReport,
-  riskForm,
-  setRiskForm,
-  showRiskForm,
-  setShowRiskForm,
-  addRisk,
-  removeRisk,
-  addPresetRisk,
-}: {
-  report: RiskManagerReport;
-  setReport: (r: RiskManagerReport) => void;
-  riskForm: RiskFormState;
-  setRiskForm: Dispatch<SetStateAction<RiskFormState>>;
-  showRiskForm: boolean;
-  setShowRiskForm: (v: boolean) => void;
-  addRisk: () => void;
-  removeRisk: (id: string) => void;
-  addPresetRisk: (preset: RiskFormState) => void;
-}) {
-  const highCount = report.risks.filter((r) => r.severity === "high").length;
-  const score = report.overallScore;
-
-  const [suggestion, setSuggestion] = useState<RiskSuggestion | null>(null);
-  const [showGuide, setShowGuide] = useState(false);
-  const [residualWarning, setResidualWarning] = useState<ResidualWarning>({ show: false, message: "", severity: "info" });
-  const [suggestionUsed, setSuggestionUsed] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // FIX 2 — (prev: RiskFormState) instead of (prev: typeof riskForm)
-  const handleDescriptionChange = useCallback((value: string) => {
-    setRiskForm((prev: RiskFormState) => ({ ...prev, description: value }));
-    setSuggestionUsed(false);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      if (value.trim().length > 15) {
-        setSuggestion(analyzeRiskDescription(value));
-      } else {
-        setSuggestion(null);
-      }
-    }, 600);
-  }, [setRiskForm]);
-
-  useEffect(() => {
-    setResidualWarning(validateResidualRisk(
-      riskForm.severity,
-      riskForm.probability,
-      riskForm.residual,
-      riskForm.mitigation
-    ));
-  }, [riskForm.severity, riskForm.probability, riskForm.residual, riskForm.mitigation]);
-
-  useEffect(() => {
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, []);
-
-  function applySuggestion() {
-    if (!suggestion) return;
-    // FIX 2 — (prev: RiskFormState) instead of (prev: typeof riskForm)
-    setRiskForm((prev: RiskFormState) => ({
-      ...prev,
-      severity: suggestion.severity,
-      probability: suggestion.probability,
-      residual: suggestion.residual,
-    }));
-    setSuggestionUsed(true);
-  }
-
-  return (
-    <div>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: T.text, margin: 0 }}>
-          Scoping &amp; Identificazione Rischi
-        </h2>
-        <button
-          onClick={() => setShowGuide(!showGuide)}
-          style={{
-            display: "flex", alignItems: "center", gap: 6, borderRadius: 7,
-            padding: "5px 10px", fontSize: 12, fontWeight: 500, cursor: "pointer",
-            background: showGuide ? T.neutralBg : "transparent",
-            color: showGuide ? T.neutral : T.muted,
-            border: `1px solid ${showGuide ? T.neutralBdr : T.border}`,
-          }}
-        >
-          <Eye style={{ width: 13, height: 13 }} />
-          Guida ai Criteri
-        </button>
-      </div>
-      <p style={{ fontSize: 12, color: T.muted, marginBottom: 16 }}>
-        Sistema:{" "}
-        <input
-          value={report.systemName}
-          onChange={(e) => setReport({ ...report, systemName: e.target.value })}
-          style={{
-            borderBottom: `1px solid ${T.border}`, background: "transparent",
-            padding: "1px 4px", color: T.text, outline: "none", fontSize: 12,
-          }}
-        />
-      </p>
-
-      {showGuide && (() => {
-        const guide = RISK_PHASE_GUIDES["scoping"];
-        return (
-          <div style={{ background: "rgba(13,16,22,0.03)", border: "1px solid rgba(13,16,22,0.08)", borderRadius: 12, padding: 18, marginBottom: 20 }}>
-            {/* Ref badge + goal */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-              <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 9999,
-                background: "rgba(13,16,22,0.06)", border: "1px solid rgba(13,16,22,0.1)", color: T.muted, letterSpacing: "0.3px" }}>
-                {guide.ref}
-              </span>
-              <span style={{ fontSize: 11, fontWeight: 600, color: T.text }}>Obiettivo della fase</span>
-            </div>
-            <p style={{ fontSize: 12, color: T.muted, marginBottom: 14, lineHeight: 1.55 }}>{guide.goal}</p>
-
-            {/* ESEMPI box */}
-            <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", marginBottom: 8 }}>ESEMPI</div>
-              <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
-                {guide.examples.map((ex, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setRiskForm((prev: RiskFormState) => ({ ...prev, description: ex.text }))}
-                    style={{
-                      textAlign: "left" as const, padding: "8px 10px", borderRadius: 8, cursor: "pointer",
-                      background: T.card, border: "1px solid rgba(13,16,22,0.08)", fontSize: 12, color: T.muted,
-                      lineHeight: 1.5, transition: "border-color 0.1s",
-                    }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(13,16,22,0.2)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(13,16,22,0.08)"; }}
-                  >
-                    <span style={{ fontWeight: 600, color: T.text, marginRight: 4 }}>{ex.label}</span>{ex.text}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Starter phrases */}
-            <div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", marginBottom: 8 }}>INIZIA CON</div>
-              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
-                {guide.starters.map((s, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setRiskForm((prev: RiskFormState) => ({ ...prev, description: s }))}
-                    style={{
-                      padding: "4px 12px", borderRadius: 20, fontSize: 11, cursor: "pointer",
-                      background: "rgba(13,16,22,0.04)", border: "1px solid rgba(13,16,22,0.1)", color: T.muted,
-                    }}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
+        {/* RIGHT — chat */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, overflow: "hidden", minWidth: 0 }}>
+          <div style={{ padding: "8px 16px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "#f5f5f4", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#0D1016" }} />
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#0D1016" }}>
+              Fase corrente: {PHASES[currentPhaseIndex]?.label}
+            </span>
+            <span style={{ fontSize: 11, color: "rgba(0,0,0,0.45)" }}>
+              — {PHASES[currentPhaseIndex]?.article}
+            </span>
+            <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4 }}>
+              <FileText size={10} style={{ color: "rgba(0,0,0,0.25)" }} />
+              <span style={{ fontSize: 9, color: "rgba(0,0,0,0.25)" }}>Audio Chirp3-HD disponibile</span>
             </div>
           </div>
-        );
-      })()}
 
-      {/* Stats strip */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 8, marginBottom: 24 }}>
-        {[
-          { label: "Rischi totali", value: report.risks.length, valueColor: T.text },
-          { label: "Alta severità", value: highCount, valueColor: T.red },
-          { label: "Score medio", value: score.toFixed(2), valueColor: T.amber },
-          { label: "Rating", value: computeOverallRating(score), valueColor: T.neutral },
-        ].map((c, i) => (
-          <div key={c.label} style={{
-            background: T.card, border: `1px solid ${T.border}`, borderRadius: 10,
-            boxShadow: "0 1px 3px rgba(0,0,0,0.04)", padding: "12px 14px",
-          }}>
-            <div style={{ fontSize: 20, fontWeight: 600, color: c.valueColor, letterSpacing: "-0.5px" }}>{c.value}</div>
-            <div style={{ marginTop: 2, fontSize: 10, color: T.muted, textTransform: "uppercase", letterSpacing: "0.6px" }}>{c.label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* ── Catalogo predefinito AI Act ──────────────────────────────────── */}
-      <CatalogSection addPresetRisk={addPresetRisk} />
-
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-        <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>Rischi identificati</h3>
-        <button
-          onClick={() => setShowRiskForm(!showRiskForm)}
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            borderRadius: 7, background: T.text, color: "#fff",
-            padding: "5px 12px", fontSize: 12, fontWeight: 500,
-            border: "none", cursor: "pointer",
-          }}
-        >
-          <Plus style={{ width: 13, height: 13 }} />
-          Nuovo rischio
-        </button>
-      </div>
-
-      {showRiskForm && (
-        <div className="rounded-xl border border-border bg-muted/50 p-4 mb-4 space-y-3">
-          <div>
-            <textarea
-              value={riskForm.description}
-              onChange={(e) => handleDescriptionChange(e.target.value)}
-              placeholder="Descrivi il rischio (salute, sicurezza, diritti fondamentali...)"
-              rows={2}
-              className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
-            {suggestion && !suggestionUsed && (
-              <div className="mt-2 rounded-lg border border-primary/30 bg-primary/5 p-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-semibold text-primary">✨ Suggerimento IA</span>
-                      <span className={cls(
-                        "text-[10px] rounded-full px-1.5 py-0.5 border",
-                        suggestion.confidence >= 0.8
-                          ? "bg-success/10 text-success border-success/30"
-                          : suggestion.confidence >= 0.6
-                          ? "bg-warning/10 text-warning border-warning/30"
-                          : "bg-muted text-muted-foreground border-border"
-                      )}>
-                        {(suggestion.confidence * 100).toFixed(0)}% confidenza
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed">
-                      {suggestion.rationale}
+          {/* Phase guide card */}
+          {(() => {
+            const guide = PHASE_GUIDES[PHASES[currentPhaseIndex]?.id as RiskPhaseId];
+            if (!guide) return null;
+            return (
+              <div style={{ borderBottom: "1px solid rgba(0,0,0,0.06)", background: "#fafafa", flexShrink: 0 }}>
+                <button
+                  onClick={() => setShowPhaseGuide(v => !v)}
+                  style={{
+                    width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                    padding: "8px 16px", background: "transparent", border: "none", cursor: "pointer",
+                    fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.45)",
+                  }}
+                >
+                  <span>Guida fase · {PHASES[currentPhaseIndex]?.label}</span>
+                  <span style={{ fontSize: 10 }}>{showPhaseGuide ? "▲" : "▼"}</span>
+                </button>
+                {showPhaseGuide && (
+                  <div style={{ padding: "0 16px 12px" }}>
+                    <p style={{ fontSize: 11, color: "rgba(0,0,0,0.55)", margin: "0 0 8px", lineHeight: 1.5 }}>
+                      {guide.goal}
                     </p>
-                    {suggestion.matchedKeywords.length > 0 && (
-                      <p className="mt-1 text-[10px] text-muted-foreground">
-                        Rilevato: {suggestion.matchedKeywords.join(" · ")}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className={cls(
-                        "text-[10px] font-medium rounded-full px-2 py-0.5 border",
-                        severityColor[suggestion.severity]
-                      )}>
-                        → {suggestion.severity.toUpperCase()}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground">
-                        Prob: {suggestion.probability.toUpperCase()} · Residuo: {RESIDUAL_LABEL[suggestion.residual]}
-                      </span>
+                    {/* Starter questions */}
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
+                      {guide.starters.map((s, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setInput(s)}
+                          style={{
+                            fontSize: 10, padding: "4px 10px", borderRadius: 20,
+                            background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.08)",
+                            color: "#0D1016", cursor: "pointer", fontWeight: 500,
+                          }}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                    {/* Example answer chips */}
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
+                      {guide.examples.map((ex, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setInput(ex.text)}
+                          style={{
+                            fontSize: 10, padding: "4px 10px", borderRadius: 20,
+                            background: "rgba(13,16,22,0.06)", border: "1px solid rgba(0,0,0,0.10)",
+                            color: "#0D1016", cursor: "pointer", textAlign: "left", fontWeight: 500,
+                          }}
+                          title={ex.text}
+                        >
+                          Esempio: {ex.label}
+                        </button>
+                      ))}
+                    </div>
+                    {/* Custom phrase input */}
+                    <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                      <input
+                        value={customPhrase}
+                        onChange={e => setCustomPhrase(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === "Enter" && customPhrase.trim()) {
+                            setInput(customPhrase.trim());
+                            setCustomPhrase("");
+                          }
+                        }}
+                        placeholder="Oppure scrivi una risposta personalizzata…"
+                        style={{
+                          flex: 1, fontSize: 11, padding: "6px 10px", borderRadius: 8,
+                          border: "1px solid rgba(0,0,0,0.10)", outline: "none",
+                          background: "#fff", color: "#0D1016",
+                        }}
+                      />
+                      {customPhrase.trim() && (
+                        <button
+                          onClick={() => { setInput(customPhrase.trim()); setCustomPhrase(""); }}
+                          style={{
+                            fontSize: 10, fontWeight: 700, padding: "5px 10px", borderRadius: 8,
+                            background: "#0D1016", color: "#fff", border: "none", cursor: "pointer",
+                          }}
+                        >
+                          Inserisci →
+                        </button>
+                      )}
                     </div>
                   </div>
-                  <button
-                    onClick={applySuggestion}
-                    className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors ml-3"
-                  >
-                    Applica
-                  </button>
+                )}
+              </div>
+            );
+          })()}
+
+          <div style={{ flex: 1, overflowY: "auto", padding: "16px 16px 8px" }}>
+            {messages.map((msg, i) => (
+              <ChatBubble
+                key={i} message={msg} index={i}
+                onSpeak={speak} isPlaying={playingId === i}
+              />
+            ))}
+            {isLoading && (
+              <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10 }}>
+                <div style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)", borderRadius: "14px 14px 14px 4px", padding: "10px 14px", display: "flex", alignItems: "center", gap: 8 }}>
+                  <Loader2 size={13} style={{ color: "#0D1016", animation: "spin 1s linear infinite" }} />
+                  <span style={{ fontSize: 12, color: "rgba(0,0,0,0.4)" }}>Analisi in corso…</span>
                 </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <select
-              value={riskForm.category}
-              onChange={(e) => setRiskForm({ ...riskForm, category: e.target.value as RiskCategory })}
-              className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-            >
-              {Object.entries(RISK_CATEGORY_LABELS).map(([k, v]) => (
-                <option key={k} value={k}>{v}</option>
-              ))}
-            </select>
-            <div className="relative">
-              <select
-                value={riskForm.severity}
-                onChange={(e) => setRiskForm({ ...riskForm, severity: e.target.value as Severity })}
-                className={cls(
-                  "w-full rounded-lg border px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50",
-                  suggestion && !suggestionUsed
-                    ? "bg-primary/5 border-primary/40 ring-1 ring-primary/30"
-                    : "bg-card border-border"
-                )}
-              >
-                <option value="high">Severità: Alta</option>
-                <option value="medium">Severità: Media</option>
-                <option value="low">Severità: Bassa</option>
-              </select>
-              {suggestion && !suggestionUsed && (
-                <span className="absolute -top-2 -right-2 text-[9px] bg-primary text-primary-foreground rounded-full px-1.5 py-0.5 font-medium leading-none">
-                  ✨ {suggestion.severity.toUpperCase()}
-                </span>
-              )}
-            </div>
-            <div className="relative">
-              <select
-                value={riskForm.probability}
-                onChange={(e) => setRiskForm({ ...riskForm, probability: e.target.value as Probability })}
-                className={cls(
-                  "w-full rounded-lg border px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50",
-                  suggestion && !suggestionUsed
-                    ? "bg-primary/5 border-primary/40 ring-1 ring-primary/30"
-                    : "bg-card border-border"
-                )}
-              >
-                <option value="high">Prob: Alta</option>
-                <option value="medium">Prob: Media</option>
-                <option value="low">Prob: Bassa</option>
-              </select>
-              {suggestion && !suggestionUsed && (
-                <span className="absolute -top-2 -right-2 text-[9px] bg-primary text-primary-foreground rounded-full px-1.5 py-0.5 font-medium leading-none">
-                  ✨ {suggestion.probability.toUpperCase()}
-                </span>
-              )}
-            </div>
-            <select
-              value={riskForm.residual}
-              onChange={(e) => setRiskForm({ ...riskForm, residual: e.target.value as ResidualRisk })}
-              className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-            >
-              <option value="acceptable">Residuo: Accettabile</option>
-              <option value="monitor">Residuo: Monitorare</option>
-              <option value="high">Residuo: Elevato</option>
-            </select>
-            <button
-              onClick={addRisk}
-              className="rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
-              Aggiungi
-            </button>
-          </div>
-
-          {residualWarning.show && (
-            <div className={cls(
-              "rounded-lg border p-3 text-xs flex items-start gap-2",
-              residualWarning.severity === "danger" && "border-danger/30 bg-danger/5 text-danger",
-              residualWarning.severity === "warning" && "border-warning/30 bg-warning/5 text-warning",
-              residualWarning.severity === "info" && "border-primary/30 bg-primary/5 text-primary",
-            )}>
-              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-              <span>{residualWarning.message}</span>
-            </div>
-          )}
-
-          <input
-            value={riskForm.mitigation}
-            onChange={(e) => setRiskForm({ ...riskForm, mitigation: e.target.value })}
-            placeholder="Misure di mitigazione adottate..."
-            className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
-        </div>
-      )}
-
-      <div className="space-y-2">
-        {report.risks.length === 0 ? (
-          <div className="rounded-xl border border-border bg-muted/30 p-8 text-center">
-            <AlertTriangle className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">Nessun rischio. Aggiungi il primo.</p>
-          </div>
-        ) : (
-          report.risks.map((r) => (
-            <div key={r.id} className="rounded-lg border border-border bg-muted/30 p-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                  <div>
-                    <span className="text-sm font-medium text-foreground">{r.description}</span>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className={`text-[10px] font-medium rounded-full px-2 py-0.5 border ${severityColor[r.severity]}`}>
-                        {r.severity.toUpperCase()}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground">
-                        {RISK_CATEGORY_LABELS[r.category]} · Score: {r.quantitativeScore?.toFixed(2) || "-"}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs text-muted-foreground">Mitigazione: {r.mitigation} · Residuo: {RESIDUAL_LABEL[r.residual]}</p>
-                  </div>
-                </div>
-                <button onClick={() => removeRisk(r.id)} className="text-muted-foreground hover:text-danger transition-colors shrink-0">
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ─── QUANTITATIVE PHASE ────────────────────────────────────────────
-
-function QuantitativePhase({
-  mcInput,
-  setMcInput,
-  mcResult,
-  handleRunMC,
-  risks,
-}: {
-  mcInput: MonteCarloInput;
-  setMcInput: (v: MonteCarloInput) => void;
-  mcResult: MonteCarloResult | null;
-  handleRunMC: () => void;
-  risks: RiskItem[];
-}) {
-  return (
-    <div>
-      <h2 className="text-lg font-semibold text-foreground mb-1">
-        Modellazione Quantitativa: Monte Carlo
-      </h2>
-      <p className="text-xs text-muted-foreground mb-6">
-        Simula R = L × S con distribuzione gaussiana. Itera n volte per
-        ottenere distribuzione del rischio, P90, P95, P99.
-      </p>
-
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
-        {[
-          { label: "μ Likelihood", key: "likelihoodMean", step: 0.05 },
-          { label: "σ Likelihood", key: "likelihoodStdDev", step: 0.05 },
-          { label: "μ Severity", key: "severityMean", step: 0.05 },
-          { label: "σ Severity", key: "severityStdDev", step: 0.05 },
-          { label: "Iterazioni", key: "iterations", step: 1000 },
-        ].map((f) => (
-          <div key={f.key}>
-            <label className="block text-[10px] font-medium text-muted-foreground mb-1 uppercase">{f.label}</label>
-            {/* FIX 4 — typed key access */}
-            <input
-              type="number"
-              value={mcInput[f.key as keyof MonteCarloInput]}
-              onChange={(e) => setMcInput({ ...mcInput, [f.key as keyof MonteCarloInput]: Number(e.target.value) })}
-              step={f.step}
-              min={0}
-              max={f.key === "iterations" ? 100000 : 1}
-              className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
-          </div>
-        ))}
-      </div>
-
-      <button
-        onClick={handleRunMC}
-        className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors mb-6"
-      >
-        <Calculator className="h-4 w-4" />
-        Esegui simulazione Monte Carlo
-      </button>
-
-      {mcResult && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-            {[
-              { label: "Media", value: mcResult.mean.toFixed(4) },
-              { label: "Mediana", value: mcResult.median.toFixed(4) },
-              { label: "P90", value: mcResult.p90.toFixed(4) },
-              { label: "P95", value: mcResult.p95.toFixed(4) },
-              { label: "P99", value: mcResult.p99.toFixed(4) },
-              { label: "% > 0.7", value: (mcResult.aboveThreshold * 100).toFixed(1) + "%" },
-            ].map((m) => (
-              <div key={m.label} className="rounded-lg border border-border bg-muted/50 p-3 text-center">
-                <div className="text-lg font-bold text-foreground">{m.value}</div>
-                <div className="text-[10px] text-muted-foreground uppercase">{m.label}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="rounded-xl border border-border bg-muted/30 p-4">
-            <h4 className="text-xs font-semibold text-foreground mb-3">Distribuzione rischio simulato</h4>
-            <div className="space-y-1">
-              {mcResult.distribution.map((d) => {
-                const maxCount = Math.max(...mcResult.distribution.map((x) => x.count), 1);
-                const pct = (d.count / maxCount) * 100;
-                return (
-                  <div key={d.bin} className="flex items-center gap-2">
-                    <span className="text-[10px] text-muted-foreground w-12 text-right">{d.bin}</span>
-                    <div className="flex-1 h-4 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary rounded-full transition-all"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    <span className="text-[10px] text-muted-foreground w-8">{d.count}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── TEMPORAL PHASE ────────────────────────────────────────────────
-
-function TemporalPhase({
-  temporalRecords,
-  tempForm,
-  setTempForm,
-  addTemporal,
-}: {
-  temporalRecords: TemporalRecord[];
-  tempForm: TempFormState;
-  setTempForm: Dispatch<SetStateAction<TempFormState>>;
-  addTemporal: () => void;
-}) {
-  return (
-    <div>
-      <h2 className="text-lg font-semibold text-foreground mb-1">
-        Audit Bitemporale
-      </h2>
-      <p className="text-xs text-muted-foreground mb-6">
-        Registra fatti con doppia timeline: valid time (quando il fatto è
-        vero) e transaction time (quando è stato registrato). Hash SHA-256.
-      </p>
-
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div>
-          <label className="block text-[10px] font-medium text-muted-foreground mb-1 uppercase">Tipo entità</label>
-          <input
-            value={tempForm.entityType}
-            onChange={(e) => setTempForm({ ...tempForm, entityType: e.target.value })}
-            placeholder="es: risk, mitigation, audit"
-            className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
-        </div>
-        <div>
-          <label className="block text-[10px] font-medium text-muted-foreground mb-1 uppercase">ID entità</label>
-          <input
-            value={tempForm.entityId}
-            onChange={(e) => setTempForm({ ...tempForm, entityId: e.target.value })}
-            placeholder="es: risk-123"
-            className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
-        </div>
-        <div>
-          <label className="block text-[10px] font-medium text-muted-foreground mb-1 uppercase">Valid time (ISO)</label>
-          <input
-            value={tempForm.validTime}
-            onChange={(e) => setTempForm({ ...tempForm, validTime: e.target.value })}
-            placeholder={new Date().toISOString()}
-            className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
-        </div>
-        <div>
-          <label className="block text-[10px] font-medium text-muted-foreground mb-1 uppercase">Dati (JSON)</label>
-          <input
-            value={tempForm.dataJson}
-            onChange={(e) => setTempForm({ ...tempForm, dataJson: e.target.value })}
-            placeholder='{"key": "value"}'
-            className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono"
-          />
-        </div>
-      </div>
-
-      <button
-        onClick={addTemporal}
-        className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors mb-6"
-      >
-        <Save className="h-4 w-4" />
-        Registra record bitemporale
-      </button>
-
-      <div className="space-y-2">
-        {temporalRecords.length === 0 ? (
-          <p className="text-xs text-muted-foreground">Nessun record registrato.</p>
-        ) : (
-          temporalRecords.map((r) => (
-            <div key={r.id} className="rounded-lg border border-border bg-muted/30 p-3 font-mono text-xs">
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-semibold text-foreground">{r.entityType}/{r.entityId}</span>
-                <span className="text-muted-foreground">{r.hash.slice(0, 16)}...</span>
-              </div>
-              <div className="text-muted-foreground">
-                Valid: {r.validTime.slice(0, 19)} · Tx: {r.transactionTime.slice(0, 19)}
-              </div>
-              <pre className="mt-1 text-[10px] text-foreground/70 overflow-x-auto">
-                {JSON.stringify(r.data, null, 2)}
-              </pre>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ─── DRIFT PHASE ───────────────────────────────────────────────────
-
-function DriftPhase({
-  driftBaselineStr,
-  setDriftBaselineStr,
-  driftCurrentStr,
-  setDriftCurrentStr,
-  driftResults,
-  handleDetectDrift,
-}: {
-  driftBaselineStr: string;
-  setDriftBaselineStr: (v: string) => void;
-  driftCurrentStr: string;
-  setDriftCurrentStr: (v: string) => void;
-  driftResults: DriftWindow[];
-  handleDetectDrift: () => void;
-}) {
-  return (
-    <div>
-      <h2 className="text-lg font-semibold text-foreground mb-1">
-        Drift Detection (PSI)
-      </h2>
-      <p className="text-xs text-muted-foreground mb-6">
-        Calcola il Population Stability Index (PSI) tra due distribuzioni.
-        PSI &gt; 0.25 = drift elevato. PSI &gt; 0.1 = drift medio.
-        PSI &gt; 0.05 = drift basso.
-      </p>
-
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <label className="block text-[10px] font-medium text-muted-foreground mb-1 uppercase">
-            Baseline (es: 0.12,0.15,0.10,0.08,...)
-          </label>
-          <textarea
-            value={driftBaselineStr}
-            onChange={(e) => setDriftBaselineStr(e.target.value)}
-            placeholder="0.12,0.15,0.10,0.08,0.20,0.11"
-            rows={3}
-            className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground font-mono focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
-        </div>
-        <div>
-          <label className="block text-[10px] font-medium text-muted-foreground mb-1 uppercase">
-            Corrente (es: 0.14,0.18,0.09,0.07,0.22,0.12)
-          </label>
-          <textarea
-            value={driftCurrentStr}
-            onChange={(e) => setDriftCurrentStr(e.target.value)}
-            placeholder="0.14,0.18,0.09,0.07,0.22,0.12"
-            rows={3}
-            className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground font-mono focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
-        </div>
-      </div>
-
-      <button
-        onClick={handleDetectDrift}
-        className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors mb-6"
-      >
-        <Activity className="h-4 w-4" />
-        Calcola PSI e rileva drift
-      </button>
-
-      <div className="space-y-3">
-        {driftResults.map((d, i) => (
-          <div key={i} className="rounded-xl border border-border bg-muted/30 p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold text-foreground">Finestra #{i + 1}</span>
-              <span className={cls(
-                "text-[10px] font-bold rounded-full px-2 py-0.5 border",
-                d.severity === "high" && "bg-danger/10 text-danger border-danger/30",
-                d.severity === "medium" && "bg-warning/10 text-warning border-warning/30",
-                d.severity === "low" && "bg-warning/10 text-warning border-warning/30",
-                d.severity === "none" && "bg-success/10 text-success border-success/30",
-              )}>
-                {d.driftDetected ? `DRIFT: ${d.severity.toUpperCase()}` : "NESSUN DRIFT"}
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-              <div>PSI: <span className="text-foreground font-mono font-semibold">{d.baselinePSI.toFixed(4)}</span></div>
-            </div>
-          </div>
-        ))}
-        {driftResults.length === 0 && (
-          <p className="text-xs text-muted-foreground">Nessuna analisi drift eseguita.</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ─── GPAI PHASE ────────────────────────────────────────────────────
-
-// FIX 3 — Proper types in GPAIPhase props
-function GPAIPhase({
-  gpaiForm,
-  setGpaiForm,
-  gpaiResult,
-  handleAssessGPAI,
-}: {
-  gpaiForm: GPAIFormState;
-  setGpaiForm: Dispatch<SetStateAction<GPAIFormState>>;
-  gpaiResult: GPAIRiskAssessment | null;
-  handleAssessGPAI: () => void;
-}) {
-  return (
-    <div>
-      <h2 className="text-lg font-semibold text-foreground mb-1">
-        GPAI &amp; Rischio Sistemico
-      </h2>
-      <p className="text-xs text-muted-foreground mb-6">
-        Valuta il rischio sistemico di modelli General-Purpose AI (Art.
-        51-56). Soglia &gt; 10^25 FLOPS per notifica obbligatoria.
-      </p>
-
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div>
-          <label className="block text-[10px] font-medium text-muted-foreground mb-1 uppercase">Nome modello</label>
-          <input
-            value={gpaiForm.modelName}
-            onChange={(e) => setGpaiForm({ ...gpaiForm, modelName: e.target.value })}
-            placeholder="es: GPT-4, Claude 3, Llama 3"
-            className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
-        </div>
-        <div>
-          <label className="block text-[10px] font-medium text-muted-foreground mb-1 uppercase">Provider</label>
-          <input
-            value={gpaiForm.providerName}
-            onChange={(e) => setGpaiForm({ ...gpaiForm, providerName: e.target.value })}
-            placeholder="es: OpenAI, Anthropic, Meta"
-            className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
-        </div>
-        <div>
-          <label className="block text-[10px] font-medium text-muted-foreground mb-1 uppercase">FLOPS training</label>
-          <input
-            value={gpaiForm.computeFlops}
-            onChange={(e) => setGpaiForm({ ...gpaiForm, computeFlops: e.target.value })}
-            placeholder="es: 1e25"
-            className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground font-mono focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
-        </div>
-        <div>
-          <label className="block text-[10px] font-medium text-muted-foreground mb-1 uppercase">Dati training (TB)</label>
-          <input
-            value={gpaiForm.trainingDataSize}
-            onChange={(e) => setGpaiForm({ ...gpaiForm, trainingDataSize: e.target.value })}
-            placeholder="es: 45"
-            className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
-        </div>
-        <div>
-          <label className="block text-[10px] font-medium text-muted-foreground mb-1 uppercase">Consumo energia (kWh)</label>
-          <input
-            value={gpaiForm.energyKwh}
-            onChange={(e) => setGpaiForm({ ...gpaiForm, energyKwh: e.target.value })}
-            placeholder="es: 500000"
-            className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
-        </div>
-        <div className="flex items-center gap-6 self-end pb-1">
-          <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-            <input
-              type="checkbox"
-              checked={gpaiForm.openSource}
-              onChange={(e) => setGpaiForm({ ...gpaiForm, openSource: e.target.checked })}
-              className="rounded"
-            />
-            Open Source
-          </label>
-          <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-            <input
-              type="checkbox"
-              checked={gpaiForm.hasModelCard}
-              onChange={(e) => setGpaiForm({ ...gpaiForm, hasModelCard: e.target.checked })}
-              className="rounded"
-            />
-            Model Card
-          </label>
-        </div>
-      </div>
-
-      <button
-        onClick={handleAssessGPAI}
-        className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors mb-6"
-      >
-        <Gauge className="h-4 w-4" />
-        Valuta rischio sistemico GPAI
-      </button>
-
-      {gpaiResult && (
-        <div className="rounded-xl border border-border bg-muted/30 p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-foreground">
-              {gpaiResult.modelName} ({gpaiResult.providerName})
-            </h3>
-            <span className={cls(
-              "text-xs font-bold rounded-full px-3 py-1 border",
-              gpaiResult.hasSystemicRisk
-                ? "bg-danger/10 text-danger border-danger/30"
-                : "bg-success/10 text-success border-success/30"
-            )}>
-              {gpaiResult.hasSystemicRisk ? "RISCHIO SISTEMICO" : "NESSUN RISCHIO SISTEMICO"}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-lg border border-border bg-muted/50 p-3 text-center">
-              <div className="text-xl font-bold text-foreground">{gpaiResult.systemicRiskScore}</div>
-              <div className="text-[10px] text-muted-foreground uppercase">Score / 100</div>
-            </div>
-            <div className="rounded-lg border border-border bg-muted/50 p-3 text-center">
-              <div className="text-xl font-bold text-foreground">{gpaiResult.computeFlops.toExponential(0)}</div>
-              <div className="text-[10px] text-muted-foreground uppercase">FLOPS</div>
-            </div>
-            <div className="rounded-lg border border-border bg-muted/50 p-3 text-center">
-              <div className="text-xl font-bold text-foreground">{gpaiResult.energyConsumptionKwh.toLocaleString()}</div>
-              <div className="text-[10px] text-muted-foreground uppercase">kWh</div>
-            </div>
-          </div>
-
-          {gpaiResult.requiredMeasures.length > 0 && (
-            <div>
-              <h4 className="text-xs font-semibold text-foreground mb-2">Misure obbligatorie:</h4>
-              <ul className="space-y-1">
-                {gpaiResult.requiredMeasures.map((m, i) => (
-                  <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-                    <FileWarning className="h-3.5 w-3.5 text-warning shrink-0 mt-0.5" />
-                    {m}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── SANCTIONS PHASE ───────────────────────────────────────────────
-
-function SanctionsPhase({
-  sanctions,
-  toggleSanction,
-}: {
-  sanctions: SanctionTracker[];
-  toggleSanction: (i: number) => void;
-}) {
-  return (
-    <div>
-      <h2 className="text-lg font-semibold text-foreground mb-1">
-        Governance &amp; Sanzioni (Art. 99)
-      </h2>
-      <p className="text-xs text-muted-foreground mb-6">
-        Monitora lo stato delle sanzioni potenziali per violazioni
-        dell&apos;AI Act. Penalità fino a 35M€ o 7% del fatturato globale.
-      </p>
-
-      <div className="space-y-3">
-        {sanctions.map((s, i) => (
-          <div key={i} className="rounded-xl border border-border bg-muted/30 p-4">
-            <div className="flex items-start justify-between mb-2">
-              <div>
-                <span className="text-xs font-mono text-primary">{s.article}</span>
-                <h4 className="text-sm font-medium text-foreground mt-0.5">{s.description}</h4>
-              </div>
+          <div style={{ padding: "12px 16px", borderTop: "1px solid rgba(0,0,0,0.07)", flexShrink: 0 }}>
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
+              <textarea
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={`Fase: ${PHASES[currentPhaseIndex]?.subtitle} — scrivi la tua risposta…`}
+                rows={2}
+                disabled={isLoading}
+                style={{
+                  flex: 1, fontSize: 13, padding: "10px 14px", borderRadius: 10,
+                  border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", resize: "none",
+                  outline: "none", fontFamily: "var(--font-inter, system-ui)",
+                  background: "#ffffff", lineHeight: 1.5,
+                  opacity: isLoading ? 0.5 : 1,
+                }}
+                onFocus={e => (e.target.style.borderColor = "rgba(0,0,0,0.25)")}
+                onBlur={e => (e.target.style.borderColor = "rgba(0,0,0,0.12)")}
+              />
               <button
-                onClick={() => toggleSanction(i)}
-                className={cls(
-                  "flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium border transition-colors",
-                  s.status === "resolved"
-                    ? "bg-success/10 text-success border-success/30"
-                    : "bg-muted text-muted-foreground border-border hover:bg-success/10 hover:text-success"
-                )}
+                onClick={sendMessage}
+                disabled={!input.trim() || isLoading}
+                style={{
+                  flexShrink: 0, width: 40, height: 40,
+                  background: (!input.trim() || isLoading) ? "rgba(0,0,0,0.06)" : "#0D1016",
+                  color: (!input.trim() || isLoading) ? "rgba(0,0,0,0.25)" : "#ffffff",
+                  border: "none", borderRadius: 10, cursor: (!input.trim() || isLoading) ? "not-allowed" : "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.15s",
+                }}
               >
-                {s.status === "resolved" ? (
-                  <CheckCircle className="h-3.5 w-3.5" />
-                ) : (
-                  <XCircle className="h-3.5 w-3.5" />
-                )}
-                {s.status === "resolved" ? "Risolto" : "Segna risolto"}
+                <Send size={15} />
               </button>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-muted-foreground">
-              <div>
-                <span className={cls(
-                  "rounded-full px-2 py-0.5 border text-[10px] font-medium",
-                  getSanctionSeverityColor(s.severity)
-                )}>
-                  {s.severity === "high" ? "GRAVE" : s.severity === "medium" ? "MEDIA" : "LIEVE"}
-                </span>
-              </div>
-              <div>Max: <span className="text-foreground font-semibold">{s.maxPenaltyEUR.toLocaleString()}€</span></div>
-              <div>o <span className="text-foreground font-semibold">{s.maxPenaltyPercent}%</span> fatturato</div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ─── OUTPUT PHASE ───────────────────────────────────────────────────
-
-// FIX 8 + 9 — add onDownload and onReset props
-function OutputPhase({
-  report,
-  finalized,
-  handleFinalize,
-  onDownload,
-  onReset,
-  nextReviewDate,
-  setNextReviewDate,
-  reviewCycle,
-  setReviewCycle,
-}: {
-  report: RiskManagerReport;
-  finalized: boolean;
-  handleFinalize: () => void;
-  onDownload: () => void;
-  onReset: () => void;
-  nextReviewDate: string;
-  setNextReviewDate: (v: string) => void;
-  reviewCycle: "monthly" | "quarterly" | "biannual" | "annual";
-  setReviewCycle: (v: "monthly" | "quarterly" | "biannual" | "annual") => void;
-}) {
-  const resolvedSanctions = report.sanctions.filter((s) => s.status === "resolved").length;
-
-  return (
-    <div>
-      <h2 className="text-lg font-semibold text-foreground mb-1">
-        Report Finale Risk Manager
-      </h2>
-      <p className="text-xs text-muted-foreground mb-6">
-        Riepilogo completo della valutazione dei rischi AI Act.
-      </p>
-
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
-        {[
-          { label: "Rischi", value: report.risks.length },
-          { label: "Score", value: report.overallScore.toFixed(2) },
-          { label: "Rating", value: report.overallRating },
-          { label: "Sanzioni OK", value: resolvedSanctions },
-          { label: "Hash", value: report.evidenceHash.slice(0, 10) + "..." },
-        ].map((c) => (
-          <div key={c.label} className="rounded-lg border border-border bg-muted/50 p-3 text-center">
-            <div className="text-lg font-bold text-foreground">{c.value}</div>
-            <div className="text-[10px] text-muted-foreground uppercase">{c.label}</div>
-          </div>
-        ))}
-      </div>
-
-      <div className="rounded-xl border border-border bg-muted/30 p-4 mb-6">
-        <h4 className="text-sm font-semibold text-foreground mb-2">Sistema: {report.systemName}</h4>
-        <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-          <div>Data creazione: {report.createdAt.slice(0, 19)}</div>
-          <div>Monte Carlo: {report.monteCarloResults ? "✅ Eseguito" : "⏳ Non eseguito"}</div>
-          <div>Audit records: {report.temporalLedger.length}</div>
-          <div>Drift windows: {report.driftWindows.length}</div>
-          <div>GPAI Assessment: {report.gpaiAssessment ? "✅ Completato" : "⏳ Non eseguito"}</div>
-          <div>Sanzioni tracciate: {report.sanctions.length}</div>
-        </div>
-      </div>
-
-      <div
-        className={cls(
-          "rounded-xl border p-4 mb-6 text-center",
-          report.overallRating === "low" && "border-success/30 bg-success/5",
-          report.overallRating === "limited" && "border-warning/30 bg-warning/5",
-          report.overallRating === "high" && "border-danger/30 bg-danger/5",
-          report.overallRating === "unacceptable" && "border-danger/50 bg-danger/10",
-        )}
-      >
-        <div className="text-3xl font-bold mb-1">
-          {report.overallRating === "low" && "🟢 Rischio Basso"}
-          {report.overallRating === "limited" && "🟡 Rischio Limitato"}
-          {report.overallRating === "high" && "🟠 Rischio Elevato"}
-          {report.overallRating === "unacceptable" && "🔴 Rischio Inaccettabile"}
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Score complessivo: {report.overallScore.toFixed(3)}
-        </p>
-      </div>
-
-      {/* Art. 9(1)(b) — Review cycle */}
-      <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        <div>
-          <label style={{ fontSize: 13, fontWeight: 500, color: T.text, display: "block", marginBottom: 6 }}>
-            Data prossima revisione
-            <span style={{ color: "#DC2626", marginLeft: 4 }}>*</span>
-            <span style={{ fontSize: 11, color: T.muted, fontWeight: 400, marginLeft: 8 }}>Art. 9(1)(b)</span>
-          </label>
-          <input
-            type="date"
-            value={nextReviewDate}
-            onChange={(e) => setNextReviewDate(e.target.value)}
-            style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, background: "#fff" }}
-          />
-        </div>
-        <div>
-          <label style={{ fontSize: 13, fontWeight: 500, color: T.text, display: "block", marginBottom: 6 }}>
-            Ciclo di revisione
-          </label>
-          <select
-            value={reviewCycle}
-            onChange={(e) => setReviewCycle(e.target.value as typeof reviewCycle)}
-            style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, background: "#fff" }}
-          >
-            <option value="monthly">Mensile</option>
-            <option value="quarterly">Trimestrale</option>
-            <option value="biannual">Semestrale</option>
-            <option value="annual">Annuale</option>
-          </select>
-        </div>
-      </div>
-
-      {!finalized ? (
-        <button
-          onClick={handleFinalize}
-          className="flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-colors mx-auto"
-          style={{ marginTop: 16 }}
-        >
-          <Shield className="h-4 w-4" />
-          Finalizza e sigilla (SHA-256)
-        </button>
-      ) : (
-        <div className="space-y-3">
-          <div className="rounded-xl border border-success/30 bg-success/5 p-6 text-center">
-            <CheckCircle className="h-8 w-8 text-success mx-auto mb-2" />
-            <p className="text-sm font-semibold text-success">Report finalizzato e sigillato</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Evidence hash: {report.evidenceHash.slice(0, 32)}...
+            <p style={{ fontSize: 10, color: "rgba(0,0,0,0.25)", marginTop: 6 }}>
+              Enter per inviare · Shift+Enter per andare a capo
             </p>
           </div>
-
-          {/* FIX 8 — Download button */}
-          <div className="flex justify-center mt-4">
-            <button
-              onClick={onDownload}
-              className="flex items-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Download className="h-4 w-4" />
-              Scarica report JSON (per auditor)
-            </button>
-          </div>
-
-          {/* FIX 9 — Reset button */}
-          <div className="flex justify-center">
-            <button
-              onClick={onReset}
-              className="flex items-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors mt-2"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Nuovo assessment
-            </button>
-          </div>
         </div>
-      )}
+      </div>
 
-      <SignOffPanel toolKey="risk-manager" toolLabel="Risk Manager" />
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

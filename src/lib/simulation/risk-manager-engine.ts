@@ -28,8 +28,6 @@ export interface RiskItem {
   residual: ResidualRisk;
   quantitativeScore?: number; // R = L × S
   createdAt: string;
-  /** Traccia il modulo di origine quando il rischio è importato automaticamente (Art. 9(2)(b)) */
-  sourceModule?: "fria" | "dpia" | "manual";
 }
 
 export interface MonteCarloInput {

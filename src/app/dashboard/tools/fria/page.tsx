@@ -9,12 +9,27 @@ import {
   AlertTriangle, Shield, Users, Activity, FileText, Download,
 } from "lucide-react";
 import SignOffPanel from "@/components/ui/SignOffPanel";
-import FriaGuidedMode from "@/components/fria/FriaGuidedMode";
-import type { GuidedAnswers } from "@/lib/guided/guided-types";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
+import { FriaGuidedMode } from "@/components/fria/FriaGuidedMode";
+import { RightsCatalog } from "@/components/fria/RightsCatalog";
+import { ContextCatalog } from "@/components/fria/ContextCatalog";
+import { NextStepGuide } from "@/components/fria/NextStepGuide";
+import { RightImpactAIDraft } from "@/components/fria/RightImpactAIDraft";
+import { FriaGapCheck } from "@/components/fria/FriaGapCheck";
+import type { FriaGapCheck as FriaGapCheckResult } from "@/app/actions/checkFriaGaps";
 import type { FRIAResult } from "@/lib/dossier/storage-schema";
+import { useAutoSave } from "@/hooks/useAutoSave";
+import { VersionHistoryPanel } from "@/components/compliance/VersionHistoryPanel";
+import { draftFria } from "@/app/actions/draftFria";
+import { draftFriaPublicSummary } from "@/app/actions/draftFriaPublicSummary";
+import type { ClassifierResult, RiskManagerResult, DataAuditResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
-import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
+import { SystemSelector } from "@/components/compliance/SystemSelector";
+import { getAssessment, patchFRIA, patchShared, migrateLegacyFRIA, syncCorrelatedRisksFromFRIA } from "@/lib/assessment/assessment-helpers";
+import type { AssessmentShared } from "@/lib/assessment/assessment-schema";
+import { CorrelatedRisksPanel } from "@/components/assessment/CorrelatedRisksPanel";
+import { AssessmentSharedHeader } from "@/components/assessment/AssessmentSharedHeader";
+import { AssessmentStepper } from "@/components/assessment/AssessmentStepper";
 import {
   type FRIADocument, type FRIAScenario, type FRIARightImpact,
   type FRIASeverityAssessment, type FRIAMitigationMeasure,
@@ -23,32 +38,8 @@ import {
   createEmptyFRIA, computeSeverity, computePriority,
   generatePublicSummary, calculateFRIACompleteness, getOverallFRIARisk,
 } from "@/lib/simulation/fria-engine";
-import { useScopedStorage } from "@/lib/hooks/useScopedStorage";
-import {
-  createEmptyRiskReport,
-  type RiskManagerReport,
-  type Severity as RMSeverity,
-  type Probability as RMProbability,
-} from "@/lib/simulation/risk-manager-engine";
-import { importRiskFromAssessment, isDuplicateRisk } from "@/lib/risk-register/import-from-assessment";
-
-const EMPTY_RISK_REPORT: RiskManagerReport = createEmptyRiskReport("Nuovo Sistema AI");
-
-/** FRIA usa 4 livelli (incl. "critical"); il Risk Register ne usa 3 — "critical" confluisce in "high". */
-function toRMLevel(level: string): RMSeverity {
-  return level === "critical" ? "high" : (level as RMSeverity) || "medium";
-}
 
 // ─── Storage ─────────────────────────────────────────────────────────────────
-const FRIA_DOC_KEY = "aicomply_fria_document";
-function loadDoc(): FRIADocument {
-  if (typeof window === "undefined") return createEmptyFRIA();
-  try {
-    const raw = localStorage.getItem(FRIA_DOC_KEY);
-    if (raw) return JSON.parse(raw) as FRIADocument;
-  } catch { /* ignore */ }
-  return createEmptyFRIA();
-}
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const T = {
@@ -56,7 +47,7 @@ const T = {
   border: "rgba(0,0,0,0.08)", card: "#ffffff", bg: "#f8f8f7",
   red: "#dc2626", redBg: "rgba(220,38,38,0.06)", redBdr: "rgba(220,38,38,0.2)",
   amber: "#d97706", amberBg: "rgba(202,138,4,0.06)", amberBdr: "rgba(202,138,4,0.2)",
-  neutral: "#0D1016", neutralBg: "rgba(13,16,22,0.04)", neutralBdr: "rgba(13,16,22,0.1)",
+  
   green: "#16a34a", greenBg: "rgba(22,163,74,0.06)", greenBdr: "rgba(22,163,74,0.2)",
 } as const;
 
@@ -72,7 +63,7 @@ const inputSt: CSSProperties = {
 };
 
 // ─── Tiny helpers ─────────────────────────────────────────────────────────────
-type RiskColor = "red" | "amber" | "green" | "neutral" | "gray";
+type RiskColor = "red" | "amber" | "green" | "gray";
 
 function riskColorFor(v: string): RiskColor {
   if (v === "high" || v === "critical") return "red";
@@ -86,7 +77,6 @@ function Badge({ label, color = "gray" }: { label: string; color?: RiskColor }) 
     red:   { bg: T.redBg,   bdr: T.redBdr,   text: T.red   },
     amber: { bg: T.amberBg, bdr: T.amberBdr, text: T.amber },
     green: { bg: T.greenBg, bdr: T.greenBdr, text: T.green },
-    neutral: { bg: T.neutralBg, bdr: T.neutralBdr, text: T.neutral },
     gray:  { bg: "rgba(0,0,0,0.04)", bdr: T.border, text: T.muted },
   };
   const c = map[color];
@@ -137,6 +127,21 @@ function Inp({ label, value, onChange, ph }: {
   );
 }
 
+// ─── Hash utilities (staleness detection) ────────────────────────────────────
+function djb2(str: string): string {
+  let h = 5381;
+  for (let i = 0; i < str.length; i++) h = (((h << 5) + h) + str.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(16);
+}
+
+function computeFriaHash(doc: FRIADocument): string {
+  return djb2([
+    doc.system_name, doc.organization,
+    doc.context.technology_overview, doc.context.affected_persons,
+    doc.context.intended_purpose_explanation,
+  ].join("|"));
+}
+
 // ─── Phase nav config ─────────────────────────────────────────────────────────
 type Phase = "1" | "2" | "3" | "4" | "5";
 const PHASES: { id: Phase; label: string; sub: string; Icon: React.ComponentType<{ style?: CSSProperties }> }[] = [
@@ -159,43 +164,207 @@ const DEFAULT_TRIGGERS = [
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function FRIAPage() {
-  const [doc, setDoc] = useState<FRIADocument>(() => loadDoc());
-  const [riskReport, setRiskReport] = useScopedStorage<RiskManagerReport>("risk_manager_report", EMPTY_RISK_REPORT);
+  const [doc, setDoc] = useState<FRIADocument>(() => createEmptyFRIA());
   const [phase, setPhase] = useState<Phase>("1");
+  const [gapCheckResult, setGapCheckResult] = useState<FriaGapCheckResult | null>(null);
   const [openAcc, setOpenAcc] = useState<Set<"A" | "B" | "C">>(new Set(["A"]));
   const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
   const [p2Tab, setP2Tab] = useState<"rights" | "matrix">("rights");
   const [openRights, setOpenRights] = useState<Set<string>>(new Set());
   const [openRightGroups, setOpenRightGroups] = useState<Set<string>>(new Set(["dignity_group", "freedom_group", "equality_group"]));
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
-  const [guidedMode, setGuidedMode] = useState(false);
+  const [showCatalog, setShowCatalog] = useState(false);
   const [dossierSavedAt, setDossierSavedAt] = useState<string | null>(() =>
     readFromStorage<FRIAResult>("fria")?.completedAt ?? null
   );
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saveTimer   = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const contentRef  = useRef<HTMLDivElement>(null);
+  const [expandedPhases, setExpandedPhases] = useState<Set<string>>(new Set(["1"]));
+
+  function scrollToPhase(id: string) {
+    setPhase(id as Phase);
+    const el = contentRef.current?.querySelector(`#fase-${id}`) as HTMLElement | null;
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  const phaseProgress = useMemo(() => {
+    const ctx = doc.context;
+    const f = (v: string | undefined) => !!(v?.trim());
+    const phases = [
+      { id: "1", label: "Contesto", legalRef: "Art. 27(2)(a)", subPoints: [
+        { label: "Nome sistema",        done: f(doc.system_name) },
+        { label: "Organizzazione",      done: f(doc.organization) },
+        { label: "Scopo previsto",      done: f(ctx.intended_purpose_explanation) },
+        { label: "Persone interessate", done: f(ctx.affected_persons) },
+        { label: "Tecnologia",          done: f(ctx.technology_overview) },
+      ]},
+      { id: "2", label: "Scenari", legalRef: "Art. 27(2)(b)", subPoints: [
+        { label: "Almeno uno scenario", done: doc.scenarios.length > 0 },
+        { label: "Impatti sui diritti", done: doc.scenarios.some(s => s.right_impacts.length > 0) },
+      ]},
+      { id: "3", label: "Decisione", legalRef: "Art. 27(2)(c)", subPoints: [
+        { label: "Raccomandazione",  done: f(doc.deployment.recommendation) },
+        { label: "Responsabile",     done: f(doc.deployment.approver_name) },
+        { label: "Motivazione",      done: f(doc.deployment.decision_justification) },
+      ]},
+      { id: "4", label: "Monitoraggio", legalRef: "Art. 27(2)(d)", subPoints: [
+        { label: "Elementi monitoraggio",  done: doc.monitoring.items.length > 0 },
+        { label: "Trigger aggiornamento",  done: doc.monitoring.update_triggers.length > 0 },
+      ]},
+      { id: "5", label: "Stakeholder", legalRef: "Art. 27(2)(e)", subPoints: [
+        { label: "Stakeholder mappati", done: doc.stakeholders.length > 0 },
+        { label: "Log engagement",      done: doc.engagement_log.length > 0 },
+      ]},
+    ];
+    return phases.map(p => {
+      const done  = p.subPoints.filter(sp => sp.done).length;
+      const total = p.subPoints.length;
+      return { ...p, done, total, percent: Math.round((done / total) * 100) };
+    });
+  }, [doc]);
+
+  // ── Sync FRIA fields → shared (idempotente, fire-and-forget) ─────────────
+  function syncFriaToShared(friaDoc: FRIADocument) {
+    const patch: Partial<AssessmentShared> = {};
+    if (friaDoc.system_name) patch.systemName = friaDoc.system_name;
+    if (friaDoc.organization) patch.organization = friaDoc.organization;
+    if (friaDoc.context.affected_persons) patch.dataSubjects = [friaDoc.context.affected_persons];
+    if (friaDoc.context.processes_personal_data === "yes") patch.processesPersonalData = true;
+    if (Object.keys(patch).length > 0) patchShared(patch);
+  }
+
+  // ── Load from Assessment storage on mount ─────────────────────────────────
+  useEffect(() => {
+    migrateLegacyFRIA();
+    const friaDat = getAssessment().fria;
+    setDoc(friaDat);
+    syncFriaToShared(friaDat);
+    // Staleness check: compare current hash vs stored hash
+    const storedStaleness = readFromStorage<{ hash: string; savedAt: string }>("friaStaleness");
+    if (storedStaleness?.hash) {
+      const currentHash = computeFriaHash(friaDat);
+      if (currentHash !== storedStaleness.hash) setStalenessWarning(true);
+    }
+  }, []);
+
+  // Save staleness hash when sign-off is completed
+  useEffect(() => {
+    if (doc.deployment.approved_at) {
+      const hash = computeFriaHash(doc);
+      writeToStorage("friaStaleness", { hash, savedAt: doc.deployment.approved_at });
+      setStalenessWarning(false);
+    }
+  }, [doc.deployment.approved_at]);
+
+  // ── Auto-save ogni 30s ────────────────────────────────────────────────────
+  const { justSaved: friaSaved } = useAutoSave(
+    "fria",
+    doc,
+    (d) => patchFRIA(() => d)
+  );
+
+  // ── AI draft generator ────────────────────────────────────────────────────
+  const [loadingDraft, setLoadingDraft] = useState(false);
+  const [draftGenerated, setDraftGenerated] = useState(false);
+  const [draftError, setDraftError] = useState<string | null>(null);
+  const [loadingAiSummary, setLoadingAiSummary] = useState(false);
+  const [aiSummaryIsFromAI, setAiSummaryIsFromAI] = useState(false);
+  const [stalenessWarning, setStalenessWarning] = useState(false);
+  const [guidedMode, setGuidedMode] = useState(false);
+
+  // Leggi dati correlati per il banner contestuale
+  const riskData   = useMemo(() => readFromStorage<RiskManagerResult>("riskManager"), []);
+  const dataAudit  = useMemo(() => readFromStorage<DataAuditResult>("dataAudit"), []);
+
+  async function handleDraftFria() {
+    const classifier = readFromStorage<ClassifierResult>("classifier");
+    if (!classifier?.systemName) {
+      setDraftError("Completa prima il Classifier per generare la bozza.");
+      return;
+    }
+    setLoadingDraft(true);
+    setDraftError(null);
+    const result = await draftFria(
+      classifier.systemName,
+      classifier.systemDescription ?? "",
+      classifier.riskLevel ?? "",
+      riskData?.risks?.map((r) => ({ title: r.title, severity: r.impact })) ?? [],
+      dataAudit?.datasets?.some((d) => d.personalData) ?? false
+    );
+    setLoadingDraft(false);
+    if ("error" in result) { setDraftError(result.error); return; }
+
+    // Applica fase 1: intended_purpose_explanation
+    setDoc((prev) => {
+      const n = {
+        ...prev,
+        context: { ...prev.context, intended_purpose_explanation: result.phase1_description },
+        updatedAt: new Date().toISOString(),
+      };
+      debounceSave(n);
+      return n;
+    });
+
+    // Applica fase 3: aggiungi scenari
+    result.phase3_scenarios.forEach((s) => {
+      const sc: import("@/lib/simulation/fria-engine").FRIAScenario = {
+        id:           `fria-ai-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        title:        s.scenario,
+        description:  `Persone interessate: ${s.affectedPersons}. Likelihood: ${s.likelihood}/5.`,
+        type:         "automated_decision",
+        right_impacts: [],
+      };
+      setDoc((prev) => {
+        const n = { ...prev, scenarios: [...prev.scenarios, sc], updatedAt: new Date().toISOString() };
+        debounceSave(n);
+        return n;
+      });
+    });
+
+    setDraftGenerated(true);
+  }
 
   // Pre-populate from Classifier
-  const classifierData = useMemo(() => {
-    try { const r = localStorage.getItem("aicomply_classifier_result"); return r ? JSON.parse(r) : null; }
-    catch { return null; }
-  }, []);
+  const classifierData = useMemo(() => readFromStorage<ClassifierResult>("classifier"), []);
   useEffect(() => {
     if (classifierData?.systemName && !doc.system_name) {
       upDoc({ system_name: classifierData.systemName });
     }
   }, [classifierData]);
 
+  // ── CONNECTION 2: Risk Manager → FRIA scenarios ───────────────────────────
+  const [rmScenarios, setRmScenarios] = useState<Array<{
+    id: string; title: string; likelihood: string; impact: string; mitigation: string;
+  }>>([]);
+  useEffect(() => {
+    const riskData = readFromStorage<{
+      risks?: Array<{ id: string; title: string; likelihood: string; impact: string; mitigation: string }>;
+    }>("riskManager");
+    if (riskData?.risks && riskData.risks.length > 0) {
+      setRmScenarios(riskData.risks);
+    }
+  }, []);
+
   // ─── Persistence ─────────────────────────────────────────────────────────
   function debounceSave(d: FRIADocument) {
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      localStorage.setItem(FRIA_DOC_KEY, JSON.stringify(d));
+      patchFRIA(() => d);
     }, 500);
   }
 
   // ─── Update helpers ───────────────────────────────────────────────────────
   function upDoc(patch: Partial<Pick<FRIADocument, "system_name" | "organization" | "responsible_team" | "fria_start_date">>) {
-    setDoc((prev) => { const n = { ...prev, ...patch, updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
+    setDoc((prev) => {
+      const n = { ...prev, ...patch, updatedAt: new Date().toISOString() };
+      debounceSave(n);
+      // Sync shared fields that FRIA owns
+      const sharedPatch: Partial<AssessmentShared> = {};
+      if (patch.system_name !== undefined) sharedPatch.systemName = patch.system_name;
+      if (patch.organization !== undefined) sharedPatch.organization = patch.organization;
+      if (Object.keys(sharedPatch).length > 0) patchShared(sharedPatch);
+      return n;
+    });
   }
   function upCtx(patch: Record<string, unknown>) {
     setDoc((prev) => {
@@ -213,6 +382,13 @@ export default function FRIAPage() {
   // ─── Scenario helpers ─────────────────────────────────────────────────────
   function addScenario() {
     const sc: FRIAScenario = { id: crypto.randomUUID(), title: `Scenario ${doc.scenarios.length + 1}`, description: "", type: "", right_impacts: [] };
+    setDoc((prev) => { const n = { ...prev, scenarios: [...prev.scenarios, sc], updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
+    setActiveScenarioId(sc.id);
+    setP2Tab("rights");
+  }
+
+  function addScenarioFromRM(title: string, description: string) {
+    const sc: FRIAScenario = { id: crypto.randomUUID(), title, description, type: "operativo", right_impacts: [] };
     setDoc((prev) => { const n = { ...prev, scenarios: [...prev.scenarios, sc], updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
     setActiveScenarioId(sc.id);
     setP2Tab("rights");
@@ -359,6 +535,16 @@ export default function FRIAPage() {
   function showToast(msg: string, type: "success" | "error" = "success") {
     setToast({ msg, type }); setTimeout(() => setToast(null), 3000);
   }
+
+  async function handleAiPublicSummary() {
+    setLoadingAiSummary(true);
+    const r = await draftFriaPublicSummary(doc);
+    setLoadingAiSummary(false);
+    if ("error" in r) { showToast(r.error, "error"); return; }
+    upDeploy({ public_summary: r.summary });
+    setAiSummaryIsFromAI(true);
+  }
+
   function saveToDossier() {
     const completedAt = new Date().toISOString();
     const overallRisk = getOverallFRIARisk(doc);
@@ -377,44 +563,11 @@ export default function FRIAPage() {
       totalScenarios: doc.scenarios.length, overallRisk,
       completeness: `${completeness}%`, recommendation: doc.deployment.recommendation, savedAt: completedAt,
     }, "fria");
-    localStorage.setItem(FRIA_DOC_KEY, JSON.stringify(doc));
+    patchFRIA(() => doc);
+    syncCorrelatedRisksFromFRIA();
     setDossierSavedAt(completedAt);
     showToast("FRIA salvata nel dossier di compliance");
   }
-
-  /** Importa nel Risk Register i rischi rilevanti emersi dalla FRIA (Art. 9(2)(b)) — vedi PROMPT_BA Parte 4. */
-  function handleImportRisksToRegister() {
-    const candidates = doc.scenarios.flatMap((scenario) =>
-      scenario.right_impacts
-        .filter(
-          (ri) =>
-            ri.severity.computed_severity === "high" ||
-            ri.severity.computed_severity === "critical" ||
-            ri.residual_risk === "review" ||
-            ri.residual_risk === "unacceptable"
-        )
-        .map((ri) => {
-          const rightLabel = FUNDAMENTAL_RIGHTS.find((f) => f.id === ri.right_id)?.name ?? ri.right_id;
-          return importRiskFromAssessment("fria", {
-            title: `${scenario.title} — ${rightLabel}`,
-            description: ri.notes || scenario.description || "Rischio rilevato in fase di valutazione FRIA",
-            category: "fundamental-rights",
-            severity: toRMLevel(ri.severity.computed_severity),
-            probability: toRMLevel(ri.likelihood.computed_priority) as RMProbability,
-            mitigation: ri.mitigations.map((m) => m.description).filter(Boolean).join("; "),
-          });
-        })
-    );
-
-    const newRisks = candidates.filter((c) => !isDuplicateRisk(riskReport.risks, c));
-    if (newRisks.length === 0) {
-      showToast(candidates.length > 0 ? "Nessun nuovo rischio da importare — già presenti" : "Nessun rischio significativo rilevato da importare");
-      return;
-    }
-    setRiskReport((prev) => ({ ...prev, risks: [...prev.risks, ...newRisks] }));
-    showToast(`${newRisks.length} rischio${newRisks.length > 1 ? "i" : ""} importato${newRisks.length > 1 ? "i" : "o"} nel Risk Register`);
-  }
-
   function exportReport() {
     const blob = new Blob([JSON.stringify({ export_type: "FRIA Art. 27 EU AI Act", exported_at: new Date().toISOString(), document: doc }, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -444,94 +597,13 @@ export default function FRIAPage() {
     const yN  = [{ value: "yes", label: "Sì" }, { value: "no", label: "No" }];
     const hml = [{ value: "high", label: "Alto" }, { value: "medium", label: "Medio" }, { value: "low", label: "Basso" }];
 
-    // Map GuidedAnswers → context fields when user applies guided mode
-    function applyGuidedAnswers(answers: GuidedAnswers) {
-      const fieldMap: Record<string, string> = {
-        f_intended_purpose_match: "intended_purpose_match",
-        f_intended_purpose_explanation: "intended_purpose_explanation",
-        f_timeframe: "timeframe",
-        f_frequency: "frequency",
-        f_legal_basis: "legal_basis",
-        f_dpia_done: "dpia_done",
-        f_main_users: "main_users",
-        f_affected_persons: "affected_persons",
-        f_legal_framework: "legal_framework",
-        f_complaint_mechanisms: "complaint_mechanisms",
-        f_technology_overview: "technology_overview",
-        f_has_generative_component: "has_generative_component",
-        f_training_data_types: "training_data_types",
-        f_bias_assessed: "bias_assessed",
-        f_processes_personal_data: "processes_personal_data",
-        f_gdpr_processing_compliant: "gdpr_processing_compliant",
-        f_accuracy_acceptable: "accuracy_acceptable",
-        f_human_oversight_assigned: "human_oversight_assigned",
-        f_oversight_persons_trained: "oversight_persons_trained",
-        f_workers_informed: "workers_informed",
-        f_affected_persons_informed: "affected_persons_informed",
-      };
-      const patch: Record<string, string> = {};
-      for (const [qid, ctxKey] of Object.entries(fieldMap)) {
-        if (answers[qid]) patch[ctxKey] = answers[qid];
-      }
-      if (Object.keys(patch).length > 0) upCtx(patch);
-      setGuidedMode(false);
-    }
-
     return (
       <div>
-        <div style={{ marginBottom: 24, display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-          <div>
-            <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 1 — Analisi del contesto</h2>
-            <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Cluster A: contesto di deployment · Cluster B: caratteristiche AI · Cluster C: governance</p>
-          </div>
-          {/* Guided / Free toggle */}
-          <div style={{ display: "flex", gap: 4, background: "rgba(13,16,22,0.04)", borderRadius: 8, padding: 3 }}>
-            {(["Guidata", "Libera"] as const).map((mode) => {
-              const isActive = (mode === "Guidata") === guidedMode;
-              return (
-                <button key={mode} onClick={() => setGuidedMode(mode === "Guidata")}
-                  style={{ padding: "4px 12px", borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: "pointer",
-                    background: isActive ? T.text : "none", color: isActive ? "#fff" : T.muted, border: "none" }}>
-                  {mode}
-                </button>
-              );
-            })}
-          </div>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 1 — Analisi del contesto</h2>
+          <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Cluster A: contesto di deployment · Cluster B: caratteristiche AI · Cluster C: governance</p>
         </div>
-
-        {/* Guided mode overlay */}
-        {guidedMode && (
-          <div style={{ ...cardSt, padding: 24, marginBottom: 24 }}>
-            <FriaGuidedMode
-              onApply={applyGuidedAnswers}
-              onClose={() => setGuidedMode(false)}
-              initialAnswers={{
-                f_intended_purpose_match: c.intended_purpose_match,
-                f_intended_purpose_explanation: c.intended_purpose_explanation ?? "",
-                f_timeframe: c.timeframe,
-                f_frequency: c.frequency,
-                f_legal_basis: c.legal_basis,
-                f_dpia_done: c.dpia_done,
-                f_main_users: c.main_users,
-                f_affected_persons: c.affected_persons,
-                f_legal_framework: c.legal_framework,
-                f_complaint_mechanisms: c.complaint_mechanisms,
-                f_technology_overview: c.technology_overview,
-                f_has_generative_component: c.has_generative_component,
-                f_training_data_types: c.training_data_types,
-                f_bias_assessed: c.bias_assessed,
-                f_processes_personal_data: c.processes_personal_data,
-                f_gdpr_processing_compliant: c.gdpr_processing_compliant,
-                f_accuracy_acceptable: c.accuracy_acceptable,
-                f_human_oversight_assigned: c.human_oversight_assigned,
-                f_oversight_persons_trained: c.oversight_persons_trained,
-                f_workers_informed: c.workers_informed,
-                f_affected_persons_informed: c.affected_persons_informed,
-              }}
-            />
-          </div>
-        )}
-
+        <ContextCatalog onApply={(patch) => upCtx(patch)} />
         {sections.map((sec) => {
           const open = openAcc.has(sec.id);
           const pct = Math.round((sec.filled / sec.fields) * 100);
@@ -637,6 +709,38 @@ export default function FRIAPage() {
           <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 2 — Sviluppo scenari e impatto</h2>
           <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Identifica scenari tipici e worst-case. Valuta l&apos;impatto su ciascun diritto fondamentale.</p>
         </div>
+
+        {/* ── Risk Manager suggestions banner ──────────────────────────── */}
+        {rmScenarios.length > 0 && (
+          <div style={{
+            padding: "10px 14px", borderRadius: 8, marginBottom: 16,
+            background: "rgba(217,119,6,0.06)", border: "1px solid rgba(217,119,6,0.2)",
+          }}>
+            <p style={{ fontSize: 12, color: "#d97706", margin: "0 0 8px", fontWeight: 500 }}>
+              <strong>{rmScenarios.length} rischi</strong> pre-caricati dal Risk Manager.
+              Puoi aggiungerli come scenari di partenza per questa fase.
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              {rmScenarios.map((r) => (
+                <button key={r.id}
+                  onClick={() => addScenarioFromRM(
+                    r.title,
+                    `Rischio importato dal Risk Manager — likelihood: ${r.likelihood}, impact: ${r.impact}${r.mitigation ? `. Mitigazione proposta: ${r.mitigation}` : ""}`
+                  )}
+                  style={{
+                    textAlign: "left", fontSize: 12, padding: "4px 10px",
+                    borderRadius: 6, border: "1px solid rgba(217,119,6,0.3)",
+                    background: "white", cursor: "pointer", color: T.amber,
+                  }}>
+                  + Aggiungi scenario: {r.title}
+                  <span style={{ marginLeft: 6, opacity: 0.6 }}>
+                    ({r.likelihood} / {r.impact})
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
           {/* Scenario list */}
           <div style={{ width: 196, flexShrink: 0 }}>
@@ -708,6 +812,49 @@ export default function FRIAPage() {
 
                 {p2Tab === "rights" && (
                   <div style={{ padding: "16px 20px", maxHeight: 540, overflow: "auto" }}>
+                    {/* Catalog toggle */}
+                    <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+                      <button onClick={() => setShowCatalog(v => !v)} style={{ fontSize: 11, padding: "4px 10px", borderRadius: 6, border: `1px solid ${T.border}`, background: showCatalog ? T.text : T.card, color: showCatalog ? "#fff" : T.muted, cursor: "pointer" }}>
+                        {showCatalog ? "✕ Chiudi catalogo" : "📋 Seleziona da catalogo"}
+                      </button>
+                    </div>
+                    {showCatalog && (
+                      <RightsCatalog
+                        selectedRightIds={activeScenario.right_impacts.map((ri) => ri.right_id)}
+                        onSelectRight={(rightId) => toggleRightImpact(activeScenario.id, rightId)}
+                      />
+                    )}
+                    {/* Prioritizzazione visibile */}
+                    {activeScenario.right_impacts.length > 1 && (() => {
+                      const sorted = [...activeScenario.right_impacts]
+                        .filter(ri => ri.likelihood.computed_priority)
+                        .sort((a, b) => {
+                          const rank: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
+                          return (rank[b.likelihood.computed_priority] ?? 0) - (rank[a.likelihood.computed_priority] ?? 0);
+                        });
+                      if (sorted.length === 0) return null;
+                      const sevColors: Record<string, string> = { critical: "#dc2626", high: "#d97706", medium: "#d97706", low: "#16a34a" };
+                      return (
+                        <div style={{ marginBottom: 16, padding: "10px 12px", background: T.bg, borderRadius: 8, border: `1px solid ${T.border}` }}>
+                          <p style={{ fontSize: 10, fontWeight: 700, color: T.text, textTransform: "uppercase" as const, letterSpacing: "0.5px", marginBottom: 8 }}>
+                            Prioritizzazione impatti — likelihood × severità
+                          </p>
+                          {sorted.map((ri, idx) => {
+                            const r = FUNDAMENTAL_RIGHTS.find(f => f.id === ri.right_id);
+                            const priority = ri.likelihood.computed_priority;
+                            return (
+                              <div key={ri.right_id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 0", borderBottom: idx < sorted.length - 1 ? `1px solid ${T.border}` : "none" }}>
+                                <span style={{ fontSize: 10, fontWeight: 700, color: T.faint, minWidth: 18 }}>#{idx + 1}</span>
+                                <span style={{ fontSize: 11, color: T.text, flex: 1 }}>{r?.name ?? ri.right_id}</span>
+                                <span style={{ fontSize: 10, fontWeight: 600, color: sevColors[priority] ?? T.muted, background: "rgba(0,0,0,0.04)", padding: "1px 6px", borderRadius: 9999 }}>
+                                  {priority?.toUpperCase()}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
                     {RIGHTS_GROUPS.map((grp) => {
                       const rights = FUNDAMENTAL_RIGHTS.filter((r) => grp.rightIds.includes(r.id));
                       const openGrp = openRightGroups.has(grp.id);
@@ -718,7 +865,7 @@ export default function FRIAPage() {
                             style={{ width: "100%", padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", background: openGrp ? T.bg : T.card, border: "none", cursor: "pointer" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                               <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{grp.label}</span>
-                              {selCount > 0 && <Badge label={`${selCount} sel.`} color="neutral" />}
+                              {selCount > 0 && <Badge label={`${selCount} sel.`} color="gray" />}
                             </div>
                             {openGrp ? <ChevronDown style={{ width: 13, height: 13, color: T.muted }} /> : <ChevronRight style={{ width: 13, height: 13, color: T.muted }} />}
                           </button>
@@ -737,7 +884,7 @@ export default function FRIAPage() {
                                       {right.is_absolute && <Badge label="assoluto" color="red" />}
                                       {checked && (
                                         <button onClick={() => setOpenRights((prev) => { const n = new Set(prev); n.has(right.id) ? n.delete(right.id) : n.add(right.id); return n; })}
-                                          style={{ fontSize: 10, color: T.neutral, background: "none", border: "none", cursor: "pointer", padding: "2px 4px" }}>
+                                          style={{ fontSize: 10, color: T.text, background: "none", border: "none", cursor: "pointer", padding: "2px 4px" }}>
                                           {openAssess ? "chiudi ↑" : "valuta ↓"}
                                         </button>
                                       )}
@@ -754,14 +901,14 @@ export default function FRIAPage() {
                                             law_enforcement: "Forze dell'ordine", migration: "Migrazione", justice: "Giustizia",
                                           };
                                           return (
-                                            <div style={{ marginBottom: 14, padding: "10px 12px", borderRadius: 7, background: T.neutralBg, border: `1px solid ${T.neutralBdr}` }}>
-                                              <div style={{ fontSize: 10, fontWeight: 600, color: T.neutral, textTransform: "uppercase" as const, letterSpacing: "0.5px", marginBottom: 7 }}>
+                                            <div style={{ marginBottom: 14, padding: "10px 12px", borderRadius: 7, background: "rgba(0,0,0,0.04)", border: `1px solid ${T.border}` }}>
+                                              <div style={{ fontSize: 10, fontWeight: 600, color: T.text, textTransform: "uppercase" as const, letterSpacing: "0.5px", marginBottom: 7 }}>
                                                 Rischi documentati ECNL/DIHR per settore
                                               </div>
                                               <div style={{ display: "flex", flexDirection: "column" as const, gap: 4 }}>
                                                 {sectorHints.map(([sector, desc]) => (
                                                   <div key={sector} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                                                    <span style={{ fontSize: 10, fontWeight: 600, color: T.neutral, minWidth: 120, flexShrink: 0 }}>{sectorLabel[sector] ?? sector}</span>
+                                                    <span style={{ fontSize: 10, fontWeight: 600, color: T.text, minWidth: 120, flexShrink: 0 }}>{sectorLabel[sector] ?? sector}</span>
                                                     <span style={{ fontSize: 11, color: T.text, lineHeight: 1.4 }}>{desc}</span>
                                                   </div>
                                                 ))}
@@ -769,21 +916,61 @@ export default function FRIAPage() {
                                             </div>
                                           );
                                         })()}
+                                        <RightImpactAIDraft
+                                          systemName={doc.system_name || "Sistema AI"}
+                                          systemDescription={doc.context.technology_overview || ""}
+                                          riskLevel={""}
+                                          scenarioTitle={activeScenario.title}
+                                          scenarioDescription={activeScenario.description}
+                                          rightId={right.id}
+                                          rightName={right.name}
+                                          rightDescription={right.description}
+                                          triggerQuestions={right.triggerQuestions}
+                                          onApply={(sevPatch, likelihood, note) => {
+                                            upSeverity(activeScenario.id, right.id, sevPatch as Partial<FRIASeverityAssessment>);
+                                            upLikelihood(activeScenario.id, right.id, likelihood);
+                                            if (note) upRightImpact(activeScenario.id, right.id, { notes: note });
+                                          }}
+                                        />
                                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
                                           <Sel label="Entità interferenza" value={impact.severity.extent_of_interference}
-                                            options={[{ value: "core_violation", label: "Violazione del nucleo essenziale" }, { value: "significant", label: "Significativa" }, { value: "limited", label: "Limitata" }]}
+                                            options={[
+                                              { value: "very_serious", label: "Molto grave (nucleo del diritto)" },
+                                              { value: "serious", label: "Grave" },
+                                              { value: "moderate", label: "Moderata" },
+                                              { value: "minor", label: "Minore" },
+                                              { value: "none", label: "Nessuna" },
+                                            ]}
                                             onChange={(v) => upSeverity(activeScenario.id, right.id, { extent_of_interference: v as FRIASeverityAssessment["extent_of_interference"] })} />
-                                          <Sel label="Portata geografica" value={impact.severity.scope_of_impact}
-                                            options={[{ value: "multiple_countries", label: "Più paesi" }, { value: "one_country", label: "Un paese" }, { value: "region", label: "Regione/locale" }]}
+                                          <Sel label="Portata (scope)" value={impact.severity.scope_of_impact}
+                                            options={[
+                                              { value: "systemic", label: "Sistemico" },
+                                              { value: "large_group", label: "Gruppo esteso" },
+                                              { value: "group", label: "Gruppo" },
+                                              { value: "individual", label: "Individuale" },
+                                            ]}
                                             onChange={(v) => upSeverity(activeScenario.id, right.id, { scope_of_impact: v as FRIASeverityAssessment["scope_of_impact"] })} />
                                           <Sel label="Persone interessate" value={impact.severity.persons_affected}
-                                            options={[{ value: "most", label: "La maggior parte" }, { value: "some", label: "Alcune" }, { value: "few", label: "Poche" }]}
+                                            options={[
+                                              { value: "very_many", label: "Moltissime" },
+                                              { value: "many", label: "Molte" },
+                                              { value: "few", label: "Poche" },
+                                            ]}
                                             onChange={(v) => upSeverity(activeScenario.id, right.id, { persons_affected: v as FRIASeverityAssessment["persons_affected"] })} />
                                           <Sel label="Gravità" value={impact.severity.gravity}
-                                            options={[{ value: "high", label: "Alta" }, { value: "medium", label: "Media" }, { value: "low", label: "Bassa" }]}
+                                            options={[
+                                              { value: "critical", label: "Critica" },
+                                              { value: "high", label: "Alta" },
+                                              { value: "medium", label: "Media" },
+                                              { value: "low", label: "Bassa" },
+                                            ]}
                                             onChange={(v) => upSeverity(activeScenario.id, right.id, { gravity: v as FRIASeverityAssessment["gravity"] })} />
                                           <Sel label="Reversibilità" value={impact.severity.irreversibility}
-                                            options={[{ value: "none", label: "Irreversibile" }, { value: "complex", label: "Difficilmente reversibile" }, { value: "medium", label: "Parzialmente reversibile" }]}
+                                            options={[
+                                              { value: "irreversible", label: "Irreversibile" },
+                                              { value: "partially", label: "Parzialmente reversibile" },
+                                              { value: "reversible", label: "Reversibile" },
+                                            ]}
                                             onChange={(v) => upSeverity(activeScenario.id, right.id, { irreversibility: v as FRIASeverityAssessment["irreversibility"] })} />
                                           <div style={{ marginBottom: 12 }}>
                                             <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>Severità calcolata</label>
@@ -794,7 +981,12 @@ export default function FRIAPage() {
                                             </div>
                                           </div>
                                           <Sel label="Probabilità" value={impact.likelihood.likelihood}
-                                            options={[{ value: "high", label: "Alta" }, { value: "medium", label: "Media" }, { value: "low", label: "Bassa" }]}
+                                            options={[
+                                              { value: "almost_certain", label: "Quasi certa" },
+                                              { value: "likely", label: "Probabile" },
+                                              { value: "possible", label: "Possibile" },
+                                              { value: "negligible", label: "Trascurabile" },
+                                            ]}
                                             onChange={(v) => upLikelihood(activeScenario.id, right.id, v)} />
                                           <div style={{ marginBottom: 12 }}>
                                             <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>Priorità calcolata</label>
@@ -844,6 +1036,38 @@ export default function FRIAPage() {
                                             </div>
                                           ))}
                                         </div>
+                                        {/* What-If residual panel */}
+                                        {impact.severity.computed_severity && (
+                                          <div style={{ marginTop: 8, padding: "8px 10px", background: T.bg, borderRadius: 6, border: `1px solid ${T.border}` }}>
+                                            <p style={{ fontSize: 10, fontWeight: 600, color: T.text, marginBottom: 4 }}>
+                                              What-If: impatto residuo stimato
+                                            </p>
+                                            {(() => {
+                                              const implemented = impact.mitigations.filter(m => m.status === "implemented" || m.status === "verified").length;
+                                              const sevOrder = ["critical","high","medium","low"] as const;
+                                              const currentIdx = sevOrder.indexOf(impact.severity.computed_severity as (typeof sevOrder)[number]);
+                                              const residualIdx = Math.min(sevOrder.length - 1, currentIdx + (implemented > 0 ? 1 : 0));
+                                              const residual = sevOrder[residualIdx] ?? impact.severity.computed_severity;
+                                              const improved = residualIdx > currentIdx;
+                                              const sevColors: Record<string, string> = { critical: "#dc2626", high: "#d97706", medium: "#d97706", low: "#16a34a" };
+                                              return (
+                                                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11 }}>
+                                                  <span style={{ color: sevColors[impact.severity.computed_severity] ?? T.muted, fontWeight: 600 }}>
+                                                    {impact.severity.computed_severity.toUpperCase()}
+                                                  </span>
+                                                  {improved && <>
+                                                    <span style={{ color: T.faint }}>→</span>
+                                                    <span style={{ color: sevColors[residual] ?? T.muted, fontWeight: 600 }}>{residual.toUpperCase()}</span>
+                                                    <span style={{ color: T.green, fontSize: 10 }}>({implemented} mitig. attive)</span>
+                                                  </>}
+                                                  {!improved && (
+                                                    <span style={{ color: T.faint, fontSize: 10 }}>Nessuna mitigazione attiva — severità invariata</span>
+                                                  )}
+                                                </div>
+                                              );
+                                            })()}
+                                          </div>
+                                        )}
                                       </div>
                                     )}
                                   </div>
@@ -915,6 +1139,11 @@ export default function FRIAPage() {
           <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 3 — Decisione di deployment</h2>
           <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Valuta gli impatti residui, determina la raccomandazione e genera la sintesi pubblica.</p>
         </div>
+        <FriaGapCheck
+          doc={doc}
+          onNavigateToPhase={(p) => setPhase(p as Phase)}
+          onResult={setGapCheckResult}
+        />
         {/* Absolute rights alert — ECNL/DIHR: cannot be balanced by proportionality */}
         {(() => {
           const absoluteImpacted = doc.scenarios.flatMap((s) => s.right_impacts).filter((ri) => {
@@ -987,15 +1216,61 @@ export default function FRIAPage() {
         {/* Public summary */}
         <div style={{ ...cardSt, padding: 20, marginBottom: 20 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>Sintesi pubblica obbligatoria (Art. 27)</h3>
-            <button onClick={() => { const s = generatePublicSummary(doc); upDeploy({ public_summary: s }); showToast("Sintesi pubblica generata"); }}
-              style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, background: T.text, color: "#fff", border: "none", borderRadius: 8, padding: "7px 14px", cursor: "pointer" }}>
-              <FileText style={{ width: 13, height: 13 }} /> Genera sintesi
-            </button>
+            <div>
+              <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 2px" }}>Sintesi pubblica obbligatoria (Art. 27)</h3>
+              {aiSummaryIsFromAI && (
+                <span style={{ fontSize: 10, fontWeight: 700, color: T.amber, background: T.amberBg, padding: "1px 7px", borderRadius: 9999 }}>
+                  ✦ AI — verifica e conferma
+                </span>
+              )}
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                onClick={() => { const s = generatePublicSummary(doc); upDeploy({ public_summary: s }); setAiSummaryIsFromAI(false); showToast("Sintesi generata"); }}
+                style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, background: T.bg, color: T.text, border: `1px solid ${T.border}`, borderRadius: 8, padding: "7px 14px", cursor: "pointer" }}
+              >
+                <FileText style={{ width: 13, height: 13 }} /> Genera sintesi
+              </button>
+              <button
+                onClick={handleAiPublicSummary}
+                disabled={loadingAiSummary}
+                style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, background: loadingAiSummary ? T.bg : T.text, color: loadingAiSummary ? T.muted : "#fff", border: "none", borderRadius: 8, padding: "7px 14px", cursor: loadingAiSummary ? "default" : "pointer" }}
+              >
+                {loadingAiSummary ? "⟳ Generazione AI…" : "✦ Bozza AI"}
+              </button>
+            </div>
           </div>
           <textarea value={d.public_summary} onChange={(e) => upDeploy({ public_summary: e.target.value })} rows={14}
             placeholder="Clicca 'Genera sintesi' per creare automaticamente il testo basato sui dati inseriti…"
             style={{ ...inputSt, resize: "vertical", fontFamily: "monospace", fontSize: 11, lineHeight: 1.6 }} />
+        </div>
+
+        {/* Art. 27(2) — Notifica autorità di vigilanza */}
+        {(d.recommendation === "deploy_with_conditions" || d.recommendation === "do_not_deploy") && (
+          <div style={{ marginBottom: 16, padding: "12px 16px", borderRadius: 8, background: T.amberBg, border: `1px solid ${T.amberBdr}`, display: "flex", gap: 10, alignItems: "flex-start" }}>
+            <span style={{ fontSize: 16, flexShrink: 0 }}>⚠</span>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: T.amber, marginBottom: 4 }}>
+                Promemoria Art. 27(2) — Notifica all&apos;autorità di vigilanza
+              </div>
+              <div style={{ fontSize: 12, color: T.text, lineHeight: 1.5 }}>
+                La raccomandazione non è &quot;deploy&quot; incondizionato. Ai sensi dell&apos;Art. 27(2) AI Act, il deployer
+                ha l&apos;obbligo di notificare l&apos;autorità nazionale di vigilanza del mercato e documentare la notifica
+                nella FRIA. [verifica contro il testo vigente dell&apos;AI Act]
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Rischi correlati DPIA ⇄ FRIA */}
+        <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)", padding: 20, marginBottom: 16 }}>
+          <p style={{ fontSize: 13, fontWeight: 600, color: "#0D1016", margin: "0 0 6px" }}>
+            Rischi correlati DPIA ⇄ FRIA
+          </p>
+          <p style={{ fontSize: 11, color: "rgba(0,0,0,0.40)", margin: "0 0 14px" }}>
+            Rischi generati automaticamente dalla correlazione WP29 / DIHR. Applica le mitigazioni al Risk Manager.
+          </p>
+          <CorrelatedRisksPanel />
         </div>
 
         {/* SignOff */}
@@ -1013,6 +1288,33 @@ export default function FRIAPage() {
           <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 4 — Piano di monitoraggio</h2>
           <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Definisci cosa monitorare, i trigger per l&apos;aggiornamento e mantieni lo storico delle revisioni.</p>
         </div>
+
+        {/* Staleness warning */}
+        {stalenessWarning && (
+          <div style={{ marginBottom: 16, padding: "12px 16px", borderRadius: 8, background: T.amberBg, border: `1px solid ${T.amberBdr}`, display: "flex", alignItems: "flex-start", gap: 10 }}>
+            <span style={{ fontSize: 16, flexShrink: 0 }}>⚠</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: T.amber, marginBottom: 4 }}>
+                FRIA da rivedere — le circostanze iniziali sono cambiate
+              </div>
+              <div style={{ fontSize: 12, color: T.text, lineHeight: 1.5, marginBottom: 8 }}>
+                I dati di input (sistema, contesto, persone interessate) sono cambiati rispetto all&apos;ultima firma.
+                Verifica che la valutazione degli impatti e le misure di mitigazione siano ancora valide. [verifica contro il testo vigente dell&apos;AI Act]
+              </div>
+              <button
+                onClick={() => {
+                  const hash = computeFriaHash(doc);
+                  writeToStorage("friaStaleness", { hash, savedAt: new Date().toISOString() });
+                  setStalenessWarning(false);
+                  showToast("Baseline aggiornata");
+                }}
+                style={{ fontSize: 11, fontWeight: 600, padding: "4px 12px", borderRadius: 6, border: "none", background: T.text, color: "#fff", cursor: "pointer" }}
+              >
+                Segna come rivisto — salva nuova baseline
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Monitoring items */}
         <div style={{ ...cardSt, padding: 20, marginBottom: 16 }}>
@@ -1050,7 +1352,7 @@ export default function FRIAPage() {
           <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 14px" }}>Trigger per aggiornamento FRIA</h3>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
             {DEFAULT_TRIGGERS.map((t) => (
-              <label key={t} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", borderRadius: 7, cursor: "pointer", background: mon.update_triggers.includes(t) ? T.neutralBg : "none" }}>
+              <label key={t} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", borderRadius: 7, cursor: "pointer", background: mon.update_triggers.includes(t) ? "rgba(0,0,0,0.04)" : "none" }}>
                 <input type="checkbox" checked={mon.update_triggers.includes(t)} onChange={() => toggleTrigger(t)} style={{ cursor: "pointer" }} />
                 <span style={{ fontSize: 12, color: T.text }}>{t}</span>
               </label>
@@ -1094,6 +1396,48 @@ export default function FRIAPage() {
           <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 5 — Stakeholder e coinvolgimento</h2>
           <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Mappa i portatori di interesse e documenta il processo di consultazione.</p>
         </div>
+
+        {/* Impatti ad alto rischio che richiedono validazione stakeholder */}
+        {(() => {
+          const highImpacts = doc.scenarios.flatMap(s =>
+            s.right_impacts
+              .filter(ri => ri.severity?.computed_severity === "high" || ri.severity?.computed_severity === "critical")
+              .map(ri => ({ scenarioTitle: s.title, rightId: ri.right_id, severity: ri.severity.computed_severity }))
+          );
+          if (highImpacts.length === 0) return null;
+          const hasEngagement = doc.engagement_log.some(e => e.findings?.trim());
+          return (
+            <div style={{ marginBottom: 16, padding: "14px 16px", borderRadius: 10, background: T.card, border: `1px solid ${T.border}`, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Impatti ad alto rischio — validazione stakeholder</span>
+                {hasEngagement
+                  ? <span style={{ fontSize: 10, fontWeight: 700, color: T.green, background: T.greenBg, padding: "2px 8px", borderRadius: 9999 }}>✓ Engagement documentato</span>
+                  : <span style={{ fontSize: 10, fontWeight: 700, color: T.amber, background: T.amberBg, padding: "2px 8px", borderRadius: 9999 }}>Consultazione raccomandata</span>
+                }
+              </div>
+              <p style={{ fontSize: 12, color: T.muted, margin: "0 0 10px", lineHeight: 1.4 }}>
+                {highImpacts.length} impatto/i ad alta severità identificati nella Fase 2. Documenta le consultazioni nel log qui sotto per validare queste valutazioni. [verifica contro il testo vigente dell&apos;AI Act]
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {highImpacts.slice(0, 5).map((imp, i) => {
+                  const rightName = FUNDAMENTAL_RIGHTS.find(r => r.id === imp.rightId)?.name ?? imp.rightId;
+                  return (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderRadius: 6, background: imp.severity === "critical" ? T.redBg : T.amberBg, border: `1px solid ${imp.severity === "critical" ? T.redBdr : T.amberBdr}` }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: imp.severity === "critical" ? T.red : T.amber, minWidth: 60 }}>
+                        {imp.severity === "critical" ? "CRITICO" : "ALTO"}
+                      </span>
+                      <span style={{ fontSize: 12, color: T.text }}>{rightName}</span>
+                      <span style={{ fontSize: 11, color: T.muted }}>— {imp.scenarioTitle || "Scenario"}</span>
+                    </div>
+                  );
+                })}
+                {highImpacts.length > 5 && (
+                  <p style={{ fontSize: 11, color: T.faint, margin: 0 }}>+ altri {highImpacts.length - 5} impatti</p>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Stakeholders */}
         <div style={{ ...cardSt, padding: 20, marginBottom: 16 }}>
@@ -1173,18 +1517,223 @@ export default function FRIAPage() {
     );
   }
 
+  // ─── Guided mode early return ─────────────────────────────────────────────
+  if (guidedMode) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
+        <FriaGuidedMode onExitGuidedMode={() => setGuidedMode(false)} />
+      </div>
+    );
+  }
+
   // ─── Main render ──────────────────────────────────────────────────────────
   return (
     <div className="w-full" style={{ display: "flex", flexDirection: "column", gap: 0, minHeight: 0, fontFamily: "var(--font-inter, system-ui)" }}>
 
-      <SystemContextBanner checkProhibited={true} />
+      <SystemSelector checkProhibited={true} />
+      <AssessmentStepper currentTool="fria" />
+      <AssessmentSharedHeader />
 
-      <div style={{ display: "flex", gap: 0, minHeight: 0 }}>
+      {/* ── Mode selector ────────────────────────────────────────────────────── */}
+      <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+        {([
+          {
+            key: "form",
+            title: "Form strutturato",
+            desc: "Modulo completo Art. 27 — scenari, diritti, deployment, stakeholder.",
+            active: !guidedMode,
+            onClick: () => setGuidedMode(false),
+          },
+          {
+            key: "guided",
+            title: "FRIA guidata",
+            desc: "Modalità conversazionale DIHR/ECNL · 36 domande · documento live.",
+            active: guidedMode,
+            onClick: () => setGuidedMode(true),
+          },
+        ] as { key: string; title: string; desc: string; active: boolean; onClick: () => void }[]).map((m) => (
+          <button
+            key={m.key}
+            onClick={m.onClick}
+            style={{
+              flex: 1, textAlign: "left", padding: "12px 14px", borderRadius: 10,
+              border: m.active ? "1.5px solid #23403a" : "1px solid rgba(0,0,0,0.10)",
+              background: m.active ? "rgba(35,64,58,0.05)" : "#fff",
+              cursor: m.active ? "default" : "pointer",
+              transition: "border-color 0.15s, background 0.15s",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 3 }}>
+              {m.active && (
+                <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#23403a", flexShrink: 0 }} />
+              )}
+              <p style={{ fontSize: 12, fontWeight: 700, color: "#0D1016", margin: 0 }}>{m.title}</p>
+            </div>
+            <p style={{ fontSize: 10, color: "rgba(0,0,0,0.45)", margin: 0 }}>{m.desc}</p>
+          </button>
+        ))}
+      </div>
+
+      {/* ── Prerequisiti + AI Draft Banner (Art. 27) ───────────────────────── */}
+      {(() => {
+        const clf  = readFromStorage<ClassifierResult>("classifier");
+        const hasClassifier = !!(clf?.systemName || clf?.riskLevel);
+        const hasRiskMgr    = !!(riskData);
+        const hasDataAudit  = !!(dataAudit);
+
+        const steps = [
+          {
+            key: "classifier",
+            label: "Classifier",
+            art: "Art. 6",
+            done: hasClassifier,
+            href: "/dashboard/tools/classifier",
+            required: true,
+            why: "Determina il livello di rischio del sistema AI",
+          },
+          {
+            key: "risk",
+            label: "Risk Manager",
+            art: "Art. 9",
+            done: hasRiskMgr,
+            href: "/dashboard/modules/risk-manager",
+            required: false,
+            why: "Pre-carica scenari di rischio nelle fasi 2–3 della FRIA",
+          },
+          {
+            key: "data",
+            label: "Qualità Dati",
+            art: "Art. 10",
+            done: hasDataAudit,
+            href: "/dashboard/tools/data-audit",
+            required: false,
+            why: "Arricchisce l'analisi con dati di governance",
+          },
+        ];
+
+        return (
+          <div style={{
+            borderRadius: 10, marginBottom: 16, overflow: "hidden",
+            border: "1px solid rgba(0,0,0,0.09)",
+          }}>
+            {/* Header */}
+            <div style={{ padding: "12px 16px", background: "rgba(0,0,0,0.025)", borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: "#0D1016", margin: 0, letterSpacing: "0.03em" }}>
+                SORGENTI DATI PER LA BOZZA AI
+              </p>
+            </div>
+
+            {/* Steps */}
+            <div style={{ background: "white" }}>
+              {steps.map((s, i) => (
+                <div key={s.key} style={{
+                  display: "flex", alignItems: "center", gap: 12,
+                  padding: "11px 16px",
+                  borderBottom: i < steps.length - 1 ? "1px solid rgba(0,0,0,0.06)" : "none",
+                }}>
+                  {/* Status dot */}
+                  <div style={{
+                    width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: s.done ? "rgba(22,163,74,0.10)" : s.required ? "rgba(220,38,38,0.08)" : "rgba(0,0,0,0.04)",
+                    border: `1.5px solid ${s.done ? "rgba(22,163,74,0.30)" : s.required ? "rgba(220,38,38,0.25)" : "rgba(0,0,0,0.12)"}`,
+                  }}>
+                    {s.done
+                      ? <span style={{ fontSize: 10, color: "#16a34a" }}>✓</span>
+                      : <span style={{ fontSize: 9, color: s.required ? "#dc2626" : "rgba(0,0,0,0.30)" }}>○</span>
+                    }
+                  </div>
+
+                  {/* Info */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: "#0D1016" }}>{s.label}</span>
+                      <span style={{
+                        fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
+                        background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.40)",
+                      }}>{s.art}</span>
+                      {s.required && !s.done && (
+                        <span style={{
+                          fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
+                          background: "rgba(220,38,38,0.08)", color: "#dc2626",
+                        }}>RICHIESTO</span>
+                      )}
+                    </div>
+                    <p style={{ fontSize: 11, color: "rgba(0,0,0,0.40)", margin: "1px 0 0", lineHeight: 1.3 }}>{s.why}</p>
+                  </div>
+
+                  {/* Action */}
+                  {s.done ? (
+                    <Link href={s.href} style={{
+                      fontSize: 11, fontWeight: 500, color: "rgba(0,0,0,0.40)",
+                      textDecoration: "none", whiteSpace: "nowrap",
+                    }}>
+                      Modifica →
+                    </Link>
+                  ) : (
+                    <Link href={s.href} style={{
+                      fontSize: 11, fontWeight: 600, padding: "5px 11px", borderRadius: 7,
+                      border: s.required ? "1px solid rgba(220,38,38,0.25)" : "1px solid rgba(0,0,0,0.12)",
+                      background: s.required ? "rgba(220,38,38,0.06)" : "rgba(0,0,0,0.02)",
+                      color: s.required ? "#dc2626" : "#374151",
+                      textDecoration: "none", whiteSpace: "nowrap",
+                    }}>
+                      {s.required ? "Completa prima →" : "Migliora bozza →"}
+                    </Link>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Draft button footer */}
+            <div style={{ padding: "11px 16px", background: "rgba(0,0,0,0.015)", borderTop: "1px solid rgba(0,0,0,0.07)", display: "flex", alignItems: "center", gap: 10 }}>
+              <button
+                onClick={handleDraftFria}
+                disabled={loadingDraft || !hasClassifier}
+                style={{
+                  padding: "7px 16px", borderRadius: 7, border: "none",
+                  background: (!hasClassifier || loadingDraft) ? "#e5e7eb" : "#0D1016",
+                  color: (!hasClassifier || loadingDraft) ? "#9ca3af" : "white",
+                  fontSize: 13, fontWeight: 500,
+                  cursor: (!hasClassifier || loadingDraft) ? "not-allowed" : "pointer",
+                }}
+              >
+                {loadingDraft ? "Generazione bozza…" : "✦ Genera bozza AI da dati esistenti"}
+              </button>
+              {!hasClassifier && (
+                <span style={{ fontSize: 11, color: "#dc2626", fontWeight: 500 }}>
+                  Completa il Classifier per sbloccare la generazione automatica
+                </span>
+              )}
+              {draftGenerated && (
+                <span style={{ fontSize: 11, color: "#d97706", fontWeight: 500 }}>
+                  ✦ Bozza applicata — verifica ogni campo prima di salvare
+                </span>
+              )}
+              {draftError && (
+                <span style={{ fontSize: 11, color: "#dc2626" }}>{draftError}</span>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
+      <div style={{ display: "flex", gap: 12, minHeight: 0 }}>
 
       {/* ── Left sidebar ── */}
-      <div style={{ width: 232, flexShrink: 0, borderRight: `1px solid ${T.border}`, background: T.card, display: "flex", flexDirection: "column", minHeight: "100%" }}>
+      <div style={{ width: 232, flexShrink: 0, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, overflow: "hidden", background: "#fafafa", display: "flex", flexDirection: "column", minHeight: "100%" }}>
+        {/* DOCUMENTO header */}
+        <div style={{ padding: "12px 12px 10px", borderBottom: `1px solid ${T.border}` }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>Documento</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", fontFamily: "monospace" }}>{completeness}%</span>
+          </div>
+          <div style={{ width: "100%", height: 4, background: "rgba(0,0,0,0.07)", borderRadius: 2, overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${completeness}%`, background: "#0D1016", borderRadius: 2, transition: "width 0.5s ease" }} />
+          </div>
+        </div>
         {/* System name + org */}
-        <div style={{ padding: "16px 14px 12px", borderBottom: `1px solid ${T.border}` }}>
+        <div style={{ padding: "12px 14px 12px", borderBottom: `1px solid ${T.border}` }}>
           <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", marginBottom: 8 }}>Sistema AI</div>
           <input value={doc.system_name} onChange={(e) => upDoc({ system_name: e.target.value })} placeholder="Nome del sistema AI"
             style={{ ...inputSt, marginBottom: 6, fontSize: 13, fontWeight: 500 }} />
@@ -1197,23 +1746,61 @@ export default function FRIAPage() {
           </div>
         </div>
 
-        {/* Phase nav */}
-        <div style={{ padding: "10px 8px", flex: 1 }}>
+        {/* Phase nav — FriaProgressRail style */}
+        <div style={{ padding: "8px 8px", flex: 1, overflowY: "auto" as const }}>
           <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", padding: "0 6px", marginBottom: 6 }}>Fasi FRIA</div>
-          {PHASES.map((p) => {
-            const isActive = phase === p.id;
-            const { Icon } = p;
+          {phaseProgress.map((p) => {
+            const isActive   = phase === p.id;
+            const isExpanded = expandedPhases.has(p.id);
+            const borderColor = isActive ? "rgba(35,64,58,0.20)" : p.percent === 100 ? "rgba(35,64,58,0.12)" : "rgba(0,0,0,0.07)";
+            const bgColor     = isActive ? "rgba(35,64,58,0.06)" : "transparent";
+            const circleColor = p.percent === 100 ? "#23403a" : "#dc2626";
+            const pctColor    = p.percent === 100 ? T.green : p.percent > 0 ? T.amber : T.faint;
             return (
-              <button key={p.id} onClick={() => setPhase(p.id)}
-                style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 10px", borderRadius: 8, border: "none", marginBottom: 2, cursor: "pointer", background: isActive ? T.text : "none", textAlign: "left" as const }}>
-                <span style={{ width: 22, height: 22, borderRadius: 6, background: isActive ? "rgba(255,255,255,0.15)" : T.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Icon style={{ width: 12, height: 12, color: isActive ? "#fff" : T.muted }} />
-                </span>
-                <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: isActive ? "#fff" : T.text }}>{p.id}. {p.label}</div>
-                  <div style={{ fontSize: 10, color: isActive ? "rgba(255,255,255,0.6)" : T.faint }}>{p.sub}</div>
+              <div key={p.id} style={{ border: `1px solid ${borderColor}`, background: bgColor, borderRadius: 8, overflow: "hidden", marginBottom: 4 }}>
+                <button
+                  onClick={() => {
+                    scrollToPhase(p.id);
+                    setExpandedPhases(prev => { const n = new Set(prev); n.has(p.id) ? n.delete(p.id) : n.add(p.id); return n; });
+                  }}
+                  style={{ width: "100%", textAlign: "left" as const, border: "none", background: "transparent", padding: "9px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}
+                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "rgba(0,0,0,0.02)"; }}
+                  onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
+                >
+                  <div style={{ flexShrink: 0 }}>
+                    <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${circleColor}` }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 11, fontWeight: 600, color: T.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
+                      {p.id}. {p.label}
+                    </p>
+                    <p style={{ fontSize: 9, color: T.muted, margin: 0, marginTop: 1 }}>
+                      {p.done}/{p.total} · {p.legalRef}
+                    </p>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    <span style={{ fontSize: 9.5, fontWeight: 700, color: pctColor, fontFamily: "monospace" }}>{p.percent}%</span>
+                    <ChevronRight size={10} style={{ color: T.faint, transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                  </div>
+                </button>
+                <div style={{ height: 2, background: "rgba(0,0,0,0.04)" }}>
+                  <div style={{ height: "100%", width: `${p.percent}%`, background: circleColor, transition: "width 0.35s" }} />
                 </div>
-              </button>
+                {isExpanded && (
+                  <div style={{ borderTop: "1px solid rgba(0,0,0,0.05)", padding: "4px 6px 6px" }}>
+                    {p.subPoints.map(sp => (
+                      <div key={sp.label} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 4px", borderRadius: 5 }}>
+                        <div style={{ flexShrink: 0 }}>
+                          <div style={{ width: 10, height: 10, borderRadius: "50%", border: `1.5px solid ${sp.done ? "#23403a" : "#dc2626"}` }} />
+                        </div>
+                        <p style={{ fontSize: 10, color: sp.done ? T.muted : T.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const, textDecoration: sp.done ? "line-through" : "none", opacity: sp.done ? 0.55 : 1 }}>
+                          {sp.label}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
@@ -1250,17 +1837,24 @@ export default function FRIAPage() {
               <Download style={{ width: 12, height: 12, color: T.muted }} />
             </button>
           </div>
-          <button
-            onClick={handleImportRisksToRegister}
-            style={{ width: "100%", marginTop: 6, fontSize: 11, fontWeight: 500, padding: "6px 8px", borderRadius: 7, background: "#fff", color: T.muted, border: `1px solid ${T.border}`, cursor: "pointer" }}
-          >
-            Importa rischi nel Risk Register
-          </button>
+          {/* Auto-save indicator */}
+          {friaSaved && (
+            <div style={{ marginTop: 8, fontSize: 10, color: "#16a34a", textAlign: "center" as const }}>
+              ✓ Salvato automaticamente
+            </div>
+          )}
+          {/* Version History */}
+          <div style={{ marginTop: 12 }}>
+            <VersionHistoryPanel
+              toolId="fria"
+              onRestore={(data) => setDoc(data as import("@/lib/simulation/fria-engine").FRIADocument)}
+            />
+          </div>
         </div>
       </div>
 
       {/* ── Main content ── */}
-      <div style={{ flex: 1, minWidth: 0, padding: "0 4px 40px 28px", overflowY: "auto" as const }}>
+      <div ref={contentRef} style={{ flex: 1, minWidth: 0, padding: "0 4px 40px 28px", overflowY: "auto" as const, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, background: "#fafafa" }}>
         {/* Dossier save banner */}
         {dossierSavedAt ? (
           <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 8, padding: "10px 14px", marginBottom: 20, background: T.greenBg, border: `1px solid ${T.greenBdr}`, fontSize: 12 }}>
@@ -1275,11 +1869,12 @@ export default function FRIAPage() {
           </div>
         )}
 
-        {phase === "1" && renderPhase1()}
-        {phase === "2" && renderPhase2()}
-        {phase === "3" && renderPhase3()}
-        {phase === "4" && renderPhase4()}
-        {phase === "5" && renderPhase5()}
+        <div id="fase-1">{renderPhase1()}</div>
+        <div id="fase-2" style={{ marginTop: 48 }}>{renderPhase2()}</div>
+        <div id="fase-3" style={{ marginTop: 48 }}>{renderPhase3()}</div>
+        <div id="fase-4" style={{ marginTop: 48 }}>{renderPhase4()}</div>
+        <div id="fase-5" style={{ marginTop: 48 }}>{renderPhase5()}</div>
+        <NextStepGuide fria={doc} gapCheck={gapCheckResult} onNavigateToPhase={(p) => scrollToPhase(p)} />
       </div>
 
       {/* Toast */}
@@ -1295,3 +1890,4 @@ export default function FRIAPage() {
     </div>
   );
 }
+
