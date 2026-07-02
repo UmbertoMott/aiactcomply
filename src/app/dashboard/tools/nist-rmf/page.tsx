@@ -40,7 +40,7 @@ const FUNCTION_CONFIG: Record<NistFunction, { color: string; bg: string; border:
     desc: "Stabilisce accountability, cultura e governance per la gestione del rischio AI nell'organizzazione.",
   },
   MAP: {
-    color: "#2563eb", bg: "rgba(37,99,235,0.06)", border: "rgba(37,99,235,0.2)",
+    color: "#0D1016", bg: "rgba(13,16,22,0.06)", border: "rgba(13,16,22,0.2)",
     desc: "Identifica e classifica i rischi AI nel contesto dell'organizzazione e degli stakeholder.",
   },
   MEASURE: {
@@ -277,7 +277,7 @@ export default function NistRmfPage() {
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1 text-xs mt-2 hover:underline"
-          style={{ color: "#2563eb" }}
+          style={{ color: "#0D1016" }}
         >
           NIST AI RMF ufficiale <ExternalLink className="w-3 h-3" />
         </a>
@@ -422,7 +422,7 @@ export default function NistRmfPage() {
                             : <Circle       className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: "rgba(0,0,0,0.2)" }} />
                           }
                           <div>
-                            <span className="text-xs font-medium" style={{ color: "#2563eb" }}>{a.article}</span>
+                            <span className="text-xs font-medium" style={{ color: "#0D1016" }}>{a.article}</span>
                             <span className="text-xs ml-1.5" style={{ color: T.muted }}>— {a.description}</span>
                           </div>
                         </div>

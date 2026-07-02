@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { BookOpen, Scale, Send } from "lucide-react";
+import { BookOpen, Scale, Send, Menu, Plus, Pencil, Trash2 } from "lucide-react";
+import HighlightedSourceText from "@/components/legal/HighlightedSourceText";
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -33,6 +34,43 @@ interface ChatMessage {
   confidence?: string;
   latencyMs?: number;
   chunksFound?: number;
+  userQuery?: string; // domanda che ha prodotto la risposta — usata per l'highlight Tier 2
+}
+
+// ─── Chat session persistence ──────────────────────────────────
+
+const LEGAL_CHATS_KEY = "aicomply_legal_chats_v1";
+
+interface LegalChatSession {
+  id: string;
+  name: string;
+  messages: ChatMessage[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+function loadSessions(): LegalChatSession[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(LEGAL_CHATS_KEY);
+    return raw ? (JSON.parse(raw) as LegalChatSession[]) : [];
+  } catch { return []; }
+}
+
+function saveSessions(ss: LegalChatSession[]): void {
+  try { localStorage.setItem(LEGAL_CHATS_KEY, JSON.stringify(ss)); } catch {}
+}
+
+function genId(): string {
+  return `lc_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+}
+
+function relTime(ts: number): string {
+  const diff = Date.now() - ts;
+  if (diff < 60_000) return "ora";
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)} min fa`;
+  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)} h fa`;
+  return `${Math.floor(diff / 86_400_000)} gg fa`;
 }
 
 // ─── Answer parsing ───────────────────────────────────────────
@@ -143,6 +181,21 @@ const SUGGESTIONS: { label: string; query: string }[] = [
   },
 ];
 
+// ─── EU AI Act navigation sections ───────────────────────────────
+
+const EU_ACT_SECTIONS: { label: string; ref: string; query: string }[] = [
+  { label: "Pratiche proibite", ref: "Art. 5", query: "Quali pratiche AI sono vietate dall'Art. 5 dell'EU AI Act?" },
+  { label: "Classificazione alto rischio", ref: "Art. 6–7", query: "Come si classificano i sistemi AI ad alto rischio secondo l'EU AI Act?" },
+  { label: "Requisiti tecnici", ref: "Art. 8–15", query: "Quali requisiti tecnici devono rispettare i sistemi AI ad alto rischio?" },
+  { label: "Obblighi fornitori", ref: "Art. 16", query: "Quali sono gli obblighi dei fornitori di sistemi AI ad alto rischio?" },
+  { label: "Obblighi deployer", ref: "Art. 26", query: "Quali sono gli obblighi dei deployer di sistemi AI?" },
+  { label: "FRIA", ref: "Art. 27", query: "Quando è obbligatoria la Fundamental Rights Impact Assessment (FRIA) ai sensi dell'Art. 27?" },
+  { label: "Conformità e certificazione", ref: "Art. 43–49", query: "Come funziona la procedura di valutazione della conformità per sistemi AI ad alto rischio?" },
+  { label: "Modelli GPAI", ref: "Art. 51–56", query: "Quali obblighi hanno i fornitori di modelli AI general purpose (GPAI)?" },
+  { label: "Governance e vigilanza", ref: "Art. 64–70", query: "Come funziona la governance dell'EU AI Act e le strutture di vigilanza nazionale?" },
+  { label: "Sanzioni", ref: "Art. 99–101", query: "Quali sanzioni prevede l'EU AI Act per la non conformità?" },
+];
+
 // ─── Toggle button (outside component to avoid remount on render) ─
 
 function ToggleBtn({
@@ -184,13 +237,66 @@ export default function LegalAssistantPage() {
   const [activeChunkIndex, setActiveChunkIndex] = useState<number>(-1);
   const [activeMsgIndex, setActiveMsgIndex] = useState<number>(-1);
 
+  // Chat session state
+  const [sessions, setSessions] = useState<LegalChatSession[]>([]);
+  const [currentSid, setCurrentSid] = useState<string>(() => genId());
+  const [showChatList, setShowChatList] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
+
+  const [splitRatio, setSplitRatio] = useState(58); // % width for chat panel in split mode
+  const isDragging = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
+    function onMouseMove(e: MouseEvent) {
+      if (!isDragging.current || !containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const ratio = ((e.clientX - rect.left) / rect.width) * 100;
+      setSplitRatio(Math.min(75, Math.max(25, ratio)));
+    }
+    function onMouseUp() {
+      isDragging.current = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    }
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  // Load sessions on mount
+  useEffect(() => { setSessions(loadSessions()); }, []);
+
+  // Persist current session whenever messages change
+  useEffect(() => {
+    if (messages.length === 0) return;
+    setSessions(prev => {
+      const existing = prev.find(s => s.id === currentSid);
+      const firstName = messages.find(m => m.role === "user")?.content.slice(0, 55) ?? "Nuova chat";
+      const now = Date.now();
+      const updated: LegalChatSession = {
+        id: currentSid,
+        name: existing?.name ?? firstName,
+        messages,
+        createdAt: existing?.createdAt ?? now,
+        updatedAt: now,
+      };
+      const next = [updated, ...prev.filter(s => s.id !== currentSid)];
+      saveSessions(next);
+      return next;
+    });
+  }, [messages, currentSid]);
 
   async function sendMessage(text: string) {
     if (!text.trim() || loading) return;
@@ -232,6 +338,7 @@ export default function LegalAssistantPage() {
         confidence: data.confidence,
         latencyMs: data.latencyMs,
         chunksFound: data.chunksFound ?? 0,
+        userQuery: text.trim(),
       };
 
       setMessages((prev) => {
@@ -261,6 +368,46 @@ export default function LegalAssistantPage() {
     if (layout === "chat") setLayout("split");
   }
 
+  function startNewChat() {
+    setMessages([]);
+    setCurrentSid(genId());
+    setActiveChunkIndex(-1);
+    setActiveMsgIndex(-1);
+    setInput("");
+    setShowChatList(false);
+  }
+
+  function loadSession(s: LegalChatSession) {
+    setMessages(s.messages);
+    setCurrentSid(s.id);
+    setActiveChunkIndex(-1);
+    setActiveMsgIndex(s.messages.length - 1);
+    setShowChatList(false);
+  }
+
+  function deleteSession(id: string) {
+    setSessions(prev => {
+      const next = prev.filter(s => s.id !== id);
+      saveSessions(next);
+      return next;
+    });
+    if (id === currentSid) {
+      setMessages([]);
+      setCurrentSid(genId());
+      setActiveChunkIndex(-1);
+      setActiveMsgIndex(-1);
+    }
+  }
+
+  function renameSession(id: string, name: string) {
+    setSessions(prev => {
+      const next = prev.map(s => s.id === id ? { ...s, name: name.trim() || s.name } : s);
+      saveSessions(next);
+      return next;
+    });
+    setEditingId(null);
+  }
+
   function handleSourceRowClick(chunkIdx: number, msgIdx: number) {
     setActiveMsgIndex(msgIdx);
     setActiveChunkIndex(chunkIdx);
@@ -276,8 +423,8 @@ export default function LegalAssistantPage() {
     <div
       className="flex flex-col min-w-0"
       style={{
-        flex: 1,
-        borderRight: layout === "split" ? "1px solid rgba(0,0,0,0.06)" : "none",
+        flex: layout === "split" ? `0 0 ${splitRatio}%` : "1 1 auto",
+        minWidth: 0,
       }}
     >
       <div
@@ -360,13 +507,13 @@ export default function LegalAssistantPage() {
                           <div
                             key={bi}
                             onClick={() => b.artRef && handleBadgeClick(b.artRef, msgIdx)}
-                            className={`flex items-start gap-1.5 px-1.5 py-1 rounded-md transition-colors${b.artRef && !isActive ? " hover:bg-[rgba(99,102,241,0.05)] hover:border-[rgba(99,102,241,0.15)]" : ""}`}
+                            className={`flex items-start gap-1.5 px-1.5 py-1 rounded-md transition-colors${b.artRef && !isActive ? " hover:bg-[rgba(0,0,0,0.03)] hover:border-[rgba(0,0,0,0.08)]" : ""}`}
                             style={{
                               cursor: b.artRef ? "pointer" : "default",
                               border: isActive
-                                ? "1px solid rgba(99,102,241,0.2)"
+                                ? "1px solid rgba(0,0,0,0.10)"
                                 : "1px solid transparent",
-                              background: isActive ? "rgba(99,102,241,0.07)" : "transparent",
+                              background: isActive ? "rgba(0,0,0,0.05)" : "transparent",
                             }}
                           >
                             <span className="text-[10px] text-muted-foreground mt-0.5 flex-shrink-0">•</span>
@@ -374,7 +521,7 @@ export default function LegalAssistantPage() {
                             {b.artRef && (
                               <span
                                 className="text-[9px] font-semibold rounded px-1.5 py-0.5 flex-shrink-0"
-                                style={{ background: "rgba(99,102,241,0.1)", color: "#4f46e5" }}
+                                style={{ background: "rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.55)" }}
                               >
                                 {b.artRef} ↗
                               </span>
@@ -402,7 +549,7 @@ export default function LegalAssistantPage() {
                           <span
                             key={i}
                             className="text-[9px] font-medium rounded px-1.5 py-0.5"
-                            style={{ background: "rgba(99,102,241,0.08)", color: "#4f46e5" }}
+                            style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.55)" }}
                           >
                             {ref}
                           </span>
@@ -440,7 +587,7 @@ export default function LegalAssistantPage() {
                     key={i}
                     className="w-1.5 h-1.5 rounded-full"
                     style={{
-                      background: "rgba(99,102,241,0.5)",
+                      background: "rgba(0,0,0,0.35)",
                       animation: `pulse 1.2s ${delay}s infinite`,
                     }}
                   />
@@ -485,7 +632,7 @@ export default function LegalAssistantPage() {
             <button
               key={i}
               onClick={() => { sendMessage(s.query); }}
-              className="text-[9px] text-muted-foreground px-2 py-0.5 rounded transition-colors hover:text-accent"
+              className="text-[9px] text-muted-foreground px-2 py-0.5 rounded transition-colors hover:text-foreground"
               style={{ background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.08)" }}
             >
               {s.label}
@@ -500,10 +647,9 @@ export default function LegalAssistantPage() {
     <div
       className="flex flex-col min-w-0"
       style={{
-        width: layout === "source" ? "100%" : "42%",
+        flex: "1 1 auto",
+        minWidth: 0,
         background: "#ffffff",
-        flexShrink: 0,
-        borderLeft: layout === "split" ? "1px solid rgba(0,0,0,0.06)" : "none",
       }}
     >
       <div
@@ -525,7 +671,7 @@ export default function LegalAssistantPage() {
         {activeSource && (
           <span
             className="text-[9px] font-semibold rounded px-1.5 py-0.5 flex-shrink-0"
-            style={{ background: "rgba(99,102,241,0.1)", color: "#4f46e5" }}
+            style={{ background: "rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.55)", fontFamily: "'DM Mono', monospace", letterSpacing: "0.02em" }}
           >
             {activeSource.sectionRef}
           </span>
@@ -543,9 +689,9 @@ export default function LegalAssistantPage() {
           <div className="flex flex-col items-center justify-center h-full gap-2 text-center">
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: "rgba(99,102,241,0.08)" }}
+              style={{ background: "rgba(0,0,0,0.05)" }}
             >
-              <BookOpen className="h-4 w-4" style={{ color: "#4f46e5" }} />
+              <BookOpen className="h-4 w-4" style={{ color: "rgba(0,0,0,0.55)" }} />
             </div>
             <p className="text-xs text-muted-foreground max-w-[180px]">
               Fai una domanda per vedere le fonti
@@ -555,27 +701,29 @@ export default function LegalAssistantPage() {
           <div
             className="rounded-md p-3 my-2"
             style={{
-              background: "rgba(99,102,241,0.06)",
-              border: "1px solid rgba(99,102,241,0.18)",
+              background: "#FAFAF9",
+              border: "1px solid rgba(0,0,0,0.08)",
+              borderLeft: "3px solid rgba(0,0,0,0.15)",
             }}
           >
             <div className="flex items-center justify-between mb-2">
               <span
                 className="text-[9px] font-semibold uppercase tracking-wider"
-                style={{ color: "#4f46e5", letterSpacing: "0.06em" }}
+                style={{ color: "rgba(0,0,0,0.55)", letterSpacing: "0.06em" }}
               >
                 Chunk selezionato
               </span>
               <span
                 className="text-[8px] font-semibold rounded px-1 py-0.5"
-                style={{ background: "rgba(99,102,241,0.1)", color: "#4f46e5" }}
+                style={{ background: "rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.55)" }}
               >
                 rilevanza {activeSource.similarity.toFixed(2)}
               </span>
             </div>
-            <p className="text-[11px] text-foreground leading-[1.7]">
-              {activeSource.chunkText}
-            </p>
+            <HighlightedSourceText
+              text={activeSource.chunkText}
+              query={activeMsg?.userQuery}
+            />
           </div>
         )}
       </div>
@@ -596,19 +744,19 @@ export default function LegalAssistantPage() {
               <div
                 key={i}
                 onClick={() => handleSourceRowClick(i, activeMsgIndex)}
-                className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer transition-colors${activeChunkIndex !== i ? " hover:bg-[rgba(99,102,241,0.05)] hover:border-[rgba(99,102,241,0.1)]" : ""}`}
+                className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer transition-colors${activeChunkIndex !== i ? " hover:bg-[rgba(0,0,0,0.03)] hover:border-[rgba(0,0,0,0.07)]" : ""}`}
                 style={{
                   border:
                     activeChunkIndex === i
-                      ? "1px solid rgba(99,102,241,0.2)"
+                      ? "1px solid rgba(0,0,0,0.10)"
                       : "1px solid transparent",
                   background:
-                    activeChunkIndex === i ? "rgba(99,102,241,0.07)" : "transparent",
+                    activeChunkIndex === i ? "rgba(0,0,0,0.05)" : "transparent",
                 }}
               >
                 <span
                   className="text-[9px] font-semibold rounded px-1.5 py-0.5 flex-shrink-0"
-                  style={{ background: "rgba(99,102,241,0.1)", color: "#4f46e5" }}
+                  style={{ background: "rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.55)", fontFamily: "'DM Mono', monospace", fontSize: 8 }}
                 >
                   {src.sectionRef ?? "—"}
                 </span>
@@ -647,15 +795,157 @@ export default function LegalAssistantPage() {
       </div>
 
       <div
-        className="rounded-xl mt-4 overflow-hidden flex"
-        style={{
-          border: "1px solid rgba(0,0,0,0.08)",
-          height: "calc(100vh - 200px)",
-          minHeight: "500px",
-        }}
+        className="mt-4 flex gap-3"
+        style={{ height: "calc(100vh - 200px)", minHeight: "500px" }}
       >
-        {layout !== "source" && chatPanel}
-        {layout !== "chat" && sourcePanel}
+        {/* ── Left sidebar: EU AI Act sections / Chat history ── */}
+        <div style={{ width: 220, flexShrink: 0, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, overflow: "hidden", background: "#fafafa", display: "flex", flexDirection: "column" }}>
+          {/* Header */}
+          <div style={{ padding: "10px 10px 8px", borderBottom: "1px solid rgba(0,0,0,0.07)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>
+                {showChatList ? "Cronologia" : "Documento"}
+              </span>
+              {!showChatList && (
+                <p style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", margin: "2px 0 0", lineHeight: 1.3 }}>Reg. UE 2024/1689 · EU AI Act</p>
+              )}
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+              {showChatList && (
+                <button
+                  onClick={startNewChat}
+                  title="Nuova chat"
+                  style={{ width: 22, height: 22, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 5, color: "rgba(0,0,0,0.45)" }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.06)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                ><Plus size={13} /></button>
+              )}
+              <button
+                onClick={() => setShowChatList(p => !p)}
+                title={showChatList ? "Sezioni EU AI Act" : "Cronologia chat"}
+                style={{ width: 22, height: 22, border: "none", background: showChatList ? "rgba(0,0,0,0.08)" : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 5, color: "rgba(0,0,0,0.5)" }}
+                onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.06)")}
+                onMouseLeave={e => (e.currentTarget.style.background = showChatList ? "rgba(0,0,0,0.08)" : "transparent")}
+              ><Menu size={13} /></button>
+            </div>
+          </div>
+
+          {/* Body */}
+          <div style={{ flex: 1, overflowY: "auto" as const, padding: "8px" }}>
+            {showChatList ? (
+              sessions.length === 0 ? (
+                <p style={{ fontSize: 10, color: "rgba(0,0,0,0.3)", padding: "12px 4px", margin: 0 }}>Nessuna chat salvata.</p>
+              ) : (
+                sessions.map(s => (
+                  <div key={s.id} style={{
+                    borderRadius: 7, marginBottom: 3, overflow: "hidden",
+                    border: `1px solid ${s.id === currentSid ? "rgba(0,0,0,0.14)" : "rgba(0,0,0,0.06)"}`,
+                    background: s.id === currentSid ? "rgba(0,0,0,0.03)" : "transparent",
+                  }}>
+                    {editingId === s.id ? (
+                      <div style={{ padding: "6px 8px" }}>
+                        <input
+                          value={editingName}
+                          onChange={e => setEditingName(e.target.value)}
+                          onBlur={() => renameSession(s.id, editingName)}
+                          onKeyDown={e => { if (e.key === "Enter") renameSession(s.id, editingName); if (e.key === "Escape") setEditingId(null); }}
+                          autoFocus
+                          style={{ width: "100%", fontSize: 11, border: "1px solid rgba(0,0,0,0.15)", borderRadius: 4, padding: "2px 5px", background: "#fff", outline: "none", boxSizing: "border-box" as const }}
+                        />
+                      </div>
+                    ) : (
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <button
+                          onClick={() => loadSession(s)}
+                          style={{ flex: 1, textAlign: "left" as const, background: "none", border: "none", padding: "7px 8px", cursor: "pointer", minWidth: 0 }}
+                        >
+                          <p style={{ fontSize: 11, fontWeight: s.id === currentSid ? 600 : 400, color: "#0D1016", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>{s.name}</p>
+                          <p style={{ fontSize: 9, color: "rgba(0,0,0,0.35)", margin: 0, marginTop: 1 }}>{relTime(s.updatedAt)}</p>
+                        </button>
+                        <div style={{ display: "flex", gap: 1, paddingRight: 4, flexShrink: 0 }}>
+                          <button
+                            onClick={() => { setEditingId(s.id); setEditingName(s.name); }}
+                            title="Rinomina"
+                            style={{ width: 20, height: 20, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, color: "rgba(0,0,0,0.35)" }}
+                            onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.06)")}
+                            onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                          ><Pencil size={10} /></button>
+                          <button
+                            onClick={() => deleteSession(s.id)}
+                            title="Elimina"
+                            style={{ width: 20, height: 20, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, color: "rgba(0,0,0,0.35)" }}
+                            onMouseEnter={e => { e.currentTarget.style.background = "rgba(220,38,38,0.08)"; e.currentTarget.style.color = "#dc2626"; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "rgba(0,0,0,0.35)"; }}
+                          ><Trash2 size={10} /></button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )
+            ) : (
+              EU_ACT_SECTIONS.map((s) => (
+                <button
+                  key={s.ref}
+                  onClick={() => { sendMessage(s.query); setInput(""); }}
+                  style={{ width: "100%", textAlign: "left" as const, border: "1px solid rgba(0,0,0,0.07)", background: "transparent", padding: "9px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, borderRadius: 8, marginBottom: 4 }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,0,0,0.03)"; e.currentTarget.style.borderColor = "rgba(0,0,0,0.12)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(0,0,0,0.07)"; }}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>{s.label}</p>
+                    <p style={{ fontSize: 9, color: "rgba(0,0,0,0.42)", margin: 0, marginTop: 2, fontFamily: "monospace" }}>{s.ref}</p>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* ── Existing chat + source panels ── */}
+        <div
+          ref={containerRef}
+          className="rounded-xl overflow-hidden flex"
+          style={{
+            border: "1px solid rgba(0,0,0,0.08)",
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
+          {layout !== "source" && chatPanel}
+          {layout === "split" && (
+            <div
+              style={{
+                flex: "0 0 5px",
+                cursor: "col-resize",
+                background: "transparent",
+                position: "relative",
+                zIndex: 10,
+              }}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                isDragging.current = true;
+                document.body.style.cursor = "col-resize";
+                document.body.style.userSelect = "none";
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: "3px",
+                  height: "36px",
+                  borderRadius: "2px",
+                  background: "rgba(0,0,0,0.12)",
+                  transition: "background 0.15s",
+                }}
+              />
+            </div>
+          )}
+          {layout !== "chat" && sourcePanel}
+        </div>
       </div>
 
       <style>{`

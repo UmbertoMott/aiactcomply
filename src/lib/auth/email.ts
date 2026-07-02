@@ -1,4 +1,12 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
+
+// Resend è il provider principale. Fallback console.log se la chiave non è configurata.
+function getResend(): Resend | null {
+  if (!process.env.RESEND_API_KEY) return null;
+  return new Resend(process.env.RESEND_API_KEY);
+}
+
+const FROM = process.env.RESEND_FROM ?? "AIComply <onboarding@resend.dev>";
 
 function escapeHtml(s: string): string {
   return s
@@ -9,91 +17,17 @@ function escapeHtml(s: string): string {
     .replace(/'/g, "&#x27;");
 }
 
-function getTransporter() {
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-  if (!user || !pass) return null;
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || "smtp.gmail.com",
-    port: parseInt(process.env.SMTP_PORT || "587"),
-    secure: false,
-    auth: { user, pass },
-  });
-}
-
-export async function sendOTPEmail(email: string, otp: string, name: string) {
-  const transporter = getTransporter();
-  if (!transporter) {
-    console.log(`[EMAIL MOCK] A: ${email} | OTP: ${otp}`);
-    return;
-  }
-
-  await transporter.sendMail({
-    from: process.env.SMTP_FROM || "AIComply <noreply@aicomply.app>",
-    to: email,
-    subject: "Il tuo codice di verifica AIComply",
-    html: `
-      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-        <h2 style="color: #6366f1;">AIComply</h2>
-        <p>Ciao <strong>${escapeHtml(name)}</strong>,</p>
-        <p>Il tuo codice di verifica è:</p>
-        <div style="background: #0f172a; border-radius: 12px; padding: 24px; text-align: center; margin: 24px 0;">
-          <span style="font-size: 36px; letter-spacing: 8px; font-weight: 700; color: #6366f1;">
-            ${otp}
-          </span>
-        </div>
-        <p style="color: #64748b; font-size: 14px;">
-          Il codice scade tra 10 minuti. Se non hai richiesto questa verifica, ignora questa email.
-        </p>
-        <hr style="border: none; border-top: 1px solid #1e293b; margin: 24px 0;" />
-        <p style="color: #64748b; font-size: 12px;">
-          AIComply — Conforme al Regolamento UE 2024/1689
-        </p>
-      </div>
-    `,
-  });
-}
-
-export async function sendWelcomeEmail(email: string, name: string) {
-  const transporter = getTransporter();
-  if (!transporter) {
-    console.log(`[EMAIL MOCK] Benvenuto a: ${email}`);
-    return;
-  }
-
-  await transporter.sendMail({
-    from: process.env.SMTP_FROM || "AIComply <noreply@aicomply.app>",
-    to: email,
-    subject: "Benvenuto in AIComply!",
-    html: `
-      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-        <h2 style="color: #6366f1;">AIComply</h2>
-        <p>Ciao <strong>${escapeHtml(name)}</strong>,</p>
-        <p>Grazie per esserti registrato su <strong>AIComply</strong>.</p>
-        <p>Ora puoi accedere alla dashboard per iniziare il percorso di compliance al Regolamento UE 2024/1689.</p>
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard"
-           style="display: inline-block; background: #6366f1; color: white; padding: 12px 24px;
-                  border-radius: 8px; text-decoration: none; font-weight: 600; margin: 16px 0;">
-          Vai alla dashboard
-        </a>
-        <hr style="border: none; border-top: 1px solid #1e293b; margin: 24px 0;" />
-        <p style="color: #64748b; font-size: 12px;">
-          AIComply — Conforme al Regolamento UE 2024/1689
-        </p>
-      </div>
-    `,
-  });
-}
+// ── Login OTP ──────────────────────────────────────────────────────────────
 
 export async function sendLoginOTPEmail(email: string, otp: string): Promise<void> {
-  const transporter = getTransporter();
-  if (!transporter) {
+  const resend = getResend();
+  if (!resend) {
     console.log(`[EMAIL MOCK] Login OTP per ${email}: ${otp}`);
     return;
   }
 
-  await transporter.sendMail({
-    from: process.env.SMTP_FROM || "AIComply <noreply@aicomply.app>",
+  await resend.emails.send({
+    from: FROM,
     to: email,
     subject: `${otp} — Il tuo codice di accesso AIComply`,
     html: `
@@ -114,7 +48,6 @@ export async function sendLoginOTPEmail(email: string, otp: string): Promise<voi
         </p>
         <p style="color: #64748b; font-size: 13px; margin: 0 0 24px;">
           🔒 Se non stai cercando di accedere ad AIComply, ignora questa email.
-          Nessuna azione è necessaria — il tuo account è al sicuro.
         </p>
 
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
@@ -126,6 +59,72 @@ export async function sendLoginOTPEmail(email: string, otp: string): Promise<voi
   });
 }
 
+// ── OTP registrazione (usata altrove nel progetto) ─────────────────────────
+
+export async function sendOTPEmail(email: string, otp: string, name: string): Promise<void> {
+  const resend = getResend();
+  if (!resend) {
+    console.log(`[EMAIL MOCK] A: ${email} | OTP: ${otp}`);
+    return;
+  }
+
+  await resend.emails.send({
+    from: FROM,
+    to: email,
+    subject: "Il tuo codice di verifica AIComply",
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #6366f1;">AIComply</h2>
+        <p>Ciao <strong>${escapeHtml(name)}</strong>,</p>
+        <p>Il tuo codice di verifica è:</p>
+        <div style="background: #0f172a; border-radius: 12px; padding: 24px; text-align: center; margin: 24px 0;">
+          <span style="font-size: 36px; letter-spacing: 8px; font-weight: 700; color: #6366f1;">
+            ${otp}
+          </span>
+        </div>
+        <p style="color: #64748b; font-size: 14px;">
+          Il codice scade tra 10 minuti. Se non hai richiesto questa verifica, ignora questa email.
+        </p>
+        <hr style="border: none; border-top: 1px solid #1e293b; margin: 24px 0;" />
+        <p style="color: #64748b; font-size: 12px;">AIComply — Conforme al Regolamento UE 2024/1689</p>
+      </div>
+    `,
+  });
+}
+
+// ── Welcome email ──────────────────────────────────────────────────────────
+
+export async function sendWelcomeEmail(email: string, name: string): Promise<void> {
+  const resend = getResend();
+  if (!resend) {
+    console.log(`[EMAIL MOCK] Benvenuto a: ${email}`);
+    return;
+  }
+
+  await resend.emails.send({
+    from: FROM,
+    to: email,
+    subject: "Benvenuto in AIComply!",
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #6366f1;">AIComply</h2>
+        <p>Ciao <strong>${escapeHtml(name)}</strong>,</p>
+        <p>Grazie per esserti registrato su <strong>AIComply</strong>.</p>
+        <p>Ora puoi accedere alla dashboard per iniziare il percorso di compliance al Regolamento UE 2024/1689.</p>
+        <a href="${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/dashboard"
+           style="display: inline-block; background: #6366f1; color: white; padding: 12px 24px;
+                  border-radius: 8px; text-decoration: none; font-weight: 600; margin: 16px 0;">
+          Vai alla dashboard
+        </a>
+        <hr style="border: none; border-top: 1px solid #1e293b; margin: 24px 0;" />
+        <p style="color: #64748b; font-size: 12px;">AIComply — Conforme al Regolamento UE 2024/1689</p>
+      </div>
+    `,
+  });
+}
+
+// ── Waitlist notification ──────────────────────────────────────────────────
+
 export async function sendWaitlistNotification(entry: {
   name: string;
   email: string;
@@ -134,16 +133,16 @@ export async function sendWaitlistNotification(entry: {
   ai_systems: string;
   plan: string;
 }): Promise<void> {
+  const resend = getResend();
   const notifyEmail = process.env.WAITLIST_NOTIFY_EMAIL ?? "dridrop@gmail.com";
-  const transporter = getTransporter();
 
-  if (!transporter) {
+  if (!resend) {
     console.log(`[WAITLIST] Nuovo iscritto: ${entry.name} <${entry.email}> (${entry.company}) — piano: ${entry.plan}`);
     return;
   }
 
-  await transporter.sendMail({
-    from: process.env.SMTP_FROM || "AIComply <noreply@aicomply.app>",
+  await resend.emails.send({
+    from: FROM,
     to: notifyEmail,
     subject: `🎯 Nuovo iscritto waitlist — ${escapeHtml(entry.name)} (${escapeHtml(entry.company)})`,
     html: `

@@ -272,6 +272,7 @@ function formToResult(f: FormState): L132Result {
     remediation: f.remediation,
     isDeepfakeRisk: f.isDeepfakeRisk,
     requiresHRNotice: f.requiresHRNotice,
+    deployedInItaly: f.deployedInItaly,
   };
 }
 
@@ -484,36 +485,49 @@ function CheckItem({
             : "1px solid rgba(0,0,0,0.06)",
       }}
     >
-      <div className="flex items-center gap-2 mt-0.5 flex-shrink-0">
-        <button
-          onClick={() => onChange(true)}
-          className="w-5 h-5 rounded-full flex items-center justify-center transition-all"
-          style={{
-            background:
-              value === true ? "#15803d" : "rgba(0,0,0,0.06)",
-            border: value === true ? "none" : "1.5px solid rgba(0,0,0,0.18)",
-          }}
-          title="Conforme"
-        >
-          {value === true && (
-            <CheckCircle className="h-3 w-3" style={{ color: "#fff" }} />
-          )}
-        </button>
-        <button
-          onClick={() => onChange(false)}
-          className="w-5 h-5 rounded-full flex items-center justify-center transition-all"
-          style={{
-            background:
-              value === false ? "#dc2626" : "rgba(0,0,0,0.06)",
-            border:
-              value === false ? "none" : "1.5px solid rgba(0,0,0,0.18)",
-          }}
-          title="Non conforme"
-        >
-          {value === false && (
-            <XCircle className="h-3 w-3" style={{ color: "#fff" }} />
-          )}
-        </button>
+      <div className="flex items-end gap-2 mt-0.5 flex-shrink-0">
+        {/* Sì */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+          <span style={{
+            fontSize: 9, fontWeight: 600, letterSpacing: "0.05em",
+            color: value === true ? "#15803d" : "rgba(0,0,0,0.28)",
+            transition: "color 0.15s",
+          }}>Sì</span>
+          <button
+            onClick={() => onChange(true)}
+            className="w-5 h-5 rounded-full flex items-center justify-center transition-all"
+            style={{
+              background: value === true ? "#15803d" : "rgba(0,0,0,0.06)",
+              border: value === true ? "none" : "1.5px solid rgba(0,0,0,0.18)",
+            }}
+            title="Conforme"
+          >
+            {value === true && (
+              <CheckCircle className="h-3 w-3" style={{ color: "#fff" }} />
+            )}
+          </button>
+        </div>
+        {/* No */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+          <span style={{
+            fontSize: 9, fontWeight: 600, letterSpacing: "0.05em",
+            color: value === false ? "#dc2626" : "rgba(0,0,0,0.28)",
+            transition: "color 0.15s",
+          }}>No</span>
+          <button
+            onClick={() => onChange(false)}
+            className="w-5 h-5 rounded-full flex items-center justify-center transition-all"
+            style={{
+              background: value === false ? "#dc2626" : "rgba(0,0,0,0.06)",
+              border: value === false ? "none" : "1.5px solid rgba(0,0,0,0.18)",
+            }}
+            title="Non conforme"
+          >
+            {value === false && (
+              <XCircle className="h-3 w-3" style={{ color: "#fff" }} />
+            )}
+          </button>
+        </div>
       </div>
       <p className="text-[12px] leading-relaxed" style={{ color: "#0D1016" }}>
         {label}
@@ -563,11 +577,20 @@ export default function L132Page() {
   const [aiSystems, setAiSystems] = useState<{ id: string; name: string; risk_tier: string }[]>([]);
   const [dbSynced, setDbSynced] = useState(false);
   const [dbSyncing, setDbSyncing] = useState(false);
+  const [showLegalNote, setShowLegalNote] = useState(true);
 
   // Load saved state (localStorage + DB)
   useEffect(() => {
     const savedLocal = readFromStorage<L132Result>("l132");
-    if (savedLocal) setForm(resultToForm(savedLocal));
+    if (savedLocal) {
+      setForm(resultToForm(savedLocal));
+    } else {
+      // Pre-populate systemName from Classifier on first open
+      const cls = readFromStorage<{ systemName?: string }>("classifier");
+      if (cls?.systemName) {
+        setForm((f) => ({ ...f, systemName: cls.systemName! }));
+      }
+    }
     // Carica sistemi AI dal DB
     loadAISystems().then(setAiSystems);
   }, []);
@@ -687,9 +710,9 @@ export default function L132Page() {
         <div className="flex items-start gap-3">
           <div
             className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: "rgba(220,38,38,0.07)" }}
+            style={{ background: "rgba(13,16,22,0.06)" }}
           >
-            <Scale className="h-5 w-5" style={{ color: "#dc2626" }} />
+            <Scale className="h-5 w-5" style={{ color: "#0D1016" }} />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
@@ -1150,13 +1173,32 @@ export default function L132Page() {
         </div>
 
         {/* Legal note */}
+        {showLegalNote && (
         <div
           className="mt-6 rounded-lg p-4"
           style={{
             background: "rgba(245,158,11,0.06)",
             border: "1px solid rgba(245,158,11,0.25)",
+            position: "relative",
           }}
         >
+          <button
+            onClick={() => setShowLegalNote(false)}
+            style={{
+              position: "absolute", top: 10, right: 10,
+              width: 20, height: 20,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              color: "rgba(146,64,14,0.5)",
+              fontSize: 16,
+              lineHeight: 1,
+              padding: 0,
+              borderRadius: 4,
+            }}
+            aria-label="Chiudi nota legale"
+          >×</button>
           <p
             className="text-[12px] font-semibold mb-1"
             style={{ color: "#92400e" }}
@@ -1178,6 +1220,7 @@ export default function L132Page() {
             informativo e non sostituisce la consulenza legale specializzata.
           </p>
         </div>
+        )}
       </div>
 
       {/* Toast */}

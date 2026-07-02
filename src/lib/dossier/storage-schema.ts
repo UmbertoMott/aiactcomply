@@ -8,6 +8,10 @@ export interface ClassifierResult {
   annexI?: boolean;
   applicableArticles: string[];
   completedAt: string;
+  /** Ruolo dell'organizzazione rispetto al sistema: provider/deployer */
+  role?: "provider" | "deployer" | "fornitore" | "dispiegatore" | "deployer/utilizzatore" | string;
+  /** Il sistema è o integra un modello di uso generale (GPAI) */
+  isGPAI?: boolean;
 }
 
 export interface RiskManagerResult {
@@ -294,6 +298,7 @@ export interface L132Result {
   remediation: string;
   isDeepfakeRisk: boolean;
   requiresHRNotice: boolean;
+  deployedInItaly?: boolean;
 }
 
 export interface ProviderTransitionResult {
@@ -322,6 +327,21 @@ export interface EUDBResult {
   member_states_count: number;
   risk_classification: string;
   registrationRequired: boolean;
+  completedAt: string;
+}
+
+export interface IncidentResult {
+  systemName: string;
+  providerName: string;
+  incidentDate: string;
+  description: string;
+  affectedPersons: number | null;
+  severity: "minor" | "serious" | "critical";
+  isSeriousIncident: boolean;
+  art73Obligation: boolean;
+  notificationDeadlineHours: number;
+  notified: boolean;
+  notifiedAt?: string;
   completedAt: string;
 }
 
@@ -354,7 +374,27 @@ export interface DossierData {
   authorizedRep?: AuthRepResult;
   providerTransition?: ProviderTransitionResult;
   art50?: { systemsCount: number; completedAt: string };
+  incident?: IncidentResult;
 }
+
+// ── Org Profile — flag organizzativi per sidebar condizionale ───────────────
+
+export interface OrgProfile {
+  /** True se l'organizzazione opera con la PA italiana → mostra L.132 + AGID/ACN */
+  paItaly: boolean;
+  /** True se il sistema classificato in Triage è un modello GPAI → mostra GPAI Assessment */
+  gpaiDetected: boolean;
+  /** True se l'utente ha abilitato il mapping NIST AI RMF (Enterprise opt-in) */
+  nistEnabled: boolean;
+  /** Nome organizzazione (opzionale) */
+  orgName?: string;
+}
+
+export const DEFAULT_ORG_PROFILE: OrgProfile = {
+  paItaly: false,
+  gpaiDetected: false,
+  nistEnabled: false,
+};
 
 export const STORAGE_KEYS = {
   prohibited:  "aicomply_prohibited_result",
@@ -379,13 +419,48 @@ export const STORAGE_KEYS = {
   authorizedRep: "aicomply_authorized_rep_result",
   providerTransition: "aicomply_provider_transition_result",
   art50: "aicomply_art50_result",
+  orgProfile: "aicomply_org_profile",
+  incident: "aicomply_incident_result",
+  assessment: "aicomply_assessment",
+  spineRisks: "aicomply_spine_risks",
+  dpiaSignoff: "aicomply_dpia_signoff",
+  friaSignoff: "aicomply_fria_signoff",
+  friaStaleness: "aicomply_fria_staleness",
+  dpiaStaleness: "aicomply_dpia_staleness",
+  dpiaGuided:    "aicomply_dpia_guided",
+  friaGuided:    "aicomply_fria_guided",
 } as const;
+
+// ── Project-scoped storage key ───────────────────────────────────────────────
+
+function getActiveProjectId(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("aicomply_active_project_id") ?? null;
+}
+
+/**
+ * Restituisce la chiave localStorage per un tool:
+ * - Con progetto attivo → `aicomply_p_{projectId}_{toolId}`
+ * - Senza progetto → usa il legacy STORAGE_KEYS[key] per retrocompatibilità
+ */
+function scopedKey(key: keyof typeof STORAGE_KEYS): string {
+  const pid = getActiveProjectId();
+  return pid ? `aicomply_p_${pid}_${key}` : STORAGE_KEYS[key];
+}
 
 export function readFromStorage<T>(key: keyof typeof STORAGE_KEYS): T | null {
   try {
     if (typeof window === "undefined") return null;
-    const raw = localStorage.getItem(STORAGE_KEYS[key]);
-    return raw ? (JSON.parse(raw) as T) : null;
+    // Prima prova la chiave scoped al progetto attivo
+    const primary = scopedKey(key);
+    const raw = localStorage.getItem(primary);
+    if (raw) return JSON.parse(raw) as T;
+    // Fallback alla chiave legacy (dati pre-multiproject)
+    if (primary !== STORAGE_KEYS[key]) {
+      const legacy = localStorage.getItem(STORAGE_KEYS[key]);
+      if (legacy) return JSON.parse(legacy) as T;
+    }
+    return null;
   } catch {
     return null;
   }
@@ -394,8 +469,27 @@ export function readFromStorage<T>(key: keyof typeof STORAGE_KEYS): T | null {
 export function writeToStorage<T>(key: keyof typeof STORAGE_KEYS, data: T): void {
   try {
     if (typeof window === "undefined") return;
-    localStorage.setItem(STORAGE_KEYS[key], JSON.stringify(data));
+    localStorage.setItem(scopedKey(key), JSON.stringify(data));
+    // Version snapshot — import lazy per evitare circular
+    import("@/lib/projects/version-history").then(({ appendVersion }) => {
+      appendVersion(key, data);
+    }).catch(() => {});
+    // Supabase sync — fire-and-forget, non blocca la UI
+    // Usa un debounce globale per non saturare su keystroke
+    _scheduleDbSync(key, data);
   } catch {
     // ignore quota errors in SSR
   }
+}
+
+// ─── Debounced Supabase sync (globale) ────────────────────────────────────────
+const _dbSyncTimers: Record<string, ReturnType<typeof setTimeout>> = {};
+
+function _scheduleDbSync<T>(key: string, data: T): void {
+  if (_dbSyncTimers[key]) clearTimeout(_dbSyncTimers[key]);
+  _dbSyncTimers[key] = setTimeout(() => {
+    import("@/app/actions/toolState").then(({ saveToolState }) => {
+      saveToolState(key, data).catch(() => {});
+    }).catch(() => {});
+  }, 2500);
 }

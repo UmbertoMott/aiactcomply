@@ -99,7 +99,7 @@ export default function UserMenu() {
           className="hidden sm:block text-[12px] font-medium max-w-[120px] truncate"
           style={{ color: "#0D1016" }}
         >
-          {company || email?.split("@")[0] || "Account"}
+          {(company || email?.split("@")[0] || "Account").replace(/^./, (c) => c.toUpperCase())}
         </span>
         <ChevronDown
           className="h-3 w-3 transition-transform"

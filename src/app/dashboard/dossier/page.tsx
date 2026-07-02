@@ -31,6 +31,10 @@ function StatusIcon({ status }: { status: DossierSection["status"] }) {
     return <CheckCircle size={14} strokeWidth={1.5} style={{ color: "#15803d", flexShrink: 0 }} />;
   if (status === "partial")
     return <AlertTriangle size={14} strokeWidth={1.5} style={{ color: "#d97706", flexShrink: 0 }} />;
+  if (status === "not_applicable")
+    return <div style={{ width: 14, height: 14, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ width: 8, height: 1.5, borderRadius: 1, background: "rgba(0,0,0,0.18)" }} />
+    </div>;
   return <XCircle size={14} strokeWidth={1.5} style={{ color: "rgba(0,0,0,0.2)", flexShrink: 0 }} />;
 }
 
@@ -121,6 +125,41 @@ export default function DossierPage() {
     );
     triggerPrint(data);
   }, [data, pct, done, sections.length]);
+
+  async function handleExportPdf() {
+    if (!data) return;
+    showToast("Generazione PDF in corso…");
+    const sectionPayload = sections.map(s => ({
+      title: s.title,
+      article: s.article ?? "",
+      content: s.status === "not_applicable"
+        ? `Non applicabile — ${s.notApplicableReason ?? "non richiesto per questo sistema/tier"}`
+        : `Stato: ${s.status}${s.completedAt ? ` — completato il ${new Date(s.completedAt).toLocaleDateString("it-IT")}` : ""}`,
+      status: (s.status === "complete" ? "complete" : s.status === "partial" ? "partial" : "empty") as "complete" | "partial" | "empty",
+    }));
+    try {
+      const res = await fetch("/api/compliance/export-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemName: data.meta.systemName,
+          systemId: `dossier-${Date.now()}`,
+          sections: sectionPayload,
+        }),
+      });
+      if (!res.ok) { showToast("Errore export PDF"); return; }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `AIComply_Dossier_${data.meta.systemName.replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("PDF esportato ✓");
+    } catch {
+      showToast("Errore durante l'export PDF");
+    }
+  }
 
   function handleExportJSON() {
     if (!data) return;
@@ -264,6 +303,13 @@ export default function DossierPage() {
               >
                 <Download size={11} /> Esporta JSON
               </button>
+              <button
+                onClick={handleExportPdf}
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium hover:opacity-75 transition-opacity"
+                style={{ background: "#0D1016", border: "1px solid rgba(0,0,0,0.12)", color: "#fff", cursor: "pointer" }}
+              >
+                <Download size={11} /> Export PDF
+              </button>
             </div>
           </div>
 
@@ -337,14 +383,23 @@ export default function DossierPage() {
                 {sections.map((s) => (
                   <div key={s.id} className="flex items-start gap-2.5 px-4 py-2.5" style={{ borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
                     <StatusIcon status={s.status} />
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0" style={{ opacity: s.status === "not_applicable" ? 0.4 : 1 }}>
                       <div className="flex items-center gap-1.5">
                         <span className="text-[10px] font-semibold" style={{ color: "rgba(0,0,0,0.3)" }}>{s.article}</span>
-                        <span className="text-[11px] font-medium truncate" style={{ color: "#0D1016" }}>{s.title}</span>
+                        <span className="text-[11px] font-medium truncate" style={{ color: s.status === "not_applicable" ? "rgba(0,0,0,0.4)" : "#0D1016" }}>{s.title}</span>
+                        {s.status === "not_applicable" && (
+                          <span className="text-[9px] px-1 rounded" style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.3)", border: "1px solid rgba(0,0,0,0.07)", whiteSpace: "nowrap" }}>
+                            N/A
+                          </span>
+                        )}
                       </div>
                       {s.status === "complete" && s.completedAt ? (
                         <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.3)" }}>
                           {new Date(s.completedAt).toLocaleDateString("it-IT")}
+                        </p>
+                      ) : s.status === "not_applicable" ? (
+                        <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.3)", fontStyle: "italic" }}>
+                          {s.notApplicableReason ?? "Non applicabile per questo sistema"}
                         </p>
                       ) : s.status !== "complete" ? (
                         <Link
@@ -411,21 +466,19 @@ export default function DossierPage() {
             </div>
             <div
               className="rounded-xl overflow-hidden"
-              style={{ background: "#e5e7eb", padding: 16, minHeight: 640 }}
+              style={{ background: "#e5e7eb", padding: 16 }}
             >
-              {/* Scaled document */}
+              {/* Scaled document — zoom affects layout so no grey overflow */}
               <div
                 style={{
                   background: "#ffffff",
                   borderRadius: 4,
                   boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
-                  transformOrigin: "top left",
-                  transform: "scale(0.58)",
-                  width: "172%",   // 100/0.58 ≈ 172 — compensate for scale
                   pointerEvents: "none",
                   userSelect: "none",
                   overflow: "hidden",
-                }}
+                  zoom: 0.58,
+                } as React.CSSProperties}
               >
                 <DossierPreview data={data} />
               </div>

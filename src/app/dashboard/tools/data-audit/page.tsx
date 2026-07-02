@@ -1,100 +1,346 @@
 "use client";
-
-import { useState, useEffect } from "react";
-import SignOffPanel from "@/components/ui/SignOffPanel";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useCallback, useEffect, useRef, CSSProperties } from "react";
 import Link from "next/link";
 import {
-  MOCK_DATASETS, calculateBiasReport, getTemporalSnapshots,
-  COLUMN_LINEAGE, type TemporalSnapshot,
-  parseCSV, computeRealBiasReport,
-  type RealDatasetConfig, type BiasReport,
-} from "@/lib/simulation/data-audit-engine";
+  Database, Upload, CheckCircle2, Clock, Minus, AlertTriangle,
+  Sparkles, Loader2, Info, X, ExternalLink, Check, ChevronDown,
+  FileText, AlertCircle, Shield,
+} from "lucide-react";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
-import type { DataAuditResult } from "@/lib/dossier/storage-schema";
+import type { ClassifierResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
-import { SystemContextBanner } from "@/components/compliance/SystemContextBanner";
-import { DBStatusBadge, type DBSource } from "@/components/ui/DBStatusBadge";
+import { SystemSelector } from "@/components/compliance/SystemSelector";
+import {
+  DATA_GOVERNANCE_PRACTICES,
+  SPECIAL_CATEGORIES_MODULE,
+  MAX_CSV_SIZE_BYTES,
+} from "@/lib/data-audit/data-governance-practices";
+import {
+  loadDataAuditRecord,
+  saveDataAuditRecord,
+  countDocumented,
+  type DataAuditRecord,
+  type DatasetProfile,
+  type DatasetRole,
+  type GovernancePracticeRecord,
+  type PracticeStatus,
+} from "@/lib/data-audit/data-audit-types";
+import { profileDataset } from "@/lib/data-audit/csv-profiler";
+import {
+  draftGovernancePracticeDocumentation,
+  analyzeBiasIndicators,
+} from "@/app/actions/dataAuditActions";
 
-const CUSTOM_DATASET_ID = "__custom__";
+// ─── Tokens ───────────────────────────────────────────────────────────────────
+const T = {
+  text: "#0D1016", muted: "rgba(0,0,0,0.42)", faint: "rgba(0,0,0,0.22)", border: "rgba(0,0,0,0.08)",
+  card: "#fff", bg: "#f9f9fb",
+  red: "#dc2626", redBg: "rgba(220,38,38,0.06)", redBdr: "rgba(220,38,38,0.18)",
+  amber: "#d97706", amberBg: "rgba(202,138,4,0.07)", amberBdr: "rgba(202,138,4,0.22)",
+  green: "#15803d", greenBg: "rgba(22,163,74,0.06)", greenBdr: "rgba(22,163,74,0.18)",
+  blue: "#0D1016", blueBg: "rgba(0,0,0,0.04)", blueBdr: "rgba(0,0,0,0.12)",
+  violet: "#0D1016", violetBg: "rgba(0,0,0,0.04)", violetBdr: "rgba(0,0,0,0.12)",
+} as const;
+const FONT: CSSProperties = { fontFamily: "Inter, system-ui, sans-serif" };
+const card: CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
+const inp: CSSProperties = { width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, color: T.text, background: T.card, outline: "none" };
+const ta: CSSProperties = { ...inp, resize: "vertical" as const };
 
-interface CustomDatasetConfig {
-  name: string;
-  source: string;
-  rows: string;
-  sensitiveFeatures: string;
+// ─── Dataset upload component ─────────────────────────────────────────────────
+
+interface DatasetUploadProps {
+  role: DatasetRole;
+  roleLabel: string;
+  optional: boolean;
+  profile: DatasetProfile | null;
+  onProfile: (p: DatasetProfile) => void;
+  onRemove: () => void;
 }
 
-type AuditMode = "demo" | "real";
+function DatasetUpload({ role, roleLabel, optional, profile, onProfile, onRemove }: DatasetUploadProps) {
+  const [dragging, setDragging] = useState(false);
+  const [parsing, setParsing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-function Bar({ value, max = 1, color }: { value: number; max?: number; color: string }) {
+  async function processFile(file: File) {
+    setError(null);
+    if (!file.name.endsWith(".csv")) { setError("Solo file .csv"); return; }
+    if (file.size > MAX_CSV_SIZE_BYTES) { setError(`File troppo grande (max ${MAX_CSV_SIZE_BYTES / 1024 / 1024} MB)`); return; }
+    setParsing(true);
+    try {
+      const text = await file.text();
+      const p = profileDataset(crypto.randomUUID(), role, file.name, text);
+      // text is processed and immediately discarded — only profile (stats) is kept
+      onProfile(p);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Errore parsing CSV");
+    } finally {
+      setParsing(false);
+    }
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault(); setDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) processFile(file);
+  }
+
+  if (profile) {
+    const sensitiveCount = profile.columns.filter(c => c.flaggedAsSensitive).length;
+    const highMissing = profile.columns.filter(c => c.missingPercentage > 20);
+    return (
+      <div className="rounded-xl p-4" style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}>
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <CheckCircle2 size={14} style={{ color: T.green }} />
+              <span className="text-[12px] font-semibold truncate" style={{ color: T.green }}>{profile.fileName}</span>
+            </div>
+            <div className="flex flex-wrap gap-3 text-[11px]" style={{ color: T.muted }}>
+              <span>{profile.rowCount.toLocaleString()} righe</span>
+              <span>{profile.columnCount} colonne</span>
+              <span>{profile.overallMissingPercentage}% missing</span>
+              {sensitiveCount > 0 && (
+                <span className="font-semibold" style={{ color: T.amber }}>
+                  ⚠ {sensitiveCount} colonne sensibili rilevate
+                </span>
+              )}
+              {highMissing.length > 0 && (
+                <span className="font-semibold" style={{ color: T.red }}>
+                  {highMissing.length} colonne con &gt;20% valori mancanti
+                </span>
+              )}
+            </div>
+          </div>
+          <button onClick={onRemove} style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}>
+            <X size={14} style={{ color: T.muted }} />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.07)" }}>
-      <motion.div className="h-full rounded-full"
-        initial={{ width: 0 }}
-        animate={{ width: `${Math.min(1, value / max) * 100}%` }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        style={{ background: color }}
-      />
+    <div>
+      {/* Privacy notice — sempre visibile, come da constraint */}
+      <div className="flex items-start gap-1.5 mb-2 text-[11px]" style={{ color: T.muted }}>
+        <Shield size={11} className="mt-0.5 flex-shrink-0" style={{ color: T.blue }} />
+        <span>I tuoi dati non vengono salvati: calcoliamo solo statistiche aggregate, il file viene scartato dopo l&apos;analisi.</span>
+      </div>
+      <div
+        onDragOver={e => { e.preventDefault(); setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={handleDrop}
+        onClick={() => inputRef.current?.click()}
+        className="rounded-xl border-2 border-dashed flex flex-col items-center justify-center p-6 cursor-pointer transition-colors"
+        style={{ borderColor: dragging ? T.blue : T.border, background: dragging ? T.blueBg : T.bg }}
+      >
+        {parsing ? (
+          <Loader2 size={20} className="animate-spin mb-2" style={{ color: T.blue }} />
+        ) : (
+          <Upload size={20} className="mb-2" style={{ color: T.muted }} />
+        )}
+        <p className="text-[12px] font-medium" style={{ color: T.text }}>
+          {parsing ? "Analisi in corso..." : `Dataset ${roleLabel}`}
+          {optional && <span className="ml-1 text-[10px]" style={{ color: T.muted }}>(non obbligatorio)</span>}
+        </p>
+        <p className="text-[11px]" style={{ color: T.muted }}>
+          {parsing ? "Profiling colonne..." : "Trascina un .csv o clicca — max 25 MB"}
+        </p>
+        <input ref={inputRef} type="file" accept=".csv" className="hidden"
+          onChange={e => { const f = e.target.files?.[0]; if (f) processFile(f); }} />
+      </div>
+      {error && <p className="text-[11px] mt-1" style={{ color: T.red }}>{error}</p>}
     </div>
   );
 }
 
-// ─── Shared metric cards renderer ────────────────────────────────────────────
+// ─── Column profile table ─────────────────────────────────────────────────────
 
-interface MetricCardsProps {
-  report: BiasReport;
-  animKey: string;
+function ColumnTable({ profile, onConfirmSensitive }: { profile: DatasetProfile; onConfirmSensitive: (colName: string, confirmed: boolean) => void }) {
+  const [open, setOpen] = useState(false);
+  const flagged = profile.columns.filter(c => c.flaggedAsSensitive);
+
+  return (
+    <div className="mt-3">
+      <button onClick={() => setOpen(v => !v)} className="flex items-center gap-1.5 text-[11px] font-medium" style={{ color: T.blue, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+        <ChevronDown size={12} style={{ transform: open ? "rotate(180deg)" : "none" }} />
+        {open ? "Nascondi" : "Mostra"} profilo colonne ({profile.columnCount})
+        {flagged.length > 0 && <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-semibold" style={{ background: T.amberBg, color: T.amber }}>⚠ {flagged.length} sensibili</span>}
+      </button>
+      {open && (
+        <div className="mt-2 overflow-x-auto rounded-lg border" style={{ borderColor: T.border }}>
+          <table className="w-full text-[11px]">
+            <thead>
+              <tr style={{ background: T.bg, borderBottom: `1px solid ${T.border}` }}>
+                {["Colonna", "Tipo", "Missing %", "Valori unici", "Min/Max o top valori", "Sensibile?"].map(h => (
+                  <th key={h} className="text-left px-3 py-2 font-semibold" style={{ color: T.muted }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {profile.columns.map((col, i) => (
+                <tr key={col.name} style={{ borderTop: i > 0 ? `1px solid ${T.border}` : "none", background: col.flaggedAsSensitive && !col.sensitiveFlagConfirmed ? T.amberBg : "transparent" }}>
+                  <td className="px-3 py-2 font-medium" style={{ color: T.text, maxWidth: 140 }}>
+                    <span className="block truncate">{col.name}</span>
+                  </td>
+                  <td className="px-3 py-2">
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-mono" style={{ background: T.bg, color: T.muted }}>{col.inferredType}</span>
+                  </td>
+                  <td className="px-3 py-2">
+                    <span style={{ color: col.missingPercentage > 20 ? T.red : col.missingPercentage > 5 ? T.amber : T.green, fontWeight: col.missingPercentage > 20 ? 600 : 400 }}>
+                      {col.missingPercentage}%
+                    </span>
+                  </td>
+                  <td className="px-3 py-2" style={{ color: T.muted }}>{col.uniqueValueCount ?? "—"}</td>
+                  <td className="px-3 py-2" style={{ color: T.muted, maxWidth: 200 }}>
+                    {col.numericStats
+                      ? `${col.numericStats.min} – ${col.numericStats.max}`
+                      : col.categoricalDistribution
+                      ? col.categoricalDistribution.slice(0, 3).map(d => `${d.value}(${d.percentage}%)`).join(", ")
+                      : "—"}
+                  </td>
+                  <td className="px-3 py-2">
+                    {col.flaggedAsSensitive ? (
+                      col.sensitiveFlagConfirmed ? (
+                        <span className="text-[10px] font-semibold" style={{ color: T.amber }}>✓ Confermata</span>
+                      ) : (
+                        <div className="flex items-center gap-1 flex-wrap">
+                          <span className="text-[10px] font-semibold" style={{ color: T.violet }}>✦ AI ({col.sensitiveCategoryGuess})</span>
+                          <button onClick={() => onConfirmSensitive(col.name, true)}
+                            className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: T.amberBg, color: T.amber, border: `1px solid ${T.amberBdr}`, cursor: "pointer" }}>
+                            Conferma
+                          </button>
+                          <button onClick={() => onConfirmSensitive(col.name, false)}
+                            className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: T.bg, color: T.muted, border: `1px solid ${T.border}`, cursor: "pointer" }}>
+                            No
+                          </button>
+                        </div>
+                      )
+                    ) : (
+                      <span style={{ color: T.faint }}>—</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
 }
 
-function MetricCards({ report, animKey }: MetricCardsProps) {
-  const metrics = [
-    { key: "OFI",  label: "Objective Fairness Index", sub: "B − E",          value: report.ofi, alert: report.ofi > 0.15, max: 0.5, fmt: (v: number) => v.toFixed(3) },
-    { key: "SPD",  label: "Statistical Parity Diff.", sub: "Art. 10 §2",      value: report.spd, alert: report.spd > 0.1,  max: 0.5, fmt: (v: number) => v.toFixed(3) },
-    { key: "DI",   label: "Disparate Impact",         sub: "4/5 rule < 0.8", value: report.di,  alert: report.di  < 0.8,  max: 1,   fmt: (v: number) => v.toFixed(2)  },
-    { key: "EOD",  label: "Equalized Odds Diff.",     sub: "ΔTPR / ΔFPR",     value: report.eod, alert: report.eod > 0.1,  max: 0.5, fmt: (v: number) => v.toFixed(3) },
-  ];
+// ─── Governance practice card ─────────────────────────────────────────────────
+
+interface PracticeCardProps {
+  def: typeof DATA_GOVERNANCE_PRACTICES[number];
+  rec: GovernancePracticeRecord | undefined;
+  pending: string | null;
+  onUpdate: (id: string, patch: Partial<GovernancePracticeRecord>) => void;
+  onAcceptAi: (id: string) => void;
+  onDraft: (id: string) => void;
+  drafting: boolean;
+  computedSummary?: React.ReactNode;
+}
+
+function PracticeCard({ def, rec, pending, onUpdate, onAcceptAi, onDraft, drafting, computedSummary }: PracticeCardProps) {
+  const [open, setOpen] = useState(false);
+  const status = rec?.status ?? "not_documented";
+  const statusMap = {
+    not_documented: { label: "Non documentato", color: T.red },
+    in_progress:    { label: "In corso",         color: T.amber },
+    documented:     { label: "Documentato",       color: T.green },
+    not_applicable: { label: "N/A",               color: T.muted },
+  };
+  const s = statusMap[status];
+
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-      <AnimatePresence mode="wait">
-        {metrics.map((m) => (
-          <motion.div key={`${m.key}-${animKey}`}
-            initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-            <div className="rounded-xl p-4"
-              style={{
-                background: m.alert ? "rgba(220,38,38,0.04)" : "#ffffff",
-                border: m.alert ? "1px solid rgba(220,38,38,0.18)" : "1px solid rgba(0,0,0,0.07)",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-              }}>
-              <div className="flex items-start justify-between mb-2.5">
-                <div>
-                  <p className="text-[20px] font-semibold"
-                    style={{ color: m.alert ? "#dc2626" : "#0D1016", letterSpacing: "-0.5px" }}>
-                    {m.fmt(m.value)}
-                  </p>
-                  <p className="text-[10px] font-bold mt-0.5" style={{ color: m.alert ? "#dc2626" : "#3b82f6" }}>
-                    {m.key}
-                  </p>
-                </div>
-                {m.alert && (
-                  <span className="text-[9px] px-1.5 py-0.5 rounded font-semibold mt-0.5"
-                    style={{ background: "rgba(220,38,38,0.08)", color: "#dc2626" }}>
-                    ALERT
-                  </span>
-                )}
-              </div>
-              <Bar
-                value={m.key === "DI" ? 1 - m.value : m.value}
-                max={m.key === "DI" ? 0.4 : m.max}
-                color={m.alert ? "#ef4444" : "linear-gradient(90deg,#3b82f6,#6366f1)"}
-              />
-              <p className="text-[9px] mt-2" style={{ color: "rgba(0,0,0,0.35)" }}>{m.label}</p>
-              <p className="text-[9px]" style={{ color: "rgba(0,0,0,0.25)" }}>{m.sub}</p>
+    <div className="rounded-xl border" style={{ background: T.card, borderColor: status === "documented" ? "#86efac" : T.border }}>
+      <button className="w-full flex items-start gap-3 p-4 text-left" onClick={() => setOpen(v => !v)}>
+        <div className="mt-0.5">
+          {status === "documented" ? <CheckCircle2 size={15} style={{ color: T.green }} /> :
+           status === "in_progress" ? <Clock size={15} style={{ color: T.amber }} /> :
+           status === "not_applicable" ? <Minus size={15} style={{ color: T.faint }} /> :
+           <Minus size={15} style={{ color: T.faint }} />}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>{def.reference.split(" ")[0]} {def.reference.split(" ")[1]}</span>
+            <span className="text-[12px] font-semibold" style={{ color: T.text }}>{def.label}</span>
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ color: s.color, background: `${s.color}10` }}>{s.label}</span>
+            {pending && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: T.violetBg, color: T.violet }}>✦ AI</span>}
+            {def.source !== "manual" && <span className="text-[10px] px-1 rounded" style={{ background: T.bg, color: T.muted }}>calcolato</span>}
+          </div>
+          <p className="text-[10px] mt-0.5" style={{ color: T.faint }}>{def.reference}</p>
+        </div>
+        <span className="text-[10px] flex-shrink-0" style={{ color: T.faint }}>{open ? "▲" : "▼"}</span>
+      </button>
+
+      {open && (
+        <div className="px-4 pb-4 border-t" style={{ borderColor: "#f3f4f6" }}>
+          {/* Computed summary (stats-based, no AI badge needed) */}
+          {computedSummary && (
+            <div className="mt-3 rounded-lg p-3 mb-3" style={{ background: T.bg, border: `1px solid ${T.border}` }}>
+              <p className="text-[10px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: T.muted }}>
+                Riepilogo statistico automatico
+              </p>
+              {computedSummary}
             </div>
-          </motion.div>
-        ))}
-      </AnimatePresence>
+          )}
+
+          {/* AI pending */}
+          {pending && (
+            <div className="mt-3 rounded-lg p-3 mb-3" style={{ background: T.violetBg, border: `1px solid ${T.violetBdr}` }}>
+              <p className="text-[11px] font-semibold mb-1.5" style={{ color: T.violet }}>✦ AI — verifica e conferma</p>
+              <p className="text-[12px] whitespace-pre-wrap leading-relaxed" style={{ color: T.text }}>{pending}</p>
+              <button onClick={() => onAcceptAi(def.id)}
+                className="mt-2 flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded"
+                style={{ background: T.violet, color: "#fff", border: "none", cursor: "pointer" }}>
+                <Check size={11} /> Accetta e applica
+              </button>
+            </div>
+          )}
+
+          {/* Documentation textarea */}
+          <div className="mt-3 mb-3">
+            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>Documentazione</label>
+            <textarea rows={4} value={rec?.documentation ?? ""}
+              onChange={e => onUpdate(def.id, { documentation: e.target.value })}
+              placeholder={def.computedHint ?? "Documenta questa pratica..."}
+              style={ta} />
+          </div>
+
+          {/* Status + AI draft */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {(["not_documented", "in_progress", "documented", "not_applicable"] as PracticeStatus[]).map(s => {
+              const labels = { not_documented: "Non doc.", in_progress: "In corso", documented: "Documentato", not_applicable: "N/A" };
+              const active = (rec?.status ?? "not_documented") === s;
+              return (
+                <button key={s} onClick={() => onUpdate(def.id, { status: s })}
+                  className="text-[11px] px-2.5 py-1 rounded-lg border"
+                  style={{ borderColor: active ? T.blue : T.border, background: active ? T.blueBg : "transparent", color: active ? T.blue : T.muted, fontWeight: active ? 600 : 400 }}>
+                  {labels[s]}
+                </button>
+              );
+            })}
+            <button onClick={() => onDraft(def.id)} disabled={drafting}
+              className="ml-auto flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-lg"
+              style={{ background: T.violet, color: "#fff", border: "none", cursor: "pointer", opacity: drafting ? 0.7 : 1 }}>
+              {drafting ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
+              Bozza AI
+            </button>
+          </div>
+
+          {/* Linked tool */}
+          {def.linkedToolPath && (
+            <Link href={def.linkedToolPath} className="inline-flex items-center gap-1 mt-2 text-[11px] font-medium" style={{ color: T.blue }}>
+              <ExternalLink size={11} /> {def.linkedToolLabel}
+            </Link>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -102,861 +348,466 @@ function MetricCards({ report, animKey }: MetricCardsProps) {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function DataAuditPage() {
-  // ── Demo mode state ──────────────────────────────────────────────────────
-  const [datasetId, setDatasetId] = useState(MOCK_DATASETS[0].id);
-  const [snapIdx,   setSnapIdx]   = useState(5);
-  const [ctgan,     setCtgan]     = useState(false);
-  const [savedAt,   setSavedAt]   = useState<string | null>(() =>
-    readFromStorage<DataAuditResult>("dataAudit")?.completedAt ?? null
-  );
-  const [showCustomForm, setShowCustomForm] = useState(false);
-  const [customConfig, setCustomConfig] = useState<CustomDatasetConfig>({
-    name: "", source: "", rows: "", sensitiveFeatures: "",
-  });
-
-  // ── Shared state ─────────────────────────────────────────────────────────
-  const [auditMode, setAuditMode] = useState<AuditMode>("demo");
+  const [record, setRecord] = useState<DataAuditRecord>(() => loadDataAuditRecord());
   const [toast, setToast] = useState<string | null>(null);
-  const [dbSource, setDbSource] = useState<DBSource>("loading");
+  const [savedAt, setSavedAt] = useState<string | null>(() => readFromStorage<{ completedAt?: string }>("dataAudit")?.completedAt ?? null);
 
-  useEffect(() => {
-    fetch("/api/ai-systems")
-      .then(r => setDbSource(r.ok ? "db" : "localStorage"))
-      .catch(() => setDbSource("localStorage"));
-  }, []);
+  // AI copilot state
+  const [draftingId, setDraftingId] = useState<string | null>(null);
+  const [pendingDrafts, setPendingDrafts] = useState<Record<string, string>>({});
+  const [biasAnalyzing, setBiasAnalyzing] = useState(false);
+  const [biasAnalyses, setBiasAnalyses] = useState<Array<{ columnName: string; analysis: string }>>([]);
+  const [biasAnalysisAccepted, setBiasAnalysisAccepted] = useState(false);
+  const [sanctionsBannerDismissed, setSanctionsBannerDismissed] = useState(false);
 
-  // ── Real mode state ──────────────────────────────────────────────────────
-  const [csvRecords, setCsvRecords]     = useState<Record<string, string>[]>([]);
-  const [csvColumns, setCsvColumns]     = useState<string[]>([]);
-  const [csvFileName, setCsvFileName]   = useState<string>("");
-  const [realConfig, setRealConfig]     = useState<RealDatasetConfig>({
-    name: "", sensitiveCol: "", outcomeCol: "", positiveOutcome: "1",
-  });
-  const [realReport, setRealReport]     = useState<BiasReport | null>(null);
-  const [csvParseError, setCsvParseError] = useState<string>("");
-  const [labelingProcess, setLabelingProcess] = useState("");
-  const [labelingInstructions, setLabelingInstructions] = useState("");
-  const [geoCoverage, setGeoCoverage] = useState("");
-  const [geoGapNote, setGeoGapNote] = useState("");
-  const [usesSpecialCategoriesForBias, setUsesSpecialCategoriesForBias] = useState(false);
-  const [specialCategoryGuarantees, setSpecialCategoryGuarantees] = useState("");
+  const cls = typeof window !== "undefined" ? readFromStorage<ClassifierResult>("classifier") : null;
+  const systemName = cls?.systemName ?? "Sistema AI";
+  const systemDescription = cls?.systemDescription ?? "";
+  const riskTier = cls?.riskLevel ?? "n.d.";
 
-  function showToastMsg(msg: string) {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3000);
+  function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(null), 3000); }
+
+  function patchRecord(patch: Partial<DataAuditRecord>) {
+    setRecord(prev => { const next = { ...prev, ...patch, updatedAt: new Date().toISOString() }; saveDataAuditRecord(next); return next; });
   }
 
-  // ── Demo-mode derived values ─────────────────────────────────────────────
-  const dataset   = MOCK_DATASETS.find((d) => d.id === datasetId)!;
-  const snapshots = getTemporalSnapshots(datasetId);
-  const asOf      = snapshots[snapIdx].asOf;
-  const report    = calculateBiasReport(datasetId, asOf, ctgan);
-
-  const riskColors = {
-    critical: { bg: "rgba(220,38,38,0.07)",  text: "#dc2626", border: "rgba(220,38,38,0.2)"  },
-    high:     { bg: "rgba(234,88,12,0.07)",  text: "#ea580c", border: "rgba(234,88,12,0.2)"  },
-    medium:   { bg: "rgba(202,138,4,0.07)",  text: "#ca8a04", border: "rgba(202,138,4,0.2)"  },
-    low:      { bg: "rgba(22,163,74,0.07)",  text: "#16a34a", border: "rgba(22,163,74,0.2)"  },
-  };
-  const risk = riskColors[report.riskLevel];
-
-  const card = { background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
-
-  function exportCycloneDXBOM() {
-    const bom = {
-      bomFormat: "CycloneDX",
-      specVersion: "1.5",
-      serialNumber: `urn:uuid:${crypto.randomUUID()}`,
-      version: 1,
-      metadata: {
-        timestamp: new Date().toISOString(),
-        tools: [{ vendor: "AIComply", name: "Data Audit Engine", version: "2.0" }],
-        component: {
-          type: "machine-learning-model",
-          name: dataset.name,
-          description: `AI Act Art. 10 — Data Governance Audit`,
-        },
-      },
-      components: [
-        {
-          type: "data",
-          bom_ref: dataset.id,
-          name: dataset.name,
-          description: `Source: ${dataset.source}`,
-          data: {
-            type: "dataset",
-            classification: "personal",
-            sensitiveData: dataset.sensitiveFeatures,
-            governance: {
-              custodians: [{ organization: { name: "Compliance Officer" } }],
-            },
-          },
-          properties: [
-            { name: "aicomply:rows", value: dataset.rows.toString() },
-            { name: "aicomply:asOf", value: asOf.toISOString().slice(0, 10) },
-            { name: "aicomply:riskLevel", value: report.riskLevel },
-            { name: "aicomply:ofi", value: report.ofi.toFixed(4) },
-            { name: "aicomply:spd", value: report.spd.toFixed(4) },
-            { name: "aicomply:di", value: report.di.toFixed(4) },
-            { name: "aicomply:eod", value: report.eod.toFixed(4) },
-            { name: "aicomply:ctganActive", value: ctgan.toString() },
-            { name: "aicomply:ctganRequired", value: report.ctganRequired.toString() },
-            { name: "aicomply:regulation", value: "EU AI Act Art. 10 — Reg. EU 2024/1689" },
-          ],
-        },
-      ],
-      vulnerabilities: report.ofi > 0.15 ? [
-        {
-          id: `AICOMPLY-BIAS-${dataset.id.toUpperCase()}`,
-          description: `OFI ${report.ofi.toFixed(3)} > soglia 0.15 — Bias rilevato`,
-          ratings: [{ severity: report.riskLevel, method: "AIComply-Fairness" }],
-          recommendation: report.ctganRequired
-            ? "Applicare CTGAN debiasing prima del deployment"
-            : "Monitorare nelle prossime finestre temporali",
-        },
-      ] : [],
-    };
-
-    const filename = `cyclonedx-bom-${dataset.id}-${new Date().toISOString().slice(0, 10)}.json`;
-    const blob = new Blob([JSON.stringify(bom, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = filename; a.click();
-    URL.revokeObjectURL(url);
-    showToastMsg(`CycloneDX BOM esportato: ${filename}`);
+  // Dataset operations
+  function upsertDataset(profile: DatasetProfile) {
+    const datasets = record.datasets.filter(d => d.role !== profile.role);
+    patchRecord({ datasets: [...datasets, profile] });
+    showToast(`Dataset ${profile.role} caricato — ${profile.rowCount.toLocaleString()} righe, ${profile.columnCount} colonne`);
   }
 
-  async function saveToDossier() {
-    const completedAt = new Date().toISOString();
-    writeToStorage<DataAuditResult>("dataAudit", {
-      datasets: MOCK_DATASETS.map((ds) => {
-        const r = calculateBiasReport(ds.id, snapshots[snapIdx].asOf, ctgan);
-        return {
-          name: ds.name,
-          source: ds.source,
-          size: `${ds.rows.toLocaleString("it-IT")} record`,
-          biasChecked: true,
-          qualityScore: Math.round((1 - r.ofi) * 100),
-          personalData: ds.sensitiveFeatures.length > 0,
-          issues: r.ofi > 0.15 ? ["OFI elevato — verificare bias"] : [],
-        };
-      }),
-      overallQuality: report.riskLevel === "low" ? "pass" : report.riskLevel === "critical" ? "fail" : "review",
-      completedAt,
-      labelingProcess,
-      labelingInstructions,
-      geoCoverage,
-      geoGapNote,
-      usesSpecialCategoriesForBias,
-      specialCategoryGuarantees,
+  function removeDataset(role: DatasetRole) {
+    patchRecord({ datasets: record.datasets.filter(d => d.role !== role) });
+  }
+
+  function confirmSensitiveColumn(datasetId: string, colName: string, confirmed: boolean) {
+    const datasets = record.datasets.map(ds => {
+      if (ds.id !== datasetId) return ds;
+      const columns = ds.columns.map(col => {
+        if (col.name !== colName) return col;
+        return { ...col, sensitiveFlagConfirmed: confirmed, flaggedAsSensitive: confirmed ? true : false };
+      });
+      return { ...ds, columns };
     });
 
-    await appendEvidence("adr", {
-      type: "Data Audit — Governance dei Dati Art. 10",
-      dataset: dataset.name,
-      source: dataset.source,
-      asOf: asOf.toISOString().slice(0, 10),
-      riskLevel: report.riskLevel,
-      ofi: report.ofi.toFixed(3),
-      spd: report.spd.toFixed(3),
-      di: report.di.toFixed(2),
-      eod: report.eod.toFixed(3),
-      ctganActive: ctgan,
-      ctganRequired: report.ctganRequired,
-      underrepresented: report.underrepresented,
-      proxyColumns: COLUMN_LINEAGE.filter((c) => c.isProxy).map((c) => c.column),
-    }, "data-audit");
-
-    setSavedAt(completedAt);
-    showToastMsg("Audit salvato nel dossier e registrato su Evidence Layer ✓");
+    // Recompute special categories applicability
+    const anyConfirmed = datasets.some(ds => ds.columns.some(c => c.sensitiveFlagConfirmed));
+    const specialCategories = { ...record.specialCategories, applicable: anyConfirmed ? "yes" as const : record.specialCategories.applicable };
+    patchRecord({ datasets, specialCategories });
   }
 
-  // ─── Render ────────────────────────────────────────────────────────────────
+  // Governance practice operations
+  function getPracticeRec(id: string): GovernancePracticeRecord | undefined {
+    return record.governancePractices.find(p => p.practiceId === id);
+  }
 
-  return (
-    <div className="w-full" style={{ fontFamily: "var(--font-inter, system-ui)" }}>
+  function updatePractice(id: string, patch: Partial<GovernancePracticeRecord>) {
+    const existing = record.governancePractices.find(p => p.practiceId === id);
+    const updated: GovernancePracticeRecord = { practiceId: id, status: "not_documented", aiConfirmed: false, ...existing, ...patch };
+    const governancePractices = record.governancePractices.some(p => p.practiceId === id)
+      ? record.governancePractices.map(p => p.practiceId === id ? updated : p)
+      : [...record.governancePractices, updated];
+    patchRecord({ governancePractices });
+  }
 
-      <SystemContextBanner checkProhibited={true} />
+  function acceptDraft(id: string) {
+    const text = pendingDrafts[id];
+    if (!text) return;
+    updatePractice(id, { documentation: text, aiConfirmed: true, status: "in_progress" });
+    setPendingDrafts(prev => { const n = { ...prev }; delete n[id]; return n; });
+  }
 
-      {/* ── DB Status ────────────────────────────────────────────────────────── */}
-      <div style={{ marginBottom: 12 }}>
-        <DBStatusBadge source={dbSource} />
-      </div>
+  async function draftPractice(id: string) {
+    setDraftingId(id);
+    try {
+      const result = await draftGovernancePracticeDocumentation({
+        practiceId: id,
+        systemName,
+        systemDescription,
+        riskTier,
+        datasetSummaries: record.datasets.map(d => ({
+          role: d.role, fileName: d.fileName, rowCount: d.rowCount, columnCount: d.columnCount, overallMissingPercentage: d.overallMissingPercentage,
+        })),
+      });
+      setPendingDrafts(prev => ({ ...prev, [id]: result.documentation }));
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : "Errore AI");
+    } finally {
+      setDraftingId(null);
+    }
+  }
 
-      {/* ── Mode tabs ──────────────────────────────────────────────────────── */}
-      <div style={{ display: "flex", gap: 0, marginBottom: 24, borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
-        {([
-          { id: "demo" as const, label: "Dataset demo" },
-          { id: "real" as const, label: "📂 Carica CSV reale" },
-        ]).map(tab => (
-          <button key={tab.id} onClick={() => setAuditMode(tab.id)}
-            style={{
-              padding: "9px 20px", fontSize: 13, fontWeight: auditMode === tab.id ? 600 : 400,
-              color: auditMode === tab.id ? "#0D1016" : "rgba(0,0,0,0.42)",
-              background: "none", border: "none",
-              borderBottom: auditMode === tab.id ? "2px solid #0D1016" : "2px solid transparent",
-              cursor: "pointer",
-            }}>
-            {tab.label}
-          </button>
-        ))}
-      </div>
+  async function runBiasAnalysis() {
+    setBiasAnalyzing(true);
+    try {
+      const confirmedSensitive = record.datasets.flatMap(ds =>
+        ds.columns
+          .filter(c => c.sensitiveFlagConfirmed)
+          .map(c => ({
+            name: c.name,
+            datasetRole: ds.role,
+            distribution: c.categoricalDistribution ?? [],
+            numericStats: c.numericStats,
+          }))
+      );
+      if (confirmedSensitive.length === 0) { showToast("Nessuna colonna sensibile confermata"); setBiasAnalyzing(false); return; }
+      const result = await analyzeBiasIndicators({ systemName, intendedPurpose: systemDescription, sensitiveColumns: confirmedSensitive });
+      setBiasAnalyses(result.analyses);
+      setBiasAnalysisAccepted(false);
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : "Errore analisi bias");
+    } finally {
+      setBiasAnalyzing(false);
+    }
+  }
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          DEMO MODE — comportamento originale invariato
-      ══════════════════════════════════════════════════════════════════════ */}
-      {auditMode === "demo" && (
-        <>
-          {/* Dossier saved banner */}
-          {savedAt ? (
-            <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
-              style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)" }}>
-              <span style={{ color: "#15803d" }}>✓ Risultati salvati nel dossier · Aggiornato il {new Date(savedAt).toLocaleDateString("it-IT")}</span>
-              <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>Vedi dossier →</Link>
+  function saveToDossier() {
+    const now = new Date().toISOString();
+    const documented = countDocumented(record);
+    writeToStorage("dataAudit", {
+      datasets: record.datasets.map(d => ({
+        name: d.fileName, source: d.role, size: `${d.rowCount} righe`,
+        biasChecked: record.specialCategories.applicable === "yes",
+        qualityScore: Math.round(100 - d.overallMissingPercentage),
+        personalData: record.specialCategories.applicable === "yes",
+        issues: d.columns.filter(c => c.missingPercentage > 20).map(c => `${c.name}: ${c.missingPercentage}% mancanti`),
+      })),
+      overallQuality: documented >= 8 ? "pass" : documented >= 5 ? "review" : "fail",
+      completedAt: now,
+    });
+    appendEvidence("decision", { type: "Data Audit Art. 10 — record salvato", documented, datasets: record.datasets.length, savedAt: now }, "dataAudit");
+    setSavedAt(now);
+    showToast("Qualità Dati salvato nel dossier");
+  }
+
+  // Computed summaries for "computed" source practices
+  function computedSummaryFor(id: string): React.ReactNode | undefined {
+    const datasets = record.datasets;
+    if (datasets.length === 0) return undefined;
+
+    if (id === "availability_assessment" || id === "quality_criteria") {
+      return (
+        <div className="space-y-1 text-[11px]" style={{ color: T.text }}>
+          {datasets.map(d => (
+            <div key={d.id}>
+              <span className="font-semibold">{d.role} — {d.fileName}:</span>{" "}
+              {d.rowCount.toLocaleString()} righe, {d.columnCount} colonne,{" "}
+              {d.overallMissingPercentage}% missing medio
+              {d.overallMissingPercentage > 20 && <span style={{ color: T.red }}> ⚠ qualità bassa</span>}
+              {d.overallMissingPercentage <= 5 && <span style={{ color: T.green }}> ✓ qualità alta</span>}
             </div>
-          ) : (
-            <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[12px]"
-              style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}>
-              <span style={{ color: "rgba(0,0,0,0.45)" }}>Salva i risultati del Data Audit nel dossier di compliance</span>
-              <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1 transition-opacity hover:opacity-80"
-                style={{ background: "#0D1016", color: "#ffffff", border: "none", cursor: "pointer" }}>
-                Salva nel dossier
+          ))}
+        </div>
+      );
+    }
+    if (id === "data_gaps") {
+      const highMissing = datasets.flatMap(d =>
+        d.columns.filter(c => c.missingPercentage > 20).map(c => ({ ds: d.fileName, col: c.name, pct: c.missingPercentage }))
+      );
+      if (highMissing.length === 0) return <p className="text-[11px]" style={{ color: T.green }}>Nessuna colonna con più del 20% di valori mancanti.</p>;
+      return (
+        <ul className="space-y-0.5 text-[11px]" style={{ color: T.text }}>
+          {highMissing.map((h, i) => <li key={i}>• <strong>{h.col}</strong> ({h.ds}): <span style={{ color: T.red }}>{h.pct}% mancanti</span></li>)}
+        </ul>
+      );
+    }
+    if (id === "bias_examination") {
+      const confirmed = datasets.flatMap(d => d.columns.filter(c => c.sensitiveFlagConfirmed).map(c => ({ ds: d.fileName, col: c.name })));
+      if (confirmed.length === 0) return <p className="text-[11px]" style={{ color: T.muted }}>Nessuna colonna sensibile confermata. Carica un dataset e conferma le colonne sensibili.</p>;
+      return (
+        <div>
+          <p className="text-[11px] mb-1" style={{ color: T.text }}>Colonne sensibili confermate:</p>
+          <ul className="space-y-0.5 text-[11px]" style={{ color: T.muted }}>
+            {confirmed.map((c, i) => <li key={i}>• <strong>{c.col}</strong> ({c.ds})</li>)}
+          </ul>
+          {biasAnalyses.length > 0 && !biasAnalysisAccepted && (
+            <div className="mt-2 rounded-lg p-2.5" style={{ background: T.violetBg, border: `1px solid ${T.violetBdr}` }}>
+              <p className="text-[10px] font-semibold mb-1" style={{ color: T.violet }}>✦ AI — verifica e conferma</p>
+              {biasAnalyses.map((a, i) => (
+                <div key={i} className="mb-2">
+                  <p className="text-[11px] font-semibold" style={{ color: T.text }}>{a.columnName}</p>
+                  <p className="text-[11px] leading-relaxed" style={{ color: T.muted }}>{a.analysis}</p>
+                </div>
+              ))}
+              <button onClick={() => { setBiasAnalysisAccepted(true); updatePractice("bias_examination", { documentation: biasAnalyses.map(a => `${a.columnName}: ${a.analysis}`).join("\n\n"), aiConfirmed: true }); }}
+                className="text-[11px] font-semibold px-2 py-1 rounded flex items-center gap-1"
+                style={{ background: T.violet, color: "#fff", border: "none", cursor: "pointer" }}>
+                <Check size={11} /> Accetta analisi AI
               </button>
             </div>
           )}
+        </div>
+      );
+    }
+    return undefined;
+  }
 
-          {/* Header */}
-          <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
-            <div>
-              <p className="text-[11px] font-semibold uppercase mb-1"
-                style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "1.2px" }}>Art. 10 — Governance dei Dati</p>
-              <h1 className="text-[24px] font-medium" style={{ color: "#0D1016", letterSpacing: "-0.8px" }}>
-                Data Audit
-              </h1>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <select
-                value={datasetId}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (val === CUSTOM_DATASET_ID) {
-                    setShowCustomForm(true);
-                  } else {
-                    setDatasetId(val);
-                    setSnapIdx(5);
-                    setCtgan(false);
-                    setShowCustomForm(false);
-                  }
-                }}
-                className="text-[12px] rounded-lg px-3 py-2 outline-none"
-                style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)", color: "#0D1016" }}
-              >
-                {MOCK_DATASETS.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-                <option value={CUSTOM_DATASET_ID}>+ Dataset personalizzato…</option>
-              </select>
-              <button onClick={() => setCtgan(!ctgan)}
-                className="text-[11px] flex items-center gap-1.5 rounded-lg px-3 py-2 transition-all"
-                style={ctgan
-                  ? { background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.25)", color: "#2563eb" }
-                  : { background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.45)" }}>
-                <span className={`w-1.5 h-1.5 rounded-full ${ctgan ? "bg-blue-500" : "bg-black/20"}`} />
-                CTGAN Debiasing {ctgan ? "ON" : "OFF"}
-              </button>
-              <span className="text-[11px] font-medium px-3 py-2 rounded-lg"
-                style={{ background: risk.bg, border: `1px solid ${risk.border}`, color: risk.text }}>
-                {report.riskLevel.toUpperCase()}
-              </span>
-            </div>
+  const documented = countDocumented(record);
+  const total = DATA_GOVERNANCE_PRACTICES.length;
+  const pct = Math.round((documented / total) * 100);
+
+  // Determine which roles are required
+  const isOther = record.developmentApproach === "other_technique";
+  const ROLES: Array<{ role: DatasetRole; label: string; optional: boolean }> = [
+    { role: "training",   label: "Training",   optional: isOther },
+    { role: "validation", label: "Validazione", optional: isOther },
+    { role: "testing",    label: "Test",        optional: false   },
+  ];
+
+  const anyConfirmedSensitive = record.datasets.some(d => d.columns.some(c => c.sensitiveFlagConfirmed));
+  const showSpecialCategories = record.specialCategories.applicable === "yes" || anyConfirmedSensitive;
+
+  return (
+    <div className="w-full" style={FONT}>
+      <SystemSelector checkProhibited={false} />
+
+      {/* Dossier banner */}
+      {savedAt ? (
+        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-4 text-[12px]" style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}>
+          <span style={{ color: T.green }}>✓ Salvato nel dossier · {new Date(savedAt).toLocaleDateString("it-IT")}</span>
+          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium" style={{ color: T.green }}>Vedi dossier →</Link>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-4 text-[12px]" style={{ background: T.card, border: `1px solid ${T.border}` }}>
+          <span style={{ color: T.muted }}>Salva Qualità Dati nel dossier di compliance</span>
+          <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>Salva</button>
+        </div>
+      )}
+
+      {/* Header */}
+      <div className="mb-5">
+        <div className="flex items-center gap-2 mb-1">
+          <Database size={20} style={{ color: T.blue }} />
+          <h1 className="text-xl font-bold" style={{ color: T.text }}>Qualità Dati</h1>
+          <span className="text-[11px] font-medium px-2 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>Art. 10</span>
+        </div>
+        <p className="text-[12px]" style={{ color: T.muted }}>
+          Requisiti di qualità, governance e provenienza dei dati di training, validazione e test per sistemi AI ad alto rischio.
+        </p>
+        {cls && (
+          <div className="mt-2 flex items-center gap-3 text-[11px]" style={{ color: T.muted }}>
+            <span>Sistema: <strong style={{ color: T.text }}>{cls.systemName}</strong></span>
+            <span>Tier: <strong style={{ color: T.text }}>{cls.riskLevel}</strong></span>
           </div>
+        )}
+      </div>
 
-          <AnimatePresence>
-            {showCustomForm && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="rounded-xl p-4 mb-5"
-                  style={{ background: "rgba(59,130,246,0.04)", border: "1px solid rgba(59,130,246,0.15)" }}>
-                  <p className="text-[11px] font-semibold mb-3" style={{ color: "#2563eb" }}>
-                    Dataset personalizzato — i parametri influenzano la simulazione bias
-                  </p>
-                  <div className="grid grid-cols-2 gap-3 mb-3">
-                    <div>
-                      <label className="text-[10px] font-medium block mb-1"
-                        style={{ color: "rgba(0,0,0,0.45)", textTransform: "uppercase", letterSpacing: "0.8px" }}>
-                        Nome dataset *
-                      </label>
-                      <input
-                        value={customConfig.name}
-                        onChange={(e) => setCustomConfig((c) => ({ ...c, name: e.target.value }))}
-                        placeholder="es. HR Screening Q1 2025"
-                        className="w-full rounded-lg px-3 py-2 text-[12px] outline-none"
-                        style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.1)", color: "#0D1016" }}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-medium block mb-1"
-                        style={{ color: "rgba(0,0,0,0.45)", textTransform: "uppercase", letterSpacing: "0.8px" }}>
-                        Fonte dati
-                      </label>
-                      <input
-                        value={customConfig.source}
-                        onChange={(e) => setCustomConfig((c) => ({ ...c, source: e.target.value }))}
-                        placeholder="es. Snowflake.prod / HR_DATA"
-                        className="w-full rounded-lg px-3 py-2 text-[12px] outline-none"
-                        style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.1)", color: "#0D1016" }}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-medium block mb-1"
-                        style={{ color: "rgba(0,0,0,0.45)", textTransform: "uppercase", letterSpacing: "0.8px" }}>
-                        N° record (approx.)
-                      </label>
-                      <input
-                        value={customConfig.rows}
-                        onChange={(e) => setCustomConfig((c) => ({ ...c, rows: e.target.value }))}
-                        placeholder="es. 84000"
-                        type="number"
-                        className="w-full rounded-lg px-3 py-2 text-[12px] outline-none"
-                        style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.1)", color: "#0D1016" }}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-medium block mb-1"
-                        style={{ color: "rgba(0,0,0,0.45)", textTransform: "uppercase", letterSpacing: "0.8px" }}>
-                        Feature sensibili (separate da virgola)
-                      </label>
-                      <input
-                        value={customConfig.sensitiveFeatures}
-                        onChange={(e) => setCustomConfig((c) => ({ ...c, sensitiveFeatures: e.target.value }))}
-                        placeholder="es. gender, age_group, ethnicity"
-                        className="w-full rounded-lg px-3 py-2 text-[12px] outline-none"
-                        style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.1)", color: "#0D1016" }}
-                      />
-                    </div>
-                  </div>
-                  <p className="text-[10px] mb-3" style={{ color: "rgba(0,0,0,0.4)" }}>
-                    Nota: la simulazione fairness usa i parametri del tuo dataset per adattare i bias score.
-                    Il numero di feature sensibili influenza OFI e DI.
-                  </p>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        if (!customConfig.name.trim()) {
-                          showToastMsg("Inserisci il nome del dataset");
-                          return;
-                        }
-                        setDatasetId("ds_hiring_2024");
-                        setSnapIdx(5);
-                        setCtgan(false);
-                        setShowCustomForm(false);
-                        showToastMsg(`Dataset "${customConfig.name}" caricato — simulazione aggiornata`);
-                      }}
-                      className="text-[11px] rounded-lg px-4 py-2 font-medium"
-                      style={{ background: "#0D1016", color: "#fff", cursor: "pointer" }}
-                    >
-                      Carica dataset
-                    </button>
-                    <button
-                      onClick={() => { setShowCustomForm(false); }}
-                      className="text-[11px] rounded-lg px-4 py-2"
-                      style={{ background: "transparent", border: "1px solid rgba(0,0,0,0.1)", color: "rgba(0,0,0,0.5)", cursor: "pointer" }}
-                    >
-                      Annulla
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
+      {/* Art. 10(6) triage */}
+      <div className="rounded-xl p-4 mb-5" style={{ ...card }}>
+        <div className="flex items-center gap-2 mb-2">
+          <Info size={14} style={{ color: T.blue }} />
+          <span className="text-[12px] font-semibold" style={{ color: T.text }}>Approccio di sviluppo — Art. 10(6)</span>
+        </div>
+        <p className="text-[11px] mb-3" style={{ color: T.muted }}>
+          Il sistema è stato sviluppato tramite addestramento di modelli (es. machine learning), o tramite altre tecniche (es. sistemi a regole)?
+          Se "altre tecniche", solo il dataset di test è obbligatorio.
+        </p>
+        <div className="flex gap-2 flex-wrap">
+          {([
+            { v: "trained_model", l: "Addestramento modelli (ML)" },
+            { v: "other_technique", l: "Altre tecniche (regole, logica)" },
+          ] as const).map(opt => (
+            <button key={opt.v}
+              onClick={() => patchRecord({ developmentApproach: opt.v })}
+              className="text-[12px] px-3 py-1.5 rounded-lg border"
+              style={{
+                borderColor: record.developmentApproach === opt.v ? T.blue : T.border,
+                background: record.developmentApproach === opt.v ? T.blueBg : "transparent",
+                color: record.developmentApproach === opt.v ? T.blue : T.muted,
+                fontWeight: record.developmentApproach === opt.v ? 600 : 400,
+                cursor: "pointer",
+              }}>
+              {opt.l}
+            </button>
+          ))}
+          {record.developmentApproach !== "unspecified" && (
+            <button onClick={() => patchRecord({ developmentApproach: "unspecified" })}
+              className="text-[11px] px-2 py-1 rounded" style={{ color: T.muted, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
+              Modifica
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Progress */}
+      <div className="flex items-center gap-3 mb-5">
+        <span className="text-2xl font-bold" style={{ color: pct === 100 ? T.green : T.text }}>{documented}/{total}</span>
+        <div className="flex-1">
+          <div className="text-[11px] font-medium mb-1" style={{ color: T.muted }}>pratiche Art. 10 documentate</div>
+          <div className="h-2 rounded-full" style={{ background: T.border }}>
+            <div className="h-2 rounded-full transition-all" style={{ width: `${pct}%`, background: pct === 100 ? T.green : T.blue }} />
+          </div>
+        </div>
+        <span className="text-[11px]" style={{ color: T.muted }}>{pct}%</span>
+      </div>
+
+      {/* ── Dataset upload panels ── */}
+      <section className="mb-6">
+        <h2 className="text-[13px] font-semibold mb-3" style={{ color: T.text }}>Dataset</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {ROLES.map(({ role, label, optional }) => {
+            const profile = record.datasets.find(d => d.role === role) ?? null;
+            return (
+              <div key={role}>
+                <p className="text-[11px] font-semibold uppercase tracking-wide mb-2" style={{ color: T.muted }}>
+                  {label}
+                  {optional && <span className="ml-1 normal-case" style={{ color: T.faint }}>(non obbligatorio)</span>}
+                </p>
+                <DatasetUpload
+                  role={role} roleLabel={label} optional={optional}
+                  profile={profile}
+                  onProfile={upsertDataset}
+                  onRemove={() => removeDataset(role)}
+                />
+                {profile && (
+                  <ColumnTable
+                    profile={profile}
+                    onConfirmSensitive={(colName, confirmed) => confirmSensitiveColumn(profile.id, colName, confirmed)}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Bias analysis button */}
+        {anyConfirmedSensitive && (
+          <div className="mt-4 flex items-center gap-3">
+            <button onClick={runBiasAnalysis} disabled={biasAnalyzing}
+              className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg"
+              style={{ background: T.violet, color: "#fff", border: "none", cursor: "pointer", opacity: biasAnalyzing ? 0.7 : 1 }}>
+              {biasAnalyzing ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
+              Analisi bias AI su colonne sensibili
+            </button>
+            <span className="text-[11px]" style={{ color: T.muted }}>Art. 10(2)(f) — risultato marcato ✦ AI, richiede accettazione</span>
+          </div>
+        )}
+      </section>
+
+      {/* ── 10 Governance practice cards ── */}
+      <section className="mb-6">
+        <h2 className="text-[13px] font-semibold mb-3" style={{ color: T.text }}>
+          Pratiche di governance — Art. 10(2)-(4)
+        </h2>
+        <div className="space-y-2">
+          {DATA_GOVERNANCE_PRACTICES.map(def => (
+            <PracticeCard
+              key={def.id}
+              def={def}
+              rec={getPracticeRec(def.id)}
+              pending={pendingDrafts[def.id] ?? null}
+              onUpdate={updatePractice}
+              onAcceptAi={acceptDraft}
+              onDraft={draftPractice}
+              drafting={draftingId === def.id}
+              computedSummary={computedSummaryFor(def.id)}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* ── Art. 10(5) special categories (conditional) ── */}
+      {showSpecialCategories && (
+        <>
+          <div className="flex items-center gap-3 my-5">
+            <div className="flex-1 h-px" style={{ background: T.border }} />
+            <span className="text-[11px] font-semibold uppercase tracking-wide px-2" style={{ color: T.violet }}>
+              Modulo condizionale — Categorie particolari
+            </span>
+            <div className="flex-1 h-px" style={{ background: T.border }} />
+          </div>
+          <div className="rounded-xl border-2 p-4 mb-6" style={{ background: T.card, borderColor: T.violet }}>
+            <div className="flex items-center gap-2 mb-1">
+              <AlertCircle size={16} style={{ color: T.violet }} />
+              <span className="font-semibold text-sm" style={{ color: T.text }}>{SPECIAL_CATEGORIES_MODULE.label}</span>
+              <span className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: T.violetBg, color: T.violet }}>{SPECIAL_CATEGORIES_MODULE.primaryReference}</span>
+            </div>
+            <p className="text-[12px] mb-4 leading-relaxed" style={{ color: T.muted }}>{SPECIAL_CATEGORIES_MODULE.description}</p>
+
+            {/* Confirmed sensitive columns */}
+            {anyConfirmedSensitive && (
+              <div className="mb-3">
+                <p className="text-[11px] font-semibold mb-1" style={{ color: T.text }}>Colonne confermate come sensibili:</p>
+                <ul className="text-[11px] space-y-0.5" style={{ color: T.muted }}>
+                  {record.datasets.flatMap(d => d.columns.filter(c => c.sensitiveFlagConfirmed).map(c => (
+                    <li key={`${d.id}-${c.name}`}>• <strong>{c.name}</strong> — {d.fileName} ({d.role})</li>
+                  )))}
+                </ul>
+              </div>
             )}
-          </AnimatePresence>
 
-          {/* Dataset strip */}
-          <div className="rounded-xl p-3.5 mb-5" style={card}>
-            <div className="flex flex-wrap gap-5 text-[11px]" style={{ color: "rgba(0,0,0,0.42)" }}>
-              {[
-                ["Fonte", customConfig.name && datasetId === "ds_hiring_2024" && showCustomForm === false
-                  ? customConfig.source || dataset.source
-                  : dataset.source],
-                ["Righe", customConfig.rows && customConfig.name
-                  ? Number(customConfig.rows).toLocaleString("it-IT")
-                  : dataset.rows.toLocaleString("it-IT")],
-                ["Valido dal", dataset.validFrom.toLocaleDateString("it-IT")],
-                ["Feature sensibili", customConfig.sensitiveFeatures && customConfig.name
-                  ? customConfig.sensitiveFeatures
-                  : dataset.sensitiveFeatures.join(", ")],
-                ["As Of", asOf.toLocaleDateString("it-IT")],
-              ].map(([k, v]) => (
-                <span key={k}>
-                  <span style={{ color: "rgba(0,0,0,0.6)", fontWeight: 500 }}>{k}:</span> {v}
-                </span>
-              ))}
-              {ctgan && <span style={{ color: "#2563eb" }}>✦ CTGAN attivo</span>}
+            {/* Legal basis */}
+            <div className="mb-3">
+              <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>
+                Base giuridica e garanzie adottate — Art. 10(5)
+              </label>
+              <textarea rows={3} value={record.specialCategories.legalBasisDocumentation ?? ""}
+                onChange={e => patchRecord({ specialCategories: { ...record.specialCategories, legalBasisDocumentation: e.target.value } })}
+                placeholder="Descrivi la base giuridica ex Art. 9 GDPR, le misure di pseudonimizzazione adottate, e le garanzie per il trattamento..."
+                style={ta} />
             </div>
-          </div>
 
-          {/* Temporal timeline */}
-          <div className="rounded-xl p-4 mb-5" style={card}>
-            <p className="text-[10px] font-semibold uppercase mb-4"
-              style={{ color: "rgba(0,0,0,0.28)", letterSpacing: "1px" }}>
-              Timeline bitemporale — clicca per interrogare «As Of»
-            </p>
-            <div className="relative flex items-start">
-              <div className="absolute left-0 right-0 top-[10px] h-px" style={{ background: "rgba(0,0,0,0.07)" }} />
-              {snapshots.map((snap: TemporalSnapshot, i: number) => {
-                const r = snap.report;
-                const active = i === snapIdx;
-                const dot = r.riskLevel === "critical" ? "#dc2626" : r.riskLevel === "high" ? "#ea580c" : r.riskLevel === "medium" ? "#ca8a04" : "#16a34a";
+            {/* Status */}
+            <div className="flex items-center gap-2 flex-wrap mb-3">
+              {(["not_documented", "in_progress", "documented"] as PracticeStatus[]).map(s => {
+                const labels = { not_documented: "Non documentato", in_progress: "In corso", documented: "Documentato", not_applicable: "N/A" };
+                const active = record.specialCategories.status === s;
                 return (
-                  <button key={i} onClick={() => setSnapIdx(i)} className="relative flex flex-col items-center flex-1 gap-1">
-                    <motion.div animate={{ scale: active ? 1.35 : 1 }}
-                      className="w-[20px] h-[20px] rounded-full z-10 flex items-center justify-center"
-                      style={{ background: active ? dot : "#fff", border: `2px solid ${dot}`, boxShadow: active ? `0 0 0 3px ${dot}22` : "none" }}>
-                      {active && <div className="w-2 h-2 rounded-full" style={{ background: dot }} />}
-                    </motion.div>
-                    <span className="text-[10px] mt-1" style={{ color: active ? "#0D1016" : "rgba(0,0,0,0.35)", fontWeight: active ? 500 : 400 }}>
-                      {snap.label}
-                    </span>
-                    <span className="text-[9px]" style={{ color: active ? dot : "rgba(0,0,0,0.28)" }}>
-                      DI {r.di.toFixed(2)}
-                    </span>
+                  <button key={s} onClick={() => patchRecord({ specialCategories: { ...record.specialCategories, status: s } })}
+                    className="text-[11px] px-2.5 py-1 rounded-lg border"
+                    style={{ borderColor: active ? T.violet : T.border, background: active ? T.violetBg : "transparent", color: active ? T.violet : T.muted, fontWeight: active ? 600 : 400, cursor: "pointer" }}>
+                    {labels[s]}
                   </button>
                 );
               })}
             </div>
-          </div>
 
-          {/* Metric cards — demo */}
-          <MetricCards report={report} animKey={`${snapIdx}-${ctgan}`} />
-
-          {/* Bottom: groups + lineage */}
-          <div className="grid lg:grid-cols-2 gap-4">
-
-            {/* Group comparison */}
-            <div className="rounded-xl p-4" style={card}>
-              <p className="text-[10px] font-semibold uppercase mb-4"
-                style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "1px" }}>Confronto gruppi</p>
-              <div className="space-y-3">
-                {report.groups.map((g) => (
-                  <div key={g.group}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[11px] flex items-center gap-1.5" style={{ color: "#0D1016" }}>
-                        {g.group}
-                        {g.selectionRate < 0.15 && (
-                          <span className="text-[9px] px-1.5 py-0.5 rounded"
-                            style={{ background: "rgba(220,38,38,0.08)", color: "#dc2626" }}>CTGAN req.</span>
-                        )}
-                      </span>
-                      <div className="flex gap-3 text-[10px]" style={{ color: "rgba(0,0,0,0.4)" }}>
-                        <span>TPR {(g.tpr * 100).toFixed(0)}%</span>
-                        <span>FPR {(g.fpr * 100).toFixed(0)}%</span>
-                        <span className="font-semibold w-8 text-right"
-                          style={{ color: g.selectionRate < 0.3 ? "#dc2626" : "#16a34a" }}>
-                          {(g.selectionRate * 100).toFixed(0)}%
-                        </span>
-                      </div>
-                    </div>
-                    <Bar value={g.selectionRate} max={0.5}
-                      color={g.selectionRate < 0.3 ? "linear-gradient(90deg,#ef4444,#f97316)" : "linear-gradient(90deg,#3b82f6,#22c55e)"} />
-                  </div>
-                ))}
-              </div>
-              {ctgan && (
-                <div className="mt-4 rounded-lg px-3 py-2 text-[11px]"
-                  style={{ background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.15)", color: "#2563eb" }}>
-                  ✦ CTGAN ha generato campioni sintetici per bilanciare i gruppi
-                </div>
-              )}
-            </div>
-
-            {/* Column lineage */}
-            <div className="rounded-xl p-4" style={card}>
-              <p className="text-[10px] font-semibold uppercase mb-4"
-                style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "1px" }}>Column Lineage — proxy detector</p>
-              <div className="space-y-2">
-                {COLUMN_LINEAGE.map((col) => (
-                  <div key={col.column} className="flex items-center justify-between rounded-lg px-3 py-2"
-                    style={{
-                      background: col.isProxy ? "rgba(220,38,38,0.04)" : "#FAFAF9",
-                      border: col.isProxy ? "1px solid rgba(220,38,38,0.15)" : "1px solid rgba(0,0,0,0.06)",
-                    }}>
-                    <div>
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-[11px] font-mono" style={{ color: "#2563eb" }}>{col.column}</span>
-                        <span style={{ color: "rgba(0,0,0,0.25)", fontSize: "9px" }}>→</span>
-                        <span className="text-[11px]" style={{ color: "rgba(0,0,0,0.6)" }}>{col.feature}</span>
-                        {col.isProxy && (
-                          <span className="text-[9px] px-1.5 py-0.5 rounded font-semibold"
-                            style={{ background: "rgba(220,38,38,0.08)", color: "#dc2626" }}>
-                            PROXY {col.proxyFor}
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-[9px]" style={{ color: "rgba(0,0,0,0.3)" }}>{col.source}</span>
-                    </div>
-                    <div className="flex items-center gap-2 ml-3">
-                      <div className="w-14 h-1 rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.07)" }}>
-                        <div className="h-full rounded-full"
-                          style={{ width: `${col.influence * 100}%`, background: col.isProxy ? "#ef4444" : "#3b82f6" }} />
-                      </div>
-                      <span className="text-[10px] w-7 text-right font-medium"
-                        style={{ color: col.isProxy ? "#dc2626" : "rgba(0,0,0,0.45)" }}>
-                        {(col.influence * 100).toFixed(0)}%
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <p className="text-[9px] mt-3" style={{ color: "rgba(0,0,0,0.3)" }}>
-                Colonne PROXY come surrogati di attributi protetti — deployment bloccato se influenza {'>'} 50%
-              </p>
+            {/* Cross-links to DPIA and FRIA */}
+            <div className="flex gap-3 flex-wrap">
+              <Link href="/dashboard/tools/dpia" className="inline-flex items-center gap-1 text-[12px] font-medium" style={{ color: T.blue }}>
+                <ExternalLink size={12} /> DPIA — Art. 35 GDPR
+              </Link>
+              <Link href="/dashboard/tools/fria" className="inline-flex items-center gap-1 text-[12px] font-medium" style={{ color: T.blue }}>
+                <ExternalLink size={12} /> FRIA — Art. 27 AI Act
+              </Link>
             </div>
           </div>
-
-          {/* CTGAN alert */}
-          {report.ctganRequired && !ctgan && (
-            <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
-              className="mt-4 rounded-xl px-5 py-4 flex items-start gap-3"
-              style={{ background: "rgba(234,88,12,0.06)", border: "1px solid rgba(234,88,12,0.2)" }}>
-              <span style={{ color: "#ea580c" }}>⚠</span>
-              <div className="flex-1">
-                <p className="text-[12px] font-semibold" style={{ color: "#ea580c" }}>
-                  DI {report.di.toFixed(2)} &lt; 0.8 — Regola dei Quattro Quinti violata
-                </p>
-                <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.45)" }}>
-                  Attiva CTGAN per bilanciare i gruppi sottorappresentati e sbloccare il deployment.
-                </p>
-              </div>
-              <button onClick={() => setCtgan(true)}
-                className="text-[11px] rounded-lg px-3 py-1.5 flex-shrink-0"
-                style={{ background: "#0D1016", color: "#fff" }}>
-                Attiva CTGAN →
-              </button>
-            </motion.div>
-          )}
-
-          {/* CycloneDX footer */}
-          <div className="mt-4 flex items-center justify-between rounded-lg px-4 py-2.5"
-            style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)" }}>
-            <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>
-              CycloneDX ML BOM · SHA-256: {datasetId === "ds_hiring_2024" ? "a3f9c2…d841" : datasetId === "ds_credit_2024" ? "b7e1a4…c293" : "c4d2f1…e751"} · Firmato: Compliance Officer
-            </span>
-            <button
-              onClick={exportCycloneDXBOM}
-              className="text-[10px] px-3 py-1 rounded transition-opacity hover:opacity-70"
-              style={{ background: "#0D1016", color: "#fff", cursor: "pointer" }}
-            >
-              Esporta BOM ↓
-            </button>
-          </div>
-
-          {/* Art. 10(3) — Processo di etichettatura */}
-          <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, padding: 20, marginBottom: 16 }}>
-            <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 12, color: "#0D1016" }}>
-              Processo di etichettatura (Art. 10(3))
-            </div>
-            <label style={{ fontSize: 13, fontWeight: 500, marginBottom: 6, display: "block" as const, color: "#0D1016" }}>
-              Descrivi il processo di etichettatura (labeling) dei dati di addestramento
-            </label>
-            <textarea
-              value={labelingProcess}
-              onChange={(e) => setLabelingProcess(e.target.value)}
-              placeholder="Es: etichettatura manuale da 3 annotatori con consensus; tool usato; criteri di qualità; % di disaccordo massimo accettato..."
-              style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.07)", fontSize: 13, resize: "vertical" as const, minHeight: 80, boxSizing: "border-box" as const }}
-            />
-            <label style={{ fontSize: 13, fontWeight: 500, marginTop: 12, marginBottom: 8, display: "block" as const, color: "#0D1016" }}>
-              Istruzioni di etichettatura disponibili (Art. 10(3))
-            </label>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" as const }}>
-              {["Sì — documentate internamente", "Sì — allegate alla doc tecnica", "No — da produrre"].map(opt => (
-                <label key={opt} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, cursor: "pointer" }}>
-                  <input type="radio" name="labeling_instructions" value={opt}
-                    checked={labelingInstructions === opt}
-                    onChange={() => setLabelingInstructions(opt)} />
-                  {opt}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Art. 10(4) — Rappresentatività geografica */}
-          <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, padding: 20, marginBottom: 16 }}>
-            <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 12, color: "#0D1016" }}>
-              Rappresentatività geografica (Art. 10(4))
-            </div>
-            <label style={{ fontSize: 13, fontWeight: 500, marginBottom: 8, display: "block" as const, color: "#0D1016" }}>
-              Il dataset copre adeguatamente le aree geografiche in cui il sistema sarà deployato?
-            </label>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" as const, marginBottom: 12 }}>
-              {["Sì", "Parzialmente", "No", "Non applicabile"].map(opt => (
-                <label key={opt} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, cursor: "pointer" }}>
-                  <input type="radio" name="geo_coverage" value={opt}
-                    checked={geoCoverage === opt} onChange={() => setGeoCoverage(opt)} />
-                  {opt}
-                </label>
-              ))}
-            </div>
-            {(geoCoverage === "Parzialmente" || geoCoverage === "No") && (
-              <textarea
-                value={geoGapNote}
-                onChange={(e) => setGeoGapNote(e.target.value)}
-                placeholder="Descrivi le aree geografiche sotto-rappresentate e le misure di mitigazione previste..."
-                style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.07)", fontSize: 13, resize: "vertical" as const, minHeight: 60, boxSizing: "border-box" as const }}
-              />
-            )}
-          </div>
-
-          {/* Art. 10(5) — Categorie speciali per bias detection */}
-          <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, padding: 20, marginBottom: 16 }}>
-            <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, color: "#0D1016" }}>
-              Trattamento categorie speciali per bias detection (Art. 10(5))
-            </div>
-            <div style={{ fontSize: 12, color: "rgba(0,0,0,0.42)", marginBottom: 12 }}>
-              Art. 10(5) consente eccezionalmente il trattamento di dati di categorie speciali al solo fine di rilevare e correggere bias algoritmici, con garanzie adeguate.
-            </div>
-            <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer" }}>
-              <input
-                type="checkbox"
-                checked={usesSpecialCategoriesForBias}
-                onChange={(e) => setUsesSpecialCategoriesForBias(e.target.checked)}
-                style={{ marginTop: 2 }}
-              />
-              <span style={{ fontSize: 13 }}>
-                Il sistema tratta categorie speciali di dati esclusivamente per bias detection (Art. 10(5))
-              </span>
-            </label>
-            {usesSpecialCategoriesForBias && (
-              <div style={{ marginTop: 12 }}>
-                <label style={{ fontSize: 13, fontWeight: 500, marginBottom: 6, display: "block" as const, color: "#0D1016" }}>
-                  Garanzie tecniche e organizzative adottate:
-                </label>
-                <textarea
-                  value={specialCategoryGuarantees}
-                  onChange={(e) => setSpecialCategoryGuarantees(e.target.value)}
-                  placeholder="Es: pseudonimizzazione, accesso limitato, cancellazione post-analisi, base giuridica GDPR Art. 9(2)(g)..."
-                  style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.07)", fontSize: 13, resize: "vertical" as const, minHeight: 70, boxSizing: "border-box" as const }}
-                />
-              </div>
-            )}
-          </div>
-
-          <SignOffPanel toolKey="data-audit" toolLabel="Data & Training Audit" />
         </>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          REAL MODE — CSV upload + analisi fairness reale
-      ══════════════════════════════════════════════════════════════════════ */}
-      {auditMode === "real" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-
-          {/* Header */}
-          <div>
-            <p className="text-[11px] font-semibold uppercase mb-1"
-              style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "1.2px" }}>Art. 10 — Governance dei Dati</p>
-            <h1 className="text-[24px] font-medium" style={{ color: "#0D1016", letterSpacing: "-0.8px" }}>
-              Analisi Dataset Reale
-            </h1>
-          </div>
-
-          {/* Upload card */}
-          <div style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, padding: 20 }}>
-            <h3 style={{ fontSize: 13, fontWeight: 600, color: "#0D1016", margin: "0 0 4px" }}>
-              Carica il tuo dataset CSV
-            </h3>
-            <p style={{ fontSize: 12, color: "rgba(0,0,0,0.42)", marginBottom: 16, lineHeight: 1.5 }}>
-              Il file viene elaborato localmente nel browser — nessun dato viene inviato ai server.
-              Formato: CSV con header, separatore virgola o punto e virgola.
-            </p>
-
-            <label style={{
-              display: "flex", alignItems: "center", gap: 12, padding: "12px 16px",
-              border: "2px dashed rgba(0,0,0,0.12)", borderRadius: 10, cursor: "pointer",
-              background: "rgba(0,0,0,0.02)",
-            }}>
-              <input type="file" accept=".csv,.txt" style={{ display: "none" }}
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  setCsvParseError("");
-                  setCsvFileName(file.name);
-                  const reader = new FileReader();
-                  reader.onload = (ev) => {
-                    const text = ev.target?.result as string;
-                    const records = parseCSV(text);
-                    if (records.length === 0) {
-                      setCsvParseError("File vuoto o formato non riconosciuto.");
-                      return;
-                    }
-                    setCsvRecords(records);
-                    setCsvColumns(Object.keys(records[0]));
-                    setRealReport(null);
-                    setRealConfig(c => ({ ...c, name: file.name.replace(".csv", "") }));
-                    showToastMsg(`${records.length} righe caricate da ${file.name}`);
-                  };
-                  reader.readAsText(file, "UTF-8");
-                }}
-              />
-              <span style={{ fontSize: 24 }}>📂</span>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 500, color: "#0D1016" }}>
-                  {csvFileName || "Clicca per selezionare un file CSV"}
-                </div>
-                {csvRecords.length > 0 && (
-                  <div style={{ fontSize: 11, color: "rgba(0,0,0,0.42)" }}>
-                    {csvRecords.length} righe · {csvColumns.length} colonne rilevate
-                  </div>
-                )}
-              </div>
-            </label>
-
-            {csvParseError && (
-              <div style={{
-                marginTop: 8, padding: "8px 12px", borderRadius: 7,
-                background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.2)",
-                fontSize: 12, color: "#dc2626",
-              }}>
-                {csvParseError}
-              </div>
-            )}
-          </div>
-
-          {/* Configurazione colonne */}
-          {csvColumns.length > 0 && (
-            <div style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, padding: 20 }}>
-              <h3 style={{ fontSize: 13, fontWeight: 600, color: "#0D1016", margin: "0 0 16px" }}>
-                Configurazione analisi fairness
-              </h3>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
-                <div>
-                  <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "rgba(0,0,0,0.42)", marginBottom: 4 }}>
-                    Colonna caratteristica sensibile *
-                  </label>
-                  <select
-                    value={realConfig.sensitiveCol}
-                    onChange={e => setRealConfig(c => ({ ...c, sensitiveCol: e.target.value }))}
-                    style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.07)", fontSize: 12, background: "#fff", color: "#0D1016" }}
-                  >
-                    <option value="">— seleziona —</option>
-                    {csvColumns.map(col => <option key={col} value={col}>{col}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "rgba(0,0,0,0.42)", marginBottom: 4 }}>
-                    Colonna outcome / predizione *
-                  </label>
-                  <select
-                    value={realConfig.outcomeCol}
-                    onChange={e => setRealConfig(c => ({ ...c, outcomeCol: e.target.value }))}
-                    style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.07)", fontSize: 12, background: "#fff", color: "#0D1016" }}
-                  >
-                    <option value="">— seleziona —</option>
-                    {csvColumns.map(col => <option key={col} value={col}>{col}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: "rgba(0,0,0,0.42)", marginBottom: 4 }}>
-                    Valore &quot;esito positivo&quot;
-                  </label>
-                  <input
-                    value={realConfig.positiveOutcome}
-                    onChange={e => setRealConfig(c => ({ ...c, positiveOutcome: e.target.value }))}
-                    placeholder="es. 1, true, yes, hired"
-                    style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.07)", fontSize: 12, background: "#fff", color: "#0D1016" }}
-                  />
-                </div>
-              </div>
-
-              <button
-                disabled={!realConfig.sensitiveCol || !realConfig.outcomeCol}
-                onClick={() => {
-                  if (!realConfig.sensitiveCol || !realConfig.outcomeCol) return;
-                  const rpt = computeRealBiasReport(csvRecords, realConfig);
-                  setRealReport(rpt);
-                  showToastMsg("Analisi completata");
-                }}
-                style={{
-                  marginTop: 16, padding: "9px 20px", borderRadius: 8, fontSize: 13, fontWeight: 500,
-                  background: (!realConfig.sensitiveCol || !realConfig.outcomeCol) ? "rgba(0,0,0,0.07)" : "#0D1016",
-                  color: (!realConfig.sensitiveCol || !realConfig.outcomeCol) ? "rgba(0,0,0,0.3)" : "#fff",
-                  border: "none",
-                  cursor: (!realConfig.sensitiveCol || !realConfig.outcomeCol) ? "not-allowed" : "pointer",
-                }}
-              >
-                Analizza dataset
-              </button>
-            </div>
-          )}
-
-          {/* Risultati */}
-          {realReport && (
-            <>
-              {/* Metric cards — real */}
-              <MetricCards report={realReport} animKey="real" />
-
-              {/* Tabella gruppi */}
-              <div style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, padding: 20 }}>
-                <h3 style={{ fontSize: 13, fontWeight: 600, color: "#0D1016", margin: "0 0 16px" }}>
-                  Distribuzione per gruppi — <span style={{ fontFamily: "monospace", color: "#2563eb" }}>{realConfig.sensitiveCol}</span>
-                </h3>
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                  <thead>
-                    <tr>
-                      {["Gruppo", "Righe", "Selection rate", "Stato"].map(h => (
-                        <th key={h} style={{
-                          textAlign: "left", fontSize: 11, fontWeight: 600,
-                          color: "rgba(0,0,0,0.42)", paddingBottom: 8,
-                          borderBottom: "1px solid rgba(0,0,0,0.07)",
-                        }}>
-                          {h}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {realReport.groups.map(g => (
-                      <tr key={g.group}>
-                        <td style={{ padding: "8px 0 8px", fontSize: 12, fontWeight: 500, color: "#0D1016", borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
-                          {g.group}
-                        </td>
-                        <td style={{ padding: "8px 0 8px", fontSize: 12, color: "rgba(0,0,0,0.6)", borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
-                          {g.size.toLocaleString("it-IT")}
-                        </td>
-                        <td style={{ padding: "8px 0 8px", fontSize: 12, color: "rgba(0,0,0,0.6)", borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
-                          {(g.selectionRate * 100).toFixed(1)}%
-                        </td>
-                        <td style={{ padding: "8px 0 8px", borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
-                          {g.selectionRate < 0.15
-                            ? <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 4, background: "rgba(220,38,38,0.07)", color: "#dc2626", border: "1px solid rgba(220,38,38,0.2)" }}>Sottorappresentato</span>
-                            : <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 4, background: "rgba(22,163,74,0.07)", color: "#16a34a", border: "1px solid rgba(22,163,74,0.2)" }}>OK</span>
-                          }
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Nota metodologica */}
-              <div style={{
-                padding: "10px 14px", borderRadius: 8,
-                background: "rgba(29,78,216,0.05)", border: "1px solid rgba(29,78,216,0.15)",
-                fontSize: 11, color: "#1d4ed8",
-              }}>
-                <strong>Nota metodologica:</strong> EOD semplificato (selection rate difference) — per EOD preciso servono le true labels (ground truth).
-                SPD e DI sono calcolati dalla distribuzione degli outcome nel CSV caricato.
-              </div>
-            </>
-          )}
+      {/* Sanctions note */}
+      {!sanctionsBannerDismissed && (
+        <div className="flex items-start gap-2 p-3 rounded-lg mb-4 text-xs" style={{ background: "#fef9c3", border: "1px solid #fde047", color: "#713f12" }}>
+          <Info size={14} className="mt-0.5 flex-shrink-0" />
+          <span style={{ flex: 1 }}>
+            <strong>Sanzioni Art. 99–101:</strong> Mancata conformità ai requisiti Art. 10 sui dati può comportare sanzioni fino a 15 milioni € o 3% del fatturato mondiale.
+          </span>
+          <button
+            onClick={() => setSanctionsBannerDismissed(true)}
+            style={{ flexShrink: 0, background: "none", border: "none", cursor: "pointer", padding: 2, color: "#713f12", opacity: 0.6, lineHeight: 1, display: "flex", alignItems: "center" }}
+            aria-label="Chiudi"
+          >
+            <X size={14} />
+          </button>
         </div>
       )}
 
-      {/* ── Toast (globale) ──────────────────────────────────────────────────── */}
+      {/* Save */}
+      <div className="flex justify-end">
+        <button onClick={saveToDossier}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[12px] font-medium"
+          style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
+          <CheckCircle2 className="h-3.5 w-3.5" /> Salva nel dossier
+        </button>
+      </div>
+
+      {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 rounded-xl border px-4 py-3 text-sm shadow-xl"
-          style={{ background: "#0D1016", color: "#fff", border: "1px solid rgba(255,255,255,0.1)" }}>
-          {toast}
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg"
+          style={{ background: T.text, color: "#fff" }}>
+          ✓ {toast}
         </div>
       )}
     </div>
