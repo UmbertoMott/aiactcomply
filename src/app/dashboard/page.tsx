@@ -2,11 +2,9 @@
 
 import React, { useState, useEffect, CSSProperties } from "react";
 import {
-  ArrowRight, X,
-  FileCheck2, CalendarClock, BadgeCheck,
-  AlertTriangle, Scale, ClipboardList, Activity, Zap, BarChart3,
-  Cpu, History, ChevronRight, Server,
-  AlertCircle, CheckCircle2, TrendingUp,
+  ArrowRight, X, ChevronRight, Layers, Plus,
+  Clock, CheckCircle2, AlertCircle, Activity,
+  Zap, TrendingUp, Ban,
 } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -16,8 +14,7 @@ import { REGULATORY_DEADLINES, daysUntil, type RegulatoryDeadline } from "@/lib/
 import { getAllEvidence, type EvidenceRecord } from "@/lib/evidence/evidence-layer";
 import { useUserRole } from "@/lib/hooks/useUserRole";
 import { readFromStorage, type ClassifierResult } from "@/lib/dossier/storage-schema";
-import { loadInventory, computeObligationCount } from "@/lib/inventory/ai-system";
-import type { AISystem } from "@/lib/inventory/ai-system";
+import { ActivityQueue } from "@/components/dashboard/ActivityQueue";
 import { ProjectMembers } from "@/components/dashboard/ProjectMembers";
 
 const OnboardingWizard = dynamic(
@@ -31,42 +28,70 @@ const T = {
   text:    "#0D1016",
   muted:   "rgba(0,0,0,0.40)",
   faint:   "rgba(0,0,0,0.22)",
-  border:  "rgba(0,0,0,0.08)",
+  border:  "rgba(0,0,0,0.07)",
+  bg:      "#FAFAF9",
   card:    "#ffffff",
   red:     "#dc2626",   redBg:   "rgba(220,38,38,0.06)",   redBdr:  "rgba(220,38,38,0.18)",
   amber:   "#b45309",   amberBg: "rgba(245,158,11,0.06)",  amberBdr:"rgba(245,158,11,0.2)",
-  green:   "#059669",   greenBg: "rgba(5,150,105,0.06)",   greenBdr:"rgba(5,150,105,0.18)",
-  gray:    "#6b7280",   grayBg:  "rgba(0,0,0,0.04)",
+  blue:    "#0D1016",   blueBg:  "rgba(13,16,22,0.04)",    blueBdr: "rgba(13,16,22,0.12)",
+  green:   "#15803d",   greenBg: "rgba(21,128,61,0.06)",   greenBdr:"rgba(21,128,61,0.18)",
+  gray:    "#6b7280",   grayBg:  "rgba(0,0,0,0.04)",       grayBdr: "rgba(0,0,0,0.10)",
 } as const;
 
-const card: CSSProperties = {
+const cardSt: CSSProperties = {
   background: T.card,
   border: `1px solid ${T.border}`,
   borderRadius: 10,
-  boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.015)",
+  boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
 };
 
 // ── Risk config ───────────────────────────────────────────────────────────────
 
-const RISK_CFG: Record<string, { label: string; color: string; bg: string; bdr: string }> = {
-  unacceptable: { label: "Inaccettabile", color: T.red,   bg: T.redBg,   bdr: T.redBdr   },
-  high:         { label: "Alto",          color: T.red,   bg: T.redBg,   bdr: T.redBdr   },
-  limited:      { label: "Limitato",      color: T.amber, bg: T.amberBg, bdr: T.amberBdr },
-  minimal:      { label: "Minimale",      color: T.green, bg: T.greenBg, bdr: T.greenBdr },
+const RISK_CFG: Record<string, { label: string; color: string; bg: string; bdr: string; bar: string }> = {
+  unacceptable: { label: "Inaccettabile", color: T.red,   bg: T.redBg,   bdr: T.redBdr,   bar: T.red   },
+  high:         { label: "Alto rischio",  color: T.red,   bg: T.redBg,   bdr: T.redBdr,   bar: T.red   },
+  limited:      { label: "Limitato",      color: T.amber, bg: T.amberBg, bdr: T.amberBdr, bar: T.amber },
+  minimal:      { label: "Minimale",      color: T.green, bg: T.greenBg, bdr: T.greenBdr, bar: T.green },
 };
 
-// ── Evidence config ───────────────────────────────────────────────────────────
+// ── Alert card ────────────────────────────────────────────────────────────────
 
-type EvIcon = React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
+function AlertCard({ label, desc, ctaLabel, ctaHref, onDismiss }: {
+  label: string; desc: string; ctaLabel: string; ctaHref: string; onDismiss?: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5 px-4 py-3 rounded-xl"
+      style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-[11.5px] font-semibold leading-snug" style={{ color: "#92400e", letterSpacing: "-0.01em" }}>
+          {label}
+        </p>
+        {onDismiss && (
+          <button onClick={onDismiss} className="flex-shrink-0 mt-0.5 rounded hover:opacity-50 transition-opacity"
+            style={{ color: "rgba(0,0,0,0.22)" }} aria-label="Chiudi">
+            <X className="h-3 w-3" />
+          </button>
+        )}
+      </div>
+      <p className="text-[11px] leading-snug" style={{ color: T.muted }}>{desc}</p>
+      <Link href={ctaHref} className="flex items-center gap-0.5 w-fit text-[11px] font-semibold mt-0.5 hover:opacity-70 transition-opacity"
+        style={{ color: "#b45309" }}>
+        {ctaLabel} <ChevronRight className="h-3 w-3" />
+      </Link>
+    </div>
+  );
+}
 
-const EV_CFG: Record<string, { label: string; color: string; Icon: EvIcon }> = {
-  adr:        { label: "Decisione",    color: T.text,  Icon: Scale         },
-  decision:   { label: "Decisione",    color: T.text,  Icon: Scale         },
-  audit:      { label: "Audit",        color: T.amber, Icon: ClipboardList },
-  log:        { label: "Log",          color: T.gray,  Icon: Activity      },
-  test:       { label: "Test",         color: T.green, Icon: Zap           },
-  incident:   { label: "Incidente",    color: T.red,   Icon: AlertTriangle },
-  monitoring: { label: "Monitoraggio", color: T.gray,  Icon: BarChart3     },
+// ── Evidence type label ───────────────────────────────────────────────────────
+
+const EV_LABELS: Record<string, { label: string; color: string }> = {
+  adr:        { label: "Decisione",   color: T.blue  },
+  decision:   { label: "Decisione",   color: T.blue  },
+  audit:      { label: "Audit",       color: T.amber },
+  log:        { label: "Log",         color: T.gray  },
+  test:       { label: "Test",        color: T.green },
+  incident:   { label: "Incidente",   color: T.red   },
+  monitoring: { label: "Monitoraggio",color: T.gray  },
 };
 
 function relTime(iso: string): string {
@@ -75,65 +100,34 @@ function relTime(iso: string): string {
   if (diff < 3600) return `${Math.floor(diff / 60)} min fa`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h fa`;
   if (diff < 172800) return "ieri";
-  return `${Math.floor(diff / 86400)} gg fa`;
+  return `${Math.floor(diff / 86400)} giorni fa`;
 }
 
-// ── Badge components ──────────────────────────────────────────────────────────
+// ── Section header ────────────────────────────────────────────────────────────
 
-function RiskBadge({ level }: { level?: string }) {
-  const cfg = level ? RISK_CFG[level] : null;
-  if (!cfg) return <span style={{ fontSize: 10, color: T.faint }}>—</span>;
+function SectionHeader({ label, count, href, linkLabel }: {
+  label: string; count?: number; href?: string; linkLabel?: string;
+}) {
   return (
-    <span style={{
-      display: "inline-flex", alignItems: "center", gap: 5,
-      fontSize: 11, fontWeight: 600, padding: "5px 12px", borderRadius: 100,
-      background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.bdr}`,
-      letterSpacing: "0.05px",
-    }}>
-      <span style={{ width: 5, height: 5, borderRadius: "50%", background: cfg.color, flexShrink: 0 }} />
-      {cfg.label}
-    </span>
-  );
-}
-
-function StatusBadge({ status }: { status?: string }) {
-  const isGood   = status === "compliant";
-  const isActive = status === "active";
-  const isReview = status === "review";
-  const label  = isActive ? "In corso" : isGood ? "Conforme" : isReview ? "Revisione" : status ?? "—";
-  const color  = isGood ? T.green : isActive ? T.amber : T.gray;
-  const bg     = isGood ? T.greenBg : isActive ? T.amberBg : T.grayBg;
-  const bdr    = isGood ? T.greenBdr : isActive ? T.amberBdr : "rgba(0,0,0,0.10)";
-  return (
-    <span style={{
-      display: "inline-flex", alignItems: "center", gap: 5,
-      fontSize: 11, fontWeight: 500, padding: "5px 12px", borderRadius: 100,
-      background: bg, color, border: `1px solid ${bdr}`,
-    }}>
-      <span style={{
-        width: 5, height: 5, borderRadius: "50%", background: color, flexShrink: 0,
-      }} />
-      {label}
-    </span>
-  );
-}
-
-function ScoreBar({ pct }: { pct: number }) {
-  const color = pct >= 80 ? T.green : pct >= 40 ? T.amber : T.red;
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-      <div style={{ flex: 1, height: 5, borderRadius: 3, background: "rgba(0,0,0,0.06)", overflow: "hidden" }}>
-        <div style={{
-          height: "100%", borderRadius: 3, background: color,
-          width: `${pct > 0 ? Math.max(pct, 4) : 0}%`,
-          transition: "width 0.8s ease",
-        }} />
+    <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center gap-2">
+        <div style={{ width: 2, height: 12, borderRadius: 1, background: T.text }} />
+        <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: T.muted }}>
+          {label}
+        </span>
+        {count !== undefined && (
+          <span style={{
+            fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 3,
+            background: T.grayBg, color: T.faint, border: `1px solid ${T.border}`,
+          }}>{count}</span>
+        )}
       </div>
-      <span style={{
-        fontSize: 12, fontWeight: 700, color: T.text,
-        minWidth: 34, textAlign: "right",
-        letterSpacing: "-0.5px", fontVariantNumeric: "tabular-nums",
-      }}>{pct}%</span>
+      {href && linkLabel && (
+        <Link href={href} className="flex items-center gap-0.5 hover:opacity-60 transition-opacity"
+          style={{ fontSize: 11, color: T.muted }}>
+          {linkLabel} <ArrowRight className="h-2.5 w-2.5" />
+        </Link>
+      )}
     </div>
   );
 }
@@ -141,93 +135,100 @@ function ScoreBar({ pct }: { pct: number }) {
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 interface DiscoveredSystem {
-  id: string; name: string; status: string;
-  addedToCompliance: boolean; riskLevel?: string;
-}
-
-interface InProgressActivity {
   id: string;
-  title: string;
-  sub: string;
-  href: string;
-  pct: number; // -1 = unknown
+  name: string;
+  status: string;
+  addedToCompliance: boolean;
+  riskLevel?: string;
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
   const { role } = useUserRole();
-  const [showWizard, setShowWizard]         = useState(false);
-  const [dossierPct, setDossierPct]         = useState(0);
-  const [dossierDone, setDossierDone]       = useState(0);
-  const [mounted, setMounted]               = useState(false);
+  const [showWizard, setShowWizard]   = useState(false);
+  const [dossierPct, setDossierPct]   = useState(0);
+  const [dossierDone, setDossierDone] = useState(0);
+  const [totalSections, setTotalSections] = useState(0);
+  const [mounted, setMounted]         = useState(false);
 
-  const [hasSources, setHasSources]         = useState(true);
+  // Alert state
+  const [newSystemCount, setNewSystemCount]   = useState(0);
+  const [newSystemNames, setNewSystemNames]   = useState<string[]>([]);
+  const [hasSources, setHasSources]           = useState(true);
   const [discoveryDismissed, setDiscoveryDismissed] = useState(false);
   const [deadlineDismissed, setDeadlineDismissed]   = useState(true);
-  const [alertDeadline, setAlertDeadline]   = useState<RegulatoryDeadline | null>(null);
-  const [alertDeadlineDays, setAlertDeadlineDays] = useState<number | null>(null);
-  const [art73MinDays, setArt73MinDays]     = useState<number | null>(null);
-  const [art73Count, setArt73Count]         = useState(0);
-  const [art73Dismissed, setArt73Dismissed] = useState(false);
-  const [gpaiDismissed, setGpaiDismissed]   = useState(true);
-  const [newSystemCount, setNewSystemCount] = useState(0);
+  const [alertDeadline, setAlertDeadline]           = useState<RegulatoryDeadline | null>(null);
+  const [alertDeadlineDays, setAlertDeadlineDays]   = useState<number | null>(null);
+  const [art73MinDays, setArt73MinDays] = useState<number | null>(null);
+  const [art73Count, setArt73Count]     = useState(0);
+  const [art73Dismissed, setArt73Dismissed]   = useState(false);
+  const [gpaiDismissed, setGpaiDismissed]     = useState(true);
 
-  const [systems, setSystems]               = useState<DiscoveredSystem[]>([]);
-  const [inventorySystems, setInventorySystems] = useState<AISystem[]>([]);
+  // Main data
+  const [systems, setSystems]             = useState<DiscoveredSystem[]>([]);
   const [onboardingSystem, setOnboardingSystem] = useState<string>("");
-  const [nextActions, setNextActions]       = useState<{ id: string; title: string; article: string; href: string }[]>([]);
-  const [deadlines, setDeadlines]           = useState<{ deadline: RegulatoryDeadline; days: number }[]>([]);
+  const [nextActions, setNextActions]     = useState<{ id: string; title: string; article: string; href: string }[]>([]);
+  const [deadlines, setDeadlines]         = useState<{ deadline: RegulatoryDeadline; days: number }[]>([]);
   const [recentEvidence, setRecentEvidence] = useState<EvidenceRecord[]>([]);
-  const [inProgress, setInProgress]         = useState<InProgressActivity[]>([]);
 
   useEffect(() => {
     setMounted(true);
     if (!isOnboardingDone()) setShowWizard(true);
 
-    const data     = aggregateDossier();
+    // Dossier
+    const data = aggregateDossier();
     const sections = getDossierSections(data);
     setDossierPct(getCompletionPercentage(sections));
     setDossierDone(getCompletedCount(sections));
+    setTotalSections(sections.length);
 
+    // Next actions
     setNextActions(
-      sections.filter(s => s.status !== "complete").slice(0, 5)
+      sections
+        .filter(s => s.status !== "complete")
+        .slice(0, 5)
         .map(s => ({ id: s.id, title: s.title, article: s.article, href: s.href }))
     );
 
+    // Onboarding system name
     try {
       const ob = localStorage.getItem("aicomply_onboarding_data");
-      if (ob) { const p = JSON.parse(ob); setOnboardingSystem(p?.systemName || ""); }
+      if (ob) { const parsed = JSON.parse(ob); setOnboardingSystem(parsed?.systemName || ""); }
     } catch { /* ignore */ }
 
+    // AI Systems from Discovery
     try {
       const classifier = readFromStorage<ClassifierResult>("classifier");
       const sysRaw = localStorage.getItem("aicomply_discovered_systems");
       const sys: DiscoveredSystem[] = sysRaw ? JSON.parse(sysRaw) : [];
-      setSystems(sys.filter(s => s.status !== "ignored").map(s => ({
+      const active = sys.filter(s => s.status !== "ignored").map(s => ({
         ...s,
         riskLevel: classifier?.systemName && classifier.systemName.toLowerCase() === s.name.toLowerCase()
-          ? classifier.riskLevel : s.riskLevel,
-      })));
+          ? classifier.riskLevel
+          : s.riskLevel,
+      }));
+      setSystems(active);
     } catch { /* ignore */ }
-    try { setInventorySystems(loadInventory()); } catch { /* ignore */ }
 
+    // Upcoming deadlines (next 3)
     const today = new Date();
-    setDeadlines(
-      REGULATORY_DEADLINES
-        .filter(d => new Date(d.date) > today)
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-        .slice(0, 3)
-        .map(d => ({ deadline: d, days: daysUntil(d.date) }))
-    );
+    const upcoming = REGULATORY_DEADLINES
+      .filter(d => new Date(d.date) > today)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(0, 3)
+      .map(d => ({ deadline: d, days: daysUntil(d.date) }));
+    setDeadlines(upcoming);
 
+    // Evidence
     try {
       const ev = getAllEvidence();
       setRecentEvidence(
-        [...ev].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 6)
+        [...ev].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 5)
       );
     } catch { /* ignore */ }
 
+    // Alerts
     setGpaiDismissed(localStorage.getItem("aicomply_gpai_banner_dismissed") === "1");
 
     try {
@@ -239,12 +240,14 @@ export default function DashboardPage() {
       const pending = sys2.filter((s: { status: string; addedToCompliance: boolean }) =>
         !s.addedToCompliance && s.status !== "ignored");
       setNewSystemCount(pending.length);
+      setNewSystemNames(pending.slice(0, 2).map((s: { name: string }) => s.name));
     } catch { /* ignore */ }
 
-    const DISMISS_KEY = "aicomply_deadline_banner_dismissed_v2";
-    if (localStorage.getItem(DISMISS_KEY) !== "1") {
+    const DEADLINE_DISMISS_KEY = "aicomply_deadline_banner_dismissed_v2";
+    if (localStorage.getItem(DEADLINE_DISMISS_KEY) !== "1") {
+      const todayN = new Date();
       const next = REGULATORY_DEADLINES
-        .filter(d => new Date(d.date) > new Date())
+        .filter(d => new Date(d.date) > todayN)
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0] ?? null;
       if (next) { setAlertDeadline(next); setAlertDeadlineDays(daysUntil(next.date)); setDeadlineDismissed(false); }
     }
@@ -254,61 +257,27 @@ export default function DashboardPage() {
       if (raw) {
         const incidents = JSON.parse(raw) as Array<{ date: string; notified: boolean }>;
         const urgent = incidents.filter(i => !i.notified).map(i => {
-          const d = new Date(new Date(i.date).getTime() + 15 * 24 * 60 * 60 * 1000);
-          return Math.ceil((d.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+          const created = new Date(i.date);
+          const deadline = new Date(created.getTime() + 15 * 24 * 60 * 60 * 1000);
+          return Math.ceil((deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
         }).filter(d => d <= 15 && d > 0);
         if (urgent.length > 0) { setArt73Count(urgent.length); setArt73MinDays(Math.min(...urgent)); }
       }
     } catch { /* ignore */ }
-
-    // ── In-progress activity detection ──────────────────────────
-    try {
-      const acts: InProgressActivity[] = [];
-      const friaG = readFromStorage<{ overallPercent: number }>("friaGuided");
-      if (friaG && friaG.overallPercent > 0 && friaG.overallPercent < 100) {
-        acts.push({ id: "fria", title: "FRIA guidata", sub: "Valutazione impatto diritti fondamentali · Art. 27", href: "/dashboard/tools/fria", pct: friaG.overallPercent });
-      }
-      const dpiaG = readFromStorage<{ overallPercent: number }>("dpiaGuided");
-      if (dpiaG && dpiaG.overallPercent > 0 && dpiaG.overallPercent < 100) {
-        acts.push({ id: "dpia", title: "DPIA guidata", sub: "Data Protection Impact Assessment · Art. 35", href: "/dashboard/tools/dpia", pct: dpiaG.overallPercent });
-      }
-      const assessment = readFromStorage<object>("assessment");
-      if (assessment && Object.keys(assessment).length > 0) {
-        acts.push({ id: "assessment", title: "Valutazione conformità", sub: "Assessment AI Act · Art. 9", href: "/dashboard/tools/assessment", pct: -1 });
-      }
-      const rrKeys = Object.keys(localStorage).filter(k => k.includes("risk_register") && !k.includes("signoff"));
-      if (rrKeys.length > 0) {
-        acts.push({ id: "risk", title: "Risk Register", sub: "Registro rischi AI · Art. 9(9)", href: "/dashboard/tools/risk-manager", pct: -1 });
-      }
-      setInProgress(acts);
-    } catch { /* ignore */ }
   }, []);
 
-  const pctColor      = dossierPct >= 80 ? T.green : dossierPct >= 40 ? T.amber : T.text;
-  const scoreLabel    = dossierPct >= 80 ? "OTTIMO" : dossierPct >= 40 ? "IN MIGLIORAMENTO" : "AZIONE RICHIESTA";
-  const levelLabel    = dossierPct >= 80 ? "LIVELLO ALTO" : dossierPct >= 40 ? "LIVELLO MEDIO" : "LIVELLO BASSO";
-  const showDiscovery = newSystemCount > 0 || (!hasSources && !discoveryDismissed);
-  const showDeadline  = !deadlineDismissed && alertDeadline !== null;
-  const showArt73     = art73Count > 0 && !art73Dismissed;
-  const mainSysName   = onboardingSystem || "Sistema AI principale";
-  const classifier    = typeof window !== "undefined" ? readFromStorage<ClassifierResult>("classifier") : null;
-  const hasInventory  = inventorySystems.length > 0;
-  const showMainSys   = !hasInventory && systems.length === 0 && isOnboardingDone();
-  const totalSystems  = hasInventory ? inventorySystems.length
-    : systems.length > 0 ? systems.length : showMainSys ? 1 : 0;
-  // Tier → RISK_CFG key adapter
-  const TIER_RISK: Record<string, string> = {
-    prohibited: "unacceptable", high_risk: "high",
-    limited: "limited", minimal: "minimal",
-    gpai: "limited", gpai_systemic: "high", unclassified: "minimal",
-  };
-  const showBanner    = nextActions[0] || showDeadline || showArt73 || showDiscovery;
-  const criticalDeadlines = deadlines.filter(d => d.days <= 90);
+  const pctColor = dossierPct >= 80 ? T.green : dossierPct >= 40 ? T.amber : T.red;
 
-  const nowStr = mounted ? new Date().toLocaleString("it-IT", {
-    weekday: "short", day: "2-digit", month: "short", year: "numeric",
-    hour: "2-digit", minute: "2-digit",
-  }) + " UTC" : "";
+  const showDiscovery = newSystemCount > 0 || (!hasSources && !discoveryDismissed);
+  const showDeadline  = !deadlineDismissed && alertDeadline !== null && alertDeadlineDays !== null;
+  const showArt73     = art73Count > 0 && !art73Dismissed;
+  const showGpai      = !gpaiDismissed;
+  const alertCount    = [showDiscovery, showDeadline, showArt73, showGpai].filter(Boolean).length;
+
+  // Main system fallback
+  const mainSystemName = onboardingSystem || "Sistema AI principale";
+  const classifier     = typeof window !== "undefined" ? readFromStorage<ClassifierResult>("classifier") : null;
+  const showMainSystem = systems.length === 0 && isOnboardingDone();
 
   return (
     <>
@@ -316,421 +285,428 @@ export default function DashboardPage() {
 
       <style>{`
         @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(6px); }
+          from { opacity: 0; transform: translateY(10px); }
           to   { opacity: 1; transform: translateY(0); }
         }
-        .fu { animation: fadeUp 0.3s ease both; }
-        .fu-1 { animation: fadeUp 0.3s 0.05s ease both; }
-        .fu-2 { animation: fadeUp 0.3s 0.10s ease both; }
-        .fu-3 { animation: fadeUp 0.3s 0.15s ease both; }
-        .sys-row:hover { background: rgba(0,0,0,0.015) !important; }
-        .bottom-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04) !important; }
-        @media (max-width: 900px) {
-          .main-grid  { grid-template-columns: 1fr !important; }
-          .stats-grid { grid-template-columns: 1fr 1fr !important; }
-          .bot-grid   { grid-template-columns: 1fr !important; }
-        }
+        .fade-up { animation: fadeUp 0.35s ease both; }
       `}</style>
 
       <div className="w-full">
 
-        {/* ── HEADER ──────────────────────────────────────────────── */}
-        <div className="fu" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 22 }}>
-          <div>
-            <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.8px", textTransform: "uppercase", color: T.faint, marginBottom: 7 }}>
-              {nowStr}
-            </p>
-            <h1 style={{ fontSize: 27, fontWeight: 400, letterSpacing: "-0.9px", color: T.text, lineHeight: 1.1, marginBottom: 5 }}>
-              Compliance Overview
-            </h1>
-            <p style={{ fontSize: 12, color: T.muted }}>
-              {role === "deployer" ? "Obblighi Art. 26 — deployer"
-                : role === "distributor" ? "Obblighi minimi Art. 24"
-                : "EU AI Act 2024/1689"}
-            </p>
-          </div>
-
-          {/* Score */}
-          <div style={{ textAlign: "right", flexShrink: 0 }}>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 1, justifyContent: "flex-end" }}>
-              <span style={{ fontSize: 58, fontWeight: 200, letterSpacing: "-4px", color: T.text, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
-                {dossierPct}
-              </span>
-              <span style={{ fontSize: 24, fontWeight: 300, color: "rgba(0,0,0,0.18)", letterSpacing: "-1px" }}>/100</span>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end", marginTop: 5 }}>
-              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: T.faint }}>{levelLabel}</span>
-              <span style={{ width: 3, height: 3, borderRadius: "50%", background: T.faint, display: "inline-block" }} />
-              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: pctColor }}>{scoreLabel}</span>
-            </div>
-            <div style={{ height: 2, width: 100, background: "rgba(0,0,0,0.06)", borderRadius: 1, marginTop: 7, marginLeft: "auto" }}>
-              <div style={{ height: 2, width: `${dossierPct}%`, maxWidth: 100, background: pctColor, borderRadius: 1, transition: "width 0.8s ease" }} />
-            </div>
-          </div>
-        </div>
-
-        {/* ── ALERT BANNER ────────────────────────────────────────── */}
-        {showBanner && (
-          <div className="fu-1" style={{
-            display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16,
-            padding: "13px 18px", borderRadius: 8, marginBottom: 16,
-            background: "rgba(0,0,0,0.025)",
-            border: `1px solid rgba(0,0,0,0.07)`,
-            borderLeft: `3px solid ${T.text}`,
-          }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 3 }}>
-                {showArt73 ? `Art. 73 · Notifica entro ${art73MinDays} giorni`
-                  : showDeadline ? alertDeadline!.title
-                  : showDiscovery ? "Sistemi AI rilevati — classificazione richiesta"
-                  : nextActions[0]?.title}
-              </p>
-              <p style={{ fontSize: 11, color: T.muted }}>
-                {showArt73 ? `${art73Count} incidente/i non segnalato/i · Art. 73`
-                  : showDeadline ? `${alertDeadline!.article} · Scadenza ${new Date(alertDeadline!.date).toLocaleDateString("it-IT", { day:"2-digit", month:"short", year:"numeric" })} — ${alertDeadlineDays} giorni rimanenti`
-                  : showDiscovery ? "Discovery per classificare automaticamente i sistemi AI"
-                  : nextActions[0] ? `Art. ${nextActions[0].article} · Allegato III` : ""}
-              </p>
-            </div>
-            <Link
-              href={showArt73 ? "/dashboard/post-market"
-                : showDeadline ? "/dashboard/notifications"
-                : showDiscovery ? "/dashboard/tools/inventory"
-                : nextActions[0]?.href ?? "/dashboard/journey"}
-              style={{
-                padding: "8px 16px", background: T.text, color: "#fff", borderRadius: 6,
-                fontSize: 11.5, fontWeight: 500, whiteSpace: "nowrap",
-                display: "inline-flex", alignItems: "center", gap: 6, flexShrink: 0,
-                letterSpacing: "-0.1px",
-              }}>
-              {showArt73 ? "Notifica ora"
-                : showDeadline ? "Vedi timeline"
-                : showDiscovery ? "Avvia Discovery"
-                : "Vai alla sezione"}
-              <ArrowRight size={12} />
-            </Link>
+        {/* ── ALERTS ──────────────────────────────────────────────────── */}
+        {alertCount > 0 && (
+          <div className="mb-6" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 8 }}>
+            {showDiscovery && (
+              <AlertCard
+                label={newSystemCount > 0 ? `${newSystemCount} sistema/i AI — classificazione richiesta` : "Scopri i sistemi AI nella tua infrastruttura"}
+                desc={newSystemCount > 0 ? (newSystemNames.length > 0 ? newSystemNames.join(", ") : "Sistemi rilevati non ancora classificati.") : "Connetti GitHub, AWS o Azure per un inventario automatico."}
+                ctaLabel="Avvia Discovery" ctaHref="/dashboard/discovery"
+                onDismiss={newSystemCount === 0 ? () => setDiscoveryDismissed(true) : undefined}
+              />
+            )}
+            {showDeadline && (
+              <AlertCard
+                label={`${alertDeadline!.article} · ${alertDeadlineDays} giorni alla scadenza`}
+                desc={alertDeadline!.title} ctaLabel="Vedi timeline" ctaHref="/dashboard/notifications"
+                onDismiss={() => { setDeadlineDismissed(true); localStorage.setItem("aicomply_deadline_banner_dismissed_v2", "1"); }}
+              />
+            )}
+            {showArt73 && (
+              <AlertCard
+                label={`Art. 73 · Notifica entro ${art73MinDays} giorni`}
+                desc={`${art73Count} incidente/i non ancora segnalato/i all'autorità competente.`}
+                ctaLabel="Notifica ora" ctaHref="/dashboard/post-market"
+                onDismiss={() => setArt73Dismissed(true)}
+              />
+            )}
+            {showGpai && (
+              <AlertCard
+                label="GPAI Art. 51-55 · Obblighi in vigore"
+                desc="Usi OpenAI, Anthropic o Google AI? Hai obblighi già operativi da configurare."
+                ctaLabel="Configura" ctaHref="/dashboard/modules/gpai"
+                onDismiss={() => { setGpaiDismissed(true); localStorage.setItem("aicomply_gpai_banner_dismissed", "1"); }}
+              />
+            )}
           </div>
         )}
 
-        {/* ── STATS ───────────────────────────────────────────────── */}
-        <div className="stats-grid fu-1" style={{ ...card, display: "grid", gridTemplateColumns: "repeat(4, 1fr)", marginBottom: 14, overflow: "hidden" }}>
-          {[
-            {
-              Icon: Server,
-              label: "SISTEMI AI",
-              value: totalSystems,
-              sub: totalSystems > 0
-                ? `${systems.filter(s => s.riskLevel === "high" || s.riskLevel === "unacceptable").length} alto rischio · All. III`
-                : "Avvia Discovery",
-            },
-            {
-              Icon: AlertCircle,
-              label: "OBBLIGHI APERTI",
-              value: nextActions.length,
-              sub: nextActions.length > 0 ? `${Math.min(nextActions.length, 2)} urgenti · entro 7 giorni` : "tutti adempiuti",
-            },
-            {
-              Icon: FileCheck2,
-              label: "DOC. FIRMATI",
-              value: dossierDone,
-              sub: "eIDAS SES · hash-chain verificata",
-            },
-            {
-              Icon: CalendarClock,
-              label: "PROSSIMA SCADENZA",
-              value: deadlines[0] ? `${deadlines[0].days}` : "—",
-              unit: deadlines[0] ? "gg" : undefined,
-              sub: deadlines[0] ? `${deadlines[0].deadline.article} · notifica incidente` : "nessuna scadenza",
-            },
-          ].map(({ Icon, label, value, unit, sub }, i) => (
-            <div key={label} style={{
-              padding: "16px 20px",
-              borderRight: i < 3 ? `1px solid ${T.border}` : "none",
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 10 }}>
-                <Icon size={11} style={{ color: T.faint }} />
-                <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.9px", textTransform: "uppercase", color: T.faint }}>
-                  {label}
-                </span>
+        {/* ── ACTIVITY QUEUE ──────────────────────────────────────────── */}
+        <ActivityQueue />
+
+        {/* ── HEADER + DOSSIER ────────────────────────────────────────── */}
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h1 style={{ fontSize: 26, fontWeight: 400, letterSpacing: "-0.8px", color: T.text, lineHeight: 1.15, marginBottom: 4 }}>
+              Dashboard
+            </h1>
+            <p style={{ fontSize: 13, color: T.muted }}>
+              {role === "deployer" ? "Obblighi Art. 26 — tool obbligatori per deployer."
+                : role === "distributor" ? "Obblighi minimi Art. 24 per distributori."
+                : "Compliance EU AI Act 2024/1689 — completa i tool per ogni sistema AI."}
+            </p>
+          </div>
+          <Link href="/dashboard/dossier"
+            className="flex items-center gap-3 rounded-xl px-4 py-3 hover:opacity-80 transition-opacity flex-shrink-0 ml-8"
+            style={{ ...cardSt, minWidth: 200 }}>
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-1.5">
+                <span style={{ fontSize: 11, color: T.muted, fontWeight: 500 }}>Dossier</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: pctColor }}>{dossierPct}%</span>
               </div>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 3, marginBottom: 4 }}>
-                <span style={{ fontSize: 34, fontWeight: 200, letterSpacing: "-1.5px", color: T.text, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
-                  {value}
-                </span>
-                {unit && <span style={{ fontSize: 14, fontWeight: 400, color: T.muted }}>{unit}</span>}
+              <div className="h-1 rounded-full" style={{ background: "rgba(0,0,0,0.07)" }}>
+                <div className="h-1 rounded-full transition-all duration-700"
+                  style={{ width: `${dossierPct}%`, background: pctColor }} />
               </div>
-              <p style={{ fontSize: 10, color: T.faint, lineHeight: 1.4 }}>{sub}</p>
+              <p style={{ fontSize: 10, color: "rgba(0,0,0,0.3)", marginTop: 4 }}>
+                {dossierDone}/{totalSections} sezioni · Genera PDF →
+              </p>
             </div>
-          ))}
+          </Link>
         </div>
 
-        {/* ── MAIN GRID ───────────────────────────────────────────── */}
-        <div className="main-grid fu-2" style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 12, marginBottom: 12, alignItems: "start" }}>
+        {/* ── STATS ───────────────────────────────────────────────────── */}
+        <div className="rounded-xl mb-6" style={{ ...cardSt }}>
+          <div className="grid grid-cols-4">
+            {[
+              { label: "Tool completati", value: String(dossierDone), sub: `/${totalSections}` },
+              { label: "Sistemi AI",       value: systems.length > 0 ? String(systems.length) : showMainSystem ? "1" : "0", sub: "" },
+              { label: "Azioni in sospeso",value: String(nextActions.length), sub: "" },
+              { label: "Prossima scadenza",value: deadlines[0] ? `${deadlines[0].days}g` : "—", sub: "" },
+            ].map((s, i) => (
+              <div key={s.label} className="px-6 py-4"
+                style={{ borderRight: i < 3 ? `1px solid ${T.border}` : "none" }}>
+                <div style={{ fontSize: 22, fontWeight: 600, letterSpacing: "-0.5px", color: T.text, lineHeight: 1.1 }}>
+                  {s.value}
+                  {s.sub && <span style={{ fontSize: 13, fontWeight: 400, color: T.faint }}>{s.sub}</span>}
+                </div>
+                <div style={{ fontSize: 11, color: "rgba(0,0,0,0.38)", marginTop: 3 }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-          {/* Systems Table */}
-          <div style={{ ...card, overflow: "hidden" }}>
-            <div style={{ padding: "12px 18px 10px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <Cpu size={13} style={{ color: T.faint }} />
-                <div>
-                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.9px", textTransform: "uppercase", color: T.faint }}>
-                    INVENTARIO SISTEMI AI
-                  </span>
-                  {totalSystems > 0 && (
-                    <span style={{ fontSize: 9, color: T.faint, marginLeft: 8 }}>
-                      {Math.min(4, totalSystems)} / {totalSystems}
-                    </span>
-                  )}
+        {/* ── 2-COLUMN MAIN ───────────────────────────────────────────── */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 20, alignItems: "start" }}>
+
+          {/* ── LEFT: AI Systems ─────────────────────────────────────── */}
+          <div>
+            <SectionHeader
+              label="I tuoi sistemi AI"
+              count={systems.length > 0 ? systems.length : showMainSystem ? 1 : 0}
+              href="/dashboard/discovery"
+              linkLabel="Aggiungi sistema"
+            />
+
+            {/* Empty state */}
+            {systems.length === 0 && !showMainSystem && (
+              <div style={{ ...cardSt, padding: 40, textAlign: "center" }} className="fade-up">
+                <Layers className="h-8 w-8 mx-auto mb-3" style={{ color: T.faint }} />
+                <p style={{ fontSize: 13, fontWeight: 500, color: T.text, marginBottom: 6 }}>
+                  Nessun sistema AI registrato
+                </p>
+                <p style={{ fontSize: 12, color: T.muted, marginBottom: 16, maxWidth: 280, margin: "0 auto 16px" }}>
+                  Avvia Discovery per rilevare automaticamente i sistemi AI nella tua infrastruttura.
+                </p>
+                <Link href="/dashboard/discovery"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-[12px] font-medium hover:opacity-80 transition-opacity"
+                  style={{ background: T.text, color: "#fff" }}>
+                  <Plus className="h-3.5 w-3.5" /> Avvia Discovery
+                </Link>
+              </div>
+            )}
+
+            {/* Main system from onboarding (fallback) */}
+            {systems.length === 0 && showMainSystem && (
+              <SystemCard
+                name={mainSystemName}
+                riskLevel={classifier?.riskLevel}
+                dossierPct={dossierPct}
+                nextAction={nextActions[0]?.title}
+                nextActionHref={nextActions[0]?.href}
+                index={0}
+                status="active"
+              />
+            )}
+
+            {/* Discovered systems grid */}
+            {systems.length > 0 && (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                {systems.map((sys, i) => (
+                  <SystemCard
+                    key={sys.id}
+                    name={sys.name}
+                    riskLevel={sys.riskLevel}
+                    dossierPct={dossierPct}
+                    nextAction={nextActions[0]?.title}
+                    nextActionHref={nextActions[0]?.href}
+                    index={i}
+                    status={sys.status}
+                  />
+                ))}
+                {/* Add system card */}
+                <Link href="/dashboard/discovery"
+                  className="fade-up flex flex-col items-center justify-center gap-2 rounded-xl hover:opacity-70 transition-opacity"
+                  style={{
+                    border: `1.5px dashed ${T.border}`,
+                    background: "transparent",
+                    minHeight: 120,
+                    animationDelay: `${systems.length * 60}ms`,
+                  }}>
+                  <Plus className="h-5 w-5" style={{ color: T.faint }} />
+                  <span style={{ fontSize: 11, color: T.faint }}>Aggiungi sistema</span>
+                </Link>
+              </div>
+            )}
+          </div>
+
+          {/* ── RIGHT: Sidebar panel ────────────────────────────────── */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
+            {/* Scadenze urgenti */}
+            {deadlines.length > 0 && (
+              <div style={{ ...cardSt, padding: 16 }}>
+                <SectionHeader label="Scadenze urgenti" href="/dashboard/notifications" linkLabel="Tutte" />
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {deadlines.map(({ deadline, days }, i) => {
+                    const color = days <= 30 ? T.red : days <= 90 ? T.amber : T.muted;
+                    const bg    = days <= 30 ? T.redBg : days <= 90 ? T.amberBg : T.grayBg;
+                    const bdr   = days <= 30 ? T.redBdr : days <= 90 ? T.amberBdr : T.grayBdr;
+                    return (
+                      <Link key={deadline.id} href="/dashboard/notifications"
+                        className="flex items-start justify-between gap-2 group hover:opacity-80 transition-opacity"
+                        style={{
+                          padding: "9px 10px",
+                          borderRadius: 8,
+                          border: `1px solid ${i === 0 ? bdr : T.border}`,
+                          background: i === 0 ? bg : "transparent",
+                        }}>
+                        <div className="flex-1 min-w-0">
+                          <p style={{ fontSize: 11, fontWeight: 600, color: T.text, marginBottom: 1 }}>
+                            {deadline.article}
+                          </p>
+                          <p style={{ fontSize: 11, color: T.muted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {deadline.title}
+                          </p>
+                        </div>
+                        <span style={{
+                          fontSize: 10, fontWeight: 700, flexShrink: 0,
+                          padding: "2px 7px", borderRadius: 4,
+                          background: bg, color: color, border: `1px solid ${bdr}`,
+                        }}>
+                          {days}g
+                        </span>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
+            )}
+
+            {/* Prossime azioni */}
+            <div style={{ ...cardSt, padding: 16 }}>
+              <SectionHeader label="Prossime azioni" count={nextActions.length} />
+              {nextActions.length === 0 ? (
+                <div className="flex items-center gap-2" style={{ padding: "8px 0" }}>
+                  <CheckCircle2 className="h-4 w-4 flex-shrink-0" style={{ color: T.green }} />
+                  <span style={{ fontSize: 12, color: T.green, fontWeight: 500 }}>Dossier completato</span>
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  {nextActions.map((action, i) => (
+                    <Link key={action.id} href={action.href}
+                      className="flex items-center gap-2.5 group hover:opacity-70 transition-opacity"
+                      style={{
+                        padding: "7px 0",
+                        borderBottom: i < nextActions.length - 1 ? `1px solid ${T.border}` : "none",
+                      }}>
+                      <div style={{
+                        width: 6, height: 6, borderRadius: 3, flexShrink: 0,
+                        background: i === 0 ? T.red : T.faint,
+                      }} />
+                      <span style={{ flex: 1, fontSize: 12, color: T.text, fontWeight: i === 0 ? 500 : 400 }}>
+                        {action.title}
+                      </span>
+                      <span style={{
+                        fontSize: 9, color: T.faint,
+                        background: T.grayBg, padding: "1px 5px", borderRadius: 3,
+                        border: `1px solid ${T.border}`, flexShrink: 0,
+                      }}>
+                        {action.article}
+                      </span>
+                      <ArrowRight className="h-3 w-3 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        style={{ color: T.faint }} />
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Col headers */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 140px 120px 160px", columnGap: 24, padding: "8px 18px", background: "rgba(0,0,0,0.015)", borderBottom: `1px solid ${T.border}` }}>
-              {["SISTEMA", "RISCHIO", "STATO", "DOSSIER"].map(h => (
-                <span key={h} style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase", color: T.faint }}>
-                  {h}
-                </span>
+            {/* Attività recente */}
+            <div style={{ ...cardSt, padding: 16 }}>
+              <SectionHeader label="Attività recente" href="/dashboard/evidence-layer" linkLabel="Vedi tutto" />
+              {recentEvidence.length === 0 ? (
+                <p style={{ fontSize: 12, color: T.faint, padding: "6px 0" }}>
+                  Nessuna attività ancora.
+                </p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  {recentEvidence.map((ev, i) => {
+                    const cfg = EV_LABELS[ev.type] ?? { label: ev.type, color: T.gray };
+                    return (
+                      <div key={ev.id} className="flex items-center gap-2.5"
+                        style={{
+                          padding: "7px 0",
+                          borderBottom: i < recentEvidence.length - 1 ? `1px solid ${T.border}` : "none",
+                        }}>
+                        <div style={{ width: 6, height: 6, borderRadius: 3, flexShrink: 0, background: cfg.color }} />
+                        <div className="flex-1 min-w-0">
+                          <span style={{
+                            fontSize: 11, fontWeight: 500, padding: "1px 5px", borderRadius: 3,
+                            background: T.grayBg, color: T.muted, marginRight: 4,
+                            border: `1px solid ${T.border}`,
+                          }}>{cfg.label}</span>
+                          <span style={{ fontSize: 11, color: T.text }}>
+                            {(ev.content as Record<string, unknown>)?.tool as string ?? ev.type}
+                          </span>
+                        </div>
+                        <span style={{ fontSize: 10, color: T.faint, flexShrink: 0 }}>
+                          {relTime(ev.timestamp)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Quick links */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              {[
+                { label: "Roadmap",     href: "/dashboard/journey",      Icon: TrendingUp },
+                { label: "Post-Market", href: "/dashboard/post-market",  Icon: Activity   },
+                { label: "Art. 5",      href: "/dashboard/tools/prohibited", Icon: Ban   },
+                { label: "Conformity",  href: "/dashboard/tools/conformity", Icon: Zap   },
+              ].map(({ label, href, Icon }) => (
+                <Link key={href} href={href}
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:opacity-75 transition-opacity"
+                  style={{ ...cardSt, fontSize: 11, fontWeight: 500, color: T.muted }}>
+                  <Icon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: T.faint }} />
+                  {label}
+                </Link>
               ))}
             </div>
 
-            {/* Rows */}
-            {totalSystems === 0 ? (
-              <div style={{ padding: "32px 18px", textAlign: "center" }}>
-                <Server size={28} style={{ color: "rgba(0,0,0,0.08)", margin: "0 auto 10px" }} />
-                <p style={{ fontSize: 13, color: T.muted, marginBottom: 12 }}>Nessun sistema AI registrato</p>
-                <Link href="/dashboard/tools/inventory"
-                  style={{ fontSize: 12, fontWeight: 500, color: "#fff", background: T.text, padding: "8px 16px", borderRadius: 6, display: "inline-flex", alignItems: "center", gap: 6 }}>
-                  Vai all&apos;inventario <ArrowRight size={12} />
-                </Link>
-              </div>
-            ) : (
-              <>
-                {/* Inventory systems (primary source) */}
-                {hasInventory && inventorySystems.slice(0, 4).map((sys, i) => {
-                  const { total: oblTotal, done: oblDone } = computeObligationCount(sys);
-                  const invPct = oblTotal > 0 ? Math.round(oblDone / oblTotal * 100) : dossierPct;
-                  const invStatus = sys.status === "in_production" && oblDone === oblTotal ? "compliant"
-                    : sys.status === "deprecated" ? "review" : "active";
-                  return (
-                    <Link key={sys.id} href={`/dashboard/tools/inventory/${sys.id}`} style={{ textDecoration: "none" }}>
-                      <div className="sys-row" style={{
-                        display: "grid", gridTemplateColumns: "1fr 140px 120px 160px", columnGap: 24,
-                        padding: "13px 18px", alignItems: "center",
-                        borderBottom: i < Math.min(3, inventorySystems.length - 1) ? `1px solid ${T.border}` : "none",
-                        transition: "background 0.15s", cursor: "pointer",
-                      }}>
-                        <div>
-                          <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 2 }}>{sys.name}</p>
-                          <p style={{ fontSize: 10, color: T.faint }}>
-                            {sys.tier !== "unclassified" ? (TIER_RISK[sys.tier] === "unacceptable" ? "Vietato" : TIER_RISK[sys.tier] === "high" ? "Alto rischio" : sys.tier === "gpai" ? "GPAI" : "Rischio limitato") : "Da classificare"}
-                            {(sys.tier === "high_risk" || sys.tier === "prohibited") ? " · All.III §4" : " · Art. 50"}
-                          </p>
-                        </div>
-                        <RiskBadge level={TIER_RISK[sys.tier]} />
-                        <StatusBadge status={invStatus} />
-                        <ScoreBar pct={invPct > 0 ? invPct : dossierPct} />
-                      </div>
-                    </Link>
-                  );
-                })}
-                {/* Discovery fallback (when no inventory) */}
-                {!hasInventory && showMainSys && systems.length === 0 && (
-                  <div className="sys-row" style={{ display: "grid", gridTemplateColumns: "1fr 140px 120px 160px", columnGap: 24, padding: "13px 18px", alignItems: "center", borderBottom: `1px solid ${T.border}`, transition: "background 0.15s" }}>
-                    <div>
-                      <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 2 }}>{mainSysName}</p>
-                      <p style={{ fontSize: 10, color: T.faint }}>
-                        {classifier?.riskLevel ? RISK_CFG[classifier.riskLevel]?.label ?? "Classificato" : "Classificato"}
-                        {(classifier?.riskLevel === "high" || classifier?.riskLevel === "unacceptable") ? " · All.III §4" : " · Art. 50"}
-                      </p>
-                    </div>
-                    <RiskBadge level={classifier?.riskLevel} />
-                    <StatusBadge status="active" />
-                    <ScoreBar pct={dossierPct} />
-                  </div>
-                )}
-                {!hasInventory && systems.slice(0, 4).map((sys, i) => (
-                  <div key={sys.id} className="sys-row" style={{
-                    display: "grid", gridTemplateColumns: "1fr 140px 120px 160px", columnGap: 24,
-                    padding: "13px 18px", alignItems: "center",
-                    borderBottom: i < Math.min(3, systems.length - 1) ? `1px solid ${T.border}` : "none",
-                    transition: "background 0.15s",
-                  }}>
-                    <div>
-                      <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 2 }}>{sys.name}</p>
-                      <p style={{ fontSize: 10, color: T.faint }}>
-                        {sys.riskLevel ? RISK_CFG[sys.riskLevel]?.label ?? "—" : "Da classificare"}
-                        {(sys.riskLevel === "high" || sys.riskLevel === "unacceptable") ? " · All.III §4" : " · Art. 50"}
-                      </p>
-                    </div>
-                    <RiskBadge level={sys.riskLevel} />
-                    <StatusBadge status={sys.status} />
-                    <ScoreBar pct={dossierPct} />
-                  </div>
-                ))}
-              </>
-            )}
-
-            <div style={{ padding: "11px 18px", borderTop: totalSystems > 0 ? `1px solid ${T.border}` : "none" }}>
-              <Link href="/dashboard/tools/inventory"
-                style={{
-                  fontSize: 11.5, fontWeight: 500, color: T.text,
-                  display: "inline-flex", alignItems: "center", gap: 7,
-                  padding: "7px 12px", borderRadius: 6,
-                  border: `1px solid ${T.border}`, background: "rgba(0,0,0,0.01)",
-                  transition: "opacity 0.15s",
-                }}>
-                <Server size={12} style={{ color: T.faint }} />
-                Tutti i sistemi
-                <ArrowRight size={11} style={{ color: T.faint }} />
-              </Link>
-            </div>
-          </div>
-
-          {/* Activity */}
-          <div style={{ ...card, overflow: "hidden" }}>
-            <div style={{ padding: "12px 18px 10px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", gap: 7 }}>
-              <History size={12} style={{ color: T.faint }} />
-              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.9px", textTransform: "uppercase", color: T.faint }}>
-                ATTIVITÀ RECENTE
-              </span>
-            </div>
-
-            {recentEvidence.length === 0 ? (
-              <div style={{ padding: "24px 18px" }}>
-                <p style={{ fontSize: 12, color: T.faint }}>Nessuna attività ancora.</p>
-              </div>
-            ) : (
-              recentEvidence.map((ev, i) => {
-                const cfg = EV_CFG[ev.type] ?? { label: ev.type, color: T.gray, Icon: Activity };
-                const { Icon } = cfg;
-                const toolName = (ev.content as Record<string, unknown>)?.tool as string
-                  || (ev.content as Record<string, unknown>)?.title as string
-                  || cfg.label;
-                const artLabel = (ev.content as Record<string, unknown>)?.article as string ?? "";
-                return (
-                  <div key={ev.id} style={{
-                    padding: "11px 18px",
-                    borderBottom: i < recentEvidence.length - 1 ? `1px solid ${T.border}` : "none",
-                  }}>
-                    <div style={{ display: "flex", alignItems: "flex-start", gap: 9 }}>
-                      <div style={{
-                        width: 26, height: 26, borderRadius: 6, flexShrink: 0,
-                        background: T.grayBg, border: `1px solid ${T.border}`,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                      }}>
-                        <Icon size={12} style={{ color: cfg.color }} />
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 11.5, fontWeight: 600, color: T.text, marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {toolName}
-                        </p>
-                        <p style={{ fontSize: 10, color: T.faint }}>
-                          {artLabel ? `${artLabel} · ` : ""}{cfg.label} · {relTime(ev.timestamp)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-
-            <div style={{ padding: "11px 18px", borderTop: recentEvidence.length > 0 ? `1px solid ${T.border}` : "none" }}>
-              <Link href="/dashboard/evidence-layer"
-                style={{ fontSize: 11.5, fontWeight: 500, color: T.text, display: "inline-flex", alignItems: "center", gap: 6 }}>
-                <History size={11} style={{ color: T.faint }} />
-                Log completo
-                <ArrowRight size={11} style={{ color: T.faint }} />
-              </Link>
-            </div>
           </div>
         </div>
 
         {/* ── MEMBRI DEL PROGETTO (visibile solo con progetto attivo) ── */}
         <ProjectMembers />
 
-        {/* ── BOTTOM CARDS ─────────────────────────────────────────── */}
-        <div className="bot-grid fu-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
-
-          {[
-            {
-              href:  "/dashboard/dossier",
-              Icon:  FileCheck2,
-              title: `${dossierDone} documenti firmati`,
-              sub:   "hash-chain verificata · Art. 18",
-              accent: T.green,
-            },
-            {
-              href:  "/dashboard/notifications",
-              Icon:  CalendarClock,
-              title: `${criticalDeadlines.length} scadenze critiche`,
-              sub:   deadlines[0]
-                ? `${deadlines[0].deadline.article}${deadlines[1] ? " · " + deadlines[1].deadline.article : ""} · entro ${deadlines[0].days} giorni`
-                : "Nessuna scadenza imminente",
-              accent: criticalDeadlines.length > 0 ? T.amber : T.text,
-            },
-            {
-              href:  "/dashboard/tools/trust-center",
-              Icon:  BadgeCheck,
-              title: "Trust Center",
-              sub:   "bozza · non pubblicato · Art. 13",
-              accent: T.text,
-            },
-          ].map(({ href, Icon, title, sub, accent }) => (
-            <Link key={href} href={href} className="bottom-card" style={{
-              ...card, padding: "15px 18px", display: "block", textDecoration: "none",
-              transition: "box-shadow 0.15s",
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 7 }}>
-                <div style={{
-                  width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                  background: T.grayBg, border: `1px solid ${T.border}`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                }}>
-                  <Icon size={15} style={{ color: accent }} />
-                </div>
-                <p style={{ fontSize: 15, fontWeight: 400, letterSpacing: "-0.3px", color: T.text, lineHeight: 1.2 }}>
-                  {title}
-                </p>
-              </div>
-              <p style={{ fontSize: 10, color: T.faint, paddingLeft: 43 }}>{sub}</p>
-            </Link>
-          ))}
-
-        </div>
-
-        {/* ── ATTIVITÀ IN CORSO ─────────────────────────────────── */}
-        {inProgress.length > 0 && (
-          <div style={{ marginTop: 10 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-              <span style={{ fontSize: 10, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>Attività in corso</span>
-              <span style={{ fontSize: 10, color: T.faint }}>{inProgress.length} {inProgress.length === 1 ? "attività" : "attività"}</span>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(inProgress.length, 4)}, 1fr)`, gap: 10 }}>
-              {inProgress.map(act => (
-                <Link key={act.id} href={act.href} style={{ ...card, padding: "14px 16px", display: "block", textDecoration: "none", transition: "box-shadow 0.15s" }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                    <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, margin: 0 }}>{act.title}</p>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: T.muted, fontFamily: "monospace" }}>
-                      {act.pct >= 0 ? `${act.pct}%` : "in corso"}
-                    </span>
-                  </div>
-                  {act.pct >= 0 && (
-                    <div style={{ height: 3, background: "rgba(0,0,0,0.07)", borderRadius: 2, overflow: "hidden", marginBottom: 8 }}>
-                      <div style={{ height: "100%", background: T.text, borderRadius: 2, width: `${act.pct}%`, transition: "width 0.5s" }} />
-                    </div>
-                  )}
-                  <p style={{ fontSize: 10, color: T.faint, margin: 0, marginBottom: 10 }}>{act.sub}</p>
-                  <div style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 10.5, fontWeight: 500, color: T.text }}>
-                    Riprendi <ArrowRight size={10} />
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
       </div>
     </>
+  );
+}
+
+// ── System Card ───────────────────────────────────────────────────────────────
+
+function SystemCard({ name, riskLevel, dossierPct, nextAction, nextActionHref, index, status }: {
+  name: string;
+  riskLevel?: string;
+  dossierPct: number;
+  nextAction?: string;
+  nextActionHref?: string;
+  index: number;
+  status?: string;
+}) {
+  const cfg = riskLevel ? RISK_CFG[riskLevel] : null;
+  const barColor = cfg?.bar ?? "rgba(0,0,0,0.15)";
+
+  return (
+    <Link href={nextActionHref ?? "/dashboard/journey"}
+      className="fade-up group block relative overflow-hidden rounded-xl hover:shadow-md transition-shadow"
+      style={{
+        ...cardSt,
+        borderLeft: `3px solid ${cfg?.color ?? "rgba(0,0,0,0.12)"}`,
+        animationDelay: `${index * 60}ms`,
+        padding: 14,
+      }}>
+
+      {/* Name */}
+      <p style={{ fontSize: 13, fontWeight: 600, color: "#0D1016", marginBottom: 3, lineHeight: 1.3 }}>
+        {name}
+      </p>
+
+      {/* Risk badge */}
+      {cfg ? (
+        <span style={{
+          display: "inline-block", fontSize: 10, fontWeight: 600,
+          padding: "2px 7px", borderRadius: 4, marginBottom: 12,
+          background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.bdr}`,
+        }}>
+          {cfg.label}
+        </span>
+      ) : (
+        <span style={{
+          display: "inline-block", fontSize: 10, fontWeight: 500,
+          padding: "2px 7px", borderRadius: 4, marginBottom: 12,
+          background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.32)",
+          border: "1px solid rgba(0,0,0,0.08)",
+        }}>
+          Da classificare
+        </span>
+      )}
+
+      {/* Status badge */}
+      {status && status !== "ignored" && (
+        <span style={{
+          display: "inline-block", fontSize: 9, fontWeight: 600,
+          padding: "1px 6px", borderRadius: 3, marginBottom: 8, marginLeft: 4,
+          background: "rgba(21,128,61,0.06)", color: "#15803d",
+          border: "1px solid rgba(21,128,61,0.18)",
+        }}>
+          {status === "active" ? "Attivo" : status}
+        </span>
+      )}
+
+      {/* Progress */}
+      <div style={{ marginBottom: 8 }}>
+        <div className="flex items-center justify-between mb-1">
+          <span style={{ fontSize: 10, color: "rgba(0,0,0,0.35)" }}>Dossier</span>
+          <span style={{ fontSize: 10, fontWeight: 600, color: dossierPct >= 80 ? "#15803d" : dossierPct >= 40 ? "#b45309" : "#dc2626" }}>
+            {dossierPct}%
+          </span>
+        </div>
+        <div style={{ height: 3, borderRadius: 2, background: "rgba(0,0,0,0.07)" }}>
+          <div style={{
+            height: 3, borderRadius: 2,
+            width: `${dossierPct}%`,
+            background: barColor,
+            transition: "width 0.8s ease",
+          }} />
+        </div>
+      </div>
+
+      {/* Next action */}
+      {nextAction && (
+        <div className="flex items-center gap-1.5">
+          <AlertCircle className="h-3 w-3 flex-shrink-0" style={{ color: "rgba(0,0,0,0.25)" }} />
+          <span style={{ fontSize: 11, color: "rgba(0,0,0,0.40)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {nextAction}
+          </span>
+        </div>
+      )}
+      {!nextAction && (
+        <div className="flex items-center gap-1.5">
+          <CheckCircle2 className="h-3 w-3 flex-shrink-0" style={{ color: "#15803d" }} />
+          <span style={{ fontSize: 11, color: "#15803d" }}>Dossier completato</span>
+        </div>
+      )}
+
+      {/* Hover arrow */}
+      <ArrowRight
+        className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0.5"
+        style={{ color: "rgba(0,0,0,0.2)" }}
+      />
+    </Link>
   );
 }
