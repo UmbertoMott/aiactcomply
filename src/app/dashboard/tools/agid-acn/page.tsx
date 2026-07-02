@@ -6,7 +6,6 @@ import {
   Shield, AlertTriangle, ExternalLink, ChevronDown, ChevronUp,
   Building2, Lock, AlertOctagon, CheckCircle2, Clock, Phone,
 } from "lucide-react";
-import { enqueueActivities, getActiveScopeId } from "@/lib/queue/activity-queue";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -16,10 +15,10 @@ const T = {
   faint:    "rgba(0,0,0,0.28)",
   border:   "rgba(0,0,0,0.07)",
   card:     "#ffffff",
-  red:      "#dc2626", redBg:   "rgba(220,38,38,0.06)",  redBdr:   "rgba(220,38,38,0.18)",
-  amber:    "#d97706", amberBg: "rgba(245,158,11,0.06)", amberBdr: "rgba(245,158,11,0.2)",
+  red:      "#0D1016", redBg:   "rgba(13,16,22,0.04)",   redBdr:   "rgba(13,16,22,0.12)",
+  amber:    "#0D1016", amberBg: "rgba(13,16,22,0.04)",   amberBdr: "rgba(13,16,22,0.12)",
   blue:     "#0D1016", blueBg:  "rgba(13,16,22,0.04)",   blueBdr:  "rgba(13,16,22,0.12)",
-  green:    "#15803d", greenBg: "rgba(22,163,74,0.06)",  greenBdr: "rgba(22,163,74,0.2)",
+  green:    "#0D1016", greenBg: "rgba(13,16,22,0.04)",   greenBdr: "rgba(13,16,22,0.12)",
 };
 
 const card = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 12 };
@@ -62,9 +61,9 @@ const AUTHORITIES = [
     name: "ACN",
     fullName: "Agenzia per la Cybersicurezza Nazionale",
     icon: Shield,
-    color: "#7c3aed",
-    colorBg: "rgba(124,58,237,0.06)",
-    colorBdr: "rgba(124,58,237,0.2)",
+    color: "#0D1016",
+    colorBg: "rgba(13,16,22,0.04)",
+    colorBdr: "rgba(13,16,22,0.12)",
     role: "Autorità nazionale per la cybersicurezza — supervisione requisiti Art. 15 EU AI Act (robustezza e sicurezza informatica)",
     website: "https://www.acn.gov.it",
     contact: "info@acn.gov.it / acn@pec.acn.gov.it",
@@ -113,20 +112,7 @@ const AUTHORITIES = [
 
 // ─── Sanzioni penali L.132/2025 ───────────────────────────────────────────────
 
-interface QueueItem { label: string; tool: string; href: string; source: string }
-interface CriminalRisk {
-  title: string;
-  article: string;
-  penalty: string;
-  aggravated: string;
-  description: string;
-  who_is_at_risk: string;
-  mitigation: string;
-  primary: { label: string; tool: string; href: string };
-  queued?: QueueItem[];
-}
-
-const CRIMINAL_RISKS: CriminalRisk[] = [
+const CRIMINAL_RISKS = [
   {
     title: "Deepfake non consensuali",
     article: "Art. 5 L.132/2025",
@@ -135,7 +121,7 @@ const CRIMINAL_RISKS: CriminalRisk[] = [
     description: "Creazione o diffusione di immagini, video o audio sintetici che ritraggono una persona senza il suo consenso, in contesti sessuali o denigratori.",
     who_is_at_risk: "Provider di sistemi di generazione immagini/video, deployer che non implementano filtri adeguati",
     mitigation: "Implementare disclosure Art. 50, watermarking obbligatorio, controlli consenso utente",
-    primary: { label: "Vai all'Art. 50 Kit", tool: "art50-kit", href: "/dashboard/tools/art50-kit" },
+    href: "/dashboard/tools/art50-kit",
   },
   {
     title: "Manipolazione e frode tramite AI",
@@ -145,7 +131,7 @@ const CRIMINAL_RISKS: CriminalRisk[] = [
     description: "Uso di sistemi AI per ingannare persone fisiche a fini di frode, manipolazione psicologica, o ottenimento illecito di vantaggi patrimoniali.",
     who_is_at_risk: "Chiunque utilizzi chatbot o sistemi AI in modo ingannevole verso consumatori",
     mitigation: "Disclosure obbligatoria AI, policy di uso accettabile, monitoring output",
-    primary: { label: "Vai alla Trasparenza", tool: "transparency", href: "/dashboard/tools/transparency" },
+    href: "/dashboard/tools/transparency",
   },
   {
     title: "Violazione tutela minori (under 14)",
@@ -155,11 +141,7 @@ const CRIMINAL_RISKS: CriminalRisk[] = [
     description: "Raccolta o trattamento dati personali di minori di 14 anni tramite sistemi AI senza consenso esplicito del genitore/tutore.",
     who_is_at_risk: "Deployer di sistemi AI consumer accessibili a minori, piattaforme educative",
     mitigation: "Verifica età, consenso genitoriale documentato, age-gating",
-    primary: { label: "Valuta con DPIA", tool: "dpia", href: "/dashboard/tools/dpia" },
-    queued: [
-      { label: "Completa la FRIA (gruppi vulnerabili)", tool: "fria", href: "/dashboard/tools/fria", source: "Rischio penale — tutela minori (Art. 8 L.132/2025)" },
-      { label: "Aggiorna il MOG 231 (sezione AI)", tool: "l132", href: "/dashboard/tools/l132", source: "Rischio penale — tutela minori (Art. 8 L.132/2025)" },
-    ],
+    href: "/dashboard/tools/fria",
   },
   {
     title: "Reati D.Lgs. 231/2001 tramite AI",
@@ -169,7 +151,7 @@ const CRIMINAL_RISKS: CriminalRisk[] = [
     description: "L'ente è responsabile per reati commessi tramite sistemi AI da suoi dipendenti/manager se non ha adottato un MOG 231 che includa protocolli di controllo AI.",
     who_is_at_risk: "Tutte le società che usano sistemi AI nei processi aziendali senza MOG 231 aggiornato",
     mitigation: "Adottare MOG 231 con sezione AI, ODV formato, protocolli di controllo documentati",
-    primary: { label: "Aggiorna il MOG 231", tool: "l132", href: "/dashboard/tools/l132" },
+    href: "/dashboard/tools/l132",
   },
 ];
 
@@ -260,7 +242,7 @@ function AuthorityCard({ auth }: { auth: typeof AUTHORITIES[number] }) {
                 <div className="space-y-2">
                   {auth.when_to_notify.map((n, i) => (
                     <div key={i} className="rounded-lg px-3 py-2.5" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-                      <div className="text-xs font-medium mb-1" style={{ color: "#92400e" }}>{n.trigger}</div>
+                      <div className="text-xs font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>{n.trigger}</div>
                       <div className="flex items-center gap-3 text-[11px]" style={{ color: "rgba(0,0,0,0.45)" }}>
                         <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {n.deadline}</span>
                         <span style={{ color: T.blue }}>{n.article}</span>
@@ -294,22 +276,8 @@ function AuthorityCard({ auth }: { auth: typeof AUTHORITIES[number] }) {
   );
 }
 
-function CriminalRiskCard({ risk }: { risk: CriminalRisk }) {
+function CriminalRiskCard({ risk }: { risk: typeof CRIMINAL_RISKS[number] }) {
   const [open, setOpen] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
-
-  function handlePrimaryClick() {
-    const queued = risk.queued ?? [];
-    if (queued.length > 0) {
-      const scopeId = getActiveScopeId();
-      const added = enqueueActivities(scopeId, queued);
-      if (added > 0) {
-        setToast(`${added} ${added === 1 ? "attività aggiunta" : "attività aggiunte"} in coda`);
-        setTimeout(() => setToast(null), 3000);
-      }
-    }
-    window.location.href = risk.primary.href;
-  }
 
   return (
     <div style={card} className="overflow-hidden">
@@ -357,37 +325,11 @@ function CriminalRiskCard({ risk }: { risk: CriminalRisk }) {
                 <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: T.faint }}>Come mitigare</p>
                 <p className="text-xs" style={{ color: T.muted }}>{risk.mitigation}</p>
               </div>
-
-              {/* Queued badge: shown when the risk has secondary actions */}
-              {risk.queued && risk.queued.length > 0 && (
-                <div className="rounded-lg px-3 py-2.5" style={{ background: "rgba(13,16,22,0.04)", border: "1px solid rgba(13,16,22,0.1)" }}>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: "rgba(0,0,0,0.42)" }}>
-                    Azioni aggiuntive (in coda al click)
-                  </p>
-                  <ul className="space-y-0.5">
-                    {risk.queued.map((q, i) => (
-                      <li key={i} className="text-xs" style={{ color: "rgba(0,0,0,0.55)" }}>
-                        → {q.label}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              <div className="flex items-center gap-2 flex-wrap">
-                <button
-                  onClick={handlePrimaryClick}
-                  className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg transition-opacity hover:opacity-80"
-                  style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}
-                >
-                  {risk.primary.label} <ExternalLink className="w-3 h-3" />
-                </button>
-                {toast && (
-                  <span className="text-xs" style={{ color: "rgba(0,0,0,0.45)", animation: "fadeIn 0.2s ease" }}>
-                    ✓ {toast}
-                  </span>
-                )}
-              </div>
+              <a href={risk.href}
+                className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg transition-colors hover:opacity-90"
+                style={{ background: T.redBg, color: T.red, border: `1px solid ${T.redBdr}` }}>
+                Vai al tool di mitigazione <ExternalLink className="w-3 h-3" />
+              </a>
             </div>
           </motion.div>
         )}
@@ -479,7 +421,7 @@ export default function AgidAcnPage() {
       {tab === "criminal" && (
         <div className="space-y-3">
           <div className="rounded-xl px-4 py-3" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-            <p className="text-xs leading-relaxed" style={{ color: "#92400e" }}>
+            <p className="text-xs leading-relaxed" style={{ color: "rgba(0,0,0,0.45)" }}>
               <strong>Nota:</strong> Le sanzioni penali si applicano indipendentemente dall&apos;eventuale conformità
               all&apos;EU AI Act. Un sistema tecnicamente conforme può comunque esporre a responsabilità penale se usato
               in violazione della L.132/2025.
