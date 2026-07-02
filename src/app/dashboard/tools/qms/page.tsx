@@ -1,8 +1,10 @@
 "use client";
 
-import { Trash2, FileText, CheckCircle, Download, Plus } from "lucide-react";
+import { Trash2, FileText, CheckCircle, Download, Plus, Sparkles } from "lucide-react";
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import { useState, useEffect } from "react";
+import { draftQmsSection, QMS_SECTIONS, type QmsSectionId } from "@/app/actions/draftQmsSection";
+import { buildComplianceContextFromStorage } from "@/hooks/useComplianceContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
@@ -86,6 +88,29 @@ export default function QMSPage() {
   }
 
   const completedCount = sections.filter((s) => s.completed).length;
+
+  // Part 4 — AI draft per section
+  const [sectionDrafting, setSectionDrafting] = useState<Record<string, boolean>>({});
+
+  // Map templateSection.art → QmsSectionId (e.g. "Art. 17(1)(a)" → "a")
+  function artToQmsId(art: string): QmsSectionId | null {
+    const match = art.match(/Art\. 17\(1\)\(([a-m])\)/);
+    if (!match) return null;
+    const letter = match[1] as QmsSectionId;
+    return QMS_SECTIONS.find(s => s.id === letter) ? letter : null;
+  }
+
+  async function draftSection(sectionId: string, art: string) {
+    const qmsId = artToQmsId(art);
+    if (!qmsId) return;
+    setSectionDrafting(prev => ({ ...prev, [sectionId]: true }));
+    const ctx = buildComplianceContextFromStorage();
+    const result = await draftQmsSection(qmsId, ctx);
+    setSectionDrafting(prev => ({ ...prev, [sectionId]: false }));
+    if (!("error" in result)) {
+      updateContent(sectionId, result.content);
+    }
+  }
   const [savedAt, setSavedAt] = useState<string | null>(() =>
     readFromStorage<QMSResult>("qms")?.completedAt ?? null
   );
@@ -316,6 +341,19 @@ export default function QMSPage() {
                     style={{ background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.4)" }}>
                     {s.art}
                   </span>
+                  {/* AI draft button */}
+                  {artToQmsId(s.art) && (
+                    <button
+                      disabled={sectionDrafting[s.id]}
+                      onClick={() => draftSection(s.id, s.art)}
+                      className="flex items-center gap-1 text-[10px] font-medium rounded-full px-2 py-0.5 transition-colors"
+                      style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.25)", color: "#92400e", cursor: sectionDrafting[s.id] ? "wait" : "pointer" }}
+                      title="Genera bozza con AI (Vertex AI)"
+                    >
+                      <Sparkles className="h-3 w-3" />
+                      {sectionDrafting[s.id] ? "…" : "✦ AI"}
+                    </button>
+                  )}
                   <button
                     onClick={() => toggle(s.id)}
                     className="text-[10px] font-medium rounded-full px-2 py-0.5 transition-colors"

@@ -1,249 +1,399 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Button from "@/components/ui/Button";
+import Link from "next/link";
+import { useState, useEffect } from "react";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0 },
+const SERIF = "Georgia, 'Times New Roman', serif";
+const MONO = "'DM Mono', monospace";
+
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
 };
 
-const stagger = {
-  show: { transition: { staggerChildren: 0.1 } },
+const wordVariant = {
+  hidden: { opacity: 0, y: 22 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.52, ease: [0.25, 0.46, 0.45, 0.94] as const },
+  },
 };
+
+const CYCLING_WORDS = ["compromessi", "burocrazia", "ritardi", "rischi", "eccezioni"];
+const DELETE_SPEED = 48;
+const TYPE_SPEED = 60;
+const IDLE_MS = 2400;
+const START_DELAY = 2000;
+
+function TypewriterWord() {
+  const [wordIdx, setWordIdx] = useState(0);
+  const [displayed, setDisplayed] = useState(CYCLING_WORDS[0]);
+  const [phase, setPhase] = useState<"idle" | "deleting" | "typing" | "waiting">("idle");
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setStarted(true), START_DELAY);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    if (!started) return;
+    let t: ReturnType<typeof setTimeout>;
+    if (phase === "idle") {
+      t = setTimeout(() => setPhase("deleting"), IDLE_MS);
+    } else if (phase === "deleting") {
+      if (displayed.length > 0) {
+        t = setTimeout(() => setDisplayed(d => d.slice(0, -1)), DELETE_SPEED);
+      } else {
+        setPhase("waiting");
+      }
+    } else if (phase === "waiting") {
+      t = setTimeout(() => {
+        const next = (wordIdx + 1) % CYCLING_WORDS.length;
+        setWordIdx(next);
+        setPhase("typing");
+      }, 180);
+    } else if (phase === "typing") {
+      const target = CYCLING_WORDS[wordIdx];
+      if (displayed.length < target.length) {
+        t = setTimeout(() => setDisplayed(target.slice(0, displayed.length + 1)), TYPE_SPEED);
+      } else {
+        setPhase("idle");
+      }
+    }
+    return () => clearTimeout(t);
+  }, [started, phase, displayed, wordIdx]);
+
+  const showCursor = phase !== "idle" || !started;
+
+  return (
+    <span style={{ position: "relative", fontStyle: "italic", fontWeight: 300 }}>
+      {displayed}
+      <span style={{
+        display: "inline-block", width: 2, height: "0.8em", background: "#ffffff",
+        marginLeft: 3, verticalAlign: "middle",
+        animation: showCursor ? "none" : "cursorBlink 1.1s ease-in-out infinite",
+        opacity: showCursor ? 1 : undefined, borderRadius: 1,
+      }} />
+    </span>
+  );
+}
+
+// ─── FRAMEWORK BADGE ICONS (original SVG, no trademarks) ─────────────────────
+
+function EuStarsIcon({ color }: { color: string }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      {Array.from({ length: 12 }).map((_, i) => {
+        const angle = (i * 30 - 90) * (Math.PI / 180);
+        const x = 12 + 7.5 * Math.cos(angle);
+        const y = 12 + 7.5 * Math.sin(angle);
+        return <circle key={i} cx={x} cy={y} r="1.55" fill={color} />;
+      })}
+    </svg>
+  );
+}
+
+function IsoGridIcon({ color }: { color: string }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="3" width="18" height="18" stroke={color} strokeWidth="1.6" fill="none" />
+      <line x1="3" y1="9"  x2="21" y2="9"  stroke={color} strokeWidth="1"   opacity="0.45" />
+      <line x1="3" y1="15" x2="21" y2="15" stroke={color} strokeWidth="1"   opacity="0.45" />
+      <line x1="9"  y1="3" x2="9"  y2="21" stroke={color} strokeWidth="1"   opacity="0.45" />
+      <line x1="15" y1="3" x2="15" y2="21" stroke={color} strokeWidth="1"   opacity="0.45" />
+    </svg>
+  );
+}
+
+function NistDotsIcon({ color }: { color: string }) {
+  const pts = [4, 12, 20];
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      {pts.flatMap(x => pts.map(y => (
+        <circle key={`${x}${y}`} cx={x} cy={y} r={x === 12 && y === 12 ? 2.8 : 2} fill={color}
+          opacity={x === 12 && y === 12 ? 1 : 0.55} />
+      )))}
+    </svg>
+  );
+}
+
+function GdprShieldIcon({ color }: { color: string }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M12 2.5L3 6.5v5.5c0 4.9 3.8 9.4 9 10.5 5.2-1.1 9-5.6 9-10.5V6.5L12 2.5z"
+        stroke={color} strokeWidth="1.6" fill="none" strokeLinejoin="round" />
+      <path d="M8.5 12l2.5 2.5 4.5-5" stroke={color} strokeWidth="1.6"
+        strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function LockIcon({ color }: { color: string }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <rect x="4" y="11" width="16" height="11" rx="2.5" stroke={color} strokeWidth="1.6" fill="none" />
+      <path d="M7.5 11V7.5a4.5 4.5 0 0 1 9 0V11" stroke={color} strokeWidth="1.6"
+        fill="none" strokeLinecap="round" />
+      <circle cx="12" cy="17" r="1.6" fill={color} />
+      <line x1="12" y1="17" x2="12" y2="19.5" stroke={color} strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function EdpbIcon({ color }: { color: string }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="9" stroke={color} strokeWidth="1.6" fill="none" />
+      {Array.from({ length: 8 }).map((_, i) => {
+        const angle = (i * 45 - 90) * (Math.PI / 180);
+        return <circle key={i} cx={12 + 5 * Math.cos(angle)} cy={12 + 5 * Math.sin(angle)}
+          r="1.3" fill={color} opacity={i % 2 === 0 ? 1 : 0.45} />;
+      })}
+    </svg>
+  );
+}
+
+function FrameworkIcon({ type, color }: { type: string; color: string }) {
+  switch (type) {
+    case "eu":   return <EuStarsIcon color={color} />;
+    case "iso":  return <IsoGridIcon color={color} />;
+    case "nist": return <NistDotsIcon color={color} />;
+    case "gdpr": return <GdprShieldIcon color={color} />;
+    case "lock": return <LockIcon color={color} />;
+    case "edpb": return <EdpbIcon color={color} />;
+    default:     return null;
+  }
+}
+
+// ─── FRAMEWORK BADGE COMPONENT ────────────────────────────────────────────────
+
+const FRAMEWORKS = [
+  { name: "EU AI Act",   sub: "Reg. 2024/1689",      color: "#003399", icon: "eu"   },
+  { name: "ISO 42001",   sub: "AI Management",        color: "#111111", icon: "iso"  },
+  { name: "NIST AI RMF", sub: "v1.0 · 2023",          color: "#0B3D2E", icon: "nist" },
+  { name: "GDPR",        sub: "Reg. 2016/679",        color: "#003399", icon: "gdpr" },
+  { name: "ISO 27001",   sub: "Info Security",        color: "#111111", icon: "lock" },
+  { name: "EDPB · WP29", sub: "AI Guidelines",        color: "#003399", icon: "edpb" },
+];
+
+function FrameworkBadge({ name, sub, color, icon }: typeof FRAMEWORKS[0]) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 12,
+        padding: "11px 18px 11px 12px",
+        border: `1.5px solid ${hovered ? color : "rgba(0,0,0,0.10)"}`,
+        borderRadius: 10,
+        background: hovered ? `${color}08` : "#ffffff",
+        boxShadow: hovered
+          ? `0 6px 20px ${color}22, 0 1px 4px rgba(0,0,0,0.06)`
+          : "0 1px 4px rgba(0,0,0,0.05), 0 0 0 0.5px rgba(0,0,0,0.04)",
+        transform: hovered ? "translateY(-2px)" : "translateY(0)",
+        transition: "all 0.22s cubic-bezier(0.34,1.56,0.64,1)",
+        cursor: "default",
+        userSelect: "none",
+      }}
+    >
+      {/* Icon container */}
+      <div style={{
+        width: 36, height: 36,
+        borderRadius: 7,
+        background: hovered ? `${color}14` : `${color}0d`,
+        border: `1px solid ${color}22`,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        flexShrink: 0,
+        transition: "all 0.22s ease",
+      }}>
+        <FrameworkIcon type={icon} color={color} />
+      </div>
+
+      {/* Text */}
+      <div>
+        <div style={{
+          fontFamily: MONO,
+          fontSize: 12,
+          fontWeight: 700,
+          color: hovered ? color : "#0D1016",
+          letterSpacing: "0.01em",
+          lineHeight: 1.2,
+          marginBottom: 3,
+          transition: "color 0.2s ease",
+        }}>
+          {name}
+        </div>
+        <div style={{
+          fontFamily: MONO,
+          fontSize: 9,
+          color: hovered ? `${color}99` : "rgba(0,0,0,0.35)",
+          letterSpacing: "0.04em",
+          transition: "color 0.2s ease",
+        }}>
+          {sub}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── HERO ─────────────────────────────────────────────────────────────────────
+
+const LINE1 = ["AI", "Act", "compliance,"];
 
 export default function Hero() {
   return (
-    <section
-      className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden text-center px-6 pb-24 pt-20"
-      style={{ background: "#0D1016" }}
-    >
-      {/* Mesh gradient */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 60% at 20% 10%, rgba(30,58,138,0.35) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 80% 90%, rgba(17,24,83,0.4) 0%, transparent 60%)",
-        }}
-      />
-      {/* Subtle grid */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)",
-          backgroundSize: "64px 64px",
-        }}
-      />
+    <>
+      <style>{`
+        @keyframes cursorBlink {
+          0%, 100% { opacity: 1 }
+          50%       { opacity: 0 }
+        }
+      `}</style>
 
-      <motion.div
-        variants={stagger}
-        initial="hidden"
-        animate="show"
-        className="relative z-10 flex flex-col items-center max-w-4xl"
+      {/* ── Full-bleed video hero ── */}
+      <section
+        className="relative overflow-hidden"
+        style={{ minHeight: "88vh", display: "flex", flexDirection: "column" }}
       >
-        {/* Badge */}
-        <motion.div variants={fadeUp}>
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 py-1.5 text-[12px] text-white/55 mb-9">
-            <span
-              className="block w-1.5 h-1.5 rounded-full bg-blue-500"
-              style={{ boxShadow: "0 0 8px rgba(59,130,246,0.8)" }}
-            />
-            EU AI Act — In vigore agosto 2026
-          </div>
-        </motion.div>
-
-        {/* H1 */}
-        <motion.h1
-          variants={fadeUp}
-          className="text-white mb-6"
+        {/* Background video */}
+        <video
+          src="/videos/hero-demo.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
           style={{
-            fontSize: "clamp(40px, 5vw, 68px)",
-            fontWeight: 400,
-            letterSpacing: "-3px",
-            lineHeight: 1.0,
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center",
+            filter: "brightness(0.62) contrast(1.05) saturate(1.15)",
           }}
-        >
-          AI Act compliance,{" "}
-          <em
-            className="not-italic"
-            style={{
-              background:
-                "linear-gradient(135deg, #93c5fd 0%, #6366f1 50%, #818cf8 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            senza compromessi.
-          </em>
-        </motion.h1>
+        />
 
-        {/* Subtitle */}
-        <motion.p
-          variants={fadeUp}
-          className="mb-11 max-w-lg text-white/45"
-          style={{ fontSize: "18px", fontWeight: 300, letterSpacing: "-0.2px", lineHeight: 1.6 }}
-        >
-          AIComply automatizza risk assessment, documentazione e integrazione
-          nei tuoi workflow. Dal caos normativo alla conformità certificata.
-        </motion.p>
+        {/* Dark overlay gradient */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(to bottom, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.52) 60%, rgba(0,0,0,0.72) 100%)",
+            zIndex: 1,
+          }}
+        />
 
-        {/* CTAs */}
-        <motion.div variants={fadeUp} className="flex gap-3 mb-18">
-          <Button href="/register" variant="primary">
-            Inizia gratis
-          </Button>
-          <Button variant="ghost">Scopri come funziona</Button>
-        </motion.div>
-
-        {/* Product mockup */}
+        {/* Content */}
         <motion.div
-          variants={fadeUp}
-          transition={{ delay: 0.15 }}
-          className="w-full max-w-4xl rounded-2xl overflow-hidden"
-          style={{
-            border: "1px solid rgba(255,255,255,0.1)",
-            background: "rgba(255,255,255,0.04)",
-            boxShadow:
-              "0 40px 80px rgba(0,0,0,0.6), 0 0 120px rgba(59,130,246,0.08)",
-          }}
+          initial="hidden"
+          animate="show"
+          variants={container}
+          className="relative flex flex-col items-center justify-center text-center px-6 flex-1"
+          style={{ zIndex: 2, paddingTop: 120, paddingBottom: 100 }}
         >
-          {/* Browser chrome */}
-          <div
-            className="flex items-center gap-1.5 px-4 py-3"
-            style={{
-              background: "rgba(255,255,255,0.05)",
-              borderBottom: "1px solid rgba(255,255,255,0.08)",
-            }}
-          >
-            {["rgba(255,255,255,0.12)", "rgba(255,255,255,0.12)", "rgba(255,255,255,0.12)"].map(
-              (bg, i) => (
-                <span
-                  key={i}
-                  className="block w-2.5 h-2.5 rounded-full"
-                  style={{ background: bg }}
-                />
-              )
-            )}
-            <span
-              className="mx-auto rounded px-4 py-1 text-[11px] text-white/25"
-              style={{ background: "rgba(255,255,255,0.05)" }}
-            >
-              app.aicomply.eu
-            </span>
-          </div>
-
-          {/* Dashboard content */}
-          <div className="grid p-6 gap-4" style={{ gridTemplateColumns: "180px 1fr" }}>
-            {/* Sidebar */}
+          {/* Badge */}
+          <motion.div variants={wordVariant}>
             <div
-              className="rounded-xl p-4"
+              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-8"
               style={{
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(255,255,255,0.07)",
+                border: "1px solid rgba(255,255,255,0.22)",
+                fontSize: 12,
+                color: "rgba(255,255,255,0.70)",
+                background: "rgba(255,255,255,0.08)",
+                backdropFilter: "blur(8px)",
               }}
             >
-              <div
-                className="text-[13px] font-semibold text-white/75 mb-5"
-                style={{ letterSpacing: "-0.3px" }}
-              >
-                AIComply
-              </div>
-              {["Dashboard", "Risk Assessment", "Documenti", "Integrazioni"].map(
-                (item, i) => (
-                  <div
-                    key={item}
-                    className="text-[11px] px-2.5 py-2 rounded-md mb-0.5"
-                    style={
-                      i === 0
-                        ? {
-                            background: "rgba(59,130,246,0.15)",
-                            color: "rgba(255,255,255,0.8)",
-                          }
-                        : { color: "rgba(255,255,255,0.3)" }
-                    }
-                  >
-                    {item}
-                  </div>
-                )
-              )}
+              EU AI Act — In vigore agosto 2026
             </div>
+          </motion.div>
 
-            {/* Main */}
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <span
-                  className="text-[15px] font-semibold text-white/85"
-                  style={{ letterSpacing: "-0.4px" }}
-                >
-                  Compliance Overview
-                </span>
-                <span
-                  className="text-[10px] font-semibold rounded-full px-2.5 py-0.5"
-                  style={{
-                    background: "rgba(34,197,94,0.15)",
-                    color: "#4ade80",
-                    border: "1px solid rgba(74,222,128,0.2)",
-                  }}
-                >
-                  Compliant
-                </span>
-              </div>
+          {/* H1 */}
+          <motion.h1
+            variants={container}
+            className="mb-6 max-w-4xl mx-auto"
+            style={{
+              fontFamily: SERIF,
+              fontSize: "clamp(44px, 6.5vw, 82px)",
+              fontWeight: 400,
+              letterSpacing: "-3.5px",
+              lineHeight: 1.0,
+              color: "#ffffff",
+            }}
+          >
+            {LINE1.map((word) => (
+              <motion.span key={word} variants={wordVariant}
+                style={{ display: "inline-block", marginRight: "0.22em" }}>
+                {word}
+              </motion.span>
+            ))}
+            <br />
+            <motion.span variants={wordVariant} style={{ display: "inline-block", marginRight: "0.22em" }}>
+              senza
+            </motion.span>
+            <motion.span variants={wordVariant} style={{ display: "inline-block" }}>
+              <TypewriterWord />
+            </motion.span>
+          </motion.h1>
 
-              <div className="grid grid-cols-3 gap-2.5">
-                {[
-                  { label: "Sistemi mappati", value: "12", sub: "3 alto rischio" },
-                  { label: "Documenti generati", value: "47", sub: "Aggiornati auto" },
-                  { label: "Prossima scadenza", value: "14d", sub: "Review Q2 2026" },
-                ].map(({ label, value, sub }) => (
-                  <div
-                    key={label}
-                    className="rounded-lg p-3"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                    }}
-                  >
-                    <div className="text-[10px] text-white/30 mb-1">{label}</div>
-                    <div
-                      className="text-[20px] font-semibold text-white/85"
-                      style={{ letterSpacing: "-0.8px" }}
-                    >
-                      {value}
-                    </div>
-                    <div className="text-[10px] text-white/25 mt-0.5">{sub}</div>
-                  </div>
-                ))}
-              </div>
+          {/* Subtitle */}
+          <motion.p
+            variants={wordVariant}
+            className="mb-10 max-w-md"
+            style={{ fontSize: 17, fontWeight: 300, color: "rgba(255,255,255,0.62)", letterSpacing: "-0.2px", lineHeight: 1.65 }}
+          >
+            AIComply automatizza risk assessment, documentazione e integrazione nei tuoi workflow.
+            Dal caos normativo alla conformità certificata.
+          </motion.p>
 
-              <div
-                className="rounded-lg p-3"
-                style={{
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                }}
-              >
-                <div className="flex justify-between text-[10px] text-white/30 mb-2">
-                  <span>Completamento requisiti AI Act</span>
-                  <span className="text-white/60 font-medium">84%</span>
-                </div>
-                <div
-                  className="h-[3px] rounded-full overflow-hidden"
-                  style={{ background: "rgba(255,255,255,0.08)" }}
-                >
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: "84%",
-                      background: "linear-gradient(90deg, #3b82f6, #6366f1)",
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* CTAs */}
+          <motion.div variants={wordVariant} className="flex gap-3">
+            <Link href="/register"
+              className="text-[13px] font-medium rounded-full px-6 py-3 transition-opacity hover:opacity-85"
+              style={{ background: "#ffffff", color: "#0D1016", letterSpacing: "-0.2px" }}
+            >
+              Inizia gratis
+            </Link>
+            <Link href="/pricing"
+              className="text-[13px] rounded-full px-6 py-3 transition-colors hover:bg-white/10"
+              style={{ border: "1px solid rgba(255,255,255,0.30)", color: "rgba(255,255,255,0.80)", background: "transparent" }}
+            >
+              Scopri i prezzi
+            </Link>
+          </motion.div>
         </motion.div>
-      </motion.div>
-    </section>
+      </section>
+
+      {/* Framework badges — 6 fissi, centrati */}
+      <section style={{ background: "#ffffff" }}>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.85, duration: 0.8 }}
+          style={{
+            borderBottom: "1px solid rgba(0,0,0,0.07)",
+            paddingTop: 28,
+            paddingBottom: 28,
+            display: "flex",
+            justifyContent: "center",
+            flexWrap: "wrap",
+            gap: 12,
+            paddingLeft: 24,
+            paddingRight: 24,
+          }}
+        >
+          {FRAMEWORKS.map((fw) => (
+            <FrameworkBadge key={fw.name} {...fw} />
+          ))}
+        </motion.div>
+      </section>
+    </>
   );
 }

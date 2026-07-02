@@ -12,7 +12,8 @@ const LOCATION  = process.env.VERTEX_LOCATION ?? "us-central1";
 const SA_JSON   = process.env.VERTEX_SERVICE_ACCOUNT_JSON ?? "";
 
 const EMBED_MODEL      = "text-embedding-004";
-const GENERATION_MODEL = "gemini-2.0-flash-001";
+// Unico modello accessibile sul progetto gen-lang-client (verificato 200 via REST)
+const GENERATION_MODEL = "gemini-2.5-flash";
 
 // ─── Ollama fallback (self-hosted mode) ──────────────────────────────────────
 
@@ -62,9 +63,25 @@ interface ServiceAccount {
   token_uri: string;
 }
 
+/** Escapa i newline letterali che appaiono DENTRO le stringhe JSON, lasciando intatti quelli fuori. */
+function repairJsonNewlines(raw: string): string {
+  let inString = false;
+  let escaped = false;
+  let out = "";
+  for (let i = 0; i < raw.length; i++) {
+    const ch = raw[i];
+    if (escaped)          { out += ch; escaped = false; continue; }
+    if (ch === "\\" && inString) { out += ch; escaped = true; continue; }
+    if (ch === '"')        { inString = !inString; out += ch; continue; }
+    if ((ch === "\n" || ch === "\r") && inString) { out += "\\n"; continue; }
+    out += ch;
+  }
+  return out;
+}
+
 let _tokenCache: { token: string; expires: number } | null = null;
 
-async function getAccessToken(): Promise<string> {
+export async function getAccessToken(): Promise<string> {
   if (_tokenCache && Date.now() < _tokenCache.expires - 30_000) {
     return _tokenCache.token;
   }
@@ -76,7 +93,10 @@ async function getAccessToken(): Promise<string> {
     );
   }
 
-  const sa: ServiceAccount = JSON.parse(SA_JSON);
+  // Vercel può iniettare newline letterali dentro i valori stringa del JSON
+  // (es. nella private_key). Li eseguiamo escape SOLO dentro le stringhe JSON,
+  // lasciando intatti i newline che separano le proprietà (validi in JSON).
+  const sa: ServiceAccount = JSON.parse(repairJsonNewlines(SA_JSON));
   const now = Math.floor(Date.now() / 1000);
   const exp = now + 3600;
 

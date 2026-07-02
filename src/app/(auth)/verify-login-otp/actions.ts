@@ -1,10 +1,12 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server-actions";
-import { verifyLoginOTP, canResendOTP, generateLoginOTP } from "@/lib/auth/login-otp";
+import { createOTPCookie, verifyOTPCookie, otpCookieExists } from "@/lib/auth/otp-cookie";
 import { sendLoginOTPEmail } from "@/lib/auth/email";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+
+// ── Verifica codice inserito dall'utente ───────────────────────────────────
 
 export async function verifyLoginOTPAction(formData: FormData) {
   const code = (formData.get("code") as string ?? "").trim();
@@ -17,28 +19,28 @@ export async function verifyLoginOTPAction(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user?.id || !user?.email) {
-    redirect("/login");
+    return { error: "Sessione scaduta. Torna al login e riprova." };
   }
 
-  const result = verifyLoginOTP(user.id, user.email, code);
+  const result = await verifyOTPCookie(user.id, code);
 
   if (!result.success) {
     const messages: Record<string, string> = {
-      expired:           "Il codice è scaduto. Richiedi un nuovo codice.",
+      expired:           "Il codice è scaduto. Clicca 'Rinvia codice'.",
       invalid:           "Codice non corretto. Riprova.",
-      too_many_attempts: "Troppi tentativi. Effettua di nuovo il login.",
-      not_found:         "Sessione non trovata. Effettua di nuovo il login.",
+      too_many_attempts: "Troppi tentativi. Torna al login.",
+      not_found:         "Codice non trovato. Clicca 'Rinvia codice' per riceverne uno nuovo.",
     };
     return { error: messages[result.reason] ?? "Errore di verifica." };
   }
 
-  // Setta cookie di verifica OTP — httpOnly, 24 ore
-  const cookieStore = await cookies();
-  cookieStore.set("login_otp_verified", "1", {
+  // OTP corretto — imposta cookie di sessione verificata (24h)
+  const jar = await cookies();
+  jar.set("login_otp_verified", "1", {
     httpOnly: true,
     secure:   process.env.NODE_ENV === "production",
     sameSite: "strict",
-    maxAge:   60 * 60 * 24, // 24 ore
+    maxAge:   60 * 60 * 24,
     path:     "/",
   });
 
@@ -51,6 +53,8 @@ export async function verifyLoginOTPAction(formData: FormData) {
   redirect("/dashboard");
 }
 
+// ── Rinvia codice ──────────────────────────────────────────────────────────
+
 export async function resendLoginOTPAction() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -59,12 +63,28 @@ export async function resendLoginOTPAction() {
     return { error: "Sessione scaduta. Accedi di nuovo." };
   }
 
-  if (!canResendOTP(user.id)) {
-    return { error: "Hai già richiesto troppi codici. Attendi qualche minuto." };
-  }
-
-  const newCode = generateLoginOTP(user.id, user.email);
+  const newCode = await createOTPCookie(user.id);
   await sendLoginOTPEmail(user.email, newCode);
 
   return { success: true };
+}
+
+// ── Auto-genera OTP se l'utente arriva sulla pagina senza un codice attivo ─
+// (es. sessione persistente che bypassa il flow di login)
+
+export async function ensureOTPSent(): Promise<{ sent: boolean }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user?.id || !user?.email) return { sent: false };
+
+  // Se esiste già un cookie OTP valido, non rigenerare
+  const exists = await otpCookieExists();
+  if (exists) return { sent: false };
+
+  // Genera e invia
+  const newCode = await createOTPCookie(user.id);
+  await sendLoginOTPEmail(user.email, newCode);
+
+  return { sent: true };
 }

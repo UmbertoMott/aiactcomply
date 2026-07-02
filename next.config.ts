@@ -16,6 +16,7 @@ const securityHeaders = [
       "img-src 'self' data: https:",
       "font-src 'self' data:",
       "connect-src 'self' https://*.supabase.co https://aiplatform.googleapis.com",
+      "media-src 'self' blob:",                              // blob: per audio TTS generato client-side
       "frame-ancestors 'none'",
     ].join("; "),
   },

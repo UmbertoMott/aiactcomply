@@ -5,7 +5,7 @@ import { registrationSchema, loginSchema } from "@/lib/auth/password-validator";
 import { checkRateLimitAsync, resetRateLimitAsync } from "@/lib/auth/rate-limit";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { generateLoginOTP } from "@/lib/auth/login-otp";
+import { createOTPCookie } from "@/lib/auth/otp-cookie";
 import { sendLoginOTPEmail } from "@/lib/auth/email";
 
 function getClientIP(): string {
@@ -125,10 +125,10 @@ export async function loginEmail(formData: FormData) {
   // Reset rate limit on success
   await resetRateLimitAsync(ip);
 
-  // Genera e invia OTP via email — step obbligatorio per tutti gli accessi
+  // Genera OTP, salva hash in cookie httpOnly, invia email
   const { data: { user } } = await supabase.auth.getUser();
   if (user?.id && user?.email) {
-    const otpCode = generateLoginOTP(user.id, user.email);
+    const otpCode = await createOTPCookie(user.id);
     await sendLoginOTPEmail(user.email, otpCode);
   }
 

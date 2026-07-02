@@ -68,10 +68,16 @@ export async function updateSession(request: NextRequest) {
   }
 
   // ── Redirect utente autenticato fuori dalle pagine auth ────────────────────
+  // Solo se ha ANCHE il cookie OTP → è pienamente autenticato → dashboard
+  // Se ha sessione ma non il cookie OTP → lascia vedere il login per riautenticarsi
   if (user && isAuthPage && !isVerifyMFA && !isVerifyOTP) {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/dashboard";
-    return NextResponse.redirect(redirectUrl);
+    const otpVerified = request.cookies.get("login_otp_verified")?.value;
+    if (otpVerified) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/dashboard";
+      return NextResponse.redirect(redirectUrl);
+    }
+    // Sessione attiva ma OTP non verificato → mostra login normalmente
   }
 
   return supabaseResponse;

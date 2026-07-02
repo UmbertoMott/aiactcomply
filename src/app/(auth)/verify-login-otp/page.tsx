@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useTransition } from "react";
 import Link from "next/link";
-import { verifyLoginOTPAction, resendLoginOTPAction } from "./actions";
+import { verifyLoginOTPAction, resendLoginOTPAction, ensureOTPSent } from "./actions";
 
 export default function VerifyLoginOTPPage() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
@@ -14,6 +14,10 @@ export default function VerifyLoginOTPPage() {
 
   useEffect(() => {
     inputsRef.current[0]?.focus();
+
+    // Auto-genera OTP se l'utente arriva con sessione persistente
+    ensureOTPSent().catch(() => {});
+
     const timer = setInterval(() => {
       setResendCooldown((c) => (c > 0 ? c - 1 : 0));
     }, 1000);
@@ -81,6 +85,7 @@ export default function VerifyLoginOTPPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-[#E2E8F0] p-8">
+
         {/* Header */}
         <div className="text-center mb-8">
           <div className="w-12 h-12 bg-[#0D1016] rounded-xl flex items-center justify-center mx-auto mb-4">
@@ -98,7 +103,6 @@ export default function VerifyLoginOTPPage() {
 
         {/* OTP Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* 6 input singola cifra */}
           <div className="flex gap-2 justify-center" onPaste={handlePaste}>
             {code.map((digit, i) => (
               <input
@@ -117,21 +121,18 @@ export default function VerifyLoginOTPPage() {
             ))}
           </div>
 
-          {/* Errore */}
           {error && (
             <p className="text-sm text-red-600 text-center bg-red-50 rounded-lg py-2 px-3">
               {error}
             </p>
           )}
 
-          {/* Successo resend */}
           {resendMsg && (
             <p className="text-sm text-green-600 text-center bg-green-50 rounded-lg py-2 px-3">
               {resendMsg}
             </p>
           )}
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={isPending || !allFilled}
@@ -143,7 +144,7 @@ export default function VerifyLoginOTPPage() {
           </button>
         </form>
 
-        {/* Rinvia codice */}
+        {/* Rinvia */}
         <div className="mt-6 text-center">
           <p className="text-sm text-[#64748B]">Non hai ricevuto il codice?</p>
           <button
@@ -157,7 +158,6 @@ export default function VerifyLoginOTPPage() {
           </button>
         </div>
 
-        {/* Torna al login */}
         <div className="mt-4 text-center">
           <Link href="/login" className="text-sm text-[#64748B] hover:text-[#0D1016] transition-colors">
             ← Torna al login

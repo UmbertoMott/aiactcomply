@@ -199,15 +199,19 @@ ALTER TABLE mog_231_protocols ENABLE ROW LEVEL SECURITY;
 ALTER TABLE compliance_logs ENABLE ROW LEVEL SECURITY;
 
 -- Ogni utente vede solo i propri dati
+DROP POLICY IF EXISTS "users_own_ai_systems" ON ai_systems;
 CREATE POLICY "users_own_ai_systems" ON ai_systems
   FOR ALL USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "users_own_technical_files" ON technical_files;
 CREATE POLICY "users_own_technical_files" ON technical_files
   FOR ALL USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "users_own_mog231" ON mog_231_protocols;
 CREATE POLICY "users_own_mog231" ON mog_231_protocols
   FOR ALL USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "users_own_logs" ON compliance_logs;
 CREATE POLICY "users_own_logs" ON compliance_logs
   FOR ALL USING (auth.uid() = user_id);
 
@@ -220,14 +224,17 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS ai_systems_updated_at ON ai_systems;
 CREATE TRIGGER ai_systems_updated_at
   BEFORE UPDATE ON ai_systems
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS technical_files_updated_at ON technical_files;
 CREATE TRIGGER technical_files_updated_at
   BEFORE UPDATE ON technical_files
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS mog231_updated_at ON mog_231_protocols;
 CREATE TRIGGER mog231_updated_at
   BEFORE UPDATE ON mog_231_protocols
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();

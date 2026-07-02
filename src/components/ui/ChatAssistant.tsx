@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, CSSProperties } from "react";
 import {
-  MessageCircle, X, Send, Sparkles, ChevronDown,
+  MessageCircle, X, Send, ChevronDown,
   RotateCcw, Minimize2,
 } from "lucide-react";
 
@@ -960,9 +960,9 @@ Come posso aiutarti?`,
     position: "fixed",
     bottom: 24,
     right: 24,
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     background: "#0D1016",
     border: "none",
     cursor: "pointer",
@@ -988,8 +988,8 @@ Come posso aiutarti?`,
         title="Assistente AIComply"
       >
         {open
-          ? <X style={{ width: 18, height: 18, color: "#fff" }} />
-          : <Sparkles style={{ width: 20, height: 20, color: "#fff" }} />
+          ? <X style={{ width: 16, height: 16, color: "#fff" }} />
+          : <MessageCircle style={{ width: 18, height: 18, color: "#fff" }} />
         }
       </button>
 
@@ -1010,7 +1010,7 @@ Come posso aiutarti?`,
             display: "flex", alignItems: "center", justifyContent: "center",
             flexShrink: 0,
           }}>
-            <Sparkles style={{ width: 15, height: 15, color: "#fff" }} />
+            <MessageCircle style={{ width: 15, height: 15, color: "#fff" }} />
           </div>
           <div style={{ flex: 1 }}>
             <p style={{ fontSize: 13, fontWeight: 600, color: "#fff", lineHeight: 1.2 }}>

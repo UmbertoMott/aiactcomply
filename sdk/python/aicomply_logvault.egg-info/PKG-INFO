@@ -1,0 +1,37 @@
+Metadata-Version: 2.4
+Name: aicomply-logvault
+Version: 1.0.0
+Summary: AIComply LogVault SDK — EU AI Act Art. 12 compliance logging
+Home-page: https://aicomply-omega.vercel.app
+Author: AIComply
+Keywords: eu-ai-act compliance logging langchain llamaindex openai
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Requires-Python: >=3.9
+Requires-Dist: requests>=2.28.0
+Provides-Extra: openai
+Requires-Dist: openai>=1.0.0; extra == "openai"
+Provides-Extra: langchain
+Requires-Dist: langchain-core>=0.1.0; extra == "langchain"
+Provides-Extra: llamaindex
+Requires-Dist: llama-index-core>=0.10.0; extra == "llamaindex"
+Provides-Extra: all
+Requires-Dist: openai>=1.0.0; extra == "all"
+Requires-Dist: langchain-core>=0.1.0; extra == "all"
+Requires-Dist: llama-index-core>=0.10.0; extra == "all"
+Dynamic: author
+Dynamic: classifier
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

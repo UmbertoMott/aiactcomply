@@ -29,6 +29,10 @@ import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { generatePassport, verifyPassport, exportForRegulator, getPassportSummary, type ConformityPassport } from "@/lib/crypto/passport";
 import { writeToStorage } from "@/lib/dossier/storage-schema";
 import type { ClassifierResult } from "@/lib/dossier/storage-schema";
+import { loadOrgProfile, saveOrgProfile } from "@/lib/dossier/org-profile";
+import { parseBrainDump, type BrainDumpResult } from "@/app/actions/parseBrainDump";
+import { detectDualRole, type DualRoleResult } from "@/app/actions/detectDualRole";
+import { seedAssessmentFromClassifier } from "@/lib/assessment/assessment-helpers";
 
 // ─── ADDITION 1 — Persistence ────────────────────────────────────────
 
@@ -58,6 +62,18 @@ function saveResult(
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(record));
   writeToStorage<ClassifierResult>("classifier", {
+    systemName: systemName,
+    systemDescription: "",
+    riskLevel: (r.riskLevel?.toLowerCase() ?? "minimal") as ClassifierResult["riskLevel"],
+    annexIII: !!(r.annexCategory),
+    annexI: annexI,
+    applicableArticles: [
+      ...(r.annexCategory ? ["Annex III"] : []),
+      ...(r.isExemptedArt6_3 ? ["Art. 6(3)"] : []),
+    ],
+    completedAt: new Date().toISOString(),
+  });
+  seedAssessmentFromClassifier({
     systemName: systemName,
     systemDescription: "",
     riskLevel: (r.riskLevel?.toLowerCase() ?? "minimal") as ClassifierResult["riskLevel"],
@@ -109,6 +125,15 @@ const cardSt = {
 
 export default function ClassifierPage() {
   // Existing state
+  // Step 0: show conversational intro if org profile not yet configured
+  const [showStep0, setShowStep0] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("aicomply_step0_done") !== "1";
+  });
+  const [step0OrgType, setStep0OrgType] = useState<"pa" | "private" | "">("");
+  const [step0SystemType, setStep0SystemType] = useState<"hr" | "medical" | "credit" | "biometric" | "other" | "">("");
+  const [step0NistInterest, setStep0NistInterest] = useState(false);
+
   const [phase, setPhase] = useState<"intro" | "scan" | "decision" | "result">("intro");
   const [files] = useState(MOCK_PROJECT_FILES);
   const [result, setResult] = useState<ReturnType<typeof classifyRisk> | null>(null);
@@ -134,6 +159,20 @@ export default function ClassifierPage() {
   const [savedClassification] = useState<PersistedClassification | null>(() => loadSavedResult());
   const [isSaved, setIsSaved] = useState(false);
   const [annexIAnswer, setAnnexIAnswer] = useState<string>("");
+
+  // Part 2 — BrainDump (Step 0)
+  const [brainDumpText, setBrainDumpText]       = useState("");
+  const [brainDumpLoading, setBrainDumpLoading] = useState(false);
+  const [brainDumpResult, setBrainDumpResult]   = useState<BrainDumpResult | null>(null);
+  const [brainDumpError, setBrainDumpError]     = useState<string | null>(null);
+
+  // Part AG1 — Dual Role Art. 25
+  const [orgRole, setOrgRole] = useState<"provider" | "deployer" | "">("");
+  const [vendorName, setVendorName] = useState("");
+  const [modificationsDesc, setModificationsDesc] = useState("");
+  const [dualRoleLoading, setDualRoleLoading] = useState(false);
+  const [dualRoleResult, setDualRoleResult] = useState<DualRoleResult | null>(null);
+  const [dualRoleError, setDualRoleError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsSaved(localStorage.getItem(STORAGE_KEY) !== null);
@@ -345,9 +384,277 @@ export default function ClassifierPage() {
         })}
       </div>
 
+      {/* ── STEP 0: Conversational intro ────────────────────────────── */}
+      {showStep0 && (
+        <div style={{
+          background: "#fff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 14,
+          padding: 28, marginBottom: 24,
+        }}>
+          <div className="flex items-center gap-2 mb-1">
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "rgba(0,0,0,0.35)", textTransform: "uppercase" }}>
+              Passo 0 / Prima classificazione
+            </span>
+          </div>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: "#0D1016", margin: "0 0 6px" }}>
+            Raccontaci la tua organizzazione
+          </h2>
+          <p style={{ fontSize: 13, color: "rgba(0,0,0,0.45)", marginBottom: 24, lineHeight: 1.6 }}>
+            Rispondi a 3 domande rapide per personalizzare il tuo percorso di conformità EU AI Act.
+          </p>
+
+          {/* Q1: Tipo organizzazione */}
+          <div className="mb-5">
+            <p style={{ fontSize: 13, fontWeight: 500, color: "#0D1016", marginBottom: 10 }}>
+              1. Che tipo di organizzazione sei?
+            </p>
+            <div className="flex gap-3">
+              {[
+                { id: "pa" as const,      label: "Pubblica Amministrazione", sublabel: "Comune, Regione, Ministero, AUSL…" },
+                { id: "private" as const, label: "Privata / Enterprise",      sublabel: "Azienda, startup, libero professionista" },
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setStep0OrgType(opt.id)}
+                  style={{
+                    flex: 1, padding: "12px 16px", borderRadius: 10, textAlign: "left", cursor: "pointer",
+                    border: step0OrgType === opt.id ? "2px solid #0D1016" : "1px solid rgba(0,0,0,0.1)",
+                    background: step0OrgType === opt.id ? "rgba(13,16,22,0.04)" : "#fff",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "#0D1016" }}>{opt.label}</div>
+                  <div style={{ fontSize: 11, color: "rgba(0,0,0,0.45)", marginTop: 2 }}>{opt.sublabel}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Q2: Tipo sistema */}
+          <div className="mb-5">
+            <p style={{ fontSize: 13, fontWeight: 500, color: "#0D1016", marginBottom: 10 }}>
+              2. Che tipo di sistema AI vuoi classificare?
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+              {[
+                { id: "hr" as const,        label: "HR / Recruiting",      sublabel: "Selezione candidati, valutazioni" },
+                { id: "medical" as const,   label: "Medicale / Salute",    sublabel: "Diagnosi, triage, monitoraggio" },
+                { id: "credit" as const,    label: "Credito / Finance",    sublabel: "Scoring, frodi, valutazione rischio" },
+                { id: "biometric" as const, label: "Biometrico",           sublabel: "Riconoscimento facciale, voce" },
+                { id: "other" as const,     label: "Altro",                sublabel: "NLP, raccomandazioni, automazione…" },
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setStep0SystemType(opt.id)}
+                  style={{
+                    padding: "10px 14px", borderRadius: 8, textAlign: "left", cursor: "pointer",
+                    border: step0SystemType === opt.id ? "2px solid #0D1016" : "1px solid rgba(0,0,0,0.1)",
+                    background: step0SystemType === opt.id ? "rgba(13,16,22,0.04)" : "#fff",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  <div style={{ fontSize: 12, fontWeight: 600, color: "#0D1016" }}>{opt.label}</div>
+                  <div style={{ fontSize: 11, color: "rgba(0,0,0,0.4)", marginTop: 1 }}>{opt.sublabel}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Q3: NIST interest */}
+          <div className="mb-6">
+            <p style={{ fontSize: 13, fontWeight: 500, color: "#0D1016", marginBottom: 10 }}>
+              3. Hai requisiti di mappatura al NIST AI RMF?
+            </p>
+            <div className="flex gap-3">
+              {[
+                { value: true,  label: "Sì, usiamo NIST" },
+                { value: false, label: "No / Non so" },
+              ].map((opt) => (
+                <button
+                  key={String(opt.value)}
+                  onClick={() => setStep0NistInterest(opt.value)}
+                  style={{
+                    flex: 1, padding: "10px 16px", borderRadius: 10, cursor: "pointer",
+                    border: step0NistInterest === opt.value ? "2px solid #0D1016" : "1px solid rgba(0,0,0,0.1)",
+                    background: step0NistInterest === opt.value ? "rgba(13,16,22,0.04)" : "#fff",
+                    fontSize: 13, fontWeight: 500, color: "#0D1016",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="flex items-center gap-4">
+            <button
+              disabled={!step0OrgType || !step0SystemType}
+              onClick={() => {
+                // Save to OrgProfile
+                const existing = loadOrgProfile();
+                saveOrgProfile({
+                  ...existing,
+                  paItaly: step0OrgType === "pa",
+                  nistEnabled: step0NistInterest,
+                });
+                if (typeof window !== "undefined") {
+                  localStorage.setItem("aicomply_step0_done", "1");
+                }
+                setShowStep0(false);
+              }}
+              style={{
+                padding: "10px 24px", borderRadius: 8, fontSize: 13, fontWeight: 600,
+                background: "#0D1016", color: "#fff", border: "none",
+                cursor: (!step0OrgType || !step0SystemType) ? "not-allowed" : "pointer",
+                opacity: (!step0OrgType || !step0SystemType) ? 0.4 : 1,
+                transition: "opacity 0.15s",
+              }}
+            >
+              Continua con la classificazione →
+            </button>
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  localStorage.setItem("aicomply_step0_done", "1");
+                }
+                setShowStep0(false);
+              }}
+              style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", background: "none", border: "none", cursor: "pointer" }}
+            >
+              Salta
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ADDITION 9 — PHASE: INTRO (rewritten inner content) */}
       {phase === "intro" && (
         <div className="space-y-6">
+
+          {/* ── BrainDump — Step 0 ── */}
+          <div style={{
+            background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)",
+            borderRadius: 12, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.04)"
+          }}>
+            <p style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 4 }}>
+              ✦ Descrivi il tuo sistema AI in linguaggio libero
+            </p>
+            <p style={{ fontSize: 12, color: T.muted, marginBottom: 12 }}>
+              Dimmi cosa fa, chi lo usa, che dati elabora. L&apos;AI pre-compila il classificatore.
+            </p>
+            <textarea
+              value={brainDumpText}
+              onChange={(e) => setBrainDumpText(e.target.value)}
+              placeholder="Es: «Usiamo un modello che analizza i CV dei candidati e assegna un punteggio per pre-filtrare le candidature. Usa dati demografici come età e istruzione. I recruiter vedono solo i candidati con score > 70.»"
+              rows={4}
+              style={{
+                width: "100%", borderRadius: 8, padding: "10px 12px",
+                border: "1px solid rgba(0,0,0,0.12)", fontSize: 12, color: T.text,
+                resize: "vertical", outline: "none", lineHeight: 1.55,
+                fontFamily: "inherit",
+              }}
+            />
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10 }}>
+              <button
+                disabled={brainDumpLoading || brainDumpText.trim().length < 20}
+                onClick={async () => {
+                  setBrainDumpLoading(true);
+                  setBrainDumpError(null);
+                  setBrainDumpResult(null);
+                  const res = await parseBrainDump(brainDumpText);
+                  setBrainDumpLoading(false);
+                  if ("error" in res) {
+                    setBrainDumpError(res.error);
+                  } else {
+                    setBrainDumpResult(res);
+                    // Pre-fill system name if empty
+                    if (!customSystemName && res.systemName) {
+                      setCustomSystemName(res.systemName);
+                    }
+                    setInputMode("manual");
+                  }
+                }}
+                style={{
+                  padding: "7px 16px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+                  background: brainDumpText.trim().length < 20 ? "rgba(0,0,0,0.07)" : T.text,
+                  color: brainDumpText.trim().length < 20 ? T.faint : "#fff",
+                  border: "none", cursor: brainDumpText.trim().length < 20 ? "not-allowed" : "pointer",
+                  transition: "all 0.15s",
+                }}
+              >
+                {brainDumpLoading ? "Analisi in corso…" : "✦ Analizza con AI"}
+              </button>
+              {brainDumpResult && (
+                <span style={{ fontSize: 11, color: T.green }}>✓ Analisi completata</span>
+              )}
+            </div>
+
+            {/* Error */}
+            {brainDumpError && (
+              <p style={{ fontSize: 11, color: "#b91c1c", marginTop: 8 }}>⚠ {brainDumpError}</p>
+            )}
+
+            {/* Result cards */}
+            {brainDumpResult && (
+              <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
+                {/* Tier */}
+                <div style={{
+                  padding: "8px 12px", borderRadius: 8, fontSize: 12,
+                  background: brainDumpResult.likelyTier === "high_risk"
+                    ? "rgba(220,38,38,0.06)" : "rgba(245,158,11,0.06)",
+                  border: `1px solid ${brainDumpResult.likelyTier === "high_risk"
+                    ? "rgba(220,38,38,0.2)" : "rgba(245,158,11,0.2)"}`,
+                }}>
+                  <span style={{ fontWeight: 600, color: T.text }}>Tier stimato: </span>
+                  <span style={{ color: brainDumpResult.likelyTier === "high_risk" ? "#b91c1c" : "#a16207" }}>
+                    {brainDumpResult.likelyTier === "high_risk" ? "Alto rischio (Annex III)" :
+                     brainDumpResult.likelyTier === "limited" ? "Rischio limitato" :
+                     brainDumpResult.likelyTier === "minimal" ? "Rischio minimale" : brainDumpResult.likelyTier}
+                  </span>
+                  <span style={{ marginLeft: 8, fontSize: 11, color: T.faint }}>
+                    ({brainDumpResult.confidenceLevel === "high" ? "alta" : brainDumpResult.confidenceLevel === "medium" ? "media" : "bassa"} confidenza)
+                  </span>
+                </div>
+
+                {/* Art.5 risk warning */}
+                {brainDumpResult.art5Risk && (
+                  <div style={{
+                    padding: "8px 12px", borderRadius: 8, fontSize: 12,
+                    background: "rgba(220,38,38,0.07)", border: "1px solid rgba(220,38,38,0.25)",
+                  }}>
+                    <p style={{ fontWeight: 700, color: "#b91c1c", marginBottom: 2 }}>
+                      🚨 Possibile violazione Art. 5 rilevata
+                    </p>
+                    <p style={{ color: T.muted }}>
+                      Verifica la sezione &quot;Pratiche Vietate&quot; per confermare.
+                      {brainDumpResult.likelyTierArticle ? ` Riferimento: ${brainDumpResult.likelyTierArticle}` : ""}
+                    </p>
+                  </div>
+                )}
+
+                {/* Flagged warnings */}
+                {brainDumpResult.flaggedWarnings.length > 0 && (
+                  <div style={{
+                    padding: "8px 12px", borderRadius: 8, fontSize: 12,
+                    background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.2)",
+                  }}>
+                    <p style={{ fontWeight: 600, color: "#92400e", marginBottom: 4 }}>⚠ Segnalazioni</p>
+                    <ul style={{ margin: 0, paddingLeft: 16, color: T.muted }}>
+                      {brainDumpResult.flaggedWarnings.map((w, i) => (
+                        <li key={i} style={{ marginBottom: 2 }}>{w}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <p style={{ fontSize: 11, color: T.faint }}>
+                  ✦ AI — verifica · Completa il classificatore per una valutazione definitiva
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* Saved result banner */}
           {savedClassification && (
             <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 flex items-center justify-between">
@@ -400,13 +707,13 @@ export default function ClassifierPage() {
               <button
                 onClick={() => setInputMode("demo")}
                 style={{
-                  borderRadius: 9, border: `1px solid ${inputMode === "demo" ? T.blue : T.border}`,
-                  background: inputMode === "demo" ? T.blueBg : T.card,
+                  borderRadius: 9, border: `1px solid ${inputMode === "demo" ? T.text : T.border}`,
+                  background: inputMode === "demo" ? "rgba(0,0,0,0.04)" : T.card,
                   padding: 16, textAlign: "left", cursor: "pointer", transition: "border-color 0.15s",
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                  <Brain style={{ width: 15, height: 15, color: T.blue }} />
+                  <Brain style={{ width: 15, height: 15, color: T.text }} />
                   <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Progetto demo</span>
                 </div>
                 <p style={{ fontSize: 11, color: T.muted, lineHeight: 1.4 }}>
@@ -416,13 +723,13 @@ export default function ClassifierPage() {
               <button
                 onClick={() => setInputMode("manual")}
                 style={{
-                  borderRadius: 9, border: `1px solid ${inputMode === "manual" ? T.blue : T.border}`,
-                  background: inputMode === "manual" ? T.blueBg : T.card,
+                  borderRadius: 9, border: `1px solid ${inputMode === "manual" ? T.text : T.border}`,
+                  background: inputMode === "manual" ? "rgba(0,0,0,0.04)" : T.card,
                   padding: 16, textAlign: "left", cursor: "pointer", transition: "border-color 0.15s",
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                  <Code2 style={{ width: 15, height: 15, color: T.blue }} />
+                  <Code2 style={{ width: 15, height: 15, color: T.text }} />
                   <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Il mio sistema AI</span>
                 </div>
                 <p style={{ fontSize: 11, color: T.muted, lineHeight: 1.4 }}>
@@ -469,6 +776,116 @@ export default function ClassifierPage() {
                     className="w-full rounded-lg border border-border bg-muted/20 px-3 py-2 text-xs text-foreground font-mono"
                   />
                 </div>
+
+                {/* Ruolo organizzazione */}
+                <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 16, marginTop: 4 }}>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: T.text, display: "block", marginBottom: 10 }}>
+                    Ruolo della tua organizzazione rispetto a questo sistema AI
+                  </label>
+                  <div style={{ display: "flex", gap: 10 }}>
+                    {([
+                      { id: "provider" as const, label: "Provider", sub: "Sviluppo / immissione sul mercato" },
+                      { id: "deployer" as const, label: "Deployer", sub: "Utilizzo / messa in servizio" },
+                    ] as const).map((opt) => (
+                      <button key={opt.id} onClick={() => setOrgRole(opt.id)}
+                        style={{
+                          flex: 1, padding: "10px 12px", borderRadius: 9, textAlign: "left", cursor: "pointer",
+                          border: orgRole === opt.id ? `2px solid ${T.text}` : `1px solid ${T.border}`,
+                          background: orgRole === opt.id ? "rgba(0,0,0,0.04)" : T.card, transition: "all 0.15s",
+                        }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{opt.label}</div>
+                        <div style={{ fontSize: 11, color: T.muted, marginTop: 2 }}>{opt.sub}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Dual-role panel — solo se deployer */}
+                {orgRole === "deployer" && (
+                  <div style={{
+                    background: "rgba(0,0,0,0.04)", border: `1px solid rgba(37,99,235,0.2)`,
+                    borderRadius: 10, padding: 16, marginTop: 4,
+                  }}>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>
+                      ✦ Verifica ruolo Art. 25 — il deployer che modifica diventa provider?
+                    </p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                      <div>
+                        <label style={{ fontSize: 11, color: T.muted, display: "block", marginBottom: 4 }}>
+                          Nome vendor / soluzione di base
+                        </label>
+                        <input value={vendorName} onChange={(e) => setVendorName(e.target.value)}
+                          placeholder="es. OpenAI GPT-4, Salesforce Einstein, SAP AI..."
+                          style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, color: T.text, background: T.card, outline: "none" }} />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: 11, color: T.muted, display: "block", marginBottom: 4 }}>
+                          Modifiche apportate al sistema base (descrizione libera)
+                        </label>
+                        <textarea value={modificationsDesc} onChange={(e) => setModificationsDesc(e.target.value)}
+                          placeholder="es. Fine-tuning su dati aziendali, cambio scopo d'uso, integrazione con output decisionali..."
+                          rows={3}
+                          style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, color: T.text, background: T.card, outline: "none", resize: "vertical" }} />
+                      </div>
+                      <button
+                        disabled={dualRoleLoading || !vendorName.trim()}
+                        onClick={async () => {
+                          setDualRoleLoading(true);
+                          setDualRoleError(null);
+                          setDualRoleResult(null);
+                          const res = await detectDualRole(customSystemName || "Sistema AI", vendorName, modificationsDesc);
+                          setDualRoleLoading(false);
+                          if (res.error) setDualRoleError(res.error);
+                          else setDualRoleResult(res.result);
+                        }}
+                        style={{
+                          padding: "8px 16px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+                          background: dualRoleLoading || !vendorName.trim() ? "rgba(0,0,0,0.08)" : T.text,
+                          color: dualRoleLoading || !vendorName.trim() ? T.muted : "#fff",
+                          border: "none", cursor: dualRoleLoading || !vendorName.trim() ? "not-allowed" : "pointer",
+                          alignSelf: "flex-start",
+                        }}>
+                        {dualRoleLoading ? "Analisi in corso…" : "✦ Verifica ruolo Art. 25"}
+                      </button>
+                      {dualRoleError && (
+                        <p style={{ fontSize: 11, color: T.red }}>{dualRoleError === "MISSING_INPUT" ? "Inserisci nome sistema e vendor." : "Errore generazione. Riprova."}</p>
+                      )}
+                      {dualRoleResult && (
+                        <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: 12 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                            <span style={{
+                              fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 6,
+                              background: dualRoleResult.isDualRole ? "rgba(220,38,38,0.1)" : "rgba(22,163,74,0.1)",
+                              color: dualRoleResult.isDualRole ? T.red : T.green,
+                            }}>
+                              {dualRoleResult.roleVerdict === "both_provider_and_deployer" ? "Ruolo dual: PROVIDER + DEPLOYER" :
+                               dualRoleResult.roleVerdict === "provider" ? "Hai assunto ruolo di PROVIDER" :
+                               dualRoleResult.roleVerdict === "deployer" ? "Ruolo: DEPLOYER" : "Ruolo incerto"}
+                            </span>
+                            {dualRoleResult.art25Applies && (
+                              <span style={{ fontSize: 10, color: T.red, fontWeight: 600 }}>⚠ Art. 25 si applica</span>
+                            )}
+                          </div>
+                          <p style={{ fontSize: 12, color: T.text, marginBottom: 8 }}>{dualRoleResult.summary}</p>
+                          {dualRoleResult.substantialModification && (
+                            <p style={{ fontSize: 11, color: T.amber, marginBottom: 8 }}>
+                              Modifica sostanziale rilevata: {dualRoleResult.substantialModificationReason}
+                            </p>
+                          )}
+                          {dualRoleResult.art25Obligations.length > 0 && (
+                            <div>
+                              <p style={{ fontSize: 11, fontWeight: 600, color: T.muted, marginBottom: 4 }}>Obblighi Art. 25:</p>
+                              <ul style={{ margin: 0, paddingLeft: 16, fontSize: 11, color: T.muted }}>
+                                {dualRoleResult.art25Obligations.map((o, i) => <li key={i} style={{ marginBottom: 2 }}>{o}</li>)}
+                              </ul>
+                            </div>
+                          )}
+                          <p style={{ fontSize: 10, color: T.faint, marginTop: 8 }}>✦ AI — verifica e conferma</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -477,7 +894,7 @@ export default function ClassifierPage() {
           <div className="grid lg:grid-cols-2 gap-6">
             <div style={{ ...cardSt, padding: 24 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                <Code2 style={{ width: 16, height: 16, color: T.blue }} />
+                <Code2 style={{ width: 16, height: 16, color: T.text }} />
                 <h2 style={{ fontSize: 14, fontWeight: 600, color: T.text, margin: 0 }}>
                   {inputMode === "demo"
                     ? "Progetto: CV-Screener AI"
@@ -527,7 +944,7 @@ export default function ClassifierPage() {
                   { icon: Hash, text: "Genererà un certificato firmato SHA-256" },
                 ].map((s, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                    <s.icon style={{ width: 14, height: 14, color: T.blue, marginTop: 1, flexShrink: 0 }} />
+                    <s.icon style={{ width: 14, height: 14, color: T.text, marginTop: 1, flexShrink: 0 }} />
                     <span style={{ fontSize: 12, color: T.muted, lineHeight: 1.5 }}>{s.text}</span>
                   </div>
                 ))}
