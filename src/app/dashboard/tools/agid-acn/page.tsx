@@ -6,6 +6,7 @@ import {
   Shield, AlertTriangle, ExternalLink, ChevronDown, ChevronUp,
   Building2, Lock, AlertOctagon, CheckCircle2, Clock, Phone,
 } from "lucide-react";
+import { ProhibitedPracticesArt5 } from "@/components/agid-acn/ProhibitedPracticesArt5";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -344,6 +345,7 @@ type TabId = "authorities" | "criminal" | "sanctions";
 
 export default function AgidAcnPage() {
   const [tab, setTab] = useState<TabId>("authorities");
+  const [art5Open, setArt5Open] = useState(false);
 
   const TABS: { id: TabId; label: string }[] = [
     { id: "authorities", label: "Autorità di vigilanza" },
@@ -442,6 +444,51 @@ export default function AgidAcnPage() {
           </p>
           {ADMIN_SANCTIONS.map((s, i) => {
             const colors = SEVERITY_COLORS[s.severity];
+            const isCritical = s.severity === "critical";
+
+            if (isCritical) {
+              return (
+                <div key={i} className="rounded-xl overflow-hidden" style={{ border: `1px solid ${colors.bdr}` }}>
+                  <button
+                    onClick={() => setArt5Open((v) => !v)}
+                    aria-expanded={art5Open}
+                    className="w-full text-left p-4 transition-colors hover:bg-black/[0.01]"
+                    style={{ background: colors.bg }}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold mb-1" style={{ color: colors.txt }}>{s.max_amount}</p>
+                        <p className="text-xs" style={{ color: "rgba(0,0,0,0.55)" }}>{s.violation}</p>
+                        <p className="text-[10px] mt-1.5 font-medium" style={{ color: "rgba(0,0,0,0.35)" }}>
+                          {art5Open ? "▲ Nascondi le 8 fattispecie vietate" : "▼ Vedi le 8 fattispecie vietate (Art. 5)"}
+                        </p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-xs font-medium" style={{ color: colors.txt }}>oppure</p>
+                        <p className="text-sm font-semibold" style={{ color: colors.txt }}>{s.max_pct}</p>
+                      </div>
+                    </div>
+                  </button>
+
+                  <AnimatePresence>
+                    {art5Open && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.22 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-4 pb-4" style={{ borderTop: `1px solid rgba(220,38,38,0.12)` }}>
+                          <ProhibitedPracticesArt5 />
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            }
+
             return (
               <div key={i} className="rounded-xl p-4" style={{ background: colors.bg, border: `1px solid ${colors.bdr}` }}>
                 <div className="flex items-start justify-between gap-4">
