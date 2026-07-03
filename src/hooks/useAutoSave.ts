@@ -2,13 +2,10 @@
 // Salva automaticamente lo stato ogni 30 secondi (quando cambia)
 
 import { useEffect, useRef, useState } from "react";
-import { appendVersion } from "@/lib/projects/version-history";
 
 interface UseAutoSaveOptions {
   /** Intervallo in ms (default 30 000) */
   intervalMs?: number;
-  /** Etichetta da mostrare nel pannello versioni */
-  versionLabel?: string;
 }
 
 interface UseAutoSaveResult {
@@ -30,7 +27,7 @@ export function useAutoSave<T>(
   saveFn: (s: T) => void,
   options: UseAutoSaveOptions = {}
 ): UseAutoSaveResult {
-  const { intervalMs = 30_000, versionLabel = "Salvataggio automatico" } = options;
+  const { intervalMs = 30_000 } = options;
 
   const [justSaved, setJustSaved] = useState(false);
   const stateRef   = useRef<T>(state);
@@ -46,7 +43,6 @@ export function useAutoSave<T>(
       const current = stateRef.current;
       try {
         saveFnRef.current(current);
-        appendVersion(toolId, current, versionLabel);
       } catch {
         // ignore errors in auto-save
       }
@@ -61,7 +57,7 @@ export function useAutoSave<T>(
       if (timerRef.current) clearTimeout(timerRef.current);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toolId, intervalMs, versionLabel]);
+  }, [toolId, intervalMs]);
 
   return { justSaved };
 }

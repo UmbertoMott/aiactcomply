@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback, CSSProperties } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Download, Shield, RefreshCw, AlertTriangle, CheckCircle, Settings,
+  Download, Shield, RefreshCw, AlertTriangle, CheckCircle,
   ChevronDown, ChevronUp, Info, Upload, FileText, Sparkles, Loader2,
   Check, ExternalLink, X, Plus, Hash,
 } from "lucide-react";
@@ -705,9 +705,10 @@ export default function LogVaultPage() {
         </div>
         <div className="flex gap-2 items-center">
           <button onClick={() => setShowConfig(v => !v)}
-            className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg"
-            style={{ background: showConfig ? T.blueBg : T.bg, border: `1px solid ${T.border}`, color: T.muted }}>
-            <Settings size={13} />
+            className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg font-medium"
+            style={{ background: showConfig ? "rgba(220,38,38,0.06)" : T.bg, border: `1px solid ${showConfig ? "rgba(220,38,38,0.18)" : T.border}`, color: showConfig ? T.red : T.muted }}>
+            <AlertTriangle size={13} />
+            Segnala evento
             {showConfig ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           </button>
           <button
@@ -730,14 +731,25 @@ export default function LogVaultPage() {
         {showConfig && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden mb-4">
             <div className="rounded-xl p-4" style={card}>
-              <p className="text-[10px] font-semibold uppercase mb-3" style={{ color: T.faint, letterSpacing: "1px" }}>✦ Segnala evento — AI severity (Art. 73)</p>
+              <div className="flex items-start gap-2.5 mb-3">
+                <AlertTriangle size={15} style={{ color: T.red, flexShrink: 0, marginTop: 1 }} />
+                <div>
+                  <p className="text-[13px] font-semibold" style={{ color: T.text }}>Segnala un evento anomalo — Art. 73 AI Act</p>
+                  <p className="text-[11px] mt-0.5 leading-relaxed" style={{ color: T.muted }}>
+                    Descrivi qualsiasi comportamento inatteso del sistema AI: predizioni errate, bias rilevato, output fuori soglia,
+                    errori di input, violazioni di sicurezza o qualunque anomalia operativa.
+                    L&apos;AI classificherà automaticamente la gravità (Art. 73) e segnalerà se è richiesta notifica all&apos;autorità competente.
+                  </p>
+                </div>
+              </div>
               <textarea value={eventDesc} onChange={e => { setEventDesc(e.target.value); setSeveritySuggestion(null); }}
                 onBlur={e => handleDescriptionBlur(e.target.value)}
-                placeholder="Descrivi l'evento anomalo (min 20 caratteri)…" rows={2} style={ta} />
-              {loadingSeverity && <p className="text-[11px] mt-1" style={{ color: T.muted }}>Classificazione in corso…</p>}
+                placeholder="Es: «Il sistema ha classificato erroneamente 3 candidati come idonei nonostante profili incompleti, superando la soglia del 5% di falsi positivi definita nelle specifiche tecniche. L'anomalia è stata rilevata il 02/07/2026 ore 14:30.»"
+                rows={3} style={ta} />
+              {loadingSeverity && <p className="text-[11px] mt-1" style={{ color: T.muted }}>Classificazione AI in corso…</p>}
               {severitySuggestion && (
                 <div className="mt-2 rounded-lg p-2.5" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-                  <p className="text-[12px] font-semibold" style={{ color: T.amber }}>✦ Severity: <strong>{severitySuggestion.severity.toUpperCase()}</strong></p>
+                  <p className="text-[12px] font-semibold" style={{ color: T.amber }}>Livello di gravità rilevato: <strong>{severitySuggestion.severity.toUpperCase()}</strong></p>
                   <p className="text-[11px] mt-0.5" style={{ color: T.muted }}>{severitySuggestion.rationale}</p>
                   {severitySuggestion.regulatoryFlag && <p className="text-[11px] mt-0.5" style={{ color: T.red }}>⚠ {severitySuggestion.regulatoryFlag}</p>}
                 </div>

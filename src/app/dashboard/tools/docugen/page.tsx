@@ -7,6 +7,7 @@ import { GitBranch, Download, AlertTriangle, CheckCircle, Clock, History, Chevro
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { DocugenResult, DataAuditResult, RiskManagerResult, ClassifierResult, DPIAResult } from "@/lib/dossier/storage-schema";
+import { loadInventory, type AISystem } from "@/lib/inventory/ai-system";
 import { checkAnnexIVGaps, type AnnexIVGapsResult } from "@/app/actions/checkAnnexIVGaps";
 import { validateDocuGenCoherence, type CoherenceReport } from "@/app/actions/validateDocuGenCoherence";
 import { assessChangeImpact, type ChangeImpactReport } from "@/app/actions/assessChangeImpact";
@@ -278,6 +279,7 @@ export default function DocuGenPage() {
   const [workName, setWorkName] = useState("");
   const [showVersionPanel, setShowVersionPanel] = useState(false);
   const [crossContent] = useState<Record<string, string>>(() => readCrossToolContent());
+  const [inventorySystems, setInventorySystems] = useState<AISystem[]>([]);
 
   // Timeline state
   const [timelineStep, setTimelineStep] = useState<TimelineStep>("aggregate");
@@ -330,6 +332,7 @@ export default function DocuGenPage() {
   const editDocRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setInventorySystems(loadInventory());
     loadAISystems().then(setAiSystems);
     loadFromDB().then(({ technicalFileId: tfId, aiSystemId: asId }) => {
       if (tfId) setTechnicalFileId(tfId);
@@ -715,15 +718,24 @@ export default function DocuGenPage() {
           )}
           <div className="flex items-center gap-2 mt-1">
             <span className="text-[11px]" style={{ color: "rgba(0,0,0,0.38)" }}>Sistema:</span>
-            <input
-              value={systemName}
-              onChange={(e) => setSystemName(e.target.value)}
-              placeholder="Nome del sistema AI documentato..."
-              className="text-[12px] bg-transparent outline-none border-b"
-              style={{ color: "#0D1016", borderBottomColor: "rgba(0,0,0,0.15)", minWidth: "220px" }}
-              onFocus={(e) => (e.target.style.borderBottomColor = "rgba(0,0,0,0.4)")}
-              onBlur={(e) => (e.target.style.borderBottomColor = "rgba(0,0,0,0.15)")}
-            />
+            {inventorySystems.length > 0 ? (
+              <select
+                value={systemName}
+                onChange={(e) => setSystemName(e.target.value)}
+                className="text-[12px] outline-none border-b bg-transparent"
+                style={{ color: "#0D1016", borderBottomColor: "rgba(0,0,0,0.15)", minWidth: "220px", cursor: "pointer" }}
+              >
+                <option value="">— seleziona sistema AI —</option>
+                {inventorySystems.map((s) => (
+                  <option key={s.id} value={s.name}>{s.name}</option>
+                ))}
+              </select>
+            ) : (
+              <span className="text-[11px]" style={{ color: "rgba(0,0,0,0.38)" }}>
+                Nessun sistema nell&apos;inventario —{" "}
+                <a href="/dashboard/tools/inventory" style={{ color: "#0D1016", textDecoration: "underline" }}>aggiungi sistema</a>
+              </span>
+            )}
           </div>
         </div>
 
