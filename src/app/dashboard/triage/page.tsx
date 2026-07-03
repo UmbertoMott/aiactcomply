@@ -7,371 +7,120 @@ import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { ClassifierResult, OrgProfile } from "@/lib/dossier/storage-schema";
 import {
   ChevronRight, ChevronLeft, AlertTriangle, Shield,
-  CheckCircle2, ArrowRight, FileText, Zap,
-  AlertOctagon, Info, BookOpen, Save,
+  CheckCircle2, ArrowRight, FileText,
+  AlertOctagon, Info, BookOpen, Save, Ban, Zap,
 } from "lucide-react";
+import { classify, type ClassifyAnswers, type ClassifyResult, type ClassificationOutcome } from "@/lib/classifier/classify";
+import { ART5_PRACTICES, ANNEX_III_AREAS, ART63_EXCEPTIONS, ANNEX_I_PRODUCTS } from "@/lib/classifier/classifier-rules";
 
-// ─── Tipi ────────────────────────────────────────────────────────────────────
+// ─── Design tokens ────────────────────────────────────────────────────────────
 
-type Role = "provider" | "deployer" | "importer" | "distributor" | "unknown";
-type Sector =
-  | "hr" | "health" | "education" | "finance" | "lawenforcement"
-  | "infrastructure" | "publicadmin" | "other";
-type OutputType =
-  | "decisions" | "content_generation" | "profiling" | "biometric"
-  | "internal_optimization" | "other";
-type RiskTier = "prohibited" | "high" | "limited" | "minimal" | "gpai";
+const T = {
+  text:    "#0D1016",
+  muted:   "rgba(0,0,0,0.42)",
+  faint:   "rgba(0,0,0,0.28)",
+  border:  "rgba(0,0,0,0.07)",
+  card:    "#ffffff",
+  bg:      "#FAFAF9",
+  red:     "#dc2626",
+  redBg:   "rgba(220,38,38,0.06)",
+  redBdr:  "rgba(220,38,38,0.18)",
+  amber:   "#d97706",
+  amberBg: "rgba(245,158,11,0.06)",
+  green:   "#15803d",
+  greenBg: "rgba(22,163,74,0.06)",
+} as const;
 
-interface Answers {
-  role?: Role;
-  sector?: Sector;
-  outputType?: OutputType;
-  isGPAI?: boolean;
-  personalData?: "sensitive" | "personal" | "none";
-  automatedDecisions?: "full" | "support" | "no";
-  endUsers?: string[];
-  deployment?: "eu_only" | "eu_plus" | "outside_eu";
-  stage?: "development" | "production" | "update";
-  riskSignals?: string[];
-}
+// ─── Tipi locali ──────────────────────────────────────────────────────────────
 
-interface TriageReport {
-  riskTier: RiskTier;
-  roleConfirmed: Role;
-  urgentActions: { label: string; article: string; deadline: string; href: string }[];
-  applicableArticles: { article: string; description: string; obligation: string }[];
-  estimatedEffortDays: number;
-  summary: string;
-  prohibitedFlags: string[];
-}
+type Role = "provider" | "deployer" | "importer" | "distributor" | "authorized_rep" | "product_manufacturer" | "unknown";
+type AreaId = "scope" | "system" | "highrisk" | "transparency" | "result";
 
-// ─── Macro-aree (4 step + result) ────────────────────────────────────────────
+// ─── Outcome → display config ─────────────────────────────────────────────────
 
-type AreaId = "context" | "system" | "people" | "deployment" | "result";
-
-// ─── Logica di classificazione ────────────────────────────────────────────────
-
-function computeTriage(answers: Answers): TriageReport {
-  const {
-    role, sector, outputType, personalData, automatedDecisions,
-    endUsers = [], riskSignals = [], isGPAI,
-  } = answers;
-
-  const prohibited: string[] = [];
-
-  if (riskSignals.includes("emotion_workplace") || riskSignals.includes("emotion_education"))
-    prohibited.push("Riconoscimento emozioni in luoghi di lavoro/istruzione — Art. 5(1)(f)");
-  if (riskSignals.includes("realtime_biometric_public"))
-    prohibited.push("Identificazione biometrica in tempo reale in spazi pubblici — Art. 5(1)(b)");
-  if (riskSignals.includes("social_scoring"))
-    prohibited.push("Social scoring pubblico — Art. 5(1)(c)");
-  if (riskSignals.includes("subliminal_manipulation"))
-    prohibited.push("Manipolazione subliminale — Art. 5(1)(a)");
-  if (riskSignals.includes("vulnerable_exploitation"))
-    prohibited.push("Sfruttamento di vulnerabilità — Art. 5(1)(a)");
-
-  if (prohibited.length > 0) {
-    return {
-      riskTier: "prohibited",
-      roleConfirmed: role || "unknown",
-      prohibitedFlags: prohibited,
-      urgentActions: [
-        {
-          label: "Consulta un legale specializzato EU AI Act",
-          article: "Art. 5",
-          deadline: "Entro 48h",
-          href: "/dashboard/tools/legal-assistant",
-        },
-        {
-          label: "Rivedi l'architettura del sistema",
-          article: "Art. 5",
-          deadline: "Prima del deploy",
-          href: "/dashboard/tools/classifier",
-        },
-      ],
-      applicableArticles: [
-        { article: "Art. 5", description: "Pratiche AI vietate", obligation: "Divieto assoluto di messa in opera" },
-      ],
-      estimatedEffortDays: 0,
-      summary:
-        "Il sistema presenta caratteristiche che rientrano nelle pratiche vietate dall'Art. 5 EU AI Act. Non può essere messo in opera nell'UE nella forma attuale.",
-    };
-  }
-
-  if (isGPAI || outputType === "content_generation") {
-    return buildGPAIReport(answers);
-  }
-
-  const isHighRisk = checkHighRisk(sector, outputType, automatedDecisions, riskSignals, endUsers);
-  if (isHighRisk) return buildHighRiskReport(answers, role || "unknown");
-
-  if (riskSignals.includes("deepfake") || riskSignals.includes("chatbot")) {
-    return buildLimitedReport(answers, role || "unknown");
-  }
-
-  return buildMinimalReport(answers, role || "unknown");
-}
-
-function checkHighRisk(
-  sector?: Sector,
-  outputType?: OutputType,
-  automatedDecisions?: string,
-  riskSignals?: string[],
-  endUsers?: string[],
-): boolean {
-  if (sector === "hr" && (automatedDecisions === "full" || automatedDecisions === "support")) return true;
-  if (sector === "health") return true;
-  if (sector === "education" && automatedDecisions !== "no") return true;
-  if (sector === "finance" && riskSignals?.includes("credit_scoring")) return true;
-  if (sector === "lawenforcement") return true;
-  if (outputType === "biometric") return true;
-  if (outputType === "profiling" && endUsers?.includes("consumers")) return true;
-  if (riskSignals?.includes("annex3_explicit")) return true;
-  return false;
-}
-
-function buildHighRiskReport(answers: Answers, role: Role): TriageReport {
-  const isProvider = role === "provider";
-  const isDeployer = role === "deployer";
-
-  const urgentActions: TriageReport["urgentActions"] = [];
-
-  urgentActions.push({
-    label: "Completa l'AI Classifier (Art. 6 pathway)",
-    article: "Art. 6",
-    deadline: "Prima del deploy",
-    href: "/dashboard/tools/classifier",
-  });
-
-  if (isProvider) {
-    urgentActions.push({
-      label: "Avvia gestione del rischio (Art. 9)",
-      article: "Art. 9",
-      deadline: "Prima del deploy",
-      href: "/dashboard/tools/risk-manager",
-    });
-    urgentActions.push({
-      label: "Genera documentazione tecnica Annex IV (Art. 11)",
-      article: "Art. 11",
-      deadline: "Prima del deploy",
-      href: "/dashboard/tools/docugen",
-    });
-    urgentActions.push({
-      label: "Configura LogVault per logging automatico (Art. 12)",
-      article: "Art. 12",
-      deadline: "Alla messa in opera",
-      href: "/dashboard/tools/logvault",
-    });
-    urgentActions.push({
-      label: "Completa la FRIA (Art. 27)",
-      article: "Art. 27",
-      deadline: "Prima del deploy",
-      href: "/dashboard/tools/fria",
-    });
-  }
-
-  if (isDeployer) {
-    urgentActions.push({
-      label: "Verifica obblighi deployer (Art. 26)",
-      article: "Art. 26",
-      deadline: "Prima dell'uso",
-      href: "/dashboard/tools/deployer",
-    });
-    urgentActions.push({
-      label: "Configura supervisione umana (Art. 14)",
-      article: "Art. 14",
-      deadline: "Prima dell'uso",
-      href: "/dashboard/tools/oversight",
-    });
-  }
-
-  const articles: TriageReport["applicableArticles"] = isProvider
-    ? [
-        { article: "Art. 6",  description: "Classificazione alto rischio",   obligation: "Applicare tutti gli obblighi Capo III" },
-        { article: "Art. 9",  description: "Sistema gestione rischio",        obligation: "Obbligatorio, continuo, documentato" },
-        { article: "Art. 10", description: "Governance dei dati",             obligation: "Qualità, provenienza, bias mitigation" },
-        { article: "Art. 11", description: "Documentazione tecnica Annex IV", obligation: "Obbligatoria prima del deploy" },
-        { article: "Art. 12", description: "Logging automatico",              obligation: "Obbligatorio per sistemi alto rischio" },
-        { article: "Art. 13", description: "Trasparenza",                     obligation: "Istruzioni per l'uso, metriche performance" },
-        { article: "Art. 14", description: "Supervisione umana",              obligation: "Meccanismi di override obbligatori" },
-        { article: "Art. 15", description: "Accuratezza e robustezza",        obligation: "Testing obbligatorio" },
-        { article: "Art. 27", description: "FRIA",                            obligation: "Prima del deploy per sistemi che impattano diritti fondamentali" },
-        { article: "Art. 43", description: "Conformity assessment",           obligation: "Self-assessment o notified body" },
-        { article: "Art. 49", description: "Registrazione EUDB",              obligation: "Obbligatoria per provider alto rischio" },
-      ]
-    : [
-        { article: "Art. 26", description: "Obblighi deployer",  obligation: "9 obblighi specifici per chi usa sistemi alto rischio" },
-        { article: "Art. 14", description: "Supervisione umana", obligation: "Nomina supervisori formati" },
-        { article: "Art. 12", description: "Log retention",      obligation: "Conservare log almeno 6 mesi" },
-      ];
-
-  return {
-    riskTier: "high",
-    roleConfirmed: role,
-    prohibitedFlags: [],
-    urgentActions: urgentActions.slice(0, 5),
-    applicableArticles: articles,
-    estimatedEffortDays: isProvider ? 60 : 20,
-    summary: `Sistema classificato ad ${
-      isProvider ? "ALTO RISCHIO — provider" : "ALTO RISCHIO — deployer"
-    }. ${
-      isProvider
-        ? "Obblighi completi del Capo III applicabili."
-        : "Applica Art. 26 e verifica le condizioni di uso."
-    }`,
-  };
-}
-
-function buildGPAIReport(answers: Answers): TriageReport {
-  return {
-    riskTier: "gpai",
-    roleConfirmed: answers.role || "provider",
-    prohibitedFlags: [],
-    urgentActions: [
-      {
-        label: "Verifica se il modello supera 10²⁵ FLOPS (systemic risk)",
-        article: "Art. 51",
-        deadline: "Subito",
-        href: "/dashboard/tools/gpai",
-      },
-      {
-        label: "Prepara documentazione tecnica modello",
-        article: "Art. 53",
-        deadline: "Prima della distribuzione",
-        href: "/dashboard/tools/docugen",
-      },
-      {
-        label: "Verifica aderenza al Code of Practice GPAI",
-        article: "Art. 56",
-        deadline: "Entro 2026",
-        href: "/dashboard/tools/gpai",
-      },
-    ],
-    applicableArticles: [
-      { article: "Art. 51", description: "Classificazione GPAI",   obligation: "Notifica se systemic risk" },
-      { article: "Art. 53", description: "Obblighi GPAI provider", obligation: "Documentazione tecnica, copyright policy" },
-      { article: "Art. 54", description: "Obblighi GPAI systemic", obligation: "Adversarial testing, incident reporting" },
-    ],
-    estimatedEffortDays: 30,
-    summary:
-      "Modello AI a uso generale (GPAI). Applicano Art. 51-55. Se supera la soglia di calcolo → rischio sistemico con obblighi aggiuntivi.",
-  };
-}
-
-function buildLimitedReport(answers: Answers, role: Role): TriageReport {
-  return {
-    riskTier: "limited",
-    roleConfirmed: role,
-    prohibitedFlags: [],
-    urgentActions: [
-      {
-        label: "Implementa disclosure Art. 50 (chatbot/contenuti AI)",
-        article: "Art. 50",
-        deadline: "2 dicembre 2026",
-        href: "/dashboard/tools/art50-kit",
-      },
-      {
-        label: "Labeling contenuti sintetici (deepfake)",
-        article: "Art. 50(4)",
-        deadline: "2 dicembre 2026",
-        href: "/dashboard/tools/art50-kit",
-      },
-    ],
-    applicableArticles: [
-      {
-        article: "Art. 50",
-        description: "Obblighi trasparenza sistemi limitati",
-        obligation: "Disclosure obbligatoria per chatbot e media sintetici",
-      },
-    ],
-    estimatedEffortDays: 5,
-    summary:
-      "Sistema a rischio limitato. L'obbligo principale è la disclosure all'utente (Art. 50). Deadline: 2 dicembre 2026.",
-  };
-}
-
-function buildMinimalReport(answers: Answers, role: Role): TriageReport {
-  return {
-    riskTier: "minimal",
-    roleConfirmed: role,
-    prohibitedFlags: [],
-    urgentActions: [
-      {
-        label: "Verifica assenza pratiche vietate Art. 5",
-        article: "Art. 5",
-        deadline: "In vigore ora",
-        href: "/dashboard/tools/prohibited",
-      },
-      {
-        label: "Considera adozione volontaria Codice di Condotta",
-        article: "Art. 95",
-        deadline: "Facoltativo",
-        href: "/dashboard/tools/qms",
-      },
-    ],
-    applicableArticles: [
-      { article: "Art. 5",  description: "Pratiche vietate",   obligation: "Verifica assenza (sempre obbligatorio)" },
-      { article: "Art. 95", description: "Codici di condotta", obligation: "Facoltativo ma raccomandato" },
-    ],
-    estimatedEffortDays: 2,
-    summary:
-      "Sistema a rischio minimale. Nessun obbligo specifico oltre alla verifica Art. 5. Puoi adottare volontariamente un codice di condotta.",
-  };
-}
-
-// ─── UI helpers ───────────────────────────────────────────────────────────────
-
-const RISK_CONFIG: Record<
-  RiskTier,
-  { label: string; color: string; bg: string; border: string; icon: React.ReactNode }
-> = {
+const OUTCOME_CONFIG: Record<ClassificationOutcome, {
+  label: string; color: string; bg: string; border: string;
+  icon: React.ReactNode; estimatedDays: number;
+}> = {
+  out_of_scope: {
+    label: "FUORI AMBITO AI ACT",
+    color: T.green,
+    bg: T.greenBg,
+    border: "rgba(21,128,61,0.25)",
+    icon: <CheckCircle2 className="w-6 h-6" />,
+    estimatedDays: 0,
+  },
+  not_ai_system: {
+    label: "NON È UN SISTEMA AI",
+    color: T.green,
+    bg: T.greenBg,
+    border: "rgba(21,128,61,0.25)",
+    icon: <CheckCircle2 className="w-6 h-6" />,
+    estimatedDays: 0,
+  },
   prohibited: {
-    label: "PRATICA VIETATA",
-    color: "#ef4444",
-    bg: "rgba(239,68,68,0.08)",
-    border: "rgba(239,68,68,0.3)",
+    label: "PRATICA VIETATA — ART. 5",
+    color: T.red,
+    bg: T.redBg,
+    border: T.redBdr,
     icon: <AlertOctagon className="w-6 h-6" />,
+    estimatedDays: 0,
   },
-  high: {
-    label: "ALTO RISCHIO",
-    color: "#f97316",
-    bg: "rgba(249,115,22,0.08)",
-    border: "rgba(249,115,22,0.3)",
+  high_risk_annex_i: {
+    label: "ALTO RISCHIO — ALLEGATO I",
+    color: T.amber,
+    bg: T.amberBg,
+    border: "rgba(245,158,11,0.28)",
     icon: <AlertTriangle className="w-6 h-6" />,
+    estimatedDays: 60,
   },
-  gpai: {
-    label: "GPAI",
-    color: "#8b5cf6",
-    bg: "rgba(139,92,246,0.08)",
-    border: "rgba(139,92,246,0.3)",
-    icon: <Zap className="w-6 h-6" />,
+  high_risk_annex_iii: {
+    label: "ALTO RISCHIO — ALLEGATO III",
+    color: T.amber,
+    bg: T.amberBg,
+    border: "rgba(245,158,11,0.28)",
+    icon: <AlertTriangle className="w-6 h-6" />,
+    estimatedDays: 60,
   },
   limited: {
     label: "RISCHIO LIMITATO",
-    color: "#eab308",
-    bg: "rgba(234,179,8,0.08)",
-    border: "rgba(234,179,8,0.3)",
+    color: "#b45309",
+    bg: "rgba(180,83,9,0.06)",
+    border: "rgba(180,83,9,0.22)",
     icon: <Info className="w-6 h-6" />,
+    estimatedDays: 5,
   },
   minimal: {
     label: "RISCHIO MINIMALE",
-    color: "#22c55e",
-    bg: "rgba(34,197,94,0.08)",
-    border: "rgba(34,197,94,0.3)",
+    color: T.green,
+    bg: T.greenBg,
+    border: "rgba(21,128,61,0.25)",
     icon: <CheckCircle2 className="w-6 h-6" />,
+    estimatedDays: 2,
   },
 };
+
+// ─── Mappa outcome → ClassifierResult.riskLevel ───────────────────────────────
+
+function outcomeToRiskLevel(o: ClassificationOutcome): ClassifierResult["riskLevel"] {
+  if (o === "prohibited" || o === "out_of_scope") return "unacceptable";
+  if (o === "high_risk_annex_i" || o === "high_risk_annex_iii") return "high";
+  if (o === "limited") return "limited";
+  return "minimal";
+}
+
+// ─── UI helpers ───────────────────────────────────────────────────────────────
 
 function ProgressBar({ current, total }: { current: number; total: number }) {
   return (
     <div className="flex items-center gap-3">
       <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.07)" }}>
         <div
-          className="h-full rounded-full bg-[#0D1016] transition-all duration-500"
-          style={{ width: `${(current / total) * 100}%` }}
+          className="h-full rounded-full transition-all duration-500"
+          style={{ width: `${(current / total) * 100}%`, background: T.text }}
         />
       </div>
-      <span className="text-xs tabular-nums" style={{ color: "rgba(0,0,0,0.40)" }}>
+      <span className="text-xs tabular-nums" style={{ color: T.muted }}>
         {current}/{total}
       </span>
     </div>
@@ -380,37 +129,31 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[11px] font-semibold uppercase tracking-widest mb-2" style={{ color: "rgba(0,0,0,0.40)" }}>
+    <p className="text-[11px] font-semibold uppercase tracking-widest mb-2" style={{ color: T.muted }}>
       {children}
     </p>
   );
 }
 
-function OptionButton({
-  label, description, selected, onClick,
-}: {
-  label: string; description: string; selected: boolean; onClick: () => void;
+function OptionButton({ label, description, selected, onClick }: {
+  label: string; description?: string; selected: boolean; onClick: () => void;
 }) {
   return (
     <button
       onClick={onClick}
       style={selected
-        ? { border: "1px solid #0D1016", background: "rgba(0,0,0,0.04)", borderRadius: 12 }
-        : { border: "1px solid rgba(0,0,0,0.07)", background: "#ffffff", borderRadius: 12 }
+        ? { border: `1px solid ${T.text}`, background: "rgba(0,0,0,0.04)", borderRadius: 12 }
+        : { border: `1px solid ${T.border}`, background: T.card, borderRadius: 12 }
       }
       className="w-full text-left px-4 py-3 transition-all duration-150 hover:shadow-sm"
     >
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-medium" style={{ color: "#0D1016" }}>
-            {label}
-          </p>
-          {description && (
-            <p className="text-xs mt-0.5" style={{ color: "rgba(0,0,0,0.40)" }}>{description}</p>
-          )}
+          <p className="text-sm font-medium" style={{ color: T.text }}>{label}</p>
+          {description && <p className="text-xs mt-0.5" style={{ color: T.muted }}>{description}</p>}
         </div>
         {selected && (
-          <div className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center" style={{ background: "#0D1016" }}>
+          <div className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center" style={{ background: T.text }}>
             <div className="w-2 h-2 rounded-full bg-white" />
           </div>
         )}
@@ -419,17 +162,15 @@ function OptionButton({
   );
 }
 
-function MultiOptionButton({
-  label, description, selected, onClick,
-}: {
-  label: string; description: string; selected: boolean; onClick: () => void;
+function MultiOptionButton({ label, description, selected, onClick, warn }: {
+  label: string; description?: string; selected: boolean; onClick: () => void; warn?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
       style={selected
-        ? { border: "1px solid #0D1016", background: "rgba(0,0,0,0.04)", borderRadius: 12 }
-        : { border: "1px solid rgba(0,0,0,0.07)", background: "#ffffff", borderRadius: 12 }
+        ? { border: `1px solid ${warn ? T.red : T.text}`, background: warn ? T.redBg : "rgba(0,0,0,0.04)", borderRadius: 12 }
+        : { border: `1px solid ${T.border}`, background: T.card, borderRadius: 12 }
       }
       className="w-full text-left px-4 py-3 transition-all duration-150 hover:shadow-sm"
     >
@@ -437,7 +178,7 @@ function MultiOptionButton({
         <div
           className="w-4 h-4 rounded flex-shrink-0 flex items-center justify-center transition-colors"
           style={selected
-            ? { background: "#0D1016", border: "1px solid #0D1016" }
+            ? { background: warn ? T.red : T.text, border: `1px solid ${warn ? T.red : T.text}` }
             : { border: "1px solid rgba(0,0,0,0.20)", background: "white" }
           }
         >
@@ -447,257 +188,21 @@ function MultiOptionButton({
             </svg>
           )}
         </div>
-        <div>
-          <p className="text-sm font-medium" style={{ color: "#0D1016" }}>
-            {label}
-          </p>
-          {description && (
-            <p className="text-xs mt-0.5" style={{ color: "rgba(0,0,0,0.40)" }}>{description}</p>
-          )}
+        <div className="text-left">
+          <p className="text-sm font-medium" style={{ color: T.text }}>{label}</p>
+          {description && <p className="text-xs mt-0.5" style={{ color: warn ? T.red : T.muted }}>{description}</p>}
         </div>
       </div>
     </button>
   );
 }
 
-// ─── Report view ──────────────────────────────────────────────────────────────
-
-function ProhibitedDraftView({
-  report,
-  onSaveDraft,
-  draftSaved,
-}: {
-  report: TriageReport;
-  onSaveDraft: () => void;
-  draftSaved: boolean;
-}) {
+function AreaStep({ index, label, active }: { index: number; label: string; active: boolean }) {
   return (
-    <div className="space-y-4">
-      {/* Banner principale */}
-      <div
-        className="rounded-xl p-4"
-        style={{
-          background: "rgba(239,68,68,0.08)",
-          border: "1px solid rgba(239,68,68,0.3)",
-        }}
-      >
-        <div className="flex items-start gap-3">
-          <AlertOctagon className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-semibold text-red-400 mb-1">
-              PRATICA VIETATA — Art. 5 EU AI Act
-            </p>
-            <p className="text-xs leading-relaxed" style={{ color: "rgba(0,0,0,0.65)" }}>
-              Il sistema presenta caratteristiche incompatibili con il Regolamento UE 2024/1689.
-              <strong style={{ color: "#0D1016" }}> Non può essere messo in opera nell'UE nella forma attuale.</strong>
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Punti di violazione evidenziati */}
-      <div>
-        <p className="text-[11px] font-semibold uppercase tracking-widest mb-2" style={{ color: "rgba(0,0,0,0.40)" }}>
-          Violazioni rilevate
-        </p>
-        <div className="space-y-2">
-          {report.prohibitedFlags.map((flag, i) => (
-            <div
-              key={i}
-              className="flex items-start gap-2.5 rounded-lg px-3 py-2.5"
-              style={{
-                background: "rgba(239,68,68,0.06)",
-                border: "1px solid rgba(239,68,68,0.2)",
-              }}
-            >
-              <div className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0 mt-1.5" />
-              <p className="text-xs" style={{ color: "rgba(0,0,0,0.65)" }}>{flag}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Cosa fare */}
-      <div>
-        <p className="text-[11px] font-semibold uppercase tracking-widest mb-2" style={{ color: "rgba(0,0,0,0.40)" }}>
-          Prossimi passi consigliati
-        </p>
-        <div className="space-y-2">
-          {report.urgentActions.map((action, i) => (
-            <Link
-              key={i}
-              href={action.href}
-              className="flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:shadow-sm"
-              style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#ffffff" }}
-            >
-              <div>
-                <p className="text-xs font-medium" style={{ color: "#0D1016" }}>{action.label}</p>
-                <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.40)" }}>{action.article} · {action.deadline}</p>
-              </div>
-              <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "rgba(0,0,0,0.30)" }} />
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Salva bozza */}
-      <div
-        className="rounded-xl p-4"
-        style={{
-          background: "#ffffff",
-          border: "1px solid rgba(0,0,0,0.07)",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-        }}
-      >
-        <div className="flex items-start gap-3">
-          <BookOpen className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "rgba(0,0,0,0.40)" }} />
-          <div className="flex-1">
-            <p className="text-xs font-medium mb-1" style={{ color: "#0D1016" }}>
-              Salva come bozza per revisione legale
-            </p>
-            <p className="text-[11px] mb-3" style={{ color: "rgba(0,0,0,0.40)" }}>
-              Puoi salvare questo report come bozza con le violazioni evidenziate
-              e condividerlo con il tuo consulente legale prima di qualunque modifica al sistema.
-            </p>
-            {draftSaved ? (
-              <div className="flex items-center gap-2 text-xs text-green-600">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                Bozza salvata localmente
-              </div>
-            ) : (
-              <button
-                onClick={onSaveDraft}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-white text-xs font-medium transition-colors hover:opacity-90"
-                style={{ background: "#0D1016" }}
-              >
-                <Save className="w-3.5 h-3.5" />
-                Salva bozza
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function TriageReportView({ report }: { report: TriageReport }) {
-  const cfg = RISK_CONFIG[report.riskTier];
-
-  return (
-    <div className="space-y-4">
-      {/* Tier badge */}
-      <div
-        className="rounded-xl p-4"
-        style={{ background: cfg.bg, border: `1px solid ${cfg.border}` }}
-      >
-        <div className="flex items-center gap-3 mb-2">
-          <span style={{ color: cfg.color }}>{cfg.icon}</span>
-          <span className="text-sm font-bold" style={{ color: cfg.color }}>
-            {cfg.label}
-          </span>
-        </div>
-        <p className="text-xs leading-relaxed" style={{ color: "rgba(0,0,0,0.65)" }}>{report.summary}</p>
-      </div>
-
-      {/* Effort */}
-      {report.estimatedEffortDays > 0 && (
-        <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg" style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}>
-          <FileText className="w-3.5 h-3.5" style={{ color: "rgba(0,0,0,0.40)" }} />
-          <p className="text-xs" style={{ color: "rgba(0,0,0,0.40)" }}>
-            Effort stimato:
-            <span className="ml-1 font-semibold" style={{ color: "#0D1016" }}>
-              ~{report.estimatedEffortDays} giorni lavorativi
-            </span>
-          </p>
-        </div>
-      )}
-
-      {/* Azioni urgenti */}
-      <div>
-        <p className="text-[11px] font-semibold uppercase tracking-widest mb-2" style={{ color: "rgba(0,0,0,0.40)" }}>
-          Azioni prioritarie
-        </p>
-        <div className="space-y-2">
-          {report.urgentActions.map((action, i) => (
-            <Link
-              key={i}
-              href={action.href}
-              className="flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:shadow-sm"
-              style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#ffffff" }}
-            >
-              <div>
-                <p className="text-xs font-medium" style={{ color: "#0D1016" }}>{action.label}</p>
-                <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.40)" }}>
-                  {action.article} · {action.deadline}
-                </p>
-              </div>
-              <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "rgba(0,0,0,0.30)" }} />
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Articoli applicabili */}
-      <div>
-        <p className="text-[11px] font-semibold uppercase tracking-widest mb-2" style={{ color: "rgba(0,0,0,0.40)" }}>
-          Articoli applicabili
-        </p>
-        <div className="space-y-1.5">
-          {report.applicableArticles.map((a, i) => (
-            <div
-              key={i}
-              className="rounded-lg px-3 py-2"
-              style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono font-bold" style={{ color: "#0D1016" }}>
-                  {a.article}
-                </span>
-                <span className="text-xs" style={{ color: "rgba(0,0,0,0.65)" }}>{a.description}</span>
-              </div>
-              <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.40)" }}>{a.obligation}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* CTA */}
-      <div className="flex gap-2 pt-1">
-        <Link
-          href="/dashboard/journey"
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#0D1016] hover:bg-[#2a2b31] text-white text-sm font-medium transition-colors"
-        >
-          Vai alla Roadmap
-          <ArrowRight className="w-4 h-4" />
-        </Link>
-        <Link
-          href="/dashboard/tools/classifier"
-          className="px-4 py-3 rounded-xl text-sm transition-colors flex items-center justify-center hover:shadow-sm"
-          style={{ border: "1px solid rgba(0,0,0,0.08)", background: "rgba(0,0,0,0.04)", color: "#0D1016" }}
-        >
-          <FileText className="w-4 h-4" />
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-// ─── Area label component ─────────────────────────────────────────────────────
-
-function AreaStep({
-  index, label, active,
-}: {
-  index: number; label: string; active: boolean;
-}) {
-  return (
-    <div className="flex items-center gap-2 text-xs" style={{ color: active ? "#0D1016" : "rgba(0,0,0,0.35)" }}>
+    <div className="flex items-center gap-2 text-xs" style={{ color: active ? T.text : T.muted }}>
       <div
         className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-        style={active
-          ? { background: "#0D1016", color: "white" }
-          : { background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.35)" }
-        }
+        style={active ? { background: T.text, color: "white" } : { background: "rgba(0,0,0,0.06)", color: T.muted }}
       >
         {index}
       </div>
@@ -706,136 +211,332 @@ function AreaStep({
   );
 }
 
+// ─── Result view ──────────────────────────────────────────────────────────────
+
+function ResultView({
+  result, onSaveDraft, draftSaved, onReset,
+}: {
+  result: ClassifyResult; onSaveDraft: () => void; draftSaved: boolean; onReset: () => void;
+}) {
+  const cfg = OUTCOME_CONFIG[result.outcome];
+
+  return (
+    <div className="space-y-4">
+      {/* Outcome badge */}
+      <div className="rounded-xl p-4" style={{ background: cfg.bg, border: `1px solid ${cfg.border}` }}>
+        <div className="flex items-center gap-3 mb-2">
+          <span style={{ color: cfg.color }}>{cfg.icon}</span>
+          <div>
+            <span className="text-sm font-bold" style={{ color: cfg.color }}>{cfg.label}</span>
+            {result.gpai && (
+              <span
+                className="ml-2 text-[10px] font-semibold px-1.5 py-0.5 rounded"
+                style={{ background: "rgba(0,0,0,0.07)", color: T.text, fontFamily: "monospace" }}
+              >
+                + GPAI
+              </span>
+            )}
+            {result.gpaiSystemic && (
+              <span
+                className="ml-1 text-[10px] font-semibold px-1.5 py-0.5 rounded"
+                style={{ background: T.redBg, color: T.red, border: `1px solid ${T.redBdr}`, fontFamily: "monospace" }}
+              >
+                RISCHIO SISTEMICO
+              </span>
+            )}
+          </div>
+        </div>
+        <p className="text-xs leading-relaxed" style={{ color: "rgba(0,0,0,0.65)" }}>{result.rationale}</p>
+        <p className="text-[10px] mt-2 italic" style={{ color: T.faint }}>{result.legalNote}</p>
+      </div>
+
+      {/* Pratiche vietate dettaglio */}
+      {result.prohibitedPractices.length > 0 && (
+        <div>
+          <SectionLabel>Violazioni Art. 5 rilevate</SectionLabel>
+          <div className="space-y-2">
+            {result.prohibitedPractices.map(p => (
+              <div key={p.letter} className="rounded-lg px-3 py-2.5" style={{ background: T.redBg, border: `1px solid ${T.redBdr}` }}>
+                <div className="flex items-start gap-2.5">
+                  <Ban className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: T.red }} />
+                  <div>
+                    <p className="text-xs font-semibold" style={{ color: T.red }}>({p.letter}) {p.label}</p>
+                    <p className="text-[10px] mt-0.5" style={{ color: T.muted }}>{p.ref}</p>
+                    {p.exceptions && p.exceptions.length > 0 && (
+                      <p className="text-[10px] mt-1" style={{ color: T.muted }}>
+                        <em>Eccezioni tassative: {p.exceptions.join("; ")}</em>
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Profilazione override */}
+      {result.profilingOverride && (
+        <div className="rounded-lg px-3 py-2.5" style={{ background: T.amberBg, border: "1px solid rgba(245,158,11,0.28)" }}>
+          <p className="text-xs font-semibold mb-0.5" style={{ color: T.amber }}>
+            Override Art. 6(3) — profilazione rilevata
+          </p>
+          <p className="text-[10px]" style={{ color: T.muted }}>
+            La presenza di profilazione di persone fisiche blocca l&apos;applicazione di qualsiasi eccezione Art. 6(3): il sistema resta classificato ad alto rischio. [verifica]
+          </p>
+        </div>
+      )}
+
+      {/* Eccezione 6(3) applicata */}
+      {result.exception63Applied && (
+        <div className="rounded-lg px-3 py-2.5" style={{ background: T.greenBg, border: "1px solid rgba(21,128,61,0.25)" }}>
+          <p className="text-xs font-semibold mb-0.5" style={{ color: T.green }}>
+            Eccezione Art. 6(3) applicata — {result.exception63Applied.label}
+          </p>
+          <p className="text-[10px]" style={{ color: T.muted }}>
+            {result.exception63Applied.ref} · Obbligo di documentare la valutazione di esenzione. [verifica]
+          </p>
+        </div>
+      )}
+
+      {/* Annex III aree */}
+      {result.annexIIIAreas.length > 0 && (
+        <div>
+          <SectionLabel>Aree Allegato III coinvolte</SectionLabel>
+          <div className="space-y-1.5">
+            {result.annexIIIAreas.map(a => (
+              <div key={a.id} className="rounded-lg px-3 py-2" style={{ background: T.card, border: `1px solid ${T.border}` }}>
+                <p className="text-xs font-semibold" style={{ color: T.text }}>§{a.id} — {a.label}</p>
+                <p className="text-[10px] mt-0.5" style={{ color: T.muted }}>{a.ref}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Allegato I */}
+      {result.annexIProduct && (
+        <div className="rounded-lg px-3 py-2.5" style={{ background: T.amberBg, border: "1px solid rgba(245,158,11,0.28)" }}>
+          <p className="text-xs font-semibold mb-0.5" style={{ color: T.amber }}>Allegato I — {result.annexIProduct}</p>
+          <p className="text-[10px]" style={{ color: T.muted }}>Percorso Art. 6(1): obblighi alto rischio applicabili. [verifica]</p>
+        </div>
+      )}
+
+      {/* Trasparenza Art. 50 */}
+      {result.transparencyObligations.length > 0 && (
+        <div>
+          <SectionLabel>Obblighi trasparenza Art. 50</SectionLabel>
+          <div className="space-y-1.5">
+            {result.transparencyObligations.map((o, i) => (
+              <div key={i} className="flex items-start gap-2 rounded-lg px-3 py-2" style={{ background: T.card, border: `1px solid ${T.border}` }}>
+                <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: T.text }} />
+                <p className="text-xs" style={{ color: T.muted }}>{o}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Effort */}
+      {cfg.estimatedDays > 0 && (
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg" style={{ background: T.card, border: `1px solid ${T.border}` }}>
+          <FileText className="w-3.5 h-3.5" style={{ color: T.muted }} />
+          <p className="text-xs" style={{ color: T.muted }}>
+            Effort stimato:
+            <span className="ml-1 font-semibold" style={{ color: T.text }}>~{cfg.estimatedDays} giorni lavorativi</span>
+          </p>
+        </div>
+      )}
+
+      {/* Articoli e obblighi */}
+      {result.obligations.length > 0 && (
+        <div>
+          <SectionLabel>Obblighi applicabili</SectionLabel>
+          <div className="space-y-1.5">
+            {result.obligations.map((o, i) => (
+              <div key={i} className="rounded-lg px-3 py-2" style={{ background: T.card, border: `1px solid ${T.border}` }}>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono font-bold" style={{ color: T.text }}>{o.article}</span>
+                  <span className="text-xs" style={{ color: "rgba(0,0,0,0.65)" }}>{o.description}</span>
+                </div>
+                <p className="text-[10px] mt-0.5" style={{ color: T.muted }}>{o.obligation}</p>
+                {o.toolHref && (
+                  <Link href={o.toolHref} className="text-[10px] font-semibold underline mt-0.5 block" style={{ color: T.text }}>
+                    Vai al tool →
+                  </Link>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* CTA */}
+      <div className="flex gap-2 pt-1">
+        <Link
+          href="/dashboard/journey"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-medium transition-colors hover:opacity-90"
+          style={{ background: T.text }}
+        >
+          Vai alla Roadmap <ArrowRight className="w-4 h-4" />
+        </Link>
+        <Link
+          href="/dashboard/tools/classifier"
+          className="px-4 py-3 rounded-xl text-sm transition-colors flex items-center justify-center hover:shadow-sm"
+          style={{ border: `1px solid ${T.border}`, background: "rgba(0,0,0,0.04)", color: T.text }}
+        >
+          <FileText className="w-4 h-4" />
+        </Link>
+      </div>
+
+      {/* Salva bozza / nuovo triage */}
+      <div className="rounded-xl p-4" style={{ background: T.card, border: `1px solid ${T.border}`, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+        <div className="flex items-start gap-3">
+          <BookOpen className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: T.muted }} />
+          <div className="flex-1">
+            <p className="text-xs font-medium mb-1" style={{ color: T.text }}>Salva risultato per revisione</p>
+            <p className="text-[11px] mb-3" style={{ color: T.muted }}>
+              Salva localmente questo report e condividilo con il tuo consulente.
+            </p>
+            {draftSaved ? (
+              <div className="flex items-center gap-2 text-xs" style={{ color: T.green }}>
+                <CheckCircle2 className="w-3.5 h-3.5" /> Salvato
+              </div>
+            ) : (
+              <button onClick={onSaveDraft} className="flex items-center gap-2 px-3 py-2 rounded-lg text-white text-xs font-medium hover:opacity-90" style={{ background: T.text }}>
+                <Save className="w-3.5 h-3.5" /> Salva bozza
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <button onClick={onReset} className="w-full text-xs py-2 rounded-lg" style={{ color: T.muted, border: `1px solid ${T.border}` }}>
+        ← Ricomincia triage
+      </button>
+    </div>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function TriagePage() {
-  const [area, setArea] = useState<AreaId>("context");
-  const [report, setReport] = useState<TriageReport | null>(null);
+  const [area, setArea]             = useState<AreaId>("scope");
+  const [result, setResult]         = useState<ClassifyResult | null>(null);
   const [draftSaved, setDraftSaved] = useState(false);
 
-  // Area 1 — Contesto
-  const [role, setRole] = useState<Role | null>(null);
-  const [sector, setSector] = useState<Sector | null>(null);
+  // ── Area 1: Ambito & Ruolo ─────────────────────────────────────────────────
+  const [scopeExclusions, setScopeExclusions] = useState<string[]>([]);
+  const [isAISystem, setIsAISystem]           = useState<boolean | null>(null);
+  const [isDeterministic, setIsDeterministic] = useState<boolean | null>(null);
+  const [role, setRole]                       = useState<Role | null>(null);
+  const [outsideEU, setOutsideEU]             = useState<boolean | null>(null);
+  const [isProductMfr, setIsProductMfr]       = useState<boolean | null>(null);
 
-  // Area 2 — Sistema
-  const [outputType, setOutputType] = useState<OutputType | null>(null);
-  const [isGPAI, setIsGPAI] = useState<boolean | null>(null);
+  // ── Area 2: Sistema (Art.5 + GPAI) ────────────────────────────────────────
+  const [art5Flags, setArt5Flags]                   = useState<string[]>([]);
+  const [art5Exceptions, setArt5Exceptions]         = useState<Record<string, boolean>>({});
+  const [isGPAIModel, setIsGPAIModel]               = useState<boolean | null>(null);
+  const [gpaiSystemic, setGpaiSystemic]             = useState<boolean | null>(null);
 
-  // Area 3 — Persone (skip per distributor/importer)
-  const [personalData, setPersonalData] = useState<"sensitive" | "personal" | "none" | null>(null);
-  const [automatedDecisions, setAutomatedDecisions] = useState<"full" | "support" | "no" | null>(null);
-  const [endUsers, setEndUsers] = useState<string[]>([]);
+  // ── Area 3: Alto rischio (Annex I + III + 6(3)) ───────────────────────────
+  const [annexIProductId, setAnnexIProductId]                   = useState<string | null>(null);
+  const [annexIThirdParty, setAnnexIThirdParty]                 = useState<boolean | null>(null);
+  const [annexIIIAreaIds, setAnnexIIIAreaIds]                   = useState<number[]>([]);
+  const [art63ExceptionId, setArt63ExceptionId]                 = useState<string | null>(null);
+  const [profilingOfPersons, setProfilingOfPersons]             = useState<boolean | null>(null);
 
-  // Area 4 — Deployment
-  const [deployment, setDeployment] = useState<"eu_only" | "eu_plus" | "outside_eu" | null>(null);
-  const [stage, setStage] = useState<"development" | "production" | "update" | null>(null);
-  const [riskSignals, setRiskSignals] = useState<string[]>([]);
+  // ── Area 4: Trasparenza (Art.50) ───────────────────────────────────────────
+  const [isChatbot, setIsChatbot]                                     = useState<boolean | null>(null);
+  const [generatesSyntheticMedia, setGeneratesSyntheticMedia]         = useState<boolean | null>(null);
+  const [hasEmotionNonProhibited, setHasEmotionNonProhibited]         = useState<boolean | null>(null);
+  const [hasBiometricCatNonProhibited, setHasBiometricCatNonProhibited] = useState<boolean | null>(null);
+  const [generatesPublicText, setGeneratesPublicText]                 = useState<boolean | null>(null);
 
-  // Conditional logic: distributor/importer skip Area 3
-  const skipPeopleArea = role === "distributor" || role === "importer";
-  // Skip automatedDecisions if outputType = internal_optimization or no personal data
-  const skipAutomatedDecisions = outputType === "internal_optimization" || personalData === "none";
+  // Derived
+  const scopedOut = scopeExclusions.length > 0 && !scopeExclusions.includes("none");
+  const notAI     = isDeterministic === true;
 
-  const TOTAL_AREAS = skipPeopleArea ? 3 : 4;
-  const areaIndex: Record<AreaId, number> = {
-    context: 1,
-    system: 2,
-    people: skipPeopleArea ? 2 : 3,
-    deployment: skipPeopleArea ? 3 : 4,
-    result: skipPeopleArea ? 3 : 4,
-  };
+  // Step progress
+  const TOTAL_STEPS = 4;
+  const areaIdx: Record<AreaId, number> = { scope: 1, system: 2, highrisk: 3, transparency: 4, result: 4 };
 
-  function goToArea(next: AreaId) {
-    if (next === "result") {
-      const answers: Answers = {
-        role: role || undefined,
-        sector: sector || undefined,
-        outputType: outputType || undefined,
-        isGPAI: isGPAI ?? false,
-        personalData: skipPeopleArea ? undefined : (personalData || undefined),
-        automatedDecisions: (skipPeopleArea || skipAutomatedDecisions) ? undefined : (automatedDecisions || undefined),
-        endUsers: skipPeopleArea ? [] : endUsers,
-        deployment: deployment || undefined,
-        stage: stage || undefined,
-        riskSignals,
-      };
-      const newReport = computeTriage(answers);
-      setReport(newReport);
-      // Auto-sync to classifier when triage result is computed
-      if (next === "result") {
-        syncToClassifier(newReport, answers);
-      }
-    }
-    setArea(next);
+  const areaLabels = ["Ambito & Ruolo", "Sistema & Art.5", "Alto rischio", "Trasparenza"];
+
+  function goResult() {
+    const answers: ClassifyAnswers = {
+      scopeExclusions: scopedOut ? (scopeExclusions.filter(s => s !== "none") as ClassifyAnswers["scopeExclusions"]) : [],
+      hasMLOrInference: isAISystem === true,
+      producesInfluentialOutput: isAISystem === true,
+      isPurelyDeterministic: isDeterministic === true,
+      art5Flags: art5Flags.filter(f => f !== "none") as ClassifyAnswers["art5Flags"],
+      art5ExceptionsApplied: art5Exceptions as ClassifyAnswers["art5ExceptionsApplied"],
+      isGPAIModel: isGPAIModel ?? false,
+      gpaiSystemicRisk: gpaiSystemic ?? false,
+      annexIProductId: annexIProductId,
+      annexIRequiresThirdPartyAssessment: annexIThirdParty ?? false,
+      annexIIIAreaIds: annexIIIAreaIds,
+      art63ExceptionId: (art63ExceptionId ?? null) as ClassifyAnswers["art63ExceptionId"],
+      profilingOfPersons: profilingOfPersons ?? false,
+      isChatbot: isChatbot ?? false,
+      generatesSyntheticMedia: generatesSyntheticMedia ?? false,
+      hasEmotionRecognitionNonProhibited: hasEmotionNonProhibited ?? false,
+      hasNonProhibitedBiometricCategorization: hasBiometricCatNonProhibited ?? false,
+      generatesPublicInterestText: generatesPublicText ?? false,
+      role: (isProductMfr ? "product_manufacturer" : outsideEU ? "authorized_rep" : role) as ClassifyAnswers["role"],
+      outsideEUProvider: outsideEU ?? false,
+      isProductManufacturerProvider: isProductMfr ?? false,
+    };
+    const r = classify(answers);
+    setResult(r);
+    syncToStorage(r, role);
+    setArea("result");
   }
 
-  function saveDraft() {
-    if (!report) return;
-    try {
-      localStorage.setItem(
-        "aicomply_triage_draft",
-        JSON.stringify({
-          ...report,
-          status: "draft",
-          savedAt: new Date().toISOString(),
-        }),
-      );
-      setDraftSaved(true);
-    } catch {}
-    // Sync to shared classifier slot so Risk Manager, Journey, NIST-RMF can read it
-    const currentAnswers: Answers = { role: role ?? undefined, sector: sector ?? undefined };
-    syncToClassifier(report, currentAnswers);
-  }
-
-  function syncToClassifier(r: TriageReport, a: Answers) {
+  function syncToStorage(r: ClassifyResult, rl: Role | null) {
     try {
       const existing = readFromStorage<ClassifierResult>("classifier");
-      const tierToLevel: Record<string, ClassifierResult["riskLevel"]> = {
-        prohibited: "unacceptable",
-        high: "high",
-        gpai: "limited",
-        limited: "limited",
-        minimal: "minimal",
-      };
       const classifierData: ClassifierResult = {
         systemName: existing?.systemName || "Sistema AI",
-        systemDescription: existing?.systemDescription || (a.sector ? `Settore: ${a.sector}` : ""),
-        riskLevel: tierToLevel[r.riskTier] ?? "limited",
-        annexIII: r.riskTier === "high",
-        annexI: false,
-        applicableArticles: r.applicableArticles.map((x) => x.article),
+        systemDescription: existing?.systemDescription || "",
+        riskLevel: outcomeToRiskLevel(r.outcome),
+        annexIII: r.outcome === "high_risk_annex_iii",
+        annexI: r.outcome === "high_risk_annex_i",
+        applicableArticles: r.applicableArticles,
         completedAt: new Date().toISOString(),
+        role: rl ?? undefined,
+        isGPAI: r.gpai,
       };
       writeToStorage<ClassifierResult>("classifier", classifierData);
-      // Aggiorna gpaiDetected in OrgProfile se il tier è GPAI
-      if (r.riskTier === "gpai") {
-        const orgProfile = readFromStorage<OrgProfile>("orgProfile") ?? {
-          paItaly: false, gpaiDetected: false, nistEnabled: false
-        };
+      if (r.gpai) {
+        const orgProfile = readFromStorage<OrgProfile>("orgProfile") ?? { paItaly: false, gpaiDetected: false, nistEnabled: false };
         writeToStorage<OrgProfile>("orgProfile", { ...orgProfile, gpaiDetected: true });
       }
     } catch {}
   }
 
-  function toggleSignal(val: string) {
-    if (val === "none") {
-      setRiskSignals(["none"]);
-      return;
-    }
-    const filtered = riskSignals.filter(s => s !== "none");
-    setRiskSignals(
-      filtered.includes(val) ? filtered.filter(x => x !== val) : [...filtered, val],
-    );
+  function saveDraft() {
+    if (!result) return;
+    try {
+      localStorage.setItem("aicomply_triage_draft", JSON.stringify({ ...result, status: "draft", savedAt: new Date().toISOString() }));
+      setDraftSaved(true);
+    } catch {}
   }
 
   function reset() {
-    setArea("context");
-    setReport(null);
-    setDraftSaved(false);
-    setRole(null); setSector(null);
-    setOutputType(null); setIsGPAI(null);
-    setPersonalData(null); setAutomatedDecisions(null); setEndUsers([]);
-    setDeployment(null); setStage(null); setRiskSignals([]);
+    setArea("scope");
+    setResult(null); setDraftSaved(false);
+    setScopeExclusions([]); setIsAISystem(null); setIsDeterministic(null);
+    setRole(null); setOutsideEU(null); setIsProductMfr(null);
+    setArt5Flags([]); setArt5Exceptions({}); setIsGPAIModel(null); setGpaiSystemic(null);
+    setAnnexIProductId(null); setAnnexIThirdParty(null); setAnnexIIIAreaIds([]);
+    setArt63ExceptionId(null); setProfilingOfPersons(null);
+    setIsChatbot(null); setGeneratesSyntheticMedia(null); setHasEmotionNonProhibited(null);
+    setHasBiometricCatNonProhibited(null); setGeneratesPublicText(null);
+  }
+
+  function toggleArr<T>(arr: T[], val: T, setter: (a: T[]) => void) {
+    setter(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]);
   }
 
   const slide = {
@@ -845,37 +546,27 @@ export default function TriagePage() {
     transition: { duration: 0.22, ease: "easeOut" as const },
   };
 
-  const areaLabels = skipPeopleArea
-    ? ["Ruolo & settore", "Il sistema", "Deployment"]
-    : ["Ruolo & settore", "Il sistema", "Persone & dati", "Deployment"];
-
   return (
-    <div className="min-h-screen" style={{ background: "#FAFAF9", color: "#0D1016" }}>
+    <div className="min-h-screen" style={{ background: T.bg, color: T.text }}>
       <div className="max-w-xl mx-auto px-4 py-10">
 
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2">
-            <Shield className="w-5 h-5" style={{ color: "#0D1016" }} />
-            <span className="text-sm font-medium" style={{ color: "rgba(0,0,0,0.40)" }}>Triage EU AI Act</span>
+            <Shield className="w-5 h-5" style={{ color: T.text }} />
+            <span className="text-sm font-medium" style={{ color: T.muted }}>Triage EU AI Act</span>
           </div>
-          <h1 className="text-2xl font-bold mb-1" style={{ color: "#0D1016" }}>Analisi rapida di conformità</h1>
-          <p className="text-sm" style={{ color: "rgba(0,0,0,0.40)" }}>
-            4 aree tematiche per capire quali obblighi si applicano al tuo sistema AI.
+          <h1 className="text-2xl font-bold mb-1" style={{ color: T.text }}>Analisi rapida di conformità</h1>
+          <p className="text-sm" style={{ color: T.muted }}>
+            Albero decisionale esaustivo — Artt. 2, 3, 5, 6 + GPAI + Art. 50. {" "}
+            <span style={{ color: T.faint }}>Non è consulenza legale. [verifica]</span>
           </p>
-
-          {/* Step tracker */}
           {area !== "result" && (
             <div className="mt-5">
-              <ProgressBar current={areaIndex[area]} total={TOTAL_AREAS} />
+              <ProgressBar current={areaIdx[area]} total={TOTAL_STEPS} />
               <div className="flex items-center gap-4 mt-3 flex-wrap">
                 {areaLabels.map((label, i) => (
-                  <AreaStep
-                    key={i}
-                    index={i + 1}
-                    label={label}
-                    active={areaIndex[area] === i + 1}
-                  />
+                  <AreaStep key={i} index={i + 1} label={label} active={areaIdx[area] === i + 1} />
                 ))}
               </div>
             </div>
@@ -884,371 +575,426 @@ export default function TriagePage() {
 
         <AnimatePresence mode="wait">
 
-          {/* ── AREA 1 — Ruolo & Settore ─────────────────────────────────────── */}
-          {area === "context" && (
-            <motion.div key="context" {...slide} className="space-y-5">
+          {/* ── AREA 1 — Ambito & Ruolo (Passi 0 + 1 + ruolo) ──────────────── */}
+          {area === "scope" && (
+            <motion.div key="scope" {...slide} className="space-y-5">
+
+              {/* Passo 0 — esclusioni ambito Art. 2 */}
               <div>
-                <SectionLabel>Qual è il tuo ruolo?</SectionLabel>
+                <SectionLabel>Passo 0 — Ambito Art. 2: il sistema rientra in una di queste esclusioni?</SectionLabel>
                 <div className="space-y-2">
                   {[
-                    { value: "provider",    label: "Provider",      description: "Sviluppo o commercializzo il sistema AI" },
-                    { value: "deployer",    label: "Deployer",      description: "Uso un sistema AI di terze parti nella mia organizzazione" },
-                    { value: "importer",    label: "Importatore",   description: "Porto nell'UE sistemi AI sviluppati fuori dall'UE" },
-                    { value: "distributor", label: "Distributore",  description: "Distribuisco sistemi AI senza modificarli" },
-                    { value: "unknown",     label: "Non so ancora", description: "Ho bisogno di capire prima il mio ruolo" },
+                    { value: "military",              label: "Finalità militari, difesa o sicurezza nazionale",        warn: false },
+                    { value: "research_premarket",    label: "Solo R&D, non ancora immesso sul mercato",               warn: false },
+                    { value: "personal_nonprofessional", label: "Uso personale non professionale",                     warn: false },
+                    { value: "foss_no_high_risk",     label: "Software open source (non distribuito come alto rischio/GPAI)", warn: false },
+                    { value: "none",                  label: "Nessuna di queste — il sistema è in ambito AI Act",       warn: false },
                   ].map(opt => (
-                    <OptionButton
+                    <MultiOptionButton
                       key={opt.value}
                       label={opt.label}
-                      description={opt.description}
-                      selected={role === opt.value}
-                      onClick={() => setRole(opt.value as Role)}
+                      selected={scopeExclusions.includes(opt.value)}
+                      onClick={() => {
+                        if (opt.value === "none") { setScopeExclusions(["none"]); return; }
+                        toggleArr(scopeExclusions.filter(s => s !== "none"), opt.value, setScopeExclusions);
+                      }}
                     />
                   ))}
                 </div>
               </div>
 
-              {role && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <SectionLabel>Settore di operatività</SectionLabel>
+              {/* Se escluso, va direttamente al risultato */}
+              {scopedOut && (
+                <div className="rounded-lg p-3" style={{ background: T.greenBg, border: "1px solid rgba(21,128,61,0.25)" }}>
+                  <p className="text-xs" style={{ color: T.green }}>
+                    Sistema escluso dall&apos;ambito AI Act (Art. 2). Puoi ottenere subito l&apos;esito.
+                  </p>
+                </div>
+              )}
+
+              {scopedOut && (
+                <button onClick={goResult} className="w-full px-4 py-3 rounded-xl text-white text-sm font-medium hover:opacity-90 flex items-center justify-center gap-2" style={{ background: T.text }}>
+                  Ottieni esito <ChevronRight className="w-4 h-4" />
+                </button>
+              )}
+
+              {/* Passo 1 — Art. 3(1): è un sistema di IA? */}
+              {!scopedOut && scopeExclusions.length > 0 && (
+                <>
+                  <div>
+                    <SectionLabel>Passo 1 — Art. 3(1): il sistema è un sistema di IA?</SectionLabel>
+                    <div className="space-y-2">
+                      {[
+                        { value: true,  label: "Sì — usa ML/inferenza e produce output non puramente deterministici" },
+                        { value: false, label: "No — è puramente deterministico (regole esplicite pre-programmate senza inferenza)" },
+                      ].map(opt => (
+                        <OptionButton
+                          key={String(opt.value)}
+                          label={opt.label}
+                          selected={isDeterministic === !opt.value && isAISystem === opt.value}
+                          onClick={() => { setIsAISystem(opt.value); setIsDeterministic(!opt.value); }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {notAI && (
+                    <button onClick={goResult} className="w-full px-4 py-3 rounded-xl text-white text-sm font-medium hover:opacity-90 flex items-center justify-center gap-2" style={{ background: T.text }}>
+                      Ottieni esito <ChevronRight className="w-4 h-4" />
+                    </button>
+                  )}
+                </>
+              )}
+
+              {/* Ruolo */}
+              {!scopedOut && isAISystem === true && (
+                <div>
+                  <SectionLabel>Qual è il tuo ruolo? (Art. 3 + Art. 22 + Art. 25)</SectionLabel>
                   <div className="space-y-2">
                     {[
-                      { value: "hr",             label: "Risorse umane",            description: "Selezione, valutazione, gestione dipendenti" },
-                      { value: "health",         label: "Sanità / medicina",         description: "Diagnosi, terapia, supporto clinico" },
-                      { value: "education",      label: "Istruzione / formazione",   description: "Valutazione studenti, tutoring, accesso a istituti" },
-                      { value: "finance",        label: "Servizi finanziari",         description: "Credito, assicurazioni, scoring finanziario" },
-                      { value: "lawenforcement", label: "Sicurezza pubblica",         description: "Polizia, magistratura, controllo frontiere" },
-                      { value: "infrastructure", label: "Infrastrutture critiche",    description: "Energia, acqua, trasporti" },
-                      { value: "publicadmin",    label: "Pubblica amministrazione",   description: "Servizi pubblici, benefici sociali" },
-                      { value: "other",          label: "Altro settore",              description: "Marketing, customer service, produzione, etc." },
+                      { value: "provider",              label: "Provider",              description: "Sviluppo o commercializzo il sistema" },
+                      { value: "deployer",              label: "Deployer",              description: "Uso un sistema AI di terze parti nella mia organizzazione" },
+                      { value: "importer",              label: "Importatore",           description: "Porto nell'UE sistemi AI sviluppati fuori dall'UE" },
+                      { value: "distributor",           label: "Distributore",          description: "Distribuisco senza modificare" },
+                      { value: "product_manufacturer",  label: "Fabbricante (Art. 25)", description: "Immetto il sistema come mio prodotto o lo modifico sostanzialmente" },
+                      { value: "unknown",               label: "Non so ancora",         description: "Devo capire il mio ruolo" },
                     ].map(opt => (
                       <OptionButton
                         key={opt.value}
                         label={opt.label}
                         description={opt.description}
-                        selected={sector === opt.value}
-                        onClick={() => setSector(opt.value as Sector)}
+                        selected={role === opt.value}
+                        onClick={() => setRole(opt.value as Role)}
                       />
                     ))}
                   </div>
-                </motion.div>
+                </div>
               )}
 
-              {role && sector && (
-                <button
-                  onClick={() => goToArea("system")}
-                  className="w-full px-4 py-3 rounded-xl bg-[#0D1016] hover:bg-[#2a2b31] text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
-                >
+              {/* Art. 22: provider fuori UE */}
+              {!scopedOut && role === "provider" && (
+                <div>
+                  <SectionLabel>Il provider è stabilito fuori dall'UE? (Art. 22)</SectionLabel>
+                  <div className="space-y-2">
+                    {[
+                      { value: true,  label: "Sì — ho bisogno di un rappresentante autorizzato nell'UE (Art. 22)" },
+                      { value: false, label: "No — sono stabilito nell'UE" },
+                    ].map(opt => (
+                      <OptionButton key={String(opt.value)} label={opt.label} selected={outsideEU === opt.value} onClick={() => setOutsideEU(opt.value)} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {!scopedOut && role && (role !== "provider" || outsideEU !== null) && (
+                <button onClick={() => setArea("system")} className="w-full px-4 py-3 rounded-xl text-white text-sm font-medium hover:opacity-90 flex items-center justify-center gap-2" style={{ background: T.text }}>
                   Continua <ChevronRight className="w-4 h-4" />
                 </button>
               )}
 
-              {(role === "distributor" || role === "importer") && (
-                <div
-                  className="rounded-lg px-3 py-2.5 flex items-start gap-2"
-                  style={{ background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.15)" }}
-                >
-                  <Info className="w-3.5 h-3.5 text-blue-400 flex-shrink-0 mt-0.5" />
-                  <p className="text-[11px]" style={{ color: "rgba(0,0,0,0.50)" }}>
-                    Come <strong style={{ color: "#0D1016" }}>{role === "distributor" ? "Distributore" : "Importatore"}</strong>, le domande sui dati di addestramento e sui soggetti impattati non si applicano — saranno saltate automaticamente.
+              {(role === "importer" || role === "distributor") && (
+                <div className="rounded-lg px-3 py-2.5 flex items-start gap-2" style={{ background: "rgba(0,0,0,0.03)", border: `1px solid ${T.border}` }}>
+                  <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: T.muted }} />
+                  <p className="text-[11px]" style={{ color: T.muted }}>
+                    Come <strong style={{ color: T.text }}>{role === "distributor" ? "Distributore" : "Importatore"}</strong> gli obblighi principali sono Art. 23/24. Il triage completo ti mostrerà le verifiche richieste prima della distribuzione.
                   </p>
                 </div>
               )}
             </motion.div>
           )}
 
-          {/* ── AREA 2 — Il sistema ──────────────────────────────────────────── */}
+          {/* ── AREA 2 — Sistema (Passo 2: Art.5 + Passo 3: GPAI) ──────────── */}
           {area === "system" && (
             <motion.div key="system" {...slide} className="space-y-5">
+
+              {/* Passo 2: Art. 5 — 8 fattispecie con lettere corrette */}
               <div>
-                <SectionLabel>Cosa produce principalmente il sistema?</SectionLabel>
+                <SectionLabel>Passo 2 — Art. 5: il sistema rientra in pratiche vietate? (seleziona tutte)</SectionLabel>
                 <div className="space-y-2">
-                  {[
-                    { value: "decisions",            label: "Decisioni su persone",        description: "Approvazioni, rifiuti, score che impattano individui" },
-                    { value: "content_generation",   label: "Genera contenuti",             description: "Testi, immagini, audio, video, codice" },
-                    { value: "profiling",            label: "Profila o classifica persone", description: "Segmentazione, scoring comportamentale" },
-                    { value: "biometric",            label: "Riconosce biometria",          description: "Volti, voci, gesti, emozioni, impronte" },
-                    { value: "internal_optimization",label: "Ottimizza processi interni",   description: "Logistica, manutenzione — senza impatto diretto su persone" },
-                    { value: "other",                label: "Altro",                        description: "Ricerca, analisi dati aggregati, simulazioni" },
-                  ].map(opt => (
-                    <OptionButton
-                      key={opt.value}
-                      label={opt.label}
-                      description={opt.description}
-                      selected={outputType === opt.value}
-                      onClick={() => setOutputType(opt.value as OutputType)}
+                  {ART5_PRACTICES.map(p => (
+                    <MultiOptionButton
+                      key={p.letter}
+                      label={`(${p.letter}) ${p.label}`}
+                      description={`${p.ref} — ${p.description.slice(0, 80)}…`}
+                      selected={art5Flags.includes(p.letter)}
+                      warn={art5Flags.includes(p.letter)}
+                      onClick={() => toggleArr(art5Flags.filter(f => f !== "none"), p.letter, setArt5Flags)}
                     />
                   ))}
+                  <MultiOptionButton
+                    label="Nessuna di queste pratiche vietate"
+                    selected={art5Flags.includes("none") || art5Flags.length === 0}
+                    onClick={() => setArt5Flags(["none"])}
+                  />
                 </div>
               </div>
 
-              {outputType && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <SectionLabel>È un modello AI a uso generale (GPAI)?</SectionLabel>
-                  <div className="space-y-2">
-                    {[
-                      { value: true,  label: "Sì, è un modello fondazionale / GPAI", description: "Addestrato su larga scala, usabile per molteplici task (es. LLM, diffusion model)" },
-                      { value: false, label: "No, è un sistema AI specifico",         description: "Progettato per uno scopo preciso e limitato" },
-                    ].map(opt => (
-                      <OptionButton
-                        key={String(opt.value)}
-                        label={opt.label}
-                        description={opt.description}
-                        selected={isGPAI === opt.value}
-                        onClick={() => setIsGPAI(opt.value)}
-                      />
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-
-              {outputType && isGPAI !== null && (
-                <button
-                  onClick={() => goToArea(skipPeopleArea ? "deployment" : "people")}
-                  className="w-full px-4 py-3 rounded-xl bg-[#0D1016] hover:bg-[#2a2b31] text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
-                >
-                  Continua <ChevronRight className="w-4 h-4" />
-                </button>
-              )}
-            </motion.div>
-          )}
-
-          {/* ── AREA 3 — Persone & dati (skip per distributor/importer) ─────── */}
-          {area === "people" && !skipPeopleArea && (
-            <motion.div key="people" {...slide} className="space-y-5">
-              <div>
-                <SectionLabel>Il sistema processa dati personali?</SectionLabel>
-                <div className="space-y-2">
-                  {[
-                    { value: "sensitive", label: "Sì, dati sensibili",                  description: "Salute, etnia, biometria, opinioni politiche, religione" },
-                    { value: "personal",  label: "Sì, dati personali standard",          description: "Nome, email, comportamento online, localizzazione" },
-                    { value: "none",      label: "No, solo dati aggregati o anonimi",    description: "Nessun dato riconducibile a individui specifici" },
-                  ].map(opt => (
-                    <OptionButton
-                      key={opt.value}
-                      label={opt.label}
-                      description={opt.description}
-                      selected={personalData === opt.value}
-                      onClick={() => setPersonalData(opt.value as "sensitive" | "personal" | "none")}
-                    />
-                  ))}
+              {/* Eccezioni per (d), (f), (g), (h) */}
+              {(["d", "f", "g", "h"] as const).some(l => art5Flags.includes(l)) && (
+                <div className="rounded-lg p-3 space-y-2" style={{ background: T.amberBg, border: "1px solid rgba(245,158,11,0.28)" }}>
+                  <p className="text-xs font-semibold" style={{ color: T.amber }}>
+                    Le fattispecie (d), (f), (g), (h) hanno eccezioni tassative. Si applica qualcuna?
+                  </p>
+                  {(["d", "f", "g", "h"] as const).filter(l => art5Flags.includes(l)).map(l => {
+                    const practice = ART5_PRACTICES.find(p => p.letter === l)!;
+                    return (
+                      <div key={l}>
+                        <p className="text-[10px] font-semibold mb-1" style={{ color: T.text }}>({l}) Eccezione:</p>
+                        {practice.exceptions?.map((exc, i) => (
+                          <MultiOptionButton
+                            key={i}
+                            label={exc.slice(0, 90)}
+                            selected={art5Exceptions[l] === true}
+                            onClick={() => setArt5Exceptions(prev => ({ ...prev, [l]: !prev[l] }))}
+                          />
+                        ))}
+                      </div>
+                    );
+                  })}
                 </div>
-              </div>
+              )}
 
-              {personalData && !skipAutomatedDecisions && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <SectionLabel>Il sistema prende decisioni automatizzate su persone?</SectionLabel>
+              {/* Passo 3: GPAI */}
+              {art5Flags.length > 0 && (
+                <div>
+                  <SectionLabel>Passo 3 — GPAI (Artt. 51-55): è un modello AI a uso generale?</SectionLabel>
                   <div className="space-y-2">
                     {[
-                      { value: "full",    label: "Sì, decisioni completamente automatiche",  description: "L'output AI è la decisione finale, senza revisione umana obbligatoria" },
-                      { value: "support", label: "Sì, ma supporta una decisione umana",       description: "L'AI raccomanda, un umano decide in ultima istanza" },
-                      { value: "no",      label: "No, non impatta direttamente persone",      description: "Uso puramente interno o tecnico" },
+                      { value: true,  label: "Sì — modello fondazionale / GPAI (es. LLM, diffusion model)",  description: "Artt. 51-55 applicabili in parallelo" },
+                      { value: false, label: "No — sistema specifico per uno scopo determinato",               description: "" },
                     ].map(opt => (
-                      <OptionButton
-                        key={opt.value}
-                        label={opt.label}
-                        description={opt.description}
-                        selected={automatedDecisions === opt.value}
-                        onClick={() => setAutomatedDecisions(opt.value as "full" | "support" | "no")}
-                      />
+                      <OptionButton key={String(opt.value)} label={opt.label} description={opt.description} selected={isGPAIModel === opt.value} onClick={() => setIsGPAIModel(opt.value)} />
                     ))}
                   </div>
-                </motion.div>
-              )}
 
-              {personalData && (skipAutomatedDecisions || automatedDecisions) && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <SectionLabel>
-                    Chi sono gli utenti finali?{" "}
-                    <span className="normal-case font-normal" style={{color:"rgba(0,0,0,0.35)"}}>(seleziona tutti)</span>
-                  </SectionLabel>
-                  <div className="space-y-2">
-                    {[
-                      { value: "consumers",     label: "Consumatori / cittadini", description: "Persone comuni, non professionisti del settore" },
-                      { value: "professionals", label: "Professionisti",           description: "Medici, avvocati, ingegneri, HR specialist" },
-                      { value: "employees",     label: "Dipendenti aziendali",     description: "Solo uso interno all'organizzazione" },
-                      { value: "minors",        label: "Minori (under 18)",        description: "Il sistema può essere usato o impattare bambini/adolescenti" },
-                      { value: "vulnerable",    label: "Persone vulnerabili",      description: "Anziani, persone con disabilità, minoranze" },
-                    ].map(opt => (
-                      <MultiOptionButton
-                        key={opt.value}
-                        label={opt.label}
-                        description={opt.description}
-                        selected={endUsers.includes(opt.value)}
-                        onClick={() =>
-                          setEndUsers(endUsers.includes(opt.value)
-                            ? endUsers.filter(x => x !== opt.value)
-                            : [...endUsers, opt.value])
-                        }
-                      />
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-
-              {personalData && (skipAutomatedDecisions || automatedDecisions) && endUsers.length > 0 && (
-                <button
-                  onClick={() => goToArea("deployment")}
-                  className="w-full px-4 py-3 rounded-xl bg-[#0D1016] hover:bg-[#2a2b31] text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
-                >
-                  Continua <ChevronRight className="w-4 h-4" />
-                </button>
-              )}
-            </motion.div>
-          )}
-
-          {/* ── AREA 4 — Deployment & segnali ───────────────────────────────── */}
-          {area === "deployment" && (
-            <motion.div key="deployment" {...slide} className="space-y-5">
-              <div>
-                <SectionLabel>Dove è deployato il sistema?</SectionLabel>
-                <div className="space-y-2">
-                  {[
-                    { value: "eu_only",    label: "Solo nell'Unione Europea",                    description: "Utenti e infrastruttura esclusivamente in UE" },
-                    { value: "eu_plus",    label: "UE e altri paesi",                             description: "Presente in UE e altrove" },
-                    { value: "outside_eu", label: "Fuori dall'UE ma accessibile da utenti UE",    description: "Server fuori UE ma gli utenti possono essere europei" },
-                  ].map(opt => (
-                    <OptionButton
-                      key={opt.value}
-                      label={opt.label}
-                      description={opt.description}
-                      selected={deployment === opt.value}
-                      onClick={() => setDeployment(opt.value as "eu_only" | "eu_plus" | "outside_eu")}
-                    />
-                  ))}
+                  {isGPAIModel === true && (
+                    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-2 mt-2">
+                      <SectionLabel>Supera la soglia di rischio sistemico? (≥10²⁵ FLOP o designazione Commissione)</SectionLabel>
+                      {[
+                        { value: true,  label: "Sì — Art. 55 (rischio sistemico) applicabile" },
+                        { value: false, label: "No / Non so" },
+                      ].map(opt => (
+                        <OptionButton key={String(opt.value)} label={opt.label} selected={gpaiSystemic === opt.value} onClick={() => setGpaiSystemic(opt.value)} />
+                      ))}
+                    </motion.div>
+                  )}
                 </div>
-              </div>
-
-              {deployment && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <SectionLabel>A che punto è il sistema?</SectionLabel>
-                  <div className="space-y-2">
-                    {[
-                      { value: "development", label: "In fase di sviluppo",          description: "Non ancora in produzione" },
-                      { value: "production",  label: "Già in produzione",             description: "Gli utenti lo usano ora" },
-                      { value: "update",      label: "In aggiornamento sostanziale",  description: "Modifica che cambia funzioni o performance del sistema esistente" },
-                    ].map(opt => (
-                      <OptionButton
-                        key={opt.value}
-                        label={opt.label}
-                        description={opt.description}
-                        selected={stage === opt.value}
-                        onClick={() => setStage(opt.value as "development" | "production" | "update")}
-                      />
-                    ))}
-                  </div>
-                </motion.div>
               )}
 
-              {deployment && stage && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <SectionLabel>
-                    Segnali di rischio{" "}
-                    <span className="normal-case font-normal" style={{color:"rgba(0,0,0,0.35)"}}>(seleziona tutti i pertinenti)</span>
-                  </SectionLabel>
-                  <div className="space-y-2">
-                    {[
-                      { value: "realtime_biometric_public", label: "Identifica persone in tempo reale in spazi pubblici tramite biometria",  description: "⚠️ Potenzialmente vietato — Art. 5" },
-                      { value: "emotion_workplace",          label: "Rileva emozioni in luoghi di lavoro",                                   description: "⚠️ Potenzialmente vietato — Art. 5" },
-                      { value: "emotion_education",          label: "Rileva emozioni in contesti educativi",                                 description: "⚠️ Potenzialmente vietato — Art. 5" },
-                      { value: "social_scoring",             label: "Assegna punteggi sociali a cittadini per conto di enti pubblici",       description: "⚠️ Vietato — Art. 5" },
-                      { value: "subliminal_manipulation",    label: "Usa tecniche subliminali o sfrutta debolezze cognitive",               description: "⚠️ Vietato — Art. 5" },
-                      { value: "vulnerable_exploitation",    label: "Sfrutta vulnerabilità specifiche di gruppi a rischio",                  description: "⚠️ Potenzialmente vietato — Art. 5" },
-                      { value: "credit_scoring",             label: "Calcola scoring creditizio o assicurativo su persone fisiche",          description: "Alto rischio — Annex III" },
-                      { value: "deepfake",                   label: "Genera immagini, video o audio sintetici (deepfake)",                   description: "Obbligo labeling — Art. 50" },
-                      { value: "chatbot",                    label: "Interfaccia conversazionale con utenti (chatbot)",                      description: "Obbligo disclosure — Art. 50" },
-                      { value: "annex3_explicit",            label: "È un sistema esplicitamente elencato nell'Annex III",                   description: "Già classificato alto rischio" },
-                      { value: "none",                       label: "Nessuno di questi elementi",                                           description: "" },
-                    ].map(opt => (
-                      <MultiOptionButton
-                        key={opt.value}
-                        label={opt.label}
-                        description={opt.description}
-                        selected={riskSignals.includes(opt.value)}
-                        onClick={() => toggleSignal(opt.value)}
-                      />
-                    ))}
-                  </div>
-                  <button
-                    onClick={() => goToArea("result")}
-                    disabled={riskSignals.length === 0}
-                    className="w-full mt-3 px-4 py-3 rounded-xl bg-[#0D1016] hover:bg-[#2a2b31] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
-                  >
-                    Genera report di triage <ChevronRight className="w-4 h-4" />
+              {art5Flags.length > 0 && isGPAIModel !== null && (
+                <div className="flex gap-2">
+                  <button onClick={() => setArea("scope")} className="px-4 py-3 rounded-xl text-sm flex items-center gap-1 hover:shadow-sm" style={{ border: `1px solid ${T.border}`, color: T.muted }}>
+                    <ChevronLeft className="w-4 h-4" /> Indietro
                   </button>
-                </motion.div>
+                  <button onClick={() => setArea("highrisk")} className="flex-1 px-4 py-3 rounded-xl text-white text-sm font-medium hover:opacity-90 flex items-center justify-center gap-2" style={{ background: T.text }}>
+                    Continua <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
               )}
             </motion.div>
           )}
 
-          {/* ── RESULT ──────────────────────────────────────────────────────── */}
-          {area === "result" && report && (
-            <motion.div key="result" {...slide}>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-base font-semibold" style={{ color: "#0D1016" }}>Report di triage</h2>
-                <button
-                  onClick={reset}
-                  className="text-xs transition-colors"
-                  style={{ color: "rgba(0,0,0,0.40)" }}
-                >
-                  Ricomincia
-                </button>
+          {/* ── AREA 3 — Alto rischio (Passo 4: Annex I + Passo 5-6: Annex III) */}
+          {area === "highrisk" && (
+            <motion.div key="highrisk" {...slide} className="space-y-5">
+
+              {/* Passo 4: Allegato I */}
+              <div>
+                <SectionLabel>Passo 4 — Allegato I (Art. 6(1)): il sistema è componente di sicurezza di un prodotto regolamentato UE?</SectionLabel>
+                <div className="space-y-2">
+                  {[...ANNEX_I_PRODUCTS.map(p => ({ value: p.id, label: p.label, description: p.ref })),
+                    { value: "none", label: "No — non è un prodotto Allegato I", description: "" }].map(opt => (
+                    <OptionButton key={opt.value} label={opt.label} description={opt.description} selected={(annexIProductId ?? "none") === opt.value} onClick={() => setAnnexIProductId(opt.value === "none" ? null : opt.value)} />
+                  ))}
+                </div>
               </div>
 
-              {report.riskTier === "prohibited" ? (
-                <ProhibitedDraftView
-                  report={report}
-                  onSaveDraft={saveDraft}
-                  draftSaved={draftSaved}
-                />
-              ) : (
-                <TriageReportView report={report} />
+              {annexIProductId && (
+                <div>
+                  <SectionLabel>Richiede valutazione di conformità di terzi (Notified Body)?</SectionLabel>
+                  <div className="space-y-2">
+                    {[{ value: true, label: "Sì" }, { value: false, label: "No" }].map(opt => (
+                      <OptionButton key={String(opt.value)} label={opt.label} selected={annexIThirdParty === opt.value} onClick={() => setAnnexIThirdParty(opt.value)} />
+                    ))}
+                  </div>
+                </div>
               )}
+
+              {/* Passo 5: Allegato III — 8 aree */}
+              {(annexIProductId === null || annexIThirdParty !== null) && (
+                <div>
+                  <SectionLabel>Passo 5 — Allegato III (Art. 6(2)): il sistema rientra in una di queste 8 aree? (seleziona tutte)</SectionLabel>
+                  <div className="space-y-2">
+                    {ANNEX_III_AREAS.map(a => (
+                      <MultiOptionButton
+                        key={a.id}
+                        label={`§${a.id} — ${a.label}`}
+                        description={`${a.ref} — ${a.examples[0]}`}
+                        selected={annexIIIAreaIds.includes(a.id)}
+                        onClick={() => toggleArr(annexIIIAreaIds, a.id, setAnnexIIIAreaIds)}
+                      />
+                    ))}
+                    <MultiOptionButton
+                      label="Nessuna area Allegato III"
+                      selected={annexIIIAreaIds.length === 0}
+                      onClick={() => setAnnexIIIAreaIds([])}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Passo 6: profilazione + eccezione 6(3) */}
+              {annexIIIAreaIds.length > 0 && (
+                <>
+                  <div>
+                    <SectionLabel>Override Art. 6(3): il sistema effettua profilazione di persone fisiche?</SectionLabel>
+                    <div className="space-y-2">
+                      {[
+                        { value: true,  label: "Sì — effettua profilazione",         description: "Blocca qualsiasi eccezione Art. 6(3): il sistema è sempre alto rischio" },
+                        { value: false, label: "No — non effettua profilazione",      description: "Possibile applicazione di un'eccezione Art. 6(3)" },
+                      ].map(opt => (
+                        <OptionButton key={String(opt.value)} label={opt.label} description={opt.description} selected={profilingOfPersons === opt.value} onClick={() => setProfilingOfPersons(opt.value)} />
+                      ))}
+                    </div>
+                  </div>
+
+                  {profilingOfPersons === false && (
+                    <div>
+                      <SectionLabel>Eccezione Art. 6(3): si applica una di queste eccezioni?</SectionLabel>
+                      <div className="space-y-2">
+                        {ART63_EXCEPTIONS.map(e => (
+                          <OptionButton
+                            key={e.id}
+                            label={e.label}
+                            description={`${e.ref} — ${e.condition}`}
+                            selected={art63ExceptionId === e.id}
+                            onClick={() => setArt63ExceptionId(art63ExceptionId === e.id ? null : e.id)}
+                          />
+                        ))}
+                        <OptionButton
+                          label="Nessuna eccezione applicabile"
+                          selected={art63ExceptionId === null}
+                          onClick={() => setArt63ExceptionId(null)}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              <div className="flex gap-2">
+                <button onClick={() => setArea("system")} className="px-4 py-3 rounded-xl text-sm flex items-center gap-1 hover:shadow-sm" style={{ border: `1px solid ${T.border}`, color: T.muted }}>
+                  <ChevronLeft className="w-4 h-4" /> Indietro
+                </button>
+                <button
+                  onClick={() => setArea("transparency")}
+                  disabled={(annexIProductId !== null && annexIThirdParty === null) || (annexIIIAreaIds.length > 0 && profilingOfPersons === null)}
+                  className="flex-1 px-4 py-3 rounded-xl text-white text-sm font-medium hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  style={{ background: T.text }}
+                >
+                  Continua <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* ── AREA 4 — Trasparenza (Passo 7: Art. 50) ────────────────────── */}
+          {area === "transparency" && (
+            <motion.div key="transparency" {...slide} className="space-y-5">
+              <div>
+                <SectionLabel>Passo 7 — Trasparenza Art. 50: il sistema presenta una di queste caratteristiche?</SectionLabel>
+                <p className="text-xs mb-3" style={{ color: T.muted }}>
+                  Queste domande riguardano obblighi di trasparenza, indipendentemente dal rischio.
+                </p>
+                <div className="space-y-2">
+                  {[
+                    {
+                      q: "È un chatbot o sistema conversazionale con utenti?",
+                      val: isChatbot,
+                      set: setIsChatbot,
+                      note: "Art. 50(1) — disclosure obbligatoria",
+                    },
+                    {
+                      q: "Genera contenuti sintetici / deepfake (immagini, video, audio, testi)?",
+                      val: generatesSyntheticMedia,
+                      set: setGeneratesSyntheticMedia,
+                      note: "Art. 50(2)–(4) — marcatura obbligatoria",
+                    },
+                    {
+                      q: "Ha funzioni di riconoscimento emozioni (non vietate ex Art. 5)?",
+                      val: hasEmotionNonProhibited,
+                      set: setHasEmotionNonProhibited,
+                      note: "Art. 50(1) — informativa alle persone",
+                    },
+                    {
+                      q: "Ha funzioni di categorizzazione biometrica non vietate?",
+                      val: hasBiometricCatNonProhibited,
+                      set: setHasBiometricCatNonProhibited,
+                      note: "Art. 50(1) — informativa",
+                    },
+                    {
+                      q: "Genera testi AI destinati a informare il pubblico su questioni di interesse generale?",
+                      val: generatesPublicText,
+                      set: setGeneratesPublicText,
+                      note: "Art. 50(3) — marcatura",
+                    },
+                  ].map(({ q, val, set, note }, i) => (
+                    <div key={i} className="rounded-xl p-3 space-y-2" style={{ border: `1px solid ${T.border}`, background: T.card }}>
+                      <p className="text-xs font-medium" style={{ color: T.text }}>{q}</p>
+                      <p className="text-[10px]" style={{ color: T.faint }}>{note}</p>
+                      <div className="flex gap-2">
+                        {[{ v: true, l: "Sì" }, { v: false, l: "No" }].map(({ v, l }) => (
+                          <button
+                            key={String(v)}
+                            onClick={() => set(v)}
+                            className="flex-1 py-2 rounded-lg text-xs font-medium border transition-colors"
+                            style={val === v
+                              ? { background: T.text, color: "white", border: `1px solid ${T.text}` }
+                              : { background: T.card, color: T.muted, border: `1px solid ${T.border}` }
+                            }
+                          >
+                            {l}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button onClick={() => setArea("highrisk")} className="px-4 py-3 rounded-xl text-sm flex items-center gap-1 hover:shadow-sm" style={{ border: `1px solid ${T.border}`, color: T.muted }}>
+                  <ChevronLeft className="w-4 h-4" /> Indietro
+                </button>
+                <button
+                  onClick={goResult}
+                  disabled={[isChatbot, generatesSyntheticMedia, hasEmotionNonProhibited, hasBiometricCatNonProhibited, generatesPublicText].some(v => v === null)}
+                  className="flex-1 px-4 py-3 rounded-xl text-white text-sm font-medium hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  style={{ background: T.text }}
+                >
+                  Genera report <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* ── RESULT ─────────────────────────────────────────────────────── */}
+          {area === "result" && result && (
+            <motion.div key="result" {...slide}>
+              <div className="flex items-center gap-2 mb-4">
+                <Zap className="w-4 h-4" style={{ color: T.muted }} />
+                <span className="text-xs font-medium" style={{ color: T.muted }}>Report di triage</span>
+              </div>
+              <ResultView
+                result={result}
+                onSaveDraft={saveDraft}
+                draftSaved={draftSaved}
+                onReset={reset}
+              />
             </motion.div>
           )}
 
         </AnimatePresence>
-
-        {/* Back button */}
-        {area !== "context" && area !== "result" && (
-          <button
-            onClick={() => {
-              if (area === "system") setArea("context");
-              else if (area === "people") setArea("system");
-              else if (area === "deployment") setArea(skipPeopleArea ? "system" : "people");
-            }}
-            className="mt-6 flex items-center gap-1.5 text-xs transition-colors"
-            style={{ color: "rgba(0,0,0,0.40)" }}
-          >
-            <ChevronLeft className="w-3.5 h-3.5" />
-            Indietro
-          </button>
-        )}
-
       </div>
     </div>
   );
