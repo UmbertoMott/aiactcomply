@@ -17,6 +17,7 @@ import { RiskRegisterViewer } from "./components/RiskRegisterViewer";
 import { buildRiskRegisterDocument, buildAnnexSections, shouldShowGpaiModule, type AnnexSection } from "@/lib/risk/risk-register-mapper";
 import type { RiskRegisterDocument } from "@/lib/risk/risk-register-types";
 import { computeRegisterProgress, type SectionProgress } from "@/lib/risk/risk-register-progress";
+import { RiskRegisterGuidedMode } from "@/components/risk/RiskRegisterGuidedMode";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -761,6 +762,7 @@ export default function RiskManagerPage() {
   const [viewerAnchor, setViewerAnchor] = useState<string | null>(null);
   const [showPhaseGuide, setShowPhaseGuide] = useState(true);
   const [customPhrase, setCustomPhrase] = useState("");
+  const [guidedMode, setGuidedMode] = useState(false);
   const layoutRef = useRef<HTMLDivElement>(null);
 
   // Apre il documento e scrolla alla sezione richiesta
@@ -933,6 +935,18 @@ export default function RiskManagerPage() {
 
   if (!hydrated) return null;
 
+  if (guidedMode) {
+    return (
+      <div style={{ fontFamily: "var(--font-inter, system-ui)", background: "#ffffff", height: "calc(100vh - 4rem)", display: "flex", flexDirection: "column" }}>
+        <SystemSelector />
+        <ProviderTransitionAlertBanner />
+        <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+          <RiskRegisterGuidedMode onExitGuidedMode={() => setGuidedMode(false)} />
+        </div>
+      </div>
+    );
+  }
+
   const progressPct = registerProgress.overallPercent;
   const hasContent = completedPhases.length > 0 || Object.keys(documentation).length > 0;
 
@@ -964,6 +978,34 @@ export default function RiskManagerPage() {
               <RotateCcw size={12} /> Reset
             </button>
           </div>
+        </div>
+
+        {/* Tab switcher: Form completo / Risk Register guidato */}
+        <div style={{ display: "flex", gap: 0, borderBottom: "1px solid rgba(0,0,0,0.08)", marginTop: 8 }}>
+          <button
+            onClick={() => setGuidedMode(false)}
+            style={{
+              padding: "8px 16px", fontSize: 12, fontWeight: !guidedMode ? 700 : 500,
+              color: !guidedMode ? "#0D1016" : "rgba(0,0,0,0.42)",
+              background: "none", border: "none", cursor: "pointer",
+              borderBottom: !guidedMode ? "2px solid #0D1016" : "2px solid transparent",
+              marginBottom: -1,
+            }}
+          >
+            Form strutturato
+          </button>
+          <button
+            onClick={() => setGuidedMode(true)}
+            style={{
+              padding: "8px 16px", fontSize: 12, fontWeight: guidedMode ? 700 : 500,
+              color: guidedMode ? "#0D1016" : "rgba(0,0,0,0.42)",
+              background: "none", border: "none", cursor: "pointer",
+              borderBottom: guidedMode ? "2px solid #0D1016" : "2px solid transparent",
+              marginBottom: -1,
+            }}
+          >
+            Risk Register guidato
+          </button>
         </div>
       </div>
 
