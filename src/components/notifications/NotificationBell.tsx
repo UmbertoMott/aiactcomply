@@ -15,54 +15,55 @@ import {
   priorityOrder,
 } from "@/lib/notifications/notifications-engine";
 import { STORAGE_KEYS, readFromStorage } from "@/lib/dossier/storage-schema";
-import {
-  Bell,
-  X,
-  Circle,
-  AlertTriangle,
-  Clock,
-  Calendar,
-  Award,
-  Play,
-  ClipboardList,
-} from "lucide-react";
+import { Bell, X } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useCallback, useRef } from "react";
 
-// Suppress unused import warnings — icons are kept for potential icon rendering
-void AlertTriangle;
-void Clock;
-void Calendar;
-void Award;
-void Play;
-void ClipboardList;
+// ─── Design tokens ────────────────────────────────────────────────────────────
+const T = {
+  text:   "#0D1016",
+  muted:  "rgba(0,0,0,0.45)",
+  faint:  "rgba(0,0,0,0.28)",
+  border: "rgba(0,0,0,0.07)",
+  card:   "#ffffff",
+  bg:     "#fafaf9",
+} as const;
 
-const PRIORITY_BORDER: Record<NotificationPriority, string> = {
-  critical: "#dc2626",
-  high: "#d97706",
-  medium: "#3b82f6",
-  info: "rgba(0,0,0,0.12)",
+const MONO: React.CSSProperties = {
+  fontFamily: "'DM Mono', monospace",
+  letterSpacing: "0.03em",
 };
 
-const PRIORITY_BG: Record<NotificationPriority, string> = {
-  critical: "#fff5f5",
-  high: "#fffbeb",
-  medium: "#eff6ff",
-  info: "#ffffff",
+const SANS: React.CSSProperties = {
+  fontFamily: "var(--font-dm-sans, system-ui, sans-serif)",
 };
+
+// Colore accento per la striscia sinistra — niente blu, solo semantica neutra/rossa/ambra
+const PRIORITY_ACCENT: Record<NotificationPriority, string> = {
+  critical: "rgba(220,38,38,0.55)",
+  high:     "rgba(180,83,9,0.45)",
+  medium:   "rgba(0,0,0,0.18)",
+  info:     "rgba(0,0,0,0.09)",
+};
+
+// Rimuove emoji e simboli speciali dal titolo (vengono dall'engine)
+function stripLeadingEmoji(s: string): string {
+  return s.replace(/^[\p{Emoji}\p{So}\s]+/u, "").trim();
+}
+
+// ─── Componente ───────────────────────────────────────────────────────────────
 
 export default function NotificationBell() {
-  const [open, setOpen] = useState(false);
-  const [notifications, setNotifications] = useState<AIComplyNotification[]>([]);
-  const [dismissed, setDismissed] = useState<string[]>([]);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen]                       = useState(false);
+  const [notifications, setNotifications]     = useState<AIComplyNotification[]>([]);
+  const [dismissed, setDismissed]             = useState<string[]>([]);
+  const containerRef                          = useRef<HTMLDivElement>(null);
 
-  // Initialize notifications
+  // Inizializza notifiche
   useEffect(() => {
-    const existing = loadNotifications();
+    const existing     = loadNotifications();
     const dismissedIds = loadDismissed();
-
-    const onboarding = readFromStorage<{ riskLevel?: string }>("onboarding");
+    const onboarding   = readFromStorage<{ riskLevel?: string }>("onboarding");
 
     const completedTools = (Object.keys(STORAGE_KEYS) as Array<keyof typeof STORAGE_KEYS>)
       .filter(
@@ -74,41 +75,31 @@ export default function NotificationBell() {
       .map((k) => STORAGE_KEYS[k]);
 
     const freshDeadlines = generateDeadlineNotifications(new Date());
-    const freshProgress = generateProgressNotifications(
-      completedTools,
-      onboarding?.riskLevel ?? null
-    );
-    const merged = mergeNotifications(existing, [...freshDeadlines, ...freshProgress], dismissedIds);
+    const freshProgress  = generateProgressNotifications(completedTools, onboarding?.riskLevel ?? null);
+    const merged         = mergeNotifications(existing, [...freshDeadlines, ...freshProgress], dismissedIds);
 
     merged.sort((a, b) => priorityOrder(a.priority) - priorityOrder(b.priority));
-
     setNotifications(merged);
     setDismissed(dismissedIds);
     saveNotifications(merged);
   }, []);
 
-  // Close on outside click
+  // Chiudi cliccando fuori
   useEffect(() => {
     function handleMouseDown(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false);
       }
     }
-    if (open) {
-      document.addEventListener("mousedown", handleMouseDown);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleMouseDown);
-    };
+    if (open) document.addEventListener("mousedown", handleMouseDown);
+    return () => document.removeEventListener("mousedown", handleMouseDown);
   }, [open]);
 
   const unreadCount = getUnreadCount(notifications);
 
   const markAllRead = useCallback(() => {
-    const now = new Date().toISOString();
-    const updated = notifications.map((n) =>
-      n.readAt ? n : { ...n, readAt: now }
-    );
+    const now     = new Date().toISOString();
+    const updated = notifications.map((n) => (n.readAt ? n : { ...n, readAt: now }));
     setNotifications(updated);
     saveNotifications(updated);
   }, [notifications]);
@@ -127,7 +118,7 @@ export default function NotificationBell() {
 
   const markRead = useCallback(
     (id: string) => {
-      const now = new Date().toISOString();
+      const now     = new Date().toISOString();
       const updated = notifications.map((n) =>
         n.id === id && !n.readAt ? { ...n, readAt: now } : n
       );
@@ -139,41 +130,43 @@ export default function NotificationBell() {
 
   return (
     <div ref={containerRef} style={{ position: "relative", display: "inline-block" }}>
-      {/* Bell button */}
+
+      {/* ─── Bell trigger ─────────────────────────────────────────────────── */}
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label="Notifiche"
         style={{
-          position: "relative",
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          padding: "6px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: "6px",
+          position:        "relative",
+          background:      "none",
+          border:          "none",
+          cursor:          "pointer",
+          padding:         "6px",
+          display:         "flex",
+          alignItems:      "center",
+          justifyContent:  "center",
+          borderRadius:    "6px",
         }}
       >
-        <Bell size={18} color="rgba(0,0,0,0.5)" />
+        <Bell size={17} color={T.faint} strokeWidth={1.6} />
         {unreadCount > 0 && (
           <span
             style={{
-              position: "absolute",
-              top: "2px",
-              right: "2px",
-              minWidth: "16px",
-              height: "16px",
-              borderRadius: "9999px",
-              background: "#dc2626",
-              color: "#fff",
-              fontSize: "10px",
-              fontWeight: 700,
-              display: "flex",
-              alignItems: "center",
+              position:    "absolute",
+              top:         "1px",
+              right:       "1px",
+              minWidth:    "15px",
+              height:      "15px",
+              borderRadius:"9999px",
+              background:  T.text,
+              color:       "#fff",
+              fontSize:    "9px",
+              fontWeight:  700,
+              display:     "flex",
+              alignItems:  "center",
               justifyContent: "center",
-              padding: "0 3px",
-              lineHeight: 1,
+              padding:     "0 3px",
+              lineHeight:  1,
+              ...MONO,
             }}
           >
             {unreadCount > 9 ? "9+" : unreadCount}
@@ -181,190 +174,179 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {/* Dropdown */}
+      {/* ─── Dropdown ──────────────────────────────────────────────────────── */}
       {open && (
         <div
           style={{
-            position: "absolute",
-            top: "calc(100% + 8px)",
-            right: 0,
-            width: "380px",
-            background: "#ffffff",
-            borderRadius: "12px",
-            boxShadow:
-              "0 4px 6px -1px rgba(0,0,0,0.1), 0 10px 25px -3px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.06)",
-            zIndex: 50,
-            maxHeight: "480px",
-            overflowY: "auto",
-            display: "flex",
-            flexDirection: "column",
+            position:    "absolute",
+            top:         "calc(100% + 8px)",
+            right:       0,
+            width:       "360px",
+            background:  T.card,
+            borderRadius:"14px",
+            boxShadow:   "0 2px 4px rgba(0,0,0,0.06), 0 12px 32px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.06)",
+            zIndex:      50,
+            maxHeight:   "480px",
+            overflowY:   "auto",
+            display:     "flex",
+            flexDirection:"column",
+            ...SANS,
           }}
         >
           {/* Header */}
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
+              display:        "flex",
+              alignItems:     "center",
               justifyContent: "space-between",
-              padding: "14px 16px 10px",
-              borderBottom: "1px solid rgba(0,0,0,0.07)",
-              position: "sticky",
-              top: 0,
-              background: "#ffffff",
-              zIndex: 1,
+              padding:        "14px 16px 12px",
+              borderBottom:   `1px solid ${T.border}`,
+              position:       "sticky",
+              top:            0,
+              background:     T.card,
+              zIndex:         1,
             }}
           >
-            <span style={{ fontSize: "14px", fontWeight: 600, color: "#111" }}>
+            <span style={{ fontSize: "13px", fontWeight: 600, color: T.text, letterSpacing: "-0.2px" }}>
               Notifiche
+              {unreadCount > 0 && (
+                <span style={{ ...MONO, fontSize: 10, fontWeight: 500, color: T.faint, marginLeft: 6 }}>
+                  {unreadCount} nuove
+                </span>
+              )}
             </span>
             {unreadCount > 0 && (
               <button
                 onClick={markAllRead}
                 style={{
                   background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "12px",
-                  color: "#3b82f6",
+                  border:     "none",
+                  cursor:     "pointer",
+                  fontSize:   "11px",
+                  color:      T.muted,
                   fontWeight: 500,
-                  padding: 0,
+                  padding:    0,
+                  ...MONO,
                 }}
               >
-                Segna tutte lette
+                Segna lette
               </button>
             )}
           </div>
 
-          {/* Notification list */}
+          {/* Lista notifiche */}
           {notifications.length === 0 ? (
             <div
               style={{
-                display: "flex",
+                display:       "flex",
                 flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "40px 24px",
-                gap: "10px",
-                color: "rgba(0,0,0,0.4)",
+                alignItems:    "center",
+                justifyContent:"center",
+                padding:       "44px 24px",
+                gap:           "6px",
               }}
             >
-              <Bell size={32} color="rgba(0,0,0,0.2)" />
-              <span style={{ fontSize: "14px", fontWeight: 500 }}>Nessuna notifica</span>
-              <span style={{ fontSize: "12px", textAlign: "center" }}>
-                Le notifiche di compliance e scadenze appariranno qui
+              <span style={{ fontSize: "13px", fontWeight: 500, color: T.text }}>Nessuna notifica</span>
+              <span style={{ fontSize: "11px", color: T.muted, textAlign: "center", lineHeight: 1.5 }}>
+                Le scadenze e gli aggiornamenti di conformità appariranno qui
               </span>
             </div>
           ) : (
             <div style={{ padding: "8px" }}>
               {notifications.map((n) => {
                 const isUnread = !n.readAt;
+                const title    = stripLeadingEmoji(n.title);
+
                 return (
                   <div
                     key={n.id}
+                    onClick={() => markRead(n.id)}
                     style={{
-                      position: "relative",
-                      borderLeft: `4px solid ${PRIORITY_BORDER[n.priority]}`,
-                      background: isUnread ? PRIORITY_BG[n.priority] : "#ffffff",
-                      borderRadius: "6px",
-                      padding: "10px 36px 10px 12px",
-                      marginBottom: "6px",
+                      position:     "relative",
+                      borderLeft:   `2px solid ${isUnread ? PRIORITY_ACCENT[n.priority] : "transparent"}`,
+                      background:   isUnread ? T.bg : T.card,
+                      borderRadius: "8px",
+                      padding:      "10px 32px 10px 12px",
+                      marginBottom: "4px",
+                      cursor:       "default",
+                      transition:   "background 0.15s",
                     }}
                   >
-                    {/* Dismiss button */}
+                    {/* Dismiss */}
                     <button
-                      onClick={() => dismissNotification(n.id)}
+                      onClick={(e) => { e.stopPropagation(); dismissNotification(n.id); }}
                       aria-label="Rimuovi notifica"
                       style={{
-                        position: "absolute",
-                        top: "8px",
-                        right: "8px",
+                        position:   "absolute",
+                        top:        "9px",
+                        right:      "8px",
                         background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: "2px",
-                        color: "rgba(0,0,0,0.3)",
-                        display: "flex",
+                        border:     "none",
+                        cursor:     "pointer",
+                        padding:    "2px",
+                        color:      T.faint,
+                        display:    "flex",
                         alignItems: "center",
-                        borderRadius: "4px",
+                        borderRadius:"3px",
+                        opacity:    0.7,
                       }}
                     >
-                      <X size={12} />
+                      <X size={11} strokeWidth={2} />
                     </button>
 
-                    {/* Mark as read dot */}
-                    {isUnread && (
-                      <button
-                        onClick={() => markRead(n.id)}
-                        aria-label="Segna come letta"
-                        title="Segna come letta"
-                        style={{
-                          position: "absolute",
-                          top: "28px",
-                          right: "8px",
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          padding: "2px",
-                          color: PRIORITY_BORDER[n.priority],
-                          display: "flex",
-                          alignItems: "center",
-                          borderRadius: "4px",
-                        }}
-                      >
-                        <Circle size={8} fill={PRIORITY_BORDER[n.priority]} />
-                      </button>
-                    )}
-
-                    {/* Title */}
+                    {/* Titolo senza emoji */}
                     <div
                       style={{
-                        fontSize: "13px",
-                        fontWeight: 500,
-                        color: "#111",
-                        lineHeight: 1.4,
-                        marginBottom: "4px",
+                        fontSize:     "12px",
+                        fontWeight:   isUnread ? 600 : 500,
+                        color:        T.text,
+                        lineHeight:   1.45,
+                        marginBottom: "3px",
                         paddingRight: "4px",
+                        letterSpacing:"-0.1px",
                       }}
                     >
-                      {n.title}
+                      {title}
                     </div>
 
                     {/* Body */}
                     <div
                       style={{
-                        fontSize: "11px",
-                        color: "rgba(0,0,0,0.55)",
-                        lineHeight: 1.5,
+                        fontSize:     "11px",
+                        color:        T.muted,
+                        lineHeight:   1.55,
                         marginBottom: "8px",
                       }}
                     >
                       {n.body}
                     </div>
 
-                    {/* Footer row */}
+                    {/* Footer: tag articolo + timestamp + azione */}
                     <div
                       style={{
-                        display: "flex",
+                        display:    "flex",
                         alignItems: "center",
-                        gap: "8px",
-                        flexWrap: "wrap",
+                        gap:        "6px",
+                        flexWrap:   "wrap",
                       }}
                     >
                       {n.relatedArticle && (
                         <span
                           style={{
-                            fontSize: "10px",
-                            fontWeight: 600,
-                            color: "rgba(0,0,0,0.4)",
-                            background: "rgba(0,0,0,0.06)",
+                            ...MONO,
+                            fontSize:     "9px",
+                            fontWeight:   600,
+                            color:        T.faint,
+                            background:   "rgba(0,0,0,0.05)",
                             borderRadius: "4px",
-                            padding: "1px 6px",
+                            padding:      "2px 6px",
+                            textTransform:"uppercase",
                           }}
                         >
                           {n.relatedArticle}
                         </span>
                       )}
-                      <span style={{ fontSize: "10px", color: "rgba(0,0,0,0.35)" }}>
+                      <span style={{ ...MONO, fontSize: "9px", color: T.faint }}>
                         {relativeTime(n.createdAt)}
                       </span>
 
@@ -373,14 +355,13 @@ export default function NotificationBell() {
                           href={n.actionHref}
                           onClick={() => setOpen(false)}
                           style={{
-                            marginLeft: "auto",
-                            fontSize: "11px",
-                            fontWeight: 600,
-                            color: PRIORITY_BORDER[n.priority] === "rgba(0,0,0,0.12)"
-                              ? "#3b82f6"
-                              : PRIORITY_BORDER[n.priority],
+                            marginLeft:  "auto",
+                            fontSize:    "10px",
+                            fontWeight:  600,
+                            color:       T.text,
                             textDecoration: "none",
-                            whiteSpace: "nowrap",
+                            whiteSpace:  "nowrap",
+                            ...MONO,
                           }}
                         >
                           {n.actionLabel} →
@@ -396,26 +377,29 @@ export default function NotificationBell() {
           {/* Footer */}
           <div
             style={{
-              borderTop: "1px solid rgba(0,0,0,0.07)",
-              padding: "10px 16px",
-              position: "sticky",
-              bottom: 0,
-              background: "#ffffff",
+              borderTop:  `1px solid ${T.border}`,
+              padding:    "10px 16px",
+              position:   "sticky",
+              bottom:     0,
+              background: T.card,
             }}
           >
             <Link
               href="/dashboard/notifications"
               onClick={() => setOpen(false)}
               style={{
-                fontSize: "12px",
-                color: "#3b82f6",
-                fontWeight: 500,
+                ...MONO,
+                fontSize:    "10px",
+                fontWeight:  500,
+                color:       T.muted,
                 textDecoration: "none",
-                display: "block",
-                textAlign: "center",
+                display:     "block",
+                textAlign:   "center",
+                letterSpacing:"0.04em",
+                textTransform:"uppercase",
               }}
             >
-              Vedi tutte le notifiche →
+              Tutte le notifiche →
             </Link>
           </div>
         </div>
