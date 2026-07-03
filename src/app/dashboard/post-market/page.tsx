@@ -24,6 +24,7 @@ import {
   SEVERITY_CLASS_LABEL,
 } from "@/lib/incidents/incident-classification";
 import type { ClassificationInput, SeverityClassification, NotificationDeadlineType } from "@/lib/incidents/incident-classification";
+import { INCIDENT_CATEGORIES, computeDeadline } from "@/lib/incidents/incident-rules";
 import { detectDraftIncidentsFromLogVault, getLinkedIncidentsForDeployerObligation } from "@/lib/incidents/incident-actions";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { motion, AnimatePresence } from "framer-motion";
@@ -91,10 +92,17 @@ type MonitoringCheck = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function getDaysRemaining(dateStr: string, notified: boolean): number {
+function addDays(isoDate: string, days: number): string {
+  const d = new Date(isoDate);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+function getDaysRemaining(dateStr: string, notified: boolean, deadlineDate?: string): number {
   if (notified) return 0;
-  const reported = new Date(dateStr);
-  const deadline = new Date(reported.getTime() + 15 * 24 * 60 * 60 * 1000);
+  const deadline = deadlineDate
+    ? new Date(deadlineDate)
+    : new Date(new Date(dateStr).getTime() + 15 * 24 * 60 * 60 * 1000);
   const today = new Date();
   const diff = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   return Math.max(0, diff);
@@ -287,14 +295,14 @@ function savePlan(plan: MonitoringCheck[]) {
 const SEV_STYLE: Record<Severity, { bg: string; color: string; border: string }> = {
   critical: { bg: "rgba(220,38,38,0.08)", color: "#b91c1c", border: "rgba(220,38,38,0.25)" },
   high: { bg: "rgba(245,158,11,0.08)", color: "#92400e", border: "rgba(245,158,11,0.25)" },
-  medium: { bg: "rgba(59,130,246,0.08)", color: "#1d4ed8", border: "rgba(59,130,246,0.25)" },
+  medium: { bg: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.55)", border: "rgba(0,0,0,0.18)" },
   low: { bg: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.45)", border: "rgba(0,0,0,0.12)" },
 };
 
 const STATUS_COLOR: Record<IncidentStatus, string> = {
   draft: "#7c3aed",
   pending: "#dc2626",
-  reported: "#3b82f6",
+  reported: "#52525b",
   investigating: "#d97706",
   report_complete: "#0891b2",
   resolved: "#15803d",
@@ -381,16 +389,15 @@ function PostMarketPageInner() {
   // Plan: expanded rows
   const [expandedChecks, setExpandedChecks] = useState<Set<string>>(new Set());
 
-  // ── Incident Art. 73 state ────────────────────────────────────────────────
-  const [selectedDetailTab, setSelectedDetailTab] = useState<"classificazione" | "rapporto" | "collegamenti">("rapporto");
-  const EMPTY_CLASSIFICATION: ClassificationInput = {
-    involvesDeath: false,
-    involvesSeriousHealthDamage: false,
-    involvesCriticalInfrastructureDamage: false,
-    involvesFundamentalRightsViolation: false,
-    involvesPropertyOrEnvironmentDamage: false,
-  };
-  const [classificationForm, setClassificationForm] = useState<ClassificationInput>(EMPTY_CLASSIFICATION);
+  // ── Incident Art. 73 stepper state ────────────────────────────────────────
+  const [stepperStep, setStepperStep] = useState(1);
+  const [stepperCategories, setStepperCategories] = useState<string[]>([]);
+
+  // Reset stepper when selected incident changes
+  useEffect(() => {
+    setStepperStep(1);
+    setStepperCategories([]);
+  }, [selected?.id]);
 
   // LogVault auto-detection on mount — merge draft incidents not already present
   useEffect(() => {
@@ -451,9 +458,9 @@ function PostMarketPageInner() {
   const toNotify = incidents.filter((i) => !i.notified);
   const minDays =
     toNotify.length > 0
-      ? Math.min(...toNotify.map((i) => getDaysRemaining(i.date, false)))
+      ? Math.min(...toNotify.map((i) => getDaysRemaining(i.date, false, i.notificationDeadlineDate)))
       : null;
-  const urgentCount = toNotify.filter((i) => getDaysRemaining(i.date, false) <= 3).length;
+  const urgentCount = toNotify.filter((i) => getDaysRemaining(i.date, false, i.notificationDeadlineDate) <= 3).length;
 
   const planDone = plan.filter((c) => c.done).length;
   const planTotal = plan.length;
@@ -465,7 +472,7 @@ function PostMarketPageInner() {
     .filter((i) => filterStatus === "all" || i.status === filterStatus)
     .sort((a, b) => {
       if (!a.notified && !b.notified)
-        return getDaysRemaining(a.date, false) - getDaysRemaining(b.date, false);
+        return getDaysRemaining(a.date, false, a.notificationDeadlineDate) - getDaysRemaining(b.date, false, b.notificationDeadlineDate);
       if (!a.notified) return -1;
       if (!b.notified) return 1;
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -562,6 +569,35 @@ function PostMarketPageInner() {
     setSelected((s) =>
       s?.id === incidentId
         ? { ...s, severityClassification: result.severityClassification, notificationDeadlineType: result.notificationDeadlineType, notificationDeadlineDate: deadlineDate, aiConfirmed: false }
+        : s
+    );
+  }
+
+  function applyNewClassification(incidentId: string, categoryIds: string[], eventDate: string) {
+    const result = computeDeadline(categoryIds);
+    if (!result) {
+      const updated = incidents.map(i =>
+        i.id === incidentId
+          ? { ...i, severityClassification: "malfunction" as SeverityClassification, notificationDeadlineType: "none" as NotificationDeadlineType, notificationDeadlineDate: undefined, aiConfirmed: true }
+          : i
+      );
+      setIncidents(updated);
+      saveIncidents(updated);
+      setSelected(s => s?.id === incidentId ? { ...s, severityClassification: "malfunction", notificationDeadlineType: "none", notificationDeadlineDate: undefined, aiConfirmed: true } : s);
+      return;
+    }
+    const deadlineDate = addDays(eventDate, result.days);
+    const deadlineType: NotificationDeadlineType = result.days <= 2 ? "immediate_2d" : "standard_15d";
+    const updated = incidents.map(i =>
+      i.id === incidentId
+        ? { ...i, severityClassification: "serious_incident" as SeverityClassification, notificationDeadlineType: deadlineType, notificationDeadlineDate: deadlineDate, aiConfirmed: true }
+        : i
+    );
+    setIncidents(updated);
+    saveIncidents(updated);
+    setSelected(s =>
+      s?.id === incidentId
+        ? { ...s, severityClassification: "serious_incident", notificationDeadlineType: deadlineType, notificationDeadlineDate: deadlineDate, aiConfirmed: true }
         : s
     );
   }
@@ -1326,10 +1362,11 @@ function PostMarketPageInner() {
               ) : (
                 <div className="divide-y" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
                   {filtered.map((inc) => {
-                    const days = getDaysRemaining(inc.date, inc.notified);
+                    const days = getDaysRemaining(inc.date, inc.notified, inc.notificationDeadlineDate);
                     const sev = SEV_STYLE[inc.severity];
                     const isSelected = selected?.id === inc.id;
-                    const progressPct = inc.notified ? 100 : ((15 - days) / 15) * 100;
+                    const deadlineDays = inc.notificationDeadlineType === "immediate_2d" ? 2 : 15;
+                    const progressPct = inc.notified ? 100 : ((deadlineDays - days) / deadlineDays) * 100;
                     return (
                       <div
                         key={inc.id}
@@ -1628,108 +1665,30 @@ function PostMarketPageInner() {
               </div>
             ) : (
               <>
-                {/* Card 1: Detail */}
+                {/* 5-step linear stepper */}
                 <div
                   className="rounded-xl overflow-hidden"
                   style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#fff" }}
                 >
-                  <div
-                    className="px-4 py-3 flex items-start justify-between"
-                    style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}
-                  >
-                    <div>
-                      <span
-                        className="text-[10px] font-mono"
-                        style={{ color: "rgba(0,0,0,0.35)" }}
-                      >
-                        {selected.id}
-                      </span>
-                      <p
-                        className="text-[12px] font-medium"
-                        style={{ color: "#0D1016" }}
-                      >
-                        {selected.title}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setSelected(null)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        color: "rgba(0,0,0,0.3)",
-                        padding: "2px",
-                      }}
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                  <div className="px-4 py-3 space-y-2.5">
-                    {[
-                      { label: "Sistema", value: selected.system },
-                      { label: "Data rilevamento", value: selected.date },
-                      { label: "Autorità", value: selected.authority },
-                      {
-                        label: "Utenti impattati",
-                        value: selected.affectedUsers || "—",
-                      },
-                    ].map((row) => (
-                      <div key={row.label}>
-                        <span
-                          className="text-[9px] font-semibold uppercase tracking-wide block"
-                          style={{ color: "rgba(0,0,0,0.35)" }}
-                        >
-                          {row.label}
-                        </span>
-                        <p className="text-[11px]" style={{ color: "#0D1016" }}>
-                          {row.value}
-                        </p>
-                      </div>
-                    ))}
-                    <div>
-                      <span
-                        className="text-[9px] font-semibold uppercase tracking-wide block"
-                        style={{ color: "rgba(0,0,0,0.35)" }}
-                      >
-                        Descrizione
-                      </span>
-                      <p
-                        className="text-[11px] leading-relaxed"
-                        style={{ color: "rgba(0,0,0,0.55)" }}
-                      >
-                        {selected.description}
-                      </p>
-                    </div>
-                    {selected.actions && (
+                  {/* Header: title + status */}
+                  <div style={{ padding: "12px 16px", borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 8 }}>
                       <div>
-                        <span
-                          className="text-[9px] font-semibold uppercase tracking-wide block"
-                          style={{ color: "rgba(0,0,0,0.35)" }}
-                        >
-                          Azioni intraprese
+                        <span style={{ fontSize: 10, fontFamily: "var(--font-dm-mono, monospace)", color: "rgba(0,0,0,0.35)" }}>
+                          {selected.id}
                         </span>
-                        <p
-                          className="text-[11px] leading-relaxed"
-                          style={{ color: "rgba(0,0,0,0.55)" }}
-                        >
-                          {selected.actions}
+                        <p style={{ fontSize: 12, fontWeight: 600, color: "#0D1016", margin: "1px 0 0" }}>
+                          {selected.title}
                         </p>
                       </div>
-                    )}
-                  </div>
-
-                  {/* Status selector */}
-                  <div
-                    className="px-4 py-3"
-                    style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}
-                  >
-                    <p
-                      className="text-[10px] font-semibold uppercase tracking-wide mb-2"
-                      style={{ color: "rgba(0,0,0,0.35)" }}
-                    >
-                      Aggiorna status
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
+                      <button
+                        onClick={() => setSelected(null)}
+                        style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(0,0,0,0.3)", padding: "2px", flexShrink: 0 }}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                       {(["pending", "reported", "investigating", "resolved", "closed"] as IncidentStatus[]).map((s) => {
                         const active = selected.status === s;
                         return (
@@ -1737,18 +1696,10 @@ function PostMarketPageInner() {
                             key={s}
                             onClick={() => updateStatus(selected.id, s)}
                             style={{
-                              padding: "3px 8px",
-                              borderRadius: "6px",
-                              fontSize: "10px",
-                              fontWeight: 500,
-                              cursor: "pointer",
-                              background: active
-                                ? `${STATUS_COLOR[s]}18`
-                                : "rgba(0,0,0,0.04)",
-                              color: active ? STATUS_COLOR[s] : "rgba(0,0,0,0.45)",
-                              border: active
-                                ? `1px solid ${STATUS_COLOR[s]}40`
-                                : "1px solid transparent",
+                              padding: "2px 8px", borderRadius: 6, fontSize: 9, fontWeight: 500, cursor: "pointer",
+                              background: active ? `${STATUS_COLOR[s]}18` : "rgba(0,0,0,0.04)",
+                              color: active ? STATUS_COLOR[s] : "rgba(0,0,0,0.38)",
+                              border: active ? `1px solid ${STATUS_COLOR[s]}40` : "1px solid transparent",
                               transition: "all 0.12s",
                             }}
                           >
@@ -1759,302 +1710,340 @@ function PostMarketPageInner() {
                     </div>
                   </div>
 
-                  {/* Export */}
-                  <div
-                    className="px-4 py-3"
-                    style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}
-                  >
-                    <button
-                      onClick={() => exportIncidentTxt(selected)}
-                      className="flex items-center gap-1 text-[11px] hover:opacity-70 transition-opacity"
-                      style={{
-                        color: "rgba(0,0,0,0.5)",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <Download className="h-3 w-3" /> Esporta scheda incidente
-                    </button>
-                  </div>
-                </div>
-
-                {/* Card 2: Notification action */}
-                <div
-                  className="rounded-xl overflow-hidden"
-                  style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#fff" }}
-                >
-                  <div className="px-4 py-3" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
-                    <p className="text-[12px] font-medium" style={{ color: "#0D1016" }}>Azione richiesta</p>
-                  </div>
-                  <div className="px-4 py-3">
-                    {selected.source === "logvault_auto" && (
-                      <div className="rounded-lg px-3 py-2 mb-3 flex items-start gap-2" style={{ background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.18)" }}>
-                        <Sparkles className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" style={{ color: "#7c3aed" }} />
-                        <p className="text-[11px]" style={{ color: "#7c3aed" }}>
-                          ✦ AI — Bozza generata automaticamente da LogVault. Classifica la severità nella tab "Classificazione" prima di procedere con la notifica. [verify against current AI Act text]
-                        </p>
+                  {/* Step nav */}
+                  <div style={{ display: "flex", alignItems: "center", padding: "8px 16px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "rgba(0,0,0,0.01)" }}>
+                    {[
+                      { n: 1, label: "Dati" },
+                      { n: 2, label: "Classifica" },
+                      { n: 3, label: "Termine" },
+                      { n: 4, label: "Notifica" },
+                      { n: 5, label: "Follow-up" },
+                    ].map(({ n, label }, i) => (
+                      <div key={n} style={{ display: "flex", alignItems: "center", flex: i < 4 ? "none" : undefined }}>
+                        <button
+                          onClick={() => setStepperStep(n)}
+                          style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                        >
+                          <div style={{
+                            width: 22, height: 22, borderRadius: 11,
+                            background: stepperStep === n ? "#0D1016" : stepperStep > n ? "rgba(0,0,0,0.12)" : "rgba(0,0,0,0.06)",
+                            color: stepperStep === n ? "#fff" : "rgba(0,0,0,0.4)",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            fontSize: 9, fontWeight: 700, transition: "all 0.15s",
+                          }}>
+                            {n}
+                          </div>
+                          <span style={{ fontSize: 8, color: stepperStep === n ? "#0D1016" : "rgba(0,0,0,0.35)", fontWeight: stepperStep === n ? 600 : 400, whiteSpace: "nowrap" }}>
+                            {label}
+                          </span>
+                        </button>
+                        {i < 4 && (
+                          <div style={{ flex: 1, height: 1, background: "rgba(0,0,0,0.09)", margin: "0 6px", marginBottom: 13, minWidth: 12 }} />
+                        )}
                       </div>
-                    )}
-                    {selected.severityClassification === "serious_incident" && !selected.notified ? (
-                      <>
-                        <div className="rounded-lg px-3 py-2.5 mb-3" style={{ background: "rgba(220,38,38,0.05)", border: "1px solid rgba(220,38,38,0.18)" }}>
-                          <p className="text-[11px] font-semibold mb-0.5" style={{ color: "#dc2626" }}>
-                            {selected.notificationDeadlineType === "immediate_2d"
-                              ? "⚠ Notifica IMMEDIATA richiesta (max 2 gg) — Art. 73(3) [verify against current AI Act text]"
-                              : `Notifica entro ${getDaysRemaining(selected.date, false)} giorni — Art. 73(2) [verify against current AI Act text]`}
-                          </p>
-                          {selected.notificationDeadlineDate && (
-                            <p className="text-[10px]" style={{ color: "rgba(220,38,38,0.7)" }}>
-                              Scadenza: {selected.notificationDeadlineDate}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <button onClick={() => setShowNotifyModal(true)} className="flex items-center justify-center gap-1.5 w-full rounded-lg py-2 text-[11px] font-semibold text-white" style={{ background: "#dc2626", border: "none", cursor: "pointer" }}>
-                            <FileText className="h-3.5 w-3.5" /> Genera testo notifica
-                          </button>
-                          <button onClick={() => markNotified(selected.id)} className="flex items-center justify-center gap-1.5 w-full rounded-lg py-2 text-[11px] font-semibold" style={{ border: "1px solid rgba(220,38,38,0.3)", color: "#dc2626", background: "none", cursor: "pointer" }}>
-                            <CheckCircle className="h-3.5 w-3.5" /> Segna come notificato
-                          </button>
-                        </div>
-                      </>
-                    ) : selected.notified ? (
-                      <div className="rounded-lg px-3 py-2.5 flex items-center gap-2" style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.2)" }}>
-                        <CheckCircle className="h-4 w-4 flex-shrink-0" style={{ color: "#15803d" }} />
-                        <p className="text-[11px] font-medium" style={{ color: "#15803d" }}>
-                          ✓ Notificato il {selected.notifiedAt?.slice(0, 10) ?? "—"}
-                        </p>
-                      </div>
-                    ) : (
-                      <p className="text-[11px]" style={{ color: "rgba(0,0,0,0.4)" }}>
-                        Nessuna notifica obbligatoria — classifica la severità nella tab "Classificazione" per determinare se è un incidente grave. [verify against current AI Act text]
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Card 3: Sub-tabs — Classificazione / Rapporto Art. 73(4) / Collegamenti */}
-                <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#fff" }}>
-                  {/* Sub-tab nav */}
-                  <div className="flex gap-0" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
-                    {([
-                      { id: "classificazione" as const, label: "Classificazione" },
-                      { id: "rapporto" as const, label: "Rapporto 73(4)" },
-                      { id: "collegamenti" as const, label: "Collegamenti" },
-                    ]).map(({ id, label }) => (
-                      <button
-                        key={id}
-                        onClick={() => setSelectedDetailTab(id)}
-                        className="flex-1 py-2.5 text-[10px] font-medium border-b-2 transition-all"
-                        style={selectedDetailTab === id
-                          ? { borderColor: "#0D1016", color: "#0D1016" }
-                          : { borderColor: "transparent", color: "rgba(0,0,0,0.42)" }}
-                      >
-                        {label}
-                      </button>
                     ))}
                   </div>
 
-                  {/* Sub-tab: Classificazione */}
-                  {selectedDetailTab === "classificazione" && (
-                    <div className="p-4 space-y-3">
-                      <div className="flex items-center gap-1.5 mb-2">
-                        <span className="text-[9px] font-semibold rounded px-1.5 py-0.5" style={{ background: "rgba(124,58,237,0.08)", color: "#7c3aed", border: "1px solid rgba(124,58,237,0.2)" }}>✦ AI</span>
-                        <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.42)" }}>
-                          Classificazione automatica — da confermare. [verify against current AI Act text]
-                        </p>
-                      </div>
-                      {[
-                        { field: "involvesDeath" as keyof ClassificationInput, label: "Coinvolge morte di una persona", ref: "Art. 73(3)" },
-                        { field: "involvesSeriousHealthDamage" as keyof ClassificationInput, label: "Danno grave e irreversibile alla salute", ref: "Art. 3(49)(a)" },
-                        { field: "involvesCriticalInfrastructureDamage" as keyof ClassificationInput, label: "Danno grave a infrastrutture critiche", ref: "Art. 73(3)" },
-                        { field: "involvesFundamentalRightsViolation" as keyof ClassificationInput, label: "Violazione grave dei diritti fondamentali", ref: "Art. 3(49)(b)" },
-                        { field: "involvesPropertyOrEnvironmentDamage" as keyof ClassificationInput, label: "Danno grave a proprietà o ambiente", ref: "Art. 3(49)(c)" },
-                      ].map(({ field, label, ref }) => (
-                        <label key={field} className="flex items-start gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={classificationForm[field]}
-                            onChange={(e) => setClassificationForm((f) => ({ ...f, [field]: e.target.checked }))}
-                            style={{ accentColor: "#dc2626", marginTop: "2px", flexShrink: 0 }}
-                          />
-                          <div>
-                            <p className="text-[11px]" style={{ color: "#0D1016" }}>{label}</p>
-                            <p className="text-[9px]" style={{ color: "rgba(0,0,0,0.35)" }}>{ref} [verify against current AI Act text]</p>
-                          </div>
-                        </label>
-                      ))}
-                      <button
-                        onClick={() => applyClassification(selected.id, classificationForm, selected.date)}
-                        className="w-full rounded-lg py-2 text-[10px] font-semibold mt-2"
-                        style={{ background: "#0D1016", color: "#fff", border: "none", cursor: "pointer" }}
-                      >
-                        Applica classificazione
-                      </button>
-                      {selected.severityClassification && (
-                        <div className="rounded-lg px-3 py-2 mt-2" style={{
-                          background: selected.severityClassification === "serious_incident" ? "rgba(220,38,38,0.06)" : "rgba(245,158,11,0.06)",
-                          border: `1px solid ${selected.severityClassification === "serious_incident" ? "rgba(220,38,38,0.18)" : "rgba(245,158,11,0.18)"}`,
-                        }}>
-                          <p className="text-[10px] font-semibold" style={{ color: selected.severityClassification === "serious_incident" ? "#b91c1c" : "#92400e" }}>
-                            {SEVERITY_CLASS_LABEL[selected.severityClassification]}
-                          </p>
-                          {selected.notificationDeadlineType && (
-                            <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.5)" }}>
-                              {DEADLINE_TYPE_LABEL[selected.notificationDeadlineType]}
-                            </p>
-                          )}
-                          {!selected.aiConfirmed && (
-                            <button
-                              onClick={() => {
-                                updateIncidentField(selected.id, "aiConfirmed", true);
-                                updateIncidentField(selected.id, "status", selected.severityClassification === "serious_incident" ? "pending" : "investigating");
-                              }}
-                              className="text-[9px] font-semibold rounded px-2 py-0.5 mt-1.5"
-                              style={{ background: "#0D1016", color: "#fff", border: "none", cursor: "pointer" }}
-                            >
-                              Conferma classificazione ✓
-                            </button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  {/* Step content */}
+                  <div style={{ padding: "14px 16px" }}>
 
-                  {/* Sub-tab: Rapporto Art. 73(4) */}
-                  {selectedDetailTab === "rapporto" && (
-                    <div className="p-4">
-                      <div className="rounded-lg border p-4 mb-3" style={{ borderColor: "rgba(0,0,0,0.08)", background: "rgba(0,0,0,0.02)" }}>
-                        <p className="text-[10px] font-semibold uppercase tracking-wide mb-3" style={{ color: "rgba(0,0,0,0.4)", letterSpacing: "0.08em" }}>
-                          Sezioni obbligatorie — Rapporto completo Art. 73(4){" "}
-                          <span className="font-mono" style={{ color: "rgba(0,0,0,0.3)" }}>[verify against current AI Act text]</span>
+                    {/* Step 1: Dati incidente */}
+                    {stepperStep === 1 && (
+                      <div className="space-y-2.5">
+                        {[
+                          { label: "Sistema", value: selected.system },
+                          { label: "Data rilevamento", value: selected.date },
+                          { label: "Autorità", value: selected.authority },
+                          { label: "Utenti impattati", value: selected.affectedUsers || "—" },
+                        ].map(row => (
+                          <div key={row.label}>
+                            <span style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: "0.08em", color: "rgba(0,0,0,0.35)", display: "block" }}>{row.label}</span>
+                            <p style={{ fontSize: 11, color: "#0D1016", margin: "1px 0 0" }}>{row.value}</p>
+                          </div>
+                        ))}
+                        <div>
+                          <span style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: "0.08em", color: "rgba(0,0,0,0.35)", display: "block" }}>Descrizione</span>
+                          <p style={{ fontSize: 11, color: "rgba(0,0,0,0.55)", lineHeight: 1.5, margin: "1px 0 0" }}>{selected.description}</p>
+                        </div>
+                        {selected.actions && (
+                          <div>
+                            <span style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: "0.08em", color: "rgba(0,0,0,0.35)", display: "block" }}>Azioni intraprese</span>
+                            <p style={{ fontSize: 11, color: "rgba(0,0,0,0.55)", lineHeight: 1.5, margin: "1px 0 0" }}>{selected.actions}</p>
+                          </div>
+                        )}
+                        {selected.source === "logvault_auto" && (
+                          <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "8px 12px", borderRadius: 8, background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.18)" }}>
+                            <Sparkles className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" style={{ color: "#7c3aed" }} />
+                            <p style={{ fontSize: 10, color: "#7c3aed", margin: 0 }}>Bozza generata automaticamente da LogVault. Verifica i dati prima di procedere.</p>
+                          </div>
+                        )}
+                        <div style={{ display: "flex", gap: 8, paddingTop: 4 }}>
+                          <button
+                            onClick={() => exportIncidentTxt(selected)}
+                            style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10, color: "rgba(0,0,0,0.5)", background: "none", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 6, padding: "4px 10px", cursor: "pointer" }}
+                          >
+                            <Download className="h-3 w-3" /> Esporta scheda
+                          </button>
+                          <button
+                            onClick={() => setStepperStep(2)}
+                            style={{ flex: 1, fontSize: 10, fontWeight: 600, background: "#0D1016", color: "#fff", border: "none", borderRadius: 6, padding: "4px 10px", cursor: "pointer" }}
+                          >
+                            Avanti — Classifica →
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Step 2: Classifica */}
+                    {stepperStep === 2 && (
+                      <div className="space-y-3">
+                        <p style={{ fontSize: 10, color: "rgba(0,0,0,0.45)", lineHeight: 1.5, margin: 0 }}>
+                          Incidente grave ai sensi dell&apos;Art. 3(49) Reg. (UE) 2024/1689 se coinvolge almeno una delle categorie seguenti.
                         </p>
-                        <div className="mb-3">
-                          <label className="block text-[11px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.55)" }}>
-                            Sezione 4 — Analisi causa radice <span style={{ color: "#dc2626" }}>*</span>
+                        {INCIDENT_CATEGORIES.map(cat => (
+                          <label key={cat.id} style={{ display: "flex", alignItems: "flex-start", gap: 8, cursor: "pointer" }}>
+                            <input
+                              type="checkbox"
+                              checked={stepperCategories.includes(cat.id)}
+                              onChange={e => {
+                                setStepperCategories(prev =>
+                                  e.target.checked ? [...prev, cat.id] : prev.filter(id => id !== cat.id)
+                                );
+                              }}
+                              style={{ accentColor: "#dc2626", marginTop: 2, flexShrink: 0 }}
+                            />
+                            <div>
+                              <p style={{ fontSize: 11, color: "#0D1016", margin: 0 }}>{cat.label}</p>
+                              <p style={{ fontSize: 9, color: "rgba(0,0,0,0.35)", margin: "1px 0 0" }}>
+                                {cat.articleRef} · {cat.deadlineDays} gg — {cat.deadlineArtRef}
+                              </p>
+                            </div>
+                          </label>
+                        ))}
+
+                        {stepperCategories.length > 0 && (() => {
+                          const dl = computeDeadline(stepperCategories);
+                          return dl ? (
+                            <div style={{
+                              padding: "8px 12px", borderRadius: 8,
+                              background: dl.days <= 2 ? "rgba(220,38,38,0.06)" : "rgba(0,0,0,0.04)",
+                              border: `1px solid ${dl.days <= 2 ? "rgba(220,38,38,0.2)" : "rgba(0,0,0,0.1)"}`,
+                            }}>
+                              <p style={{ fontSize: 10, fontWeight: 600, color: dl.days <= 2 ? "#dc2626" : "#0D1016", margin: 0 }}>
+                                Termine reattivo: {dl.days} giorni ({dl.artRef})
+                              </p>
+                              <p style={{ fontSize: 9, color: "rgba(0,0,0,0.4)", margin: "2px 0 0" }}>
+                                Scadenza: {addDays(selected.date, dl.days)}
+                              </p>
+                            </div>
+                          ) : null;
+                        })()}
+
+                        <button
+                          onClick={() => {
+                            applyNewClassification(selected.id, stepperCategories, selected.date);
+                            setStepperStep(stepperCategories.length > 0 ? 3 : 5);
+                          }}
+                          style={{ width: "100%", fontSize: 10, fontWeight: 600, background: "#0D1016", color: "#fff", border: "none", borderRadius: 6, padding: "7px", cursor: "pointer" }}
+                        >
+                          Applica classificazione
+                        </button>
+                        {stepperCategories.length === 0 && (
+                          <p style={{ fontSize: 9, color: "rgba(0,0,0,0.35)", textAlign: "center", margin: 0 }}>
+                            Nessuna categoria → nessun obbligo di notifica esterna (Art. 72)
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Step 3: Termine calcolato */}
+                    {stepperStep === 3 && (() => {
+                      const deadline = selected.notificationDeadlineDate;
+                      const days = getDaysRemaining(selected.date, selected.notified, deadline);
+                      const isAlert = days <= 2;
+                      const dl = selected.notificationDeadlineType === "immediate_2d" ? 2 : 15;
+                      const dlRef = selected.notificationDeadlineType === "immediate_2d" ? "Art. 73(3)" : "Art. 73(2)";
+                      return (
+                        <div className="space-y-3">
+                          <div style={{
+                            padding: "12px 14px", borderRadius: 10,
+                            background: isAlert ? "rgba(220,38,38,0.06)" : "rgba(0,0,0,0.03)",
+                            border: `1px solid ${isAlert ? "rgba(220,38,38,0.25)" : "rgba(0,0,0,0.1)"}`,
+                          }}>
+                            <p style={{ fontSize: 18, fontWeight: 700, color: isAlert ? "#dc2626" : "#0D1016", margin: 0 }}>
+                              {selected.notified ? "✓ Notificato" : days === 0 ? "SCADUTO" : `${days} giorni rimanenti`}
+                            </p>
+                            {!selected.notified && (
+                              <p style={{ fontSize: 10, color: "rgba(0,0,0,0.45)", margin: "4px 0 0" }}>
+                                termine di {dl} giorni ({dlRef}){deadline ? ` — scadenza ${deadline}` : ""}
+                              </p>
+                            )}
+                            {isAlert && !selected.notified && days > 0 && (
+                              <p style={{ fontSize: 10, fontWeight: 600, color: "#dc2626", margin: "6px 0 0" }}>
+                                ⚠ Notifica urgente — contatta l&apos;autorità immediatamente
+                              </p>
+                            )}
+                          </div>
+                          {selected.severityClassification && (
+                            <div style={{ padding: "8px 12px", borderRadius: 8, background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.08)" }}>
+                              <p style={{ fontSize: 10, fontWeight: 600, color: "#0D1016", margin: 0 }}>
+                                {SEVERITY_CLASS_LABEL[selected.severityClassification]}
+                              </p>
+                              {selected.notificationDeadlineType && selected.notificationDeadlineType !== "none" && (
+                                <p style={{ fontSize: 9, color: "rgba(0,0,0,0.45)", margin: "2px 0 0" }}>
+                                  {DEADLINE_TYPE_LABEL[selected.notificationDeadlineType]}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                          <button
+                            onClick={() => setStepperStep(4)}
+                            style={{ width: "100%", fontSize: 10, fontWeight: 600, background: "#0D1016", color: "#fff", border: "none", borderRadius: 6, padding: "7px", cursor: "pointer" }}
+                          >
+                            Avanti — Genera notifica →
+                          </button>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Step 4: Genera/Notifica */}
+                    {stepperStep === 4 && (
+                      <div className="space-y-3">
+                        {selected.notified ? (
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 8, background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.2)" }}>
+                            <CheckCircle className="h-4 w-4 flex-shrink-0" style={{ color: "#15803d" }} />
+                            <p style={{ fontSize: 11, fontWeight: 500, color: "#15803d", margin: 0 }}>
+                              Notificato il {selected.notifiedAt?.slice(0, 10) ?? "—"}
+                            </p>
+                          </div>
+                        ) : selected.severityClassification !== "serious_incident" ? (
+                          <p style={{ fontSize: 11, color: "rgba(0,0,0,0.4)", margin: 0 }}>
+                            Nessuna notifica obbligatoria — registra nel log interno (Art. 72).
+                          </p>
+                        ) : (
+                          <>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                              <button
+                                onClick={() => setShowNotifyModal(true)}
+                                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%", padding: "8px", borderRadius: 8, fontSize: 11, fontWeight: 600, background: "#dc2626", color: "#fff", border: "none", cursor: "pointer" }}
+                              >
+                                <FileText className="h-3.5 w-3.5" /> Genera testo notifica
+                              </button>
+                              <button
+                                onClick={() => markNotified(selected.id)}
+                                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%", padding: "8px", borderRadius: 8, fontSize: 11, fontWeight: 600, border: "1px solid rgba(220,38,38,0.3)", color: "#dc2626", background: "none", cursor: "pointer" }}
+                              >
+                                <CheckCircle className="h-3.5 w-3.5" /> Segna come notificato
+                              </button>
+                            </div>
+                            <p style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", lineHeight: 1.5, margin: 0 }}>
+                              Reg. (UE) 2024/1689 Art. 73. La notifica preliminare deve essere seguita da rapporto completo (Art. 73(4)) compilabile nello step 5.
+                            </p>
+                          </>
+                        )}
+                        <button
+                          onClick={() => setStepperStep(5)}
+                          style={{ width: "100%", fontSize: 10, fontWeight: 600, background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.6)", border: "none", borderRadius: 6, padding: "6px", cursor: "pointer" }}
+                        >
+                          Avanti — Follow-up →
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Step 5: Follow-up */}
+                    {stepperStep === 5 && (
+                      <div className="space-y-3">
+                        <div>
+                          <label style={{ display: "block", fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.5)", marginBottom: 4 }}>
+                            Causa radice — Sez. 4 <span style={{ color: "#dc2626" }}>*</span>
                           </label>
                           <textarea
                             value={selected.rootCause ?? ""}
-                            onChange={(e) => updateIncidentField(selected.id, "rootCause", e.target.value)}
-                            rows={4}
-                            placeholder="Causa radice: errore sistema, gap nel training data, failure deployment, errore operativo…"
-                            className="w-full rounded-md px-3 py-2 text-sm outline-none resize-vertical"
-                            style={{ border: "1px solid rgba(0,0,0,0.10)", background: "#fff", color: "#0D1016", fontSize: 12 }}
+                            onChange={e => updateIncidentField(selected.id, "rootCause", e.target.value)}
+                            rows={3}
+                            placeholder="Causa radice: errore sistema, gap training data, failure deployment…"
+                            style={{ width: "100%", fontSize: 11, padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", resize: "vertical", outline: "none", background: "#fff", boxSizing: "border-box" }}
                           />
                         </div>
                         <div>
-                          <label className="block text-[11px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.55)" }}>
-                            Sezione 6 — Misure definitive adottate <span style={{ color: "#dc2626" }}>*</span>
+                          <label style={{ display: "block", fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.5)", marginBottom: 4 }}>
+                            Misure definitive — Sez. 6 <span style={{ color: "#dc2626" }}>*</span>
                           </label>
                           <textarea
                             value={selected.finalMeasures ?? ""}
-                            onChange={(e) => updateIncidentField(selected.id, "finalMeasures", e.target.value)}
-                            rows={4}
-                            placeholder="Misure permanenti: patch, retraining, modifica processo, nuovi controlli…"
-                            className="w-full rounded-md px-3 py-2 text-sm outline-none resize-vertical"
-                            style={{ border: "1px solid rgba(0,0,0,0.10)", background: "#fff", color: "#0D1016", fontSize: 12 }}
+                            onChange={e => updateIncidentField(selected.id, "finalMeasures", e.target.value)}
+                            rows={3}
+                            placeholder="Misure permanenti: patch, retraining, modifica processo…"
+                            style={{ width: "100%", fontSize: 11, padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", resize: "vertical", outline: "none", background: "#fff", boxSizing: "border-box" }}
                           />
                         </div>
-                      </div>
-                      {(() => {
-                        const canGenerate = !!(selected.rootCause?.trim() && selected.finalMeasures?.trim());
-                        return (
+                        {(() => {
+                          const canGenerate = !!(selected.rootCause?.trim() && selected.finalMeasures?.trim());
+                          return (
+                            <button
+                              disabled={!canGenerate}
+                              onClick={() => {
+                                const text = generateFullReport(selected);
+                                const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement("a");
+                                a.href = url;
+                                a.download = `rapporto-completo-art73-${selected.id.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.txt`;
+                                a.click();
+                                URL.revokeObjectURL(url);
+                                updateIncidentField(selected.id, "status", "report_complete");
+                                void appendEvidence("incident", { type: "Post-Market Report Completo Art. 73(4)", incidentId: selected.id, system: selected.system, generatedAt: new Date().toISOString() }, "post-market");
+                              }}
+                              style={{
+                                width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                                padding: "8px", borderRadius: 8, fontSize: 10, fontWeight: 600,
+                                background: canGenerate ? "#0D1016" : "rgba(0,0,0,0.06)",
+                                color: canGenerate ? "#fff" : "rgba(0,0,0,0.3)",
+                                border: "none", cursor: canGenerate ? "pointer" : "not-allowed",
+                              }}
+                            >
+                              <Download className="h-3.5 w-3.5" />
+                              {canGenerate ? "Genera Rapporto Completo Art. 73(4)" : "Compila le sezioni obbligatorie"}
+                            </button>
+                          );
+                        })()}
+                        <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingTop: 2 }}>
+                          {selected.notificationDeadlineDate && (
+                            <a
+                              href="/dashboard/compliance-ops/deadlines"
+                              style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 8, background: "rgba(220,38,38,0.04)", border: "1px solid rgba(220,38,38,0.15)", textDecoration: "none" }}
+                            >
+                              <Clock className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#dc2626" }} />
+                              <div style={{ flex: 1 }}>
+                                <p style={{ fontSize: 10, fontWeight: 500, color: "#dc2626", margin: 0 }}>Deadline Timeline</p>
+                                <p style={{ fontSize: 9, color: "rgba(0,0,0,0.45)", margin: "1px 0 0" }}>Scadenza: {selected.notificationDeadlineDate}</p>
+                              </div>
+                              <Link2 className="h-3 w-3 flex-shrink-0" style={{ color: "rgba(0,0,0,0.3)" }} />
+                            </a>
+                          )}
                           <button
-                            disabled={!canGenerate}
-                            onClick={() => {
-                              const text = generateFullReport(selected);
-                              const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-                              const url = URL.createObjectURL(blob);
-                              const a = document.createElement("a");
-                              a.href = url;
-                              a.download = `rapporto-completo-art73-${selected.id.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.txt`;
-                              a.click();
-                              URL.revokeObjectURL(url);
-                              updateIncidentField(selected.id, "status", "report_complete");
-                              void appendEvidence("incident", {
-                                type: "Post-Market Report Completo Art. 73(4)",
-                                incidentId: selected.id,
-                                system: selected.system,
-                                generatedAt: new Date().toISOString(),
-                              }, "post-market");
-                            }}
-                            className="w-full flex items-center justify-center gap-1.5 rounded-lg py-2 text-[11px] font-semibold"
-                            style={{ background: canGenerate ? "#0D1016" : "rgba(0,0,0,0.08)", color: canGenerate ? "#fff" : "rgba(0,0,0,0.3)", border: "none", cursor: canGenerate ? "pointer" : "not-allowed" }}
+                            onClick={() => setTab("monitoring")}
+                            style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 8, background: "rgba(21,128,61,0.04)", border: "1px solid rgba(21,128,61,0.15)", cursor: "pointer", textAlign: "left" }}
                           >
-                            <Download className="h-3.5 w-3.5" />
-                            {canGenerate ? "Genera Rapporto Completo Art. 73(4)" : "Compila le sezioni obbligatorie per sbloccare"}
-                          </button>
-                        );
-                      })()}
-                    </div>
-                  )}
-
-                  {/* Sub-tab: Collegamenti */}
-                  {selectedDetailTab === "collegamenti" && (
-                    <div className="p-4 space-y-3">
-                      {/* Deadline Timeline link */}
-                      {selected.notificationDeadlineDate && (
-                        <a
-                          href="/dashboard/compliance-ops/deadlines"
-                          className="flex items-center gap-2 rounded-lg px-3 py-2.5 hover:opacity-80 transition-opacity"
-                          style={{ background: "rgba(220,38,38,0.05)", border: "1px solid rgba(220,38,38,0.15)", textDecoration: "none" }}
-                        >
-                          <Clock className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#dc2626" }} />
-                          <div>
-                            <p className="text-[11px] font-medium" style={{ color: "#dc2626" }}>Deadline Timeline</p>
-                            <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.45)" }}>
-                              Scadenza notifica: {selected.notificationDeadlineDate}
-                            </p>
-                          </div>
-                          <Link2 className="h-3 w-3 ml-auto flex-shrink-0" style={{ color: "rgba(0,0,0,0.3)" }} />
-                        </a>
-                      )}
-
-                      {/* Deployer Dashboard link */}
-                      {(() => {
-                        const linked = getLinkedIncidentsForDeployerObligation(selected.system);
-                        return (
-                          <a
-                            href="/dashboard/tools/deployer"
-                            className="flex items-center gap-2 rounded-lg px-3 py-2.5 hover:opacity-80 transition-opacity"
-                            style={{ background: "rgba(59,130,246,0.05)", border: "1px solid rgba(59,130,246,0.15)", textDecoration: "none" }}
-                          >
-                            <ClipboardList className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#3b82f6" }} />
-                            <div>
-                              <p className="text-[11px] font-medium" style={{ color: "#3b82f6" }}>Deployer Dashboard</p>
-                              <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.45)" }}>
-                                {linked.length} incident{linked.length === 1 ? "e" : "i"} collegat{linked.length === 1 ? "o" : "i"} — Art. 26(5) [verify against current AI Act text]
-                              </p>
+                            <FileText className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#15803d" }} />
+                            <div style={{ flex: 1 }}>
+                              <p style={{ fontSize: 10, fontWeight: 500, color: "#15803d", margin: 0 }}>Monitoraggio Post-Market</p>
+                              <p style={{ fontSize: 9, color: "rgba(0,0,0,0.45)", margin: "1px 0 0" }}>Vedi report e piano PMM (Art. 72)</p>
                             </div>
-                            <Link2 className="h-3 w-3 ml-auto flex-shrink-0" style={{ color: "rgba(0,0,0,0.3)" }} />
-                          </a>
-                        );
-                      })()}
-
-                      {/* Post-Market Monitoring link */}
-                      <button
-                        onClick={() => setTab("monitoring")}
-                        className="w-full flex items-center gap-2 rounded-lg px-3 py-2.5 hover:opacity-80 transition-opacity text-left"
-                        style={{ background: "rgba(21,128,61,0.05)", border: "1px solid rgba(21,128,61,0.15)" }}
-                      >
-                        <FileText className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#15803d" }} />
-                        <div>
-                          <p className="text-[11px] font-medium" style={{ color: "#15803d" }}>Monitoraggio Post-Market</p>
-                          <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.45)" }}>
-                            Vedi report e piano PMM (Art. 72) [verify against current AI Act text]
-                          </p>
+                            <Link2 className="h-3 w-3 flex-shrink-0" style={{ color: "rgba(0,0,0,0.3)" }} />
+                          </button>
                         </div>
-                        <Link2 className="h-3 w-3 ml-auto flex-shrink-0" style={{ color: "rgba(0,0,0,0.3)" }} />
-                      </button>
-                    </div>
-                  )}
+                      </div>
+                    )}
+
+                  </div>
                 </div>
               </>
             )}
           </div>
         </div>
       )}
+
 
       {/* ── TAB 2: Piano Art. 72 ── */}
       {tab === "plan" && (
