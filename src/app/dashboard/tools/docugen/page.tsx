@@ -609,12 +609,12 @@ export default function DocuGenPage() {
               {docugenSaved && <span className="ml-2 text-[10px]" style={{ color: "#16a34a" }}>✓ Auto-salvato</span>}
             </span>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <button onClick={() => setShowSaveNote(v => !v)}
+              <button onClick={() => { if (!workName && systemName) setWorkName(systemName); setShowSaveNote(v => !v); }}
                 className="text-[11px] rounded-full px-3 py-1 transition-opacity hover:opacity-80"
                 style={{ background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer" }}>
                 {showSaveNote ? "▲" : "Nomina e salva"}
               </button>
-              <button onClick={() => { setShowSaveNote(true); }} className="text-[11px] font-medium rounded-full px-3 py-1 transition-opacity hover:opacity-80"
+              <button onClick={() => { if (!workName && systemName) setWorkName(systemName); setShowSaveNote(true); }} className="text-[11px] font-medium rounded-full px-3 py-1 transition-opacity hover:opacity-80"
                 style={{ background: "rgba(0,0,0,0.08)", color: "#0D1016", border: "none", cursor: "pointer" }}
                 onDoubleClick={() => saveToDossier(false)}>
                 Salva lavoro
@@ -717,25 +717,18 @@ export default function DocuGenPage() {
             </div>
           )}
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-[11px]" style={{ color: "rgba(0,0,0,0.38)" }}>Sistema:</span>
-            {inventorySystems.length > 0 ? (
-              <select
-                value={systemName}
-                onChange={(e) => setSystemName(e.target.value)}
-                className="text-[12px] outline-none border-b bg-transparent"
-                style={{ color: "#0D1016", borderBottomColor: "rgba(0,0,0,0.15)", minWidth: "220px", cursor: "pointer" }}
-              >
-                <option value="">— seleziona sistema AI —</option>
-                {inventorySystems.map((s) => (
-                  <option key={s.id} value={s.name}>{s.name}</option>
-                ))}
-              </select>
-            ) : (
-              <span className="text-[11px]" style={{ color: "rgba(0,0,0,0.38)" }}>
-                Nessun sistema nell&apos;inventario —{" "}
-                <a href="/dashboard/tools/inventory" style={{ color: "#0D1016", textDecoration: "underline" }}>aggiungi sistema</a>
-              </span>
-            )}
+            <span className="text-[11px]" style={{ color: "rgba(0,0,0,0.38)" }}>Lavoro:</span>
+            <input
+              type="text"
+              value={systemName}
+              onChange={(e) => {
+                setSystemName(e.target.value);
+                setWorkName(e.target.value);
+              }}
+              placeholder="Nome del lavoro…"
+              className="text-[12px] outline-none border-b bg-transparent"
+              style={{ color: "#0D1016", borderBottomColor: "rgba(0,0,0,0.15)", minWidth: "220px" }}
+            />
           </div>
         </div>
 
