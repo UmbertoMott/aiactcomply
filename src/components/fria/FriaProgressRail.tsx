@@ -26,12 +26,13 @@ function ProgressBar({ pct, color = T.green }: { pct: number; color?: string }) 
 export interface FriaProgressRailProps {
   progress: GuidedFriaProgress;
   activeSection: string | null;
+  currentSubPointId?: string | null;
   onSectionClick: (sectionKey: string, anchor: string) => void;
   onSubPointClick: (subPointId: string) => void;
 }
 
 export function FriaProgressRail({
-  progress, activeSection, onSectionClick,
+  progress, activeSection, currentSubPointId, onSectionClick, onSubPointClick,
 }: FriaProgressRailProps) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const pct = progress.overallPercent;
@@ -123,27 +124,41 @@ export function FriaProgressRail({
               {/* Sotto-punti espansi */}
               {isExpanded && sec.subPoints.length > 0 && (
                 <div style={{ borderTop: `1px solid rgba(0,0,0,0.05)`, padding: "4px 6px 6px 6px" }}>
-                  {sec.subPoints.map(sp => (
-                    <div key={sp.id} style={{
-                      display: "flex", alignItems: "center", gap: 6,
-                      padding: "4px 4px", borderRadius: 5,
-                    }}>
-                      <div style={{ flexShrink: 0 }}>
-                        {sp.status === "done"
-                          ? <div style={{ width: 10, height: 10, borderRadius: "50%", border: `1.5px solid ${T.green}` }} />
-                          : <div style={{ width: 10, height: 10, borderRadius: "50%", border: `1.5px solid #dc2626` }} />
-                        }
-                      </div>
-                      <p style={{
-                        fontSize: 10, color: sp.status === "done" ? T.muted : T.text,
-                        margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                        textDecoration: sp.status === "done" ? "line-through" : "none",
-                        opacity: sp.status === "done" ? 0.55 : 1,
-                      }}>
-                        {sp.label}
-                      </p>
-                    </div>
-                  ))}
+                  {sec.subPoints.map(sp => {
+                    const isCurrent = currentSubPointId === sp.id;
+                    return (
+                      <button
+                        key={sp.id}
+                        onClick={() => onSubPointClick(sp.id)}
+                        style={{
+                          width: "100%", textAlign: "left", border: "none",
+                          background: isCurrent ? T.greenBg : "transparent",
+                          borderRadius: 5, cursor: "pointer",
+                          display: "flex", alignItems: "center", gap: 6,
+                          padding: "4px 6px",
+                          outline: isCurrent ? `1px solid ${T.greenBdr}` : "none",
+                        }}
+                        onMouseEnter={e => { if (!isCurrent) e.currentTarget.style.background = "rgba(0,0,0,0.03)"; }}
+                        onMouseLeave={e => { if (!isCurrent) e.currentTarget.style.background = "transparent"; }}
+                      >
+                        <div style={{ flexShrink: 0 }}>
+                          {sp.status === "done"
+                            ? <div style={{ width: 10, height: 10, borderRadius: "50%", border: `1.5px solid ${T.green}` }} />
+                            : <div style={{ width: 10, height: 10, borderRadius: "50%", border: `1.5px solid ${isCurrent ? T.amber : "#dc2626"}` }} />
+                          }
+                        </div>
+                        <p style={{
+                          fontSize: 10, fontWeight: isCurrent ? 600 : 400,
+                          color: sp.status === "done" ? T.muted : isCurrent ? T.green : T.text,
+                          margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                          textDecoration: sp.status === "done" ? "line-through" : "none",
+                          opacity: sp.status === "done" ? 0.55 : 1,
+                        }}>
+                          {sp.label}
+                        </p>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>

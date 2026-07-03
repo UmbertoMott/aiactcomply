@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef, useCallback } from "react";
-import { Download, X, Pencil, Check, Bold, Italic, Underline, Highlighter } from "lucide-react";
+import { Download, Pencil, Check, Bold, Italic, Underline, Highlighter } from "lucide-react";
 import { readFromStorage, writeToStorage } from "@/lib/dossier/storage-schema";
 import type { FriaGuidedDoc, FriaAnswer } from "@/lib/fria/fria-guided-types";
 import { createEmptyFriaGuidedDoc } from "@/lib/fria/fria-guided-types";
@@ -38,7 +38,7 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
   const [pdfLoading, setPdfLoading]             = useState(false);
   const [lastSaved, setLastSaved]               = useState<Date | null>(null);
 
-  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(true);
   const [docWidth, setDocWidth]     = useState(380);
   const [isResizing, setIsResizing] = useState(false);
   const [editing, setEditing]       = useState(false);
@@ -78,15 +78,6 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
     if (editRef.current) setEditedHtml(editRef.current.innerHTML);
     setEditing(false);
   };
-
-  const openViewer = useCallback(() => {
-    if (!viewerOpen) {
-      const total = layoutRef.current?.clientWidth ?? 1200;
-      const avail = total - RAIL_W - SPLITTER;
-      setDocWidth(Math.max(280, Math.floor(avail / 2)));
-    }
-    setViewerOpen(true);
-  }, [viewerOpen]);
 
   const startResize = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -136,14 +127,13 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
 
   const handleSectionClick = useCallback((sectionKey: string, anchor: string) => {
     setActiveSection(sectionKey);
-    openViewer();
     setTimeout(() => {
       if (viewerRef.current) {
         const el = viewerRef.current.querySelector(`#${anchor}`);
         if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     }, 50);
-  }, [openViewer]);
+  }, []);
 
   const handleSubPointClick = useCallback((subPointId: string) => {
     setForcedSubPointId(subPointId);
@@ -240,6 +230,7 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
           <FriaProgressRail
             progress={progress}
             activeSection={activeSection}
+            currentSubPointId={forcedSubPointId ?? doc.currentSubPointId}
             onSectionClick={handleSectionClick}
             onSubPointClick={handleSubPointClick}
           />
@@ -314,20 +305,6 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
                   {editing ? <Check size={12} /> : <Pencil size={12} />}
                 </button>
 
-                <button
-                  onClick={() => { setViewerOpen(false); setEditing(false); }}
-                  title="Chiudi documento"
-                  style={{
-                    flexShrink: 0, width: 24, height: 24, borderRadius: 12,
-                    background: "rgba(0,0,0,0.05)", border: "none", cursor: "pointer",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    color: "rgba(0,0,0,0.45)",
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.10)")}
-                  onMouseLeave={e => (e.currentTarget.style.background = "rgba(0,0,0,0.05)")}
-                >
-                  <X size={12} />
-                </button>
               </div>
 
               {/* Contenuto scrollabile */}
