@@ -364,20 +364,21 @@ export default function ClassifierPage() {
         style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: "6px", display: "inline-flex" }}>
         {PHASES_STEPS.map((p, i) => {
           const isActive = phase === p.id;
-          const isDone = phaseOrder.indexOf(phase) > i;
           return (
             <div key={p.id} className="flex items-center">
-              <div style={{
-                display: "flex", alignItems: "center", gap: 6,
-                borderRadius: 7, padding: "5px 12px", fontSize: 12, fontWeight: 500,
-                background: isActive ? T.text : "transparent",
-                color: isActive ? "#fff" : isDone ? T.green : T.muted,
-                transition: "all 0.15s",
-              }}>
+              <button
+                onClick={() => setPhase(p.id)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 6,
+                  borderRadius: 7, padding: "5px 12px", fontSize: 12, fontWeight: 500,
+                  background: isActive ? T.text : "transparent",
+                  color: isActive ? "#fff" : T.muted,
+                  transition: "all 0.15s",
+                  border: "none", cursor: "pointer",
+                }}>
                 <p.icon style={{ width: 13, height: 13 }} />
                 {p.label}
-                {isDone && <span style={{ fontSize: 10, color: T.green }}>✓</span>}
-              </div>
+              </button>
               {i < 3 && <ChevronRight style={{ width: 12, height: 12, color: T.border, margin: "0 2px", flexShrink: 0 }} />}
             </div>
           );
