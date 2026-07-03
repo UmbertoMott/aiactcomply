@@ -6,7 +6,7 @@ import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { ClassifierResult, OrgProfile } from "@/lib/dossier/storage-schema";
 import {
-  ChevronRight, ChevronLeft, AlertTriangle, Shield,
+  ChevronRight, ChevronLeft, AlertTriangle, Crosshair,
   CheckCircle2, ArrowRight, FileText,
   AlertOctagon, Info, BookOpen, Save, Ban, Zap,
 } from "lucide-react";
@@ -553,7 +553,7 @@ export default function TriagePage() {
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2">
-            <Shield className="w-5 h-5" style={{ color: T.text }} />
+            <Crosshair className="w-5 h-5" style={{ color: T.text }} />
             <span className="text-sm font-medium" style={{ color: T.muted }}>Triage EU AI Act</span>
           </div>
           <h1 className="text-2xl font-bold mb-1" style={{ color: T.text }}>Analisi rapida di conformità</h1>

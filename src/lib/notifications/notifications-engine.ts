@@ -95,7 +95,7 @@ export function generateDeadlineNotifications(today: Date = new Date()): AICompl
     if (daysUntil < 0) {
       notifications.push({
         id: `deadline-past-${deadline.id}`,
-        title: `⚠️ Scadenza passata: ${deadline.title}`,
+        title: `Scadenza passata: ${deadline.title}`,
         body: `La scadenza del ${deadlineDate.toLocaleDateString("it-IT")} è già trascorsa. Verifica la tua conformità immediatamente.`,
         priority: "critical",
         category: "deadline",
@@ -111,7 +111,7 @@ export function generateDeadlineNotifications(today: Date = new Date()): AICompl
     if (daysUntil <= 30) {
       notifications.push({
         id: `deadline-urgent-${deadline.id}`,
-        title: `🚨 ${daysUntil} giorni alla scadenza: ${deadline.title}`,
+        title: `${daysUntil} giorni alla scadenza: ${deadline.title}`,
         body: `${deadline.description} Scadenza: ${deadlineDate.toLocaleDateString("it-IT")}.`,
         priority: "critical",
         category: "deadline",
@@ -128,7 +128,7 @@ export function generateDeadlineNotifications(today: Date = new Date()): AICompl
     if (daysUntil <= 90) {
       notifications.push({
         id: `deadline-soon-${deadline.id}`,
-        title: `📅 ${daysUntil} giorni: ${deadline.title}`,
+        title: `${daysUntil} giorni: ${deadline.title}`,
         body: `${deadline.description}`,
         priority: "high",
         category: "deadline",
@@ -145,7 +145,7 @@ export function generateDeadlineNotifications(today: Date = new Date()): AICompl
     if (daysUntil <= 180) {
       notifications.push({
         id: `deadline-upcoming-${deadline.id}`,
-        title: `📋 Scadenza in ${daysUntil} giorni: ${deadline.title}`,
+        title: `Scadenza in ${daysUntil} giorni: ${deadline.title}`,
         body: `Hai tempo, ma è il momento giusto per iniziare. ${deadline.description}`,
         priority: "medium",
         category: "deadline",

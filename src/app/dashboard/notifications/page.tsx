@@ -63,7 +63,7 @@ const categoryLabel: Record<NotificationCategory, string> = {
 };
 
 function priorityBorderColor(p: AIComplyNotification["priority"]): string {
-  return { critical: "#dc2626", high: "#d97706", medium: "#3b82f6", info: "rgba(0,0,0,0.12)" }[p];
+  return { critical: "#dc2626", high: "#d97706", medium: "rgba(0,0,0,0.15)", info: "rgba(0,0,0,0.09)" }[p];
 }
 
 function priorityBg(p: AIComplyNotification["priority"], read: boolean): string {
@@ -71,7 +71,7 @@ function priorityBg(p: AIComplyNotification["priority"], read: boolean): string 
   return {
     critical: "rgba(220,38,38,0.03)",
     high: "rgba(217,119,6,0.03)",
-    medium: "rgba(59,130,246,0.03)",
+    medium: "rgba(0,0,0,0.02)",
     info: "#ffffff",
   }[p];
 }
@@ -239,7 +239,7 @@ function TimelineItem({
                 className="h-1.5 rounded-full transition-all duration-500"
                 style={{
                   width: `${pct}%`,
-                  background: pct === 100 ? "#15803d" : isUrgent ? "#dc2626" : "#3b82f6",
+                  background: pct === 100 ? "#15803d" : isUrgent ? "#dc2626" : "#0D1016",
                 }}
               />
             </div>
@@ -301,20 +301,15 @@ function NotifCard({
   const isRead = !!n.readAt;
   return (
     <div
-      className="rounded-xl p-4 mb-3 flex gap-3"
+      className="rounded-xl p-4 mb-3"
       style={{
         background: priorityBg(n.priority, isRead),
         border: "1px solid rgba(0,0,0,0.07)",
-        borderLeft: `4px solid ${priorityBorderColor(n.priority)}`,
-        opacity: isRead ? 0.7 : 1,
+        borderLeft: `3px solid ${priorityBorderColor(n.priority)}`,
+        opacity: isRead ? 0.65 : 1,
         boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
       }}
     >
-      {/* Icon */}
-      <div className="flex-shrink-0 mt-0.5" style={{ color: priorityBorderColor(n.priority) }}>
-        <NotifIcon icon={n.icon} />
-      </div>
-
       {/* Content */}
       <div className="flex-1 min-w-0">
         <p className="text-[13px] font-medium mb-0.5" style={{ color: isRead ? "rgba(0,0,0,0.45)" : "#0D1016" }}>
