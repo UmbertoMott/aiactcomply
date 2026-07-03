@@ -11,11 +11,11 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",   // unsafe-inline/eval needed for Next.js dev + RSC
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com",   // unsafe-inline/eval needed for Next.js dev + RSC
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co https://aiplatform.googleapis.com",
+      "connect-src 'self' https://*.supabase.co https://aiplatform.googleapis.com https://www.google-analytics.com https://region1.google-analytics.com https://analytics.google.com",
       "media-src 'self' blob:",                              // blob: per audio TTS generato client-side
       "frame-ancestors 'none'",
     ].join("; "),

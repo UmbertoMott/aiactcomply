@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useSyncExternalStore } from "react";
 
 // ─── Tipi ────────────────────────────────────────────────────────────────────
 
@@ -14,7 +14,7 @@ interface ConsentState {
 }
 
 const STORAGE_KEY = "regulaeos_cookie_consent";
-const EVENT_NAME  = "cookie-consent-changed";
+export const COOKIE_CONSENT_CHANGED_EVENT = "cookie-consent-changed";
 
 const DEFAULT: ConsentState = {
   necessary: true,
@@ -52,7 +52,29 @@ export function openCookieSettings(): void {
 function saveConsent(state: Omit<ConsentState, "_saved">) {
   const full: ConsentState = { ...state, _saved: true };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(full));
-  window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: full }));
+  window.dispatchEvent(new CustomEvent(COOKIE_CONSENT_CHANGED_EVENT, { detail: full }));
+}
+
+function subscribeToConsent(onStoreChange: () => void) {
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key === STORAGE_KEY) onStoreChange();
+  };
+
+  window.addEventListener(COOKIE_CONSENT_CHANGED_EVENT, onStoreChange);
+  window.addEventListener("storage", handleStorage);
+
+  return () => {
+    window.removeEventListener(COOKIE_CONSENT_CHANGED_EVENT, onStoreChange);
+    window.removeEventListener("storage", handleStorage);
+  };
+}
+
+function getConsentSavedSnapshot() {
+  return getConsent()._saved;
+}
+
+function getServerConsentSavedSnapshot() {
+  return true;
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -63,16 +85,15 @@ const MONO  = "'DM Mono', monospace";
 const SERIF = "Georgia, 'Times New Roman', serif";
 
 export default function CookieBanner() {
-  const [visible,  setVisible]  = useState(false);
+  const consentSaved = useSyncExternalStore(
+    subscribeToConsent,
+    getConsentSavedSnapshot,
+    getServerConsentSavedSnapshot
+  );
+  const [forcedOpen, setForcedOpen] = useState(false);
   const [panel,    setPanel]    = useState(false);    // pannello preferenze
   const [analytics, setAnalytics] = useState(false);
   const [marketing, setMarketing] = useState(false);
-
-  // Mostra il banner solo se il consenso non è ancora stato dato
-  useEffect(() => {
-    const c = getConsent();
-    if (!c._saved) setVisible(true);
-  }, []);
 
   // Ascolta openCookieSettings() dall'esterno (Footer)
   useEffect(() => {
@@ -80,8 +101,8 @@ export default function CookieBanner() {
       const c = getConsent();
       setAnalytics(c.analytics);
       setMarketing(c.marketing);
+      setForcedOpen(true);
       setPanel(true);
-      setVisible(true);
     };
     window.addEventListener("open-cookie-settings", handler);
     return () => window.removeEventListener("open-cookie-settings", handler);
@@ -89,19 +110,19 @@ export default function CookieBanner() {
 
   const acceptAll = useCallback(() => {
     saveConsent({ necessary: true, analytics: true, marketing: true });
-    setVisible(false);
+    setForcedOpen(false);
     setPanel(false);
   }, []);
 
   const rejectAll = useCallback(() => {
     saveConsent({ necessary: true, analytics: false, marketing: false });
-    setVisible(false);
+    setForcedOpen(false);
     setPanel(false);
   }, []);
 
   const saveCustom = useCallback(() => {
     saveConsent({ necessary: true, analytics, marketing });
-    setVisible(false);
+    setForcedOpen(false);
     setPanel(false);
   }, [analytics, marketing]);
 
@@ -111,6 +132,8 @@ export default function CookieBanner() {
     setMarketing(c.marketing);
     setPanel(true);
   }, []);
+
+  const visible = forcedOpen || !consentSaved;
 
   if (!visible) return null;
 
