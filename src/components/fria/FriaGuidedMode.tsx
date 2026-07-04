@@ -165,7 +165,7 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
               style={{
                 display: "flex", alignItems: "center", gap: 6,
                 padding: "6px 12px", borderRadius: 7,
-                border: `1px solid ${T.green}`, background: T.green,
+                border: `1px solid ${T.text}`, background: T.text,
                 cursor: "pointer", fontSize: 11, fontWeight: 700, color: "#fff",
               }}
             >
