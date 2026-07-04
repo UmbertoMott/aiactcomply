@@ -20,8 +20,7 @@ const T = {
   amber:  "#b45309",
 } as const;
 
-const RAIL_W   = 256;
-const SPLITTER = 6;
+const RAIL_W = 256;
 
 interface FriaGuidedModeProps {
   onExitGuidedMode?: () => void;
@@ -38,13 +37,9 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
   const [pdfLoading, setPdfLoading]             = useState(false);
   const [lastSaved, setLastSaved]               = useState<Date | null>(null);
 
-  const [viewerOpen, setViewerOpen] = useState(true);
-  const [docWidth, setDocWidth]     = useState(380);
-  const [isResizing, setIsResizing] = useState(false);
-  const [editing, setEditing]       = useState(false);
+  const [editing, setEditing] = useState(false);
   const [editedHtml, setEditedHtml] = useState<string | null>(null);
 
-  const layoutRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const editRef   = useRef<HTMLDivElement>(null);
@@ -78,25 +73,6 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
     if (editRef.current) setEditedHtml(editRef.current.innerHTML);
     setEditing(false);
   };
-
-  const startResize = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
-    const startX     = e.clientX;
-    const startWidth = docWidth;
-    const onMove = (ev: MouseEvent) => {
-      const total = layoutRef.current?.clientWidth ?? 1200;
-      const max   = (total - RAIL_W - SPLITTER) * 0.70;
-      setDocWidth(Math.min(Math.max(startWidth + (ev.clientX - startX), 260), max));
-    };
-    const onUp = () => {
-      setIsResizing(false);
-      document.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseup", onUp);
-    };
-    document.addEventListener("mousemove", onMove);
-    document.addEventListener("mouseup", onUp);
-  }, [docWidth]);
 
   const progress = computeGuidedFriaProgress(doc);
 
@@ -214,11 +190,8 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
         </div>
       </div>
 
-      {/* Layout: [Rail] [Doc?] [Splitter?] [Chat] */}
-      <div
-        ref={layoutRef}
-        style={{ flex: 1, display: "flex", minHeight: 0, gap: 12, padding: "12px", userSelect: isResizing ? "none" : "auto" }}
-      >
+      {/* Layout: [Rail 256px] [Doc 50%] [Chat 50%] */}
+      <div style={{ flex: 1, display: "flex", minHeight: 0, gap: 12, padding: "12px" }}>
         {/* SINISTRA — Rail avanzamento */}
         <div style={{
           width: RAIL_W, flexShrink: 0,
@@ -237,10 +210,9 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
         </div>
 
         {/* CENTRO — Documento live */}
-        {viewerOpen && (
-          <>
-            <div style={{
-              width: docWidth, flexShrink: 0, minWidth: 260, maxWidth: "65%",
+        <>
+          <div style={{
+              flex: 1, minWidth: 0,
               display: "flex", flexDirection: "column",
               border: "none", borderLeft: `1px solid ${T.border}`,
               overflow: "hidden", background: T.card,
@@ -343,21 +315,7 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
               </div>
             </div>
 
-            {/* Splitter */}
-            <div
-              onMouseDown={startResize}
-              style={{
-                width: SPLITTER, flexShrink: 0, cursor: "col-resize",
-                background: isResizing ? "rgba(35,64,58,0.15)" : "transparent",
-                borderLeft: `1px solid ${T.border}`,
-                transition: "background 0.15s",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}
-              onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.06)")}
-              onMouseLeave={e => { if (!isResizing) e.currentTarget.style.background = "transparent"; }}
-            />
-          </>
-        )}
+        </>
 
         {/* DESTRA — Chat guidata */}
         <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
