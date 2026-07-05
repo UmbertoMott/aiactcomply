@@ -8,14 +8,15 @@ import Stats from "@/components/sections/Stats";
 import VideoShowcase from "@/components/sections/VideoShowcase";
 import Quote from "@/components/sections/Quote";
 import CtaFinal from "@/components/sections/CtaFinal";
+import ChiEroga from "@/components/sections/ChiEroga";
 import Footer from "@/components/sections/Footer";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aicomply-omega.vercel.app";
 
 export const metadata: Metadata = {
-  title: "RegulaeOS — Conformità EU AI Act | Classificazione Rischio e Documentazione",
+  title: "RegulaeOS — Assistenza professionale alla conformità EU AI Act",
   description:
-    "RegulaeOS è la piattaforma SaaS per la conformità al Regolamento EU AI Act (2024/1689). Classifica il rischio del tuo sistema AI, genera documentazione tecnica e gestisci gli obblighi normativi. Scadenza agosto 2026.",
+    "RegulaeOS eroga assistenza professionale alla conformità al Regolamento EU AI Act (2024/1689), erogata da un avvocato iscritto all'albo. Risk assessment, FRIA, DPIA e documentazione tecnica: ogni valutazione è assistita dallo strumento e validata dall'avvocato.",
   keywords: [
     "EU AI Act compliance",
     "conformità AI Act",
@@ -60,12 +61,12 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "Organization",
+      "@type": "LegalService",
       "@id": `${BASE_URL}/#organization`,
-      name: "AIComply",
+      name: "RegulaeOS",
       url: BASE_URL,
       description:
-        "Piattaforma SaaS per la conformità al Regolamento EU AI Act 2024/1689. Classificazione del rischio, documentazione tecnica e gestione degli obblighi normativi.",
+        "Servizio di assistenza professionale alla conformità al Regolamento EU AI Act 2024/1689, erogato dall'Avv. Umberto Mottola, iscritto all'Ordine degli Avvocati di Napoli.",
       foundingDate: "2024",
       areaServed: "EU",
       knowsAbout: ["EU AI Act", "AI Governance", "AI Compliance", "Intelligenza Artificiale"],
@@ -131,7 +132,7 @@ const jsonLd = {
       "@id": `${BASE_URL}/#website`,
       url: BASE_URL,
       name: "AIComply",
-      description: "Piattaforma SaaS per la conformità al Regolamento EU AI Act in italiano",
+      description: "Servizio di assistenza professionale alla conformità al Regolamento EU AI Act in italiano, erogato da un avvocato iscritto all'albo.",
       inLanguage: "it",
       publisher: { "@id": `${BASE_URL}/#organization` },
       potentialAction: {
@@ -159,6 +160,7 @@ export default function Home() {
         <Stats />
         <VideoShowcase />
         <Quote />
+        <ChiEroga />
         <CtaFinal />
       </main>
       <Footer />

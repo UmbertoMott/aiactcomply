@@ -343,29 +343,39 @@ export default function Hero() {
             </motion.span>
           </motion.h1>
 
+          {/* Framing line */}
+          <motion.p
+            variants={wordVariant}
+            className="mb-3 max-w-lg"
+            style={{ fontSize: 13, fontWeight: 400, color: "rgba(255,255,255,0.50)", letterSpacing: "0.02em", lineHeight: 1.6, fontFamily: "'DM Mono', monospace" }}
+          >
+            Assistenza professionale alla conformità AI Act, erogata da un avvocato iscritto all&rsquo;albo.
+            Il software è lo strumento con cui il servizio è reso.
+          </motion.p>
+
           {/* Subtitle */}
           <motion.p
             variants={wordVariant}
             className="mb-10 max-w-md"
             style={{ fontSize: 17, fontWeight: 300, color: "rgba(255,255,255,0.62)", letterSpacing: "-0.2px", lineHeight: 1.65 }}
           >
-            AIComply automatizza risk assessment, documentazione e integrazione nei tuoi workflow.
-            Dal caos normativo alla conformità certificata.
+            Risk assessment, FRIA, DPIA e documentazione tecnica: ogni valutazione è assistita
+            dallo strumento e validata dall&rsquo;avvocato.
           </motion.p>
 
           {/* CTAs */}
           <motion.div variants={wordVariant} className="flex gap-3">
-            <Link href="/register"
+            <Link href="/contatti"
               className="text-[13px] font-medium rounded-full px-6 py-3 transition-opacity hover:opacity-85"
               style={{ background: "#ffffff", color: "#0D1016", letterSpacing: "-0.2px" }}
             >
-              Inizia gratis
+              Attiva l&rsquo;assistenza
             </Link>
             <Link href="/pricing"
               className="text-[13px] rounded-full px-6 py-3 transition-colors hover:bg-white/10"
               style={{ border: "1px solid rgba(255,255,255,0.30)", color: "rgba(255,255,255,0.80)", background: "transparent" }}
             >
-              Scopri i prezzi
+              Scopri i piani
             </Link>
           </motion.div>
         </motion.div>

@@ -25,7 +25,7 @@ export default function CtaFinal() {
             lineHeight: 1.05,
           }}
         >
-          Pronti a essere<br />compliant?
+          Attiva l&rsquo;assistenza.<br />Ogni valutazione validata.
         </h2>
         <p
           className="mb-9 leading-relaxed"
@@ -35,14 +35,14 @@ export default function CtaFinal() {
             color: "rgba(255,255,255,0.4)",
           }}
         >
-          Demo di 30 minuti. Ti mostriamo il tuo primo risk assessment in tempo
-          reale — sul tuo sistema AI, non su un esempio generico.
+          Chiamata di 30 minuti. Analizziamo insieme il tuo sistema AI e ti mostriamo
+          come l&rsquo;avvocato, assistito dallo strumento, predispone il tuo primo assessment.
         </p>
         <div className="flex gap-3 justify-center">
-          <Button href="/register" variant="primary">
-            Inizia gratis
+          <Button href="/contatti" variant="primary">
+            Attiva l&rsquo;assistenza
           </Button>
-          <Button variant="ghost">Parla con il team</Button>
+          <Button href="/contatti" variant="ghost">Parla con l&rsquo;avvocato</Button>
         </div>
       </motion.div>
     </section>

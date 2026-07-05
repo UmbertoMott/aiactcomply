@@ -15,10 +15,11 @@ const LEGAL_LINKS = [
 ];
 
 const PRODUCT_LINKS = [
-  { label: "Prodotto",     href: "/products" },
-  { label: "Prezzi",       href: "/pricing" },
-  { label: "Scanner AI",   href: "/scanner" },
-  { label: "Risorse",      href: "/risorse" },
+  { label: "Il servizio",          href: "/products" },
+  { label: "Piani di assistenza",  href: "/pricing" },
+  { label: "Scanner AI",           href: "/scanner" },
+  { label: "Risorse",              href: "/risorse" },
+  { label: "Chi eroga il servizio", href: "/#chi-eroga" },
 ];
 
 export default function Footer() {
@@ -51,14 +52,15 @@ export default function Footer() {
               />
             </Link>
             <p style={{ fontFamily: MONO, fontSize: 11, color: "rgba(255,255,255,0.32)", lineHeight: 1.65, maxWidth: 240 }}>
-              Piattaforma SaaS per la conformità al Regolamento EU AI Act (2024/1689).
+              Assistenza professionale alla conformità AI Act, erogata da un avvocato iscritto all&rsquo;albo.
+              Il software è lo strumento con cui il servizio è reso.
             </p>
           </div>
 
           {/* Prodotto */}
           <nav aria-label="Prodotto" style={{ flex: "1 1 140px" }}>
             <p style={{ fontFamily: MONO, fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 14 }}>
-              Prodotto
+              Servizio
             </p>
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
               {PRODUCT_LINKS.map(l => (

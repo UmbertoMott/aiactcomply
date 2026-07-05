@@ -18,7 +18,9 @@ export default function TerminiPage() {
 
         <h2>1. Definizioni</h2>
         <p>
-          <strong>«Servizio»</strong> indica la piattaforma SaaS RegulaeOS accessibile su regulaeos.com e relativi sottodomini.{" "}
+          <strong>«Servizio»</strong> indica il servizio di assistenza professionale alla conformità AI Act erogato
+          tramite la piattaforma RegulaeOS, accessibile su regulaeos.com e relativi sottodomini.{" "}
+          <strong>«Strumento»</strong> indica il software RegulaeOS, utilizzato come mezzo per l&apos;erogazione del Servizio.{" "}
           <strong>«Utente»</strong> indica qualsiasi persona fisica o giuridica che accede al Servizio.{" "}
           <strong>«Account»</strong> indica il profilo utente creato al momento della registrazione.{" "}
           <strong>«Dati dell&apos;Utente»</strong> indica qualsiasi contenuto caricato o generato dall&apos;Utente tramite il Servizio.
@@ -26,13 +28,19 @@ export default function TerminiPage() {
 
         <h2>2. Oggetto del contratto</h2>
         <p>
-          RegulaeOS S.r.l. fornisce strumenti SaaS per supportare gli utenti nella valutazione e nella documentazione
-          della conformità al Regolamento (UE) 2024/1689 («EU AI Act») e alla normativa correlata (GDPR, ISO 42001, ecc.).
+          Il Servizio consiste nell&apos;assistenza professionale alla conformità al Regolamento (UE) 2024/1689 («EU AI Act»)
+          e alla normativa correlata (GDPR, ISO 42001, ecc.), erogata dall&apos;<strong>Avv. Umberto Mottola</strong>,
+          iscritto all&apos;Ordine degli Avvocati di Napoli, nell&apos;esercizio della professione forense e nel rispetto
+          del codice deontologico. Il canone mensile è corrispettivo di tale assistenza. Lo Strumento (software RegulaeOS)
+          è il mezzo tecnico con cui l&apos;assistenza è resa; la sua messa a disposizione è accessoria e strumentale
+          all&apos;erogazione del Servizio, non ne costituisce l&apos;oggetto principale.
         </p>
         <p>
-          <strong>Il Servizio ha natura di supporto operativo e non costituisce consulenza legale.</strong>{" "}
-          I documenti generati dalla piattaforma devono essere verificati da un professionista abilitato prima di
-          essere presentati ad autorità competenti.
+          <strong>Gli output automatici dello Strumento hanno natura assistiva</strong> e non costituiscono di per sé
+          parere o consulenza legale finché non sono verificati e validati dall&apos;avvocato; i riferimenti normativi
+          devono essere confrontati col testo normativo vigente [verifica contro il testo vigente].{" "}
+          L&apos;assistenza, la revisione e la validazione degli assessment sono rese dall&apos;avvocato nell&apos;esercizio
+          della professione: a questo livello si applicano il rapporto professionale e le relative tutele.
         </p>
 
         <h2>3. Registrazione e account</h2>
@@ -43,7 +51,13 @@ export default function TerminiPage() {
           <li>RegulaeOS si riserva il diritto di sospendere o cancellare account in caso di violazione dei presenti Termini.</li>
         </ul>
 
-        <h2>4. Piani e pagamenti</h2>
+        <h2>4. Canone di assistenza e piani</h2>
+        <p>
+          Il corrispettivo versato dall&apos;Utente è un <strong>canone di assistenza professionale</strong> per il Servizio
+          descritto all&apos;art. 2. La messa a disposizione dello Strumento software è compresa nel canone in quanto
+          accessoria all&apos;erogazione del Servizio; non costituisce licenza software autonoma né l&apos;oggetto principale
+          del contratto.
+        </p>
         <table>
           <thead>
             <tr>
@@ -54,24 +68,24 @@ export default function TerminiPage() {
           </thead>
           <tbody>
             <tr>
-              <td><strong>Starter</strong></td>
-              <td>1 sistema AI, compliance Art. 50, tool base</td>
+              <td><strong>Essenziale</strong></td>
+              <td>Assistenza su 1 sistema AI, Triage, Scanner Art. 50, Risk Register, assessment validati</td>
               <td>Mensile automatico</td>
             </tr>
             <tr>
-              <td><strong>Professional</strong></td>
-              <td>5 sistemi AI, dossier completo, Legal Assistant RAG</td>
+              <td><strong>Studio</strong></td>
+              <td>Tutti i moduli (Risk Register, FRIA, DPIA), parere su richiesta, dossier firmato</td>
               <td>Mensile automatico</td>
             </tr>
             <tr>
-              <td><strong>Enterprise</strong></td>
-              <td>Sistemi illimitati, SLA dedicato, onboarding</td>
-              <td>Annuale (su accordo)</td>
+              <td><strong>Su Misura</strong></td>
+              <td>Più sistemi seguiti, workspace multipli, Rappresentante Autorizzato (Art. 22), SLA</td>
+              <td>Su accordo</td>
             </tr>
           </tbody>
         </table>
         <p>
-          I prezzi sono in euro IVA esclusa. Il pagamento avviene tramite Stripe. L&apos;abbonamento si rinnova automaticamente
+          I prezzi sono in euro IVA esclusa. Il pagamento avviene tramite Stripe. Il canone si rinnova automaticamente
           salvo disdetta con 7 giorni di preavviso. Non è previsto rimborso per il periodo già fatturato, salvo quanto
           previsto dal Codice del Consumo per i consumatori (recesso entro 14 giorni dall&apos;attivazione).
         </p>

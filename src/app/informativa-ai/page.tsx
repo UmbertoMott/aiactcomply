@@ -57,27 +57,35 @@ export default function InformativaAIPage() {
         <ul>
           <li>
             Le risposte del Legal Assistant sono generate sulla base di fonti normative indicizzate
-            (EU AI Act, ISO 22989, EDPB Guidelines) ma <strong>non sostituiscono il parere di un legale qualificato</strong>.
+            (EU AI Act, ISO 22989, EDPB Guidelines) ma <strong>non costituiscono di per sé parere o consulenza legale
+            finché non sono verificate e validate dall&apos;avvocato</strong>; i riferimenti normativi vanno confrontati
+            col testo vigente [verifica contro il testo vigente].
           </li>
           <li>
-            I suggerimenti di pre-compilazione richiedono sempre revisione e validazione da parte dell&apos;utente
+            I suggerimenti di pre-compilazione richiedono sempre revisione e validazione da parte dell&apos;avvocato
             prima dell&apos;uso ufficiale.
           </li>
           <li>
-            La classificazione del rischio è un risultato orientativo: la decisione finale spetta all&apos;azienda
-            e ai suoi consulenti.
+            La classificazione del rischio è un risultato orientativo: la decisione finale è integrata dalla
+            revisione professionale dell&apos;avvocato.
           </li>
           <li>
             I modelli AI possono produrre output imprecisi o non aggiornati («allucinazioni»).
-            RegulaeOS non garantisce l&apos;assenza di errori.
+            RegulaeOS non garantisce l&apos;assenza di errori negli output automatici.
           </li>
         </ul>
 
-        <h2>3. Supervisione umana</h2>
+        <h2>3. Supervisione umana e validazione professionale</h2>
         <p>
           Ogni output AI presentato nella piattaforma è chiaramente etichettato come generato da AI
           e richiede conferma esplicita dell&apos;utente prima di essere salvato o esportato.
           Il sistema non prende decisioni giuridicamente vincolanti in modo automatico.
+        </p>
+        <p>
+          <strong>La validazione professionale degli assessment è resa dall&apos;Avv. Umberto Mottola</strong>,
+          iscritto all&apos;Ordine degli Avvocati di Napoli, nell&apos;esercizio della professione forense.
+          Gli output automatici dello strumento acquistano valenza professionale solo dopo tale verifica e validazione
+          da parte dell&apos;avvocato. Il software è lo strumento; l&apos;assistenza è il servizio.
         </p>
 
         <h2>4. Dati usati per l'AI</h2>

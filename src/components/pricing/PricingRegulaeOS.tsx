@@ -32,7 +32,7 @@ const TIERS: Tier[] = [
   {
     eyebrow: "ESSENZIALE",
     price: "€49",
-    priceSub: "/mese",
+    priceSub: "/mese · canone di assistenza",
     desc: "Per iniziare a mettere in regola un sistema AI.",
     features: [
       "Assistenza su 1 sistema AI",
@@ -42,12 +42,12 @@ const TIERS: Tier[] = [
       "Supporto via email",
     ],
     cta: "Attiva l'assistenza",
-    href: "/waitlist?plan=essenziale",
+    href: "/contatti",
   },
   {
     eyebrow: "STUDIO",
     price: "€149",
-    priceSub: "/mese",
+    priceSub: "/mese · canone di assistenza",
     desc: "Assistenza completa, con parere e revisione.",
     features: [
       "Tutti i moduli — Risk Register, FRIA, DPIA",
@@ -58,7 +58,7 @@ const TIERS: Tier[] = [
       "Supporto prioritario",
     ],
     cta: "Attiva l'assistenza",
-    href: "/waitlist?plan=studio",
+    href: "/contatti",
     recommended: true,
   },
   {
@@ -73,7 +73,7 @@ const TIERS: Tier[] = [
       "Assistenza dedicata e SLA",
     ],
     cta: "Parla con l'avvocato",
-    href: "mailto:info@aicomply.eu",
+    href: "/contatti",
   },
 ];
 
