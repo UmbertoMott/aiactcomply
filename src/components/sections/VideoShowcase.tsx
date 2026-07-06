@@ -547,7 +547,7 @@ function ProductHero() {
       <div style={{ maxWidth: 1380, margin: "0 auto", padding: "96px 56px", display: "flex", alignItems: "center", gap: 72 }} className="showcase-row ph-inner">
 
         {/* ─── LEFT: screenshot grande + floating cards ─────────────────── */}
-        <div style={{ flex: "0 0 58%", position: "relative", ...fadeLeft }}>
+        <div style={{ flex: "0 0 63%", position: "relative", ...fadeLeft }}>
 
           {/* 3D tilt wrapper */}
           <div
@@ -644,7 +644,7 @@ function ProductHero() {
         </div>
 
         {/* ─── RIGHT: testo ─────────────────────────────────────────────── */}
-        <div style={{ flex: "0 0 36%", ...fadeRight }}>
+        <div style={{ flex: "0 0 31%", ...fadeRight }}>
           <p style={{ fontFamily: MONO, fontSize: 11, fontWeight: 500, color: "rgba(0,0,0,0.32)", letterSpacing: "0.07em", textTransform: "uppercase" as const, marginBottom: 20 }}>
             Valutazione d&apos;impatto · Art. 27 AI Act
           </p>
