@@ -18,10 +18,15 @@ function isOnTrackedHost() {
   return typeof window !== "undefined" && TRACKED_HOSTS.has(window.location.hostname);
 }
 
-function gtag(...args: unknown[]) {
+// IMPORTANTE: gtag.js processa la coda dataLayer solo se ogni voce è
+// l'oggetto `arguments` (array-like), NON un vero Array. Pushando un Array
+// il comando `config` viene ignorato → nessun page_view → 0 utenti.
+// Questo replica esattamente lo snippet ufficiale: function gtag(){dataLayer.push(arguments)}
+const gtag = function gtag() {
   window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push(args);
-}
+  // eslint-disable-next-line prefer-rest-params
+  window.dataLayer.push(arguments);
+} as (...args: unknown[]) => void;
 
 function injectGA() {
   if (document.getElementById("ga4-script")) return; // già iniettato
