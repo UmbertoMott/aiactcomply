@@ -88,7 +88,7 @@ Comunicazioni marketing: ${form.marketing ? "Sì" : "No"}
 Inviato dal form Prenota una demo (regulaeos.com/prenota-demo)`;
 
     window.location.href =
-      `mailto:demo@regulaeos.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      `mailto:connect@regulaeos.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     setSent(true);
   };
 
@@ -115,7 +115,7 @@ Inviato dal form Prenota una demo (regulaeos.com/prenota-demo)`;
         </p>
         <p style={{ fontSize: 14, color: "rgba(0,0,0,0.55)", lineHeight: 1.6, maxWidth: 340, margin: "0 auto" }}>
           Si è aperto il tuo client di posta con la richiesta precompilata verso{" "}
-          <strong style={{ color: "#0D1016" }}>demo@regulaeos.com</strong>. Completa
+          <strong style={{ color: "#0D1016" }}>connect@regulaeos.com</strong>. Completa
           l&rsquo;invio da lì: ti ricontattiamo entro 24 ore lavorative.
         </p>
         <button
