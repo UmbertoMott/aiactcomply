@@ -33,11 +33,20 @@ function injectGA() {
   window.dataLayer = window.dataLayer || [];
   window.gtag = gtag;
   gtag("js", new Date());
-  gtag("config", GA_ID);
+  // send_page_view: false → il page_view iniziale NON viene affidato al config
+  // (accodato prima che gtag.js sia pronto, l'auto-invio va perso). Lo inviamo
+  // esplicitamente nell'onload dello script, quando la libreria è pronta.
+  gtag("config", GA_ID, { send_page_view: false });
   const s = document.createElement("script");
   s.id = "ga4-script";
   s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
   s.async = true;
+  s.onload = () => {
+    gtag("event", "page_view", {
+      page_path:  window.location.pathname + window.location.search,
+      page_title: document.title,
+    });
+  };
   document.head.appendChild(s);
 }
 
