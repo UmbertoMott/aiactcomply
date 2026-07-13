@@ -764,10 +764,13 @@ export default function ProductsPage() {
       </section>
 
       {/* ── Module sections + conversion blocks ── */}
-      {MODULES.map((mod) => (
+      {/* Banner CTA ogni 3 sezioncine: dopo Mod2 (3ª) e dopo Mod5 (6ª) */}
+      {MODULES.map((mod, i) => (
         <div key={mod.id}>
           <ModuleSection {...mod} />
           <ConversionBlock data={CONVERSION[mod.id]} />
+          {i === 1 && <BookDemoBanner theme="dark" />}
+          {i === 4 && <BookDemoBanner theme="light" />}
         </div>
       ))}
 
@@ -813,7 +816,6 @@ export default function ProductsPage() {
           </Link>
         </div>
       </section>
-      <BookDemoBanner theme="dark" />
     </div>
   );
 }

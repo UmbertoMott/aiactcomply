@@ -62,8 +62,6 @@ export default function RisorseIndex() {
         )}
       </section>
 
-      <BookDemoBanner theme="dark" />
-
       {/* CTA */}
       <section style={{ borderTop: "1px solid rgba(0,0,0,0.07)", padding: "64px 24px", textAlign: "center" }}>
         <p style={{ fontSize: 15, color: "rgba(0,0,0,0.42)", marginBottom: 20 }}>
@@ -77,6 +75,8 @@ export default function RisorseIndex() {
           Prova lo scanner Art. 50 gratis →
         </Link>
       </section>
+
+      <BookDemoBanner theme="dark" />
     </div>
   );
 }
