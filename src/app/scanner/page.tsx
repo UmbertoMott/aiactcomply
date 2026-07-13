@@ -3,6 +3,7 @@
 import { useState, useRef, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Nav from "@/components/Nav";
+import BookDemoBanner from "@/components/BookDemoBanner";
 import ScannerTrustSection from "@/components/scanner/ScannerTrustSection";
 import type { Art50ScanResult, Art50Signal, CriterionKey } from "@/lib/scanner/art50-detector";
 
@@ -569,6 +570,7 @@ export default function ScannerPage() {
             <ScannerTrustSection onScanRequest={scrollToInput} />
           )}
         </div>
+        <BookDemoBanner theme="light" />
       </main>
     </>
   );

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import Nav from "@/components/Nav";
+import BookDemoBanner from "@/components/BookDemoBanner";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
 const MONO  = "'DM Mono', monospace";
@@ -812,6 +813,7 @@ export default function ProductsPage() {
           </Link>
         </div>
       </section>
+      <BookDemoBanner theme="dark" />
     </div>
   );
 }

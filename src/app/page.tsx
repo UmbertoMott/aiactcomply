@@ -11,6 +11,7 @@ import Quote from "@/components/sections/Quote";
 import CtaFinal from "@/components/sections/CtaFinal";
 import ChiEroga from "@/components/sections/ChiEroga";
 import Footer from "@/components/sections/Footer";
+import BookDemoBanner from "@/components/BookDemoBanner";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aicomply-omega.vercel.app";
 
@@ -158,9 +159,11 @@ export default function Home() {
         <Hero />
         <PlatformSection />
         <Pain />
+        <BookDemoBanner theme="dark" />
         <Stepper />
         <Stats />
         <VideoShowcase />
+        <BookDemoBanner theme="light" />
         <Quote />
         <ChiEroga />
         <CtaFinal />

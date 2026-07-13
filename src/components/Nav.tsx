@@ -36,10 +36,17 @@ export default function Nav() {
       <div className="flex items-center gap-3">
         <Link
           href="/login"
-          className="text-[13px] transition-colors"
+          className="hidden sm:inline text-[13px] transition-colors"
           style={{ color: "rgba(0,0,0,0.42)" }}
         >
           Accedi
+        </Link>
+        <Link
+          href="/prenota-demo"
+          className="hidden sm:inline-flex text-[13px] font-medium rounded-full px-5 py-2 transition-colors hover:bg-black/[0.04]"
+          style={{ border: "1px solid rgba(0,0,0,0.15)", color: "#0D1016", letterSpacing: "-0.2px" }}
+        >
+          Prenota demo
         </Link>
         <Link
           href="/register"

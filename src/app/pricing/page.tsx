@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Nav from "@/components/Nav";
+import BookDemoBanner from "@/components/BookDemoBanner";
 import { PricingRegulaeOS } from "@/components/pricing/PricingRegulaeOS";
 
 // ─── FAQ data (aggiornato per l'offerta di assistenza) ────────────────────────
@@ -87,6 +88,7 @@ export default function PricingPage() {
           <FaqList />
         </section>
 
+        <BookDemoBanner theme="dark" />
       </main>
     </>
   );

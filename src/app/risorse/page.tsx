@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Nav from "@/components/Nav";
+import BookDemoBanner from "@/components/BookDemoBanner";
 import PostCard from "./PostCard";
 import { getAllPosts } from "@/lib/blog/posts";
 import type { Metadata } from "next";
@@ -60,6 +61,8 @@ export default function RisorseIndex() {
           </div>
         )}
       </section>
+
+      <BookDemoBanner theme="dark" />
 
       {/* CTA */}
       <section style={{ borderTop: "1px solid rgba(0,0,0,0.07)", padding: "64px 24px", textAlign: "center" }}>
