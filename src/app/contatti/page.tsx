@@ -13,6 +13,24 @@ const MONO  = "'DM Mono', monospace";
 export default function ContattiPage() {
   return (
     <>
+      <style>{`
+        .contatti-card {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          padding: 24px 28px;
+          background: #ffffff;
+          border: 1px solid rgba(0,0,0,0.08);
+          border-radius: 14px;
+          text-decoration: none;
+          transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .contatti-card:hover {
+          box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+          border-color: rgba(0,0,0,0.18);
+        }
+      `}</style>
+
       <Nav />
       <main style={{ background: "#fafaf9", minHeight: "100vh" }}>
         <section style={{ maxWidth: 720, margin: "0 auto", padding: "120px 24px 96px" }}>
@@ -37,36 +55,15 @@ export default function ContattiPage() {
           </h1>
 
           <p style={{ fontSize: 17, lineHeight: 1.7, color: "rgba(0,0,0,0.55)", marginBottom: 56, maxWidth: 560 }}>
-            Per avviare il servizio di assistenza alla conformità EU AI Act, invia una mail o
-            prenota una chiamata conoscitiva di 30 minuti. Nessun impegno iniziale.
+            Per avviare il servizio di assistenza alla conformità EU AI Act, invia una mail.
+            Risposta entro 24 ore lavorative. Nessun impegno iniziale.
           </p>
 
           {/* Contact cards */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 64 }}>
 
             {/* Email */}
-            <a
-              href="mailto:info@aicomply.eu"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 20,
-                padding: "24px 28px",
-                background: "#ffffff",
-                border: "1px solid rgba(0,0,0,0.08)",
-                borderRadius: 14,
-                textDecoration: "none",
-                transition: "box-shadow 0.2s ease, border-color 0.2s ease",
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 8px 32px rgba(0,0,0,0.08)";
-                (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(0,0,0,0.15)";
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLAnchorElement).style.boxShadow = "none";
-                (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(0,0,0,0.08)";
-              }}
-            >
+            <a href="mailto:info@aicomply.eu" className="contatti-card">
               <div style={{
                 width: 44, height: 44, borderRadius: 10,
                 background: "#0D1016",
@@ -90,32 +87,31 @@ export default function ContattiPage() {
 
             {/* Avvocato info */}
             <div style={{
+              display: "flex", alignItems: "center", gap: 20,
               padding: "24px 28px",
               background: "#ffffff",
               border: "1px solid rgba(0,0,0,0.08)",
               borderRadius: 14,
             }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-                <div style={{
-                  width: 44, height: 44, borderRadius: 10,
-                  background: "#fafaf9",
-                  border: "1px solid rgba(0,0,0,0.08)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  flexShrink: 0,
-                }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="8" r="4" stroke="#0D1016" strokeWidth="1.6" />
-                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#0D1016" strokeWidth="1.6" strokeLinecap="round" />
-                  </svg>
-                </div>
-                <div>
-                  <p style={{ fontFamily: MONO, fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.35)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>
-                    Chi risponde
-                  </p>
-                  <p style={{ fontSize: 15, fontWeight: 500, color: "#0D1016", letterSpacing: "-0.2px" }}>
-                    Avv. Umberto Mottola — Foro di Napoli
-                  </p>
-                </div>
+              <div style={{
+                width: 44, height: 44, borderRadius: 10,
+                background: "#fafaf9",
+                border: "1px solid rgba(0,0,0,0.08)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0,
+              }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="8" r="4" stroke="#0D1016" strokeWidth="1.6" />
+                  <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#0D1016" strokeWidth="1.6" strokeLinecap="round" />
+                </svg>
+              </div>
+              <div>
+                <p style={{ fontFamily: MONO, fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.35)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>
+                  Chi risponde
+                </p>
+                <p style={{ fontSize: 15, fontWeight: 500, color: "#0D1016", letterSpacing: "-0.2px" }}>
+                  Avv. Umberto Mottola — Foro di Napoli
+                </p>
               </div>
             </div>
 
