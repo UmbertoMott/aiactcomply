@@ -45,10 +45,10 @@ export default async function BlogPost({ params }: Props) {
     description: post.metaDescription,
     datePublished: post.dateISO,
     dateModified: post.dateISO,
-    author: { "@type": "Organization", name: "AIComply" },
+    author: { "@type": "Organization", name: "RegulaeOS" },
     publisher: {
       "@type": "Organization",
-      name: "AIComply",
+      name: "RegulaeOS",
       url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://aicomply-omega.vercel.app",
     },
     mainEntityOfPage: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://aicomply-omega.vercel.app"}/risorse/${post.slug}`,

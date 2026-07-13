@@ -89,7 +89,7 @@ function WaitlistForm() {
             style={{ fontSize: "32px", fontWeight: 400, letterSpacing: "-1.2px", lineHeight: 1.15 }}
           >
             Sii tra i primi<br />
-            <span style={{ color: "rgba(255,255,255,0.35)" }}>a usare AIComply.</span>
+            <span style={{ color: "rgba(255,255,255,0.35)" }}>a usare RegulaeOS.</span>
           </h2>
 
           <p
@@ -123,7 +123,7 @@ function WaitlistForm() {
         </div>
 
         <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.2)" }}>
-          © 2025 AIComply. Tutti i diritti riservati.
+          © 2025 RegulaeOS. Tutti i diritti riservati.
         </p>
       </div>
 

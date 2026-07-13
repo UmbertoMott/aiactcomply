@@ -76,7 +76,7 @@ const jsonLd = {
     {
       "@type": "SoftwareApplication",
       "@id": `${BASE_URL}/#software`,
-      name: "AIComply",
+      name: "RegulaeOS",
       applicationCategory: "BusinessApplication",
       operatingSystem: "Web",
       url: BASE_URL,
@@ -133,7 +133,7 @@ const jsonLd = {
       "@type": "WebSite",
       "@id": `${BASE_URL}/#website`,
       url: BASE_URL,
-      name: "AIComply",
+      name: "RegulaeOS",
       description: "Servizio di assistenza professionale alla conformità al Regolamento EU AI Act in italiano, erogato da un avvocato iscritto all'albo.",
       inLanguage: "it",
       publisher: { "@id": `${BASE_URL}/#organization` },

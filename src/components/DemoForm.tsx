@@ -1,15 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import CountrySelect from "@/components/CountrySelect";
 
 const MONO  = "'DM Mono', monospace";
 const GREEN = "#0B3D2E";
-
-const COUNTRIES = [
-  "Italia", "Francia", "Germania", "Spagna", "Portogallo", "Paesi Bassi",
-  "Belgio", "Austria", "Irlanda", "Svizzera", "Regno Unito", "Stati Uniti",
-  "Altro paese UE", "Altro",
-];
 
 const ORG_TYPES = [
   "Studio legale",
@@ -69,8 +64,11 @@ export default function DemoForm() {
     setForm(f => ({ ...f, [k]: v }));
   };
 
+  const [errPaese, setErrPaese] = useState(false);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.paese) { setErrPaese(true); return; }
     const subject = `Richiesta demo — ${form.azienda || form.nome}`;
     const body =
 `Nuova richiesta di demo RegulaeOS
@@ -165,10 +163,13 @@ Inviato dal form Prenota una demo (regulaeos.com/prenota-demo)`;
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginBottom: 22 }}>
         <Field label="Paese *">
-          <select required style={{ ...inputStyle, appearance: "none", cursor: "pointer", color: form.paese ? "#0D1016" : "rgba(0,0,0,0.4)" }} value={form.paese} onChange={set("paese")}>
-            <option value="" disabled>Seleziona…</option>
-            {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
+          <CountrySelect
+            value={form.paese}
+            onChange={(name) => { setForm(f => ({ ...f, paese: name })); setErrPaese(false); }}
+          />
+          {errPaese && (
+            <p style={{ fontSize: 11, color: "#b42318", marginTop: 5 }}>Seleziona un paese</p>
+          )}
         </Field>
         <Field label="Tipo organizzazione *">
           <select required style={{ ...inputStyle, appearance: "none", cursor: "pointer", color: form.org ? "#0D1016" : "rgba(0,0,0,0.4)" }} value={form.org} onChange={set("org")}>

@@ -244,7 +244,7 @@ function ModuleSection({
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
                   <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.25)" }}>
-                    aicomply.it
+                    regulaeos.com
                   </span>
                 </div>
               </div>
@@ -665,7 +665,7 @@ const MODULES: ModuleProps[] = [
     num: "01",
     badge: "Triage · Art. 5 · 6 · 51",
     title: "Capisci quali obblighi ti riguardano.",
-    desc: "Quattro aree tematiche, poche domande guidate, e AIComply classifica il tuo sistema — rischio inaccettabile, alto, limitato o minimo — mappandolo agli articoli e agli allegati che contano.",
+    desc: "Quattro aree tematiche, poche domande guidate, e RegulaeOS classifica il tuo sistema — rischio inaccettabile, alto, limitato o minimo — mappandolo agli articoli e agli allegati che contano.",
     capabilities: ["Classificazione 4 livelli", "Mapping Art. 6 + Annex III", "Export PDF", "Storico sessioni"],
     videoSrc: "/videos/triage.mp4",
     reverse: false,
@@ -687,7 +687,7 @@ const MODULES: ModuleProps[] = [
     num: "03",
     badge: "Risk Manager · Art. 9 · 27 · 35",
     title: "Valutazioni d'impatto che si scrivono da sole.",
-    desc: "Risk Register, FRIA e DPIA prendono forma dai dati già raccolti negli altri moduli. AIComply pre-compila le sezioni e tu validi.",
+    desc: "Risk Register, FRIA e DPIA prendono forma dai dati già raccolti negli altri moduli. RegulaeOS pre-compila le sezioni e tu validi.",
     capabilities: ["Risk Register", "FRIA + DPIA integrate", "Pre-compilazione automatica", "Export firmato"],
     videoSrc: "/videos/fria.mp4",
     reverse: false,
