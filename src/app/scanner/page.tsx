@@ -570,7 +570,7 @@ export default function ScannerPage() {
             <ScannerTrustSection onScanRequest={scrollToInput} />
           )}
         </div>
-        <BookDemoBanner theme="light" />
+        <BookDemoBanner />
       </main>
     </>
   );

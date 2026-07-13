@@ -769,8 +769,8 @@ export default function ProductsPage() {
         <div key={mod.id}>
           <ModuleSection {...mod} />
           <ConversionBlock data={CONVERSION[mod.id]} />
-          {i === 1 && <BookDemoBanner theme="dark" />}
-          {i === 4 && <BookDemoBanner theme="light" />}
+          {i === 1 && <BookDemoBanner />}
+          {i === 4 && <BookDemoBanner />}
         </div>
       ))}
 

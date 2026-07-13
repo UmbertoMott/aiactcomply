@@ -76,7 +76,7 @@ export default function RisorseIndex() {
         </Link>
       </section>
 
-      <BookDemoBanner theme="dark" />
+      <BookDemoBanner />
     </div>
   );
 }

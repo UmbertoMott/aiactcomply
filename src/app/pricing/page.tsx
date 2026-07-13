@@ -88,7 +88,7 @@ export default function PricingPage() {
           <FaqList />
         </section>
 
-        <BookDemoBanner theme="dark" />
+        <BookDemoBanner />
       </main>
     </>
   );

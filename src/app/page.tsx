@@ -159,11 +159,11 @@ export default function Home() {
         <Hero />
         <PlatformSection />
         <Pain />
-        <BookDemoBanner theme="dark" />
+        <BookDemoBanner />
         <Stepper />
         <Stats />
         <VideoShowcase />
-        <BookDemoBanner theme="light" />
+        <BookDemoBanner />
         <Quote />
         <ChiEroga />
         <CtaFinal />
