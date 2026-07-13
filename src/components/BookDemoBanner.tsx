@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
-const MONO  = "'DM Mono', monospace";
 
 type Props = {
   theme?: "light" | "dark";
@@ -25,8 +24,15 @@ export default function BookDemoBanner({
   const titleC  = dark ? "#ffffff" : "#0D1016";
   const subC    = dark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)";
   const border  = dark ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(0,0,0,0.07)";
-  const btnBg   = dark ? "#ffffff" : "#0D1016";
-  const btnC    = dark ? "#0D1016" : "#ffffff";
+
+  // Pillola stile Hero: su fondo scuro → piena bianca ("Attiva l'assistenza");
+  // su fondo chiaro → contornata scura ("Scopri i piani" adattato cromaticamente).
+  const btnClass = dark
+    ? "transition-opacity hover:opacity-85"
+    : "transition-colors hover:bg-black/[0.04]";
+  const btnStyle: React.CSSProperties = dark
+    ? { background: "#ffffff", color: "#0D1016", border: "1.5px solid #ffffff" }
+    : { background: "transparent", color: "#0D1016", border: "1.5px solid rgba(0,0,0,0.22)" };
 
   return (
     <section style={{
@@ -63,27 +69,10 @@ export default function BookDemoBanner({
 
         <Link
           href="/prenota-demo"
-          style={{
-            flexShrink: 0,
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 9,
-            fontFamily: MONO,
-            fontSize: 13,
-            fontWeight: 600,
-            letterSpacing: "0.01em",
-            color: btnC,
-            background: btnBg,
-            padding: "13px 26px",
-            borderRadius: 999,
-            textDecoration: "none",
-            transition: "opacity 0.15s ease",
-          }}
+          className={`flex-shrink-0 inline-flex items-center justify-center text-[14px] font-medium rounded-full px-8 py-3.5 ${btnClass}`}
+          style={{ ...btnStyle, letterSpacing: "-0.2px", textDecoration: "none" }}
         >
           Prenota una demo
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12h14M13 6l6 6-6 6" stroke={btnC} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
         </Link>
       </div>
     </section>
