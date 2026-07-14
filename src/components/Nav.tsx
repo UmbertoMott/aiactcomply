@@ -15,7 +15,7 @@ const RES_CONTENUTI = [
 ];
 
 const RES_STRUMENTI = [
-  { label: "Scanner Art. 50", href: "/scanner", desc: "Verifica gratuita e anonima degli obblighi di trasparenza." },
+  { label: "Calcolatore ROI sanzioni", href: "/roi", desc: "Stima l'esposizione alle sanzioni AI Act e il ROI della prevenzione." },
   { label: "Il prodotto", href: "/products", desc: "I sei moduli per l'intero ciclo di conformità." },
 ];
 
@@ -152,34 +152,36 @@ export default function Nav() {
               </div>
             </div>
 
-            {/* Colonna 3 — Card in evidenza */}
+            {/* Colonna 3 — Card in evidenza: Calcolatore ROI */}
             <div>
-              <Link href="/scanner" onClick={closeNow} style={{ textDecoration: "none", display: "block" }}>
+              <Link href="/roi" onClick={closeNow} style={{ textDecoration: "none", display: "block" }}>
                 <div style={{
-                  background: "#f2f2f0",
+                  background: "#0D1016",
                   borderRadius: 14,
                   height: 150,
                   display: "flex",
+                  flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  gap: 12,
+                  gap: 4,
                   marginBottom: 16,
-                  border: "1px solid rgba(0,0,0,0.05)",
                 }}>
-                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 2.5L4 6v6c0 4.4 3.4 8.3 8 9.5 4.6-1.2 8-5.1 8-9.5V6l-8-3.5z" stroke="#0D1016" strokeWidth="1.4" fill="none" strokeLinejoin="round" />
-                    <path d="M8.5 12l2.5 2.5 4.5-5" stroke="#0D1016" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  <span style={{ fontFamily: SERIF, fontSize: 26, color: "#0D1016", letterSpacing: "-0.5px" }}>
-                    Scanner <strong>Art. 50</strong>
+                  <span style={{ fontFamily: MONO, fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                    Esposizione fino a
+                  </span>
+                  <span style={{ fontFamily: SERIF, fontSize: 40, color: "#ffffff", letterSpacing: "-1.5px", lineHeight: 1 }}>
+                    €35M <span style={{ fontSize: 22, color: "rgba(255,255,255,0.55)" }}>/ 7%</span>
+                  </span>
+                  <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.35)", letterSpacing: "0.05em" }}>
+                    del fatturato · Art. 99 AI Act
                   </span>
                 </div>
                 <p style={{ fontSize: 14, fontWeight: 600, color: "#0D1016", marginBottom: 5 }}>
-                  Scanner Art. 50 — gratuito
+                  Calcolatore ROI — Evita le sanzioni
                 </p>
                 <p style={{ fontSize: 12.5, color: "rgba(0,0,0,0.45)", lineHeight: 1.55 }}>
-                  Scopri in 2 minuti quali obblighi di trasparenza ti riguardano.
-                  Anonimo, senza registrazione.
+                  Stima la tua esposizione e il ritorno della prevenzione in
+                  base al fatturato e al tipo di violazione.
                 </p>
               </Link>
             </div>
