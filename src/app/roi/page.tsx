@@ -39,14 +39,45 @@ export default function RoiPage() {
             o il 7% del fatturato</strong> mondiale. Calcola la tua esposizione e il ritorno
             della prevenzione: la conformità costa una frazione del rischio.
           </p>
+
+          {/* Urgenza — date reali di applicazione */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 28 }}>
+            {[
+              { d: "2 feb 2025", t: "Pratiche vietate già sanzionabili" },
+              { d: "2 ago 2025", t: "Obblighi GPAI in vigore" },
+              { d: "2 ago 2026", t: "Alto rischio (Annex III)" },
+            ].map((x) => (
+              <div key={x.d} style={{ display: "inline-flex", alignItems: "center", gap: 9, background: "#ffffff", border: "1px solid rgba(0,0,0,0.09)", borderRadius: 999, padding: "8px 15px" }}>
+                <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#0B3D2E" }} />
+                <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, color: "#0D1016" }}>{x.d}</span>
+                <span style={{ fontSize: 12, color: "rgba(0,0,0,0.5)" }}>· {x.t}</span>
+              </div>
+            ))}
+          </div>
         </section>
 
         <section style={{ maxWidth: 1000, margin: "0 auto", padding: "0 24px 40px" }}>
           <RoiCalculator />
         </section>
 
+        {/* Il costo dell'inazione — marketing */}
+        <section style={{ maxWidth: 1000, margin: "0 auto", padding: "24px 24px 8px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20 }}>
+            {[
+              { t: "Il rischio non aspetta", d: "L'esposizione è già attiva per le pratiche vietate e cresce a ogni scadenza. Ogni mese senza presidio è rischio accumulato." },
+              { t: "La prevenzione costa una frazione", d: "Un assessment strutturato vale una minima parte del massimale sanzionatorio — e protegge anche la reputazione." },
+              { t: "Validato da un avvocato", d: "Ogni valutazione è resa da un avvocato iscritto all'albo: non un output automatico, ma una posizione difendibile." },
+            ].map((c) => (
+              <div key={c.t} style={{ border: "1px solid rgba(0,0,0,0.08)", borderRadius: 14, padding: "24px 24px", background: "#ffffff" }}>
+                <p style={{ fontFamily: SERIF, fontSize: 19, fontWeight: 400, letterSpacing: "-0.4px", color: "#0D1016", marginBottom: 8 }}>{c.t}</p>
+                <p style={{ fontSize: 13.5, color: "rgba(0,0,0,0.5)", lineHeight: 1.6 }}>{c.d}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* Disclaimer + CTA */}
-        <section style={{ maxWidth: 1000, margin: "0 auto", padding: "8px 24px 80px" }}>
+        <section style={{ maxWidth: 1000, margin: "0 auto", padding: "36px 24px 80px" }}>
           <p style={{ fontFamily: MONO, fontSize: 11, color: "rgba(0,0,0,0.38)", lineHeight: 1.65, marginBottom: 32, maxWidth: 720 }}>
             Stima indicativa basata sull&rsquo;Art. 99 del Regolamento (UE) 2024/1689. Gli importi
             rappresentano il massimale teorico; l&rsquo;entità effettiva dipende dalla natura della
