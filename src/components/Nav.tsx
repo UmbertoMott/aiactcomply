@@ -10,8 +10,6 @@ const MONO  = "'DM Mono', monospace";
 // ─── Contenuti del mega-menu Risorse (risorse reali) ─────────────────────────
 const RES_CONTENUTI = [
   { label: "Blog & Articoli", href: "/risorse", desc: "Analisi e aggiornamenti sull'EU AI Act." },
-  { label: "Scadenze 2025–2028", href: "/risorse/scadenze-ai-act-aggiornate-calendario-2025-2028", desc: "Il calendario completo degli obblighi normativi." },
-  { label: "Sistemi ad alto rischio", href: "/risorse/sistema-ai-alto-rischio-annex-iii-obblighi", desc: "Annex III e obblighi per l'alto rischio." },
 ];
 
 const RES_STRUMENTI = [
