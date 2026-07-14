@@ -123,6 +123,90 @@ export async function sendWelcomeEmail(email: string, name: string): Promise<voi
   });
 }
 
+// ── Report ROI sanzioni ────────────────────────────────────────────────────
+
+export async function sendRoiReport(
+  lead: { firstName: string; lastName: string; email: string; company: string; country: string },
+  fig: {
+    esposizione: string; tier: string; fatturato: string;
+    rischio: string[]; costo: string[]; netto: string[];
+    totRischio: string; totCosto: string; totNetto: string; roi: string;
+  }
+): Promise<void> {
+  const resend = getResend();
+  const notifyEmail = process.env.WAITLIST_NOTIFY_EMAIL ?? "connect@regulaeos.com";
+
+  if (!resend) {
+    console.log(`[ROI REPORT] A: ${lead.email} (${lead.company}) — esposizione ${fig.esposizione}, ROI ${fig.roi}×`);
+    return;
+  }
+
+  const rows = [
+    { label: "Rischio atteso evitato", vals: fig.rischio, tot: fig.totRischio },
+    { label: "Costo della conformità", vals: fig.costo, tot: fig.totCosto },
+    { label: "Valore netto protetto", vals: fig.netto, tot: fig.totNetto },
+  ];
+
+  const table = `
+    <table style="width:100%;border-collapse:collapse;font-size:13px;margin:16px 0;">
+      <tr style="color:#94a3b8;">
+        <td style="padding:8px 0;"></td>
+        <td style="padding:8px 6px;text-align:right;">Anno 1</td>
+        <td style="padding:8px 6px;text-align:right;">Anno 2</td>
+        <td style="padding:8px 6px;text-align:right;">Anno 3</td>
+        <td style="padding:8px 6px;text-align:right;font-weight:600;">Totale</td>
+      </tr>
+      ${rows.map((r) => `
+        <tr style="border-top:1px solid #e2e8f0;">
+          <td style="padding:10px 0;color:#334155;">${escapeHtml(r.label)}</td>
+          ${r.vals.map((v) => `<td style="padding:10px 6px;text-align:right;color:#0f172a;">${escapeHtml(v)}</td>`).join("")}
+          <td style="padding:10px 6px;text-align:right;font-weight:700;color:#0D1016;">${escapeHtml(r.tot)}</td>
+        </tr>`).join("")}
+    </table>`;
+
+  const html = `
+    <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px; color:#0D1016;">
+      <h2 style="margin:0 0 4px;">RegulaeOS</h2>
+      <p style="color:#64748b;font-size:13px;margin:0 0 24px;">Report ROI — Prevenzione sanzioni EU AI Act</p>
+
+      <p style="font-size:15px;">Ciao <strong>${escapeHtml(lead.firstName)}</strong>, ecco il report dettagliato per <strong>${escapeHtml(lead.company)}</strong>.</p>
+
+      <div style="background:#0D1016;border-radius:12px;padding:24px;margin:20px 0;">
+        <p style="color:rgba(255,255,255,0.5);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px;">Esposizione sanzionatoria massima</p>
+        <p style="color:#fff;font-size:34px;font-weight:700;margin:0;">${escapeHtml(fig.esposizione)}</p>
+        <p style="color:rgba(255,255,255,0.5);font-size:12px;margin:8px 0 0;">${escapeHtml(fig.tier)} · Art. 99 AI Act</p>
+      </div>
+
+      <p style="font-size:14px;color:#334155;">Proiezione a 3 anni sul fatturato indicato (${escapeHtml(fig.fatturato)}):</p>
+      ${table}
+
+      <div style="background:#f1f5f9;border-radius:12px;padding:20px;margin:16px 0;text-align:center;">
+        <p style="color:#64748b;font-size:12px;margin:0 0 4px;">Ritorno sulla prevenzione (3 anni)</p>
+        <p style="font-size:32px;font-weight:700;margin:0;color:#0D1016;">${escapeHtml(fig.roi)}×</p>
+      </div>
+
+      <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com"}/prenota-demo"
+         style="display:inline-block;background:#0D1016;color:#fff;padding:13px 28px;border-radius:999px;text-decoration:none;font-weight:600;margin:12px 0;">
+        Prenota una demo con l'avvocato
+      </a>
+
+      <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
+      <p style="color:#94a3b8;font-size:11px;line-height:1.6;">
+        Stima indicativa basata sull'Art. 99 del Regolamento (UE) 2024/1689. Gli importi rappresentano il
+        massimale teorico; per le PMI si applica il minore tra i due importi. Non costituisce consulenza
+        legale personalizzata. Ricevi questa email perché hai richiesto il report su regulaeos.com.
+      </p>
+    </div>`;
+
+  await resend.emails.send({
+    from: FROM,
+    to: lead.email,
+    bcc: notifyEmail,
+    subject: `Il tuo report ROI — Esposizione ${fig.esposizione} · RegulaeOS`,
+    html,
+  });
+}
+
 // ── Waitlist notification ──────────────────────────────────────────────────
 
 export async function sendWaitlistNotification(entry: {

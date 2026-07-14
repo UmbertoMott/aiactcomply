@@ -1,25 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import Link from "next/link";
+import { TIERS, computeRoi, fmtFull, fmtCompact, type TierKey } from "@/lib/roi";
+import RoiLeadModal from "@/components/RoiLeadModal";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
 const MONO  = "'DM Mono', monospace";
-
-// Sanzioni Art. 99 EU AI Act — "il maggiore tra" importo fisso e % del fatturato mondiale.
-const TIERS = [
-  { key: "vietate",    label: "Pratiche vietate (Art. 5)",         pct: 0.07,  cap: 35_000_000, note: "Manipolazione, social scoring, biometria proibita." },
-  { key: "altorischio",label: "Obblighi alto rischio / GPAI",      pct: 0.03,  cap: 15_000_000, note: "Violazione obblighi per sistemi ad alto rischio o GPAI." },
-  { key: "info",       label: "Informazioni errate alle autorità", pct: 0.015, cap: 7_500_000,  note: "Dati falsi, incompleti o fuorvianti alle autorità." },
-] as const;
-
-// Maturità dell'enforcement: cresce mentre l'AI Act entra pienamente in vigore (2026→2028).
-const RAMP = [1, 1.5, 2];
-
-const fmtFull = (n: number) =>
-  new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
-const fmtCompact = (n: number) =>
-  new Intl.NumberFormat("it-IT", { notation: "compact", style: "currency", currency: "EUR", maximumFractionDigits: 1 }).format(n);
 
 const inputStyle: React.CSSProperties = {
   width: "100%", padding: "12px 14px", fontSize: 15, color: "#0D1016",
@@ -48,25 +35,14 @@ function Cell({ value, blurred, strong }: { value: string; blurred: boolean; str
 
 export default function RoiCalculator() {
   const [fatturato, setFatturato] = useState(10_000_000);
-  const [tierKey, setTierKey]     = useState<(typeof TIERS)[number]["key"]>("altorischio");
+  const [tierKey, setTierKey]     = useState<TierKey>("altorischio");
   const [costo, setCosto]         = useState(12_000);
   const [prob, setProb]           = useState(15); // %
   const [revealed, setRevealed]   = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const tier = TIERS.find((t) => t.key === tierKey)!;
-
-  const model = useMemo(() => {
-    const E = Math.max(tier.cap, tier.pct * (fatturato || 0)); // esposizione massima
-    const p = Math.min(Math.max(prob, 0) / 100, 1);
-    const rischio = RAMP.map((r) => E * Math.min(p * r, 1));    // rischio atteso evitato per anno
-    const costoY  = RAMP.map(() => costo);
-    const netto   = rischio.map((r, i) => r - costoY[i]);
-    const totRischio = rischio.reduce((a, b) => a + b, 0);
-    const totCosto   = costoY.reduce((a, b) => a + b, 0);
-    const totNetto   = netto.reduce((a, b) => a + b, 0);
-    const roi = totCosto > 0 ? totRischio / totCosto : 0;
-    return { E, rischio, costoY, netto, totRischio, totCosto, totNetto, roi };
-  }, [tier, fatturato, prob, costo]);
+  const model = computeRoi(fatturato, tierKey, prob, costo);
 
   const cols = (arr: number[], total: number) => [...arr, total];
 
@@ -138,7 +114,7 @@ export default function RoiCalculator() {
             </p>
           </div>
           {!revealed && (
-            <button onClick={() => setRevealed(true)}
+            <button onClick={() => setModalOpen(true)}
               style={{
                 flexShrink: 0, fontFamily: MONO, fontSize: 12, fontWeight: 600,
                 color: "#ffffff", background: "#0D1016", border: "none",
@@ -206,6 +182,14 @@ export default function RoiCalculator() {
           </div>
         )}
       </div>
+
+      {modalOpen && (
+        <RoiLeadModal
+          calc={{ fatturato, tierKey, prob, costo }}
+          onSuccess={() => { setRevealed(true); setModalOpen(false); }}
+          onClose={() => setModalOpen(false)}
+        />
+      )}
 
       <style>{`
         @media (max-width: 820px) {
