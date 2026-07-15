@@ -4,7 +4,7 @@
 export const TIERS = [
   { key: "vietate",    label: "Pratiche vietate (Art. 5)",         pct: 0.07,  cap: 35_000_000, note: "Manipolazione, social scoring, biometria proibita." },
   { key: "altorischio",label: "Obblighi alto rischio / GPAI",      pct: 0.03,  cap: 15_000_000, note: "Violazione obblighi per sistemi ad alto rischio o GPAI." },
-  { key: "info",       label: "Informazioni errate alle autorità", pct: 0.015, cap: 7_500_000,  note: "Dati falsi, incompleti o fuorvianti alle autorità." },
+  { key: "info",       label: "Informazioni errate alle autorità", pct: 0.01,  cap: 7_500_000,  note: "Dati falsi, incompleti o fuorvianti alle autorità (Art. 99.5: 1%)." },
 ] as const;
 
 export type TierKey = (typeof TIERS)[number]["key"];

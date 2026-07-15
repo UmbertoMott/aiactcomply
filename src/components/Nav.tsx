@@ -97,6 +97,13 @@ export default function Nav() {
 
         <div className="flex items-center gap-3">
           <Link
+            href="/login"
+            className="text-[13px] transition-colors hover:text-[#0D1016]"
+            style={{ color: "rgba(0,0,0,0.42)" }}
+          >
+            Accedi
+          </Link>
+          <Link
             href="/prenota-demo"
             className="inline-flex text-[13px] font-medium rounded-full px-5 py-2 transition-opacity hover:opacity-80"
             style={{ background: "#0D1016", color: "#ffffff", letterSpacing: "-0.2px" }}
