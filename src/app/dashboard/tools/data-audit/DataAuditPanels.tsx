@@ -4,6 +4,7 @@ import { CSSProperties } from "react";
 import type { DataAuditRecord, DatasetProfile, FairnessReport, RepresentativenessCheck } from "@/lib/data-audit/data-audit-types";
 import { qualityScorecard } from "@/lib/data-audit/csv-profiler";
 import { computeFairness, computeRepresentativeness, type Row, MIN_CELL } from "@/lib/data-audit/fairness";
+import { analyzeFairnessNarrative } from "@/app/actions/dataAuditActions";
 
 const T = {
   text: "#0D1016", muted: "rgba(0,0,0,0.42)", faint: "rgba(0,0,0,0.22)", border: "rgba(0,0,0,0.08)",
@@ -54,7 +55,10 @@ export function QualityScorecard({ datasets }: { datasets: DatasetProfile[] }) {
 }
 
 // ═══ §4 Fairness Panel ══════════════════════════════════════════════════════
-export function FairnessPanel({ datasets, rowsById }: { datasets: DatasetProfile[]; rowsById: Record<string, Row[]> }) {
+export function FairnessPanel({ datasets, rowsById, systemName, intendedPurpose, onReport }: {
+  datasets: DatasetProfile[]; rowsById: Record<string, Row[]>;
+  systemName: string; intendedPurpose: string; onReport: (r: FairnessReport) => void;
+}) {
   const withRows = datasets.filter(d => rowsById[d.id]?.length);
   const [dsId, setDsId] = useState(withRows[0]?.id ?? "");
   const ds = datasets.find(d => d.id === dsId);
@@ -64,6 +68,9 @@ export function FairnessPanel({ datasets, rowsById }: { datasets: DatasetProfile
   const [gtCol, setGtCol] = useState("");
   const [protectedCol2, setProtectedCol2] = useState("");
   const [report, setReport] = useState<FairnessReport | null>(null);
+  const [narrative, setNarrative] = useState<string | null>(null);
+  const [aiConfirmed, setAiConfirmed] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
 
   const cols = ds?.columns ?? [];
   const sensitiveCols = cols.filter(c => c.sensitiveFlagConfirmed);
@@ -72,11 +79,29 @@ export function FairnessPanel({ datasets, rowsById }: { datasets: DatasetProfile
   function run() {
     const rows = rowsById[dsId];
     if (!rows || !protectedCol || !outcomeCol || !positive) return;
-    setReport(computeFairness(rows, {
+    const rep = computeFairness(rows, {
       datasetId: dsId, protectedColumn: protectedCol, outcomeColumn: outcomeCol,
       positiveOutcomeValue: positive, groundTruthColumn: gtCol || undefined,
       protectedColumn2: protectedCol2 || undefined,
-    }));
+    });
+    setReport(rep);
+    setNarrative(null);
+    setAiConfirmed(false);
+    onReport(rep);
+  }
+
+  async function genNarrative() {
+    if (!report) return;
+    setAiLoading(true);
+    try {
+      const res = await analyzeFairnessNarrative({ systemName, intendedPurpose, fairness: report });
+      setNarrative(res.narrative);
+      setAiConfirmed(false);
+    } catch {
+      setNarrative("Errore nella generazione del commento AI.");
+    } finally {
+      setAiLoading(false);
+    }
   }
 
   const riskColor: Record<string, string> = { low: T.green, medium: T.amber, high: T.red, critical: T.red };
@@ -168,6 +193,31 @@ export function FairnessPanel({ datasets, rowsById }: { datasets: DatasetProfile
                   : <>Equal Opportunity / Equalized Odds: <b>non calcolabili senza colonna ground-truth</b>.</>}
               </div>
 
+              {/* §8 Commento AI — solo su aggregati, badge ✦ fino ad accettazione */}
+              <div className="mt-3 pt-3" style={{ borderTop: `1px solid ${T.border}` }}>
+                {!narrative ? (
+                  <button onClick={genNarrative} disabled={aiLoading}
+                    className="text-[12px] font-medium px-3 py-1.5 rounded-lg"
+                    style={{ background: T.dark, color: "#fff", border: "none", cursor: "pointer", opacity: aiLoading ? 0.6 : 1 }}>
+                    {aiLoading ? "Generazione…" : "✦ Genera commento AI"}
+                  </button>
+                ) : (
+                  <div style={{ background: "#fafaf9", border: `1px solid ${T.border}`, borderRadius: 8, padding: 12 }}>
+                    <div className="text-[10px] mb-1" style={{ color: aiConfirmed ? T.green : T.amber, fontWeight: 600 }}>
+                      {aiConfirmed ? "✓ Confermato dall'utente" : "✦ AI — verifica e conferma"}
+                    </div>
+                    <p className="text-[12px]" style={{ color: T.text, lineHeight: 1.6 }}>{narrative}</p>
+                    {!aiConfirmed && (
+                      <button onClick={() => setAiConfirmed(true)}
+                        className="text-[11px] font-medium px-2.5 py-1 rounded-md mt-2"
+                        style={{ background: T.green, color: "#fff", border: "none", cursor: "pointer" }}>
+                        Accetta e conferma
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+
               {report.intersectional && (
                 <div className="mt-3">
                   <p className="text-[11px] font-semibold" style={{ color: T.text }}>Intersezionale (min {MIN_CELL} per cella)</p>
@@ -197,7 +247,7 @@ function Metric({ k, v }: { k: string; v: string }) {
 }
 
 // ═══ §5 Representativeness Panel ════════════════════════════════════════════
-export function RepresentativenessPanel({ datasets, rowsById }: { datasets: DatasetProfile[]; rowsById: Record<string, Row[]> }) {
+export function RepresentativenessPanel({ datasets, rowsById, onCheck }: { datasets: DatasetProfile[]; rowsById: Record<string, Row[]>; onCheck: (c: RepresentativenessCheck) => void }) {
   const withRows = datasets.filter(d => rowsById[d.id]?.length);
   const [dsId, setDsId] = useState(withRows[0]?.id ?? "");
   const ds = datasets.find(d => d.id === dsId);
@@ -215,7 +265,10 @@ export function RepresentativenessPanel({ datasets, rowsById }: { datasets: Data
     const rows = rowsById[dsId];
     if (!rows || !col) return;
     const reference = groups.map(g => ({ group: g, expectedPct: parseFloat(refPct[g] ?? "") || 0 })).filter(r => r.expectedPct > 0);
-    setCheck(computeRepresentativeness(rows, col, reference, source || undefined));
+    const c = computeRepresentativeness(rows, col, reference, source || undefined);
+    c.datasetId = dsId;
+    setCheck(c);
+    onCheck(c);
   }
 
   const verdictColor: Record<string, string> = { representative: T.green, review: T.amber, not_representative: T.red, no_reference: T.muted };

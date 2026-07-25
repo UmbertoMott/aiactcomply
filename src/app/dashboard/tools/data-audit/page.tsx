@@ -23,9 +23,12 @@ import {
   type DatasetRole,
   type GovernancePracticeRecord,
   type PracticeStatus,
+  type FairnessReport,
+  type RepresentativenessCheck,
 } from "@/lib/data-audit/data-audit-types";
-import { profileDatasetDetailed, computeDatasetFingerprint, MAX_FILE_BYTES } from "@/lib/data-audit/csv-profiler";
+import { profileDatasetDetailed, computeDatasetFingerprint, qualityScorecard, MAX_FILE_BYTES } from "@/lib/data-audit/csv-profiler";
 import type { Row } from "@/lib/data-audit/fairness";
+import { useRouter } from "next/navigation";
 import {
   QualityScorecard, FairnessPanel, RepresentativenessPanel, IsoMappingTable, exportDataGovernanceJSON,
 } from "./DataAuditPanels";
@@ -363,6 +366,43 @@ export default function DataAuditPage() {
   const [record, setRecord] = useState<DataAuditRecord>(() => loadDataAuditRecord());
   // Righe grezze in memoria (per fairness/rappresentatività) — MAI persistite né inviate.
   const [rowsById, setRowsById] = useState<Record<string, Row[]>>({});
+  const router = useRouter();
+
+  function saveFairnessReport(r: FairnessReport) {
+    const others = record.fairnessReports.filter(x => !(x.datasetId === r.datasetId && x.protectedColumn === r.protectedColumn));
+    patchRecord({ fairnessReports: [...others, r] });
+  }
+  function saveRepCheck(c: RepresentativenessCheck) {
+    const others = record.representativenessChecks.filter(x => !(x.datasetId === c.datasetId && x.column === c.column));
+    patchRecord({ representativenessChecks: [...others, c] });
+  }
+
+  function sendToDocuGen() {
+    const now = new Date().toISOString();
+    const documented = countDocumented(record);
+    const anyFairFail = record.fairnessReports.some(f => !f.fourFifthsPass || f.riskLevel === "high" || f.riskLevel === "critical");
+    writeToStorage("dataAudit", {
+      datasets: record.datasets.map(d => {
+        const s = qualityScorecard(d);
+        const frs = record.fairnessReports.filter(f => f.datasetId === d.id);
+        return {
+          name: d.fileName, source: d.role, size: `${d.rowCount.toLocaleString()} righe`,
+          biasChecked: frs.length > 0,
+          qualityScore: Math.round(s.completeness),
+          personalData: record.specialCategories.applicable === "yes",
+          issues: [
+            ...d.columns.filter(c => c.missingPercentage > 20).map(c => `${c.name}: ${c.missingPercentage}% mancanti`),
+            ...frs.map(f => `Fairness ${f.protectedColumn}: DI ${f.disparateImpactRatio}, SPD ${f.statisticalParityDiff}${f.fourFifthsPass ? "" : " — regola 4/5 FAIL"}`),
+          ],
+        };
+      }),
+      overallQuality: anyFairFail ? "fail" : documented >= 8 ? "pass" : "review",
+      completedAt: now,
+      usesSpecialCategoriesForBias: record.specialCategories.applicable === "yes",
+    });
+    showToast("Dati inviati a DocuGen — Allegato IV, Art. 10");
+    router.push("/dashboard/tools/docugen");
+  }
   const [toast, setToast] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<string | null>(() => readFromStorage<{ completedAt?: string }>("dataAudit")?.completedAt ?? null);
 
@@ -709,8 +749,9 @@ export default function DataAuditPage() {
 
       {/* ── Data Quality Scorecard · Fairness · Rappresentatività ── */}
       <QualityScorecard datasets={record.datasets} />
-      <FairnessPanel datasets={record.datasets} rowsById={rowsById} />
-      <RepresentativenessPanel datasets={record.datasets} rowsById={rowsById} />
+      <FairnessPanel datasets={record.datasets} rowsById={rowsById}
+        systemName={systemName} intendedPurpose={systemDescription} onReport={saveFairnessReport} />
+      <RepresentativenessPanel datasets={record.datasets} rowsById={rowsById} onCheck={saveRepCheck} />
 
       {/* ── 10 Governance practice cards ── */}
       <section className="mb-6">
@@ -837,6 +878,11 @@ export default function DataAuditPage() {
             className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg"
             style={{ background: "#fff", color: T.text, border: `1px solid ${T.border}`, cursor: "pointer" }}>
             <FileText size={13} /> Stampa / Salva PDF
+          </button>
+          <button onClick={sendToDocuGen} disabled={record.datasets.length === 0}
+            className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg"
+            style={{ background: "#fff", color: T.text, border: `1px solid ${T.border}`, cursor: "pointer", opacity: record.datasets.length === 0 ? 0.5 : 1 }}>
+            <ExternalLink size={13} /> Invia alla Documentazione Tecnica (DocuGen)
           </button>
         </div>
       </section>

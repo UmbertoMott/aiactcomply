@@ -1,6 +1,6 @@
 "use server";
 import { generateText } from "@/lib/rag/rag-vertex";
-import type { DatasetProfile, GovernancePracticeRecord } from "@/lib/data-audit/data-audit-types";
+import type { DatasetProfile, GovernancePracticeRecord, FairnessReport, RepresentativenessCheck } from "@/lib/data-audit/data-audit-types";
 import { DATA_GOVERNANCE_PRACTICES } from "@/lib/data-audit/data-governance-practices";
 
 // ── draftGovernancePracticeDocumentation ──────────────────────────────────
@@ -132,4 +132,46 @@ Rispondi nel formato JSON:
   catch { throw new Error("Errore parsing JSON dalla risposta AI."); }
 
   return { analyses: parsed.analyses, aiWarning: "✦ AI — verifica e conferma" };
+}
+
+// ── analyzeFairnessNarrative ──────────────────────────────────────────────
+// Commento neutro sui report di fairness/rappresentatività (SOLO metriche
+// aggregate — mai righe grezze). Non conclude conformità/non conformità.
+
+export async function analyzeFairnessNarrative(input: {
+  systemName: string;
+  intendedPurpose: string;
+  fairness: FairnessReport;
+  representativeness?: RepresentativenessCheck;
+}): Promise<{ narrative: string; aiWarning: string }> {
+  const f = input.fairness;
+  const groupsDesc = f.groups
+    .map(g => `  ${g.group}: n=${g.size}, selection rate ${(g.selectionRate * 100).toFixed(1)}%${g.tpr !== undefined ? `, TPR ${(g.tpr * 100).toFixed(1)}%` : ""}`)
+    .join("\n");
+
+  const repDesc = input.representativeness && input.representativeness.verdict !== "no_reference"
+    ? `\nRappresentatività (carattere ${input.representativeness.column}): TVD ${input.representativeness.totalVariationDistance}, verdetto ${input.representativeness.verdict}. Scarti per gruppo: ${input.representativeness.perGroupGap.map(g => `${g.group} ${g.gapPct}%`).join(", ")}.`
+    : "";
+
+  const prompt = `Sei un esperto di equità algoritmica e conformità AI Act UE (Art. 10(2)(f), Art. 10(3) [verify against current AI Act text]).
+
+Sistema AI: ${input.systemName}. Finalità: ${input.intendedPurpose}.
+
+Report di fairness (metriche aggregate deterministiche — nessun dato grezzo) sul carattere protetto "${f.protectedColumn}", esito "${f.outcomeColumn}" (valore positivo "${f.positiveOutcomeValue}"):
+Gruppi:
+${groupsDesc}
+Statistical Parity Diff: ${f.statisticalParityDiff}. Disparate Impact: ${f.disparateImpactRatio} (regola 4/5 ${f.fourFifthsPass ? "superata" : "NON superata"}). Rischio: ${f.riskLevel}.
+${f.groundTruthAvailable ? `Equal Opportunity Diff: ${f.equalOpportunityDiff}, Equalized Odds Diff: ${f.equalizedOddsDiff}.` : "Ground truth non disponibile: EOD/equalized odds non calcolati."}${repDesc}
+
+Scrivi un paragrafo neutro (4-6 frasi) che:
+1. Descrive gli squilibri osservati usando i numeri forniti
+2. Segnala i punti che meritano approfondimento, senza affermazioni categoriche
+3. Invita alla verifica umana
+4. NON conclude conformità/non conformità (giudizio riservato all'avvocato)
+Ogni citazione termina con [verificare sul testo AI Act vigente].
+
+Rispondi SOLO con il testo, senza intestazioni.`;
+
+  const text = await generateText(prompt);
+  return { narrative: text.trim(), aiWarning: "✦ AI — verifica e conferma" };
 }
