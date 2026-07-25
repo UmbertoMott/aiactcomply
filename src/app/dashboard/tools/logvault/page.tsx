@@ -25,7 +25,6 @@ import {
   type TraceabilityCoverageRecord, type BiometricLogRequirementCoverage,
 } from "@/lib/logvault/logvault-types";
 import { useScopedStorage } from "@/lib/hooks/useScopedStorage";
-// Note: logvault-engine.ts is preserved for chain-verification utilities used by other tools.
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 const T = {
