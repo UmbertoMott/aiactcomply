@@ -1,56 +1,58 @@
-// CSV profiling — client-side, pure functions, no I/O.
-// Il file CSV viene elaborato in memoria; solo le statistiche aggregate
-// (DatasetProfile) vengono persistite. Nessuna riga grezza è mai salvata.
-import type { ColumnProfile, ColumnType, DatasetProfile } from "./data-audit-types";
+// CSV/TSV profiling — client-side, pure functions, no I/O.
+// Il file viene elaborato in memoria nel browser; solo le statistiche aggregate
+// (DatasetProfile) vengono persistite. Nessuna riga grezza è mai salvata né inviata.
+import Papa from "papaparse";
+import type { ColumnProfile, ColumnType, DatasetProfile, DataQualityScorecard } from "./data-audit-types";
 import { detectSensitiveHint } from "./data-governance-practices";
 
-const MISSING_VALUES = new Set(["", "na", "n/a", "null", "none", "-", "nan", "undefined"]);
+export const MAX_ROWS = 200_000;
+export const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
+const MISSING_VALUES = new Set(["", "na", "n/a", "null", "none", "-", "nan", "undefined"]);
 function isMissing(val: string): boolean {
-  return MISSING_VALUES.has(val.toLowerCase().trim());
+  return MISSING_VALUES.has((val ?? "").toLowerCase().trim());
 }
 
 function tryParseNumber(val: string): number | null {
-  // Support both . and , as decimal separator
-  const normalized = val.trim().replace(/,/g, ".");
+  const normalized = val.trim().replace(/\s/g, "").replace(/,/g, ".");
+  if (normalized === "" || /[^0-9.\-+eE]/.test(normalized)) return null;
   const n = parseFloat(normalized);
   return isNaN(n) ? null : n;
 }
 
 const BOOL_VALUES = new Set(["true", "false", "0", "1", "si", "sì", "no", "yes"]);
 const DATE_PATTERNS = [
-  /^\d{4}-\d{2}-\d{2}(T.*)?$/,           // ISO 8601 / YYYY-MM-DD
-  /^\d{2}\/\d{2}\/\d{4}$/,               // DD/MM/YYYY
-  /^\d{2}-\d{2}-\d{4}$/,                  // DD-MM-YYYY
-  /^\d{4}\/\d{2}\/\d{2}$/,               // YYYY/MM/DD
+  /^\d{4}-\d{2}-\d{2}(T.*)?$/,
+  /^\d{2}\/\d{2}\/\d{4}$/,
+  /^\d{2}-\d{2}-\d{4}$/,
+  /^\d{4}\/\d{2}\/\d{2}$/,
 ];
+const isDate = (v: string) => DATE_PATTERNS.some(p => p.test(v.trim()));
 
 function inferType(values: string[]): ColumnType {
   const nonMissing = values.filter(v => !isMissing(v));
   if (nonMissing.length === 0) return "unknown";
-
   const sample = nonMissing.slice(0, Math.min(nonMissing.length, 500));
   const total = sample.length;
-
-  // Boolean
   if (sample.every(v => BOOL_VALUES.has(v.toLowerCase().trim()))) return "boolean";
-
-  // Numeric
-  const numericCount = sample.filter(v => tryParseNumber(v) !== null).length;
-  if (numericCount / total >= 0.9) return "numeric";
-
-  // Datetime
-  const dateCount = sample.filter(v => DATE_PATTERNS.some(p => p.test(v.trim()))).length;
-  if (dateCount / total >= 0.9) return "datetime";
-
-  // Categorical (≤50 unique or ≤5% of total)
+  if (sample.filter(v => tryParseNumber(v) !== null).length / total >= 0.9) return "numeric";
+  if (sample.filter(v => isDate(v)).length / total >= 0.9) return "datetime";
   const unique = new Set(nonMissing.map(v => v.trim())).size;
   if (unique <= 50 || unique / nonMissing.length <= 0.05) return "categorical";
-
   return "text";
 }
 
-function numericStats(values: number[]): ColumnProfile["numericStats"] {
+// Conta i valori non conformi al tipo dominante inferito (ISO/IEC 5259 consistency).
+function countTypeErrors(type: ColumnType, nonMissing: string[]): number {
+  switch (type) {
+    case "numeric":  return nonMissing.filter(v => tryParseNumber(v) === null).length;
+    case "boolean":  return nonMissing.filter(v => !BOOL_VALUES.has(v.toLowerCase().trim())).length;
+    case "datetime": return nonMissing.filter(v => !isDate(v)).length;
+    default:         return 0; // categorical/text: qualunque stringa è ammessa
+  }
+}
+
+function numericStats(values: number[]): NonNullable<ColumnProfile["numericStats"]> | undefined {
   if (values.length === 0) return undefined;
   const sorted = [...values].sort((a, b) => a - b);
   const min = sorted[0];
@@ -60,7 +62,11 @@ function numericStats(values: number[]): ColumnProfile["numericStats"] {
   const median = sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
   const variance = values.reduce((a, b) => a + (b - mean) ** 2, 0) / values.length;
   const stdDev = Math.sqrt(variance);
-  return { min: +min.toFixed(4), max: +max.toFixed(4), mean: +mean.toFixed(4), median: +median.toFixed(4), stdDev: +stdDev.toFixed(4) };
+  const outlierCount = stdDev > 0 ? values.filter(v => Math.abs((v - mean) / stdDev) > 3).length : 0;
+  return {
+    min: +min.toFixed(4), max: +max.toFixed(4), mean: +mean.toFixed(4),
+    median: +median.toFixed(4), stdDev: +stdDev.toFixed(4), outlierCount,
+  };
 }
 
 function categoricalDistribution(values: string[]): NonNullable<ColumnProfile["categoricalDistribution"]> {
@@ -79,17 +85,13 @@ function profileColumn(name: string, rawValues: string[]): ColumnProfile {
   const nonMissing = rawValues.filter(v => !isMissing(v));
   const inferredType = inferType(rawValues);
   const uniqueValueCount = new Set(nonMissing.map(v => v.trim())).size;
-
+  const typeErrorCount = countTypeErrors(inferredType, nonMissing);
   const sensitiveHint = detectSensitiveHint(name);
-  const flaggedAsSensitive = sensitiveHint !== null;
 
   const col: ColumnProfile = {
-    name,
-    inferredType,
-    missingCount,
-    missingPercentage,
-    uniqueValueCount,
-    flaggedAsSensitive,
+    name, inferredType, missingCount, missingPercentage, uniqueValueCount,
+    typeErrorCount,
+    flaggedAsSensitive: sensitiveHint !== null,
     sensitiveCategoryGuess: sensitiveHint ?? undefined,
     sensitiveFlagConfirmed: false,
   };
@@ -98,47 +100,58 @@ function profileColumn(name: string, rawValues: string[]): ColumnProfile {
     const nums = nonMissing.map(tryParseNumber).filter((n): n is number => n !== null);
     col.numericStats = numericStats(nums);
   }
-
   if (inferredType === "categorical" || inferredType === "boolean") {
     col.categoricalDistribution = categoricalDistribution(nonMissing);
   }
-
   return col;
 }
 
-export function parseCSVText(text: string): { headers: string[]; rows: Record<string, string>[] } {
-  const lines = text.trim().split(/\r?\n/);
-  if (lines.length < 2) return { headers: [], rows: [] };
+// ── Parsing robusto via papaparse (gestisce quote, newline nei campi, BOM, delim auto) ──
 
-  // Simple CSV parser: handles quoted fields
-  function parseLine(line: string): string[] {
-    const result: string[] = [];
-    let current = "";
-    let inQuotes = false;
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      if (ch === '"') {
-        if (inQuotes && line[i + 1] === '"') { current += '"'; i++; }
-        else inQuotes = !inQuotes;
-      } else if (ch === "," && !inQuotes) {
-        result.push(current);
-        current = "";
-      } else {
-        current += ch;
-      }
-    }
-    result.push(current);
-    return result;
-  }
+export interface ParseResult {
+  headers: string[];
+  rows: Record<string, string>[];
+  droppedRowCount: number;
+  duplicateColumns: string[];
+  delimiter: string;
+}
 
-  const headers = parseLine(lines[0]).map(h => h.trim().replace(/^"|"$/g, ""));
-  const rows = lines.slice(1).filter(l => l.trim()).map(line => {
-    const vals = parseLine(line);
-    const row: Record<string, string> = {};
-    headers.forEach((h, i) => { row[h] = (vals[i] ?? "").trim().replace(/^"|"$/g, ""); });
-    return row;
+export function parseTabular(text: string): ParseResult {
+  const clean = text.replace(/^﻿/, ""); // strip BOM
+  const res = Papa.parse<Record<string, string>>(clean, {
+    header: true,
+    skipEmptyLines: "greedy",
+    dynamicTyping: false,
+    delimiter: "", // auto-detect , ; \t |
+    transformHeader: (h) => h.trim(),
   });
-  return { headers, rows };
+  const headers = (res.meta.fields ?? []).map(h => h.trim()).filter(Boolean);
+  const seen = new Set<string>();
+  const duplicateColumns: string[] = [];
+  for (const h of headers) { if (seen.has(h)) duplicateColumns.push(h); else seen.add(h); }
+  const errorRows = new Set((res.errors ?? []).map(e => e.row));
+  const rows = (res.data ?? []).filter(r => r && Object.keys(r).length > 0);
+  return {
+    headers, rows,
+    droppedRowCount: errorRows.size,
+    duplicateColumns,
+    delimiter: res.meta.delimiter ?? ",",
+  };
+}
+
+function countDuplicateRows(rows: Record<string, string>[], headers: string[]): number {
+  const seen = new Set<string>();
+  let dup = 0;
+  for (const r of rows) {
+    const key = headers.map(h => (r[h] ?? "").trim()).join("");
+    if (seen.has(key)) dup++; else seen.add(key);
+  }
+  return dup;
+}
+
+export interface ProfileResult {
+  profile: DatasetProfile;
+  parseWarnings: { droppedRowCount: number; duplicateColumns: string[]; sampled: boolean; delimiter: string };
 }
 
 export function profileDataset(
@@ -147,24 +160,76 @@ export function profileDataset(
   fileName: string,
   csvText: string
 ): DatasetProfile {
-  const { headers, rows } = parseCSVText(csvText);
-  const columns: ColumnProfile[] = headers.map(name => {
-    const vals = rows.map(r => r[name] ?? "");
-    return profileColumn(name, vals);
-  });
+  return profileDatasetDetailed(id, role, fileName, csvText).profile;
+}
 
+export function profileDatasetDetailed(
+  id: string,
+  role: DatasetProfile["role"],
+  fileName: string,
+  csvText: string
+): ProfileResult {
+  const { headers, rows: allRows, droppedRowCount, duplicateColumns, delimiter } = parseTabular(csvText);
+
+  const totalRows = allRows.length;
+  const sampled = totalRows > MAX_ROWS;
+  const rows = sampled ? allRows.slice(0, MAX_ROWS) : allRows;
+
+  const columns: ColumnProfile[] = headers.map(name => profileColumn(name, rows.map(r => r[name] ?? "")));
   const overallMissingPercentage = columns.length > 0
     ? +(columns.reduce((s, c) => s + c.missingPercentage, 0) / columns.length).toFixed(2)
     : 0;
+  const duplicateRowCount = countDuplicateRows(rows, headers);
 
-  return {
-    id,
-    role,
-    fileName,
+  const profile: DatasetProfile = {
+    id, role, fileName,
     uploadedAt: new Date().toISOString(),
+    analyzedAt: new Date().toISOString(),
     rowCount: rows.length,
     columnCount: headers.length,
     overallMissingPercentage,
+    duplicateRowCount,
     columns,
+    ...(sampled ? { sampledFrom: totalRows } : {}),
+    ...(droppedRowCount > 0 ? { droppedRowCount } : {}),
   };
+
+  return { profile, parseWarnings: { droppedRowCount, duplicateColumns, sampled, delimiter } };
+}
+
+// ── Data Quality Scorecard (ISO/IEC 5259 [verify]) ──────────────────────────
+
+export function qualityScorecard(profile: DatasetProfile): DataQualityScorecard {
+  const completeness = +(100 - profile.overallMissingPercentage).toFixed(1);
+  const uniqueness = profile.rowCount > 0
+    ? +(100 - (profile.duplicateRowCount / profile.rowCount) * 100).toFixed(1)
+    : 100;
+  const totalCells = profile.rowCount * Math.max(profile.columnCount, 1);
+  const typeErrors = profile.columns.reduce((s, c) => s + (c.typeErrorCount ?? 0), 0);
+  const consistency = totalCells > 0 ? +(100 - (typeErrors / totalCells) * 100).toFixed(1) : 100;
+  return { completeness, uniqueness, consistency };
+}
+
+// ── Fingerprint del dataset (SHA-256 di schema + statistiche, non dei dati grezzi) §7 ──
+
+export async function computeDatasetFingerprint(profile: DatasetProfile): Promise<string> {
+  const canonical = JSON.stringify({
+    headers: profile.columns.map(c => c.name),
+    rowCount: profile.rowCount,
+    columnCount: profile.columnCount,
+    columns: profile.columns.map(c => ({
+      name: c.name,
+      inferredType: c.inferredType,
+      missingPct: Math.round(c.missingPercentage),
+      uniqueCount: c.uniqueValueCount ?? 0,
+    })),
+  });
+  if (typeof crypto === "undefined" || !crypto.subtle) {
+    // Fallback deterministico se subtle non disponibile (ambiente non-browser)
+    let h = 0;
+    for (let i = 0; i < canonical.length; i++) { h = (h * 31 + canonical.charCodeAt(i)) | 0; }
+    return `nohash-${(h >>> 0).toString(16)}`;
+  }
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(canonical));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
 }
