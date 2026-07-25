@@ -10,10 +10,30 @@ export const TraceabilityCoverageRecordSchema = z.object({
   purposeId: z.string(),
   covered: CoverageStatusEnum.default("unspecified"),
   evidenceFields: z.array(z.string()).default([]),
+  coveragePct: z.number().optional(),   // §3 miglior fill-rate tra i campi mappati
   notes: z.string().optional(),
   aiConfirmed: z.boolean().default(false),
 });
 export type TraceabilityCoverageRecord = z.infer<typeof TraceabilityCoverageRecordSchema>;
+
+// ── §4 Qualità & continuità (ISO/IEC 42001 A.9 / 27001 A.8.15 [verify]) ──────
+export const LogQualityFindingsSchema = z.object({
+  timestampValidPct: z.number(),
+  outOfOrderCount: z.number(),
+  chronologicalGaps: z.array(z.object({ start: z.string(), end: z.string(), durationHours: z.number() })).default([]),
+  duplicateCount: z.number(),
+  overallFieldFillRate: z.number(),
+});
+export type LogQualityFindings = z.infer<typeof LogQualityFindingsSchema>;
+
+// ── §6 Verifica hash-chain (ISO/IEC 27037 [verify]) ─────────────────────────
+export const HashChainResultSchema = z.object({
+  status: z.enum(["verified", "broken", "no_integrity_fields"]),
+  brokenAtEntry: z.number().optional(),
+  checkedCount: z.number().default(0),
+  detectedFields: z.object({ hash: z.string().optional(), prevHash: z.string().optional(), sequence: z.string().optional() }).optional(),
+});
+export type HashChainResult = z.infer<typeof HashChainResultSchema>;
 
 export const ImportedLogSetSchema = z.object({
   id: z.string(),
@@ -24,9 +44,25 @@ export const ImportedLogSetSchema = z.object({
   dateRangeStart: z.string().optional(),
   dateRangeEnd: z.string().optional(),
   detectedFields: z.array(z.string()),
+  fieldFillRates: z.array(z.object({ field: z.string(), fillRate: z.number() })).default([]),
+  qualityFindings: LogQualityFindingsSchema.optional(),
+  integrity: HashChainResultSchema.optional(),
+  fingerprint: z.string().optional(),
+  analyzedAt: z.string().optional(),
+  sampledFrom: z.number().optional(),
   notes: z.string().optional(),
 });
 export type ImportedLogSet = z.infer<typeof ImportedLogSetSchema>;
+
+// ── §5 Ritenzione calcolata (Art. 26(6) / Art. 12 [verify]) ─────────────────
+export const RetentionAssessmentSchema = z.object({
+  role: z.enum(["provider", "deployer", "unspecified"]).default("unspecified"),
+  retentionPolicyMonths: z.number().optional(),
+  retentionSpanMonths: z.number().optional(),
+  verdict: z.enum(["pass", "below_minimum", "policy_below_span", "unknown"]).default("unknown"),
+  notes: z.string().optional(),
+});
+export type RetentionAssessment = z.infer<typeof RetentionAssessmentSchema>;
 
 export const BiometricLogRequirementCoverageSchema = z.object({
   requirementId: z.string(),
@@ -48,6 +84,7 @@ export const LogVaultRecordSchema = z.object({
   importedLogSets: z.array(ImportedLogSetSchema).default([]),
   traceabilityCoverage: z.array(TraceabilityCoverageRecordSchema).default([]),
   biometricLogging: BiometricLoggingAssessmentSchema.default({ applicable: "unspecified", requirementCoverage: [] }),
+  retention: RetentionAssessmentSchema.default({ role: "unspecified", verdict: "unknown" }),
   retentionNotes: z.string().optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
@@ -58,14 +95,14 @@ const STORAGE_KEY = "aicomply_logvault_record_v1";
 
 export function loadLogVaultRecord(): LogVaultRecord {
   if (typeof window === "undefined") {
-    return { loggingCapabilityConfirmed: "unspecified", importedLogSets: [], traceabilityCoverage: [], biometricLogging: { applicable: "unspecified", requirementCoverage: [] } };
+    return { loggingCapabilityConfirmed: "unspecified", importedLogSets: [], traceabilityCoverage: [], biometricLogging: { applicable: "unspecified", requirementCoverage: [] }, retention: { role: "unspecified", verdict: "unknown" } };
   }
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { loggingCapabilityConfirmed: "unspecified", importedLogSets: [], traceabilityCoverage: [], biometricLogging: { applicable: "unspecified", requirementCoverage: [] } };
+    if (!raw) return { loggingCapabilityConfirmed: "unspecified", importedLogSets: [], traceabilityCoverage: [], biometricLogging: { applicable: "unspecified", requirementCoverage: [] }, retention: { role: "unspecified", verdict: "unknown" } };
     return JSON.parse(raw);
   } catch {
-    return { loggingCapabilityConfirmed: "unspecified", importedLogSets: [], traceabilityCoverage: [], biometricLogging: { applicable: "unspecified", requirementCoverage: [] } };
+    return { loggingCapabilityConfirmed: "unspecified", importedLogSets: [], traceabilityCoverage: [], biometricLogging: { applicable: "unspecified", requirementCoverage: [] }, retention: { role: "unspecified", verdict: "unknown" } };
   }
 }
 

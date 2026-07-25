@@ -11,7 +11,8 @@ import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { LogvaultResult, ClassifierResult } from "@/lib/dossier/storage-schema";
 import { suggestEventSeverity } from "@/app/actions/suggestEventSeverity";
-import { parseLogFile, analyzeLogCoverage } from "@/app/actions/logvaultActions";
+import { analyzeLogCoverage } from "@/app/actions/logvaultActions";
+import { analyzeLogSet, computeRetention, MAX_LOG_FILE_BYTES, MAX_ENTRIES } from "@/lib/logvault/log-analyzer";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { TRACEABILITY_PURPOSES, BIOMETRIC_LOG_REQUIREMENTS, FIELD_NAME_HINTS, MAX_LOG_FILE_SIZE_BYTES } from "@/lib/logvault/traceability-purposes";
@@ -395,6 +396,7 @@ const EMPTY_RECORD: LogVaultRecord = {
   importedLogSets: [],
   traceabilityCoverage: [],
   biometricLogging: { applicable: "unspecified", requirementCoverage: [] },
+  retention: { role: "unspecified", verdict: "unknown" },
 };
 
 
@@ -490,33 +492,27 @@ export default function LogVaultPage() {
 
   // ── Import handling ────────────────────────────────────────────────────────
   async function handleFileImport(file: File) {
-    if (file.size > MAX_LOG_FILE_SIZE_BYTES) { showToast(`File troppo grande (max ${MAX_LOG_FILE_SIZE_BYTES / 1024 / 1024} MB)`, "error"); return; }
+    if (file.size > MAX_LOG_FILE_BYTES) { showToast(`File troppo grande (max ${MAX_LOG_FILE_BYTES / 1024 / 1024} MB)`, "error"); return; }
     const ext = file.name.split(".").pop()?.toLowerCase();
-    if (!["json", "ndjson", "csv"].includes(ext ?? "")) { showToast("Formato non supportato — usa .json, .ndjson o .csv", "error"); return; }
+    if (!["json", "ndjson", "jsonl", "csv", "tsv"].includes(ext ?? "")) { showToast("Formato non supportato — usa .json/.ndjson/.csv/.tsv", "error"); return; }
 
     setUploading(true);
     try {
       const text = await file.text();
-      const meta = await parseLogFile(text, file.name);
-      if (meta.entryCount === 0) { showToast("Nessuna voce valida trovata nel file", "error"); return; }
+      // Analisi interamente client-side: le voci grezze non lasciano mai il browser.
+      const { logSet, entries } = await analyzeLogSet(crypto.randomUUID(), file.name, text);
+      if (logSet.entryCount === 0) { showToast("Nessuna voce valida trovata nel file", "error"); return; }
 
-      const logSet: ImportedLogSet = {
-        id: crypto.randomUUID(),
-        fileName: file.name,
-        format: meta.format,
-        uploadedAt: new Date().toISOString(),
-        entryCount: meta.entryCount,
-        dateRangeStart: meta.dateRangeStart,
-        dateRangeEnd: meta.dateRangeEnd,
-        detectedFields: meta.detectedFields,
-      };
-
-      // Preview samples: client-only, not persisted
-      setPreviewSamples(prev => ({ ...prev, [logSet.id]: meta.previewSample }));
-      setUploadWarnings(meta.warnings);
+      // Preview: solo ≤5 voci, in sessione, mai persistite
+      const preview = entries.slice(0, 5).map(e => Object.fromEntries(Object.entries(e).map(([k, v]) => [k, v == null ? "" : String(v)])));
+      setPreviewSamples(prev => ({ ...prev, [logSet.id]: preview }));
+      const warns: string[] = [];
+      if (logSet.sampledFrom) warns.push(`Analisi su un campione di ${MAX_ENTRIES.toLocaleString()} voci su ${logSet.sampledFrom.toLocaleString()} totali`);
+      if (logSet.notes) warns.push(logSet.notes);
+      setUploadWarnings(warns);
 
       patchRecord({ importedLogSets: [...record.importedLogSets, logSet] });
-      showToast(`${meta.entryCount.toLocaleString()} voci importate — ${meta.detectedFields.length} campi rilevati`);
+      showToast(`${logSet.entryCount.toLocaleString()} voci importate — ${logSet.detectedFields.length} campi rilevati`);
     } catch (e) {
       showToast(e instanceof Error ? e.message : "Errore durante il parsing", "error");
     } finally {
