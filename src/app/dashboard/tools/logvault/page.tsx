@@ -12,7 +12,10 @@ import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { LogvaultResult, ClassifierResult } from "@/lib/dossier/storage-schema";
 import { suggestEventSeverity } from "@/app/actions/suggestEventSeverity";
 import { analyzeLogCoverage } from "@/app/actions/logvaultActions";
-import { analyzeLogSet, computeRetention, MAX_LOG_FILE_BYTES, MAX_ENTRIES } from "@/lib/logvault/log-analyzer";
+import { analyzeLogSet, MAX_LOG_FILE_BYTES, MAX_ENTRIES } from "@/lib/logvault/log-analyzer";
+import {
+  CoverageFillRatePanel, LogQualityCard, IntegrityCard, RetentionPanel, LogIsoTable, exportLogConformityJSON,
+} from "./LogVaultPanels";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { TRACEABILITY_PURPOSES, BIOMETRIC_LOG_REQUIREMENTS, FIELD_NAME_HINTS, MAX_LOG_FILE_SIZE_BYTES } from "@/lib/logvault/traceability-purposes";
@@ -976,10 +979,16 @@ export default function LogVaultPage() {
             </>
           )}
 
+          {/* ── §3 copertura fill-rate · §4 qualità · §6 integrità · §5 ritenzione ── */}
+          <CoverageFillRatePanel record={record} />
+          <LogQualityCard logSets={record.importedLogSets} />
+          <IntegrityCard logSets={record.importedLogSets} />
+          <RetentionPanel record={record} onChange={(r) => patchRecord({ retention: r })} />
+
           {/* ── Retention notes ────────────────────────────────────────────── */}
           <section className="mb-6 rounded-xl p-4" style={card}>
             <h2 className="text-[12px] font-semibold mb-1" style={{ color: T.text }}>
-              Politica di conservazione — Art. 26(6) [verify against current AI Act text]
+              Note di conservazione (descrittive) — Art. 26(6) [verify against current AI Act text]
             </h2>
             <p className="text-[11px] mb-3" style={{ color: T.muted }}>
               Documenta la politica di conservazione dei log adottata dal deployer/provider (durata, sistema utilizzato).
@@ -993,6 +1002,27 @@ export default function LogVaultPage() {
               <Link href="/dashboard/tools/deployer-dashboard" className="inline-flex items-center gap-1 text-[11px] font-medium" style={{ color: T.blue }}>
                 <ExternalLink size={11} /> Deployer Dashboard — obbligo log_retention (Art. 26(6))
               </Link>
+            </div>
+          </section>
+
+          {/* ── §10 Standard ISO ── */}
+          <LogIsoTable />
+
+          {/* ── §9 Export Log Conformity Statement ── */}
+          <section className="mb-6 rounded-xl p-4" style={card}>
+            <h2 className="text-[12px] font-semibold mb-1" style={{ color: T.text }}>Evidenza — Log Conformity Statement</h2>
+            <p className="text-[11px] mb-3" style={{ color: T.muted }}>Art. 12 / Allegato IV [verify]. Copertura, qualità, ritenzione, integrità, fingerprint, timestamp.</p>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => exportLogConformityJSON(record)}
+                className="text-[12px] font-medium px-3 py-1.5 rounded-lg"
+                style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
+                Esporta JSON
+              </button>
+              <button onClick={() => window.print()}
+                className="text-[12px] font-medium px-3 py-1.5 rounded-lg"
+                style={{ background: "#fff", color: T.text, border: `1px solid ${T.border}`, cursor: "pointer" }}>
+                Stampa / Salva PDF
+              </button>
             </div>
           </section>
 
