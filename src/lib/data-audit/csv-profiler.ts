@@ -151,7 +151,8 @@ function countDuplicateRows(rows: Record<string, string>[], headers: string[]): 
 
 export interface ProfileResult {
   profile: DatasetProfile;
-  parseWarnings: { droppedRowCount: number; duplicateColumns: string[]; sampled: boolean; delimiter: string };
+  rows: Record<string, string>[];   // righe (campionate) in memoria — per fairness/rappresentatività, mai persistite
+  parseWarnings: { droppedRowCount: number; duplicateColumns: string[]; sampled: boolean; delimiter: string; totalRows: number };
 }
 
 export function profileDataset(
@@ -194,7 +195,7 @@ export function profileDatasetDetailed(
     ...(droppedRowCount > 0 ? { droppedRowCount } : {}),
   };
 
-  return { profile, parseWarnings: { droppedRowCount, duplicateColumns, sampled, delimiter } };
+  return { profile, rows, parseWarnings: { droppedRowCount, duplicateColumns, sampled, delimiter, totalRows } };
 }
 
 // ── Data Quality Scorecard (ISO/IEC 5259 [verify]) ──────────────────────────

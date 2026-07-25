@@ -13,7 +13,6 @@ import { SystemSelector } from "@/components/compliance/SystemSelector";
 import {
   DATA_GOVERNANCE_PRACTICES,
   SPECIAL_CATEGORIES_MODULE,
-  MAX_CSV_SIZE_BYTES,
 } from "@/lib/data-audit/data-governance-practices";
 import {
   loadDataAuditRecord,
@@ -25,7 +24,11 @@ import {
   type GovernancePracticeRecord,
   type PracticeStatus,
 } from "@/lib/data-audit/data-audit-types";
-import { profileDataset } from "@/lib/data-audit/csv-profiler";
+import { profileDatasetDetailed, computeDatasetFingerprint, MAX_FILE_BYTES } from "@/lib/data-audit/csv-profiler";
+import type { Row } from "@/lib/data-audit/fairness";
+import {
+  QualityScorecard, FairnessPanel, RepresentativenessPanel, IsoMappingTable, exportDataGovernanceJSON,
+} from "./DataAuditPanels";
 import {
   draftGovernancePracticeDocumentation,
   analyzeBiasIndicators,
@@ -53,7 +56,7 @@ interface DatasetUploadProps {
   roleLabel: string;
   optional: boolean;
   profile: DatasetProfile | null;
-  onProfile: (p: DatasetProfile) => void;
+  onProfile: (p: DatasetProfile, rows: Row[]) => void;
   onRemove: () => void;
 }
 
@@ -61,20 +64,28 @@ function DatasetUpload({ role, roleLabel, optional, profile, onProfile, onRemove
   const [dragging, setDragging] = useState(false);
   const [parsing, setParsing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [warn, setWarn] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function processFile(file: File) {
-    setError(null);
-    if (!file.name.endsWith(".csv")) { setError("Solo file .csv"); return; }
-    if (file.size > MAX_CSV_SIZE_BYTES) { setError(`File troppo grande (max ${MAX_CSV_SIZE_BYTES / 1024 / 1024} MB)`); return; }
+    setError(null); setWarn(null);
+    const lower = file.name.toLowerCase();
+    if (!lower.endsWith(".csv") && !lower.endsWith(".tsv")) { setError("Carica un file CSV o TSV"); return; }
+    if (file.size > MAX_FILE_BYTES) { setError(`File troppo grande (max ${MAX_FILE_BYTES / 1024 / 1024} MB)`); return; }
     setParsing(true);
     try {
       const text = await file.text();
-      const p = profileDataset(crypto.randomUUID(), role, file.name, text);
-      // text is processed and immediately discarded — only profile (stats) is kept
-      onProfile(p);
+      const { profile: p, rows, parseWarnings } = profileDatasetDetailed(crypto.randomUUID(), role, file.name, text);
+      p.fingerprint = await computeDatasetFingerprint(p);
+      // il testo grezzo è elaborato in memoria e scartato; solo il profilo (stats) è persistito.
+      const msgs: string[] = [];
+      if (parseWarnings.sampled) msgs.push(`Analisi su un campione di 200.000 righe su ${parseWarnings.totalRows.toLocaleString()} totali`);
+      if (parseWarnings.droppedRowCount > 0) msgs.push(`${parseWarnings.droppedRowCount} righe malformate scartate`);
+      if (parseWarnings.duplicateColumns.length) msgs.push(`Colonne duplicate: ${parseWarnings.duplicateColumns.join(", ")}`);
+      setWarn(msgs.length ? msgs.join(" · ") : null);
+      onProfile(p, rows);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Errore parsing CSV");
+      setError(e instanceof Error ? e.message : "Errore parsing del file");
     } finally {
       setParsing(false);
     }
@@ -146,12 +157,13 @@ function DatasetUpload({ role, roleLabel, optional, profile, onProfile, onRemove
           {optional && <span className="ml-1 text-[10px]" style={{ color: T.muted }}>(non obbligatorio)</span>}
         </p>
         <p className="text-[11px]" style={{ color: T.muted }}>
-          {parsing ? "Profiling colonne..." : "Trascina un .csv o clicca — max 25 MB"}
+          {parsing ? "Profiling colonne..." : "Trascina un .csv/.tsv o clicca — max 50 MB"}
         </p>
-        <input ref={inputRef} type="file" accept=".csv" className="hidden"
+        <input ref={inputRef} type="file" accept=".csv,.tsv" className="hidden"
           onChange={e => { const f = e.target.files?.[0]; if (f) processFile(f); }} />
       </div>
       {error && <p className="text-[11px] mt-1" style={{ color: T.red }}>{error}</p>}
+      {warn && <p className="text-[11px] mt-1" style={{ color: T.amber }}>{warn}</p>}
     </div>
   );
 }
@@ -349,6 +361,8 @@ function PracticeCard({ def, rec, pending, onUpdate, onAcceptAi, onDraft, drafti
 
 export default function DataAuditPage() {
   const [record, setRecord] = useState<DataAuditRecord>(() => loadDataAuditRecord());
+  // Righe grezze in memoria (per fairness/rappresentatività) — MAI persistite né inviate.
+  const [rowsById, setRowsById] = useState<Record<string, Row[]>>({});
   const [toast, setToast] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<string | null>(() => readFromStorage<{ completedAt?: string }>("dataAudit")?.completedAt ?? null);
 
@@ -372,13 +386,20 @@ export default function DataAuditPage() {
   }
 
   // Dataset operations
-  function upsertDataset(profile: DatasetProfile) {
+  function upsertDataset(profile: DatasetProfile, rows: Row[]) {
+    const prev = record.datasets.find(d => d.role === profile.role);
+    setRowsById(m => { const next = { ...m, [profile.id]: rows }; if (prev && prev.id !== profile.id) delete next[prev.id]; return next; });
     const datasets = record.datasets.filter(d => d.role !== profile.role);
     patchRecord({ datasets: [...datasets, profile] });
-    showToast(`Dataset ${profile.role} caricato — ${profile.rowCount.toLocaleString()} righe, ${profile.columnCount} colonne`);
+    const changed = prev?.fingerprint && profile.fingerprint && prev.fingerprint !== profile.fingerprint;
+    showToast(changed
+      ? `Dataset ${profile.role} cambiato dall'ultima analisi (${prev!.fingerprint!.slice(0, 8)}… → ${profile.fingerprint!.slice(0, 8)}…): ripeti l'audit`
+      : `Dataset ${profile.role} caricato — ${profile.rowCount.toLocaleString()} righe, ${profile.columnCount} colonne`);
   }
 
   function removeDataset(role: DatasetRole) {
+    const prev = record.datasets.find(d => d.role === role);
+    if (prev) setRowsById(m => { const next = { ...m }; delete next[prev.id]; return next; });
     patchRecord({ datasets: record.datasets.filter(d => d.role !== role) });
   }
 
@@ -602,7 +623,7 @@ export default function DataAuditPage() {
         </div>
         <p className="text-[11px] mb-3" style={{ color: T.muted }}>
           Il sistema è stato sviluppato tramite addestramento di modelli (es. machine learning), o tramite altre tecniche (es. sistemi a regole)?
-          Se "altre tecniche", solo il dataset di test è obbligatorio.
+          Se &quot;altre tecniche&quot;, solo il dataset di test è obbligatorio.
         </p>
         <div className="flex gap-2 flex-wrap">
           {([
@@ -685,6 +706,11 @@ export default function DataAuditPage() {
           </div>
         )}
       </section>
+
+      {/* ── Data Quality Scorecard · Fairness · Rappresentatività ── */}
+      <QualityScorecard datasets={record.datasets} />
+      <FairnessPanel datasets={record.datasets} rowsById={rowsById} />
+      <RepresentativenessPanel datasets={record.datasets} rowsById={rowsById} />
 
       {/* ── 10 Governance practice cards ── */}
       <section className="mb-6">
@@ -793,6 +819,27 @@ export default function DataAuditPage() {
           </button>
         </div>
       )}
+
+      {/* ── Standard ISO applicati ── */}
+      <IsoMappingTable />
+
+      {/* ── Export Data Governance Statement (Art. 11 / Allegato IV) ── */}
+      <section className="mb-6">
+        <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Evidenza — Data Governance Statement</h2>
+        <p className="text-[11px] mb-3" style={{ color: T.muted }}>Art. 11 / Allegato IV [verify]. Include scorecard, fairness, rappresentatività, pratiche, fingerprint, timestamp.</p>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => exportDataGovernanceJSON(record)}
+            className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg"
+            style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
+            <FileText size={13} /> Esporta JSON
+          </button>
+          <button onClick={() => window.print()}
+            className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg"
+            style={{ background: "#fff", color: T.text, border: `1px solid ${T.border}`, cursor: "pointer" }}>
+            <FileText size={13} /> Stampa / Salva PDF
+          </button>
+        </div>
+      </section>
 
       {/* Save */}
       <div className="flex justify-end">
