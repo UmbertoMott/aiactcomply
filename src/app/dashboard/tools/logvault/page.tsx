@@ -16,7 +16,7 @@ import { analyzeLogSet, MAX_LOG_FILE_BYTES, MAX_ENTRIES } from "@/lib/logvault/l
 import {
   CoverageFillRatePanel, LogQualityCard, IntegrityCard, RetentionPanel, LogIsoTable, exportLogConformityJSON,
 } from "./LogVaultPanels";
-import { ToolPhaseBar, type ToolPhase } from "@/components/compliance/ToolPhaseBar";
+import { ToolPhaseBar, PhaseHeading, type ToolPhase } from "@/components/compliance/ToolPhaseBar";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { TRACEABILITY_PURPOSES, BIOMETRIC_LOG_REQUIREMENTS, FIELD_NAME_HINTS, MAX_LOG_FILE_SIZE_BYTES } from "@/lib/logvault/traceability-purposes";
@@ -742,13 +742,13 @@ export default function LogVaultPage() {
       {record.loggingCapabilityConfirmed === "no" && (
         <div className="rounded-xl p-4 mb-6" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
           <p className="text-[12px] font-semibold mb-2" style={{ color: T.amber }}>
-            ⚠ Il sistema non dispone di logging — art. 12(1) [verify against current AI Act text] richiede registrazione automatica
+            ⚠ Il sistema non dispone di logging — art. 12(1) [Reg. (UE) 2024/1689] richiede registrazione automatica
           </p>
           <p className="text-[11px] leading-relaxed" style={{ color: T.text }}>
             Richiedere al provider del sistema AI di implementare funzionalità di logging automatico degli eventi. I sistemi ad alto rischio sono obbligati a mantenere log che consentano alle autorità competenti di verificare la conformità dopo la messa in servizio.
           </p>
           <p className="text-[11px] mt-2" style={{ color: T.muted }}>
-            Riferimento: Art. 12(1), Art. 79(1) [verify against current AI Act text] — Segnalare al provider e documentare la richiesta in Risk Manager.
+            Riferimento: Art. 12(1) [Reg. (UE) 2024/1689], Art. 79(1) [verify] — Segnalare al provider e documentare la richiesta in Risk Manager.
           </p>
         </div>
       )}
@@ -760,7 +760,7 @@ export default function LogVaultPage() {
           <div className="flex items-start gap-2 rounded-lg p-3 mb-5 text-[11px]" style={{ background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
             <Shield size={12} className="mt-0.5 flex-shrink-0" style={{ color: T.blue }} />
             <span style={{ color: T.muted }}>
-              <strong style={{ color: T.blue }}>Privacy log:</strong> LogVault verifica la struttura dei tuoi log rispetto agli obblighi dell&apos;Art. 12. Non sostituisce il sistema di conservazione log del titolare — l&apos;obbligo di conservazione (Art. 26(6) [verify against current AI Act text]) resta in capo al deployer/provider. I dati grezzi non vengono persistiti: solo metadati aggregati (campi, conteggi, intervallo temporale) sono salvati.
+              <strong style={{ color: T.blue }}>Privacy log:</strong> LogVault verifica la struttura dei tuoi log rispetto agli obblighi dell&apos;Art. 12. Non sostituisce il sistema di conservazione log del titolare — l&apos;obbligo di conservazione (Art. 26(6) [Reg. (UE) 2024/1689]) resta in capo al deployer/provider. I dati grezzi non vengono persistiti: solo metadati aggregati (campi, conteggi, intervallo temporale) sono salvati.
             </span>
           </div>
 
@@ -768,7 +768,8 @@ export default function LogVaultPage() {
           <ToolPhaseBar phases={phases} currentIdx={phaseIdx} />
 
           {/* ── Import section ─────────────────────────────────────────────── */}
-          <section id="fase-carica" className="mb-6">
+          <section id="fase-carica" style={{ scrollMarginTop: 72 }} className="mb-6">
+            <PhaseHeading n={1} title="Carica i log" sub="JSON / NDJSON / CSV / TSV — analisi solo nel browser" />
             <h2 className="text-[13px] font-semibold mb-3" style={{ color: T.text }}>Importa log reali</h2>
 
             {/* Existing log sets */}
@@ -796,7 +797,7 @@ export default function LogVaultPage() {
               style={{ borderColor: T.border, background: T.bg }}>
               {uploading ? <Loader2 size={20} className="animate-spin mb-2" style={{ color: T.blue }} /> : <Upload size={20} className="mb-2" style={{ color: T.muted }} />}
               <p className="text-[12px] font-medium" style={{ color: T.text }}>{uploading ? "Analisi in corso..." : "Trascina un file o clicca per selezionare"}</p>
-              <p className="text-[11px]" style={{ color: T.muted }}>Formati: .json, .ndjson, .csv — max 25 MB</p>
+              <p className="text-[11px]" style={{ color: T.muted }}>Formati: .json / .ndjson / .csv / .tsv — max 50 MB</p>
               <p className="text-[11px] mt-1" style={{ color: T.faint }}>I dati grezzi non vengono salvati — solo statistiche aggregate</p>
               <input ref={fileInputRef} type="file" accept=".json,.ndjson,.jsonl,.csv,.tsv" className="hidden"
                 onChange={e => { const f = e.target.files?.[0]; if (f) handleFileImport(f); e.currentTarget.value = ""; }} />
@@ -824,7 +825,7 @@ export default function LogVaultPage() {
             <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
               <div>
                 <h2 className="text-[13px] font-semibold" style={{ color: T.text }}>
-                  Finalità di tracciabilità — Art. 12(2)(a)-(c) [verify against current AI Act text]
+                  Finalità di tracciabilità — Art. 12(2)(a)-(c) [Reg. (UE) 2024/1689]
                 </h2>
                 <p className="text-[11px] mt-0.5" style={{ color: T.muted }}>{covered}/3 finalità valutate</p>
               </div>
@@ -871,7 +872,7 @@ export default function LogVaultPage() {
 
               {biometricApplicable === "unspecified" && (
                 <div className="rounded-xl p-4 mb-4" style={card}>
-                  <p className="text-[12px] font-semibold mb-1" style={{ color: T.text }}>Applicabilità Art. 12(3) — sistemi di identificazione biometrica [verify against current AI Act text]</p>
+                  <p className="text-[12px] font-semibold mb-1" style={{ color: T.text }}>Applicabilità Art. 12(3) — sistemi di identificazione biometrica [Reg. (UE) 2024/1689]</p>
                   <p className="text-[11px] mb-3" style={{ color: T.muted }}>
                     Il sistema è classificato in Annex III punto 1(a) (sistemi di identificazione biometrica remota)?
                     Se già valutato in Oversight, il valore viene ereditato automaticamente.
@@ -892,13 +893,13 @@ export default function LogVaultPage() {
                 <div className="rounded-xl border-2 p-4 mb-6" style={{ background: T.card, borderColor: T.violet }}>
                   <div className="flex items-center gap-2 mb-3">
                     <Shield size={15} style={{ color: T.violet }} />
-                    <span className="font-semibold text-sm" style={{ color: T.text }}>Requisiti minimi di log — Art. 12(3) [verify against current AI Act text]</span>
+                    <span className="font-semibold text-sm" style={{ color: T.text }}>Requisiti minimi di log — Art. 12(3) [Reg. (UE) 2024/1689]</span>
                   </div>
 
                   {totalBiometricUncovered > 0 && (
                     <div className="rounded-lg p-3 mb-3" style={{ background: T.redBg, border: `1px solid ${T.redBdr}` }}>
                       <p className="text-[12px] font-semibold" style={{ color: T.red }}>
-                        I log attualmente importati non soddisfano {totalBiometricUncovered}/4 requisiti minimi dell&apos;Art. 12(3) [verify against current AI Act text] per i sistemi di identificazione biometrica
+                        I log attualmente importati non soddisfano {totalBiometricUncovered}/4 requisiti minimi dell&apos;Art. 12(3) [Reg. (UE) 2024/1689] per i sistemi di identificazione biometrica
                       </p>
                       <p className="text-[11px] mt-1" style={{ color: T.muted }}>
                         Intervenire sul sistema di logging del provider per aggiungere i campi mancanti.
@@ -926,8 +927,12 @@ export default function LogVaultPage() {
           )}
 
           {/* ── §3 copertura fill-rate · §4 qualità · §6 integrità · §5 ritenzione ── */}
-          <div id="fase-copertura"><CoverageFillRatePanel record={record} /></div>
-          <div id="fase-verifica">
+          <div id="fase-copertura" style={{ scrollMarginTop: 72 }}>
+            <PhaseHeading n={2} title="Copertura delle finalità" sub="Art. 12(2)(a-c) sul riempimento reale dei campi" />
+            <CoverageFillRatePanel record={record} />
+          </div>
+          <div id="fase-verifica" style={{ scrollMarginTop: 72 }}>
+            <PhaseHeading n={3} title="Verifica del registro" sub="Qualità · integrità (hash-chain) · ritenzione Art. 26(6)" />
             <LogQualityCard logSets={record.importedLogSets} />
             <IntegrityCard logSets={record.importedLogSets} />
             <RetentionPanel record={record} onChange={(r) => patchRecord({ retention: r })} />
@@ -936,7 +941,7 @@ export default function LogVaultPage() {
           {/* ── Retention notes ────────────────────────────────────────────── */}
           <section className="mb-6 rounded-xl p-4" style={card}>
             <h2 className="text-[12px] font-semibold mb-1" style={{ color: T.text }}>
-              Note di conservazione (descrittive) — Art. 26(6) [verify against current AI Act text]
+              Note di conservazione (descrittive) — Art. 26(6) [Reg. (UE) 2024/1689]
             </h2>
             <p className="text-[11px] mb-3" style={{ color: T.muted }}>
               Documenta la politica di conservazione dei log adottata dal deployer/provider (durata, sistema utilizzato).
@@ -954,7 +959,9 @@ export default function LogVaultPage() {
           </section>
 
           {/* ── §10 Standard ISO ── */}
-          <div id="fase-export" />
+          <div id="fase-export" style={{ scrollMarginTop: 72 }}>
+            <PhaseHeading n={4} title="Evidenza" sub="Standard ISO, export Log Conformity Statement" />
+          </div>
           <LogIsoTable />
 
           {/* ── §9 Export Log Conformity Statement ── */}

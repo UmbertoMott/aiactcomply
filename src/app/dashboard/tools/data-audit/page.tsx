@@ -29,7 +29,7 @@ import {
 import { profileDatasetDetailed, computeDatasetFingerprint, qualityScorecard, MAX_FILE_BYTES } from "@/lib/data-audit/csv-profiler";
 import type { Row } from "@/lib/data-audit/fairness";
 import { useRouter } from "next/navigation";
-import { ToolPhaseBar, type ToolPhase } from "@/components/compliance/ToolPhaseBar";
+import { ToolPhaseBar, PhaseHeading, type ToolPhase } from "@/components/compliance/ToolPhaseBar";
 import {
   QualityScorecard, FairnessPanel, RepresentativenessPanel, IsoMappingTable, exportDataGovernanceJSON,
 } from "./DataAuditPanels";
@@ -719,7 +719,8 @@ export default function DataAuditPage() {
       <ToolPhaseBar phases={phases} currentIdx={phaseIdx} />
 
       {/* ── Dataset upload panels ── */}
-      <section id="fase-carica" className="mb-6">
+      <section id="fase-carica" style={{ scrollMarginTop: 72 }} className="mb-6">
+        <PhaseHeading n={1} title="Carica i dataset" sub="Training, validation, testing — analisi solo nel browser" />
         <h2 className="text-[13px] font-semibold mb-3" style={{ color: T.text }}>Dataset</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {ROLES.map(({ role, label, optional }) => {
@@ -762,15 +763,20 @@ export default function DataAuditPage() {
       </section>
 
       {/* ── Data Quality Scorecard · Fairness · Rappresentatività ── */}
-      <div id="fase-qualita"><QualityScorecard datasets={record.datasets} /></div>
-      <div id="fase-fairness">
+      <div id="fase-qualita" style={{ scrollMarginTop: 72 }}>
+        <PhaseHeading n={2} title="Qualità dei dati" sub="Scorecard ISO/IEC 5259 · profilo colonne · categorie sensibili" />
+        <QualityScorecard datasets={record.datasets} />
+      </div>
+      <div id="fase-fairness" style={{ scrollMarginTop: 72 }}>
+        <PhaseHeading n={3} title="Fairness & rappresentatività" sub="Bias (Art. 10(2)(f)) e rappresentatività (Art. 10(3))" />
         <FairnessPanel datasets={record.datasets} rowsById={rowsById}
           systemName={systemName} intendedPurpose={systemDescription} onReport={saveFairnessReport} />
         <RepresentativenessPanel datasets={record.datasets} rowsById={rowsById} onCheck={saveRepCheck} />
       </div>
 
       {/* ── 10 Governance practice cards ── */}
-      <section className="mb-6">
+      <section id="fase-export" style={{ scrollMarginTop: 72 }} className="mb-6">
+        <PhaseHeading n={4} title="Evidenza & governance" sub="Pratiche Art. 10, export e invio a DocuGen" />
         <h2 className="text-[13px] font-semibold mb-3" style={{ color: T.text }}>
           Pratiche di governance — Art. 10(2)-(4)
         </h2>
@@ -881,7 +887,7 @@ export default function DataAuditPage() {
       <IsoMappingTable />
 
       {/* ── Export Data Governance Statement (Art. 11 / Allegato IV) ── */}
-      <section id="fase-export" className="mb-6">
+      <section className="mb-6">
         <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Evidenza — Data Governance Statement</h2>
         <p className="text-[11px] mb-3" style={{ color: T.muted }}>Art. 11 / Allegato IV [verify]. Include scorecard, fairness, rappresentatività, pratiche, fingerprint, timestamp.</p>
         <div className="flex flex-wrap gap-2">
