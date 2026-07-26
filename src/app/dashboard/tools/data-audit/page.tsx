@@ -31,7 +31,7 @@ import type { Row } from "@/lib/data-audit/fairness";
 import { useRouter } from "next/navigation";
 import { ToolPhaseBar, PhaseHeading, type ToolPhase } from "@/components/compliance/ToolPhaseBar";
 import {
-  QualityScorecard, FairnessPanel, RepresentativenessPanel, IsoMappingTable, exportDataGovernanceJSON,
+  QualityScorecard, FairnessPanel, RepresentativenessPanel, exportDataGovernanceJSON,
 } from "./DataAuditPanels";
 import {
   draftGovernancePracticeDocumentation,
@@ -883,8 +883,6 @@ export default function DataAuditPage() {
         </div>
       )}
 
-      {/* ── Standard ISO applicati ── */}
-      <IsoMappingTable />
 
       {/* ── Export Data Governance Statement (Art. 11 / Allegato IV) ── */}
       <section className="mb-6">

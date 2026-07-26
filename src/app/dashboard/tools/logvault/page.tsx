@@ -14,7 +14,7 @@ import { suggestEventSeverity } from "@/app/actions/suggestEventSeverity";
 import { analyzeLogCoverage } from "@/app/actions/logvaultActions";
 import { analyzeLogSet, MAX_LOG_FILE_BYTES, MAX_ENTRIES } from "@/lib/logvault/log-analyzer";
 import {
-  CoverageFillRatePanel, LogQualityCard, IntegrityCard, RetentionPanel, LogIsoTable, exportLogConformityJSON,
+  CoverageFillRatePanel, LogQualityCard, IntegrityCard, RetentionPanel, exportLogConformityJSON,
 } from "./LogVaultPanels";
 import { ToolPhaseBar, PhaseHeading, type ToolPhase } from "@/components/compliance/ToolPhaseBar";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
@@ -958,11 +958,9 @@ export default function LogVaultPage() {
             </div>
           </section>
 
-          {/* ── §10 Standard ISO ── */}
           <div id="fase-export" style={{ scrollMarginTop: 72 }}>
-            <PhaseHeading n={4} title="Evidenza" sub="Standard ISO, export Log Conformity Statement" />
+            <PhaseHeading n={4} title="Evidenza" sub="Export Log Conformity Statement" />
           </div>
-          <LogIsoTable />
 
           {/* ── §9 Export Log Conformity Statement ── */}
           <section className="mb-6 rounded-xl p-4" style={card}>
