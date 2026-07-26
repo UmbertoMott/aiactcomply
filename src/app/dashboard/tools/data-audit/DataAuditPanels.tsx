@@ -315,7 +315,7 @@ export function RepresentativenessPanel({ datasets, rowsById, onCheck }: { datas
           {check && (
             <div className="mt-4">
               {check.verdict === "no_reference" ? (
-                <p className="text-[12px]" style={{ color: T.amber }}>Rappresentatività non valutabile senza una popolazione di riferimento dichiarata (Art. 10(3) [verify]). Mostrata solo la distribuzione osservata.</p>
+                <p className="text-[12px]" style={{ color: T.amber }}>Rappresentatività non valutabile senza una popolazione di riferimento dichiarata (Art. 10(3)). Mostrata solo la distribuzione osservata.</p>
               ) : (
                 <div className="flex gap-4 mb-2 text-[12px]">
                   <Metric k="Total Variation Distance" v={check.totalVariationDistance.toFixed(3)} />
@@ -380,7 +380,7 @@ export function IsoMappingTable() {
 // ═══ §9 Export JSON (Data Governance Statement) ═════════════════════════════
 export function exportDataGovernanceJSON(record: DataAuditRecord) {
   const statement = {
-    kind: "Data Governance Statement (Art. 10 / Allegato IV [verify])",
+    kind: "Data Governance Statement (Art. 10 / Allegato IV)",
     generatedAt: new Date().toISOString(),
     record,
   };

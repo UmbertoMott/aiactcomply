@@ -36,7 +36,7 @@ export function LogQualityCard({ logSets }: { logSets: ImportedLogSet[] }) {
               </div>
               {q.chronologicalGaps.length > 0 ? (
                 <div className="text-[10px]" style={{ color: T.red }}>
-                  <b>{q.chronologicalGaps.length} buchi cronologici</b> (possibile perdita log · Art. 12 [verify]):
+                  <b>{q.chronologicalGaps.length} buchi cronologici</b> (possibile perdita log · Art. 12):
                   <ul className="mt-1" style={{ listStyle: "disc", paddingLeft: 16, color: T.muted }}>
                     {q.chronologicalGaps.slice(0, 3).map((g, i) => (
                       <li key={i}>{g.start.slice(0, 16)} → {g.end.slice(0, 16)} ({g.durationHours}h)</li>
@@ -113,7 +113,7 @@ export function CoverageFillRatePanel({ record }: { record: LogVaultRecord }) {
   return (
     <section className="mb-6">
       <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Copertura per finalità — riempimento reale</h2>
-      <p className="text-[11px] mb-3" style={{ color: T.muted }}>Art. 12(2)(a-c) [verify]. &quot;Coperto&quot; richiede un campo mappato valorizzato ≥ 95% delle voci — non la sola presenza.</p>
+      <p className="text-[11px] mb-3" style={{ color: T.muted }}>Art. 12(2)(a-c). &quot;Coperto&quot; richiede un campo mappato valorizzato ≥ 95% delle voci — non la sola presenza.</p>
       <div style={card}>
         {TRACEABILITY_PURPOSES.map(p => {
           const cov = record.traceabilityCoverage.find(c => c.purposeId === p.id);
@@ -157,7 +157,7 @@ export function RetentionPanel({ record, onChange }: { record: LogVaultRecord; o
   return (
     <section className="mb-6">
       <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Ritenzione dei log</h2>
-      <p className="text-[11px] mb-3" style={{ color: T.muted }}>Art. 26(6) / Art. 12 [verify]. Minimo 6 mesi per il deployer salvo diverso obbligo di legge.</p>
+      <p className="text-[11px] mb-3" style={{ color: T.muted }}>Art. 26(6) / Art. 12. Minimo 6 mesi per il deployer salvo diverso obbligo di legge.</p>
       <div style={card}>
         <div className="flex flex-wrap gap-3 mb-3">
           <div><label style={label}>Ruolo</label>
@@ -213,7 +213,7 @@ export function LogIsoTable() {
 // ═══ §9 Export Log Conformity Statement ═════════════════════════════════════
 export function exportLogConformityJSON(record: LogVaultRecord) {
   const statement = {
-    kind: "Log Conformity Statement (Art. 12 / Allegato IV [verify])",
+    kind: "Log Conformity Statement (Art. 12 / Allegato IV)",
     generatedAt: new Date().toISOString(),
     record,
   };

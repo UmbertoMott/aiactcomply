@@ -1,5 +1,5 @@
 // Art. 12 AI Act — finalità di tracciabilità dei log
-// [verify against current AI Act text] su ogni citazione — numerazione paragrafi
+// [Reg. (UE) 2024/1689] su ogni citazione — numerazione paragrafi
 // ricostruita dalla memoria del modello, non verificata sul testo consolidato.
 
 export interface TraceabilityPurposeDefinition {
@@ -21,24 +21,24 @@ export const TRACEABILITY_PURPOSES: readonly TraceabilityPurposeDefinition[] = [
   {
     id: "risk_identification",
     label: "Identificare situazioni di rischio o modifiche sostanziali",
-    reference: "Art. 12(2)(a) [verify against current AI Act text]",
-    crossReference: "Art. 79(1) [verify against current AI Act text]",
+    reference: "Art. 12(2)(a) [Reg. (UE) 2024/1689]",
+    crossReference: "Art. 79(1) [Reg. (UE) 2024/1689]",
     linkedToolPath: "/dashboard/tools/risk-manager",
     linkedToolLabel: "Risk Manager — step traceability",
   },
   {
     id: "post_market_monitoring",
     label: "Facilitare il monitoraggio post-commercializzazione",
-    reference: "Art. 12(2)(b) [verify against current AI Act text]",
-    crossReference: "Art. 72 [verify against current AI Act text]",
+    reference: "Art. 12(2)(b) [Reg. (UE) 2024/1689]",
+    crossReference: "Art. 72 [Reg. (UE) 2024/1689]",
     linkedToolPath: "/dashboard/tools/post-market",
     linkedToolLabel: "Post-Market (Art. 72-73)",
   },
   {
     id: "deployer_monitoring",
     label: "Monitoraggio del funzionamento da parte del deployer",
-    reference: "Art. 12(2)(c) [verify against current AI Act text]",
-    crossReference: "Art. 26(5) [verify against current AI Act text]",
+    reference: "Art. 12(2)(c) [Reg. (UE) 2024/1689]",
+    crossReference: "Art. 26(5) [Reg. (UE) 2024/1689]",
     linkedToolPath: "/dashboard/tools/deployer-dashboard",
     linkedToolLabel: "Deployer Dashboard — monitoring_risk_reporting",
   },
@@ -48,22 +48,22 @@ export const BIOMETRIC_LOG_REQUIREMENTS: readonly BiometricLogRequirementDefinit
   {
     id: "usage_period",
     label: "Periodo di ciascun utilizzo (data/ora di inizio e fine)",
-    reference: "Art. 12(3)(a) [verify against current AI Act text]",
+    reference: "Art. 12(3)(a) [Reg. (UE) 2024/1689]",
   },
   {
     id: "reference_database",
     label: "Banca dati di riferimento utilizzata dal sistema",
-    reference: "Art. 12(3)(b) [verify against current AI Act text]",
+    reference: "Art. 12(3)(b) [Reg. (UE) 2024/1689]",
   },
   {
     id: "matched_input_data",
     label: "Dati di input per i quali la ricerca ha portato a una corrispondenza",
-    reference: "Art. 12(3)(c) [verify against current AI Act text]",
+    reference: "Art. 12(3)(c) [Reg. (UE) 2024/1689]",
   },
   {
     id: "verifier_identity",
-    label: "Identità dei verificatori (Art. 14(5) [verify against current AI Act text])",
-    reference: "Art. 12(3)(d) [verify against current AI Act text]",
+    label: "Identità dei verificatori (Art. 14(5) [Reg. (UE) 2024/1689])",
+    reference: "Art. 12(3)(d) [Reg. (UE) 2024/1689]",
   },
 ] as const satisfies readonly BiometricLogRequirementDefinition[];
 
