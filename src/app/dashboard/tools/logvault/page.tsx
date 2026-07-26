@@ -17,6 +17,7 @@ import {
   CoverageFillRatePanel, LogQualityCard, IntegrityCard, RetentionPanel, exportLogConformityJSON,
 } from "./LogVaultPanels";
 import { ToolPhaseBar, PhaseHeading, type ToolPhase } from "@/components/compliance/ToolPhaseBar";
+import { SectionEmptyState } from "@/components/logvault/SectionEmptyState";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { TRACEABILITY_PURPOSES, BIOMETRIC_LOG_REQUIREMENTS, FIELD_NAME_HINTS, MAX_LOG_FILE_SIZE_BYTES } from "@/lib/logvault/traceability-purposes";
@@ -457,6 +458,10 @@ export default function LogVaultPage() {
     : "unspecified";
   const verifierRoles: string[] = oversightFourEyes?.verifierRoles ?? [];
 
+  // Fonte di verità unica per gli empty-state pre-upload
+  const logsImported = record.importedLogSets.length > 0;
+  const biometricApplicableBool = biometricApplicable === "yes";
+
   // Read Oversight intervention_stop safe state
   function getOversightSafeState(): string | undefined {
     if (typeof window === "undefined") return undefined;
@@ -829,27 +834,31 @@ export default function LogVaultPage() {
                 </h2>
                 <p className="text-[11px] mt-0.5" style={{ color: T.muted }}>{covered}/3 finalità valutate</p>
               </div>
-              <button onClick={runAiAnalysis} disabled={analyzing}
+              <button onClick={runAiAnalysis} disabled={analyzing || !logsImported}
                 className="flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-lg"
-                style={{ background: "#0D1016", color: "#fff", border: "none", cursor: "pointer", opacity: analyzing ? 0.7 : 1 }}>
+                style={{ background: "#0D1016", color: "#fff", border: "none", cursor: logsImported ? "pointer" : "not-allowed", opacity: (analyzing || !logsImported) ? 0.5 : 1 }}>
                 {analyzing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
                 Analisi AI copertura
               </button>
             </div>
 
-            <div className="space-y-2">
-              {TRACEABILITY_PURPOSES.map(def => (
-                <PurposeCard
-                  key={def.id}
-                  def={def}
-                  rec={record.traceabilityCoverage.find(c => c.purposeId === def.id)}
-                  pendingProposal={aiProposals[def.id] ?? null}
-                  onUpdate={updatePurpose}
-                  onAcceptAi={acceptPurposeAi}
-                  allDetectedFields={allDetectedFields}
-                />
-              ))}
-            </div>
+            {logsImported ? (
+              <div className="space-y-2">
+                {TRACEABILITY_PURPOSES.map(def => (
+                  <PurposeCard
+                    key={def.id}
+                    def={def}
+                    rec={record.traceabilityCoverage.find(c => c.purposeId === def.id)}
+                    pendingProposal={aiProposals[def.id] ?? null}
+                    onUpdate={updatePurpose}
+                    onAcceptAi={acceptPurposeAi}
+                    allDetectedFields={allDetectedFields}
+                  />
+                ))}
+              </div>
+            ) : (
+              <SectionEmptyState message="Carica un file di log per valutare la copertura delle 3 finalità di tracciabilità." />
+            )}
 
             {/* AI safe state suggestion */}
             {aiSafeStateSuggestion && (
@@ -861,81 +870,31 @@ export default function LogVaultPage() {
             )}
           </section>
 
-          {/* ── Art. 12(3) biometric module (conditional) ─────────────────── */}
-          {biometricApplicable !== "no" && (
-            <>
-              <div className="flex items-center gap-3 my-5">
-                <div className="flex-1 h-px" style={{ background: T.border }} />
-                <span className="text-[11px] font-semibold uppercase tracking-wide px-2" style={{ color: T.violet }}>Modulo condizionale — Sistemi di identificazione biometrica</span>
-                <div className="flex-1 h-px" style={{ background: T.border }} />
-              </div>
-
-              {biometricApplicable === "unspecified" && (
-                <div className="rounded-xl p-4 mb-4" style={card}>
-                  <p className="text-[12px] font-semibold mb-1" style={{ color: T.text }}>Applicabilità Art. 12(3) — sistemi di identificazione biometrica [Reg. (UE) 2024/1689]</p>
-                  <p className="text-[11px] mb-3" style={{ color: T.muted }}>
-                    Il sistema è classificato in Annex III punto 1(a) (sistemi di identificazione biometrica remota)?
-                    Se già valutato in Oversight, il valore viene ereditato automaticamente.
-                  </p>
-                  <div className="flex gap-2">
-                    {([{ v: "yes" as const, l: "Sì — sistema biometrico Annex III 1(a)" }, { v: "no" as const, l: "No — non applicabile" }]).map(opt => (
-                      <button key={opt.v} onClick={() => patchRecord({ biometricLogging: { ...record.biometricLogging, applicable: opt.v } })}
-                        className="text-[12px] px-3 py-1.5 rounded-lg border"
-                        style={{ borderColor: T.border, background: "transparent", color: T.muted, cursor: "pointer" }}>
-                        {opt.l}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {biometricApplicable === "yes" && (
-                <div className="rounded-xl border-2 p-4 mb-6" style={{ background: T.card, borderColor: T.violet }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Shield size={15} style={{ color: T.violet }} />
-                    <span className="font-semibold text-sm" style={{ color: T.text }}>Requisiti minimi di log — Art. 12(3) [Reg. (UE) 2024/1689]</span>
-                  </div>
-
-                  {totalBiometricUncovered > 0 && (
-                    <div className="rounded-lg p-3 mb-3" style={{ background: T.redBg, border: `1px solid ${T.redBdr}` }}>
-                      <p className="text-[12px] font-semibold" style={{ color: T.red }}>
-                        I log attualmente importati non soddisfano {totalBiometricUncovered}/4 requisiti minimi dell&apos;Art. 12(3) [Reg. (UE) 2024/1689] per i sistemi di identificazione biometrica
-                      </p>
-                      <p className="text-[11px] mt-1" style={{ color: T.muted }}>
-                        Intervenire sul sistema di logging del provider per aggiungere i campi mancanti.
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="space-y-2">
-                    {BIOMETRIC_LOG_REQUIREMENTS.map(def => (
-                      <BiometricCard
-                        key={def.id}
-                        def={def}
-                        rec={record.biometricLogging.requirementCoverage.find(r => r.requirementId === def.id)}
-                        pendingProposal={aiProposals[def.id] ?? null}
-                        onUpdate={updateBiometric}
-                        onAcceptAi={acceptBiometricAi}
-                        allDetectedFields={allDetectedFields}
-                        verifierRoles={verifierRoles.length > 0 ? verifierRoles : undefined}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-
-          {/* ── §3 copertura fill-rate · §4 qualità · §6 integrità · §5 ritenzione ── */}
+          {/* ── §2 copertura fill-rate ── */}
           <div id="fase-copertura" style={{ scrollMarginTop: 72 }}>
             <PhaseHeading n={2} title="Copertura delle finalità" sub="Art. 12(2)(a-c) sul riempimento reale dei campi" />
-            <CoverageFillRatePanel record={record} />
+            {logsImported ? (
+              <CoverageFillRatePanel record={record} />
+            ) : (
+              <SectionEmptyState message="Carica un file di log per calcolare la copertura sul riempimento reale dei campi." />
+            )}
           </div>
+          {/* ── §3 verifica: qualità · integrità · ritenzione ── */}
           <div id="fase-verifica" style={{ scrollMarginTop: 72 }}>
             <PhaseHeading n={3} title="Verifica del registro" sub="Qualità · integrità (hash-chain) · ritenzione Art. 26(6)" />
-            <LogQualityCard logSets={record.importedLogSets} />
-            <IntegrityCard logSets={record.importedLogSets} />
-            <RetentionPanel record={record} onChange={(r) => patchRecord({ retention: r })} />
+            {logsImported ? (
+              <>
+                <LogQualityCard logSets={record.importedLogSets} />
+                <IntegrityCard logSets={record.importedLogSets} />
+              </>
+            ) : (
+              <SectionEmptyState message="Carica un file di log per verificare qualità, integrità e continuità del registro." />
+            )}
+            {logsImported ? (
+              <RetentionPanel record={record} onChange={(r) => patchRecord({ retention: r })} />
+            ) : (
+              <div className="mt-4"><SectionEmptyState message="Carica un file di log: la durata coperta viene calcolata dai timestamp reali." /></div>
+            )}
           </div>
 
           {/* ── Retention notes ────────────────────────────────────────────── */}
@@ -957,6 +916,49 @@ export default function LogVaultPage() {
               </Link>
             </div>
           </section>
+
+          {/* ── Modulo condizionale Art. 12(3) biometrico — solo se Annex III 1(a) ── */}
+          {biometricApplicableBool && (
+            <section className="mb-6">
+              <div className="flex items-center gap-3 my-4">
+                <div className="flex-1 h-px" style={{ background: T.border }} />
+                <span className="text-[11px] font-semibold uppercase tracking-wide px-2" style={{ color: T.violet }}>Modulo condizionale — Log biometrici Art. 12(3)</span>
+                <div className="flex-1 h-px" style={{ background: T.border }} />
+              </div>
+              {logsImported ? (
+                <div className="rounded-xl border-2 p-4" style={{ background: T.card, borderColor: T.violet }}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Shield size={15} style={{ color: T.violet }} />
+                    <span className="font-semibold text-sm" style={{ color: T.text }}>Requisiti minimi di log — Art. 12(3) [Reg. (UE) 2024/1689]</span>
+                  </div>
+                  {totalBiometricUncovered > 0 && (
+                    <div className="rounded-lg p-3 mb-3" style={{ background: T.redBg, border: `1px solid ${T.redBdr}` }}>
+                      <p className="text-[12px] font-semibold" style={{ color: T.red }}>
+                        I log importati non soddisfano {totalBiometricUncovered}/4 requisiti minimi dell&apos;Art. 12(3) [Reg. (UE) 2024/1689] per i sistemi di identificazione biometrica
+                      </p>
+                      <p className="text-[11px] mt-1" style={{ color: T.muted }}>Intervenire sul sistema di logging del provider per aggiungere i campi mancanti.</p>
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    {BIOMETRIC_LOG_REQUIREMENTS.map(def => (
+                      <BiometricCard
+                        key={def.id}
+                        def={def}
+                        rec={record.biometricLogging.requirementCoverage.find(r => r.requirementId === def.id)}
+                        pendingProposal={aiProposals[def.id] ?? null}
+                        onUpdate={updateBiometric}
+                        onAcceptAi={acceptBiometricAi}
+                        allDetectedFields={allDetectedFields}
+                        verifierRoles={verifierRoles.length > 0 ? verifierRoles : undefined}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <SectionEmptyState message="Carica un file di log per verificare i 4 requisiti minimi Art. 12(3)." />
+              )}
+            </section>
+          )}
 
           <div id="fase-export" style={{ scrollMarginTop: 72 }}>
             <PhaseHeading n={4} title="Evidenza" sub="Export Log Conformity Statement" />
