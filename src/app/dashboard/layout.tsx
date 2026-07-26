@@ -8,7 +8,7 @@ import {
   FileArchive, TrendingUp, Database, UserCheck, ArrowRightLeft, Map, Building2,
   Landmark, Zap, Menu, X, ChevronRight, ChevronLeft, ChevronDown,
   LogOut, Settings, LayoutGrid, Siren, Home, CalendarClock, ShieldCheck, Bot,
-  Monitor,
+  Monitor, Eye, Megaphone, ClipboardCheck, BadgeCheck, Boxes, AlertTriangle,
 } from "lucide-react";
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { useUserRole, ROLE_LABELS } from "@/lib/hooks/useUserRole";
@@ -181,6 +181,54 @@ const PILLARS: NavPillar[] = [
     href: "/dashboard/tools/resilience",
     art: "Art. 15",
     tooltip: "Accuratezza, robustezza e cybersicurezza — evidenza da red-team/eval (Art. 15)",
+  },
+  {
+    id: "transparency",
+    icon: Megaphone,
+    label: "Transparency",
+    href: "/dashboard/tools/transparency",
+    art: "Art. 13/50",
+    tooltip: "Obblighi di trasparenza e informazioni all'utente (Art. 13, Art. 50)",
+  },
+  {
+    id: "oversight",
+    icon: Eye,
+    label: "Oversight",
+    href: "/dashboard/tools/oversight",
+    art: "Art. 14",
+    tooltip: "Sorveglianza umana e misure di controllo (Art. 14)",
+  },
+  {
+    id: "qms",
+    icon: ClipboardCheck,
+    label: "QMS",
+    href: "/dashboard/tools/qms",
+    art: "Art. 17",
+    tooltip: "Sistema di gestione della qualità (Art. 17)",
+  },
+  {
+    id: "conformity",
+    icon: BadgeCheck,
+    label: "Conformità",
+    href: "/dashboard/tools/conformity",
+    art: "Art. 43",
+    tooltip: "Valutazione di conformità e marcatura CE (Art. 43)",
+  },
+  {
+    id: "gpai",
+    icon: Boxes,
+    label: "GPAI",
+    href: "/dashboard/tools/gpai",
+    art: "Art. 51-55",
+    tooltip: "Modelli per finalità generali (Art. 51-55)",
+  },
+  {
+    id: "incident",
+    icon: AlertTriangle,
+    label: "Incidenti",
+    href: "/dashboard/tools/incident",
+    art: "Art. 73",
+    tooltip: "Segnalazione di incidenti gravi (Art. 73)",
   },
   {
     id: "deployer",

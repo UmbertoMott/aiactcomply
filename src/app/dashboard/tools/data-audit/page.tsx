@@ -29,7 +29,8 @@ import {
 import { profileDatasetDetailed, computeDatasetFingerprint, qualityScorecard, MAX_FILE_BYTES } from "@/lib/data-audit/csv-profiler";
 import type { Row } from "@/lib/data-audit/fairness";
 import { useRouter } from "next/navigation";
-import { ToolPhaseBar, PhaseHeading, type ToolPhase } from "@/components/compliance/ToolPhaseBar";
+import { ToolPhaseBar, PhaseHeading, NextPhaseCta, type ToolPhase, type PhaseStatus } from "@/components/compliance/ToolPhaseBar";
+import { SectionEmptyState } from "@/components/compliance/SectionEmptyState";
 import {
   QualityScorecard, FairnessPanel, RepresentativenessPanel, exportDataGovernanceJSON,
 } from "./DataAuditPanels";
@@ -426,9 +427,51 @@ export default function DataAuditPage() {
     { id: "fairness", label: "Fairness",  sublabel: "Bias & rappresentatività", anchor: "fase-fairness" },
     { id: "evidenza", label: "Evidenza",  sublabel: "Governance & export",    anchor: "fase-export" },
   ];
-  const phaseIdx = record.datasets.length === 0 ? 0
-    : record.fairnessReports.length === 0 ? 1
-    : countDocumented(record) >= 1 ? 3 : 2;
+
+  // ── Stato reale per fase (la ✓ riflette il lavoro fatto, non lo scroll) ──
+  const requiredRoles: DatasetRole[] = record.developmentApproach === "other_technique"
+    ? ["testing"] : ["training", "validation", "testing"];
+  const datasetsLoaded = record.datasets.length > 0;
+  const caricaDone = requiredRoles.every(r => record.datasets.some(d => d.role === r));
+  const fairnessDone = record.fairnessReports.length > 0 || record.representativenessChecks.length > 0;
+  const documentedNow = countDocumented(record);
+  const totalPractices = DATA_GOVERNANCE_PRACTICES.length;
+  const evidenzaDone = documentedNow >= totalPractices;
+
+  const phaseStatus: PhaseStatus[] = [
+    caricaDone ? "done" : datasetsLoaded ? "active" : "todo",
+    datasetsLoaded ? "done" : "todo",
+    fairnessDone ? "done" : datasetsLoaded ? "active" : "todo",
+    evidenzaDone ? "done" : documentedNow > 0 ? "active" : "todo",
+  ];
+  const phasesDone = phaseStatus.filter(s => s === "done").length;
+  const overallPct = Math.round(
+    (phaseStatus.reduce((acc, s) => acc + (s === "done" ? 1 : s === "active" ? 0.5 : 0), 0) / phases.length) * 100
+  );
+  const phaseIdx = phaseStatus.findIndex(s => s !== "done") === -1 ? phases.length - 1 : phaseStatus.findIndex(s => s !== "done");
+
+  // ── Scroll-spy: evidenzia nella barra la fase attualmente in viewport ──
+  const [activePhase, setActivePhase] = useState(0);
+  useEffect(() => {
+    const anchors = phases.map(p => p.anchor);
+    const visible = new Map<string, number>();
+    const observer = new IntersectionObserver(
+      entries => {
+        for (const e of entries) {
+          if (e.isIntersecting) visible.set(e.target.id, e.intersectionRatio);
+          else visible.delete(e.target.id);
+        }
+        // fase attiva = la prima (in ordine di scaletta) tra quelle visibili
+        for (let i = 0; i < anchors.length; i++) {
+          if (visible.has(anchors[i])) { setActivePhase(i); return; }
+        }
+      },
+      { rootMargin: "-64px 0px -55% 0px", threshold: [0, 0.1, 0.5] }
+    );
+    anchors.forEach(a => { const el = document.getElementById(a); if (el) observer.observe(el); });
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(null), 3000); }
 
@@ -616,10 +659,6 @@ export default function DataAuditPage() {
     return undefined;
   }
 
-  const documented = countDocumented(record);
-  const total = DATA_GOVERNANCE_PRACTICES.length;
-  const pct = Math.round((documented / total) * 100);
-
   // Determine which roles are required
   const isOther = record.developmentApproach === "other_technique";
   const ROLES: Array<{ role: DatasetRole; label: string; optional: boolean }> = [
@@ -703,25 +742,20 @@ export default function DataAuditPage() {
         </div>
       </div>
 
-      {/* Progress */}
-      <div className="flex items-center gap-3 mb-5">
-        <span className="text-2xl font-bold" style={{ color: pct === 100 ? T.green : T.text }}>{documented}/{total}</span>
-        <div className="flex-1">
-          <div className="text-[11px] font-medium mb-1" style={{ color: T.muted }}>pratiche Art. 10 documentate</div>
-          <div className="h-2 rounded-full" style={{ background: T.border }}>
-            <div className="h-2 rounded-full transition-all" style={{ width: `${pct}%`, background: pct === 100 ? T.green : T.blue }} />
-          </div>
-        </div>
-        <span className="text-[11px]" style={{ color: T.muted }}>{pct}%</span>
-      </div>
-
-      {/* ── Scaletta guidata ── */}
-      <ToolPhaseBar phases={phases} currentIdx={phaseIdx} />
+      {/* ── Scaletta guidata — stati reali per fase, scroll-spy, avanzamento persistente ── */}
+      <ToolPhaseBar
+        phases={phases}
+        currentIdx={phaseIdx}
+        status={phaseStatus}
+        activeIdx={activePhase}
+        progressPct={overallPct}
+        meta={`${phasesDone}/${phases.length} fasi · ${documentedNow}/${totalPractices} pratiche`}
+      />
 
       {/* ── Dataset upload panels ── */}
       <section id="fase-carica" style={{ scrollMarginTop: 72 }} className="mb-6">
-        <PhaseHeading n={1} title="Carica i dataset" sub="Training, validation, testing — analisi solo nel browser" />
-        <h2 className="text-[13px] font-semibold mb-3" style={{ color: T.text }}>Dataset</h2>
+        <PhaseHeading n={1} title="Carica i dataset" done={caricaDone}
+          sub={caricaDone ? "Tutti i dataset richiesti sono caricati" : "Training, validation, testing — analisi solo nel browser"} />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {ROLES.map(({ role, label, optional }) => {
             const profile = record.datasets.find(d => d.role === role) ?? null;
@@ -760,23 +794,51 @@ export default function DataAuditPage() {
             <span className="text-[11px]" style={{ color: T.muted }}>Art. 10(2)(f) — risultato marcato ✦ AI, richiede accettazione</span>
           </div>
         )}
+        {caricaDone && <NextPhaseCta label="Prosegui: Qualità dei dati" anchor="fase-qualita" />}
       </section>
 
       {/* ── Data Quality Scorecard · Fairness · Rappresentatività ── */}
-      <div id="fase-qualita" style={{ scrollMarginTop: 72 }}>
-        <PhaseHeading n={2} title="Qualità dei dati" sub="Scorecard ISO/IEC 5259 · profilo colonne · categorie sensibili" />
-        <QualityScorecard datasets={record.datasets} />
+      <div id="fase-qualita" style={{ scrollMarginTop: 72 }} className="mb-6">
+        <PhaseHeading n={2} title="Qualità dei dati" done={datasetsLoaded}
+          sub="Scorecard ISO/IEC 5259 · profilo colonne · categorie sensibili" />
+        {datasetsLoaded ? (
+          <>
+            <QualityScorecard datasets={record.datasets} />
+            <NextPhaseCta label="Prosegui: Fairness & rappresentatività" anchor="fase-fairness" />
+          </>
+        ) : (
+          <SectionEmptyState message="Carica un dataset nella fase 1 per calcolare la scorecard di qualità (completezza, unicità, consistenza)." />
+        )}
       </div>
-      <div id="fase-fairness" style={{ scrollMarginTop: 72 }}>
-        <PhaseHeading n={3} title="Fairness & rappresentatività" sub="Bias (Art. 10(2)(f)) e rappresentatività (Art. 10(3))" />
-        <FairnessPanel datasets={record.datasets} rowsById={rowsById}
-          systemName={systemName} intendedPurpose={systemDescription} onReport={saveFairnessReport} />
-        <RepresentativenessPanel datasets={record.datasets} rowsById={rowsById} onCheck={saveRepCheck} />
+      <div id="fase-fairness" style={{ scrollMarginTop: 72 }} className="mb-6">
+        <PhaseHeading n={3} title="Fairness & rappresentatività" done={fairnessDone}
+          sub="Bias (Art. 10(2)(f)) e rappresentatività (Art. 10(3))" />
+        {datasetsLoaded ? (
+          <>
+            <FairnessPanel datasets={record.datasets} rowsById={rowsById}
+              systemName={systemName} intendedPurpose={systemDescription} onReport={saveFairnessReport} />
+            <RepresentativenessPanel datasets={record.datasets} rowsById={rowsById} onCheck={saveRepCheck} />
+            {fairnessDone && <NextPhaseCta label="Prosegui: Evidenza & governance" anchor="fase-export" />}
+          </>
+        ) : (
+          <SectionEmptyState message="Carica un dataset per misurare fairness (regola dei 4/5, SPD) e rappresentatività rispetto alla popolazione di riferimento." />
+        )}
       </div>
 
       {/* ── 10 Governance practice cards ── */}
       <section id="fase-export" style={{ scrollMarginTop: 72 }} className="mb-6">
-        <PhaseHeading n={4} title="Evidenza & governance" sub="Pratiche Art. 10, export e invio a DocuGen" />
+        <PhaseHeading n={4} title="Evidenza & governance" done={evidenzaDone}
+          sub="Pratiche Art. 10, export e invio a DocuGen" />
+        {/* Avanzamento pratiche — contestuale alla fase, non più in cima alla pagina */}
+        <div className="flex items-center gap-3 mb-4">
+          <span className="text-lg font-bold" style={{ color: evidenzaDone ? T.green : T.text }}>{documentedNow}/{totalPractices}</span>
+          <div className="flex-1">
+            <div className="text-[11px] font-medium mb-1" style={{ color: T.muted }}>pratiche Art. 10 documentate</div>
+            <div className="h-1.5 rounded-full" style={{ background: T.border }}>
+              <div className="h-1.5 rounded-full transition-all" style={{ width: `${Math.round((documentedNow / totalPractices) * 100)}%`, background: evidenzaDone ? T.green : T.blue }} />
+            </div>
+          </div>
+        </div>
         <h2 className="text-[13px] font-semibold mb-3" style={{ color: T.text }}>
           Pratiche di governance — Art. 10(2)-(4)
         </h2>

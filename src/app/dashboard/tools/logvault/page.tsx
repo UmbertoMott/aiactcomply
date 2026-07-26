@@ -16,7 +16,7 @@ import { analyzeLogSet, MAX_LOG_FILE_BYTES, MAX_ENTRIES } from "@/lib/logvault/l
 import {
   CoverageFillRatePanel, LogQualityCard, IntegrityCard, RetentionPanel, exportLogConformityJSON,
 } from "./LogVaultPanels";
-import { ToolPhaseBar, PhaseHeading, type ToolPhase } from "@/components/compliance/ToolPhaseBar";
+import { ToolPhaseBar, PhaseHeading, NextPhaseCta, type ToolPhase, type PhaseStatus } from "@/components/compliance/ToolPhaseBar";
 import { SectionEmptyState } from "@/components/logvault/SectionEmptyState";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
@@ -439,6 +439,38 @@ export default function LogVaultPage() {
     : record.retention.role !== "unspecified" ? 3
     : record.traceabilityCoverage.some(c => c.evidenceFields.length > 0) ? 2 : 1;
 
+  // ── Stato reale per fase (la ✓ riflette il lavoro fatto, non lo scroll) ──
+  const logsIn = record.importedLogSets.length > 0;
+  const coveredCount = countCovered(record);
+  const retentionSet = record.retention.role !== "unspecified";
+  const phaseStatus: PhaseStatus[] = [
+    logsIn ? "done" : "active",
+    coveredCount >= 3 ? "done" : logsIn ? "active" : "todo",
+    retentionSet ? "done" : logsIn ? "active" : "todo",
+    (coveredCount >= 3 && retentionSet) ? "active" : "todo",
+  ];
+  const phasesDone = phaseStatus.filter(s => s === "done").length;
+  const overallPct = Math.round(
+    (phaseStatus.reduce((a, s) => a + (s === "done" ? 1 : s === "active" ? 0.5 : 0), 0) / phases.length) * 100
+  );
+
+  // ── Scroll-spy: evidenzia nella barra la fase attualmente in viewport ──
+  const [activePhase, setActivePhase] = useState(0);
+  useEffect(() => {
+    const anchors = phases.map(p => p.anchor);
+    const visible = new Set<string>();
+    const observer = new IntersectionObserver(
+      entries => {
+        for (const e of entries) { if (e.isIntersecting) visible.add(e.target.id); else visible.delete(e.target.id); }
+        for (let i = 0; i < anchors.length; i++) if (visible.has(anchors[i])) { setActivePhase(i); return; }
+      },
+      { rootMargin: "-64px 0px -55% 0px", threshold: [0, 0.1, 0.5] }
+    );
+    anchors.forEach(a => { const el = document.getElementById(a); if (el) observer.observe(el); });
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [record.loggingCapabilityConfirmed]);
+
   // Read Oversight fourEyes for biometric applicability
   function getOversightFourEyes() {
     if (typeof window === "undefined") return null;
@@ -769,12 +801,20 @@ export default function LogVaultPage() {
             </span>
           </div>
 
-          {/* ── Scaletta guidata ── */}
-          <ToolPhaseBar phases={phases} currentIdx={phaseIdx} />
+          {/* ── Scaletta guidata — stati reali, scroll-spy, avanzamento persistente ── */}
+          <ToolPhaseBar
+            phases={phases}
+            currentIdx={phaseIdx}
+            status={phaseStatus}
+            activeIdx={activePhase}
+            progressPct={overallPct}
+            meta={`${phasesDone}/${phases.length} fasi · ${coveredCount}/3 finalità`}
+          />
 
           {/* ── Import section ─────────────────────────────────────────────── */}
           <section id="fase-carica" style={{ scrollMarginTop: 72 }} className="mb-6">
-            <PhaseHeading n={1} title="Carica i log" sub="JSON / NDJSON / CSV / TSV — analisi solo nel browser" />
+            <PhaseHeading n={1} title="Carica i log" done={logsIn}
+              sub={logsIn ? "Log importati — analisi solo nel browser" : "JSON / NDJSON / CSV / TSV — analisi solo nel browser"} />
             <h2 className="text-[13px] font-semibold mb-3" style={{ color: T.text }}>Importa log reali</h2>
 
             {/* Existing log sets */}
@@ -871,17 +911,22 @@ export default function LogVaultPage() {
           </section>
 
           {/* ── §2 copertura fill-rate ── */}
-          <div id="fase-copertura" style={{ scrollMarginTop: 72 }}>
-            <PhaseHeading n={2} title="Copertura delle finalità" sub="Art. 12(2)(a-c) sul riempimento reale dei campi" />
+          <div id="fase-copertura" style={{ scrollMarginTop: 72 }} className="mb-6">
+            <PhaseHeading n={2} title="Copertura delle finalità" done={coveredCount >= 3}
+              sub="Art. 12(2)(a-c) sul riempimento reale dei campi" />
             {logsImported ? (
-              <CoverageFillRatePanel record={record} />
+              <>
+                <CoverageFillRatePanel record={record} />
+                <NextPhaseCta label="Prosegui: Verifica del registro" anchor="fase-verifica" />
+              </>
             ) : (
               <SectionEmptyState message="Carica un file di log per calcolare la copertura sul riempimento reale dei campi." />
             )}
           </div>
           {/* ── §3 verifica: qualità · integrità · ritenzione ── */}
-          <div id="fase-verifica" style={{ scrollMarginTop: 72 }}>
-            <PhaseHeading n={3} title="Verifica del registro" sub="Qualità · integrità (hash-chain) · ritenzione Art. 26(6)" />
+          <div id="fase-verifica" style={{ scrollMarginTop: 72 }} className="mb-6">
+            <PhaseHeading n={3} title="Verifica del registro" done={retentionSet}
+              sub="Qualità · integrità (hash-chain) · ritenzione Art. 26(6)" />
             {logsImported ? (
               <>
                 <LogQualityCard logSets={record.importedLogSets} />
@@ -891,7 +936,10 @@ export default function LogVaultPage() {
               <SectionEmptyState message="Carica un file di log per verificare qualità, integrità e continuità del registro." />
             )}
             {logsImported ? (
-              <RetentionPanel record={record} onChange={(r) => patchRecord({ retention: r })} />
+              <>
+                <RetentionPanel record={record} onChange={(r) => patchRecord({ retention: r })} />
+                {retentionSet && <NextPhaseCta label="Prosegui: Evidenza" anchor="fase-export" />}
+              </>
             ) : (
               <div className="mt-4"><SectionEmptyState message="Carica un file di log: la durata coperta viene calcolata dai timestamp reali." /></div>
             )}
@@ -961,7 +1009,8 @@ export default function LogVaultPage() {
           )}
 
           <div id="fase-export" style={{ scrollMarginTop: 72 }}>
-            <PhaseHeading n={4} title="Evidenza" sub="Export Log Conformity Statement" />
+            <PhaseHeading n={4} title="Evidenza" done={coveredCount >= 3 && retentionSet}
+              sub="Export Log Conformity Statement" />
           </div>
 
           {/* ── §9 Export Log Conformity Statement ── */}

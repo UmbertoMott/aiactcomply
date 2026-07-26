@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useRef, CSSProperties } from "react";
+import React, { useState, useRef, useEffect, CSSProperties } from "react";
 import Link from "next/link";
 import { Shield, Upload, Loader2, X, ExternalLink, FileText, CheckCircle2, AlertTriangle } from "lucide-react";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { ResilienceResult, ClassifierResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
-import { ToolPhaseBar, PhaseHeading, type ToolPhase } from "@/components/compliance/ToolPhaseBar";
+import { ToolPhaseBar, PhaseHeading, NextPhaseCta, type ToolPhase, type PhaseStatus } from "@/components/compliance/ToolPhaseBar";
 import { SectionEmptyState } from "@/components/logvault/SectionEmptyState";
 import {
   RESILIENCE_PILLARS, PREN18282_THREATS, ROBUSTNESS_ITEMS,
@@ -59,6 +59,37 @@ export default function ResiliencePage() {
   const phaseIdx = !evalsImported ? 0
     : record.threats.some(t => t.status !== "not_assessed") ? 2
     : 1;
+
+  // ── Stato reale per fase (la ✓ riflette il lavoro fatto, non lo scroll) ──
+  const accDone = record.subPopulation.length > 0;
+  const threatsAssessed = record.threats.length > 0 && record.threats.every(t => t.status !== "not_assessed");
+  const phaseStatus: PhaseStatus[] = [
+    evalsImported ? "done" : "active",
+    accDone ? "done" : evalsImported ? "active" : "todo",
+    threatsAssessed ? "done" : evalsImported ? "active" : "todo",
+    (accDone && threatsAssessed) ? "active" : "todo",
+  ];
+  const phasesDone = phaseStatus.filter(s => s === "done").length;
+  const overallPct = Math.round(
+    (phaseStatus.reduce((a, s) => a + (s === "done" ? 1 : s === "active" ? 0.5 : 0), 0) / phases.length) * 100
+  );
+
+  // ── Scroll-spy: evidenzia nella barra la fase attualmente in viewport ──
+  const [activePhase, setActivePhase] = useState(0);
+  useEffect(() => {
+    const anchors = phases.map(p => p.anchor);
+    const visible = new Set<string>();
+    const observer = new IntersectionObserver(
+      entries => {
+        for (const e of entries) { if (e.isIntersecting) visible.add(e.target.id); else visible.delete(e.target.id); }
+        for (let i = 0; i < anchors.length; i++) if (visible.has(anchors[i])) { setActivePhase(i); return; }
+      },
+      { rootMargin: "-64px 0px -55% 0px", threshold: [0, 0.1, 0.5] }
+    );
+    anchors.forEach(a => { const el = document.getElementById(a); if (el) observer.observe(el); });
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Import ──────────────────────────────────────────────────────────────
   async function handleImport(file: File) {
@@ -160,11 +191,19 @@ export default function ResiliencePage() {
           </p>
         </div>
 
-        <ToolPhaseBar phases={phases} currentIdx={phaseIdx} />
+        <ToolPhaseBar
+          phases={phases}
+          currentIdx={phaseIdx}
+          status={phaseStatus}
+          activeIdx={activePhase}
+          progressPct={overallPct}
+          meta={`${phasesDone}/${phases.length} fasi`}
+        />
 
         {/* ── FASE 1 — Import ── */}
         <section id="fase-carica" style={{ scrollMarginTop: 72 }} className="mb-6">
-          <PhaseHeading n={1} title="Carica i risultati dei test" sub="Accuratezza · robustezza · red-team (JSON/CSV)" />
+          <PhaseHeading n={1} title="Carica i risultati dei test" done={evalsImported}
+            sub={evalsImported ? "Risultati importati — analisi solo nel browser" : "Accuratezza · robustezza · red-team (JSON/CSV)"} />
           <div className="flex gap-2 mb-2 flex-wrap">
             {(Object.keys(KIND_LABEL) as EvalKind[]).map(k => (
               <button key={k} onClick={() => setUploadKind(k)}
@@ -196,7 +235,8 @@ export default function ResiliencePage() {
 
         {/* ── FASE 2 — Accuratezza & sotto-popolazioni ── */}
         <section id="fase-accuratezza" style={{ scrollMarginTop: 72 }} className="mb-6">
-          <PhaseHeading n={2} title="Accuratezza dichiarata & sotto-popolazioni" sub="Art. 15(3) · disaggregazione per gruppo (Art. 15 ↔ 10)" />
+          <PhaseHeading n={2} title="Accuratezza dichiarata & sotto-popolazioni" done={accDone}
+            sub="Art. 15(3) · disaggregazione per gruppo (Art. 15 ↔ 10)" />
           {!evalsImported ? (
             <SectionEmptyState message="Carica i risultati di accuratezza per calcolare metriche complessive e disaggregate per sotto-popolazione." />
           ) : (
@@ -249,13 +289,15 @@ export default function ResiliencePage() {
                   </div>
                 ))}
               </div>
+              <NextPhaseCta label="Prosegui: Minacce & robustezza" anchor="fase-minacce" />
             </>
           )}
         </section>
 
         {/* ── FASE 3 — Minacce prEN 18282 & robustezza ── */}
         <section id="fase-minacce" style={{ scrollMarginTop: 72 }} className="mb-6">
-          <PhaseHeading n={3} title="Matrice minacce & robustezza" sub="prEN 18282 (Art. 15(5)) · robustezza operativa (Art. 15(4))" />
+          <PhaseHeading n={3} title="Matrice minacce & robustezza" done={threatsAssessed}
+            sub="prEN 18282 (Art. 15(5)) · robustezza operativa (Art. 15(4))" />
           {!evalsImported ? (
             <SectionEmptyState message="Carica i risultati red-team / robustezza per mappare le minacce prEN 18282 e valutare la robustezza." />
           ) : (
@@ -330,13 +372,15 @@ export default function ResiliencePage() {
                   })}
                 </div>
               </div>
+              <NextPhaseCta label="Prosegui: Evidenza" anchor="fase-export" />
             </>
           )}
         </section>
 
         {/* ── FASE 4 — Evidenza ── */}
         <section id="fase-export" style={{ scrollMarginTop: 72 }} className="mb-6">
-          <PhaseHeading n={4} title="Evidenza" sub="Resilience Statement (Art. 15 / Allegato IV)" />
+          <PhaseHeading n={4} title="Evidenza" done={accDone && threatsAssessed}
+            sub="Resilience Statement (Art. 15 / Allegato IV)" />
           <div style={card}>
             <p className="text-[11px] mb-3" style={{ color: T.muted }}>
               Accuratezza dichiarata + disaggregato, robustezza, matrice prEN 18282 con stati e gap, fingerprint, timestamp.

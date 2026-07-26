@@ -17,6 +17,7 @@ import { VersionHistoryPanel } from "@/components/compliance/VersionHistoryPanel
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { appendVersion, listVersions, type VersionSnapshot } from "@/lib/projects/version-history";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
+import { ToolPhaseBar, type ToolPhase, type PhaseStatus } from "@/components/compliance/ToolPhaseBar";
 
 const STORAGE_KEY = "docugen_state";
 
@@ -449,6 +450,24 @@ export default function DocuGenPage() {
   const emptyRequired = ANNEX_IV.filter((s) => s.required && getSectionStatus(s.id) === "empty");
   const canFinalize = emptyRequired.length === 0;
 
+  // ── Allineamento al linguaggio a fasi condiviso (ToolPhaseBar) ──
+  // DocuGen è modale: la barra seleziona lo step invece di scrollare.
+  const isFinalized = versionSnapshots[0]?.status === "finalized";
+  const startedCount = doneCount + draftCount;
+  const docuPhases: ToolPhase[] = [
+    { id: "aggregate", label: "Aggregazione",  sublabel: "Sorgenti dati",       anchor: "docu-aggregate" },
+    { id: "draft",     label: "Bozza",          sublabel: "Drafting assistito",  anchor: "docu-draft" },
+    { id: "validate",  label: "Validazione",    sublabel: "Revisione umana",     anchor: "docu-validate" },
+    { id: "export",    label: "Evidenza",       sublabel: "Export audit-ready",  anchor: "docu-export" },
+  ];
+  const stepIndex = TIMELINE_STEPS.findIndex((s) => s.id === timelineStep);
+  const docuPhaseStatus: PhaseStatus[] = [
+    startedCount > 0 ? "done" : "active",
+    startedCount >= 9 ? "done" : startedCount > 0 ? "active" : "todo",
+    doneCount >= 9 ? "done" : doneCount > 0 ? "active" : "todo",
+    isFinalized ? "done" : doneCount >= 9 ? "active" : "todo",
+  ];
+
   async function saveToDossier(asFinalized = false) {
     const completedAt = new Date().toISOString();
     const resolvedName = systemName.trim() || "Sistema AI (non specificato)";
@@ -825,23 +844,16 @@ export default function DocuGenPage() {
         </div>
       )}
 
-      {/* ── Timeline Step Bar ── */}
-      <div style={{ display: "flex", gap: 0, marginBottom: 24 }}>
-        {TIMELINE_STEPS.map((step, i) => (
-          <button key={step.id} onClick={() => setTimelineStep(step.id)} style={{
-            flex: 1, padding: "12px 16px",
-            background: timelineStep === step.id ? "#0D1016" : "transparent",
-            color: timelineStep === step.id ? "#fff" : "rgba(0,0,0,0.42)",
-            border: "1px solid rgba(0,0,0,0.08)",
-            borderLeft: i > 0 ? "none" : "1px solid rgba(0,0,0,0.08)",
-            borderRadius: i === 0 ? "8px 0 0 8px" : i === 3 ? "0 8px 8px 0" : 0,
-            cursor: "pointer", fontSize: 12, fontWeight: 500, textAlign: "left" as const,
-          }}>
-            <span style={{ display: "block", fontSize: 10, opacity: 0.6, marginBottom: 2 }}>Step {i + 1}</span>
-            {step.label}
-          </button>
-        ))}
-      </div>
+      {/* ── Scaletta guidata — linguaggio a fasi condiviso (stati reali, avanzamento) ── */}
+      <ToolPhaseBar
+        phases={docuPhases}
+        currentIdx={stepIndex}
+        status={docuPhaseStatus}
+        activeIdx={stepIndex}
+        progressPct={Math.round((doneCount / 9) * 100)}
+        meta={`${doneCount}/9 sezioni validate`}
+        onSelect={(i) => setTimelineStep(TIMELINE_STEPS[i].id)}
+      />
 
       {/* ── Step 1: Data Aggregation ── */}
       {timelineStep === "aggregate" && (
