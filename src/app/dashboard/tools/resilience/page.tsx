@@ -1,336 +1,365 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Shield, Zap, AlertTriangle, Play, RefreshCw, CheckCircle, Download } from "lucide-react";
+import React, { useState, useRef, CSSProperties } from "react";
 import Link from "next/link";
-import { simulateRedTeamAttack, getDefenseHealth, type RedTeamAttack } from "@/lib/simulation/red-team";
+import { Shield, Upload, Loader2, X, ExternalLink, FileText, CheckCircle2, AlertTriangle } from "lucide-react";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
-import type { ResilienceResult, ClassifierResult, RiskManagerResult } from "@/lib/dossier/storage-schema";
+import type { ResilienceResult, ClassifierResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
+import { ToolPhaseBar, PhaseHeading, type ToolPhase } from "@/components/compliance/ToolPhaseBar";
+import { SectionEmptyState } from "@/components/logvault/SectionEmptyState";
+import {
+  RESILIENCE_PILLARS, PREN18282_THREATS, ROBUSTNESS_ITEMS,
+} from "@/lib/resilience/resilience-requirements";
+import {
+  loadResilienceRecord, saveResilienceRecord, getDataAuditConfirmedGroups,
+  type ResilienceRecord, type EvalKind, type ThreatCoverage, type SubPopulationMetric,
+} from "@/lib/resilience/resilience-types";
+import {
+  parseEvalFile, guessFields, computeSubPopulation, computeASR, computeResilienceFingerprint,
+  MAX_EVAL_BYTES, type EvalRow,
+} from "@/lib/resilience/eval-analyzer";
 
-const STORAGE_KEY = "resilience_attacks";
+const T = {
+  text: "#0D1016", muted: "rgba(0,0,0,0.42)", faint: "rgba(0,0,0,0.22)", border: "rgba(0,0,0,0.08)",
+  card: "#fff", bg: "#f9f9fb", red: "#dc2626", amber: "#d97706", green: "#15803d", violet: "#7c3aed",
+} as const;
+const card: CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, padding: 16 };
+const inp: CSSProperties = { padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, color: T.text, background: T.card, outline: "none" };
+const lbl: CSSProperties = { fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: T.muted, marginBottom: 5, display: "block" };
+
+const KIND_LABEL: Record<EvalKind, string> = { accuracy: "Accuratezza / performance", robustness: "Robustezza (perturbazione/OOD)", redteam: "Red-team / adversarial / cyber" };
 
 export default function ResiliencePage() {
-  const [attacks, setAttacks] = useState<RedTeamAttack[]>(() => {
-    if (typeof window === "undefined") return [];
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]") as RedTeamAttack[]; }
-    catch { return []; }
+  const [record, setRecord] = useState<ResilienceRecord>(() => loadResilienceRecord());
+  const [rowsById, setRowsById] = useState<Record<string, EvalRow[]>>({});
+  const [toast, setToast] = useState<string | null>(null);
+  const [systemName] = useState(() => {
+    const cls = typeof window !== "undefined" ? readFromStorage<ClassifierResult>("classifier") : null;
+    return cls?.systemName ?? "Sistema AI";
   });
-  const [running, setRunning] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
-  const [savedAt, setSavedAt] = useState<string | null>(() =>
-    readFromStorage<ResilienceResult>("resilience")?.completedAt ?? null
-  );
-  const [accuracyThreshold, setAccuracyThreshold] = useState<number>(95);
-  const [fallbackChecks, setFallbackChecks] = useState<Record<string, boolean>>({});
-  const [systemName, setSystemName] = useState<string>("");
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploadKind, setUploadKind] = useState<EvalKind>("accuracy");
+  const [uploading, setUploading] = useState(false);
 
-  // Pre-populate from Classifier
-  useEffect(() => {
-    const existing = readFromStorage<ResilienceResult>("resilience");
-    if (existing) return; // Don't overwrite user's saved data
-    const cls = readFromStorage<ClassifierResult>("classifier");
-    if (cls?.systemName) setSystemName(cls.systemName);
-  }, []);
+  function persist(next: ResilienceRecord) { setRecord(next); saveResilienceRecord(next); }
+  function patch(p: Partial<ResilienceRecord>) { persist({ ...record, ...p }); }
+  function showToast(m: string) { setToast(m); setTimeout(() => setToast(null), 3000); }
 
-  function showToast(msg: string, type: "success" | "error" = "success") {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
+  const evalsImported = record.evalSets.length > 0;
+  const auditGroups = typeof window !== "undefined" ? getDataAuditConfirmedGroups() : [];
+  const isGenerative = record.isGenerative === "yes";
+
+  const phases: ToolPhase[] = [
+    { id: "carica", label: "Carica", sublabel: "Risultati test esterni", anchor: "fase-carica" },
+    { id: "accuratezza", label: "Accuratezza", sublabel: "Metriche & sotto-popolazioni", anchor: "fase-accuratezza" },
+    { id: "minacce", label: "Minacce", sublabel: "prEN 18282 & robustezza", anchor: "fase-minacce" },
+    { id: "evidenza", label: "Evidenza", sublabel: "Export", anchor: "fase-export" },
+  ];
+  const phaseIdx = !evalsImported ? 0
+    : record.threats.some(t => t.status !== "not_assessed") ? 2
+    : 1;
+
+  // ── Import ──────────────────────────────────────────────────────────────
+  async function handleImport(file: File) {
+    if (file.size > MAX_EVAL_BYTES) { showToast(`File troppo grande (max ${MAX_EVAL_BYTES / 1024 / 1024} MB)`); return; }
+    setUploading(true);
+    try {
+      const text = await file.text();
+      const { rows, detectedFields } = parseEvalFile(text, file.name);
+      if (rows.length === 0) { showToast("Nessuna riga valida nel file"); return; }
+      const id = crypto.randomUUID();
+      const evalSet = { id, fileName: file.name, kind: uploadKind, rowCount: rows.length, detectedFields, analyzedAt: new Date().toISOString() };
+      setRowsById(m => ({ ...m, [id]: rows }));
+      patch({ evalSets: [...record.evalSets, evalSet] });
+      showToast(`${rows.length} righe importate — ${detectedFields.length} campi`);
+    } catch (e) { showToast(e instanceof Error ? e.message : "Errore import"); }
+    finally { setUploading(false); }
+  }
+  function removeEvalSet(id: string) {
+    setRowsById(m => { const n = { ...m }; delete n[id]; return n; });
+    patch({ evalSets: record.evalSets.filter(e => e.id !== id) });
   }
 
-  function runBatch() {
-    setRunning(true);
-    const batch = Array.from({ length: 5 }, () => simulateRedTeamAttack());
-    setTimeout(() => {
-      setAttacks((prev) => {
-        const next = [...batch, ...prev];
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-        return next;
-      });
-      setRunning(false);
-
-      // Registra breach nell'evidence layer
-      const breaches = batch.filter((a) => a.result === "breach");
-      if (breaches.length > 0) {
-        breaches.forEach((b) => {
-          appendEvidence(
-            "incident",
-            {
-              type: "Red Team Breach — Art. 15 Resilienza",
-              attackType: b.type,
-              target: b.target.slice(0, 100),
-              defenseScore: b.defenseScore,
-              timestamp: b.timestamp,
-              id: b.id,
-            },
-            "resilience"
-          );
-        });
-        showToast(`⚠ ${breaches.length} breach rilevato/i — registrato nell'Evidence Layer`, "error");
-      } else {
-        showToast(`Batch completato — ${batch.length} attacchi bloccati`);
-      }
-    }, 1000);
-  }
-
-  function resetAttacks() {
-    setAttacks([]);
-    localStorage.removeItem(STORAGE_KEY);
-    showToast("Log attacchi azzerato");
-  }
-
-  const health = getDefenseHealth(attacks);
-  const lastBreach = attacks.find((a) => a.result === "breach");
-
-  function saveToDossier() {
-    if (attacks.length === 0) {
-      showToast("Esegui almeno un batch prima di salvare nel dossier", "error");
-      return;
-    }
-    const completedAt = new Date().toISOString();
-    writeToStorage<ResilienceResult>("resilience", {
-      accuracyMetric: health.defenseRate,
-      robustnessTested: true,
-      cybersecurityMeasures: ["Rilevamento adversarial inputs", "Rate limiting", "Output sanitization", "Audit log immutabile"],
-      fallbackProcedure: "In caso di breach: disabilitazione automatica e notifica al compliance officer",
-      lastTestedAt: completedAt,
-      completedAt,
-      accuracyThreshold,
-      fallbackChecks,
+  // ── Sotto-popolazione ───────────────────────────────────────────────────
+  const [spDsId, setSpDsId] = useState("");
+  const [spMetric, setSpMetric] = useState("");
+  const spSetsWithRows = record.evalSets.filter(e => rowsById[e.id]?.length);
+  function computeSP() {
+    const rows = rowsById[spDsId];
+    const es = record.evalSets.find(e => e.id === spDsId);
+    if (!rows || !es) return;
+    const g = guessFields(es.detectedFields);
+    if (!g.group || !g.value) { showToast("Servono una colonna gruppo e una valore nel file"); return; }
+    const sp = computeSubPopulation(rows, {
+      metric: spMetric || "metrica",
+      groupCol: g.group, valueCol: g.value, sampleCol: g.sample, metricCol: g.metric, threshold: record.gapThreshold,
     });
-    appendEvidence(
-      "adr",
-      {
-        type: "Red Team Testing — Resilienza Art. 15",
-        totalAttacks: health.total,
-        blocked: health.blocked,
-        breaches: health.breaches,
-        defenseRate: `${health.defenseRate}%`,
-        attackTypes: [...new Set(attacks.map((a) => a.type))],
-        lastBreach: lastBreach ? { type: lastBreach.type, id: lastBreach.id, timestamp: lastBreach.timestamp } : null,
-        savedAt: completedAt,
-      },
-      "resilience"
-    );
-    setSavedAt(completedAt);
-    showToast("Risultati Red Teaming salvati nel dossier");
+    const others = record.subPopulation.filter(s => !(s.metric === sp.metric && s.dimension === sp.dimension));
+    patch({ subPopulation: [...others, sp] });
+    showToast(`Sotto-popolazioni calcolate — gap max ${(sp.maxGap * 100).toFixed(1)}%`);
   }
 
-  function exportReport() {
-    const report = {
-      export_type: "Resilience Red Team Report — Art. 15 EU AI Act",
-      exported_at: new Date().toISOString(),
-      regulation: "EU 2024/1689 — Art. 15 (Accuracy, Robustness, Cybersecurity)",
-      summary: {
-        total_attacks: health.total,
-        blocked: health.blocked,
-        breaches: health.breaches,
-        defense_rate: `${health.defenseRate}%`,
-      },
-      attack_log: attacks.map((a) => ({
-        id: a.id,
-        type: a.type,
-        timestamp: a.timestamp,
-        result: a.result,
-        defense_score: a.defenseScore,
-        target: a.target,
-        details: a.details,
-      })),
-    };
-    const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement("a");
-    a.href     = url;
-    a.download = `red-team-report-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast("Report esportato — " + attacks.length + " attacchi");
+  // ── Minacce ─────────────────────────────────────────────────────────────
+  function updateThreat(threatId: string, p: Partial<ThreatCoverage>) {
+    const others = record.threats.filter(t => t.threatId !== threatId);
+    const cur = record.threats.find(t => t.threatId === threatId) ?? { threatId, status: "not_assessed" as const, aiConfirmed: false };
+    patch({ threats: [...others, { ...cur, ...p }] });
   }
+  const redteamSets = record.evalSets.filter(e => e.kind === "redteam");
+
+  // ── Robustezza ──────────────────────────────────────────────────────────
+  function updateRobustness(itemId: string, p: { status?: "documented" | "gap" | "unspecified"; notes?: string }) {
+    const others = record.robustness.filter(r => r.itemId !== itemId);
+    const cur = record.robustness.find(r => r.itemId === itemId) ?? { itemId, status: "unspecified" as const };
+    patch({ robustness: [...others, { ...cur, ...p }] });
+  }
+
+  // ── Export ──────────────────────────────────────────────────────────────
+  async function exportJSON() {
+    const fingerprint = await computeResilienceFingerprint(record);
+    const withFp = { ...record, fingerprint };
+    persist(withFp);
+    const statement = { kind: "Resilience Statement (Art. 15 / Allegato IV [verify])", generatedAt: new Date().toISOString(), record: withFp };
+    const blob = new Blob([JSON.stringify(statement, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = `resilience-statement-${new Date().toISOString().slice(0, 10)}.json`; a.click();
+    URL.revokeObjectURL(url);
+  }
+  async function saveToDossier() {
+    const fingerprint = await computeResilienceFingerprint(record);
+    persist({ ...record, fingerprint });
+    const notAssessed = PREN18282_THREATS.filter(t => (record.threats.find(x => x.threatId === t.id)?.status ?? "not_assessed") === "not_assessed").length;
+    writeToStorage("resilience", {
+      systemName,
+      accuracyDeclared: record.accuracy.length > 0,
+      subPopulationGaps: record.subPopulation.filter(s => s.verdict !== "ok").length,
+      threatsNotAssessed: notAssessed,
+      completedAt: new Date().toISOString(),
+    } as unknown as ResilienceResult);
+    appendEvidence("decision", { type: "Resilience Art. 15 — record salvato", threatsNotAssessed: notAssessed }, "resilience");
+    showToast("Salvato nel dossier");
+  }
+
+  const verdictColor: Record<string, string> = { ok: T.green, review: T.amber, critical: T.red };
 
   return (
-    <div className="w-full">
-      {savedAt ? (
-        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
-          style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)", fontFamily: "var(--font-inter, system-ui)" }}>
-          <CheckCircle size={13} strokeWidth={1.5} style={{ color: "#15803d" }} />
-          <span style={{ color: "#15803d" }}>✓ Risultati salvati nel dossier · Aggiornato il {new Date(savedAt).toLocaleDateString("it-IT")}</span>
-          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>Vedi dossier →</Link>
+    <div style={{ background: T.bg, minHeight: "100vh", fontFamily: "Inter, system-ui, sans-serif" }}>
+      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "24px 20px 80px" }}>
+        <div className="mb-4">
+          <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: T.muted }}>Art. 15 AI Act — Accuratezza, robustezza, cybersicurezza</p>
+          <h1 className="text-[22px] font-bold" style={{ color: T.text }}>Resilience</h1>
         </div>
-      ) : (
-        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[12px]"
-          style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", fontFamily: "var(--font-inter, system-ui)" }}>
-          <span style={{ color: "rgba(0,0,0,0.45)" }}>Salva i risultati Red Teaming nel dossier di compliance</span>
-          <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1 hover:opacity-80"
-            style={{ background: "#0D1016", color: "#ffffff", border: "none", cursor: "pointer" }}>
-            Salva nel dossier
-          </button>
-        </div>
-      )}
 
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 500, letterSpacing: "-0.8px", color: "#0D1016", margin: 0 }}>Continuous Red Teaming (Art. 15)</h1>
-        <p style={{ marginTop: 4, fontSize: 13, color: "rgba(0,0,0,0.42)", lineHeight: 1.5 }}>Bombardamento periodico del modello con attacchi simulati. Salute difensiva in tempo reale.</p>
-      </div>
-
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        {[
-          { label: "Attacchi totali", value: health.total,          textColor: "#0D1016" },
-          { label: "Bloccati",        value: health.blocked,        textColor: "#16a34a" },
-          { label: "Breach",          value: health.breaches,       textColor: health.breaches > 0 ? "#dc2626" : "#16a34a" },
-          { label: "Difesa",          value: `${health.defenseRate}%`, textColor: health.defenseRate > 80 ? "#16a34a" : health.defenseRate > 60 ? "#ca8a04" : "#dc2626" },
-        ].map((c) => (
-          <div key={c.label} className="rounded-xl p-4"
-            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
-            <Shield className="h-4 w-4 mb-2" style={{ color: "rgba(0,0,0,0.3)" }} />
-            <div className="text-[20px] font-semibold" style={{ color: c.textColor, letterSpacing: "-0.5px" }}>{c.value}</div>
-            <div className="mt-0.5 text-[11px]" style={{ color: "rgba(0,0,0,0.38)" }}>{c.label}</div>
-          </div>
-        ))}
-      </div>
-
-      {lastBreach && (
-        <div className="rounded-xl p-4 mb-6 flex items-start gap-3"
-          style={{ background: "rgba(220,38,38,0.05)", border: "1px solid rgba(220,38,38,0.2)" }}>
-          <AlertTriangle className="h-5 w-5 mt-0.5 shrink-0" style={{ color: "#dc2626" }} />
-          <div>
-            <p className="text-[13px] font-medium" style={{ color: "#dc2626" }}>Breach rilevato: {lastBreach.type}</p>
-            <p className="text-[11px] mt-1" style={{ color: "rgba(0,0,0,0.45)" }}>{lastBreach.details}</p>
-            <p className="text-[10px] font-mono mt-1" style={{ color: "rgba(0,0,0,0.35)" }}>{lastBreach.id} · {lastBreach.timestamp.slice(11, 19)}</p>
-          </div>
+        {/* Privacy */}
+        <div className="rounded-xl p-3 mb-4 flex items-start gap-2" style={{ background: "rgba(0,0,0,0.03)", border: `1px solid ${T.border}` }}>
+          <Shield size={14} className="mt-0.5 flex-shrink-0" style={{ color: T.text }} />
+          <p className="text-[11px]" style={{ color: T.muted }}>
+            Resilience <strong style={{ color: T.text }}>non esegue attacchi</strong>: importa e struttura i risultati dei test che esegui coi tuoi strumenti (red-team/eval)
+            come evidenza Art. 15 mappata a prEN 18282. Tutto è elaborato nel browser: nessun artefatto grezzo (dataset, pesi, prompt) viene salvato — solo metriche aggregate.
+          </p>
         </div>
-      )}
 
-      <div className="flex flex-wrap items-center gap-2 mb-6">
-        <button onClick={runBatch} disabled={running}
-          className="flex items-center gap-1.5 text-[12px] px-4 py-2 rounded-lg transition-opacity hover:opacity-80 disabled:opacity-50"
-          style={{ background: "#0D1016", color: "#ffffff", borderRadius: 9999 }}>
-          {running ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
-          {running ? "Simulazione in corso..." : "Esegui 5 attacchi simulati"}
-        </button>
-        {attacks.length > 0 && (
-          <>
-            <button onClick={exportReport}
-              className="flex items-center gap-1.5 text-[12px] px-4 py-2 rounded-lg transition-opacity hover:opacity-70"
-              style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.09)", color: "rgba(0,0,0,0.6)", borderRadius: 9999 }}>
-              <Download className="h-3.5 w-3.5" /> Esporta report
-            </button>
-            <button onClick={resetAttacks}
-              className="text-[12px] px-4 py-2 rounded-lg transition-opacity hover:opacity-70"
-              style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.09)", color: "rgba(0,0,0,0.45)", borderRadius: 9999 }}>
-              Reset log
-            </button>
-          </>
-        )}
-      </div>
+        <ToolPhaseBar phases={phases} currentIdx={phaseIdx} />
 
-      {/* Accuracy threshold — Art. 15(1) */}
-      <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, padding: 20, marginBottom: 16 }}>
-        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
-          Soglia di accuracy accettabile dichiarata (Art. 15(1))
-        </div>
-        <div style={{ fontSize: 12, color: "rgba(0,0,0,0.42)", marginBottom: 12 }}>
-          Threshold sotto cui il sistema non deve scendere in produzione
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <input
-            type="number"
-            min={0}
-            max={100}
-            value={accuracyThreshold}
-            onChange={(e) => setAccuracyThreshold(Number(e.target.value))}
-            style={{ width: 80, padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.07)", fontSize: 13 }}
-          />
-          <span style={{ fontSize: 13, color: "rgba(0,0,0,0.42)" }}>%</span>
-        </div>
-      </div>
-
-      {/* Fallback procedures — Art. 15(4) */}
-      <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, padding: 20, marginBottom: 16 }}>
-        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
-          Procedure di fallback in caso di guasto o inconsistenza (Art. 15(4))
-        </div>
-        {[
-          { id: "fallback_human", label: "Trasferimento automatico a supervisore umano in caso di errore critico" },
-          { id: "fallback_degraded", label: "Modalità degradata documentata (funzionalità ridotta vs interruzione totale)" },
-          { id: "fallback_logging", label: "Logging automatico di tutti gli errori e guasti per analisi post-incident" },
-          { id: "fallback_recovery", label: "Procedura di recovery documentata con tempi massimi di ripristino (RTO)" },
-        ].map(item => (
-          <label key={item.id} style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 10, cursor: "pointer" }}>
-            <input
-              type="checkbox"
-              checked={fallbackChecks[item.id] ?? false}
-              onChange={(e) => setFallbackChecks(prev => ({ ...prev, [item.id]: e.target.checked }))}
-              style={{ marginTop: 2 }}
-            />
-            <span style={{ fontSize: 13 }}>{item.label}</span>
-          </label>
-        ))}
-      </div>
-
-      <div className="rounded-xl overflow-hidden"
-        style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}>
-        <div className="px-5 py-3 flex items-center justify-between"
-          style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
-          <h2 className="text-[13px] font-semibold" style={{ color: "#0D1016" }}>Log Attacchi</h2>
-          <span className="text-[11px]" style={{ color: "rgba(0,0,0,0.35)" }}>{attacks.length} record</span>
-        </div>
-        <div className="max-h-80 overflow-y-auto">
-          <AnimatePresence initial={false}>
-            {attacks.map((a) => (
-              <motion.div key={a.id}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.2 }}
-                className="px-5 py-3">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <Zap className="h-3.5 w-3.5" style={{ color: "rgba(0,0,0,0.3)" }} />
-                    <span className="text-[11px] font-mono" style={{ color: "#0D1016" }}>{a.type}</span>
-                    <span className="text-[10px] font-medium rounded-full px-2 py-0.5"
-                      style={{
-                        background: a.result === "breach" ? "rgba(220,38,38,0.1)" : a.result === "detected" ? "rgba(202,138,4,0.1)" : "rgba(22,163,74,0.1)",
-                        color: a.result === "breach" ? "#dc2626" : a.result === "detected" ? "#ca8a04" : "#16a34a",
-                      }}>
-                      {a.result}
-                    </span>
-                    <span className="text-[10px] font-mono" style={{ color: "rgba(0,0,0,0.35)" }}>
-                      score: {a.defenseScore}
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-mono" style={{ color: "rgba(0,0,0,0.35)" }}>
-                    {a.timestamp.slice(11, 19)}
-                  </span>
-                </div>
-                <p className="text-[10px] ml-5 truncate" style={{ color: "rgba(0,0,0,0.45)" }}>{a.target}</p>
-              </motion.div>
+        {/* ── FASE 1 — Import ── */}
+        <section id="fase-carica" style={{ scrollMarginTop: 72 }} className="mb-6">
+          <PhaseHeading n={1} title="Carica i risultati dei test" sub="Accuratezza · robustezza · red-team (JSON/CSV)" />
+          <div className="flex gap-2 mb-2 flex-wrap">
+            {(Object.keys(KIND_LABEL) as EvalKind[]).map(k => (
+              <button key={k} onClick={() => setUploadKind(k)}
+                className="text-[11px] px-3 py-1.5 rounded-lg border"
+                style={{ borderColor: uploadKind === k ? T.text : T.border, background: uploadKind === k ? T.text : "transparent", color: uploadKind === k ? "#fff" : T.muted, cursor: "pointer" }}>
+                {KIND_LABEL[k]}
+              </button>
             ))}
-          </AnimatePresence>
-          {attacks.length === 0 && (
-            <div className="px-5 py-12 text-center text-[13px]" style={{ color: "rgba(0,0,0,0.35)" }}>
-              Nessun attacco simulato. Esegui un batch per iniziare il Red Teaming.
+          </div>
+          <div onClick={() => fileRef.current?.click()}
+            onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleImport(f); }}
+            className="rounded-xl border-2 border-dashed flex flex-col items-center justify-center p-6 cursor-pointer" style={{ borderColor: T.border, background: T.bg }}>
+            {uploading ? <Loader2 size={20} className="animate-spin mb-2" style={{ color: T.text }} /> : <Upload size={20} className="mb-2" style={{ color: T.muted }} />}
+            <p className="text-[12px] font-medium" style={{ color: T.text }}>{uploading ? "Analisi…" : `Importa: ${KIND_LABEL[uploadKind]}`}</p>
+            <p className="text-[11px]" style={{ color: T.muted }}>Trascina un .json/.csv o clicca — max 25 MB · nessun artefatto grezzo salvato</p>
+            <input ref={fileRef} type="file" accept=".json,.csv,.tsv" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleImport(f); e.currentTarget.value = ""; }} />
+          </div>
+          {record.evalSets.length > 0 && (
+            <div className="mt-3 space-y-1">
+              {record.evalSets.map(es => (
+                <div key={es.id} className="flex items-center justify-between text-[11px] px-3 py-2 rounded-lg" style={{ background: T.card, border: `1px solid ${T.border}` }}>
+                  <span style={{ color: T.text }}><b>{es.fileName}</b> · {KIND_LABEL[es.kind]} · {es.rowCount} righe · {es.detectedFields.length} campi{!rowsById[es.id] ? " · (ricarica per ricalcolare)" : ""}</span>
+                  <button onClick={() => removeEvalSet(es.id)} style={{ background: "none", border: "none", cursor: "pointer" }}><X size={13} style={{ color: T.muted }} /></button>
+                </div>
+              ))}
             </div>
           )}
-        </div>
-      </div>
+        </section>
 
-      {/* Toast */}
-      <AnimatePresence>
-        {toast && (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 16 }}
-            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg"
-            style={{
-              background: toast.type === "error" ? "rgba(220,38,38,0.95)" : "#0D1016",
-              color: "#ffffff",
-            }}
-          >
-            {toast.type === "error" ? "⚠" : "✓"} {toast.msg}
-          </motion.div>
-        )}
-      </AnimatePresence>
+        {/* ── FASE 2 — Accuratezza & sotto-popolazioni ── */}
+        <section id="fase-accuratezza" style={{ scrollMarginTop: 72 }} className="mb-6">
+          <PhaseHeading n={2} title="Accuratezza dichiarata & sotto-popolazioni" sub="Art. 15(3) · disaggregazione per gruppo (Art. 15 ↔ 10)" />
+          {!evalsImported ? (
+            <SectionEmptyState message="Carica i risultati di accuratezza per calcolare metriche complessive e disaggregate per sotto-popolazione." />
+          ) : (
+            <>
+              <div style={card} className="mb-3">
+                <p className="text-[12px] font-semibold mb-1" style={{ color: T.text }}>Livello di accuratezza dichiarato nelle istruzioni per l&apos;uso?</p>
+                <p className="text-[11px] mb-2" style={{ color: T.muted }}>Art. 13(3)(b) [verify]. Il livello e le metriche vanno indicati nelle istruzioni.</p>
+                <div className="flex gap-2 items-center flex-wrap">
+                  {(["yes", "no"] as const).map(v => {
+                    const active = record.accuracy[0]?.declaredInInstructions === v;
+                    return (
+                      <button key={v} onClick={() => patch({ accuracy: record.accuracy.length ? record.accuracy.map((a, i) => i === 0 ? { ...a, declaredInInstructions: v } : a) : [{ metric: "accuracy", value: 0, declaredInInstructions: v, source: "manual" }] })}
+                        className="text-[11px] px-3 py-1.5 rounded-lg border" style={{ borderColor: active ? T.text : T.border, background: active ? T.text : "transparent", color: active ? "#fff" : T.muted, cursor: "pointer" }}>
+                        {v === "yes" ? "Sì — dichiarato" : "No — non dichiarato"}
+                      </button>
+                    );
+                  })}
+                  {record.accuracy[0]?.declaredInInstructions === "no" && <span className="text-[11px]" style={{ color: T.red }}>⚠ Gap Art. 15(3)</span>}
+                  <Link href="/dashboard/tools/transparency" className="text-[11px] inline-flex items-center gap-1 ml-auto" style={{ color: T.text }}><ExternalLink size={11} /> Transparency Kit</Link>
+                </div>
+              </div>
+
+              <div style={card}>
+                <p className="text-[12px] font-semibold mb-2" style={{ color: T.text }}>Metriche per sotto-popolazione</p>
+                {auditGroups.length > 0 && <p className="text-[10px] mb-2" style={{ color: T.muted }}>Gruppi protetti da Data Audit: {auditGroups.join(", ")}</p>}
+                <div className="flex gap-2 flex-wrap items-end mb-3">
+                  <div><label style={lbl}>Set importato</label>
+                    <select style={inp} value={spDsId} onChange={e => setSpDsId(e.target.value)}>
+                      <option value="">Seleziona…</option>
+                      {spSetsWithRows.map(e => <option key={e.id} value={e.id}>{e.fileName}</option>)}
+                    </select></div>
+                  <div><label style={lbl}>Metrica (etichetta)</label>
+                    <input style={inp} value={spMetric} onChange={e => setSpMetric(e.target.value)} placeholder="es. accuracy" /></div>
+                  <button onClick={computeSP} disabled={!spDsId} className="text-[12px] font-medium px-3 py-1.5 rounded-lg" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer", opacity: spDsId ? 1 : 0.5 }}>Calcola disaggregato</button>
+                </div>
+                {spSetsWithRows.length === 0 && <p className="text-[11px]" style={{ color: T.amber }}>Ricarica un set in questa sessione (le righe non vengono salvate) per calcolare il disaggregato.</p>}
+                {record.subPopulation.map((sp: SubPopulationMetric) => (
+                  <div key={sp.metric + sp.dimension} className="mt-3 pt-3" style={{ borderTop: `1px solid ${T.border}` }}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[12px] font-semibold" style={{ color: T.text }}>{sp.metric} — overall {(sp.overall * 100).toFixed(1)}%</span>
+                      <span className="text-[11px] font-bold" style={{ color: verdictColor[sp.verdict] }}>gap {(sp.maxGap * 100).toFixed(1)}% · {sp.verdict}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {sp.byGroup.map(g => (
+                        <span key={g.group} className="text-[10px] px-2 py-1 rounded" style={{ background: T.bg, color: (g.sampleSize ?? 0) < 30 ? T.faint : T.text }}>
+                          {g.group}: {(g.value * 100).toFixed(1)}%{(g.sampleSize ?? 0) < 30 ? " (campione insuff.)" : ""}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </section>
+
+        {/* ── FASE 3 — Minacce prEN 18282 & robustezza ── */}
+        <section id="fase-minacce" style={{ scrollMarginTop: 72 }} className="mb-6">
+          <PhaseHeading n={3} title="Matrice minacce & robustezza" sub="prEN 18282 (Art. 15(5)) · robustezza operativa (Art. 15(4))" />
+          {!evalsImported ? (
+            <SectionEmptyState message="Carica i risultati red-team / robustezza per mappare le minacce prEN 18282 e valutare la robustezza." />
+          ) : (
+            <>
+              <div style={card} className="mb-3">
+                <p className="text-[12px] font-semibold mb-2" style={{ color: T.text }}>Matrice minacce — prEN 18282 [verify]</p>
+                <div className="space-y-2">
+                  {PREN18282_THREATS.map(threat => {
+                    const rec = record.threats.find(t => t.threatId === threat.id);
+                    const status = rec?.status ?? "not_assessed";
+                    const statusColor = status === "tested_mitigated" ? T.green : status === "tested_gap" ? T.red : T.muted;
+                    return (
+                      <div key={threat.id} className="rounded-lg p-3" style={{ border: `1px solid ${T.border}` }}>
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div>
+                            <p className="text-[12px] font-medium" style={{ color: T.text }}>{threat.label}
+                              {threat.generativeOnly && !isGenerative && <span className="text-[10px] ml-1" style={{ color: T.amber }}>· verifica applicabilità</span>}
+                            </p>
+                            <p className="text-[10px]" style={{ color: T.muted }}>{threat.reference}</p>
+                          </div>
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0" style={{ color: statusColor, background: T.bg }}>
+                            {status === "tested_mitigated" ? "Testato & mitigato" : status === "tested_gap" ? "Testato — gap" : "Non valutato"}
+                          </span>
+                        </div>
+                        <div className="flex gap-2 flex-wrap items-center">
+                          <select style={{ ...inp, fontSize: 11 }} value={status} onChange={e => updateThreat(threat.id, { status: e.target.value as ThreatCoverage["status"] })}>
+                            <option value="not_assessed">Non valutato</option>
+                            <option value="tested_mitigated">Testato & mitigato</option>
+                            <option value="tested_gap">Testato — gap</option>
+                          </select>
+                          {redteamSets.length > 0 && (
+                            <select style={{ ...inp, fontSize: 11 }} value={rec?.evidenceEvalSetId ?? ""} onChange={e => {
+                              const es = e.target.value; const rows = rowsById[es];
+                              let asr: number | undefined;
+                              if (rows) { const g = guessFields(record.evalSets.find(x => x.id === es)?.detectedFields ?? []); if (g.attempts && g.successes) { const a = computeASR(rows, g.attempts, g.successes); asr = a ?? undefined; } }
+                              updateThreat(threat.id, { evidenceEvalSetId: es || undefined, attackSuccessRate: asr });
+                            }}>
+                              <option value="">Collega evidenza…</option>
+                              {redteamSets.map(es => <option key={es.id} value={es.id}>{es.fileName}</option>)}
+                            </select>
+                          )}
+                          {rec?.attackSuccessRate !== undefined && <span className="text-[11px] font-semibold" style={{ color: rec.attackSuccessRate > 0 ? T.red : T.green }}>ASR {(rec.attackSuccessRate * 100).toFixed(1)}%</span>}
+                          <input style={{ ...inp, fontSize: 11, flex: 1, minWidth: 160 }} value={rec?.mitigation ?? ""} onChange={e => updateThreat(threat.id, { mitigation: e.target.value })} placeholder="Mitigazione adottata…" />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-3 rounded-lg p-2 flex items-center gap-2 flex-wrap" style={{ background: "rgba(220,38,38,0.06)" }}>
+                  <AlertTriangle size={13} style={{ color: T.red }} />
+                  <span className="text-[11px]" style={{ color: T.red }}>Le minacce &quot;non valutate&quot; restano gap di cybersicurezza.</span>
+                  <Link href="/dashboard/tools/risk-manager" className="text-[11px] inline-flex items-center gap-1 ml-auto" style={{ color: T.text }}><ExternalLink size={11} /> Risk Manager (Art. 9)</Link>
+                </div>
+              </div>
+
+              <div style={card}>
+                <p className="text-[12px] font-semibold mb-2" style={{ color: T.text }}>Robustezza operativa — Art. 15(4) [verify]</p>
+                <div className="space-y-2">
+                  {ROBUSTNESS_ITEMS.map(item => {
+                    const rec = record.robustness.find(r => r.itemId === item.id);
+                    return (
+                      <div key={item.id} className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[12px] flex-1" style={{ color: T.text, minWidth: 200 }}>{item.label}</span>
+                        <select style={{ ...inp, fontSize: 11 }} value={rec?.status ?? "unspecified"} onChange={e => updateRobustness(item.id, { status: e.target.value as "documented" | "gap" | "unspecified" })}>
+                          <option value="unspecified">Da valutare</option>
+                          <option value="documented">Documentato</option>
+                          <option value="gap">Gap</option>
+                        </select>
+                        <input style={{ ...inp, fontSize: 11, flex: 1, minWidth: 160 }} value={rec?.notes ?? ""} onChange={e => updateRobustness(item.id, { notes: e.target.value })} placeholder="Note…" />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
+        </section>
+
+        {/* ── FASE 4 — Evidenza ── */}
+        <section id="fase-export" style={{ scrollMarginTop: 72 }} className="mb-6">
+          <PhaseHeading n={4} title="Evidenza" sub="Resilience Statement (Art. 15 / Allegato IV)" />
+          <div style={card}>
+            <p className="text-[11px] mb-3" style={{ color: T.muted }}>
+              Accuratezza dichiarata + disaggregato, robustezza, matrice prEN 18282 con stati e gap, fingerprint, timestamp.
+              {record.fingerprint && <span style={{ fontFamily: "monospace" }}> · fp {record.fingerprint.slice(0, 10)}…</span>}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={exportJSON} className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}><FileText size={13} /> Esporta JSON</button>
+              <button onClick={() => window.print()} className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg" style={{ background: "#fff", color: T.text, border: `1px solid ${T.border}`, cursor: "pointer" }}><FileText size={13} /> Stampa / Salva PDF</button>
+              <button onClick={saveToDossier} className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg ml-auto" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}><CheckCircle2 size={13} /> Salva nel dossier</button>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3">
+            {RESILIENCE_PILLARS.map(p => (
+              <Link key={p.id} href={p.linkedPath} className="rounded-lg p-3 block" style={{ background: T.card, border: `1px solid ${T.border}`, textDecoration: "none" }}>
+                <p className="text-[11px] font-semibold" style={{ color: T.text }}>{p.label}</p>
+                <p className="text-[10px]" style={{ color: T.muted }}>{p.reference}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {toast && <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg" style={{ background: T.text, color: "#fff" }}>✓ {toast}</div>}
+      </div>
     </div>
   );
 }
