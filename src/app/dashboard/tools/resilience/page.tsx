@@ -203,7 +203,7 @@ export default function ResiliencePage() {
             <>
               <div style={card} className="mb-3">
                 <p className="text-[12px] font-semibold mb-1" style={{ color: T.text }}>Livello di accuratezza dichiarato nelle istruzioni per l&apos;uso?</p>
-                <p className="text-[11px] mb-2" style={{ color: T.muted }}>Art. 13(3)(b) [verify]. Il livello e le metriche vanno indicati nelle istruzioni.</p>
+                <p className="text-[11px] mb-2" style={{ color: T.muted }}>Art. 13(3)(b) [Reg. (UE) 2024/1689]. Il livello e le metriche vanno indicati nelle istruzioni.</p>
                 <div className="flex gap-2 items-center flex-wrap">
                   {(["yes", "no"] as const).map(v => {
                     const active = record.accuracy[0]?.declaredInInstructions === v;
@@ -312,7 +312,7 @@ export default function ResiliencePage() {
               </div>
 
               <div style={card}>
-                <p className="text-[12px] font-semibold mb-2" style={{ color: T.text }}>Robustezza operativa — Art. 15(4) [verify]</p>
+                <p className="text-[12px] font-semibold mb-2" style={{ color: T.text }}>Robustezza operativa — Art. 15(4) [Reg. (UE) 2024/1689]</p>
                 <div className="space-y-2">
                   {ROBUSTNESS_ITEMS.map(item => {
                     const rec = record.robustness.find(r => r.itemId === item.id);
