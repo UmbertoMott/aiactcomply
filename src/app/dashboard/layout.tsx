@@ -175,6 +175,14 @@ const PILLARS: NavPillar[] = [
     tooltip: "Qualità e governance dei dati di training (Art. 10)",
   },
   {
+    id: "resilience",
+    icon: Siren,
+    label: "Resilience",
+    href: "/dashboard/tools/resilience",
+    art: "Art. 15",
+    tooltip: "Accuratezza, robustezza e cybersicurezza — evidenza da red-team/eval (Art. 15)",
+  },
+  {
     id: "deployer",
     icon: UserCheck,
     label: "Deployer Dashboard",
