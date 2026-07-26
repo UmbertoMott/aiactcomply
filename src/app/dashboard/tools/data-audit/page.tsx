@@ -29,6 +29,7 @@ import {
 import { profileDatasetDetailed, computeDatasetFingerprint, qualityScorecard, MAX_FILE_BYTES } from "@/lib/data-audit/csv-profiler";
 import type { Row } from "@/lib/data-audit/fairness";
 import { useRouter } from "next/navigation";
+import { ToolPhaseBar, type ToolPhase } from "@/components/compliance/ToolPhaseBar";
 import {
   QualityScorecard, FairnessPanel, RepresentativenessPanel, IsoMappingTable, exportDataGovernanceJSON,
 } from "./DataAuditPanels";
@@ -419,6 +420,16 @@ export default function DataAuditPage() {
   const systemDescription = cls?.systemDescription ?? "";
   const riskTier = cls?.riskLevel ?? "n.d.";
 
+  const phases: ToolPhase[] = [
+    { id: "carica",   label: "Carica",    sublabel: "Dataset",                anchor: "fase-carica" },
+    { id: "qualita",  label: "Qualità",   sublabel: "Profilo & scorecard",    anchor: "fase-qualita" },
+    { id: "fairness", label: "Fairness",  sublabel: "Bias & rappresentatività", anchor: "fase-fairness" },
+    { id: "evidenza", label: "Evidenza",  sublabel: "Governance & export",    anchor: "fase-export" },
+  ];
+  const phaseIdx = record.datasets.length === 0 ? 0
+    : record.fairnessReports.length === 0 ? 1
+    : countDocumented(record) >= 1 ? 3 : 2;
+
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(null), 3000); }
 
   function patchRecord(patch: Partial<DataAuditRecord>) {
@@ -704,8 +715,11 @@ export default function DataAuditPage() {
         <span className="text-[11px]" style={{ color: T.muted }}>{pct}%</span>
       </div>
 
+      {/* ── Scaletta guidata ── */}
+      <ToolPhaseBar phases={phases} currentIdx={phaseIdx} />
+
       {/* ── Dataset upload panels ── */}
-      <section className="mb-6">
+      <section id="fase-carica" className="mb-6">
         <h2 className="text-[13px] font-semibold mb-3" style={{ color: T.text }}>Dataset</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {ROLES.map(({ role, label, optional }) => {
@@ -748,10 +762,12 @@ export default function DataAuditPage() {
       </section>
 
       {/* ── Data Quality Scorecard · Fairness · Rappresentatività ── */}
-      <QualityScorecard datasets={record.datasets} />
-      <FairnessPanel datasets={record.datasets} rowsById={rowsById}
-        systemName={systemName} intendedPurpose={systemDescription} onReport={saveFairnessReport} />
-      <RepresentativenessPanel datasets={record.datasets} rowsById={rowsById} onCheck={saveRepCheck} />
+      <div id="fase-qualita"><QualityScorecard datasets={record.datasets} /></div>
+      <div id="fase-fairness">
+        <FairnessPanel datasets={record.datasets} rowsById={rowsById}
+          systemName={systemName} intendedPurpose={systemDescription} onReport={saveFairnessReport} />
+        <RepresentativenessPanel datasets={record.datasets} rowsById={rowsById} onCheck={saveRepCheck} />
+      </div>
 
       {/* ── 10 Governance practice cards ── */}
       <section className="mb-6">
@@ -865,7 +881,7 @@ export default function DataAuditPage() {
       <IsoMappingTable />
 
       {/* ── Export Data Governance Statement (Art. 11 / Allegato IV) ── */}
-      <section className="mb-6">
+      <section id="fase-export" className="mb-6">
         <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Evidenza — Data Governance Statement</h2>
         <p className="text-[11px] mb-3" style={{ color: T.muted }}>Art. 11 / Allegato IV [verify]. Include scorecard, fairness, rappresentatività, pratiche, fingerprint, timestamp.</p>
         <div className="flex flex-wrap gap-2">

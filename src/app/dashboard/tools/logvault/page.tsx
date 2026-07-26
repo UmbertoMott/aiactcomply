@@ -16,6 +16,7 @@ import { analyzeLogSet, MAX_LOG_FILE_BYTES, MAX_ENTRIES } from "@/lib/logvault/l
 import {
   CoverageFillRatePanel, LogQualityCard, IntegrityCard, RetentionPanel, LogIsoTable, exportLogConformityJSON,
 } from "./LogVaultPanels";
+import { ToolPhaseBar, type ToolPhase } from "@/components/compliance/ToolPhaseBar";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { TRACEABILITY_PURPOSES, BIOMETRIC_LOG_REQUIREMENTS, FIELD_NAME_HINTS, MAX_LOG_FILE_SIZE_BYTES } from "@/lib/logvault/traceability-purposes";
@@ -427,6 +428,16 @@ export default function LogVaultPage() {
   const intendedPurpose = cls?.systemDescription ?? "";
   const riskTier = cls?.riskLevel ?? "n.d.";
 
+  const phases: ToolPhase[] = [
+    { id: "carica",    label: "Carica",    sublabel: "Log import",          anchor: "fase-carica" },
+    { id: "copertura", label: "Copertura", sublabel: "Finalità Art. 12(2)", anchor: "fase-copertura" },
+    { id: "verifica",  label: "Verifica",  sublabel: "Qualità · integrità · ritenzione", anchor: "fase-verifica" },
+    { id: "evidenza",  label: "Evidenza",  sublabel: "Export",              anchor: "fase-export" },
+  ];
+  const phaseIdx = record.importedLogSets.length === 0 ? 0
+    : record.retention.role !== "unspecified" ? 3
+    : record.traceabilityCoverage.some(c => c.evidenceFields.length > 0) ? 2 : 1;
+
   // Read Oversight fourEyes for biometric applicability
   function getOversightFourEyes() {
     if (typeof window === "undefined") return null;
@@ -753,8 +764,11 @@ export default function LogVaultPage() {
             </span>
           </div>
 
+          {/* ── Scaletta guidata ── */}
+          <ToolPhaseBar phases={phases} currentIdx={phaseIdx} />
+
           {/* ── Import section ─────────────────────────────────────────────── */}
-          <section className="mb-6">
+          <section id="fase-carica" className="mb-6">
             <h2 className="text-[13px] font-semibold mb-3" style={{ color: T.text }}>Importa log reali</h2>
 
             {/* Existing log sets */}
@@ -784,7 +798,7 @@ export default function LogVaultPage() {
               <p className="text-[12px] font-medium" style={{ color: T.text }}>{uploading ? "Analisi in corso..." : "Trascina un file o clicca per selezionare"}</p>
               <p className="text-[11px]" style={{ color: T.muted }}>Formati: .json, .ndjson, .csv — max 25 MB</p>
               <p className="text-[11px] mt-1" style={{ color: T.faint }}>I dati grezzi non vengono salvati — solo statistiche aggregate</p>
-              <input ref={fileInputRef} type="file" accept=".json,.ndjson,.csv" className="hidden"
+              <input ref={fileInputRef} type="file" accept=".json,.ndjson,.jsonl,.csv,.tsv" className="hidden"
                 onChange={e => { const f = e.target.files?.[0]; if (f) handleFileImport(f); e.currentTarget.value = ""; }} />
             </div>
 
@@ -912,10 +926,12 @@ export default function LogVaultPage() {
           )}
 
           {/* ── §3 copertura fill-rate · §4 qualità · §6 integrità · §5 ritenzione ── */}
-          <CoverageFillRatePanel record={record} />
-          <LogQualityCard logSets={record.importedLogSets} />
-          <IntegrityCard logSets={record.importedLogSets} />
-          <RetentionPanel record={record} onChange={(r) => patchRecord({ retention: r })} />
+          <div id="fase-copertura"><CoverageFillRatePanel record={record} /></div>
+          <div id="fase-verifica">
+            <LogQualityCard logSets={record.importedLogSets} />
+            <IntegrityCard logSets={record.importedLogSets} />
+            <RetentionPanel record={record} onChange={(r) => patchRecord({ retention: r })} />
+          </div>
 
           {/* ── Retention notes ────────────────────────────────────────────── */}
           <section className="mb-6 rounded-xl p-4" style={card}>
@@ -938,6 +954,7 @@ export default function LogVaultPage() {
           </section>
 
           {/* ── §10 Standard ISO ── */}
+          <div id="fase-export" />
           <LogIsoTable />
 
           {/* ── §9 Export Log Conformity Statement ── */}
