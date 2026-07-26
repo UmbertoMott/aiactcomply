@@ -151,7 +151,7 @@ export const DEPLOYER_OBLIGATIONS: readonly DeployerObligationDefinition[] = [
     alwaysApplicable: false,
     applicabilityField: "eudbRequired",
     evidenceType: "registration_reference",
-    linkedTool: "/dashboard/tools/eudb",
+    linkedTool: "/dashboard/compliance-ops/eudb",
   },
   {
     id: "D-11",

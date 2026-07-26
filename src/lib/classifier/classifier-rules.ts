@@ -439,7 +439,7 @@ export const ARTICLE_OBLIGATIONS: ArticleObligation[] = [
     description: "Obblighi dei deployer",
     obligation: "9 obblighi specifici: verifica conformità, supervisione umana, monitoraggio, log retention, FRIA se applicabile",
     applies: ["deployer"],
-    toolHref: "/dashboard/tools/deployer",
+    toolHref: "/dashboard/tools/deployer-dashboard",
   },
   {
     article: "Art. 27",

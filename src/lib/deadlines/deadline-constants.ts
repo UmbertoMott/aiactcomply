@@ -150,11 +150,11 @@ export const DEADLINE_ACTIONS: Record<string, { label: string; href?: string }[]
     { label: "Configura LogVault con import reale (Art. 12)", href: "/dashboard/tools/logvault" },
     { label: "Completa Human Oversight - DocuGen step 04 (Art. 14)", href: "/dashboard/tools/docugen" },
     { label: "Completa Art. 50 Kit - disclosure (Art. 50)", href: "/dashboard/tools/art50-kit" },
-    { label: "Registrati in EUDB (Art. 49)", href: "/dashboard/tools/eudb" },
+    { label: "Registrati in EUDB (Art. 49)", href: "/dashboard/compliance-ops/eudb" },
   ],
   public_authority_deployer: [
     { label: "Completa Deployer Dashboard - obblighi Art. 26", href: "/dashboard/tools/deployer-dashboard" },
-    { label: "Registrati in EUDB (Art. 49)", href: "/dashboard/tools/eudb" },
+    { label: "Registrati in EUDB (Art. 49)", href: "/dashboard/compliance-ops/eudb" },
   ],
   high_risk_annex1: [
     { label: "Verifica classificazione nel Triage", href: "/dashboard/triage" },

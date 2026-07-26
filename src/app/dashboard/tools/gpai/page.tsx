@@ -188,7 +188,7 @@ const ART53_OBLIGATIONS: Art53Obligation[] = [
     article: "Art. 53(1)(e) → Art. 49",
     description: "I GPAI provider devono registrarsi nel database UE. Categoria specifica per GPAI nel portale EC.",
     note: "Usa il tool EUDB Registration per generare il pacchetto Annex VIII.",
-    href: "/dashboard/tools/eudb",
+    href: "/dashboard/compliance-ops/eudb",
   },
 ];
 

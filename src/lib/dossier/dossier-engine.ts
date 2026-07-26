@@ -250,7 +250,7 @@ export function getDossierSections(data: DossierData): DossierSection[] {
       id: "deployer",
       article: "Art. 26",
       title: "Deployer Obligations",
-      href: "/dashboard/tools/deployer",
+      href: "/dashboard/tools/deployer-dashboard",
       ...(isDeployer || tier === null || !isProvider
         ? { status: data.deployer ? "complete" : "missing", completedAt: data.deployer?.completedAt }
         : na("Art. 26 si applica ai deployer; i provider hanno obblighi distinti (Art. 9-17)")),
@@ -270,7 +270,7 @@ export function getDossierSections(data: DossierData): DossierSection[] {
       id: "eudb",
       article: "Art. 49",
       title: "EUDB Registration",
-      href: "/dashboard/tools/eudb",
+      href: "/dashboard/compliance-ops/eudb",
       ...(isHighRisk && (isProvider || tier === null)
         ? { status: data.eudb ? "complete" : "missing", completedAt: data.eudb?.completedAt }
         : isDeployer
@@ -282,7 +282,7 @@ export function getDossierSections(data: DossierData): DossierSection[] {
       id: "authorizedRep",
       article: "Art. 22",
       title: "Authorized Representative",
-      href: "/dashboard/tools/authorized-rep",
+      href: "/dashboard/compliance-ops/authorized-rep",
       status: data.authorizedRep ? "complete" : "missing",
       completedAt: data.authorizedRep?.completedAt,
     },
@@ -291,7 +291,7 @@ export function getDossierSections(data: DossierData): DossierSection[] {
       id: "providerTransition",
       article: "Art. 28",
       title: "Provider Transition Check",
-      href: "/dashboard/tools/provider-transition",
+      href: "/dashboard/compliance-ops/provider-transition",
       status: data.providerTransition
         ? (data.providerTransition.verdict === "deployer" ? "complete" : "partial")
         : "missing",

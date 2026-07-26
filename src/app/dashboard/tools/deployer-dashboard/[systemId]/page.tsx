@@ -833,7 +833,7 @@ export default function DeployerSystemDetailPage() {
               onChange={(e) => patchRecord({ eudbNote: e.target.value })}
             />
             <Link
-              href="/dashboard/tools/eudb"
+              href="/dashboard/compliance-ops/eudb"
               className="inline-flex items-center gap-1.5 text-xs font-medium mt-2"
               style={{ color: "#2563eb" }}
             >

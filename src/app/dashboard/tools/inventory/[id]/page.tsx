@@ -282,7 +282,7 @@ const OBLIGATIONS: Obligation[] = [
     what: "Registrare il sistema nell'EU AI database prima dell'immissione sul mercato UE",
     icon: Globe,
     storageKey: "aicomply_eudb_result",
-    href: "/dashboard/tools/eudb",
+    href: "/dashboard/compliance-ops/eudb",
     toolLabel: "EUDB",
     tiers: ["high_risk"],
     detect: raw => {
