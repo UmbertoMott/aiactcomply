@@ -25,6 +25,16 @@ async function resolveIP(): Promise<string> {
   }
 }
 
+// ── Allowlist accesso (pre-lancio): solo questi indirizzi possono entrare ─────
+// Sovrascrivibile via env AUTH_ALLOWED_EMAILS (lista separata da virgole).
+const ALLOWED_EMAILS = new Set(
+  (process.env.AUTH_ALLOWED_EMAILS ?? "dridrop@gmail.com")
+    .split(",").map((e) => e.trim().toLowerCase()).filter(Boolean)
+);
+function isAllowedEmail(email: string | null | undefined): boolean {
+  return ALLOWED_EMAILS.has((email ?? "").trim().toLowerCase());
+}
+
 export async function signup(formData: FormData) {
   const rawData = {
     email:    formData.get("email")    as string,
@@ -36,6 +46,11 @@ export async function signup(formData: FormData) {
   const parsed = registrationSchema.safeParse(rawData);
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message };
+  }
+
+  // Accesso riservato in pre-lancio
+  if (!isAllowedEmail(rawData.email)) {
+    return { error: "Le registrazioni sono al momento riservate. Contatta connect@regulaeos.com." };
   }
 
   // ── Duplicate checks (using service-role admin client) ───────────────
@@ -96,6 +111,11 @@ export async function loginEmail(formData: FormData) {
   const parsed = loginSchema.safeParse(rawData);
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message };
+  }
+
+  // Accesso riservato in pre-lancio: solo email in allowlist
+  if (!isAllowedEmail(rawData.email)) {
+    return { error: "Accesso non abilitato per questo indirizzo email." };
   }
 
   // Rate limiting
