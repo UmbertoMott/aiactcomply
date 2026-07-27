@@ -93,17 +93,22 @@ export type LogVaultRecord = z.infer<typeof LogVaultRecordSchema>;
 
 const STORAGE_KEY = "aicomply_logvault_record_v1";
 
+const DEFAULT_LOGVAULT: LogVaultRecord = {
+  loggingCapabilityConfirmed: "unspecified",
+  importedLogSets: [],
+  traceabilityCoverage: [],
+  biometricLogging: { applicable: "unspecified", requirementCoverage: [] },
+  retention: { role: "unspecified", verdict: "unknown" },
+};
+
 export function loadLogVaultRecord(): LogVaultRecord {
-  if (typeof window === "undefined") {
-    return { loggingCapabilityConfirmed: "unspecified", importedLogSets: [], traceabilityCoverage: [], biometricLogging: { applicable: "unspecified", requirementCoverage: [] }, retention: { role: "unspecified", verdict: "unknown" } };
-  }
+  if (typeof window === "undefined") return DEFAULT_LOGVAULT;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { loggingCapabilityConfirmed: "unspecified", importedLogSets: [], traceabilityCoverage: [], biometricLogging: { applicable: "unspecified", requirementCoverage: [] }, retention: { role: "unspecified", verdict: "unknown" } };
-    return JSON.parse(raw);
-  } catch {
-    return { loggingCapabilityConfirmed: "unspecified", importedLogSets: [], traceabilityCoverage: [], biometricLogging: { applicable: "unspecified", requirementCoverage: [] }, retention: { role: "unspecified", verdict: "unknown" } };
-  }
+    if (!raw) return DEFAULT_LOGVAULT;
+    // Fonde i default: retrocompatibile con record salvati prima dell'aggiunta di `retention`.
+    return { ...DEFAULT_LOGVAULT, ...JSON.parse(raw) };
+  } catch { return DEFAULT_LOGVAULT; }
 }
 
 export function saveLogVaultRecord(record: LogVaultRecord): void {

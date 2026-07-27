@@ -126,12 +126,24 @@ export type DataAuditRecord = z.infer<typeof DataAuditRecordSchema>;
 
 const STORAGE_KEY = "aicomply_data_audit_v1";
 
+const DEFAULT_DATA_AUDIT: DataAuditRecord = {
+  developmentApproach: "unspecified",
+  datasets: [],
+  governancePractices: [],
+  specialCategories: { applicable: "unspecified", flaggedColumns: [], status: "not_documented" },
+  fairnessReports: [],
+  representativenessChecks: [],
+};
+
 export function loadDataAuditRecord(): DataAuditRecord {
-  if (typeof window === "undefined") return { datasets: [], governancePractices: [], specialCategories: { applicable: "unspecified", flaggedColumns: [], status: "not_documented" }, fairnessReports: [], representativenessChecks: [], developmentApproach: "unspecified" };
+  if (typeof window === "undefined") return DEFAULT_DATA_AUDIT;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : { datasets: [], governancePractices: [], specialCategories: { applicable: "unspecified", flaggedColumns: [], status: "not_documented" }, fairnessReports: [], representativenessChecks: [], developmentApproach: "unspecified" };
-  } catch { return { datasets: [], governancePractices: [], specialCategories: { applicable: "unspecified", flaggedColumns: [], status: "not_documented" }, fairnessReports: [], representativenessChecks: [], developmentApproach: "unspecified" }; }
+    if (!raw) return DEFAULT_DATA_AUDIT;
+    // Fonde i default: retrocompatibile con record salvati da versioni precedenti
+    // (evita crash su campi aggiunti dopo, es. fairnessReports/representativenessChecks).
+    return { ...DEFAULT_DATA_AUDIT, ...JSON.parse(raw) };
+  } catch { return DEFAULT_DATA_AUDIT; }
 }
 
 export function saveDataAuditRecord(record: DataAuditRecord): void {
