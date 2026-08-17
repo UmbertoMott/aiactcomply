@@ -266,6 +266,7 @@ export default function Hero() {
         {/* Background video */}
         <video
           src="/videos/hero-demo.mp4"
+          poster="/videos/hero-demo-poster.jpg"
           autoPlay
           muted
           loop

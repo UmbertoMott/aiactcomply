@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { preload } from "react-dom";
 import Nav from "@/components/Nav";
 import Hero from "@/components/sections/Hero";
 import PlatformSection from "@/components/sections/PlatformSection";
@@ -147,7 +146,6 @@ const jsonLd = {
 };
 
 export default function Home() {
-  preload("/videos/hero-demo.mp4", { as: "video", type: "video/mp4" });
   return (
     <>
       <script
