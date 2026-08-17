@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Bell, AlertTriangle, Clock, Calendar, CheckCircle,
-  X, Filter, Info, ArrowRight,
+  X, Info, ArrowRight,
   Award, Play, ClipboardList,
 } from "lucide-react";
 import {
@@ -506,6 +506,20 @@ export default function NotificationsPage() {
     saveNotifications(newNotifs);
   }
 
+  // Recupera le notifiche rimosse: azzera la lista dei "dismissed" e rigenera.
+  function handleRestoreDismissed() {
+    const existing = loadNotifications();
+    const onboarding = readFromStorage<{ riskLevel?: string }>("onboarding");
+    const freshDeadlines = generateDeadlineNotifications(new Date());
+    const freshProgress = generateProgressNotifications(completedTools, onboarding?.riskLevel ?? null);
+    const merged = mergeNotifications(existing, [...freshDeadlines, ...freshProgress], []);
+    merged.sort((a, b) => priorityOrder(a.priority) - priorityOrder(b.priority));
+    setNotifications(merged);
+    setDismissed([]);
+    saveDismissed([]);
+    saveNotifications(merged);
+  }
+
   function updateSettings(patch: Partial<NotifSettings>) {
     if (!settings) return;
     const updated = { ...settings, ...patch, criticalAlert: true };
@@ -527,7 +541,7 @@ export default function NotificationsPage() {
   const unreadCount = getUnreadCount(notifications);
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-3xl mx-auto">
       {/* Page header */}
       <div className="mb-6">
         <h1
@@ -543,7 +557,7 @@ export default function NotificationsPage() {
 
       {/* Tabs */}
       <div
-        className="flex gap-1 mb-6 p-1 rounded-lg"
+        className="flex gap-1 mb-6 p-1 rounded-lg mx-auto"
         style={{ background: "rgba(0,0,0,0.05)", width: "fit-content" }}
       >
         {(["notifications", "timeline"] as const).map((t) => (
@@ -559,7 +573,6 @@ export default function NotificationsPage() {
           >
             {t === "notifications" ? (
               <span className="flex items-center gap-2">
-                <Bell className="h-3.5 w-3.5" />
                 Notifiche
                 {unreadCount > 0 && (
                   <span
@@ -572,7 +585,6 @@ export default function NotificationsPage() {
               </span>
             ) : (
               <span className="flex items-center gap-2">
-                <Calendar className="h-3.5 w-3.5" />
                 Timeline AI Act
               </span>
             )}
@@ -599,7 +611,6 @@ export default function NotificationsPage() {
           {/* Filters + actions row */}
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div className="flex items-center gap-1">
-              <Filter className="h-3.5 w-3.5 mr-1" style={{ color: "rgba(0,0,0,0.3)" }} />
               {(["all", "unread", "critical", "deadline", "tool"] as FilterType[]).map((f) => (
                 <button
                   key={f}
@@ -630,6 +641,16 @@ export default function NotificationsPage() {
               >
                 Rimuovi lette
               </button>
+              {dismissed.length > 0 && (
+                <button
+                  onClick={handleRestoreDismissed}
+                  className="text-[11px] px-3 py-1 rounded-full transition-colors"
+                  style={{ background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.5)" }}
+                  title="Ripristina le notifiche rimosse"
+                >
+                  Ripristina rimosse ({dismissed.length})
+                </button>
+              )}
             </div>
           </div>
 
@@ -643,6 +664,15 @@ export default function NotificationsPage() {
               <p className="text-[11px] mt-1" style={{ color: "rgba(0,0,0,0.25)" }}>
                 {filter !== "all" ? "Prova a cambiare il filtro." : "Tutte le scadenze appariranno qui."}
               </p>
+              {dismissed.length > 0 && (
+                <button
+                  onClick={handleRestoreDismissed}
+                  className="mt-4 inline-flex items-center gap-1.5 text-[11px] font-medium rounded-full px-4 py-1.5 transition-opacity hover:opacity-85"
+                  style={{ background: "#0D1016", color: "#ffffff" }}
+                >
+                  Ripristina {dismissed.length} notific{dismissed.length === 1 ? "a rimossa" : "he rimosse"}
+                </button>
+              )}
             </div>
           ) : (
             filtered.map((n) => (
