@@ -245,6 +245,38 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       copyright: "Tutti i diritti riservati",
       compliance: "Conforme a EU AI Act 2024/1689 · GDPR 2016/679",
     },
+    dash: {
+      // Sidebar — etichette (i nomi prodotto restano invariati)
+      nav_inventory: "Inventario Sistemi AI",
+      nav_dataAudit: "Qualità Dati",
+      nav_conformity: "Conformità",
+      nav_incident: "Incidenti",
+      nav_authRep: "Repr. Autorizzato",
+      nav_deadlines: "Scadenze",
+      art_docugen: "All. IV",
+      // Sidebar — tooltip
+      tt_dataAudit: "Qualità e governance dei dati di training (Art. 10)",
+      tt_resilience: "Accuratezza, robustezza e cybersicurezza — evidenza da red-team/eval (Art. 15)",
+      tt_transparency: "Obblighi di trasparenza e informazioni all'utente (Art. 13, Art. 50)",
+      tt_oversight: "Sorveglianza umana e misure di controllo (Art. 14)",
+      tt_qms: "Sistema di gestione della qualità (Art. 17)",
+      tt_conformity: "Valutazione di conformità e marcatura CE (Art. 43)",
+      tt_gpai: "Modelli per finalità generali (Art. 51-55)",
+      tt_incident: "Segnalazione di incidenti gravi (Art. 73)",
+      tt_legalAssistant: "Assistente AI con RAG sull'EU AI Act — domande in linguaggio naturale",
+      tt_logvault: "Registro log operativi e attività in deployment (Art. 12)",
+      // Shell — varie
+      breadcrumbHome: "Dashboard",
+      changeRole: "cambia",
+      settings: "Settings",
+      logout: "Esci",
+      published: "Pubblicato",
+      // Mobile gate
+      mobile_title: "Apri dal computer",
+      mobile_body: "RegulaeOS è progettato per essere usato su desktop. Accedi dal tuo computer per utilizzare tutti gli strumenti di compliance.",
+      mobile_billing: "Vai alla fatturazione",
+      mobile_logout: "Esci dall'account",
+    },
   },
   en: {
     nav: {
@@ -480,6 +512,38 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       cookieSettingsAria: "Open cookie settings",
       copyright: "All rights reserved",
       compliance: "Compliant with EU AI Act 2024/1689 · GDPR 2016/679",
+    },
+    dash: {
+      // Sidebar — labels (product names stay unchanged)
+      nav_inventory: "AI Systems Inventory",
+      nav_dataAudit: "Data Quality",
+      nav_conformity: "Conformity",
+      nav_incident: "Incidents",
+      nav_authRep: "Authorized Rep.",
+      nav_deadlines: "Deadlines",
+      art_docugen: "Annex IV",
+      // Sidebar — tooltips
+      tt_dataAudit: "Training data quality and governance (Art. 10)",
+      tt_resilience: "Accuracy, robustness and cybersecurity — evidence from red-team/eval (Art. 15)",
+      tt_transparency: "Transparency obligations and user information (Art. 13, Art. 50)",
+      tt_oversight: "Human oversight and control measures (Art. 14)",
+      tt_qms: "Quality management system (Art. 17)",
+      tt_conformity: "Conformity assessment and CE marking (Art. 43)",
+      tt_gpai: "General-purpose AI models (Art. 51-55)",
+      tt_incident: "Serious incident reporting (Art. 73)",
+      tt_legalAssistant: "AI assistant with RAG over the EU AI Act — natural-language questions",
+      tt_logvault: "Operational log register and deployment activity (Art. 12)",
+      // Shell — misc
+      breadcrumbHome: "Dashboard",
+      changeRole: "change",
+      settings: "Settings",
+      logout: "Log out",
+      published: "Published",
+      // Mobile gate
+      mobile_title: "Open on desktop",
+      mobile_body: "RegulaeOS is designed for desktop use. Sign in from your computer to use all the compliance tools.",
+      mobile_billing: "Go to billing",
+      mobile_logout: "Sign out",
     },
   },
 };
