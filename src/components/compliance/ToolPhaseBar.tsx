@@ -1,7 +1,51 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 // Barra di fasi guidata (scaletta) — sticky in alto, segue lo scroll.
 // Spunto da AssessmentStepper (FRIA). I numeri combaciano con PhaseHeading.
+
+// ── Scroll-spy robusto ──────────────────────────────────────────────────────
+// Restituisce l'indice della fase "corrente": l'ultima intestazione la cui cima
+// è già passata sotto la barra sticky. Funziona sia se scrolla la finestra sia
+// se scrolla un contenitore interno (rileva lo scroll-parent).
+function getScrollParent(el: Element | null): HTMLElement | Window {
+  let node = el?.parentElement ?? null;
+  while (node) {
+    const oy = getComputedStyle(node).overflowY;
+    if ((oy === "auto" || oy === "scroll") && node.scrollHeight > node.clientHeight) return node;
+    node = node.parentElement;
+  }
+  return window;
+}
+
+export function useActivePhase(anchors: string[], offset = 160): number {
+  const [active, setActive] = useState(0);
+  const key = anchors.join("|");
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const first = anchors.map(a => document.getElementById(a)).find(Boolean) ?? null;
+    const scroller = getScrollParent(first);
+    const compute = () => {
+      let idx = 0;
+      for (let i = 0; i < anchors.length; i++) {
+        const el = document.getElementById(anchors[i]);
+        if (el && el.getBoundingClientRect().top <= offset) idx = i;
+      }
+      setActive(idx);
+    };
+    compute();
+    const targets: (HTMLElement | Window)[] = scroller === window ? [window] : [scroller, window];
+    targets.forEach(t => t.addEventListener("scroll", compute, { passive: true } as AddEventListenerOptions));
+    window.addEventListener("resize", compute);
+    return () => {
+      targets.forEach(t => t.removeEventListener("scroll", compute));
+      window.removeEventListener("resize", compute);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, offset]);
+  return active;
+}
 //
 // Retrocompatibile: i tool esistenti passano solo { phases, currentIdx }.
 // Nuove prop opzionali:
