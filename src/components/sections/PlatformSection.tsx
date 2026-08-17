@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useT } from "@/i18n/LocaleProvider";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
 const MONO = "'DM Mono', monospace";
@@ -11,14 +12,14 @@ const GREEN = "#1D3B2C";
 const RUST  = "#7A2F1C";
 
 const modules = [
-  { art: "Art. 6",  num: "6",  name: "AI Classifier",  color: GREEN, desc: "Classificazione rischio automatica secondo gli allegati EU AI Act. Mappa il sistema agli articoli applicabili e genera le prime azioni da intraprendere in pochi minuti." },
-  { art: "Art. 9",  num: "9",  name: "Risk Manager",   color: RUST,  desc: "Risk register, gap analysis e copertura Art. 9. Ogni rischio tracciato con misure di mitigazione, probabilità di impatto e responsabili assegnati." },
-  { art: "Art. 11", num: "11", name: "Documentazione", color: GREEN, desc: "Fascicolo tecnico Annex IV generato automaticamente. FRIA e DPIA pre-compilate dai dati già inseriti — nessun copia-incolla tra moduli." },
-  { art: "Art. 10", num: "10", name: "Data Audit",     color: RUST,  desc: "Qualità dati, bias detection e data lineage traceability. Metriche di conformità in tempo reale su dataset di training e inferenza." },
-  { art: "Art. 12", num: "12", name: "LogVault",       color: GREEN, desc: "Logging hash-chained e audit trail immutabile. Ogni operazione firmata crittograficamente e verificabile dagli ispettori dell'autorità di vigilanza." },
-  { art: "Art. 27", num: "27", name: "FRIA",           color: RUST,  desc: "Fundamental Rights Impact Assessment guidato passo-passo. Sincronizzato in tempo reale con Risk Manager e DPIA — i dati comuni non si inseriscono due volte." },
-  { art: "Art. 72", num: "72", name: "Post-Market",    color: RUST,  desc: "Monitoraggio continuo con drift detection automatica. Soglie pre-configurate inviano alert all'autorità notificante secondo Art. 73 senza intervento manuale." },
-  { art: "Art. 50", num: "50", name: "Scanner",        color: GREEN, desc: "Verifica trasparenza AI gratuita e anonima. Report completo in 30 secondi con valutazione Art. 50: nessuna registrazione richiesta." },
+  { art: "Art. 6",  num: "6",  key: "classifier", color: GREEN },
+  { art: "Art. 9",  num: "9",  key: "risk",       color: RUST  },
+  { art: "Art. 11", num: "11", key: "docs",       color: GREEN },
+  { art: "Art. 10", num: "10", key: "dataAudit",  color: RUST  },
+  { art: "Art. 12", num: "12", key: "logvault",   color: GREEN },
+  { art: "Art. 27", num: "27", key: "fria",       color: RUST  },
+  { art: "Art. 72", num: "72", key: "postmarket", color: RUST  },
+  { art: "Art. 50", num: "50", key: "scanner",    color: GREEN },
 ];
 
 // diagonal cascade stagger: top-left → bottom-right wave
@@ -29,6 +30,7 @@ function diagonalDelay(i: number, cols = 4) {
 }
 
 export default function PlatformSection() {
+  const t = useT("platform");
   const [activeIdx, setActiveIdx] = useState(0);
   const [paused, setPaused] = useState(false);
   const [progressKey, setProgressKey] = useState(0);
@@ -117,7 +119,7 @@ export default function PlatformSection() {
               className="text-[12px] font-medium uppercase mb-5"
               style={{ letterSpacing: "1.5px", color: "rgba(0,0,0,0.28)", fontFamily: MONO }}
             >
-              La piattaforma
+              {t("kicker")}
             </p>
             <h2
               style={{
@@ -130,12 +132,12 @@ export default function PlatformSection() {
                 marginBottom: 16,
               }}
             >
-              La piattaforma unificata<br />per la conformità AI.
+              {t("title1")}<br />{t("title2")}
             </h2>
             <p
               style={{ fontSize: 14, color: "rgba(0,0,0,0.42)", lineHeight: 1.65, maxWidth: 480 }}
             >
-              Un unico sistema che connette classificazione, documentazione ed esecuzione degli obblighi normativi EU AI Act.
+              {t("subtitle")}
             </p>
           </div>
 
@@ -205,7 +207,7 @@ export default function PlatformSection() {
             const isActive = i === activeIdx;
             return (
               <motion.div
-                key={m.name}
+                key={m.key}
                 initial={{ opacity: 0, y: 14 }}
                 animate={sectionVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
                 transition={{ duration: 0.4, delay: diagonalDelay(i) }}
@@ -269,7 +271,7 @@ export default function PlatformSection() {
                     lineHeight: 1.2,
                   }}
                 >
-                  {m.name}
+                  {t(`${m.key}_name`)}
                 </p>
 
                 {/* Progress bar on active card */}
@@ -341,7 +343,7 @@ export default function PlatformSection() {
                   textTransform: "uppercase",
                   marginBottom: 5,
                 }}>
-                  {active.art} — {active.name}
+                  {active.art} — {t(`${active.key}_name`)}
                 </p>
                 <p style={{
                   fontSize: 14,
@@ -349,7 +351,7 @@ export default function PlatformSection() {
                   lineHeight: 1.65,
                   maxWidth: 640,
                 }}>
-                  {active.desc}
+                  {t(`${active.key}_desc`)}
                 </p>
               </div>
               <div

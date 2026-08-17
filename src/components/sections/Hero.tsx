@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useT } from "@/i18n/LocaleProvider";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
 const MONO = "'DM Mono', monospace";
@@ -21,15 +22,15 @@ const wordVariant = {
   },
 };
 
-const CYCLING_WORDS = ["compromessi", "burocrazia", "ritardi", "rischi", "eccezioni"];
 const DELETE_SPEED = 48;
 const TYPE_SPEED = 60;
 const IDLE_MS = 2400;
 const START_DELAY = 2000;
 
-function TypewriterWord() {
+function TypewriterWord({ wordsCsv }: { wordsCsv: string }) {
+  const words = wordsCsv.split(",");
   const [wordIdx, setWordIdx] = useState(0);
-  const [displayed, setDisplayed] = useState(CYCLING_WORDS[0]);
+  const [displayed, setDisplayed] = useState(() => wordsCsv.split(",")[0]);
   const [phase, setPhase] = useState<"idle" | "deleting" | "typing" | "waiting">("idle");
   const [started, setStarted] = useState(false);
 
@@ -51,12 +52,12 @@ function TypewriterWord() {
       }
     } else if (phase === "waiting") {
       t = setTimeout(() => {
-        const next = (wordIdx + 1) % CYCLING_WORDS.length;
+        const next = (wordIdx + 1) % words.length;
         setWordIdx(next);
         setPhase("typing");
       }, 180);
     } else if (phase === "typing") {
-      const target = CYCLING_WORDS[wordIdx];
+      const target = words[wordIdx];
       if (displayed.length < target.length) {
         t = setTimeout(() => setDisplayed(target.slice(0, displayed.length + 1)), TYPE_SPEED);
       } else {
@@ -64,7 +65,7 @@ function TypewriterWord() {
       }
     }
     return () => clearTimeout(t);
-  }, [started, phase, displayed, wordIdx]);
+  }, [started, phase, displayed, wordIdx, wordsCsv]);
 
   const showCursor = phase !== "idle" || !started;
 
@@ -249,6 +250,7 @@ function FrameworkBadge({ name, sub, color, icon }: typeof FRAMEWORKS[0]) {
 const LINE1 = ["AI", "Act", "compliance,"];
 
 export default function Hero() {
+  const t = useT("hero");
   return (
     <>
       <style>{`
@@ -313,7 +315,7 @@ export default function Hero() {
                 backdropFilter: "blur(8px)",
               }}
             >
-              EU AI Act — In vigore agosto 2026
+              {t("badge")}
             </div>
           </motion.div>
 
@@ -338,10 +340,10 @@ export default function Hero() {
             ))}
             <br />
             <motion.span variants={wordVariant} style={{ display: "inline-block", marginRight: "0.22em" }}>
-              senza
+              {t("without")}
             </motion.span>
             <motion.span variants={wordVariant} style={{ display: "inline-block" }}>
-              <TypewriterWord />
+              <TypewriterWord wordsCsv={t("cyclingWords")} />
             </motion.span>
           </motion.h1>
 
@@ -351,8 +353,7 @@ export default function Hero() {
             className="mb-3 max-w-lg"
             style={{ fontSize: 13, fontWeight: 400, color: "rgba(255,255,255,0.50)", letterSpacing: "0.02em", lineHeight: 1.6, fontFamily: "'DM Mono', monospace" }}
           >
-            Assistenza professionale alla conformità AI Act, erogata da un avvocato iscritto all&rsquo;albo.
-            Il software è lo strumento con cui il servizio è reso.
+            {t("framing")}
           </motion.p>
 
           {/* Subtitle */}
@@ -361,8 +362,7 @@ export default function Hero() {
             className="mb-10 max-w-md"
             style={{ fontSize: 17, fontWeight: 300, color: "rgba(255,255,255,0.62)", letterSpacing: "-0.2px", lineHeight: 1.65 }}
           >
-            Risk assessment, FRIA, DPIA e documentazione tecnica: ogni valutazione è assistita
-            dallo strumento e validata dall&rsquo;avvocato.
+            {t("subtitle")}
           </motion.p>
 
           {/* CTAs */}
@@ -371,13 +371,13 @@ export default function Hero() {
               className="text-[13px] font-medium rounded-full px-6 py-3 transition-opacity hover:opacity-85"
               style={{ background: "#ffffff", color: "#0D1016", letterSpacing: "-0.2px" }}
             >
-              Attiva l&rsquo;assistenza
+              {t("ctaPrimary")}
             </Link>
             <Link href="/pricing"
               className="text-[13px] rounded-full px-6 py-3 transition-colors hover:bg-white/10"
               style={{ border: "1px solid rgba(255,255,255,0.30)", color: "rgba(255,255,255,0.80)", background: "transparent" }}
             >
-              Scopri i piani
+              {t("ctaSecondary")}
             </Link>
           </motion.div>
         </motion.div>
