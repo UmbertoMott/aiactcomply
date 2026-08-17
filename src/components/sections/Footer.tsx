@@ -3,26 +3,29 @@
 import Link from "next/link";
 import Image from "next/image";
 import { openCookieSettings } from "@/components/CookieBanner";
+import { useT } from "@/i18n/LocaleProvider";
 
 const MONO = "'DM Mono', monospace";
 const DARK = "#0D1016";
 
-const LEGAL_LINKS = [
-  { label: "Privacy",         href: "/privacy" },
-  { label: "Termini",         href: "/termini" },
-  { label: "Informativa AI",  href: "/informativa-ai" },
-  { label: "Cookie Policy",   href: "/cookie-policy" },
-];
-
-const PRODUCT_LINKS = [
-  { label: "Il servizio",          href: "/products" },
-  { label: "Piani di assistenza",  href: "/pricing" },
-  { label: "Scanner AI",           href: "/scanner" },
-  { label: "Risorse",              href: "/risorse" },
-  { label: "Chi eroga il servizio", href: "/#chi-eroga" },
-];
-
 export default function Footer() {
+  const t = useT("footer");
+
+  const PRODUCT_LINKS = [
+    { label: t("link_service"),  href: "/products" },
+    { label: t("link_pricing"),  href: "/pricing" },
+    { label: t("link_scanner"),  href: "/scanner" },
+    { label: t("link_resources"), href: "/risorse" },
+    { label: t("link_provider"), href: "/#chi-eroga" },
+  ];
+
+  const LEGAL_LINKS = [
+    { label: t("link_privacy"),      href: "/privacy" },
+    { label: t("link_terms"),        href: "/termini" },
+    { label: t("link_aiNotice"),     href: "/informativa-ai" },
+    { label: t("link_cookiePolicy"), href: "/cookie-policy" },
+  ];
+
   return (
     <footer
       style={{
@@ -52,15 +55,14 @@ export default function Footer() {
               />
             </Link>
             <p style={{ fontFamily: MONO, fontSize: 11, color: "rgba(255,255,255,0.32)", lineHeight: 1.65, maxWidth: 240 }}>
-              Assistenza professionale alla conformità AI Act, erogata da un avvocato iscritto all&rsquo;albo.
-              Il software è lo strumento con cui il servizio è reso.
+              {t("tagline")}
             </p>
           </div>
 
           {/* Prodotto */}
-          <nav aria-label="Prodotto" style={{ flex: "1 1 140px" }}>
+          <nav aria-label={t("colService")} style={{ flex: "1 1 140px" }}>
             <p style={{ fontFamily: MONO, fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 14 }}>
-              Servizio
+              {t("colService")}
             </p>
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
               {PRODUCT_LINKS.map(l => (
@@ -79,9 +81,9 @@ export default function Footer() {
           </nav>
 
           {/* Legale */}
-          <nav aria-label="Legale" style={{ flex: "1 1 140px" }}>
+          <nav aria-label={t("colLegal")} style={{ flex: "1 1 140px" }}>
             <p style={{ fontFamily: MONO, fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 14 }}>
-              Legale
+              {t("colLegal")}
             </p>
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
               {LEGAL_LINKS.map(l => (
@@ -99,7 +101,7 @@ export default function Footer() {
               <li>
                 <button
                   onClick={openCookieSettings}
-                  aria-label="Apri impostazioni cookie"
+                  aria-label={t("cookieSettingsAria")}
                   style={{
                     fontFamily: MONO, fontSize: 12,
                     color: "rgba(255,255,255,0.5)",
@@ -111,7 +113,7 @@ export default function Footer() {
                   onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.9)")}
                   onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.5)")}
                 >
-                  Impostazioni cookie
+                  {t("cookieSettings")}
                 </button>
               </li>
             </ul>
@@ -129,10 +131,10 @@ export default function Footer() {
           gap: 12,
         }}>
           <p style={{ fontFamily: MONO, fontSize: 11, color: "rgba(255,255,255,0.22)" }}>
-            © {new Date().getFullYear()} RegulaeOS S.r.l. — P.IVA [•] — Tutti i diritti riservati
+            © {new Date().getFullYear()} RegulaeOS S.r.l. — P.IVA [•] — {t("copyright")}
           </p>
           <p style={{ fontFamily: MONO, fontSize: 11, color: "rgba(255,255,255,0.22)" }}>
-            Conforme a EU AI Act 2024/1689 · GDPR 2016/679
+            {t("compliance")}
           </p>
         </div>
 

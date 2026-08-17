@@ -1,10 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useT } from "@/i18n/LocaleProvider";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
 
 export default function Quote() {
+  const t = useT("quote");
   return (
     <section
       className="px-12 py-24"
@@ -48,10 +50,7 @@ export default function Quote() {
                 marginBottom: 32,
               }}
             >
-              &ldquo;La compliance nasce come strumento lungo e burocratico — pensato per
-              scoraggiare più che guidare. La nostra missione è renderla fluida:
-              perché le aziende rispettino davvero i diritti degli utenti,
-              non solo per evitare sanzioni salate.&rdquo;
+              &ldquo;{t("text")}&rdquo;
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -72,7 +71,7 @@ export default function Quote() {
                 <p style={{ fontSize: 13, fontWeight: 500, color: "#0D1016", lineHeight: 1.3 }}>
                   Umberto Mottola
                 </p>
-                <p style={{ fontSize: 12, color: "rgba(0,0,0,0.38)" }}>Founder, RegulaeOS</p>
+                <p style={{ fontSize: 12, color: "rgba(0,0,0,0.38)" }}>{t("role")}</p>
               </div>
             </div>
           </div>

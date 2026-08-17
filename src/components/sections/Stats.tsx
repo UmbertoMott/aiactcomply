@@ -2,8 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useInView } from "framer-motion";
+import { useT } from "@/i18n/LocaleProvider";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
+
+type Stat = {
+  raw: number;
+  display: (n: number) => string;
+  sectionLabel: string;
+  label: string;
+};
 
 function useCountUp(target: number, duration = 1400, inView = false) {
   const [count, setCount] = useState(0);
@@ -25,33 +33,12 @@ function useCountUp(target: number, duration = 1400, inView = false) {
   return count;
 }
 
-const stats = [
-  {
-    raw: 30,
-    display: () => "30%",
-    sectionLabel: "Riduzione tempi audit",
-    label: "delle ore non fatturabili eliminate grazie all'automazione AI",
-  },
-  {
-    raw: 300,
-    display: (n: number) => `${n}+`,
-    sectionLabel: "Sistemi AI mappati",
-    label: "sistemi classificati e documentati in Europa",
-  },
-  {
-    raw: 48,
-    display: () => "<48h",
-    sectionLabel: "Dal primo accesso all'assessment",
-    label: "primo risk assessment completo e certificabile",
-  },
-];
-
 function StatCol({
   stat,
   inView,
   isLast,
 }: {
-  stat: (typeof stats)[0];
+  stat: Stat;
   inView: boolean;
   isLast: boolean;
 }) {
@@ -99,6 +86,28 @@ function StatCol({
 export default function Stats() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const t = useT("stats");
+
+  const stats: Stat[] = [
+    {
+      raw: 30,
+      display: () => "30%",
+      sectionLabel: t("stat1_section"),
+      label: t("stat1_label"),
+    },
+    {
+      raw: 300,
+      display: (n: number) => `${n}+`,
+      sectionLabel: t("stat2_section"),
+      label: t("stat2_label"),
+    },
+    {
+      raw: 48,
+      display: () => "<48h",
+      sectionLabel: t("stat3_section"),
+      label: t("stat3_label"),
+    },
+  ];
 
   return (
     <section
