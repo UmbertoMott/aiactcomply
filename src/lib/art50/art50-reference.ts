@@ -13,31 +13,31 @@ export const ART50_OBLIGATIONS: readonly Art50ObligationDefinition[] = [
   {
     id: "direct_interaction_disclosure",
     label: "Disclosure di interazione con sistema IA",
-    reference: "Art. 50(1) [verify against current AI Act text]",
+    reference: "Art. 50(1)",
     appliesToSelf: true,
   },
   {
     id: "synthetic_content_marking",
     label: "Marcatura leggibile da macchina dei contenuti sintetici",
-    reference: "Art. 50(2) [verify against current AI Act text]",
+    reference: "Art. 50(2)",
     appliesToSelf: true,
   },
   {
     id: "emotion_biometric_disclosure",
     label: "Disclosure riconoscimento emozioni / categorizzazione biometrica",
-    reference: "Art. 50(3) [verify against current AI Act text]",
+    reference: "Art. 50(3)",
     appliesToSelf: false,
   },
   {
     id: "deepfake_disclosure",
     label: "Disclosure contenuti deepfake",
-    reference: "Art. 50(4) [verify against current AI Act text]",
+    reference: "Art. 50(4)",
     appliesToSelf: false,
   },
   {
     id: "timing_and_accessibility",
     label: "Tempistica e accessibilità della disclosure",
-    reference: "Art. 50(5) [verify against current AI Act text]",
+    reference: "Art. 50(5)",
     appliesToSelf: true,
   },
 ] as const satisfies readonly Art50ObligationDefinition[];

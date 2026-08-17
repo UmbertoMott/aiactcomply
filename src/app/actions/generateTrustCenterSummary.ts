@@ -58,7 +58,6 @@ Dati:
 Istruzioni:
 - Usa linguaggio comprensibile a non-esperti
 - Non inventa informazioni non presenti nei dati forniti
-- Ogni riferimento normativo termina con [verify against current AI Act text]
 - Output: solo il testo della sezione, nessuna formattazione Markdown
 
 Scrivi il testo della sezione "Classificazione del rischio" per il Trust Center:`;
@@ -79,7 +78,6 @@ Ambito applicativo (Annex IV §2): ${applicativeScope ?? "non specificato"}
 Istruzioni:
 - Usa linguaggio chiaro e non tecnico
 - Non inventa informazioni non presenti nei dati forniti
-- Ogni riferimento normativo termina con [verify against current AI Act text]
 - Output: solo il testo della sezione, nessuna formattazione Markdown
 
 Scrivi il testo della sezione "Finalità e ambito di utilizzo previsto" per il Trust Center:`;
@@ -97,13 +95,12 @@ Scrivi il testo della sezione "Finalità e ambito di utilizzo previsto" per il T
         .join("\n");
       const prompt = `Sei un esperto di conformità AI Act UE. Scrivi 2-4 frasi per comunicare le misure di sorveglianza umana adottate per un sistema AI ad alto rischio.
 
-Misure implementate (Art. 14 Reg. (UE) 2024/1689 [verify against current AI Act text]):
+Misure implementate (Art. 14 Reg. (UE) 2024/1689):
 ${measuresList}
 
 Istruzioni:
 - Sintetizza solo le misure effettivamente implementate — non aggiungere misure non elencate
 - Usa linguaggio comprensibile a non-esperti
-- Ogni riferimento normativo termina con [verify against current AI Act text]
 - Output: solo il testo della sezione, nessuna formattazione Markdown
 
 Scrivi il testo della sezione "Misure di sorveglianza umana" per il Trust Center:`;
@@ -124,7 +121,6 @@ Disclosure attive: ${discList}
 Istruzioni:
 - Elenca in modo chiaro le disclosure effettivamente attive — non inventa obblighi non listati
 - Usa linguaggio comprensibile a non-esperti
-- Ogni riferimento normativo termina con [verify against current AI Act text]
 - Output: solo il testo della sezione, nessuna formattazione Markdown
 
 Scrivi il testo della sezione "Informazioni di trasparenza" per il Trust Center:`;
@@ -145,7 +141,6 @@ Dati:
 - Marcatura CE: ${ceMark ? "apposta" : "non ancora apposta"}
 
 Istruzioni:
-- Ogni riferimento normativo termina con [verify against current AI Act text]
 - Output: solo il testo della sezione, nessuna formattazione Markdown
 
 Scrivi il testo della sezione "Stato della dichiarazione di conformità" per il Trust Center:`;
@@ -158,7 +153,7 @@ Scrivi il testo della sezione "Stato della dichiarazione di conformità" per il 
       if (!complete || !registrationNumber) {
         return notComplete("Dati non disponibili — completa la registrazione EUDB (Art. 49) per ottenere il numero di registrazione e poter pubblicare questa sezione.");
       }
-      const text = `Il sistema AI è registrato nella banca dati europea dei sistemi AI ad alto rischio (EU AI Database) ai sensi dell'Art. 49 del Reg. (UE) 2024/1689 [verify against current AI Act text]. Numero di registrazione: ${registrationNumber}.`;
+      const text = `Il sistema AI è registrato nella banca dati europea dei sistemi AI ad alto rischio (EU AI Database) ai sensi dell'Art. 49 del Reg. (UE) 2024/1689. Numero di registrazione: ${registrationNumber}.`;
       return { text, aiConfirmed: false, sourceComplete: true };
     }
 
@@ -176,7 +171,6 @@ Dati:
 
 Istruzioni:
 - Usa linguaggio comprensibile a non-esperti
-- Ogni riferimento normativo termina con [verify against current AI Act text]
 - Output: solo il testo della sezione, nessuna formattazione Markdown
 
 Scrivi il testo della sezione "Impegno di monitoraggio post-market" per il Trust Center:`;
@@ -191,7 +185,7 @@ Scrivi il testo della sezione "Impegno di monitoraggio post-market" per il Trust
       }
       const lines: string[] = [];
       if (arName) {
-        lines.push(`Authorized Representative (Art. 22 Reg. (UE) 2024/1689 [verify against current AI Act text]): ${arName}${arCountry ? `, ${arCountry}` : ""}${arContact ? ` — ${arContact}` : ""}.`);
+        lines.push(`Authorized Representative (Art. 22 Reg. (UE) 2024/1689): ${arName}${arCountry ? `, ${arCountry}` : ""}${arContact ? ` — ${arContact}` : ""}.`);
       }
       if (providerName || providerEmail) {
         lines.push(`Provider: ${providerName ?? ""}${providerEmail ? ` — ${providerEmail}` : ""}.`);

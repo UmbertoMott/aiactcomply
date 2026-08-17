@@ -29,7 +29,7 @@ import {
 import { profileDatasetDetailed, computeDatasetFingerprint, qualityScorecard, MAX_FILE_BYTES } from "@/lib/data-audit/csv-profiler";
 import type { Row } from "@/lib/data-audit/fairness";
 import { useRouter } from "next/navigation";
-import { ToolPhaseBar, PhaseHeading, NextPhaseCta, type ToolPhase, type PhaseStatus } from "@/components/compliance/ToolPhaseBar";
+import { ToolPhaseBar, PhaseHeading, NextPhaseCta, useActivePhase, type ToolPhase, type PhaseStatus } from "@/components/compliance/ToolPhaseBar";
 import { SectionEmptyState } from "@/components/compliance/SectionEmptyState";
 import {
   QualityScorecard, FairnessPanel, RepresentativenessPanel, exportDataGovernanceJSON,
@@ -450,28 +450,8 @@ export default function DataAuditPage() {
   );
   const phaseIdx = phaseStatus.findIndex(s => s !== "done") === -1 ? phases.length - 1 : phaseStatus.findIndex(s => s !== "done");
 
-  // ── Scroll-spy: evidenzia nella barra la fase attualmente in viewport ──
-  const [activePhase, setActivePhase] = useState(0);
-  useEffect(() => {
-    const anchors = phases.map(p => p.anchor);
-    const visible = new Map<string, number>();
-    const observer = new IntersectionObserver(
-      entries => {
-        for (const e of entries) {
-          if (e.isIntersecting) visible.set(e.target.id, e.intersectionRatio);
-          else visible.delete(e.target.id);
-        }
-        // fase attiva = la prima (in ordine di scaletta) tra quelle visibili
-        for (let i = 0; i < anchors.length; i++) {
-          if (visible.has(anchors[i])) { setActivePhase(i); return; }
-        }
-      },
-      { rootMargin: "-64px 0px -55% 0px", threshold: [0, 0.1, 0.5] }
-    );
-    anchors.forEach(a => { const el = document.getElementById(a); if (el) observer.observe(el); });
-    return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // ── Scroll-spy robusto (hook condiviso): evidenzia la fase in viewport ──
+  const activePhase = useActivePhase(phases.map(p => p.anchor));
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(null), 3000); }
 
@@ -949,7 +929,7 @@ export default function DataAuditPage() {
       {/* ── Export Data Governance Statement (Art. 11 / Allegato IV) ── */}
       <section className="mb-6">
         <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Evidenza — Data Governance Statement</h2>
-        <p className="text-[11px] mb-3" style={{ color: T.muted }}>Art. 11 / Allegato IV [verify]. Include scorecard, fairness, rappresentatività, pratiche, fingerprint, timestamp.</p>
+        <p className="text-[11px] mb-3" style={{ color: T.muted }}>Art. 11 / Allegato IV. Include scorecard, fairness, rappresentatività, pratiche, fingerprint, timestamp.</p>
         <div className="flex flex-wrap gap-2">
           <button onClick={() => exportDataGovernanceJSON(record)}
             className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg"

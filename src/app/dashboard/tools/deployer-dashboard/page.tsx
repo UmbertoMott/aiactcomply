@@ -133,8 +133,7 @@ export default function DeployerDashboardPage() {
           <Info size={13} style={{ flexShrink: 0, marginTop: 1 }} />
           <span style={{ flex: 1 }}>
             <strong>Sanzioni Art. 99–101:</strong> Il mancato rispetto degli obblighi del deployer può comportare
-            sanzioni fino a 15 milioni di euro o il 3% del fatturato mondiale annuo.{" "}
-            <span style={{ opacity: 0.7 }}>[verificare sul testo AI Act vigente]</span>
+            sanzioni fino a 15 milioni di euro o il 3% del fatturato mondiale annuo.
           </span>
           <button
             onClick={() => setBannerDismissed(true)}

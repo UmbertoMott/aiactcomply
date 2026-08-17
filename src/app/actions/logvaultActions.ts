@@ -163,14 +163,14 @@ export async function analyzeLogCoverage(input: {
 }): Promise<AnalyzeLogCoverageResult> {
   const purposes = TRACEABILITY_PURPOSES.map(p => `- ${p.id}: ${p.label} (${p.reference})`).join("\n");
   const biometricSection = input.includeBiometric
-    ? "\n\nRequisiti biometrici (Art. 12(3) [verify against current AI Act text]):\n" +
+    ? "\n\nRequisiti biometrici (Art. 12(3)):\n" +
       BIOMETRIC_LOG_REQUIREMENTS.map(r => `- ${r.id}: ${r.label} (${r.reference})`).join("\n")
     : "";
   const safeStateSection = input.oversightSafeStateDescription
-    ? `\n\nDescrizione "stato sicuro" da Oversight (Art. 14(4)(e) [verify against current AI Act text]): "${input.oversightSafeStateDescription}"`
+    ? `\n\nDescrizione "stato sicuro" da Oversight (Art. 14(4)(e)): "${input.oversightSafeStateDescription}"`
     : "";
 
-  const prompt = `Sei un esperto di conformità AI Act UE (Reg. 2024/1689), specializzato in requisiti di logging (Art. 12 [verify against current AI Act text]).
+  const prompt = `Sei un esperto di conformità AI Act UE (Reg. 2024/1689), specializzato in requisiti di logging (Art. 12).
 
 Sistema AI:
 - Nome: ${input.systemName}
@@ -180,7 +180,7 @@ Sistema AI:
 Campi rilevati nei log importati: ${input.detectedFields.length > 0 ? input.detectedFields.join(", ") : "(nessun file ancora importato)"}
 ${safeStateSection}
 
-Finalità di tracciabilità (Art. 12(2)(a)-(c) [verify against current AI Act text]):
+Finalità di tracciabilità (Art. 12(2)(a)-(c)):
 ${purposes}${biometricSection}
 
 Per ciascuna finalità/requisito, proponi:

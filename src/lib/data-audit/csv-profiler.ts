@@ -198,7 +198,7 @@ export function profileDatasetDetailed(
   return { profile, rows, parseWarnings: { droppedRowCount, duplicateColumns, sampled, delimiter, totalRows } };
 }
 
-// ── Data Quality Scorecard (ISO/IEC 5259 [verify]) ──────────────────────────
+// ── Data Quality Scorecard (ISO/IEC 5259) ──────────────────────────
 
 export function qualityScorecard(profile: DatasetProfile): DataQualityScorecard {
   const completeness = +(100 - profile.overallMissingPercentage).toFixed(1);

@@ -649,8 +649,7 @@ export default function DeployerSystemDetailPage() {
         style={{ background: "#fef9c3", border: "1px solid #fde047", color: "#713f12" }}
       >
         <Info size={14} className="mt-0.5 flex-shrink-0" />
-        Sanzioni Art. 99–101: fino a 15 milioni € o 3% fatturato mondiale per inadempienza deployer.{" "}
-        <span style={{ opacity: 0.8 }}>[verificare sul testo AI Act vigente]</span>
+        Sanzioni Art. 99–101: fino a 15 milioni € o 3% fatturato mondiale per inadempienza deployer.
       </div>
 
       {/* ── Art. 26 Dettaglio Operativo (PROMPT BD) ── */}
@@ -822,7 +821,7 @@ export default function DeployerSystemDetailPage() {
             <p className="text-xs mb-3" style={{ color: "#6b7280" }}>
               Come autorità pubblica che effettua il deployment di un sistema AI ad alto rischio,
               sei tenuto a registrare il sistema nel database EU AI Act prima dell&apos;uso.{" "}
-              <span style={{ color: "#9ca3af" }}>[verificare sul testo AI Act vigente]</span>
+              <span style={{ color: "#9ca3af" }}></span>
             </p>
             <textarea
               rows={3}

@@ -112,25 +112,25 @@ export const ANNEX3_LAW_ENFORCEMENT_CHECKLIST: AnnexIIILawEnforcementItem[] = [
   {
     id: "le_1",
     label: "Valutazione impatto specifico su diritti fondamentali delle persone sottoposte a misure di polizia",
-    reference: "Annex III pt. 1(a) [verify against current AI Act text]",
+    reference: "Annex III pt. 1(a)",
     completed: false,
   },
   {
     id: "le_2",
     label: "Documentazione delle salvaguardie procedurali specifiche per sistemi biometrici in contesti di law enforcement",
-    reference: "Annex III pt. 6 [verify against current AI Act text]",
+    reference: "Annex III pt. 6",
     completed: false,
   },
   {
     id: "le_3",
     label: "Revisione periodica dell'impatto su gruppi vulnerabili (minori, rifugiati) per sistemi migrazione/asilo",
-    reference: "Annex III pt. 7 [verify against current AI Act text]",
+    reference: "Annex III pt. 7",
     completed: false,
   },
   {
     id: "le_4",
     label: "Notifica all'autorità di sorveglianza del mercato competente per casi di rischio sistemico",
-    reference: "Art. 72(3) + Annex III [verify against current AI Act text]",
+    reference: "Art. 72(3) + Annex III",
     completed: false,
   },
 ];

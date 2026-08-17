@@ -58,9 +58,9 @@ ISTRUZIONI:
 {
   "tier": "minimal|limited|high_risk|prohibited|gpai|gpai_systemic",
   "role": "provider|deployer|importer|distributor|authorized_rep|product_manufacturer",
-  "roleBasis": "Art. X — motivo [verify against current AI Act text]",
-  "tierBasis": "Art. Y / Allegato III — motivazione [verify against current AI Act text]",
-  "obligationsNote": "Descrizione obblighi principali [verify against current AI Act text]"
+  "roleBasis": "Art. X — motivo",
+  "tierBasis": "Art. Y / Allegato III — motivazione",
+  "obligationsNote": "Descrizione obblighi principali"
 }
 </suggest>
 

@@ -210,7 +210,7 @@ export function buildAnnexSections(chatDoc: RiskDocumentation): AnnexSection[] {
     const fields = Object.fromEntries(Object.entries(data).filter(([, v]) => v !== undefined && v !== null && v !== ""));
     if (Object.keys(fields).length > 0) annexes.push({ title, article, fields });
   };
-  push("GPAI e Rischio Sistemico", "Art. 51-55 [verify against current AI Act text]", chatDoc.gpai_systemic_risk as Record<string, unknown> | undefined);
+  push("GPAI e Rischio Sistemico", "Art. 51-55", chatDoc.gpai_systemic_risk as Record<string, unknown> | undefined);
   return annexes;
 }
 

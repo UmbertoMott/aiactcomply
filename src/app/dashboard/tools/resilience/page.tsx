@@ -6,7 +6,7 @@ import { Shield, Upload, Loader2, X, ExternalLink, FileText, CheckCircle2, Alert
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { ResilienceResult, ClassifierResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
-import { ToolPhaseBar, PhaseHeading, NextPhaseCta, type ToolPhase, type PhaseStatus } from "@/components/compliance/ToolPhaseBar";
+import { ToolPhaseBar, PhaseHeading, NextPhaseCta, useActivePhase, type ToolPhase, type PhaseStatus } from "@/components/compliance/ToolPhaseBar";
 import { SectionEmptyState } from "@/components/logvault/SectionEmptyState";
 import {
   RESILIENCE_PILLARS, PREN18282_THREATS, ROBUSTNESS_ITEMS,
@@ -74,22 +74,8 @@ export default function ResiliencePage() {
     (phaseStatus.reduce((a, s) => a + (s === "done" ? 1 : s === "active" ? 0.5 : 0), 0) / phases.length) * 100
   );
 
-  // ── Scroll-spy: evidenzia nella barra la fase attualmente in viewport ──
-  const [activePhase, setActivePhase] = useState(0);
-  useEffect(() => {
-    const anchors = phases.map(p => p.anchor);
-    const visible = new Set<string>();
-    const observer = new IntersectionObserver(
-      entries => {
-        for (const e of entries) { if (e.isIntersecting) visible.add(e.target.id); else visible.delete(e.target.id); }
-        for (let i = 0; i < anchors.length; i++) if (visible.has(anchors[i])) { setActivePhase(i); return; }
-      },
-      { rootMargin: "-64px 0px -55% 0px", threshold: [0, 0.1, 0.5] }
-    );
-    anchors.forEach(a => { const el = document.getElementById(a); if (el) observer.observe(el); });
-    return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // ── Scroll-spy robusto (hook condiviso): evidenzia la fase in viewport ──
+  const activePhase = useActivePhase(phases.map(p => p.anchor));
 
   // ── Import ──────────────────────────────────────────────────────────────
   async function handleImport(file: File) {
@@ -151,7 +137,7 @@ export default function ResiliencePage() {
     const fingerprint = await computeResilienceFingerprint(record);
     const withFp = { ...record, fingerprint };
     persist(withFp);
-    const statement = { kind: "Resilience Statement (Art. 15 / Allegato IV [verify])", generatedAt: new Date().toISOString(), record: withFp };
+    const statement = { kind: "Resilience Statement (Art. 15 / Allegato IV)", generatedAt: new Date().toISOString(), record: withFp };
     const blob = new Blob([JSON.stringify(statement, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href = url; a.download = `resilience-statement-${new Date().toISOString().slice(0, 10)}.json`; a.click();
@@ -303,7 +289,7 @@ export default function ResiliencePage() {
           ) : (
             <>
               <div style={card} className="mb-3">
-                <p className="text-[12px] font-semibold mb-2" style={{ color: T.text }}>Matrice minacce — prEN 18282 [verify]</p>
+                <p className="text-[12px] font-semibold mb-2" style={{ color: T.text }}>Matrice minacce — prEN 18282</p>
                 <div className="space-y-2">
                   {PREN18282_THREATS.map(threat => {
                     const rec = record.threats.find(t => t.threatId === threat.id);

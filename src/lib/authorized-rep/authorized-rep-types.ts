@@ -67,50 +67,50 @@ export function makeChecklist(): ARChecklistItem[] {
     {
       id: "eudb",
       label: "AR registrata nel EUDB per conto del provider",
-      article: "Art. 22(2)(a) [verify against current AI Act text]",
+      article: "Art. 22(2)(a)",
       completed: false, notes: "",
       evidenceLabel: "Numero registrazione EUDB", evidenceValue: "",
     },
     {
       id: "doc_conformity",
       label: "Dichiarazione di conformità UE verificata e in custodia dell'AR",
-      article: "Art. 22(2)(b) [verify against current AI Act text]",
+      article: "Art. 22(2)(b)",
       completed: false, notes: "", evidenceValue: "",
     },
     {
       id: "doc_technical",
       label: "Documentazione tecnica verificata e accessibile all'AR",
-      article: "Art. 22(2)(b) [verify against current AI Act text]",
+      article: "Art. 22(2)(b)",
       completed: false, notes: "", evidenceValue: "",
     },
     {
       id: "notifica_autorita",
       label: "Procedura trasmissione informazioni alle autorità di vigilanza attivata",
-      article: "Art. 22(2)(c) [verify against current AI Act text]",
+      article: "Art. 22(2)(c)",
       completed: false, notes: "", evidenceValue: "",
     },
     {
       id: "notifica_provider",
       label: "Procedura notifica al provider di richieste/indagini delle autorità attivata",
-      article: "Art. 22(2)(d) [verify against current AI Act text]",
+      article: "Art. 22(2)(d)",
       completed: false, notes: "", evidenceValue: "",
     },
     {
       id: "cooperazione",
       label: "Cooperazione con autorità di vigilanza per azioni correttive pianificata",
-      article: "Art. 22(2)(e) [verify against current AI Act text]",
+      article: "Art. 22(2)(e)",
       completed: false, notes: "", evidenceValue: "",
     },
     {
       id: "terminazione",
       label: "Procedura di terminazione mandato documentata (con notifica alle autorità)",
-      article: "Art. 22(2)(f) [verify against current AI Act text]",
+      article: "Art. 22(2)(f)",
       completed: false, notes: "", evidenceValue: "",
     },
     {
       id: "firma",
       label: "Mandato firmato da entrambe le parti e archiviato (conservazione min. 10 anni)",
-      article: "Art. 22(1)+(3) [verify against current AI Act text]",
+      article: "Art. 22(1)+(3)",
       completed: false, notes: "",
       evidenceLabel: "Data firma", evidenceValue: "",
     },
@@ -303,7 +303,7 @@ export function generateMandate(doc: AuthRepDoc): string {
 
   return `MANDATO DI AUTHORIZED REPRESENTATIVE
 ai sensi dell'Art. 22 del Regolamento (UE) 2024/1689 (AI Act)
-[verify against current AI Act text]
+
 Generato da AIComply il ${new Date().toLocaleDateString("it-IT")}
 
 ${SEP}
@@ -333,12 +333,12 @@ POTERI CONFERITI
 ${SEP}
 Il Provider conferisce all'AR i seguenti poteri, in conformità all'Art. 22(2) del Regolamento (UE) 2024/1689:
 
-(a) Registrazione nel database UE (EUDB) ai sensi dell'Art. 49 per conto del Provider [verify against current AI Act text]
-(b) Verifica e custodia della dichiarazione di conformità UE e della documentazione tecnica [verify against current AI Act text]
-(c) Trasmissione alle autorità di vigilanza di tutte le informazioni e documentazione richiesta [verify against current AI Act text]
-(d) Notifica immediata al Provider di qualsiasi richiesta, indagine o azione correttiva delle autorità [verify against current AI Act text]
-(e) Cooperazione piena con le autorità di vigilanza del mercato per qualsiasi azione correttiva [verify against current AI Act text]
-(f) Facoltà di terminare il presente mandato con notifica alle autorità competenti qualora il Provider agisca in violazione degli obblighi del Regolamento (UE) 2024/1689 [verify against current AI Act text]
+(a) Registrazione nel database UE (EUDB) ai sensi dell'Art. 49 per conto del Provider
+(b) Verifica e custodia della dichiarazione di conformità UE e della documentazione tecnica
+(c) Trasmissione alle autorità di vigilanza di tutte le informazioni e documentazione richiesta
+(d) Notifica immediata al Provider di qualsiasi richiesta, indagine o azione correttiva delle autorità
+(e) Cooperazione piena con le autorità di vigilanza del mercato per qualsiasi azione correttiva
+(f) Facoltà di terminare il presente mandato con notifica alle autorità competenti qualora il Provider agisca in violazione degli obblighi del Regolamento (UE) 2024/1689
 
 ${SEP}
 OBBLIGHI DEL PROVIDER
@@ -359,5 +359,5 @@ Nome e qualifica: _________________________
 
 [Il presente mandato deve essere firmato da entrambe le parti e conservato per tutta la durata
 della commercializzazione del sistema AI nell'UE e per almeno 10 anni successivi
-— Art. 22(1)+(3) [verify against current AI Act text]]`.trim();
+— Art. 22(1)+(3)]`.trim();
 }

@@ -20,7 +20,7 @@ export async function proposeLabellingPlan(input: {
   contentTypes: string[];
   systemType: string;
 }): Promise<ProposeLabellingPlanResult> {
-  const prompt = `Sei un esperto di conformità AI Act UE (Reg. 2024/1689), specializzato in obblighi di trasparenza e marcatura contenuti sintetici (Art. 50(2) [verify against current AI Act text]).
+  const prompt = `Sei un esperto di conformità AI Act UE (Reg. 2024/1689), specializzato in obblighi di trasparenza e marcatura contenuti sintetici (Art. 50(2)).
 
 Sistema AI:
 - Nome: ${input.systemName}
@@ -35,14 +35,13 @@ Per ciascun tipo di contenuto generato, proponi il metodo di labelling più appr
 - disclosure_statement_only: sola dichiarazione testuale — ATTENZIONE: non soddisfa Art. 50(2) machine-readable senza eccezione
 - none: nessun meccanismo — NON conforme senza eccezione documentata
 
-Se applicabile, indica se una delle eccezioni Art. 50(2) [verify against current AI Act text] si applica:
+Se applicabile, indica se una delle eccezioni Art. 50(2) si applica:
 - assistive_editing: editing assistivo senza alterazione sostanziale
 - no_substantial_alteration: output non altera sostanzialmente l'input
 - law_enforcement: autorizzato per indagini penali
 
 Considera le best practice di settore: per testo generato da AI il metodo minimo accettabile è embedded_metadata o disclosure_statement_only con eccezione documentata; per audio/video/immagine è raccomandato embedded_metadata (C2PA).
 
-Ogni citazione deve terminare con [verify against current AI Act text].
 
 Rispondi SOLO nel formato JSON:
 <extract>

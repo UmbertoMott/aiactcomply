@@ -23,7 +23,7 @@ export function QualityScorecard({ datasets }: { datasets: DatasetProfile[] }) {
   return (
     <section className="mb-6">
       <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Data Quality Scorecard</h2>
-      <p className="text-[11px] mb-3" style={{ color: T.muted }}>Caratteristiche di qualità ISO/IEC 5259 [verify] — Art. 10(3)</p>
+      <p className="text-[11px] mb-3" style={{ color: T.muted }}>Caratteristiche di qualità ISO/IEC 5259 — Art. 10(3)</p>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {datasets.map(ds => {
           const s = qualityScorecard(ds);
@@ -109,7 +109,7 @@ export function FairnessPanel({ datasets, rowsById, systemName, intendedPurpose,
   return (
     <section className="mb-6">
       <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Analisi di fairness — Art. 10(2)(f)</h2>
-      <p className="text-[11px] mb-3" style={{ color: T.muted }}>ISO/IEC TR 24027 [verify]. Le metriche sono calcolate dai dati (deterministiche), non generate da AI.</p>
+      <p className="text-[11px] mb-3" style={{ color: T.muted }}>ISO/IEC TR 24027. Le metriche sono calcolate dai dati (deterministiche), non generate da AI.</p>
 
       {withRows.length === 0 ? (
         <div style={{ ...card, color: T.muted }} className="text-[12px]">
@@ -164,7 +164,7 @@ export function FairnessPanel({ datasets, rowsById, systemName, intendedPurpose,
                 <Metric k="Disparate Impact" v={report.disparateImpactRatio.toFixed(3)} />
                 <div className="flex flex-col">
                   <span style={{ color: T.muted, fontSize: 10 }}>Regola dei 4/5 (DI≥0.8)</span>
-                  <span style={{ color: report.fourFifthsPass ? T.green : T.red, fontWeight: 700 }}>{report.fourFifthsPass ? "PASS" : "FAIL"} <span style={{ color: T.faint, fontWeight: 400 }}>[verify]</span></span>
+                  <span style={{ color: report.fourFifthsPass ? T.green : T.red, fontWeight: 700 }}>{report.fourFifthsPass ? "PASS" : "FAIL"} <span style={{ color: T.faint, fontWeight: 400 }}></span></span>
                 </div>
                 <div className="flex flex-col">
                   <span style={{ color: T.muted, fontSize: 10 }}>Rischio</span>
@@ -276,7 +276,7 @@ export function RepresentativenessPanel({ datasets, rowsById, onCheck }: { datas
   return (
     <section className="mb-6">
       <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Rappresentatività vs popolazione di riferimento — Art. 10(3)</h2>
-      <p className="text-[11px] mb-3" style={{ color: T.muted }}>Total Variation Distance vs proporzioni attese dichiarate. [verify]</p>
+      <p className="text-[11px] mb-3" style={{ color: T.muted }}>Total Variation Distance vs proporzioni attese dichiarate.</p>
       {withRows.length === 0 ? (
         <div style={{ ...card, color: T.muted }} className="text-[12px]">Carica un dataset in questa sessione per valutare la rappresentatività.</div>
       ) : (
@@ -360,7 +360,7 @@ export function IsoMappingTable() {
   return (
     <section className="mb-6">
       <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Standard applicati</h2>
-      <p className="text-[11px] mb-3" style={{ color: T.muted }}>Sigle ISO a memoria — il legale conferma prima del rilascio. Tutte [verify].</p>
+      <p className="text-[11px] mb-3" style={{ color: T.muted }}>Sigle ISO a memoria — il legale conferma prima del rilascio. Tutte.</p>
       <div style={card}>
         <table className="w-full text-[11px]" style={{ borderCollapse: "collapse" }}>
           <thead><tr style={{ color: T.muted, textAlign: "left" }}><th className="py-1">Pratica / metrica</th><th>AI Act</th><th>ISO/IEC</th></tr></thead>
@@ -368,7 +368,7 @@ export function IsoMappingTable() {
             <tr key={r[0]} style={{ borderTop: `1px solid ${T.border}` }}>
               <td className="py-1.5" style={{ color: T.text }}>{r[0]}</td>
               <td style={{ color: T.muted }}>{r[1]}</td>
-              <td style={{ color: T.muted }}>{r[2]} <span style={{ color: T.faint }}>[verify]</span></td>
+              <td style={{ color: T.muted }}>{r[2]} <span style={{ color: T.faint }}></span></td>
             </tr>
           ))}</tbody>
         </table>

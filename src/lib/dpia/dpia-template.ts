@@ -115,7 +115,7 @@ export const WP248_CRITERIA: DpiaCriterion[] = [
 
 export const WP248_TRIGGER_RULE = {
   threshold: 2,
-  note: "WP248: un trattamento che soddisfa almeno due criteri richiede, in linea di principio, una DPIA. Un solo criterio può bastare in casi specifici; valutare caso per caso. [verifica contro il testo vigente del GDPR/WP248]",
+  note: "WP248: un trattamento che soddisfa almeno due criteri richiede, in linea di principio, una DPIA. Un solo criterio può bastare in casi specifici; valutare caso per caso.",
 } as const;
 
 /* ──────────────────────────────────────────────────────────────────
@@ -191,7 +191,7 @@ export const NECESSITY_PROPORTIONALITY_FIELDS = [
 export const PRIOR_CONSULTATION = {
   ref: "GDPR Art. 36",
   trigger:
-    "Se la DPIA indica un rischio residuo elevato in assenza di misure di attenuazione adottate dal titolare, è necessaria la consultazione preventiva dell'autorità di controllo. [verifica contro il testo vigente del GDPR/WP248]",
+    "Se la DPIA indica un rischio residuo elevato in assenza di misure di attenuazione adottate dal titolare, è necessaria la consultazione preventiva dell'autorità di controllo.",
 } as const;
 
 /* ──────────────────────────────────────────────────────────────────
@@ -204,7 +204,7 @@ export const DPIA_TEMPLATE_META = {
   methodology: "WP248 rev.01 (EDPB/ex-WP29)",
   version: "1.0",
   disclaimer:
-    "Template basato su Art. 35(7) GDPR e metodologia WP248. Bozza per revisione del DPO/titolare, non documento definitivo. [verifica contro il testo vigente del GDPR/WP248]",
+    "Template basato su Art. 35(7) GDPR e metodologia WP248. Bozza per revisione del DPO/titolare, non documento definitivo.",
 } as const;
 
 /* ──────────────────────────────────────────────────────────────────
@@ -754,7 +754,7 @@ export const DPIA_SUBPOINTS: DpiaSubPoint[] = [
     examples: [
       "Il DPO ha esaminato la DPIA il 20/03/2024 e concorda con la valutazione del rischio residuo (medio). Raccomanda: aggiungere controlli sul tempo di risposta alle richieste degli interessati.",
       "Il DPO esprime parere favorevole condizionato: richiede l'implementazione della pseudonimizzazione prima del go-live e una revisione della DPIA entro 6 mesi dall'avvio.",
-      "DPO non designato — valutare obbligatorietà ex Art. 37 GDPR. [verifica contro il testo vigente del GDPR/WP248]",
+      "DPO non designato — valutare obbligatorietà ex Art. 37 GDPR.",
     ],
   },
   {
@@ -782,7 +782,7 @@ export const DPIA_SUBPOINTS: DpiaSubPoint[] = [
     examples: [
       "Basso — le misure adottate (cifratura, MFA, RBAC, formazione) riducono la probabilità e l'impatto delle minacce a un livello accettabile.",
       "Medio — il rischio è stato ridotto ma non eliminato; il titolare decide di procedere sotto propria responsabilità documentata.",
-      "Alto — nonostante le misure, il rischio residuo rimane elevato: è richiesta la consultazione preventiva dell'autorità di controllo ex Art. 36. [verifica contro il testo vigente del GDPR/WP248]",
+      "Alto — nonostante le misure, il rischio residuo rimane elevato: è richiesta la consultazione preventiva dell'autorità di controllo ex Art. 36.",
     ],
   },
   {
@@ -795,7 +795,7 @@ export const DPIA_SUBPOINTS: DpiaSubPoint[] = [
     required: false,
     examples: [
       "No — il rischio residuo è stato ridotto a livello medio/basso; la consultazione non è necessaria.",
-      "Sì — il rischio residuo rimane alto nonostante le misure; il Garante verrà consultato prima dell'avvio del trattamento. [verifica contro il testo vigente del GDPR/WP248]",
+      "Sì — il rischio residuo rimane alto nonostante le misure; il Garante verrà consultato prima dell'avvio del trattamento.",
     ],
   },
   {

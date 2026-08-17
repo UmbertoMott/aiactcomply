@@ -1,5 +1,5 @@
 // Annex VIII formal validator — PROMPT BF
-// [verify against current AI Act text]
+//
 
 import type { EudbDraft } from "@/types/eudb";
 

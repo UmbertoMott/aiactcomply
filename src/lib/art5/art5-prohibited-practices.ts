@@ -20,29 +20,29 @@ export const ART5_EMOTION_BIOMETRIC_PRACTICES = [
   {
     id: "emotion_recognition_workplace_education",
     label: "Riconoscimento delle emozioni — luogo di lavoro e istruzione",
-    reference: "Art. 5(1)(f) [verify against current AI Act text]",
+    reference: "Art. 5(1)(f)",
     exemptions: [
       {
         id: "medical_safety",
         label: "Uso per motivi medici o di sicurezza",
-        reference: "Art. 5(1)(f) [verify against current AI Act text]",
+        reference: "Art. 5(1)(f)",
       },
     ],
   },
   {
     id: "biometric_categorization_sensitive_attributes",
     label: "Categorizzazione biometrica — attributi sensibili",
-    reference: "Art. 5(1)(g) [verify against current AI Act text]",
+    reference: "Art. 5(1)(g)",
     exemptions: [
       {
         id: "lawful_dataset_labelling",
         label: "Labelling/filtering di dataset biometrici lecitamente acquisiti, senza categorizzazione individuale di persone",
-        reference: "Art. 5(1)(g) [verify against current AI Act text]",
+        reference: "Art. 5(1)(g)",
       },
       {
         id: "law_enforcement",
         label: "Categorizzazione biometrica nell'ambito di attività di contrasto (law enforcement)",
-        reference: "Art. 5(1)(g) [verify against current AI Act text]",
+        reference: "Art. 5(1)(g)",
       },
     ],
   },

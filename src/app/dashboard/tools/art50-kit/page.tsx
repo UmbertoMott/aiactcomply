@@ -90,7 +90,7 @@ function NonConformWarning({ method, exemptionClaimed }: { method: LabellingMeth
     <div className="flex items-start gap-1.5 rounded-lg p-2.5 mt-1" style={{ background: T.redBg, border: `1px solid ${T.redBdr}` }}>
       <AlertTriangle size={12} className="mt-0.5 flex-shrink-0" style={{ color: T.red }} />
       <p className="text-[11px]" style={{ color: T.red }}>
-        Questo metodo non soddisfa il requisito di marcatura leggibile da dispositivi dell&apos;Art. 50(2) [verify against current AI Act text], salvo applicazione di un&apos;eccezione documentata.
+        Questo metodo non soddisfa il requisito di marcatura leggibile da dispositivi dell&apos;Art. 50(2), salvo applicazione di un&apos;eccezione documentata.
       </p>
     </div>
   );
@@ -137,8 +137,8 @@ export default function Art50KitPage() {
         status: "gap" as SelfComplianceStatus,
         evidence: undefined,
         remediationNotes: i.obligationId === "direct_interaction_disclosure"
-          ? "Art. 50(1)/(5) [verify against current AI Act text]: aggiungere banner/header persistente nel componente chat che identifichi l'interlocutore come sistema IA. Il badge ✦ AI sui singoli campi è necessario ma non sufficiente per le interfacce conversazionali."
-          : "Art. 50(2) [verify against current AI Act text]: i badge ✦ AI — verifica e conferma sui campi sono human-readable ma non machine-readable. Remediation minima: aggiungere footer standardizzato 'Documento generato con assistenza IA — RegulaeOS' negli export, e valutare metadati XMP/IPTC per PDF.",
+          ? "Art. 50(1)/(5): aggiungere banner/header persistente nel componente chat che identifichi l'interlocutore come sistema IA. Il badge ✦ AI sui singoli campi è necessario ma non sufficiente per le interfacce conversazionali."
+          : "Art. 50(2): i badge ✦ AI — verifica e conferma sui campi sono human-readable ma non machine-readable. Remediation minima: aggiungere footer standardizzato 'Documento generato con assistenza IA — RegulaeOS' negli export, e valutare metadati XMP/IPTC per PDF.",
       }));
       setSelfItems(initial);
     } else {
@@ -196,7 +196,7 @@ export default function Art50KitPage() {
       `Punteggio Art. 50:    ${system.lastScore !== null ? system.lastScore + "/100" : "n/d"}`, "",
       "COMPONENTI DICHIARATI INSTALLATI:",
       "  - Banner disclosure AI visibile agli utenti", "  - Meta tag machine-readable (ai-disclosure)", "  - Markup strutturato JSON-LD", "",
-      "RIFERIMENTO NORMATIVO:", "  Art. 50(1)-(5) Regolamento (UE) 2024/1689 (AI Act) [verify against current AI Act text]", "  Deadline: 2 dicembre 2026", "",
+      "RIFERIMENTO NORMATIVO:", "  Art. 50(1)-(5) Regolamento (UE) 2024/1689 (AI Act)", "  Deadline: 2 dicembre 2026", "",
       "NOTA LEGALE:", "  AI Comply non rilascia attestazioni di conformità legale.", "  Questo documento costituisce esclusivamente un registro interno.", "=".repeat(60),
       `Generato da RegulaeOS — ${new Date().toISOString()}`,
     ];
@@ -274,7 +274,7 @@ export default function Art50KitPage() {
       {/* ── Art. 50(1)-(5) reference table ─────────────────────────────────── */}
       <div className="rounded-xl overflow-hidden" style={card}>
         <div className="px-4 py-3 border-b" style={{ borderColor: "#f3f4f6" }}>
-          <p className="text-[12px] font-semibold" style={{ color: T.text }}>Obblighi Art. 50(1)-(5) [verify against current AI Act text]</p>
+          <p className="text-[12px] font-semibold" style={{ color: T.text }}>Obblighi Art. 50(1)-(5)</p>
           <p className="text-[10px] mt-0.5" style={{ color: T.faint }}>✦ AI — verifica e conferma: struttura paragrafi ricostruita dalla memoria del modello — verificare sul testo consolidato AI Act.</p>
         </div>
         <div className="divide-y" style={{ borderColor: "#f3f4f6" }}>
@@ -482,7 +482,7 @@ export default function Art50KitPage() {
                           <div className="rounded-xl p-4" style={{ background: T.bg, border: `1px solid ${T.border}` }}>
                             <div className="flex items-center gap-2 mb-3">
                               <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>Art. 50(1)</span>
-                              <span className="text-[12px] font-semibold" style={{ color: T.text }}>Disclosure di interazione con sistema IA [verify against current AI Act text]</span>
+                              <span className="text-[12px] font-semibold" style={{ color: T.text }}>Disclosure di interazione con sistema IA</span>
                             </div>
                             <div className="space-y-3">
                               {[
@@ -541,7 +541,7 @@ export default function Art50KitPage() {
                           <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
                             <div className="flex items-center gap-2">
                               <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>Art. 50(2)</span>
-                              <span className="text-[12px] font-semibold" style={{ color: T.text }}>Marcatura machine-readable contenuti sintetici [verify against current AI Act text]</span>
+                              <span className="text-[12px] font-semibold" style={{ color: T.text }}>Marcatura machine-readable contenuti sintetici</span>
                             </div>
                             <button onClick={() => runProposeLabellingPlan(system)} disabled={proposing === system.id}
                               className="flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-lg"
@@ -626,7 +626,7 @@ export default function Art50KitPage() {
                                     {/* Exemption */}
                                     {!machineReadable && (
                                       <div className="mt-2">
-                                        <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>Eccezione Art. 50(2) [verify against current AI Act text]</label>
+                                        <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>Eccezione Art. 50(2)</label>
                                         <select value={label?.exemptionClaimed ?? ""} onChange={e => {
                                           const syntheticContentLabels = rec.syntheticContentLabels.map(l => l.contentType === ct ? { ...l, exemptionClaimed: e.target.value || undefined } : l);
                                           patchSystemRec(system.id, { syntheticContentLabels });
@@ -654,12 +654,12 @@ export default function Art50KitPage() {
                           <div className="rounded-xl p-4" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
                             <div className="flex items-center gap-2 mb-2">
                               <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded" style={{ background: T.amberBg, color: T.amber }}>Art. 50(4)</span>
-                              <span className="text-[12px] font-semibold" style={{ color: T.text }}>Disclosure contenuti deepfake [verify against current AI Act text]</span>
+                              <span className="text-[12px] font-semibold" style={{ color: T.text }}>Disclosure contenuti deepfake</span>
                             </div>
                             <p className="text-[11px] mb-3 leading-relaxed" style={{ color: T.muted }}>
                               I deployer di sistemi che generano o manipolano immagine/audio/video che costituiscono un &quot;deepfake&quot; devono divulgare che il contenuto è stato generato o manipolato artificialmente.
                               Eccezioni: (a) opere evidentemente artistiche/creative/satiriche/fittizie — obbligo limitato alla divulgazione dell&apos;esistenza; (b) testo pubblicato con responsabilità editoriale e revisione umana — non si applica.
-                              [verify against current AI Act text]
+
                             </p>
 
                             {/* Applicability */}
@@ -687,7 +687,7 @@ export default function Art50KitPage() {
                                     placeholder="es. 'Etichetta visibile in sovraimpressione: Immagine generata artificialmente — RegulaeOS'" style={ta} />
                                 </div>
                                 <div>
-                                  <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>Eccezione Art. 50(4) [verify against current AI Act text]</label>
+                                  <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>Eccezione Art. 50(4)</label>
                                   <select value={rec.deepfakeDisclosure?.exemptionClaimed ?? ""}
                                     onChange={e => patchSystemRec(system.id, { deepfakeDisclosure: { ...rec.deepfakeDisclosure, systemId: system.id, exemptionClaimed: e.target.value || undefined } as typeof rec.deepfakeDisclosure })}
                                     style={{ ...inp, width: "auto" }}>
@@ -710,11 +710,11 @@ export default function Art50KitPage() {
                         <div className="rounded-xl p-4" style={{ background: T.bg, border: `1px solid ${T.border}` }}>
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>Art. 50(3)</span>
-                            <span className="text-[12px] font-semibold" style={{ color: T.text }}>Disclosure riconoscimento emozioni / categorizzazione biometrica [verify against current AI Act text]</span>
+                            <span className="text-[12px] font-semibold" style={{ color: T.text }}>Disclosure riconoscimento emozioni / categorizzazione biometrica</span>
                           </div>
                           <p className="text-[11px] mb-3 leading-relaxed" style={{ color: T.muted }}>
                             I deployer di sistemi di riconoscimento delle emozioni o di categorizzazione biometrica devono informare le persone fisiche esposte al sistema.
-                            Questo obbligo è gestito in Art. 5 Checker (Art. 5(1)(f)/(g)) e Deployer Dashboard (obblighi di informazione). [verify against current AI Act text]
+                            Questo obbligo è gestito in Art. 5 Checker (Art. 5(1)(f)/(g)) e Deployer Dashboard (obblighi di informazione).
                           </p>
                           <div className="flex gap-3 flex-wrap">
                             <Link href="/dashboard/tools/prohibited" className="inline-flex items-center gap-1 text-[11px] font-medium" style={{ color: T.blue }}>
@@ -744,7 +744,7 @@ export default function Art50KitPage() {
             <strong style={{ color: T.text }}>Art. 50 AI Act — cosa richiede.</strong>{" "}
             I sistemi AI che interagiscono direttamente con persone fisiche devono informare gli utenti della natura artificiale del sistema in modo chiaro, tempestivo e comprensibile (Art. 50(1)).
             I contenuti sintetici (testo/audio/immagine/video) devono essere marcati in formato leggibile da dispositivi (Art. 50(2)).
-            Obbligatorio dal 2 dicembre 2026. Multa massima: 1% del fatturato annuo globale (Art. 99(3)). [verify against current AI Act text]
+            Obbligatorio dal 2 dicembre 2026. Multa massima: 1% del fatturato annuo globale (Art. 99(3)).
           </div>
         </>
       )}
@@ -758,7 +758,7 @@ export default function Art50KitPage() {
             <h2 className="text-xl font-semibold" style={{ color: T.text }}>Autoconformità RegulaeOS — Art. 50</h2>
             <p className="text-sm mt-1" style={{ color: T.muted }}>
               RegulaeOS è essa stessa provider di funzionalità IA (i suggerimenti ✦ AI) soggette ad Art. 50.
-              Questa sezione documenta lo stato di conformità delle proprie interazioni AI. [verify against current AI Act text]
+              Questa sezione documenta lo stato di conformità delle proprie interazioni AI.
             </p>
           </div>
 
@@ -779,7 +779,7 @@ export default function Art50KitPage() {
           {/* Art. 50(1)/(5) — direct interaction disclosure (Legal Assistant, chat) */}
           <div>
             <h3 className="text-[12px] font-semibold mb-3" style={{ color: T.text }}>
-              Art. 50(1)/(5) — Disclosure interazione con IA [verify against current AI Act text]
+              Art. 50(1)/(5) — Disclosure interazione con IA
             </h3>
             {!selfBannerDismissed && (
               <div className="rounded-xl p-4 mb-4 relative" style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.09)" }}>
@@ -795,7 +795,7 @@ export default function Art50KitPage() {
                   <p className="text-[11px] leading-relaxed" style={{ color: T.muted }}>
                     Art. 50(1) richiede che le interfacce conversazionali identifichino il sistema AI al primo contatto, in modo chiaro e distinguibile (Art. 50(5)).
                     Il badge ✦ AI sui singoli campi è necessario ma non sufficiente per le interfacce chat — serve un banner/header persistente.
-                    [verify against current AI Act text]
+
                   </p>
                 </div>
               </div>
@@ -810,14 +810,14 @@ export default function Art50KitPage() {
           {/* Art. 50(2) — machine-readable on exports */}
           <div>
             <h3 className="text-[12px] font-semibold mb-3" style={{ color: T.text }}>
-              Art. 50(2) — Marcatura machine-readable sui documenti esportati [verify against current AI Act text]
+              Art. 50(2) — Marcatura machine-readable sui documenti esportati
             </h3>
             <div className="rounded-xl p-4 mb-4" style={{ background: T.bg, border: `1px solid ${T.border}` }}>
               <p className="text-[11px] leading-relaxed" style={{ color: T.muted }}>
                 I documenti generati con assistenza AI (DPIA, FRIA, Risk Manager, DocuGen, ecc.) devono includere marcatura leggibile da macchina.
                 Stato attuale: export PDF/JSON via Blob senza metadati strutturati — metodo attuale è <strong>disclosure_statement_only</strong> (badge ✦ AI visibile nel testo, non machine-readable).
                 Remediation minima: footer standardizzato &quot;Documento generato con assistenza di intelligenza artificiale — RegulaeOS&quot; su ogni export, e valutazione metadati XMP/IPTC per PDF.
-                [verify against current AI Act text]
+
               </p>
             </div>
             <div className="space-y-2">

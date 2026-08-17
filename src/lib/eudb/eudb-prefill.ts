@@ -1,7 +1,7 @@
 // EUDB auto-prefill from cross-module data — PROMPT AS
 // ✦ AI — verifica e conferma: mappatura campi Annex VIII su altri moduli
 // ricostruita dalla memoria del modello. Validare contro testo consolidato Art. 49
-// e Annex VIII Reg. (UE) 2024/1689. [verify against current AI Act text]
+// e Annex VIII Reg. (UE) 2024/1689.
 
 export type EligibilityAnswer = "yes" | "no" | "unsure" | "";
 
@@ -75,10 +75,10 @@ export const EU_COUNTRIES = [
 ];
 
 export const RISK_CLASSIFICATIONS = [
-  "Sistema ad alto rischio — Annex III (Art. 6(2)) [verify against current AI Act text]",
-  "Sistema ad alto rischio — Annex I (Art. 6(1)) [verify against current AI Act text]",
-  "GPAI model — rischio sistemico (Art. 51) [verify against current AI Act text]",
-  "Sistema ad alto rischio — Annex I + Annex III [verify against current AI Act text]",
+  "Sistema ad alto rischio — Annex III (Art. 6(2))",
+  "Sistema ad alto rischio — Annex I (Art. 6(1))",
+  "GPAI model — rischio sistemico (Art. 51)",
+  "Sistema ad alto rischio — Annex I + Annex III",
 ];
 
 export function createEmptyDoc(): EUDBDoc {

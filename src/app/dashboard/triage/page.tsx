@@ -282,7 +282,7 @@ function ResultView({
             Override Art. 6(3) — profilazione rilevata
           </p>
           <p className="text-[10px]" style={{ color: T.muted }}>
-            La presenza di profilazione di persone fisiche blocca l&apos;applicazione di qualsiasi eccezione Art. 6(3): il sistema resta classificato ad alto rischio. [verifica]
+            La presenza di profilazione di persone fisiche blocca l&apos;applicazione di qualsiasi eccezione Art. 6(3): il sistema resta classificato ad alto rischio.
           </p>
         </div>
       )}
@@ -294,7 +294,7 @@ function ResultView({
             Eccezione Art. 6(3) applicata — {result.exception63Applied.label}
           </p>
           <p className="text-[10px]" style={{ color: T.muted }}>
-            {result.exception63Applied.ref} · Obbligo di documentare la valutazione di esenzione. [verifica]
+            {result.exception63Applied.ref} · Obbligo di documentare la valutazione di esenzione.
           </p>
         </div>
       )}
@@ -318,7 +318,7 @@ function ResultView({
       {result.annexIProduct && (
         <div className="rounded-lg px-3 py-2.5" style={{ background: T.amberBg, border: "1px solid rgba(245,158,11,0.28)" }}>
           <p className="text-xs font-semibold mb-0.5" style={{ color: T.amber }}>Allegato I — {result.annexIProduct}</p>
-          <p className="text-[10px]" style={{ color: T.muted }}>Percorso Art. 6(1): obblighi alto rischio applicabili. [verifica]</p>
+          <p className="text-[10px]" style={{ color: T.muted }}>Percorso Art. 6(1): obblighi alto rischio applicabili.</p>
         </div>
       )}
 
@@ -559,7 +559,7 @@ export default function TriagePage() {
           <h1 className="text-2xl font-bold mb-1" style={{ color: T.text }}>Analisi rapida di conformità</h1>
           <p className="text-sm" style={{ color: T.muted }}>
             Albero decisionale esaustivo — Artt. 2, 3, 5, 6 + GPAI + Art. 50. {" "}
-            <span style={{ color: T.faint }}>Non è consulenza legale. [verifica]</span>
+            <span style={{ color: T.faint }}>Non è consulenza legale.</span>
           </p>
           {area !== "result" && (
             <div className="mt-5">

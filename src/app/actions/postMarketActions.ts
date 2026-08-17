@@ -31,13 +31,12 @@ METRICHE DEL PERIODO (${metrics.periodStart} → ${metrics.periodEnd}):
 ISTRUZIONI:
 1. Scrivi un paragrafo narrativo (max 250 parole) del periodo di monitoraggio, includendo: stato generale del sistema, trend principali, eventuali criticità emerse.
 2. Identifica le anomalie da segnalare (max 3), con riferimento al Risk Register dove pertinente.
-3. Ogni citazione normativa deve terminare con [verify against current AI Act text].
 4. Output SOLO nel formato:
 <extract>
 {
   "narrative": "...",
   "flaggedAnomalies": [
-    { "metric": "error_rate", "description": "...", "riskRegisterRef": "RISK-001 [verify against current AI Act text]", "severity": "high" }
+    { "metric": "error_rate", "description": "...", "riskRegisterRef": "RISK-001", "severity": "high" }
   ]
 }
 </extract>
@@ -73,7 +72,7 @@ export async function proposePMMPlan(input: {
   tier: string;
   riskLevel?: string;
 }): Promise<ProposePMMPlanResult> {
-  const prompt = `Sei un esperto di conformità AI Act UE. Proponi un Piano di Monitoraggio Post-Market (PMM) per un sistema AI ad alto rischio ai sensi dell'Art. 72 [verify against current AI Act text].
+  const prompt = `Sei un esperto di conformità AI Act UE. Proponi un Piano di Monitoraggio Post-Market (PMM) per un sistema AI ad alto rischio ai sensi dell'Art. 72.
 
 Sistema: "${input.systemName}"
 Ruolo: ${input.systemRole}
@@ -86,7 +85,6 @@ Proponi:
 - La frequenza di raccolta dati consigliata
 - Un breve razionale
 
-Ogni citazione normativa deve terminare con [verify against current AI Act text].
 
 Rispondi SOLO nel formato JSON:
 <extract>

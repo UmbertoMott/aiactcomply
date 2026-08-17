@@ -37,7 +37,6 @@ Art. 25(3): La "modifica sostanziale" include cambi al fine previsto, all'output
 significative. NON include personalizzazioni minori (UI, parametri, traduzioni).
 
 REGOLE:
-- art25Obligations deve terminare con "[verify against current AI Act text]" per ogni voce
 - summary deve essere specifico al caso
 - Rispondi SOLO con JSON valido, nessun testo fuori dal JSON
 
@@ -50,7 +49,7 @@ Formato JSON atteso:
   "isDualRole": true|false,
   "roleVerdict": "provider|deployer|both_provider_and_deployer|unclear",
   "art25Applies": true|false,
-  "art25Obligations": ["...[verify against current AI Act text]", "..."],
+  "art25Obligations": ["...", "..."],
   "substantialModification": true|false,
   "substantialModificationReason": "...",
   "riskLevel": "low|medium|high",

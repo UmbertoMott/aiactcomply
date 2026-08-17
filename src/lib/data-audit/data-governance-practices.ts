@@ -1,6 +1,6 @@
 // Art. 10 AI Act — pratiche di governance dei dati
 // Citazioni AI Act verificate contro il Regolamento (UE) 2024/1689 (art. 10(2)(a-h),
-// (3),(4),(5),(6)) il 2026-07. Le clausole ISO restano [verify] (accesso a pagamento).
+// (3),(4),(5),(6)) il 2026-07. Le clausole ISO restano (accesso a pagamento).
 
 export type PracticeSource = "manual" | "computed" | "both";
 

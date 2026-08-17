@@ -196,7 +196,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
         status:              PHASE_STATUS[data.devPhase] ?? "planned",
         euNexus:             true,
         role:                "provider",
-        roleBasis:           "Ipotizzato da onboarding — verificare [verify against current AI Act text]",
+        roleBasis:           "Ipotizzato da onboarding — verificare",
         tier:                RISK_TIER[result.level] ?? "unclassified",
         tierBasis:           `${result.articleRef} — ${result.riskLabel} (calcolato da onboarding)`,
         dualRoleFlag:        false,

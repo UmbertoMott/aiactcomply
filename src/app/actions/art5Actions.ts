@@ -33,12 +33,12 @@ SISTEMA AI DA ANALIZZARE:
 - Finalità dichiarata: ${input.intendedPurpose}
 - Descrizione: ${input.description}
 
-PRATICA 1 — Art. 5(1)(f) [verify against current AI Act text]:
+PRATICA 1 — Art. 5(1)(f):
 Sistemi che inferiscono le emozioni di persone fisiche in luoghi di lavoro o istituti di istruzione.
 Keyword di attenzione: ${EMOTION_RECOGNITION_HINTS.join(", ")}.
 Contesti di rischio: ${WORKPLACE_EDUCATION_HINTS.join(", ")}.
 
-PRATICA 2 — Art. 5(1)(g) [verify against current AI Act text]:
+PRATICA 2 — Art. 5(1)(g):
 Sistemi di categorizzazione biometrica che classificano individui sulla base di dati biometrici
 per inferire: ${SENSITIVE_INFERENCE_CATEGORIES.join(", ")}.
 Keyword di attenzione: ${BIOMETRIC_CATEGORIZATION_HINTS.join(", ")}.

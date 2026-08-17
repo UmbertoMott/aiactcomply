@@ -47,10 +47,10 @@ DATA ODIERNA: ${today}
 
 REGOLE TASSATIVE:
 1. likelyTier: controlla nell'ordine Art. 5 → Annex III → GPAI → Art. 50 → minimal
-2. Se il testo menziona screening CV, selezione candidati, valutazione performance lavorativa: likelyTier = "high_risk", likelyTierArticle = "Annex III(4)(a) — employment, recruitment/selection [verify against current AI Act text]"
-3. Se menziona scoring crediti, assicurazioni vita/salute, accesso servizi finanziari: likelyTier = "high_risk", likelyTierArticle = "Annex III(5) — access to financial services [verify against current AI Act text]"
+2. Se il testo menziona screening CV, selezione candidati, valutazione performance lavorativa: likelyTier = "high_risk", likelyTierArticle = "Annex III(4)(a) — employment, recruitment/selection"
+3. Se menziona scoring crediti, assicurazioni vita/salute, accesso servizi finanziari: likelyTier = "high_risk", likelyTierArticle = "Annex III(5) — access to financial services"
 4. Se menziona riconoscimento emozioni in contesto lavorativo o educativo: art5Risk = true (Art. 5(1)(f))
-5. Se menziona GPT, Claude, Gemini, LLM, modello linguistico, chatbot AI: likelyTier = "gpai", likelyTierArticle = "Art. 51 — General Purpose AI Model [verify against current AI Act text]"
+5. Se menziona GPT, Claude, Gemini, LLM, modello linguistico, chatbot AI: likelyTier = "gpai", likelyTierArticle = "Art. 51 — General Purpose AI Model"
 6. Se menziona identificazione biometrica real-time in spazi pubblici: likelyTier = "prohibited", art5Risk = true
 7. dualRoleRisk = true se l'utente menziona fine-tuning, modifica, adattamento del modello base
 8. flaggedWarnings: massimo 3 warning, solo se normativamente fondati
@@ -76,7 +76,7 @@ Rispondi SOLO con JSON valido, nessun testo fuori dal JSON:
   "deploymentScope": "ambito geografico/funzionale",
   "likelyRole": "provider|deployer|importer|distributor|unknown",
   "likelyTier": "prohibited|high_risk|limited|minimal|gpai|unclassified",
-  "likelyTierArticle": "riferimento normativo [verify against current AI Act text]",
+  "likelyTierArticle": "riferimento normativo",
   "dualRoleRisk": false,
   "art5Risk": false,
   "confidenceLevel": "high|medium|low",

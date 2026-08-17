@@ -43,7 +43,6 @@ Art. 36(3) richiede la comunicazione di: (a) responsabilità tra titolari e DPO,
 (c) misure di protezione adottate, (d) dati di contatto del DPO, (e) la DPIA stessa.
 
 REGOLE:
-- article deve terminare con "[verify against current AI Act text]" o "[verify against current GDPR text]"
 - Rispondi SOLO con JSON valido
 
 Sistema: "${dpiaConclusion.systemName}"
@@ -62,7 +61,7 @@ Formato JSON:
   "requiredActions": [
     {
       "action": "...",
-      "article": "Art. 36(...) [verify against current GDPR text]",
+      "article": "Art. 36(...)",
       "deadline": "...",
       "priority": "obbligatorio|raccomandato"
     }

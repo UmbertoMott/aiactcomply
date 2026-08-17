@@ -1,7 +1,7 @@
 // EUDB XML/JSON machine-readable export — PROMPT BF
 // XML structure based on EAIB technical specifications (placeholder — update when
 // official schema is published by the European AI Office).
-// [verify against current AI Act text]
+//
 
 import type { EudbDraft } from "@/types/eudb";
 
@@ -21,7 +21,7 @@ export function generateEudbXml(draft: EudbDraft): string {
                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                      exportedAt="${now}">
 
-  <!-- Allegato VIII — Sezione A: Dati del Fornitore [verify against current AI Act text] -->
+  <!-- Allegato VIII — Sezione A: Dati del Fornitore -->
   <Provider>
     <Name>${escapeXml(draft.providerName)}</Name>
     <Address>${escapeXml(draft.providerAddress)}</Address>
@@ -29,7 +29,7 @@ export function generateEudbXml(draft: EudbDraft): string {
     <Role>${escapeXml(draft.providerRole)}</Role>
   </Provider>
 
-  <!-- Allegato VIII — Sezione B: Informazioni sul Sistema AI [verify against current AI Act text] -->
+  <!-- Allegato VIII — Sezione B: Informazioni sul Sistema AI -->
   <AISystem>
     <Name>${escapeXml(draft.systemName)}</Name>
     <Version>${escapeXml(draft.systemVersion)}</Version>

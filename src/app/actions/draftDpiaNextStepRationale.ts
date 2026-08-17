@@ -23,7 +23,7 @@ Spiega in 2-3 frasi PERCHÉ questo è il passo prioritario ora, riferendoti conc
 Rispondi con JSON:
 {"rationale": "..."}
 
-[verifica contro il testo vigente del GDPR/WP248]`;
+`;
 
   try {
     const text = await generateText(prompt, { temperature: 0.3, maxOutputTokens: 200 });

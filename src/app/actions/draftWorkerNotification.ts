@@ -37,7 +37,6 @@ La notifica deve essere chiara, comprensibile e includere: scopo del sistema, im
 misure di supervisione umana, diritti dei lavoratori.
 
 REGOLE OBBLIGATORIE:
-- article deve terminare con "[verify against current AI Act text]"
 - notificationText deve essere in italiano, professionale ma comprensibile
 - Rispondi SOLO con JSON valido
 
@@ -52,7 +51,7 @@ Formato JSON:
   "art26Requirements": [
     {
       "requirement": "...",
-      "article": "Art. 26(...) [verify against current AI Act text]",
+      "article": "Art. 26(...)",
       "addressedInDraft": true|false
     }
   ],

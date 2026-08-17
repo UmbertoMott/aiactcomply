@@ -1,5 +1,5 @@
 // Art. 15 AI Act — accuratezza, robustezza, cybersicurezza.
-// Citazioni centralizzate. [verify against current AI Act text] su ogni riferimento
+// Citazioni centralizzate. su ogni riferimento
 // normativo; sigle prEN/ISO a memoria, conferma del legale prima del rilascio.
 
 export const RESILIENCE_PILLARS = [
@@ -9,14 +9,14 @@ export const RESILIENCE_PILLARS = [
 ] as const;
 export type ResiliencePillarId = (typeof RESILIENCE_PILLARS)[number]["id"];
 
-// Categorie di minaccia — Art. 15(5) ↔ prEN 18282 [verify]
+// Categorie di minaccia — Art. 15(5) ↔ prEN 18282
 export const PREN18282_THREATS = [
-  { id: "data_poisoning",      label: "Data poisoning (avvelenamento dati di training)",          generativeOnly: false, reference: "Art. 15(5) [Reg. (UE) 2024/1689] · prEN 18282 [verify]" },
-  { id: "model_poisoning",     label: "Model poisoning / backdoor",                               generativeOnly: false, reference: "Art. 15(5) [Reg. (UE) 2024/1689] · prEN 18282 [verify]" },
-  { id: "evasion_adversarial", label: "Adversarial examples / evasion",                           generativeOnly: false, reference: "Art. 15(5) [Reg. (UE) 2024/1689] · prEN 18282 [verify]" },
-  { id: "prompt_injection",    label: "Prompt injection (sistemi generativi / GPAI)",             generativeOnly: true,  reference: "Art. 15(5) [Reg. (UE) 2024/1689] · prEN 18282 [verify]" },
-  { id: "model_inversion",     label: "Model inversion / membership inference (confidenzialità)", generativeOnly: false, reference: "Art. 15(5) [Reg. (UE) 2024/1689] · prEN 18282 [verify]" },
-  { id: "model_theft",         label: "Model extraction / theft",                                 generativeOnly: false, reference: "Art. 15(5) [Reg. (UE) 2024/1689] · prEN 18282 [verify]" },
+  { id: "data_poisoning",      label: "Data poisoning (avvelenamento dati di training)",          generativeOnly: false, reference: "Art. 15(5) [Reg. (UE) 2024/1689] · prEN 18282" },
+  { id: "model_poisoning",     label: "Model poisoning / backdoor",                               generativeOnly: false, reference: "Art. 15(5) [Reg. (UE) 2024/1689] · prEN 18282" },
+  { id: "evasion_adversarial", label: "Adversarial examples / evasion",                           generativeOnly: false, reference: "Art. 15(5) [Reg. (UE) 2024/1689] · prEN 18282" },
+  { id: "prompt_injection",    label: "Prompt injection (sistemi generativi / GPAI)",             generativeOnly: true,  reference: "Art. 15(5) [Reg. (UE) 2024/1689] · prEN 18282" },
+  { id: "model_inversion",     label: "Model inversion / membership inference (confidenzialità)", generativeOnly: false, reference: "Art. 15(5) [Reg. (UE) 2024/1689] · prEN 18282" },
+  { id: "model_theft",         label: "Model extraction / theft",                                 generativeOnly: false, reference: "Art. 15(5) [Reg. (UE) 2024/1689] · prEN 18282" },
 ] as const;
 export type ThreatId = (typeof PREN18282_THREATS)[number]["id"];
 
@@ -30,11 +30,11 @@ export type RobustnessItemId = (typeof ROBUSTNESS_ITEMS)[number]["id"];
 
 // Mappatura ISO/EN (mostrata in UI)
 export const RESILIENCE_ISO_MAP: readonly [string, string, string][] = [
-  ["Cybersicurezza / minacce", "Art. 15(5)", "prEN 18282 (cybersecurity AI) [verify]"],
-  ["Robustezza / qualità", "Art. 15(4)", "ISO/IEC 24029 (robustness NN); ISO/IEC 25059 [verify]"],
-  ["Bias / sotto-popolazioni", "Art. 15 ↔ 10", "ISO/IEC TR 24027 (bias in AI) [verify]"],
-  ["Gestione rischi collegata", "Art. 15 ↔ 9", "prEN 18228; ISO/IEC 23894 [verify]"],
-  ["Sicurezza dell'informazione", "Art. 15(5)", "ISO/IEC 27001 [verify]"],
+  ["Cybersicurezza / minacce", "Art. 15(5)", "prEN 18282 (cybersecurity AI)"],
+  ["Robustezza / qualità", "Art. 15(4)", "ISO/IEC 24029 (robustness NN); ISO/IEC 25059"],
+  ["Bias / sotto-popolazioni", "Art. 15 ↔ 10", "ISO/IEC TR 24027 (bias in AI)"],
+  ["Gestione rischi collegata", "Art. 15 ↔ 9", "prEN 18228; ISO/IEC 23894"],
+  ["Sicurezza dell'informazione", "Art. 15(5)", "ISO/IEC 27001"],
 ];
 
 export const MIN_GROUP = 30;              // §4 campione minimo per sotto-gruppo

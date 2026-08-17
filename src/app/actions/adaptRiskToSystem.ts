@@ -30,7 +30,7 @@ Rischio: "${catalogItem.title}" — ${catalogItem.description} (categoria: ${cat
 Sistema: "${context.systemName ?? "Sistema AI"}", ${context.systemDescription ?? ""}, tier: ${context.riskTier ?? "?"}
 
 JSON (tutti i campi obbligatori):
-{"adaptedTitle":"...","adaptedDescription":"...specifica al sistema...","relevanceReason":"...","suggestedLikelihood":"low|medium|high","suggestedImpact":"low|medium|high","likelihoodBasis":"... [verify against current AI Act text]","impactBasis":"... [verify against current AI Act text]","art9Reference":"Art. 9(?) [verify against current AI Act text]"}`;
+{"adaptedTitle":"...","adaptedDescription":"...specifica al sistema...","relevanceReason":"...","suggestedLikelihood":"low|medium|high","suggestedImpact":"low|medium|high","likelihoodBasis":"...","impactBasis":"...","art9Reference":"Art. 9(?)"}`;
 
   try {
     const text = await generateText(prompt, { temperature: 0.2, maxOutputTokens: 350 });

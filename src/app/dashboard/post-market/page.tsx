@@ -1268,7 +1268,7 @@ function PostMarketPageInner() {
                           {/* Footer note */}
                           <div style={{ padding: "8px 14px", background: "rgba(0,0,0,0.02)", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
                             <p style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", margin: 0, lineHeight: 1.5 }}>
-                              ⚠ In caso di dubbio tra Critical e High, classificare sempre come Critical e notificare entro 2 gg. La riclassificazione può avvenire dopo la notifica iniziale (Art. 73(5)). [verify against current AI Act text]
+                              ⚠ In caso di dubbio tra Critical e High, classificare sempre come Critical e notificare entro 2 gg. La riclassificazione può avvenire dopo la notifica iniziale (Art. 73(5)).
                             </p>
                           </div>
                         </div>
@@ -2386,7 +2386,7 @@ function PostMarketPageInner() {
           >
             <span className="text-[10px] font-semibold mt-0.5" style={{ color: "#92400e" }}>✦ AI</span>
             <p className="text-[11px]" style={{ color: "#92400e" }}>
-              Le proposte AI sono bozze da verificare. Obblighi Art. 72 ricostruiti dalla memoria del modello — verificare contro testo consolidato Reg. (UE) 2024/1689. [verify against current AI Act text]
+              Le proposte AI sono bozze da verificare. Obblighi Art. 72 ricostruiti dalla memoria del modello — verificare contro testo consolidato Reg. (UE) 2024/1689.
             </p>
           </div>
 
@@ -2404,7 +2404,7 @@ function PostMarketPageInner() {
                   Piano di Monitoraggio Post-Market
                 </span>
                 <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.4)" }}>
-                  Art. 72(1) — sistema ad alto rischio [verify against current AI Act text]
+                  Art. 72(1) — sistema ad alto rischio
                 </p>
               </div>
               <div className="flex gap-2">
@@ -2591,7 +2591,7 @@ function PostMarketPageInner() {
                 {pmmPlan.isAnnex3LawEnforcement && pmmPlan.annex3LawEnforcementChecklist && (
                   <div className="space-y-2 rounded-lg p-3" style={{ background: "rgba(220,38,38,0.04)", border: "1px solid rgba(220,38,38,0.12)" }}>
                     <p className="text-[10px] font-semibold mb-2" style={{ color: "#b91c1c" }}>
-                      Checklist aggiuntiva — Annex III law enforcement [verify against current AI Act text]
+                      Checklist aggiuntiva — Annex III law enforcement
                     </p>
                     {pmmPlan.annex3LawEnforcementChecklist.map((item) => (
                       <label key={item.id} className="flex items-start gap-2 cursor-pointer">
@@ -2647,7 +2647,7 @@ function PostMarketPageInner() {
                   Report di monitoraggio
                 </span>
                 <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.4)" }}>
-                  Art. 72(4) — bozza AI poi confermata dal compliance officer [verify against current AI Act text]
+                  Art. 72(4) — bozza AI poi confermata dal compliance officer
                 </p>
               </div>
               <button
@@ -2806,7 +2806,7 @@ function PostMarketPageInner() {
                     Bozza report: {draftReport.id}
                   </p>
                   <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.4)" }}>
-                    ✦ AI — verifica e conferma finché aiConfirmed !== true [verify against current AI Act text]
+                    ✦ AI — verifica e conferma finché aiConfirmed !== true
                   </p>
                 </div>
                 <button onClick={() => setShowDraftModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(0,0,0,0.35)" }}>

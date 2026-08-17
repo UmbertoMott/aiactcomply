@@ -31,9 +31,9 @@ export interface AISystem {
   status: SystemStatus
   euNexus: boolean
   role: SystemRole | null
-  roleBasis: string               // sempre con "[verify against current AI Act text]"
+  roleBasis: string               // motivazione normativa della classificazione
   tier: SystemTier
-  tierBasis: string               // articolo o Annex entry + "[verify]"
+  tierBasis: string               // articolo o Annex entry + ""
   dualRoleFlag: boolean           // true se provider + deployer (Art. 25 substantial modification)
   obligationsAssessed: boolean
   obligationsNote: string

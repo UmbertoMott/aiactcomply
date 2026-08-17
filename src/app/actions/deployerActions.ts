@@ -47,12 +47,12 @@ Rispondi ESCLUSIVAMENTE nel formato JSON seguente, senza testo aggiuntivo:
     "rbiApplicable": false
   },
   "rationale": {
-    "usesHighRiskSystem": "Motivazione breve in italiano [verificare sul testo AI Act vigente]",
-    "usesInternalProcedures": "Motivazione breve in italiano [verificare sul testo AI Act vigente]",
-    "employeeImpact": "Motivazione breve in italiano [verificare sul testo AI Act vigente]",
-    "biometricCategorization": "Motivazione breve in italiano [verificare sul testo AI Act vigente]",
-    "eudbRequired": "Motivazione breve in italiano [verificare sul testo AI Act vigente]",
-    "rbiApplicable": "Motivazione breve in italiano [verificare sul testo AI Act vigente]"
+    "usesHighRiskSystem": "Motivazione breve in italiano",
+    "usesInternalProcedures": "Motivazione breve in italiano",
+    "employeeImpact": "Motivazione breve in italiano",
+    "biometricCategorization": "Motivazione breve in italiano",
+    "eudbRequired": "Motivazione breve in italiano",
+    "rbiApplicable": "Motivazione breve in italiano"
   }
 }
 </extract>`;
@@ -107,7 +107,7 @@ L'informativa deve:
 3. Spiegare come interagisce con i lavoratori
 4. Descrivere le misure di supervisione umana
 5. Indicare i diritti dei lavoratori e i referenti per domande
-6. Contenere la dicitura normativa [verificare sul testo AI Act vigente]
+6. Contenere la dicitura normativa
 7. Essere pronta per la comunicazione sindacale / HR
 
 Restituisci SOLO il testo dell'informativa, senza prefazioni o commenti aggiuntivi.

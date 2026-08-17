@@ -20,7 +20,7 @@ export function LogQualityCard({ logSets }: { logSets: ImportedLogSet[] }) {
   return (
     <section className="mb-6">
       <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Qualità del registro</h2>
-      <p className="text-[11px] mb-3" style={{ color: T.muted }}>ISO/IEC 42001 A.9 (event logs) · ISO/IEC 27001 A.8.15 (logging) [verify]</p>
+      <p className="text-[11px] mb-3" style={{ color: T.muted }}>ISO/IEC 42001 A.9 (event logs) · ISO/IEC 27001 A.8.15 (logging)</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {logSets.map(ls => {
           const q = ls.qualityFindings;
@@ -67,7 +67,7 @@ export function IntegrityCard({ logSets }: { logSets: ImportedLogSet[] }) {
   return (
     <section className="mb-6">
       <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Integrità</h2>
-      <p className="text-[11px] mb-3" style={{ color: T.muted }}>ISO/IEC 27037 (integrità dell&apos;evidenza digitale) [verify]</p>
+      <p className="text-[11px] mb-3" style={{ color: T.muted }}>ISO/IEC 27037 (integrità dell&apos;evidenza digitale)</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {logSets.map(ls => {
           const s = ls.integrity;
@@ -193,7 +193,7 @@ export function LogIsoTable() {
   return (
     <section className="mb-6">
       <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Standard applicati</h2>
-      <p className="text-[11px] mb-3" style={{ color: T.muted }}>Sigle a memoria — conferma del legale prima del rilascio. Tutte [verify].</p>
+      <p className="text-[11px] mb-3" style={{ color: T.muted }}>Sigle a memoria — conferma del legale prima del rilascio. Tutte.</p>
       <div style={card}>
         <table className="w-full text-[11px]" style={{ borderCollapse: "collapse" }}>
           <thead><tr style={{ color: T.muted, textAlign: "left" }}><th className="py-1">Controllo</th><th>AI Act</th><th>ISO/IEC</th></tr></thead>
@@ -201,7 +201,7 @@ export function LogIsoTable() {
             <tr key={row[0]} style={{ borderTop: `1px solid ${T.border}` }}>
               <td className="py-1.5" style={{ color: T.text }}>{row[0]}</td>
               <td style={{ color: T.muted }}>{row[1]}</td>
-              <td style={{ color: T.muted }}>{row[2]} <span style={{ color: T.faint }}>[verify]</span></td>
+              <td style={{ color: T.muted }}>{row[2]} <span style={{ color: T.faint }}></span></td>
             </tr>
           ))}</tbody>
         </table>

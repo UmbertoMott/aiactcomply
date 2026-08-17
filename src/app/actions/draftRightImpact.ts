@@ -58,7 +58,7 @@ Rispondi con JSON valido:
   "mitigation_hints": ["misura 1", "misura 2", "misura 3"]
 }
 
-Nota: scenario_brief e severity_rationale devono terminare con '[verifica contro il testo vigente dell'AI Act]'.
+Nota: scenario_brief e severity_rationale devono terminare con ''.
 Solo JSON valido, nessun testo fuori.`;
 
   try {

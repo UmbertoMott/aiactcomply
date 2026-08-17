@@ -40,7 +40,7 @@ Art. 10(2) richiede: (a) scelte di design appropriate, (b) raccolta dati, (c) op
 (g) misure appropriate per i bias individuati.
 
 REGOLE:
-- article deve citare il sottoparagrafo specifico (es. "Art. 10(2)(f) [verify against current AI Act text]")
+- article deve citare il sottoparagrafo specifico (es. "Art. 10(2)(f)")
 - Rispondi SOLO con JSON valido
 
 Dataset: "${datasetInfo.name}"
@@ -59,7 +59,7 @@ Formato JSON:
       "requirement": "...",
       "gap": "...",
       "priority": "obbligatorio|raccomandato",
-      "article": "Art. 10(...) [verify against current AI Act text]"
+      "article": "Art. 10(...)"
     }
   ],
   "geoCoverageIssues": ["..."],

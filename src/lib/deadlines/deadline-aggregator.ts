@@ -10,7 +10,7 @@ function isEligibleForPostMarket(system: AISystem): boolean {
 
 // Exported — consumed by EUDB wizard (PROMPT AS) and deadline page badge
 export function requiresEUDBRegistration(system: AISystem): boolean {
-  // Rispecchia la logica di Step 1 (Q1/Q2) — validare contro Art. 49(1)/(3) [verify against current AI Act text]
+  // Rispecchia la logica di Step 1 (Q1/Q2) — validare contro Art. 49(1)/(3)
   const isHighRiskProvider =
     (system.role === "provider" || system.role === "authorized_rep") &&
     (system.tier === "high_risk" || system.tier === "gpai_systemic");
@@ -45,8 +45,8 @@ export function buildEUDBDeadline(system: AISystem): AIActDeadline | null {
     id: `eudb_registration_${system.id}`,
     date: referenceDate,
     label: `Registrazione EUDB — ${system.name}`,
-    description: `Registrazione del sistema "${system.name}" nella banca dati UE prima della messa sul mercato o in servizio — Art. 49(1) [verify against current AI Act text].`,
-    article: "Art. 49(1) [verify against current AI Act text]",
+    description: `Registrazione del sistema "${system.name}" nella banca dati UE prima della messa sul mercato o in servizio — Art. 49(1).`,
+    article: "Art. 49(1)",
     applies_to: appliesTo.length ? appliesTo : (["high_risk_annex3", "high_risk_annex1"] as AIActTier[]),
     tool_href: `/dashboard/compliance-ops/eudb`,
     severity: "important",
@@ -92,8 +92,8 @@ export function buildIncidentNotificationDeadline(system: AISystem, incident: In
     label: `Notifica incidente grave — ${system.name}`,
     description: incident.description ?? `Scadenza notifica incidente ${incident.id} per il sistema "${system.name}". Verificare termine esatto.`,
     article: is2d
-      ? "Art. 73(3) [verify against current AI Act text]"
-      : "Art. 73(2) [verify against current AI Act text]",
+      ? "Art. 73(3)"
+      : "Art. 73(2)",
     applies_to: appliesTo.length ? appliesTo : ["high_risk_annex3", "high_risk_annex1", "gpai_systemic"] as AIActTier[],
     tool_href: `/dashboard/post-market?tab=incidents&incident=${incident.id}`,
     severity: "critical",
@@ -104,7 +104,7 @@ export function buildIncidentNotificationDeadline(system: AISystem, incident: In
   };
 }
 
-// buildProviderTransitionDeadline: exported — Art. 28 [verify against current AI Act text]
+// buildProviderTransitionDeadline: exported — Art. 28
 export function buildProviderTransitionDeadline(
   system: AISystem,
   appliesTo: AIActTier[],
@@ -154,9 +154,9 @@ export function buildProviderTransitionDeadline(
     date: deadline,
     label: `Provider Transition — ${system.name}`,
     description: verdict === "provider"
-      ? `Modifica sostanziale confermata per "${system.name}": obblighi da provider in vigore (Art. 28). Prima modifica sostanziale: ${earliestSubstDate ?? "non registrata"}. Completare le obbligazioni nel tool. [verify against current AI Act text]`
-      : `Modifica sostanziale potenziale per "${system.name}": richiesta valutazione legale per determinare obblighi da provider (Art. 28). [verify against current AI Act text]`,
-    article: "Art. 28 [verify against current AI Act text]",
+      ? `Modifica sostanziale confermata per "${system.name}": obblighi da provider in vigore (Art. 28). Prima modifica sostanziale: ${earliestSubstDate ?? "non registrata"}. Completare le obbligazioni nel tool.`
+      : `Modifica sostanziale potenziale per "${system.name}": richiesta valutazione legale per determinare obblighi da provider (Art. 28).`,
+    article: "Art. 28",
     applies_to: appliesTo.length ? appliesTo : (["high_risk_annex3"] as AIActTier[]),
     tool_href: "/dashboard/compliance-ops/provider-transition",
     severity: verdict === "provider" ? "critical" : "important",
@@ -183,8 +183,8 @@ export function buildDynamicDeadlines(systems: AISystem[]): AIActDeadline[] {
         id: `post_market_${system.id}`,
         date: addMonths(inServiceDate, 12),
         label: `Post-Market: primo report — ${system.name}`,
-        description: `Primo report di monitoraggio post-market per il sistema "${system.name}". Data calcolata come in_service_date + 12 mesi. Verificare periodicita esatta contro Art. 72 [verify against current AI Act text].`,
-        article: "Art. 72 [verify against current AI Act text]",
+        description: `Primo report di monitoraggio post-market per il sistema "${system.name}". Data calcolata come in_service_date + 12 mesi. Verificare periodicita esatta contro Art. 72.`,
+        article: "Art. 72",
         applies_to: appliesTo,
         tool_href: "/dashboard/post-market",
         severity: "important",
@@ -223,7 +223,7 @@ export function buildDynamicDeadlines(systems: AISystem[]): AIActDeadline[] {
         date: system.nextReview,
         label: `Revisione FRIA/DPIA — ${system.name}`,
         description: `Scadenza revisione periodica della valutazione d'impatto per il sistema "${system.name}" (da Risk Manager nextReview).`,
-        article: "Art. 9, Art. 27 [verify against current AI Act text]",
+        article: "Art. 9, Art. 27",
         applies_to: appliesTo,
         tool_href: "/dashboard/tools/fria",
         severity: "informational",

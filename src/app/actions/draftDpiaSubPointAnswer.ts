@@ -59,7 +59,7 @@ ISTRUZIONI:
 2. Se il contesto non è sufficiente per una risposta specifica, usa l'Esempio 1 come base e segnalalo.
 3. La risposta deve essere in italiano, diretta e utilizzabile immediatamente.
 4. NON aggiungere intestazioni, prefissi come "Bozza:", "Proposta:" — solo il testo della risposta.
-5. Termina sempre con: [verifica contro il testo vigente del GDPR/WP248]
+5. Termina sempre con:
 6. Massimo 150 parole.`;
 
   try {

@@ -24,7 +24,7 @@ export function Art26_8({ record, onChange }: Props) {
     <div className="space-y-3">
       <p className="text-xs text-slate-400">
         Il deployer di un sistema ad alto rischio che impatta persone fisiche deve condurre
-        una FRIA prima del deployment (Art. 26(8) [verify against current AI Act text]).
+        una FRIA prima del deployment (Art. 26(8)).
       </p>
 
       <div className="space-y-2">

@@ -55,8 +55,8 @@ export default function ProviderTransitionAlertBanner() {
         </p>
         <p style={{ color: "#94A3B8", fontSize: 12, lineHeight: 1.5 }}>
           {isProvider
-            ? `Le modifiche apportate al sistema AI potrebbero configurare obblighi da provider ai sensi dell'Art. 28 Reg. (UE) 2024/1689.${earliest ? ` Prima modifica sostanziale: ${earliest}.` : ""} [verify against current AI Act text]`
-            : "Una o più risposte 'Incerto' richiedono valutazione legale prima di escludere obblighi da provider (Art. 28). [verify against current AI Act text]"
+            ? `Le modifiche apportate al sistema AI potrebbero configurare obblighi da provider ai sensi dell'Art. 28 Reg. (UE) 2024/1689.${earliest ? ` Prima modifica sostanziale: ${earliest}.` : ""}`
+            : "Una o più risposte 'Incerto' richiedono valutazione legale prima di escludere obblighi da provider (Art. 28)."
           }
         </p>
       </div>

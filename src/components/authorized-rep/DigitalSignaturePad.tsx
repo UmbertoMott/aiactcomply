@@ -164,7 +164,7 @@ export function DigitalSignaturePad({ mandateId, onSign, disabled }: Props) {
         ⚠ Questa firma digitale NON ha valore legale equiparabile a una firma qualificata eIDAS.
         Firmando, il Rappresentante Autorizzato conferma di aver letto e accettato tutti gli obblighi
         previsti dall&apos;Art. 22 EU AI Act. La firma è accompagnata da timestamp e hash di integrità
-        SHA-256 per finalità di audit. [verify against current AI Act text]
+        SHA-256 per finalità di audit.
       </p>
 
       <button

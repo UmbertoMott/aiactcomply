@@ -683,7 +683,7 @@ export default function DeadlinesPage() {
         <div className="mt-8 pt-4 text-[11px] leading-relaxed" style={{ borderTop: `1px solid ${BORDER}`, color: MUTED }}>
           ✦ AI — verifica e conferma: questo tool e un aggregatore di navigazione, non un documento di compliance formale.
           Le scadenze dinamiche sono calcolate a runtime dai dati degli altri moduli. Verificare sempre le date contro il testo consolidato
-          del Regolamento (UE) 2024/1689 [verify against current AI Act text] con il team legale prima di ogni decisione operativa.
+          del Regolamento (UE) 2024/1689 con il team legale prima di ogni decisione operativa.
         </div>
       </div>
     </div>

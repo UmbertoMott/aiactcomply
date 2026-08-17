@@ -4,8 +4,8 @@
  * Pipeline `classify(answers)` — albero decisionale esaustivo EU AI Act.
  * Passi 0–8 + asse GPAI parallelo. Nessun ramo esclusivo.
  *
- * Fonte: Regolamento (UE) 2024/1689 [verifica contro il testo vigente]
- *        Draft Guidelines Annex I, Annex III, General Principles [verifica]
+ * Fonte: Regolamento (UE) 2024/1689
+ *        Draft Guidelines Annex I, Annex III, General Principles
  */
 
 import {
@@ -129,7 +129,7 @@ export interface ClassifyResult {
 // ─── Pipeline ──────────────────────────────────────────────────────────────────
 
 const LEGAL_NOTE =
-  "[verifica contro il testo vigente dell'AI Act (Reg. (UE) 2024/1689) e le Draft Guidelines della Commissione]";
+  "";
 
 export function classify(answers: ClassifyAnswers): ClassifyResult {
   const role: Role = answers.role ?? "unknown";

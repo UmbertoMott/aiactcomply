@@ -48,7 +48,6 @@ Pratica di governance richiesta:
 Scrivi una bozza di documentazione per questa pratica di governance (3-6 frasi). La bozza deve essere:
 - Concreta e riferita ai dati effettivamente caricati quando le statistiche sono disponibili
 - In italiano formale
-- Ogni citazione normativa termina con [verificare sul testo AI Act vigente]
 - Orientata alla compliance, non generica
 
 Rispondi SOLO con il testo della documentazione, senza intestazioni o spiegazioni aggiuntive.`;
@@ -95,7 +94,7 @@ export async function analyzeBiasIndicators(input: {
     return `Colonna: "${col.name}" (dataset: ${col.datasetRole})\nDistribuzione:\n${dist}${numStats ? "\nStatistiche numeriche:\n" + numStats : ""}`;
   }).join("\n\n");
 
-  const prompt = `Sei un esperto di equità algoritmica e conformità AI Act UE (Art. 10(2)(f) [verify against current AI Act text]).
+  const prompt = `Sei un esperto di equità algoritmica e conformità AI Act UE (Art. 10(2)(f)).
 
 Sistema AI:
 - Nome: ${input.systemName}
@@ -111,7 +110,7 @@ Per ciascuna colonna, scrivi un breve paragrafo (3-5 frasi) che:
 3. Invita l'utente a verificare se la distribuzione riflette un possibile bias nei dati
 4. NON formula conclusioni di conformità/non conformità (richiede giudizio umano)
 
-Termina ogni citazione con [verificare sul testo AI Act vigente].
+Termina ogni citazione con.
 
 Rispondi nel formato JSON:
 <extract>
@@ -153,7 +152,7 @@ export async function analyzeFairnessNarrative(input: {
     ? `\nRappresentatività (carattere ${input.representativeness.column}): TVD ${input.representativeness.totalVariationDistance}, verdetto ${input.representativeness.verdict}. Scarti per gruppo: ${input.representativeness.perGroupGap.map(g => `${g.group} ${g.gapPct}%`).join(", ")}.`
     : "";
 
-  const prompt = `Sei un esperto di equità algoritmica e conformità AI Act UE (Art. 10(2)(f), Art. 10(3) [verify against current AI Act text]).
+  const prompt = `Sei un esperto di equità algoritmica e conformità AI Act UE (Art. 10(2)(f), Art. 10(3)).
 
 Sistema AI: ${input.systemName}. Finalità: ${input.intendedPurpose}.
 
@@ -168,7 +167,6 @@ Scrivi un paragrafo neutro (4-6 frasi) che:
 2. Segnala i punti che meritano approfondimento, senza affermazioni categoriche
 3. Invita alla verifica umana
 4. NON conclude conformità/non conformità (giudizio riservato all'avvocato)
-Ogni citazione termina con [verificare sul testo AI Act vigente].
 
 Rispondi SOLO con il testo, senza intestazioni.`;
 

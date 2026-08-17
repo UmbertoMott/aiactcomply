@@ -34,7 +34,7 @@ Art. 6(3): Se il sistema subisce una modifica sostanziale, deve essere considera
 ai fini della conformità.
 Art. 11: La documentazione tecnica deve essere aggiornata per riflettere ogni modifica.
 
-Indicatori di modifica sostanziale [verify against current AI Act text — Art. 6(3), Art. 25]:
+Indicatori di modifica sostanziale:
 - Cambio dell'intended purpose
 - Retraining o fine-tuning sostanziale del modello
 - Cambio delle performance oltre le soglie documentate
@@ -48,7 +48,6 @@ A4_7_misure_supervisione, A4_8_requisiti_input, A4_9_gestione_rischi,
 A4_10_ciclo_sviluppo, A4_11_post_market_monitoring, A4_12_dichiarazione_conformita
 
 REGOLE:
-- substModificationBasis deve terminare con "[verify against current AI Act text — Art. 6(3), Art. 25]"
 - Se isSubstantialModification=true, requiresNewConformityAssessment è quasi sempre true
 - Rispondi SOLO con JSON valido
 
@@ -59,7 +58,7 @@ Annex III applicabile: ${currentAnnexIII ?? "non specificato"}
 Formato JSON:
 {
   "isSubstantialModification": true|false,
-  "substModificationBasis": "... [verify against current AI Act text — Art. 6(3), Art. 25]",
+  "substModificationBasis": "...",
   "affectedAnnexIVSections": [
     {
       "sectionId": "A4_5_metriche_performance",

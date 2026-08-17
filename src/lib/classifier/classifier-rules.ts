@@ -4,8 +4,8 @@
  * Configurazione normativa separata dal codice di classificazione.
  * Aggiornare qui quando cambiano le Guidelines o il testo del Regolamento.
  *
- * Fonte: Regolamento (UE) 2024/1689 [verifica contro il testo vigente]
- *        Draft Guidelines Annex I, Annex III, General Principles [verifica]
+ * Fonte: Regolamento (UE) 2024/1689
+ *        Draft Guidelines Annex I, Annex III, General Principles
  */
 
 // ─── Art. 5 — Pratiche vietate (8 fattispecie, lettere (a)–(h)) ──────────────

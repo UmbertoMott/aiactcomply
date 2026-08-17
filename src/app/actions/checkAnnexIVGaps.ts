@@ -50,7 +50,7 @@ Allegato IV richiede (elenco non esaustivo):
 7. Descrizione delle modifiche apportate durante il ciclo di vita
 
 REGOLE:
-- annexIVRef deve citare il punto specifico dell'Allegato IV (es. "All. IV §1(a) [verify against current AI Act text]")
+- annexIVRef deve citare il punto specifico dell'Allegato IV (es. "All. IV §1(a)")
 - Rispondi SOLO con JSON valido
 
 Documentazione analizzata:
@@ -70,7 +70,7 @@ Formato JSON:
   "missingSections": [
     {
       "section": "...",
-      "annexIVRef": "All. IV §... [verify against current AI Act text]",
+      "annexIVRef": "All. IV §...",
       "description": "...",
       "priority": "obbligatorio|raccomandato"
     }

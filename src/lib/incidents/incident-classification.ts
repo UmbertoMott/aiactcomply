@@ -20,7 +20,7 @@ export interface ClassificationResult {
   computeDeadlineDate: (eventDate: string) => string;
 }
 
-// Mapping dead-lines per tipo [verify against current AI Act text]
+// Mapping dead-lines per tipo
 const DEADLINE_DAYS: Record<NotificationDeadlineType, number> = {
   immediate_2d: 2,    // Art. 73(3) — morte / danno grave irreversibile infrastrutture critiche
   standard_15d: 15,   // Art. 73(2) — altri incidenti gravi
@@ -63,13 +63,13 @@ export function classifyIncidentSeverity(input: ClassificationInput): Classifica
 
 // Display helpers
 export const DEADLINE_TYPE_LABEL: Record<NotificationDeadlineType, string> = {
-  immediate_2d: "Immediata (max 2 gg) — Art. 73(3) [verify against current AI Act text]",
-  standard_15d: "Entro 15 gg — Art. 73(2) [verify against current AI Act text]",
+  immediate_2d: "Immediata (max 2 gg) — Art. 73(3)",
+  standard_15d: "Entro 15 gg — Art. 73(2)",
   none: "Nessuna notifica obbligatoria",
 };
 
 export const SEVERITY_CLASS_LABEL: Record<SeverityClassification, string> = {
-  serious_incident: "Incidente grave — Art. 3(49) [verify against current AI Act text]",
+  serious_incident: "Incidente grave — Art. 3(49)",
   malfunction: "Malfunzionamento",
   near_miss: "Quasi-incidente",
 };

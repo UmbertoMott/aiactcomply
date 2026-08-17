@@ -16,7 +16,7 @@ import { analyzeLogSet, MAX_LOG_FILE_BYTES, MAX_ENTRIES } from "@/lib/logvault/l
 import {
   CoverageFillRatePanel, LogQualityCard, IntegrityCard, RetentionPanel, exportLogConformityJSON,
 } from "./LogVaultPanels";
-import { ToolPhaseBar, PhaseHeading, NextPhaseCta, type ToolPhase, type PhaseStatus } from "@/components/compliance/ToolPhaseBar";
+import { ToolPhaseBar, PhaseHeading, NextPhaseCta, useActivePhase, type ToolPhase, type PhaseStatus } from "@/components/compliance/ToolPhaseBar";
 import { SectionEmptyState } from "@/components/logvault/SectionEmptyState";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
@@ -291,7 +291,7 @@ function BiometricCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDet
           {def.id === "verifier_identity" && verifierRoles && verifierRoles.length > 0 && (
             <div className="mt-2 rounded-lg p-2.5 mb-2" style={{ background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
               <p className="text-[11px] font-semibold mb-1" style={{ color: T.blue }}>
-                Confronto con Oversight — Art. 14(5) [verify against current AI Act text]
+                Confronto con Oversight — Art. 14(5)
               </p>
               <p className="text-[11px]" style={{ color: T.muted }}>
                 Ruoli verificatori registrati in Oversight: <strong>{verifierRoles.join(", ")}</strong>
@@ -454,22 +454,8 @@ export default function LogVaultPage() {
     (phaseStatus.reduce((a, s) => a + (s === "done" ? 1 : s === "active" ? 0.5 : 0), 0) / phases.length) * 100
   );
 
-  // ── Scroll-spy: evidenzia nella barra la fase attualmente in viewport ──
-  const [activePhase, setActivePhase] = useState(0);
-  useEffect(() => {
-    const anchors = phases.map(p => p.anchor);
-    const visible = new Set<string>();
-    const observer = new IntersectionObserver(
-      entries => {
-        for (const e of entries) { if (e.isIntersecting) visible.add(e.target.id); else visible.delete(e.target.id); }
-        for (let i = 0; i < anchors.length; i++) if (visible.has(anchors[i])) { setActivePhase(i); return; }
-      },
-      { rootMargin: "-64px 0px -55% 0px", threshold: [0, 0.1, 0.5] }
-    );
-    anchors.forEach(a => { const el = document.getElementById(a); if (el) observer.observe(el); });
-    return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [record.loggingCapabilityConfirmed]);
+  // ── Scroll-spy robusto (hook condiviso): evidenzia la fase in viewport ──
+  const activePhase = useActivePhase(phases.map(p => p.anchor));
 
   // Read Oversight fourEyes for biometric applicability
   function getOversightFourEyes() {
@@ -785,7 +771,7 @@ export default function LogVaultPage() {
             Richiedere al provider del sistema AI di implementare funzionalità di logging automatico degli eventi. I sistemi ad alto rischio sono obbligati a mantenere log che consentano alle autorità competenti di verificare la conformità dopo la messa in servizio.
           </p>
           <p className="text-[11px] mt-2" style={{ color: T.muted }}>
-            Riferimento: Art. 12(1) [Reg. (UE) 2024/1689], Art. 79(1) [verify] — Segnalare al provider e documentare la richiesta in Risk Manager.
+            Riferimento: Art. 12(1) [Reg. (UE) 2024/1689], Art. 79(1) — Segnalare al provider e documentare la richiesta in Risk Manager.
           </p>
         </div>
       )}
@@ -903,7 +889,7 @@ export default function LogVaultPage() {
             {/* AI safe state suggestion */}
             {aiSafeStateSuggestion && (
               <div className="mt-3 rounded-lg p-3" style={{ background: T.violetBg, border: `1px solid ${T.violetBdr}` }}>
-                <p className="text-[11px] font-semibold mb-1" style={{ color: T.violet }}>✦ AI — verifica e conferma (Art. 14(4)(e) [verify against current AI Act text])</p>
+                <p className="text-[11px] font-semibold mb-1" style={{ color: T.violet }}>✦ AI — verifica e conferma (Art. 14(4)(e))</p>
                 <p className="text-[11px] leading-relaxed" style={{ color: T.text }}>{aiSafeStateSuggestion}</p>
                 <button onClick={() => setAiSafeStateSuggestion(null)} className="text-[10px] mt-1" style={{ color: T.muted, background: "none", border: "none", cursor: "pointer" }}>Chiudi</button>
               </div>
@@ -1016,7 +1002,7 @@ export default function LogVaultPage() {
           {/* ── §9 Export Log Conformity Statement ── */}
           <section className="mb-6 rounded-xl p-4" style={card}>
             <h2 className="text-[12px] font-semibold mb-1" style={{ color: T.text }}>Evidenza — Log Conformity Statement</h2>
-            <p className="text-[11px] mb-3" style={{ color: T.muted }}>Art. 12 / Allegato IV [verify]. Copertura, qualità, ritenzione, integrità, fingerprint, timestamp.</p>
+            <p className="text-[11px] mb-3" style={{ color: T.muted }}>Art. 12 / Allegato IV. Copertura, qualità, ritenzione, integrità, fingerprint, timestamp.</p>
             <div className="flex flex-wrap gap-2">
               <button onClick={() => exportLogConformityJSON(record)}
                 className="text-[12px] font-medium px-3 py-1.5 rounded-lg"

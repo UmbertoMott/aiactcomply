@@ -15,7 +15,7 @@ export function Art26_5({ record, onChange }: Props) {
     <div className="space-y-3">
       <p className="text-xs text-slate-400">
         Il deployer non deve modificare il sistema oltre l&apos;uso previsto dal provider
-        e deve dichiararlo formalmente (Art. 26(5) [verify against current AI Act text]).
+        e deve dichiararlo formalmente (Art. 26(5)).
       </p>
 
       <div>

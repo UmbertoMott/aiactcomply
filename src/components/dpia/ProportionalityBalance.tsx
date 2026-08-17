@@ -128,7 +128,7 @@ export function ProportionalityBalance({ dpia }: ProportionalityBalanceProps) {
       {/* Note */}
       <p style={{ fontSize: 10, color: T.faint, fontStyle: "italic", lineHeight: 1.55 }}>
         Questa stima è indicativa e deriva dai campi già compilati.
-        {" "}[verifica contro il testo vigente del GDPR/WP248]
+        {" "}
       </p>
     </div>
   );

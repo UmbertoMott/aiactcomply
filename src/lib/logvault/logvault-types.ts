@@ -16,7 +16,7 @@ export const TraceabilityCoverageRecordSchema = z.object({
 });
 export type TraceabilityCoverageRecord = z.infer<typeof TraceabilityCoverageRecordSchema>;
 
-// ── §4 Qualità & continuità (ISO/IEC 42001 A.9 / 27001 A.8.15 [verify]) ──────
+// ── §4 Qualità & continuità (ISO/IEC 42001 A.9 / 27001 A.8.15) ──────
 export const LogQualityFindingsSchema = z.object({
   timestampValidPct: z.number(),
   outOfOrderCount: z.number(),
@@ -26,7 +26,7 @@ export const LogQualityFindingsSchema = z.object({
 });
 export type LogQualityFindings = z.infer<typeof LogQualityFindingsSchema>;
 
-// ── §6 Verifica hash-chain (ISO/IEC 27037 [verify]) ─────────────────────────
+// ── §6 Verifica hash-chain (ISO/IEC 27037) ─────────────────────────
 export const HashChainResultSchema = z.object({
   status: z.enum(["verified", "broken", "no_integrity_fields"]),
   brokenAtEntry: z.number().optional(),
@@ -54,7 +54,7 @@ export const ImportedLogSetSchema = z.object({
 });
 export type ImportedLogSet = z.infer<typeof ImportedLogSetSchema>;
 
-// ── §5 Ritenzione calcolata (Art. 26(6) / Art. 12 [verify]) ─────────────────
+// ── §5 Ritenzione calcolata (Art. 26(6) / Art. 12) ─────────────────
 export const RetentionAssessmentSchema = z.object({
   role: z.enum(["provider", "deployer", "unspecified"]).default("unspecified"),
   retentionPolicyMonths: z.number().optional(),

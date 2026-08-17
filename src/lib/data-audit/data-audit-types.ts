@@ -44,14 +44,14 @@ export const DatasetProfileSchema = z.object({
 });
 export type DatasetProfile = z.infer<typeof DatasetProfileSchema>;
 
-// ── Data Quality Scorecard (ISO/IEC 5259 [verify]) ──────────────────────────
+// ── Data Quality Scorecard (ISO/IEC 5259) ──────────────────────────
 export interface DataQualityScorecard {
   completeness: number;   // 100 − overallMissingPct
   uniqueness: number;     // 100 − %duplicati
   consistency: number;    // 100 − %type-error medio
 }
 
-// ── Fairness (Art. 10(2)(f) · ISO/IEC TR 24027 [verify]) ────────────────────
+// ── Fairness (Art. 10(2)(f) · ISO/IEC TR 24027) ────────────────────
 export const FairnessReportSchema = z.object({
   datasetId: z.string(),
   protectedColumn: z.string(),

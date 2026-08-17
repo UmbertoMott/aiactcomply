@@ -1,4 +1,4 @@
-// Fairness metrics (Art. 10(2)(f) · ISO/IEC TR 24027 [verify]) e rappresentatività
+// Fairness metrics (Art. 10(2)(f) · ISO/IEC TR 24027) e rappresentatività
 // (Art. 10(3)). Funzioni pure che operano sulle righe in memoria nel browser —
 // nessuna riga grezza viene mai persistita o inviata al server.
 import type { FairnessReport, RepresentativenessCheck } from "./data-audit-types";

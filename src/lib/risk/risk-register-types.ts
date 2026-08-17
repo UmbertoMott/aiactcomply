@@ -2,8 +2,8 @@
 // Guidato Art. 9 (§0-§9 + trasversale Comunicazione), metodo ISO/IEC 23894.
 import { z } from "zod";
 
-export const VERIFY_NOTE_IT = "[verificare sul testo AI Act vigente]";
-export const VERIFY_NOTE_EN = "[verify against current AI Act text]";
+export const VERIFY_NOTE_IT = "";
+export const VERIFY_NOTE_EN = "";
 
 // --- §0: Scoping e criteri di rischio (Art. 9(1) + Art. 6/Annex III) ---
 export const SystemIdentificationSchema = z.object({

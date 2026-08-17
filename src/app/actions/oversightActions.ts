@@ -41,12 +41,12 @@ Sistema AI da analizzare:
 
 Per ciascuno dei 5 requisiti operativi Art. 14(4) elencati di seguito, proponi:
 1. implementationType: uno tra ["provider_built_in", "deployer_implemented", "both", "not_specified"]
-   - "provider_built_in" = misura tecnicamente integrata dal provider (Art. 14(3)(a) [verify against current AI Act text])
-   - "deployer_implemented" = misura da implementare dal deployer (Art. 14(3)(b) [verify against current AI Act text])
+   - "provider_built_in" = misura tecnicamente integrata dal provider (Art. 14(3)(a))
+   - "deployer_implemented" = misura da implementare dal deployer (Art. 14(3)(b))
 2. implementationTypeRationale: motivazione breve (1 frase, italiano)
 3. measureDescription: 2-4 frasi concrete e specifiche per questo sistema — NON placeholder generici.
    - Per intervention_stop: descrivi esattamente lo "stato sicuro" operativo (es. cosa succede alle decisioni in sospeso, chi può riattivare, entro quanto)
-   - Per automation_bias_awareness: descrivi misure concrete (es. obbligo di visualizzare confidence score, rotazione operatori, audit periodicoPer tutte le citazioni includi il suffisso: [verificare sul testo AI Act vigente]
+   - Per automation_bias_awareness: descrivi misure concrete (es. obbligo di visualizzare confidence score, rotazione operatori, audit periodicoPer tutte le citazioni includi il suffisso:
 
 I 5 requisiti:
 ${requirementsList}
@@ -58,36 +58,36 @@ Rispondi ESCLUSIVAMENTE nel formato JSON seguente, senza testo aggiuntivo:
     {
       "requirementId": "understanding_capabilities",
       "implementationType": "deployer_implemented",
-      "implementationTypeRationale": "Motivazione breve [verificare sul testo AI Act vigente]",
-      "measureDescription": "Descrizione concreta 2-4 frasi [verificare sul testo AI Act vigente]",
+      "implementationTypeRationale": "Motivazione breve",
+      "measureDescription": "Descrizione concreta 2-4 frasi",
       "status": "not_started"
     },
     {
       "requirementId": "automation_bias_awareness",
       "implementationType": "deployer_implemented",
-      "implementationTypeRationale": "Motivazione breve [verificare sul testo AI Act vigente]",
-      "measureDescription": "Descrizione concreta con misure specifiche anti-automation-bias [verificare sul testo AI Act vigente]",
+      "implementationTypeRationale": "Motivazione breve",
+      "measureDescription": "Descrizione concreta con misure specifiche anti-automation-bias",
       "status": "not_started"
     },
     {
       "requirementId": "output_interpretation",
       "implementationType": "both",
-      "implementationTypeRationale": "Motivazione breve [verificare sul testo AI Act vigente]",
-      "measureDescription": "Descrizione concreta [verificare sul testo AI Act vigente]",
+      "implementationTypeRationale": "Motivazione breve",
+      "measureDescription": "Descrizione concreta",
       "status": "not_started"
     },
     {
       "requirementId": "override_non_use",
       "implementationType": "deployer_implemented",
-      "implementationTypeRationale": "Motivazione breve [verificare sul testo AI Act vigente]",
-      "measureDescription": "Procedura override concreta [verificare sul testo AI Act vigente]",
+      "implementationTypeRationale": "Motivazione breve",
+      "measureDescription": "Procedura override concreta",
       "status": "not_started"
     },
     {
       "requirementId": "intervention_stop",
       "implementationType": "deployer_implemented",
-      "implementationTypeRationale": "Motivazione breve [verificare sul testo AI Act vigente]",
-      "measureDescription": "Stato sicuro: descrizione operativa di cosa succede alle decisioni in sospeso, chi riattiva, entro quanto [verificare sul testo AI Act vigente]",
+      "implementationTypeRationale": "Motivazione breve",
+      "measureDescription": "Stato sicuro: descrizione operativa di cosa succede alle decisioni in sospeso, chi riattiva, entro quanto",
       "status": "not_started"
     }
   ]
@@ -122,7 +122,7 @@ export async function assessFourEyesApplicability(input: {
   riskTier?: string;
 }): Promise<FourEyesApplicabilityResult> {
   const prompt = `Sei un esperto di AI Act UE (Reg. 2024/1689).
-Devi determinare se il seguente sistema AI rientra nell'Allegato III punto 1(a) — cioè se è un sistema di identificazione biometrica e/o categorizzazione biometrica — ai fini dell'applicazione della verifica a due persone di cui all'Art. 14(5) [verify against current AI Act text].
+Devi determinare se il seguente sistema AI rientra nell'Allegato III punto 1(a) — cioè se è un sistema di identificazione biometrica e/o categorizzazione biometrica — ai fini dell'applicazione della verifica a due persone di cui all'Art. 14(5).
 
 Sistema:
 - Nome: ${input.systemName}
@@ -134,7 +134,7 @@ Rispondi SOLO con JSON:
 <extract>
 {
   "applicable": "yes|no|unspecified",
-  "rationale": "Motivazione breve (1-2 frasi in italiano). Concludi con [verificare sul testo AI Act vigente]"
+  "rationale": "Motivazione breve (1-2 frasi in italiano). Concludi con"
 }
 </extract>
 

@@ -34,7 +34,6 @@ ragionevolmente prevedibili. Per i sistemi ad alto rischio, deve essere continuo
 durata del ciclo di vita.
 
 REGOLE OBBLIGATORIE:
-- art9Requirement deve terminare con "[verify against current AI Act text]"
 - Sii specifico sugli articoli dell'Art. 9 non coperti
 - Non inventare requisiti inesistenti
 - coverageScore 0-100: 100 = copertura completa per quel tier
@@ -54,7 +53,7 @@ Formato JSON atteso:
   "missingAreas": [
     {
       "area": "...",
-      "art9Requirement": "... [verify against current AI Act text]",
+      "art9Requirement": "...",
       "suggestedRiskTitle": "...",
       "priority": "obbligatorio|raccomandato"
     }

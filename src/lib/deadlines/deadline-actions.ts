@@ -44,7 +44,6 @@ Raggruppa le scadenze in 3 gruppi di priorita:
 
 Per ogni scadenza fornisci un reasoning breve (max 1 frase) sul perche e prioritaria o meno rispetto alle altre dello stesso periodo. Considera sanzioni, impatto operativo, dipendenze tra adempimenti.
 
-Ogni citazione normativa deve terminare con [verify against current AI Act text].
 
 Rispondi SOLO nel formato JSON:
 <extract>

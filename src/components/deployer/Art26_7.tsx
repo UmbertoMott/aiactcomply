@@ -21,7 +21,7 @@ export function Art26_7({ record, onChange }: Props) {
     <div className="space-y-3">
       <p className="text-xs text-slate-400">
         Le persone fisiche soggette alle decisioni del sistema AI devono essere informate
-        del suo utilizzo (Art. 26(7) [verify against current AI Act text]).
+        del suo utilizzo (Art. 26(7)).
       </p>
 
       <div className="space-y-2">

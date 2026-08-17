@@ -202,7 +202,7 @@ export function computeRetention(logSets: ImportedLogSet[], role: RetentionAsses
     : undefined;
 
   let verdict: RetentionAssessment["verdict"] = "unknown";
-  const minMonths = role === "deployer" ? 6 : undefined; // Art. 26(6) [verify]
+  const minMonths = role === "deployer" ? 6 : undefined; // Art. 26(6)
   if (policyMonths !== undefined && minMonths !== undefined) {
     verdict = policyMonths < minMonths ? "below_minimum"
       : spanMonths !== undefined && spanMonths > policyMonths ? "policy_below_span"

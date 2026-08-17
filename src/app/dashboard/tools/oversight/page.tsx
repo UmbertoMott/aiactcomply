@@ -255,7 +255,7 @@ function FrictionGate({ events, onAddEvent, systemSuspended, mode }: FrictionGat
           ))}
           <p className="text-[10px] mt-1.5" style={{ color: T.faint }}>
             <Brain className="h-3 w-3 inline mr-1" style={{ color: T.blue }} />
-            Art. 14(4): approvazione &lt; 2s presume automation bias. [verify against current AI Act text]
+            Art. 14(4): approvazione &lt; 2s presume automation bias.
           </p>
         </div>
       )}
@@ -329,7 +329,7 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, frictionE
           {/* Implementation type */}
           <div className="mb-3">
             <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1.5" style={{ color: T.muted }}>
-              Tipo di misura — Art. 14(3) [verify against current AI Act text]
+              Tipo di misura — Art. 14(3)
             </label>
             <select
               value={record?.implementationType ?? "not_specified"}
@@ -422,7 +422,7 @@ function InterventionStopPanel({ systemSuspended }: { systemSuspended: boolean }
   return (
     <div className="mt-4 rounded-xl p-4" style={{ background: suspended ? T.redBg : T.bg, border: `1px solid ${suspended ? T.redBdr : T.border}` }}>
       <p className="text-[11px] font-semibold uppercase tracking-wide mb-2" style={{ color: suspended ? T.red : T.muted }}>
-        Controllo arresto di sicurezza — Art. 14(4)(e) [verify against current AI Act text]
+        Controllo arresto di sicurezza — Art. 14(4)(e)
       </p>
       <p className="text-[12px] mb-3 leading-relaxed" style={{ color: suspended ? T.red : T.muted }}>
         {suspended
@@ -700,7 +700,7 @@ export default function OversightPage() {
     const now = new Date().toISOString();
     const implemented = countImplemented(record);
     writeToStorage("oversight", {
-      oversightMechanism: `Art. 14(4)(a)-(e) — ${implemented}/5 requisiti implementati [verify against current AI Act text]`,
+      oversightMechanism: `Art. 14(4)(a)-(e) — ${implemented}/5 requisiti implementati`,
       humanInterventionPoints: record.requirements
         .filter(r => r.status === "implemented")
         .map(r => OVERSIGHT_REQUIREMENTS.find(d => d.id === r.requirementId)?.label ?? r.requirementId),
@@ -746,8 +746,7 @@ export default function OversightPage() {
           <span className="text-[11px] font-medium px-2 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>Art. 14</span>
         </div>
         <p className="text-[12px]" style={{ color: T.muted }}>
-          Obblighi del deployer per la supervisione umana dei sistemi AI ad alto rischio.{" "}
-          <span style={{ opacity: 0.7 }}>[verify against current AI Act text]</span>
+          Obblighi del deployer per la supervisione umana dei sistemi AI ad alto rischio.
         </p>
       </div>
 
@@ -756,7 +755,7 @@ export default function OversightPage() {
         <Info size={16} className="mt-0.5 flex-shrink-0" style={{ color: T.blue }} />
         <div>
           <p className="text-[12px] font-semibold mb-1" style={{ color: T.blue }}>
-            Finalità della supervisione umana — Art. 14(1)-(2) [verify against current AI Act text]
+            Finalità della supervisione umana — Art. 14(1)-(2)
           </p>
           <p className="text-[12px] leading-relaxed" style={{ color: "#1e3a8a" }}>
             I sistemi AI ad alto rischio devono essere progettati e sviluppati in modo da poter essere
@@ -840,8 +839,7 @@ export default function OversightPage() {
       <div className="flex items-start gap-2 p-3 rounded-lg mt-6 text-xs" style={{ background: "#fef9c3", border: "1px solid #fde047", color: "#713f12" }}>
         <Info size={14} className="mt-0.5 flex-shrink-0" />
         <span>
-          <strong>Sanzioni Art. 99–101:</strong> Mancata implementazione della supervisione umana può comportare sanzioni fino a 30 milioni € o 6% del fatturato mondiale.{" "}
-          <span style={{ opacity: 0.75 }}>[verify against current AI Act text]</span>
+          <strong>Sanzioni Art. 99–101:</strong> Mancata implementazione della supervisione umana può comportare sanzioni fino a 30 milioni € o 6% del fatturato mondiale.
         </span>
       </div>
 

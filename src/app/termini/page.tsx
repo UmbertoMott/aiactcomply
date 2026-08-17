@@ -38,7 +38,7 @@ export default function TerminiPage() {
         <p>
           <strong>Gli output automatici dello Strumento hanno natura assistiva</strong> e non costituiscono di per sé
           parere o consulenza legale finché non sono verificati e validati dall&apos;avvocato; i riferimenti normativi
-          devono essere confrontati col testo normativo vigente [verifica contro il testo vigente].{" "}
+          devono essere confrontati col testo normativo vigente.{" "}
           L&apos;assistenza, la revisione e la validazione degli assessment sono rese dall&apos;avvocato nell&apos;esercizio
           della professione: a questo livello si applicano il rapporto professionale e le relative tutele.
         </p>

@@ -56,7 +56,7 @@ Rispondi SOLO con il testo della sintesi, senza intestazioni aggiuntive, senza J
 
   try {
     const text = await generateText(prompt, { temperature: 0.2, maxOutputTokens: 800 });
-    const summary = text.trim() + "\n\n[verifica contro il testo vigente dell'AI Act]";
+    const summary = text.trim() + "\n\n";
     return { summary };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

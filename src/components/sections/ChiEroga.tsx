@@ -46,7 +46,7 @@ export default function ChiEroga() {
           Ogni valutazione di conformità — Triage, Risk Register, FRIA, DPIA, Post-Market — è assistita
           dallo strumento e revisionata e validata dall&rsquo;avvocato prima di essere finalizzata.
           Gli output automatici della piattaforma non costituiscono di per sé parere legale finché non
-          sottoposti a tale verifica [verifica contro il testo vigente].
+          sottoposti a tale verifica.
         </p>
 
         {/* Divider + legal note */}

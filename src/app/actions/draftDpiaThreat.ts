@@ -60,10 +60,10 @@ Rispondi SOLO con JSON valido, nessun testo fuori dal JSON:
   "suggested_mitigation": "...",
   "suggested_residual_likelihood": "low|medium|high",
   "suggested_residual_severity": "low|medium|high",
-  "rationale": "... [verifica contro il testo vigente del GDPR/WP248]"
+  "rationale": "..."
 }
 
-[verifica contro il testo vigente del GDPR/WP248]`;
+`;
 
   try {
     const text = await generateText(prompt, { temperature: 0.2, maxOutputTokens: 400 });

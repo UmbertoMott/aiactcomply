@@ -292,7 +292,7 @@ export async function POST(req: NextRequest) {
   drawText(
     sanitize(
       `ID sistema: ${systemId ?? "N/A"} · Generato: ${new Date().toISOString()} · ` +
-      `I tag [verify against current AI Act text] indicano campi che richiedono verifica legale professionale.`
+      `I tag indicano campi che richiedono verifica legale professionale.`
     ),
     { size: 7, color: rgb(0.6, 0.6, 0.6) }
   )

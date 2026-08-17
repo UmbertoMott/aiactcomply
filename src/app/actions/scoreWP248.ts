@@ -58,7 +58,6 @@ C8_uso_innovativo: Uso innovativo o applicazione di nuove soluzioni tecnologiche
 C9_trasferimento_extraue: Trasferimento di dati extraUE o accesso da paesi terzi
 
 REGOLE OBBLIGATORIE:
-- wpReference deve terminare con "[verify against WP248 rev.01 and GDPR Art. 35]"
 - matchedCount deve corrispondere esattamente al numero di criteri con matched=true
 - dpiaRequired = true se matchedCount >= 2
 - priorConsultationRisk = true se ci sono ≥2 criteri matched con high-residual-risk
@@ -78,7 +77,7 @@ Formato JSON:
       "matched": true|false,
       "confidence": "low|medium|high",
       "reasoning": "...",
-      "wpReference": "WP248 rev.01 criterio 1 [verify against WP248 rev.01 and GDPR Art. 35]"
+      "wpReference": "WP248 rev.01 criterio 1"
     }
     // ... tutti 9 criteri
   ],

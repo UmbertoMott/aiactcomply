@@ -34,7 +34,7 @@ export function Art26_4({ record, onChange }: Props) {
     <div className="space-y-3">
       <p className="text-xs text-slate-400">
         Notifica il provider di qualsiasi malfunzionamento serio o incidente che potrebbe violare diritti fondamentali
-        o causare danni (Art. 26(4) [verify against current AI Act text]).
+        o causare danni (Art. 26(4)).
       </p>
 
       {record.providerNotifications.length > 0 && (

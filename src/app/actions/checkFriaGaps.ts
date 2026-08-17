@@ -90,14 +90,14 @@ Rispondi SOLO con JSON valido:
       "articleRef": "Art. 27(1)(a)",
       "label": "Descrizione processi e finalità",
       "status": "ok|incomplete|missing",
-      "finding": "cosa è presente o cosa manca (max 60 parole) [verifica contro il testo vigente dell'AI Act]",
+      "finding": "cosa è presente o cosa manca (max 60 parole)",
       "cta_phase": "1",
       "cta_label": "Vai a Fase 1 — Contesto"
     }
   ],
   "overall_coverage": "complete|partial|insufficient",
   "critical_gaps": ["lista gap critici"],
-  "recommendation": "Raccomandazione sintetica (1-2 frasi) [verifica contro il testo vigente dell'AI Act]"
+  "recommendation": "Raccomandazione sintetica (1-2 frasi)"
 }`;
 
   try {

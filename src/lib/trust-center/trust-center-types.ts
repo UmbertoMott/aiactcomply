@@ -1,7 +1,7 @@
 // Trust Center — tipi condivisi editor + pagina pubblica (PROMPT AV + BC)
 // ✦ AI — verifica e conferma: tabella sezioni ricostruita dalla memoria del modello.
 // Validare contro Art. 6, Annex III/IV, Art. 14, Art. 22, Art. 47-50, Art. 72
-// del Reg. (UE) 2024/1689 prima della pubblicazione. [verify against current AI Act text]
+// del Reg. (UE) 2024/1689 prima della pubblicazione.
 
 // ── Access control (PROMPT BC — Art. 13, Art. 50) ─────────────────────────────
 export type TrustCenterVisibility = "public" | "restricted" | "invite_only";
@@ -44,49 +44,49 @@ export const SECTION_META: Record<TrustCenterSectionId, TrustCenterSectionMeta> 
   risk_tier: {
     id: "risk_tier",
     label: "Classificazione del rischio",
-    article: "Art. 6 + Annex III [verify against current AI Act text]",
+    article: "Art. 6 + Annex III",
     sourceModule: "Triage / AI Inventory",
   },
   intended_use: {
     id: "intended_use",
     label: "Finalità e ambito di utilizzo previsto",
-    article: "Annex IV §1-2 [verify against current AI Act text]",
+    article: "Annex IV §1-2",
     sourceModule: "DocuGen AI — Annex IV",
   },
   oversight: {
     id: "oversight",
     label: "Misure di sorveglianza umana",
-    article: "Art. 14 [verify against current AI Act text]",
+    article: "Art. 14",
     sourceModule: "Oversight (Art. 14)",
   },
   transparency: {
     id: "transparency",
     label: "Informazioni di trasparenza",
-    article: "Art. 50(1)/(2)/(3)/(4) [verify against current AI Act text]",
+    article: "Art. 50(1)/(2)/(3)/(4)",
     sourceModule: "Art. 50 Kit",
   },
   conformity: {
     id: "conformity",
     label: "Stato della dichiarazione di conformità",
-    article: "Art. 47-48 [verify against current AI Act text]",
+    article: "Art. 47-48",
     sourceModule: "DocuGen AI / Conformity",
   },
   eudb: {
     id: "eudb",
     label: "Registrazione nella banca dati UE",
-    article: "Art. 49 [verify against current AI Act text]",
+    article: "Art. 49",
     sourceModule: "EUDB Registration",
   },
   post_market: {
     id: "post_market",
     label: "Impegno di monitoraggio post-market",
-    article: "Art. 72 [verify against current AI Act text]",
+    article: "Art. 72",
     sourceModule: "Post-Market Monitoring",
   },
   contact: {
     id: "contact",
     label: "Contatti e rappresentante autorizzato",
-    article: "Art. 22 [verify against current AI Act text]",
+    article: "Art. 22",
     sourceModule: "Authorized Representative / Profilo organizzazione",
   },
 };

@@ -19,7 +19,7 @@ Prossimo step raccomandato: ${params.stepTitle}
 
 Scrivi in italiano 1-2 frasi che spiegano PERCHÉ questo specifico step è il prossimo passo utile per questa FRIA, facendo riferimento ai dati specifici del sistema.
 Sii concreto: cita numeri (es. "3 scenari senza misure di mitigazione"), stati specifici, o gap normativi.
-Termina con [verifica contro il testo vigente dell'AI Act].`;
+Termina con.`;
 
   try {
     const text = await generateText(prompt, { temperature: 0.3, maxOutputTokens: 200 });

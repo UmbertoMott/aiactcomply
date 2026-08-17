@@ -1256,7 +1256,7 @@ export default function FRIAPage() {
               <div style={{ fontSize: 12, color: T.text, lineHeight: 1.5 }}>
                 La raccomandazione non è &quot;deploy&quot; incondizionato. Ai sensi dell&apos;Art. 27(2) AI Act, il deployer
                 ha l&apos;obbligo di notificare l&apos;autorità nazionale di vigilanza del mercato e documentare la notifica
-                nella FRIA. [verifica contro il testo vigente dell&apos;AI Act]
+                nella FRIA.
               </div>
             </div>
           </div>
@@ -1299,7 +1299,7 @@ export default function FRIAPage() {
               </div>
               <div style={{ fontSize: 12, color: T.text, lineHeight: 1.5, marginBottom: 8 }}>
                 I dati di input (sistema, contesto, persone interessate) sono cambiati rispetto all&apos;ultima firma.
-                Verifica che la valutazione degli impatti e le misure di mitigazione siano ancora valide. [verifica contro il testo vigente dell&apos;AI Act]
+                Verifica che la valutazione degli impatti e le misure di mitigazione siano ancora valide.
               </div>
               <button
                 onClick={() => {
@@ -1416,7 +1416,7 @@ export default function FRIAPage() {
                 }
               </div>
               <p style={{ fontSize: 12, color: T.muted, margin: "0 0 10px", lineHeight: 1.4 }}>
-                {highImpacts.length} impatto/i ad alta severità identificati nella Fase 2. Documenta le consultazioni nel log qui sotto per validare queste valutazioni. [verifica contro il testo vigente dell&apos;AI Act]
+                {highImpacts.length} impatto/i ad alta severità identificati nella Fase 2. Documenta le consultazioni nel log qui sotto per validare queste valutazioni.
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {highImpacts.slice(0, 5).map((imp, i) => {

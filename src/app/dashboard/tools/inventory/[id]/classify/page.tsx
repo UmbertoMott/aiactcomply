@@ -314,7 +314,7 @@ export default function ClassifyPage() {
             </div>
           </div>
 
-          {/* Checkbox verifica — sostituisce la stringa [verify] */}
+          {/* Checkbox verifica — sostituisce la stringa */}
           <div style={{ marginTop: 22, padding: "14px 16px", background: "rgba(0,0,0,0.025)", borderRadius: 10, border: `1px solid ${T.border}` }}>
             <label style={{ display: "flex", alignItems: "flex-start", gap: 12, cursor: "pointer" }}>
               <input type="checkbox" checked={verified} onChange={e => setVerified(e.target.checked)}

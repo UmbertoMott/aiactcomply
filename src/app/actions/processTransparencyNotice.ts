@@ -43,7 +43,7 @@ Art. 13(3) richiede: (a) identità del provider, (b) caratteristiche e capacità
 (d) livello di accuratezza/robustezza, (e) supervisione umana necessaria, (f) vita utile attesa.
 
 REGOLE:
-- article deve citare il sottoparagrafo specifico (es. "Art. 13(3)(a) [verify against current AI Act text]")
+- article deve citare il sottoparagrafo specifico (es. "Art. 13(3)(a)")
 - Rispondi SOLO con JSON valido
 
 Sistema: "${systemName}"
@@ -57,7 +57,7 @@ Formato JSON:
   "missingFields": [
     {
       "field": "...",
-      "article": "Art. 13(...) [verify against current AI Act text]",
+      "article": "Art. 13(...)",
       "reason": "...",
       "priority": "obbligatorio|raccomandato"
     }

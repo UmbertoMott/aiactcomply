@@ -41,8 +41,6 @@ Data di oggi: ${today}
 DESCRIZIONE: "${freeTextDescription}"${systemsContext}
 
 REGOLE FONDAMENTALI:
-1. Il campo roleBasis DEVE terminare con " [verify against current AI Act text]"
-2. Il campo tierBasis DEVE terminare con " [verify against current AI Act text]"
 3. Se non puoi determinare un campo con ragionevole certezza, usa null per i campi nullable o "unclassified" per il tier
 4. confidenceLevel = "high" solo se la descrizione è inequivocabile. "low" se ambigua
 5. Per il tier, controlla nell'ordine: Art. 5 (prohibited) → Annex III (high_risk) → GPAI → Art. 50 (limited) → minimal
@@ -58,11 +56,11 @@ Rispondi SOLO con JSON valido che rispetti esattamente questo schema. Nessun tes
   "status": "in_production | planned | in_development | deprecated",
   "euNexus": true,
   "role": "provider | deployer | importer | distributor | authorized_rep | product_manufacturer | null",
-  "roleBasis": "motivazione in 1 frase [verify against current AI Act text]",
+  "roleBasis": "motivazione in 1 frase",
   "tier": "prohibited | high_risk | limited | minimal | gpai | gpai_systemic | unclassified",
-  "tierBasis": "articolo o Annex entry in 1 frase [verify against current AI Act text]",
+  "tierBasis": "articolo o Annex entry in 1 frase",
   "dualRoleFlag": false,
-  "obligationsNote": "obblighi principali applicabili in 1-2 frasi [verify against current AI Act text]",
+  "obligationsNote": "obblighi principali applicabili in 1-2 frasi",
   "nextReview": "${nextYear}",
   "reviewTrigger": "on substantial modification or annually",
   "knownVendor": "nome vendor se riconosciuto (Workday, Salesforce, GitHub Copilot, ecc.) oppure null",

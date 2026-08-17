@@ -59,7 +59,7 @@ export default function InformativaAIPage() {
             Le risposte del Legal Assistant sono generate sulla base di fonti normative indicizzate
             (EU AI Act, ISO 22989, EDPB Guidelines) ma <strong>non costituiscono di per sé parere o consulenza legale
             finché non sono verificate e validate dall&apos;avvocato</strong>; i riferimenti normativi vanno confrontati
-            col testo vigente [verifica contro il testo vigente].
+            col testo vigente.
           </li>
           <li>
             I suggerimenti di pre-compilazione richiedono sempre revisione e validazione da parte dell&apos;avvocato

@@ -49,7 +49,7 @@ export function Art26_9({ record, onChange }: Props) {
     <div className="space-y-3">
       <p className="text-xs text-slate-400">
         Se il sistema presenta rischi gravi o inattesi per la sicurezza o i diritti fondamentali,
-        sospendilo immediatamente e notifica il fornitore (Art. 26(9) [verify against current AI Act text]).
+        sospendilo immediatamente e notifica il fornitore (Art. 26(9)).
       </p>
       <textarea
         value={reason}

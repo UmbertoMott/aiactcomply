@@ -50,7 +50,6 @@ Tipi di incoerenza da cercare:
 - Sistema descritto come GPAI ma contesto non lo indica
 
 REGOLE:
-- art11Reference deve terminare con "[verify against current AI Act text — Art. 11]"
 - "critical" = incoerenza che potrebbe invalidare la conformità
 - Se non ci sono incongruenze, restituisci array vuoto e coherenceScore: 100
 - Rispondi SOLO con JSON valido
@@ -71,7 +70,7 @@ Formato JSON:
       "sourceContext": "Classificatore|Risk Manager|Data Audit|Oversight",
       "severity": "info|warning|critical",
       "explanation": "...",
-      "art11Reference": "Art. 11(...) [verify against current AI Act text — Art. 11]"
+      "art11Reference": "Art. 11(...)"
     }
   ],
   "coherenceScore": 0-100,

@@ -44,7 +44,6 @@ Art. 73(3): Se vi è rischio per la vita, notifica entro 24 ore.
 Regola generale: notifica entro 15 giorni (days: 15) dall'incidente o dalla sua conoscenza.
 
 REGOLE OBBLIGATORIE:
-- art73Reference deve terminare con "[verify against current AI Act text — Art. 73]"
 - seriousnessLevel "grave_urgente" = rischio per la vita → hours: 24, days: null
 - seriousnessLevel "grave" = grave non urgente → hours: null, days: 15
 - seriousnessLevel "non_grave" → hours: null, days: null
@@ -64,11 +63,11 @@ Formato JSON:
   "notificationDeadline": {
     "hours": 24|null,
     "days": 15|null,
-    "basis": "Art. 73(...) [verify against current AI Act text — Art. 73]"
+    "basis": "Art. 73(...)"
   },
   "competentAuthority": "...",
   "immediateActions": ["...", "..."],
-  "art73Reference": "Art. 73 Reg. UE 2024/1689 [verify against current AI Act text — Art. 73]",
+  "art73Reference": "Art. 73 Reg. UE 2024/1689",
   "recommendation": "..."
 }`;
 

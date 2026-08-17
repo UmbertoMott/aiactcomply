@@ -89,7 +89,7 @@ Rispondi SOLO con JSON valido:
       "articleRef": "Art. 35(7)(a)",
       "label": "Descrizione sistematica del trattamento",
       "status": "ok|incomplete|missing",
-      "finding": "cosa è presente o cosa manca (max 60 parole) [verifica contro il testo vigente del GDPR/WP248]",
+      "finding": "cosa è presente o cosa manca (max 60 parole)",
       "cta_step": 1,
       "cta_label": "Vai a Step 1 — Descrizione"
     }
@@ -97,7 +97,7 @@ Rispondi SOLO con JSON valido:
   "overall_coverage": "complete|partial|insufficient",
   "critical_gaps": ["lista gap critici, stringhe brevi"],
   "art36_required": false,
-  "recommendation": "Raccomandazione sintetica (1-2 frasi) [verifica contro il testo vigente del GDPR/WP248]"
+  "recommendation": "Raccomandazione sintetica (1-2 frasi)"
 }`;
 
   try {

@@ -308,7 +308,7 @@ function PartiesSection({ doc }: { doc: DpiaGuidedDoc }) {
           </p>
           <p style={{ fontSize: 9, color: DOC.red, margin: "2px 0 0", opacity: 0.8 }}>
             Il rischio residuo è elevato. Il trattamento non può avere luogo fino alla consultazione dell'autorità.
-            [verifica contro il testo vigente del GDPR/WP248]
+
           </p>
         </div>
       )}

@@ -134,7 +134,7 @@ function Art35CoveragePanel({ coverage, art36 }: { coverage: ReturnType<typeof c
             ⚠ Art. 36 — Consultazione preventiva dell'autorità di controllo richiesta
           </p>
           <p style={{ fontSize: 10, color: T.red, margin: "3px 0 0", opacity: 0.8 }}>
-            Il rischio residuo è elevato. Prima di procedere è necessaria la consultazione del Garante. [verifica contro il testo vigente del GDPR/WP248]
+            Il rischio residuo è elevato. Prima di procedere è necessaria la consultazione del Garante.
           </p>
         </div>
       )}

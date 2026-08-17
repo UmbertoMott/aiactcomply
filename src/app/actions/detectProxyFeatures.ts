@@ -33,7 +33,6 @@ Art. 10(2)(f) richiede di esaminare eventuali bias nei dati che potrebbero porta
 Art. 10(5) consente l'uso di categorie speciali SOLO per individuare e correggere bias nei dati.
 
 REGOLE:
-- art10Risk deve terminare con "[verify against current AI Act text]"
 - Rispondi SOLO con JSON valido, nessun testo fuori dal JSON
 
 Scopo del sistema: "${systemPurpose || "non specificato"}"
@@ -46,7 +45,7 @@ Formato JSON atteso:
     {
       "featureName": "...",
       "proxiedAttribute": "...",
-      "art10Risk": "... [verify against current AI Act text]",
+      "art10Risk": "...",
       "severity": "low|medium|high|critical",
       "mitigation": "..."
     }

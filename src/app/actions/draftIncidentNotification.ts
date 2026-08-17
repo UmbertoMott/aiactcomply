@@ -43,7 +43,6 @@ La notifica deve includere obbligatoriamente:
 6. Piano di follow-up e misure correttive (cronoprogramma)
 
 REGOLE OBBLIGATORIE:
-- art73Reference deve terminare con "[verify against current AI Act text — Art. 73]"
 - draftNote deve chiarire ESPLICITAMENTE che è una BOZZA e richiede revisione legale
 - Il tono è formale e fattuale — nessun linguaggio di minimizzazione
 - notificationText deve essere in italiano, strutturato con sezioni numerate
@@ -68,7 +67,7 @@ Formato JSON:
     "followUpPlan": "..."
   },
   "requiredAttachments": ["...", "..."],
-  "art73Reference": "Art. 73 Reg. UE 2024/1689 [verify against current AI Act text — Art. 73]",
+  "art73Reference": "Art. 73 Reg. UE 2024/1689",
   "draftNote": "BOZZA — richiede revisione da consulente legale qualificato prima dell'invio all'autorità."
 }`;
 

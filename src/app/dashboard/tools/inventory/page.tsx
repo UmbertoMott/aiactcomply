@@ -698,15 +698,15 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
               </select>
             </div>
             <div style={{ gridColumn: "1 / -1" }}>
-              <FieldLabel label="Base ruolo [verify]" showAi={aiFields.has("roleBasis")} />
-              <input value={roleBasis} onChange={e => { setRoleBasis(e.target.value); removeAiField("roleBasis") }} style={INPUT_STYLE} placeholder="Motivazione in 1 frase [verify against current AI Act text]" />
+              <FieldLabel label="Base ruolo" showAi={aiFields.has("roleBasis")} />
+              <input value={roleBasis} onChange={e => { setRoleBasis(e.target.value); removeAiField("roleBasis") }} style={INPUT_STYLE} placeholder="Motivazione in 1 frase" />
             </div>
             <div style={{ gridColumn: "1 / -1" }}>
-              <FieldLabel label="Base classificazione tier [verify]" showAi={aiFields.has("tierBasis")} />
-              <input value={tierBasis} onChange={e => { setTierBasis(e.target.value); removeAiField("tierBasis") }} style={INPUT_STYLE} placeholder="Es. Annex III(4)(a) — employment [verify against current AI Act text]" />
+              <FieldLabel label="Base classificazione tier" showAi={aiFields.has("tierBasis")} />
+              <input value={tierBasis} onChange={e => { setTierBasis(e.target.value); removeAiField("tierBasis") }} style={INPUT_STYLE} placeholder="Es. Annex III(4)(a) — employment" />
             </div>
             <div style={{ gridColumn: "1 / -1" }}>
-              <FieldLabel label="Note obblighi applicabili [verify]" showAi={aiFields.has("obligationsNote")} />
+              <FieldLabel label="Note obblighi applicabili" showAi={aiFields.has("obligationsNote")} />
               <textarea value={obligationsNote} onChange={e => { setObligationsNote(e.target.value); removeAiField("obligationsNote") }} rows={2} style={{ ...INPUT_STYLE, resize: "vertical", fontFamily: "inherit" }} />
             </div>
           </div>
@@ -884,7 +884,7 @@ function ClassifyModal({ system, onClose, onSave }: {
   }
 
   const canSave = tier !== "unclassified"
-    ? (tierBasis.trim().length > 0 && tierBasis.includes("[verify"))
+    ? tierBasis.trim().length > 0
     : true
 
   return (
@@ -993,34 +993,31 @@ function ClassifyModal({ system, onClose, onSave }: {
             {/* Campi testo con PLACEHOLDER (non precompilati) */}
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div>
-                <FieldLabel label="Base ruolo — articolo di riferimento [verify] *" showAi={false} />
+                <FieldLabel label="Base ruolo — articolo di riferimento *" showAi={false} />
                 <input
                   value={roleBasis}
                   onChange={e => setRoleBasis(e.target.value)}
                   style={INPUT_STYLE}
-                  placeholder="Es. Art. 3(4) — usiamo un sistema AI sviluppato da un fornitore terzo in contesto professionale HR [verify against current AI Act text]"
+                  placeholder="Es. Art. 3(4) — usiamo un sistema AI sviluppato da un fornitore terzo in contesto professionale HR"
                 />
               </div>
               <div>
-                <FieldLabel label="Base classificazione tier — articolo o Annex entry [verify] *" showAi={false} />
+                <FieldLabel label="Base classificazione tier — articolo o Annex entry *" showAi={false} />
                 <input
                   value={tierBasis}
                   onChange={e => setTierBasis(e.target.value)}
-                  style={{ ...INPUT_STYLE, borderColor: tier !== "unclassified" && tierBasis.trim().length > 0 && !tierBasis.includes("[verify") ? "#dc2626" : "rgba(0,0,0,0.12)" }}
-                  placeholder="Es. Allegato III(4)(a) — sistema di pre-selezione CV, ambito occupazione [verify against current AI Act text]"
+                  style={{ ...INPUT_STYLE, borderColor: "rgba(0,0,0,0.12)" }}
+                  placeholder="Es. Allegato III(4)(a) — sistema di pre-selezione CV, ambito occupazione"
                 />
-                {tier !== "unclassified" && tierBasis.trim().length > 0 && !tierBasis.includes("[verify") && (
-                  <p style={{ fontSize: 11, color: "#dc2626", margin: "3px 0 0" }}>Il campo deve contenere "[verify against current AI Act text]" per confermare consapevolezza normativa.</p>
-                )}
               </div>
               <div>
-                <FieldLabel label="Note obblighi applicabili [verify]" showAi={false} />
+                <FieldLabel label="Note obblighi applicabili" showAi={false} />
                 <textarea
                   value={obligationsNote}
                   onChange={e => setObligationsNote(e.target.value)}
                   rows={3}
                   style={{ ...INPUT_STYLE, resize: "vertical", fontFamily: "inherit" }}
-                  placeholder="Es. Documentazione tecnica (Art. 11), supervisione umana obbligatoria (Art. 14), registrazione EU DB (Art. 49) [verify against current AI Act text]"
+                  placeholder="Es. Documentazione tecnica (Art. 11), supervisione umana obbligatoria (Art. 14), registrazione EU DB (Art. 49)"
                 />
                 {tier !== "unclassified" && !obligationsNote.trim() && (
                   <button onClick={() => setObligationsNote(tierCfg.obligations.join("\n"))}

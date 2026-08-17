@@ -78,7 +78,7 @@ export function ContextCatalog({ onApply }: ContextCatalogProps) {
     suggestions.push({
       field: "Allegato III",
       label: "Sistema Allegato III — supervisione umana",
-      value: "Sistema Allegato III — verifica supervisione umana (Art. 14) [verifica contro il testo vigente dell'AI Act]",
+      value: "Sistema Allegato III — verifica supervisione umana (Art. 14)",
       isNote: true,
     });
   }

@@ -44,16 +44,16 @@ interface Phase {
 // 11 step numerati 1-11 (allineamento template Art. 9 §0-§9 + trasversale Comunicazione).
 // Il modulo condizionale gpai_systemic_risk NON è in questo array.
 const PHASES: Phase[] = [
-  { id: "scoping",        label: "1. Scoping",                   subtitle: "§0 Ambito e criteri rischio",    article: "Art. 9(1) [verify against current AI Act text]",               supportRef: "Art. 6, Allegato III [verify against current AI Act text]",   docSection: "§0" },
-  { id: "identification", label: "2. Identificazione Rischi",    subtitle: "§1 incl. minori e vulnerabili",  article: "Art. 9(2)(a) [verify against current AI Act text]",            supportRef: "Art. 9(9) [verify against current AI Act text]",              docSection: "§1" },
-  { id: "estimation",     label: "3. Stima e Valutazione",       subtitle: "§2 uso previsto / improprio",    article: "Art. 9(2)(b) [verify against current AI Act text]",            docSection: "§2" },
-  { id: "testing",        label: "4. Test e Validazione",        subtitle: "§3 metriche e soglie",           article: "Art. 9(6)-(8) [verify against current AI Act text]",           supportRef: "Art. 60 [verify against current AI Act text]",                docSection: "§3" },
-  { id: "mitigation",     label: "5. Trattamento Rischio",       subtitle: "§4 rischio residuo",             article: "Art. 9(2)(d), 9(4)-(5) [verify against current AI Act text]", supportRef: "Art. 13 [verify against current AI Act text]",                docSection: "§4" },
-  { id: "monitoring",     label: "6. Monitoraggio Post-Market",  subtitle: "§5 drift detection",             article: "Art. 9(2)(c) [verify against current AI Act text]",            supportRef: "Art. 72 [verify against current AI Act text]",                docSection: "§5" },
-  { id: "gap_check",      label: "7. Gap Check Art. 9",          subtitle: "§6 verifica di copertura",       article: "Art. 9(2)(a)-(d), 9(6)-(9) [verify against current AI Act text]", docSection: "§6" },
-  { id: "traceability",   label: "8. Tracciabilità",             subtitle: "§7 versionamento e QMS",         article: "Art. 9(1)-(2) [verify against current AI Act text]",           supportRef: "Art. 12, 17 [verify against current AI Act text]",            docSection: "§7" },
-  { id: "dismissal",      label: "9. Dismissione / Ritiro",      subtitle: "§8 rischi di fine vita",         article: "Art. 9 [verify against current AI Act text]",                  supportRef: "ISO 23894 Annex C",                                           docSection: "§8" },
-  { id: "signoff",        label: "10. Approvazione e Firme",     subtitle: "§9 sign-off finale",             article: "Art. 9(1) + 9(10) [verify against current AI Act text]",      docSection: "§9" },
+  { id: "scoping",        label: "1. Scoping",                   subtitle: "§0 Ambito e criteri rischio",    article: "Art. 9(1)",               supportRef: "Art. 6, Allegato III",   docSection: "§0" },
+  { id: "identification", label: "2. Identificazione Rischi",    subtitle: "§1 incl. minori e vulnerabili",  article: "Art. 9(2)(a)",            supportRef: "Art. 9(9)",              docSection: "§1" },
+  { id: "estimation",     label: "3. Stima e Valutazione",       subtitle: "§2 uso previsto / improprio",    article: "Art. 9(2)(b)",            docSection: "§2" },
+  { id: "testing",        label: "4. Test e Validazione",        subtitle: "§3 metriche e soglie",           article: "Art. 9(6)-(8)",           supportRef: "Art. 60",                docSection: "§3" },
+  { id: "mitigation",     label: "5. Trattamento Rischio",       subtitle: "§4 rischio residuo",             article: "Art. 9(2)(d), 9(4)-(5)", supportRef: "Art. 13",                docSection: "§4" },
+  { id: "monitoring",     label: "6. Monitoraggio Post-Market",  subtitle: "§5 drift detection",             article: "Art. 9(2)(c)",            supportRef: "Art. 72",                docSection: "§5" },
+  { id: "gap_check",      label: "7. Gap Check Art. 9",          subtitle: "§6 verifica di copertura",       article: "Art. 9(2)(a)-(d), 9(6)-(9)", docSection: "§6" },
+  { id: "traceability",   label: "8. Tracciabilità",             subtitle: "§7 versionamento e QMS",         article: "Art. 9(1)-(2)",           supportRef: "Art. 12, 17",            docSection: "§7" },
+  { id: "dismissal",      label: "9. Dismissione / Ritiro",      subtitle: "§8 rischi di fine vita",         article: "Art. 9",                  supportRef: "ISO 23894 Annex C",                                           docSection: "§8" },
+  { id: "signoff",        label: "10. Approvazione e Firme",     subtitle: "§9 sign-off finale",             article: "Art. 9(1) + 9(10)",      docSection: "§9" },
   { id: "communication",  label: "11. Comunicazione",            subtitle: "Trasversale — ISO 23894 §6.2",  article: "ISO 23894 §6.2",                                               docSection: "Trasversale" },
 ];
 
@@ -62,7 +62,7 @@ const GPAI_MODULE: Phase = {
   id: "gpai_systemic_risk",
   label: "GPAI & Rischio Sistemico",
   subtitle: "Modulo condizionale",
-  article: "Art. 51-55 (Capo V) [verify against current AI Act text]",
+  article: "Art. 51-55 (Capo V)",
   docSection: "(condizionale)",
 };
 
@@ -497,7 +497,7 @@ function PhaseDocColumn({
   const docFooter = (
     <div style={{ borderTop: "1px solid rgba(0,0,0,0.12)", marginTop: 20, paddingTop: 8 }}>
       <p style={{ fontSize: 9, color: "rgba(0,0,0,0.4)", fontStyle: "italic", margin: 0 }}>
-        Generato da AIComply · {new Date().toLocaleDateString("it-IT")} · [verificare sul testo AI Act vigente]
+        Generato da AIComply · {new Date().toLocaleDateString("it-IT")} ·
       </p>
     </div>
   );
@@ -671,7 +671,7 @@ function ExportMenu({ documentation, systemName }: { documentation: RiskDocument
   function exportMarkdown() {
     const lines = ["# Risk Register — AI Act Art. 9", `**Sistema**: ${name}`, `**Data**: ${date}`, ""];
     buildSections().forEach(s => { lines.push(`## ${s.title}`, s.content, ""); });
-    lines.push("---\n*[verify against current AI Act text] — Generato da AIComply*");
+    lines.push("---\n* — Generato da AIComply*");
     const blob = new Blob([lines.join("\n")], { type: "text/markdown" });
     const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `RiskRegister_${name}_${date}.md` });
     a.click(); URL.revokeObjectURL(a.href);
@@ -707,7 +707,7 @@ p{margin:4pt 0;line-height:1.5}
 <h1>Risk Register — AI Act Art. 9</h1>
 <p class="meta">Sistema: ${name} &nbsp;·&nbsp; Data: ${date} &nbsp;·&nbsp; Generato da AIComply</p>
 ${sections.map(s => `<h2>${s.title}</h2><p>${s.content.replace(/\n/g, "<br>")}</p>`).join("\n")}
-<p class="footer">[verify against current AI Act text] — Documento generato da AIComply. Richiedere verifica legale professionale prima dell&apos;utilizzo.</p>
+<p class="footer"> — Documento generato da AIComply. Richiedere verifica legale professionale prima dell&apos;utilizzo.</p>
 </body></html>`;
     const blob = new Blob([html], { type: "application/msword" });
     const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `RiskRegister_${name}_${date}.doc` });
@@ -1042,7 +1042,7 @@ export default function RiskManagerPage() {
               <span>I campi estratti dall&apos;AI richiedono verifica legale professionale.</span>
             </div>
             <div style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", lineHeight: 1.4, paddingTop: 3, borderTop: "1px solid rgba(0,0,0,0.05)" }}>
-              La mancata conformità all&apos;Art. 9 può comportare sanzioni ai sensi degli artt. 99-101 [verify against current AI Act text].
+              La mancata conformità all&apos;Art. 9 può comportare sanzioni ai sensi degli artt. 99-101.
             </div>
           </div>
         </div>

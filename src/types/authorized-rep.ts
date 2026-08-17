@@ -1,5 +1,5 @@
 // AuthorizedRepRecord types — PROMPT BG
-// [verify against current AI Act text]
+//
 
 export interface DigitalSignature {
   signedAt: string;

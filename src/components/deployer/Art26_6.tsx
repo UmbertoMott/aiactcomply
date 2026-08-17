@@ -23,7 +23,7 @@ export function Art26_6({ record, onChange }: Props) {
     <div className="space-y-3">
       <p className="text-xs text-slate-400">
         Designa un referente interno disponibile a cooperare con le autorità di vigilanza
-        e fornire accesso alla documentazione (Art. 26(6) [verify against current AI Act text]).
+        e fornire accesso alla documentazione (Art. 26(6)).
       </p>
 
       <div className="grid grid-cols-1 gap-2">

@@ -166,7 +166,7 @@ export default function TrustCenterPublicView({ slug, serverAccessConfig }: Prop
           </h1>
           <p style={{ color: MUTED, fontSize: 14, lineHeight: 1.6 }}>
             Questo documento fornisce informazioni pubbliche sul sistema AI di questa organizzazione
-            ai sensi del Reg. (UE) 2024/1689 (AI Act) [verify against current AI Act text].
+            ai sensi del Reg. (UE) 2024/1689 (AI Act).
           </p>
           {page!.noindex && (
             <p style={{ color: "#4b5563", fontSize: 12, marginTop: 10 }}>
@@ -219,7 +219,7 @@ export default function TrustCenterPublicView({ slug, serverAccessConfig }: Prop
           <p style={{ color: "#374151", fontSize: 11, marginTop: 6 }}>
             Le informazioni presenti in questa pagina sono fornite dall&apos;organizzazione responsabile del sistema AI.
             I riferimenti normativi sono da verificare contro il testo consolidato del Reg. (UE) 2024/1689.
-            [verify against current AI Act text]
+
           </p>
         </div>
       </div>
