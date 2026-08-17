@@ -3,19 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useT } from "@/i18n/LocaleProvider";
+import LanguageToggle from "@/components/LanguageToggle";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
 const MONO  = "'DM Mono', monospace";
-
-// ─── Contenuti del mega-menu Risorse (risorse reali) ─────────────────────────
-const RES_CONTENUTI = [
-  { label: "Blog & Articoli", href: "/risorse", desc: "Analisi e aggiornamenti sull'EU AI Act." },
-];
-
-const RES_STRUMENTI = [
-  { label: "Calcolatore ROI sanzioni", href: "/roi", desc: "Stima l'esposizione alle sanzioni AI Act e il ROI della prevenzione." },
-  { label: "Il prodotto", href: "/products", desc: "I sei moduli per l'intero ciclo di conformità." },
-];
 
 function MenuItem({ label, href, desc, onNav }: { label: string; href: string; desc: string; onNav: () => void }) {
   return (
@@ -38,9 +30,19 @@ function MenuItem({ label, href, desc, onNav }: { label: string; href: string; d
 }
 
 export default function Nav() {
+  const t = useT("nav");
   const [scrolled, setScrolled] = useState(false);
   const [resOpen, setResOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Contenuti del mega-menu Risorse (etichette tradotte, href reali).
+  const RES_CONTENUTI = [
+    { label: t("blogLabel"), href: "/risorse", desc: t("blogDesc") },
+  ];
+  const RES_STRUMENTI = [
+    { label: t("roiToolLabel"), href: "/roi", desc: t("roiToolDesc") },
+    { label: t("productToolLabel"), href: "/products", desc: t("productToolDesc") },
+  ];
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -76,9 +78,9 @@ export default function Nav() {
         </Link>
 
         <div className="hidden md:flex items-center gap-8 text-[13px]" style={{ color: "rgba(0,0,0,0.42)" }}>
-          <Link href="/products" className="hover:text-[#0D1016] transition-colors">Prodotto</Link>
-          <Link href="/pricing" className="hover:text-[#0D1016] transition-colors">Prezzi</Link>
-          <Link href="/scanner" className="hover:text-[#0D1016] transition-colors">Scanner Art. 50</Link>
+          <Link href="/products" className="hover:text-[#0D1016] transition-colors">{t("product")}</Link>
+          <Link href="/pricing" className="hover:text-[#0D1016] transition-colors">{t("pricing")}</Link>
+          <Link href="/scanner" className="hover:text-[#0D1016] transition-colors">{t("scanner")}</Link>
 
           {/* Risorse — trigger mega-menu */}
           <div onMouseEnter={openMenu} onMouseLeave={scheduleClose} style={{ position: "relative" }}>
@@ -87,7 +89,7 @@ export default function Nav() {
               className="inline-flex items-center gap-1.5 transition-colors"
               style={{ color: resOpen ? "#0D1016" : "rgba(0,0,0,0.42)" }}
             >
-              Risorse
+              {t("resources")}
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style={{ transform: resOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s ease" }}>
                 <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -96,19 +98,20 @@ export default function Nav() {
         </div>
 
         <div className="flex items-center gap-3">
+          <LanguageToggle />
           <Link
             href="/login"
             className="text-[13px] transition-colors hover:text-[#0D1016]"
             style={{ color: "rgba(0,0,0,0.42)" }}
           >
-            Accedi
+            {t("login")}
           </Link>
           <Link
             href="/prenota-demo"
             className="inline-flex text-[13px] font-medium rounded-full px-5 py-2 transition-opacity hover:opacity-80"
             style={{ background: "#0D1016", color: "#ffffff", letterSpacing: "-0.2px" }}
           >
-            Prenota demo
+            {t("bookDemo")}
           </Link>
         </div>
       </div>
@@ -140,7 +143,7 @@ export default function Nav() {
             {/* Colonna 1 — Contenuti */}
             <div>
               <p style={{ fontFamily: MONO, fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.3)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 12, paddingLeft: 12 }}>
-                Contenuti
+                {t("contents")}
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 {RES_CONTENUTI.map((r) => <MenuItem key={r.href} {...r} onNav={closeNow} />)}
@@ -150,7 +153,7 @@ export default function Nav() {
             {/* Colonna 2 — Strumenti */}
             <div>
               <p style={{ fontFamily: MONO, fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.3)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 12, paddingLeft: 12 }}>
-                Strumenti
+                {t("tools")}
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 {RES_STRUMENTI.map((r) => <MenuItem key={r.href} {...r} onNav={closeNow} />)}
@@ -172,21 +175,20 @@ export default function Nav() {
                   marginBottom: 16,
                 }}>
                   <span style={{ fontFamily: MONO, fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-                    Esposizione fino a
+                    {t("roiCardKicker")}
                   </span>
                   <span style={{ fontFamily: SERIF, fontSize: 40, color: "#ffffff", letterSpacing: "-1.5px", lineHeight: 1 }}>
                     €35M <span style={{ fontSize: 22, color: "rgba(255,255,255,0.55)" }}>/ 7%</span>
                   </span>
                   <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.35)", letterSpacing: "0.05em" }}>
-                    del fatturato · Art. 99 AI Act
+                    {t("roiCardTurnover")}
                   </span>
                 </div>
                 <p style={{ fontSize: 14, fontWeight: 600, color: "#0D1016", marginBottom: 5 }}>
-                  Calcolatore ROI — Evita le sanzioni
+                  {t("roiCardTitle")}
                 </p>
                 <p style={{ fontSize: 12.5, color: "rgba(0,0,0,0.45)", lineHeight: 1.55 }}>
-                  Stima la tua esposizione e il ritorno della prevenzione in
-                  base al fatturato e al tipo di violazione.
+                  {t("roiCardDesc")}
                 </p>
               </Link>
             </div>

@@ -3,6 +3,8 @@ import { Inter, DM_Sans, DM_Mono } from "next/font/google";
 import Script from "next/script";
 import CookieBanner from "@/components/CookieBanner";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import { LocaleProvider } from "@/i18n/LocaleProvider";
+import { getLocale } from "@/i18n/server";
 import "./globals.css";
 
 const inter = Inter({
@@ -64,14 +66,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
   return (
     <html
-      lang="it"
+      lang={locale}
       className={`${inter.variable} ${dmSans.variable} ${dmMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
@@ -79,7 +82,9 @@ export default function RootLayout({
         <Script id="theme-init" strategy="beforeInteractive">
           {`(function(){var t=localStorage.getItem('theme');if(t==='light')document.documentElement.classList.add('light')})()`}
         </Script>
-        {children}
+        <LocaleProvider locale={locale}>
+          {children}
+        </LocaleProvider>
         <GoogleAnalytics />
         <CookieBanner />
       </body>
