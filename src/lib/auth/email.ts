@@ -19,18 +19,28 @@ function escapeHtml(s: string): string {
 
 // ── Login OTP ──────────────────────────────────────────────────────────────
 
-export async function sendLoginOTPEmail(email: string, otp: string): Promise<void> {
+export async function sendLoginOTPEmail(
+  email: string,
+  otp: string
+): Promise<{ ok: boolean; error?: string }> {
   const resend = getResend();
   if (!resend) {
+    // In produzione la chiave DEVE esserci: fallire in modo esplicito, non silenzioso.
+    if (process.env.NODE_ENV === "production") {
+      console.error(`[EMAIL] RESEND_API_KEY non configurata — OTP di accesso NON inviato a ${email}`);
+      return { ok: false, error: "email_not_configured" };
+    }
+    // Dev senza SMTP: mock volontario, il codice è nel log del server.
     console.log(`[EMAIL MOCK] Login OTP per ${email}: ${otp}`);
-    return;
+    return { ok: true };
   }
 
-  await resend.emails.send({
-    from: FROM,
-    to: email,
-    subject: `${otp} — Il tuo codice di accesso AIComply`,
-    html: `
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM,
+      to: email,
+      subject: `${otp} — Il tuo codice di accesso AIComply`,
+      html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px;">
         <h2 style="color: #0D1016; margin: 0 0 8px;">AIComply</h2>
         <p style="color: #64748b; font-size: 14px; margin: 0 0 24px;">Verifica del tuo accesso</p>
@@ -56,7 +66,16 @@ export async function sendLoginOTPEmail(email: string, otp: string): Promise<voi
         </p>
       </div>
     `,
-  });
+    });
+    if (error) {
+      console.error("[EMAIL] Invio OTP di accesso fallito:", error);
+      return { ok: false, error: error.message ?? "send_failed" };
+    }
+    return { ok: true };
+  } catch (err) {
+    console.error("[EMAIL] Eccezione durante l'invio OTP di accesso:", err);
+    return { ok: false, error: "send_exception" };
+  }
 }
 
 // ── OTP registrazione (usata altrove nel progetto) ─────────────────────────
