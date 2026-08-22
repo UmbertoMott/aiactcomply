@@ -18,6 +18,9 @@ import { useUserRole } from "@/lib/hooks/useUserRole";
 import { readFromStorage, type ClassifierResult } from "@/lib/dossier/storage-schema";
 import { loadInventory, computeObligationCount } from "@/lib/inventory/ai-system";
 import type { AISystem } from "@/lib/inventory/ai-system";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
+
+type TFn = (key: string) => string;
 
 const OnboardingWizard = dynamic(
   () => import("@/components/onboarding/OnboardingWizard"),
@@ -47,39 +50,40 @@ const card: CSSProperties = {
 
 // ── Risk config ───────────────────────────────────────────────────────────────
 
-const RISK_CFG: Record<string, { label: string; color: string; bg: string; bdr: string }> = {
-  unacceptable: { label: "Inaccettabile", color: T.red,   bg: T.redBg,   bdr: T.redBdr   },
-  high:         { label: "Alto",          color: T.red,   bg: T.redBg,   bdr: T.redBdr   },
-  limited:      { label: "Limitato",      color: T.amber, bg: T.amberBg, bdr: T.amberBdr },
-  minimal:      { label: "Minimale",      color: T.green, bg: T.greenBg, bdr: T.greenBdr },
+const RISK_CFG: Record<string, { labelKey: string; color: string; bg: string; bdr: string }> = {
+  unacceptable: { labelKey: "risk_unacceptable", color: T.red,   bg: T.redBg,   bdr: T.redBdr   },
+  high:         { labelKey: "risk_high",         color: T.red,   bg: T.redBg,   bdr: T.redBdr   },
+  limited:      { labelKey: "risk_limited",      color: T.amber, bg: T.amberBg, bdr: T.amberBdr },
+  minimal:      { labelKey: "risk_minimal",      color: T.green, bg: T.greenBg, bdr: T.greenBdr },
 };
 
 // ── Evidence config ───────────────────────────────────────────────────────────
 
 type EvIcon = React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
 
-const EV_CFG: Record<string, { label: string; color: string; Icon: EvIcon }> = {
-  adr:        { label: "Decisione",    color: T.text,  Icon: Scale         },
-  decision:   { label: "Decisione",    color: T.text,  Icon: Scale         },
-  audit:      { label: "Audit",        color: T.amber, Icon: ClipboardList },
-  log:        { label: "Log",          color: T.gray,  Icon: Activity      },
-  test:       { label: "Test",         color: T.green, Icon: Zap           },
-  incident:   { label: "Incidente",    color: T.red,   Icon: AlertTriangle },
-  monitoring: { label: "Monitoraggio", color: T.gray,  Icon: BarChart3     },
+const EV_CFG: Record<string, { labelKey: string; color: string; Icon: EvIcon }> = {
+  adr:        { labelKey: "ev_decision",   color: T.text,  Icon: Scale         },
+  decision:   { labelKey: "ev_decision",   color: T.text,  Icon: Scale         },
+  audit:      { labelKey: "ev_audit",      color: T.amber, Icon: ClipboardList },
+  log:        { labelKey: "ev_log",        color: T.gray,  Icon: Activity      },
+  test:       { labelKey: "ev_test",       color: T.green, Icon: Zap           },
+  incident:   { labelKey: "ev_incident",   color: T.red,   Icon: AlertTriangle },
+  monitoring: { labelKey: "ev_monitoring", color: T.gray,  Icon: BarChart3     },
 };
 
-function relTime(iso: string): string {
+function relTime(iso: string, t: TFn): string {
   const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-  if (diff < 60) return "poco fa";
-  if (diff < 3600) return `${Math.floor(diff / 60)} min fa`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h fa`;
-  if (diff < 172800) return "ieri";
-  return `${Math.floor(diff / 86400)} gg fa`;
+  if (diff < 60) return t("rel_now");
+  if (diff < 3600) return `${Math.floor(diff / 60)} ${t("rel_min")}`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}${t("rel_h")}`;
+  if (diff < 172800) return t("rel_yesterday");
+  return `${Math.floor(diff / 86400)} ${t("rel_days")}`;
 }
 
 // ── Badge components ──────────────────────────────────────────────────────────
 
 function RiskBadge({ level }: { level?: string }) {
+  const t = useT("dashHome");
   const cfg = level ? RISK_CFG[level] : null;
   if (!cfg) return <span style={{ fontSize: 10, color: T.faint }}>—</span>;
   return (
@@ -90,16 +94,17 @@ function RiskBadge({ level }: { level?: string }) {
       letterSpacing: "0.05px",
     }}>
       <span style={{ width: 5, height: 5, borderRadius: "50%", background: cfg.color, flexShrink: 0 }} />
-      {cfg.label}
+      {t(cfg.labelKey)}
     </span>
   );
 }
 
 function StatusBadge({ status }: { status?: string }) {
+  const t = useT("dashHome");
   const isGood   = status === "compliant";
   const isActive = status === "active";
   const isReview = status === "review";
-  const label  = isActive ? "In corso" : isGood ? "Conforme" : isReview ? "Revisione" : status ?? "—";
+  const label  = isActive ? t("st_active") : isGood ? t("st_compliant") : isReview ? t("st_review") : status ?? "—";
   const color  = isGood ? T.green : isActive ? T.amber : T.gray;
   const bg     = isGood ? T.greenBg : isActive ? T.amberBg : T.grayBg;
   const bdr    = isGood ? T.greenBdr : isActive ? T.amberBdr : "rgba(0,0,0,0.10)";
@@ -146,8 +151,8 @@ interface DiscoveredSystem {
 
 interface InProgressActivity {
   id: string;
-  title: string;
-  sub: string;
+  titleKey: string;
+  subKey: string;
   href: string;
   pct: number; // -1 = unknown
 }
@@ -156,6 +161,8 @@ interface InProgressActivity {
 
 export default function DashboardPage() {
   const { role } = useUserRole();
+  const t = useT("dashHome");
+  const locale = useLocale();
   const [showWizard, setShowWizard]         = useState(false);
   const [dossierPct, setDossierPct]         = useState(0);
   const [dossierDone, setDossierDone]       = useState(0);
@@ -265,31 +272,31 @@ export default function DashboardPage() {
       const acts: InProgressActivity[] = [];
       const friaG = readFromStorage<{ overallPercent: number }>("friaGuided");
       if (friaG && friaG.overallPercent > 0 && friaG.overallPercent < 100) {
-        acts.push({ id: "fria", title: "FRIA guidata", sub: "Valutazione impatto diritti fondamentali · Art. 27", href: "/dashboard/tools/fria", pct: friaG.overallPercent });
+        acts.push({ id: "fria", titleKey: "ip_fria_title", subKey: "ip_fria_sub", href: "/dashboard/tools/fria", pct: friaG.overallPercent });
       }
       const dpiaG = readFromStorage<{ overallPercent: number }>("dpiaGuided");
       if (dpiaG && dpiaG.overallPercent > 0 && dpiaG.overallPercent < 100) {
-        acts.push({ id: "dpia", title: "DPIA guidata", sub: "Data Protection Impact Assessment · Art. 35", href: "/dashboard/tools/dpia", pct: dpiaG.overallPercent });
+        acts.push({ id: "dpia", titleKey: "ip_dpia_title", subKey: "ip_dpia_sub", href: "/dashboard/tools/dpia", pct: dpiaG.overallPercent });
       }
       const assessment = readFromStorage<object>("assessment");
       if (assessment && Object.keys(assessment).length > 0) {
-        acts.push({ id: "assessment", title: "Valutazione conformità", sub: "Assessment AI Act · Art. 9", href: "/dashboard/tools/assessment", pct: -1 });
+        acts.push({ id: "assessment", titleKey: "ip_assessment_title", subKey: "ip_assessment_sub", href: "/dashboard/tools/assessment", pct: -1 });
       }
       const rrKeys = Object.keys(localStorage).filter(k => k.includes("risk_register") && !k.includes("signoff"));
       if (rrKeys.length > 0) {
-        acts.push({ id: "risk", title: "Risk Register", sub: "Registro rischi AI · Art. 9(9)", href: "/dashboard/tools/risk-manager", pct: -1 });
+        acts.push({ id: "risk", titleKey: "ip_risk_title", subKey: "ip_risk_sub", href: "/dashboard/tools/risk-manager", pct: -1 });
       }
       setInProgress(acts);
     } catch { /* ignore */ }
   }, []);
 
   const pctColor      = dossierPct >= 80 ? T.green : dossierPct >= 40 ? T.amber : T.text;
-  const scoreLabel    = dossierPct >= 80 ? "OTTIMO" : dossierPct >= 40 ? "IN MIGLIORAMENTO" : "AZIONE RICHIESTA";
-  const levelLabel    = dossierPct >= 80 ? "LIVELLO ALTO" : dossierPct >= 40 ? "LIVELLO MEDIO" : "LIVELLO BASSO";
+  const scoreLabel    = dossierPct >= 80 ? t("score_good") : dossierPct >= 40 ? t("score_improving") : t("score_action");
+  const levelLabel    = dossierPct >= 80 ? t("level_high") : dossierPct >= 40 ? t("level_med") : t("level_low");
   const showDiscovery = newSystemCount > 0 || (!hasSources && !discoveryDismissed);
   const showDeadline  = !deadlineDismissed && alertDeadline !== null;
   const showArt73     = art73Count > 0 && !art73Dismissed;
-  const mainSysName   = onboardingSystem || "Sistema AI principale";
+  const mainSysName   = onboardingSystem || t("mainSysName");
   const classifier    = typeof window !== "undefined" ? readFromStorage<ClassifierResult>("classifier") : null;
   const hasInventory  = inventorySystems.length > 0;
   const showMainSys   = !hasInventory && systems.length === 0 && isOnboardingDone();
@@ -304,7 +311,8 @@ export default function DashboardPage() {
   const showBanner    = nextActions[0] || showDeadline || showArt73 || showDiscovery;
   const criticalDeadlines = deadlines.filter(d => d.days <= 90);
 
-  const nowStr = mounted ? new Date().toLocaleString("it-IT", {
+  const dateLocale = locale === "en" ? "en-GB" : "it-IT";
+  const nowStr = mounted ? new Date().toLocaleString(dateLocale, {
     weekday: "short", day: "2-digit", month: "short", year: "numeric",
     hour: "2-digit", minute: "2-digit",
   }) + " UTC" : "";
@@ -340,12 +348,12 @@ export default function DashboardPage() {
               {nowStr}
             </p>
             <h1 style={{ fontSize: 27, fontWeight: 400, letterSpacing: "-0.9px", color: T.text, lineHeight: 1.1, marginBottom: 5 }}>
-              Compliance Overview
+              {t("title")}
             </h1>
             <p style={{ fontSize: 12, color: T.muted }}>
-              {role === "deployer" ? "Obblighi Art. 26 — deployer"
-                : role === "distributor" ? "Obblighi minimi Art. 24"
-                : "EU AI Act 2024/1689"}
+              {role === "deployer" ? t("role_deployer")
+                : role === "distributor" ? t("role_distributor")
+                : t("role_default")}
             </p>
           </div>
 
@@ -379,16 +387,16 @@ export default function DashboardPage() {
           }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 3 }}>
-                {showArt73 ? `Art. 73 · Notifica entro ${art73MinDays} giorni`
+                {showArt73 ? `${t("b_art73_pre")} ${art73MinDays} ${t("b_days")}`
                   : showDeadline ? alertDeadline!.title
-                  : showDiscovery ? "Sistemi AI rilevati — classificazione richiesta"
+                  : showDiscovery ? t("b_discovery_title")
                   : nextActions[0]?.title}
               </p>
               <p style={{ fontSize: 11, color: T.muted }}>
-                {showArt73 ? `${art73Count} incidente/i non segnalato/i · Art. 73`
-                  : showDeadline ? `${alertDeadline!.article} · Scadenza ${new Date(alertDeadline!.date).toLocaleDateString("it-IT", { day:"2-digit", month:"short", year:"numeric" })} — ${alertDeadlineDays} giorni rimanenti`
-                  : showDiscovery ? "Discovery per classificare automaticamente i sistemi AI"
-                  : nextActions[0] ? `Art. ${nextActions[0].article} · Allegato III` : ""}
+                {showArt73 ? `${art73Count} ${t("b_art73_sub")}`
+                  : showDeadline ? `${alertDeadline!.article} · ${t("b_deadline_due")} ${new Date(alertDeadline!.date).toLocaleDateString(dateLocale, { day:"2-digit", month:"short", year:"numeric" })} — ${alertDeadlineDays} ${t("b_days_remaining")}`
+                  : showDiscovery ? t("b_discovery_sub")
+                  : nextActions[0] ? `Art. ${nextActions[0].article} · ${t("annexIII")}` : ""}
               </p>
             </div>
             <Link
@@ -402,10 +410,10 @@ export default function DashboardPage() {
                 display: "inline-flex", alignItems: "center", gap: 6, flexShrink: 0,
                 letterSpacing: "-0.1px",
               }}>
-              {showArt73 ? "Notifica ora"
-                : showDeadline ? "Vedi timeline"
-                : showDiscovery ? "Avvia Discovery"
-                : "Vai alla sezione"}
+              {showArt73 ? t("btn_notify")
+                : showDeadline ? t("btn_timeline")
+                : showDiscovery ? t("btn_discovery")
+                : t("btn_section")}
               <ArrowRight size={12} />
             </Link>
           </div>
@@ -416,30 +424,30 @@ export default function DashboardPage() {
           {[
             {
               Icon: Server,
-              label: "SISTEMI AI",
+              label: t("stat_systems"),
               value: totalSystems,
               sub: totalSystems > 0
-                ? `${systems.filter(s => s.riskLevel === "high" || s.riskLevel === "unacceptable").length} alto rischio · All. III`
-                : "Avvia Discovery",
+                ? `${systems.filter(s => s.riskLevel === "high" || s.riskLevel === "unacceptable").length} ${t("stat_systems_sub")}`
+                : t("stat_startDiscovery"),
             },
             {
               Icon: AlertCircle,
-              label: "OBBLIGHI APERTI",
+              label: t("stat_openObl"),
               value: nextActions.length,
-              sub: nextActions.length > 0 ? `${Math.min(nextActions.length, 2)} urgenti · entro 7 giorni` : "tutti adempiuti",
+              sub: nextActions.length > 0 ? `${Math.min(nextActions.length, 2)} ${t("stat_obl_urgent")}` : t("stat_obl_none"),
             },
             {
               Icon: FileCheck2,
-              label: "DOC. FIRMATI",
+              label: t("stat_signedDocs"),
               value: dossierDone,
-              sub: "eIDAS SES · hash-chain verificata",
+              sub: t("stat_docs_sub"),
             },
             {
               Icon: CalendarClock,
-              label: "PROSSIMA SCADENZA",
+              label: t("stat_nextDeadline"),
               value: deadlines[0] ? `${deadlines[0].days}` : "—",
-              unit: deadlines[0] ? "gg" : undefined,
-              sub: deadlines[0] ? `${deadlines[0].deadline.article} · notifica incidente` : "nessuna scadenza",
+              unit: deadlines[0] ? t("unit_days") : undefined,
+              sub: deadlines[0] ? `${deadlines[0].deadline.article} · ${t("stat_deadline_sub")}` : t("stat_noDeadline"),
             },
           ].map(({ Icon, label, value, unit, sub }, i) => (
             <div key={label} style={{
@@ -473,7 +481,7 @@ export default function DashboardPage() {
                 <Cpu size={13} style={{ color: T.faint }} />
                 <div>
                   <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.9px", textTransform: "uppercase", color: T.faint }}>
-                    INVENTARIO SISTEMI AI
+                    {t("tbl_title")}
                   </span>
                   {totalSystems > 0 && (
                     <span style={{ fontSize: 9, color: T.faint, marginLeft: 8 }}>
@@ -486,7 +494,7 @@ export default function DashboardPage() {
 
             {/* Col headers */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 140px 120px 160px", columnGap: 24, padding: "8px 18px", background: "rgba(0,0,0,0.015)", borderBottom: `1px solid ${T.border}` }}>
-              {["SISTEMA", "RISCHIO", "STATO", "DOSSIER"].map(h => (
+              {[t("col_system"), t("col_risk"), t("col_status"), t("col_dossier")].map(h => (
                 <span key={h} style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase", color: T.faint }}>
                   {h}
                 </span>
@@ -497,10 +505,10 @@ export default function DashboardPage() {
             {totalSystems === 0 ? (
               <div style={{ padding: "32px 18px", textAlign: "center" }}>
                 <Server size={28} style={{ color: "rgba(0,0,0,0.08)", margin: "0 auto 10px" }} />
-                <p style={{ fontSize: 13, color: T.muted, marginBottom: 12 }}>Nessun sistema AI registrato</p>
+                <p style={{ fontSize: 13, color: T.muted, marginBottom: 12 }}>{t("empty_systems")}</p>
                 <Link href="/dashboard/tools/inventory"
                   style={{ fontSize: 12, fontWeight: 500, color: "#fff", background: T.text, padding: "8px 16px", borderRadius: 6, display: "inline-flex", alignItems: "center", gap: 6 }}>
-                  Vai all&apos;inventario <ArrowRight size={12} />
+                  {t("go_inventory")} <ArrowRight size={12} />
                 </Link>
               </div>
             ) : (
@@ -522,8 +530,8 @@ export default function DashboardPage() {
                         <div>
                           <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 2 }}>{sys.name}</p>
                           <p style={{ fontSize: 10, color: T.faint }}>
-                            {sys.tier !== "unclassified" ? (TIER_RISK[sys.tier] === "unacceptable" ? "Vietato" : TIER_RISK[sys.tier] === "high" ? "Alto rischio" : sys.tier === "gpai" ? "GPAI" : "Rischio limitato") : "Da classificare"}
-                            {(sys.tier === "high_risk" || sys.tier === "prohibited") ? " · All.III §4" : " · Art. 50"}
+                            {sys.tier !== "unclassified" ? (TIER_RISK[sys.tier] === "unacceptable" ? t("risk_prohibited") : TIER_RISK[sys.tier] === "high" ? t("risk_highShort") : sys.tier === "gpai" ? "GPAI" : t("risk_limitedShort")) : t("toClassify")}
+                            {(sys.tier === "high_risk" || sys.tier === "prohibited") ? ` ${t("suffix_annexIII4")}` : ` ${t("suffix_art50")}`}
                           </p>
                         </div>
                         <RiskBadge level={TIER_RISK[sys.tier]} />
@@ -539,8 +547,8 @@ export default function DashboardPage() {
                     <div>
                       <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 2 }}>{mainSysName}</p>
                       <p style={{ fontSize: 10, color: T.faint }}>
-                        {classifier?.riskLevel ? RISK_CFG[classifier.riskLevel]?.label ?? "Classificato" : "Classificato"}
-                        {(classifier?.riskLevel === "high" || classifier?.riskLevel === "unacceptable") ? " · All.III §4" : " · Art. 50"}
+                        {classifier?.riskLevel && RISK_CFG[classifier.riskLevel] ? t(RISK_CFG[classifier.riskLevel].labelKey) : t("classified")}
+                        {(classifier?.riskLevel === "high" || classifier?.riskLevel === "unacceptable") ? ` ${t("suffix_annexIII4")}` : ` ${t("suffix_art50")}`}
                       </p>
                     </div>
                     <RiskBadge level={classifier?.riskLevel} />
@@ -558,8 +566,8 @@ export default function DashboardPage() {
                     <div>
                       <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 2 }}>{sys.name}</p>
                       <p style={{ fontSize: 10, color: T.faint }}>
-                        {sys.riskLevel ? RISK_CFG[sys.riskLevel]?.label ?? "—" : "Da classificare"}
-                        {(sys.riskLevel === "high" || sys.riskLevel === "unacceptable") ? " · All.III §4" : " · Art. 50"}
+                        {sys.riskLevel && RISK_CFG[sys.riskLevel] ? t(RISK_CFG[sys.riskLevel].labelKey) : sys.riskLevel ? "—" : t("toClassify")}
+                        {(sys.riskLevel === "high" || sys.riskLevel === "unacceptable") ? ` ${t("suffix_annexIII4")}` : ` ${t("suffix_art50")}`}
                       </p>
                     </div>
                     <RiskBadge level={sys.riskLevel} />
@@ -580,7 +588,7 @@ export default function DashboardPage() {
                   transition: "opacity 0.15s",
                 }}>
                 <Server size={12} style={{ color: T.faint }} />
-                Tutti i sistemi
+                {t("all_systems")}
                 <ArrowRight size={11} style={{ color: T.faint }} />
               </Link>
             </div>
@@ -591,21 +599,23 @@ export default function DashboardPage() {
             <div style={{ padding: "12px 18px 10px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", gap: 7 }}>
               <History size={12} style={{ color: T.faint }} />
               <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.9px", textTransform: "uppercase", color: T.faint }}>
-                ATTIVITÀ RECENTE
+                {t("act_recent")}
               </span>
             </div>
 
             {recentEvidence.length === 0 ? (
               <div style={{ padding: "24px 18px" }}>
-                <p style={{ fontSize: 12, color: T.faint }}>Nessuna attività ancora.</p>
+                <p style={{ fontSize: 12, color: T.faint }}>{t("act_none")}</p>
               </div>
             ) : (
               recentEvidence.map((ev, i) => {
-                const cfg = EV_CFG[ev.type] ?? { label: ev.type, color: T.gray, Icon: Activity };
-                const { Icon } = cfg;
+                const cfg = EV_CFG[ev.type];
+                const evLabel = cfg ? t(cfg.labelKey) : ev.type;
+                const Icon = cfg?.Icon ?? Activity;
+                const cfgColor = cfg?.color ?? T.gray;
                 const toolName = (ev.content as Record<string, unknown>)?.tool as string
                   || (ev.content as Record<string, unknown>)?.title as string
-                  || cfg.label;
+                  || evLabel;
                 const artLabel = (ev.content as Record<string, unknown>)?.article as string ?? "";
                 return (
                   <div key={ev.id} style={{
@@ -618,14 +628,14 @@ export default function DashboardPage() {
                         background: T.grayBg, border: `1px solid ${T.border}`,
                         display: "flex", alignItems: "center", justifyContent: "center",
                       }}>
-                        <Icon size={12} style={{ color: cfg.color }} />
+                        <Icon size={12} style={{ color: cfgColor }} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ fontSize: 11.5, fontWeight: 600, color: T.text, marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           {toolName}
                         </p>
                         <p style={{ fontSize: 10, color: T.faint }}>
-                          {artLabel ? `${artLabel} · ` : ""}{cfg.label} · {relTime(ev.timestamp)}
+                          {artLabel ? `${artLabel} · ` : ""}{evLabel} · {relTime(ev.timestamp, t)}
                         </p>
                       </div>
                     </div>
@@ -638,7 +648,7 @@ export default function DashboardPage() {
               <Link href="/dashboard/evidence-layer"
                 style={{ fontSize: 11.5, fontWeight: 500, color: T.text, display: "inline-flex", alignItems: "center", gap: 6 }}>
                 <History size={11} style={{ color: T.faint }} />
-                Log completo
+                {t("act_fullLog")}
                 <ArrowRight size={11} style={{ color: T.faint }} />
               </Link>
             </div>
@@ -652,24 +662,24 @@ export default function DashboardPage() {
             {
               href:  "/dashboard/dossier",
               Icon:  FileCheck2,
-              title: `${dossierDone} documenti firmati`,
-              sub:   "hash-chain verificata · Art. 18",
+              title: `${dossierDone} ${t("card_docs")}`,
+              sub:   t("card_docs_sub"),
               accent: T.green,
             },
             {
               href:  "/dashboard/notifications",
               Icon:  CalendarClock,
-              title: `${criticalDeadlines.length} scadenze critiche`,
+              title: `${criticalDeadlines.length} ${t("card_deadlines")}`,
               sub:   deadlines[0]
-                ? `${deadlines[0].deadline.article}${deadlines[1] ? " · " + deadlines[1].deadline.article : ""} · entro ${deadlines[0].days} giorni`
-                : "Nessuna scadenza imminente",
+                ? `${deadlines[0].deadline.article}${deadlines[1] ? " · " + deadlines[1].deadline.article : ""} · ${t("card_within")} ${deadlines[0].days} ${t("b_days")}`
+                : t("card_deadlines_none"),
               accent: criticalDeadlines.length > 0 ? T.amber : T.text,
             },
             {
               href:  "/dashboard/tools/trust-center",
               Icon:  BadgeCheck,
               title: "Trust Center",
-              sub:   "bozza · non pubblicato · Art. 13",
+              sub:   t("card_trust_sub"),
               accent: T.text,
             },
           ].map(({ href, Icon, title, sub, accent }) => (
@@ -699,16 +709,16 @@ export default function DashboardPage() {
         {inProgress.length > 0 && (
           <div style={{ marginTop: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-              <span style={{ fontSize: 10, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>Attività in corso</span>
-              <span style={{ fontSize: 10, color: T.faint }}>{inProgress.length} {inProgress.length === 1 ? "attività" : "attività"}</span>
+              <span style={{ fontSize: 10, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>{t("ip_title")}</span>
+              <span style={{ fontSize: 10, color: T.faint }}>{inProgress.length} {t("ip_count")}</span>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(inProgress.length, 4)}, 1fr)`, gap: 10 }}>
               {inProgress.map(act => (
                 <Link key={act.id} href={act.href} style={{ ...card, padding: "14px 16px", display: "block", textDecoration: "none", transition: "box-shadow 0.15s" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                    <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, margin: 0 }}>{act.title}</p>
+                    <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, margin: 0 }}>{t(act.titleKey)}</p>
                     <span style={{ fontSize: 10, fontWeight: 700, color: T.muted, fontFamily: "monospace" }}>
-                      {act.pct >= 0 ? `${act.pct}%` : "in corso"}
+                      {act.pct >= 0 ? `${act.pct}%` : t("ip_inProgress")}
                     </span>
                   </div>
                   {act.pct >= 0 && (
@@ -716,9 +726,9 @@ export default function DashboardPage() {
                       <div style={{ height: "100%", background: T.text, borderRadius: 2, width: `${act.pct}%`, transition: "width 0.5s" }} />
                     </div>
                   )}
-                  <p style={{ fontSize: 10, color: T.faint, margin: 0, marginBottom: 10 }}>{act.sub}</p>
+                  <p style={{ fontSize: 10, color: T.faint, margin: 0, marginBottom: 10 }}>{t(act.subKey)}</p>
                   <div style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 10.5, fontWeight: 500, color: T.text }}>
-                    Riprendi <ArrowRight size={10} />
+                    {t("ip_resume")} <ArrowRight size={10} />
                   </div>
                 </Link>
               ))}
