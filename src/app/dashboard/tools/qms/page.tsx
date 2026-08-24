@@ -10,28 +10,34 @@ import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { QMSResult, ClassifierResult, RiskManagerResult, DataAuditResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
+import { useT } from "@/i18n/LocaleProvider";
 
 const STORAGE_KEY = "qms_sections";
 const SYSNAME_KEY = "qms_system_name";
 
-const templateSections = [
-  { id: "compliance", title: "Strategia conformità normativa", desc: "Comprese procedure di valutazione e gestione modifiche", art: "Art. 17(1)(a)" },
-  { id: "design", title: "Progettazione e controllo", desc: "Tecniche, procedure e interventi per la progettazione del sistema", art: "Art. 17(1)(b)" },
-  { id: "development", title: "Sviluppo e garanzia qualità", desc: "Tecniche e procedure per lo sviluppo del sistema", art: "Art. 17(1)(c)" },
-  { id: "testing", title: "Procedure di esame, prova e convalida", desc: "Da effettuare prima, durante e dopo lo sviluppo", art: "Art. 17(1)(d)" },
-  { id: "specs", title: "Specifiche tecniche e norme", desc: "Norme armonizzate applicate e mezzi per garantire conformità", art: "Art. 17(1)(e)" },
-  { id: "data_mgmt", title: "Gestione dati", desc: "Acquisizione, raccolta, analisi, etichettatura, conservazione", art: "Art. 17(1)(f)" },
-  { id: "risk", title: "Sistema gestione rischi", desc: "Integrazione del risk management system (Art. 9)", art: "Art. 17(1)(g)" },
-  { id: "monitoring", title: "Monitoraggio post-market", desc: "Predisposizione e manutenzione sistema di monitoraggio", art: "Art. 17(1)(h)" },
-  { id: "incidents", title: "Segnalazione incidenti", desc: "Procedure relative alla segnalazione di incidenti gravi", art: "Art. 17(1)(i)" },
-  { id: "communication", title: "Comunicazione con autorità", desc: "Gestione rapporti con autorità, organismi notificati e stakeholder", art: "Art. 17(1)(j)" },
-  { id: "records", title: "Conservazione registrazioni", desc: "Sistemi e procedure per la conservazione della documentazione", art: "Art. 17(1)(k)" },
-  { id: "resources", title: "Gestione risorse", desc: "Misure relative alla sicurezza dell'approvvigionamento", art: "Art. 17(1)(l)" },
-  { id: "accountability", title: "Quadro di responsabilità", desc: "Responsabilità dirigenza e personale per tutti gli aspetti", art: "Art. 17(1)(m)" },
-];
+type T = (key: string) => string;
+
+function buildTemplateSections(t: T) {
+  return [
+    { id: "compliance", title: t("sec_compliance_title"), desc: t("sec_compliance_desc"), art: "Art. 17(1)(a)" },
+    { id: "design", title: t("sec_design_title"), desc: t("sec_design_desc"), art: "Art. 17(1)(b)" },
+    { id: "development", title: t("sec_development_title"), desc: t("sec_development_desc"), art: "Art. 17(1)(c)" },
+    { id: "testing", title: t("sec_testing_title"), desc: t("sec_testing_desc"), art: "Art. 17(1)(d)" },
+    { id: "specs", title: t("sec_specs_title"), desc: t("sec_specs_desc"), art: "Art. 17(1)(e)" },
+    { id: "data_mgmt", title: t("sec_data_mgmt_title"), desc: t("sec_data_mgmt_desc"), art: "Art. 17(1)(f)" },
+    { id: "risk", title: t("sec_risk_title"), desc: t("sec_risk_desc"), art: "Art. 17(1)(g)" },
+    { id: "monitoring", title: t("sec_monitoring_title"), desc: t("sec_monitoring_desc"), art: "Art. 17(1)(h)" },
+    { id: "incidents", title: t("sec_incidents_title"), desc: t("sec_incidents_desc"), art: "Art. 17(1)(i)" },
+    { id: "communication", title: t("sec_communication_title"), desc: t("sec_communication_desc"), art: "Art. 17(1)(j)" },
+    { id: "records", title: t("sec_records_title"), desc: t("sec_records_desc"), art: "Art. 17(1)(k)" },
+    { id: "resources", title: t("sec_resources_title"), desc: t("sec_resources_desc"), art: "Art. 17(1)(l)" },
+    { id: "accountability", title: t("sec_accountability_title"), desc: t("sec_accountability_desc"), art: "Art. 17(1)(m)" },
+  ];
+}
 
 type QMSSection = {
   id: string;
+  tplId?: string;
   title: string;
   desc: string;
   art: string;
@@ -40,6 +46,8 @@ type QMSSection = {
 };
 
 export default function QMSPage() {
+  const t = useT("toolQms");
+  const templateSections = buildTemplateSections(t);
   const [sections, setSections] = useState<QMSSection[]>(() => {
     if (typeof window === "undefined") return [];
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]") as QMSSection[]; }
@@ -68,10 +76,10 @@ export default function QMSPage() {
     if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   }
 
-  function addSection(s: typeof templateSections[number]) {
+  function addSection(s: ReturnType<typeof buildTemplateSections>[number]) {
     persist([
       ...sections,
-      { id: crypto.randomUUID(), title: s.title, desc: s.desc, art: s.art, content: "", completed: false },
+      { id: crypto.randomUUID(), tplId: s.id, title: s.title, desc: s.desc, art: s.art, content: "", completed: false },
     ]);
   }
 
@@ -129,7 +137,7 @@ export default function QMSPage() {
     // Pre-populate risk section content from risk manager data
     if (riskManager?.risks?.length) {
       setSections(prev => {
-        const riskSection = prev.find(s => s.title === "Sistema gestione rischi");
+        const riskSection = prev.find(s => s.tplId === "risk" || s.title === "Sistema gestione rischi");
         if (!riskSection || riskSection.content) return prev;
         const summary = `Livello di rischio complessivo: ${riskManager.overallRiskLevel}. ` +
           `${riskManager.risks.length} rischi identificati. ` +
@@ -139,7 +147,7 @@ export default function QMSPage() {
             .join("; ") +
           (riskManager.risks.length > 3 ? "; ..." : ".");
         const next = prev.map(s =>
-          s.title === "Sistema gestione rischi" ? { ...s, content: summary } : s
+          (s.tplId === "risk" || s.title === "Sistema gestione rischi") ? { ...s, content: summary } : s
         );
         if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
         return next;
@@ -149,14 +157,14 @@ export default function QMSPage() {
     // Pre-populate data_mgmt section content from data audit data
     if (dataAudit?.datasets?.length) {
       setSections(prev => {
-        const dataSection = prev.find(s => s.title === "Gestione dati");
+        const dataSection = prev.find(s => s.tplId === "data_mgmt" || s.title === "Gestione dati");
         if (!dataSection || dataSection.content) return prev;
         const personalCount = dataAudit.datasets.filter(d => d.personalData).length;
         const summary = `Qualità complessiva: ${dataAudit.overallQuality}. ` +
           `${dataAudit.datasets.length} dataset analizzati, di cui ${personalCount} con dati personali. ` +
           `Dataset: ${dataAudit.datasets.map(d => d.name).join(", ")}.`;
         const next = prev.map(s =>
-          s.title === "Gestione dati" ? { ...s, content: summary } : s
+          (s.tplId === "data_mgmt" || s.title === "Gestione dati") ? { ...s, content: summary } : s
         );
         if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
         return next;
@@ -167,12 +175,12 @@ export default function QMSPage() {
 
   function saveToDossier() {
     if (sections.length === 0) {
-      showToast("Aggiungi almeno una sezione prima di salvare nel dossier", "error");
+      showToast(t("toast_needSave"), "error");
       return;
     }
     const completedAt = new Date().toISOString();
     const postMarketPlanExists = sections.some(
-      (s) => s.title.toLowerCase().includes("monitoraggio") && s.completed
+      (s) => (s.tplId === "monitoring" || s.title.toLowerCase().includes("monitoraggio")) && s.completed
     );
     writeToStorage<QMSResult>("qms", {
       qmsDocumentRef: `QMS-${systemName || "AIComply"}-v1.0-${new Date().toISOString().split("T")[0]}`,
@@ -196,12 +204,12 @@ export default function QMSPage() {
       "qms"
     );
     setSavedAt(completedAt);
-    showToast("QMS salvato nel dossier");
+    showToast(t("toast_saved"));
   }
 
   function exportQMS() {
     if (sections.length === 0) {
-      showToast("Aggiungi almeno una sezione prima di esportare", "error");
+      showToast(t("toast_needExport"), "error");
       return;
     }
     const report = {
@@ -230,7 +238,7 @@ export default function QMSPage() {
     a.download = `qms-export-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast("SGQ esportato — " + sections.length + " sezioni");
+    showToast(t("toast_exported") + " " + sections.length + " " + t("sections_word"));
   }
 
   return (
@@ -239,16 +247,16 @@ export default function QMSPage() {
         <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
           style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)", fontFamily: "var(--font-inter, system-ui)" }}>
           <CheckCircle size={13} strokeWidth={1.5} style={{ color: "#15803d" }} />
-          <span style={{ color: "#15803d" }}>✓ Risultati salvati nel dossier · Aggiornato il {new Date(savedAt).toLocaleDateString("it-IT")}</span>
-          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>Vedi dossier →</Link>
+          <span style={{ color: "#15803d" }}>✓ {t("savedBanner")} {new Date(savedAt).toLocaleDateString("it-IT")}</span>
+          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>{t("seeDossier")}</Link>
         </div>
       ) : (
         <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[12px]"
           style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", fontFamily: "var(--font-inter, system-ui)" }}>
-          <span style={{ color: "rgba(0,0,0,0.45)" }}>Salva la configurazione QMS nel dossier di compliance</span>
+          <span style={{ color: "rgba(0,0,0,0.45)" }}>{t("saveHint")}</span>
           <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1 hover:opacity-80"
             style={{ background: "#0D1016", color: "#ffffff", border: "none", cursor: "pointer" }}>
-            Salva nel dossier
+            {t("saveBtn")}
           </button>
         </div>
       )}
@@ -258,22 +266,20 @@ export default function QMSPage() {
         <input
           value={systemName}
           onChange={(e) => setSystemName(e.target.value)}
-          placeholder="Nome sistema AI…"
+          placeholder={t("systemName_placeholder")}
           className="rounded-lg px-3 py-1.5 text-[12px] focus:outline-none"
           style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)", color: "#0D1016", width: "200px" }}
         />
       </div>
       <p className="text-sm mb-8" style={{ color: "rgba(0,0,0,0.45)" }}>
-        Sistema di Gestione della Qualità — Art. 17 Regolamento UE 2024/1689.
-        Documenta politiche, procedure e istruzioni scritte per garantire la
-        conformità.
+        {t("subtitle")}
       </p>
 
       <div className="grid grid-cols-4 gap-4 mb-8">
         {[
-          { label: "Sezioni", value: sections.length, textColor: "#0D1016" },
-          { label: "Completate", value: completedCount, textColor: "#16a34a" },
-          { label: "Template", value: templateSections.length, textColor: "#2563eb" },
+          { label: t("stat_sections"), value: sections.length, textColor: "#0D1016" },
+          { label: t("stat_completed"), value: completedCount, textColor: "#16a34a" },
+          { label: t("stat_template"), value: templateSections.length, textColor: "#2563eb" },
         ].map((card) => (
           <div key={card.label} className="rounded-xl p-4"
             style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
@@ -287,27 +293,27 @@ export default function QMSPage() {
             onClick={exportQMS}
             className="w-full flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-[11px] font-medium transition-opacity hover:opacity-80"
             style={{ background: "#0D1016", color: "#ffffff", border: "none", cursor: "pointer" }}>
-            <Download className="h-3 w-3" /> Esporta SGQ
+            <Download className="h-3 w-3" /> {t("export_btn")}
           </button>
         </div>
       </div>
 
       <h2 className="text-sm font-semibold mb-4" style={{ color: "#0D1016" }}>
-        Aggiungi sezioni QMS
+        {t("add_heading")}
       </h2>
       <div className="grid md:grid-cols-2 gap-2 mb-8">
         {templateSections
-          .filter((t) => !sections.find((s) => s.title === t.title))
-          .map((t) => (
+          .filter((tpl) => !sections.find((s) => (s.tplId ?? s.title) === tpl.id || s.title === tpl.title))
+          .map((tpl) => (
             <button
-              key={t.id}
-              onClick={() => addSection(t)}
+              key={tpl.id}
+              onClick={() => addSection(tpl)}
               className="rounded-lg px-4 py-2.5 text-xs text-left transition-all flex items-center gap-1.5"
               style={{ border: "1px solid rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.5)", background: "#ffffff" }}
             >
               <Plus className="h-3 w-3 shrink-0" style={{ color: "rgba(0,0,0,0.3)" }} />
-              {t.title}{" "}
-              <span style={{ color: "rgba(0,0,0,0.25)" }}>({t.art})</span>
+              {tpl.title}{" "}
+              <span style={{ color: "rgba(0,0,0,0.25)" }}>({tpl.art})</span>
             </button>
           ))}
       </div>
@@ -332,8 +338,8 @@ export default function QMSPage() {
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4" style={{ color: "#2563eb" }} />
                   <div>
-                    <h3 className="text-sm font-semibold" style={{ color: "#0D1016" }}>{s.title}</h3>
-                    <p className="text-xs" style={{ color: "rgba(0,0,0,0.45)" }}>{s.desc}</p>
+                    <h3 className="text-sm font-semibold" style={{ color: "#0D1016" }}>{s.tplId ? t(`sec_${s.tplId}_title`) : s.title}</h3>
+                    <p className="text-xs" style={{ color: "rgba(0,0,0,0.45)" }}>{s.tplId ? t(`sec_${s.tplId}_desc`) : s.desc}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -348,7 +354,7 @@ export default function QMSPage() {
                       onClick={() => draftSection(s.id, s.art)}
                       className="flex items-center gap-1 text-[10px] font-medium rounded-full px-2 py-0.5 transition-colors"
                       style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.25)", color: "#92400e", cursor: sectionDrafting[s.id] ? "wait" : "pointer" }}
-                      title="Genera bozza con AI (Vertex AI)"
+                      title={t("ai_title")}
                     >
                       <Sparkles className="h-3 w-3" />
                       {sectionDrafting[s.id] ? "…" : "✦ AI"}
@@ -361,7 +367,7 @@ export default function QMSPage() {
                       ? { background: "rgba(22,163,74,0.1)", border: "1px solid rgba(22,163,74,0.3)", color: "#16a34a" }
                       : { background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.45)" }}
                   >
-                    {s.completed ? "OK" : "Bozza"}
+                    {s.completed ? t("badge_ok") : t("badge_draft")}
                   </button>
                   <button
                     onClick={() => removeSection(s.id)}
@@ -381,7 +387,7 @@ export default function QMSPage() {
                   background: "rgba(0,0,0,0.02)",
                   color: "#0D1016",
                 }}
-                placeholder="Descrivi policy, procedure e istruzioni per questa sezione..."
+                placeholder={t("content_placeholder")}
                 rows={3}
               />
             </motion.div>
@@ -389,7 +395,7 @@ export default function QMSPage() {
         </AnimatePresence>
       </div>
 
-      <SignOffPanel toolKey="qms" toolLabel="Sistema di Gestione Qualità" />
+      <SignOffPanel toolKey="qms" toolLabel={t("signoff_label")} />
 
       {/* Toast */}
       <AnimatePresence>
