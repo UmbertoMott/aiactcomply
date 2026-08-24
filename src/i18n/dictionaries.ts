@@ -208,12 +208,13 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
     },
     quote: {
       text: "La compliance nasce come strumento lungo e burocratico — pensato per scoraggiare più che guidare. La nostra missione è renderla fluida: perché le aziende rispettino davvero i diritti degli utenti, non solo per evitare sanzioni salate.",
+      name: "L'Avvocato",
       role: "Founder, RegulaeOS",
     },
     chiEroga: {
       kicker: "Chi eroga il servizio",
-      title: "Avv. Umberto Mottola — Foro di Napoli",
-      body1: "Il servizio è reso dall'<strong>Avv. Umberto Mottola</strong>, iscritto all'Ordine degli Avvocati di Napoli, nell'esercizio della professione forense e nel rispetto del codice deontologico forense.",
+      title: "L'Avvocato — Foro di Napoli",
+      body1: "Il servizio è reso dall'<strong>Avvocato</strong> iscritto all'Ordine degli Avvocati di Napoli, nell'esercizio della professione forense e nel rispetto del codice deontologico forense.",
       body2: "<strong>RegulaeOS è il software con cui l'assistenza è erogata.</strong> Gli output della piattaforma — Triage, Risk Register, FRIA, DPIA, Post-Market — sono elaborazioni di lavorazione interne. Il parere e i documenti di conformità costituiscono prestazione professionale resa dall'Avvocato nell'ambito di un incarico.",
       legalNote: "Ai sensi dell'art. 35 del Codice Deontologico Forense, la comunicazione informativa qui resa è veritiera, verificabile e non comparativa. La versione definitiva del copy e dei documenti legali va confermata dall'avvocato titolare.",
     },
@@ -242,7 +243,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       link_cookiePolicy: "Cookie Policy",
       cookieSettings: "Impostazioni cookie",
       cookieSettingsAria: "Apri impostazioni cookie",
-      legalLine: "Avv. Umberto Mottola — Foro di Napoli — P.IVA [•]. RegulaeOS è software proprietario dell'Avv. Mottola, utilizzato quale strumento della prestazione professionale.",
+      legalLine: "L'Avvocato — Foro di Napoli — P.IVA [•]. RegulaeOS è software proprietario dell'Avvocato, utilizzato quale strumento della prestazione professionale.",
       compliance: "Conforme a EU AI Act 2024/1689 · GDPR 2016/679",
     },
     dash: {
@@ -771,12 +772,13 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
     },
     quote: {
       text: "Compliance was born as a long, bureaucratic tool — designed to discourage more than to guide. Our mission is to make it fluid: so that companies genuinely respect users' rights, not just to avoid heavy penalties.",
+      name: "The Lawyer",
       role: "Founder, RegulaeOS",
     },
     chiEroga: {
       kicker: "Who provides the service",
-      title: "Umberto Mottola, Attorney — Naples Bar",
-      body1: "The service is provided by <strong>Umberto Mottola, Attorney</strong>, admitted to the Naples Bar, in the exercise of the legal profession and in compliance with the professional code of conduct for lawyers.",
+      title: "The Lawyer — Naples Bar",
+      body1: "The service is provided by <strong>the Lawyer</strong> admitted to the Naples Bar, in the exercise of the legal profession and in compliance with the professional code of conduct for lawyers.",
       body2: "<strong>RegulaeOS is the software through which the assistance is delivered.</strong> The platform's outputs — Triage, Risk Register, FRIA, DPIA, Post-Market — are internal working elaborations. The opinion and the compliance documents constitute a professional service rendered by the Lawyer within an engagement.",
       legalNote: "Pursuant to Art. 35 of the Italian Bar's Code of Conduct, the informative communication provided here is truthful, verifiable and non-comparative. The final version of the copy and legal documents must be confirmed by the responsible lawyer.",
     },
@@ -805,7 +807,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       link_cookiePolicy: "Cookie Policy",
       cookieSettings: "Cookie settings",
       cookieSettingsAria: "Open cookie settings",
-      legalLine: "Umberto Mottola, Attorney — Naples Bar — VAT [•]. RegulaeOS is proprietary software of Mr Mottola, used as the instrument of the professional service.",
+      legalLine: "The Lawyer — Naples Bar — VAT [•]. RegulaeOS is proprietary software of the Lawyer, used as the instrument of the professional service.",
       compliance: "Compliant with EU AI Act 2024/1689 · GDPR 2016/679",
     },
     dash: {

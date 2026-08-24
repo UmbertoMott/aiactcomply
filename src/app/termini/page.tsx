@@ -29,7 +29,7 @@ export default function TerminiPage() {
         <h2>2. Oggetto del contratto</h2>
         <p>
           Il Servizio consiste nell&apos;assistenza professionale alla conformità al Regolamento (UE) 2024/1689 («EU AI Act»)
-          e alla normativa correlata (GDPR, ISO 42001, ecc.), erogata dall&apos;<strong>Avv. Umberto Mottola</strong>,
+          e alla normativa correlata (GDPR, ISO 42001, ecc.), erogata dall&apos;<strong>Avvocato</strong>
           iscritto all&apos;Ordine degli Avvocati di Napoli, nell&apos;esercizio della professione forense e nel rispetto
           del codice deontologico. Il canone mensile è corrispettivo di tale assistenza. Lo Strumento (software RegulaeOS)
           è il mezzo tecnico con cui l&apos;assistenza è resa; la sua messa a disposizione è accessoria e strumentale

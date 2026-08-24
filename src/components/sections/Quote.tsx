@@ -56,7 +56,7 @@ export default function Quote() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/founder.jpg"
-                alt="Umberto Mottola"
+                alt={t("name")}
                 style={{
                   width: 44,
                   height: 44,
@@ -69,7 +69,7 @@ export default function Quote() {
               />
               <div>
                 <p style={{ fontSize: 13, fontWeight: 500, color: "#0D1016", lineHeight: 1.3 }}>
-                  Umberto Mottola
+                  {t("name")}
                 </p>
                 <p style={{ fontSize: 12, color: "rgba(0,0,0,0.38)" }}>{t("role")}</p>
               </div>

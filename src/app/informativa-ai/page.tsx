@@ -82,7 +82,7 @@ export default function InformativaAIPage() {
           Il sistema non prende decisioni giuridicamente vincolanti in modo automatico.
         </p>
         <p>
-          <strong>La prestazione professionale è resa dall&apos;Avv. Umberto Mottola</strong>,
+          <strong>La prestazione professionale è resa dall&apos;Avvocato</strong>
           iscritto all&apos;Ordine degli Avvocati di Napoli, nell&apos;esercizio della professione forense.
           Gli output dello strumento sono elaborazioni di lavorazione interne; il parere e i documenti di conformità
           costituiscono prestazione professionale resa dall&apos;Avvocato nell&apos;ambito di un incarico.
