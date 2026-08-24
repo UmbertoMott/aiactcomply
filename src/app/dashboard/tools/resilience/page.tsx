@@ -20,6 +20,7 @@ import {
   MAX_EVAL_BYTES, type EvalRow,
 } from "@/lib/resilience/eval-analyzer";
 import { useT } from "@/i18n/LocaleProvider";
+import FinalExportGate from "@/components/disclosure/FinalExportGate";
 
 const T = {
   text: "#0D1016", muted: "rgba(0,0,0,0.42)", faint: "rgba(0,0,0,0.22)", border: "rgba(0,0,0,0.08)",
@@ -372,9 +373,11 @@ export default function ResiliencePage() {
               {t("ev_desc")}
               {record.fingerprint && <span style={{ fontFamily: "monospace" }}> · fp {record.fingerprint.slice(0, 10)}…</span>}
             </p>
-            <div className="flex flex-wrap gap-2">
-              <button onClick={exportJSON} className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}><FileText size={13} /> {t("ev_exportJson")}</button>
-              <button onClick={() => window.print()} className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg" style={{ background: "#fff", color: T.text, border: `1px solid ${T.border}`, cursor: "pointer" }}><FileText size={13} /> {t("ev_printPdf")}</button>
+            <div className="flex flex-wrap gap-2 items-center">
+              <FinalExportGate>
+                <button onClick={exportJSON} className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}><FileText size={13} /> {t("ev_exportJson")}</button>
+                <button onClick={() => window.print()} className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg" style={{ background: "#fff", color: T.text, border: `1px solid ${T.border}`, cursor: "pointer" }}><FileText size={13} /> {t("ev_printPdf")}</button>
+              </FinalExportGate>
               <button onClick={saveToDossier} className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg ml-auto" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}><CheckCircle2 size={13} /> {t("ev_saveDossier")}</button>
             </div>
           </div>

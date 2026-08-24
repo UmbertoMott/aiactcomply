@@ -565,6 +565,13 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       ev_printPdf: "Stampa / Salva PDF",
       ev_saveDossier: "Salva nel dossier",
     },
+    deontology: {
+      ai_generated: "Generato da AI",
+      internal_draft: "Bozza interna di lavorazione",
+      deliverable_note: "Il deliverable finale (parere e documenti di conformità) è reso dall'Avvocato nell'ambito dell'incarico.",
+      legal_assistant_label: "Strumento di reperimento normativo e informazione — non eroga pareri legali.",
+      export_gated: "Export finale disabilitato: il deliverable è consegnato dall'Avvocato dopo revisione.",
+    },
   },
   en: {
     nav: {
@@ -1111,6 +1118,13 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       ev_exportJson: "Export JSON",
       ev_printPdf: "Print / Save PDF",
       ev_saveDossier: "Save to dossier",
+    },
+    deontology: {
+      ai_generated: "AI-generated",
+      internal_draft: "Internal working draft",
+      deliverable_note: "The final deliverable (opinion and compliance documents) is rendered by the Lawyer within the engagement.",
+      legal_assistant_label: "Normative-retrieval and information tool — it does not provide legal advice.",
+      export_gated: "Final export disabled: the deliverable is delivered by the Lawyer after review.",
     },
   },
 };
