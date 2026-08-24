@@ -13,7 +13,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
   it: {
     nav: {
       product: "Prodotto",
-      pricing: "Prezzi",
+      pricing: "Piani di assistenza",
       scanner: "Scanner Art. 50",
       resources: "Risorse",
       login: "Accedi",
@@ -569,7 +569,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
   en: {
     nav: {
       product: "Product",
-      pricing: "Pricing",
+      pricing: "Assistance plans",
       scanner: "Art. 50 Scanner",
       resources: "Resources",
       login: "Log in",
