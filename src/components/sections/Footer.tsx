@@ -130,8 +130,8 @@ export default function Footer() {
           alignItems: "center",
           gap: 12,
         }}>
-          <p style={{ fontFamily: MONO, fontSize: 11, color: "rgba(255,255,255,0.22)" }}>
-            © {new Date().getFullYear()} RegulaeOS S.r.l. — P.IVA [•] — {t("copyright")}
+          <p style={{ fontFamily: MONO, fontSize: 11, color: "rgba(255,255,255,0.22)", maxWidth: 620, lineHeight: 1.6 }}>
+            {t("legalLine")}
           </p>
           <p style={{ fontFamily: MONO, fontSize: 11, color: "rgba(255,255,255,0.22)" }}>
             {t("compliance")}

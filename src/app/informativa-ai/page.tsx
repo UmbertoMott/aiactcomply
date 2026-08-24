@@ -57,9 +57,9 @@ export default function InformativaAIPage() {
         <ul>
           <li>
             Le risposte del Legal Assistant sono generate sulla base di fonti normative indicizzate
-            (EU AI Act, ISO 22989, EDPB Guidelines) ma <strong>non costituiscono di per sé parere o consulenza legale
-            finché non sono verificate e validate dall&apos;avvocato</strong>; i riferimenti normativi vanno confrontati
-            col testo vigente.
+            (EU AI Act, ISO 22989, EDPB Guidelines) e hanno finalità di <strong>reperimento normativo e
+            informazione</strong>: sono elaborazioni di lavorazione interne e non costituiscono parere o
+            consulenza legale. I riferimenti normativi vanno confrontati col testo vigente.
           </li>
           <li>
             I suggerimenti di pre-compilazione richiedono sempre revisione e validazione da parte dell&apos;avvocato
@@ -82,10 +82,11 @@ export default function InformativaAIPage() {
           Il sistema non prende decisioni giuridicamente vincolanti in modo automatico.
         </p>
         <p>
-          <strong>La validazione professionale degli assessment è resa dall&apos;Avv. Umberto Mottola</strong>,
+          <strong>La prestazione professionale è resa dall&apos;Avv. Umberto Mottola</strong>,
           iscritto all&apos;Ordine degli Avvocati di Napoli, nell&apos;esercizio della professione forense.
-          Gli output automatici dello strumento acquistano valenza professionale solo dopo tale verifica e validazione
-          da parte dell&apos;avvocato. Il software è lo strumento; l&apos;assistenza è il servizio.
+          Gli output dello strumento sono elaborazioni di lavorazione interne; il parere e i documenti di conformità
+          costituiscono prestazione professionale resa dall&apos;Avvocato nell&apos;ambito di un incarico.
+          Il software è lo strumento; l&apos;assistenza è il servizio.
         </p>
 
         <h2>4. Dati usati per l'AI</h2>
