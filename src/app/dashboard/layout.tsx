@@ -18,6 +18,7 @@ import NotificationBell from "@/components/notifications/NotificationBell";
 import DisclosureModal from "@/components/disclosure/DisclosureModal";
 import DisclosureBanner from "@/components/disclosure/DisclosureBanner";
 import MachineMarkers from "@/components/disclosure/MachineMarkers";
+import DeliverableGateGuard from "@/components/disclosure/DeliverableGateGuard";
 import UserMenu from "@/components/dashboard/UserMenu";
 import ChatAssistant from "@/components/ui/ChatAssistant";
 import SessionWarning from "@/components/auth/SessionWarning";
@@ -355,6 +356,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="flex flex-col h-screen w-full overflow-hidden" style={{ background: "#FFFFFF" }}>
       {/* Art. 50 — machine-readable markers (meta tags + JSON-LD) */}
       <MachineMarkers />
+      {/* Deontologia — gate deliverable finale (attivo solo con flag; default off) */}
+      <DeliverableGateGuard />
       {/* Art. 50 — first-session blocking modal */}
       <DisclosureModal lang={locale} />
       {/* Art. 50 — persistent non-dismissible banner */}
