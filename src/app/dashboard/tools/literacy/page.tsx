@@ -7,6 +7,9 @@ import {
   GraduationCap, Plus, Download, Trash2, Users, Calendar,
   CheckCircle, Clock, BookOpen, ChevronDown, ChevronUp,
 } from "lucide-react";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
+
+type TFn = (key: string) => string;
 
 // ─── Data model ────────────────────────────────────────────────────────────────
 
@@ -20,14 +23,16 @@ type TrainingCategory =
   | "etica"
   | "altro";
 
-const CATEGORY_LABELS: Record<TrainingCategory, string> = {
-  fondamenti: "Fondamenti AI",
-  rischi:     "Rischi e bias",
-  normativa:  "Normativa (EU AI Act)",
-  strumenti:  "Strumenti aziendali AI",
-  etica:      "Etica e responsabilità",
-  altro:      "Altro",
-};
+function buildCategoryLabels(t: TFn): Record<TrainingCategory, string> {
+  return {
+    fondamenti: t("cat_fondamenti"),
+    rischi:     t("cat_rischi"),
+    normativa:  t("cat_normativa"),
+    strumenti:  t("cat_strumenti"),
+    etica:      t("cat_etica"),
+    altro:      t("cat_altro"),
+  };
+}
 
 // ─── Ruoli aziendali Art. 4 L.132/2025 + MOG 231 ──────────────────────────────
 
@@ -39,14 +44,16 @@ type StaffRole =
   | "legal_compliance"
   | "tutti_dipendenti";
 
-const STAFF_ROLE_LABELS: Record<StaffRole, string> = {
-  dirigenti:        "Dirigenti / CXO",
-  manager_ai:       "Manager sistemi AI",
-  developer:        "Sviluppatori / Data scientist",
-  hr:               "Risorse umane",
-  legal_compliance: "Legale / Compliance",
-  tutti_dipendenti: "Tutti i dipendenti",
-};
+function buildStaffRoleLabels(t: TFn): Record<StaffRole, string> {
+  return {
+    dirigenti:        t("role_dirigenti"),
+    manager_ai:       t("role_manager_ai"),
+    developer:        t("role_developer"),
+    hr:               t("role_hr"),
+    legal_compliance: t("role_legal_compliance"),
+    tutti_dipendenti: t("role_tutti_dipendenti"),
+  };
+}
 
 // Ore minime raccomandate per ruolo (MOG 231 best practice)
 const ROLE_MIN_HOURS: Record<StaffRole, number> = {
@@ -91,8 +98,8 @@ function save(store: LiteracyStore): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso + "T00:00:00").toLocaleDateString("it-IT", {
+function formatDate(iso: string, loc: string): string {
+  return new Date(iso + "T00:00:00").toLocaleDateString(loc, {
     day: "2-digit", month: "long", year: "numeric",
   });
 }
@@ -171,10 +178,11 @@ async function syncToMog231(sessions: TrainingSession[]): Promise<void> {
 
 // ─── RoleCompliancePanel ──────────────────────────────────────────────────────
 
-function RoleCompliancePanel({ sessions }: { sessions: TrainingSession[] }) {
+function RoleCompliancePanel({ sessions, t }: { sessions: TrainingSession[]; t: TFn }) {
   const hours = computeHoursByRole(sessions);
   const roles = Object.keys(ROLE_MIN_HOURS) as StaffRole[];
   const score = computeLiteracyScore(sessions);
+  const STAFF_ROLE_LABELS = buildStaffRoleLabels(t);
 
   return (
     <div
@@ -185,10 +193,10 @@ function RoleCompliancePanel({ sessions }: { sessions: TrainingSession[] }) {
       <div className="flex items-center justify-between mb-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.35)" }}>
-            Compliance Art. 4 L.132/2025
+            {t("complianceTitle")}
           </p>
           <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.4)" }}>
-            Ore formazione per ruolo vs. soglie MOG 231
+            {t("complianceSubtitle")}
           </p>
         </div>
         <div className="text-right">
@@ -199,7 +207,7 @@ function RoleCompliancePanel({ sessions }: { sessions: TrainingSession[] }) {
             {score}%
           </div>
           <div className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>
-            {score >= 80 ? "Conforme" : score >= 50 ? "Parziale" : "Insufficiente"}
+            {score >= 80 ? t("statusConforme") : score >= 50 ? t("statusParziale") : t("statusInsufficiente")}
           </div>
         </div>
       </div>
@@ -218,7 +226,7 @@ function RoleCompliancePanel({ sessions }: { sessions: TrainingSession[] }) {
                   {STAFF_ROLE_LABELS[role]}
                 </span>
                 <span className="text-[11px] font-medium" style={{ color: ok ? "#16a34a" : "rgba(0,0,0,0.4)" }}>
-                  {done.toFixed(1)}h / {min}h min
+                  {done.toFixed(1)}h / {min}h {t("minSuffix")}
                 </span>
               </div>
               <div className="h-1.5 rounded-full w-full" style={{ background: "rgba(0,0,0,0.07)" }}>
@@ -237,8 +245,7 @@ function RoleCompliancePanel({ sessions }: { sessions: TrainingSession[] }) {
 
       {score < 100 && (
         <p className="text-[11px] mt-3" style={{ color: "rgba(0,0,0,0.4)" }}>
-          Le soglie sono basate su best practice MOG 231. Art. 4 EU AI Act non prescrive ore minime specifiche,
-          ma richiede &quot;adeguato livello di competenza AI&quot; documentato.
+          {t("mog231Note")}
         </p>
       )}
     </div>
@@ -252,6 +259,11 @@ type Toast = { msg: string; type: "success" | "error" };
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function LiteracyPage() {
+  const t = useT("toolLiteracy");
+  const locale = useLocale();
+  const loc = locale === "it" ? "it-IT" : "en-GB";
+  const CATEGORY_LABELS = buildCategoryLabels(t);
+  const STAFF_ROLE_LABELS = buildStaffRoleLabels(t);
   const [store, setStore]     = useState<LiteracyStore>({ sessions: [] });
   const [showForm, setShowForm] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -297,11 +309,11 @@ export default function LiteracyPage() {
 
   function addSession() {
     if (!fTitle.trim()) {
-      showToast("Inserisci il titolo della sessione", "error");
+      showToast(t("toast_needTitle"), "error");
       return;
     }
     if (!fDate) {
-      showToast("Inserisci la data", "error");
+      showToast(t("toast_needDate"), "error");
       return;
     }
     const attendeeList = fAttendees
@@ -326,7 +338,7 @@ export default function LiteracyPage() {
     setStore(next);
     save(next);
     syncToMog231(next.sessions);
-    showToast("Sessione registrata");
+    showToast(t("toast_registered"));
     setShowForm(false);
     setFTitle(""); setFTrainer(""); setFAttendees(""); setFNotes(""); setFDuration("60"); setFormRoles([]);
   }
@@ -334,71 +346,66 @@ export default function LiteracyPage() {
   // ── Delete session ───────────────────────────────────────────────────────────
 
   function deleteSession(id: string) {
-    if (!confirm("Eliminare questa sessione di formazione?")) return;
+    if (!confirm(t("confirmDelete"))) return;
     const next: LiteracyStore = { sessions: store.sessions.filter(s => s.id !== id) };
     setStore(next);
     save(next);
     syncToMog231(next.sessions);
     if (expanded === id) setExpanded(null);
-    showToast("Sessione eliminata");
+    showToast(t("toast_deleted"));
   }
 
   // ── Export registro ──────────────────────────────────────────────────────────
 
   function exportRegistro() {
     if (!sessions.length) {
-      showToast("Nessuna sessione da esportare", "error");
+      showToast(t("toast_nothingToExport"), "error");
       return;
     }
     const sorted = [...sessions].sort((a, b) => b.date.localeCompare(a.date));
     const lines: string[] = [
-      "REGISTRO DI ALFABETIZZAZIONE AI — ART. 4 EU AI ACT (UE) 2024/1689",
+      t("reg_title"),
       "=".repeat(60),
       "",
-      `Totale sessioni:       ${totalSessions}`,
-      `Ore di formazione:     ${totalHours.toFixed(1)} h`,
-      `Partecipanti unici:    ${uniqueAttendees}`,
-      `Esportato il:          ${new Date().toLocaleDateString("it-IT", { day: "2-digit", month: "long", year: "numeric" })}`,
+      `${t("reg_totalSessions")} ${totalSessions}`,
+      `${t("reg_trainingHours")} ${totalHours.toFixed(1)} h`,
+      `${t("reg_uniqueAttendees")} ${uniqueAttendees}`,
+      `${t("reg_exportedOn")} ${new Date().toLocaleDateString(loc, { day: "2-digit", month: "long", year: "numeric" })}`,
       "",
       "=".repeat(60),
-      "SESSIONI DI FORMAZIONE",
+      t("reg_sessionsHeader"),
       "=".repeat(60),
       "",
     ];
 
     sorted.forEach((s, i) => {
-      lines.push(`[${i + 1}] ${formatDate(s.date)} — ${s.title}`);
-      lines.push(`    Categoria:    ${CATEGORY_LABELS[s.category]}`);
-      lines.push(`    Formatore:    ${s.trainer || "non specificato"}`);
-      lines.push(`    Durata:       ${s.durationMinutes} minuti`);
+      lines.push(`[${i + 1}] ${formatDate(s.date, loc)} — ${s.title}`);
+      lines.push(`    ${t("reg_category")}    ${CATEGORY_LABELS[s.category]}`);
+      lines.push(`    ${t("reg_trainer")}    ${s.trainer || t("reg_notSpecified")}`);
+      lines.push(`    ${t("reg_duration")}       ${s.durationMinutes} ${t("minutesWord")}`);
       if ((s.roles || []).length > 0) {
-        lines.push(`    Ruoli:        ${s.roles.map(r => STAFF_ROLE_LABELS[r]).join(", ")}`);
+        lines.push(`    ${t("reg_roles")}        ${s.roles.map(r => STAFF_ROLE_LABELS[r]).join(", ")}`);
       }
       if (s.attendees.length) {
-        lines.push(`    Partecipanti: ${s.attendees.join(", ")}`);
+        lines.push(`    ${t("reg_attendees")} ${s.attendees.join(", ")}`);
       }
       if (s.notes) {
-        lines.push(`    Note:         ${s.notes}`);
+        lines.push(`    ${t("reg_notes")}         ${s.notes}`);
       }
       lines.push("");
     });
 
     lines.push("=".repeat(60));
-    lines.push("RIFERIMENTO NORMATIVO");
+    lines.push(t("reg_legalRef"));
     lines.push("=".repeat(60));
     lines.push("");
-    lines.push("Art. 4 Regolamento (UE) 2024/1689 — AI Act");
-    lines.push("Provider e deployer adottano misure per garantire, nella misura del");
-    lines.push("possibile, un sufficiente livello di alfabetizzazione AI del proprio");
-    lines.push("personale e di altre persone che gestiscono i sistemi AI per loro conto.");
+    lines.push(t("reg_art4Line1"));
+    lines.push(t("reg_art4Line2"));
     lines.push("");
-    lines.push("NOTA LEGALE:");
-    lines.push("  Il presente registro costituisce evidenza delle misure adottate ai");
-    lines.push("  sensi dell'Art. 4. L'Art. 4 non prescrive un formato specifico per");
-    lines.push("  la documentazione. AI Comply non rilascia attestazioni di conformità.");
+    lines.push(t("reg_legalNote"));
     lines.push("");
     lines.push("=".repeat(60));
-    lines.push(`Generato da AI Comply Platform — ${new Date().toISOString()}`);
+    lines.push(`${t("reg_generatedBy")} ${new Date().toISOString()}`);
 
     const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
     const url  = URL.createObjectURL(blob);
@@ -407,7 +414,7 @@ export default function LiteracyPage() {
     a.download = `registro-ai-literacy-art4-${new Date().toISOString().slice(0, 10)}.txt`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast("Registro esportato");
+    showToast(t("toast_exported"));
   }
 
   // ─── Render ─────────────────────────────────────────────────────────────────
@@ -434,7 +441,7 @@ export default function LiteracyPage() {
               className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
               style={{ background: "rgba(220,38,38,0.1)", color: "#b91c1c" }}
             >
-              In vigore dal 2 Feb 2025
+              {t("inForceSince")}
             </span>
           </div>
           <h1 className="text-xl font-semibold" style={{ color: "#0D1016" }}>
@@ -442,7 +449,7 @@ export default function LiteracyPage() {
           </h1>
           <div className="flex items-center gap-2 mt-1">
             <p className="text-sm" style={{ color: "rgba(0,0,0,0.45)" }}>
-              Registro documentale delle sessioni di formazione sull&apos;intelligenza artificiale
+              {t("subtitle")}
             </p>
             <DBStatusBadge source={dbSource} />
           </div>
@@ -458,7 +465,7 @@ export default function LiteracyPage() {
             }}
           >
             <Download className="h-4 w-4" />
-            Esporta registro
+            {t("exportRegister")}
           </button>
           <button
             onClick={() => setShowForm(v => !v)}
@@ -466,7 +473,7 @@ export default function LiteracyPage() {
             style={{ background: "#0D1016" }}
           >
             <Plus className="h-4 w-4" />
-            Aggiungi sessione
+            {t("addSession")}
           </button>
         </div>
       </div>
@@ -474,10 +481,10 @@ export default function LiteracyPage() {
       {/* ── B. Stats row ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { icon: BookOpen,   label: "Sessioni",         value: String(totalSessions) },
-          { icon: Clock,      label: "Ore totali",        value: totalHours.toFixed(1) + " h" },
-          { icon: Users,      label: "Partecipanti",      value: String(uniqueAttendees) },
-          { icon: Calendar,   label: "Ultima sessione",   value: lastSession ? formatDate(lastSession.date).split(" ").slice(0, 2).join(" ") : "—" },
+          { icon: BookOpen,   label: t("stat_sessions"),   value: String(totalSessions) },
+          { icon: Clock,      label: t("stat_totalHours"), value: totalHours.toFixed(1) + " h" },
+          { icon: Users,      label: t("stat_attendees"),  value: String(uniqueAttendees) },
+          { icon: Calendar,   label: t("stat_lastSession"), value: lastSession ? formatDate(lastSession.date, loc).split(" ").slice(0, 2).join(" ") : "—" },
         ].map(({ icon: Icon, label, value }) => (
           <div
             key={label}
@@ -509,18 +516,18 @@ export default function LiteracyPage() {
             style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.09)" }}
           >
             <h3 className="text-sm font-semibold mb-4" style={{ color: "#0D1016" }}>
-              Nuova sessione di formazione
+              {t("newSession")}
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Title */}
               <div className="md:col-span-2">
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
-                  Titolo sessione *
+                  {t("titleLabel")} *
                 </label>
                 <input
                   type="text"
-                  placeholder="es. Introduzione all'EU AI Act per il team legale"
+                  placeholder={t("titlePh")}
                   value={fTitle}
                   onChange={e => setFTitle(e.target.value)}
                   style={inputStyle}
@@ -530,7 +537,7 @@ export default function LiteracyPage() {
               {/* Date */}
               <div>
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
-                  Data *
+                  {t("dateLabel")} *
                 </label>
                 <input
                   type="date"
@@ -543,7 +550,7 @@ export default function LiteracyPage() {
               {/* Duration */}
               <div>
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
-                  Durata (minuti)
+                  {t("durationLabel")}
                 </label>
                 <input
                   type="number"
@@ -558,7 +565,7 @@ export default function LiteracyPage() {
               {/* Category */}
               <div className="md:col-span-2">
                 <label className="block text-xs font-medium mb-2" style={{ color: "rgba(0,0,0,0.55)" }}>
-                  Categoria
+                  {t("categoryLabel")}
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {(Object.keys(CATEGORY_LABELS) as TrainingCategory[]).map(cat => (
@@ -582,11 +589,11 @@ export default function LiteracyPage() {
               {/* Trainer */}
               <div>
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
-                  Formatore / Ente erogatore
+                  {t("trainerLabel")}
                 </label>
                 <input
                   type="text"
-                  placeholder="es. Studio Legale X / Internal"
+                  placeholder={t("trainerPh")}
                   value={fTrainer}
                   onChange={e => setFTrainer(e.target.value)}
                   style={inputStyle}
@@ -596,8 +603,8 @@ export default function LiteracyPage() {
               {/* Ruoli coinvolti */}
               <div className="md:col-span-2">
                 <label className="block text-xs font-medium mb-2" style={{ color: "rgba(0,0,0,0.55)" }}>
-                  Ruoli coinvolti{" "}
-                  <span style={{ color: "rgba(0,0,0,0.35)" }}>(seleziona tutti)</span>
+                  {t("rolesLabel")}{" "}
+                  <span style={{ color: "rgba(0,0,0,0.35)" }}>{t("selectAll")}</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {(Object.keys(STAFF_ROLE_LABELS) as StaffRole[]).map(role => {
@@ -628,11 +635,11 @@ export default function LiteracyPage() {
               {/* Attendees */}
               <div>
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
-                  Partecipanti (separati da virgola)
+                  {t("attendeesLabel")}
                 </label>
                 <input
                   type="text"
-                  placeholder="es. Team sviluppo, Responsabile AI, HR"
+                  placeholder={t("attendeesPh")}
                   value={fAttendees}
                   onChange={e => setFAttendees(e.target.value)}
                   style={inputStyle}
@@ -642,11 +649,11 @@ export default function LiteracyPage() {
               {/* Notes */}
               <div className="md:col-span-2">
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
-                  Note / Contenuto trattato
+                  {t("notesLabel")}
                 </label>
                 <textarea
                   rows={3}
-                  placeholder="Argomenti trattati, materiali distribuiti, valutazione esito..."
+                  placeholder={t("notesPh")}
                   value={fNotes}
                   onChange={e => setFNotes(e.target.value)}
                   style={{ ...inputStyle, resize: "vertical" }}
@@ -665,7 +672,7 @@ export default function LiteracyPage() {
                   color: "rgba(0,0,0,0.55)",
                 }}
               >
-                Annulla
+                {t("cancel")}
               </button>
               <button
                 type="button"
@@ -674,7 +681,7 @@ export default function LiteracyPage() {
                 className="px-5 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-40 transition-opacity hover:opacity-90"
                 style={{ background: "#0D1016" }}
               >
-                Registra sessione →
+                {t("registerSession")}
               </button>
             </div>
           </motion.div>
@@ -689,24 +696,24 @@ export default function LiteracyPage() {
         >
           <GraduationCap className="h-10 w-10 mx-auto mb-4" style={{ color: "rgba(0,0,0,0.18)" }} />
           <p className="font-medium" style={{ color: "rgba(0,0,0,0.55)" }}>
-            Nessuna sessione registrata
+            {t("noSessions")}
           </p>
           <p className="text-sm mt-1 max-w-xs mx-auto" style={{ color: "rgba(0,0,0,0.35)" }}>
-            Registra la prima sessione di formazione per soddisfare l&apos;obbligo Art. 4.
+            {t("noSessionsDesc")}
           </p>
           <button
             onClick={() => setShowForm(true)}
             className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity"
             style={{ background: "#0D1016" }}
           >
-            <Plus className="h-4 w-4" /> Registra prima sessione
+            <Plus className="h-4 w-4" /> {t("registerFirstSession")}
           </button>
         </div>
       )}
 
       {/* ── E. Compliance per ruolo ── */}
       {sessions.length > 0 && (
-        <RoleCompliancePanel sessions={sessions} />
+        <RoleCompliancePanel sessions={sessions} t={t} />
       )}
 
       {/* ── F. Sessions list ── */}
@@ -752,13 +759,13 @@ export default function LiteracyPage() {
                         </span>
                       </div>
                       <div className="flex items-center gap-3 mt-1 text-xs" style={{ color: "rgba(0,0,0,0.4)" }}>
-                        <span>{formatDate(session.date)}</span>
+                        <span>{formatDate(session.date, loc)}</span>
                         <span>·</span>
                         <span>{session.durationMinutes} min</span>
                         {session.attendees.length > 0 && (
                           <>
                             <span>·</span>
-                            <span>{session.attendees.length} partecipant{session.attendees.length === 1 ? "e" : "i"}</span>
+                            <span>{session.attendees.length} {session.attendees.length === 1 ? t("attendeeSingular") : t("attendeePlural")}</span>
                           </>
                         )}
                         {session.trainer && (
@@ -803,13 +810,13 @@ export default function LiteracyPage() {
                         >
                           <div>
                             <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(0,0,0,0.35)" }}>
-                              Dettagli sessione
+                              {t("sessionDetails")}
                             </p>
                             {[
-                              ["Data",       formatDate(session.date)],
-                              ["Durata",     session.durationMinutes + " minuti"],
-                              ["Categoria",  CATEGORY_LABELS[session.category]],
-                              ["Formatore",  session.trainer || "—"],
+                              [t("dateLabel"),       formatDate(session.date, loc)],
+                              [t("durationWord"),     session.durationMinutes + " " + t("minutesWord")],
+                              [t("categoryLabel"),  CATEGORY_LABELS[session.category]],
+                              [t("trainerWord"),  session.trainer || "—"],
                             ].map(([k, v]) => (
                               <div key={k} className="flex gap-3 mb-1.5">
                                 <span className="w-24 flex-shrink-0 text-xs" style={{ color: "rgba(0,0,0,0.38)" }}>{k}</span>
@@ -821,7 +828,7 @@ export default function LiteracyPage() {
                             {(session.roles || []).length > 0 && (
                               <>
                                 <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(0,0,0,0.35)" }}>
-                                  Ruoli coinvolti
+                                  {t("rolesInvolved")}
                                 </p>
                                 <div className="flex flex-wrap gap-1.5 mb-3">
                                   {(session.roles || []).map(r => (
@@ -839,7 +846,7 @@ export default function LiteracyPage() {
                           {session.attendees.length > 0 && (
                               <>
                                 <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(0,0,0,0.35)" }}>
-                                  Partecipanti ({session.attendees.length})
+                                  {t("attendeesWord")} ({session.attendees.length})
                                 </p>
                                 <div className="flex flex-wrap gap-1.5">
                                   {session.attendees.map(a => (
@@ -857,7 +864,7 @@ export default function LiteracyPage() {
                             {session.notes && (
                               <>
                                 <p className="text-[10px] font-semibold uppercase tracking-wider mb-2 mt-3" style={{ color: "rgba(0,0,0,0.35)" }}>
-                                  Note
+                                  {t("notesWord")}
                                 </p>
                                 <p className="text-xs leading-relaxed" style={{ color: "rgba(0,0,0,0.55)" }}>
                                   {session.notes}
@@ -884,13 +891,10 @@ export default function LiteracyPage() {
         }}
       >
         <span style={{ color: "#92400e" }}>
-          📋 <strong>Obbligo documentale</strong> —
+          📋 <strong>{t("calloutTitle")}</strong> —
         </span>{" "}
         <span style={{ color: "rgba(0,0,0,0.6)" }}>
-          L&apos;Art. 4 non prescrive un formato specifico per la documentazione.
-          Il presente registro costituisce evidenza della misura adottata. In caso di
-          ispezione da parte dell&apos;Autorità di vigilanza nazionale, è necessario essere
-          in grado di dimostrare le azioni intraprese.
+          {t("calloutBody")}
         </span>
       </div>
 
