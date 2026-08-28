@@ -32,6 +32,9 @@ import {
   suggestOversightMeasures,
   assessFourEyesApplicability,
 } from "@/app/actions/oversightActions";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
+
+type TFn = (key: string) => string;
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const T = {
@@ -55,11 +58,11 @@ const ta: CSSProperties = { ...inp, resize: "vertical" as const };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function StatusPill({ status }: { status: OversightRequirementStatus }) {
+function StatusPill({ status, t }: { status: OversightRequirementStatus; t: TFn }) {
   const map = {
-    not_started: { label: "Non avviato", color: T.red,   bg: T.redBg   },
-    in_progress:  { label: "In corso",    color: T.amber, bg: T.amberBg },
-    implemented:  { label: "Implementato",color: T.green, bg: T.greenBg },
+    not_started: { label: t("status_not_started"), color: T.red,   bg: T.redBg   },
+    in_progress:  { label: t("status_in_progress"),  color: T.amber, bg: T.amberBg },
+    implemented:  { label: t("status_implemented"), color: T.green, bg: T.greenBg },
   };
   const s = map[status];
   return (
@@ -111,9 +114,10 @@ interface FrictionGateProps {
   onAddEvent: (ev: FrictionEvent) => void;
   systemSuspended: boolean;
   mode: "automation_bias" | "override";
+  t: TFn;
 }
 
-function FrictionGate({ events, onAddEvent, systemSuspended, mode }: FrictionGateProps) {
+function FrictionGate({ events, onAddEvent, systemSuspended, mode, t }: FrictionGateProps) {
   const [approved, setApproved] = useState(false);
   const [frictionActive, setFrictionActive] = useState(false);
   const [frictionReason, setFrictionReason] = useState("");
@@ -163,16 +167,16 @@ function FrictionGate({ events, onAddEvent, systemSuspended, mode }: FrictionGat
   return (
     <div className="mt-4 rounded-xl p-4" style={{ background: T.bg, border: `1px solid ${T.border}` }}>
       <p className="text-[11px] font-semibold uppercase tracking-wide mb-3" style={{ color: T.muted }}>
-        {mode === "automation_bias" ? "Simulazione Friction Gate — Art. 14(4)(b)" : "Simulazione Override — Art. 14(4)(d)"}
+        {mode === "automation_bias" ? t("fg_title_automation") : t("fg_title_override")}
       </p>
 
       <div className="rounded-lg p-3 mb-3" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
         <AlertTriangle className="h-4 w-4 inline mr-1 mb-0.5" style={{ color: T.amber }} />
         <span className="text-[12px] font-medium" style={{ color: T.text }}>
-          Scenario: Output rischioso rilevato — candidato respinto con confidenza 89%
+          {t("fg_scenario")}
         </span>
         <p className="text-[10px] mt-1" style={{ color: T.muted }}>
-          Il sistema ha rilevato un pattern di bias nel training set. L&apos;output potrebbe violare l&apos;Art. 21 Carta UE.
+          {t("fg_scenarioDesc")}
         </p>
       </div>
 
@@ -180,12 +184,12 @@ function FrictionGate({ events, onAddEvent, systemSuspended, mode }: FrictionGat
         <button onClick={handleApprove}
           className="w-full rounded-lg text-[12px] font-medium"
           style={{ padding: "9px 16px", background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
-          {mode === "automation_bias" ? "Approva output (test timing gate)" : "Approva output"}
+          {mode === "automation_bias" ? t("fg_approveTest") : t("fg_approve")}
         </button>
       )}
       {systemSuspended && !approved && (
         <div className="text-[12px] rounded-lg p-2.5" style={{ background: T.redBg, border: `1px solid ${T.redBdr}`, color: T.red }}>
-          Sistema sospeso — approvazione disabilitata
+          {t("fg_suspended")}
         </div>
       )}
 
@@ -193,22 +197,22 @@ function FrictionGate({ events, onAddEvent, systemSuspended, mode }: FrictionGat
         <div className="rounded-lg p-4" style={{ background: T.redBg, border: `1px solid ${T.redBdr}` }}>
           <div className="flex items-center gap-2 mb-2">
             <StopCircle className="h-4 w-4" style={{ color: T.red }} />
-            <span className="text-[12px] font-bold" style={{ color: T.red }}>⛔ Friction Gate ATTIVATO</span>
+            <span className="text-[12px] font-bold" style={{ color: T.red }}>⛔ {t("fg_activated")}</span>
           </div>
           <p className="text-[11px] mb-3" style={{ color: T.muted }}>
-            Approvazione troppo rapida (&lt; 2s). Motivazione obbligatoria per prevenire automation bias.
+            {t("fg_tooFast")}
           </p>
           <textarea value={frictionReason} onChange={e => setFrictionReason(e.target.value)}
-            placeholder="Spiega perché questo output è accettabile nonostante i rischi rilevati..."
+            placeholder={t("fg_reasonPh")}
             style={{ ...ta, marginBottom: 10 }} rows={3} />
           <div className="flex gap-2">
             <button onClick={confirmWithReason} disabled={!frictionReason.trim()}
               style={{ borderRadius: 7, background: T.text, padding: "7px 14px", fontSize: 12, fontWeight: 500, color: "#fff", border: "none", cursor: "pointer", opacity: !frictionReason.trim() ? 0.4 : 1 }}>
-              Conferma con motivazione
+              {t("fg_confirmReason")}
             </button>
             <button onClick={blockOutput}
               style={{ borderRadius: 7, padding: "7px 14px", fontSize: 12, border: `1px solid ${T.redBdr}`, color: T.red, background: "transparent", cursor: "pointer" }}>
-              Blocca output
+              {t("fg_blockOutput")}
             </button>
           </div>
         </div>
@@ -216,19 +220,19 @@ function FrictionGate({ events, onAddEvent, systemSuspended, mode }: FrictionGat
       {approved && (
         <div className="rounded-lg p-2.5 flex items-center gap-2" style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}>
           <CheckCircle2 className="h-4 w-4" style={{ color: T.green }} />
-          <span className="text-[12px]" style={{ color: T.green }}>Output approvato e registrato nell&apos;Evidence Layer.</span>
+          <span className="text-[12px]" style={{ color: T.green }}>{t("fg_approvedMsg")}</span>
         </div>
       )}
       {blocked && (
         <div className="rounded-lg p-2.5 flex items-center gap-2" style={{ background: T.redBg, border: `1px solid ${T.redBdr}` }}>
           <StopCircle className="h-4 w-4" style={{ color: T.red }} />
-          <span className="text-[12px]" style={{ color: T.red }}>Output bloccato — registrato nell&apos;Evidence Layer.</span>
+          <span className="text-[12px]" style={{ color: T.red }}>{t("fg_blockedMsg")}</span>
         </div>
       )}
       {(approved || blocked) && (
         <button onClick={() => { setApproved(false); setBlocked(false); setFrictionActive(false); setFrictionReason(""); startTime.current = Date.now(); }}
           style={{ marginTop: 8, fontSize: 11, color: T.muted, background: "none", border: "none", cursor: "pointer", textDecoration: "underline", padding: 0 }}>
-          Resetta scenario demo
+          {t("fg_reset")}
         </button>
       )}
 
@@ -237,7 +241,7 @@ function FrictionGate({ events, onAddEvent, systemSuspended, mode }: FrictionGat
         <div className="mt-3 rounded-lg p-2.5 flex items-start gap-2" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
           <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" style={{ color: T.amber }} />
           <p className="text-[11px]" style={{ color: "#78350f" }}>
-            ⚠ {frictionPct}% dei {events.length} eventi ha attivato il Friction Gate — verificare la formazione del personale.
+            ⚠ {frictionPct}% {t("fg_highBias_of")} {events.length} {t("fg_highBias_rest")}
           </p>
         </div>
       )}
@@ -245,17 +249,17 @@ function FrictionGate({ events, onAddEvent, systemSuspended, mode }: FrictionGat
       {/* Mini event log */}
       {recentEvents.length > 0 && (
         <div className="mt-3">
-          <p className="text-[10px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: T.faint }}>Ultimi eventi</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: T.faint }}>{t("fg_recentEvents")}</p>
           {recentEvents.map((ev) => (
             <div key={ev.id} className="flex items-center gap-2 py-1" style={{ borderTop: `1px solid ${T.border}`, fontSize: 11 }}>
               <span style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0, background: ev.type === "approved" ? T.green : ev.type === "blocked" ? T.red : T.amber }} />
-              <span style={{ flex: 1, color: T.text }}>{ev.type === "approved" ? "Approvato" : ev.type === "blocked" ? "Bloccato" : "Friction Gate"}</span>
+              <span style={{ flex: 1, color: T.text }}>{ev.type === "approved" ? t("fg_ev_approved") : ev.type === "blocked" ? t("fg_ev_blocked") : t("fg_ev_friction")}</span>
               <span style={{ color: T.faint }}>{ev.elapsed.toFixed(1)}s</span>
             </div>
           ))}
           <p className="text-[10px] mt-1.5" style={{ color: T.faint }}>
             <Brain className="h-3 w-3 inline mr-1" style={{ color: T.blue }} />
-            Art. 14(4): approvazione &lt; 2s presume automation bias.
+            {t("fg_note")}
           </p>
         </div>
       )}
@@ -275,9 +279,10 @@ interface ReqCardProps {
   onAddFrictionEvent: (ev: FrictionEvent) => void;
   systemSuspended: boolean;
   index: number;
+  t: TFn;
 }
 
-function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, frictionEvents, onAddFrictionEvent, systemSuspended, index }: ReqCardProps) {
+function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, frictionEvents, onAddFrictionEvent, systemSuspended, index, t }: ReqCardProps) {
   const [open, setOpen] = useState(false);
   const status = record?.status ?? "not_started";
 
@@ -294,7 +299,7 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, frictionE
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[11px] font-mono font-bold" style={{ color: T.blue }}>Art. 14(4)({String.fromCharCode(96 + index)})</span>
             <span className="text-sm font-semibold" style={{ color: T.text }}>{req.label}</span>
-            <StatusPill status={status} />
+            <StatusPill status={status} t={t} />
             {pending && <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: T.violetBg, color: T.violet, border: `1px solid ${T.violetBdr}` }}>✦ AI</span>}
           </div>
           <p className="text-[11px] mt-1" style={{ color: T.muted }}>{req.primaryReference}</p>
@@ -309,10 +314,10 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, frictionE
           {/* AI pending suggestion */}
           {pending && (
             <div className="rounded-lg p-3 mb-4" style={{ background: T.violetBg, border: `1px solid ${T.violetBdr}` }}>
-              <p className="text-[11px] font-semibold mb-1.5" style={{ color: T.violet }}>✦ AI — verifica e conferma</p>
+              <p className="text-[11px] font-semibold mb-1.5" style={{ color: T.violet }}>✦ {t("aiVerify")}</p>
               {pending.implementationType && (
                 <p className="text-[11px] mb-1" style={{ color: T.text }}>
-                  <strong>Tipo misura proposto:</strong> {MEASURE_IMPLEMENTATION_TYPE_LABELS[pending.implementationType] ?? pending.implementationType}
+                  <strong>{t("proposedType")}</strong> {MEASURE_IMPLEMENTATION_TYPE_LABELS[pending.implementationType] ?? pending.implementationType}
                 </p>
               )}
               {pending.measureDescription && (
@@ -321,7 +326,7 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, frictionE
               <button onClick={() => onAcceptAi(req.id)}
                 className="mt-2 flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded"
                 style={{ background: T.violet, color: "#fff", border: "none", cursor: "pointer" }}>
-                <Check size={12} /> Accetta e applica
+                <Check size={12} /> {t("acceptApply")}
               </button>
             </div>
           )}
@@ -329,7 +334,7 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, frictionE
           {/* Implementation type */}
           <div className="mb-3">
             <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1.5" style={{ color: T.muted }}>
-              Tipo di misura — Art. 14(3)
+              {t("measureType")}
             </label>
             <select
               value={record?.implementationType ?? "not_specified"}
@@ -344,22 +349,22 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, frictionE
           {/* Measure description */}
           <div className="mb-3">
             <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1.5" style={{ color: T.muted }}>
-              Descrizione della misura adottata
+              {t("measureDesc")}
             </label>
             <textarea
               rows={3}
               value={record?.measureDescription ?? ""}
               onChange={e => onUpdate(req.id, { measureDescription: e.target.value })}
-              placeholder="Descrivi concretamente la misura implementata o pianificata..."
+              placeholder={t("measureDescPh")}
               style={ta} />
           </div>
 
           {/* Status */}
           <div className="mb-3">
-            <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1.5" style={{ color: T.muted }}>Stato</label>
+            <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1.5" style={{ color: T.muted }}>{t("statusLabel")}</label>
             <div className="flex gap-2 flex-wrap">
               {(["not_started", "in_progress", "implemented"] as OversightRequirementStatus[]).map(s => {
-                const labels = { not_started: "Non avviato", in_progress: "In corso", implemented: "Implementato" };
+                const labels = { not_started: t("status_not_started"), in_progress: t("status_in_progress"), implemented: t("status_implemented") };
                 const colors = { not_started: T.red, in_progress: T.amber, implemented: T.green };
                 const active = (record?.status ?? "not_started") === s;
                 return (
@@ -390,12 +395,13 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, frictionE
               onAddEvent={onAddFrictionEvent}
               systemSuspended={systemSuspended}
               mode={req.id === "automation_bias_awareness" ? "automation_bias" : "override"}
+              t={t}
             />
           )}
 
           {/* Suspend/resume — embedded in intervention_stop */}
           {req.id === "intervention_stop" && (
-            <InterventionStopPanel systemSuspended={systemSuspended} />
+            <InterventionStopPanel systemSuspended={systemSuspended} t={t} />
           )}
         </div>
       )}
@@ -405,7 +411,7 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, frictionE
 
 // ─── Intervention Stop panel (migrated from original suspendSystem/resumeSystem) ───
 
-function InterventionStopPanel({ systemSuspended }: { systemSuspended: boolean }) {
+function InterventionStopPanel({ systemSuspended, t }: { systemSuspended: boolean; t: TFn }) {
   const [suspended, setSuspended] = useState(systemSuspended);
 
   function suspend() {
@@ -422,24 +428,22 @@ function InterventionStopPanel({ systemSuspended }: { systemSuspended: boolean }
   return (
     <div className="mt-4 rounded-xl p-4" style={{ background: suspended ? T.redBg : T.bg, border: `1px solid ${suspended ? T.redBdr : T.border}` }}>
       <p className="text-[11px] font-semibold uppercase tracking-wide mb-2" style={{ color: suspended ? T.red : T.muted }}>
-        Controllo arresto di sicurezza — Art. 14(4)(e)
+        {t("is_title")}
       </p>
       <p className="text-[12px] mb-3 leading-relaxed" style={{ color: suspended ? T.red : T.muted }}>
-        {suspended
-          ? "Sistema sospeso. Le decisioni in sospeso vengono instradate a revisione manuale. Il sistema non emette nuovi output fino alla riattivazione da parte di un supervisore autorizzato."
-          : "Il deployer può intervenire e arrestare il sistema in qualsiasi momento, portandolo in uno stato sicuro."}
+        {suspended ? t("is_suspendedDesc") : t("is_activeDesc")}
       </p>
       {!suspended ? (
         <button onClick={suspend}
           className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[12px] font-semibold"
           style={{ background: T.red, color: "#fff", border: "none", cursor: "pointer" }}>
-          <StopCircle className="h-4 w-4" /> SOSPENDI SISTEMA
+          <StopCircle className="h-4 w-4" /> {t("is_suspend")}
         </button>
       ) : (
         <button onClick={resume}
           className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[12px] font-semibold"
           style={{ background: T.green, color: "#fff", border: "none", cursor: "pointer" }}>
-          <Play className="h-4 w-4" /> Riattiva sistema
+          <Play className="h-4 w-4" /> {t("is_resume")}
         </button>
       )}
     </div>
@@ -455,6 +459,7 @@ function FourEyesModule({
   systemDescription,
   onAiAssess,
   aiAssessing,
+  t,
 }: {
   record: OversightRecord["fourEyes"];
   onUpdate: (patch: Partial<OversightRecord["fourEyes"]>) => void;
@@ -462,6 +467,7 @@ function FourEyesModule({
   systemDescription: string;
   onAiAssess: () => void;
   aiAssessing: boolean;
+  t: TFn;
 }) {
   const [rolesInput, setRolesInput] = useState(record.verifierRoles ?? []);
 
@@ -479,33 +485,31 @@ function FourEyesModule({
       {record.applicable === "unspecified" && (
         <div className="rounded-lg p-3 mb-4" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
           <p className="text-[12px] font-semibold mb-2" style={{ color: T.amber }}>
-            Applicabilità da verificare — {FOUR_EYES_MODULE.supportReference}
+            {t("fe_applicabilityToVerify")} — {FOUR_EYES_MODULE.supportReference}
           </p>
           <p className="text-[11px] mb-3" style={{ color: "#78350f" }}>
-            Questo sistema risulta in Annex III secondo il Classificatore, ma non è stato determinato
-            se rientra specificamente nel punto 1(a) — identificazione/categorizzazione biometrica.
-            Conferma applicabilità:
+            {t("fe_triageDesc")}
           </p>
           <div className="flex gap-2 flex-wrap mb-2">
             <button onClick={() => onUpdate({ applicable: "yes" })}
               className="text-[12px] px-3 py-1 rounded-lg border"
               style={{ background: T.greenBg, borderColor: T.green, color: T.green, fontWeight: 600 }}>
-              Sì — è un sistema biometrico (Annex III 1(a))
+              {t("fe_yesBiometric")}
             </button>
             <button onClick={() => onUpdate({ applicable: "no" })}
               className="text-[12px] px-3 py-1 rounded-lg border"
               style={{ background: T.redBg, borderColor: T.red, color: T.red }}>
-              No — non è un sistema biometrico
+              {t("fe_noBiometric")}
             </button>
           </div>
           <button onClick={onAiAssess} disabled={aiAssessing}
             className="flex items-center gap-1.5 text-[11px] font-medium"
             style={{ color: T.violet, background: "none", border: "none", cursor: "pointer" }}>
             {aiAssessing ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
-            Valuta applicabilità con AI
+            {t("fe_assessAi")}
           </button>
           {record.aiConfirmed && (
-            <p className="text-[11px] mt-1 font-semibold" style={{ color: T.amber }}>✦ AI — verifica e conferma</p>
+            <p className="text-[11px] mt-1 font-semibold" style={{ color: T.amber }}>✦ {t("aiVerify")}</p>
           )}
         </div>
       )}
@@ -514,26 +518,26 @@ function FourEyesModule({
         <div className="space-y-3">
           <div>
             <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1.5" style={{ color: T.muted }}>
-              Procedura di verifica a due persone
+              {t("fe_procedure")}
             </label>
             <textarea rows={3} value={record.procedureDescription ?? ""}
               onChange={e => onUpdate({ procedureDescription: e.target.value })}
-              placeholder="Descrivi la procedura: chi verifica, in quale sequenza, come si documenta la doppia conferma..."
+              placeholder={t("fe_procedurePh")}
               style={ta} />
           </div>
           <div>
             <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1.5" style={{ color: T.muted }}>
-              Ruoli/funzioni autorizzati alla doppia verifica
+              {t("fe_roles")}
             </label>
             <TagInput items={rolesInput}
               onChange={(v) => { setRolesInput(v); onUpdate({ verifierRoles: v }); }}
-              placeholder="es. Operatore L1, Supervisore L2 (Invio per aggiungere)" />
+              placeholder={t("fe_rolesPh")} />
           </div>
           <div>
-            <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1.5" style={{ color: T.muted }}>Stato</label>
+            <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1.5" style={{ color: T.muted }}>{t("statusLabel")}</label>
             <div className="flex gap-2">
               {(["not_started", "in_progress", "implemented"] as OversightRequirementStatus[]).map(s => {
-                const labels = { not_started: "Non avviato", in_progress: "In corso", implemented: "Implementato" };
+                const labels = { not_started: t("status_not_started"), in_progress: t("status_in_progress"), implemented: t("status_implemented") };
                 const colors = { not_started: T.red, in_progress: T.amber, implemented: T.green };
                 const active = record.status === s;
                 return (
@@ -552,9 +556,9 @@ function FourEyesModule({
       {record.applicable === "no" && (
         <div className="rounded-lg p-3" style={{ background: T.bg, border: `1px solid ${T.border}` }}>
           <p className="text-[12px]" style={{ color: T.muted }}>
-            Modulo non applicabile — il sistema non è classificato in Annex III punto 1(a).
+            {t("fe_notApplicable")}
             <button onClick={() => onUpdate({ applicable: "unspecified" })} className="ml-2 underline" style={{ background: "none", border: "none", cursor: "pointer", color: T.muted, fontSize: 11 }}>
-              Modifica
+              {t("fe_edit")}
             </button>
           </p>
         </div>
@@ -566,6 +570,9 @@ function FourEyesModule({
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function OversightPage() {
+  const t = useT("toolOversight");
+  const locale = useLocale();
+  const loc = locale === "it" ? "it-IT" : "en-GB";
   const [record, setRecord] = useState<OversightRecord>(() => loadOversightRecord());
   const [frictionEvents, setFrictionEvents] = useState<FrictionEvent[]>(() => loadFrictionEvents());
   const [systemSuspended] = useState(() => getSystemSuspended());
@@ -669,9 +676,9 @@ export default function OversightPage() {
         map[m.requirementId] = { measureDescription: m.measureDescription, implementationType: m.implementationType };
       }
       setPendingSuggestions(map);
-      showToast("Bozze AI generate — verifica e accetta per ciascun requisito");
+      showToast(t("toast_aiDrafts"));
     } catch (e) {
-      setAiError(e instanceof Error ? e.message : "Errore AI");
+      setAiError(e instanceof Error ? e.message : t("aiError"));
     } finally {
       setAiLoading(false);
     }
@@ -690,7 +697,7 @@ export default function OversightPage() {
       if (result.applicable === "yes") setShowFourEyes(true);
       if (result.applicable === "no") setShowFourEyes(false);
     } catch (e) {
-      showToast(e instanceof Error ? e.message : "Errore AI", "err");
+      showToast(e instanceof Error ? e.message : t("aiError"), "err");
     } finally {
       setFourEyesAiLoading(false);
     }
@@ -710,7 +717,7 @@ export default function OversightPage() {
     });
     appendEvidence("decision", { type: "Oversight Art. 14 — framework configurato", implemented, frictionEvents: frictionEvents.length, savedAt: now }, "oversight");
     setSavedAt(now);
-    showToast("Framework Oversight salvato nel dossier");
+    showToast(t("toast_saved"));
   }
 
   const implementedCount = countImplemented(record);
@@ -726,14 +733,14 @@ export default function OversightPage() {
       {/* Dossier banner */}
       {savedAt ? (
         <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]" style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}>
-          <span style={{ color: T.green }}>✓ Salvato nel dossier · {new Date(savedAt).toLocaleDateString("it-IT")}</span>
-          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium" style={{ color: T.green }}>Vedi dossier →</Link>
+          <span style={{ color: T.green }}>✓ {t("dossierSaved")} · {new Date(savedAt).toLocaleDateString(loc)}</span>
+          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium" style={{ color: T.green }}>{t("seeDossier")}</Link>
         </div>
       ) : (
         <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[12px]" style={{ background: T.card, border: `1px solid ${T.border}` }}>
-          <span style={{ color: T.muted }}>Salva il framework di oversight nel dossier di compliance</span>
+          <span style={{ color: T.muted }}>{t("saveHint")}</span>
           <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
-            Salva nel dossier
+            {t("saveToDossier")}
           </button>
         </div>
       )}
@@ -742,11 +749,11 @@ export default function OversightPage() {
       <div className="mb-5">
         <div className="flex items-center gap-2 mb-1">
           <Shield size={20} style={{ color: T.blue }} />
-          <h1 className="text-xl font-bold" style={{ color: T.text }}>Supervisione Umana</h1>
+          <h1 className="text-xl font-bold" style={{ color: T.text }}>{t("title")}</h1>
           <span className="text-[11px] font-medium px-2 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>Art. 14</span>
         </div>
         <p className="text-[12px]" style={{ color: T.muted }}>
-          Obblighi del deployer per la supervisione umana dei sistemi AI ad alto rischio.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -755,14 +762,10 @@ export default function OversightPage() {
         <Info size={16} className="mt-0.5 flex-shrink-0" style={{ color: T.blue }} />
         <div>
           <p className="text-[12px] font-semibold mb-1" style={{ color: T.blue }}>
-            Finalità della supervisione umana — Art. 14(1)-(2)
+            {t("ctx_title")}
           </p>
           <p className="text-[12px] leading-relaxed" style={{ color: "#1e3a8a" }}>
-            I sistemi AI ad alto rischio devono essere progettati e sviluppati in modo da poter essere
-            efficacemente supervisionati da persone fisiche durante il periodo in cui sono in uso.
-            La supervisione mira a prevenire o minimizzare i rischi per la salute, la sicurezza o
-            i diritti fondamentali che possono emergere durante l&apos;uso del sistema, anche in caso
-            di uso improprio ragionevolmente prevedibile.
+            {t("ctx_body")}
           </p>
         </div>
       </div>
@@ -774,10 +777,10 @@ export default function OversightPage() {
             {implementedCount}/5
           </span>
           <div>
-            <div className="text-[11px] font-medium" style={{ color: T.muted }}>requisiti Art. 14(4)</div>
+            <div className="text-[11px] font-medium" style={{ color: T.muted }}>{t("progress_req")}</div>
             {showFourEyes && (
               <div className="text-[11px]" style={{ color: fourEyesDone ? T.green : T.violet }}>
-                {fourEyesDone ? "+1 Art. 14(5) ✓" : "+1 modulo Art. 14(5) in corso"}
+                {fourEyesDone ? t("fe_done") : t("fe_inProgress")}
               </div>
             )}
           </div>
@@ -791,7 +794,7 @@ export default function OversightPage() {
             className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg"
             style={{ background: T.violet, color: "#fff", border: "none", cursor: "pointer", opacity: aiLoading ? 0.7 : 1 }}>
             {aiLoading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
-            {Object.keys(pendingSuggestions).length > 0 ? "Rigenera bozze AI" : "Bozze AI per tutti i requisiti"}
+            {Object.keys(pendingSuggestions).length > 0 ? t("aiRegen") : t("aiDraftAll")}
           </button>
         </div>
       </div>
@@ -810,6 +813,7 @@ export default function OversightPage() {
             frictionEvents={frictionEvents}
             onAddFrictionEvent={addFrictionEvent}
             systemSuspended={systemSuspended}
+            t={t}
           />
         ))}
       </div>
@@ -820,7 +824,7 @@ export default function OversightPage() {
           <div className="flex items-center gap-3 my-5">
             <div className="flex-1 h-px" style={{ background: T.border }} />
             <span className="text-[11px] font-semibold uppercase tracking-wide px-2" style={{ color: T.violet }}>
-              Modulo condizionale — Annex III 1(a)
+              {t("fe_conditionalModule")}
             </span>
             <div className="flex-1 h-px" style={{ background: T.border }} />
           </div>
@@ -831,6 +835,7 @@ export default function OversightPage() {
             systemDescription={systemDescription}
             onAiAssess={runFourEyesAi}
             aiAssessing={fourEyesAiLoading}
+            t={t}
           />
         </>
       )}
@@ -838,9 +843,7 @@ export default function OversightPage() {
       {/* Sanctions note */}
       <div className="flex items-start gap-2 p-3 rounded-lg mt-6 text-xs" style={{ background: "#fef9c3", border: "1px solid #fde047", color: "#713f12" }}>
         <Info size={14} className="mt-0.5 flex-shrink-0" />
-        <span>
-          <strong>Sanzioni Art. 99–101:</strong> Mancata implementazione della supervisione umana può comportare sanzioni fino a 30 milioni € o 6% del fatturato mondiale.
-        </span>
+        <span dangerouslySetInnerHTML={{ __html: t("sanctions") }} />
       </div>
 
       {/* Save */}
@@ -849,7 +852,7 @@ export default function OversightPage() {
           className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[12px] font-medium"
           style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
           <CheckCircle2 className="h-3.5 w-3.5" />
-          Salva nel dossier
+          {t("saveToDossier")}
         </button>
       </div>
 
