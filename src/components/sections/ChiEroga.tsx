@@ -1,11 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useT } from "@/i18n/LocaleProvider";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
 const MONO  = "'DM Mono', monospace";
 
 export default function ChiEroga() {
+  const t = useT("chiEroga");
   return (
     <section
       id="chi-eroga"
@@ -20,7 +22,7 @@ export default function ChiEroga() {
       >
         {/* Eyebrow */}
         <p style={{ fontFamily: MONO, fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.35)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 20 }}>
-          Chi eroga il servizio
+          {t("kicker")}
         </p>
 
         {/* Title */}
@@ -33,28 +35,23 @@ export default function ChiEroga() {
           color: "#0D1016",
           marginBottom: 20,
         }}>
-          Avv. Umberto Mottola — Foro di Napoli
+          {t("title")}
         </h2>
 
         {/* Body */}
-        <p style={{ fontSize: 16, lineHeight: 1.7, color: "rgba(0,0,0,0.62)", marginBottom: 16 }}>
-          Il servizio è reso dall&rsquo;<strong>Avv. Umberto Mottola</strong>, iscritto all&rsquo;Ordine degli Avvocati
-          di Napoli, nell&rsquo;esercizio della professione forense e nel rispetto del codice deontologico forense.
-        </p>
-        <p style={{ fontSize: 16, lineHeight: 1.7, color: "rgba(0,0,0,0.62)", marginBottom: 16 }}>
-          <strong>RegulaeOS è il software con cui l&rsquo;assistenza è erogata.</strong>{" "}
-          Ogni valutazione di conformità — Triage, Risk Register, FRIA, DPIA, Post-Market — è assistita
-          dallo strumento e revisionata e validata dall&rsquo;avvocato prima di essere finalizzata.
-          Gli output automatici della piattaforma non costituiscono di per sé parere legale finché non
-          sottoposti a tale verifica.
-        </p>
+        <p
+          style={{ fontSize: 16, lineHeight: 1.7, color: "rgba(0,0,0,0.62)", marginBottom: 16 }}
+          dangerouslySetInnerHTML={{ __html: t("body1") }}
+        />
+        <p
+          style={{ fontSize: 16, lineHeight: 1.7, color: "rgba(0,0,0,0.62)", marginBottom: 16 }}
+          dangerouslySetInnerHTML={{ __html: t("body2") }}
+        />
 
         {/* Divider + legal note */}
         <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)", marginTop: 28, paddingTop: 20 }}>
           <p style={{ fontFamily: MONO, fontSize: 11, color: "rgba(0,0,0,0.38)", lineHeight: 1.65 }}>
-            Ai sensi dell&rsquo;art. 35 del Codice Deontologico Forense, la comunicazione informativa
-            qui resa è veritiera, verificabile e non comparativa.
-            La versione definitiva del copy e dei documenti legali va confermata dall&rsquo;avvocato titolare.
+            {t("legalNote")}
           </p>
         </div>
       </motion.div>

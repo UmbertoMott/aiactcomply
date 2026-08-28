@@ -20,6 +20,7 @@ import type { FRIADocument } from "@/lib/simulation/fria-engine";
 import type { IntakeContext } from "@/app/actions/parseIntakeContext";
 import { T } from "@/components/assessment/tokens";
 import { UnifiedDraftPanel } from "@/components/assessment/UnifiedDraftPanel";
+import { useT } from "@/i18n/LocaleProvider";
 
 const cardSt: CSSProperties = {
   background: T.card, border: `1px solid ${T.border}`,
@@ -28,12 +29,12 @@ const cardSt: CSSProperties = {
 
 type AssessmentStage = "intake" | "spine" | "branch" | "draft" | "export";
 
-const STAGES: { key: AssessmentStage; label: string; idx: number }[] = [
-  { key: "intake",  label: "① Intake",           idx: 0 },
-  { key: "spine",   label: "② Dati Condivisi",   idx: 1 },
-  { key: "branch",  label: "③ Rami DPIA/FRIA",   idx: 2 },
-  { key: "draft",   label: "④ Bozza AI",          idx: 3 },
-  { key: "export",  label: "⑤ Export",            idx: 4 },
+const STAGES: { key: AssessmentStage; idx: number }[] = [
+  { key: "intake",  idx: 0 },
+  { key: "spine",   idx: 1 },
+  { key: "branch",  idx: 2 },
+  { key: "draft",   idx: 3 },
+  { key: "export",  idx: 4 },
 ];
 
 function stageIndex(s: AssessmentStage): number {
@@ -58,6 +59,7 @@ function secondaryBtn(): CSSProperties {
 }
 
 export default function AssessmentPage() {
+  const t = useT("toolAssessment");
   const [stage, setStage] = useState<AssessmentStage>("intake");
   const [shared, setShared] = useState<AssessmentShared>(() => getAssessment().shared);
   const [dpia, setDpia] = useState<DPIAResult>(() => getAssessment().dpia);
@@ -110,7 +112,7 @@ export default function AssessmentPage() {
 
   const stageNav = (
     <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-      {STAGES.map(({ key, label, idx }) => {
+      {STAGES.map(({ key, idx }) => {
         const isActive = key === stage;
         const isPast = idx < currentIdx;
         const style: CSSProperties = {
@@ -122,7 +124,7 @@ export default function AssessmentPage() {
         };
         return (
           <button key={key} style={style} onClick={() => setStage(key)}>
-            {label}
+            {t(`stage_${key}`)}
           </button>
         );
       })}
@@ -150,7 +152,7 @@ export default function AssessmentPage() {
               onClick={() => setStage("spine")}
               disabled={!intake.systemName.trim() || !intake.processingPurpose.trim()}
               style={primaryBtn(!intake.systemName.trim() || !intake.processingPurpose.trim())}>
-              Avanti — Dati condivisi →
+              {t("btn_next_spine")}
             </button>
           </div>
         );
@@ -160,8 +162,8 @@ export default function AssessmentPage() {
           <div>
             <SharedSpine shared={shared} onSharedChange={handleSharedChange} />
             <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={() => setStage("intake")} style={secondaryBtn()}>← Indietro</button>
-              <button onClick={() => setStage("branch")} style={primaryBtn()}>Avanti — DPIA / FRIA →</button>
+              <button onClick={() => setStage("intake")} style={secondaryBtn()}>{t("btn_back")}</button>
+              <button onClick={() => setStage("branch")} style={primaryBtn()}>{t("btn_next_branch")}</button>
             </div>
           </div>
         );
@@ -172,20 +174,20 @@ export default function AssessmentPage() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
               <div>
                 <p style={{ fontSize: 11, fontWeight: 700, color: T.text, marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                  Atto 1 — DPIA Art.35 GDPR
+                  {t("act1")}
                 </p>
                 <DpiaBranch dpia={dpia} onDpiaChange={handleDpiaChange} />
               </div>
               <div>
                 <p style={{ fontSize: 11, fontWeight: 700, color: T.text, marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                  Atto 2 — FRIA Art.27 AI Act
+                  {t("act2")}
                 </p>
                 <FriaBranch fria={fria} onFriaChange={handleFriaChange} />
               </div>
             </div>
             <div style={{ display: "flex", gap: 8, marginTop: 20 }}>
-              <button onClick={() => setStage("spine")} style={secondaryBtn()}>← Indietro</button>
-              <button onClick={() => setStage("draft")} style={primaryBtn()}>Avanti — Bozza AI →</button>
+              <button onClick={() => setStage("spine")} style={secondaryBtn()}>{t("btn_back")}</button>
+              <button onClick={() => setStage("draft")} style={primaryBtn()}>{t("btn_next_draft")}</button>
             </div>
           </div>
         );
@@ -202,8 +204,8 @@ export default function AssessmentPage() {
               onFriaChange={handleFriaChange}
             />
             <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-              <button onClick={() => setStage("branch")} style={secondaryBtn()}>← Indietro</button>
-              <button onClick={() => setStage("export")} style={primaryBtn()}>Avanti — Export →</button>
+              <button onClick={() => setStage("branch")} style={secondaryBtn()}>{t("btn_back")}</button>
+              <button onClick={() => setStage("export")} style={primaryBtn()}>{t("btn_next_export")}</button>
             </div>
           </div>
         );
@@ -212,24 +214,24 @@ export default function AssessmentPage() {
         return (
           <div>
             <div style={{ ...cardSt, padding: 24, marginBottom: 16 }}>
-              <p style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 12 }}>Rischi correlati DPIA ⇄ FRIA</p>
+              <p style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 12 }}>{t("correlated")}</p>
               <CorrelatedRisksPanel />
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <div style={cardSt}>
                 <div style={{ padding: 16 }}>
                   <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 8 }}>
-                    Atto 1 — DPIA Art. 35 GDPR
+                    {t("act1")}
                   </p>
-                  <AssessmentSignOff toolKey="dpia" toolLabel="DPIA Art. 35 GDPR" shared={shared} />
+                  <AssessmentSignOff toolKey="dpia" toolLabel={t("signoff_dpia")} shared={shared} />
                 </div>
               </div>
               <div style={cardSt}>
                 <div style={{ padding: 16 }}>
                   <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 8 }}>
-                    Atto 2 — FRIA Art. 27 AI Act
+                    {t("act2")}
                   </p>
-                  <AssessmentSignOff toolKey="fria" toolLabel="FRIA Art. 27 AI Act" shared={shared} />
+                  <AssessmentSignOff toolKey="fria" toolLabel={t("signoff_fria")} shared={shared} />
                 </div>
               </div>
             </div>
@@ -247,9 +249,9 @@ export default function AssessmentPage() {
       <AssessmentSharedHeader />
 
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 700, color: T.text }}>Assessment Unificato</h1>
+        <h1 style={{ fontSize: 20, fontWeight: 700, color: T.text }}>{t("title")}</h1>
         <p style={{ fontSize: 13, color: T.muted, marginTop: 4 }}>
-          DPIA (Art. 35 GDPR) + FRIA (Art. 27 AI Act) — 1 conversazione → 2 atti firmati
+          {t("subtitle")}
         </p>
       </div>
 

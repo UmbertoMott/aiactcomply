@@ -487,9 +487,9 @@ ${"═".repeat(68)}
 Questo documento attesta l'avvio del processo di conformità ai sensi
 dell'Art. 50 del Regolamento (UE) 2024/1689 (EU AI Act).
 
-ATTENZIONE: Questo registro non costituisce certificazione di conformità
-né parere legale. La conformità completa richiede una valutazione da parte
-di un esperto qualificato.
+ATTENZIONE: Questo registro è una bozza interna di lavorazione e non costituisce
+certificazione di conformità né parere legale. Il parere e i documenti di conformità
+definitivi costituiscono prestazione professionale resa dall'Avvocato nell'ambito di un incarico.
 
 ${"─".repeat(68)}
 DATI DEL SISTEMA AI

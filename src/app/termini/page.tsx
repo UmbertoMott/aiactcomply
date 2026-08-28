@@ -29,18 +29,19 @@ export default function TerminiPage() {
         <h2>2. Oggetto del contratto</h2>
         <p>
           Il Servizio consiste nell&apos;assistenza professionale alla conformità al Regolamento (UE) 2024/1689 («EU AI Act»)
-          e alla normativa correlata (GDPR, ISO 42001, ecc.), erogata dall&apos;<strong>Avv. Umberto Mottola</strong>,
+          e alla normativa correlata (GDPR, ISO 42001, ecc.), erogata dall&apos;<strong>Avvocato</strong>
           iscritto all&apos;Ordine degli Avvocati di Napoli, nell&apos;esercizio della professione forense e nel rispetto
           del codice deontologico. Il canone mensile è corrispettivo di tale assistenza. Lo Strumento (software RegulaeOS)
           è il mezzo tecnico con cui l&apos;assistenza è resa; la sua messa a disposizione è accessoria e strumentale
           all&apos;erogazione del Servizio, non ne costituisce l&apos;oggetto principale.
         </p>
         <p>
-          <strong>Gli output automatici dello Strumento hanno natura assistiva</strong> e non costituiscono di per sé
-          parere o consulenza legale finché non sono verificati e validati dall&apos;avvocato; i riferimenti normativi
-          devono essere confrontati col testo normativo vigente.{" "}
-          L&apos;assistenza, la revisione e la validazione degli assessment sono rese dall&apos;avvocato nell&apos;esercizio
-          della professione: a questo livello si applicano il rapporto professionale e le relative tutele.
+          <strong>Gli output dello Strumento sono elaborazioni di lavorazione interne</strong> e non costituiscono
+          di per sé parere o consulenza legale; i riferimenti normativi devono essere confrontati col testo normativo
+          vigente.{" "}
+          Il parere e i documenti di conformità costituiscono prestazione professionale resa dall&apos;Avvocato
+          nell&apos;ambito dell&apos;incarico, nell&apos;esercizio della professione forense: a questo livello si
+          applicano il rapporto professionale e le relative tutele.
         </p>
 
         <h2>3. Registrazione e account</h2>

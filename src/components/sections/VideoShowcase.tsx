@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useT } from "@/i18n/LocaleProvider";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
 const MONO = "'DM Mono', monospace";
@@ -105,11 +106,12 @@ function VideoRow({ badge, title, desc, chips, videoSrc, zoom = 1, zoomX = 50, p
 // Right 45%: Forest GREEN + big text
 
 function TriageMockup() {
+  const t = useT("showcase");
   const articles = ["Art. 5", "Art. 6", "Art. 9", "Art. 10", "Art. 11", "Annex III", "Art. 13", "Annex IV", "Art. 49"];
   const steps = [
-    "Redigere documentazione tecnica Annex IV",
-    "Completare la FRIA prima della messa in opera",
-    "Registrare nel database EU (EUDB) prima dell'immissione",
+    t("triage_step1"),
+    t("triage_step2"),
+    t("triage_step3"),
   ];
   const [checked, setChecked] = useState<boolean[]>([false, false, false]);
   const toggle = (i: number) => setChecked(prev => prev.map((v, idx) => idx === i ? !v : v));
@@ -125,23 +127,23 @@ function TriageMockup() {
       </div>
       <div style={{ padding: "22px 20px" }}>
         <p style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.28)", letterSpacing: "0.1em", textTransform: "uppercase" as const, marginBottom: 14 }}>
-          Risultato classificazione
+          {t("triage_result")}
         </p>
         <div style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, padding: "12px 16px", marginBottom: 18, display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#fff", flexShrink: 0 }} />
           <div>
-            <div style={{ fontFamily: MONO, fontSize: 11, color: "#fff", letterSpacing: "0.12em", fontWeight: 600 }}>SISTEMA AD ALTO RISCHIO</div>
-            <div style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.32)", marginTop: 3 }}>Regolamento (UE) 2024/1689 — Allegato III, cat. 5</div>
+            <div style={{ fontFamily: MONO, fontSize: 11, color: "#fff", letterSpacing: "0.12em", fontWeight: 600 }}>{t("triage_highRisk")}</div>
+            <div style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.32)", marginTop: 3 }}>{t("triage_regRef")}</div>
           </div>
         </div>
-        <p style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.22)", letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 8 }}>Articoli applicabili</p>
+        <p style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.22)", letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 8 }}>{t("triage_applicable")}</p>
         <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 5, marginBottom: 18 }}>
           {articles.map(a => (
             <span key={a} style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.45)", padding: "3px 8px", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 4 }}>{a}</span>
           ))}
         </div>
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 14, marginBottom: 14 }}>
-          <p style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.22)", letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 10 }}>3 obblighi immediati identificati</p>
+          <p style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.22)", letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 10 }}>{t("triage_obligations")}</p>
           <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
             {steps.map((s, i) => (
               <div
@@ -176,10 +178,10 @@ function TriageMockup() {
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <div style={{ flex: 1, background: "#fff", borderRadius: 6, padding: "8px 0", textAlign: "center" as const }}>
-            <span style={{ fontFamily: MONO, fontSize: 10, color: DARK, fontWeight: 500 }}>Avvia documentazione</span>
+            <span style={{ fontFamily: MONO, fontSize: 10, color: DARK, fontWeight: 500 }}>{t("triage_startDoc")}</span>
           </div>
           <div style={{ padding: "8px 14px", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 6, display: "flex", alignItems: "center" }}>
-            <span style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.35)" }}>Esporta PDF</span>
+            <span style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.35)" }}>{t("triage_exportPdf")}</span>
           </div>
         </div>
       </div>
@@ -189,6 +191,7 @@ function TriageMockup() {
 
 function ClassificationInterstitial() {
   const { ref, visible } = useInView(0.08);
+  const t = useT("showcase");
   return (
     <div ref={ref} style={{ display: "flex" }} className="interstitial-row">
       <div style={{ flex: "0 0 55%", background: DARK, display: "flex", alignItems: "center", justifyContent: "center", padding: "80px 64px 80px 48px", minHeight: 560 }}>
@@ -199,19 +202,19 @@ function ClassificationInterstitial() {
       <div style={{ flex: "0 0 45%", background: GREEN, display: "flex", alignItems: "center", padding: "80px 64px 80px 56px" }}>
         <div style={{ maxWidth: 380, opacity: visible ? 1 : 0, transform: visible ? "none" : "translateX(28px)", transition: "opacity .7s .18s ease, transform .7s .18s ease" }}>
           <p style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.35)", letterSpacing: "0.12em", textTransform: "uppercase" as const, marginBottom: 24 }}>
-            Triage — Art. 6
+            {t("classif_kicker")}
           </p>
           <h3 style={{ fontFamily: SERIF, fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 400, color: "#fff", letterSpacing: "-2px", lineHeight: 1.05, marginBottom: 20 }}>
-            Classificato<br />in 4 minuti.
+            {t("classif_titleLine1")}<br />{t("classif_titleLine2")}
           </h3>
           <p style={{ fontSize: 15, color: "rgba(255,255,255,0.52)", lineHeight: 1.78, marginBottom: 32 }}>
-            Nessun esperto esterno, nessun foglio Excel. AIComply legge le caratteristiche del tuo sistema e mappa ogni obbligo normativo in automatico.
+            {t("classif_desc")}
           </p>
           <div style={{ display: "flex", flexDirection: "column" as const, gap: 14 }}>
             {[
-              "4 livelli di rischio riconosciuti (Art. 5, 6, 7)",
-              "Mapping immediato agli allegati applicabili",
-              "Report PDF pronto in 60 secondi",
+              t("classif_bullet1"),
+              t("classif_bullet2"),
+              t("classif_bullet3"),
             ].map((item, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{ width: 5, height: 5, borderRadius: "50%", background: "rgba(255,255,255,0.5)", flexShrink: 0 }} />
@@ -229,21 +232,23 @@ function ClassificationInterstitial() {
 // Left 42%: TERRACOTTA + text + 3 mini stats
 // Right 58%: DARK + Risk Register with colored severity badges
 
-const RISKS = [
-  { label: "Accesso non autorizzato ai dati personali", level: "ALTO",  art: "Art. 9" },
-  { label: "Bias nel dataset di training",              level: "MEDIO", art: "Art. 10" },
-  { label: "Mancata trasparenza verso l'utente",       level: "ALTO",  art: "Art. 13" },
-  { label: "Deriva del modello in produzione",         level: "BASSO", art: "Art. 72" },
-  { label: "Documentazione tecnica incompleta",        level: "MEDIO", art: "Art. 11" },
-];
+type Severity = "high" | "med" | "low";
 
-function levelStyle(level: string): React.CSSProperties {
-  if (level === "ALTO")  return { background: "rgba(150,50,32,0.85)", color: "#fff", border: "1px solid rgba(200,80,60,0.4)" };
-  if (level === "MEDIO") return { background: "rgba(130,90,16,0.75)", color: "#fff", border: "1px solid rgba(180,130,20,0.3)" };
+function levelStyle(severity: Severity): React.CSSProperties {
+  if (severity === "high") return { background: "rgba(150,50,32,0.85)", color: "#fff", border: "1px solid rgba(200,80,60,0.4)" };
+  if (severity === "med")  return { background: "rgba(130,90,16,0.75)", color: "#fff", border: "1px solid rgba(180,130,20,0.3)" };
   return { background: "rgba(11,61,46,0.75)", color: "#fff", border: "1px solid rgba(30,120,80,0.3)" };
 }
 
 function RiskMockup() {
+  const t = useT("showcase");
+  const RISKS: { label: string; level: string; severity: Severity; art: string }[] = [
+    { label: t("risk1_label"), level: t("riskLevelHigh"), severity: "high", art: "Art. 9" },
+    { label: t("risk2_label"), level: t("riskLevelMed"),  severity: "med",  art: "Art. 10" },
+    { label: t("risk3_label"), level: t("riskLevelHigh"), severity: "high", art: "Art. 13" },
+    { label: t("risk4_label"), level: t("riskLevelLow"),  severity: "low",  art: "Art. 72" },
+    { label: t("risk5_label"), level: t("riskLevelMed"),  severity: "med",  art: "Art. 11" },
+  ];
   return (
     <div className="risk-card" style={{ borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.30)", background: "#0e0e0e", boxShadow: "0 24px 80px rgba(0,0,0,0.6)" }}>
       <div style={{ background: "#1a1a1a", padding: "10px 14px", display: "flex", alignItems: "center", gap: 8, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
@@ -255,20 +260,20 @@ function RiskMockup() {
         </div>
       </div>
       <div style={{ padding: "10px 16px 8px", display: "grid", gridTemplateColumns: "1fr 70px 54px", gap: 8, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-        {["Rischio","Livello","Norma"].map(h => (
+        {[t("riskCol_risk"), t("riskCol_level"), t("riskCol_norm")].map(h => (
           <span key={h} style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.18)", letterSpacing: "0.08em", textTransform: "uppercase" as const }}>{h}</span>
         ))}
       </div>
       {RISKS.map((r, i) => (
         <div key={i} style={{ padding: "11px 16px", display: "grid", gridTemplateColumns: "1fr 70px 54px", gap: 8, alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.04)", background: i % 2 === 0 ? "rgba(255,255,255,0.015)" : "transparent" }}>
           <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", lineHeight: 1.35 }}>{r.label}</span>
-          <span style={{ fontFamily: MONO, fontSize: 9, padding: "3px 7px", borderRadius: 4, textAlign: "center" as const, ...levelStyle(r.level) }}>{r.level}</span>
+          <span style={{ fontFamily: MONO, fontSize: 9, padding: "3px 7px", borderRadius: 4, textAlign: "center" as const, ...levelStyle(r.severity) }}>{r.level}</span>
           <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.28)" }}>{r.art}</span>
         </div>
       ))}
       <div style={{ padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-        <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.22)" }}>5 rischi · 2 ad alto livello</span>
-        <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.22)", padding: "3px 10px", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 4, cursor: "pointer" }}>+ Aggiungi</span>
+        <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.22)" }}>{t("riskFooter_count")}</span>
+        <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.22)", padding: "3px 10px", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 4, cursor: "pointer" }}>{t("riskFooter_add")}</span>
       </div>
     </div>
   );
@@ -276,24 +281,25 @@ function RiskMockup() {
 
 function RiskInterstitial() {
   const { ref, visible } = useInView(0.08);
+  const t = useT("showcase");
   return (
     <div ref={ref} style={{ display: "flex" }} className="interstitial-row">
       <div style={{ flex: "0 0 42%", background: TERRA, display: "flex", alignItems: "center", padding: "80px 56px 80px 48px", minHeight: 560 }}>
         <div style={{ maxWidth: 340, opacity: visible ? 1 : 0, transform: visible ? "none" : "translateX(-28px)", transition: "opacity .7s ease, transform .7s ease" }}>
           <p style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.35)", letterSpacing: "0.12em", textTransform: "uppercase" as const, marginBottom: 24 }}>
-            Risk Manager — Art. 9
+            {t("riskInt_kicker")}
           </p>
           <h3 style={{ fontFamily: SERIF, fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 400, color: "#fff", letterSpacing: "-2px", lineHeight: 1.05, marginBottom: 20 }}>
-            Ogni rischio<br />ha una casa.
+            {t("riskInt_titleLine1")}<br />{t("riskInt_titleLine2")}
           </h3>
           <p style={{ fontSize: 15, color: "rgba(255,255,255,0.52)", lineHeight: 1.78, marginBottom: 36 }}>
-            Risk Register, FRIA e DPIA sincronizzati in tempo reale. Nessun foglio Excel, nessuna duplicazione — ogni rischio ha proprietario, misure e stato in un unico posto.
+            {t("riskInt_desc")}
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, borderTop: "1px solid rgba(255,255,255,0.15)", paddingTop: 28 }}>
             {[
-              { v: "47+", l: "articoli coperti" },
-              { v: "5",   l: "categorie rischio" },
-              { v: "PDF", l: "export firmato" },
+              { v: "47+", l: t("riskInt_stat1") },
+              { v: "5",   l: t("riskInt_stat2") },
+              { v: "PDF", l: t("riskInt_stat3") },
             ].map((s, i) => (
               <div key={i}>
                 <div style={{ fontFamily: SERIF, fontSize: 30, fontWeight: 400, color: "#fff", letterSpacing: "-1px", marginBottom: 5 }}>{s.v}</div>
@@ -317,6 +323,7 @@ function RiskInterstitial() {
 
 function FlowTrio() {
   const { ref, visible } = useInView(0.12);
+  const t = useT("showcase");
 
   const triageMini = (
     <div style={{ background: "#1c1c1c", borderRadius: 10, border: "1px solid rgba(255,255,255,0.20)", overflow: "hidden" }}>
@@ -324,13 +331,13 @@ function FlowTrio() {
         {[0,1,2].map(i => <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(255,255,255,0.1)" }} />)}
       </div>
       <div style={{ padding: "18px 16px 16px" }}>
-        <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.25)", marginBottom: 12 }}>Classificazione sistema AI</div>
+        <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.25)", marginBottom: 12 }}>{t("flow_triageTitle")}</div>
         <div style={{ background: "rgba(255,255,255,0.07)", borderRadius: 5, padding: "8px 10px", marginBottom: 8, border: "1px solid rgba(255,255,255,0.1)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
             <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff" }} />
-            <span style={{ fontFamily: MONO, fontSize: 8, color: "#fff", fontWeight: 600, letterSpacing: "0.08em" }}>ALTO RISCHIO</span>
+            <span style={{ fontFamily: MONO, fontSize: 8, color: "#fff", fontWeight: 600, letterSpacing: "0.08em" }}>{t("flow_highRisk")}</span>
           </div>
-          <span style={{ fontFamily: MONO, fontSize: 7, color: "rgba(255,255,255,0.28)" }}>Art. 6 · Allegato III, cat. 5</span>
+          <span style={{ fontFamily: MONO, fontSize: 7, color: "rgba(255,255,255,0.28)" }}>{t("flow_triageRef")}</span>
         </div>
         <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4 }}>
           {["Art. 9", "Art. 11", "Art. 13", "Annex IV", "Art. 49"].map(a => (
@@ -347,12 +354,12 @@ function FlowTrio() {
         {[0,1,2].map(i => <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(255,255,255,0.1)" }} />)}
       </div>
       <div style={{ padding: "18px 16px 16px" }}>
-        <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.25)", marginBottom: 12 }}>Annex IV — Fascicolo tecnico</div>
+        <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.25)", marginBottom: 12 }}>{t("flow_docTitle")}</div>
         {[
-          { label: "Descrizione sistema AI", pct: 100 },
-          { label: "Misure di conformità",   pct: 82 },
-          { label: "Data governance",        pct: 55 },
-          { label: "FRIA collegata",         pct: 94 },
+          { label: t("flow_docRow1"), pct: 100 },
+          { label: t("flow_docRow2"), pct: 82 },
+          { label: t("flow_docRow3"), pct: 55 },
+          { label: t("flow_docRow4"), pct: 94 },
         ].map(row => (
           <div key={row.label} style={{ marginBottom: 7 }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
@@ -374,7 +381,7 @@ function FlowTrio() {
         {[0,1,2].map(i => <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(255,255,255,0.1)" }} />)}
       </div>
       <div style={{ padding: "18px 16px 16px" }}>
-        <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.25)", marginBottom: 12 }}>Post-Market — Dashboard</div>
+        <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.25)", marginBottom: 12 }}>{t("flow_monitorTitle")}</div>
         <div style={{ display: "flex", gap: 6, marginBottom: 10 }}>
           {[
             { label: "Uptime", val: "99.8%" },
@@ -388,9 +395,9 @@ function FlowTrio() {
           ))}
         </div>
         {[
-          "14:32 — Nessuna deriva rilevata",
-          "13:10 — Soglie Art. 73 verificate",
-          "12:00 — Report settimanale inviato",
+          t("flow_log1"),
+          t("flow_log2"),
+          t("flow_log3"),
         ].map((log, i) => (
           <div key={i} style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 5 }}>
             <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#2D7A50", flexShrink: 0 }} />
@@ -402,16 +409,16 @@ function FlowTrio() {
   );
 
   const panels = [
-    { num: "01", title: "Classifica", desc: "Il sistema AI viene classificato per livello di rischio e mappato agli articoli applicabili in pochi minuti.", mini: triageMini },
-    { num: "02", title: "Documenta", desc: "Fascicolo tecnico Annex IV, FRIA e DPIA pre-compilati dai dati già inseriti — nessun copia-incolla tra moduli.", mini: docMini },
-    { num: "03", title: "Monitora",  desc: "Post-Market sorveglia il sistema in produzione con drift detection e alert automatici per l'autorità notificante.", mini: monitorMini },
+    { num: "01", title: t("flow_panel1_title"), desc: t("flow_panel1_desc"), mini: triageMini },
+    { num: "02", title: t("flow_panel2_title"), desc: t("flow_panel2_desc"), mini: docMini },
+    { num: "03", title: t("flow_panel3_title"), desc: t("flow_panel3_desc"), mini: monitorMini },
   ];
 
   return (
     <div ref={ref} style={{ background: DARK, padding: "80px 56px" }}>
       <div>
         <p style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.22)", letterSpacing: "0.12em", textTransform: "uppercase" as const, marginBottom: 56 }}>
-          Il flusso completo
+          {t("flow_kicker")}
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 56 }} className="trio-grid">
           {panels.map((p, i) => (
@@ -515,6 +522,7 @@ function LegalVideoRow({ badge, title, desc, chips, videoSrc, reverse }: Omit<Ro
 
 function ProductHero() {
   const { ref, visible } = useInView(0.06);
+  const t = useT("showcase");
   const tiltRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [hovering, setHovering] = useState(false);
@@ -577,7 +585,7 @@ function ProductHero() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/screenshots/fria.png"
-                alt="FRIA Guidata — RegulaeOS"
+                alt={t("imgAlt_fria")}
                 style={{ width: "100%", display: "block" }}
               />
             </div>
@@ -594,7 +602,7 @@ function ProductHero() {
               transform: "translateZ(48px)",
               transition: tiltTransition,
             }}>
-              <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.32)", marginBottom: 10, letterSpacing: "0.08em" }}>AVANZAMENTO FRIA</div>
+              <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.32)", marginBottom: 10, letterSpacing: "0.08em" }}>{t("ph_progressLabel")}</div>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                 <div style={{ position: "relative", width: 40, height: 40, flexShrink: 0 }}>
                   <svg viewBox="0 0 40 40" style={{ transform: "rotate(-90deg)", width: 40, height: 40 }}>
@@ -606,12 +614,12 @@ function ProductHero() {
                 </div>
                 <div>
                   <div style={{ fontFamily: MONO, fontSize: 10, fontWeight: 600, color: DARK }}>15 / 48</div>
-                  <div style={{ fontFamily: MONO, fontSize: 8, color: "rgba(0,0,0,0.38)", marginTop: 1 }}>risposte completate</div>
+                  <div style={{ fontFamily: MONO, fontSize: 8, color: "rgba(0,0,0,0.38)", marginTop: 1 }}>{t("ph_answersDone")}</div>
                 </div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                 <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#2ECC71" }} />
-                <span style={{ fontFamily: MONO, fontSize: 8, color: "rgba(0,0,0,0.45)" }}>Sezione 1A · 100% ✓</span>
+                <span style={{ fontFamily: MONO, fontSize: 8, color: "rgba(0,0,0,0.45)" }}>{t("ph_sectionDone")}</span>
               </div>
             </div>
 
@@ -626,7 +634,7 @@ function ProductHero() {
               transform: "translateZ(32px)",
               transition: tiltTransition,
             }}>
-              <div style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.28)", marginBottom: 8, letterSpacing: "0.1em" }}>COPERTURA NORMATIVA</div>
+              <div style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.28)", marginBottom: 8, letterSpacing: "0.1em" }}>{t("ph_coverageLabel")}</div>
               <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 5, maxWidth: 220 }}>
                 {["Art. 27", "Art. 9", "Art. 13", "Art. 26", "WP29", "DIHR", "ECNL", "CFR"].map(a => (
                   <span key={a} style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.72)", padding: "3px 8px", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 4 }}>{a}</span>
@@ -646,7 +654,7 @@ function ProductHero() {
         {/* ─── RIGHT: testo ─────────────────────────────────────────────── */}
         <div style={{ flex: "0 0 31%", ...fadeRight }}>
           <p style={{ fontFamily: MONO, fontSize: 11, fontWeight: 500, color: "rgba(0,0,0,0.32)", letterSpacing: "0.07em", textTransform: "uppercase" as const, marginBottom: 20 }}>
-            Valutazione d&apos;impatto · Art. 27 AI Act
+            {t("ph_kicker")}
           </p>
           <h2 style={{
             fontFamily: SERIF,
@@ -657,20 +665,19 @@ function ProductHero() {
             color: DARK,
             marginBottom: 22,
           }}>
-            Il fascicolo che l&apos;autorità si aspetta. Pronto prima che te lo chieda.
+            {t("ph_title")}
           </h2>
           <p style={{ fontSize: 15, fontWeight: 300, color: "rgba(0,0,0,0.48)", lineHeight: 1.85, marginBottom: 28 }}>
-            Ogni azienda che utilizza sistemi AI ad alto rischio ha obblighi documentali precisi — e sanzioni fino al 3% del fatturato globale per chi non li rispetta.
-            RegulaeOS guida ogni sezione, cita ogni articolo applicabile e genera il dossier conforme in ore, non in mesi di consulenza.
+            {t("ph_desc")}
           </p>
           <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 7, marginBottom: 36 }}>
-            {["FRIA Art. 27", "DPIA integrata", "Pre-compilazione AI", "Export SHA-256", "WP29 · DIHR · CFR"].map(c => (
+            {t("ph_chips").split("|").map(c => (
               <span key={c} style={{ fontFamily: MONO, fontSize: 11, padding: "5px 13px", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 20, color: "rgba(0,0,0,0.42)" }}>{c}</span>
             ))}
           </div>
           <div style={{ height: 1, background: "rgba(0,0,0,0.07)", marginBottom: 28 }} />
           <div style={{ display: "flex", gap: 32 }}>
-            {[{ v: "48", l: "sezioni guidate" }, { v: "7", l: "framework coperti" }, { v: "3%", l: "sanzione max fatturato" }].map(stat => (
+            {[{ v: "48", l: t("ph_stat1") }, { v: "7", l: t("ph_stat2") }, { v: "3%", l: t("ph_stat3") }].map(stat => (
               <div key={stat.l}>
                 <div style={{ fontFamily: SERIF, fontSize: 28, fontWeight: 400, letterSpacing: "-1px", color: DARK }}>{stat.v}</div>
                 <div style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.35)", marginTop: 2 }}>{stat.l}</div>
@@ -686,54 +693,56 @@ function ProductHero() {
 
 // ─── ROW DATA ─────────────────────────────────────────────────────────────────
 
-const ROW1: RowProps = {
-  badge: "Triage · Art. 5 · 6 · 51",
-  title: "Capisci quali obblighi ti riguardano.",
-  desc: "Quattro aree tematiche, poche domande guidate, e AIComply classifica il tuo sistema — rischio inaccettabile, alto, limitato o minimo — mappandolo agli articoli e agli allegati che contano.",
-  chips: ["Classificazione 4 livelli", "Mapping Art. 6 + Annex III", "Export PDF", "Storico sessioni"],
-  videoSrc: "/videos/triage.mp4",
-  reverse: false,
-};
-
-const ROW2: Omit<RowProps, "zoom" | "zoomX" | "playbackRate"> = {
-  badge: "Legal Assistant · 2024/1689",
-  title: "Risposte con le fonti, non opinioni.",
-  desc: "Fai una domanda sull'AI Act, su ISO 22989 o sulle Guidelines: il Legal Assistant cita il testo esatto, articolo per articolo, con il chunk sorgente sempre verificabile a fianco.",
-  chips: ["RAG su EU AI Act", "ISO 22989 + Guidelines", "Chunk sorgente verificabile", "Badge articolo per risposta"],
-  videoSrc: "/videos/legal-assistant.mp4",
-  reverse: true,
-};
-
-const ROW3: RowProps = {
-  badge: "Risk Manager · Art. 27",
-  title: "Valutazioni d'impatto che si scrivono da sole.",
-  desc: "Risk Register, FRIA e DPIA prendono forma dai dati già raccolti negli altri moduli. AIComply pre-compila le sezioni e tu validi.",
-  chips: ["Risk Register", "FRIA + DPIA integrate", "Pre-compilazione automatica", "Export firmato"],
-  videoSrc: "/videos/fria.mp4",
-  reverse: false,
-};
-
-const ROW4: RowProps = {
-  badge: "Registrazione EUDB · Art. 49",
-  title: "Pronto per il database UE, senza copia-incolla.",
-  desc: "Mappatura dei campi Annex VIII e criteri di eleggibilità pre-compilati dal Triage, da verificare contro il testo consolidato del Regolamento.",
-  chips: ["Annex VIII mapping", "Criteri eleggibilità", "Sincronizzato con Triage"],
-  videoSrc: "/videos/eudb.mp4",
-  reverse: true,
-};
-
-const ROW5: RowProps = {
-  badge: "Trust Center · Art. 13 · 50",
-  title: "Dimostra la conformità in pubblico.",
-  desc: "Pubblica una pagina di trasparenza verificabile: classificazione del rischio, finalità d'uso e pacchetto di conformità esportabile, confermati prima di andare online.",
-  chips: ["Pagina pubblica verificabile", "Badge conformità", "Export pacchetto compliance"],
-  videoSrc: "/videos/trust.mp4",
-  reverse: false,
-};
-
 // ─── MAIN EXPORT ──────────────────────────────────────────────────────────────
 
 export default function VideoShowcase() {
+  const t = useT("showcase");
+
+  const ROW1: RowProps = {
+    badge: t("row1_badge"),
+    title: t("row1_title"),
+    desc: t("row1_desc"),
+    chips: t("row1_chips").split("|"),
+    videoSrc: "/videos/triage.mp4",
+    reverse: false,
+  };
+
+  const ROW2: Omit<RowProps, "zoom" | "zoomX" | "playbackRate"> = {
+    badge: t("row2_badge"),
+    title: t("row2_title"),
+    desc: t("row2_desc"),
+    chips: t("row2_chips").split("|"),
+    videoSrc: "/videos/legal-assistant.mp4",
+    reverse: true,
+  };
+
+  const ROW3: RowProps = {
+    badge: t("row3_badge"),
+    title: t("row3_title"),
+    desc: t("row3_desc"),
+    chips: t("row3_chips").split("|"),
+    videoSrc: "/videos/fria.mp4",
+    reverse: false,
+  };
+
+  const ROW4: RowProps = {
+    badge: t("row4_badge"),
+    title: t("row4_title"),
+    desc: t("row4_desc"),
+    chips: t("row4_chips").split("|"),
+    videoSrc: "/videos/eudb.mp4",
+    reverse: true,
+  };
+
+  const ROW5: RowProps = {
+    badge: t("row5_badge"),
+    title: t("row5_title"),
+    desc: t("row5_desc"),
+    chips: t("row5_chips").split("|"),
+    videoSrc: "/videos/trust.mp4",
+    reverse: false,
+  };
+
   return (
     <section style={{ background: "#ffffff", borderTop: "1px solid rgba(0,0,0,0.07)" }}>
       <style>{`
@@ -807,10 +816,10 @@ export default function VideoShowcase() {
       {/* Header */}
       <div className="px-4 sm:px-8 md:px-12 py-16 md:py-24" style={{ maxWidth: 960, margin: "0 auto" }}>
         <p style={{ fontFamily: MONO, fontSize: 11, fontWeight: 500, letterSpacing: "1.5px", textTransform: "uppercase", color: "rgba(0,0,0,0.28)", marginBottom: 14 }}>
-          Il prodotto in movimento
+          {t("header_kicker")}
         </p>
         <h2 style={{ fontFamily: SERIF, fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 400, letterSpacing: "-2px", color: DARK, lineHeight: 1.05 }}>
-          Vedi come funziona ogni modulo.
+          {t("header_title")}
         </h2>
       </div>
 

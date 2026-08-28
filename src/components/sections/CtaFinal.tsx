@@ -2,8 +2,10 @@
 
 import { motion } from "framer-motion";
 import Button from "@/components/ui/Button";
+import { useT } from "@/i18n/LocaleProvider";
 
 export default function CtaFinal() {
+  const t = useT("ctaFinal");
   return (
     <section
       className="px-12 py-28 text-center"
@@ -25,7 +27,7 @@ export default function CtaFinal() {
             lineHeight: 1.05,
           }}
         >
-          Attiva l&rsquo;assistenza.<br />Ogni valutazione validata.
+          {t("titleLine1")}<br />{t("titleLine2")}
         </h2>
         <p
           className="mb-9 leading-relaxed"
@@ -35,14 +37,13 @@ export default function CtaFinal() {
             color: "rgba(255,255,255,0.4)",
           }}
         >
-          Chiamata di 30 minuti. Analizziamo insieme il tuo sistema AI e ti mostriamo
-          come l&rsquo;avvocato, assistito dallo strumento, predispone il tuo primo assessment.
+          {t("subtitle")}
         </p>
         <div className="flex gap-3 justify-center">
           <Button href="/contatti" variant="primary">
-            Attiva l&rsquo;assistenza
+            {t("ctaPrimary")}
           </Button>
-          <Button href="/contatti" variant="ghost">Parla con l&rsquo;avvocato</Button>
+          <Button href="/contatti" variant="ghost">{t("ctaSecondary")}</Button>
         </div>
       </motion.div>
     </section>

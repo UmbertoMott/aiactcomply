@@ -64,7 +64,10 @@ export async function resendLoginOTPAction() {
   }
 
   const newCode = await createOTPCookie(user.id);
-  await sendLoginOTPEmail(user.email, newCode);
+  const sent = await sendLoginOTPEmail(user.email, newCode);
+  if (!sent.ok) {
+    return { error: "Invio del codice non riuscito. Riprova tra qualche istante." };
+  }
 
   return { success: true };
 }
@@ -84,7 +87,10 @@ export async function ensureOTPSent(): Promise<{ sent: boolean }> {
 
   // Genera e invia
   const newCode = await createOTPCookie(user.id);
-  await sendLoginOTPEmail(user.email, newCode);
+  const sent = await sendLoginOTPEmail(user.email, newCode);
+  if (!sent.ok) {
+    console.error("[OTP] ensureOTPSent: invio email fallito per", user.email);
+  }
 
-  return { sent: true };
+  return { sent: sent.ok };
 }

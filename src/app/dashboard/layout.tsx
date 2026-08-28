@@ -18,12 +18,16 @@ import NotificationBell from "@/components/notifications/NotificationBell";
 import DisclosureModal from "@/components/disclosure/DisclosureModal";
 import DisclosureBanner from "@/components/disclosure/DisclosureBanner";
 import MachineMarkers from "@/components/disclosure/MachineMarkers";
+import DeliverableGateGuard from "@/components/disclosure/DeliverableGateGuard";
 import UserMenu from "@/components/dashboard/UserMenu";
 import ChatAssistant from "@/components/ui/ChatAssistant";
 import SessionWarning from "@/components/auth/SessionWarning";
 import { ProjectSwitcher } from "@/components/layout/ProjectSwitcher";
 import { ProjectMembersMenu } from "@/components/dashboard/ProjectMembersMenu";
 import { sanitizeSidebarLabel } from "@/lib/sidebar/sidebar-utils";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
+
+type T = (key: string) => string;
 
 
 type NavChild = {
@@ -49,6 +53,7 @@ type NavPillar = {
 
 function MobileGate() {
   const router = useRouter();
+  const t = useT("dash");
   async function handleLogout() {
     const { createClient } = await import("@/lib/supabase/client");
     const supabase = createClient();
@@ -75,12 +80,12 @@ function MobileGate() {
 
         {/* Headline */}
         <h1 style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 22, fontWeight: 700, color: "#ffffff", lineHeight: 1.3, marginBottom: 14 }}>
-          Apri dal computer
+          {t("mobile_title")}
         </h1>
 
         {/* Body */}
         <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.65, marginBottom: 36 }}>
-          RegulaeOS è progettato per essere usato su desktop. Accedi dal tuo computer per utilizzare tutti gli strumenti di compliance.
+          {t("mobile_body")}
         </p>
 
         {/* Links */}
@@ -90,14 +95,14 @@ function MobileGate() {
             className="w-full flex items-center justify-center rounded-xl text-sm font-medium transition-opacity hover:opacity-80"
             style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.75)", padding: "12px 0" }}
           >
-            Vai alla fatturazione
+            {t("mobile_billing")}
           </a>
           <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center rounded-xl text-sm transition-opacity hover:opacity-80"
             style={{ color: "rgba(255,255,255,0.35)", padding: "10px 0" }}
           >
-            Esci dall&apos;account
+            {t("mobile_logout")}
           </button>
         </div>
       </div>
@@ -126,7 +131,8 @@ function SidebarTooltip({ text, children }: { text: string; children: React.Reac
   );
 }
 
-const PILLARS: NavPillar[] = [
+function buildPillars(t: T): NavPillar[] {
+  return [
   {
     id: "dashboard",
     icon: Home,
@@ -136,7 +142,7 @@ const PILLARS: NavPillar[] = [
   {
     id: "inventory",
     icon: LayoutGrid,
-    label: "Inventario Sistemi AI",
+    label: t("nav_inventory"),
     href: "/dashboard/tools/inventory",
     art: "Art. 6",
   },
@@ -163,16 +169,16 @@ const PILLARS: NavPillar[] = [
     icon: FileCode,
     label: "DocuGen AI",
     href: "/dashboard/tools/docugen",
-    art: "All. IV",
+    art: t("art_docugen"),
     badge: "new",
   },
   {
     id: "data-audit",
     icon: ClipboardList,
-    label: "Qualità Dati",
+    label: t("nav_dataAudit"),
     href: "/dashboard/tools/data-audit",
     art: "Art. 10",
-    tooltip: "Qualità e governance dei dati di training (Art. 10)",
+    tooltip: t("tt_dataAudit"),
   },
   {
     id: "resilience",
@@ -180,7 +186,7 @@ const PILLARS: NavPillar[] = [
     label: "Resilience",
     href: "/dashboard/tools/resilience",
     art: "Art. 15",
-    tooltip: "Accuratezza, robustezza e cybersicurezza — evidenza da red-team/eval (Art. 15)",
+    tooltip: t("tt_resilience"),
   },
   {
     id: "transparency",
@@ -188,7 +194,7 @@ const PILLARS: NavPillar[] = [
     label: "Transparency",
     href: "/dashboard/tools/transparency",
     art: "Art. 13/50",
-    tooltip: "Obblighi di trasparenza e informazioni all'utente (Art. 13, Art. 50)",
+    tooltip: t("tt_transparency"),
   },
   {
     id: "oversight",
@@ -196,7 +202,7 @@ const PILLARS: NavPillar[] = [
     label: "Oversight",
     href: "/dashboard/tools/oversight",
     art: "Art. 14",
-    tooltip: "Sorveglianza umana e misure di controllo (Art. 14)",
+    tooltip: t("tt_oversight"),
   },
   {
     id: "qms",
@@ -204,15 +210,15 @@ const PILLARS: NavPillar[] = [
     label: "QMS",
     href: "/dashboard/tools/qms",
     art: "Art. 17",
-    tooltip: "Sistema di gestione della qualità (Art. 17)",
+    tooltip: t("tt_qms"),
   },
   {
     id: "conformity",
     icon: BadgeCheck,
-    label: "Conformità",
+    label: t("nav_conformity"),
     href: "/dashboard/tools/conformity",
     art: "Art. 43",
-    tooltip: "Valutazione di conformità e marcatura CE (Art. 43)",
+    tooltip: t("tt_conformity"),
   },
   {
     id: "gpai",
@@ -220,15 +226,15 @@ const PILLARS: NavPillar[] = [
     label: "GPAI",
     href: "/dashboard/tools/gpai",
     art: "Art. 51-55",
-    tooltip: "Modelli per finalità generali (Art. 51-55)",
+    tooltip: t("tt_gpai"),
   },
   {
     id: "incident",
     icon: AlertTriangle,
-    label: "Incidenti",
+    label: t("nav_incident"),
     href: "/dashboard/tools/incident",
     art: "Art. 73",
-    tooltip: "Segnalazione di incidenti gravi (Art. 73)",
+    tooltip: t("tt_incident"),
   },
   {
     id: "deployer",
@@ -245,7 +251,7 @@ const PILLARS: NavPillar[] = [
     href: "/dashboard/tools/legal-assistant",
     art: "RAG",
     badge: "new" as const,
-    tooltip: "Assistente AI con RAG sull'EU AI Act — domande in linguaggio naturale",
+    tooltip: t("tt_legalAssistant"),
   },
   {
     id: "compliance",
@@ -253,11 +259,11 @@ const PILLARS: NavPillar[] = [
     label: "Compliance Ops",
     art: "Art. 12–72",
     children: [
-      { icon: CalendarClock,  label: "Scadenze",            href: "/dashboard/compliance-ops/deadlines",  art: "Timeline" },
-      { icon: FileArchive,    label: "LogVault",            href: "/dashboard/tools/logvault",            art: "Art. 12", tooltip: "Registro log operativi e attività in deployment (Art. 12)" },
+      { icon: CalendarClock,  label: t("nav_deadlines"),    href: "/dashboard/compliance-ops/deadlines",  art: "Timeline" },
+      { icon: FileArchive,    label: "LogVault",            href: "/dashboard/tools/logvault",            art: "Art. 12", tooltip: t("tt_logvault") },
       { icon: TrendingUp,     label: "Post-Market",         href: "/dashboard/post-market",               art: "Art. 72-73" },
       { icon: Database,       label: "EUDB",                href: "/dashboard/compliance-ops/eudb",       art: "Art. 49" },
-      { icon: UserCheck,      label: "Repr. Autorizzato",         href: "/dashboard/compliance-ops/authorized-rep", art: "Art. 22" },
+      { icon: UserCheck,      label: t("nav_authRep"),      href: "/dashboard/compliance-ops/authorized-rep", art: "Art. 22" },
       { icon: ArrowRightLeft, label: "Provider Transition", href: "/dashboard/compliance-ops/provider-transition", art: "Art. 28" },
       { icon: ShieldCheck,    label: "Trust Center",        href: "/dashboard/compliance-ops/trust-center", art: "Art. 13/50" },
       { icon: Scale,          label: "L.132/2025",          href: "/dashboard/tools/l132",                art: "PA Italy", flag: "paItaly" },
@@ -265,10 +271,14 @@ const PILLARS: NavPillar[] = [
       { icon: Map,            label: "NIST AI RMF",         href: "/dashboard/tools/nist-ai-rmf",         art: "NIST", flag: "nistEnabled" },
     ],
   },
-];
+  ];
+}
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const t = useT("dash");
+  const locale = useLocale();
+  const pillars = buildPillars(t);
   const [isMobile, setIsMobile] = useState(false);
   const [layoutMounted, setLayoutMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -291,7 +301,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const [expandedPillars, setExpandedPillars] = useState<Set<string>>(() => {
     const set = new Set<string>();
-    for (const pillar of PILLARS) {
+    for (const pillar of pillars) {
       if (pillar.children?.some((c) => pathname.startsWith(c.href))) {
         set.add(pillar.id);
       }
@@ -336,7 +346,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!layoutMounted) return null;
   if (isMobile) return <MobileGate />;
 
-  const currentItem = PILLARS.flatMap((p) =>
+  const currentItem = pillars.flatMap((p) =>
     p.href ? [{ label: p.label, href: p.href }] : (p.children ?? [])
   ).find((i) => pathname.startsWith(i.href));
 
@@ -346,10 +356,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="flex flex-col h-screen w-full overflow-hidden" style={{ background: "#FFFFFF" }}>
       {/* Art. 50 — machine-readable markers (meta tags + JSON-LD) */}
       <MachineMarkers />
+      {/* Deontologia — gate deliverable finale (attivo solo con flag; default off) */}
+      <DeliverableGateGuard />
       {/* Art. 50 — first-session blocking modal */}
-      <DisclosureModal lang="it" />
+      <DisclosureModal lang={locale} />
       {/* Art. 50 — persistent non-dismissible banner */}
-      <DisclosureBanner lang="it" />
+      <DisclosureBanner lang={locale} />
       <div className="flex flex-1 min-h-0 overflow-hidden">
       {sidebarOpen && (
         <div
@@ -424,7 +436,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
 
             {/* 5 Pilastri */}
-            {PILLARS.map((pillar) => {
+            {pillars.map((pillar) => {
               const isExpanded = expandedPillars.has(pillar.id);
               const isPillarActive = pillar.href
                 ? pathname.startsWith(pillar.href)
@@ -514,7 +526,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             </div>
                             {!collapsed && (
                               child.href === "/dashboard/compliance-ops/trust-center" && trustCenterPublished
-                                ? <span className="text-[9px] px-1 py-0.5 rounded border" style={{ background: "rgba(6,78,59,0.4)", color: "#6ee7b7", borderColor: "rgba(52,211,153,0.3)" }}>Pubblicato</span>
+                                ? <span className="text-[9px] px-1 py-0.5 rounded border" style={{ background: "rgba(6,78,59,0.4)", color: "#6ee7b7", borderColor: "rgba(52,211,153,0.3)" }}>{t("published")}</span>
                                 : child.art
                                   ? <span className="text-[9px] px-1 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}>{sanitizeSidebarLabel(child.art)}</span>
                                   : null
@@ -536,14 +548,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Link
                 href="/dashboard/account"
                 onClick={() => setSidebarOpen(false)}
-                title={collapsed ? "Settings" : undefined}
+                title={collapsed ? t("settings") : undefined}
                 className={`flex items-center ${collapsed ? "justify-center px-0 py-2" : "gap-2 px-2 py-1.5"} rounded-md text-[11px] transition-all`}
                 style={pathname.startsWith("/dashboard/account")
                   ? { background: "rgba(255,255,255,0.06)", color: "#ffffff", boxShadow: "inset 2px 0 0 0 rgba(255,255,255,0.55)" }
                   : { color: "rgba(255,255,255,0.5)" }}
               >
                 <Settings className="h-3.5 w-3.5" />
-                {!collapsed && <span>Settings</span>}
+                {!collapsed && <span>{t("settings")}</span>}
               </Link>
             </div>
           </nav>
@@ -557,14 +569,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <form action={logout}>
             <button
               type="submit"
-              title="Esci"
+              title={t("logout")}
               className={`flex items-center ${collapsed ? "justify-center w-full py-1.5" : "gap-2 w-full px-2 py-1.5"} rounded-md text-[11px] transition-all`}
               style={{ color: "rgba(255,255,255,0.5)", cursor: "pointer" }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,1)"; (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.08)"; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.5)"; (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
             >
               <LogOut className="h-3.5 w-3.5" />
-              {!collapsed && "Esci"}
+              {!collapsed && t("logout")}
             </button>
           </form>
         </div>
@@ -599,7 +611,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Menu className="h-5 w-5" />
           </button>
           <div className="flex items-center gap-1.5 text-[12px]" style={{ color: "rgba(0,0,0,0.35)" }}>
-            <Link href="/dashboard" className="hover:opacity-70 transition-opacity">Dashboard</Link>
+            <Link href="/dashboard" className="hover:opacity-70 transition-opacity">{t("breadcrumbHome")}</Link>
             {currentItem && (
               <>
                 <ChevronRight className="h-3 w-3" />
@@ -624,7 +636,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 className="text-[10px] transition-opacity hover:opacity-70"
                 style={{ color: "rgba(0,0,0,0.3)" }}
               >
-                cambia
+                {t("changeRole")}
               </Link>
             </div>
           )}
