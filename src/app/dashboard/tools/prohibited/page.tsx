@@ -17,6 +17,9 @@ import type { ProhibitedCheckResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import AIOutputLabel from "@/components/disclosure/AIOutputLabel";
 import { generateViolationMessage } from "@/app/actions/generateViolationMessage";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
+
+type TFn = (key: string) => string;
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const card = {
@@ -27,31 +30,35 @@ const card = {
 const font = { fontFamily: "var(--font-inter, system-ui)" };
 
 // ─── Answer button config ─────────────────────────────────────────────────────
-const ANSWER_OPTS: {
+type AnswerOpt = {
   value: CheckAnswer;
   label: string;
   activeStyle: React.CSSProperties;
   idleStyle: React.CSSProperties;
-}[] = [
-  {
-    value: "no",
-    label: "✓  No, il mio sistema non fa questo",
-    activeStyle: { background: "rgba(22,163,74,0.08)", border: "1.5px solid rgba(22,163,74,0.5)", color: "#15803d" },
-    idleStyle:   { background: "#fafafa", border: "1px solid rgba(0,0,0,0.08)", color: "rgba(0,0,0,0.65)" },
-  },
-  {
-    value: "yes",
-    label: "✕  Sì, il mio sistema potrebbe farlo",
-    activeStyle: { background: "rgba(220,38,38,0.07)", border: "1.5px solid rgba(220,38,38,0.45)", color: "#b91c1c" },
-    idleStyle:   { background: "#fafafa", border: "1px solid rgba(0,0,0,0.08)", color: "rgba(0,0,0,0.65)" },
-  },
-  {
-    value: "unsure",
-    label: "?  Non sono sicuro",
-    activeStyle: { background: "rgba(202,138,4,0.07)", border: "1.5px solid rgba(202,138,4,0.4)", color: "#a16207" },
-    idleStyle:   { background: "#fafafa", border: "1px solid rgba(0,0,0,0.08)", color: "rgba(0,0,0,0.65)" },
-  },
-];
+};
+
+function buildAnswerOpts(t: TFn): AnswerOpt[] {
+  return [
+    {
+      value: "no",
+      label: t("ans_no"),
+      activeStyle: { background: "rgba(22,163,74,0.08)", border: "1.5px solid rgba(22,163,74,0.5)", color: "#15803d" },
+      idleStyle:   { background: "#fafafa", border: "1px solid rgba(0,0,0,0.08)", color: "rgba(0,0,0,0.65)" },
+    },
+    {
+      value: "yes",
+      label: t("ans_yes"),
+      activeStyle: { background: "rgba(220,38,38,0.07)", border: "1.5px solid rgba(220,38,38,0.45)", color: "#b91c1c" },
+      idleStyle:   { background: "#fafafa", border: "1px solid rgba(0,0,0,0.08)", color: "rgba(0,0,0,0.65)" },
+    },
+    {
+      value: "unsure",
+      label: t("ans_unsure"),
+      activeStyle: { background: "rgba(202,138,4,0.07)", border: "1.5px solid rgba(202,138,4,0.4)", color: "#a16207" },
+      idleStyle:   { background: "#fafafa", border: "1px solid rgba(0,0,0,0.08)", color: "rgba(0,0,0,0.65)" },
+    },
+  ];
+}
 
 // ─── Status dot for sidebar ───────────────────────────────────────────────────
 function StatusDot({ answer }: { answer: CheckAnswer }) {
@@ -81,32 +88,36 @@ import type { LucideProps } from "lucide-react";
 
 const VERDICT_META: Record<
   FinalVerdict["verdict"],
-  { bg: string; border: string; color: string; label: string; Icon: React.FC<LucideProps> }
+  { bg: string; border: string; color: string; labelKey: string; Icon: React.FC<LucideProps> }
 > = {
   violation: {
     bg: "rgba(220,38,38,0.05)", border: "rgba(220,38,38,0.2)", color: "#b91c1c",
-    label: "VIOLAZIONE RILEVATA",
+    labelKey: "verdict_violation",
     Icon: AlertOctagon,
   },
   potential_violation: {
     bg: "rgba(234,88,12,0.05)", border: "rgba(234,88,12,0.2)", color: "#c2410c",
-    label: "RISCHIO POTENZIALE",
+    labelKey: "verdict_potential",
     Icon: AlertTriangle,
   },
   clear: {
     bg: "rgba(22,163,74,0.05)", border: "rgba(22,163,74,0.2)", color: "#15803d",
-    label: "NESSUNA VIOLAZIONE",
+    labelKey: "verdict_clear",
     Icon: CheckCircle,
   },
   conditional: {
     bg: "rgba(202,138,4,0.05)", border: "rgba(202,138,4,0.2)", color: "#a16207",
-    label: "VALUTAZIONE INCOMPLETA",
+    labelKey: "verdict_incomplete",
     Icon: HelpCircle,
   },
 };
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function ProhibitedPage() {
+  const t = useT("toolProhibited");
+  const locale = useLocale();
+  const loc = locale === "it" ? "it-IT" : "en-GB";
+  const ANSWER_OPTS = buildAnswerOpts(t);
   const [answers, setAnswers] = useState<Record<string, CheckAnswer>>(() => {
     if (typeof window === "undefined") return {};
     try {
@@ -229,11 +240,11 @@ export default function ProhibitedPage() {
     >
       <CheckCircle size={13} strokeWidth={1.5} style={{ color: "#15803d" }} />
       <span style={{ color: "#15803d" }}>
-        ✓ Risultati salvati nel dossier · Aggiornato il{" "}
-        {new Date(saved).toLocaleDateString("it-IT")}
+        ✓ {t("dossierSaved")} · {t("dossierUpdatedOn")}{" "}
+        {new Date(saved).toLocaleDateString(loc)}
       </span>
       <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>
-        Vedi dossier →
+        {t("seeDossier")}
       </Link>
     </div>
   ) : null;
@@ -247,20 +258,17 @@ export default function ProhibitedPage() {
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-1 flex-wrap">
             <h1 style={{ fontSize: "28px", fontWeight: 400, letterSpacing: "-1px", color: "#0D1016" }}>
-              Pratiche Vietate — Art. 5
+              {t("pageTitle")}
             </h1>
             <span
               className="text-[10px] font-semibold rounded-full px-2.5 py-1 uppercase"
               style={{ background: "rgba(220,38,38,0.1)", color: "#b91c1c", letterSpacing: "0.5px" }}
             >
-              In vigore dal 2 feb 2025
+              {t("inForceSince")}
             </span>
           </div>
-          <p className="text-[13px]" style={{ color: "rgba(0,0,0,0.42)" }}>
-            Verifica se il tuo sistema AI ricade nelle pratiche vietate in assoluto dal Regolamento UE 2024/1689.
-            Sanzioni fino a <strong style={{ color: "#0D1016" }}>35M€</strong> o il{" "}
-            <strong style={{ color: "#0D1016" }}>7% del fatturato globale</strong>.
-          </p>
+          <p className="text-[13px]" style={{ color: "rgba(0,0,0,0.42)" }}
+            dangerouslySetInnerHTML={{ __html: t("intro") }} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -270,7 +278,7 @@ export default function ProhibitedPage() {
             <div className="rounded-xl overflow-hidden" style={card}>
               <div className="px-4 py-3" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
                 <p className="text-[11px] font-semibold" style={{ color: "rgba(0,0,0,0.35)", letterSpacing: "0.5px" }}>
-                  {answered} / {total} valutate
+                  {answered} / {total} {t("evaluated")}
                 </p>
                 <div className="mt-1.5 h-1 rounded-full" style={{ background: "rgba(0,0,0,0.06)" }}>
                   <div
@@ -330,7 +338,7 @@ export default function ProhibitedPage() {
                       className="text-[10px] font-medium rounded px-2 py-0.5"
                       style={{ background: "rgba(202,138,4,0.08)", color: "#a16207" }}
                     >
-                      Eccezioni previste
+                      {t("exceptionsForeseen")}
                     </span>
                   )}
                 </div>
@@ -385,7 +393,7 @@ export default function ProhibitedPage() {
                   style={{ color: "rgba(0,0,0,0.35)", listStyle: "none" }}
                 >
                   <ChevronRight className="h-3 w-3 transition-transform group-open:rotate-90" />
-                  Esempi di sistemi in violazione
+                  {t("examplesInViolation")}
                 </summary>
                 <ul className="mt-2 flex flex-col gap-1 pl-4">
                   {check.exampleSystems.map((ex, i) => (
@@ -405,7 +413,7 @@ export default function ProhibitedPage() {
                     style={{ color: "rgba(0,0,0,0.35)", listStyle: "none" }}
                   >
                     <ChevronRight className="h-3 w-3 transition-transform group-open:rotate-90" />
-                    Eccezioni previste dalla legge
+                    {t("exceptionsByLaw")}
                   </summary>
                   <ul className="mt-2 flex flex-col gap-1 pl-4">
                     {check.exceptions.map((ex, i) => (
@@ -426,7 +434,7 @@ export default function ProhibitedPage() {
                   className="flex items-center gap-1.5 text-[12px] transition-opacity disabled:opacity-30"
                   style={{ color: "rgba(0,0,0,0.45)", background: "none", border: "none", cursor: activeCheck === 0 ? "not-allowed" : "pointer", padding: 0 }}
                 >
-                  <ArrowLeft size={13} /> Precedente
+                  <ArrowLeft size={13} /> {t("previous")}
                 </button>
 
                 {activeCheck < total - 1 ? (
@@ -441,7 +449,7 @@ export default function ProhibitedPage() {
                       cursor: answers[check.id] ? "pointer" : "not-allowed",
                     }}
                   >
-                    Successivo <ChevronRight size={13} />
+                    {t("next")} <ChevronRight size={13} />
                   </button>
                 ) : (
                   <button
@@ -455,7 +463,7 @@ export default function ProhibitedPage() {
                       cursor: allDone ? "pointer" : "not-allowed",
                     }}
                   >
-                    Calcola verdetto <ChevronRight size={13} />
+                    {t("calcVerdict")} <ChevronRight size={13} />
                   </button>
                 )}
               </div>
@@ -486,7 +494,7 @@ export default function ProhibitedPage() {
       {/* Art. 50 — AI Output Label */}
       <div className="mb-4">
         <AIOutputLabel
-          documentType="Verifica Pratiche Vietate · Art. 5 AI Act"
+          documentType={t("aiLabelDocType")}
           outputType="GEN"
         />
       </div>
@@ -494,18 +502,18 @@ export default function ProhibitedPage() {
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-1">
           <h1 style={{ fontSize: "28px", fontWeight: 400, letterSpacing: "-1px", color: "#0D1016" }}>
-            Pratiche Vietate — Art. 5
+            {t("pageTitle")}
           </h1>
           <span
             className="text-[10px] font-semibold rounded-full px-2.5 py-1 uppercase"
             style={{ background: "rgba(220,38,38,0.1)", color: "#b91c1c", letterSpacing: "0.5px" }}
           >
-            In vigore dal 2 feb 2025
+            {t("inForceSince")}
           </span>
         </div>
         <p className="text-[13px]" style={{ color: "rgba(0,0,0,0.42)" }}>
-          Valutazione completata il{" "}
-          {new Date(verdict.generatedAt).toLocaleString("it-IT", {
+          {t("assessmentCompletedOn")}{" "}
+          {new Date(verdict.generatedAt).toLocaleString(loc, {
             day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit",
           })}
         </p>
@@ -519,7 +527,7 @@ export default function ProhibitedPage() {
         <vm.Icon size={22} strokeWidth={1.5} style={{ color: vm.color, flexShrink: 0, marginTop: 1 }} />
         <div className="flex-1">
           <p className="text-[11px] font-semibold uppercase mb-1" style={{ color: vm.color, letterSpacing: "0.8px" }}>
-            {vm.label}
+            {t(vm.labelKey)}
           </p>
           <p className="text-[13px] leading-relaxed mb-3" style={{ color: "#0D1016" }}>
             {verdict.summaryText}
@@ -529,7 +537,7 @@ export default function ProhibitedPage() {
             style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.07)" }}
           >
             <p className="text-[11px] font-semibold uppercase mb-0.5" style={{ color: "rgba(0,0,0,0.35)", letterSpacing: "0.5px" }}>
-              Azione raccomandata
+              {t("recommendedAction")}
             </p>
             <p className="text-[12px]" style={{ color: "#0D1016" }}>{verdict.recommendedAction}</p>
           </div>
@@ -554,18 +562,15 @@ export default function ProhibitedPage() {
             <AlertOctagon size={20} strokeWidth={1.5} style={{ color: "#b91c1c", flexShrink: 0, marginTop: 1 }} />
             <div>
               <p className="text-[12px] font-bold uppercase mb-1" style={{ color: "#b91c1c", letterSpacing: "0.8px" }}>
-                🚨 Violazione Art. 5 — Divieto Assoluto
+                🚨 {t("violationBannerTitle")}
               </p>
-              <p className="text-[12px] leading-relaxed" style={{ color: "#0D1016" }}>
-                Il sistema presenta <strong>{verdict.violatedChecks.length}</strong> pratica/e vietata/e in assoluto.
-                Queste pratiche <strong>non possono essere abilitate</strong> nella UE indipendentemente dal caso d&apos;uso.
-                Sanzioni fino a <strong>35.000.000 €</strong> o il <strong>7% del fatturato mondiale</strong> (Art. 99(3) EU AI Act).
-              </p>
+              <p className="text-[12px] leading-relaxed" style={{ color: "#0D1016" }}
+                dangerouslySetInnerHTML={{ __html: t("violationBannerBodyPre") + " <strong>" + verdict.violatedChecks.length + "</strong> " + t("violationBannerBodyPost") }} />
             </div>
           </div>
 
           <p className="text-[11px] font-semibold uppercase mb-2" style={{ color: "#b91c1c", letterSpacing: "0.8px" }}>
-            🚫 Pratiche vietate rilevate ({verdict.violatedChecks.length})
+            🚫 {t("prohibitedDetected")} ({verdict.violatedChecks.length})
           </p>
           <div className="flex flex-col gap-2">
             {verdict.violatedChecks.map((c) => (
@@ -591,7 +596,7 @@ export default function ProhibitedPage() {
                   <div className="rounded-lg p-3 mb-2"
                     style={{ background: "rgba(220,38,38,0.05)", border: "1px solid rgba(220,38,38,0.12)" }}>
                     <p className="text-[10px] font-semibold uppercase mb-1" style={{ color: "rgba(220,38,38,0.6)", letterSpacing: "0.5px" }}>
-                      ✦ Analisi AI — verifica
+                      ✦ {t("aiAnalysisVerify")}
                     </p>
                     <p className="text-[12px] leading-relaxed" style={{ color: "#0D1016" }}>
                       {aiMessages[c.id]}
@@ -599,14 +604,14 @@ export default function ProhibitedPage() {
                   </div>
                 ) : verdict.verdict === "violation" ? (
                   <p className="text-[11px] mb-2" style={{ color: "rgba(0,0,0,0.35)" }}>
-                    ✦ Generazione analisi AI in corso…
+                    ✦ {t("aiAnalysisGenerating")}
                   </p>
                 ) : null}
                 <p
                   className="text-[11px] font-semibold rounded px-2 py-1 inline-block"
                   style={{ background: "rgba(220,38,38,0.08)", color: "#b91c1c" }}
                 >
-                  Vietato in assoluto — nessuna eccezione
+                  {t("absolutelyProhibited")}
                 </p>
               </div>
             ))}
@@ -618,7 +623,7 @@ export default function ProhibitedPage() {
       {verdict.potentialChecks.length > 0 && (
         <section className="mb-4">
           <p className="text-[11px] font-semibold uppercase mb-2" style={{ color: "#d97706", letterSpacing: "0.8px" }}>
-            ⚠️ Aree di rischio da verificare ({verdict.potentialChecks.length})
+            ⚠️ {t("riskAreasToVerify")} ({verdict.potentialChecks.length})
           </p>
           <div className="flex flex-col gap-2">
             {verdict.potentialChecks.map((c) => (
@@ -640,7 +645,7 @@ export default function ProhibitedPage() {
                       className="text-[10px] font-medium rounded px-1.5 py-0.5"
                       style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.4)" }}
                     >
-                      Eccezioni disponibili
+                      {t("exceptionsAvailable")}
                     </span>
                   )}
                 </div>
@@ -650,7 +655,7 @@ export default function ProhibitedPage() {
                 {c.severity === "conditional" && c.exceptions.length > 0 && (
                   <div>
                     <p className="text-[10px] font-semibold mb-1" style={{ color: "rgba(0,0,0,0.35)", letterSpacing: "0.5px" }}>
-                      ECCEZIONI PREVISTE:
+                      {t("exceptionsForeseenLabel")}
                     </p>
                     <ul className="flex flex-col gap-0.5">
                       {c.exceptions.map((ex, i) => (
@@ -677,12 +682,12 @@ export default function ProhibitedPage() {
             style={{ color: "#15803d", letterSpacing: "0.8px", background: "none", border: "none", cursor: "pointer", padding: 0 }}
           >
             {clearOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-            ✓ Aree conformi
+            ✓ {t("compliantAreas")}
             <span
               className="ml-1 rounded-full px-2 py-0.5 text-[10px] font-medium"
               style={{ background: "rgba(22,163,74,0.1)", color: "#15803d" }}
             >
-              {verdict.clearChecks.length} verificate
+              {verdict.clearChecks.length} {t("verifiedCount")}
             </span>
           </button>
           {clearOpen && (
@@ -721,7 +726,7 @@ export default function ProhibitedPage() {
             className="flex items-center gap-1.5 rounded-full px-4 py-2 text-[12px] font-medium transition-all hover:opacity-80"
             style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.6)", border: "none", cursor: "pointer" }}
           >
-            <ArrowLeft size={12} /> Rivedi le risposte
+            <ArrowLeft size={12} /> {t("reviewAnswers")}
           </button>
           <button
             onClick={() => {
@@ -751,19 +756,19 @@ export default function ProhibitedPage() {
               a.download = `art5-check-${verdict.verdict}-${new Date().toISOString().slice(0, 10)}.json`;
               a.click();
               URL.revokeObjectURL(url);
-              showToast("Report Art. 5 esportato");
+              showToast(t("toastExported"));
             }}
             className="flex items-center gap-1.5 rounded-full px-4 py-2 text-[12px] font-medium transition-all hover:opacity-80"
             style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.6)", border: "none", cursor: "pointer" }}
           >
-            <Download size={12} /> Esporta JSON
+            <Download size={12} /> {t("exportJson")}
           </button>
           <button
             onClick={() => window.print()}
             className="flex items-center gap-1.5 rounded-full px-4 py-2 text-[12px] font-medium transition-all hover:opacity-80"
             style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.6)", border: "none", cursor: "pointer" }}
           >
-            <Printer size={12} /> Stampa PDF
+            <Printer size={12} /> {t("printPdf")}
           </button>
         </div>
 
@@ -773,7 +778,7 @@ export default function ProhibitedPage() {
             className="flex items-center gap-1.5 rounded-full px-5 py-2 text-[12px] font-medium transition-all hover:opacity-85"
             style={{ background: "#0D1016", color: "#ffffff" }}
           >
-            Procedi al Risk Manager <ChevronRight size={12} />
+            {t("proceedRiskManager")} <ChevronRight size={12} />
           </Link>
         )}
       </div>
