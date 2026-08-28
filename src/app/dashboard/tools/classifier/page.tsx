@@ -33,6 +33,7 @@ import { loadOrgProfile, saveOrgProfile } from "@/lib/dossier/org-profile";
 import { parseBrainDump, type BrainDumpResult } from "@/app/actions/parseBrainDump";
 import { detectDualRole, type DualRoleResult } from "@/app/actions/detectDualRole";
 import { seedAssessmentFromClassifier } from "@/lib/assessment/assessment-helpers";
+import { useT } from "@/i18n/LocaleProvider";
 
 // ─── ADDITION 1 — Persistence ────────────────────────────────────────
 
@@ -124,6 +125,7 @@ const cardSt = {
 // ─── COMPONENT ───────────────────────────────────────────────────────
 
 export default function ClassifierPage() {
+  const t = useT("toolClassifier");
   // Existing state
   // Step 0: show conversational intro if org profile not yet configured
   const [showStep0, setShowStep0] = useState<boolean>(() => {
@@ -284,8 +286,8 @@ export default function ClassifierPage() {
     );
     setPassport(p);
 
-    saveResult(activeSystemName, res, p.passport_id, exemptionDossier?.id ?? null, annexIAnswer === "Sì — è safety component di prodotto Annex I");
-    showToast(`Classificazione completata: ${res.riskLevel} — salvata su Evidence Layer`);
+    saveResult(activeSystemName, res, p.passport_id, exemptionDossier?.id ?? null, annexIAnswer === "yes");
+    showToast(`${t("toastClassified")}: ${res.riskLevel} — ${t("toastSavedEvidence")}`);
 
     // Fire-and-forget audit trail — never blocks UI, never throws
     void (async () => {
@@ -339,10 +341,10 @@ export default function ClassifierPage() {
   };
 
   const PHASES_STEPS = [
-    { id: "intro",    label: "Repository", icon: GitBranch },
-    { id: "scan",     label: "Discovery",  icon: Search    },
+    { id: "intro",    label: t("phase_repository"), icon: GitBranch },
+    { id: "scan",     label: t("phase_discovery"),  icon: Search    },
     { id: "decision", label: "Art. 6(3)",  icon: Scale     },
-    { id: "result",   label: "Certificato",icon: FileText  },
+    { id: "result",   label: t("phase_certificate"), icon: FileText  },
   ] as const;
   const phaseOrder = PHASES_STEPS.map((p) => p.id);
 
@@ -351,11 +353,10 @@ export default function ClassifierPage() {
       {/* ── Header ── */}
       <div className="mb-7">
         <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.4px", color: T.text, margin: 0 }}>
-          AI Classifier — Discovery Engine
+          {t("title")}
         </h1>
         <p style={{ marginTop: 4, fontSize: 13, color: T.muted, lineHeight: 1.5 }}>
-          Scansione automatica in 3 fasi: AST Analysis → Infrastructure Mapping →
-          Art. 6(3) Decision Tree. Classificazione basata sul codice reale.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -393,25 +394,25 @@ export default function ClassifierPage() {
         }}>
           <div className="flex items-center gap-2 mb-1">
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "rgba(0,0,0,0.35)", textTransform: "uppercase" }}>
-              Passo 0 / Prima classificazione
+              {t("step0_kicker")}
             </span>
           </div>
           <h2 style={{ fontSize: 18, fontWeight: 600, color: "#0D1016", margin: "0 0 6px" }}>
-            Raccontaci la tua organizzazione
+            {t("step0_title")}
           </h2>
           <p style={{ fontSize: 13, color: "rgba(0,0,0,0.45)", marginBottom: 24, lineHeight: 1.6 }}>
-            Rispondi a 3 domande rapide per personalizzare il tuo percorso di conformità EU AI Act.
+            {t("step0_sub")}
           </p>
 
           {/* Q1: Tipo organizzazione */}
           <div className="mb-5">
             <p style={{ fontSize: 13, fontWeight: 500, color: "#0D1016", marginBottom: 10 }}>
-              1. Che tipo di organizzazione sei?
+              {t("q1_org")}
             </p>
             <div className="flex gap-3">
               {[
-                { id: "pa" as const,      label: "Pubblica Amministrazione", sublabel: "Comune, Regione, Ministero, AUSL…" },
-                { id: "private" as const, label: "Privata / Enterprise",      sublabel: "Azienda, startup, libero professionista" },
+                { id: "pa" as const,      label: t("org_pa"), sublabel: t("org_pa_sub") },
+                { id: "private" as const, label: t("org_private"), sublabel: t("org_private_sub") },
               ].map((opt) => (
                 <button
                   key={opt.id}
@@ -433,15 +434,15 @@ export default function ClassifierPage() {
           {/* Q2: Tipo sistema */}
           <div className="mb-5">
             <p style={{ fontSize: 13, fontWeight: 500, color: "#0D1016", marginBottom: 10 }}>
-              2. Che tipo di sistema AI vuoi classificare?
+              {t("q2_system")}
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
               {[
-                { id: "hr" as const,        label: "HR / Recruiting",      sublabel: "Selezione candidati, valutazioni" },
-                { id: "medical" as const,   label: "Medicale / Salute",    sublabel: "Diagnosi, triage, monitoraggio" },
-                { id: "credit" as const,    label: "Credito / Finance",    sublabel: "Scoring, frodi, valutazione rischio" },
-                { id: "biometric" as const, label: "Biometrico",           sublabel: "Riconoscimento facciale, voce" },
-                { id: "other" as const,     label: "Altro",                sublabel: "NLP, raccomandazioni, automazione…" },
+                { id: "hr" as const,        label: "HR / Recruiting",      sublabel: t("sys_hr_sub") },
+                { id: "medical" as const,   label: t("sys_medical"),    sublabel: t("sys_medical_sub") },
+                { id: "credit" as const,    label: t("sys_credit"),    sublabel: t("sys_credit_sub") },
+                { id: "biometric" as const, label: t("sys_biometric"),           sublabel: t("sys_biometric_sub") },
+                { id: "other" as const,     label: t("sys_other"),                sublabel: t("sys_other_sub") },
               ].map((opt) => (
                 <button
                   key={opt.id}
@@ -463,12 +464,12 @@ export default function ClassifierPage() {
           {/* Q3: NIST interest */}
           <div className="mb-6">
             <p style={{ fontSize: 13, fontWeight: 500, color: "#0D1016", marginBottom: 10 }}>
-              3. Hai requisiti di mappatura al NIST AI RMF?
+              {t("q3_nist")}
             </p>
             <div className="flex gap-3">
               {[
-                { value: true,  label: "Sì, usiamo NIST" },
-                { value: false, label: "No / Non so" },
+                { value: true,  label: t("nist_yes") },
+                { value: false, label: t("nist_no") },
               ].map((opt) => (
                 <button
                   key={String(opt.value)}
@@ -512,7 +513,7 @@ export default function ClassifierPage() {
                 transition: "opacity 0.15s",
               }}
             >
-              Continua con la classificazione →
+              {t("continueClassification")}
             </button>
             <button
               onClick={() => {
@@ -523,7 +524,7 @@ export default function ClassifierPage() {
               }}
               style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", background: "none", border: "none", cursor: "pointer" }}
             >
-              Salta
+              {t("skip")}
             </button>
           </div>
         </div>
@@ -539,15 +540,15 @@ export default function ClassifierPage() {
             borderRadius: 12, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.04)"
           }}>
             <p style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 4 }}>
-              ✦ Descrivi il tuo sistema AI in linguaggio libero
+              ✦ {t("brainDumpTitle")}
             </p>
             <p style={{ fontSize: 12, color: T.muted, marginBottom: 12 }}>
-              Dimmi cosa fa, chi lo usa, che dati elabora. L&apos;AI pre-compila il classificatore.
+              {t("brainDumpSub")}
             </p>
             <textarea
               value={brainDumpText}
               onChange={(e) => setBrainDumpText(e.target.value)}
-              placeholder="Es: «Usiamo un modello che analizza i CV dei candidati e assegna un punteggio per pre-filtrare le candidature. Usa dati demografici come età e istruzione. I recruiter vedono solo i candidati con score > 70.»"
+              placeholder={t("brainDumpPh")}
               rows={4}
               style={{
                 width: "100%", borderRadius: 8, padding: "10px 12px",
@@ -584,10 +585,10 @@ export default function ClassifierPage() {
                   transition: "all 0.15s",
                 }}
               >
-                {brainDumpLoading ? "Analisi in corso…" : "✦ Analizza con AI"}
+                {brainDumpLoading ? t("analyzing") : t("analyzeWithAi")}
               </button>
               {brainDumpResult && (
-                <span style={{ fontSize: 11, color: T.green }}>✓ Analisi completata</span>
+                <span style={{ fontSize: 11, color: T.green }}>✓ {t("analysisComplete")}</span>
               )}
             </div>
 
@@ -607,14 +608,14 @@ export default function ClassifierPage() {
                   border: `1px solid ${brainDumpResult.likelyTier === "high_risk"
                     ? "rgba(220,38,38,0.2)" : "rgba(245,158,11,0.2)"}`,
                 }}>
-                  <span style={{ fontWeight: 600, color: T.text }}>Tier stimato: </span>
+                  <span style={{ fontWeight: 600, color: T.text }}>{t("estimatedTier")} </span>
                   <span style={{ color: brainDumpResult.likelyTier === "high_risk" ? "#b91c1c" : "#a16207" }}>
-                    {brainDumpResult.likelyTier === "high_risk" ? "Alto rischio (Annex III)" :
-                     brainDumpResult.likelyTier === "limited" ? "Rischio limitato" :
-                     brainDumpResult.likelyTier === "minimal" ? "Rischio minimale" : brainDumpResult.likelyTier}
+                    {brainDumpResult.likelyTier === "high_risk" ? t("tier_high") :
+                     brainDumpResult.likelyTier === "limited" ? t("tier_limited") :
+                     brainDumpResult.likelyTier === "minimal" ? t("tier_minimal") : brainDumpResult.likelyTier}
                   </span>
                   <span style={{ marginLeft: 8, fontSize: 11, color: T.faint }}>
-                    ({brainDumpResult.confidenceLevel === "high" ? "alta" : brainDumpResult.confidenceLevel === "medium" ? "media" : "bassa"} confidenza)
+                    ({brainDumpResult.confidenceLevel === "high" ? t("conf_high") : brainDumpResult.confidenceLevel === "medium" ? t("conf_medium") : t("conf_low")} {t("confidenceWord")})
                   </span>
                 </div>
 
@@ -625,11 +626,11 @@ export default function ClassifierPage() {
                     background: "rgba(220,38,38,0.07)", border: "1px solid rgba(220,38,38,0.25)",
                   }}>
                     <p style={{ fontWeight: 700, color: "#b91c1c", marginBottom: 2 }}>
-                      🚨 Possibile violazione Art. 5 rilevata
+                      🚨 {t("art5Violation")}
                     </p>
                     <p style={{ color: T.muted }}>
-                      Verifica la sezione &quot;Pratiche Vietate&quot; per confermare.
-                      {brainDumpResult.likelyTierArticle ? ` Riferimento: ${brainDumpResult.likelyTierArticle}` : ""}
+                      {t("art5Check")}
+                      {brainDumpResult.likelyTierArticle ? ` ${t("referenceWord")}: ${brainDumpResult.likelyTierArticle}` : ""}
                     </p>
                   </div>
                 )}
@@ -640,7 +641,7 @@ export default function ClassifierPage() {
                     padding: "8px 12px", borderRadius: 8, fontSize: 12,
                     background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.2)",
                   }}>
-                    <p style={{ fontWeight: 600, color: "#92400e", marginBottom: 4 }}>⚠ Segnalazioni</p>
+                    <p style={{ fontWeight: 600, color: "#92400e", marginBottom: 4 }}>⚠ {t("warnings")}</p>
                     <ul style={{ margin: 0, paddingLeft: 16, color: T.muted }}>
                       {brainDumpResult.flaggedWarnings.map((w, i) => (
                         <li key={i} style={{ marginBottom: 2 }}>{w}</li>
@@ -650,7 +651,7 @@ export default function ClassifierPage() {
                 )}
 
                 <p style={{ fontSize: 11, color: T.faint }}>
-                  ✦ AI — verifica · Completa il classificatore per una valutazione definitiva
+                  ✦ {t("aiVerifyCompleteClassifier")}
                 </p>
               </div>
             )}
@@ -660,7 +661,7 @@ export default function ClassifierPage() {
           {savedClassification && (
             <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 flex items-center justify-between">
               <div className="text-xs text-muted-foreground">
-                <span className="text-primary font-medium">Ultima classificazione:</span>{" "}
+                <span className="text-primary font-medium">{t("lastClassification")}</span>{" "}
                 {savedClassification.systemName} —{" "}
                 <span className={`font-semibold ${
                   savedClassification.result.riskLevel === "Unacceptable" ? "text-danger" :
@@ -678,32 +679,28 @@ export default function ClassifierPage() {
           {/* Annex I preliminary check — Art. 6(1) */}
           <div style={{ ...cardSt, padding: 20 }}>
             <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, color: T.text }}>
-              Il sistema AI è incorporato o costituisce un componente di sicurezza di un prodotto
-              soggetto a normativa armonizzata UE (Annex I)?
+              {t("annexIQuestion")}
             </div>
             <div style={{ fontSize: 12, color: T.muted, marginBottom: 12 }}>
-              Esempi Annex I: macchinari (Dir. 2006/42/CE), dispositivi medici (MDR 2017/745),
-              veicoli a motore, ascensori, impianti a pressione, giocattoli, dispositivi radio.
+              {t("annexIExamples")}
             </div>
-            {["Sì — è safety component di prodotto Annex I", "No — non è safety component", "Non sono sicuro"].map(opt => (
-              <label key={opt} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, cursor: "pointer" }}>
-                <input type="radio" name="annex1_check" value={opt}
-                  checked={annexIAnswer === opt} onChange={() => setAnnexIAnswer(opt)} />
-                <span style={{ fontSize: 13, color: T.text }}>{opt}</span>
+            {([{ v: "yes", l: t("annexI_yes") }, { v: "no", l: t("annexI_no") }, { v: "unsure", l: t("annexI_unsure") }]).map(opt => (
+              <label key={opt.v} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, cursor: "pointer" }}>
+                <input type="radio" name="annex1_check" value={opt.v}
+                  checked={annexIAnswer === opt.v} onChange={() => setAnnexIAnswer(opt.v)} />
+                <span style={{ fontSize: 13, color: T.text }}>{opt.l}</span>
               </label>
             ))}
-            {annexIAnswer === "Sì — è safety component di prodotto Annex I" && (
+            {annexIAnswer === "yes" && (
               <div style={{ background: "#FFF7ED", border: "1px solid #FED7AA", borderRadius: 8, padding: "10px 14px", marginTop: 8, fontSize: 12, color: "#92400e" }}>
-                ⚠️ I sistemi Annex I seguono il percorso di conformity assessment specifico del prodotto madre
-                (notified body obbligatorio per la maggior parte). La classificazione come high-risk avviene
-                ai sensi dell&apos;Art. 6(1).
+                {t("annexINote")}
               </div>
             )}
           </div>
 
           {/* Input mode selector */}
           <div style={{ ...cardSt, padding: 20 }}>
-            <h2 style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 16 }}>Modalità di classificazione</h2>
+            <h2 style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 16 }}>{t("classificationMode")}</h2>
             <div className="grid grid-cols-2 gap-3 mb-4">
               <button
                 onClick={() => setInputMode("demo")}
@@ -715,10 +712,10 @@ export default function ClassifierPage() {
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                   <Brain style={{ width: 15, height: 15, color: T.text }} />
-                  <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Progetto demo</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{t("demoProject")}</span>
                 </div>
                 <p style={{ fontSize: 11, color: T.muted, lineHeight: 1.4 }}>
-                  CV-Screener AI — scenario di screening HR con librerie pre-caricate. Ideale per esplorare il tool.
+                  {t("demoProjectDesc")}
                 </p>
               </button>
               <button
@@ -731,10 +728,10 @@ export default function ClassifierPage() {
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                   <Code2 style={{ width: 15, height: 15, color: T.text }} />
-                  <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Il mio sistema AI</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{t("mySystem")}</span>
                 </div>
                 <p style={{ fontSize: 11, color: T.muted, lineHeight: 1.4 }}>
-                  Inserisci il nome del sistema e incolla il tuo requirements.txt per classificare il tuo progetto reale.
+                  {t("mySystemDesc")}
                 </p>
               </button>
             </div>
@@ -744,18 +741,18 @@ export default function ClassifierPage() {
               <div className="space-y-3 border-t border-border pt-4">
                 <div>
                   <label className="text-xs text-muted-foreground mb-1 block">
-                    Nome sistema AI <span className="text-danger">*</span>
+                    {t("systemNameLabel")} <span className="text-danger">*</span>
                   </label>
                   <input
                     value={customSystemName}
                     onChange={(e) => setCustomSystemName(e.target.value)}
-                    placeholder="es. HR Screening Platform v2.1"
+                    placeholder={t("systemNamePh")}
                     className="w-full rounded-lg border border-border bg-muted/20 px-3 py-2 text-xs text-foreground"
                   />
                 </div>
                 <div>
                   <label className="text-xs text-muted-foreground mb-1 block">
-                    requirements.txt (incolla il contenuto)
+                    {t("requirementsLabel")}
                   </label>
                   <textarea
                     value={customRequirements}
@@ -767,7 +764,7 @@ export default function ClassifierPage() {
                 </div>
                 <div>
                   <label className="text-xs text-muted-foreground mb-1 block">
-                    Codice Python principale (opzionale — per endpoint e profilazione)
+                    {t("pythonCodeLabel")}
                   </label>
                   <textarea
                     value={customPythonCode}
@@ -781,12 +778,12 @@ export default function ClassifierPage() {
                 {/* Ruolo organizzazione */}
                 <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 16, marginTop: 4 }}>
                   <label style={{ fontSize: 12, fontWeight: 600, color: T.text, display: "block", marginBottom: 10 }}>
-                    Ruolo della tua organizzazione rispetto a questo sistema AI
+                    {t("orgRoleLabel")}
                   </label>
                   <div style={{ display: "flex", gap: 10 }}>
                     {([
-                      { id: "provider" as const, label: "Provider", sub: "Sviluppo / immissione sul mercato" },
-                      { id: "deployer" as const, label: "Deployer", sub: "Utilizzo / messa in servizio" },
+                      { id: "provider" as const, label: "Provider", sub: t("role_provider_sub") },
+                      { id: "deployer" as const, label: "Deployer", sub: t("role_deployer_sub") },
                     ] as const).map((opt) => (
                       <button key={opt.id} onClick={() => setOrgRole(opt.id)}
                         style={{
@@ -808,23 +805,23 @@ export default function ClassifierPage() {
                     borderRadius: 10, padding: 16, marginTop: 4,
                   }}>
                     <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>
-                      ✦ Verifica ruolo Art. 25 — il deployer che modifica diventa provider?
+                      ✦ {t("dualRoleTitle")}
                     </p>
                     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                       <div>
                         <label style={{ fontSize: 11, color: T.muted, display: "block", marginBottom: 4 }}>
-                          Nome vendor / soluzione di base
+                          {t("vendorNameLabel")}
                         </label>
                         <input value={vendorName} onChange={(e) => setVendorName(e.target.value)}
-                          placeholder="es. OpenAI GPT-4, Salesforce Einstein, SAP AI..."
+                          placeholder={t("vendorNamePh")}
                           style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, color: T.text, background: T.card, outline: "none" }} />
                       </div>
                       <div>
                         <label style={{ fontSize: 11, color: T.muted, display: "block", marginBottom: 4 }}>
-                          Modifiche apportate al sistema base (descrizione libera)
+                          {t("modificationsLabel")}
                         </label>
                         <textarea value={modificationsDesc} onChange={(e) => setModificationsDesc(e.target.value)}
-                          placeholder="es. Fine-tuning su dati aziendali, cambio scopo d'uso, integrazione con output decisionali..."
+                          placeholder={t("modificationsPh")}
                           rows={3}
                           style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, color: T.text, background: T.card, outline: "none", resize: "vertical" }} />
                       </div>
@@ -846,10 +843,10 @@ export default function ClassifierPage() {
                           border: "none", cursor: dualRoleLoading || !vendorName.trim() ? "not-allowed" : "pointer",
                           alignSelf: "flex-start",
                         }}>
-                        {dualRoleLoading ? "Analisi in corso…" : "✦ Verifica ruolo Art. 25"}
+                        {dualRoleLoading ? t("analyzing") : t("verifyRole25")}
                       </button>
                       {dualRoleError && (
-                        <p style={{ fontSize: 11, color: T.red }}>{dualRoleError === "MISSING_INPUT" ? "Inserisci nome sistema e vendor." : "Errore generazione. Riprova."}</p>
+                        <p style={{ fontSize: 11, color: T.red }}>{dualRoleError === "MISSING_INPUT" ? t("missingSystemVendor") : t("generationError")}</p>
                       )}
                       {dualRoleResult && (
                         <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: 12 }}>
@@ -859,29 +856,29 @@ export default function ClassifierPage() {
                               background: dualRoleResult.isDualRole ? "rgba(220,38,38,0.1)" : "rgba(22,163,74,0.1)",
                               color: dualRoleResult.isDualRole ? T.red : T.green,
                             }}>
-                              {dualRoleResult.roleVerdict === "both_provider_and_deployer" ? "Ruolo dual: PROVIDER + DEPLOYER" :
-                               dualRoleResult.roleVerdict === "provider" ? "Hai assunto ruolo di PROVIDER" :
-                               dualRoleResult.roleVerdict === "deployer" ? "Ruolo: DEPLOYER" : "Ruolo incerto"}
+                              {dualRoleResult.roleVerdict === "both_provider_and_deployer" ? t("verdict_dual") :
+                               dualRoleResult.roleVerdict === "provider" ? t("verdict_provider") :
+                               dualRoleResult.roleVerdict === "deployer" ? t("verdict_deployer") : t("verdict_uncertain")}
                             </span>
                             {dualRoleResult.art25Applies && (
-                              <span style={{ fontSize: 10, color: T.red, fontWeight: 600 }}>⚠ Art. 25 si applica</span>
+                              <span style={{ fontSize: 10, color: T.red, fontWeight: 600 }}>⚠ {t("art25Applies")}</span>
                             )}
                           </div>
                           <p style={{ fontSize: 12, color: T.text, marginBottom: 8 }}>{dualRoleResult.summary}</p>
                           {dualRoleResult.substantialModification && (
                             <p style={{ fontSize: 11, color: T.amber, marginBottom: 8 }}>
-                              Modifica sostanziale rilevata: {dualRoleResult.substantialModificationReason}
+                              {t("substModDetected")}: {dualRoleResult.substantialModificationReason}
                             </p>
                           )}
                           {dualRoleResult.art25Obligations.length > 0 && (
                             <div>
-                              <p style={{ fontSize: 11, fontWeight: 600, color: T.muted, marginBottom: 4 }}>Obblighi Art. 25:</p>
+                              <p style={{ fontSize: 11, fontWeight: 600, color: T.muted, marginBottom: 4 }}>{t("art25Obligations")}</p>
                               <ul style={{ margin: 0, paddingLeft: 16, fontSize: 11, color: T.muted }}>
                                 {dualRoleResult.art25Obligations.map((o, i) => <li key={i} style={{ marginBottom: 2 }}>{o}</li>)}
                               </ul>
                             </div>
                           )}
-                          <p style={{ fontSize: 10, color: T.faint, marginTop: 8 }}>✦ AI — verifica e conferma</p>
+                          <p style={{ fontSize: 10, color: T.faint, marginTop: 8 }}>✦ {t("aiVerify")}</p>
                         </div>
                       )}
                     </div>
@@ -898,8 +895,8 @@ export default function ClassifierPage() {
                 <Code2 style={{ width: 16, height: 16, color: T.text }} />
                 <h2 style={{ fontSize: 14, fontWeight: 600, color: T.text, margin: 0 }}>
                   {inputMode === "demo"
-                    ? "Progetto: CV-Screener AI"
-                    : activeSystemName || "Progetto personalizzato"}
+                    ? t("projectCvScreener")
+                    : activeSystemName || t("customProject")}
                 </h2>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -911,14 +908,14 @@ export default function ClassifierPage() {
                 ))}
                 {inputMode === "manual" && Object.keys(activeFiles).length === 0 && (
                   <p style={{ fontSize: 11, color: T.amber }}>
-                    Nessun file inserito — il scan partirà con file vuoti.
+                    {t("noFilesInserted")}
                   </p>
                 )}
               </div>
               <button
                 onClick={() => {
                   if (inputMode === "manual" && !customSystemName.trim()) {
-                    showToast("Inserisci il nome del sistema AI prima di procedere");
+                    showToast(t("toast_enterName"));
                     return;
                   }
                   runScan();
@@ -931,18 +928,18 @@ export default function ClassifierPage() {
                 }}
               >
                 <Search style={{ width: 14, height: 14 }} />
-                Avvia Discovery Engine
+                {t("startDiscovery")}
               </button>
             </div>
 
             <div style={{ ...cardSt, padding: 24 }}>
-              <h2 style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 16 }}>Cosa farà il Discovery Engine:</h2>
+              <h2 style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 16 }}>{t("discoveryWillDo")}</h2>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {[
-                  { icon: Search, text: "Scannerà requirements.txt e file .py per librerie critiche" },
-                  { icon: Server, text: "Analizzerà gli endpoint API per dati biometrici/sensibili" },
-                  { icon: Scale, text: "Applicherà l'Art. 6(3) per valutare la deroga non-alto-rischio" },
-                  { icon: Hash, text: "Genererà un certificato firmato SHA-256" },
+                  { icon: Search, text: t("disc_1") },
+                  { icon: Server, text: t("disc_2") },
+                  { icon: Scale, text: t("disc_3") },
+                  { icon: Hash, text: t("disc_4") },
                 ].map((s, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
                     <s.icon style={{ width: 14, height: 14, color: T.text, marginTop: 1, flexShrink: 0 }} />
@@ -962,7 +959,7 @@ export default function ClassifierPage() {
             {/* File Browser */}
             <div className="rounded-xl border border-border bg-card">
               <div className="flex items-center justify-between px-5 py-3 border-b border-border">
-                <h2 className="text-sm font-semibold text-foreground">File Browser — clicca per Code-to-Law Map</h2>
+                <h2 className="text-sm font-semibold text-foreground">{t("fileBrowser")}</h2>
                 <span className="text-[10px] text-muted-foreground bg-muted rounded-full px-2 py-0.5">{Object.keys(files).length} files</span>
               </div>
               <div className="divide-y divide-border/50 max-h-60 overflow-y-auto">
@@ -983,7 +980,7 @@ export default function ClassifierPage() {
                       {riskCount > 0 && (
                         <span className={`text-[10px] font-medium rounded-full px-1.5 py-0.5 ${
                           matches.some((m) => m.severity === "critical") ? "bg-danger/10 text-danger" : "bg-warning/10 text-warning"
-                        }`}>{riskCount} segnali</span>
+                        }`}>{riskCount} {t("signalsWord")}</span>
                       )}
                     </div>
                   );
@@ -1005,7 +1002,7 @@ export default function ClassifierPage() {
                   </div>
                   <div className="divide-y divide-border/50 max-h-60 overflow-y-auto">
                     {lawMatches.length === 0 ? (
-                      <div className="p-4 text-xs text-muted-foreground">Nessun articolo mappato per questo file.</div>
+                      <div className="p-4 text-xs text-muted-foreground">{t("noArticleMapped")}</div>
                     ) : (
                       lawMatches.map((m, i) => (
                         <div key={i} className="p-3">
@@ -1031,7 +1028,7 @@ export default function ClassifierPage() {
             <div className="rounded-xl border border-border bg-card">
               <div className="px-5 py-3 border-b border-border">
                 <h2 className="text-sm font-semibold text-foreground">
-                  Librerie rilevate ({scanResult.libraries.length})
+                  {t("librariesDetected")} ({scanResult.libraries.length})
                 </h2>
               </div>
               <div className="divide-y divide-border/50 max-h-48 overflow-y-auto">
@@ -1059,16 +1056,16 @@ export default function ClassifierPage() {
           {/* Right panel: Summary */}
           <div className="lg:col-span-1 space-y-4">
             <div className="rounded-xl border border-border bg-card p-5">
-              <h2 className="text-sm font-semibold text-foreground mb-3">Riepilogo Discovery</h2>
+              <h2 className="text-sm font-semibold text-foreground mb-3">{t("discoverySummary")}</h2>
               <div className="space-y-3">
                 {[
-                  { label: "Librerie totali", value: scanResult.libraries.length, color: "text-foreground" },
-                  { label: "Segnali critici", value: scanResult.libraries.filter((l) => l.severity === "critical").length, color: "text-danger" },
-                  { label: "Alta severità", value: scanResult.libraries.filter((l) => l.severity === "high").length, color: "text-warning" },
-                  { label: "Endpoint API rischiosi", value: scanResult.endpoints.filter((e) => e.riskFlagged).length, color: "text-warning" },
-                  { label: "Articoli mappati", value: lawMatches.length, color: "text-primary" },
-                  { label: "Pattern inferiti", value: inferenceMatches.length, color: "text-primary" },
-                  { label: "Confidenza max", value: inferenceMatches.length > 0 ? `${Math.max(...inferenceMatches.map((m) => m.confidence))}%` : "—", color: inferenceMatches.some((m) => m.riskLevel === "Unacceptable") ? "text-danger" : "text-primary" },
+                  { label: t("totalLibraries"), value: scanResult.libraries.length, color: "text-foreground" },
+                  { label: t("criticalSignals"), value: scanResult.libraries.filter((l) => l.severity === "critical").length, color: "text-danger" },
+                  { label: t("highSeverity"), value: scanResult.libraries.filter((l) => l.severity === "high").length, color: "text-warning" },
+                  { label: t("riskyEndpoints"), value: scanResult.endpoints.filter((e) => e.riskFlagged).length, color: "text-warning" },
+                  { label: t("articlesMapped"), value: lawMatches.length, color: "text-primary" },
+                  { label: t("inferredPatterns"), value: inferenceMatches.length, color: "text-primary" },
+                  { label: t("maxConfidence"), value: inferenceMatches.length > 0 ? `${Math.max(...inferenceMatches.map((m) => m.confidence))}%` : "—", color: inferenceMatches.some((m) => m.riskLevel === "Unacceptable") ? "text-danger" : "text-primary" },
                 ].map((s) => (
                   <div key={s.label} className="flex justify-between text-xs">
                     <span className="text-muted-foreground">{s.label}</span>
@@ -1077,10 +1074,10 @@ export default function ClassifierPage() {
                 ))}
               </div>
               <button onClick={() => setShowInference(!showInference)} className="mt-3 w-full rounded-lg border border-border px-3 py-1.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors">
-                {showInference ? "Nascondi" : "Mostra"} Inferenza Semantica
+                {showInference ? t("hide") : t("show")} {t("semanticInference")}
               </button>
               <button onClick={proceedToDecision} className="mt-2 w-full rounded-lg bg-primary px-4 py-2.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
-                Procedi ad Art. 6(3) Decision Tree
+                {t("proceedDecisionTree")}
               </button>
             </div>
 
@@ -1097,7 +1094,7 @@ export default function ClassifierPage() {
                   </div>
                 ))}
                 {scanResult.endpoints.length === 0 && (
-                  <p className="text-xs text-muted-foreground">Nessun endpoint API rilevato.</p>
+                  <p className="text-xs text-muted-foreground">{t("noEndpoint")}</p>
                 )}
               </div>
             </div>
@@ -1106,7 +1103,7 @@ export default function ClassifierPage() {
             {showInference && inferenceMatches.length > 0 && (
               <div className="rounded-xl border border-border bg-card overflow-hidden">
                 <div className="px-5 py-3 border-b border-border">
-                  <h2 className="text-sm font-semibold text-foreground">Inferenza Semantica — Policy Card</h2>
+                  <h2 className="text-sm font-semibold text-foreground">{t("semanticInferencePolicy")}</h2>
                 </div>
                 <div className="divide-y divide-border/50 max-h-80 overflow-y-auto">
                   {inferenceMatches.map((m, i) => (
@@ -1124,10 +1121,10 @@ export default function ClassifierPage() {
                       </summary>
                       <div className="mt-2 pl-4 text-[10px] text-muted-foreground space-y-1">
                         <p className="text-foreground font-medium">{translateToHumanText(m)}</p>
-                        {m.matchedLibraries.length > 0 && <p>Librerie: {m.matchedLibraries.join(", ")}</p>}
-                        {m.matchedKeywords.length > 0 && <p>Keyword: {m.matchedKeywords.join(", ")}</p>}
+                        {m.matchedLibraries.length > 0 && <p>{t("librariesWord")}: {m.matchedLibraries.join(", ")}</p>}
+                        {m.matchedKeywords.length > 0 && <p>{t("keywordWord")}: {m.matchedKeywords.join(", ")}</p>}
                         {m.riskLevel === "Unacceptable" && (
-                          <p className="text-danger font-bold">⚠ Pratica vietata — Richiesto intervento Compliance Officer</p>
+                          <p className="text-danger font-bold">⚠ {t("prohibitedPractice")}</p>
                         )}
                       </div>
                     </details>
@@ -1137,7 +1134,7 @@ export default function ClassifierPage() {
                   <div className="px-5 py-3 border-t border-border text-[10px] text-muted-foreground flex items-center justify-between">
                     <span>Policy: {policyCard.id}</span>
                     <span className={`font-medium ${policyCard.requiresComplianceOfficer ? "text-warning" : "text-success"}`}>
-                      {policyCard.requiresComplianceOfficer ? "Compliance Officer richiesto" : "Auto-approvato"}
+                      {policyCard.requiresComplianceOfficer ? t("coRequired") : t("autoApproved")}
                     </span>
                   </div>
                 )}
@@ -1188,10 +1185,9 @@ export default function ClassifierPage() {
               <div className="flex items-start gap-4">
                 <Ban className="h-8 w-8 text-danger shrink-0 mt-1" />
                 <div>
-                  <h2 className="text-lg font-bold text-danger">HARD CARVE-OUT — Esenzione BLOCCATA</h2>
+                  <h2 className="text-lg font-bold text-danger">{t("hardCarveout")}</h2>
                   <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                    Rilevata logica di profilazione di persone fisiche. Ai sensi dell&apos;Art. 6(3) secondo comma,
-                    l&apos;esenzione è legalmente inapplicabile. Il sistema resta classificato come AD ALTO RISCHIO.
+                    {t("hardCarveoutDesc")}
                   </p>
                   <div className="mt-4 space-y-1">
                     {profilingSignals.filter((s) => s.art6_3_block).map((s, i) => (
@@ -1202,7 +1198,7 @@ export default function ClassifierPage() {
                     ))}
                   </div>
                   <button onClick={finalizeClassification} className="mt-6 rounded-lg bg-danger px-6 py-2.5 text-sm font-medium text-white hover:bg-danger/90">
-                    Conferma classificazione Alto Rischio
+                    {t("confirmHighRisk")}
                   </button>
                 </div>
               </div>
@@ -1216,14 +1212,14 @@ export default function ClassifierPage() {
                 <Scale className="h-6 w-6 text-primary" />
                 <div>
                   <h2 className="text-lg font-semibold text-foreground">Art. 6(3) — 4-Pillars Self-Assessment</h2>
-                  <p className="text-sm text-muted-foreground">Seleziona i criteri applicabili per richiedere l&apos;esenzione dalla classificazione ad alto rischio.</p>
+                  <p className="text-sm text-muted-foreground">{t("selectCriteria")}</p>
                 </div>
               </div>
 
               {profilingSignals.length > 0 && (
                 <div className="rounded-lg border border-warning/30 bg-warning/5 p-4 mb-6">
                   <AlertTriangle className="h-4 w-4 text-warning inline mr-1" />
-                  <span className="text-xs text-warning font-medium">Rilevati {profilingSignals.length} segnali di profilazione (nessuno con blocco obbligatorio)</span>
+                  <span className="text-xs text-warning font-medium">{t("profilingSignalsPre")} {profilingSignals.length} {t("profilingSignalsPost")}</span>
                   <div className="mt-2 space-y-1">
                     {profilingSignals.map((s, i) => (
                       <div key={i} className="text-[10px] text-muted-foreground">{s.file}:{s.line} — {s.description}</div>
@@ -1233,7 +1229,7 @@ export default function ClassifierPage() {
               )}
 
               <div className="space-y-4 mb-6">
-                <p className="text-xs font-medium text-foreground">Seleziona uno o più criteri applicabili (Art. 6(3), lettere a-d):</p>
+                <p className="text-xs font-medium text-foreground">{t("selectOneOrMore")}</p>
                 {EXEMPTION_CRITERIA.map((criterion) => {
                   const selected = selectedCriteria.includes(criterion.id);
                   return (
@@ -1266,7 +1262,7 @@ export default function ClassifierPage() {
                         </div>
                         <span className={`text-[10px] font-medium rounded-full px-2 py-0.5 ${
                           selected ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                        }`}>{selected ? "Selezionato" : "Seleziona"}</span>
+                        }`}>{selected ? t("selected") : t("select")}</span>
                       </div>
                     </div>
                   );
@@ -1275,21 +1271,21 @@ export default function ClassifierPage() {
 
               <div className="mb-6">
                 <label className="block text-xs font-medium text-foreground mb-2">
-                  Motivazione dettagliata obbligatoria
+                  {t("rationaleLabel")}
                 </label>
                 <textarea
                   value={rationale}
                   onChange={(e) => setRationale(e.target.value)}
                   className="w-full rounded-lg border border-border bg-muted px-4 py-3 text-xs text-foreground placeholder:text-muted-foreground"
-                  placeholder="Spiega dettagliatamente perché il sistema soddisfa i criteri di esenzione selezionati..."
+                  placeholder={t("rationalePh")}
                   rows={4}
                 />
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="text-xs text-muted-foreground">
-                  <strong>{selectedCriteria.length}</strong>/4 criteri selezionati
-                  {rationale.trim().length > 0 && <span className="text-success ml-2">✓ Motivazione presente</span>}
+                  <strong>{selectedCriteria.length}</strong>/4 {t("criteriaSelected")}
+                  {rationale.trim().length > 0 && <span className="text-success ml-2">✓ {t("rationalePresent")}</span>}
                 </div>
                 {/* ADDITION 8 — Fixed exemption button onClick */}
                 <button
@@ -1303,7 +1299,7 @@ export default function ClassifierPage() {
                   disabled={selectedCriteria.length === 0 || rationale.trim().length < 20}
                   className="rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
                 >
-                  Invia richiesta esenzione
+                  {t("submitExemption")}
                 </button>
               </div>
             </div>
@@ -1322,7 +1318,7 @@ export default function ClassifierPage() {
           >
             <div className="flex items-start justify-between mb-6">
               <div>
-                <h2 className="text-2xl font-bold text-foreground mb-1">Certificato di Classificazione</h2>
+                <h2 className="text-2xl font-bold text-foreground mb-1">{t("classificationCertificate")}</h2>
                 <p className="text-sm text-muted-foreground">Regolamento UE 2024/1689 — Art. 6</p>
               </div>
               <div className={`rounded-xl px-5 py-3 text-center border-2 ${
@@ -1335,7 +1331,7 @@ export default function ClassifierPage() {
                   result.riskLevel === "Unacceptable" ? "text-danger" :
                   result.riskLevel === "High" ? "text-warning" :
                   result.riskLevel === "Limited" ? "text-primary" : "text-success"
-                }`}>RISCHIO</div>
+                }`}>{t("riskWord")}</div>
                 <div className={`text-lg font-bold ${
                   result.riskLevel === "Unacceptable" ? "text-danger" :
                   result.riskLevel === "High" ? "text-warning" :
@@ -1347,9 +1343,9 @@ export default function ClassifierPage() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               {[
                 // ADDITION 10 — use activeSystemName
-                { label: "Sistema", value: activeSystemName },
-                { label: "Categoria", value: result.annexCategory || "N/A" },
-                { label: "Deroga Art. 6(3)", value: result.isExemptedArt6_3 ? "Concessa" : "Non richiesta" },
+                { label: t("systemWord"), value: activeSystemName },
+                { label: t("categoryWord"), value: result.annexCategory || "N/A" },
+                { label: t("derogationWord"), value: result.isExemptedArt6_3 ? t("granted") : t("notRequested") },
                 { label: "Score", value: `${result.score}/100` },
               ].map((s) => (
                 <div key={s.label} className="rounded-lg bg-card/50 p-3">
@@ -1389,7 +1385,7 @@ export default function ClassifierPage() {
                 }`}
               >
                 <Shield className="h-3.5 w-3.5" />
-                {signed ? "Firmato su Evidence Layer" : "Firma su Evidence Layer"}
+                {signed ? t("signedEvidence") : t("signEvidence")}
               </button>
             </div>
           </div>
@@ -1398,7 +1394,7 @@ export default function ClassifierPage() {
           {exemptionDossier && (
             <div className="rounded-xl border border-border bg-card p-5">
               <h2 className="text-sm font-semibold text-foreground mb-3">
-                Exemption Record — Art. 6(3)
+                {t("exemptionRecord")}
                 <span className={`ml-2 text-[10px] font-medium rounded-full px-2 py-0.5 ${
                   exemptionDossier.status === "BLOCKED_PROFILING" ? "bg-danger/10 text-danger" :
                   exemptionDossier.status === "EXEMPTION_GRANTED" ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
@@ -1406,11 +1402,11 @@ export default function ClassifierPage() {
               </h2>
               <div className="space-y-2 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">ID Dossier</span>
+                  <span className="text-muted-foreground">{t("dossierId")}</span>
                   <span className="font-mono text-foreground">{exemptionDossier.id}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Criteri selezionati</span>
+                  <span className="text-muted-foreground">{t("criteriaSelectedShort")}</span>
                   <span className="text-foreground">{exemptionDossier.selectedCriteria.length || "N/A"}</span>
                 </div>
                 {exemptionDossier.rationale && (
@@ -1443,7 +1439,7 @@ export default function ClassifierPage() {
                   onClick={() => setPassportOpen(!passportOpen)}
                   className="rounded-lg border border-border px-3 py-1.5 text-[10px] text-muted-foreground hover:text-foreground"
                 >
-                  {passportOpen ? "Nascondi" : "Mostra sigillo digitale"}
+                  {passportOpen ? t("hide") : t("showDigitalSeal")}
                 </button>
               </div>
 
@@ -1452,9 +1448,9 @@ export default function ClassifierPage() {
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     {[
                       { label: "ID Passport", value: passport.passport_id.slice(0, 8), color: "text-primary" },
-                      { label: "Rischio AI Act", value: passport.ai_act_risk_level, color: passport.ai_act_risk_level === "Unacceptable" ? "text-danger" : passport.ai_act_risk_level === "High" ? "text-warning" : "text-success" },
-                      { label: "Confidenza", value: passport.audit_trail.inference_confidence, color: "text-foreground" },
-                      { label: "Firma", value: passport.signature.startsWith("signed:") ? "ED25519 ✓" : "NON FIRMATO", color: passport.signature.startsWith("signed:") ? "text-success" : "text-danger" },
+                      { label: t("aiActRisk"), value: passport.ai_act_risk_level, color: passport.ai_act_risk_level === "Unacceptable" ? "text-danger" : passport.ai_act_risk_level === "High" ? "text-warning" : "text-success" },
+                      { label: t("confidenceWord2"), value: passport.audit_trail.inference_confidence, color: "text-foreground" },
+                      { label: t("signatureWord"), value: passport.signature.startsWith("signed:") ? "ED25519 ✓" : t("notSigned"), color: passport.signature.startsWith("signed:") ? "text-success" : "text-danger" },
                     ].map((c) => (
                       <div key={c.label} className="rounded-lg bg-muted p-3">
                         <p className="text-[10px] text-muted-foreground">{c.label}</p>
@@ -1491,7 +1487,7 @@ export default function ClassifierPage() {
                   <div className="flex items-center gap-3">
                     <div className="flex-1 rounded-lg border border-success/30 bg-success/5 p-2.5 text-[10px] text-success flex items-center gap-2">
                       <Shield className="h-3.5 w-3.5" />
-                      Firma ED25519 valida · Passaporto integro
+                      {t("signatureValid")}
                     </div>
                     <button
                       onClick={() => {
@@ -1516,7 +1512,7 @@ export default function ClassifierPage() {
               {!passportOpen && (
                 <div className="flex items-center gap-4">
                   <div className="flex-1 text-[10px] text-muted-foreground">
-                    <span className="text-success">●</span> Firma ED25519 · {passport.ai_act_risk_level} · {passport.audit_trail.inference_confidence} confidenza · Scadenza {passport.valid_until.slice(0, 10)}
+                    <span className="text-success">●</span> {t("ed25519Signature")} · {passport.ai_act_risk_level} · {passport.audit_trail.inference_confidence} {t("confidenceWord")} · {t("expiryWord")} {passport.valid_until.slice(0, 10)}
                   </div>
                   <button
                     onClick={() => {
@@ -1541,7 +1537,7 @@ export default function ClassifierPage() {
 
           {/* Code-to-Law summary */}
           <div className="rounded-xl border border-border bg-card p-5">
-            <h2 className="text-sm font-semibold text-foreground mb-3">Code-to-Law Map — Riferimenti incrociati</h2>
+            <h2 className="text-sm font-semibold text-foreground mb-3">{t("codeToLawCrossRef")}</h2>
             <div className="space-y-2">
               {Array.from(new Set(Object.values(files).flatMap((c) => matchCodeToLaw(c).map((m) => m.article)))).slice(0, 5).map((art) => (
                 <div key={art} className="flex items-center gap-2 text-xs text-muted-foreground py-1">
@@ -1574,13 +1570,13 @@ export default function ClassifierPage() {
               className="rounded-lg border border-border px-4 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
             >
               <Search className="h-3.5 w-3.5" />
-              Classifica un altro sistema
+              {t("classifyAnother")}
             </button>
           </div>
         </div>
       )}
 
-      <SignOffPanel toolKey="classifier" toolLabel="Classificatore AI Act" />
+      <SignOffPanel toolKey="classifier" toolLabel={t("signOffLabel")} />
 
       {/* ADDITION 12 — Toast */}
       {toast && (
