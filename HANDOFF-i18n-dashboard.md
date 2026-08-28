@@ -18,17 +18,25 @@ prohibited (`toolProhibited`), oversight (`toolOversight`), art50-kit (`toolArt5
 literacy (`toolLiteracy`), data-audit (`toolDataAudit` + `DataAuditPanels.tsx`),
 questionnaire (`toolQuestionnaire`), logvault (`toolLogvault` + `LogVaultPanels.tsx`),
 conformity (`toolConformity`), gpai (`toolGpai`), l132 (`toolL132`),
-risk-manager (`toolRiskManager` — **solo chrome+fasi**, vedi sotto), inventory (`toolInventory`).
+risk-manager (`toolRiskManager` — **solo chrome+fasi**, vedi sotto), inventory (`toolInventory`),
+docugen (`toolDocugen`).
 
 Già tradotti nella sessione precedente (mergiati): incident, nist-ai-rmf, deployer-dashboard,
 resilience, qms, assessment, trust-passport, assessment-export.
 
-## RIMANENTI da tradurre (i 4 più grandi)
+## RIMANENTI da tradurre (i 3 più grandi + cluster)
 ```
-1538  docugen        1593  classifier
-1893  fria           2150  dpia
+1593  classifier     1893  fria     2150  dpia
 ```
 + componenti condivisi `src/components/assessment/*` (cluster DPIA/FRIA, vedi §4 handoff precedente).
+
+**Gotcha classifier**: `annexIAnswer` è confrontato come stringa in `finalizeClassification`
+(`annexIAnswer === "Sì — è safety component di prodotto Annex I"`) e usato come `value` dei radio.
+Prima di tradurre le label, refactor a `{value:"yes"/"no"/"unsure", label}` con VALORE stabile,
+e aggiornare il confronto a `=== "yes"`. (Stesso principio §4 gotcha "chiavi stabili".)
+**Data-layer classifier**: output di `lib/semantic/*`, `lib/simulation/*`, passport/audit, Code-to-Law
+map = generati/data → non tradurre; tradurre solo chrome (step0, brain-dump, mode selector, risultato,
+discovery UI, esenzione, header).
 
 ## Decisioni di scope applicate (coerenti con "data-layer = pass separato")
 - **Data-layer NON tradotto**: output generati dall'AI (chat, bozze), contenuto documenti
