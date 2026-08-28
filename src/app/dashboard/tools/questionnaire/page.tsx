@@ -24,6 +24,9 @@ import {
   type GPAIResult,
   type XAIResult,
 } from "@/lib/dossier/storage-schema";
+import { useT } from "@/i18n/LocaleProvider";
+
+type TFn = (key: string) => string;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -87,11 +90,12 @@ function manual(source: string): { answer: string; status: AnswerStatus; source:
 
 // ─── Shared question builders ─────────────────────────────────────────────────
 
-const Q_COMMON: QQuestion[] = [
+function buildQCommon(t: TFn): QQuestion[] {
+  return [
   {
     id: "q1",
-    text: "Qual è la classificazione di rischio del sistema AI secondo il Regolamento UE 2024/1689 (EU AI Act)?",
-    category: "Classificazione",
+    text: t("q1_text"),
+    category: t("cat_classification"),
     mapFn: ({ classifier }) => {
       if (!classifier?.riskLevel) return manual("Completare AI Classifier nel dossier");
       const riskMap: Record<string, string> = {
@@ -109,8 +113,8 @@ const Q_COMMON: QQuestion[] = [
   },
   {
     id: "q2",
-    text: "Il sistema rientra nell'Allegato III dell'EU AI Act (sistemi ad alto rischio per settore)?",
-    category: "Classificazione",
+    text: t("q2_text"),
+    category: t("cat_classification"),
     mapFn: ({ classifier }) => {
       if (!classifier) return manual("Completare AI Classifier");
       return {
@@ -124,8 +128,8 @@ const Q_COMMON: QQuestion[] = [
   },
   {
     id: "q3",
-    text: "È stato condotto un risk assessment formale per il sistema AI?",
-    category: "Risk Management",
+    text: t("q3_text"),
+    category: t("cat_riskMgmt"),
     mapFn: ({ riskManager }) => {
       if (!riskManager) return manual("Completare Risk Manager nel dossier");
       const overall: Record<string, string> = { low: "basso", medium: "medio", high: "alto", critical: "critico" };
@@ -138,8 +142,8 @@ const Q_COMMON: QQuestion[] = [
   },
   {
     id: "q4",
-    text: "Quali sono i principali rischi identificati e le relative misure di mitigazione?",
-    category: "Risk Management",
+    text: t("q4_text"),
+    category: t("cat_riskMgmt"),
     mapFn: ({ riskManager }) => {
       if (!riskManager) return manual("Completare Risk Manager");
       if (riskManager.risks.length > 0) {
@@ -159,8 +163,8 @@ const Q_COMMON: QQuestion[] = [
   },
   {
     id: "q5",
-    text: "Il sistema elabora dati personali? Sono stati adottati i presidi GDPR?",
-    category: "Data Governance",
+    text: t("q5_text"),
+    category: t("cat_dataGov"),
     mapFn: ({ dataAudit, dpia }) => {
       if (!dataAudit) return manual("Completare Data Audit");
       const hasPersonal = dataAudit.datasets.some((d) => d.personalData);
@@ -179,8 +183,8 @@ const Q_COMMON: QQuestion[] = [
   },
   {
     id: "q6",
-    text: "Il sistema dispone di audit log? Con quale retention?",
-    category: "Audit & Logging",
+    text: t("q6_text"),
+    category: t("cat_auditLog"),
     mapFn: ({ logvault }) => {
       if (!logvault) return manual("Completare LogVault");
       const events = logvault.loggedEvents.join(", ");
@@ -196,8 +200,8 @@ const Q_COMMON: QQuestion[] = [
   },
   {
     id: "q7",
-    text: "Esiste un meccanismo di supervisione umana? Il sistema può essere interrotto da un operatore?",
-    category: "Supervisione Umana",
+    text: t("q7_text"),
+    category: t("cat_humanOversight"),
     mapFn: ({ oversight }) => {
       if (!oversight) return manual("Completare Oversight");
       const persons = oversight.responsiblePersons.join(", ");
@@ -210,8 +214,8 @@ const Q_COMMON: QQuestion[] = [
   },
   {
     id: "q8",
-    text: "Quali sono i punti di intervento umano nel processo decisionale?",
-    category: "Supervisione Umana",
+    text: t("q8_text"),
+    category: t("cat_humanOversight"),
     mapFn: ({ oversight }) => {
       if (!oversight) return manual("Completare Oversight");
       if (oversight.humanInterventionPoints.length > 0) {
@@ -230,8 +234,8 @@ const Q_COMMON: QQuestion[] = [
   },
   {
     id: "q9",
-    text: "Sono state condotte prove di robustezza e cybersecurity? Qual è il livello di accuratezza?",
-    category: "Sicurezza",
+    text: t("q9_text"),
+    category: t("cat_security"),
     mapFn: ({ resilience }) => {
       if (!resilience) return manual("Completare Resilience");
       const measures = resilience.cybersecurityMeasures.join(", ");
@@ -244,8 +248,8 @@ const Q_COMMON: QQuestion[] = [
   },
   {
     id: "q10",
-    text: "Gli utenti finali sono informati di interagire con un sistema AI?",
-    category: "Trasparenza",
+    text: t("q10_text"),
+    category: t("cat_transparency"),
     mapFn: ({ transparency }) => {
       if (!transparency) return manual("Completare Transparency");
       const info = transparency.informationProvided.join(", ");
@@ -261,8 +265,8 @@ const Q_COMMON: QQuestion[] = [
   },
   {
     id: "q11",
-    text: "Esiste un Sistema di Gestione della Qualità (QMS)? Qual è il ciclo di revisione?",
-    category: "Qualità",
+    text: t("q11_text"),
+    category: t("cat_quality"),
     mapFn: ({ qms }) => {
       if (!qms) return manual("Completare QMS");
       const certs = qms.certifications.length > 0 ? ` Certificazioni: ${qms.certifications.join(", ")}.` : "";
@@ -278,8 +282,8 @@ const Q_COMMON: QQuestion[] = [
   },
   {
     id: "q12",
-    text: "È stata emessa la Dichiarazione di Conformità UE? Riferimento registro EUDB?",
-    category: "Conformità UE",
+    text: t("q12_text"),
+    category: t("cat_euConformity"),
     mapFn: ({ conformity }) => {
       if (!conformity) return manual("Completare Conformity Assessment");
       const answer = conformity.declarationGenerated
@@ -294,8 +298,8 @@ const Q_COMMON: QQuestion[] = [
   },
   {
     id: "q13",
-    text: "È stata condotta una Fundamental Rights Impact Assessment (FRIA) ex Art. 27 AI Act?",
-    category: "Diritti Fondamentali",
+    text: t("q13_text"),
+    category: t("cat_fundRights"),
     mapFn: ({ fria }) => {
       if (!fria) return manual("Completare FRIA (Art. 27 AI Act)");
       return {
@@ -307,8 +311,8 @@ const Q_COMMON: QQuestion[] = [
   },
   {
     id: "q14",
-    text: "È stata condotta una Data Protection Impact Assessment (DPIA) ex Art. 35 GDPR?",
-    category: "GDPR",
+    text: t("q14_text"),
+    category: t("cat_gdpr"),
     mapFn: ({ dpia }) => {
       if (!dpia) return manual("Completare DPIA (GDPR Art. 35)");
       const conclusionMap: Record<string, string> = {
@@ -325,8 +329,8 @@ const Q_COMMON: QQuestion[] = [
   },
   {
     id: "q15",
-    text: "Il sistema è conforme alla Legge 23 settembre 2025 n.132 (normativa AI italiana)?",
-    category: "Normativa Italiana",
+    text: t("q15_text"),
+    category: t("cat_itLaw"),
     mapFn: ({ l132 }) => {
       if (!l132) return manual("Completare L.132/2025 Assessment");
       const statusMap: Record<string, string> = {
@@ -348,32 +352,36 @@ const Q_COMMON: QQuestion[] = [
       };
     },
   },
-];
+  ];
+}
 
 // ─── Template 1 — Generic ────────────────────────────────────────────────────
 
-const TEMPLATE_GENERIC: QTemplate = {
-  id: "generic_ai_procurement",
-  label: "Procurement AI Generico",
-  description: "Questionario standard per vendor AI — PA, enterprise, procurement IT",
-  useCase: "Uffici acquisti, Legal, Chief Information Security Officer",
-  icon: FileText,
-  questions: Q_COMMON,
-};
+function buildTemplates(t: TFn): QTemplate[] {
+  const Q_COMMON = buildQCommon(t);
+  const TEMPLATE_GENERIC: QTemplate = {
+    id: "generic_ai_procurement",
+    label: t("tpl_generic_label"),
+    description: t("tpl_generic_desc"),
+    useCase: t("tpl_generic_useCase"),
+    icon: FileText,
+    questions: Q_COMMON,
+  };
 
 // ─── Template 2 — Financial ───────────────────────────────────────────────────
 
-const Q_FINANCIAL_EXTRA: QQuestion[] = [
+function buildQFinancialExtra(t: TFn): QQuestion[] {
+  return [
   {
     id: "q16",
-    text: "Il sistema AI è classificato come ICT third-party service provider ai sensi del Regolamento DORA (UE 2022/2554)?",
-    category: "DORA",
+    text: t("fin_q16_text"),
+    category: t("cat_dora"),
     mapFn: () => manual("Verifica con team Legal/IT"),
   },
   {
     id: "q17",
-    text: "Sono stati effettuati penetration test e TLPT (Threat-Led Penetration Testing) sul sistema?",
-    category: "DORA",
+    text: t("fin_q17_text"),
+    category: t("cat_dora"),
     mapFn: ({ resilience }) => {
       if (!resilience?.robustnessTested) return manual("Completare test sicurezza");
       const measures = resilience.cybersecurityMeasures.join(", ");
@@ -387,8 +395,8 @@ const Q_FINANCIAL_EXTRA: QQuestion[] = [
   },
   {
     id: "q18",
-    text: "Il sistema utilizza modelli AI di uso generale (GPAI) soggetti agli Art. 51-55 AI Act?",
-    category: "Modelli AI",
+    text: t("fin_q18_text"),
+    category: t("cat_aiModels"),
     mapFn: ({ gpai }) => {
       if (!gpai) {
         return {
@@ -406,8 +414,8 @@ const Q_FINANCIAL_EXTRA: QQuestion[] = [
   },
   {
     id: "q19",
-    text: "Il sistema fornisce spiegazioni delle decisioni automatizzate? (XAI — Explainability)",
-    category: "Explainability",
+    text: t("fin_q19_text"),
+    category: t("cat_explainability"),
     mapFn: ({ xai }) => {
       if (!xai) return manual("Completare XAI Center");
       return {
@@ -417,24 +425,26 @@ const Q_FINANCIAL_EXTRA: QQuestion[] = [
       };
     },
   },
-];
+  ];
+}
 
-const TEMPLATE_FINANCIAL: QTemplate = {
-  id: "financial_sector",
-  label: "Settore Finanziario / Bancario",
-  description: "Questionario AI per banche, assicurazioni e intermediari — allineato EBA/EIOPA, DORA e AI Act",
-  useCase: "Compliance bancaria, Banca d'Italia, audit interno",
-  icon: Building2,
-  questions: [...Q_COMMON, ...Q_FINANCIAL_EXTRA],
-};
+  const TEMPLATE_FINANCIAL: QTemplate = {
+    id: "financial_sector",
+    label: t("tpl_financial_label"),
+    description: t("tpl_financial_desc"),
+    useCase: t("tpl_financial_useCase"),
+    icon: Building2,
+    questions: [...Q_COMMON, ...buildQFinancialExtra(t)],
+  };
 
 // ─── Template 3 — Public Sector ──────────────────────────────────────────────
 
-const Q_PA_EXTRA: QQuestion[] = [
+function buildQPaExtra(t: TFn): QQuestion[] {
+  return [
   {
     id: "q16",
-    text: "Il sistema è stato sottoposto a valutazione di impatto sui diritti fondamentali (FRIA) come richiesto dall'Art. 27 AI Act per i deployer PA?",
-    category: "PA",
+    text: t("pa_q16_text"),
+    category: t("cat_pa"),
     mapFn: ({ fria }) => {
       if (!fria) return manual("Completare FRIA (Art. 27 AI Act)");
       return {
@@ -446,8 +456,8 @@ const Q_PA_EXTRA: QQuestion[] = [
   },
   {
     id: "q17",
-    text: "Il sistema rispetta i principi di trasparenza algoritmica previsti dal CAD (D.Lgs. 82/2005, artt. 3-ter e 32)?",
-    category: "PA",
+    text: t("pa_q17_text"),
+    category: t("cat_pa"),
     mapFn: ({ transparency }) => {
       if (!transparency?.userInformedOfAI) return manual("Completare Transparency + verifica CAD");
       return {
@@ -459,8 +469,8 @@ const Q_PA_EXTRA: QQuestion[] = [
   },
   {
     id: "q18",
-    text: "È possibile richiedere riesame umano delle decisioni automatizzate adottate dal sistema (Art. 22 GDPR)?",
-    category: "PA",
+    text: t("pa_q18_text"),
+    category: t("cat_pa"),
     mapFn: ({ oversight }) => {
       if (!oversight) return manual("Completare Oversight");
       const persons = oversight.responsiblePersons.join(", ");
@@ -473,8 +483,8 @@ const Q_PA_EXTRA: QQuestion[] = [
   },
   {
     id: "q19",
-    text: "Il codice sorgente o la documentazione algoritmica è disponibile per audit da parte della stazione appaltante?",
-    category: "PA",
+    text: t("pa_q19_text"),
+    category: t("cat_pa"),
     mapFn: ({ docugen }) => {
       if (!docugen) return manual("Completare DocuGen AI");
       return {
@@ -484,18 +494,19 @@ const Q_PA_EXTRA: QQuestion[] = [
       };
     },
   },
-];
+  ];
+}
 
-const TEMPLATE_PA: QTemplate = {
-  id: "public_sector",
-  label: "Pubblica Amministrazione / Appalti Pubblici",
-  description: "Questionario AI per appalti PA — ANAC, CAD, D.Lgs. 36/2023 e AI Act Art. 27",
-  useCase: "Stazioni appaltanti, RTI, gare pubbliche",
-  icon: Shield,
-  questions: [...Q_COMMON, ...Q_PA_EXTRA],
-};
-
-const TEMPLATES: QTemplate[] = [TEMPLATE_GENERIC, TEMPLATE_FINANCIAL, TEMPLATE_PA];
+  const TEMPLATE_PA: QTemplate = {
+    id: "public_sector",
+    label: t("tpl_pa_label"),
+    description: t("tpl_pa_desc"),
+    useCase: t("tpl_pa_useCase"),
+    icon: Shield,
+    questions: [...Q_COMMON, ...buildQPaExtra(t)],
+  };
+  return [TEMPLATE_GENERIC, TEMPLATE_FINANCIAL, TEMPLATE_PA];
+}
 
 // ─── Style helpers ────────────────────────────────────────────────────────────
 
@@ -506,21 +517,21 @@ const card: React.CSSProperties = {
   borderRadius: "12px",
 };
 
-const STATUS_META: Record<AnswerStatus, { label: string; bg: string; color: string; border: string }> = {
+const STATUS_META: Record<AnswerStatus, { labelKey: string; bg: string; color: string; border: string }> = {
   auto: {
-    label: "● Automatica",
+    labelKey: "st_auto",
     bg: "rgba(22,163,74,0.08)",
     color: "#15803d",
     border: "rgba(22,163,74,0.2)",
   },
   partial: {
-    label: "◐ Parziale",
+    labelKey: "st_partial",
     bg: "rgba(202,138,4,0.08)",
     color: "#92400e",
     border: "rgba(202,138,4,0.2)",
   },
   manual: {
-    label: "○ Manuale",
+    labelKey: "st_manual",
     bg: "rgba(220,38,38,0.08)",
     color: "#dc2626",
     border: "rgba(220,38,38,0.15)",
@@ -608,6 +619,8 @@ function downloadTxt(template: QTemplate, answers: QAnswer[], systemName: string
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function QuestionnairePage() {
+  const t = useT("toolQuestionnaire");
+  const TEMPLATES = buildTemplates(t);
   const [snapshot, setSnapshot] = useState<DossierSnapshot | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<QTemplate | null>(null);
   const [answers, setAnswers] = useState<QAnswer[]>([]);
@@ -646,7 +659,7 @@ export default function QuestionnairePage() {
   function refreshSnapshot() {
     const s = loadSnapshot();
     setSnapshot(s);
-    showToast("Dossier aggiornato.");
+    showToast(t("toast_dossierUpdated"));
   }
 
   function showToast(msg: string) {
@@ -713,7 +726,7 @@ export default function QuestionnairePage() {
       localStorage.removeItem(draftKey(selectedTemplate.id));
     }
     handleGenerate();
-    showToast("Bozza resettata.");
+    showToast(t("toast_draftReset"));
   }
 
   const autoCount = answers.filter((a) => a.status === "auto").length;
@@ -742,26 +755,26 @@ export default function QuestionnairePage() {
           <div className="flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-[18px] font-semibold" style={{ color: "#0D1016" }}>
-                Buyer Questionnaire Auto-fill
+                {t("title")}
               </h1>
               <span
                 className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full"
                 style={{ background: "rgba(22,163,74,0.09)", color: "#15803d", border: "1px solid rgba(22,163,74,0.2)" }}
               >
-                <Zap className="h-3 w-3" /> Compilazione automatica
+                <Zap className="h-3 w-3" /> {t("autoFillBadge")}
               </span>
             </div>
             <p className="text-[12px] mt-0.5" style={{ color: "rgba(0,0,0,0.45)" }}>
-              Compila in automatico i questionari di conformità AI usando i dati del tuo dossier
+              {t("subtitle")}
             </p>
           </div>
           <button
             onClick={refreshSnapshot}
             className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg transition-all flex-shrink-0"
             style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.55)" }}
-            title="Ricarica dossier"
+            title={t("reloadDossier")}
           >
-            <RefreshCw className="h-3.5 w-3.5" /> Ricarica dossier
+            <RefreshCw className="h-3.5 w-3.5" /> {t("reloadDossier")}
           </button>
         </div>
       </div>
@@ -770,14 +783,14 @@ export default function QuestionnairePage() {
       <div className="mb-5 p-4 rounded-xl" style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)" }}>
         <div className="flex items-center justify-between mb-2">
           <p className="text-[12px] font-medium" style={{ color: "#0D1016" }}>
-            Dossier: <span style={{ color: barColor }}>{completedCount}/12</span> sezioni completate
+            {t("dossierWord")} <span style={{ color: barColor }}>{completedCount}/12</span> {t("sectionsCompleted")}
           </p>
           <Link
             href="/dashboard/dossier"
             className="text-[11px] font-medium"
             style={{ color: "#2563eb" }}
           >
-            Completa il dossier →
+            {t("completeDossier")}
           </Link>
         </div>
         <div className="w-full h-2 rounded-full" style={{ background: "rgba(0,0,0,0.06)" }}>
@@ -787,14 +800,14 @@ export default function QuestionnairePage() {
           />
         </div>
         <p className="text-[11px] mt-1.5" style={{ color: "rgba(0,0,0,0.4)" }}>
-          Auto-fill disponibile per ~{completedPct}% delle domande
+          {t("autoFillAvailPre")} ~{completedPct}% {t("autoFillAvailPost")}
         </p>
       </div>
 
       {/* ── Template selection ──────────────────────────────────────────────── */}
       <div className="mb-5">
         <p className="text-[12px] font-semibold mb-3" style={{ color: "#0D1016" }}>
-          Seleziona il tipo di questionario
+          {t("selectType")}
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {TEMPLATES.map((tpl) => {
@@ -835,7 +848,7 @@ export default function QuestionnairePage() {
                     className="text-[10px] px-1.5 py-0.5 rounded font-medium"
                     style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.45)" }}
                   >
-                    {tpl.questions.length} domande
+                    {tpl.questions.length} {t("questionsWord")}
                   </span>
                 </div>
               </button>
@@ -852,7 +865,7 @@ export default function QuestionnairePage() {
         style={{ background: "#0D1016", color: "#fff" }}
       >
         <Zap className="h-4 w-4" />
-        {generated ? "Rigenera questionario" : "Genera questionario"}
+        {generated ? t("regenerate") : t("generate")}
       </button>
 
       {/* ── Questions list ──────────────────────────────────────────────────── */}
@@ -894,7 +907,7 @@ export default function QuestionnairePage() {
                     value={answer.answer}
                     onChange={(e) => handleAnswerChange(q.id, e.target.value)}
                     rows={rows}
-                    placeholder="Risposta manuale richiesta — inserisci il testo…"
+                    placeholder={t("manualAnswerPh")}
                     style={{
                       width: "100%",
                       padding: "8px 10px",
@@ -915,7 +928,7 @@ export default function QuestionnairePage() {
                     className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
                     style={{ background: sm.bg, color: sm.color, border: `1px solid ${sm.border}` }}
                   >
-                    {sm.label}
+                    {t(sm.labelKey)}
                   </span>
                   <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>
                     {answer.source}
@@ -943,19 +956,19 @@ export default function QuestionnairePage() {
           {/* Stats */}
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <span className="text-[11px] font-medium" style={{ color: "#15803d" }}>
-              {autoCount} auto
+              {autoCount} {t("autoWord")}
             </span>
             <span className="text-[11px] font-medium" style={{ color: "#92400e" }}>
-              {partialCount} parziali
+              {partialCount} {t("partialWord")}
             </span>
             {manualCount > 0 && (
               <span className="text-[11px] font-medium" style={{ color: "#dc2626" }}>
-                {manualCount} manuali
+                {manualCount} {t("manualWord")}
               </span>
             )}
             {manualCount === 0 && (
               <span className="flex items-center gap-1 text-[11px]" style={{ color: "#15803d" }}>
-                <CheckCircle className="h-3.5 w-3.5" /> Completo
+                <CheckCircle className="h-3.5 w-3.5" /> {t("completeWord")}
               </span>
             )}
           </div>
@@ -970,14 +983,14 @@ export default function QuestionnairePage() {
                 border: "1px solid rgba(220,38,38,0.15)",
               }}
             >
-              Reset bozza
+              {t("resetDraft")}
             </button>
             <button
               onClick={() => downloadTxt(selectedTemplate, answers, systemName)}
               className="flex items-center gap-1.5 text-[11px] font-semibold px-4 py-1.5 rounded-lg transition-all"
               style={{ background: "#0D1016", color: "#fff" }}
             >
-              <Download className="h-3.5 w-3.5" /> Scarica .txt
+              <Download className="h-3.5 w-3.5" /> {t("downloadTxt")}
             </button>
           </div>
         </div>
@@ -992,11 +1005,10 @@ export default function QuestionnairePage() {
           <Info className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#2563eb" }} />
           <div>
             <p className="text-[12px] font-medium mb-0.5" style={{ color: "#1e40af" }}>
-              Come funziona
+              {t("howItWorksTitle")}
             </p>
-            <p className="text-[11px] leading-relaxed" style={{ color: "rgba(0,0,0,0.55)" }}>
-              Seleziona il template adatto al tuo buyer, poi clicca <strong>Genera questionario</strong>. AIComply legge il tuo dossier e pre-compila automaticamente le risposte. Le risposte in <span style={{ color: "#15803d" }}>verde</span> sono complete; quelle in <span style={{ color: "#92400e" }}>giallo</span> vanno integrate; quelle in <span style={{ color: "#dc2626" }}>rosso</span> richiedono inserimento manuale. Puoi modificare qualsiasi risposta prima di scaricare il documento.
-            </p>
+            <p className="text-[11px] leading-relaxed" style={{ color: "rgba(0,0,0,0.55)" }}
+              dangerouslySetInnerHTML={{ __html: t("howItWorksBody") }} />
           </div>
         </div>
       )}
