@@ -27,6 +27,9 @@ import {
   type TraceabilityCoverageRecord, type BiometricLogRequirementCoverage,
 } from "@/lib/logvault/logvault-types";
 import { useScopedStorage } from "@/lib/hooks/useScopedStorage";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
+
+type TFn = (key: string) => string;
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 const T = {
@@ -44,7 +47,7 @@ const inp: CSSProperties = { width: "100%", padding: "7px 10px", borderRadius: 8
 const ta: CSSProperties = { ...inp, resize: "vertical" as const };
 
 // ─── Kill Switch (Art. 14 — preserved from original) ─────────────────────────
-function KillSwitch({ onActivate }: { onActivate: () => void }) {
+function KillSwitch({ onActivate, t }: { onActivate: () => void; t: TFn }) {
   const [holding, setHolding] = useState(false);
   const [progress, setProgress] = useState(0);
   const [activated, setActivated] = useState(false);
@@ -77,7 +80,7 @@ function KillSwitch({ onActivate }: { onActivate: () => void }) {
           className="w-16 h-16 rounded-full flex items-center justify-center select-none"
           style={{ background: activated ? T.red : holding ? "#b91c1c" : T.text, cursor: activated ? "not-allowed" : "pointer", boxShadow: holding ? "0 0 0 6px rgba(220,38,38,0.15)" : "0 2px 8px rgba(0,0,0,0.2)" }}>
           <span className="text-white text-[10px] font-bold text-center leading-tight select-none">
-            {activated ? "STOP\nACTIVE" : "HOLD\nSTOP"}
+            {activated ? t("ks_stopActive") : t("ks_holdStop")}
           </span>
         </motion.button>
         {holding && (
@@ -91,21 +94,21 @@ function KillSwitch({ onActivate }: { onActivate: () => void }) {
         )}
       </div>
       <p className="text-[10px] text-center" style={{ color: T.faint }}>
-        {activated ? "Sistema arrestato — Nessuna nuova inferenza" :
-         holding ? `Rilascio emergenza… ${Math.round(progress)}%` :
-         "Tieni premuto 3s per arrestare"}
+        {activated ? t("ks_stopped") :
+         holding ? `${t("ks_releasing")} ${Math.round(progress)}%` :
+         t("ks_hold3s")}
       </p>
     </div>
   );
 }
 
 // ─── Coverage badge ───────────────────────────────────────────────────────────
-function CoverageBadge({ covered }: { covered: CoverageStatus }) {
+function CoverageBadge({ covered, t }: { covered: CoverageStatus; t: TFn }) {
   const map = {
-    yes: { label: "Coperta", color: T.green, bg: T.greenBg },
-    partial: { label: "Parziale", color: T.amber, bg: T.amberBg },
-    no: { label: "Non coperta", color: T.red, bg: T.redBg },
-    unspecified: { label: "Da valutare", color: T.faint, bg: T.bg },
+    yes: { label: t("cov_yes"), color: T.green, bg: T.greenBg },
+    partial: { label: t("cov_partial"), color: T.amber, bg: T.amberBg },
+    no: { label: t("cov_no"), color: T.red, bg: T.redBg },
+    unspecified: { label: t("cov_unspecified"), color: T.faint, bg: T.bg },
   };
   const s = map[covered];
   return (
@@ -123,7 +126,7 @@ interface PurposeCardProps {
   allDetectedFields: string[];
 }
 
-function PurposeCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDetectedFields }: PurposeCardProps) {
+function PurposeCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDetectedFields, t }: PurposeCardProps & { t: TFn }) {
   const [open, setOpen] = useState(false);
   const covered = rec?.covered ?? "unspecified";
 
@@ -146,13 +149,13 @@ function PurposeCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDetec
               {def.reference.split(" ").slice(0, 2).join(" ")}
             </span>
             <span className="text-[12px] font-semibold" style={{ color: T.text }}>{def.label}</span>
-            <CoverageBadge covered={covered} />
+            <CoverageBadge covered={covered} t={t} />
             {pendingProposal && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: T.violetBg, color: T.violet }}>✦ AI</span>}
           </div>
           <p className="text-[10px] mt-0.5" style={{ color: T.faint }}>{def.crossReference}</p>
           {matchedFields.length > 0 && covered === "unspecified" && (
             <p className="text-[11px] mt-1" style={{ color: T.amber }}>
-              ⚠ Campi potenzialmente rilevanti rilevati: {matchedFields.join(", ")}
+              ⚠ {t("pc_relevantFieldsDetected")} {matchedFields.join(", ")}
             </p>
           )}
         </div>
@@ -164,21 +167,21 @@ function PurposeCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDetec
           {/* AI proposal */}
           {pendingProposal && (
             <div className="mt-3 rounded-lg p-3 mb-3" style={{ background: T.violetBg, border: `1px solid ${T.violetBdr}` }}>
-              <p className="text-[11px] font-semibold mb-1" style={{ color: T.violet }}>✦ AI — verifica e conferma</p>
+              <p className="text-[11px] font-semibold mb-1" style={{ color: T.violet }}>✦ {t("aiVerify")}</p>
               <p className="text-[12px] mb-1" style={{ color: T.text }}>{pendingProposal.rationale}</p>
               {pendingProposal.evidenceFields.length > 0 && (
                 <p className="text-[11px]" style={{ color: T.muted }}>
-                  Campi: {pendingProposal.evidenceFields.join(", ")}
+                  {t("fieldsWord")} {pendingProposal.evidenceFields.join(", ")}
                 </p>
               )}
               <div className="flex items-center gap-1.5 mt-2">
-                <span className="text-[11px]" style={{ color: T.muted }}>Copertura proposta:</span>
-                <CoverageBadge covered={pendingProposal.proposedCovered} />
+                <span className="text-[11px]" style={{ color: T.muted }}>{t("proposedCoverage")}</span>
+                <CoverageBadge covered={pendingProposal.proposedCovered} t={t} />
               </div>
               <button onClick={() => onAcceptAi(def.id)}
                 className="mt-2 flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded"
                 style={{ background: T.violet, color: "#fff", border: "none", cursor: "pointer" }}>
-                <Check size={11} /> Accetta e applica
+                <Check size={11} /> {t("acceptApply")}
               </button>
             </div>
           )}
@@ -187,17 +190,17 @@ function PurposeCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDetec
           {matchedFields.length > 0 && covered === "unspecified" && !pendingProposal && (
             <div className="mt-3 rounded-lg p-3 mb-3" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
               <p className="text-[11px] font-semibold mb-1" style={{ color: T.amber }}>
-                ⚠ Campi potenzialmente rilevanti nei log importati
+                ⚠ {t("pc_relevantFieldsImported")}
               </p>
               <p className="text-[11px]" style={{ color: T.text }}>{matchedFields.join(", ")}</p>
               <div className="flex gap-2 mt-2">
                 <button onClick={() => onUpdate(def.id, { covered: "partial", evidenceFields: matchedFields })}
                   className="text-[11px] px-2 py-0.5 rounded" style={{ background: T.amberBg, color: T.amber, border: `1px solid ${T.amberBdr}`, cursor: "pointer" }}>
-                  Segna come parzialmente coperta
+                  {t("pc_markPartial")}
                 </button>
                 <button onClick={() => onUpdate(def.id, { covered: "yes", evidenceFields: matchedFields })}
                   className="text-[11px] px-2 py-0.5 rounded" style={{ background: T.greenBg, color: T.green, border: `1px solid ${T.greenBdr}`, cursor: "pointer" }}>
-                  Confermo — coperta
+                  {t("pc_confirmCovered")}
                 </button>
               </div>
             </div>
@@ -205,10 +208,10 @@ function PurposeCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDetec
 
           {/* Coverage selector */}
           <div className="mt-3 mb-2">
-            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1.5" style={{ color: T.muted }}>Copertura</label>
+            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1.5" style={{ color: T.muted }}>{t("coverage")}</label>
             <div className="flex gap-2 flex-wrap">
               {(["yes", "partial", "no", "unspecified"] as CoverageStatus[]).map(s => {
-                const labels: Record<CoverageStatus, string> = { yes: "Coperta", partial: "Parziale", no: "Non coperta", unspecified: "Da valutare" };
+                const labels: Record<CoverageStatus, string> = { yes: t("cov_yes"), partial: t("cov_partial"), no: t("cov_no"), unspecified: t("cov_unspecified") };
                 const active = covered === s;
                 return (
                   <button key={s} onClick={() => onUpdate(def.id, { covered: s })}
@@ -223,18 +226,18 @@ function PurposeCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDetec
 
           {/* Evidence fields */}
           <div className="mb-3">
-            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>Campi di evidenza (separati da virgola)</label>
+            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("evidenceFieldsComma")}</label>
             <input type="text" value={rec?.evidenceFields?.join(", ") ?? ""}
               onChange={e => onUpdate(def.id, { evidenceFields: e.target.value.split(",").map(s => s.trim()).filter(Boolean) })}
-              placeholder="es. error, alert, anomaly"
+              placeholder={t("pc_evFieldsPh")}
               style={inp} />
           </div>
 
           <div className="mb-3">
-            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>Note</label>
+            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("notesWord")}</label>
             <textarea rows={2} value={rec?.notes ?? ""}
               onChange={e => onUpdate(def.id, { notes: e.target.value })}
-              placeholder="Note sulla copertura di questa finalità..."
+              placeholder={t("pc_notesPh")}
               style={ta} />
           </div>
 
@@ -259,7 +262,7 @@ interface BiometricCardProps {
   verifierRoles?: string[];
 }
 
-function BiometricCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDetectedFields, verifierRoles }: BiometricCardProps) {
+function BiometricCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDetectedFields, verifierRoles, t }: BiometricCardProps & { t: TFn }) {
   const [open, setOpen] = useState(false);
   const covered = rec?.covered ?? "unspecified";
   const hints = FIELD_NAME_HINTS[def.id] ?? [];
@@ -278,7 +281,7 @@ function BiometricCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDet
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[10px] font-mono px-1 py-0.5 rounded" style={{ background: T.bg, color: T.muted }}>{def.reference.split(" ").slice(0, 2).join(" ")}</span>
             <span className="text-[11px] font-medium" style={{ color: T.text }}>{def.label}</span>
-            <CoverageBadge covered={covered} />
+            <CoverageBadge covered={covered} t={t} />
             {pendingProposal && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: T.violetBg, color: T.violet }}>✦ AI</span>}
           </div>
         </div>
@@ -291,14 +294,14 @@ function BiometricCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDet
           {def.id === "verifier_identity" && verifierRoles && verifierRoles.length > 0 && (
             <div className="mt-2 rounded-lg p-2.5 mb-2" style={{ background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
               <p className="text-[11px] font-semibold mb-1" style={{ color: T.blue }}>
-                Confronto con Oversight — Art. 14(5)
+                {t("bc_oversightCompare")}
               </p>
               <p className="text-[11px]" style={{ color: T.muted }}>
-                Ruoli verificatori registrati in Oversight: <strong>{verifierRoles.join(", ")}</strong>
+                {t("bc_verifierRoles")} <strong>{verifierRoles.join(", ")}</strong>
               </p>
               {matched.length > 0 && (
                 <p className="text-[11px] mt-1" style={{ color: T.text }}>
-                  I log contengono il campo <strong>{matched[0]}</strong> — verifica che identifichi correttamente i verificatori.
+                  {t("bc_logsContainPre")} <strong>{matched[0]}</strong> {t("bc_logsContainPost")}
                 </p>
               )}
             </div>
@@ -306,32 +309,32 @@ function BiometricCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDet
 
           {pendingProposal && (
             <div className="mt-2 rounded-lg p-2.5 mb-2" style={{ background: T.violetBg, border: `1px solid ${T.violetBdr}` }}>
-              <p className="text-[11px] font-semibold mb-1" style={{ color: T.violet }}>✦ AI — verifica e conferma</p>
+              <p className="text-[11px] font-semibold mb-1" style={{ color: T.violet }}>✦ {t("aiVerify")}</p>
               <p className="text-[11px]" style={{ color: T.text }}>{pendingProposal.rationale}</p>
-              {pendingProposal.evidenceFields.length > 0 && <p className="text-[11px] mt-1" style={{ color: T.muted }}>Campi: {pendingProposal.evidenceFields.join(", ")}</p>}
+              {pendingProposal.evidenceFields.length > 0 && <p className="text-[11px] mt-1" style={{ color: T.muted }}>{t("fieldsWord")} {pendingProposal.evidenceFields.join(", ")}</p>}
               <button onClick={() => onAcceptAi(def.id)}
                 className="mt-1.5 flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded"
                 style={{ background: T.violet, color: "#fff", border: "none", cursor: "pointer" }}>
-                <Check size={10} /> Accetta
+                <Check size={10} /> {t("accept")}
               </button>
             </div>
           )}
 
           {matched.length > 0 && covered === "unspecified" && !pendingProposal && (
             <div className="mt-2 rounded-lg p-2 mb-2" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-              <p className="text-[11px] font-semibold" style={{ color: T.amber }}>Campo rilevato: {matched.join(", ")}</p>
+              <p className="text-[11px] font-semibold" style={{ color: T.amber }}>{t("bc_fieldDetected")} {matched.join(", ")}</p>
               <div className="flex gap-1 mt-1">
                 <button onClick={() => onUpdate(def.id, { covered: "partial", evidenceField: matched[0] })}
-                  className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: T.amberBg, color: T.amber, border: `1px solid ${T.amberBdr}`, cursor: "pointer" }}>Parziale</button>
+                  className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: T.amberBg, color: T.amber, border: `1px solid ${T.amberBdr}`, cursor: "pointer" }}>{t("cov_partial")}</button>
                 <button onClick={() => onUpdate(def.id, { covered: "yes", evidenceField: matched[0] })}
-                  className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: T.greenBg, color: T.green, border: `1px solid ${T.greenBdr}`, cursor: "pointer" }}>Confermo</button>
+                  className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: T.greenBg, color: T.green, border: `1px solid ${T.greenBdr}`, cursor: "pointer" }}>{t("bc_confirm")}</button>
               </div>
             </div>
           )}
 
           <div className="flex gap-2 flex-wrap mt-2 mb-2">
             {(["yes", "partial", "no", "unspecified"] as CoverageStatus[]).map(s => {
-              const labels: Record<CoverageStatus, string> = { yes: "Sì", partial: "Parziale", no: "No", unspecified: "Da valutare" };
+              const labels: Record<CoverageStatus, string> = { yes: t("yesShort"), partial: t("cov_partial"), no: t("noShort"), unspecified: t("cov_unspecified") };
               const active = covered === s;
               return (
                 <button key={s} onClick={() => onUpdate(def.id, { covered: s })}
@@ -344,10 +347,10 @@ function BiometricCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDet
           </div>
 
           <div>
-            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>Campo di evidenza</label>
+            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("bc_evidenceField")}</label>
             <input type="text" value={rec?.evidenceField ?? ""}
               onChange={e => onUpdate(def.id, { evidenceField: e.target.value })}
-              placeholder="nome_campo nei log"
+              placeholder={t("bc_evFieldPh")}
               style={inp} />
           </div>
         </div>
@@ -357,7 +360,7 @@ function BiometricCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDet
 }
 
 // ─── Log set import card ──────────────────────────────────────────────────────
-function LogSetCard({ logSet, onRemove }: { logSet: ImportedLogSet; onRemove: () => void }) {
+function LogSetCard({ logSet, onRemove, t, loc }: { logSet: ImportedLogSet; onRemove: () => void; t: TFn; loc: string }) {
   return (
     <div className="rounded-lg p-3" style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}>
       <div className="flex items-start justify-between gap-2">
@@ -368,17 +371,17 @@ function LogSetCard({ logSet, onRemove }: { logSet: ImportedLogSet; onRemove: ()
             <span className="text-[10px] px-1 rounded" style={{ background: T.bg, color: T.muted }}>{logSet.format.toUpperCase()}</span>
           </div>
           <div className="flex flex-wrap gap-3 text-[10px]" style={{ color: T.muted }}>
-            <span>{logSet.entryCount.toLocaleString()} voci</span>
-            <span>{logSet.detectedFields.length} campi</span>
+            <span>{logSet.entryCount.toLocaleString()} {t("entriesWord")}</span>
+            <span>{logSet.detectedFields.length} {t("fieldsCountWord")}</span>
             {logSet.dateRangeStart && (
               <span>
-                {new Date(logSet.dateRangeStart).toLocaleDateString("it-IT")} – {new Date(logSet.dateRangeEnd!).toLocaleDateString("it-IT")}
+                {new Date(logSet.dateRangeStart).toLocaleDateString(loc)} – {new Date(logSet.dateRangeEnd!).toLocaleDateString(loc)}
               </span>
             )}
           </div>
           {logSet.detectedFields.length > 0 && (
             <p className="text-[10px] mt-1 truncate" style={{ color: T.faint }}>
-              Campi: {logSet.detectedFields.slice(0, 8).join(", ")}{logSet.detectedFields.length > 8 ? `... +${logSet.detectedFields.length - 8}` : ""}
+              {t("fieldsWord")} {logSet.detectedFields.slice(0, 8).join(", ")}{logSet.detectedFields.length > 8 ? `... +${logSet.detectedFields.length - 8}` : ""}
             </p>
           )}
         </div>
@@ -401,6 +404,9 @@ const EMPTY_RECORD: LogVaultRecord = {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function LogVaultPage() {
+  const t = useT("toolLogvault");
+  const locale = useLocale();
+  const loc = locale === "it" ? "it-IT" : "en-GB";
   const [record, setRecord] = useScopedStorage<LogVaultRecord>("logvault_config", EMPTY_RECORD);
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
   const [savedAt, setSavedAt] = useState<string | null>(() => readFromStorage<LogvaultResult>("logvault")?.completedAt ?? null);
@@ -430,10 +436,10 @@ export default function LogVaultPage() {
   const riskTier = cls?.riskLevel ?? "n.d.";
 
   const phases: ToolPhase[] = [
-    { id: "carica",    label: "Carica",    sublabel: "Log import",          anchor: "fase-carica" },
-    { id: "copertura", label: "Copertura", sublabel: "Finalità Art. 12(2)", anchor: "fase-copertura" },
-    { id: "verifica",  label: "Verifica",  sublabel: "Qualità · integrità · ritenzione", anchor: "fase-verifica" },
-    { id: "evidenza",  label: "Evidenza",  sublabel: "Export",              anchor: "fase-export" },
+    { id: "carica",    label: t("phase_carica"),    sublabel: t("phase_carica_sub"),    anchor: "fase-carica" },
+    { id: "copertura", label: t("phase_copertura"), sublabel: t("phase_copertura_sub"), anchor: "fase-copertura" },
+    { id: "verifica",  label: t("phase_verifica"),  sublabel: t("phase_verifica_sub"),  anchor: "fase-verifica" },
+    { id: "evidenza",  label: t("phase_evidenza"),  sublabel: t("phase_evidenza_sub"),  anchor: "fase-export" },
   ];
   const phaseIdx = record.importedLogSets.length === 0 ? 0
     : record.retention.role !== "unspecified" ? 3
@@ -502,29 +508,29 @@ export default function LogVaultPage() {
 
   // ── Import handling ────────────────────────────────────────────────────────
   async function handleFileImport(file: File) {
-    if (file.size > MAX_LOG_FILE_BYTES) { showToast(`File troppo grande (max ${MAX_LOG_FILE_BYTES / 1024 / 1024} MB)`, "error"); return; }
+    if (file.size > MAX_LOG_FILE_BYTES) { showToast(`${t("toast_tooLarge")} (max ${MAX_LOG_FILE_BYTES / 1024 / 1024} MB)`, "error"); return; }
     const ext = file.name.split(".").pop()?.toLowerCase();
-    if (!["json", "ndjson", "jsonl", "csv", "tsv"].includes(ext ?? "")) { showToast("Formato non supportato — usa .json/.ndjson/.csv/.tsv", "error"); return; }
+    if (!["json", "ndjson", "jsonl", "csv", "tsv"].includes(ext ?? "")) { showToast(t("toast_unsupported"), "error"); return; }
 
     setUploading(true);
     try {
       const text = await file.text();
       // Analisi interamente client-side: le voci grezze non lasciano mai il browser.
       const { logSet, entries } = await analyzeLogSet(crypto.randomUUID(), file.name, text);
-      if (logSet.entryCount === 0) { showToast("Nessuna voce valida trovata nel file", "error"); return; }
+      if (logSet.entryCount === 0) { showToast(t("toast_noValidEntries"), "error"); return; }
 
       // Preview: solo ≤5 voci, in sessione, mai persistite
       const preview = entries.slice(0, 5).map(e => Object.fromEntries(Object.entries(e).map(([k, v]) => [k, v == null ? "" : String(v)])));
       setPreviewSamples(prev => ({ ...prev, [logSet.id]: preview }));
       const warns: string[] = [];
-      if (logSet.sampledFrom) warns.push(`Analisi su un campione di ${MAX_ENTRIES.toLocaleString()} voci su ${logSet.sampledFrom.toLocaleString()} totali`);
+      if (logSet.sampledFrom) warns.push(`${t("warn_sampledPre")} ${MAX_ENTRIES.toLocaleString()} ${t("warn_sampledMid")} ${logSet.sampledFrom.toLocaleString()} ${t("warn_sampledPost")}`);
       if (logSet.notes) warns.push(logSet.notes);
       setUploadWarnings(warns);
 
       patchRecord({ importedLogSets: [...record.importedLogSets, logSet] });
-      showToast(`${logSet.entryCount.toLocaleString()} voci importate — ${logSet.detectedFields.length} campi rilevati`);
+      showToast(`${logSet.entryCount.toLocaleString()} ${t("toast_entriesImported")} — ${logSet.detectedFields.length} ${t("toast_fieldsDetected")}`);
     } catch (e) {
-      showToast(e instanceof Error ? e.message : "Errore durante il parsing", "error");
+      showToast(e instanceof Error ? e.message : t("toast_parseError"), "error");
     } finally {
       setUploading(false);
     }
@@ -590,7 +596,7 @@ export default function LogVaultPage() {
       setAiProposals(proposals);
       if (result.safeStateSuggestion) setAiSafeStateSuggestion(result.safeStateSuggestion);
     } catch (e) {
-      showToast(e instanceof Error ? e.message : "Errore AI", "error");
+      showToast(e instanceof Error ? e.message : t("aiError"), "error");
     } finally {
       setAnalyzing(false);
     }
@@ -628,7 +634,7 @@ export default function LogVaultPage() {
       savedAt: completedAt,
     }, "logvault");
     setSavedAt(completedAt);
-    showToast("LogVault salvato nel dossier");
+    showToast(t("toast_saved"));
   }
 
   const allDetectedFields = getAllDetectedFields(record);
@@ -651,20 +657,20 @@ export default function LogVaultPage() {
       {/* Dossier banner */}
       {savedAt ? (
         <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-4 text-[12px]" style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}>
-          <span style={{ color: T.green }}>✓ Salvato nel dossier · {new Date(savedAt).toLocaleDateString("it-IT")}</span>
-          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium" style={{ color: T.green }}>Vedi dossier →</Link>
+          <span style={{ color: T.green }}>✓ {t("savedDossier")} · {new Date(savedAt).toLocaleDateString(loc)}</span>
+          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium" style={{ color: T.green }}>{t("seeDossier")}</Link>
         </div>
       ) : (
         <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-4 text-[12px]" style={{ background: T.card, border: `1px solid ${T.border}` }}>
-          <span style={{ color: T.muted }}>Salva l&apos;analisi Art. 12 nel dossier di compliance</span>
-          <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>Salva</button>
+          <span style={{ color: T.muted }}>{t("saveHint")}</span>
+          <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>{t("save")}</button>
         </div>
       )}
 
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
         <div>
-          <p className="text-[11px] font-semibold uppercase mb-0.5" style={{ color: T.faint, letterSpacing: "1.2px" }}>Art. 12 AI Act — Registrazione automatica eventi</p>
+          <p className="text-[11px] font-semibold uppercase mb-0.5" style={{ color: T.faint, letterSpacing: "1.2px" }}>{t("kicker")}</p>
           <h1 className="text-2xl font-semibold" style={{ color: T.text, letterSpacing: "-0.6px" }}>LogVault</h1>
           {cls && <p className="text-[11px] mt-1" style={{ color: T.muted }}>{cls.systemName} · Tier {cls.riskLevel}</p>}
         </div>
@@ -673,7 +679,7 @@ export default function LogVaultPage() {
             className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg font-medium"
             style={{ background: showConfig ? "rgba(220,38,38,0.06)" : T.bg, border: `1px solid ${showConfig ? "rgba(220,38,38,0.18)" : T.border}`, color: showConfig ? T.red : T.muted }}>
             <AlertTriangle size={13} />
-            Segnala evento
+            {t("reportEvent")}
             {showConfig ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           </button>
           <button
@@ -686,7 +692,7 @@ export default function LogVaultPage() {
             }}
             className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg"
             style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
-            <Download size={13} /> Esporta evidence
+            <Download size={13} /> {t("exportEvidence")}
           </button>
         </div>
       </div>
@@ -699,22 +705,18 @@ export default function LogVaultPage() {
               <div className="flex items-start gap-2.5 mb-3">
                 <AlertTriangle size={15} style={{ color: T.red, flexShrink: 0, marginTop: 1 }} />
                 <div>
-                  <p className="text-[13px] font-semibold" style={{ color: T.text }}>Segnala un evento anomalo — Art. 73 AI Act</p>
-                  <p className="text-[11px] mt-0.5 leading-relaxed" style={{ color: T.muted }}>
-                    Descrivi qualsiasi comportamento inatteso del sistema AI: predizioni errate, bias rilevato, output fuori soglia,
-                    errori di input, violazioni di sicurezza o qualunque anomalia operativa.
-                    L&apos;AI classificherà automaticamente la gravità (Art. 73) e segnalerà se è richiesta notifica all&apos;autorità competente.
-                  </p>
+                  <p className="text-[13px] font-semibold" style={{ color: T.text }}>{t("reportAnomalyTitle")}</p>
+                  <p className="text-[11px] mt-0.5 leading-relaxed" style={{ color: T.muted }}>{t("reportAnomalyDesc")}</p>
                 </div>
               </div>
               <textarea value={eventDesc} onChange={e => { setEventDesc(e.target.value); setSeveritySuggestion(null); }}
                 onBlur={e => handleDescriptionBlur(e.target.value)}
-                placeholder="Es: «Il sistema ha classificato erroneamente 3 candidati come idonei nonostante profili incompleti, superando la soglia del 5% di falsi positivi definita nelle specifiche tecniche. L'anomalia è stata rilevata il 02/07/2026 ore 14:30.»"
+                placeholder={t("reportAnomalyPh")}
                 rows={3} style={ta} />
-              {loadingSeverity && <p className="text-[11px] mt-1" style={{ color: T.muted }}>Classificazione AI in corso…</p>}
+              {loadingSeverity && <p className="text-[11px] mt-1" style={{ color: T.muted }}>{t("classifyingAi")}</p>}
               {severitySuggestion && (
                 <div className="mt-2 rounded-lg p-2.5" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-                  <p className="text-[12px] font-semibold" style={{ color: T.amber }}>Livello di gravità rilevato: <strong>{severitySuggestion.severity.toUpperCase()}</strong></p>
+                  <p className="text-[12px] font-semibold" style={{ color: T.amber }}>{t("severityDetected")} <strong>{severitySuggestion.severity.toUpperCase()}</strong></p>
                   <p className="text-[11px] mt-0.5" style={{ color: T.muted }}>{severitySuggestion.rationale}</p>
                   {severitySuggestion.regulatoryFlag && <p className="text-[11px] mt-0.5" style={{ color: T.red }}>⚠ {severitySuggestion.regulatoryFlag}</p>}
                 </div>
@@ -727,23 +729,23 @@ export default function LogVaultPage() {
       {/* Kill switch (right side) + Art. 12(1) triage side by side */}
       <div className="flex gap-4 mb-6 flex-wrap">
         <div className="flex-shrink-0">
-          <KillSwitch onActivate={() => setKillActive(true)} />
-          {killActive && <p className="text-[10px] mt-1 text-center" style={{ color: T.red }}>Sistema arrestato — logging dell&apos;evento raccomandato</p>}
+          <KillSwitch onActivate={() => setKillActive(true)} t={t} />
+          {killActive && <p className="text-[10px] mt-1 text-center" style={{ color: T.red }}>{t("ks_loggingRecommended")}</p>}
         </div>
 
         {/* Art. 12(1) triage */}
         <div className="flex-1 min-w-0 rounded-xl p-4" style={card}>
           <div className="flex items-center gap-2 mb-2">
             <Info size={14} style={{ color: T.blue }} />
-            <span className="text-[12px] font-semibold" style={{ color: T.text }}>Triage iniziale — Art. 12(1)</span>
+            <span className="text-[12px] font-semibold" style={{ color: T.text }}>{t("triageTitle")}</span>
           </div>
           <p className="text-[11px] mb-3 leading-relaxed" style={{ color: T.muted }}>
-            Il sistema dispone di funzionalità di registrazione automatica degli eventi (log) durante il suo ciclo di vita operativo?
+            {t("triageQuestion")}
           </p>
           <div className="flex gap-2 flex-wrap">
             {([
-              { v: "yes" as const, l: "Sì — il sistema genera log automatici" },
-              { v: "no" as const, l: "No — il sistema non dispone di logging" },
+              { v: "yes" as const, l: t("triage_yes") },
+              { v: "no" as const, l: t("triage_no") },
             ]).map(opt => (
               <button key={opt.v} onClick={() => patchRecord({ loggingCapabilityConfirmed: opt.v })}
                 className="text-[12px] px-3 py-2 rounded-lg border"
@@ -765,13 +767,13 @@ export default function LogVaultPage() {
       {record.loggingCapabilityConfirmed === "no" && (
         <div className="rounded-xl p-4 mb-6" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
           <p className="text-[12px] font-semibold mb-2" style={{ color: T.amber }}>
-            ⚠ Il sistema non dispone di logging — art. 12(1) [Reg. (UE) 2024/1689] richiede registrazione automatica
+            ⚠ {t("noLogTitle")}
           </p>
           <p className="text-[11px] leading-relaxed" style={{ color: T.text }}>
-            Richiedere al provider del sistema AI di implementare funzionalità di logging automatico degli eventi. I sistemi ad alto rischio sono obbligati a mantenere log che consentano alle autorità competenti di verificare la conformità dopo la messa in servizio.
+            {t("noLogBody")}
           </p>
           <p className="text-[11px] mt-2" style={{ color: T.muted }}>
-            Riferimento: Art. 12(1) [Reg. (UE) 2024/1689], Art. 79(1) — Segnalare al provider e documentare la richiesta in Risk Manager.
+            {t("noLogRef")}
           </p>
         </div>
       )}
@@ -783,7 +785,7 @@ export default function LogVaultPage() {
           <div className="flex items-start gap-2 rounded-lg p-3 mb-5 text-[11px]" style={{ background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
             <Shield size={12} className="mt-0.5 flex-shrink-0" style={{ color: T.blue }} />
             <span style={{ color: T.muted }}>
-              <strong style={{ color: T.blue }}>Privacy log:</strong> LogVault verifica la struttura dei tuoi log rispetto agli obblighi dell&apos;Art. 12. Non sostituisce il sistema di conservazione log del titolare — l&apos;obbligo di conservazione (Art. 26(6) [Reg. (UE) 2024/1689]) resta in capo al deployer/provider. I dati grezzi non vengono persistiti: solo metadati aggregati (campi, conteggi, intervallo temporale) sono salvati.
+              <span dangerouslySetInnerHTML={{ __html: t("privacyNotice") }} />
             </span>
           </div>
 
@@ -794,20 +796,20 @@ export default function LogVaultPage() {
             status={phaseStatus}
             activeIdx={activePhase}
             progressPct={overallPct}
-            meta={`${phasesDone}/${phases.length} fasi · ${coveredCount}/3 finalità`}
+            meta={`${phasesDone}/${phases.length} ${t("phasesWord")} · ${coveredCount}/3 ${t("purposesWord")}`}
           />
 
           {/* ── Import section ─────────────────────────────────────────────── */}
           <section id="fase-carica" style={{ scrollMarginTop: 72 }} className="mb-6">
-            <PhaseHeading n={1} title="Carica i log" done={logsIn}
-              sub={logsIn ? "Log importati — analisi solo nel browser" : "JSON / NDJSON / CSV / TSV — analisi solo nel browser"} />
-            <h2 className="text-[13px] font-semibold mb-3" style={{ color: T.text }}>Importa log reali</h2>
+            <PhaseHeading n={1} title={t("ph1_title")} done={logsIn}
+              sub={logsIn ? t("ph1_subDone") : t("ph1_sub")} />
+            <h2 className="text-[13px] font-semibold mb-3" style={{ color: T.text }}>{t("importRealLogs")}</h2>
 
             {/* Existing log sets */}
             {record.importedLogSets.length > 0 && (
               <div className="space-y-2 mb-3">
                 {record.importedLogSets.map(ls => (
-                  <LogSetCard key={ls.id} logSet={ls} onRemove={() => removeLogSet(ls.id)} />
+                  <LogSetCard key={ls.id} logSet={ls} onRemove={() => removeLogSet(ls.id)} t={t} loc={loc} />
                 ))}
               </div>
             )}
@@ -827,9 +829,9 @@ export default function LogVaultPage() {
               className="rounded-xl border-2 border-dashed flex flex-col items-center justify-center p-6 cursor-pointer"
               style={{ borderColor: T.border, background: T.bg }}>
               {uploading ? <Loader2 size={20} className="animate-spin mb-2" style={{ color: T.blue }} /> : <Upload size={20} className="mb-2" style={{ color: T.muted }} />}
-              <p className="text-[12px] font-medium" style={{ color: T.text }}>{uploading ? "Analisi in corso..." : "Trascina un file o clicca per selezionare"}</p>
-              <p className="text-[11px]" style={{ color: T.muted }}>Formati: .json / .ndjson / .csv / .tsv — max 50 MB</p>
-              <p className="text-[11px] mt-1" style={{ color: T.faint }}>I dati grezzi non vengono salvati — solo statistiche aggregate</p>
+              <p className="text-[12px] font-medium" style={{ color: T.text }}>{uploading ? t("analyzing") : t("dropHint")}</p>
+              <p className="text-[11px]" style={{ color: T.muted }}>{t("formats")}</p>
+              <p className="text-[11px] mt-1" style={{ color: T.faint }}>{t("rawNotSaved")}</p>
               <input ref={fileInputRef} type="file" accept=".json,.ndjson,.jsonl,.csv,.tsv" className="hidden"
                 onChange={e => { const f = e.target.files?.[0]; if (f) handleFileImport(f); e.currentTarget.value = ""; }} />
             </div>
@@ -838,9 +840,9 @@ export default function LogVaultPage() {
             {record.importedLogSets.length > 0 && (
               <div className="grid grid-cols-3 gap-3 mt-3">
                 {[
-                  { label: "Set di log", value: record.importedLogSets.length },
-                  { label: "Voci totali", value: record.importedLogSets.reduce((s, l) => s + l.entryCount, 0).toLocaleString() },
-                  { label: "Campi rilevati", value: allDetectedFields.length },
+                  { label: t("stat_logSets"), value: record.importedLogSets.length },
+                  { label: t("stat_totalEntries"), value: record.importedLogSets.reduce((s, l) => s + l.entryCount, 0).toLocaleString() },
+                  { label: t("stat_fieldsDetected"), value: allDetectedFields.length },
                 ].map(s => (
                   <div key={s.label} className="rounded-lg p-3" style={card}>
                     <div className="text-lg font-semibold" style={{ color: T.text }}>{s.value}</div>
@@ -856,15 +858,15 @@ export default function LogVaultPage() {
             <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
               <div>
                 <h2 className="text-[13px] font-semibold" style={{ color: T.text }}>
-                  Finalità di tracciabilità — Art. 12(2)(a)-(c) [Reg. (UE) 2024/1689]
+                  {t("traceabilityTitle")}
                 </h2>
-                <p className="text-[11px] mt-0.5" style={{ color: T.muted }}>{covered}/3 finalità valutate</p>
+                <p className="text-[11px] mt-0.5" style={{ color: T.muted }}>{covered}/3 {t("purposesEvaluated")}</p>
               </div>
               <button onClick={runAiAnalysis} disabled={analyzing || !logsImported}
                 className="flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-lg"
                 style={{ background: "#0D1016", color: "#fff", border: "none", cursor: logsImported ? "pointer" : "not-allowed", opacity: (analyzing || !logsImported) ? 0.5 : 1 }}>
                 {analyzing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                Analisi AI copertura
+                {t("aiCoverageAnalysis")}
               </button>
             </div>
 
@@ -879,74 +881,74 @@ export default function LogVaultPage() {
                     onUpdate={updatePurpose}
                     onAcceptAi={acceptPurposeAi}
                     allDetectedFields={allDetectedFields}
+                    t={t}
                   />
                 ))}
               </div>
             ) : (
-              <SectionEmptyState message="Carica un file di log per valutare la copertura delle 3 finalità di tracciabilità." />
+              <SectionEmptyState message={t("empty_traceability")} />
             )}
 
             {/* AI safe state suggestion */}
             {aiSafeStateSuggestion && (
               <div className="mt-3 rounded-lg p-3" style={{ background: T.violetBg, border: `1px solid ${T.violetBdr}` }}>
-                <p className="text-[11px] font-semibold mb-1" style={{ color: T.violet }}>✦ AI — verifica e conferma (Art. 14(4)(e))</p>
+                <p className="text-[11px] font-semibold mb-1" style={{ color: T.violet }}>✦ {t("aiVerifySafeState")}</p>
                 <p className="text-[11px] leading-relaxed" style={{ color: T.text }}>{aiSafeStateSuggestion}</p>
-                <button onClick={() => setAiSafeStateSuggestion(null)} className="text-[10px] mt-1" style={{ color: T.muted, background: "none", border: "none", cursor: "pointer" }}>Chiudi</button>
+                <button onClick={() => setAiSafeStateSuggestion(null)} className="text-[10px] mt-1" style={{ color: T.muted, background: "none", border: "none", cursor: "pointer" }}>{t("close")}</button>
               </div>
             )}
           </section>
 
           {/* ── §2 copertura fill-rate ── */}
           <div id="fase-copertura" style={{ scrollMarginTop: 72 }} className="mb-6">
-            <PhaseHeading n={2} title="Copertura delle finalità" done={coveredCount >= 3}
-              sub="Art. 12(2)(a-c) sul riempimento reale dei campi" />
+            <PhaseHeading n={2} title={t("ph2_title")} done={coveredCount >= 3}
+              sub={t("ph2_sub")} />
             {logsImported ? (
               <>
-                <CoverageFillRatePanel record={record} />
-                <NextPhaseCta label="Prosegui: Verifica del registro" anchor="fase-verifica" />
+                <CoverageFillRatePanel record={record} t={t} />
+                <NextPhaseCta label={t("cta_toVerifica")} anchor="fase-verifica" />
               </>
             ) : (
-              <SectionEmptyState message="Carica un file di log per calcolare la copertura sul riempimento reale dei campi." />
+              <SectionEmptyState message={t("empty_coverage")} />
             )}
           </div>
           {/* ── §3 verifica: qualità · integrità · ritenzione ── */}
           <div id="fase-verifica" style={{ scrollMarginTop: 72 }} className="mb-6">
-            <PhaseHeading n={3} title="Verifica del registro" done={retentionSet}
-              sub="Qualità · integrità (hash-chain) · ritenzione Art. 26(6)" />
+            <PhaseHeading n={3} title={t("ph3_title")} done={retentionSet}
+              sub={t("ph3_sub")} />
             {logsImported ? (
               <>
-                <LogQualityCard logSets={record.importedLogSets} />
-                <IntegrityCard logSets={record.importedLogSets} />
+                <LogQualityCard logSets={record.importedLogSets} t={t} />
+                <IntegrityCard logSets={record.importedLogSets} t={t} />
               </>
             ) : (
-              <SectionEmptyState message="Carica un file di log per verificare qualità, integrità e continuità del registro." />
+              <SectionEmptyState message={t("empty_verifica")} />
             )}
             {logsImported ? (
               <>
-                <RetentionPanel record={record} onChange={(r) => patchRecord({ retention: r })} />
-                {retentionSet && <NextPhaseCta label="Prosegui: Evidenza" anchor="fase-export" />}
+                <RetentionPanel record={record} onChange={(r) => patchRecord({ retention: r })} t={t} />
+                {retentionSet && <NextPhaseCta label={t("cta_toEvidenza")} anchor="fase-export" />}
               </>
             ) : (
-              <div className="mt-4"><SectionEmptyState message="Carica un file di log: la durata coperta viene calcolata dai timestamp reali." /></div>
+              <div className="mt-4"><SectionEmptyState message={t("empty_retention")} /></div>
             )}
           </div>
 
           {/* ── Retention notes ────────────────────────────────────────────── */}
           <section className="mb-6 rounded-xl p-4" style={card}>
             <h2 className="text-[12px] font-semibold mb-1" style={{ color: T.text }}>
-              Note di conservazione (descrittive) — Art. 26(6) [Reg. (UE) 2024/1689]
+              {t("retentionNotesTitle")}
             </h2>
             <p className="text-[11px] mb-3" style={{ color: T.muted }}>
-              Documenta la politica di conservazione dei log adottata dal deployer/provider (durata, sistema utilizzato).
-              L&apos;obbligo di conservazione resta in capo al deployer — questo campo è solo documentazione.
+              {t("retentionNotesDesc")}
             </p>
             <textarea rows={3} value={record.retentionNotes ?? ""}
               onChange={e => patchRecord({ retentionNotes: e.target.value })}
-              placeholder="es. 'Log conservati per 24 mesi in sistema X con accesso ristretto ai ruoli Y e Z. Backup giornaliero su storage cifrato.'"
+              placeholder={t("retentionNotesPh")}
               style={ta} />
             <div className="mt-2">
               <Link href="/dashboard/tools/deployer-dashboard" className="inline-flex items-center gap-1 text-[11px] font-medium" style={{ color: T.blue }}>
-                <ExternalLink size={11} /> Deployer Dashboard — obbligo log_retention (Art. 26(6))
+                <ExternalLink size={11} /> {t("deployerLink")}
               </Link>
             </div>
           </section>
@@ -956,21 +958,21 @@ export default function LogVaultPage() {
             <section className="mb-6">
               <div className="flex items-center gap-3 my-4">
                 <div className="flex-1 h-px" style={{ background: T.border }} />
-                <span className="text-[11px] font-semibold uppercase tracking-wide px-2" style={{ color: T.violet }}>Modulo condizionale — Log biometrici Art. 12(3)</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wide px-2" style={{ color: T.violet }}>{t("bioModuleTitle")}</span>
                 <div className="flex-1 h-px" style={{ background: T.border }} />
               </div>
               {logsImported ? (
                 <div className="rounded-xl border-2 p-4" style={{ background: T.card, borderColor: T.violet }}>
                   <div className="flex items-center gap-2 mb-3">
                     <Shield size={15} style={{ color: T.violet }} />
-                    <span className="font-semibold text-sm" style={{ color: T.text }}>Requisiti minimi di log — Art. 12(3) [Reg. (UE) 2024/1689]</span>
+                    <span className="font-semibold text-sm" style={{ color: T.text }}>{t("bioMinReqTitle")}</span>
                   </div>
                   {totalBiometricUncovered > 0 && (
                     <div className="rounded-lg p-3 mb-3" style={{ background: T.redBg, border: `1px solid ${T.redBdr}` }}>
                       <p className="text-[12px] font-semibold" style={{ color: T.red }}>
-                        I log importati non soddisfano {totalBiometricUncovered}/4 requisiti minimi dell&apos;Art. 12(3) [Reg. (UE) 2024/1689] per i sistemi di identificazione biometrica
+                        {t("bioUncoveredPre")} {totalBiometricUncovered}/4 {t("bioUncoveredPost")}
                       </p>
-                      <p className="text-[11px] mt-1" style={{ color: T.muted }}>Intervenire sul sistema di logging del provider per aggiungere i campi mancanti.</p>
+                      <p className="text-[11px] mt-1" style={{ color: T.muted }}>{t("bioUncoveredHint")}</p>
                     </div>
                   )}
                   <div className="space-y-2">
@@ -984,35 +986,36 @@ export default function LogVaultPage() {
                         onAcceptAi={acceptBiometricAi}
                         allDetectedFields={allDetectedFields}
                         verifierRoles={verifierRoles.length > 0 ? verifierRoles : undefined}
+                        t={t}
                       />
                     ))}
                   </div>
                 </div>
               ) : (
-                <SectionEmptyState message="Carica un file di log per verificare i 4 requisiti minimi Art. 12(3)." />
+                <SectionEmptyState message={t("empty_biometric")} />
               )}
             </section>
           )}
 
           <div id="fase-export" style={{ scrollMarginTop: 72 }}>
-            <PhaseHeading n={4} title="Evidenza" done={coveredCount >= 3 && retentionSet}
-              sub="Export Log Conformity Statement" />
+            <PhaseHeading n={4} title={t("ph4_title")} done={coveredCount >= 3 && retentionSet}
+              sub={t("ph4_sub")} />
           </div>
 
           {/* ── §9 Export Log Conformity Statement ── */}
           <section className="mb-6 rounded-xl p-4" style={card}>
-            <h2 className="text-[12px] font-semibold mb-1" style={{ color: T.text }}>Evidenza — Log Conformity Statement</h2>
-            <p className="text-[11px] mb-3" style={{ color: T.muted }}>Art. 12 / Allegato IV. Copertura, qualità, ritenzione, integrità, fingerprint, timestamp.</p>
+            <h2 className="text-[12px] font-semibold mb-1" style={{ color: T.text }}>{t("evidenceTitle")}</h2>
+            <p className="text-[11px] mb-3" style={{ color: T.muted }}>{t("evidenceDesc")}</p>
             <div className="flex flex-wrap gap-2">
               <button onClick={() => exportLogConformityJSON(record)}
                 className="text-[12px] font-medium px-3 py-1.5 rounded-lg"
                 style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
-                Esporta JSON
+                {t("exportJson")}
               </button>
               <button onClick={() => window.print()}
                 className="text-[12px] font-medium px-3 py-1.5 rounded-lg"
                 style={{ background: "#fff", color: T.text, border: `1px solid ${T.border}`, cursor: "pointer" }}>
-                Stampa / Salva PDF
+                {t("printPdf")}
               </button>
             </div>
           </section>
@@ -1021,7 +1024,7 @@ export default function LogVaultPage() {
           <div className="flex justify-end">
             <button onClick={saveToDossier} className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[12px] font-medium"
               style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
-              <CheckCircle size={14} /> Salva nel dossier
+              <CheckCircle size={14} /> {t("saveToDossier")}
             </button>
           </div>
         </>
