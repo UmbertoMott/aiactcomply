@@ -749,6 +749,51 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       pdf_corrNone: "Nessun rischio correlato",
       pdf_rightsImpacted: "diritti impattati",
     },
+    toolDriftMonitor: {
+      kicker: "Monitoring drift — Art. 12 / Art. 15 EU AI Act",
+      title: "Config Drift Monitor",
+      subtitle: "Rilevazione automatica deviazioni: latenza, errori, guardrail, token spike.",
+      // Metriche
+      m_latency: "Latenza p99",
+      m_errorRate: "Tasso errori",
+      m_flagged: "Eventi flaggati",
+      m_guardrail: "Violazioni guardrail",
+      m_tokenSpike: "Spike token",
+      vsThreshold: "vs soglia",
+      // Status badge
+      noDrift: "Nessun drift",
+      eventsAnalyzed: "eventi analizzati",
+      alerts_word: "alert",
+      critical_word: "critici",
+      warning_word: "warning",
+      events_word: "eventi",
+      // Storico
+      history_pre: "Storico ultime",
+      history_post: "rilevazioni",
+      now_word: "ora",
+      // Controlli
+      resume: "Riprendi",
+      pause: "Pausa",
+      now_btn: "Ora",
+      lastUpdate: "Ultimo aggiornamento:",
+      next_pre: "Prossimo:",
+      pollPaused: "⏸ Polling in pausa",
+      // Errori
+      err_sessionExpired_pre: "Sessione scaduta.",
+      err_loginAgain: "Accedi di nuovo",
+      err_tables: "Tabelle DB non trovate — esegui la migration Supabase prima di usare questo tool.",
+      err_api: "Errore API:",
+      // Nessun log
+      noLog_pre: "Nessun log nella finestra",
+      noLog_post: "",
+      noLog_hint: "Configura il LogVault SDK per inviare eventi a",
+      goLogVault: "Vai a LogVault →",
+      // Alert headers
+      criticalAlerts_pre: "⚠ Alert critici",
+      warnings_pre: "Avvisi",
+      // Footer legale
+      footer: "<strong>Art. 12 EU AI Act</strong> — I sistemi ad alto rischio devono consentire il monitoraggio automatico della performance. <strong>Art. 15</strong> — Robustezza e resilienza devono essere monitorate continuativamente. Alert critici non risolti entro 24h devono essere documentati nel sistema di gestione del rischio (Art. 9).",
+    },
   },
   en: {
     nav: {
@@ -1479,6 +1524,51 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       pdf_scenarioNone: "No scenario defined",
       pdf_corrNone: "No correlated risk",
       pdf_rightsImpacted: "rights impacted",
+    },
+    toolDriftMonitor: {
+      kicker: "Drift monitoring — Art. 12 / Art. 15 EU AI Act",
+      title: "Config Drift Monitor",
+      subtitle: "Automatic deviation detection: latency, errors, guardrails, token spikes.",
+      // Metrics
+      m_latency: "p99 latency",
+      m_errorRate: "Error rate",
+      m_flagged: "Flagged events",
+      m_guardrail: "Guardrail breaches",
+      m_tokenSpike: "Token spike",
+      vsThreshold: "vs threshold",
+      // Status badge
+      noDrift: "No drift",
+      eventsAnalyzed: "events analyzed",
+      alerts_word: "alerts",
+      critical_word: "critical",
+      warning_word: "warning",
+      events_word: "events",
+      // History
+      history_pre: "Last",
+      history_post: "readings",
+      now_word: "now",
+      // Controls
+      resume: "Resume",
+      pause: "Pause",
+      now_btn: "Now",
+      lastUpdate: "Last update:",
+      next_pre: "Next:",
+      pollPaused: "⏸ Polling paused",
+      // Errors
+      err_sessionExpired_pre: "Session expired.",
+      err_loginAgain: "Log in again",
+      err_tables: "DB tables not found — run the Supabase migration before using this tool.",
+      err_api: "API error:",
+      // No logs
+      noLog_pre: "No logs in the",
+      noLog_post: "window",
+      noLog_hint: "Configure the LogVault SDK to send events to",
+      goLogVault: "Go to LogVault →",
+      // Alert headers
+      criticalAlerts_pre: "⚠ Critical alerts",
+      warnings_pre: "Warnings",
+      // Legal footer
+      footer: "<strong>Art. 12 EU AI Act</strong> — High-risk systems must enable automatic performance monitoring. <strong>Art. 15</strong> — Robustness and resilience must be monitored continuously. Critical alerts unresolved within 24h must be documented in the risk management system (Art. 9).",
     },
   },
 };
