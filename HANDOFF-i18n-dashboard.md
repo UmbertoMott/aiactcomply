@@ -30,17 +30,26 @@ resilience, qms, assessment, trust-passport, assessment-export.
 - **dpia** page.tsx (`toolDpia`, 257 chiavi) — 6 step WP248. Render-keyed criteri/prop/rights/steps.
   Hook aliasato `tr` (evita shadow param `t`=threat). Componenti figli ancora IT.
 
-## RIMANENTI da tradurre (SOLO componenti figli — le 3 page.tsx grandi sono FATTE)
+## FATTO: cluster `src/components/assessment/*` COMPLETO (namespace `assessmentShared`, 263 chiavi)
+Tutti e 10 i componenti condivisi (usati da FRIA/DPIA/assessment page):
+AssessmentStepper, AssessmentSharedHeader, CorrelatedRisksPanel, UnifiedIntake,
+GuidedQuestion, AssessmentSignOff, SharedSpine, DpiaBranch, FriaBranch, UnifiedDraftPanel.
+Verifica: `grep -L useT src/components/assessment/*.tsx` → vuoto.
+
+## RIMANENTI da tradurre (componenti figli fria/dpia)
 + componenti figli FRIA: `src/components/fria/*` (FriaGuidedMode, RightsCatalog,
   ContextCatalog, NextStepGuide, RightImpactAIDraft, FriaGapCheck).
 + componenti figli DPIA: `src/components/dpia/*` (DpiaGuidedMode, ScreeningCatalog,
   ThreatCatalog, NextStepGuide, ThreatImpactAIDraft, ProportionalityBalance,
   DpiaGapCheck, DPIATemplateViewer).
-+ componenti condivisi `src/components/assessment/*` (usati da FRIA **e** DPIA:
-  AssessmentSharedHeader, AssessmentStepper, AssessmentSignOff, CorrelatedRisksPanel,
-  SharedSpine, GuidedQuestion, UnifiedIntake, UnifiedDraftPanel, FriaBranch, DpiaBranch).
-  Namespace suggerito condiviso `assessmentShared`.
 + `src/lib/dpia/dpia-progress.ts` — label rail/step (lib output; sidebar DPIA resta IT finché non tradotto).
+
+### Gotcha assessmentShared (per continuità)
+- Badge module-scope (riskBadge/severityBadge/lensBadge) → passa `t` come argomento.
+- Componenti-badge veri (`<AiBadge/>`, `<ConfidenceBadge/>`, `<SectionCard/>`) → hook proprio `useT("assessmentShared")`.
+- Array che diventano storage con id random (STANDARD_*_CHECKS in DpiaBranch, GuidedQuestion buttons)
+  = data-layer: mantieni il valore IT, traduci solo il display (render-keyed o lookup).
+- Nomi diritti da `FUNDAMENTAL_RIGHTS` (fria-engine) = data-layer.
 
 **Gotcha fria (applica anche a dpia)**: parametri `.map((t)=>...)` e `fn(t: string)`
 ombreggiano l'hook `t` — rinominare (tab/trg/x) prima di aggiungere `const t`.
