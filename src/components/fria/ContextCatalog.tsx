@@ -3,6 +3,7 @@
 import type { CSSProperties } from "react";
 import type { ClassifierResult, DataAuditResult } from "@/lib/dossier/storage-schema";
 import { readFromStorage } from "@/lib/dossier/storage-schema";
+import { useT } from "@/i18n/LocaleProvider";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const T = {
@@ -29,6 +30,7 @@ interface Suggestion {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export function ContextCatalog({ onApply }: ContextCatalogProps) {
+  const t = useT("toolFria");
   const classifier = readFromStorage<ClassifierResult>("classifier");
   const dataAudit = readFromStorage<DataAuditResult>("dataAudit");
 
@@ -38,7 +40,7 @@ export function ContextCatalog({ onApply }: ContextCatalogProps) {
   if (classifier?.riskLevel) {
     suggestions.push({
       field: "Livello rischio AI Act",
-      label: "Livello rischio classificato",
+      label: t("cc_riskLevelLabel"),
       value: classifier.riskLevel,
       isNote: true,
     });
@@ -47,7 +49,7 @@ export function ContextCatalog({ onApply }: ContextCatalogProps) {
   if (classifier?.systemDescription) {
     suggestions.push({
       field: "Panoramica tecnologica",
-      label: "Descrizione sistema (da Classifier)",
+      label: t("cc_sysDescLabel"),
       value: classifier.systemDescription,
       patch: { technology_overview: classifier.systemDescription },
     });
@@ -56,8 +58,8 @@ export function ContextCatalog({ onApply }: ContextCatalogProps) {
   if (dataAudit?.datasets?.some((d) => d.personalData)) {
     suggestions.push({
       field: "Tratta dati personali",
-      label: "Dataset con dati personali rilevati",
-      value: "Sì — dataset con personal data identificati nel Data Audit",
+      label: t("cc_pdLabel"),
+      value: t("cc_pdValue"),
       patch: { processes_personal_data: "yes" },
     });
   }
@@ -68,8 +70,8 @@ export function ContextCatalog({ onApply }: ContextCatalogProps) {
   ) {
     suggestions.push({
       field: "Qualità dei dati sufficiente",
-      label: "Qualità complessiva dati (da Data Audit)",
-      value: `${dataAudit.overallQuality === "fail" ? "Non sufficiente" : "Da rivedere"} — ${dataAudit.overallQuality}`,
+      label: t("cc_qualityLabel"),
+      value: `${dataAudit.overallQuality === "fail" ? t("cc_qualityFail") : t("cc_qualityReview")} — ${dataAudit.overallQuality}`,
       patch: { data_quality_sufficient: "no" },
     });
   }
@@ -77,8 +79,8 @@ export function ContextCatalog({ onApply }: ContextCatalogProps) {
   if (classifier?.annexIII === true) {
     suggestions.push({
       field: "Allegato III",
-      label: "Sistema Allegato III — supervisione umana",
-      value: "Sistema Allegato III — verifica supervisione umana (Art. 14)",
+      label: t("cc_annexLabel"),
+      value: t("cc_annexValue"),
       isNote: true,
     });
   }
@@ -86,8 +88,8 @@ export function ContextCatalog({ onApply }: ContextCatalogProps) {
   if (classifier?.role === "deployer") {
     suggestions.push({
       field: "Supervisione umana assegnata",
-      label: "Ruolo deployer rilevato (da Classifier)",
-      value: "Sì — in quanto deployer, la supervisione umana è di vostra responsabilità",
+      label: t("cc_deployerLabel"),
+      value: t("cc_deployerValue"),
       patch: { human_oversight_assigned: "yes" },
     });
   }
@@ -120,10 +122,10 @@ export function ContextCatalog({ onApply }: ContextCatalogProps) {
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
         <span style={{ fontSize: 14 }}>✦</span>
         <span style={{ fontSize: 12, fontWeight: 600, color: T.amber }}>
-          Pre-compilazione automatica — dati già rilevati
+          {t("cc_header")}
         </span>
         <span style={{ fontSize: 10, color: T.muted }}>
-          ({suggestions.length} suggeriment{suggestions.length === 1 ? "o" : "i"})
+          ({suggestions.length} {suggestions.length === 1 ? t("cc_sugOne") : t("cc_sugMany")})
         </span>
       </div>
 
@@ -150,7 +152,7 @@ export function ContextCatalog({ onApply }: ContextCatalogProps) {
                 cursor: "pointer",
               }}
             >
-              Applica
+              {t("cc_apply")}
             </button>
           )}
           {sug.isNote && (
@@ -160,7 +162,7 @@ export function ContextCatalog({ onApply }: ContextCatalogProps) {
               background: "rgba(217,119,6,0.12)", border: `1px solid ${T.amberBdr}`,
               color: T.amber, fontWeight: 500,
             }}>
-              Nota
+              {t("cc_note")}
             </span>
           )}
         </div>
