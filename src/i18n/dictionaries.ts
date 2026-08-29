@@ -3043,6 +3043,8 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       dgc_criticalGaps: "gap critico/i", dgc_art36Badge: "Art. 36 — Consultazione preventiva richiesta",
       dgc_recommendation: "Raccomandazione",
       dgc_emptyHint: "Clicca \"Avvia gap-check\" per analizzare la copertura degli elementi Art. 35(7) obbligatori.",
+      sc_selectApplicable: "Seleziona i criteri applicabili al tuo trattamento", sc_applicableCount: "criteri applicabili",
+      sc_suggestedConfirm: "Suggerito — conferma tu", sc_suggestedClassifier: "Suggerito da Classifier", sc_deselect: "Deseleziona",
     },
     assessmentShared: {
       step_intake_label: "Intake", step_intake_sub: "Dati sistema",
@@ -6179,6 +6181,8 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       dgc_criticalGaps: "critical gap(s)", dgc_art36Badge: "Art. 36 — Prior consultation required",
       dgc_recommendation: "Recommendation",
       dgc_emptyHint: "Click \"Start gap-check\" to analyze the coverage of the mandatory Art. 35(7) elements.",
+      sc_selectApplicable: "Select the criteria applicable to your processing", sc_applicableCount: "applicable criteria",
+      sc_suggestedConfirm: "Suggested — confirm yourself", sc_suggestedClassifier: "Suggested by Classifier", sc_deselect: "Deselect",
     },
     assessmentShared: {
       step_intake_label: "Intake", step_intake_sub: "System data",
