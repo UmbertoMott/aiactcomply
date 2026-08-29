@@ -24,11 +24,27 @@ docugen (`toolDocugen`).
 Già tradotti nella sessione precedente (mergiati): incident, nist-ai-rmf, deployer-dashboard,
 resilience, qms, assessment, trust-passport, assessment-export.
 
-## RIMANENTI da tradurre (i 3 più grandi + cluster)
-```
-1593  classifier     1893  fria     2150  dpia
-```
-+ componenti condivisi `src/components/assessment/*` (cluster DPIA/FRIA, vedi §4 handoff precedente).
+## FATTI dopo (questa sessione di continuazione)
+- **classifier** (`toolClassifier`, 154 chiavi) — refactor annexIAnswer a valori stabili.
+- **fria** page.tsx (`toolFria`, 284 chiavi) — 5 fasi complete. Componenti figli ancora IT.
+- **dpia** page.tsx (`toolDpia`, 257 chiavi) — 6 step WP248. Render-keyed criteri/prop/rights/steps.
+  Hook aliasato `tr` (evita shadow param `t`=threat). Componenti figli ancora IT.
+
+## RIMANENTI da tradurre (SOLO componenti figli — le 3 page.tsx grandi sono FATTE)
++ componenti figli FRIA: `src/components/fria/*` (FriaGuidedMode, RightsCatalog,
+  ContextCatalog, NextStepGuide, RightImpactAIDraft, FriaGapCheck).
++ componenti figli DPIA: `src/components/dpia/*` (DpiaGuidedMode, ScreeningCatalog,
+  ThreatCatalog, NextStepGuide, ThreatImpactAIDraft, ProportionalityBalance,
+  DpiaGapCheck, DPIATemplateViewer).
++ componenti condivisi `src/components/assessment/*` (usati da FRIA **e** DPIA:
+  AssessmentSharedHeader, AssessmentStepper, AssessmentSignOff, CorrelatedRisksPanel,
+  SharedSpine, GuidedQuestion, UnifiedIntake, UnifiedDraftPanel, FriaBranch, DpiaBranch).
+  Namespace suggerito condiviso `assessmentShared`.
++ `src/lib/dpia/dpia-progress.ts` — label rail/step (lib output; sidebar DPIA resta IT finché non tradotto).
+
+**Gotcha fria (applica anche a dpia)**: parametri `.map((t)=>...)` e `fn(t: string)`
+ombreggiano l'hook `t` — rinominare (tab/trg/x) prima di aggiungere `const t`.
+Il componente module-scope `Sel` ha un proprio `useT` per il placeholder "— seleziona —".
 
 **Gotcha classifier**: `annexIAnswer` è confrontato come stringa in `finalizeClassification`
 (`annexIAnswer === "Sì — è safety component di prodotto Annex I"`) e usato come `value` dei radio.
