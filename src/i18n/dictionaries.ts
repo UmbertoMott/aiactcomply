@@ -3048,6 +3048,10 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       ta_applied: "Suggerimento applicato", ta_generate: "Genera suggerimento AI", ta_generating: "Generazione…",
       ta_suggestedMeasure: "Misura suggerita", ta_estimatedResidual: "Rischio residuo stimato:",
       ta_confirmApply: "Conferma e applica", ta_ignore: "Ignora", ta_regenerate: "Rigenera",
+      sev_highFull2: "Alta", sev_mediumFull2: "Media", sev_lowFull2: "Bassa",
+      tcat_illegitimate_access: "Accesso illegittimo", tcat_unwanted_modification: "Modifica non desiderata", tcat_data_disappearance: "Scomparsa dati",
+      tc_title: "Catalogo minacce WP248", tc_sub: "Seleziona pattern predefiniti e aggiungili alla tua analisi",
+      tc_threatsWord: "minacce", tc_added: "aggiunte", tc_pAbbr: "P", tc_gAbbr: "G", tc_alreadyAdded: "Già presente",
     },
     assessmentShared: {
       step_intake_label: "Intake", step_intake_sub: "Dati sistema",
@@ -6189,6 +6193,10 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       ta_applied: "Suggestion applied", ta_generate: "Generate AI suggestion", ta_generating: "Generating…",
       ta_suggestedMeasure: "Suggested measure", ta_estimatedResidual: "Estimated residual risk:",
       ta_confirmApply: "Confirm and apply", ta_ignore: "Ignore", ta_regenerate: "Regenerate",
+      sev_highFull2: "High", sev_mediumFull2: "Medium", sev_lowFull2: "Low",
+      tcat_illegitimate_access: "Illegitimate access", tcat_unwanted_modification: "Unwanted modification", tcat_data_disappearance: "Data disappearance",
+      tc_title: "WP248 threat catalogue", tc_sub: "Select predefined patterns and add them to your analysis",
+      tc_threatsWord: "threats", tc_added: "added", tc_pAbbr: "L", tc_gAbbr: "S", tc_alreadyAdded: "Already added",
     },
     assessmentShared: {
       step_intake_label: "Intake", step_intake_sub: "System data",
