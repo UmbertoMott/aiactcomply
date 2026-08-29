@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { getAssessment, applyMitigationToRegister } from "@/lib/assessment/assessment-helpers";
 import type { CorrelatedRisk } from "@/lib/assessment/assessment-schema";
+import { useT } from "@/i18n/LocaleProvider";
 
 const SEV_STYLE: Record<CorrelatedRisk["severity"], { bg: string; color: string; border: string }> = {
   low:      { bg: "rgba(0,0,0,0.03)", color: "rgba(0,0,0,0.45)", border: "rgba(0,0,0,0.08)" },
@@ -13,6 +14,7 @@ const SEV_STYLE: Record<CorrelatedRisk["severity"], { bg: string; color: string;
 };
 
 export function CorrelatedRisksPanel() {
+  const t = useT("assessmentShared");
   const [risks, setRisks] = useState<CorrelatedRisk[]>([]);
   const [mitigationTexts, setMitigationTexts] = useState<Record<string, string>>({});
   const [applying, setApplying] = useState<string | null>(null);
@@ -35,7 +37,7 @@ export function CorrelatedRisksPanel() {
       <div style={{ padding: "12px 16px", borderRadius: 10,
         border: "1px solid rgba(0,0,0,0.07)", background: "rgba(0,0,0,0.02)" }}>
         <p style={{ fontSize: 12, color: "rgba(0,0,0,0.40)", margin: 0 }}>
-          Nessun rischio correlato generato. Completa la sezione Rischi nella DPIA o gli Scenari nella FRIA, poi salva per generarli.
+          {t("noCorrelatedRisks")}
         </p>
       </div>
     );
@@ -90,14 +92,14 @@ export function CorrelatedRisksPanel() {
             {/* Mitigation */}
             {applied ? (
               <div style={{ fontSize: 11, color: "rgba(0,0,0,0.40)" }}>
-                ✓ Applicata al Risk Register — ID: {r.mitigation?.registerRiskId}
+                ✓ {t("appliedToRegister")} — ID: {r.mitigation?.registerRiskId}
               </div>
             ) : (
               <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
                 <input
                   value={mitigationTexts[r.id] ?? ""}
                   onChange={e => setMitigationTexts(prev => ({ ...prev, [r.id]: e.target.value }))}
-                  placeholder="Descrivi la mitigazione..."
+                  placeholder={t("ph_mitigation")}
                   style={{
                     flex: 1, padding: "6px 10px", borderRadius: 7, fontSize: 11,
                     border: "1px solid rgba(0,0,0,0.10)", color: "#0D1016",
@@ -115,7 +117,7 @@ export function CorrelatedRisksPanel() {
                     border: "1px solid rgba(0,0,0,0.10)",
                     whiteSpace: "nowrap",
                   }}>
-                  Applica al Risk Register
+                  {t("applyToRegister")}
                 </button>
               </div>
             )}
