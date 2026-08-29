@@ -3045,6 +3045,9 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       dgc_emptyHint: "Clicca \"Avvia gap-check\" per analizzare la copertura degli elementi Art. 35(7) obbligatori.",
       sc_selectApplicable: "Seleziona i criteri applicabili al tuo trattamento", sc_applicableCount: "criteri applicabili",
       sc_suggestedConfirm: "Suggerito — conferma tu", sc_suggestedClassifier: "Suggerito da Classifier", sc_deselect: "Deseleziona",
+      ta_applied: "Suggerimento applicato", ta_generate: "Genera suggerimento AI", ta_generating: "Generazione…",
+      ta_suggestedMeasure: "Misura suggerita", ta_estimatedResidual: "Rischio residuo stimato:",
+      ta_confirmApply: "Conferma e applica", ta_ignore: "Ignora", ta_regenerate: "Rigenera",
     },
     assessmentShared: {
       step_intake_label: "Intake", step_intake_sub: "Dati sistema",
@@ -6183,6 +6186,9 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       dgc_emptyHint: "Click \"Start gap-check\" to analyze the coverage of the mandatory Art. 35(7) elements.",
       sc_selectApplicable: "Select the criteria applicable to your processing", sc_applicableCount: "applicable criteria",
       sc_suggestedConfirm: "Suggested — confirm yourself", sc_suggestedClassifier: "Suggested by Classifier", sc_deselect: "Deselect",
+      ta_applied: "Suggestion applied", ta_generate: "Generate AI suggestion", ta_generating: "Generating…",
+      ta_suggestedMeasure: "Suggested measure", ta_estimatedResidual: "Estimated residual risk:",
+      ta_confirmApply: "Confirm and apply", ta_ignore: "Ignore", ta_regenerate: "Regenerate",
     },
     assessmentShared: {
       step_intake_label: "Intake", step_intake_sub: "System data",
