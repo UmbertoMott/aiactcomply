@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import type { CSSProperties } from "react";
 import { checkFriaGaps, type FriaGapCheck, type FriaGapItem } from "@/app/actions/checkFriaGaps";
 import type { FRIADocument } from "@/lib/simulation/fria-engine";
+import { useT } from "@/i18n/LocaleProvider";
 
 const T = {
   text: "#0D1016", muted: "rgba(0,0,0,0.42)", faint: "rgba(0,0,0,0.28)",
@@ -19,6 +20,7 @@ interface FriaGapCheckProps {
 }
 
 export function FriaGapCheck({ doc, onNavigateToPhase, onResult }: FriaGapCheckProps) {
+  const t = useT("toolFria");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<FriaGapCheck | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -43,8 +45,8 @@ export function FriaGapCheck({ doc, onNavigateToPhase, onResult }: FriaGapCheckP
 
   const overallColor = result?.overall_coverage === "complete" ? T.green :
     result?.overall_coverage === "partial" ? T.amber : T.red;
-  const overallLabel = result?.overall_coverage === "complete" ? "Copertura completa" :
-    result?.overall_coverage === "partial" ? "Copertura parziale" : "Copertura insufficiente";
+  const overallLabel = result?.overall_coverage === "complete" ? t("gc_complete") :
+    result?.overall_coverage === "partial" ? t("gc_partial") : t("gc_insufficient");
 
   const cardSt: CSSProperties = {
     background: T.card, border: `1px solid ${T.border}`,
@@ -58,22 +60,22 @@ export function FriaGapCheck({ doc, onNavigateToPhase, onResult }: FriaGapCheckP
         <div style={{ padding: "16px 20px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
             <p style={{ fontSize: 14, fontWeight: 600, color: T.text, margin: 0 }}>
-              Verifica copertura Art. 27 AI Act
+              {t("gc_title")}
             </p>
             <p style={{ fontSize: 11, color: T.muted, marginTop: 2, marginBottom: 0 }}>
-              Controlla la presenza di tutti gli elementi obbligatori 27(1)(a–f) + 27(2) + 27(4)
+              {t("gc_sub")}
             </p>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ fontSize: 10, fontWeight: 700, color: T.amber, background: "rgba(202,138,4,0.10)", padding: "2px 7px", borderRadius: 9999 }}>
-              ✦ AI — verifica e conferma
+              ✦ {t("aiVerifyConfirm")}
             </span>
             <button
               onClick={handleCheck}
               disabled={loading}
               style={{ fontSize: 12, fontWeight: 600, padding: "6px 14px", borderRadius: 8, border: "none", background: loading ? "rgba(0,0,0,0.04)" : T.text, color: loading ? T.muted : "#fff", cursor: loading ? "default" : "pointer" }}
             >
-              {loading ? "⟳ Analisi…" : result ? "↺ Ri-analizza" : "Avvia gap-check"}
+              {loading ? t("gc_analyzing") : result ? t("gc_reanalyze") : t("gc_start")}
             </button>
           </div>
         </div>
@@ -91,7 +93,7 @@ export function FriaGapCheck({ doc, onNavigateToPhase, onResult }: FriaGapCheckP
               </span>
               {result.critical_gaps.length > 0 && (
                 <span style={{ fontSize: 11, color: T.red }}>
-                  {result.critical_gaps.length} gap critico/i
+                  {result.critical_gaps.length} {t("gc_criticalGaps")}
                 </span>
               )}
             </div>
@@ -131,7 +133,7 @@ export function FriaGapCheck({ doc, onNavigateToPhase, onResult }: FriaGapCheckP
             {/* Recommendation */}
             <div style={{ marginTop: 14, padding: "10px 12px", background: T.bg, borderRadius: 8, border: `1px solid ${T.border}` }}>
               <p style={{ fontSize: 10, fontWeight: 700, color: T.text, textTransform: "uppercase" as const, letterSpacing: "0.5px", marginBottom: 4 }}>
-                Raccomandazione
+                {t("gc_recommendation")}
               </p>
               <p style={{ fontSize: 12, color: T.muted, margin: 0, lineHeight: 1.5 }}>{result.recommendation}</p>
             </div>
@@ -141,7 +143,7 @@ export function FriaGapCheck({ doc, onNavigateToPhase, onResult }: FriaGapCheckP
         {!result && !loading && !error && (
           <div style={{ padding: "32px 20px", textAlign: "center" }}>
             <p style={{ fontSize: 12, color: T.faint }}>
-              Clicca &quot;Avvia gap-check&quot; per analizzare la copertura degli elementi Art. 27 obbligatori.
+              {t("gc_emptyHint")}
             </p>
           </div>
         )}
