@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import type { CSSProperties } from "react";
 import { checkDpiaGaps, type DpiaGapCheck, type DpiaGapItem } from "@/app/actions/checkDpiaGaps";
 import type { DPIAResult } from "@/lib/dossier/storage-schema";
+import { useT } from "@/i18n/LocaleProvider";
 
 const T = {
   text:     "#0D1016",
@@ -29,6 +30,7 @@ interface DpiaGapCheckProps {
 }
 
 export function DpiaGapCheck({ doc, onNavigateToStep, onResult }: DpiaGapCheckProps) {
+  const t = useT("toolDpia");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DpiaGapCheck | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -53,8 +55,8 @@ export function DpiaGapCheck({ doc, onNavigateToStep, onResult }: DpiaGapCheckPr
 
   const overallColor = result?.overall_coverage === "complete" ? T.green :
     result?.overall_coverage === "partial" ? T.amber : T.red;
-  const overallLabel = result?.overall_coverage === "complete" ? "Copertura completa" :
-    result?.overall_coverage === "partial" ? "Copertura parziale" : "Copertura insufficiente";
+  const overallLabel = result?.overall_coverage === "complete" ? t("dgc_complete") :
+    result?.overall_coverage === "partial" ? t("dgc_partial") : t("dgc_insufficient");
 
   const cardSt: CSSProperties = {
     background: T.card, border: `1px solid ${T.border}`,
@@ -68,15 +70,15 @@ export function DpiaGapCheck({ doc, onNavigateToStep, onResult }: DpiaGapCheckPr
         <div style={{ padding: "16px 20px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
             <p style={{ fontSize: 14, fontWeight: 600, color: T.text, margin: 0 }}>
-              Verifica completezza Art. 35(7) GDPR
+              {t("dgc_title")}
             </p>
             <p style={{ fontSize: 11, color: T.muted, marginTop: 2, marginBottom: 0 }}>
-              Controlla la copertura degli elementi obbligatori 35(7)(a–d) + trigger Art. 36
+              {t("dgc_sub")}
             </p>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ fontSize: 10, fontWeight: 700, color: T.amber, background: "rgba(202,138,4,0.10)", padding: "2px 7px", borderRadius: 9999 }}>
-              ✦ AI — verifica e conferma
+              ✦ {t("aiVerifyConfirm")}
             </span>
             <button
               onClick={handleCheck}
@@ -89,7 +91,7 @@ export function DpiaGapCheck({ doc, onNavigateToStep, onResult }: DpiaGapCheckPr
                 cursor: loading ? "default" : "pointer",
               }}
             >
-              {loading ? "⟳ Analisi…" : result ? "↺ Ri-analizza" : "Avvia gap-check"}
+              {loading ? t("dgc_analyzing") : result ? t("dgc_reanalyze") : t("dgc_start")}
             </button>
           </div>
         </div>
@@ -110,7 +112,7 @@ export function DpiaGapCheck({ doc, onNavigateToStep, onResult }: DpiaGapCheckPr
               </span>
               {result.critical_gaps.length > 0 && (
                 <span style={{ fontSize: 11, color: T.red }}>
-                  {result.critical_gaps.length} gap critico/i
+                  {result.critical_gaps.length} {t("dgc_criticalGaps")}
                 </span>
               )}
               {result.art36_required && (
@@ -119,7 +121,7 @@ export function DpiaGapCheck({ doc, onNavigateToStep, onResult }: DpiaGapCheckPr
                   background: T.redBg, border: `1px solid ${T.redBdr}`,
                   padding: "2px 8px", borderRadius: 9999,
                 }}>
-                  ⚠ Art. 36 — Consultazione preventiva richiesta
+                  ⚠ {t("dgc_art36Badge")}
                 </span>
               )}
             </div>
@@ -174,7 +176,7 @@ export function DpiaGapCheck({ doc, onNavigateToStep, onResult }: DpiaGapCheckPr
             {/* Recommendation */}
             <div style={{ marginTop: 14, padding: "10px 12px", background: T.bg, borderRadius: 8, border: `1px solid ${T.border}` }}>
               <p style={{ fontSize: 10, fontWeight: 700, color: T.text, textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>
-                Raccomandazione
+                {t("dgc_recommendation")}
               </p>
               <p style={{ fontSize: 12, color: T.muted, margin: 0, lineHeight: 1.5 }}>
                 {result.recommendation}
@@ -186,7 +188,7 @@ export function DpiaGapCheck({ doc, onNavigateToStep, onResult }: DpiaGapCheckPr
         {!result && !loading && !error && (
           <div style={{ padding: "32px 20px", textAlign: "center" }}>
             <p style={{ fontSize: 12, color: T.faint }}>
-              Clicca &quot;Avvia gap-check&quot; per analizzare la copertura degli elementi Art. 35(7) obbligatori.
+              {t("dgc_emptyHint")}
             </p>
           </div>
         )}
