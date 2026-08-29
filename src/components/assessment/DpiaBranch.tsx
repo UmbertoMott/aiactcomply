@@ -7,6 +7,7 @@ import type {
   DPIARightsCheck,
 } from "@/lib/dossier/storage-schema";
 import { T, inputSt, textareaSt, selectSt, labelSt } from "./tokens";
+import { useT } from "@/i18n/LocaleProvider";
 
 type DpiaTab = "proportionality" | "rights" | "measures" | "art36";
 
@@ -46,6 +47,7 @@ function riskColor(val: string): CSSProperties {
 }
 
 export function DpiaBranch({ dpia, onDpiaChange }: DpiaBranchProps) {
+  const t = useT("assessmentShared");
   const [tab, setTab] = useState<DpiaTab>("proportionality");
 
   function tabBtn(key: DpiaTab, label: string) {
@@ -119,9 +121,9 @@ export function DpiaBranch({ dpia, onDpiaChange }: DpiaBranchProps) {
     <div style={containerSt}>
       {/* Tab navigation */}
       <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
-        {tabBtn("proportionality", "Proporzionalità")}
-        {tabBtn("rights", "Diritti")}
-        {tabBtn("measures", "Misure")}
+        {tabBtn("proportionality", t("db_tabProp"))}
+        {tabBtn("rights", t("db_tabRights"))}
+        {tabBtn("measures", t("db_tabMeasures"))}
         {tabBtn("art36", "Art. 36")}
       </div>
 
@@ -129,11 +131,11 @@ export function DpiaBranch({ dpia, onDpiaChange }: DpiaBranchProps) {
       {tab === "proportionality" && (
         <div>
           <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 8 }}>
-            Necessità &amp; Proporzionalità
+            {t("db_necessityProp")}
           </p>
 
           <div style={{ marginBottom: 16 }}>
-            <p style={labelSt}>Giustificazione della necessità</p>
+            <p style={labelSt}>{t("db_necessityJust")}</p>
             <textarea
               style={textareaSt}
               value={dpia.proportionality.necessity_justification}
@@ -141,16 +143,16 @@ export function DpiaBranch({ dpia, onDpiaChange }: DpiaBranchProps) {
                 ...prev,
                 proportionality: { ...prev.proportionality, necessity_justification: e.target.value },
               }))}
-              placeholder="Descrivere perché il trattamento è necessario e proporzionato alla finalità..."
+              placeholder={t("db_ph_necessity")}
             />
           </div>
 
-          <p style={labelSt}>Verifiche di proporzionalità (WP248)</p>
+          <p style={labelSt}>{t("db_propChecks")}</p>
 
           {dpia.proportionality.proportionality_checks.length === 0 ? (
             <div style={{ padding: "16px 0", textAlign: "center" }}>
               <p style={{ fontSize: 12, color: T.muted, marginBottom: 10 }}>
-                Nessuna verifica configurata.
+                {t("db_noChecks")}
               </p>
               <button
                 style={{
@@ -160,7 +162,7 @@ export function DpiaBranch({ dpia, onDpiaChange }: DpiaBranchProps) {
                 }}
                 onClick={addStandardProportionalityChecks}
               >
-                Aggiungi verifiche standard
+                {t("db_addStandard")}
               </button>
             </div>
           ) : (
@@ -175,26 +177,26 @@ export function DpiaBranch({ dpia, onDpiaChange }: DpiaBranchProps) {
                   </p>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                     <div>
-                      <p style={labelSt}>Stato</p>
+                      <p style={labelSt}>{t("db_status")}</p>
                       <select
                         style={selectSt}
                         value={check.status}
                         onChange={e => updateProportionalityCheck(check.id, "status", e.target.value)}
                       >
-                        <option value="">Non impostato</option>
-                        <option value="compliant">Conforme</option>
-                        <option value="partial">Parziale</option>
-                        <option value="non_compliant">Non conforme</option>
+                        <option value="">{t("db_notSet")}</option>
+                        <option value="compliant">{t("db_compliant")}</option>
+                        <option value="partial">{t("partial")}</option>
+                        <option value="non_compliant">{t("db_nonCompliant")}</option>
                         <option value="na">N/A</option>
                       </select>
                     </div>
                     <div>
-                      <p style={labelSt}>Note</p>
+                      <p style={labelSt}>{t("db_notes")}</p>
                       <input
                         style={inputSt}
                         value={check.notes}
                         onChange={e => updateProportionalityCheck(check.id, "notes", e.target.value)}
-                        placeholder="Note..."
+                        placeholder={t("db_ph_notes")}
                       />
                     </div>
                   </div>
@@ -209,13 +211,13 @@ export function DpiaBranch({ dpia, onDpiaChange }: DpiaBranchProps) {
       {tab === "rights" && (
         <div>
           <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 8 }}>
-            Diritti degli Interessati
+            {t("db_dataSubjectRights")}
           </p>
 
           {dpia.proportionality.rights_checks.length === 0 ? (
             <div style={{ padding: "16px 0", textAlign: "center" }}>
               <p style={{ fontSize: 12, color: T.muted, marginBottom: 10 }}>
-                Nessuna verifica configurata.
+                {t("db_noChecks")}
               </p>
               <button
                 style={{
@@ -225,7 +227,7 @@ export function DpiaBranch({ dpia, onDpiaChange }: DpiaBranchProps) {
                 }}
                 onClick={addStandardRightsChecks}
               >
-                Aggiungi verifiche standard
+                {t("db_addStandard")}
               </button>
             </div>
           ) : (
@@ -246,25 +248,25 @@ export function DpiaBranch({ dpia, onDpiaChange }: DpiaBranchProps) {
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                     <div>
-                      <p style={labelSt}>Applicabile</p>
+                      <p style={labelSt}>{t("db_applicable")}</p>
                       <select
                         style={selectSt}
                         value={check.applicable}
                         onChange={e => updateRightsCheck(check.id, "applicable", e.target.value)}
                       >
-                        <option value="">Non impostato</option>
-                        <option value="yes">Sì</option>
-                        <option value="no">No</option>
-                        <option value="partial">Parziale</option>
+                        <option value="">{t("db_notSet")}</option>
+                        <option value="yes">{t("yes")}</option>
+                        <option value="no">{t("no")}</option>
+                        <option value="partial">{t("partial")}</option>
                       </select>
                     </div>
                     <div>
-                      <p style={labelSt}>Come garantito</p>
+                      <p style={labelSt}>{t("db_howEnsured")}</p>
                       <input
                         style={inputSt}
                         value={check.how_ensured}
                         onChange={e => updateRightsCheck(check.id, "how_ensured", e.target.value)}
-                        placeholder="Descrivere la modalità..."
+                        placeholder={t("db_ph_howEnsured")}
                       />
                     </div>
                   </div>
@@ -279,11 +281,11 @@ export function DpiaBranch({ dpia, onDpiaChange }: DpiaBranchProps) {
       {tab === "measures" && (
         <div>
           <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>
-            Misure di sicurezza
+            {t("db_securityMeasures")}
           </p>
 
           <div style={{ marginBottom: 12 }}>
-            <p style={labelSt}>Misure tecniche</p>
+            <p style={labelSt}>{t("db_technicalMeasures")}</p>
             <textarea
               style={textareaSt}
               value={dpia.measures.technical_measures}
@@ -291,12 +293,12 @@ export function DpiaBranch({ dpia, onDpiaChange }: DpiaBranchProps) {
                 ...prev,
                 measures: { ...prev.measures, technical_measures: e.target.value },
               }))}
-              placeholder="Crittografia, pseudonimizzazione, controllo degli accessi, audit log..."
+              placeholder={t("db_ph_technical")}
             />
           </div>
 
           <div style={{ marginBottom: 12 }}>
-            <p style={labelSt}>Misure organizzative</p>
+            <p style={labelSt}>{t("db_organizationalMeasures")}</p>
             <textarea
               style={textareaSt}
               value={dpia.measures.organizational_measures}
@@ -304,12 +306,12 @@ export function DpiaBranch({ dpia, onDpiaChange }: DpiaBranchProps) {
                 ...prev,
                 measures: { ...prev.measures, organizational_measures: e.target.value },
               }))}
-              placeholder="Formazione del personale, procedure interne, accordi con fornitori..."
+              placeholder={t("db_ph_organizational")}
             />
           </div>
 
           <div style={{ marginBottom: 12 }}>
-            <p style={labelSt}>Livello di rischio residuo</p>
+            <p style={labelSt}>{t("db_residualLevel")}</p>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <select
                 style={{ ...selectSt, width: "auto", minWidth: 160 }}
@@ -319,15 +321,15 @@ export function DpiaBranch({ dpia, onDpiaChange }: DpiaBranchProps) {
                   measures: { ...prev.measures, overall_risk_after: e.target.value as DPIAResult["measures"]["overall_risk_after"] },
                 }))}
               >
-                <option value="">Non impostato</option>
-                <option value="high">Alto</option>
-                <option value="medium">Medio</option>
-                <option value="low">Basso</option>
+                <option value="">{t("db_notSet")}</option>
+                <option value="high">{t("sev_high")}</option>
+                <option value="medium">{t("sev_medium")}</option>
+                <option value="low">{t("sev_low")}</option>
               </select>
               {dpia.measures.overall_risk_after && (
                 <span style={riskColor(dpia.measures.overall_risk_after)}>
-                  {dpia.measures.overall_risk_after === "high" ? "Alto" :
-                   dpia.measures.overall_risk_after === "medium" ? "Medio" : "Basso"}
+                  {dpia.measures.overall_risk_after === "high" ? t("sev_high") :
+                   dpia.measures.overall_risk_after === "medium" ? t("sev_medium") : t("sev_low")}
                 </span>
               )}
             </div>
@@ -339,7 +341,7 @@ export function DpiaBranch({ dpia, onDpiaChange }: DpiaBranchProps) {
       {tab === "art36" && (
         <div>
           <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>
-            Consultazione Preventiva (Art. 36 GDPR)
+            {t("db_priorConsultTitle")}
           </p>
 
           <div style={{
@@ -347,9 +349,7 @@ export function DpiaBranch({ dpia, onDpiaChange }: DpiaBranchProps) {
             border: `1px solid ${T.border}`, borderRadius: 6,
             padding: "10px 12px", marginBottom: 14, lineHeight: 1.6,
           }}>
-            L&apos;Art.36 GDPR prevede che il titolare del trattamento consulti l&apos;Autorità di controllo
-            prima del trattamento quando la DPIA indica che il trattamento presenterebbe un rischio
-            elevato in assenza di misure adottate dal titolare.
+            {t("db_art36Body")}
           </div>
 
           <div style={{ marginBottom: 14 }}>
@@ -363,7 +363,7 @@ export function DpiaBranch({ dpia, onDpiaChange }: DpiaBranchProps) {
                 }))}
               />
               <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>
-                Consultazione preventiva richiesta
+                {t("db_priorConsultRequired")}
               </span>
             </label>
           </div>
@@ -371,7 +371,7 @@ export function DpiaBranch({ dpia, onDpiaChange }: DpiaBranchProps) {
           {dpia.measures.prior_consultation_required && (
             <div style={{ display: "grid", gap: 10 }}>
               <div>
-                <p style={labelSt}>Autorità di controllo</p>
+                <p style={labelSt}>{t("db_authority")}</p>
                 <input
                   style={inputSt}
                   value={dpia.measures.prior_consultation_authority}
@@ -379,11 +379,11 @@ export function DpiaBranch({ dpia, onDpiaChange }: DpiaBranchProps) {
                     ...prev,
                     measures: { ...prev.measures, prior_consultation_authority: e.target.value },
                   }))}
-                  placeholder="es. Garante per la protezione dei dati personali"
+                  placeholder={t("db_ph_authority")}
                 />
               </div>
               <div>
-                <p style={labelSt}>Data consultazione</p>
+                <p style={labelSt}>{t("db_consultDate")}</p>
                 <input
                   type="date"
                   style={inputSt}
