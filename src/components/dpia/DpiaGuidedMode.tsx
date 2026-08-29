@@ -11,6 +11,7 @@ import { DPIA_SUBPOINTS } from "@/lib/dpia/dpia-template";
 import { DpiaProgressRail } from "./DpiaProgressRail";
 import { DpiaLivePreview } from "./DpiaLivePreview";
 import { DpiaGuidedChat } from "./DpiaGuidedChat";
+import { useT } from "@/i18n/LocaleProvider";
 
 const T = {
   border: "rgba(0,0,0,0.08)",
@@ -39,6 +40,7 @@ interface DpiaGuidedModeProps {
 }
 
 export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMode }: DpiaGuidedModeProps) {
+  const t = useT("toolDpia");
   const [doc, setDoc] = useState<DpiaGuidedDoc>(() => {
     const saved = readFromStorage<DpiaGuidedDoc>("dpiaGuided");
     return saved ?? createEmptyGuidedDoc();
@@ -186,7 +188,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ doc }),
       });
-      if (!res.ok) throw new Error("Errore nella generazione del PDF");
+      if (!res.ok) throw new Error(t("gm_pdfError"));
       const blob = await res.blob();
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement("a");
@@ -195,7 +197,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Errore PDF");
+      alert(err instanceof Error ? err.message : t("gm_pdfErrorShort"));
     } finally {
       setPdfLoading(false);
     }
@@ -211,12 +213,12 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
         flexShrink: 0,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <p style={{ fontSize: 12, fontWeight: 700, color: T.text, margin: 0 }}>DPIA guidata</p>
+          <p style={{ fontSize: 12, fontWeight: 700, color: T.text, margin: 0 }}>{t("gm_dpiaGuided")}</p>
           <span style={{ fontSize: 10, color: T.muted }}>
-            WP248 Allegato 2 · {progress.overallPercent}% completata
+            WP248 Allegato 2 · {progress.overallPercent}% {t("gm_completed")}
           </span>
           {lastSaved && (
-            <span style={{ fontSize: 9, color: T.green }}>✓ Salvato automaticamente</span>
+            <span style={{ fontSize: 9, color: T.green }}>✓ {t("gm_autoSaved")}</span>
           )}
           {stale && (
             <span style={{
@@ -224,7 +226,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
               background: "rgba(180,83,9,0.08)", border: "1px solid rgba(180,83,9,0.2)",
               borderRadius: 9999, padding: "2px 8px",
             }}>
-              ⚠ Dati aggiornati — da rivedere
+              ⚠ {t("gm_stale")}
             </span>
           )}
         </div>
@@ -239,7 +241,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
                 cursor: "pointer", fontSize: 11, fontWeight: 700, color: "#fff",
               }}
             >
-              Vai al Form completo →
+              {t("gm_goToForm")}
             </button>
           )}
           <button
@@ -255,7 +257,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
             }}
           >
             <Download style={{ width: 13, height: 13 }} />
-            {pdfLoading ? "Generazione…" : "Genera PDF"}
+            {pdfLoading ? t("gm_generating") : t("gm_generatePdf")}
           </button>
         </div>
       </div>
@@ -298,7 +300,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: 9, fontWeight: 600, color: "rgba(0,0,0,0.35)", letterSpacing: "0.8px", textTransform: "uppercase", margin: 0 }}>
-                    Art. 35 GDPR · Documento
+                    Art. 35 GDPR · {t("gm_documentWord")}
                   </p>
                   <p style={{ fontSize: 12, fontWeight: 700, color: T.text, margin: "1px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     DPIA — WP248 rev.01
@@ -309,10 +311,10 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
                 {editing && (
                   <div style={{ display: "flex", alignItems: "center", gap: 2, padding: "2px 4px", background: T.card, border: `1px solid ${T.border}`, borderRadius: 8 }}>
                     {([
-                      { icon: <Bold size={12} />,        cmd: "bold",        title: "Grassetto" },
-                      { icon: <Italic size={12} />,      cmd: "italic",      title: "Corsivo" },
-                      { icon: <Underline size={12} />,   cmd: "underline",   title: "Sottolineato" },
-                      { icon: <Highlighter size={12} />, cmd: "hiliteColor", title: "Evidenzia", val: "#fef08a" },
+                      { icon: <Bold size={12} />,        cmd: "bold",        title: t("gm_bold") },
+                      { icon: <Italic size={12} />,      cmd: "italic",      title: t("gm_italic") },
+                      { icon: <Underline size={12} />,   cmd: "underline",   title: t("gm_underline") },
+                      { icon: <Highlighter size={12} />, cmd: "hiliteColor", title: t("gm_highlight"), val: "#fef08a" },
                     ] as { icon: React.ReactNode; cmd: string; title: string; val?: string }[]).map(b => (
                       <button
                         key={b.cmd}
@@ -336,7 +338,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
                 {/* Matita / conferma */}
                 <button
                   onClick={editing ? confirmEdit : enterEdit}
-                  title={editing ? "Salva modifiche" : "Modifica documento"}
+                  title={editing ? t("gm_saveChanges") : t("gm_editDocument")}
                   style={{
                     flexShrink: 0, width: 26, height: 26, borderRadius: 6,
                     background: editing ? T.text : "transparent",
@@ -353,7 +355,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
 
                 <button
                   onClick={() => { setViewerOpen(false); setEditing(false); }}
-                  title="Chiudi documento"
+                  title={t("gm_closeDocument")}
                   style={{
                     flexShrink: 0, width: 24, height: 24, borderRadius: 12,
                     background: "rgba(0,0,0,0.05)", border: "none", cursor: "pointer",

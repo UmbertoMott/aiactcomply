@@ -3154,6 +3154,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       dlp_gdprContact: "Referente GDPR",
       lp_date2: "Data",
       lp_methodology2: "Metodologia",
+      gm_pdfError: "Errore nella generazione del PDF", gm_pdfErrorShort: "Errore PDF", gm_dpiaGuided: "DPIA guidata", gm_completed: "completata", gm_autoSaved: "Salvato automaticamente", gm_stale: "Dati aggiornati — da rivedere", gm_goToForm: "Vai al Form completo →", gm_generating: "Generazione…", gm_generatePdf: "Genera PDF", gm_documentWord: "Documento", gm_bold: "Grassetto", gm_italic: "Corsivo", gm_underline: "Sottolineato", gm_highlight: "Evidenzia", gm_saveChanges: "Salva modifiche", gm_editDocument: "Modifica documento", gm_closeDocument: "Chiudi documento",
     },
     assessmentShared: {
       step_intake_label: "Intake", step_intake_sub: "Dati sistema",
@@ -6401,6 +6402,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       dlp_gdprContact: "GDPR contact",
       lp_date2: "Date",
       lp_methodology2: "Methodology",
+      gm_pdfError: "Error generating the PDF", gm_pdfErrorShort: "PDF error", gm_dpiaGuided: "Guided DPIA", gm_completed: "completed", gm_autoSaved: "Saved automatically", gm_stale: "Data updated — to review", gm_goToForm: "Go to full form →", gm_generating: "Generating…", gm_generatePdf: "Generate PDF", gm_documentWord: "Document", gm_bold: "Bold", gm_italic: "Italic", gm_underline: "Underline", gm_highlight: "Highlight", gm_saveChanges: "Save changes", gm_editDocument: "Edit document", gm_closeDocument: "Close document",
     },
     assessmentShared: {
       step_intake_label: "Intake", step_intake_sub: "System data",
