@@ -3047,6 +3047,8 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       dc_comportamentali: "Comportamentali", crossBorder: "Trasferimenti extra-UE", vulnerableSubjects: "Soggetti vulnerabili",
       vulnerableWarn: "minori, pazienti, lavoratori", fillAtLeast1: "Compila almeno", systemNameShort: "Nome sistema",
       and: "e", purposeShort: "Finalità", fillAtLeast2: "per abilitare la pre-compilazione AI",
+      examplesWord: "ESEMPI", orCustomAnswer: "Oppure scrivi una risposta personalizzata…",
+      answerWord: "Risposta", ph_writeHere: "Scrivi qui…",
     },
   },
   en: {
@@ -6077,6 +6079,8 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       dc_comportamentali: "Behavioural", crossBorder: "Extra-EU transfers", vulnerableSubjects: "Vulnerable subjects",
       vulnerableWarn: "minors, patients, workers", fillAtLeast1: "Fill in at least", systemNameShort: "System name",
       and: "and", purposeShort: "Purpose", fillAtLeast2: "to enable AI pre-fill",
+      examplesWord: "EXAMPLES", orCustomAnswer: "Or write a custom answer…",
+      answerWord: "Answer", ph_writeHere: "Write here…",
     },
   },
 };

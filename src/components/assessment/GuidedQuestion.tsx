@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import type { CSSProperties } from "react";
 import type { GuidedQ } from "@/lib/guided/guided-types";
+import { useT } from "@/i18n/LocaleProvider";
 
 // ─── Design tokens (no blue) ─────────────────────────────────────────────────
 const T = {
@@ -27,6 +28,7 @@ interface Props {
 }
 
 export function GuidedQuestion({ q, value, onChange }: Props) {
+  const t = useT("assessmentShared");
   const [showExamples, setShowExamples] = useState(true);
 
   const buttons =
@@ -69,7 +71,7 @@ export function GuidedQuestion({ q, value, onChange }: Props) {
             }}
           >
             <span style={{ fontSize: 10, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.6px" }}>
-              ESEMPI
+              {t("examplesWord")}
             </span>
             <span style={{ fontSize: 10, color: T.faint }}>{showExamples ? "▲" : "▼"}</span>
           </button>
@@ -121,7 +123,7 @@ export function GuidedQuestion({ q, value, onChange }: Props) {
                   border: isActive ? "1px solid transparent" : `1px solid ${T.border}`,
                 }}
               >
-                {btn}
+                {btn === "Sì" ? t("yes") : btn === "No" ? t("no") : btn === "Parzialmente" ? t("partial") : btn}
               </button>
             );
           })}
@@ -131,13 +133,13 @@ export function GuidedQuestion({ q, value, onChange }: Props) {
       {/* Free-text area */}
       <div>
         <label style={{ display: "block", fontSize: 10, fontWeight: 500, color: T.faint, marginBottom: 4 }}>
-          {buttons.length > 0 ? "Oppure scrivi una risposta personalizzata…" : "Risposta"}
+          {buttons.length > 0 ? t("orCustomAnswer") : t("answerWord")}
         </label>
         <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
           rows={3}
-          placeholder={q.examples[0]?.text ?? "Scrivi qui…"}
+          placeholder={q.examples[0]?.text ?? t("ph_writeHere")}
           style={{
             width: "100%", padding: "8px 10px", borderRadius: 8, border: `1px solid ${T.border}`,
             fontSize: 12, color: T.text, background: T.card, outline: "none",
