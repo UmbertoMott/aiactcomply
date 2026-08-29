@@ -9,6 +9,7 @@ import { FRIA_SUBPOINTS } from "@/lib/fria/fria-template";
 import { FriaProgressRail } from "./FriaProgressRail";
 import { FriaLivePreview } from "./FriaLivePreview";
 import { FriaGuidedChat } from "./FriaGuidedChat";
+import { useT } from "@/i18n/LocaleProvider";
 
 const T = {
   border: "rgba(0,0,0,0.08)",
@@ -27,6 +28,7 @@ interface FriaGuidedModeProps {
 }
 
 export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
+  const t = useT("toolFria");
   const [doc, setDoc] = useState<FriaGuidedDoc>(() => {
     const saved = readFromStorage<FriaGuidedDoc>("friaGuided");
     return saved ?? createEmptyFriaGuidedDoc();
@@ -125,7 +127,7 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ doc }),
       });
-      if (!res.ok) throw new Error("Errore nella generazione del PDF");
+      if (!res.ok) throw new Error(t("gm_pdfError"));
       const blob = await res.blob();
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement("a");
@@ -134,7 +136,7 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Errore PDF");
+      alert(err instanceof Error ? err.message : t("gm_pdfErrorShort"));
     } finally {
       setPdfLoading(false);
     }
@@ -150,12 +152,12 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
         flexShrink: 0,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <p style={{ fontSize: 12, fontWeight: 700, color: T.text, margin: 0 }}>FRIA guidata</p>
+          <p style={{ fontSize: 12, fontWeight: 700, color: T.text, margin: 0 }}>{t("gm_friaGuided")}</p>
           <span style={{ fontSize: 10, color: T.muted }}>
-            Art. 27 AI Act · {progress.overallPercent}% completata
+            Art. 27 AI Act · {progress.overallPercent}% {t("gm_completed")}
           </span>
           {lastSaved && (
-            <span style={{ fontSize: 9, color: T.green }}>✓ Salvato automaticamente</span>
+            <span style={{ fontSize: 9, color: T.green }}>✓ {t("gm_autoSaved")}</span>
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -169,7 +171,7 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
                 cursor: "pointer", fontSize: 11, fontWeight: 700, color: "#fff",
               }}
             >
-              Vai al Form completo →
+              {t("gm_goToForm")}
             </button>
           )}
           <button
@@ -185,7 +187,7 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
             }}
           >
             <Download style={{ width: 13, height: 13 }} />
-            {pdfLoading ? "Generazione…" : "Genera PDF"}
+            {pdfLoading ? t("gm_generating") : t("gm_generatePdf")}
           </button>
         </div>
       </div>
@@ -224,7 +226,7 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: 9, fontWeight: 600, color: "rgba(0,0,0,0.35)", letterSpacing: "0.8px", textTransform: "uppercase", margin: 0 }}>
-                    Art. 27 AI Act · Documento
+                    Art. 27 AI Act · {t("gm_documentWord")}
                   </p>
                   <p style={{ fontSize: 12, fontWeight: 700, color: T.text, margin: "1px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     FRIA — DIHR/ECNL 2025
@@ -235,10 +237,10 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
                 {editing && (
                   <div style={{ display: "flex", alignItems: "center", gap: 2, padding: "2px 4px", background: T.card, border: `1px solid ${T.border}`, borderRadius: 8 }}>
                     {([
-                      { icon: <Bold size={12} />,        cmd: "bold",        title: "Grassetto" },
-                      { icon: <Italic size={12} />,      cmd: "italic",      title: "Corsivo" },
-                      { icon: <Underline size={12} />,   cmd: "underline",   title: "Sottolineato" },
-                      { icon: <Highlighter size={12} />, cmd: "hiliteColor", title: "Evidenzia", val: "#fef08a" },
+                      { icon: <Bold size={12} />,        cmd: "bold",        title: t("gm_bold") },
+                      { icon: <Italic size={12} />,      cmd: "italic",      title: t("gm_italic") },
+                      { icon: <Underline size={12} />,   cmd: "underline",   title: t("gm_underline") },
+                      { icon: <Highlighter size={12} />, cmd: "hiliteColor", title: t("gm_highlight"), val: "#fef08a" },
                     ] as { icon: React.ReactNode; cmd: string; title: string; val?: string }[]).map(b => (
                       <button
                         key={b.cmd}
@@ -262,7 +264,7 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
                 {/* Matita / conferma */}
                 <button
                   onClick={editing ? confirmEdit : enterEdit}
-                  title={editing ? "Salva modifiche" : "Modifica documento"}
+                  title={editing ? t("gm_saveChanges") : t("gm_editDocument")}
                   style={{
                     flexShrink: 0, width: 26, height: 26, borderRadius: 6,
                     background: editing ? T.text : "transparent",
