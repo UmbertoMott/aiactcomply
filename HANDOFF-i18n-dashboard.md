@@ -36,13 +36,24 @@ AssessmentStepper, AssessmentSharedHeader, CorrelatedRisksPanel, UnifiedIntake,
 GuidedQuestion, AssessmentSignOff, SharedSpine, DpiaBranch, FriaBranch, UnifiedDraftPanel.
 Verifica: `grep -L useT src/components/assessment/*.tsx` → vuoto.
 
-## RIMANENTI da tradurre (componenti figli fria/dpia)
-+ componenti figli FRIA: `src/components/fria/*` (FriaGuidedMode, RightsCatalog,
-  ContextCatalog, NextStepGuide, RightImpactAIDraft, FriaGapCheck).
-+ componenti figli DPIA: `src/components/dpia/*` (DpiaGuidedMode, ScreeningCatalog,
-  ThreatCatalog, NextStepGuide, ThreatImpactAIDraft, ProportionalityBalance,
-  DpiaGapCheck, DPIATemplateViewer).
-+ `src/lib/dpia/dpia-progress.ts` — label rail/step (lib output; sidebar DPIA resta IT finché non tradotto).
+## FATTO: componenti figli del FLUSSO STANDARD (non-guided) — COMPLETI
+FRIA (`toolFria`): ContextCatalog, RightImpactAIDraft, FriaGapCheck, RightsCatalog, NextStepGuide.
+DPIA (`toolDpia`): ProportionalityBalance, DpiaGapCheck, ScreeningCatalog, ThreatCatalog,
+  ThreatImpactAIDraft, DPIATemplateViewer, NextStepGuide.
+Pattern: contenuto da lib/engine/server-action/array-persistiti = data-layer (IT);
+tradotto solo il chrome. Badge module-scope ricevono `t`; NextStepGuide render-keyed
+per stepKey (nsg_/dnsg_); STEP_DEFS resta IT per la chiamata server.
+
+## RIMANENTI: SOLO il cluster GUIDED-MODE (UI conversazionale alternativa, ~2400 righe)
+Appare solo quando l'utente passa a "modalità guidata". 8 componenti:
++ FRIA: `FriaGuidedMode` (332), `FriaGuidedChat` (370), `FriaLivePreview` (184), `FriaProgressRail` (170).
++ DPIA: `DpiaGuidedMode` (445), `DpiaGuidedChat` (506), `DpiaLivePreview` (418), `DpiaProgressRail` (154).
+Nota: FriaProgressRail NON è reso in fria/page.tsx (solo un commento "style"); il rail
+del flusso standard è inline nella page (già tradotto). Le live-preview rendono
+molto contenuto da lib (data-layer) — tradurre solo il chrome.
+
++ `src/lib/dpia/dpia-progress.ts` + `src/lib/dpia/dpia-template.ts` — label/META rail/step/coverage
+  (lib output; sidebar DPIA e parte del DPIATemplateViewer restano IT finché non tradotti). Pass separato.
 
 ### Gotcha assessmentShared (per continuità)
 - Badge module-scope (riskBadge/severityBadge/lensBadge) → passa `t` come argomento.
