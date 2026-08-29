@@ -57,13 +57,29 @@ Le 3 page.tsx grandi (classifier/fria/dpia) + il cluster assessment condiviso
 Parità namespace verificata: toolClassifier 153, toolFria 406, toolDpia 461,
 assessmentShared 263 chiavi — IT/EN identiche, nessun duplicato, tsc verde.
 
-## RIMANENTI (fuori scope dashboard tools, follow-up)
-+ `src/lib/dpia/dpia-progress.ts` + `src/lib/dpia/dpia-template.ts` +
-  `src/lib/fria/fria-*` + `src/lib/guided/*` — label/META/contenuto guidato (lib output;
-  sidebar DPIA, parte di DPIATemplateViewer/LivePreview e il contenuto delle domande
-  guidate restano IT finché non tradotti). Pass "data-layer/lib" separato.
-+ Validazione EN da parte dell'utente (avvocato) su tutti i testi legali densi
-  (Art. 6/27/35/36, WP248, Carta UE/CEDU, GDPR).
+## FATTO anche: lib DPIA progress (sidebar rail + template viewer)
+- `computeDpiaProgress(doc, t)` reso locale-aware (translator opzionale, default identità).
+  Render-keyed: label step (`dpp_step_<key>`), label/valori campi, dettagli, blocking gaps.
+  Consumer aggiornati: dpia page (`tr`), DPIATemplateViewer (`useT`). +73 chiavi toolDpia.
+- DPIATemplateViewer: `ART_35_7_ELEMENTS` (`art357_a..d`) e `DPIA_TEMPLATE_META`
+  (`tvmeta_title`/`tvmeta_disclaimer`) render-keyed al consumo. Viewer ora 100% bilingue.
+- Nota: i `detail` di `computeGuidedFria/DpiaProgress` sono calcolati ma NON mostrati
+  dai rail (dead output) → non tradotti di proposito.
+
+## RIMANENTE = SOLO il contenuto del QUESTIONARIO GUIDATO (content pass, con avvocato)
+Le domande/label vere della FRIA/DPIA guidata, in:
++ `src/lib/fria/fria-template.ts` (590) — FRIA_GUIDED_SECTIONS, FRIA_SUBPOINTS (label/ref/examples).
++ `src/lib/dpia/dpia-template.ts` (870) — DPIA_GUIDED_SECTIONS, WP248_CRITERIA, subpoint guidati.
+Rese da: guided rail (`sec.label`/`sp.label`), LivePreview (`criterionLabel`), GuidedChat (`sp.label`/examples).
+Sono testo legale sostanziale (Art. 35(7), WP248, Carta UE/CEDU) → **tradurre in un pass
+dedicato CON validazione avvocato**, non machine-translation. Approccio consigliato:
+rendere i template locale-aware come fatto per dpia-progress, oppure render-keying per id stabile.
+
+## Parità finale namespace (tsc verde)
+toolClassifier 153 · toolFria 406 · toolDpia 540 · assessmentShared 263 — IT/EN identiche, 0 duplicati.
+
+## Altri follow-up
++ Validazione EN (avvocato) su tutti i testi legali densi già tradotti.
 + Pagine dashboard fuori da `tools/` e ~18 pagine pubbliche fuori home ancora IT-only.
 
 ### Gotcha assessmentShared (per continuità)
