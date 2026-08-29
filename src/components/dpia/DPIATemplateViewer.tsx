@@ -192,7 +192,8 @@ export interface DPIATemplateViewerProps {
 }
 
 export function DPIATemplateViewer({ doc }: DPIATemplateViewerProps) {
-  const progress = computeDpiaProgress(doc);
+  const t = useT("toolDpia");
+  const progress = computeDpiaProgress(doc, t);
 
   return (
     <div style={{ fontFamily: "var(--font-inter, system-ui)" }}>
