@@ -28,6 +28,8 @@ const DOC = {
   redBdr:    "rgba(185,28,28,0.18)",
 } as const;
 
+import { useT } from "@/i18n/LocaleProvider";
+
 const SANS = "var(--font-inter, system-ui, sans-serif)";
 
 function doneValue(doc: DpiaGuidedDoc, id: string): string | null {
@@ -38,9 +40,10 @@ function doneValue(doc: DpiaGuidedDoc, id: string): string | null {
 }
 
 function Placeholder({ label }: { label: string }) {
+  const t = useT("toolDpia");
   return (
     <span style={{ color: DOC.empty, fontStyle: "italic", fontSize: 11 }}>
-      [{label} — da compilare]
+      [{label} — {t("dlp_toFill")}]
     </span>
   );
 }
@@ -98,6 +101,7 @@ function SectionHeader({ id, title, legalRef }: { id: string; title: string; leg
 // ─── SEZIONE SCREENING ────────────────────────────────────────────────────────
 
 function ScreeningSection({ doc }: { doc: DpiaGuidedDoc }) {
+  const t = useT("toolDpia");
   const criterionLabel = (idx: number) => WP248_CRITERIA[idx]?.label ?? `Criterio ${idx + 1}`;
   const criterionRef   = (idx: number) => WP248_CRITERIA[idx]?.ref ?? "";
 
@@ -111,14 +115,14 @@ function ScreeningSection({ doc }: { doc: DpiaGuidedDoc }) {
 
   return (
     <>
-      <SectionHeader id="sec-screening" title="Screening — 9 criteri WP248" legalRef="GDPR Art. 35(1) + WP248" />
+      <SectionHeader id="sec-screening" title={t("dlp_screeningTitle")} legalRef="GDPR Art. 35(1) + WP248" />
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 10, marginBottom: 8 }}>
         <thead>
           <tr style={{ background: DOC.sectionBg }}>
             <th style={{ padding: "5px 8px", textAlign: "left", fontWeight: 600, width: "5%", border: `1px solid ${DOC.border}` }}>#</th>
-            <th style={{ padding: "5px 8px", textAlign: "left", fontWeight: 600, width: "45%", border: `1px solid ${DOC.border}` }}>Criterio</th>
-            <th style={{ padding: "5px 8px", textAlign: "center", fontWeight: 600, width: "10%", border: `1px solid ${DOC.border}` }}>Si applica</th>
-            <th style={{ padding: "5px 8px", textAlign: "left", fontWeight: 600, width: "40%", border: `1px solid ${DOC.border}` }}>Note / giustificazione</th>
+            <th style={{ padding: "5px 8px", textAlign: "left", fontWeight: 600, width: "45%", border: `1px solid ${DOC.border}` }}>{t("dlp_criterion")}</th>
+            <th style={{ padding: "5px 8px", textAlign: "center", fontWeight: 600, width: "10%", border: `1px solid ${DOC.border}` }}>{t("dlp_applies")}</th>
+            <th style={{ padding: "5px 8px", textAlign: "left", fontWeight: 600, width: "40%", border: `1px solid ${DOC.border}` }}>{t("dlp_notesJust")}</th>
           </tr>
         </thead>
         <tbody>
@@ -130,13 +134,13 @@ function ScreeningSection({ doc }: { doc: DpiaGuidedDoc }) {
                 <span style={{ fontSize: 8, color: DOC.muted, marginLeft: 4 }}>{criterionRef(r.idx)}</span>
               </td>
               <td style={{ padding: "4px 8px", border: `1px solid ${DOC.border}`, textAlign: "center" }}>
-                {r.applies === "yes"     ? <span style={{ color: DOC.amber, fontWeight: 700 }}>Sì</span>
-                 : r.applies === "partial" ? <span style={{ color: DOC.amber }}>Parz.</span>
-                 : r.applies === "no"    ? <span style={{ color: DOC.muted }}>No</span>
+                {r.applies === "yes"     ? <span style={{ color: DOC.amber, fontWeight: 700 }}>{t("yes")}</span>
+                 : r.applies === "partial" ? <span style={{ color: DOC.amber }}>{t("dlp_partialAbbr")}</span>
+                 : r.applies === "no"    ? <span style={{ color: DOC.muted }}>{t("no")}</span>
                  : <Placeholder label="?" />}
               </td>
               <td style={{ padding: "4px 8px", border: `1px solid ${DOC.border}`, color: DOC.text }}>
-                {r.val ? <span style={{ fontSize: 10 }}>{r.val.length > 120 ? r.val.slice(0, 117) + "…" : r.val}</span> : <Placeholder label="risposta" />}
+                {r.val ? <span style={{ fontSize: 10 }}>{r.val.length > 120 ? r.val.slice(0, 117) + "…" : r.val}</span> : <Placeholder label={t("dlp_answer")} />}
               </td>
             </tr>
           ))}
@@ -144,7 +148,7 @@ function ScreeningSection({ doc }: { doc: DpiaGuidedDoc }) {
       </table>
       {metCount >= 2 && (
         <p style={{ fontSize: 10, fontWeight: 700, color: DOC.amber, margin: "0 0 4px", padding: "4px 8px", background: DOC.amberBg, borderRadius: 3 }}>
-          ⚠ {metCount}/9 criteri soddisfatti → DPIA in linea di principio richiesta (WP248: soglia ≥ 2).
+          ⚠ {metCount}/9 {t("dlp_criteriaMet")}
         </p>
       )}
     </>
@@ -154,23 +158,24 @@ function ScreeningSection({ doc }: { doc: DpiaGuidedDoc }) {
 // ─── SEZIONE A ────────────────────────────────────────────────────────────────
 
 function DescrSection({ doc }: { doc: DpiaGuidedDoc }) {
+  const t = useT("toolDpia");
   return (
     <>
-      <SectionHeader id="sec-descr" title="A — Descrizione sistematica del trattamento" legalRef="GDPR Art. 35(7)(a)" />
+      <SectionHeader id="sec-descr" title={t("dlp_secA")} legalRef="GDPR Art. 35(7)(a)" />
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <tbody>
-          <Field label="Sistema / Titolare"       value={doneValue(doc, "a_system_name")}              placeholder="nome sistema + titolare" />
-          <Field label="Organizzazione"           value={doneValue(doc, "a_organization")}             placeholder="organizzazione" />
-          <Field label="DPO"                      value={doneValue(doc, "a_dpo")}                      placeholder="DPO e data consultazione" />
-          <Field label="Responsabili (Art. 28)"   value={doneValue(doc, "a_processor")}               placeholder="responsabili del trattamento" />
+          <Field label={t("dlp_systemController")}       value={doneValue(doc, "a_system_name")}              placeholder={t("dlp_ph_systemController")} />
+          <Field label={t("organization")}           value={doneValue(doc, "a_organization")}             placeholder={t("dlp_ph_organization")} />
+          <Field label="DPO"                      value={doneValue(doc, "a_dpo")}                      placeholder={t("dlp_ph_dpo")} />
+          <Field label={t("dlp_processors")}   value={doneValue(doc, "a_processor")}               placeholder={t("dlp_ph_processors")} />
           <TrDivider />
-          <Field label="Finalità del trattamento"         value={doneValue(doc, "a_processing_purposes")}          placeholder="finalità" />
-          <Field label="Categorie di dati personali"      value={doneValue(doc, "a_personal_data_categories")}     placeholder="categorie dati" />
-          <Field label="Categorie particolari (Art. 9)"   value={doneValue(doc, "a_special_categories")}           placeholder="dati particolari" />
-          <Field label="Categorie di interessati"         value={doneValue(doc, "a_data_subjects_categories")}     placeholder="interessati" />
-          <Field label="Destinatari"                      value={doneValue(doc, "a_recipients")}                  placeholder="destinatari" />
-          <Field label="Periodo di conservazione"         value={doneValue(doc, "a_retention_period")}            placeholder="retention" />
-          <Field label="Archivi e sistemi"                value={doneValue(doc, "a_assets")}                      placeholder="asset informativi" />
+          <Field label={t("purposes")}         value={doneValue(doc, "a_processing_purposes")}          placeholder={t("dlp_ph_purposes")} />
+          <Field label={t("dataCategories")}      value={doneValue(doc, "a_personal_data_categories")}     placeholder={t("dlp_ph_dataCat")} />
+          <Field label={t("specialCategories")}   value={doneValue(doc, "a_special_categories")}           placeholder={t("dlp_ph_specialCat")} />
+          <Field label={t("subjectCategories")}         value={doneValue(doc, "a_data_subjects_categories")}     placeholder={t("dlp_ph_subjects")} />
+          <Field label={t("recipients")}                      value={doneValue(doc, "a_recipients")}                  placeholder={t("dlp_ph_recipients")} />
+          <Field label={t("retention")}         value={doneValue(doc, "a_retention_period")}            placeholder={t("dlp_ph_retention")} />
+          <Field label={t("dlp_assets")}                value={doneValue(doc, "a_assets")}                      placeholder={t("dlp_ph_assets")} />
         </tbody>
       </table>
     </>
@@ -180,29 +185,30 @@ function DescrSection({ doc }: { doc: DpiaGuidedDoc }) {
 // ─── SEZIONE B ────────────────────────────────────────────────────────────────
 
 function NecessitySection({ doc }: { doc: DpiaGuidedDoc }) {
+  const t = useT("toolDpia");
   const checks = [
-    { id: "b_lawful_basis",           label: "Base giuridica" },
-    { id: "b_data_minimisation",      label: "Minimizzazione" },
-    { id: "b_storage_limitation",     label: "Limitazione conservazione" },
-    { id: "b_proportionality",        label: "Proporzionalità" },
-    { id: "b_processor_clauses",      label: "Clausole responsabili (Art. 28)" },
-    { id: "b_international_transfers", label: "Trasferimenti extra-UE" },
+    { id: "b_lawful_basis",           label: t("dlp_lawfulBasis") },
+    { id: "b_data_minimisation",      label: t("dlp_minimisation") },
+    { id: "b_storage_limitation",     label: t("dlp_storageLimit") },
+    { id: "b_proportionality",        label: t("dlp_proportionality") },
+    { id: "b_processor_clauses",      label: t("dlp_processorClauses") },
+    { id: "b_international_transfers", label: t("dlp_extraEu") },
   ];
   return (
     <>
-      <SectionHeader id="sec-necessity" title="B — Necessità e proporzionalità" legalRef="GDPR Art. 35(7)(b)" />
+      <SectionHeader id="sec-necessity" title={t("dlp_secB")} legalRef="GDPR Art. 35(7)(b)" />
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <tbody>
-          <Field label="Giustificazione di necessità"  value={doneValue(doc, "b_necessity")} placeholder="necessità" />
-          <Field label="Diritti degli interessati"     value={doneValue(doc, "b_data_subject_rights")} placeholder="garanzie Artt. 12–22" />
+          <Field label={t("dlp_necessityJust")}  value={doneValue(doc, "b_necessity")} placeholder={t("dlp_ph_necessity")} />
+          <Field label={t("dlp_dataSubjectRights")}     value={doneValue(doc, "b_data_subject_rights")} placeholder={t("dlp_ph_guarantees")} />
         </tbody>
       </table>
       <div style={{ height: 1, background: DOC.border, margin: "10px 0" }} />
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 10 }}>
         <thead>
           <tr style={{ background: DOC.sectionBg }}>
-            <th style={{ padding: "4px 8px", textAlign: "left", border: `1px solid ${DOC.border}` }}>Principio</th>
-            <th style={{ padding: "4px 8px", textAlign: "left", border: `1px solid ${DOC.border}` }}>Descrizione / Misura</th>
+            <th style={{ padding: "4px 8px", textAlign: "left", border: `1px solid ${DOC.border}` }}>{t("colPrinciple")}</th>
+            <th style={{ padding: "4px 8px", textAlign: "left", border: `1px solid ${DOC.border}` }}>{t("dlp_descMeasure")}</th>
           </tr>
         </thead>
         <tbody>
@@ -223,10 +229,11 @@ function NecessitySection({ doc }: { doc: DpiaGuidedDoc }) {
 // ─── SEZIONE C ────────────────────────────────────────────────────────────────
 
 function RisksSection({ doc }: { doc: DpiaGuidedDoc }) {
+  const t = useT("toolDpia");
   const threats = [
-    { id: "c_threat_access",        label: "Accesso illegittimo ai dati",    cat: "WP248 §1" },
-    { id: "c_threat_modification",  label: "Modifica indesiderata dei dati", cat: "WP248 §2" },
-    { id: "c_threat_disappearance", label: "Scomparsa / perdita dei dati",   cat: "WP248 §3" },
+    { id: "c_threat_access",        label: t("dlp_threatAccess"),    cat: "WP248 §1" },
+    { id: "c_threat_modification",  label: t("dlp_threatModif"), cat: "WP248 §2" },
+    { id: "c_threat_disappearance", label: t("dlp_threatDisap"),   cat: "WP248 §3" },
   ];
   const riskBefore = doneValue(doc, "c_overall_risk_before");
   const riskColor  = riskBefore?.toLowerCase().includes("alto") ? DOC.red
@@ -234,22 +241,22 @@ function RisksSection({ doc }: { doc: DpiaGuidedDoc }) {
 
   return (
     <>
-      <SectionHeader id="sec-risks" title="C — Valutazione dei rischi" legalRef="GDPR Art. 35(7)(c)" />
+      <SectionHeader id="sec-risks" title={t("dlp_secC")} legalRef="GDPR Art. 35(7)(c)" />
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 10, marginBottom: 10 }}>
         <thead>
           <tr style={{ background: DOC.sectionBg }}>
-            <th style={{ padding: "4px 8px", textAlign: "left", border: `1px solid ${DOC.border}`, width: "25%" }}>Evento temuto</th>
-            <th style={{ padding: "4px 8px", textAlign: "left", border: `1px solid ${DOC.border}` }}>Scenario, probabilità, impatto</th>
+            <th style={{ padding: "4px 8px", textAlign: "left", border: `1px solid ${DOC.border}`, width: "25%" }}>{t("dlp_fearedEvent")}</th>
+            <th style={{ padding: "4px 8px", textAlign: "left", border: `1px solid ${DOC.border}` }}>{t("dlp_scenarioPI")}</th>
           </tr>
         </thead>
         <tbody>
-          {threats.map(t => (
-            <tr key={t.id}>
+          {threats.map(th => (
+            <tr key={th.id}>
               <td style={{ padding: "4px 8px", border: `1px solid ${DOC.border}`, fontWeight: 600 }}>
-                {t.label}<br /><span style={{ fontSize: 8, color: DOC.muted, fontWeight: 400 }}>{t.cat}</span>
+                {th.label}<br /><span style={{ fontSize: 8, color: DOC.muted, fontWeight: 400 }}>{th.cat}</span>
               </td>
               <td style={{ padding: "4px 8px", border: `1px solid ${DOC.border}` }}>
-                {doneValue(doc, t.id) ?? <Placeholder label="scenario + P × I" />}
+                {doneValue(doc, th.id) ?? <Placeholder label={t("dlp_ph_scenario")} />}
               </td>
             </tr>
           ))}
@@ -257,8 +264,8 @@ function RisksSection({ doc }: { doc: DpiaGuidedDoc }) {
       </table>
       <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 10 }}>
         <tbody>
-          <Field label="Misure tecniche"       value={doneValue(doc, "c_technical_measures")}     placeholder="misure tecniche" />
-          <Field label="Misure organizzative"  value={doneValue(doc, "c_organizational_measures")} placeholder="misure organizzative" />
+          <Field label={t("technicalMeasures")}       value={doneValue(doc, "c_technical_measures")}     placeholder={t("dlp_ph_technical")} />
+          <Field label={t("organizationalMeasures")}  value={doneValue(doc, "c_organizational_measures")} placeholder={t("dlp_ph_organizational")} />
         </tbody>
       </table>
       <div style={{
@@ -267,8 +274,8 @@ function RisksSection({ doc }: { doc: DpiaGuidedDoc }) {
         background: riskBefore ? (riskColor === DOC.red ? DOC.redBg : riskColor === DOC.amber ? DOC.amberBg : DOC.greenBg) : DOC.emptyBg,
         border: `1px solid ${riskBefore ? (riskColor === DOC.red ? DOC.redBdr : riskColor === DOC.amber ? DOC.amberBdr : DOC.greenBdr) : DOC.border}`,
       }}>
-        Rischio complessivo ante-misure:{" "}
-        {riskBefore ? riskBefore : <Placeholder label="livello di rischio" />}
+        {t("dlp_riskBefore")}{" "}
+        {riskBefore ? riskBefore : <Placeholder label={t("dlp_ph_riskLevel")} />}
       </div>
     </>
   );
@@ -277,6 +284,7 @@ function RisksSection({ doc }: { doc: DpiaGuidedDoc }) {
 // ─── SEZIONE D ────────────────────────────────────────────────────────────────
 
 function PartiesSection({ doc }: { doc: DpiaGuidedDoc }) {
+  const t = useT("toolDpia");
   const riskAfter = doneValue(doc, "d_overall_risk_after");
   const riskColor  = riskAfter?.toLowerCase().includes("alto") ? DOC.red
     : riskAfter?.toLowerCase().includes("medio") ? DOC.amber : DOC.green;
@@ -284,11 +292,11 @@ function PartiesSection({ doc }: { doc: DpiaGuidedDoc }) {
 
   return (
     <>
-      <SectionHeader id="sec-parties" title="D — Parti interessate e misure residue" legalRef="WP248 Allegato 2 §D / GDPR Art. 36" />
+      <SectionHeader id="sec-parties" title={t("dlp_secD")} legalRef="WP248 Allegato 2 §D / GDPR Art. 36" />
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <tbody>
-          <Field label="Parere del DPO"             value={doneValue(doc, "d_dpo_opinion")}           placeholder="parere DPO" />
-          <Field label="Opinioni degli interessati"  value={doneValue(doc, "d_data_subjects_opinions")} placeholder="consultazione interessati" />
+          <Field label={t("dlp_dpoOpinion")}             value={doneValue(doc, "d_dpo_opinion")}           placeholder={t("dlp_ph_dpoOpinion")} />
+          <Field label={t("dlp_subjectsOpinions")}  value={doneValue(doc, "d_data_subjects_opinions")} placeholder={t("dlp_ph_subjectsConsult")} />
         </tbody>
       </table>
       <div style={{ height: 1, background: DOC.border, margin: "10px 0" }} />
@@ -298,23 +306,23 @@ function PartiesSection({ doc }: { doc: DpiaGuidedDoc }) {
         background: riskAfter ? (riskColor === DOC.red ? DOC.redBg : riskColor === DOC.amber ? DOC.amberBg : DOC.greenBg) : DOC.emptyBg,
         border: `1px solid ${riskAfter ? (riskColor === DOC.red ? DOC.redBdr : riskColor === DOC.amber ? DOC.amberBdr : DOC.greenBdr) : DOC.border}`,
       }}>
-        Rischio residuo post-misure:{" "}
-        {riskAfter ? riskAfter : <Placeholder label="livello di rischio residuo" />}
+        {t("dlp_riskAfter")}{" "}
+        {riskAfter ? riskAfter : <Placeholder label={t("dlp_ph_residualLevel")} />}
       </div>
       {priorConsult?.toLowerCase().startsWith("sì") && (
         <div style={{ padding: "6px 10px", borderRadius: 4, background: DOC.redBg, border: `1px solid ${DOC.redBdr}`, marginBottom: 8 }}>
           <p style={{ fontSize: 10, fontWeight: 700, color: DOC.red, margin: 0 }}>
-            ⚠ Art. 36 — Consultazione preventiva del Garante richiesta.
+            ⚠ {t("dlp_art36Title")}
           </p>
           <p style={{ fontSize: 9, color: DOC.red, margin: "2px 0 0", opacity: 0.8 }}>
-            Il rischio residuo è elevato. Il trattamento non può avere luogo fino alla consultazione dell'autorità.
+            {t("dlp_art36Body")}
 
           </p>
         </div>
       )}
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <tbody>
-          <Field label="Pianificazione riesame" value={doneValue(doc, "d_review_schedule")} placeholder="cadenza revisione" />
+          <Field label={t("dlp_reviewPlan")} value={doneValue(doc, "d_review_schedule")} placeholder={t("dlp_ph_reviewCadence")} />
         </tbody>
       </table>
     </>
@@ -324,6 +332,7 @@ function PartiesSection({ doc }: { doc: DpiaGuidedDoc }) {
 // ─── FIRMA / CONCLUSIONE ──────────────────────────────────────────────────────
 
 function SignoffSection({ doc }: { doc: DpiaGuidedDoc }) {
+  const t = useT("toolDpia");
   const compliant = doneValue(doc, "e_compliant");
   const compliantColor =
     compliant?.toLowerCase().includes("non confor") ? DOC.red
@@ -332,30 +341,30 @@ function SignoffSection({ doc }: { doc: DpiaGuidedDoc }) {
 
   return (
     <>
-      <SectionHeader id="sec-signoff" title="Firma e conclusione" legalRef="GDPR Art. 35 / Art. 36" />
+      <SectionHeader id="sec-signoff" title={t("dlp_secSignoff")} legalRef="GDPR Art. 35 / Art. 36" />
       <div style={{
         padding: "8px 12px", borderRadius: 4, fontSize: 12, fontWeight: 700, marginBottom: 10,
         color: compliantColor,
         background: compliant ? (compliantColor === DOC.red ? DOC.redBg : compliantColor === DOC.amber ? DOC.amberBg : DOC.greenBg) : DOC.emptyBg,
         border: `1px solid ${compliant ? (compliantColor === DOC.red ? DOC.redBdr : compliantColor === DOC.amber ? DOC.amberBdr : DOC.greenBdr) : DOC.border}`,
       }}>
-        Decisione di conformità:{" "}
-        {compliant ? compliant : <Placeholder label="conforme / condizionalmente conforme / non conforme" />}
+        {t("dlp_complianceDecision")}{" "}
+        {compliant ? compliant : <Placeholder label={t("dlp_ph_compliance")} />}
       </div>
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <tbody>
-          <Field label="Condizioni / misure aggiuntive" value={doneValue(doc, "e_conditions")}      placeholder="condizioni" />
-          <Field label="Sintesi esecutiva"              value={doneValue(doc, "e_summary")}          placeholder="sintesi" />
-          <Field label="Prossimo riesame"               value={doneValue(doc, "e_next_review_date")} placeholder="data riesame" />
+          <Field label={t("dlp_conditions")} value={doneValue(doc, "e_conditions")}      placeholder={t("dlp_ph_conditions")} />
+          <Field label={t("execSummary")}              value={doneValue(doc, "e_summary")}          placeholder={t("dlp_ph_summary")} />
+          <Field label={t("dlp_nextReview")}               value={doneValue(doc, "e_next_review_date")} placeholder={t("dlp_ph_reviewDate")} />
         </tbody>
       </table>
 
       {/* Linee firma */}
       <div style={{ marginTop: 24, paddingTop: 14, borderTop: `1px solid ${DOC.border}`, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, fontFamily: SANS }}>
         {[
-          "Titolare del trattamento / DPO",
-          "Referente GDPR",
-          "Data",
+          t("dlp_controllerDpo"),
+          t("dlp_gdprContact"),
+          t("lp_date2"),
         ].map(label => (
           <div key={label}>
             <p style={{ fontSize: 9, fontWeight: 700, color: DOC.labelFg, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 16px" }}>
@@ -383,6 +392,7 @@ export interface DpiaLivePreviewProps {
 }
 
 export function DpiaLivePreview({ doc, activeSection }: DpiaLivePreviewProps) {
+  const t = useT("toolDpia");
   void activeSection;
   return (
     <div style={{ background: "#FAFAFA", minHeight: "100%", padding: "16px" }}>
@@ -402,7 +412,7 @@ export function DpiaLivePreview({ doc, activeSection }: DpiaLivePreviewProps) {
             {DPIA_TEMPLATE_META.title}
           </h1>
           <p style={{ fontSize: 10, color: DOC.muted, margin: 0, fontFamily: SANS }}>
-            Metodologia: {DPIA_TEMPLATE_META.methodology}
+            {t("lp_methodology2")}: {DPIA_TEMPLATE_META.methodology}
           </p>
         </div>
 
