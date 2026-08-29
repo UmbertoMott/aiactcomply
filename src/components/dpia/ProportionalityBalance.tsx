@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import type { DPIAResult } from "@/lib/dossier/storage-schema";
+import { useT } from "@/i18n/LocaleProvider";
 
 const T = {
   text:     "#0D1016",
@@ -25,6 +26,7 @@ interface ProportionalityBalanceProps {
 }
 
 export function ProportionalityBalance({ dpia }: ProportionalityBalanceProps) {
+  const t = useT("toolDpia");
   // Punteggio "finalità" (0-100): quanto è giustificato il trattamento
   const purposeScore = [
     (dpia.proportionality.necessity_justification?.trim().length ?? 0) > 50 ? 25 : 0,
@@ -47,10 +49,10 @@ export function ProportionalityBalance({ dpia }: ProportionalityBalanceProps) {
   const diff = purposeClamped - invasivenessClamped;
   const indicator: { label: string; bg: string; color: string; border: string } =
     diff > 0
-      ? { label: "Proporzionato",  bg: T.greenBg,  color: T.green,  border: T.greenBdr  }
+      ? { label: t("pb_proportionate"),  bg: T.greenBg,  color: T.green,  border: T.greenBdr  }
       : invasivenessClamped - purposeClamped > 30
-      ? { label: "Sproporzionato", bg: T.redBg,    color: T.red,    border: T.redBdr    }
-      : { label: "Da verificare",  bg: T.amberBg,  color: T.amber,  border: T.amberBdr  };
+      ? { label: t("pb_disproportionate"), bg: T.redBg,    color: T.red,    border: T.redBdr    }
+      : { label: t("pb_toVerify"),  bg: T.amberBg,  color: T.amber,  border: T.amberBdr  };
 
   return (
     <div style={{
@@ -64,7 +66,7 @@ export function ProportionalityBalance({ dpia }: ProportionalityBalanceProps) {
       {/* Title row */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
         <p style={{ fontSize: 12, fontWeight: 600, color: T.text }}>
-          Bilancia necessità / proporzionalità
+          {t("pb_title")}
         </p>
         <span style={{
           fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 9999,
@@ -77,7 +79,7 @@ export function ProportionalityBalance({ dpia }: ProportionalityBalanceProps) {
       {/* Purpose bar */}
       <div style={{ marginBottom: 12 }}>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-          <span style={{ fontSize: 11, color: T.muted }}>Giustificazione finalità</span>
+          <span style={{ fontSize: 11, color: T.muted }}>{t("pb_purposeJust")}</span>
           <span style={{ fontSize: 11, color: T.green, fontWeight: 600 }}>{purposeClamped} / 100</span>
         </div>
         <div style={{
@@ -93,14 +95,14 @@ export function ProportionalityBalance({ dpia }: ProportionalityBalanceProps) {
           }} />
         </div>
         <p style={{ fontSize: 10, color: T.faint, marginTop: 3 }}>
-          Finalità documentata + principi GDPR conformi + clausole Art. 28
+          {t("pb_purposeHint")}
         </p>
       </div>
 
       {/* Invasiveness bar */}
       <div style={{ marginBottom: 14 }}>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-          <span style={{ fontSize: 11, color: T.muted }}>Invasività del trattamento</span>
+          <span style={{ fontSize: 11, color: T.muted }}>{t("pb_invasiveness")}</span>
           <span style={{
             fontSize: 11, fontWeight: 600,
             color: invasivenessClamped > purposeClamped ? T.red : T.amber,
@@ -121,13 +123,13 @@ export function ProportionalityBalance({ dpia }: ProportionalityBalanceProps) {
           }} />
         </div>
         <p style={{ fontSize: 10, color: T.faint, marginTop: 3 }}>
-          Minacce ad alto/medio rischio + diritti applicabili + trasferimenti internazionali
+          {t("pb_invasivenessHint")}
         </p>
       </div>
 
       {/* Note */}
       <p style={{ fontSize: 10, color: T.faint, fontStyle: "italic", lineHeight: 1.55 }}>
-        Questa stima è indicativa e deriva dai campi già compilati.
+        {t("pb_note")}
         {" "}
       </p>
     </div>
