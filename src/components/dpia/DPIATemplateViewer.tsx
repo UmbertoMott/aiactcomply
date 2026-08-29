@@ -124,7 +124,7 @@ function Art35CoveragePanel({ coverage, art36 }: { coverage: ReturnType<typeof c
               <span style={{ fontSize: 13, fontWeight: 700, color: colorFor(v), minWidth: 16, flexShrink: 0 }}>{iconFor(v)}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <span style={{ fontSize: 10, fontWeight: 700, color: T.text, background: "rgba(0,0,0,0.06)", padding: "1px 6px", borderRadius: 3, marginRight: 6 }}>{el.ref}</span>
-                <span style={{ fontSize: 11, color: T.text }}>{el.label}</span>
+                <span style={{ fontSize: 11, color: T.text }}>{t(`art357_${el.id}`)}</span>
               </div>
               <span style={{ fontSize: 10, fontWeight: 600, color: colorFor(v), flexShrink: 0 }}>{labelFor(v)}</span>
             </div>
@@ -155,7 +155,7 @@ function ProgressHeader({ pct: percent, blockingGaps }: { pct: number; blockingG
     <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: "16px", marginBottom: 16 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
         <div>
-          <p style={{ fontSize: 13, fontWeight: 700, color: T.text, margin: 0 }}>{DPIA_TEMPLATE_META.title}</p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: T.text, margin: 0 }}>{t("tvmeta_title")}</p>
           <p style={{ fontSize: 10, color: T.faint, margin: "2px 0 0" }}>
             {DPIA_TEMPLATE_META.legalBasis} · {DPIA_TEMPLATE_META.methodology}
           </p>
@@ -179,7 +179,7 @@ function ProgressHeader({ pct: percent, blockingGaps }: { pct: number; blockingG
         </div>
       )}
       <p style={{ fontSize: 9, color: T.faint, margin: "10px 0 0", lineHeight: 1.4 }}>
-        {DPIA_TEMPLATE_META.disclaimer}
+        {t("tvmeta_disclaimer")}
       </p>
     </div>
   );
