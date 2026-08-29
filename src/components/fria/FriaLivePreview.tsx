@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { FRIA_GUIDED_SECTIONS, FRIA_SUBPOINTS, FRIA_TEMPLATE_META } from "@/lib/fria/fria-template";
 import type { FriaGuidedDoc } from "@/lib/fria/fria-guided-types";
+import { useT } from "@/i18n/LocaleProvider";
 
 const DOC = {
   bg:        "#ffffff",
@@ -33,9 +34,10 @@ function doneValue(doc: FriaGuidedDoc, id: string): string | null {
 }
 
 function Placeholder({ label }: { label: string }) {
+  const t = useT("toolFria");
   return (
     <span style={{ color: DOC.empty, fontStyle: "italic", fontSize: 11 }}>
-      [{label} — da compilare]
+      [{label} — {t("lp_toFill")}]
     </span>
   );
 }
@@ -90,6 +92,7 @@ interface FriaLivePreviewProps {
 }
 
 export function FriaLivePreview({ doc }: FriaLivePreviewProps) {
+  const t = useT("toolFria");
   const [showAvvertenza, setShowAvvertenza] = useState(true);
 
   return (
@@ -109,7 +112,7 @@ export function FriaLivePreview({ doc }: FriaLivePreviewProps) {
           {FRIA_TEMPLATE_META.title}
         </h1>
         <p style={{ fontSize: 10, color: DOC.muted, margin: 0, fontFamily: SANS }}>
-          Metodologia: {FRIA_TEMPLATE_META.methodology} · Versione {FRIA_TEMPLATE_META.version}
+          {t("lp_methodology")}: {FRIA_TEMPLATE_META.methodology} · {t("lp_version")} {FRIA_TEMPLATE_META.version}
         </p>
       </div>
 
@@ -121,7 +124,7 @@ export function FriaLivePreview({ doc }: FriaLivePreviewProps) {
           borderRadius: 5, padding: "8px 12px 8px 12px", marginBottom: 18,
         }}>
           <p style={{ fontSize: 10, color: DOC.amber, margin: 0, fontFamily: SANS, lineHeight: 1.5, paddingRight: 20 }}>
-            <strong>Avvertenza:</strong> {FRIA_TEMPLATE_META.disclaimer}
+            <strong>{t("lp_warning")}:</strong> {FRIA_TEMPLATE_META.disclaimer}
           </p>
           <button
             onClick={() => setShowAvvertenza(false)}
@@ -130,7 +133,7 @@ export function FriaLivePreview({ doc }: FriaLivePreviewProps) {
               background: "none", border: "none", cursor: "pointer",
               fontSize: 14, lineHeight: 1, color: DOC.amber, opacity: 0.7, padding: "1px 3px",
             }}
-            title="Chiudi avvertenza"
+            title={t("lp_closeWarning")}
           >
             ×
           </button>
@@ -167,9 +170,9 @@ export function FriaLivePreview({ doc }: FriaLivePreviewProps) {
         fontFamily: SANS,
       }}>
         {[
-          { label: "Deployer / Responsabile", value: "" },
-          { label: "Referente diritti fondamentali", value: "" },
-          { label: "Data", value: "" },
+          { label: t("lp_deployer"), value: "" },
+          { label: t("lp_rightsContact"), value: "" },
+          { label: t("lp_date"), value: "" },
         ].map(f => (
           <div key={f.label}>
             <p style={{ fontSize: 9, fontWeight: 700, color: DOC.labelFg, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 16px" }}>
