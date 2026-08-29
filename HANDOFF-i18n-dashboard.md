@@ -44,16 +44,27 @@ Pattern: contenuto da lib/engine/server-action/array-persistiti = data-layer (IT
 tradotto solo il chrome. Badge module-scope ricevono `t`; NextStepGuide render-keyed
 per stepKey (nsg_/dnsg_); STEP_DEFS resta IT per la chiamata server.
 
-## RIMANENTI: SOLO il cluster GUIDED-MODE (UI conversazionale alternativa, ~2400 righe)
-Appare solo quando l'utente passa a "modalità guidata". 8 componenti:
-+ FRIA: `FriaGuidedMode` (332), `FriaGuidedChat` (370), `FriaLivePreview` (184), `FriaProgressRail` (170).
-+ DPIA: `DpiaGuidedMode` (445), `DpiaGuidedChat` (506), `DpiaLivePreview` (418), `DpiaProgressRail` (154).
-Nota: FriaProgressRail NON è reso in fria/page.tsx (solo un commento "style"); il rail
-del flusso standard è inline nella page (già tradotto). Le live-preview rendono
-molto contenuto da lib (data-layer) — tradurre solo il chrome.
+## FATTO: cluster GUIDED-MODE COMPLETO
+FRIA: FriaGuidedMode, FriaGuidedChat, FriaLivePreview, FriaProgressRail.
+DPIA: DpiaGuidedMode, DpiaGuidedChat, DpiaLivePreview, DpiaProgressRail.
+Quick-reply Sì/No/Parzialmente: display tradotto, valore IT mantenuto come storage.
 
-+ `src/lib/dpia/dpia-progress.ts` + `src/lib/dpia/dpia-template.ts` — label/META rail/step/coverage
-  (lib output; sidebar DPIA e parte del DPIATemplateViewer restano IT finché non tradotti). Pass separato.
+## STATO FINALE
+**Tutti** i componenti `src/components/{fria,dpia,assessment}/*` usano `useT`
+(verifica: `grep -L useT src/components/{fria,dpia,assessment}/*.tsx` → vuoto).
+Le 3 page.tsx grandi (classifier/fria/dpia) + il cluster assessment condiviso
++ tutti i figli (flusso standard **e** guided-mode) sono bilingui IT/EN.
+Parità namespace verificata: toolClassifier 153, toolFria 406, toolDpia 461,
+assessmentShared 263 chiavi — IT/EN identiche, nessun duplicato, tsc verde.
+
+## RIMANENTI (fuori scope dashboard tools, follow-up)
++ `src/lib/dpia/dpia-progress.ts` + `src/lib/dpia/dpia-template.ts` +
+  `src/lib/fria/fria-*` + `src/lib/guided/*` — label/META/contenuto guidato (lib output;
+  sidebar DPIA, parte di DPIATemplateViewer/LivePreview e il contenuto delle domande
+  guidate restano IT finché non tradotti). Pass "data-layer/lib" separato.
++ Validazione EN da parte dell'utente (avvocato) su tutti i testi legali densi
+  (Art. 6/27/35/36, WP248, Carta UE/CEDU, GDPR).
++ Pagine dashboard fuori da `tools/` e ~18 pagine pubbliche fuori home ancora IT-only.
 
 ### Gotcha assessmentShared (per continuità)
 - Badge module-scope (riskBadge/severityBadge/lensBadge) → passa `t` come argomento.
