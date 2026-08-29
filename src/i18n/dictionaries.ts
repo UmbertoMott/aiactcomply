@@ -2909,7 +2909,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
     },
     toolDpia: {
       selectPlaceholder: "— seleziona —",
-      yes: "Sì", no: "No", low: "Bassa", medium: "Media", high: "Alta",
+      yes: "Sì", no: "No", partial: "Parzialmente", low: "Bassa", medium: "Media", high: "Alta",
       riskHigh: "Alto", riskMedium: "Medio", riskLow: "Basso",
       step0_label: "Screening", step0_sub: "WP248",
       step1_label: "Descrizione", step1_sub: "Sistematica",
@@ -3156,6 +3156,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       lp_date2: "Data",
       lp_methodology2: "Metodologia",
       gm_pdfError: "Errore nella generazione del PDF", gm_pdfErrorShort: "Errore PDF", gm_dpiaGuided: "DPIA guidata", gm_completed: "completata", gm_autoSaved: "Salvato automaticamente", gm_stale: "Dati aggiornati — da rivedere", gm_goToForm: "Vai al Form completo →", gm_generating: "Generazione…", gm_generatePdf: "Genera PDF", gm_documentWord: "Documento", gm_bold: "Grassetto", gm_italic: "Corsivo", gm_underline: "Sottolineato", gm_highlight: "Evidenzia", gm_saveChanges: "Salva modifiche", gm_editDocument: "Modifica documento", gm_closeDocument: "Chiudi documento",
+      dgcx_completed: "DPIA completata — tutte le sezioni compilate.", dgcx_guided: "DPIA Guidata AI", dgcx_ph_custom: "Oppure scrivi una risposta personalizzata…", dgcx_ph_edit: "Modifica risposta…", dgcx_answerPrefix: "Rispondi", gc_edit: "Modifica", gc_editAnswer: "Modifica risposta", gc_examples: "Esempi:", gc_confirmed: "Confermata", gc_prev: "Precedente", gc_next: "Successiva",
     },
     assessmentShared: {
       step_intake_label: "Intake", step_intake_sub: "Dati sistema",
@@ -6158,7 +6159,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
     },
     toolDpia: {
       selectPlaceholder: "— select —",
-      yes: "Yes", no: "No", low: "Low", medium: "Medium", high: "High",
+      yes: "Yes", no: "No", partial: "Partially", low: "Low", medium: "Medium", high: "High",
       riskHigh: "High", riskMedium: "Medium", riskLow: "Low",
       step0_label: "Screening", step0_sub: "WP248",
       step1_label: "Description", step1_sub: "Systematic",
@@ -6405,6 +6406,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       lp_date2: "Date",
       lp_methodology2: "Methodology",
       gm_pdfError: "Error generating the PDF", gm_pdfErrorShort: "PDF error", gm_dpiaGuided: "Guided DPIA", gm_completed: "completed", gm_autoSaved: "Saved automatically", gm_stale: "Data updated — to review", gm_goToForm: "Go to full form →", gm_generating: "Generating…", gm_generatePdf: "Generate PDF", gm_documentWord: "Document", gm_bold: "Bold", gm_italic: "Italic", gm_underline: "Underline", gm_highlight: "Highlight", gm_saveChanges: "Save changes", gm_editDocument: "Edit document", gm_closeDocument: "Close document",
+      dgcx_completed: "DPIA completed — all sections filled in.", dgcx_guided: "Guided DPIA AI", dgcx_ph_custom: "Or write a custom answer…", dgcx_ph_edit: "Edit answer…", dgcx_answerPrefix: "Answer", gc_edit: "Edit", gc_editAnswer: "Edit answer", gc_examples: "Examples:", gc_confirmed: "Confirmed", gc_prev: "Previous", gc_next: "Next",
     },
     assessmentShared: {
       step_intake_label: "Intake", step_intake_sub: "System data",
