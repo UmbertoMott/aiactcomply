@@ -1,7 +1,9 @@
 // Calcoli di avanzamento della FRIA guidata.
 import type { FriaGuidedDoc } from "./fria-guided-types";
-import { FRIA_GUIDED_SECTIONS, FRIA_SUBPOINTS } from "./fria-template";
+import { FRIA_GUIDED_SECTIONS, FRIA_SUBPOINTS, getFriaSections, getFriaSubpoints } from "./fria-template";
 import type { FriaSectionKey } from "./fria-template";
+
+type TFn = (key: string) => string;
 
 export interface GuidedFriaSubPointSummary {
   id: string;
@@ -27,9 +29,11 @@ export interface GuidedFriaProgress {
   sections: GuidedFriaSectionProgress[];
 }
 
-export function computeGuidedFriaProgress(doc: FriaGuidedDoc): GuidedFriaProgress {
-  const sections: GuidedFriaSectionProgress[] = FRIA_GUIDED_SECTIONS.map(sec => {
-    const subPoints = FRIA_SUBPOINTS.filter(sp => sp.sectionKey === sec.key);
+export function computeGuidedFriaProgress(doc: FriaGuidedDoc, locale = "it", t: TFn = (k) => k): GuidedFriaProgress {
+  const SECTIONS = getFriaSections(locale, t);
+  const SUBPOINTS = getFriaSubpoints(locale, t);
+  const sections: GuidedFriaSectionProgress[] = SECTIONS.map(sec => {
+    const subPoints = SUBPOINTS.filter(sp => sp.sectionKey === sec.key);
     const required  = subPoints.filter(sp => sp.required);
 
     const subSummaries: GuidedFriaSubPointSummary[] = subPoints.map(sp => ({

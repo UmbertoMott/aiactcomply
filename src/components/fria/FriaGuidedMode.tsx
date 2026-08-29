@@ -9,7 +9,7 @@ import { FRIA_SUBPOINTS } from "@/lib/fria/fria-template";
 import { FriaProgressRail } from "./FriaProgressRail";
 import { FriaLivePreview } from "./FriaLivePreview";
 import { FriaGuidedChat } from "./FriaGuidedChat";
-import { useT } from "@/i18n/LocaleProvider";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
 
 const T = {
   border: "rgba(0,0,0,0.08)",
@@ -29,6 +29,8 @@ interface FriaGuidedModeProps {
 
 export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
   const t = useT("toolFria");
+  const tg = useT("friaGuided");
+  const locale = useLocale();
   const [doc, setDoc] = useState<FriaGuidedDoc>(() => {
     const saved = readFromStorage<FriaGuidedDoc>("friaGuided");
     return saved ?? createEmptyFriaGuidedDoc();
@@ -76,7 +78,7 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
     setEditing(false);
   };
 
-  const progress = computeGuidedFriaProgress(doc);
+  const progress = computeGuidedFriaProgress(doc, locale, tg);
 
   const saveDoc = useCallback((next: FriaGuidedDoc) => {
     writeToStorage("friaGuided", next);

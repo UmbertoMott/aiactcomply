@@ -1,8 +1,8 @@
 "use client";
 import React, { useState } from "react";
-import { FRIA_GUIDED_SECTIONS, FRIA_SUBPOINTS, FRIA_TEMPLATE_META } from "@/lib/fria/fria-template";
+import { getFriaSections, getFriaSubpoints, getFriaTemplateMeta } from "@/lib/fria/fria-template";
 import type { FriaGuidedDoc } from "@/lib/fria/fria-guided-types";
-import { useT } from "@/i18n/LocaleProvider";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
 
 const DOC = {
   bg:        "#ffffff",
@@ -93,6 +93,11 @@ interface FriaLivePreviewProps {
 
 export function FriaLivePreview({ doc }: FriaLivePreviewProps) {
   const t = useT("toolFria");
+  const tg = useT("friaGuided");
+  const locale = useLocale();
+  const FRIA_TEMPLATE_META = getFriaTemplateMeta(locale, tg);
+  const FRIA_GUIDED_SECTIONS = getFriaSections(locale, tg);
+  const FRIA_SUBPOINTS = getFriaSubpoints(locale, tg);
   const [showAvvertenza, setShowAvvertenza] = useState(true);
 
   return (

@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Check, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
-import { FRIA_SUBPOINTS } from "@/lib/fria/fria-template";
+import { getFriaSubpoints } from "@/lib/fria/fria-template";
 import type { FriaGuidedDoc, FriaAnswer } from "@/lib/fria/fria-guided-types";
-import { useT } from "@/i18n/LocaleProvider";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
 import { nextFriaSubPointId } from "@/lib/fria/fria-guided-progress";
 
 const T = {
@@ -54,6 +54,9 @@ export function FriaGuidedChat({
   onAnswerUpdate, onNavigateToSubPoint, forcedSubPointId,
 }: FriaGuidedChatProps) {
   const t = useT("toolFria");
+  const tg = useT("friaGuided");
+  const locale = useLocale();
+  const FRIA_SUBPOINTS = getFriaSubpoints(locale, tg);
   const allIds = FRIA_SUBPOINTS.map(sp => sp.id);
 
   const currentId = forcedSubPointId

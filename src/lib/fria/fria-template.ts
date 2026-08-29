@@ -588,3 +588,32 @@ export const FRIA_TEMPLATE_META = {
   disclaimer:
     "Template basato su Art. 27 AI Act e questionario ufficiale DIHR/ECNL. Bozza per revisione del referente diritti fondamentali, non documento definitivo. Allineare al template ufficiale dell'Ufficio europeo per l'IA quando disponibile.",
 } as const;
+
+// ─── i18n: accessori locale-aware (namespace `friaGuided`) ───────────────────
+// Per l'italiano si usano i const sopra (fonte canonica). Per l'inglese si
+// risolvono le chiavi dal dizionario (blocco `en` popolato in dictionaries.ts).
+// I `ref`/`legalRef` (citazioni Art./CDFUE) restano invariati in entrambe le lingue.
+type FriaTFn = (key: string) => string;
+
+export function getFriaSections(locale: string, t: FriaTFn): FriaGuidedSection[] {
+  if (locale !== "en") return [...FRIA_GUIDED_SECTIONS];
+  return FRIA_GUIDED_SECTIONS.map(s => ({ ...s, label: t(`fsec_${s.key}`) }));
+}
+
+export function getFriaSubpoints(locale: string, t: FriaTFn): FriaSubPoint[] {
+  if (locale !== "en") return [...FRIA_SUBPOINTS];
+  return FRIA_SUBPOINTS.map(sp => ({
+    ...sp,
+    label:    t(`${sp.id}_label`),
+    question: t(`${sp.id}_q`),
+    examples: sp.examples.map((_, i) => t(`${sp.id}_ex${i}`)),
+  }));
+}
+
+export function getFriaTemplateMeta(
+  locale: string,
+  t: FriaTFn,
+): { title: string; legalBasis: string; methodology: string; version: string; disclaimer: string } {
+  if (locale !== "en") return FRIA_TEMPLATE_META;
+  return { ...FRIA_TEMPLATE_META, title: t("meta_title"), disclaimer: t("meta_disclaimer"), methodology: t("meta_methodology") };
+}
