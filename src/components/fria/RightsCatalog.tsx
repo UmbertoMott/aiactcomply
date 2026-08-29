@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { CSSProperties } from "react";
 import { FUNDAMENTAL_RIGHTS, RIGHTS_GROUPS } from "@/lib/simulation/fria-engine";
 import { rightIdToThemeId, getRefsForTheme } from "@/lib/assessment/correlation-map";
+import { useT } from "@/i18n/LocaleProvider";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const T = {
@@ -22,6 +23,7 @@ export interface RightsCatalogProps {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export function RightsCatalog({ selectedRightIds, onSelectRight }: RightsCatalogProps) {
+  const t = useT("toolFria");
   const [openGroups, setOpenGroups] = useState<Set<string>>(
     new Set(["dignity_group", "equality_group"])
   );
@@ -59,7 +61,7 @@ export function RightsCatalog({ selectedRightIds, onSelectRight }: RightsCatalog
       {/* Header */}
       <div style={{ marginBottom: 14, display: "flex", alignItems: "center", gap: 10 }}>
         <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>
-          Catalogo diritti fondamentali — seleziona quelli pertinenti
+          {t("rcat_title")}
         </h3>
         <span style={{
           fontSize: 10, fontWeight: 500, padding: "2px 8px", borderRadius: 9999,
@@ -86,7 +88,7 @@ export function RightsCatalog({ selectedRightIds, onSelectRight }: RightsCatalog
                     fontSize: 10, fontWeight: 500, padding: "2px 7px", borderRadius: 9999,
                     background: T.greenBg, border: `1px solid ${T.greenBdr}`, color: T.green,
                   }}>
-                    {selCount} sel.
+                    {selCount} {t("rcat_sel")}
                   </span>
                 )}
               </div>
@@ -126,7 +128,7 @@ export function RightsCatalog({ selectedRightIds, onSelectRight }: RightsCatalog
                                 background: T.redBg, border: `1px solid ${T.redBdr}`, color: T.red,
                                 textTransform: "uppercase" as const, letterSpacing: "0.4px",
                               }}>
-                                ASSOLUTO
+                                {t("rcat_absolute")}
                               </span>
                             )}
                           </div>
@@ -147,7 +149,7 @@ export function RightsCatalog({ selectedRightIds, onSelectRight }: RightsCatalog
                             transition: "background 0.15s, color 0.15s",
                           }}
                         >
-                          {isSelected ? "Selezionato ✓" : "Seleziona"}
+                          {isSelected ? t("rcat_selected") : t("rcat_select")}
                         </button>
                       </div>
 

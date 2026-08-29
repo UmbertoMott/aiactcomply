@@ -2886,6 +2886,8 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       gc_analyzing: "⟳ Analisi…", gc_reanalyze: "↺ Ri-analizza", gc_start: "Avvia gap-check",
       gc_criticalGaps: "gap critico/i", gc_recommendation: "Raccomandazione",
       gc_emptyHint: "Clicca \"Avvia gap-check\" per analizzare la copertura degli elementi Art. 27 obbligatori.",
+      rcat_title: "Catalogo diritti fondamentali — seleziona quelli pertinenti", rcat_sel: "sel.",
+      rcat_absolute: "ASSOLUTO", rcat_selected: "Selezionato ✓", rcat_select: "Seleziona",
     },
     toolDpia: {
       selectPlaceholder: "— seleziona —",
@@ -6020,6 +6022,8 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       gc_analyzing: "⟳ Analyzing…", gc_reanalyze: "↺ Re-analyze", gc_start: "Start gap-check",
       gc_criticalGaps: "critical gap(s)", gc_recommendation: "Recommendation",
       gc_emptyHint: "Click \"Start gap-check\" to analyze the coverage of the mandatory Art. 27 elements.",
+      rcat_title: "Fundamental rights catalogue — select the relevant ones", rcat_sel: "sel.",
+      rcat_absolute: "ABSOLUTE", rcat_selected: "Selected ✓", rcat_select: "Select",
     },
     toolDpia: {
       selectPlaceholder: "— select —",
