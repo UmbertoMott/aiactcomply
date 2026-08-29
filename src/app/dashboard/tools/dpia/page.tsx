@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, CSSProperties } from "react";
 import SignOffPanel from "@/components/ui/SignOffPanel";
+import { useT } from "@/i18n/LocaleProvider";
 import { DPIATemplateViewer } from "@/components/dpia/DPIATemplateViewer";
 import { computeDpiaProgress } from "@/lib/dpia/dpia-progress";
 import { DpiaGuidedMode } from "@/components/dpia/DpiaGuidedMode";
@@ -118,12 +119,12 @@ function computeWorstResidualRisk(threats: DPIAThreat[]): "high" | "medium" | "l
   return "low";
 }
 
-function riskBadge(level: "high" | "medium" | "low" | "") {
+function riskBadge(level: "high" | "medium" | "low" | "", tr: (k: string) => string) {
   if (!level) return null;
   const cfg = {
-    high:   { label: "Alto",   bg: T.redBg,   color: T.red,   border: T.redBdr   },
-    medium: { label: "Medio",  bg: T.amberBg, color: T.amber, border: T.amberBdr },
-    low:    { label: "Basso",  bg: T.greenBg, color: T.green, border: T.greenBdr },
+    high:   { label: tr("riskHigh"),   bg: T.redBg,   color: T.red,   border: T.redBdr   },
+    medium: { label: tr("riskMedium"), bg: T.amberBg, color: T.amber, border: T.amberBdr },
+    low:    { label: tr("riskLow"),    bg: T.greenBg, color: T.green, border: T.greenBdr },
   }[level];
   return (
     <span style={{
@@ -278,10 +279,11 @@ function Lbl({ children, required }: { children: React.ReactNode; required?: boo
 function Sel<T extends string>({
   value, onChange, options, style,
 }: { value: T; onChange: (v: T) => void; options: { value: T; label: string }[]; style?: CSSProperties }) {
+  const tr = useT("toolDpia");
   return (
     <select value={value} onChange={e => onChange(e.target.value as T)}
       style={{ ...inputSt, ...style }}>
-      <option value="">— seleziona —</option>
+      <option value="">{tr("selectPlaceholder")}</option>
       {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
   );
@@ -325,6 +327,7 @@ function computeDpiaHash(doc: DPIADoc): string {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function DPIAPage() {
+  const tr = useT("toolDpia");
   const [doc, setDoc] = useState<DPIADoc>(createEmptyDPIA);
   const [step, setStep] = useState<Step>(0);
   const [saved, setSaved] = useState(false);
@@ -801,12 +804,10 @@ export default function DPIAPage() {
             <Info className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: T.text }} />
             <div>
               <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 4 }}>
-                Screening WP248 rev.01 — 9 criteri
+                {tr("screeningInfoTitle")}
               </p>
               <p style={{ fontSize: 11, color: T.text, lineHeight: 1.6 }}>
-                Verificare se si applica almeno uno dei criteri WP248. La DPIA è obbligatoria quando
-                sono soddisfatti almeno 2 criteri. Con 1 criterio è incerto; raccomandato procedere
-                comunque. Con 0 criteri la DPIA non è richiesta ma va giustificata.
+                {tr("screeningInfoBody")}
               </p>
             </div>
           </div>
@@ -815,16 +816,16 @@ export default function DPIAPage() {
         {/* Result banner */}
         <div style={{ ...cardSt, padding: "12px 16px", background: dpiaBg, border: `1px solid ${dpiaBdr}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
-            <p style={{ fontSize: 11, fontWeight: 500, color: T.muted }}>Esito screening</p>
+            <p style={{ fontSize: 11, fontWeight: 500, color: T.muted }}>{tr("screeningResult")}</p>
             <p style={{ fontSize: 18, fontWeight: 700, color: dpiaColor, marginTop: 2 }}>
-              DPIA {dpia_required === "yes" ? "RICHIESTA" : dpia_required === "uncertain" ? "INCERTA" : "NON RICHIESTA"}
+              DPIA {dpia_required === "yes" ? tr("required") : dpia_required === "uncertain" ? tr("uncertain") : tr("notRequired")}
             </p>
           </div>
           <div style={{ textAlign: "right" }}>
             <p style={{ fontSize: 24, fontWeight: 700, color: dpiaColor }}>
               {doc.screening.criteria_met_count}/9
             </p>
-            <p style={{ fontSize: 11, color: T.muted }}>criteri soddisfatti</p>
+            <p style={{ fontSize: 11, color: T.muted }}>{tr("criteriaMet")}</p>
           </div>
         </div>
 
@@ -840,7 +841,7 @@ export default function DPIAPage() {
               transition: "all 0.15s",
             }}
           >
-            {showScreeningCatalog ? "Chiudi catalogo" : "Catalogo criteri WP248"}
+            {showScreeningCatalog ? tr("closeCatalog") : tr("screeningCatalog")}
           </button>
         </div>
 
@@ -867,23 +868,23 @@ export default function DPIAPage() {
                 {idx + 1}
               </span>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 2 }}>{c.label}</p>
-                <p style={{ fontSize: 11, color: T.muted, lineHeight: 1.5, marginBottom: 10 }}>{c.description}</p>
+                <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 2 }}>{tr(`crit_${c.id}_label`)}</p>
+                <p style={{ fontSize: 11, color: T.muted, lineHeight: 1.5, marginBottom: 10 }}>{tr(`crit_${c.id}_desc`)}</p>
                 <div className="flex items-center gap-3">
                   <Sel
                     value={c.applies as "yes" | "no" | "partial" | ""}
                     onChange={v => upCriterion(c.id, { applies: v })}
                     options={[
-                      { value: "yes", label: "Sì — applicabile" },
-                      { value: "partial", label: "Parzialmente applicabile" },
-                      { value: "no", label: "No — non applicabile" },
+                      { value: "yes", label: tr("applicableYes") },
+                      { value: "partial", label: tr("applicablePartial") },
+                      { value: "no", label: tr("applicableNo") },
                     ]}
                     style={{ width: 200 }}
                   />
                   <input
                     value={c.notes}
                     onChange={e => upCriterion(c.id, { notes: e.target.value })}
-                    placeholder="Note opzionali…"
+                    placeholder={tr("ph_optionalNotes")}
                     style={{ ...inputSt, flex: 1 }}
                   />
                 </div>
@@ -895,12 +896,12 @@ export default function DPIAPage() {
         {/* Justification if no DPIA */}
         {dpia_required === "no" && (
           <div style={{ ...cardSt, padding: 14 }}>
-            <Lbl>Giustificazione per la non effettuazione della DPIA</Lbl>
+            <Lbl>{tr("justifyNoDpia")}</Lbl>
             <textarea
               value={justification_if_no_dpia}
               onChange={e => upDoc(d => ({ ...d, screening: { ...d.screening, justification_if_no_dpia: e.target.value } }))}
               rows={3}
-              placeholder="Motivare perché nonostante il trattamento non è richiesta la DPIA…"
+              placeholder={tr("ph_justifyNoDpia")}
               style={taSt}
             />
           </div>
@@ -917,89 +918,87 @@ export default function DPIAPage() {
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {/* Identity */}
         <div style={{ ...cardSt, padding: 16 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>Identificazione</p>
+          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>{tr("identification")}</p>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
-            <div><Lbl required>Nome sistema</Lbl>
-              <input value={d.system_name} onChange={e => upDesc({ system_name: e.target.value })} style={inputSt} placeholder="es. HR AI Scoring" /></div>
-            <div><Lbl required>Organizzazione</Lbl>
-              <input value={d.organization_name} onChange={e => upDesc({ organization_name: e.target.value })} style={inputSt} placeholder="Ragione sociale" /></div>
-            <div><Lbl required>Titolare del trattamento</Lbl>
-              <input value={d.controller_name} onChange={e => upDesc({ controller_name: e.target.value })} style={inputSt} placeholder="Nome / P.IVA" /></div>
+            <div><Lbl required>{tr("systemName")}</Lbl>
+              <input value={d.system_name} onChange={e => upDesc({ system_name: e.target.value })} style={inputSt} placeholder={tr("ph_systemName")} /></div>
+            <div><Lbl required>{tr("organization")}</Lbl>
+              <input value={d.organization_name} onChange={e => upDesc({ organization_name: e.target.value })} style={inputSt} placeholder={tr("ph_legalName")} /></div>
+            <div><Lbl required>{tr("controller")}</Lbl>
+              <input value={d.controller_name} onChange={e => upDesc({ controller_name: e.target.value })} style={inputSt} placeholder={tr("ph_nameVat")} /></div>
           </div>
         </div>
 
         {/* DPO */}
         <div style={{ ...cardSt, padding: 16 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>Responsabile della protezione dati (DPO)</p>
+          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>{tr("dpoTitle")}</p>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 10 }}>
-            <div><Lbl>Nome DPO</Lbl>
-              <input value={d.dpo_name} onChange={e => upDesc({ dpo_name: e.target.value })} style={inputSt} placeholder="Nome e cognome o struttura" /></div>
-            <div><Lbl>DPO consultato?</Lbl>
+            <div><Lbl>{tr("dpoName")}</Lbl>
+              <input value={d.dpo_name} onChange={e => upDesc({ dpo_name: e.target.value })} style={inputSt} placeholder={tr("ph_dpoName")} /></div>
+            <div><Lbl>{tr("dpoConsulted")}</Lbl>
               <Sel value={d.dpo_consulted as "yes"|"no"|""} onChange={v => upDesc({ dpo_consulted: v })}
-                options={[{ value: "yes", label: "Sì" }, { value: "no", label: "No" }]} /></div>
+                options={[{ value: "yes", label: tr("yes") }, { value: "no", label: tr("no") }]} /></div>
           </div>
           {d.dpo_consulted === "no" && (
             <div style={{ marginTop: 8, padding: "10px 14px", borderRadius: 8,
               background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: T.amber, marginBottom: 3 }}>
-                ⚠ DPO non consultato — verifica obbligatoria
+                ⚠ {tr("dpoNotConsultedTitle")}
               </div>
               <div style={{ fontSize: 11, color: T.muted, lineHeight: 1.5 }}>
-                L&apos;Art. 35(2) GDPR e il WP248 richiedono che il DPO, se nominato,
-                sia obbligatoriamente consultato nella redazione della DPIA.
-                La mancata consultazione è una non conformità formale.
+                {tr("dpoNotConsultedBody")}
               </div>
             </div>
           )}
           {d.dpo_consulted === "yes" && (
-            <div><Lbl>Parere del DPO</Lbl>
+            <div><Lbl>{tr("dpoOpinion")}</Lbl>
               <textarea value={d.dpo_opinion} onChange={e => upDesc({ dpo_opinion: e.target.value })}
-                rows={2} placeholder="Sintesi del parere DPO…" style={taSt} /></div>
+                rows={2} placeholder={tr("ph_dpoOpinion")} style={taSt} /></div>
           )}
         </div>
 
         {/* Processor */}
         <div style={{ ...cardSt, padding: 16 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>Responsabile del trattamento (Art. 28)</p>
+          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>{tr("processorTitle")}</p>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <div><Lbl>Coinvolto un responsabile esterno?</Lbl>
+            <div><Lbl>{tr("processorInvolved")}</Lbl>
               <Sel value={d.processor_involved as "yes"|"no"|""} onChange={v => upDesc({ processor_involved: v })}
-                options={[{ value: "yes", label: "Sì" }, { value: "no", label: "No" }]} /></div>
+                options={[{ value: "yes", label: tr("yes") }, { value: "no", label: tr("no") }]} /></div>
             {d.processor_involved === "yes" && (
-              <div><Lbl>Nome responsabile (Art. 28)</Lbl>
-                <input value={d.processor_name} onChange={e => upDesc({ processor_name: e.target.value })} style={inputSt} placeholder="Denominazione responsabile" /></div>
+              <div><Lbl>{tr("processorName")}</Lbl>
+                <input value={d.processor_name} onChange={e => upDesc({ processor_name: e.target.value })} style={inputSt} placeholder={tr("ph_processorName")} /></div>
             )}
           </div>
         </div>
 
         {/* Data processing */}
         <div style={{ ...cardSt, padding: 16 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>Descrizione del trattamento</p>
+          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>{tr("processingDesc")}</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <div><Lbl required>Finalità del trattamento</Lbl>
+            <div><Lbl required>{tr("purposes")}</Lbl>
               <textarea value={d.processing_purposes} onChange={e => upDesc({ processing_purposes: e.target.value })}
-                rows={2} placeholder="Descrivere in modo preciso le finalità…" style={taSt} /></div>
-            <div><Lbl>Interesse legittimo (se base giuridica Art. 6(1)(f))</Lbl>
+                rows={2} placeholder={tr("ph_purposes")} style={taSt} /></div>
+            <div><Lbl>{tr("legitimateInterest")}</Lbl>
               <textarea value={d.legitimate_interest ?? ""} onChange={e => upDesc({ legitimate_interest: e.target.value })}
-                rows={2} placeholder="Descrizione dell'interesse legittimo e bilanciamento…" style={taSt} /></div>
+                rows={2} placeholder={tr("ph_legitimateInterest")} style={taSt} /></div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <div><Lbl required>Categorie di dati personali</Lbl>
+              <div><Lbl required>{tr("dataCategories")}</Lbl>
                 <textarea value={d.personal_data_categories} onChange={e => upDesc({ personal_data_categories: e.target.value })}
-                  rows={2} placeholder="es. dati anagrafici, comportamentali…" style={taSt} /></div>
-              <div><Lbl>Categorie particolari (Art. 9)</Lbl>
+                  rows={2} placeholder={tr("ph_dataCategories")} style={taSt} /></div>
+              <div><Lbl>{tr("specialCategories")}</Lbl>
                 <textarea value={d.special_categories} onChange={e => upDesc({ special_categories: e.target.value })}
-                  rows={2} placeholder="es. dati sanitari, biometrici, origine etnica…" style={taSt} /></div>
+                  rows={2} placeholder={tr("ph_specialCategories")} style={taSt} /></div>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
-              <div><Lbl required>Categorie di interessati</Lbl>
+              <div><Lbl required>{tr("subjectCategories")}</Lbl>
                 <textarea value={d.data_subjects_categories} onChange={e => upDesc({ data_subjects_categories: e.target.value })}
-                  rows={2} placeholder="es. dipendenti, clienti, minori…" style={taSt} /></div>
-              <div><Lbl>Destinatari / Riceventi</Lbl>
+                  rows={2} placeholder={tr("ph_subjectCategories")} style={taSt} /></div>
+              <div><Lbl>{tr("recipients")}</Lbl>
                 <textarea value={d.recipients} onChange={e => upDesc({ recipients: e.target.value })}
-                  rows={2} placeholder="es. partner, autorità pubbliche…" style={taSt} /></div>
-              <div><Lbl>Periodo di conservazione</Lbl>
+                  rows={2} placeholder={tr("ph_recipients")} style={taSt} /></div>
+              <div><Lbl>{tr("retention")}</Lbl>
                 <input value={d.retention_period} onChange={e => upDesc({ retention_period: e.target.value })}
-                  style={inputSt} placeholder="es. 5 anni dalla cessazione" /></div>
+                  style={inputSt} placeholder={tr("ph_retention")} /></div>
             </div>
           </div>
         </div>
@@ -1007,33 +1006,33 @@ export default function DPIAPage() {
         {/* Assets */}
         <div style={{ ...cardSt, padding: 16 }}>
           <div className="flex items-center justify-between mb-3">
-            <p style={{ fontSize: 12, fontWeight: 600, color: T.text }}>Asset che trattano i dati</p>
+            <p style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{tr("assetsTitle")}</p>
             <button onClick={addAsset} style={{ ...navBtnSt(false), display: "flex", alignItems: "center", gap: 4 }}>
-              <Plus className="h-3 w-3" /> Aggiungi
+              <Plus className="h-3 w-3" /> {tr("add")}
             </button>
           </div>
           {d.assets.length === 0 && (
             <p style={{ fontSize: 12, color: T.faint, textAlign: "center", padding: "12px 0" }}>
-              Nessun asset. Aggiungere database, applicazioni, infrastrutture.
+              {tr("noAssets")}
             </p>
           )}
           {d.assets.map(a => (
             <div key={a.id} style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 2fr auto", gap: 8, marginBottom: 8, alignItems: "end" }}>
-              <div><Lbl>Nome asset</Lbl>
-                <input value={a.name} onChange={e => upAsset(a.id, { name: e.target.value })} style={inputSt} placeholder="es. Database HR" /></div>
-              <div><Lbl>Tipo</Lbl>
+              <div><Lbl>{tr("assetName")}</Lbl>
+                <input value={a.name} onChange={e => upAsset(a.id, { name: e.target.value })} style={inputSt} placeholder={tr("ph_assetName")} /></div>
+              <div><Lbl>{tr("typeWord")}</Lbl>
                 <Sel value={a.type} onChange={v => upAsset(a.id, { type: v as DPIAAsset["type"] })}
                   options={[
-                    { value: "hardware",  label: "Hardware / server" },
-                    { value: "software",  label: "Software / applicazione" },
-                    { value: "network",   label: "Rete / infrastruttura" },
-                    { value: "database",  label: "Database / storage" },
-                    { value: "document",  label: "Documento cartaceo" },
-                    { value: "person",    label: "Persona (accesso fisico)" },
-                    { value: "other",     label: "Altro" },
+                    { value: "hardware",  label: tr("asset_hardware") },
+                    { value: "software",  label: tr("asset_software") },
+                    { value: "network",   label: tr("asset_network") },
+                    { value: "database",  label: tr("asset_database") },
+                    { value: "document",  label: tr("asset_document") },
+                    { value: "person",    label: tr("asset_person") },
+                    { value: "other",     label: tr("asset_other") },
                   ]} /></div>
-              <div><Lbl>Descrizione</Lbl>
-                <input value={a.description} onChange={e => upAsset(a.id, { description: e.target.value })} style={inputSt} placeholder="Ruolo nel trattamento…" /></div>
+              <div><Lbl>{tr("descriptionWord")}</Lbl>
+                <input value={a.description} onChange={e => upAsset(a.id, { description: e.target.value })} style={inputSt} placeholder={tr("ph_assetRole")} /></div>
               <button onClick={() => delAsset(a.id)} style={{ padding: "7px 9px", borderRadius: 8, border: `1px solid ${T.redBdr}`, background: T.redBg, color: T.red, cursor: "pointer" }}>
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
@@ -1043,28 +1042,28 @@ export default function DPIAPage() {
 
         {/* Codes & opinions */}
         <div style={{ ...cardSt, padding: 16 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>Codici di condotta, certificazioni e opinioni degli interessati</p>
+          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>{tr("codesTitle")}</p>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 10 }}>
-            <div><Lbl>Codici di condotta applicabili (Art. 40)</Lbl>
-              <input value={d.codes_of_conduct} onChange={e => upDesc({ codes_of_conduct: e.target.value })} style={inputSt} placeholder="es. Codice EDPB settore sanitario" /></div>
-            <div><Lbl>Certificazioni (Art. 42)</Lbl>
-              <input value={d.certifications} onChange={e => upDesc({ certifications: e.target.value })} style={inputSt} placeholder="es. ISO 27001, ISDP 10003" /></div>
+            <div><Lbl>{tr("codesOfConduct")}</Lbl>
+              <input value={d.codes_of_conduct} onChange={e => upDesc({ codes_of_conduct: e.target.value })} style={inputSt} placeholder={tr("ph_codesOfConduct")} /></div>
+            <div><Lbl>{tr("certifications")}</Lbl>
+              <input value={d.certifications} onChange={e => upDesc({ certifications: e.target.value })} style={inputSt} placeholder={tr("ph_certifications")} /></div>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <div><Lbl>Opinioni degli interessati raccolte?</Lbl>
+            <div><Lbl>{tr("opinionsCollected")}</Lbl>
               <Sel value={d.data_subjects_opinions as "collected"|"not_applicable"|"not_collected"|""} onChange={v => upDesc({ data_subjects_opinions: v as typeof d.data_subjects_opinions })}
                 options={[
-                  { value: "collected", label: "Sì, raccolte" },
-                  { value: "not_collected", label: "Non raccolte" },
-                  { value: "not_applicable", label: "Non applicabile" },
+                  { value: "collected", label: tr("opinions_collected") },
+                  { value: "not_collected", label: tr("opinions_notCollected") },
+                  { value: "not_applicable", label: tr("opinions_na") },
                 ]} /></div>
-            <div><Lbl>Giustificazione (se non raccolte)</Lbl>
-              <input value={d.data_subjects_opinions_justification} onChange={e => upDesc({ data_subjects_opinions_justification: e.target.value })} style={inputSt} placeholder="Motivazione…" /></div>
+            <div><Lbl>{tr("opinionsJustification")}</Lbl>
+              <input value={d.data_subjects_opinions_justification} onChange={e => upDesc({ data_subjects_opinions_justification: e.target.value })} style={inputSt} placeholder={tr("ph_reason")} /></div>
           </div>
           {d.data_subjects_opinions === "collected" && (
-            <div style={{ marginTop: 10 }}><Lbl>Dettaglio delle opinioni raccolte</Lbl>
+            <div style={{ marginTop: 10 }}><Lbl>{tr("opinionsDetails")}</Lbl>
               <textarea value={d.data_subjects_opinions_details} onChange={e => upDesc({ data_subjects_opinions_details: e.target.value })}
-                rows={2} placeholder="Sintetizzare le principali opinioni/osservazioni ricevute…" style={taSt} /></div>
+                rows={2} placeholder={tr("ph_opinionsDetails")} style={taSt} /></div>
           )}
         </div>
       </div>
@@ -1080,19 +1079,19 @@ export default function DPIAPage() {
         <ProportionalityBalance dpia={doc} />
         {/* Necessity */}
         <div style={{ ...cardSt, padding: 16 }}>
-          <Lbl required>Giustificazione della necessità del trattamento</Lbl>
+          <Lbl required>{tr("necessityJustification")}</Lbl>
           <textarea value={p.necessity_justification} onChange={e => upProp({ necessity_justification: e.target.value })}
-            rows={4} placeholder="Dimostrare che il trattamento è necessario e proporzionato rispetto alle finalità. Non esiste alternativa meno invasiva?" style={taSt} />
+            rows={4} placeholder={tr("ph_necessity")} style={taSt} />
         </div>
 
         {/* Proportionality checks table */}
         <div style={{ ...cardSt, padding: 16 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>Verifica principi GDPR (Art. 5)</p>
+          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>{tr("gdprPrinciples")}</p>
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
               <thead>
                 <tr style={{ borderBottom: `1px solid ${T.border}` }}>
-                  {["Principio", "Stato", "Note"].map(h => (
+                  {[tr("colPrinciple"), tr("colStatus"), tr("colNotes")].map(h => (
                     <th key={h} style={{ textAlign: "left", padding: "6px 8px", fontWeight: 600, color: T.muted, whiteSpace: "nowrap" }}>{h}</th>
                   ))}
                 </tr>
@@ -1101,21 +1100,21 @@ export default function DPIAPage() {
                 {p.proportionality_checks.map(c => (
                   <tr key={c.id} style={{ borderBottom: `1px solid ${T.border}` }}>
                     <td style={{ padding: "8px 8px", verticalAlign: "top" }}>
-                      <p style={{ fontWeight: 500, color: T.text, marginBottom: 2 }}>{c.principle}</p>
-                      <p style={{ fontSize: 11, color: T.muted }}>{c.description}</p>
+                      <p style={{ fontWeight: 500, color: T.text, marginBottom: 2 }}>{tr(`prop_${c.id}_principle`)}</p>
+                      <p style={{ fontSize: 11, color: T.muted }}>{tr(`prop_${c.id}_desc`)}</p>
                     </td>
                     <td style={{ padding: "8px 8px", verticalAlign: "top", width: 160 }}>
                       <Sel value={c.status as "compliant"|"partial"|"non_compliant"|"na"|""} onChange={v => upPropCheck(c.id, { status: v as typeof c.status })}
                         options={[
-                          { value: "compliant", label: "Conforme" },
-                          { value: "partial", label: "Parziale" },
-                          { value: "non_compliant", label: "Non conforme" },
+                          { value: "compliant", label: tr("st_compliant") },
+                          { value: "partial", label: tr("st_partial") },
+                          { value: "non_compliant", label: tr("st_nonCompliant") },
                           { value: "na", label: "N/A" },
                         ]} />
                     </td>
                     <td style={{ padding: "8px 8px", verticalAlign: "top" }}>
                       <input value={c.notes} onChange={e => upPropCheck(c.id, { notes: e.target.value })}
-                        placeholder="Osservazioni…" style={inputSt} />
+                        placeholder={tr("ph_observations")} style={inputSt} />
                     </td>
                   </tr>
                 ))}
@@ -1126,22 +1125,22 @@ export default function DPIAPage() {
 
         {/* Rights checks */}
         <div style={{ ...cardSt, padding: 16 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>Verifica diritti degli interessati</p>
+          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>{tr("rightsCheckTitle")}</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {p.rights_checks.map(r => (
               <div key={r.id} style={{ display: "grid", gridTemplateColumns: "2fr 120px 2fr", gap: 8, alignItems: "end", padding: "8px 0", borderBottom: `1px solid ${T.border}` }}>
                 <div>
-                  <p style={{ fontSize: 12, fontWeight: 500, color: T.text }}>{r.right}</p>
+                  <p style={{ fontSize: 12, fontWeight: 500, color: T.text }}>{tr(`right_${r.id}`)}</p>
                   <p style={{ fontSize: 11, color: T.muted }}>{r.article}</p>
                 </div>
                 <Sel value={r.applicable as "yes"|"no"|"partial"|""} onChange={v => upRightsCheck(r.id, { applicable: v as typeof r.applicable })}
                   options={[
-                    { value: "yes", label: "Applicabile" },
-                    { value: "partial", label: "Parziale" },
+                    { value: "yes", label: tr("rc_applicable") },
+                    { value: "partial", label: tr("st_partial") },
                     { value: "no", label: "N/A" },
                   ]} />
                 <input value={r.how_ensured} onChange={e => upRightsCheck(r.id, { how_ensured: e.target.value })}
-                  placeholder="Come viene garantito…" style={inputSt} />
+                  placeholder={tr("ph_howEnsured")} style={inputSt} />
               </div>
             ))}
           </div>
@@ -1149,19 +1148,19 @@ export default function DPIAPage() {
 
         {/* Transfers */}
         <div style={{ ...cardSt, padding: 16 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>Trasferimenti internazionali e clausole Art. 28</p>
+          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>{tr("transfersTitle")}</p>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <div><Lbl>Clausole contrattuali Art. 28 con responsabile?</Lbl>
+            <div><Lbl>{tr("art28Clauses")}</Lbl>
               <Sel value={p.processor_clauses_art28 as "yes"|"no"|"na"|""} onChange={v => upProp({ processor_clauses_art28: v as typeof p.processor_clauses_art28 })}
-                options={[{ value: "yes", label: "Sì" }, { value: "no", label: "No" }, { value: "na", label: "N/A" }]} /></div>
-            <div><Lbl>Trasferimenti fuori SEE (Artt. 44-49)?</Lbl>
+                options={[{ value: "yes", label: tr("yes") }, { value: "no", label: tr("no") }, { value: "na", label: "N/A" }]} /></div>
+            <div><Lbl>{tr("transfersOutsideEea")}</Lbl>
               <Sel value={p.international_transfers as "yes"|"no"|""} onChange={v => upProp({ international_transfers: v as typeof p.international_transfers })}
-                options={[{ value: "yes", label: "Sì" }, { value: "no", label: "No" }]} /></div>
+                options={[{ value: "yes", label: tr("yes") }, { value: "no", label: tr("no") }]} /></div>
           </div>
           {p.international_transfers === "yes" && (
-            <div style={{ marginTop: 10 }}><Lbl>Garanzie per i trasferimenti (SCC, BCR, adequacy decision…)</Lbl>
+            <div style={{ marginTop: 10 }}><Lbl>{tr("transferSafeguards")}</Lbl>
               <textarea value={p.international_transfers_safeguards} onChange={e => upProp({ international_transfers_safeguards: e.target.value })}
-                rows={2} placeholder="Descrivere le garanzie appropriate adottate…" style={taSt} /></div>
+                rows={2} placeholder={tr("ph_safeguards")} style={taSt} /></div>
           )}
         </div>
       </div>
@@ -1174,12 +1173,12 @@ export default function DPIAPage() {
     const { threats, overall_risk_before } = doc.risks;
 
     const categories: { id: DPIAThreat["category"]; label: string; description: string }[] = [
-      { id: "illegitimate_access", label: "Accesso illegittimo ai dati",
-        description: "Divulgazione non autorizzata, accesso non autorizzato, violazione della riservatezza." },
-      { id: "unwanted_modification", label: "Modifica indesiderata dei dati",
-        description: "Alterazione, corruzione, manipolazione dei dati personali — violazione dell'integrità." },
-      { id: "data_disappearance", label: "Scomparsa dei dati",
-        description: "Perdita, distruzione, cancellazione accidentale o impossibilità di accesso — violazione della disponibilità." },
+      { id: "illegitimate_access", label: tr("cat_illegit_label"),
+        description: tr("cat_illegit_desc") },
+      { id: "unwanted_modification", label: tr("cat_modif_label"),
+        description: tr("cat_modif_desc") },
+      { id: "data_disappearance", label: tr("cat_disap_label"),
+        description: tr("cat_disap_desc") },
     ];
 
     return (
@@ -1187,8 +1186,8 @@ export default function DPIAPage() {
         {/* Overall risk */}
         {overall_risk_before && (
           <div style={{ ...cardSt, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 12, color: T.muted }}>Rischio complessivo PRIMA delle misure:</span>
-            {riskBadge(overall_risk_before)}
+            <span style={{ fontSize: 12, color: T.muted }}>{tr("overallRiskBefore")}</span>
+            {riskBadge(overall_risk_before, tr)}
           </div>
         )}
 
@@ -1197,9 +1196,7 @@ export default function DPIAPage() {
           <div className="flex items-start gap-2">
             <Info className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: T.text }} />
             <p style={{ fontSize: 11, color: T.text, lineHeight: 1.6 }}>
-              <strong>WP248 §3:</strong> Identificare e valutare le fonti di rischio, gli impatti potenziali e le misure
-              esistenti per le tre categorie standard WP248: accesso illegittimo, modifica indesiderata, scomparsa dei dati.
-              Il livello di rischio è calcolato automaticamente: probabilità × gravità.
+              <strong>WP248 §3:</strong> {tr("wp248Body")}
             </p>
           </div>
         </div>
@@ -1216,7 +1213,7 @@ export default function DPIAPage() {
               transition: "all 0.15s",
             }}
           >
-            {showThreatCatalog ? "Chiudi catalogo" : "Seleziona da catalogo minacce"}
+            {showThreatCatalog ? tr("closeCatalog") : tr("threatCatalog")}
           </button>
         </div>
 
@@ -1239,12 +1236,12 @@ export default function DPIAPage() {
                   <p style={{ fontSize: 11, color: T.muted, marginTop: 2 }}>{cat.description}</p>
                 </div>
                 <button onClick={() => addThreat(cat.id)} style={{ ...navBtnSt(false), display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
-                  <Plus className="h-3 w-3" /> Aggiungi minaccia
+                  <Plus className="h-3 w-3" /> {tr("addThreat")}
                 </button>
               </div>
               {catThreats.length === 0 && (
                 <p style={{ fontSize: 12, color: T.faint, textAlign: "center", padding: "10px 0" }}>
-                  Nessuna minaccia. Aggiungere almeno una minaccia per questa categoria.
+                  {tr("noThreats")}
                 </p>
               )}
               {catThreats.map(t => (
@@ -1260,15 +1257,15 @@ export default function DPIAPage() {
                   <div className="flex items-start gap-2 mb-3">
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
                       <div>
-                        <Lbl>Fonte di rischio / agente di minaccia</Lbl>
+                        <Lbl>{tr("threatSource")}</Lbl>
                         <input value={t.source} onChange={e => upThreat(t.id, { source: e.target.value })}
-                          placeholder="es. hacker esterno, dipendente, errore di sistema, fornitore…"
+                          placeholder={tr("ph_threatSource")}
                           style={inputSt} />
                       </div>
                       <div>
-                        <Lbl required>Descrizione della minaccia e scenario</Lbl>
+                        <Lbl required>{tr("threatDesc")}</Lbl>
                         <textarea value={t.description} onChange={e => upThreat(t.id, { description: e.target.value })}
-                          rows={2} placeholder="Descrivere la minaccia, il suo scenario, i soggetti coinvolti…" style={taSt} />
+                          rows={2} placeholder={tr("ph_threatDesc")} style={taSt} />
                       </div>
                     </div>
                     <button onClick={() => delThreat(t.id)} style={{ padding: "6px 8px", borderRadius: 8, border: `1px solid ${T.redBdr}`, background: T.redBg, color: T.red, cursor: "pointer", marginTop: 16, flexShrink: 0 }}>
@@ -1279,26 +1276,26 @@ export default function DPIAPage() {
                   {/* Valutazione iniziale */}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 10 }}>
                     <div>
-                      <Lbl>Probabilità (iniziale)</Lbl>
+                      <Lbl>{tr("likelihoodInitial")}</Lbl>
                       <Sel value={t.likelihood} onChange={v => upThreat(t.id, { likelihood: v as DPIAThreat["likelihood"] })}
-                        options={[{ value: "low", label: "Bassa" }, { value: "medium", label: "Media" }, { value: "high", label: "Alta" }]} />
+                        options={[{ value: "low", label: tr("low") }, { value: "medium", label: tr("medium") }, { value: "high", label: tr("high") }]} />
                     </div>
                     <div>
-                      <Lbl>Gravità (iniziale)</Lbl>
+                      <Lbl>{tr("severityInitial")}</Lbl>
                       <Sel value={t.severity} onChange={v => upThreat(t.id, { severity: v as DPIAThreat["severity"] })}
-                        options={[{ value: "low", label: "Bassa" }, { value: "medium", label: "Media" }, { value: "high", label: "Alta" }]} />
+                        options={[{ value: "low", label: tr("low") }, { value: "medium", label: tr("medium") }, { value: "high", label: tr("high") }]} />
                     </div>
                     <div style={{ display: "flex", alignItems: "flex-end", gap: 6, paddingBottom: 2 }}>
-                      <span style={{ fontSize: 11, color: T.muted }}>Rischio:</span>
-                      {riskBadge(t.risk_level)}
+                      <span style={{ fontSize: 11, color: T.muted }}>{tr("riskWord")}</span>
+                      {riskBadge(t.risk_level, tr)}
                     </div>
                   </div>
 
                   {/* Misura */}
                   <div style={{ marginBottom: 10 }}>
-                    <Lbl>Misura di sicurezza pianificata</Lbl>
+                    <Lbl>{tr("plannedMeasure")}</Lbl>
                     <textarea value={t.mitigation} onChange={e => upThreat(t.id, { mitigation: e.target.value })}
-                      rows={2} placeholder="Descrivere la misura tecnica o organizzativa per mitigare la minaccia…" style={taSt} />
+                      rows={2} placeholder={tr("ph_measure")} style={taSt} />
                   </div>
 
                   {/* Valutazione rischio residuo */}
@@ -1309,29 +1306,29 @@ export default function DPIAPage() {
                     padding: "10px 12px",
                   }}>
                     <p style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: T.muted, marginBottom: 8 }}>
-                      Dopo le misure — rischio residuo
+                      {tr("afterMeasures")}
                     </p>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
                       <div>
-                        <Lbl>Probabilità residua</Lbl>
+                        <Lbl>{tr("residualLikelihood")}</Lbl>
                         <Sel value={t.residual_likelihood} onChange={v => upThreat(t.id, { residual_likelihood: v as DPIAThreat["residual_likelihood"] })}
-                          options={[{ value: "low", label: "Bassa" }, { value: "medium", label: "Media" }, { value: "high", label: "Alta" }]} />
+                          options={[{ value: "low", label: tr("low") }, { value: "medium", label: tr("medium") }, { value: "high", label: tr("high") }]} />
                       </div>
                       <div>
-                        <Lbl>Gravità residua</Lbl>
+                        <Lbl>{tr("residualSeverity")}</Lbl>
                         <Sel value={t.residual_severity} onChange={v => upThreat(t.id, { residual_severity: v as DPIAThreat["residual_severity"] })}
-                          options={[{ value: "low", label: "Bassa" }, { value: "medium", label: "Media" }, { value: "high", label: "Alta" }]} />
+                          options={[{ value: "low", label: tr("low") }, { value: "medium", label: tr("medium") }, { value: "high", label: tr("high") }]} />
                       </div>
                       <div style={{ display: "flex", alignItems: "flex-end", gap: 6, paddingBottom: 2 }}>
-                        <span style={{ fontSize: 11, color: T.muted }}>Rischio residuo:</span>
-                        {riskBadge(t.residual_risk)}
+                        <span style={{ fontSize: 11, color: T.muted }}>{tr("residualRisk")}</span>
+                        {riskBadge(t.residual_risk, tr)}
                       </div>
                     </div>
                     {t.residual_likelihood && t.residual_severity && (
                       <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 8 }}>
-                        <span style={{ fontSize: 11, color: T.muted }}>Rischio residuo:</span>
-                        {riskBadge(computeRiskLevel(t.residual_likelihood, t.residual_severity))}
-                        <span style={{ fontSize: 10, color: T.faint }}>→ {t.residual_risk || "calcola"}</span>
+                        <span style={{ fontSize: 11, color: T.muted }}>{tr("residualRisk")}</span>
+                        {riskBadge(computeRiskLevel(t.residual_likelihood, t.residual_severity), tr)}
+                        <span style={{ fontSize: 10, color: T.faint }}>→ {t.residual_risk || tr("compute")}</span>
                       </div>
                     )}
                   </div>
@@ -1359,12 +1356,10 @@ export default function DPIAPage() {
               <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: T.red }} />
               <div>
                 <p style={{ fontSize: 12, fontWeight: 600, color: T.red, marginBottom: 4 }}>
-                  ⚠️ Consultazione preventiva (Art. 36 GDPR) richiesta
+                  ⚠️ {tr("priorConsultTitle")}
                 </p>
                 <p style={{ fontSize: 11, color: T.text, lineHeight: 1.5 }}>
-                  Il rischio residuo è <strong>ALTO</strong>. Il titolare deve consultare l'Autorità di controllo
-                  prima di procedere con il trattamento (Art. 36(1) GDPR). Compilare i campi di
-                  consultazione qui sotto.
+                  {tr("priorConsultBody1")} <strong>{tr("high")}</strong>. {tr("priorConsultBody2")}
                 </p>
               </div>
             </div>
@@ -1373,17 +1368,17 @@ export default function DPIAPage() {
 
         {/* Technical/org measures */}
         <div style={{ ...cardSt, padding: 16 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>Misure di sicurezza adottate</p>
+          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>{tr("securityMeasures")}</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div>
-              <Lbl required>Misure tecniche</Lbl>
+              <Lbl required>{tr("technicalMeasures")}</Lbl>
               <textarea value={m.technical_measures} onChange={e => upMeasures({ technical_measures: e.target.value })}
-                rows={4} placeholder="es. cifratura end-to-end, pseudonimizzazione, controllo accessi RBAC, monitoraggio delle anomalie, backup crittografato…" style={taSt} />
+                rows={4} placeholder={tr("ph_technicalMeasures")} style={taSt} />
             </div>
             <div>
-              <Lbl required>Misure organizzative</Lbl>
+              <Lbl required>{tr("organizationalMeasures")}</Lbl>
               <textarea value={m.organizational_measures} onChange={e => upMeasures({ organizational_measures: e.target.value })}
-                rows={4} placeholder="es. formazione del personale, policy di accesso, accordi di riservatezza, audit interni, procedure di incident response…" style={taSt} />
+                rows={4} placeholder={tr("ph_organizationalMeasures")} style={taSt} />
             </div>
           </div>
         </div>
@@ -1391,12 +1386,12 @@ export default function DPIAPage() {
         {/* Residual threats table */}
         {threats.length > 0 && (
           <div style={{ ...cardSt, padding: 16 }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>Rischio residuo per minaccia</p>
+            <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>{tr("residualByThreat")}</p>
             <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${T.border}` }}>
-                    {["Minaccia", "P. residua", "G. residua", "Rischio residuo"].map(h => (
+                    {[tr("colThreat"), tr("colResLik"), tr("colResSev"), tr("residualRiskCol")].map(h => (
                       <th key={h} style={{ textAlign: "left", padding: "6px 8px", fontWeight: 600, color: T.muted, whiteSpace: "nowrap" }}>{h}</th>
                     ))}
                   </tr>
@@ -1406,26 +1401,26 @@ export default function DPIAPage() {
                     <tr key={t.id} style={{ borderBottom: `1px solid ${T.border}` }}>
                       <td style={{ padding: "8px 8px", maxWidth: 280 }}>
                         <p style={{ color: T.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {t.description || <span style={{ color: T.faint }}>— minaccia senza descrizione —</span>}
+                          {t.description || <span style={{ color: T.faint }}>{tr("threatNoDesc")}</span>}
                         </p>
                       </td>
                       <td style={{ padding: "8px 8px", width: 130 }}>
                         <Sel value={t.residual_likelihood} onChange={v => upThreat(t.id, { residual_likelihood: v as DPIAThreat["residual_likelihood"] })}
-                          options={[{ value: "low", label: "Bassa" }, { value: "medium", label: "Media" }, { value: "high", label: "Alta" }]} />
+                          options={[{ value: "low", label: tr("low") }, { value: "medium", label: tr("medium") }, { value: "high", label: tr("high") }]} />
                       </td>
                       <td style={{ padding: "8px 8px", width: 130 }}>
                         <Sel value={t.residual_severity} onChange={v => upThreat(t.id, { residual_severity: v as DPIAThreat["residual_severity"] })}
-                          options={[{ value: "low", label: "Bassa" }, { value: "medium", label: "Media" }, { value: "high", label: "Alta" }]} />
+                          options={[{ value: "low", label: tr("low") }, { value: "medium", label: tr("medium") }, { value: "high", label: tr("high") }]} />
                       </td>
-                      <td style={{ padding: "8px 8px" }}>{riskBadge(t.residual_risk)}</td>
+                      <td style={{ padding: "8px 8px" }}>{riskBadge(t.residual_risk, tr)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
             <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 12, color: T.muted }}>Rischio residuo complessivo:</span>
-              {worstResidual ? riskBadge(worstResidual) : <span style={{ fontSize: 12, color: T.faint }}>—</span>}
+              <span style={{ fontSize: 12, color: T.muted }}>{tr("overallResidual")}</span>
+              {worstResidual ? riskBadge(worstResidual, tr) : <span style={{ fontSize: 12, color: T.faint }}>—</span>}
             </div>
           </div>
         )}
@@ -1434,20 +1429,20 @@ export default function DPIAPage() {
         {priorConsultation && (
           <div style={{ ...cardSt, padding: 16 }}>
             <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>
-              Consultazione preventiva — Art. 36 GDPR
+              {tr("priorConsultSection")}
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
-              <div><Lbl required>Autorità di controllo competente</Lbl>
+              <div><Lbl required>{tr("competentAuthority")}</Lbl>
                 <input value={m.prior_consultation_authority} onChange={e => upMeasures({ prior_consultation_authority: e.target.value })}
-                  style={inputSt} placeholder="es. Garante Privacy (IT), CNIL (FR), ICO (UK)…" /></div>
-              <div><Lbl>Data prevista di consultazione</Lbl>
+                  style={inputSt} placeholder={tr("ph_authority")} /></div>
+              <div><Lbl>{tr("plannedConsultDate")}</Lbl>
                 <input type="date" value={m.prior_consultation_date} onChange={e => upMeasures({ prior_consultation_date: e.target.value })}
                   style={inputSt} /></div>
             </div>
             {/* AG Part 6 — AI prior consultation check */}
             <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 12 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>✦ Verifica requisiti Art. 36 GDPR</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>✦ {tr("verifyArt36")}</span>
                 <button
                   disabled={priorConsultAILoading}
                   onClick={async () => {
@@ -1472,10 +1467,10 @@ export default function DPIAPage() {
                     color: priorConsultAILoading ? T.muted : "#fff", border: "none",
                     cursor: priorConsultAILoading ? "not-allowed" : "pointer",
                   }}>
-                  {priorConsultAILoading ? "Analisi…" : "✦ Analizza obblighi"}
+                  {priorConsultAILoading ? tr("analyzing") : tr("analyzeObligations")}
                 </button>
               </div>
-              {priorConsultAIError && <p style={{ fontSize: 11, color: T.red }}>Errore. Riprova.</p>}
+              {priorConsultAIError && <p style={{ fontSize: 11, color: T.red }}>{tr("errorRetry")}</p>}
               {priorConsultAIResult && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   <p style={{ fontSize: 12, color: T.text }}>{priorConsultAIResult.gdprArticle36Assessment}</p>
@@ -1488,7 +1483,7 @@ export default function DPIAPage() {
                           <span style={{ fontSize: 10, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
                             background: a.priority === "obbligatorio" ? "rgba(220,38,38,0.2)" : "rgba(202,138,4,0.2)",
                             color: a.priority === "obbligatorio" ? T.red : T.amber, whiteSpace: "nowrap" }}>
-                            {a.priority === "obbligatorio" ? "OBB" : "RAC"}
+                            {a.priority === "obbligatorio" ? tr("mandatoryAbbr") : tr("recommendedAbbr")}
                           </span>
                           <div>
                             <p style={{ fontSize: 11, fontWeight: 500, color: T.text, margin: 0 }}>{a.action}</p>
@@ -1500,13 +1495,13 @@ export default function DPIAPage() {
                   )}
                   {priorConsultAIResult.submissionChecklist.length > 0 && (
                     <div>
-                      <p style={{ fontSize: 11, fontWeight: 600, color: T.text, marginBottom: 4 }}>Checklist invio:</p>
+                      <p style={{ fontSize: 11, fontWeight: 600, color: T.text, marginBottom: 4 }}>{tr("submissionChecklist")}</p>
                       <ul style={{ margin: 0, paddingLeft: 16, fontSize: 11, color: T.muted }}>
                         {priorConsultAIResult.submissionChecklist.map((item, i) => <li key={i}>{item}</li>)}
                       </ul>
                     </div>
                   )}
-                  <p style={{ fontSize: 10, color: T.faint }}>✦ AI — verifica e conferma</p>
+                  <p style={{ fontSize: 10, color: T.faint }}>✦ {tr("aiVerifyConfirm")}</p>
                 </div>
               )}
             </div>
@@ -1515,19 +1510,19 @@ export default function DPIAPage() {
 
         {/* Review schedule */}
         <div style={{ ...cardSt, padding: 16 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>Pianificazione delle revisioni</p>
+          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>{tr("reviewPlanning")}</p>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <div><Lbl>Frequenza di revisione</Lbl>
+            <div><Lbl>{tr("reviewFrequency")}</Lbl>
               <Sel value={m.review_schedule as "annual"|"biannual"|"quarterly"|"event_driven"|""} onChange={v => upMeasures({ review_schedule: v })}
                 options={[
-                  { value: "annual", label: "Annuale" },
-                  { value: "biannual", label: "Semestrale" },
-                  { value: "quarterly", label: "Trimestrale" },
-                  { value: "event_driven", label: "A seguito di eventi significativi" },
+                  { value: "annual", label: tr("freq_annual") },
+                  { value: "biannual", label: tr("freq_biannual") },
+                  { value: "quarterly", label: tr("freq_quarterly") },
+                  { value: "event_driven", label: tr("freq_event") },
                 ]} /></div>
-            <div><Lbl>Trigger per revisione straordinaria</Lbl>
+            <div><Lbl>{tr("extraReviewTrigger")}</Lbl>
               <input value={m.review_trigger} onChange={e => upMeasures({ review_trigger: e.target.value })}
-                style={inputSt} placeholder="es. violazione dati, cambio finalità, nuova tecnologia…" /></div>
+                style={inputSt} placeholder={tr("ph_reviewTrigger")} /></div>
           </div>
         </div>
 
@@ -1550,9 +1545,9 @@ export default function DPIAPage() {
     const isStale = savedHash !== null && savedHash !== currentHash && !stalenessDismissed;
 
     const compliantOptions: { value: "yes"|"no"|"conditional"; label: string; color: string; bg: string; border: string }[] = [
-      { value: "yes", label: "Conforme — si può procedere", color: T.green, bg: T.greenBg, border: T.greenBdr },
-      { value: "conditional", label: "Condizionalmente conforme", color: T.amber, bg: T.amberBg, border: T.amberBdr },
-      { value: "no", label: "Non conforme — non procedere", color: T.red, bg: T.redBg, border: T.redBdr },
+      { value: "yes", label: tr("concl_yes"), color: T.green, bg: T.greenBg, border: T.greenBdr },
+      { value: "conditional", label: tr("concl_conditional"), color: T.amber, bg: T.amberBg, border: T.amberBdr },
+      { value: "no", label: tr("concl_no"), color: T.red, bg: T.redBg, border: T.redBdr },
     ];
 
     return (
@@ -1562,24 +1557,24 @@ export default function DPIAPage() {
           <div style={{ ...cardSt, padding: "12px 16px", background: T.amberBg, border: `1px solid ${T.amberBdr}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
             <div>
               <p style={{ fontSize: 12, fontWeight: 600, color: T.amber, margin: "0 0 2px" }}>
-                ⚠ La DPIA potrebbe essere da rivedere
+                ⚠ {tr("staleTitle")}
               </p>
               <p style={{ fontSize: 11, color: T.muted, margin: 0 }}>
-                I dati del trattamento sono cambiati dall&apos;ultimo sign-off. Verifica se la valutazione è ancora valida (WP248: la DPIA è un processo continuo).
+                {tr("staleBody")}
               </p>
             </div>
             <button
               onClick={() => { writeToStorage("dpiaStaleness", currentHash); setSavedHash(currentHash); setStalenessDismissed(true); }}
               style={{ fontSize: 11, fontWeight: 500, padding: "5px 10px", borderRadius: 6, border: `1px solid ${T.amberBdr}`, background: T.card, color: T.amber, cursor: "pointer", whiteSpace: "nowrap" }}
             >
-              Segna come rivisto
+              {tr("markReviewed")}
             </button>
           </div>
         )}
 
         {/* Compliant */}
         <div style={{ ...cardSt, padding: 16 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>Conclusione DPIA</p>
+          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>{tr("conclusionTitle")}</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {compliantOptions.map(o => (
               <button key={o.value} onClick={() => upConclusion({ compliant: o.value })}
@@ -1608,39 +1603,39 @@ export default function DPIAPage() {
         {/* Conditions */}
         {c.compliant === "conditional" && (
           <div style={{ ...cardSt, padding: 16 }}>
-            <Lbl required>Condizioni da soddisfare prima di procedere</Lbl>
+            <Lbl required>{tr("conditionsLabel")}</Lbl>
             <textarea value={c.conditions} onChange={e => upConclusion({ conditions: e.target.value })}
-              rows={3} placeholder="Descrivere le condizioni o le misure correttive necessarie prima di avviare il trattamento…" style={taSt} />
+              rows={3} placeholder={tr("ph_conditions")} style={taSt} />
           </div>
         )}
 
         {/* Summary */}
         <div style={{ ...cardSt, padding: 16 }}>
-          <Lbl>Sintesi esecutiva</Lbl>
+          <Lbl>{tr("execSummary")}</Lbl>
           <textarea value={c.summary} onChange={e => upConclusion({ summary: e.target.value })}
-            rows={5} placeholder="Sintetizzare i risultati principali della DPIA: trattamento analizzato, rischi identificati, misure adottate, conclusione…" style={taSt} />
+            rows={5} placeholder={tr("ph_execSummary")} style={taSt} />
         </div>
 
         {/* Review date */}
         <div style={{ ...cardSt, padding: 16 }}>
-          <Lbl>Data della prossima revisione</Lbl>
+          <Lbl>{tr("nextReviewDate")}</Lbl>
           <input type="date" value={c.next_review_date} onChange={e => upConclusion({ next_review_date: e.target.value })}
             style={{ ...inputSt, width: 200 }} />
         </div>
 
         {/* Actions */}
         <div style={{ ...cardSt, padding: 16 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>Azioni</p>
+          <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>{tr("actions")}</p>
           <div className="flex items-center gap-3 flex-wrap">
             <button onClick={saveToDossier}
               style={{ ...navBtnSt(true), display: "flex", alignItems: "center", gap: 6 }}>
               <FileText className="h-3.5 w-3.5" />
-              Salva nel dossier
+              {tr("saveToDossier")}
             </button>
             <button onClick={downloadReport}
               style={{ ...navBtnSt(false), display: "flex", alignItems: "center", gap: 6 }}>
               <Download className="h-3.5 w-3.5" />
-              Scarica report (.txt)
+              {tr("downloadReport")}
             </button>
           </div>
         </div>
@@ -1648,16 +1643,16 @@ export default function DPIAPage() {
         {/* Rischi correlati DPIA ⇄ FRIA */}
         <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)", padding: 20, marginBottom: 16 }}>
           <p style={{ fontSize: 13, fontWeight: 600, color: "#0D1016", margin: "0 0 6px" }}>
-            Rischi correlati DPIA ⇄ FRIA
+            {tr("correlatedRisksTitle")}
           </p>
           <p style={{ fontSize: 11, color: "rgba(0,0,0,0.40)", margin: "0 0 14px" }}>
-            Rischi generati automaticamente dalla correlazione WP29 / DIHR. Applica le mitigazioni al Risk Manager.
+            {tr("correlatedRisksSub")}
           </p>
           <CorrelatedRisksPanel />
         </div>
 
         {/* Sign-off */}
-        <SignOffPanel toolKey="dpia" toolLabel="DPIA Art. 35 GDPR" />
+        <SignOffPanel toolKey="dpia" toolLabel={tr("signOffLabel")} />
       </div>
     );
   }
@@ -1697,8 +1692,8 @@ export default function DPIAPage() {
             onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(35,64,58,0.22)"; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(0,0,0,0.08)"; }}
           >
-            <span style={{ fontSize: 11, fontWeight: 600, color: T.muted }}>Form strutturato</span>
-            <span style={{ fontSize: 9, color: T.faint }}>6 step · compilazione diretta</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: T.muted }}>{tr("modeFormTitle")}</span>
+            <span style={{ fontSize: 9, color: T.faint }}>{tr("modeFormDescShort")}</span>
           </button>
           <div style={{
             display: "flex", flexDirection: "column", gap: 2,
@@ -1706,8 +1701,8 @@ export default function DPIAPage() {
             border: `1px solid rgba(35,64,58,0.22)`,
             background: "rgba(35,64,58,0.05)",
           }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: T.text }}>DPIA guidata</span>
-            <span style={{ fontSize: 9, color: T.muted }}>Domande guidate · AI compila per te</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: T.text }}>{tr("modeGuidedTitle")}</span>
+            <span style={{ fontSize: 9, color: T.muted }}>{tr("modeGuidedDescShort")}</span>
           </div>
         </div>
         {/* Layout 3 colonne */}
@@ -1728,10 +1723,10 @@ export default function DPIAPage() {
         <div className="flex items-start justify-between" style={{ marginBottom: 16 }}>
           <div>
             <h1 style={{ fontSize: 18, fontWeight: 700, color: T.text, marginBottom: 4 }}>
-              Valutazione d&apos;Impatto sulla Protezione dei Dati
+              {tr("pageTitle")}
             </h1>
             <p style={{ fontSize: 12, color: T.muted }}>
-              Art. 35 GDPR · Metodologia WP248 rev.01 (Gruppo di Lavoro Art. 29, ottobre 2017)
+              {tr("pageSubtitle")}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -1750,7 +1745,7 @@ export default function DPIAPage() {
                 }}
               >
                 <FileText className="h-3.5 w-3.5" />
-                <span>Documento</span>
+                <span>{tr("documentWord")}</span>
                 <span style={{ fontSize: 10, fontWeight: 700, color, background: "rgba(0,0,0,0.04)", padding: "1px 6px", borderRadius: 9999 }}>
                   {progress.overallPercent}%
                 </span>
@@ -1829,7 +1824,7 @@ export default function DPIAPage() {
                   setAiPrefillDone(true);
                 }
               } catch {
-                setAiPrefillError("Errore durante la pre-compilazione AI.");
+                setAiPrefillError(tr("aiPrefillError"));
               }
               setAiPrefillLoading(false);
             }}
@@ -1855,19 +1850,19 @@ export default function DPIAPage() {
             }}
           >
             {aiPrefillLoading
-              ? "⏳ Pre-compilazione…"
+              ? tr("aiPrefilling")
               : aiPrefillDone
-                ? "✓ AI applicata"
+                ? tr("aiApplied")
                 : (!intake.systemName.trim() || !intake.processingPurpose.trim())
-                  ? "✦ Pre-compila fasi 2-3-4 (compila contesto ↓)"
-                  : "✦ Pre-compila fasi 2-3-4 con AI"}
+                  ? tr("aiPrefillContextFirst")
+                  : tr("aiPrefillBtn")}
           </button>
           {aiPrefillError && (
             <span style={{ fontSize: 11, color: "#b91c1c" }}>⚠ {aiPrefillError}</span>
           )}
           {saved && (
             <span style={{ fontSize: 11, color: T.green, display: "flex", alignItems: "center", gap: 4 }}>
-              <Check className="h-3.5 w-3.5" /> Salvato
+              <Check className="h-3.5 w-3.5" /> {tr("saved")}
             </span>
           )}
           <span style={{
@@ -1877,7 +1872,7 @@ export default function DPIAPage() {
             border: `1px solid ${priorConsultation ? T.redBdr : doc.screening.dpia_required === "yes" ? T.amberBdr : T.greenBdr}`,
             fontWeight: 600,
           }}>
-            {priorConsultation ? "Consultazione preventiva" : doc.screening.dpia_required === "yes" ? "DPIA richiesta" : doc.screening.dpia_required === "uncertain" ? "Incerto" : "Screening in corso"}
+            {priorConsultation ? tr("badgePriorConsult") : doc.screening.dpia_required === "yes" ? tr("badgeDpiaRequired") : doc.screening.dpia_required === "uncertain" ? tr("badgeUncertain") : tr("badgeScreening")}
           </span>
         </div>
         </div>
@@ -1892,8 +1887,8 @@ export default function DPIAPage() {
             background: "rgba(35,64,58,0.05)",
             minWidth: 190,
           }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: T.text }}>Form strutturato</span>
-            <span style={{ fontSize: 10, color: T.muted, lineHeight: 1.4 }}>6 step · compilazione diretta</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: T.text }}>{tr("modeFormTitle")}</span>
+            <span style={{ fontSize: 10, color: T.muted, lineHeight: 1.4 }}>{tr("modeFormDescShort")}</span>
           </div>
           {/* DPIA guidata — inactive, clickable */}
           <button
@@ -1915,8 +1910,8 @@ export default function DPIAPage() {
               e.currentTarget.style.background = T.card;
             }}
           >
-            <span style={{ fontSize: 11, fontWeight: 700, color: T.text }}>DPIA guidata</span>
-            <span style={{ fontSize: 10, color: T.muted, lineHeight: 1.4 }}>Domande guidate · AI compila per te</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: T.text }}>{tr("modeGuidedTitle")}</span>
+            <span style={{ fontSize: 10, color: T.muted, lineHeight: 1.4 }}>{tr("modeGuidedDescShort")}</span>
           </button>
         </div>
       </div>
@@ -1943,7 +1938,7 @@ export default function DPIAPage() {
           {/* Rail header */}
           <div style={{ padding: "12px 12px 10px", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-              <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Documento</span>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>{tr("documentWord")}</span>
               <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", fontFamily: "monospace" }}>{computeDpiaProgress(doc).overallPercent}%</span>
             </div>
             <div style={{ width: "100%", height: 4, background: "rgba(0,0,0,0.07)", borderRadius: 2, overflow: "hidden" }}>
@@ -2061,12 +2056,12 @@ export default function DPIAPage() {
           {/* Step header */}
           <div style={{ marginBottom: 16 }}>
             <p style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-              Step {step} / 5
+              {tr("stepWord")} {step} / 5
             </p>
             <h2 style={{ fontSize: 15, fontWeight: 700, color: T.text }}>
-              {STEPS[step].label}
+              {tr(`step${step}_label`)}
               <span style={{ fontSize: 12, fontWeight: 400, color: T.muted, marginLeft: 8 }}>
-                {STEPS[step].sub}
+                {tr(`step${step}_sub`)}
               </span>
             </h2>
           </div>
@@ -2079,19 +2074,19 @@ export default function DPIAPage() {
               onClick={() => setStep(s => Math.max(0, s - 1) as Step)}
               disabled={step === 0}
               style={{ ...navBtnSt(false), display: "flex", alignItems: "center", gap: 4, opacity: step === 0 ? 0.35 : 1 }}>
-              <ChevronLeft className="h-4 w-4" /> Precedente
+              <ChevronLeft className="h-4 w-4" /> {tr("previous")}
             </button>
             <span style={{ fontSize: 11, color: T.faint }}>{step + 1} / {STEPS.length}</span>
             {step < STEPS.length - 1 ? (
               <button
                 onClick={() => setStep(s => Math.min(STEPS.length - 1, s + 1) as Step)}
                 style={{ ...navBtnSt(true), display: "flex", alignItems: "center", gap: 4 }}>
-                Avanti <ChevronRight className="h-4 w-4" />
+                {tr("next")} <ChevronRight className="h-4 w-4" />
               </button>
             ) : (
               <button onClick={saveToDossier}
                 style={{ ...navBtnSt(true), display: "flex", alignItems: "center", gap: 4 }}>
-                <CheckCircle2 className="h-4 w-4" /> Completa DPIA
+                <CheckCircle2 className="h-4 w-4" /> {tr("completeDpia")}
               </button>
             )}
           </div>
@@ -2125,9 +2120,9 @@ export default function DPIAPage() {
               flexShrink: 0,
             }}>
               <div>
-                <p style={{ fontSize: 13, fontWeight: 700, color: T.text, margin: 0 }}>Documento DPIA</p>
+                <p style={{ fontSize: 13, fontWeight: 700, color: T.text, margin: 0 }}>{tr("dpiaDocument")}</p>
                 <p style={{ fontSize: 10, color: T.muted, margin: "2px 0 0" }}>
-                  Art. 35 GDPR · WP248 rev.01 — aggiornato in tempo reale
+                  {tr("realTimeUpdated")}
                 </p>
               </div>
               <button
