@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import type { CSSProperties } from "react";
 import { draftRightImpact, type RightImpactDraft } from "@/app/actions/draftRightImpact";
 import type { FRIASeverityAssessment } from "@/lib/simulation/fria-engine";
+import { useT } from "@/i18n/LocaleProvider";
 
 const T = {
   text: "#0D1016", muted: "rgba(0,0,0,0.42)", faint: "rgba(0,0,0,0.28)",
@@ -26,6 +27,7 @@ interface RightImpactAIDraftProps {
 }
 
 export function RightImpactAIDraft({ ...props }: RightImpactAIDraftProps) {
+  const t = useT("toolFria");
   const [loading, setLoading] = useState(false);
   const [draft, setDraft] = useState<RightImpactDraft | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -64,23 +66,23 @@ export function RightImpactAIDraft({ ...props }: RightImpactAIDraftProps) {
     <div style={{ marginBottom: 12 }}>
       {!draft && !loading && (
         <button onClick={handleGenerate} style={{ ...btnSt, background: "rgba(0,0,0,0.04)" }}>
-          ✦ Genera bozza AI per questo diritto
+          ✦ {t("riad_generate")}
         </button>
       )}
-      {loading && <span style={{ fontSize: 11, color: T.muted }}>⟳ Generazione in corso…</span>}
+      {loading && <span style={{ fontSize: 11, color: T.muted }}>⟳ {t("riad_generating")}</span>}
       {error && <p style={{ fontSize: 11, color: T.red }}>{error}</p>}
       {draft && !confirmed && (
         <div style={{ padding: 12, background: T.amberBg, border: `1px solid ${T.amberBdr}`, borderRadius: 8, marginTop: 6 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
             <span style={{ fontSize: 10, fontWeight: 700, color: T.amber, background: "rgba(202,138,4,0.12)", padding: "2px 7px", borderRadius: 9999 }}>
-              ✦ AI — verifica e conferma
+              ✦ {t("aiVerifyConfirm")}
             </span>
           </div>
           <p style={{ fontSize: 12, color: T.text, marginBottom: 6, lineHeight: 1.5 }}>{draft.scenario_brief}</p>
           <p style={{ fontSize: 11, color: T.muted, marginBottom: 8, fontStyle: "italic" }}>{draft.severity_rationale}</p>
           {draft.mitigation_hints.length > 0 && (
             <div style={{ marginBottom: 10 }}>
-              <p style={{ fontSize: 10, fontWeight: 600, color: T.text, marginBottom: 4 }}>Suggerimenti mitigazione:</p>
+              <p style={{ fontSize: 10, fontWeight: 600, color: T.text, marginBottom: 4 }}>{t("riad_mitigationHints")}</p>
               {draft.mitigation_hints.map((h, i) => (
                 <p key={i} style={{ fontSize: 11, color: T.muted, marginBottom: 2 }}>• {h}</p>
               ))}
@@ -88,19 +90,19 @@ export function RightImpactAIDraft({ ...props }: RightImpactAIDraftProps) {
           )}
           <div style={{ display: "flex", gap: 6 }}>
             <button onClick={handleConfirm} style={{ ...btnSt, background: T.text, color: "#fff", borderColor: T.text }}>
-              ✓ Conferma e applica
+              ✓ {t("riad_confirmApply")}
             </button>
             <button onClick={() => setDraft(null)} style={btnSt}>
-              ✕ Ignora
+              ✕ {t("riad_ignore")}
             </button>
             <button onClick={handleGenerate} style={btnSt}>
-              ↺ Rigenera
+              ↺ {t("riad_regenerate")}
             </button>
           </div>
         </div>
       )}
       {confirmed && (
-        <span style={{ fontSize: 11, color: T.green }}>✓ Applicato — rivedi e salva</span>
+        <span style={{ fontSize: 11, color: T.green }}>✓ {t("riad_applied")}</span>
       )}
     </div>
   );

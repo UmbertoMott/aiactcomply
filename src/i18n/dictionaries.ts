@@ -2877,6 +2877,9 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       cc_deployerLabel: "Ruolo deployer rilevato (da Classifier)", cc_deployerValue: "Sì — in quanto deployer, la supervisione umana è di vostra responsabilità",
       cc_header: "Pre-compilazione automatica — dati già rilevati", cc_sugOne: "suggerimento", cc_sugMany: "suggerimenti",
       cc_apply: "Applica", cc_note: "Nota",
+      riad_generate: "Genera bozza AI per questo diritto", riad_generating: "Generazione in corso…",
+      riad_mitigationHints: "Suggerimenti mitigazione:", riad_confirmApply: "Conferma e applica",
+      riad_ignore: "Ignora", riad_regenerate: "Rigenera", riad_applied: "Applicato — rivedi e salva",
     },
     toolDpia: {
       selectPlaceholder: "— seleziona —",
@@ -5989,6 +5992,9 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       cc_deployerLabel: "Deployer role detected (from Classifier)", cc_deployerValue: "Yes — as a deployer, human oversight is your responsibility",
       cc_header: "Automatic pre-fill — data already detected", cc_sugOne: "suggestion", cc_sugMany: "suggestions",
       cc_apply: "Apply", cc_note: "Note",
+      riad_generate: "Generate AI draft for this right", riad_generating: "Generation in progress…",
+      riad_mitigationHints: "Mitigation hints:", riad_confirmApply: "Confirm and apply",
+      riad_ignore: "Ignore", riad_regenerate: "Regenerate", riad_applied: "Applied — review and save",
     },
     toolDpia: {
       selectPlaceholder: "— select —",
