@@ -11,7 +11,7 @@ import { DPIA_SUBPOINTS } from "@/lib/dpia/dpia-template";
 import { DpiaProgressRail } from "./DpiaProgressRail";
 import { DpiaLivePreview } from "./DpiaLivePreview";
 import { DpiaGuidedChat } from "./DpiaGuidedChat";
-import { useT } from "@/i18n/LocaleProvider";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
 
 const T = {
   border: "rgba(0,0,0,0.08)",
@@ -41,6 +41,8 @@ interface DpiaGuidedModeProps {
 
 export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMode }: DpiaGuidedModeProps) {
   const t = useT("toolDpia");
+  const tg = useT("dpiaGuided");
+  const locale = useLocale();
   const [doc, setDoc] = useState<DpiaGuidedDoc>(() => {
     const saved = readFromStorage<DpiaGuidedDoc>("dpiaGuided");
     return saved ?? createEmptyGuidedDoc();
@@ -123,7 +125,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
     document.addEventListener("mouseup", onUp);
   }, [docWidth]);
 
-  const progress = computeGuidedDpiaProgress(doc);
+  const progress = computeGuidedDpiaProgress(doc, locale, tg);
 
   const saveDoc = useCallback((next: DpiaGuidedDoc) => {
     writeToStorage("dpiaGuided", next);

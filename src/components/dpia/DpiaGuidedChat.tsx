@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Check, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
-import { DPIA_SUBPOINTS } from "@/lib/dpia/dpia-template";
+import { getDpiaSubpoints } from "@/lib/dpia/dpia-template";
 import type { DpiaGuidedDoc, DpiaAnswer } from "@/lib/dpia/dpia-guided-types";
-import { useT } from "@/i18n/LocaleProvider";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
 import { nextSubPointId } from "@/lib/dpia/dpia-guided-progress";
 import { draftDpiaSubPointAnswer } from "@/app/actions/draftDpiaSubPointAnswer";
 import type { ClassifierResult, DataAuditResult } from "@/lib/dossier/storage-schema";
@@ -40,11 +40,17 @@ function optionExamples(examples: string[], fieldType: string): Record<string, s
              : null;
   if (!opts) return null;
   const result: Record<string, string> = {};
+  // Riconosce sia i prefissi IT (valore-storage) sia quelli EN degli esempi.
+  const EN_ALIAS: Record<string, string> = { "Sì": "yes", "No": "no", "Parzialmente": "partially" };
   for (const opt of opts) {
-    const ex = examples.find(e => e.toLowerCase().startsWith(opt.toLowerCase()));
+    const alias = EN_ALIAS[opt] ?? opt.toLowerCase();
+    const ex = examples.find(e => {
+      const low = e.toLowerCase();
+      return low.startsWith(opt.toLowerCase()) || low.startsWith(alias);
+    });
     if (ex) {
       // Rimuove il prefisso "Sì — " o "No — " o "Parzialmente — "
-      result[opt] = ex.replace(new RegExp(`^${opt}\\s*[\\u2014\\-]\\s*`, "i"), "");
+      result[opt] = ex.replace(new RegExp(`^(${opt}|${alias})\\s*[\\u2014\\-\\(]\\s*`, "i"), "");
     }
   }
   return Object.keys(result).length > 0 ? result : null;
@@ -64,6 +70,9 @@ export function DpiaGuidedChat({
   onAnswerUpdate, onNavigateToSubPoint, forcedSubPointId,
 }: DpiaGuidedChatProps) {
   const t = useT("toolDpia");
+  const tg = useT("dpiaGuided");
+  const locale = useLocale();
+  const DPIA_SUBPOINTS = getDpiaSubpoints(locale, tg);
   const allIds = DPIA_SUBPOINTS.map(sp => sp.id);
 
   const currentId = forcedSubPointId

@@ -1,9 +1,9 @@
 "use client";
 // Viewer centrale della DPIA guidata — anteprima HTML in stile documento PDF.
 import React from "react";
-import { DPIA_GUIDED_SECTIONS, DPIA_SUBPOINTS, DPIA_TEMPLATE_META } from "@/lib/dpia/dpia-template";
+import { getDpiaTemplateMeta } from "@/lib/dpia/dpia-template";
 import type { DpiaGuidedDoc } from "@/lib/dpia/dpia-guided-types";
-import { WP248_CRITERIA } from "@/lib/dpia/dpia-template";
+import { getWp248Criteria } from "@/lib/dpia/dpia-template";
 
 const DOC = {
   bg:        "#ffffff",
@@ -28,7 +28,7 @@ const DOC = {
   redBdr:    "rgba(185,28,28,0.18)",
 } as const;
 
-import { useT } from "@/i18n/LocaleProvider";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
 
 const SANS = "var(--font-inter, system-ui, sans-serif)";
 
@@ -102,6 +102,9 @@ function SectionHeader({ id, title, legalRef }: { id: string; title: string; leg
 
 function ScreeningSection({ doc }: { doc: DpiaGuidedDoc }) {
   const t = useT("toolDpia");
+  const tg = useT("dpiaGuided");
+  const locale = useLocale();
+  const WP248_CRITERIA = getWp248Criteria(locale, tg);
   const criterionLabel = (idx: number) => WP248_CRITERIA[idx]?.label ?? `Criterio ${idx + 1}`;
   const criterionRef   = (idx: number) => WP248_CRITERIA[idx]?.ref ?? "";
 
@@ -333,6 +336,9 @@ function PartiesSection({ doc }: { doc: DpiaGuidedDoc }) {
 
 function SignoffSection({ doc }: { doc: DpiaGuidedDoc }) {
   const t = useT("toolDpia");
+  const tg = useT("dpiaGuided");
+  const locale = useLocale();
+  const DPIA_TEMPLATE_META = getDpiaTemplateMeta(locale, tg);
   const compliant = doneValue(doc, "e_compliant");
   const compliantColor =
     compliant?.toLowerCase().includes("non confor") ? DOC.red
@@ -393,6 +399,9 @@ export interface DpiaLivePreviewProps {
 
 export function DpiaLivePreview({ doc, activeSection }: DpiaLivePreviewProps) {
   const t = useT("toolDpia");
+  const tg = useT("dpiaGuided");
+  const locale = useLocale();
+  const DPIA_TEMPLATE_META = getDpiaTemplateMeta(locale, tg);
   void activeSection;
   return (
     <div style={{ background: "#FAFAFA", minHeight: "100%", padding: "16px" }}>

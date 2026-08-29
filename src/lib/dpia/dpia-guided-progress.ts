@@ -2,7 +2,9 @@
 // Separato da dpia-progress.ts (che lavora su DPIAResult) per non rompere
 // il DPIATemplateViewer già esistente.
 import type { DpiaGuidedDoc } from "./dpia-guided-types";
-import { DPIA_GUIDED_SECTIONS, DPIA_SUBPOINTS } from "./dpia-template";
+import { DPIA_GUIDED_SECTIONS, DPIA_SUBPOINTS, getDpiaGuidedSections, getDpiaSubpoints } from "./dpia-template";
+
+type TFn = (key: string) => string;
 import type { DpiaSectionKey } from "./dpia-template";
 
 // ─── Tipi di output ───────────────────────────────────────────────────────────
@@ -33,9 +35,11 @@ export interface GuidedDpiaProgress {
 
 // ─── Calcolo principale ───────────────────────────────────────────────────────
 
-export function computeGuidedDpiaProgress(doc: DpiaGuidedDoc): GuidedDpiaProgress {
-  const sections: GuidedSectionProgress[] = DPIA_GUIDED_SECTIONS.map(sec => {
-    const subPoints = DPIA_SUBPOINTS.filter(sp => sp.sectionKey === sec.key);
+export function computeGuidedDpiaProgress(doc: DpiaGuidedDoc, locale = "it", t: TFn = (k) => k): GuidedDpiaProgress {
+  const SECTIONS = getDpiaGuidedSections(locale, t);
+  const SUBPOINTS = getDpiaSubpoints(locale, t);
+  const sections: GuidedSectionProgress[] = SECTIONS.map(sec => {
+    const subPoints = SUBPOINTS.filter(sp => sp.sectionKey === sec.key);
     const required  = subPoints.filter(sp => sp.required);
 
     const subSummaries: GuidedSubPointSummary[] = subPoints.map(sp => ({

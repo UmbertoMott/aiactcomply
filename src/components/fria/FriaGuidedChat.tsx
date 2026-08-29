@@ -33,10 +33,16 @@ function optionExamples(examples: string[], fieldType: string): Record<string, s
              : null;
   if (!opts) return null;
   const result: Record<string, string> = {};
+  // Riconosce sia i prefissi IT (valore-storage) sia quelli EN degli esempi.
+  const EN_ALIAS: Record<string, string> = { "Sì": "yes", "No": "no", "Parzialmente": "partially" };
   for (const opt of opts) {
-    const ex = examples.find(e => e.toLowerCase().startsWith(opt.toLowerCase()));
+    const alias = EN_ALIAS[opt] ?? opt.toLowerCase();
+    const ex = examples.find(e => {
+      const low = e.toLowerCase();
+      return low.startsWith(opt.toLowerCase()) || low.startsWith(alias);
+    });
     if (ex) {
-      result[opt] = ex.replace(new RegExp(`^${opt}\\s*[\\u2014\\-\\(][^)]*\\)?\\s*`, "i"), "");
+      result[opt] = ex.replace(new RegExp(`^(${opt}|${alias})\\s*[\\u2014\\-\\(][^)]*\\)?\\s*`, "i"), "");
     }
   }
   return Object.keys(result).length > 0 ? result : null;
