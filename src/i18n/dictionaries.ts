@@ -2888,6 +2888,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       gc_emptyHint: "Clicca \"Avvia gap-check\" per analizzare la copertura degli elementi Art. 27 obbligatori.",
       rcat_title: "Catalogo diritti fondamentali — seleziona quelli pertinenti", rcat_sel: "sel.",
       rcat_absolute: "ASSOLUTO", rcat_selected: "Selezionato ✓", rcat_select: "Seleziona",
+      pr_progress: "Avanzamento",
       nsg_1_base_title: "Inserisci i dati base del sistema", nsg_1_base_desc: "Nome sistema e organizzazione sono obbligatori per procedere.", nsg_1_base_cta: "Vai a Fase 1 — Contesto",
       nsg_1_context_title: "Completa l'analisi di contesto", nsg_1_context_desc: "Descrivi la tecnologia, le finalità e le categorie di persone interessate.", nsg_1_context_cta: "Vai a Fase 1 — Contesto",
       nsg_1_governance_title: "Documenta la sorveglianza umana", nsg_1_governance_desc: "Indica il responsabile della supervisione umana del sistema (Art. 27(1)(e)).", nsg_1_governance_cta: "Vai a Fase 1 — Contesto",
@@ -3081,6 +3082,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       dnsg_complete_title: "DPIA completata", dnsg_complete_desc: "Tutti i passi obbligatori sono stati completati. Puoi procedere con firma e archiviazione.", dnsg_complete_cta: "Vai a Step 6 — Conclusione",
       dnsg_completeTitle: "DPIA completata", dnsg_completeSub: "Tutti i passi obbligatori completati", dnsg_hidden: "Suggerimento prossimo passo nascosto", dnsg_show: "Mostra", dnsg_nextStep: "Prossimo passo consigliato", dnsg_stepWord: "Step", dnsg_generating: "⟳ Generazione…", dnsg_explainWhy: "✦ Spiega perché", dnsg_ignoreForNow: "Ignora per ora",
       tv_required: "— obbligatorio —", tv_notFilled: "— non compilato —", tv_covered: "Coperto", tv_partial: "Parziale", tv_missing: "Mancante", tv_coverageTitle: "Copertura elementi obbligatori Art. 35(7)", tv_art36Title: "Art. 36 — Consultazione preventiva dell'autorità di controllo richiesta", tv_art36Body: "Il rischio residuo è elevato. Prima di procedere è necessaria la consultazione del Garante.", tv_advanced: "Avanzato", tv_inProgress: "In corso", tv_initial: "Iniziale",
+      pr_progress: "Avanzamento",
     },
     assessmentShared: {
       step_intake_label: "Intake", step_intake_sub: "Dati sistema",
@@ -6062,6 +6064,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       gc_emptyHint: "Click \"Start gap-check\" to analyze the coverage of the mandatory Art. 27 elements.",
       rcat_title: "Fundamental rights catalogue — select the relevant ones", rcat_sel: "sel.",
       rcat_absolute: "ABSOLUTE", rcat_selected: "Selected ✓", rcat_select: "Select",
+      pr_progress: "Progress",
       nsg_1_base_title: "Enter the system's basic data", nsg_1_base_desc: "System name and organization are required to proceed.", nsg_1_base_cta: "Go to Phase 1 — Context",
       nsg_1_context_title: "Complete the context analysis", nsg_1_context_desc: "Describe the technology, the purposes and the categories of affected persons.", nsg_1_context_cta: "Go to Phase 1 — Context",
       nsg_1_governance_title: "Document human oversight", nsg_1_governance_desc: "Indicate the person responsible for the system's human oversight (Art. 27(1)(e)).", nsg_1_governance_cta: "Go to Phase 1 — Context",
@@ -6255,6 +6258,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       dnsg_complete_title: "DPIA completed", dnsg_complete_desc: "All mandatory steps have been completed. You can proceed with signing and archiving.", dnsg_complete_cta: "Go to Step 6 — Conclusion",
       dnsg_completeTitle: "DPIA completed", dnsg_completeSub: "All mandatory steps completed", dnsg_hidden: "Next-step hint hidden", dnsg_show: "Show", dnsg_nextStep: "Recommended next step", dnsg_stepWord: "Step", dnsg_generating: "⟳ Generating…", dnsg_explainWhy: "✦ Explain why", dnsg_ignoreForNow: "Ignore for now",
       tv_required: "— required —", tv_notFilled: "— not filled —", tv_covered: "Covered", tv_partial: "Partial", tv_missing: "Missing", tv_coverageTitle: "Coverage of mandatory Art. 35(7) elements", tv_art36Title: "Art. 36 — Prior consultation of the supervisory authority required", tv_art36Body: "The residual risk is high. Prior consultation of the supervisory authority is required before proceeding.", tv_advanced: "Advanced", tv_inProgress: "In progress", tv_initial: "Initial",
+      pr_progress: "Progress",
     },
     assessmentShared: {
       step_intake_label: "Intake", step_intake_sub: "System data",
