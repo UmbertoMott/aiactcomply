@@ -66,7 +66,20 @@ assessmentShared 263 chiavi — IT/EN identiche, nessun duplicato, tsc verde.
 - Nota: i `detail` di `computeGuidedFria/DpiaProgress` sono calcolati ma NON mostrati
   dai rail (dead output) → non tradotti di proposito.
 
-## RIMANENTE = SOLO il contenuto del QUESTIONARIO GUIDATO (content pass, con avvocato)
+## FATTO: QUESTIONARIO GUIDATO COMPLETO (FRIA + DPIA) + export PDF
+- **FRIA** (`friaGuided`, 184 chiavi EN): 40 subpoint × label/domanda/esempi + 7 sezioni + META.
+- **DPIA** (`dpiaGuided`, 223 chiavi EN): 43 subpoint + 6 sezioni + 9 criteri WP248 + META.
+- Terminologia ufficiale dai PDF forniti dall'utente (GDPR Reg. 2016/679 OJ L119, EN; AI Act Reg. 2024/1689).
+- Architettura: getter locale-aware nei template (IT = const canonici; EN = dizionario, solo blocco `en`).
+  `computeGuidedFria/DpiaProgress(doc, locale, t)`. Consumer aggiornati (GuidedMode/Chat/LivePreview/Rail).
+- Export PDF DPIA (`/api/dpia-guided/export-pdf`) reso locale-aware (translate() server-side, +5 chiavi pdf_).
+- `optionExamples` riconosce prefissi IT **e** EN (chip-esempio sotto i quick-reply visibili in entrambe le lingue).
+- La FRIA/DPIA guidata è ora bilingue **end-to-end** (rail + chat + documento live + PDF).
+
+**Nota bug pre-esistente (non i18n)**: `/api/fria-guided/export-pdf` NON esiste come route → il bottone
+"Genera PDF" della FRIA guidata dà 404. Fuori scope traduzione.
+
+## (STORICO) RIMANENTE = SOLO il contenuto del QUESTIONARIO GUIDATO (content pass, con avvocato)
 Le domande/label vere della FRIA/DPIA guidata, in:
 + `src/lib/fria/fria-template.ts` (590) — FRIA_GUIDED_SECTIONS, FRIA_SUBPOINTS (label/ref/examples).
 + `src/lib/dpia/dpia-template.ts` (870) — DPIA_GUIDED_SECTIONS, WP248_CRITERIA, subpoint guidati.
