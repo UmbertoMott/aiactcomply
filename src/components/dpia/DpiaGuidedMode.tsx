@@ -188,7 +188,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
       const res = await fetch("/api/dpia-guided/export-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ doc }),
+        body: JSON.stringify({ doc, locale }),
       });
       if (!res.ok) throw new Error(t("gm_pdfError"));
       const blob = await res.blob();
