@@ -38,6 +38,9 @@ import {
   draftGovernancePracticeDocumentation,
   analyzeBiasIndicators,
 } from "@/app/actions/dataAuditActions";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
+
+type TFn = (key: string) => string;
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 const T = {
@@ -65,7 +68,7 @@ interface DatasetUploadProps {
   onRemove: () => void;
 }
 
-function DatasetUpload({ role, roleLabel, optional, profile, onProfile, onRemove }: DatasetUploadProps) {
+function DatasetUpload({ role, roleLabel, optional, profile, onProfile, onRemove, t }: DatasetUploadProps & { t: TFn }) {
   const [dragging, setDragging] = useState(false);
   const [parsing, setParsing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,8 +78,8 @@ function DatasetUpload({ role, roleLabel, optional, profile, onProfile, onRemove
   async function processFile(file: File) {
     setError(null); setWarn(null);
     const lower = file.name.toLowerCase();
-    if (!lower.endsWith(".csv") && !lower.endsWith(".tsv")) { setError("Carica un file CSV o TSV"); return; }
-    if (file.size > MAX_FILE_BYTES) { setError(`File troppo grande (max ${MAX_FILE_BYTES / 1024 / 1024} MB)`); return; }
+    if (!lower.endsWith(".csv") && !lower.endsWith(".tsv")) { setError(t("err_csvTsv")); return; }
+    if (file.size > MAX_FILE_BYTES) { setError(`${t("err_tooLarge")} (max ${MAX_FILE_BYTES / 1024 / 1024} MB)`); return; }
     setParsing(true);
     try {
       const text = await file.text();
@@ -84,13 +87,13 @@ function DatasetUpload({ role, roleLabel, optional, profile, onProfile, onRemove
       p.fingerprint = await computeDatasetFingerprint(p);
       // il testo grezzo è elaborato in memoria e scartato; solo il profilo (stats) è persistito.
       const msgs: string[] = [];
-      if (parseWarnings.sampled) msgs.push(`Analisi su un campione di 200.000 righe su ${parseWarnings.totalRows.toLocaleString()} totali`);
-      if (parseWarnings.droppedRowCount > 0) msgs.push(`${parseWarnings.droppedRowCount} righe malformate scartate`);
-      if (parseWarnings.duplicateColumns.length) msgs.push(`Colonne duplicate: ${parseWarnings.duplicateColumns.join(", ")}`);
+      if (parseWarnings.sampled) msgs.push(`${t("warn_sampledPre")} ${parseWarnings.totalRows.toLocaleString()} ${t("warn_sampledPost")}`);
+      if (parseWarnings.droppedRowCount > 0) msgs.push(`${parseWarnings.droppedRowCount} ${t("warn_droppedRows")}`);
+      if (parseWarnings.duplicateColumns.length) msgs.push(`${t("warn_dupCols")} ${parseWarnings.duplicateColumns.join(", ")}`);
       setWarn(msgs.length ? msgs.join(" · ") : null);
       onProfile(p, rows);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Errore parsing del file");
+      setError(e instanceof Error ? e.message : t("err_parse"));
     } finally {
       setParsing(false);
     }
@@ -114,17 +117,17 @@ function DatasetUpload({ role, roleLabel, optional, profile, onProfile, onRemove
               <span className="text-[12px] font-semibold truncate" style={{ color: T.green }}>{profile.fileName}</span>
             </div>
             <div className="flex flex-wrap gap-3 text-[11px]" style={{ color: T.muted }}>
-              <span>{profile.rowCount.toLocaleString()} righe</span>
-              <span>{profile.columnCount} colonne</span>
+              <span>{profile.rowCount.toLocaleString()} {t("rowsWord")}</span>
+              <span>{profile.columnCount} {t("columnsWord")}</span>
               <span>{profile.overallMissingPercentage}% missing</span>
               {sensitiveCount > 0 && (
                 <span className="font-semibold" style={{ color: T.amber }}>
-                  ⚠ {sensitiveCount} colonne sensibili rilevate
+                  ⚠ {sensitiveCount} {t("sensitiveColsDetected")}
                 </span>
               )}
               {highMissing.length > 0 && (
                 <span className="font-semibold" style={{ color: T.red }}>
-                  {highMissing.length} colonne con &gt;20% valori mancanti
+                  {highMissing.length} {t("colsHighMissing")}
                 </span>
               )}
             </div>
@@ -142,7 +145,7 @@ function DatasetUpload({ role, roleLabel, optional, profile, onProfile, onRemove
       {/* Privacy notice — sempre visibile, come da constraint */}
       <div className="flex items-start gap-1.5 mb-2 text-[11px]" style={{ color: T.muted }}>
         <Shield size={11} className="mt-0.5 flex-shrink-0" style={{ color: T.blue }} />
-        <span>I tuoi dati non vengono salvati: calcoliamo solo statistiche aggregate, il file viene scartato dopo l&apos;analisi.</span>
+        <span>{t("privacyNotice")}</span>
       </div>
       <div
         onDragOver={e => { e.preventDefault(); setDragging(true); }}
@@ -158,11 +161,11 @@ function DatasetUpload({ role, roleLabel, optional, profile, onProfile, onRemove
           <Upload size={20} className="mb-2" style={{ color: T.muted }} />
         )}
         <p className="text-[12px] font-medium" style={{ color: T.text }}>
-          {parsing ? "Analisi in corso..." : `Dataset ${roleLabel}`}
-          {optional && <span className="ml-1 text-[10px]" style={{ color: T.muted }}>(non obbligatorio)</span>}
+          {parsing ? t("analyzing") : `Dataset ${roleLabel}`}
+          {optional && <span className="ml-1 text-[10px]" style={{ color: T.muted }}>{t("notMandatory")}</span>}
         </p>
         <p className="text-[11px]" style={{ color: T.muted }}>
-          {parsing ? "Profiling colonne..." : "Trascina un .csv/.tsv o clicca — max 50 MB"}
+          {parsing ? t("profilingColumns") : t("dropHint")}
         </p>
         <input ref={inputRef} type="file" accept=".csv,.tsv" className="hidden"
           onChange={e => { const f = e.target.files?.[0]; if (f) processFile(f); }} />
@@ -175,7 +178,7 @@ function DatasetUpload({ role, roleLabel, optional, profile, onProfile, onRemove
 
 // ─── Column profile table ─────────────────────────────────────────────────────
 
-function ColumnTable({ profile, onConfirmSensitive }: { profile: DatasetProfile; onConfirmSensitive: (colName: string, confirmed: boolean) => void }) {
+function ColumnTable({ profile, onConfirmSensitive, t }: { profile: DatasetProfile; onConfirmSensitive: (colName: string, confirmed: boolean) => void; t: TFn }) {
   const [open, setOpen] = useState(false);
   const flagged = profile.columns.filter(c => c.flaggedAsSensitive);
 
@@ -183,15 +186,15 @@ function ColumnTable({ profile, onConfirmSensitive }: { profile: DatasetProfile;
     <div className="mt-3">
       <button onClick={() => setOpen(v => !v)} className="flex items-center gap-1.5 text-[11px] font-medium" style={{ color: T.blue, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
         <ChevronDown size={12} style={{ transform: open ? "rotate(180deg)" : "none" }} />
-        {open ? "Nascondi" : "Mostra"} profilo colonne ({profile.columnCount})
-        {flagged.length > 0 && <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-semibold" style={{ background: T.amberBg, color: T.amber }}>⚠ {flagged.length} sensibili</span>}
+        {open ? t("hide") : t("show")} {t("columnProfile")} ({profile.columnCount})
+        {flagged.length > 0 && <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-semibold" style={{ background: T.amberBg, color: T.amber }}>⚠ {flagged.length} {t("sensitiveShort")}</span>}
       </button>
       {open && (
         <div className="mt-2 overflow-x-auto rounded-lg border" style={{ borderColor: T.border }}>
           <table className="w-full text-[11px]">
             <thead>
               <tr style={{ background: T.bg, borderBottom: `1px solid ${T.border}` }}>
-                {["Colonna", "Tipo", "Missing %", "Valori unici", "Min/Max o top valori", "Sensibile?"].map(h => (
+                {[t("th_column"), t("th_type"), "Missing %", t("th_uniqueValues"), t("th_minMax"), t("th_sensitive")].map(h => (
                   <th key={h} className="text-left px-3 py-2 font-semibold" style={{ color: T.muted }}>{h}</th>
                 ))}
               </tr>
@@ -221,17 +224,17 @@ function ColumnTable({ profile, onConfirmSensitive }: { profile: DatasetProfile;
                   <td className="px-3 py-2">
                     {col.flaggedAsSensitive ? (
                       col.sensitiveFlagConfirmed ? (
-                        <span className="text-[10px] font-semibold" style={{ color: T.amber }}>✓ Confermata</span>
+                        <span className="text-[10px] font-semibold" style={{ color: T.amber }}>✓ {t("confirmed")}</span>
                       ) : (
                         <div className="flex items-center gap-1 flex-wrap">
                           <span className="text-[10px] font-semibold" style={{ color: T.violet }}>✦ AI ({col.sensitiveCategoryGuess})</span>
                           <button onClick={() => onConfirmSensitive(col.name, true)}
                             className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: T.amberBg, color: T.amber, border: `1px solid ${T.amberBdr}`, cursor: "pointer" }}>
-                            Conferma
+                            {t("confirm")}
                           </button>
                           <button onClick={() => onConfirmSensitive(col.name, false)}
                             className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: T.bg, color: T.muted, border: `1px solid ${T.border}`, cursor: "pointer" }}>
-                            No
+                            {t("no")}
                           </button>
                         </div>
                       )
@@ -262,14 +265,14 @@ interface PracticeCardProps {
   computedSummary?: React.ReactNode;
 }
 
-function PracticeCard({ def, rec, pending, onUpdate, onAcceptAi, onDraft, drafting, computedSummary }: PracticeCardProps) {
+function PracticeCard({ def, rec, pending, onUpdate, onAcceptAi, onDraft, drafting, computedSummary, t }: PracticeCardProps & { t: TFn }) {
   const [open, setOpen] = useState(false);
   const status = rec?.status ?? "not_documented";
   const statusMap = {
-    not_documented: { label: "Non documentato", color: T.red },
-    in_progress:    { label: "In corso",         color: T.amber },
-    documented:     { label: "Documentato",       color: T.green },
-    not_applicable: { label: "N/A",               color: T.muted },
+    not_documented: { label: t("status_notDocumented"), color: T.red },
+    in_progress:    { label: t("status_inProgress"),      color: T.amber },
+    documented:     { label: t("status_documented"),      color: T.green },
+    not_applicable: { label: t("status_na"),              color: T.muted },
   };
   const s = statusMap[status];
 
@@ -288,7 +291,7 @@ function PracticeCard({ def, rec, pending, onUpdate, onAcceptAi, onDraft, drafti
             <span className="text-[12px] font-semibold" style={{ color: T.text }}>{def.label}</span>
             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ color: s.color, background: `${s.color}10` }}>{s.label}</span>
             {pending && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: T.violetBg, color: T.violet }}>✦ AI</span>}
-            {def.source !== "manual" && <span className="text-[10px] px-1 rounded" style={{ background: T.bg, color: T.muted }}>calcolato</span>}
+            {def.source !== "manual" && <span className="text-[10px] px-1 rounded" style={{ background: T.bg, color: T.muted }}>{t("computed")}</span>}
           </div>
           <p className="text-[10px] mt-0.5" style={{ color: T.faint }}>{def.reference}</p>
         </div>
@@ -301,7 +304,7 @@ function PracticeCard({ def, rec, pending, onUpdate, onAcceptAi, onDraft, drafti
           {computedSummary && (
             <div className="mt-3 rounded-lg p-3 mb-3" style={{ background: T.bg, border: `1px solid ${T.border}` }}>
               <p className="text-[10px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: T.muted }}>
-                Riepilogo statistico automatico
+                {t("autoStatSummary")}
               </p>
               {computedSummary}
             </div>
@@ -310,29 +313,29 @@ function PracticeCard({ def, rec, pending, onUpdate, onAcceptAi, onDraft, drafti
           {/* AI pending */}
           {pending && (
             <div className="mt-3 rounded-lg p-3 mb-3" style={{ background: T.violetBg, border: `1px solid ${T.violetBdr}` }}>
-              <p className="text-[11px] font-semibold mb-1.5" style={{ color: T.violet }}>✦ AI — verifica e conferma</p>
+              <p className="text-[11px] font-semibold mb-1.5" style={{ color: T.violet }}>✦ {t("aiVerify")}</p>
               <p className="text-[12px] whitespace-pre-wrap leading-relaxed" style={{ color: T.text }}>{pending}</p>
               <button onClick={() => onAcceptAi(def.id)}
                 className="mt-2 flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded"
                 style={{ background: T.violet, color: "#fff", border: "none", cursor: "pointer" }}>
-                <Check size={11} /> Accetta e applica
+                <Check size={11} /> {t("acceptApply")}
               </button>
             </div>
           )}
 
           {/* Documentation textarea */}
           <div className="mt-3 mb-3">
-            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>Documentazione</label>
+            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("documentation")}</label>
             <textarea rows={4} value={rec?.documentation ?? ""}
               onChange={e => onUpdate(def.id, { documentation: e.target.value })}
-              placeholder={def.computedHint ?? "Documenta questa pratica..."}
+              placeholder={def.computedHint ?? t("documentPracticePh")}
               style={ta} />
           </div>
 
           {/* Status + AI draft */}
           <div className="flex items-center gap-2 flex-wrap">
             {(["not_documented", "in_progress", "documented", "not_applicable"] as PracticeStatus[]).map(s => {
-              const labels = { not_documented: "Non doc.", in_progress: "In corso", documented: "Documentato", not_applicable: "N/A" };
+              const labels = { not_documented: t("status_notDocShort"), in_progress: t("status_inProgress"), documented: t("status_documented"), not_applicable: t("status_na") };
               const active = (rec?.status ?? "not_documented") === s;
               return (
                 <button key={s} onClick={() => onUpdate(def.id, { status: s })}
@@ -346,7 +349,7 @@ function PracticeCard({ def, rec, pending, onUpdate, onAcceptAi, onDraft, drafti
               className="ml-auto flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-lg"
               style={{ background: T.violet, color: "#fff", border: "none", cursor: "pointer", opacity: drafting ? 0.7 : 1 }}>
               {drafting ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
-              Bozza AI
+              {t("aiDraft")}
             </button>
           </div>
 
@@ -365,6 +368,9 @@ function PracticeCard({ def, rec, pending, onUpdate, onAcceptAi, onDraft, drafti
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function DataAuditPage() {
+  const t = useT("toolDataAudit");
+  const locale = useLocale();
+  const loc = locale === "it" ? "it-IT" : "en-GB";
   const [record, setRecord] = useState<DataAuditRecord>(() => loadDataAuditRecord());
   // Righe grezze in memoria (per fairness/rappresentatività) — MAI persistite né inviate.
   const [rowsById, setRowsById] = useState<Record<string, Row[]>>({});
@@ -402,7 +408,7 @@ export default function DataAuditPage() {
       completedAt: now,
       usesSpecialCategoriesForBias: record.specialCategories.applicable === "yes",
     });
-    showToast("Dati inviati a DocuGen — Allegato IV, Art. 10");
+    showToast(t("toast_sentDocuGen"));
     router.push("/dashboard/tools/docugen");
   }
   const [toast, setToast] = useState<string | null>(null);
@@ -422,10 +428,10 @@ export default function DataAuditPage() {
   const riskTier = cls?.riskLevel ?? "n.d.";
 
   const phases: ToolPhase[] = [
-    { id: "carica",   label: "Carica",    sublabel: "Dataset",                anchor: "fase-carica" },
-    { id: "qualita",  label: "Qualità",   sublabel: "Profilo & scorecard",    anchor: "fase-qualita" },
-    { id: "fairness", label: "Fairness",  sublabel: "Bias & rappresentatività", anchor: "fase-fairness" },
-    { id: "evidenza", label: "Evidenza",  sublabel: "Governance & export",    anchor: "fase-export" },
+    { id: "carica",   label: t("phase_carica"),   sublabel: "Dataset",                anchor: "fase-carica" },
+    { id: "qualita",  label: t("phase_qualita"),  sublabel: t("phase_qualita_sub"),   anchor: "fase-qualita" },
+    { id: "fairness", label: t("phase_fairness"), sublabel: t("phase_fairness_sub"),  anchor: "fase-fairness" },
+    { id: "evidenza", label: t("phase_evidenza"), sublabel: t("phase_evidenza_sub"),  anchor: "fase-export" },
   ];
 
   // ── Stato reale per fase (la ✓ riflette il lavoro fatto, non lo scroll) ──
@@ -467,8 +473,8 @@ export default function DataAuditPage() {
     patchRecord({ datasets: [...datasets, profile] });
     const changed = prev?.fingerprint && profile.fingerprint && prev.fingerprint !== profile.fingerprint;
     showToast(changed
-      ? `Dataset ${profile.role} cambiato dall'ultima analisi (${prev!.fingerprint!.slice(0, 8)}… → ${profile.fingerprint!.slice(0, 8)}…): ripeti l'audit`
-      : `Dataset ${profile.role} caricato — ${profile.rowCount.toLocaleString()} righe, ${profile.columnCount} colonne`);
+      ? `Dataset ${profile.role} ${t("toast_datasetChanged")} (${prev!.fingerprint!.slice(0, 8)}… → ${profile.fingerprint!.slice(0, 8)}…): ${t("toast_repeatAudit")}`
+      : `Dataset ${profile.role} ${t("toast_datasetLoaded")} — ${profile.rowCount.toLocaleString()} ${t("rowsWord")}, ${profile.columnCount} ${t("columnsWord")}`);
   }
 
   function removeDataset(role: DatasetRole) {
@@ -528,7 +534,7 @@ export default function DataAuditPage() {
       });
       setPendingDrafts(prev => ({ ...prev, [id]: result.documentation }));
     } catch (e) {
-      showToast(e instanceof Error ? e.message : "Errore AI");
+      showToast(e instanceof Error ? e.message : t("aiError"));
     } finally {
       setDraftingId(null);
     }
@@ -547,12 +553,12 @@ export default function DataAuditPage() {
             numericStats: c.numericStats,
           }))
       );
-      if (confirmedSensitive.length === 0) { showToast("Nessuna colonna sensibile confermata"); setBiasAnalyzing(false); return; }
+      if (confirmedSensitive.length === 0) { showToast(t("toast_noSensitiveConfirmed")); setBiasAnalyzing(false); return; }
       const result = await analyzeBiasIndicators({ systemName, intendedPurpose: systemDescription, sensitiveColumns: confirmedSensitive });
       setBiasAnalyses(result.analyses);
       setBiasAnalysisAccepted(false);
     } catch (e) {
-      showToast(e instanceof Error ? e.message : "Errore analisi bias");
+      showToast(e instanceof Error ? e.message : t("toast_biasError"));
     } finally {
       setBiasAnalyzing(false);
     }
@@ -574,7 +580,7 @@ export default function DataAuditPage() {
     });
     appendEvidence("decision", { type: "Data Audit Art. 10 — record salvato", documented, datasets: record.datasets.length, savedAt: now }, "dataAudit");
     setSavedAt(now);
-    showToast("Qualità Dati salvato nel dossier");
+    showToast(t("toast_savedDossier"));
   }
 
   // Computed summaries for "computed" source practices
@@ -589,9 +595,9 @@ export default function DataAuditPage() {
             <div key={d.id}>
               <span className="font-semibold">{d.role} — {d.fileName}:</span>{" "}
               {d.rowCount.toLocaleString()} righe, {d.columnCount} colonne,{" "}
-              {d.overallMissingPercentage}% missing medio
-              {d.overallMissingPercentage > 20 && <span style={{ color: T.red }}> ⚠ qualità bassa</span>}
-              {d.overallMissingPercentage <= 5 && <span style={{ color: T.green }}> ✓ qualità alta</span>}
+              {d.overallMissingPercentage}% {t("avgMissing")}
+              {d.overallMissingPercentage > 20 && <span style={{ color: T.red }}> ⚠ {t("lowQuality")}</span>}
+              {d.overallMissingPercentage <= 5 && <span style={{ color: T.green }}> ✓ {t("highQuality")}</span>}
             </div>
           ))}
         </div>
@@ -601,25 +607,25 @@ export default function DataAuditPage() {
       const highMissing = datasets.flatMap(d =>
         d.columns.filter(c => c.missingPercentage > 20).map(c => ({ ds: d.fileName, col: c.name, pct: c.missingPercentage }))
       );
-      if (highMissing.length === 0) return <p className="text-[11px]" style={{ color: T.green }}>Nessuna colonna con più del 20% di valori mancanti.</p>;
+      if (highMissing.length === 0) return <p className="text-[11px]" style={{ color: T.green }}>{t("noHighMissingCols")}</p>;
       return (
         <ul className="space-y-0.5 text-[11px]" style={{ color: T.text }}>
-          {highMissing.map((h, i) => <li key={i}>• <strong>{h.col}</strong> ({h.ds}): <span style={{ color: T.red }}>{h.pct}% mancanti</span></li>)}
+          {highMissing.map((h, i) => <li key={i}>• <strong>{h.col}</strong> ({h.ds}): <span style={{ color: T.red }}>{h.pct}% {t("missingWord")}</span></li>)}
         </ul>
       );
     }
     if (id === "bias_examination") {
       const confirmed = datasets.flatMap(d => d.columns.filter(c => c.sensitiveFlagConfirmed).map(c => ({ ds: d.fileName, col: c.name })));
-      if (confirmed.length === 0) return <p className="text-[11px]" style={{ color: T.muted }}>Nessuna colonna sensibile confermata. Carica un dataset e conferma le colonne sensibili.</p>;
+      if (confirmed.length === 0) return <p className="text-[11px]" style={{ color: T.muted }}>{t("noSensitiveConfirmedHint")}</p>;
       return (
         <div>
-          <p className="text-[11px] mb-1" style={{ color: T.text }}>Colonne sensibili confermate:</p>
+          <p className="text-[11px] mb-1" style={{ color: T.text }}>{t("confirmedSensitiveCols")}</p>
           <ul className="space-y-0.5 text-[11px]" style={{ color: T.muted }}>
             {confirmed.map((c, i) => <li key={i}>• <strong>{c.col}</strong> ({c.ds})</li>)}
           </ul>
           {biasAnalyses.length > 0 && !biasAnalysisAccepted && (
             <div className="mt-2 rounded-lg p-2.5" style={{ background: T.violetBg, border: `1px solid ${T.violetBdr}` }}>
-              <p className="text-[10px] font-semibold mb-1" style={{ color: T.violet }}>✦ AI — verifica e conferma</p>
+              <p className="text-[10px] font-semibold mb-1" style={{ color: T.violet }}>✦ {t("aiVerify")}</p>
               {biasAnalyses.map((a, i) => (
                 <div key={i} className="mb-2">
                   <p className="text-[11px] font-semibold" style={{ color: T.text }}>{a.columnName}</p>
@@ -629,7 +635,7 @@ export default function DataAuditPage() {
               <button onClick={() => { setBiasAnalysisAccepted(true); updatePractice("bias_examination", { documentation: biasAnalyses.map(a => `${a.columnName}: ${a.analysis}`).join("\n\n"), aiConfirmed: true }); }}
                 className="text-[11px] font-semibold px-2 py-1 rounded flex items-center gap-1"
                 style={{ background: T.violet, color: "#fff", border: "none", cursor: "pointer" }}>
-                <Check size={11} /> Accetta analisi AI
+                <Check size={11} /> {t("acceptAiAnalysis")}
               </button>
             </div>
           )}
@@ -642,9 +648,9 @@ export default function DataAuditPage() {
   // Determine which roles are required
   const isOther = record.developmentApproach === "other_technique";
   const ROLES: Array<{ role: DatasetRole; label: string; optional: boolean }> = [
-    { role: "training",   label: "Training",   optional: isOther },
-    { role: "validation", label: "Validazione", optional: isOther },
-    { role: "testing",    label: "Test",        optional: false   },
+    { role: "training",   label: t("role_training"),   optional: isOther },
+    { role: "validation", label: t("role_validation"), optional: isOther },
+    { role: "testing",    label: t("role_testing"),    optional: false   },
   ];
 
   const anyConfirmedSensitive = record.datasets.some(d => d.columns.some(c => c.sensitiveFlagConfirmed));
@@ -657,13 +663,13 @@ export default function DataAuditPage() {
       {/* Dossier banner */}
       {savedAt ? (
         <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-4 text-[12px]" style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}>
-          <span style={{ color: T.green }}>✓ Salvato nel dossier · {new Date(savedAt).toLocaleDateString("it-IT")}</span>
-          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium" style={{ color: T.green }}>Vedi dossier →</Link>
+          <span style={{ color: T.green }}>✓ {t("savedDossier")} · {new Date(savedAt).toLocaleDateString(loc)}</span>
+          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium" style={{ color: T.green }}>{t("seeDossier")}</Link>
         </div>
       ) : (
         <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-4 text-[12px]" style={{ background: T.card, border: `1px solid ${T.border}` }}>
-          <span style={{ color: T.muted }}>Salva Qualità Dati nel dossier di compliance</span>
-          <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>Salva</button>
+          <span style={{ color: T.muted }}>{t("saveHint")}</span>
+          <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>{t("save")}</button>
         </div>
       )}
 
@@ -671,16 +677,16 @@ export default function DataAuditPage() {
       <div className="mb-5">
         <div className="flex items-center gap-2 mb-1">
           <Database size={20} style={{ color: T.blue }} />
-          <h1 className="text-xl font-bold" style={{ color: T.text }}>Qualità Dati</h1>
+          <h1 className="text-xl font-bold" style={{ color: T.text }}>{t("title")}</h1>
           <span className="text-[11px] font-medium px-2 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>Art. 10</span>
         </div>
         <p className="text-[12px]" style={{ color: T.muted }}>
-          Requisiti di qualità, governance e provenienza dei dati di training, validazione e test per sistemi AI ad alto rischio.
+          {t("subtitle")}
         </p>
         {cls && (
           <div className="mt-2 flex items-center gap-3 text-[11px]" style={{ color: T.muted }}>
-            <span>Sistema: <strong style={{ color: T.text }}>{cls.systemName}</strong></span>
-            <span>Tier: <strong style={{ color: T.text }}>{cls.riskLevel}</strong></span>
+            <span>{t("systemWord")} <strong style={{ color: T.text }}>{cls.systemName}</strong></span>
+            <span>{t("tierWord")} <strong style={{ color: T.text }}>{cls.riskLevel}</strong></span>
           </div>
         )}
       </div>
@@ -689,16 +695,15 @@ export default function DataAuditPage() {
       <div className="rounded-xl p-4 mb-5" style={{ ...card }}>
         <div className="flex items-center gap-2 mb-2">
           <Info size={14} style={{ color: T.blue }} />
-          <span className="text-[12px] font-semibold" style={{ color: T.text }}>Approccio di sviluppo — Art. 10(6)</span>
+          <span className="text-[12px] font-semibold" style={{ color: T.text }}>{t("devApproachTitle")}</span>
         </div>
         <p className="text-[11px] mb-3" style={{ color: T.muted }}>
-          Il sistema è stato sviluppato tramite addestramento di modelli (es. machine learning), o tramite altre tecniche (es. sistemi a regole)?
-          Se &quot;altre tecniche&quot;, solo il dataset di test è obbligatorio.
+          {t("devApproachDesc")}
         </p>
         <div className="flex gap-2 flex-wrap">
           {([
-            { v: "trained_model", l: "Addestramento modelli (ML)" },
-            { v: "other_technique", l: "Altre tecniche (regole, logica)" },
+            { v: "trained_model", l: t("devApproach_trained") },
+            { v: "other_technique", l: t("devApproach_other") },
           ] as const).map(opt => (
             <button key={opt.v}
               onClick={() => patchRecord({ developmentApproach: opt.v })}
@@ -716,7 +721,7 @@ export default function DataAuditPage() {
           {record.developmentApproach !== "unspecified" && (
             <button onClick={() => patchRecord({ developmentApproach: "unspecified" })}
               className="text-[11px] px-2 py-1 rounded" style={{ color: T.muted, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
-              Modifica
+              {t("edit")}
             </button>
           )}
         </div>
@@ -729,13 +734,13 @@ export default function DataAuditPage() {
         status={phaseStatus}
         activeIdx={activePhase}
         progressPct={overallPct}
-        meta={`${phasesDone}/${phases.length} fasi · ${documentedNow}/${totalPractices} pratiche`}
+        meta={`${phasesDone}/${phases.length} ${t("phasesWord")} · ${documentedNow}/${totalPractices} ${t("practicesWord")}`}
       />
 
       {/* ── Dataset upload panels ── */}
       <section id="fase-carica" style={{ scrollMarginTop: 72 }} className="mb-6">
-        <PhaseHeading n={1} title="Carica i dataset" done={caricaDone}
-          sub={caricaDone ? "Tutti i dataset richiesti sono caricati" : "Training, validation, testing — analisi solo nel browser"} />
+        <PhaseHeading n={1} title={t("ph1_title")} done={caricaDone}
+          sub={caricaDone ? t("ph1_subDone") : t("ph1_sub")} />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {ROLES.map(({ role, label, optional }) => {
             const profile = record.datasets.find(d => d.role === role) ?? null;
@@ -743,18 +748,20 @@ export default function DataAuditPage() {
               <div key={role}>
                 <p className="text-[11px] font-semibold uppercase tracking-wide mb-2" style={{ color: T.muted }}>
                   {label}
-                  {optional && <span className="ml-1 normal-case" style={{ color: T.faint }}>(non obbligatorio)</span>}
+                  {optional && <span className="ml-1 normal-case" style={{ color: T.faint }}>{t("notMandatory")}</span>}
                 </p>
                 <DatasetUpload
                   role={role} roleLabel={label} optional={optional}
                   profile={profile}
                   onProfile={upsertDataset}
                   onRemove={() => removeDataset(role)}
+                  t={t}
                 />
                 {profile && (
                   <ColumnTable
                     profile={profile}
                     onConfirmSensitive={(colName, confirmed) => confirmSensitiveColumn(profile.id, colName, confirmed)}
+                    t={t}
                   />
                 )}
               </div>
@@ -769,58 +776,58 @@ export default function DataAuditPage() {
               className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg"
               style={{ background: T.violet, color: "#fff", border: "none", cursor: "pointer", opacity: biasAnalyzing ? 0.7 : 1 }}>
               {biasAnalyzing ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
-              Analisi bias AI su colonne sensibili
+              {t("biasAnalysisBtn")}
             </button>
-            <span className="text-[11px]" style={{ color: T.muted }}>Art. 10(2)(f) — risultato marcato ✦ AI, richiede accettazione</span>
+            <span className="text-[11px]" style={{ color: T.muted }}>{t("biasAnalysisNote")}</span>
           </div>
         )}
-        {caricaDone && <NextPhaseCta label="Prosegui: Qualità dei dati" anchor="fase-qualita" />}
+        {caricaDone && <NextPhaseCta label={t("cta_toQualita")} anchor="fase-qualita" />}
       </section>
 
       {/* ── Data Quality Scorecard · Fairness · Rappresentatività ── */}
       <div id="fase-qualita" style={{ scrollMarginTop: 72 }} className="mb-6">
-        <PhaseHeading n={2} title="Qualità dei dati" done={datasetsLoaded}
-          sub="Scorecard ISO/IEC 5259 · profilo colonne · categorie sensibili" />
+        <PhaseHeading n={2} title={t("ph2_title")} done={datasetsLoaded}
+          sub={t("ph2_sub")} />
         {datasetsLoaded ? (
           <>
-            <QualityScorecard datasets={record.datasets} />
-            <NextPhaseCta label="Prosegui: Fairness & rappresentatività" anchor="fase-fairness" />
+            <QualityScorecard datasets={record.datasets} t={t} />
+            <NextPhaseCta label={t("cta_toFairness")} anchor="fase-fairness" />
           </>
         ) : (
-          <SectionEmptyState message="Carica un dataset nella fase 1 per calcolare la scorecard di qualità (completezza, unicità, consistenza)." />
+          <SectionEmptyState message={t("empty_quality")} />
         )}
       </div>
       <div id="fase-fairness" style={{ scrollMarginTop: 72 }} className="mb-6">
-        <PhaseHeading n={3} title="Fairness & rappresentatività" done={fairnessDone}
-          sub="Bias (Art. 10(2)(f)) e rappresentatività (Art. 10(3))" />
+        <PhaseHeading n={3} title={t("ph3_title")} done={fairnessDone}
+          sub={t("ph3_sub")} />
         {datasetsLoaded ? (
           <>
             <FairnessPanel datasets={record.datasets} rowsById={rowsById}
-              systemName={systemName} intendedPurpose={systemDescription} onReport={saveFairnessReport} />
-            <RepresentativenessPanel datasets={record.datasets} rowsById={rowsById} onCheck={saveRepCheck} />
-            {fairnessDone && <NextPhaseCta label="Prosegui: Evidenza & governance" anchor="fase-export" />}
+              systemName={systemName} intendedPurpose={systemDescription} onReport={saveFairnessReport} t={t} />
+            <RepresentativenessPanel datasets={record.datasets} rowsById={rowsById} onCheck={saveRepCheck} t={t} />
+            {fairnessDone && <NextPhaseCta label={t("cta_toEvidenza")} anchor="fase-export" />}
           </>
         ) : (
-          <SectionEmptyState message="Carica un dataset per misurare fairness (regola dei 4/5, SPD) e rappresentatività rispetto alla popolazione di riferimento." />
+          <SectionEmptyState message={t("empty_fairness")} />
         )}
       </div>
 
       {/* ── 10 Governance practice cards ── */}
       <section id="fase-export" style={{ scrollMarginTop: 72 }} className="mb-6">
-        <PhaseHeading n={4} title="Evidenza & governance" done={evidenzaDone}
-          sub="Pratiche Art. 10, export e invio a DocuGen" />
+        <PhaseHeading n={4} title={t("ph4_title")} done={evidenzaDone}
+          sub={t("ph4_sub")} />
         {/* Avanzamento pratiche — contestuale alla fase, non più in cima alla pagina */}
         <div className="flex items-center gap-3 mb-4">
           <span className="text-lg font-bold" style={{ color: evidenzaDone ? T.green : T.text }}>{documentedNow}/{totalPractices}</span>
           <div className="flex-1">
-            <div className="text-[11px] font-medium mb-1" style={{ color: T.muted }}>pratiche Art. 10 documentate</div>
+            <div className="text-[11px] font-medium mb-1" style={{ color: T.muted }}>{t("practicesDocumented")}</div>
             <div className="h-1.5 rounded-full" style={{ background: T.border }}>
               <div className="h-1.5 rounded-full transition-all" style={{ width: `${Math.round((documentedNow / totalPractices) * 100)}%`, background: evidenzaDone ? T.green : T.blue }} />
             </div>
           </div>
         </div>
         <h2 className="text-[13px] font-semibold mb-3" style={{ color: T.text }}>
-          Pratiche di governance — Art. 10(2)-(4)
+          {t("governancePractices")}
         </h2>
         <div className="space-y-2">
           {DATA_GOVERNANCE_PRACTICES.map(def => (
@@ -834,6 +841,7 @@ export default function DataAuditPage() {
               onDraft={draftPractice}
               drafting={draftingId === def.id}
               computedSummary={computedSummaryFor(def.id)}
+              t={t}
             />
           ))}
         </div>
@@ -845,7 +853,7 @@ export default function DataAuditPage() {
           <div className="flex items-center gap-3 my-5">
             <div className="flex-1 h-px" style={{ background: T.border }} />
             <span className="text-[11px] font-semibold uppercase tracking-wide px-2" style={{ color: T.violet }}>
-              Modulo condizionale — Categorie particolari
+              {t("conditionalModule")}
             </span>
             <div className="flex-1 h-px" style={{ background: T.border }} />
           </div>
@@ -860,7 +868,7 @@ export default function DataAuditPage() {
             {/* Confirmed sensitive columns */}
             {anyConfirmedSensitive && (
               <div className="mb-3">
-                <p className="text-[11px] font-semibold mb-1" style={{ color: T.text }}>Colonne confermate come sensibili:</p>
+                <p className="text-[11px] font-semibold mb-1" style={{ color: T.text }}>{t("colsConfirmedSensitive")}</p>
                 <ul className="text-[11px] space-y-0.5" style={{ color: T.muted }}>
                   {record.datasets.flatMap(d => d.columns.filter(c => c.sensitiveFlagConfirmed).map(c => (
                     <li key={`${d.id}-${c.name}`}>• <strong>{c.name}</strong> — {d.fileName} ({d.role})</li>
@@ -872,18 +880,18 @@ export default function DataAuditPage() {
             {/* Legal basis */}
             <div className="mb-3">
               <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>
-                Base giuridica e garanzie adottate — Art. 10(5)
+                {t("legalBasisLabel")}
               </label>
               <textarea rows={3} value={record.specialCategories.legalBasisDocumentation ?? ""}
                 onChange={e => patchRecord({ specialCategories: { ...record.specialCategories, legalBasisDocumentation: e.target.value } })}
-                placeholder="Descrivi la base giuridica ex Art. 9 GDPR, le misure di pseudonimizzazione adottate, e le garanzie per il trattamento..."
+                placeholder={t("legalBasisPh")}
                 style={ta} />
             </div>
 
             {/* Status */}
             <div className="flex items-center gap-2 flex-wrap mb-3">
               {(["not_documented", "in_progress", "documented"] as PracticeStatus[]).map(s => {
-                const labels = { not_documented: "Non documentato", in_progress: "In corso", documented: "Documentato", not_applicable: "N/A" };
+                const labels = { not_documented: t("status_notDocumented"), in_progress: t("status_inProgress"), documented: t("status_documented"), not_applicable: t("status_na") };
                 const active = record.specialCategories.status === s;
                 return (
                   <button key={s} onClick={() => patchRecord({ specialCategories: { ...record.specialCategories, status: s } })}
@@ -912,13 +920,11 @@ export default function DataAuditPage() {
       {!sanctionsBannerDismissed && (
         <div className="flex items-start gap-2 p-3 rounded-lg mb-4 text-xs" style={{ background: "#fef9c3", border: "1px solid #fde047", color: "#713f12" }}>
           <Info size={14} className="mt-0.5 flex-shrink-0" />
-          <span style={{ flex: 1 }}>
-            <strong>Sanzioni Art. 99–101:</strong> Mancata conformità ai requisiti Art. 10 sui dati può comportare sanzioni fino a 15 milioni € o 3% del fatturato mondiale.
-          </span>
+          <span style={{ flex: 1 }} dangerouslySetInnerHTML={{ __html: t("sanctions") }} />
           <button
             onClick={() => setSanctionsBannerDismissed(true)}
             style={{ flexShrink: 0, background: "none", border: "none", cursor: "pointer", padding: 2, color: "#713f12", opacity: 0.6, lineHeight: 1, display: "flex", alignItems: "center" }}
-            aria-label="Chiudi"
+            aria-label={t("close")}
           >
             <X size={14} />
           </button>
@@ -928,23 +934,23 @@ export default function DataAuditPage() {
 
       {/* ── Export Data Governance Statement (Art. 11 / Allegato IV) ── */}
       <section className="mb-6">
-        <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Evidenza — Data Governance Statement</h2>
-        <p className="text-[11px] mb-3" style={{ color: T.muted }}>Art. 11 / Allegato IV. Include scorecard, fairness, rappresentatività, pratiche, fingerprint, timestamp.</p>
+        <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>{t("evidenceStatement")}</h2>
+        <p className="text-[11px] mb-3" style={{ color: T.muted }}>{t("evidenceStatementDesc")}</p>
         <div className="flex flex-wrap gap-2">
           <button onClick={() => exportDataGovernanceJSON(record)}
             className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg"
             style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
-            <FileText size={13} /> Esporta JSON
+            <FileText size={13} /> {t("exportJson")}
           </button>
           <button onClick={() => window.print()}
             className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg"
             style={{ background: "#fff", color: T.text, border: `1px solid ${T.border}`, cursor: "pointer" }}>
-            <FileText size={13} /> Stampa / Salva PDF
+            <FileText size={13} /> {t("printPdf")}
           </button>
           <button onClick={sendToDocuGen} disabled={record.datasets.length === 0}
             className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg"
             style={{ background: "#fff", color: T.text, border: `1px solid ${T.border}`, cursor: "pointer", opacity: record.datasets.length === 0 ? 0.5 : 1 }}>
-            <ExternalLink size={13} /> Invia alla Documentazione Tecnica (DocuGen)
+            <ExternalLink size={13} /> {t("sendToDocuGen")}
           </button>
         </div>
       </section>
@@ -954,7 +960,7 @@ export default function DataAuditPage() {
         <button onClick={saveToDossier}
           className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[12px] font-medium"
           style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
-          <CheckCircle2 className="h-3.5 w-3.5" /> Salva nel dossier
+          <CheckCircle2 className="h-3.5 w-3.5" /> {t("saveToDossier")}
         </button>
       </div>
 

@@ -12,6 +12,7 @@ import type {
 } from "@/lib/dossier/storage-schema";
 import type { AssessmentShared } from "@/lib/assessment/assessment-schema";
 import { T, inputSt } from "@/components/assessment/tokens";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -68,6 +69,8 @@ export function AssessmentSignOff({
   toolLabel,
   shared,
 }: AssessmentSignOffProps) {
+  const t = useT("assessmentShared");
+  const locale = useLocale();
   const storageKey =
     toolKey === "dpia"
       ? ("dpiaSignoff" as const)
@@ -96,7 +99,7 @@ export function AssessmentSignOff({
 
   function handleSignOff() {
     if (!reviewedBy.trim() || !reviewerRole.trim()) {
-      setError("Nome e ruolo sono obbligatori.");
+      setError(t("nameRoleRequired"));
       return;
     }
     const classifier = readFromStorage<ClassifierResult>("classifier");
@@ -136,7 +139,7 @@ export function AssessmentSignOff({
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
         <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>
-          Firma del revisore
+          {t("reviewerSignature")}
         </span>
         <span
           style={{
@@ -148,7 +151,7 @@ export function AssessmentSignOff({
             border: `1px solid ${T.amberBdr}`,
           }}
         >
-          Richiesto per audit
+          {t("requiredForAudit")}
         </span>
       </div>
 
@@ -164,11 +167,10 @@ export function AssessmentSignOff({
           }}
         >
           <p style={{ fontSize: 12, fontWeight: 600, color: T.amber, margin: 0 }}>
-            ⚠ Dati modificati dopo la firma
+            ⚠ {t("dataChangedAfterSign")}
           </p>
           <p style={{ fontSize: 11, color: T.amber, margin: "4px 0 0 0", lineHeight: 1.5 }}>
-            I dati condivisi o upstream (Classifier / Data Audit) sono stati modificati dopo
-            l&apos;ultima firma. Verifica le modifiche e ri-firma per aggiornare.
+            {t("staleSignBody")}
           </p>
         </div>
       )}
@@ -189,10 +191,10 @@ export function AssessmentSignOff({
             />
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ fontSize: 12, fontWeight: 500, color: T.green, margin: 0 }}>
-                Approvato da {record.reviewedBy} · {record.reviewerRole}
+                {t("approvedBy")} {record.reviewedBy} · {record.reviewerRole}
               </p>
               <p style={{ fontSize: 11, marginTop: 2, color: T.muted, margin: "2px 0 0 0" }}>
-                {new Date(record.reviewedAt).toLocaleString("it-IT")}
+                {new Date(record.reviewedAt).toLocaleString(locale === "en" ? "en-GB" : "it-IT")}
               </p>
               {record.reviewNotes && (
                 <p
@@ -222,7 +224,7 @@ export function AssessmentSignOff({
               cursor: "pointer",
             }}
           >
-            Revoca
+            {t("revoke")}
           </button>
         </div>
       ) : (
@@ -238,12 +240,12 @@ export function AssessmentSignOff({
                 color: T.muted,
               }}
             >
-              Nome e Cognome *
+              {t("fullNameReq")}
             </label>
             <input
               value={reviewedBy}
               onChange={(e) => setReviewedBy(e.target.value)}
-              placeholder="es. Mario Rossi"
+              placeholder={t("ph_fullName")}
               style={inputSt}
             />
           </div>
@@ -257,12 +259,12 @@ export function AssessmentSignOff({
                 color: T.muted,
               }}
             >
-              Ruolo / Qualifica *
+              {t("roleReq")}
             </label>
             <input
               value={reviewerRole}
               onChange={(e) => setReviewerRole(e.target.value)}
-              placeholder="es. DPO, CTO, Legal Counsel"
+              placeholder={t("ph_role")}
               style={inputSt}
             />
           </div>
@@ -276,14 +278,14 @@ export function AssessmentSignOff({
                 color: T.muted,
               }}
             >
-              Note di revisione
+              {t("reviewNotes")}
             </label>
             <textarea
               value={reviewNotes}
               onChange={(e) => setReviewNotes(e.target.value)}
               maxLength={300}
               rows={2}
-              placeholder="Osservazioni, condizioni, riferimenti..."
+              placeholder={t("ph_reviewNotes")}
               style={{ ...inputSt, resize: "vertical" }}
             />
           </div>
@@ -308,7 +310,7 @@ export function AssessmentSignOff({
             }}
           >
             <CheckCircle2 style={{ width: 14, height: 14 }} />
-            Firma e approva — {toolLabel}
+            {t("signAndApprove")} — {toolLabel}
           </button>
         </div>
       )}

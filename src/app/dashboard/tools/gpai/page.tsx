@@ -10,6 +10,9 @@ import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { GPAIResult } from "@/lib/dossier/storage-schema";
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
+
+type TFn = (key: string) => string;
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const T = {
@@ -369,10 +372,10 @@ function computeArt55Score(art55: Art55ObligationState[]): number {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function AnswerBtn({ value, selected, onClick }: {
-  value: Answer; selected: boolean; onClick: () => void;
+function AnswerBtn({ value, selected, onClick, t }: {
+  value: Answer; selected: boolean; onClick: () => void; t: TFn;
 }) {
-  const labels: Record<NonNullable<Answer>, string> = { yes: "Sì", no: "No", unsure: "Non so" };
+  const labels: Record<NonNullable<Answer>, string> = { yes: t("ans_yes"), no: t("ans_no"), unsure: t("ans_unsure") };
   const colors: Record<NonNullable<Answer>, { bg: string; text: string; border: string }> = {
     yes:    { bg: T.blueBg,   text: T.blue,  border: T.blueBdr  },
     no:     { bg: T.greenBg,  text: T.green, border: T.greenBdr },
@@ -400,11 +403,11 @@ function AnswerBtn({ value, selected, onClick }: {
   );
 }
 
-function StatusBadge({ status, onChange }: { status: ObligationStatus; onChange: (s: ObligationStatus) => void }) {
+function StatusBadge({ status, onChange, t }: { status: ObligationStatus; onChange: (s: ObligationStatus) => void; t: TFn }) {
   const opts: { value: ObligationStatus; label: string; bg: string; text: string }[] = [
-    { value: "compliant",    label: "Compliant",    bg: T.greenBg,  text: T.green  },
-    { value: "in_progress",  label: "In Progress",  bg: T.amberBg,  text: T.amber  },
-    { value: "not_started",  label: "Non avviato",  bg: T.bg,       text: T.muted  },
+    { value: "compliant",    label: t("st_compliant"),   bg: T.greenBg,  text: T.green  },
+    { value: "in_progress",  label: t("st_inProgress"),  bg: T.amberBg,  text: T.amber  },
+    { value: "not_started",  label: t("st_notStarted"),  bg: T.bg,       text: T.muted  },
   ];
   return (
     <div style={{ display: "flex", gap: 6 }}>
@@ -431,6 +434,9 @@ function ProgressBar({ value, color = T.blue }: { value: number; color?: string 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function GPAIAssessmentPage() {
+  const t = useT("toolGpai");
+  const locale = useLocale();
+  const loc = locale === "it" ? "it-IT" : "en-GB";
   const [draft, setDraftRaw] = useState<GPAIDraft>(() => loadDraft());
   const [expandedChecks, setExpandedChecks] = useState<Set<string>>(new Set());
   const [expandedObl, setExpandedObl] = useState<Set<string>>(new Set());
@@ -510,7 +516,7 @@ export default function GPAIAssessmentPage() {
       completedAt,
     });
     setSavedAt(completedAt);
-    setToast("Salvato nel dossier ✓");
+    setToast(t("toast_saved"));
     setTimeout(() => setToast(null), 3000);
   }
 
@@ -521,32 +527,32 @@ export default function GPAIAssessmentPage() {
     gpai_provider_systemic: {
       bg: T.redBg, bdr: T.redBdr, col: T.red,
       icon: <AlertTriangle size={16} />,
-      title: "GPAI Provider con Rischio Sistemico",
-      desc: "Obblighi Art. 53 + Art. 55 + GPAI Code of Practice",
+      title: t("role_systemic_title"),
+      desc: t("role_systemic_desc"),
     },
     gpai_provider_standard: {
       bg: T.amberBg, bdr: T.amberBdr, col: T.amber,
       icon: <AlertTriangle size={16} />,
-      title: "GPAI Provider",
-      desc: "Obblighi Art. 53 — documentazione, downstream info, copyright policy, registrazione EUDB",
+      title: t("role_standard_title"),
+      desc: t("role_standard_desc"),
     },
     downstream_high_risk: {
       bg: T.yellowBg, bdr: T.yellowBdr, col: T.yellow,
       icon: <Info size={16} />,
-      title: "Downstream Provider — Sistema High-Risk",
-      desc: "Verifica la catena di responsabilità con il tuo GPAI provider upstream",
+      title: t("role_dhr_title"),
+      desc: t("role_dhr_desc"),
     },
     downstream_standard: {
       bg: T.blueBg, bdr: T.blueBdr, col: T.blue,
       icon: <Info size={16} />,
-      title: "Downstream Provider",
-      desc: "Verifica la documentazione ricevuta dal tuo GPAI provider upstream",
+      title: t("role_ds_title"),
+      desc: t("role_ds_desc"),
     },
     not_applicable: {
       bg: T.greenBg, bdr: T.greenBdr, col: T.green,
       icon: <CheckCircle2 size={16} />,
-      title: "Capitolo IX GPAI non applicabile",
-      desc: "Il tuo sistema non rientra nel perimetro GPAI del Regolamento UE 2024/1689",
+      title: t("role_na_title"),
+      desc: t("role_na_desc"),
     },
   };
 
@@ -569,9 +575,9 @@ export default function GPAIAssessmentPage() {
         <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
           style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}>
           <CheckCircle2 size={13} style={{ color: T.green }} />
-          <span style={{ color: T.green }}>Salvato nel dossier · {new Date(savedAt).toLocaleDateString("it-IT")}</span>
+          <span style={{ color: T.green }}>{t("savedDossier")} · {new Date(savedAt).toLocaleDateString(loc)}</span>
           <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: T.green }}>
-            Vedi dossier →
+            {t("seeDossier")}
           </Link>
         </div>
       ) : null}
@@ -584,11 +590,11 @@ export default function GPAIAssessmentPage() {
             Art. 51-55
           </span>
           <span style={{ fontSize: 11, fontWeight: 600, color: T.amber, background: T.amberBg, border: `1px solid ${T.amberBdr}`, borderRadius: 6, padding: "2px 8px" }}>
-            in vigore dal 2 agosto 2025
+            {t("inForce")}
           </span>
         </div>
         <p style={{ fontSize: 13, color: T.muted, margin: 0, lineHeight: 1.6 }}>
-          Valuta i tuoi obblighi rispetto ai modelli AI di uso generale (GPAI). Capitolo IX del Regolamento UE 2024/1689.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -596,10 +602,10 @@ export default function GPAIAssessmentPage() {
       <div style={{ ...cardSt, marginBottom: 20 }}>
         <div style={{ marginBottom: 16 }}>
           <h2 style={{ fontSize: 15, fontWeight: 700, color: T.text, margin: 0 }}>
-            1 — Qualificazione del ruolo
+            {t("sec1_title")}
           </h2>
           <p style={{ fontSize: 12, color: T.muted, marginTop: 4 }}>
-            Rispondi a tutte le domande per determinare il tuo ruolo rispetto ai modelli GPAI.
+            {t("sec1_sub")}
           </p>
         </div>
 
@@ -618,11 +624,11 @@ export default function GPAIAssessmentPage() {
                   </span>
                   <div style={{ flex: 1 }}>
                     <p style={{ fontSize: 13, color: T.text, margin: "0 0 10px", lineHeight: 1.5 }}>
-                      {check.question}
+                      {t(`q_${check.id}`)}
                     </p>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                       {(["yes", "no", "unsure"] as const).map(v => (
-                        <AnswerBtn key={v} value={v} selected={ans === v} onClick={() => setAnswer(check.id, ans === v ? null : v)} />
+                        <AnswerBtn key={v} value={v} selected={ans === v} onClick={() => setAnswer(check.id, ans === v ? null : v)} t={t} />
                       ))}
                       <button
                         onClick={() => toggleCheck(check.id)}
@@ -633,7 +639,7 @@ export default function GPAIAssessmentPage() {
                         }}
                       >
                         {expanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-                        Spiegazione
+                        {t("explanation")}
                       </button>
                     </div>
                     {expanded && (
@@ -642,7 +648,7 @@ export default function GPAIAssessmentPage() {
                         background: T.blueBg, border: `1px solid ${T.blueBdr}`,
                         fontSize: 12, color: T.blue, lineHeight: 1.6,
                       }}>
-                        {check.explanation}
+                        {t(`e_${check.id}`)}
                       </div>
                     )}
                   </div>
@@ -681,7 +687,7 @@ export default function GPAIAssessmentPage() {
             fontSize: 12, color: T.muted, display: "flex", alignItems: "center", gap: 8,
           }}>
             <Info size={14} />
-            Completa tutte le domande per vedere gli obblighi applicabili.
+            {t("completeAllQuestions")}
           </div>
         )}
       </div>
@@ -695,11 +701,10 @@ export default function GPAIAssessmentPage() {
               <Info size={15} style={{ color: T.blue, flexShrink: 0, marginTop: 2 }} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: T.blue, marginBottom: 4 }}>
-                  Eccezione open-source (Art. 53(2))
+                  {t("osException")}
                 </div>
                 <div style={{ fontSize: 12, color: T.blue, lineHeight: 1.6, marginBottom: 10 }}>
-                  I GPAI provider che rilasciano i pesi del modello con licenza open-source sono esonerati
-                  dagli obblighi Art. 53(1)(b) e (c), salvo il modello presenti rischio sistemico.
+                  {t("osExceptionDesc")}
                 </div>
                 <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
                   <input
@@ -709,13 +714,13 @@ export default function GPAIAssessmentPage() {
                     style={{ width: 14, height: 14 }}
                   />
                   <span style={{ fontSize: 12, color: T.blue, fontWeight: 600 }}>
-                    Il mio modello è rilasciato con licenza open-source (pesi pubblici)
+                    {t("osCheckbox")}
                   </span>
                 </label>
                 {draft.isOpenSource && (
                   <textarea
                     style={{ ...textareaSt, marginTop: 8, minHeight: 48, background: "rgba(255,255,255,0.6)" }}
-                    placeholder="Specifica la licenza e URL del repository..."
+                    placeholder={t("osNotePh")}
                     value={draft.openSourceNote}
                     onChange={e => setDraft(p => ({ ...p, openSourceNote: e.target.value }))}
                   />
@@ -729,10 +734,10 @@ export default function GPAIAssessmentPage() {
             <div style={{ marginBottom: 16 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                 <h2 style={{ fontSize: 15, fontWeight: 700, color: T.text, margin: 0 }}>
-                  2A.1 — Obblighi Art. 53
+                  {t("sec2a1_title")}
                 </h2>
                 <span style={{ fontSize: 11, fontWeight: 600, color: T.blue, background: T.blueBg, border: `1px solid ${T.blueBdr}`, borderRadius: 6, padding: "2px 8px" }}>
-                  Tutti i GPAI provider
+                  {t("allGpaiProviders")}
                 </span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
@@ -758,40 +763,40 @@ export default function GPAIAssessmentPage() {
                       {expanded ? <ChevronDown size={14} style={{ flexShrink: 0, color: T.muted }} /> : <ChevronRight size={14} style={{ flexShrink: 0, color: T.muted }} />}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                          <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{obl.label}</span>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{t(`a53_${obl.id}_label`)}</span>
                           <span style={{ fontSize: 10, color: T.muted, fontStyle: "italic" }}>{obl.article}</span>
-                          {isExempt && <span style={{ fontSize: 10, fontWeight: 600, color: T.green, background: T.greenBg, borderRadius: 4, padding: "1px 6px" }}>Esentato (open-source)</span>}
+                          {isExempt && <span style={{ fontSize: 10, fontWeight: 600, color: T.green, background: T.greenBg, borderRadius: 4, padding: "1px 6px" }}>{t("exemptOs")}</span>}
                         </div>
                       </div>
                       <div onClick={e => e.stopPropagation()}>
-                        <StatusBadge status={state.status} onChange={s => updateArt53(obl.id, { status: s })} />
+                        <StatusBadge status={state.status} onChange={s => updateArt53(obl.id, { status: s })} t={t} />
                       </div>
                     </div>
 
                     {expanded && (
                       <div style={{ padding: "12px 14px 14px", borderTop: `1px solid ${T.border}`, background: T.bg }}>
-                        <p style={{ fontSize: 12, color: T.muted, marginBottom: 10, lineHeight: 1.6 }}>{obl.description}</p>
+                        <p style={{ fontSize: 12, color: T.muted, marginBottom: 10, lineHeight: 1.6 }}>{t(`a53_${obl.id}_desc`)}</p>
 
                         {obl.template_fields && (
                           <div style={{ marginBottom: 10 }}>
-                            <div style={{ fontSize: 11, fontWeight: 600, color: T.muted, marginBottom: 6 }}>Campi da documentare:</div>
+                            <div style={{ fontSize: 11, fontWeight: 600, color: T.muted, marginBottom: 6 }}>{t("fieldsToDocument")}</div>
                             <ul style={{ margin: 0, paddingLeft: 16, fontSize: 12, color: T.text, lineHeight: 1.8 }}>
-                              {obl.template_fields.map((f, i) => <li key={i}>{f}</li>)}
+                              {obl.template_fields.map((f, i) => <li key={i}>{t(`a53_${obl.id}_f${i}`)}</li>)}
                             </ul>
                           </div>
                         )}
 
                         {obl.href && (
                           <Link href={obl.href} style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, color: T.blue, fontWeight: 600 }}>
-                            <ExternalLink size={12} /> {obl.note ?? "Vai al tool"}
+                            <ExternalLink size={12} /> {obl.note ? t(`a53_${obl.id}_note`) : t("goToTool")}
                           </Link>
                         )}
 
                         <div style={{ marginTop: 10 }}>
-                          <label style={{ fontSize: 11, color: T.muted, display: "block", marginBottom: 4 }}>Note / evidenze</label>
+                          <label style={{ fontSize: 11, color: T.muted, display: "block", marginBottom: 4 }}>{t("notesEvidence")}</label>
                           <textarea
                             style={textareaSt}
-                            placeholder="Descrivi lo stato attuale, link a documenti, data prevista completamento..."
+                            placeholder={t("art53NotesPh")}
                             value={state.notes}
                             onChange={e => updateArt53(obl.id, { notes: e.target.value })}
                           />
@@ -810,10 +815,10 @@ export default function GPAIAssessmentPage() {
               <div style={{ marginBottom: 16 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                   <h2 style={{ fontSize: 15, fontWeight: 700, color: T.text, margin: 0 }}>
-                    2A.2 — Obblighi aggiuntivi Art. 55
+                    {t("sec2a2_title")}
                   </h2>
                   <span style={{ fontSize: 11, fontWeight: 600, color: T.red, background: T.redBg, border: `1px solid ${T.redBdr}`, borderRadius: 6, padding: "2px 8px" }}>
-                    Solo rischio sistemico
+                    {t("systemicOnly")}
                   </span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
@@ -822,8 +827,7 @@ export default function GPAIAssessmentPage() {
                 </div>
                 {/* AI Office unsure warning */}
                 <div style={{ marginTop: 10, padding: "8px 12px", borderRadius: 8, background: T.amberBg, border: `1px solid ${T.amberBdr}`, fontSize: 12, color: T.amber }}>
-                  <strong>Nota:</strong> La soglia 10²⁵ FLOPs non è l’unico trigger. L’AI Office può designare un modello a rischio sistemico
-                  anche sotto soglia se presenta &quot;high-impact capabilities&quot; (Art. 51(2)).
+                  <span dangerouslySetInnerHTML={{ __html: t("flopsNote") }} />
                 </div>
               </div>
 
@@ -840,22 +844,22 @@ export default function GPAIAssessmentPage() {
                         {expanded ? <ChevronDown size={14} style={{ flexShrink: 0, color: T.muted }} /> : <ChevronRight size={14} style={{ flexShrink: 0, color: T.muted }} />}
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                            <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{obl.label}</span>
+                            <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{t(`a55_${obl.id}_label`)}</span>
                             <span style={{ fontSize: 10, color: T.muted, fontStyle: "italic" }}>{obl.article}</span>
                           </div>
                         </div>
                         <div onClick={e => e.stopPropagation()}>
-                          <StatusBadge status={state.status} onChange={s => updateArt55(obl.id, { status: s })} />
+                          <StatusBadge status={state.status} onChange={s => updateArt55(obl.id, { status: s })} t={t} />
                         </div>
                       </div>
 
                       {expanded && (
                         <div style={{ padding: "12px 14px 14px", borderTop: `1px solid ${T.border}`, background: T.bg }}>
-                          <p style={{ fontSize: 12, color: T.muted, marginBottom: 10, lineHeight: 1.6 }}>{obl.description}</p>
+                          <p style={{ fontSize: 12, color: T.muted, marginBottom: 10, lineHeight: 1.6 }}>{t(`a55_${obl.id}_desc`)}</p>
 
                           {obl.status_options && (
                             <div style={{ marginBottom: 10 }}>
-                              <label style={{ fontSize: 11, color: T.muted, display: "block", marginBottom: 6 }}>Stato adesione Code of Practice:</label>
+                              <label style={{ fontSize: 11, color: T.muted, display: "block", marginBottom: 6 }}>{t("copStatusLabel")}</label>
                               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                                 {obl.status_options.map(opt => (
                                   <button key={opt} onClick={() => updateArt55Field(obl.id, "cop_status", opt)} style={{
@@ -868,7 +872,7 @@ export default function GPAIAssessmentPage() {
                               </div>
                               {obl.note && (
                                 <div style={{ marginTop: 8, fontSize: 11, color: T.muted }}>
-                                  {obl.note} <a href="https://code-of-practice.ec.europa.eu" target="_blank" rel="noreferrer" style={{ color: T.blue }}>code-of-practice.ec.europa.eu ↗</a>
+                                  {t(`a55_${obl.id}_note`)} <a href="https://code-of-practice.ec.europa.eu" target="_blank" rel="noreferrer" style={{ color: T.blue }}>code-of-practice.ec.europa.eu ↗</a>
                                 </div>
                               )}
                             </div>
@@ -903,17 +907,17 @@ export default function GPAIAssessmentPage() {
             <div style={{ marginBottom: 16 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                 <h2 style={{ fontSize: 15, fontWeight: 700, color: T.text, margin: 0 }}>
-                  2B.1 — Verifica documentazione GPAI provider upstream
+                  {t("sec2b1_title")}
                 </h2>
               </div>
               <p style={{ fontSize: 12, color: T.muted, marginTop: 4 }}>
-                Per ogni GPAI model che usi, verifica di aver ricevuto la documentazione richiesta dall&apos;Art. 53(1)(b).
+                {t("sec2b1_sub")}
               </p>
             </div>
 
             {draft.providers.length === 0 && (
               <div style={{ padding: "24px", textAlign: "center", color: T.muted, fontSize: 13 }}>
-                Nessun provider aggiunto. Clicca il pulsante per aggiungere un GPAI model.
+                {t("noProviderAdded")}
               </div>
             )}
 
@@ -929,15 +933,15 @@ export default function GPAIAssessmentPage() {
                   >
                     {expanded ? <ChevronDown size={14} style={{ color: T.muted }} /> : <ChevronRight size={14} style={{ color: T.muted }} />}
                     <div style={{ flex: 1, fontSize: 13, fontWeight: 600, color: T.text }}>
-                      {prov.provider_name || "Provider..."} — {prov.model_name || "Modello..."}
+                      {prov.provider_name || t("providerPlaceholder")} — {prov.model_name || t("modelPlaceholder")}
                     </div>
                     {missingCount > 0 && (
                       <span style={{ fontSize: 11, fontWeight: 600, color: T.amber, background: T.amberBg, border: `1px solid ${T.amberBdr}`, borderRadius: 6, padding: "2px 8px" }}>
-                        {missingCount} doc. mancanti
+                        {missingCount} {t("docsMissing")}
                       </span>
                     )}
                     {allChecked && (
-                      <span style={{ fontSize: 11, fontWeight: 600, color: T.green }}>✓ Completo</span>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: T.green }}>✓ {t("complete")}</span>
                     )}
                     <button onClick={e => { e.stopPropagation(); removeProvider(prov.id); }} style={{
                       background: "none", border: "none", cursor: "pointer", padding: 4, color: T.muted,
@@ -950,24 +954,24 @@ export default function GPAIAssessmentPage() {
                     <div style={{ padding: "12px 14px 14px", borderTop: `1px solid ${T.border}`, background: T.bg }}>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3" style={{ marginBottom: 10 }}>
                         <div>
-                          <label style={{ fontSize: 11, color: T.muted, display: "block", marginBottom: 3 }}>Provider (es. OpenAI, Anthropic)</label>
+                          <label style={{ fontSize: 11, color: T.muted, display: "block", marginBottom: 3 }}>{t("providerLabel")}</label>
                           <input style={inputSt} value={prov.provider_name} onChange={e => updateProvider(prov.id, { provider_name: e.target.value })} placeholder="OpenAI" />
                         </div>
                         <div>
-                          <label style={{ fontSize: 11, color: T.muted, display: "block", marginBottom: 3 }}>Modello (es. GPT-4o, Claude 3.5)</label>
+                          <label style={{ fontSize: 11, color: T.muted, display: "block", marginBottom: 3 }}>{t("modelLabel")}</label>
                           <input style={inputSt} value={prov.model_name} onChange={e => updateProvider(prov.id, { model_name: e.target.value })} placeholder="GPT-4o" />
                         </div>
                       </div>
 
                       <div style={{ marginBottom: 10 }}>
                         <label style={{ fontSize: 11, color: T.muted, display: "block", marginBottom: 6, fontWeight: 600 }}>
-                          Documentazione ricevuta (Art. 53(1)(b)):
+                          {t("docReceived")}
                         </label>
                         {([
-                          { key: "has_technical_doc" as const,    label: "Documentazione tecnica Annex XI" },
-                          { key: "has_usage_policy" as const,     label: "Policy di utilizzo (Terms of Service con obblighi AI Act)" },
-                          { key: "has_copyright_policy" as const, label: "Policy dati di addestramento / copyright" },
-                          { key: "has_limitations_doc" as const,  label: "Limitazioni dichiarate e use case non supportati" },
+                          { key: "has_technical_doc" as const,    label: t("doc_technical") },
+                          { key: "has_usage_policy" as const,     label: t("doc_usage") },
+                          { key: "has_copyright_policy" as const, label: t("doc_copyright") },
+                          { key: "has_limitations_doc" as const,  label: t("doc_limitations") },
                         ] as const).map(item => (
                           <label key={item.key} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, cursor: "pointer" }}>
                             <input
@@ -983,17 +987,17 @@ export default function GPAIAssessmentPage() {
 
                       {missingCount > 0 && (
                         <div style={{ padding: "8px 12px", borderRadius: 8, background: T.amberBg, border: `1px solid ${T.amberBdr}`, fontSize: 12, color: T.amber, marginBottom: 10 }}>
-                          <strong>Documentazione mancante</strong> — contatta {prov.provider_name || "il provider"} per ottenere la documentazione richiesta dall&apos;Art. 53(1)(b).
+                          <strong>{t("docMissingTitle")}</strong> — {t("contactPre")} {prov.provider_name || t("theProvider")} {t("docMissingPost")}
                         </div>
                       )}
 
                       <div>
-                        <label style={{ fontSize: 11, color: T.muted, display: "block", marginBottom: 3 }}>URL documentazione</label>
+                        <label style={{ fontSize: 11, color: T.muted, display: "block", marginBottom: 3 }}>{t("docUrl")}</label>
                         <input style={inputSt} value={prov.doc_url} onChange={e => updateProvider(prov.id, { doc_url: e.target.value })} placeholder="https://..." />
                       </div>
                       <div style={{ marginTop: 8 }}>
-                        <label style={{ fontSize: 11, color: T.muted, display: "block", marginBottom: 3 }}>Note</label>
-                        <textarea style={textareaSt} value={prov.notes} onChange={e => updateProvider(prov.id, { notes: e.target.value })} placeholder="Note aggiuntive..." />
+                        <label style={{ fontSize: 11, color: T.muted, display: "block", marginBottom: 3 }}>{t("notesWord")}</label>
+                        <textarea style={textareaSt} value={prov.notes} onChange={e => updateProvider(prov.id, { notes: e.target.value })} placeholder={t("notesPh")} />
                       </div>
                     </div>
                   )}
@@ -1010,7 +1014,7 @@ export default function GPAIAssessmentPage() {
                 justifyContent: "center",
               }}
             >
-              <Plus size={13} /> Aggiungi GPAI provider / modello
+              <Plus size={13} /> {t("addProvider")}
             </button>
           </div>
 
@@ -1019,29 +1023,29 @@ export default function GPAIAssessmentPage() {
             <div style={{ ...cardSt, marginBottom: 20 }}>
               <div style={{ marginBottom: 14 }}>
                 <h2 style={{ fontSize: 15, fontWeight: 700, color: T.text, margin: 0 }}>
-                  2B.2 — Catena di responsabilità (sistema high-risk downstream)
+                  {t("sec2b2_title")}
                 </h2>
               </div>
 
               {/* Visual chain */}
               <div style={{ fontFamily: "monospace", fontSize: 12, color: T.muted, background: T.bg, border: `1px solid ${T.border}`, borderRadius: 8, padding: "12px 16px", marginBottom: 14, lineHeight: 1.9 }}>
-                <div style={{ color: T.blue, fontWeight: 700 }}>GPAI Provider (es. Anthropic)</div>
-                <div>&nbsp; ├── Responsabile di: documentazione tecnica Annex XI, copyright policy,</div>
-                <div>&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; limitazioni note, informazioni per downstream provider</div>
-                <div>&nbsp; └── NON responsabile di: come usi il modello nel tuo sistema high-risk</div>
-                <div style={{ marginTop: 6, color: T.text, fontWeight: 700 }}>Tu (Downstream Provider + Provider sistema high-risk)</div>
-                <div>&nbsp; ├── Responsabile di: tutti gli obblighi Art. 9-15 per il sistema high-risk</div>
-                <div>&nbsp; ├── Puoi fare affidamento su: documentazione GPAI ricevuta per la parte &quot;modello&quot;</div>
-                <div>&nbsp; └── Devi documentare: come hai integrato il modello e quali rischi aggiuntivi introduce</div>
+                <div style={{ color: T.blue, fontWeight: 700 }}>{t("chain_gpaiProvider")}</div>
+                <div>&nbsp; ├── {t("chain_gpai_resp1")}</div>
+                <div>&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {t("chain_gpai_resp2")}</div>
+                <div>&nbsp; └── {t("chain_gpai_notResp")}</div>
+                <div style={{ marginTop: 6, color: T.text, fontWeight: 700 }}>{t("chain_you")}</div>
+                <div>&nbsp; ├── {t("chain_you_resp1")}</div>
+                <div>&nbsp; ├── {t("chain_you_resp2")}</div>
+                <div>&nbsp; └── {t("chain_you_resp3")}</div>
               </div>
 
               {/* Confirmations */}
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {([
-                  { key: "received_annex_xi" as const,               label: "Ho ricevuto documentazione tecnica Annex XI dal GPAI provider" },
-                  { key: "limitations_in_risk_manager" as const,     label: "Le limitazioni dichiarate dal GPAI provider sono documentate nel mio Risk Manager (Art. 9)" },
-                  { key: "technical_doc_references_gpai" as const,   label: "La documentazione tecnica del mio sistema (Art. 11) include riferimento al GPAI model usato" },
-                  { key: "fria_considers_gpai" as const,             label: "Il mio FRIA (Art. 27) considera i rischi introdotti dall’uso del GPAI model" },
+                  { key: "received_annex_xi" as const,               label: t("conf_annexXi") },
+                  { key: "limitations_in_risk_manager" as const,     label: t("conf_limitations") },
+                  { key: "technical_doc_references_gpai" as const,   label: t("conf_techDoc") },
+                  { key: "fria_considers_gpai" as const,             label: t("conf_fria") },
                 ] as const).map(item => (
                   <label key={item.key} style={{ display: "flex", alignItems: "flex-start", gap: 8, cursor: "pointer" }}>
                     <input
@@ -1080,7 +1084,7 @@ export default function GPAIAssessmentPage() {
       {role !== "incomplete" && role !== "not_applicable" && (
         <div style={{ ...cardSt, marginBottom: 20 }}>
           <h2 style={{ fontSize: 15, fontWeight: 700, color: T.text, margin: "0 0 14px" }}>
-            3 — Score di conformità GPAI
+            {t("sec3_title")}
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ marginBottom: 16 }}>
@@ -1093,17 +1097,17 @@ export default function GPAIAssessmentPage() {
             )}
             {role === "gpai_provider_systemic" && (
               <div style={{ padding: 14, borderRadius: 10, border: `1px solid ${T.redBdr}`, background: T.redBg }}>
-                <div style={{ fontSize: 12, color: T.red, marginBottom: 6 }}>Art. 55 Compliance (rischio sistemico)</div>
+                <div style={{ fontSize: 12, color: T.red, marginBottom: 6 }}>{t("art55Compliance")}</div>
                 <ProgressBar value={art55Score} color={T.red} />
                 <div style={{ fontSize: 18, fontWeight: 700, color: T.red, marginTop: 6 }}>{art55Score}%</div>
               </div>
             )}
             {(role === "downstream_high_risk" || role === "downstream_standard") && (
               <div style={{ padding: 14, borderRadius: 10, border: `1px solid ${T.border}`, background: T.bg }}>
-                <div style={{ fontSize: 12, color: T.muted, marginBottom: 6 }}>Provider upstream coperti</div>
+                <div style={{ fontSize: 12, color: T.muted, marginBottom: 6 }}>{t("upstreamCovered")}</div>
                 <div style={{ fontSize: 18, fontWeight: 700, color: T.text }}>{draft.providers.length}</div>
                 <div style={{ fontSize: 11, color: T.muted, marginTop: 2 }}>
-                  {draft.providers.filter(p => p.has_technical_doc && p.has_usage_policy && p.has_copyright_policy && p.has_limitations_doc).length} completamente documentati
+                  {draft.providers.filter(p => p.has_technical_doc && p.has_usage_policy && p.has_copyright_policy && p.has_limitations_doc).length} {t("fullyDocumented")}
                 </div>
               </div>
             )}
@@ -1112,12 +1116,12 @@ export default function GPAIAssessmentPage() {
           {/* Open issues */}
           {(role === "gpai_provider_standard" || role === "gpai_provider_systemic") && (
             <div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: T.muted, marginBottom: 8 }}>Obblighi aperti:</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: T.muted, marginBottom: 8 }}>{t("openObligations")}</div>
               {[
                 ...draft.art53.filter(o => o.status !== "compliant").map(o => ({ id: o.id, label: ART53_OBLIGATIONS.find(a => a.id === o.id)?.label ?? o.id, art: "Art. 53" })),
                 ...(role === "gpai_provider_systemic" ? draft.art55.filter(o => o.status !== "compliant").map(o => ({ id: o.id, label: ART55_OBLIGATIONS.find(a => a.id === o.id)?.label ?? o.id, art: "Art. 55" })) : []),
               ].length === 0 ? (
-                <div style={{ fontSize: 12, color: T.green }}>✓ Tutti gli obblighi sono compliant</div>
+                <div style={{ fontSize: 12, color: T.green }}>✓ {t("allCompliant")}</div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                   {[
@@ -1147,11 +1151,11 @@ export default function GPAIAssessmentPage() {
             background: T.text, color: "#ffffff", border: "none", cursor: "pointer",
           }}
         >
-          <Save size={14} /> Salva nel dossier
+          <Save size={14} /> {t("saveToDossier")}
         </button>
       </div>
 
-      <SignOffPanel toolKey="gpai" toolLabel="GPAI Assessment — Art. 53-55" />
+      <SignOffPanel toolKey="gpai" toolLabel={t("signOffLabel")} />
 
       {/* Toast */}
       {toast && (

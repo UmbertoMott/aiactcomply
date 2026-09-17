@@ -2,6 +2,7 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
+import { useT } from "@/i18n/LocaleProvider";
 
 // ─── Counter hook ────────────────────────────────────────────────────────────
 
@@ -80,28 +81,30 @@ function StatCard({
 
 // ─── Pain section ─────────────────────────────────────────────────────────────
 
-const painData = [
-  {
-    target: 18,
-    format: (n: number) => `${Math.min(n, 6) === 0 && n < 6 ? 0 : 6}–${n}`,
-    label: "per completare un audit di conformità AI manuale",
-    delay: 0,
-  },
-  {
-    target: 100,
-    format: (n: number) => `${n}+`,
-    label: "requisiti dell'AI Act da mappare articolo per articolo",
-    delay: 0.1,
-  },
-  {
-    target: 35,
-    format: (n: number) => `${n}M€`,
-    label: "sanzione massima per non conformità ai sistemi ad alto rischio",
-    delay: 0.2,
-  },
-];
-
 export default function Pain() {
+  const t = useT("pain");
+
+  const painData = [
+    {
+      target: 18,
+      format: (n: number) => `${Math.min(n, 6) === 0 && n < 6 ? 0 : 6}–${n}`,
+      label: t("stat1_label"),
+      delay: 0,
+    },
+    {
+      target: 100,
+      format: (n: number) => `${n}+`,
+      label: t("stat2_label"),
+      delay: 0.1,
+    },
+    {
+      target: 35,
+      format: (n: number) => `${n}M€`,
+      label: t("stat3_label"),
+      delay: 0.2,
+    },
+  ];
+
   return (
     <section className="px-12 py-24" style={{ background: "#FAFAF9" }}>
       <div className="max-w-5xl mx-auto">
@@ -109,7 +112,7 @@ export default function Pain() {
           className="text-[12px] font-medium uppercase mb-4"
           style={{ letterSpacing: "1.5px", color: "rgba(0,0,0,0.3)" }}
         >
-          Il problema
+          {t("kicker")}
         </p>
         <h2
           className="mb-16 max-w-2xl"
@@ -121,7 +124,7 @@ export default function Pain() {
             color: "#0D1016",
           }}
         >
-          La conformità normativa AI è un problema non risolto.
+          {t("title")}
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

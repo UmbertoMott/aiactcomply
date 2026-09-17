@@ -3,6 +3,9 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import React, { useRef, useEffect, useCallback } from "react"
 import { Bot, ScanSearch, PenLine, FileDown, Send, Trash2 } from "lucide-react"
+import { useT } from "@/i18n/LocaleProvider"
+
+type TFn = (key: string) => string
 import { classifyChat, type ChatMessage as ClassifyChatMsg } from "@/app/actions/classifyChat"
 import {
   loadInventory, addSystem, updateSystem, deleteSystem,
@@ -106,13 +109,14 @@ const INPUT_STYLE: React.CSSProperties = {
 
 // ─── AI Badge ─────────────────────────────────────────────────────────────────
 function AiBadge() {
+  const t = useT("toolInventory")
   return (
     <span style={{
       fontSize: 10, fontWeight: 600, padding: "1px 6px", borderRadius: 3,
       background: "rgba(217,119,6,0.08)", color: "#d97706",
       border: "1px solid rgba(217,119,6,0.15)",
     }}>
-      ✦ AI — verifica
+      ✦ {t("aiVerify")}
     </span>
   )
 }
@@ -169,6 +173,7 @@ function ModalShell({
 function SystemCard({ system, onEdit, onClassify, onDelete }: {
   system: AISystem; onEdit: () => void; onClassify: () => void; onDelete: () => void
 }) {
+  const t = useT("toolInventory")
   const cfg = TIER_CONFIG[system.tier]
   const { total, done } = computeObligationCount(system)
   const pct = total > 0 ? Math.round((done / total) * 100) : 100
@@ -186,7 +191,7 @@ function SystemCard({ system, onEdit, onClassify, onDelete }: {
             fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 4,
             background: cfg.bg, color: cfg.text, border: `1px solid ${cfg.border}`,
           }}>
-            {cfg.label.toUpperCase()}
+            {t(`tier_${system.tier}_label`).toUpperCase()}
           </span>
           {system.dualRoleFlag && (
             <span style={{
@@ -198,24 +203,24 @@ function SystemCard({ system, onEdit, onClassify, onDelete }: {
             <span style={{
               fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 4,
               background: "rgba(220,38,38,0.07)", color: "#dc2626", border: "1px solid rgba(220,38,38,0.15)",
-            }}>Revisione entro 30gg</span>
+            }}>{t("reviewIn30")}</span>
           )}
         </div>
         <h3 style={{ fontSize: 14, fontWeight: 700, margin: "0 0 2px", color: "#111" }}>{system.name}</h3>
         <p style={{ fontSize: 11, color: "#9ca3af", margin: "0 0 10px" }}>
-          {system.id} · {system.owner || "—"} · {STATUS_LABELS[system.status] ?? system.status}
+          {system.id} · {system.owner || "—"} · {t(`status_${system.status}`)}
         </p>
         <p style={{
           fontSize: 12, color: "#6b7280", margin: "0 0 12px",
           display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
         }}>
-          {system.description || "Nessuna descrizione."}
+          {system.description || t("noDescription")}
         </p>
         {/* Role + EU Nexus */}
         <div style={{ display: "flex", gap: 6, marginBottom: 12, flexWrap: "wrap" }}>
           {system.role && (
             <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 4, background: "rgba(0,0,0,0.04)", color: "#374151", border: "1px solid rgba(0,0,0,0.08)" }}>
-              {ROLE_LABELS[system.role] ?? system.role}
+              {t(`roleLabel_${system.role}`)}
             </span>
           )}
           <span style={{
@@ -224,14 +229,14 @@ function SystemCard({ system, onEdit, onClassify, onDelete }: {
             color: system.euNexus ? "#2563eb" : "#9ca3af",
             border: `1px solid ${system.euNexus ? "rgba(37,99,235,0.15)" : "rgba(0,0,0,0.08)"}`,
           }}>
-            {system.euNexus ? "EU nexus ✓" : "Fuori UE"}
+            {system.euNexus ? t("euNexusYes") : t("euNexusNo")}
           </span>
         </div>
         {/* Progress obblighi */}
         {total > 0 && (
           <div style={{ marginBottom: 14 }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-              <span style={{ fontSize: 11, color: "#9ca3af" }}>Obblighi completati</span>
+              <span style={{ fontSize: 11, color: "#9ca3af" }}>{t("obligationsCompleted")}</span>
               <span style={{ fontSize: 11, color: pct === 100 ? "#16a34a" : "#374151", fontWeight: 600 }}>{done}/{total}</span>
             </div>
             <div style={{ height: 5, borderRadius: 3, background: "#f3f4f6", overflow: "hidden" }}>
@@ -251,22 +256,22 @@ function SystemCard({ system, onEdit, onClassify, onDelete }: {
             border: "none", background: "#111", color: "white", cursor: "pointer",
             display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4,
           }}>
-            Analisi 360° →
+            {t("analysis360")}
           </Link>
           {system.tier === "unclassified" ? (
             <button onClick={onClassify} style={{ padding: "6px 10px", borderRadius: 7, border: "none", background: "rgba(0,0,0,0.06)", color: "#374151", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
-              Classifica
+              {t("classify")}
             </button>
           ) : (
             <button onClick={onClassify} style={{ padding: "6px 10px", borderRadius: 7, fontSize: 12, border: "1px solid rgba(0,0,0,0.1)", background: "white", color: "#374151", cursor: "pointer" }}>
-              Riclassifica
+              {t("reclassify")}
             </button>
           )}
           <button onClick={onEdit} style={{ padding: "6px 10px", borderRadius: 7, fontSize: 12, border: "1px solid rgba(0,0,0,0.1)", background: "white", color: "#374151", cursor: "pointer" }}>
-            Modifica
+            {t("edit")}
           </button>
           <button
-            onClick={() => { if (confirm(`Eliminare "${system.name}"?`)) onDelete() }}
+            onClick={() => { if (confirm(`${t("confirmDelete")} "${system.name}"?`)) onDelete() }}
             style={{ padding: "6px 8px", borderRadius: 7, border: "1px solid rgba(220,38,38,0.2)", background: "rgba(220,38,38,0.04)", color: "#dc2626", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
           ><Trash2 size={13} /></button>
         </div>
@@ -277,20 +282,21 @@ function SystemCard({ system, onEdit, onClassify, onDelete }: {
 
 // ─── EmptyState ───────────────────────────────────────────────────────────────
 function EmptyState({ onAdd, hasFilter }: { onAdd: () => void; hasFilter: boolean }) {
+  const t = useT("toolInventory")
   return (
     <div style={{ textAlign: "center", padding: "60px 20px", background: "white", borderRadius: 14, border: "1px dashed rgba(0,0,0,0.12)" }}>
       <p style={{ fontSize: 32, marginBottom: 12 }}>📋</p>
       <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 6 }}>
-        {hasFilter ? "Nessun sistema con questo filtro" : "Inventario vuoto"}
+        {hasFilter ? t("emptyFiltered") : t("emptyTitle")}
       </p>
       <p style={{ fontSize: 13, color: "#6b7280", maxWidth: 400, margin: "0 auto 20px" }}>
         {hasFilter
-          ? "Prova a rimuovere il filtro per vedere tutti i sistemi."
-          : "Aggiungi il tuo primo sistema AI per iniziare il percorso di conformità EU AI Act."}
+          ? t("emptyFilteredDesc")
+          : t("emptyDesc")}
       </p>
       {!hasFilter && (
         <button onClick={onAdd} style={{ padding: "10px 20px", borderRadius: 8, border: "none", background: "#111", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-          + Aggiungi il primo sistema
+          {t("addFirstSystem")}
         </button>
       )}
     </div>
@@ -318,6 +324,7 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
   onClose: () => void; onSave: () => void; existingSystems: AISystem[]
   initialStep?: AddStep
 }) {
+  const t = useT("toolInventory")
   const [step, setStep] = React.useState<AddStep>(initialStep)
   const [freeText, setFreeText] = React.useState("")
   const [loading, setLoading] = React.useState(false)
@@ -427,10 +434,10 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
 
   // ── Title/subtitle per step
   const titles: Record<typeof step, { title: string; sub: string; maxW: number }> = {
-    channel:   { title: "Aggiungi sistema AI", sub: "Scegli come vuoi inserire il sistema", maxW: 520 },
-    describe:  { title: "Descrivi il sistema", sub: "Descrivi in linguaggio naturale — l'AI pre-compila i campi", maxW: 520 },
-    discovery: { title: "Importa da sorgente", sub: "Connetti una sorgente per rilevare automaticamente il sistema AI", maxW: 560 },
-    review:    { title: "Verifica e salva", sub: "Nessun dato AI viene salvato automaticamente — conferma ogni campo", maxW: 700 },
+    channel:   { title: t("add_channel_title"), sub: t("add_channel_sub"), maxW: 520 },
+    describe:  { title: t("add_describe_title"), sub: t("add_describe_sub"), maxW: 520 },
+    discovery: { title: t("add_discovery_title"), sub: t("add_discovery_sub"), maxW: 560 },
+    review:    { title: t("add_review_title"), sub: t("add_review_sub"), maxW: 700 },
   }
   const { title, sub, maxW } = titles[step]
 
@@ -443,23 +450,23 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
           {[
             {
               key: "ai" as const,
-              label: "Con AI",
-              badge: "✦ Consigliato",
-              desc: "Descrivi il sistema in linguaggio naturale. L'AI identifica ruolo, tier di rischio e obblighi applicabili.",
+              label: t("ch_ai_label"),
+              badge: t("ch_recommended"),
+              desc: t("ch_ai_desc"),
               action: () => setStep("describe"),
             },
             {
               key: "discovery" as const,
-              label: "Discovery",
-              badge: "⟳ Automatico",
-              desc: "Collega GitHub, HuggingFace, npm o altri canali. Scansione automatica per rilevare librerie AI e classificare il sistema.",
+              label: t("ch_discovery_label"),
+              badge: t("ch_automatic"),
+              desc: t("ch_discovery_desc"),
               action: () => setStep("discovery"),
             },
             {
               key: "manual" as const,
-              label: "Manuale",
-              badge: "✎ Form",
-              desc: "Compila direttamente tutti i campi. Adatto se hai già la classificazione e la base normativa.",
+              label: t("ch_manual_label"),
+              badge: t("ch_form"),
+              desc: t("ch_manual_desc"),
               action: () => { setStep("review"); setAiFields(new Set()) },
             },
           ].map((ch, i) => (
@@ -495,7 +502,7 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
           <textarea
             value={freeText}
             onChange={e => setFreeText(e.target.value)}
-            placeholder={"Es. 'Usiamo HireVue per le video interview AI nella selezione' oppure 'Abbiamo un chatbot GPT-4 per il supporto clienti sul sito'"}
+            placeholder={t("describePh")}
             rows={5}
             style={{ ...INPUT_STYLE, resize: "vertical", fontFamily: "inherit", lineHeight: 1.55 }}
           />
@@ -507,14 +514,14 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
               color: isDescribeReady ? "white" : "#9ca3af",
               fontSize: 13, fontWeight: 600, cursor: isDescribeReady ? "pointer" : "default",
             }}>
-              {loading ? "Analisi in corso…" : "✦ Analizza con AI e pre-compila"}
+              {loading ? t("analyzing") : t("analyzeAiFill")}
             </button>
             <button onClick={() => setStep("channel")} style={{ padding: "10px 14px", borderRadius: 8, fontSize: 13, border: "1px solid rgba(0,0,0,0.12)", background: "white", color: "#374151", cursor: "pointer" }}>
-              ← Canali
+              {t("backChannels")}
             </button>
           </div>
           <p style={{ fontSize: 11, color: "#9ca3af", marginTop: 10, textAlign: "center" }}>
-            I campi generati dall'AI avranno il badge ✦ AI — verifica e richiedono conferma esplicita
+            {t("aiFieldsNote")}
           </p>
         </>
       )}
@@ -556,26 +563,26 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
                 fontSize: 12, fontWeight: 600, cursor: discInput.trim() && !discScanning ? "pointer" : "default",
               }}
             >
-              {discScanning ? "Scansione…" : "Scansiona"}
+              {discScanning ? t("scanning") : t("scan")}
             </button>
           </div>
 
           {/* Results */}
           {discScanning && (
             <div style={{ padding: "20px", textAlign: "center", color: "rgba(0,0,0,0.40)", fontSize: 13 }}>
-              Analisi della sorgente in corso…
+              {t("scanningSource")}
             </div>
           )}
           {discResults !== null && !discScanning && (
             discResults.length === 0 ? (
               <div style={{ padding: "16px", borderRadius: 8, background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.08)", textAlign: "center" }}>
-                <p style={{ fontSize: 13, color: "rgba(0,0,0,0.40)", margin: 0 }}>Nessun sistema AI rilevato da questa sorgente.</p>
-                <p style={{ fontSize: 11, color: "rgba(0,0,0,0.30)", margin: "4px 0 0" }}>Prova con un'altra sorgente o usa l'inserimento manuale.</p>
+                <p style={{ fontSize: 13, color: "rgba(0,0,0,0.40)", margin: 0 }}>{t("noSystemDetected")}</p>
+                <p style={{ fontSize: 11, color: "rgba(0,0,0,0.30)", margin: "4px 0 0" }}>{t("tryOtherSource")}</p>
               </div>
             ) : (
               <div>
                 <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.40)", textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: 8 }}>
-                  {discResults.length} sistema{discResults.length > 1 ? "i" : ""} rilevato{discResults.length > 1 ? "i" : ""}
+                  {discResults.length} {discResults.length > 1 ? t("systemsDetected") : t("systemDetected")}
                 </p>
                 {discResults.map(sys => (
                   <button key={sys.id} onClick={() => applyDiscovered(sys)} style={{
@@ -590,7 +597,7 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
                         fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 4,
                         background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.40)",
                       }}>
-                        {sys.confidence.toUpperCase()} CONFIDENZA
+                        {sys.confidence.toUpperCase()} {t("confidenceWord")}
                       </span>
                     </div>
                     <p style={{ fontSize: 11, color: "rgba(0,0,0,0.45)", margin: "0 0 6px", lineHeight: 1.4 }}>{sys.description}</p>
@@ -600,7 +607,7 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
                         background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.45)",
                       }}>{e}</span>
                     ))}
-                    <span style={{ fontSize: 11, color: "rgba(0,0,0,0.30)", float: "right" }}>Importa →</span>
+                    <span style={{ fontSize: 11, color: "rgba(0,0,0,0.30)", float: "right" }}>{t("importArrow")}</span>
                   </button>
                 ))}
               </div>
@@ -609,10 +616,10 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
 
           <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
             <button onClick={() => setStep("channel")} style={{ padding: "8px 14px", borderRadius: 8, fontSize: 12, border: "1px solid rgba(0,0,0,0.10)", background: "white", color: "#374151", cursor: "pointer" }}>
-              ← Canali
+              {t("backChannels")}
             </button>
             <button onClick={() => { setStep("review"); setAiFields(new Set()) }} style={{ padding: "8px 14px", borderRadius: 8, fontSize: 12, border: "1px solid rgba(0,0,0,0.10)", background: "white", color: "#374151", cursor: "pointer", marginLeft: "auto" }}>
-              Inserimento manuale →
+              {t("manualEntry")}
             </button>
           </div>
         </>
@@ -628,11 +635,11 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
               border: `1px solid ${draft.confidenceLevel === "high" ? "rgba(22,163,74,0.2)" : "rgba(217,119,6,0.2)"}`,
             }}>
               <p style={{ fontSize: 12, margin: 0, color: draft.confidenceLevel === "high" ? "#16a34a" : "#d97706" }}>
-                <strong>Confidenza AI: {draft.confidenceLevel.toUpperCase()}</strong> — {draft.confidenceNote}
+                <strong>{t("aiConfidence")} {draft.confidenceLevel.toUpperCase()}</strong> — {draft.confidenceNote}
               </p>
               {draft.knownVendor && (
                 <p style={{ fontSize: 11, color: "#6b7280", margin: "4px 0 0" }}>
-                  Sistema riconosciuto: <strong>{draft.knownVendor}</strong>
+                  {t("recognizedSystem")} <strong>{draft.knownVendor}</strong>
                 </p>
               )}
             </div>
@@ -646,81 +653,81 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             <div style={{ gridColumn: "1 / -1" }}>
-              <FieldLabel label="Nome sistema *" showAi={aiFields.has("name")} />
+              <FieldLabel label={t("f_systemName")} showAi={aiFields.has("name")} />
               <input value={name} onChange={e => { setName(e.target.value); removeAiField("name") }} style={INPUT_STYLE} />
             </div>
             <div>
-              <FieldLabel label="Owner / Responsabile" showAi={aiFields.has("owner")} />
-              <input value={owner} onChange={e => { setOwner(e.target.value); removeAiField("owner") }} style={INPUT_STYLE} placeholder="Es. HR / Giulia Rossi" />
+              <FieldLabel label={t("f_owner")} showAi={aiFields.has("owner")} />
+              <input value={owner} onChange={e => { setOwner(e.target.value); removeAiField("owner") }} style={INPUT_STYLE} placeholder={t("ownerPh")} />
             </div>
             <div>
-              <FieldLabel label="Stato" showAi={aiFields.has("status")} />
+              <FieldLabel label={t("f_status")} showAi={aiFields.has("status")} />
               <select value={status} onChange={e => { setStatus(e.target.value); removeAiField("status") }} style={INPUT_STYLE}>
-                <option value="planned">Pianificato</option>
-                <option value="in_development">In sviluppo</option>
-                <option value="in_production">In produzione</option>
-                <option value="deprecated">Deprecato</option>
+                <option value="planned">{t("status_planned")}</option>
+                <option value="in_development">{t("status_in_development")}</option>
+                <option value="in_production">{t("status_in_production")}</option>
+                <option value="deprecated">{t("status_deprecated")}</option>
               </select>
             </div>
             <div style={{ gridColumn: "1 / -1" }}>
-              <FieldLabel label="Descrizione" showAi={aiFields.has("description")} />
+              <FieldLabel label={t("f_description")} showAi={aiFields.has("description")} />
               <textarea value={description} onChange={e => { setDescription(e.target.value); removeAiField("description") }} rows={3} style={{ ...INPUT_STYLE, resize: "vertical", fontFamily: "inherit" }} />
             </div>
             <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: 10 }}>
               <input type="checkbox" id="euNexusAdd" checked={euNexus} onChange={e => { setEuNexus(e.target.checked); removeAiField("euNexus") }} style={{ width: 16, height: 16 }} />
               <label htmlFor="euNexusAdd" style={{ fontSize: 13, color: "#374151" }}>
-                EU nexus — il sistema è deployato, offerto o produce effetti nell'UE/SEE
+                {t("euNexusFull")}
                 {aiFields.has("euNexus") && <span style={{ fontSize: 10, color: "#d97706", marginLeft: 6, fontWeight: 600 }}>✦ AI</span>}
               </label>
             </div>
             <div>
-              <FieldLabel label="Ruolo (Art. 2)" showAi={aiFields.has("role")} />
+              <FieldLabel label={t("f_role")} showAi={aiFields.has("role")} />
               <select value={role} onChange={e => { setRole(e.target.value); removeAiField("role") }} style={INPUT_STYLE}>
-                <option value="">Da definire</option>
+                <option value="">{t("role_undefined")}</option>
                 <option value="provider">Provider</option>
                 <option value="deployer">Deployer</option>
-                <option value="importer">Importatore</option>
-                <option value="distributor">Distributore</option>
-                <option value="authorized_rep">Rappresentante autorizzato</option>
-                <option value="product_manufacturer">Produttore prodotto</option>
+                <option value="importer">{t("role_importer")}</option>
+                <option value="distributor">{t("role_distributor")}</option>
+                <option value="authorized_rep">{t("role_authorized_rep")}</option>
+                <option value="product_manufacturer">{t("role_product_manufacturer")}</option>
               </select>
             </div>
             <div>
-              <FieldLabel label="Tier di rischio" showAi={aiFields.has("tier")} />
+              <FieldLabel label={t("f_tier")} showAi={aiFields.has("tier")} />
               <select value={tier} onChange={e => { setTier(e.target.value); removeAiField("tier") }} style={INPUT_STYLE}>
-                <option value="unclassified">Non classificato</option>
-                <option value="prohibited">Vietato (Art. 5)</option>
-                <option value="high_risk">Alto rischio (Annex III)</option>
-                <option value="limited">Rischio limitato (Art. 50)</option>
-                <option value="minimal">Rischio minimale</option>
-                <option value="gpai">GPAI (Art. 51)</option>
-                <option value="gpai_systemic">GPAI + Sistemico</option>
+                <option value="unclassified">{t("tier_unclassified_opt")}</option>
+                <option value="prohibited">{t("tier_prohibited_opt")}</option>
+                <option value="high_risk">{t("tier_high_risk_opt")}</option>
+                <option value="limited">{t("tier_limited_opt")}</option>
+                <option value="minimal">{t("tier_minimal_opt")}</option>
+                <option value="gpai">{t("tier_gpai_opt")}</option>
+                <option value="gpai_systemic">{t("tier_gpai_systemic_opt")}</option>
               </select>
             </div>
             <div style={{ gridColumn: "1 / -1" }}>
-              <FieldLabel label="Base ruolo" showAi={aiFields.has("roleBasis")} />
-              <input value={roleBasis} onChange={e => { setRoleBasis(e.target.value); removeAiField("roleBasis") }} style={INPUT_STYLE} placeholder="Motivazione in 1 frase" />
+              <FieldLabel label={t("f_roleBasis")} showAi={aiFields.has("roleBasis")} />
+              <input value={roleBasis} onChange={e => { setRoleBasis(e.target.value); removeAiField("roleBasis") }} style={INPUT_STYLE} placeholder={t("roleBasisPh")} />
             </div>
             <div style={{ gridColumn: "1 / -1" }}>
-              <FieldLabel label="Base classificazione tier" showAi={aiFields.has("tierBasis")} />
-              <input value={tierBasis} onChange={e => { setTierBasis(e.target.value); removeAiField("tierBasis") }} style={INPUT_STYLE} placeholder="Es. Annex III(4)(a) — employment" />
+              <FieldLabel label={t("f_tierBasis")} showAi={aiFields.has("tierBasis")} />
+              <input value={tierBasis} onChange={e => { setTierBasis(e.target.value); removeAiField("tierBasis") }} style={INPUT_STYLE} placeholder={t("tierBasisPh")} />
             </div>
             <div style={{ gridColumn: "1 / -1" }}>
-              <FieldLabel label="Note obblighi applicabili" showAi={aiFields.has("obligationsNote")} />
+              <FieldLabel label={t("f_obligations")} showAi={aiFields.has("obligationsNote")} />
               <textarea value={obligationsNote} onChange={e => { setObligationsNote(e.target.value); removeAiField("obligationsNote") }} rows={2} style={{ ...INPUT_STYLE, resize: "vertical", fontFamily: "inherit" }} />
             </div>
           </div>
 
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20, gap: 8 }}>
             <button onClick={() => setStep("describe")} style={{ padding: "9px 16px", borderRadius: 8, fontSize: 13, border: "1px solid rgba(0,0,0,0.12)", background: "white", color: "#374151", cursor: "pointer" }}>
-              ← Riscrivi descrizione
+              {t("rewriteDescription")}
             </button>
             <button
               onClick={handleSave}
               disabled={!name.trim()}
               style={{ padding: "9px 20px", borderRadius: 8, border: "none", background: name.trim() ? "#111" : "#e5e7eb", color: name.trim() ? "white" : "#9ca3af", fontSize: 13, fontWeight: 600, cursor: name.trim() ? "pointer" : "default" }}
             >
-              Salva sistema
+              {t("saveSystem")}
             </button>
           </div>
         </>
@@ -734,6 +741,7 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
 function EditSystemModal({ system, onClose, onSave }: {
   system: AISystem; onClose: () => void; onSave: () => void
 }) {
+  const t = useT("toolInventory")
   const [name, setName] = React.useState(system.name)
   const [owner, setOwner] = React.useState(system.owner)
   const [description, setDescription] = React.useState(system.description)
@@ -756,56 +764,56 @@ function EditSystemModal({ system, onClose, onSave }: {
   }
 
   return (
-    <ModalShell title={`Modifica — ${system.id}`} subtitle={system.name} onClose={onClose}>
+    <ModalShell title={`${t("editWord")} — ${system.id}`} subtitle={system.name} onClose={onClose}>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
         <div style={{ gridColumn: "1 / -1" }}>
-          <FieldLabel label="Nome sistema *" showAi={false} />
+          <FieldLabel label={t("f_systemName")} showAi={false} />
           <input value={name} onChange={e => setName(e.target.value)} style={INPUT_STYLE} />
         </div>
         <div>
-          <FieldLabel label="Owner / Responsabile" showAi={false} />
+          <FieldLabel label={t("f_owner")} showAi={false} />
           <input value={owner} onChange={e => setOwner(e.target.value)} style={INPUT_STYLE} />
         </div>
         <div>
-          <FieldLabel label="Stato" showAi={false} />
+          <FieldLabel label={t("f_status")} showAi={false} />
           <select value={status} onChange={e => setStatus(e.target.value as AISystem["status"])} style={INPUT_STYLE}>
-            <option value="planned">Pianificato</option>
-            <option value="in_development">In sviluppo</option>
-            <option value="in_production">In produzione</option>
-            <option value="deprecated">Deprecato</option>
+            <option value="planned">{t("status_planned")}</option>
+            <option value="in_development">{t("status_in_development")}</option>
+            <option value="in_production">{t("status_in_production")}</option>
+            <option value="deprecated">{t("status_deprecated")}</option>
           </select>
         </div>
         <div style={{ gridColumn: "1 / -1" }}>
-          <FieldLabel label="Descrizione" showAi={false} />
+          <FieldLabel label={t("f_description")} showAi={false} />
           <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3} style={{ ...INPUT_STYLE, resize: "vertical", fontFamily: "inherit" }} />
         </div>
         <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: 10 }}>
           <input type="checkbox" id="euNexusEdit" checked={euNexus} onChange={e => setEuNexus(e.target.checked)} style={{ width: 16, height: 16 }} />
-          <label htmlFor="euNexusEdit" style={{ fontSize: 13, color: "#374151" }}>EU nexus attivo</label>
+          <label htmlFor="euNexusEdit" style={{ fontSize: 13, color: "#374151" }}>{t("euNexusActive")}</label>
         </div>
         <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: 10 }}>
           <input type="checkbox" id="dualRole" checked={dualRoleFlag} onChange={e => setDualRoleFlag(e.target.checked)} style={{ width: 16, height: 16 }} />
           <label htmlFor="dualRole" style={{ fontSize: 13, color: "#374151" }}>
-            Dual-role (Art. 25 — substantial modification)
+            {t("dualRoleFull")}
           </label>
         </div>
         <div>
-          <FieldLabel label="Prossima revisione" showAi={false} />
+          <FieldLabel label={t("f_nextReview")} showAi={false} />
           <input type="date" value={nextReview} onChange={e => setNextReview(e.target.value)} style={INPUT_STYLE} />
         </div>
         <div>
-          <FieldLabel label="Trigger revisione" showAi={false} />
+          <FieldLabel label={t("f_reviewTrigger")} showAi={false} />
           <input value={reviewTrigger} onChange={e => setReviewTrigger(e.target.value)} style={INPUT_STYLE} />
         </div>
         <div style={{ gridColumn: "1 / -1" }}>
-          <FieldLabel label="Note obblighi" showAi={false} />
+          <FieldLabel label={t("f_obligationsShort")} showAi={false} />
           <textarea value={obligationsNote} onChange={e => setObligationsNote(e.target.value)} rows={2} style={{ ...INPUT_STYLE, resize: "vertical", fontFamily: "inherit" }} />
         </div>
       </div>
       <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 20, gap: 8 }}>
-        <button onClick={onClose} style={{ padding: "9px 16px", borderRadius: 8, fontSize: 13, border: "1px solid rgba(0,0,0,0.12)", background: "white", color: "#374151", cursor: "pointer" }}>Annulla</button>
+        <button onClick={onClose} style={{ padding: "9px 16px", borderRadius: 8, fontSize: 13, border: "1px solid rgba(0,0,0,0.12)", background: "white", color: "#374151", cursor: "pointer" }}>{t("cancel")}</button>
         <button onClick={handleSave} disabled={!name.trim()} style={{ padding: "9px 20px", borderRadius: 8, border: "none", background: name.trim() ? "#111" : "#e5e7eb", color: name.trim() ? "white" : "#9ca3af", fontSize: 13, fontWeight: 600, cursor: name.trim() ? "pointer" : "default" }}>
-          Salva modifiche
+          {t("saveChanges")}
         </button>
       </div>
     </ModalShell>
@@ -816,6 +824,7 @@ function EditSystemModal({ system, onClose, onSave }: {
 function ClassifyModal({ system, onClose, onSave }: {
   system: AISystem; onClose: () => void; onSave: () => void
 }) {
+  const t = useT("toolInventory")
   // Form state — valori vuoti all'apertura (placeholder guida l'utente)
   const [role, setRole] = React.useState(system.role ?? "")
   const [roleBasis, setRoleBasis] = React.useState("")
@@ -829,7 +838,7 @@ function ClassifyModal({ system, onClose, onSave }: {
   // Chat AI state
   const initMsg: ClassifyChatMsg = {
     role: "assistant",
-    content: `Ciao! Sono qui per aiutarti a classificare correttamente "${system.name}" ai sensi dell'EU AI Act.\n\nPer iniziare: puoi descrivermi cosa fa questo sistema AI e in quale contesto viene utilizzato?`,
+    content: `${t("chatGreetPre")} "${system.name}" ${t("chatGreetPost")}`,
   }
   const [chatMessages, setChatMessages] = React.useState<ClassifyChatMsg[]>([initMsg])
   const [chatInput, setChatInput] = React.useState("")
@@ -900,8 +909,8 @@ function ClassifyModal({ system, onClose, onSave }: {
         {/* Header */}
         <div style={{ padding: "18px 24px 14px", borderBottom: "1px solid rgba(0,0,0,0.08)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexShrink: 0 }}>
           <div>
-            <h2 style={{ fontSize: 17, fontWeight: 700, color: "#0D1016", margin: 0 }}>Classifica — {system.name}</h2>
-            <p style={{ fontSize: 12, color: "#6b7280", margin: "3px 0 0" }}>Seleziona ruolo e tier di rischio EU AI Act. Tutti i campi sono sotto tua responsabilità.</p>
+            <h2 style={{ fontSize: 17, fontWeight: 700, color: "#0D1016", margin: 0 }}>{t("classify")} — {system.name}</h2>
+            <p style={{ fontSize: 12, color: "#6b7280", margin: "3px 0 0" }}>{t("classifySub")}</p>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", padding: 4, marginTop: 2 }}>✕</button>
         </div>
@@ -915,16 +924,16 @@ function ClassifyModal({ system, onClose, onSave }: {
             {/* Banner */}
             <div style={{ padding: "10px 14px", borderRadius: 8, marginBottom: 16, background: "rgba(13,16,22,0.04)", border: "1px solid rgba(13,16,22,0.10)" }}>
               <p style={{ fontSize: 12, color: "#0D1016", margin: 0, lineHeight: 1.55 }}>
-                <strong>Attenzione:</strong> La classificazione è una responsabilità legale tua, non dell'AI. Indica l'articolo EU AI Act che giustifica la tua scelta — ti protegge in caso di audit.
+                <span dangerouslySetInnerHTML={{ __html: t("classifyWarning") }} />
               </p>
             </div>
 
             {/* Tier buttons */}
             <div style={{ marginBottom: 10 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 7 }}>
-                <FieldLabel label="Tier di rischio EU AI Act *" showAi={false} />
+                <FieldLabel label={t("tierLabel")} showAi={false} />
                 <button onClick={() => setShowTierGuide(v => !v)} style={{ fontSize: 11, color: "#6b7280", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
-                  {showTierGuide ? "Nascondi guida" : "Mostra guida"}
+                  {showTierGuide ? t("hideGuide") : t("showGuide")}
                 </button>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(115px, 1fr))", gap: 6 }}>
@@ -932,7 +941,7 @@ function ClassifyModal({ system, onClose, onSave }: {
                   <button key={key} onClick={() => { setTier(key); setShowTierGuide(true); }}
                     style={{ padding: "8px 6px", borderRadius: 7, cursor: "pointer", textAlign: "center", border: `2px solid ${tier === key ? cfg.border : "rgba(0,0,0,0.08)"}`, background: tier === key ? cfg.bg : "white", transition: "all 0.1s" }}>
                     <div style={{ width: 7, height: 7, borderRadius: "50%", background: cfg.dot, margin: "0 auto 5px" }} />
-                    <p style={{ fontSize: 10, fontWeight: 700, color: tier === key ? cfg.text : "#6b7280", margin: 0 }}>{cfg.label}</p>
+                    <p style={{ fontSize: 10, fontWeight: 700, color: tier === key ? cfg.text : "#6b7280", margin: 0 }}>{t(`tier_${key}_label`)}</p>
                   </button>
                 ))}
               </div>
@@ -942,17 +951,17 @@ function ClassifyModal({ system, onClose, onSave }: {
             {showTierGuide && (
               <div style={{ marginBottom: 14, padding: "12px 14px", borderRadius: 9, background: tierCfg.bg, border: `1px solid ${tierCfg.border}` }}>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 7, marginBottom: 6 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: tierCfg.text }}>{tierCfg.label}</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: tierCfg.text }}>{t(`tier_${tier}_label`)}</span>
                   <span style={{ fontSize: 9, color: "#9ca3af", fontFamily: "monospace" }}>{tierCfg.article}</span>
                 </div>
-                <p style={{ fontSize: 11.5, color: "#374151", margin: "0 0 8px", lineHeight: 1.5 }}>{tierCfg.what}</p>
-                <p style={{ fontSize: 9.5, fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 4px" }}>Esempi tipici</p>
+                <p style={{ fontSize: 11.5, color: "#374151", margin: "0 0 8px", lineHeight: 1.5 }}>{t(`tier_${tier}_what`)}</p>
+                <p style={{ fontSize: 9.5, fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 4px" }}>{t("typicalExamples")}</p>
                 <ul style={{ margin: "0 0 8px", paddingLeft: 16, display: "flex", flexDirection: "column", gap: 2 }}>
-                  {tierCfg.examples.map((ex, i) => <li key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.4 }}>{ex}</li>)}
+                  {tierCfg.examples.map((ex, i) => <li key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.4 }}>{t(`tier_${tier}_ex${i}`)}</li>)}
                 </ul>
-                <p style={{ fontSize: 9.5, fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 4px" }}>Obblighi principali</p>
+                <p style={{ fontSize: 9.5, fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 4px" }}>{t("mainObligations")}</p>
                 <ul style={{ margin: 0, paddingLeft: 16, display: "flex", flexDirection: "column", gap: 2 }}>
-                  {tierCfg.obligations.map((ob, i) => <li key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.4 }}>{ob}</li>)}
+                  {tierCfg.obligations.map((ob, i) => <li key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.4 }}>{t(`tier_${tier}_ob${i}`)}</li>)}
                 </ul>
               </div>
             )}
@@ -961,31 +970,31 @@ function ClassifyModal({ system, onClose, onSave }: {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <FieldLabel label="Ruolo (Art. 2)" showAi={false} />
-                  {role && <button onClick={() => setShowRoleGuide(v => !v)} style={{ fontSize: 10, color: "#6b7280", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", marginBottom: 6 }}>{showRoleGuide ? "Nascondi" : "Cos'è?"}</button>}
+                  <FieldLabel label={t("f_role")} showAi={false} />
+                  {role && <button onClick={() => setShowRoleGuide(v => !v)} style={{ fontSize: 10, color: "#6b7280", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", marginBottom: 6 }}>{showRoleGuide ? t("hide") : t("whatIsIt")}</button>}
                 </div>
                 <select value={role} onChange={e => { setRole(e.target.value); setShowRoleGuide(true); }} style={INPUT_STYLE}>
-                  <option value="">Da definire</option>
+                  <option value="">{t("role_undefined")}</option>
                   <option value="provider">Provider</option>
                   <option value="deployer">Deployer</option>
-                  <option value="importer">Importatore</option>
-                  <option value="distributor">Distributore</option>
-                  <option value="authorized_rep">Rappresentante autorizzato</option>
-                  <option value="product_manufacturer">Produttore prodotto</option>
+                  <option value="importer">{t("role_importer")}</option>
+                  <option value="distributor">{t("role_distributor")}</option>
+                  <option value="authorized_rep">{t("role_authorized_rep")}</option>
+                  <option value="product_manufacturer">{t("role_product_manufacturer")}</option>
                 </select>
                 {showRoleGuide && roleGuide && (
                   <div style={{ marginTop: 7, padding: "9px 11px", background: "rgba(0,0,0,0.03)", borderRadius: 7, border: "1px solid rgba(0,0,0,0.07)" }}>
                     <p style={{ fontSize: 9.5, fontWeight: 700, color: "#6b7280", margin: "0 0 3px", textTransform: "uppercase", letterSpacing: "0.04em" }}>{roleGuide.article}</p>
-                    <p style={{ fontSize: 11.5, color: "#374151", margin: "0 0 4px", lineHeight: 1.45 }}>{roleGuide.what}</p>
-                    <p style={{ fontSize: 11, color: "#6b7280", margin: 0, fontStyle: "italic", lineHeight: 1.35 }}>{roleGuide.example}</p>
+                    <p style={{ fontSize: 11.5, color: "#374151", margin: "0 0 4px", lineHeight: 1.45 }}>{t(`roleGuide_${role}_what`)}</p>
+                    <p style={{ fontSize: 11, color: "#6b7280", margin: 0, fontStyle: "italic", lineHeight: 1.35 }}>{t(`roleGuide_${role}_ex`)}</p>
                   </div>
                 )}
               </div>
               <div style={{ display: "flex", alignItems: "flex-start", gap: 9, paddingTop: 26 }}>
                 <input type="checkbox" id="dualRoleClassify" checked={dualRoleFlag} onChange={e => setDualRoleFlag(e.target.checked)} style={{ width: 15, height: 15, marginTop: 2, flexShrink: 0 }} />
                 <div>
-                  <label htmlFor="dualRoleClassify" style={{ fontSize: 12.5, color: "#374151", cursor: "pointer" }}>Dual-role (Art. 25)</label>
-                  <p style={{ fontSize: 10.5, color: "#9ca3af", margin: "2px 0 0", lineHeight: 1.4 }}>Sviluppatore del modello e allo stesso tempo utente interno del sistema.</p>
+                  <label htmlFor="dualRoleClassify" style={{ fontSize: 12.5, color: "#374151", cursor: "pointer" }}>{t("dualRole25")}</label>
+                  <p style={{ fontSize: 10.5, color: "#9ca3af", margin: "2px 0 0", lineHeight: 1.4 }}>{t("dualRole25Desc")}</p>
                 </div>
               </div>
             </div>
@@ -993,36 +1002,36 @@ function ClassifyModal({ system, onClose, onSave }: {
             {/* Campi testo con PLACEHOLDER (non precompilati) */}
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div>
-                <FieldLabel label="Base ruolo — articolo di riferimento *" showAi={false} />
+                <FieldLabel label={t("roleBasisLabel")} showAi={false} />
                 <input
                   value={roleBasis}
                   onChange={e => setRoleBasis(e.target.value)}
                   style={INPUT_STYLE}
-                  placeholder="Es. Art. 3(4) — usiamo un sistema AI sviluppato da un fornitore terzo in contesto professionale HR"
+                  placeholder={t("roleBasisClassifyPh")}
                 />
               </div>
               <div>
-                <FieldLabel label="Base classificazione tier — articolo o Annex entry *" showAi={false} />
+                <FieldLabel label={t("tierBasisLabel")} showAi={false} />
                 <input
                   value={tierBasis}
                   onChange={e => setTierBasis(e.target.value)}
                   style={{ ...INPUT_STYLE, borderColor: "rgba(0,0,0,0.12)" }}
-                  placeholder="Es. Allegato III(4)(a) — sistema di pre-selezione CV, ambito occupazione"
+                  placeholder={t("tierBasisClassifyPh")}
                 />
               </div>
               <div>
-                <FieldLabel label="Note obblighi applicabili" showAi={false} />
+                <FieldLabel label={t("f_obligations")} showAi={false} />
                 <textarea
                   value={obligationsNote}
                   onChange={e => setObligationsNote(e.target.value)}
                   rows={3}
                   style={{ ...INPUT_STYLE, resize: "vertical", fontFamily: "inherit" }}
-                  placeholder="Es. Documentazione tecnica (Art. 11), supervisione umana obbligatoria (Art. 14), registrazione EU DB (Art. 49)"
+                  placeholder={t("obligationsClassifyPh")}
                 />
                 {tier !== "unclassified" && !obligationsNote.trim() && (
                   <button onClick={() => setObligationsNote(tierCfg.obligations.join("\n"))}
                     style={{ marginTop: 4, fontSize: 11, color: "#6b7280", background: "none", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 5, padding: "3px 10px", cursor: "pointer" }}>
-                    Compila dalla guida tier
+                    {t("fillFromGuide")}
                   </button>
                 )}
               </div>
@@ -1030,10 +1039,10 @@ function ClassifyModal({ system, onClose, onSave }: {
 
             {/* Footer */}
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 18, gap: 8 }}>
-              <button onClick={onClose} style={{ padding: "8px 14px", borderRadius: 8, fontSize: 13, border: "1px solid rgba(0,0,0,0.12)", background: "white", color: "#374151", cursor: "pointer" }}>Annulla</button>
+              <button onClick={onClose} style={{ padding: "8px 14px", borderRadius: 8, fontSize: 13, border: "1px solid rgba(0,0,0,0.12)", background: "white", color: "#374151", cursor: "pointer" }}>{t("cancel")}</button>
               <button onClick={handleSave} disabled={!canSave}
                 style={{ padding: "8px 18px", borderRadius: 8, border: "none", background: canSave ? "#111" : "#e5e7eb", color: canSave ? "white" : "#9ca3af", fontSize: 13, fontWeight: 600, cursor: canSave ? "pointer" : "default" }}>
-                Conferma classificazione
+                {t("confirmClassification")}
               </button>
             </div>
           </div>
@@ -1044,9 +1053,9 @@ function ClassifyModal({ system, onClose, onSave }: {
             <div style={{ padding: "12px 16px 10px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "white", flexShrink: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a" }} />
-                <span style={{ fontSize: 12, fontWeight: 700, color: "#0D1016" }}>Assistente Classificazione AI Act</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#0D1016" }}>{t("classifyAssistant")}</span>
               </div>
-              <p style={{ fontSize: 10.5, color: "#9ca3af", margin: "2px 0 0" }}>Guidato su Art. 3, 5, 6, 50, 51-55, 69 e Allegato III</p>
+              <p style={{ fontSize: 10.5, color: "#9ca3af", margin: "2px 0 0" }}>{t("guidedOn")}</p>
             </div>
 
             {/* Messaggi */}
@@ -1079,10 +1088,10 @@ function ClassifyModal({ system, onClose, onSave }: {
               {chatMessages.length <= 1 && (
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
                   {[
-                    "È un chatbot di assistenza clienti",
-                    "Usa GPT-4 per analizzare i CV",
-                    "Sistema di scoring del credito",
-                    "Ottimizzazione logistica interna",
+                    t("qr_chatbot"),
+                    t("qr_gpt4cv"),
+                    t("qr_credit"),
+                    t("qr_logistics"),
                   ].map(q => (
                     <button key={q} onClick={() => setChatInput(q)}
                       style={{ fontSize: 10.5, padding: "4px 10px", borderRadius: 12, border: "1px solid rgba(0,0,0,0.1)", background: "rgba(0,0,0,0.03)", color: "#374151", cursor: "pointer" }}>
@@ -1096,7 +1105,7 @@ function ClassifyModal({ system, onClose, onSave }: {
                   value={chatInput}
                   onChange={e => setChatInput(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } }}
-                  placeholder="Descrivi il sistema AI o fai una domanda…"
+                  placeholder={t("chatPh")}
                   rows={2}
                   style={{ flex: 1, resize: "none", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 9, padding: "8px 11px", fontSize: 12, color: "#0D1016", background: "#f9f9f8", outline: "none", lineHeight: 1.5, fontFamily: "inherit" }}
                 />
@@ -1108,7 +1117,7 @@ function ClassifyModal({ system, onClose, onSave }: {
                 </button>
               </div>
               <p style={{ fontSize: 9.5, color: "#9ca3af", margin: "5px 0 0", lineHeight: 1.4 }}>
-                Le risposte AI sono suggerimenti. Verifica sempre con fonti normative aggiornate.
+                {t("aiRepliesNote")}
               </p>
             </div>
           </div>
@@ -1120,6 +1129,7 @@ function ClassifyModal({ system, onClose, onSave }: {
 
 // ─── ImportCsvModal ───────────────────────────────────────────────────────────
 function ImportCsvModal({ onClose, onSave }: { onClose: () => void; onSave: () => void }) {
+  const t = useT("toolInventory")
   const [csvText, setCsvText] = React.useState("")
   const [preview, setPreview] = React.useState<ReturnType<typeof parseInventoryCsv>>([])
   const [error, setError] = React.useState<string | null>(null)
@@ -1128,7 +1138,7 @@ function ImportCsvModal({ onClose, onSave }: { onClose: () => void; onSave: () =
   function handleParse() {
     const rows = parseInventoryCsv(csvText)
     if (rows.length === 0) {
-      setError("Nessuna riga valida trovata. Verifica il formato CSV.")
+      setError(t("noValidRows"))
       setPreview([])
       return
     }
@@ -1153,18 +1163,18 @@ GitHub Copilot,Engineering,Assistente AI alla scrittura di codice,in_production
 Chatbot Supporto Clienti,Customer Care,Assistente virtuale basato su GPT-4 per il sito,in_production`
 
   return (
-    <ModalShell title="Importa da CSV" subtitle="Tutti i sistemi importati avranno tier 'Non classificato' — nessuna classificazione automatica" onClose={onClose}>
+    <ModalShell title={t("importCsv")} subtitle={t("importCsvSub")} onClose={onClose}>
       {/* Istruzioni formato */}
       <div style={{ padding: "10px 14px", borderRadius: 8, marginBottom: 16, background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.08)" }}>
-        <p style={{ fontSize: 12, fontWeight: 600, color: "#374151", margin: "0 0 6px" }}>Formato CSV atteso:</p>
+        <p style={{ fontSize: 12, fontWeight: 600, color: "#374151", margin: "0 0 6px" }}>{t("csvFormat")}</p>
         <p style={{ fontSize: 11, color: "#6b7280", margin: "0 0 4px" }}>
-          Colonne supportate: <code>name</code> (o <code>nome</code>), <code>owner</code> (o <code>responsabile</code>), <code>description</code> (o <code>descrizione</code>), <code>status</code> (opzionale)
+          <span dangerouslySetInnerHTML={{ __html: t("csvColumns") }} />
         </p>
         <button
           onClick={() => setCsvText(exampleCsv)}
           style={{ fontSize: 11, color: "#6366f1", background: "none", border: "none", cursor: "pointer", padding: 0, textDecoration: "underline" }}
         >
-          Carica esempio →
+          {t("loadExample")}
         </button>
       </div>
 
@@ -1186,7 +1196,7 @@ Chatbot Supporto Clienti,Customer Care,Assistente virtuale basato su GPT-4 per i
           cursor: csvText.trim().length >= 5 ? "pointer" : "default", fontWeight: 500,
         }}
       >
-        Analizza CSV
+        {t("analyzeCsv")}
       </button>
 
       {/* Preview */}
@@ -1195,7 +1205,7 @@ Chatbot Supporto Clienti,Customer Care,Assistente virtuale basato su GPT-4 per i
           {/* Banner guardrail import */}
           <div style={{ padding: "10px 14px", borderRadius: 8, marginBottom: 12, background: "rgba(217,119,6,0.05)", border: "1px solid rgba(217,119,6,0.2)" }}>
             <p style={{ fontSize: 12, color: "#d97706", margin: 0 }}>
-              <strong>{preview.length} sistema{preview.length !== 1 ? "i" : ""} pronti per l'import</strong> — tutti saranno salvati con tier <strong>Non classificato</strong>. Classificali uno per uno dopo l'import usando il pulsante "Classifica →".
+              <strong>{preview.length} {preview.length !== 1 ? t("systemsReady") : t("systemReady")}</strong> — {t("importBannerRest")}
             </p>
           </div>
 
@@ -1203,7 +1213,7 @@ Chatbot Supporto Clienti,Customer Care,Assistente virtuale basato su GPT-4 per i
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
               <thead>
                 <tr style={{ background: "#f9fafb" }}>
-                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#6b7280", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>Nome</th>
+                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#6b7280", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>{t("th_name")}</th>
                   <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#6b7280", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>Owner</th>
                   <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#6b7280", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>Status</th>
                   <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#6b7280", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>Tier</th>
@@ -1214,10 +1224,10 @@ Chatbot Supporto Clienti,Customer Care,Assistente virtuale basato su GPT-4 per i
                   <tr key={i} style={{ borderBottom: i < preview.length - 1 ? "1px solid rgba(0,0,0,0.05)" : "none" }}>
                     <td style={{ padding: "8px 12px", color: "#111", fontWeight: 500 }}>{row.name}</td>
                     <td style={{ padding: "8px 12px", color: "#6b7280" }}>{row.owner || "—"}</td>
-                    <td style={{ padding: "8px 12px", color: "#6b7280" }}>{STATUS_LABELS[row.status ?? ""] ?? row.status}</td>
+                    <td style={{ padding: "8px 12px", color: "#6b7280" }}>{t(`status_${row.status ?? ""}`) || row.status}</td>
                     <td style={{ padding: "8px 12px" }}>
                       <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 4, background: "rgba(0,0,0,0.04)", color: "#6b7280", border: "1px solid rgba(0,0,0,0.1)" }}>
-                        NON CLASSIFICATO
+                        {t("unclassifiedUpper")}
                       </span>
                     </td>
                   </tr>
@@ -1228,14 +1238,14 @@ Chatbot Supporto Clienti,Customer Care,Assistente virtuale basato su GPT-4 per i
 
           {imported ? (
             <div style={{ textAlign: "center", padding: "16px", color: "#16a34a", fontWeight: 600, fontSize: 14 }}>
-              ✓ {preview.length} sistema{preview.length !== 1 ? "i importati" : " importato"}!
+              ✓ {preview.length} {preview.length !== 1 ? t("systemsImported") : t("systemImported")}!
             </div>
           ) : (
             <button
               onClick={handleImport}
               style={{ width: "100%", marginTop: 12, padding: "10px", borderRadius: 8, border: "none", background: "#111", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
             >
-              Importa {preview.length} sistema{preview.length !== 1 ? "i" : ""}
+              {t("importWord")} {preview.length} {preview.length !== 1 ? t("systemsWord") : t("systemWord")}
             </button>
           )}
         </div>
@@ -1246,6 +1256,7 @@ Chatbot Supporto Clienti,Customer Care,Assistente virtuale basato su GPT-4 per i
 
 // ─── InventoryPage (root export) ──────────────────────────────────────────────
 export default function InventoryPage() {
+  const t = useT("toolInventory")
   const [systems, setSystems] = React.useState<AISystem[]>([])
   const router = useRouter()
   const [filterTier, setFilterTier] = React.useState<SystemTier | "all">("all")
@@ -1270,9 +1281,9 @@ export default function InventoryPage() {
       <div style={{ marginBottom: 24 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>Inventario Sistemi AI</h1>
+            <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{t("title")}</h1>
             <p style={{ fontSize: 13, color: "#6b7280", margin: "4px 0 0" }}>
-              {systems.length} sistema{systems.length !== 1 ? "i" : ""} registrat{systems.length !== 1 ? "i" : "o"} · Registro EU AI Act Art. 6 + Annex III
+              {systems.length} {systems.length !== 1 ? t("systemsRegistered") : t("systemRegistered")} · {t("registerLabel")}
             </p>
           </div>
           <button
@@ -1286,9 +1297,9 @@ export default function InventoryPage() {
         {/* 3 channel cards */}
         <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
           {([
-            { icon: Bot, label: "Con AI", badge: "✦ Consigliato", desc: "Descrivi il sistema in italiano — l'AI pre-compila tier, ruolo e obblighi", step: "describe" as AddStep, primary: true },
-            { icon: ScanSearch, label: "Discovery", badge: "⟳ Automatico", desc: "Collega GitHub, npm, HuggingFace e rileva sistemi AI automaticamente", step: "discovery" as AddStep, primary: false },
-            { icon: PenLine, label: "Manuale", badge: "✎ Form", desc: "Compila tutti i campi con la tua classificazione e base normativa", step: "review" as AddStep, primary: false },
+            { icon: Bot, label: t("ch_ai_label"), badge: t("ch_recommended"), desc: t("ch_ai_desc2"), step: "describe" as AddStep, primary: true },
+            { icon: ScanSearch, label: t("ch_discovery_label"), badge: t("ch_automatic"), desc: t("ch_discovery_desc2"), step: "discovery" as AddStep, primary: false },
+            { icon: PenLine, label: t("ch_manual_label"), badge: t("ch_form"), desc: t("ch_manual_desc2"), step: "review" as AddStep, primary: false },
           ] as const).map((ch) => {
             const Icon = ch.icon
             return (
@@ -1324,7 +1335,7 @@ export default function InventoryPage() {
             onClick={() => setFilterTier("all")}
             style={{ padding: "4px 12px", borderRadius: 20, fontSize: 12, fontWeight: 500, border: "1px solid rgba(0,0,0,0.12)", cursor: "pointer", background: filterTier === "all" ? "#111" : "white", color: filterTier === "all" ? "white" : "#374151" }}
           >
-            Tutti ({systems.length})
+            {t("allFilter")} ({systems.length})
           </button>
           {(Object.keys(TIER_CONFIG) as SystemTier[]).filter(t => counts[t]).map(tier => {
             const cfg = TIER_CONFIG[tier]
@@ -1340,7 +1351,7 @@ export default function InventoryPage() {
                   color: filterTier === tier ? cfg.text : "#6b7280",
                 }}
               >
-                {cfg.label} ({counts[tier]})
+                {t(`tier_${tier}_label`)} ({counts[tier]})
               </button>
             )
           })}

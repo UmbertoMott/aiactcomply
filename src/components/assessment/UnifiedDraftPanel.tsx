@@ -11,6 +11,7 @@ import type { FriaDraft } from "@/app/actions/draftFria";
 import { draftDpiaSections } from "@/app/actions/draftDpiaSections";
 import { draftFria } from "@/app/actions/draftFria";
 import { buildComplianceContextFromStorage } from "@/hooks/useComplianceContext";
+import { useT } from "@/i18n/LocaleProvider";
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -42,6 +43,7 @@ function AiBadge() {
 }
 
 function ConfidenceBadge({ level }: { level: "alta" | "media" | "bassa" }) {
+  const t = useT("assessmentShared");
   const cfg = {
     alta:  { bg: T.greenBg, color: T.green, border: T.greenBdr },
     media: { bg: T.amberBg, color: T.amber, border: T.amberBdr },
@@ -52,7 +54,7 @@ function ConfidenceBadge({ level }: { level: "alta" | "media" | "bassa" }) {
       fontSize: 9, fontWeight: 600, padding: "2px 6px", borderRadius: 3,
       background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}`,
     }}>
-      Confidenza {level}
+      {t("udp_confidence")} {t(`udp_conf_${level}`)}
     </span>
   );
 }
@@ -144,6 +146,7 @@ interface SectionCardProps {
 }
 
 function SectionCard({ title, confirmed, ignored, onConfirm, onIgnore, children }: SectionCardProps) {
+  const t = useT("assessmentShared");
   return (
     <div style={{ ...sectionCardSt, opacity: ignored ? 0.4 : 1 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
@@ -156,12 +159,12 @@ function SectionCard({ title, confirmed, ignored, onConfirm, onIgnore, children 
           fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 4,
           background: T.greenBg, color: T.green, border: `1px solid ${T.greenBdr}`,
         }}>
-          ✓ Applicato
+          ✓ {t("udp_applied")}
         </span>
       ) : ignored ? null : (
         <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-          <button style={primaryBtnSt()} onClick={onConfirm}>✓ Conferma</button>
-          <button style={secondaryBtnSt()} onClick={onIgnore}>Ignora</button>
+          <button style={primaryBtnSt()} onClick={onConfirm}>✓ {t("udp_confirm")}</button>
+          <button style={secondaryBtnSt()} onClick={onIgnore}>{t("udp_ignore")}</button>
         </div>
       )}
     </div>
@@ -173,6 +176,7 @@ function SectionCard({ title, confirmed, ignored, onConfirm, onIgnore, children 
 export function UnifiedDraftPanel({
   shared, intake, dpia: _dpia, fria: _fria, onDpiaChange, onFriaChange,
 }: UnifiedDraftPanelProps) {
+  const t = useT("assessmentShared");
   const [draftState, setDraftState] = useState<DraftState>("idle");
   const [draftError, setDraftError] = useState<string | null>(null);
   const [dpiaDraft, setDpiaDraft] = useState<DpiaDraft | null>(null);
@@ -209,10 +213,10 @@ export function UnifiedDraftPanel({
       dpiaOk = true;
     } else {
       const errMsg = dpiaResult.status === "rejected"
-        ? "Errore generazione DPIA"
+        ? t("udp_errGenDpia")
         : ("error" in (dpiaResult.value as { error: string })
             ? (dpiaResult.value as { error: string }).error
-            : "Errore DPIA");
+            : t("udp_errDpia"));
       setDraftError(prev => prev ? `${prev} | ${errMsg}` : errMsg);
       hasError = true;
     }
@@ -222,10 +226,10 @@ export function UnifiedDraftPanel({
       friaOk = true;
     } else {
       const errMsg = friaResult.status === "rejected"
-        ? "Errore generazione FRIA"
+        ? t("udp_errGenFria")
         : ("error" in (friaResult.value as { error: string })
             ? (friaResult.value as { error: string }).error
-            : "Errore FRIA");
+            : t("udp_errFria"));
       setDraftError(prev => prev ? `${prev} | ${errMsg}` : errMsg);
       hasError = true;
     }
@@ -358,10 +362,10 @@ export function UnifiedDraftPanel({
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
           <div style={{ flex: 1 }}>
             <h2 style={{ fontSize: 15, fontWeight: 700, color: T.text, margin: 0 }}>
-              ④ Bozza AI — DPIA + FRIA
+              {t("udp_title")}
             </h2>
             <p style={{ fontSize: 12, color: T.muted, marginTop: 6, marginBottom: 0 }}>
-              L&apos;AI genera suggerimenti basati sul contesto del progetto. Conferma ogni sezione per applicarla al ramo corrispondente.
+              {t("udp_subtitle")}
             </p>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
@@ -371,7 +375,7 @@ export function UnifiedDraftPanel({
               onClick={handleGenerate}
               disabled={draftState === "loading"}
             >
-              {draftState === "loading" ? "Generazione..." : "✦ Genera bozza AI"}
+              {draftState === "loading" ? t("udp_generating") : t("udp_generate")}
             </button>
           </div>
         </div>
@@ -383,7 +387,7 @@ export function UnifiedDraftPanel({
               border: `2px solid ${T.border}`, borderTopColor: T.amber,
               animation: "spin 0.8s linear infinite",
             }} />
-            <span style={{ fontSize: 12, color: T.muted }}>Generazione in corso...</span>
+            <span style={{ fontSize: 12, color: T.muted }}>{t("udp_generatingProgress")}</span>
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
         )}
@@ -411,12 +415,12 @@ export function UnifiedDraftPanel({
                   fontSize: 11, fontWeight: 700, color: T.text, marginBottom: 12,
                   textTransform: "uppercase", letterSpacing: "0.06em",
                 }}>
-                  DPIA — Bozza AI
+                  {t("udp_dpiaDraft")}
                 </p>
 
                 {/* Assets */}
                 <SectionCard
-                  title="Assets"
+                  title={t("udp_assets")}
                   confirmed={isConfirmed("dpia-assets")}
                   ignored={isIgnored("dpia-assets")}
                   onConfirm={() => { applyDpiaAssets(dpiaDraft); confirm("dpia-assets"); }}
@@ -435,7 +439,7 @@ export function UnifiedDraftPanel({
 
                 {/* Threats */}
                 <SectionCard
-                  title="Minacce"
+                  title={t("udp_threats")}
                   confirmed={isConfirmed("dpia-threats")}
                   ignored={isIgnored("dpia-threats")}
                   onConfirm={() => { applyDpiaThreats(dpiaDraft); confirm("dpia-threats"); }}
@@ -454,7 +458,7 @@ export function UnifiedDraftPanel({
 
                 {/* Technical measures */}
                 <SectionCard
-                  title="Misure tecniche"
+                  title={t("udp_technicalMeasures")}
                   confirmed={isConfirmed("dpia-tech")}
                   ignored={isIgnored("dpia-tech")}
                   onConfirm={() => { applyDpiaMeasures(dpiaDraft); confirm("dpia-tech"); confirm("dpia-org"); }}
@@ -465,7 +469,7 @@ export function UnifiedDraftPanel({
 
                 {/* Organizational measures */}
                 <SectionCard
-                  title="Misure organizzative"
+                  title={t("udp_organizationalMeasures")}
                   confirmed={isConfirmed("dpia-org")}
                   ignored={isIgnored("dpia-org")}
                   onConfirm={() => { applyDpiaMeasures(dpiaDraft); confirm("dpia-tech"); confirm("dpia-org"); }}
@@ -476,19 +480,19 @@ export function UnifiedDraftPanel({
 
                 {/* Prior consultation */}
                 <SectionCard
-                  title="Consultazione preventiva Art.36"
+                  title={t("udp_priorConsult")}
                   confirmed={isConfirmed("dpia-consult")}
                   ignored={isIgnored("dpia-consult")}
                   onConfirm={() => { applyDpiaConsultation(dpiaDraft); confirm("dpia-consult"); }}
                   onIgnore={() => ignore("dpia-consult")}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                    <span style={{ fontSize: 11, color: T.muted }}>Richiesta:</span>
+                    <span style={{ fontSize: 11, color: T.muted }}>{t("udp_required")}</span>
                     <span style={{
                       fontSize: 11, fontWeight: 700,
                       color: dpiaDraft.priorConsultationRequired ? T.red : T.green,
                     }}>
-                      {dpiaDraft.priorConsultationRequired ? "Sì" : "No"}
+                      {dpiaDraft.priorConsultationRequired ? t("yes") : t("no")}
                     </span>
                   </div>
                   {dpiaDraft.priorConsultationRationale && (
@@ -509,12 +513,12 @@ export function UnifiedDraftPanel({
                   fontSize: 11, fontWeight: 700, color: T.text, marginBottom: 12,
                   textTransform: "uppercase", letterSpacing: "0.06em",
                 }}>
-                  FRIA — Bozza AI
+                  {t("udp_friaDraft")}
                 </p>
 
                 {/* Context description */}
                 <SectionCard
-                  title="Descrizione contesto"
+                  title={t("udp_contextDesc")}
                   confirmed={isConfirmed("fria-context")}
                   ignored={isIgnored("fria-context")}
                   onConfirm={() => { applyFriaContext(friaDraft); confirm("fria-context"); }}
@@ -527,7 +531,7 @@ export function UnifiedDraftPanel({
 
                 {/* Rights impact */}
                 <SectionCard
-                  title="Impatto diritti fondamentali"
+                  title={t("udp_rightsImpact")}
                   confirmed={isConfirmed("fria-rights")}
                   ignored={isIgnored("fria-rights")}
                   onConfirm={() => { applyFriaRights(friaDraft); confirm("fria-rights"); }}
@@ -548,7 +552,7 @@ export function UnifiedDraftPanel({
 
                 {/* Scenarios */}
                 <SectionCard
-                  title="Scenari"
+                  title={t("udp_scenarios")}
                   confirmed={isConfirmed("fria-scenarios")}
                   ignored={isIgnored("fria-scenarios")}
                   onConfirm={() => { applyFriaScenarios(friaDraft); confirm("fria-scenarios"); }}
@@ -559,7 +563,7 @@ export function UnifiedDraftPanel({
                       <li key={i} style={{ fontSize: 11, color: T.text, marginBottom: 5 }}>
                         <span style={{ fontWeight: 600 }}>{s.scenario}</span>
                         {" — "}
-                        <span style={{ color: T.muted }}>probabilità {s.likelihood}/5</span>
+                        <span style={{ color: T.muted }}>{t("udp_probability")} {s.likelihood}/5</span>
                       </li>
                     ))}
                   </ul>
@@ -577,7 +581,7 @@ export function UnifiedDraftPanel({
           background: T.bg, border: `1px solid ${T.border}`, borderRadius: 10,
         }}>
           <p style={{ fontSize: 13, color: T.muted, margin: 0 }}>
-            Clicca <strong style={{ color: T.text }}>✦ Genera bozza AI</strong> per creare suggerimenti contestuali per DPIA e FRIA in parallelo.
+            {t("udp_idle1")} <strong style={{ color: T.text }}>✦ {t("udp_generate")}</strong> {t("udp_idle2")}
           </p>
         </div>
       )}

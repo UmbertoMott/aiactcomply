@@ -67,7 +67,7 @@ const jsonLd = {
       name: "RegulaeOS",
       url: BASE_URL,
       description:
-        "Servizio di assistenza professionale alla conformità al Regolamento EU AI Act 2024/1689, erogato dall'Avv. Umberto Mottola, iscritto all'Ordine degli Avvocati di Napoli.",
+        "Servizio di assistenza professionale alla conformità al Regolamento EU AI Act 2024/1689, erogato da un avvocato iscritto all'Ordine degli Avvocati di Napoli.",
       foundingDate: "2024",
       areaServed: "EU",
       knowsAbout: ["EU AI Act", "AI Governance", "AI Compliance", "Intelligenza Artificiale"],

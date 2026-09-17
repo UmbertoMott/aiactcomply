@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import type { DPIAThreat } from "@/lib/dossier/storage-schema";
+import { useT } from "@/i18n/LocaleProvider";
 
 // ─── Design tokens (aligned with FRIA) ───────────────────────────────────────
 
@@ -212,11 +213,11 @@ interface ThreatCatalogProps {
 
 // ─── Risk badge ───────────────────────────────────────────────────────────────
 
-function RiskBadge({ level }: { level: "low" | "medium" | "high" }) {
+function RiskBadge({ level, t }: { level: "low" | "medium" | "high"; t: (k: string) => string }) {
   const cfg = {
-    high:   { label: "Alto",  bg: T.redBg,   color: T.red,   border: T.redBdr   },
-    medium: { label: "Medio", bg: T.amberBg, color: T.amber, border: T.amberBdr },
-    low:    { label: "Basso", bg: T.greenBg, color: T.green, border: T.greenBdr },
+    high:   { label: t("riskHigh"),  bg: T.redBg,   color: T.red,   border: T.redBdr   },
+    medium: { label: t("riskMedium"), bg: T.amberBg, color: T.amber, border: T.amberBdr },
+    low:    { label: t("riskLow"), bg: T.greenBg, color: T.green, border: T.greenBdr },
   }[level];
   return (
     <span style={{
@@ -228,13 +229,13 @@ function RiskBadge({ level }: { level: "low" | "medium" | "high" }) {
   );
 }
 
-function LevelBadge({ level, label }: { level: "low" | "medium" | "high"; label: string }) {
+function LevelBadge({ level, label, t }: { level: "low" | "medium" | "high"; label: string; t: (k: string) => string }) {
   const cfg = {
     high:   { color: T.red,   bg: T.redBg,   border: T.redBdr   },
     medium: { color: T.amber, bg: T.amberBg, border: T.amberBdr },
     low:    { color: T.green, bg: T.greenBg, border: T.greenBdr },
   }[level];
-  const levelLabel = { high: "Alta", medium: "Media", low: "Bassa" }[level];
+  const levelLabel = { high: t("sev_highFull2"), medium: t("sev_mediumFull2"), low: t("sev_lowFull2") }[level];
   return (
     <span style={{
       fontSize: 10, padding: "1px 6px", borderRadius: 4,
@@ -248,6 +249,7 @@ function LevelBadge({ level, label }: { level: "low" | "medium" | "high"; label:
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function ThreatCatalog({ existingThreatIds, onAddThreat }: ThreatCatalogProps) {
+  const t = useT("toolDpia");
   const [openCategories, setOpenCategories] = useState<Set<DPIAThreat["category"]>>(
     new Set(["illegitimate_access"])
   );
@@ -283,9 +285,9 @@ export function ThreatCatalog({ existingThreatIds, onAddThreat }: ThreatCatalogP
         padding: "10px 14px", borderRadius: 10,
         background: T.bg, border: `1px solid ${T.border}`,
       }}>
-        <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>Catalogo minacce WP248</span>
+        <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{t("tc_title")}</span>
         <span style={{ fontSize: 11, color: T.muted, marginLeft: 8 }}>
-          Seleziona pattern predefiniti e aggiungili alla tua analisi
+          {t("tc_sub")}
         </span>
       </div>
 
@@ -313,20 +315,20 @@ export function ThreatCatalog({ existingThreatIds, onAddThreat }: ThreatCatalogP
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{cat.label}</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{t(`tcat_${cat.id}`)}</span>
                 <span style={{
                   fontSize: 10, padding: "1px 7px", borderRadius: 9999,
                   background: "rgba(0,0,0,0.05)", color: T.muted,
                   border: `1px solid ${T.border}`,
                 }}>
-                  {patterns.length} minacce
+                  {patterns.length} {t("tc_threatsWord")}
                 </span>
                 {addedCount > 0 && (
                   <span style={{
                     fontSize: 10, padding: "1px 7px", borderRadius: 9999,
                     background: T.greenBg, color: T.green, border: `1px solid ${T.greenBdr}`,
                   }}>
-                    {addedCount} aggiunte
+                    {addedCount} {t("tc_added")}
                   </span>
                 )}
               </div>
@@ -358,9 +360,9 @@ export function ThreatCatalog({ existingThreatIds, onAddThreat }: ThreatCatalogP
                           }}>
                             {pattern.source}
                           </span>
-                          <LevelBadge level={pattern.likelihood} label="P" />
-                          <LevelBadge level={pattern.severity} label="G" />
-                          <RiskBadge level={pattern.risk_level} />
+                          <LevelBadge level={pattern.likelihood} label={t("tc_pAbbr")} t={t} />
+                          <LevelBadge level={pattern.severity} label={t("tc_gAbbr")} t={t} />
+                          <RiskBadge level={pattern.risk_level} t={t} />
                         </div>
                       </div>
                       <div style={{ flexShrink: 0 }}>
@@ -369,7 +371,7 @@ export function ThreatCatalog({ existingThreatIds, onAddThreat }: ThreatCatalogP
                             fontSize: 10, fontWeight: 500, padding: "4px 10px", borderRadius: 6,
                             background: T.greenBg, color: T.green, border: `1px solid ${T.greenBdr}`,
                           }}>
-                            Gia presente
+                            {t("tc_alreadyAdded")}
                           </span>
                         ) : (
                           <button
@@ -381,7 +383,7 @@ export function ThreatCatalog({ existingThreatIds, onAddThreat }: ThreatCatalogP
                               transition: "all 0.12s",
                             }}
                           >
-                            Aggiungi
+                            {t("add")}
                           </button>
                         )}
                       </div>

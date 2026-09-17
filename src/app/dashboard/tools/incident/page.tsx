@@ -5,8 +5,10 @@ import { Siren, AlertTriangle, FileText, ClipboardCopy, CheckCircle } from "luci
 import { classifyIncident, type IncidentClassification } from "@/app/actions/classifyIncident";
 import { draftIncidentNotification, type IncidentNotificationDraft } from "@/app/actions/draftIncidentNotification";
 import { buildComplianceContextFromStorage } from "@/hooks/useComplianceContext";
+import { useT } from "@/i18n/LocaleProvider";
 
 export default function IncidentPage() {
+  const t = useT("toolIncident");
   const [incidentDesc, setIncidentDesc] = useState("");
   const [affectedPersons, setAffectedPersons] = useState("");
   const [incidentDate, setIncidentDate] = useState("");
@@ -34,7 +36,7 @@ export default function IncidentPage() {
     if (res.classification) {
       setClassification(res.classification);
     } else {
-      setClassifyError(res.error ?? "Errore sconosciuto");
+      setClassifyError(res.error ?? t("error_unknown"));
     }
   };
 
@@ -49,7 +51,7 @@ export default function IncidentPage() {
     if (res.draft) {
       setNotificationDraft(res.draft);
     } else {
-      setDraftError(res.error ?? "Errore sconosciuto");
+      setDraftError(res.error ?? t("error_unknown"));
     }
   };
 
@@ -76,36 +78,36 @@ export default function IncidentPage() {
         </div>
         <div>
           <h1 style={{ fontSize: 20, fontWeight: 700, color: "#0D1016", margin: 0 }}>Incident Notification</h1>
-          <p style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", margin: 0 }}>Art. 73 AI Act — Notifica incidenti gravi</p>
+          <p style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", margin: 0 }}>{t("subtitle")}</p>
         </div>
       </div>
 
       {/* Step 1 — Describe incident */}
       <div className="rounded-xl p-5 mb-4" style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)" }}>
-        <p style={{ fontSize: 12, fontWeight: 700, color: "#0D1016", marginBottom: 12 }}>1. Descrivi l'incidente</p>
+        <p style={{ fontSize: 12, fontWeight: 700, color: "#0D1016", marginBottom: 12 }}>{t("step1_title")}</p>
 
-        <label style={{ fontSize: 11, color: "rgba(0,0,0,0.5)", display: "block", marginBottom: 4 }}>Descrizione dettagliata *</label>
+        <label style={{ fontSize: 11, color: "rgba(0,0,0,0.5)", display: "block", marginBottom: 4 }}>{t("desc_label")}</label>
         <textarea
           rows={4}
           value={incidentDesc}
           onChange={e => setIncidentDesc(e.target.value)}
-          placeholder="Descrivi cosa è successo, quando, quali sistemi AI erano coinvolti, quali danni o rischi si sono verificati…"
+          placeholder={t("desc_placeholder")}
           style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.12)", fontSize: 12, resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
         />
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 12 }}>
           <div>
-            <label style={{ fontSize: 11, color: "rgba(0,0,0,0.5)", display: "block", marginBottom: 4 }}>Persone coinvolte</label>
+            <label style={{ fontSize: 11, color: "rgba(0,0,0,0.5)", display: "block", marginBottom: 4 }}>{t("persons_label")}</label>
             <input
               type="text"
               value={affectedPersons}
               onChange={e => setAffectedPersons(e.target.value)}
-              placeholder="Es. 450, o 'non noto'"
+              placeholder={t("persons_placeholder")}
               style={{ width: "100%", padding: "6px 10px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.12)", fontSize: 12, boxSizing: "border-box" }}
             />
           </div>
           <div>
-            <label style={{ fontSize: 11, color: "rgba(0,0,0,0.5)", display: "block", marginBottom: 4 }}>Data/ora incidente</label>
+            <label style={{ fontSize: 11, color: "rgba(0,0,0,0.5)", display: "block", marginBottom: 4 }}>{t("date_label")}</label>
             <input
               type="datetime-local"
               value={incidentDate}
@@ -119,9 +121,9 @@ export default function IncidentPage() {
           disabled={classifyLoading || !incidentDesc.trim()}
           onClick={handleClassify}
           style={{ marginTop: 14, padding: "8px 18px", background: classifyLoading || !incidentDesc.trim() ? "rgba(0,0,0,0.08)" : "#dc2626", color: classifyLoading || !incidentDesc.trim() ? "rgba(0,0,0,0.3)" : "#fff", border: "none", borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: classifyLoading || !incidentDesc.trim() ? "default" : "pointer" }}>
-          {classifyLoading ? "✦ Classificazione in corso…" : "✦ Classifica incidente — Art. 73"}
+          {classifyLoading ? t("classify_loading") : t("classify_btn")}
         </button>
-        {classifyError && <p style={{ fontSize: 11, color: "#dc2626", marginTop: 6 }}>Errore: {classifyError}</p>}
+        {classifyError && <p style={{ fontSize: 11, color: "#dc2626", marginTop: 6 }}>{t("error_prefix")} {classifyError}</p>}
       </div>
 
       {/* Classification Result */}
@@ -131,30 +133,30 @@ export default function IncidentPage() {
           <div className="rounded-xl p-5 mb-4" style={{ background: colors.bg, border: `1px solid ${colors.border}` }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
               <div>
-                <span style={{ fontSize: 10, fontWeight: 600, color: "#2563eb", background: "rgba(37,99,235,0.08)", borderRadius: 4, padding: "2px 6px" }}>✦ AI — verifica e conferma</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: "#2563eb", background: "rgba(37,99,235,0.08)", borderRadius: 4, padding: "2px 6px" }}>{t("ai_verify")}</span>
                 <p style={{ fontSize: 16, fontWeight: 700, color: colors.text, margin: "6px 0 2px" }}>
-                  {classification.seriousnessLevel === "grave_urgente" && "⚠ INCIDENTE GRAVE — URGENTE"}
-                  {classification.seriousnessLevel === "grave" && "⚠ Incidente Grave"}
-                  {classification.seriousnessLevel === "non_grave" && "✓ Non grave (Art. 73 probabilmente non applicabile)"}
+                  {classification.seriousnessLevel === "grave_urgente" && t("sev_urgent")}
+                  {classification.seriousnessLevel === "grave" && t("sev_serious")}
+                  {classification.seriousnessLevel === "non_grave" && t("sev_nonSerious")}
                 </p>
               </div>
               {classification.notificationDeadline.hours && (
                 <div style={{ textAlign: "center", background: "#dc2626", color: "#fff", borderRadius: 8, padding: "6px 12px" }}>
                   <p style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>{classification.notificationDeadline.hours}h</p>
-                  <p style={{ fontSize: 9, margin: 0 }}>DEADLINE</p>
+                  <p style={{ fontSize: 9, margin: 0 }}>{t("deadline_label")}</p>
                 </div>
               )}
               {classification.notificationDeadline.days && !classification.notificationDeadline.hours && (
                 <div style={{ textAlign: "center", background: "#d97706", color: "#fff", borderRadius: 8, padding: "6px 12px" }}>
-                  <p style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>{classification.notificationDeadline.days}gg</p>
-                  <p style={{ fontSize: 9, margin: 0 }}>DEADLINE</p>
+                  <p style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>{classification.notificationDeadline.days}{t("unit_days")}</p>
+                  <p style={{ fontSize: 9, margin: 0 }}>{t("deadline_label")}</p>
                 </div>
               )}
             </div>
 
             {classification.matchedCriteria.length > 0 && (
               <div style={{ marginBottom: 10 }}>
-                <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.5)", marginBottom: 4 }}>Criteri Art. 3(49) corrispondenti:</p>
+                <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.5)", marginBottom: 4 }}>{t("criteria_label")}</p>
                 {classification.matchedCriteria.map((c, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 6, marginBottom: 3 }}>
                     <AlertTriangle size={12} color={colors.text} style={{ flexShrink: 0, marginTop: 1 }} />
@@ -166,18 +168,18 @@ export default function IncidentPage() {
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
               <div style={{ padding: "8px 10px", borderRadius: 6, background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.06)" }}>
-                <p style={{ fontSize: 10, color: "rgba(0,0,0,0.4)", margin: "0 0 2px" }}>Autorità destinataria</p>
+                <p style={{ fontSize: 10, color: "rgba(0,0,0,0.4)", margin: "0 0 2px" }}>{t("authority_label")}</p>
                 <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0 }}>{classification.competentAuthority}</p>
               </div>
               <div style={{ padding: "8px 10px", borderRadius: 6, background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.06)" }}>
-                <p style={{ fontSize: 10, color: "rgba(0,0,0,0.4)", margin: "0 0 2px" }}>Base normativa</p>
+                <p style={{ fontSize: 10, color: "rgba(0,0,0,0.4)", margin: "0 0 2px" }}>{t("legalBasis_label")}</p>
                 <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0 }}>{classification.art73Reference}</p>
               </div>
             </div>
 
             {classification.immediateActions.length > 0 && (
               <div style={{ marginBottom: 10 }}>
-                <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.5)", marginBottom: 4 }}>Azioni immediate:</p>
+                <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.5)", marginBottom: 4 }}>{t("actions_label")}</p>
                 {classification.immediateActions.map((a, i) => (
                   <div key={i} style={{ display: "flex", gap: 6, marginBottom: 2 }}>
                     <span style={{ fontSize: 11, color: "#0D1016" }}>→ {a}</span>
@@ -194,22 +196,22 @@ export default function IncidentPage() {
       {/* Step 2 — Draft Notification */}
       {classification && classification.isSerious && (
         <div className="rounded-xl p-5 mb-4" style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)" }}>
-          <p style={{ fontSize: 12, fontWeight: 700, color: "#0D1016", marginBottom: 12 }}>2. Misure adottate</p>
-          <label style={{ fontSize: 11, color: "rgba(0,0,0,0.5)", display: "block", marginBottom: 4 }}>Misure immediate già intraprese</label>
+          <p style={{ fontSize: 12, fontWeight: 700, color: "#0D1016", marginBottom: 12 }}>{t("step2_title")}</p>
+          <label style={{ fontSize: 11, color: "rgba(0,0,0,0.5)", display: "block", marginBottom: 4 }}>{t("measures_label")}</label>
           <textarea
             rows={3}
             value={measuresAdopted}
             onChange={e => setMeasuresAdopted(e.target.value)}
-            placeholder="Es. Sistema sospeso alle 14:32. Notificato il DPO alle 15:00. Avviata analisi forense…"
+            placeholder={t("measures_placeholder")}
             style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.12)", fontSize: 12, resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
           />
           <button
             disabled={draftLoading}
             onClick={handleDraftNotification}
             style={{ marginTop: 12, padding: "8px 18px", background: draftLoading ? "rgba(0,0,0,0.08)" : "#1d4ed8", color: draftLoading ? "rgba(0,0,0,0.3)" : "#fff", border: "none", borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: draftLoading ? "default" : "pointer" }}>
-            {draftLoading ? "✦ Redazione in corso…" : "✦ Genera bozza notifica Art. 73"}
+            {draftLoading ? t("draft_loading") : t("draft_btn")}
           </button>
-          {draftError && <p style={{ fontSize: 11, color: "#dc2626", marginTop: 6 }}>Errore: {draftError}</p>}
+          {draftError && <p style={{ fontSize: 11, color: "#dc2626", marginTop: 6 }}>{t("error_prefix")} {draftError}</p>}
         </div>
       )}
 
@@ -219,13 +221,13 @@ export default function IncidentPage() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <FileText size={16} color="#1d4ed8" />
-              <p style={{ fontSize: 13, fontWeight: 700, color: "#0D1016", margin: 0 }}>Bozza Notifica — {notificationDraft.art73Reference}</p>
+              <p style={{ fontSize: 13, fontWeight: 700, color: "#0D1016", margin: 0 }}>{t("draftTitle_prefix")} {notificationDraft.art73Reference}</p>
             </div>
             <button
               onClick={handleCopy}
               style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 6, fontSize: 11, cursor: "pointer", color: "#0D1016" }}>
               {copied ? <CheckCircle size={13} color="#15803d" /> : <ClipboardCopy size={13} />}
-              {copied ? "Copiato!" : "Copia testo"}
+              {copied ? t("copied") : t("copy")}
             </button>
           </div>
 
@@ -233,7 +235,7 @@ export default function IncidentPage() {
             <p style={{ fontSize: 10, color: "#d97706", margin: "4px 0", fontWeight: 600 }}>⚠ {notificationDraft.draftNote}</p>
           </div>
 
-          <span style={{ fontSize: 10, fontWeight: 600, color: "#2563eb", background: "rgba(37,99,235,0.08)", borderRadius: 4, padding: "2px 6px" }}>✦ AI — verifica e conferma</span>
+          <span style={{ fontSize: 10, fontWeight: 600, color: "#2563eb", background: "rgba(37,99,235,0.08)", borderRadius: 4, padding: "2px 6px" }}>{t("ai_verify")}</span>
 
           <pre style={{ fontSize: 11, lineHeight: 1.6, color: "#0D1016", whiteSpace: "pre-wrap", fontFamily: "ui-monospace, monospace", background: "rgba(0,0,0,0.02)", borderRadius: 6, padding: "12px", marginTop: 10, border: "1px solid rgba(0,0,0,0.06)" }}>
             {notificationDraft.notificationText}
@@ -241,7 +243,7 @@ export default function IncidentPage() {
 
           {notificationDraft.requiredAttachments.length > 0 && (
             <div style={{ marginTop: 12, padding: "10px 12px", borderRadius: 8, background: "rgba(37,99,235,0.04)", border: "1px solid rgba(37,99,235,0.12)" }}>
-              <p style={{ fontSize: 11, fontWeight: 600, color: "#1d4ed8", marginBottom: 6 }}>Allegati obbligatori:</p>
+              <p style={{ fontSize: 11, fontWeight: 600, color: "#1d4ed8", marginBottom: 6 }}>{t("attachments_label")}</p>
               {notificationDraft.requiredAttachments.map((a, i) => (
                 <div key={i} style={{ display: "flex", gap: 6, marginBottom: 3 }}>
                   <span style={{ fontSize: 11, color: "#0D1016" }}>📎 {a}</span>

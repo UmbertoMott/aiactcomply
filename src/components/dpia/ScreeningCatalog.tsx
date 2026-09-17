@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import type { DPIAScreeningCriterion } from "@/lib/dossier/storage-schema";
 import { readFromStorage } from "@/lib/dossier/storage-schema";
 import type { ClassifierResult, DataAuditResult } from "@/lib/dossier/storage-schema";
+import { useT } from "@/i18n/LocaleProvider";
 
 // ─── Design tokens (aligned with FRIA) ───────────────────────────────────────
 
@@ -68,6 +69,7 @@ interface ScreeningCatalogProps {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function ScreeningCatalog({ criteria, onToggle }: ScreeningCatalogProps) {
+  const t = useT("toolDpia");
   const [suggested, setSuggested] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -85,9 +87,9 @@ export function ScreeningCatalog({ criteria, onToggle }: ScreeningCatalogProps) 
         background: T.bg, border: `1px solid ${T.border}`,
       }}>
         <div>
-          <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>Catalogo criteri WP248</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{t("screeningCatalog")}</span>
           <span style={{ fontSize: 11, color: T.muted, marginLeft: 8 }}>
-            Seleziona i criteri applicabili al tuo trattamento
+            {t("sc_selectApplicable")}
           </span>
         </div>
         <span style={{
@@ -96,7 +98,7 @@ export function ScreeningCatalog({ criteria, onToggle }: ScreeningCatalogProps) 
           color: applicableCount >= 2 ? T.red : applicableCount === 1 ? T.amber : T.green,
           border: `1px solid ${applicableCount >= 2 ? T.redBdr : applicableCount === 1 ? T.amberBdr : T.greenBdr}`,
         }}>
-          {applicableCount} criteri applicabili
+          {applicableCount} {t("sc_applicableCount")}
         </span>
       </div>
 
@@ -129,13 +131,13 @@ export function ScreeningCatalog({ criteria, onToggle }: ScreeningCatalogProps) 
               </span>
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{c.label}</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{t(`crit_${c.id}_label`)}</span>
                   {isSuggested && c.applies === "" && (
                     <span style={{
                       fontSize: 10, fontWeight: 500, padding: "1px 7px", borderRadius: 9999,
                       background: T.amberBg, color: T.amber, border: `1px solid ${T.amberBdr}`,
                     }}>
-                      Suggerito — conferma tu
+                      {t("sc_suggestedConfirm")}
                     </span>
                   )}
                   {isSuggested && c.applies !== "" && (
@@ -143,12 +145,12 @@ export function ScreeningCatalog({ criteria, onToggle }: ScreeningCatalogProps) 
                       fontSize: 10, fontWeight: 500, padding: "1px 7px", borderRadius: 9999,
                       background: T.greenBg, color: T.green, border: `1px solid ${T.greenBdr}`,
                     }}>
-                      Suggerito da Classifier
+                      {t("sc_suggestedClassifier")}
                     </span>
                   )}
                 </div>
                 <p style={{ fontSize: 11, color: T.muted, lineHeight: 1.5, marginTop: 2 }}>
-                  {c.description}
+                  {t(`crit_${c.id}_desc`)}
                 </p>
               </div>
             </div>
@@ -157,10 +159,10 @@ export function ScreeningCatalog({ criteria, onToggle }: ScreeningCatalogProps) 
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: c.applies !== "" ? 8 : 0 }}>
               {(["yes", "partial", "no", ""] as const).map((val) => {
                 const labels: Record<string, string> = {
-                  yes: "Sì",
-                  partial: "Parziale",
-                  no: "No",
-                  "": "Deseleziona",
+                  yes: t("yes"),
+                  partial: t("st_partial"),
+                  no: t("no"),
+                  "": t("sc_deselect"),
                 };
                 const colors: Record<string, { bg: string; color: string; border: string }> = {
                   yes:     { bg: T.redBg,   color: T.red,   border: T.redBdr   },
@@ -194,7 +196,7 @@ export function ScreeningCatalog({ criteria, onToggle }: ScreeningCatalogProps) 
             {c.applies !== "" && (
               <textarea
                 defaultValue={c.notes}
-                placeholder="Note opzionali…"
+                placeholder={t("ph_optionalNotes")}
                 rows={2}
                 style={{
                   width: "100%", padding: "6px 10px", borderRadius: 7,

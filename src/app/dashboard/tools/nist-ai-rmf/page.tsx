@@ -1,30 +1,34 @@
 "use client";
 import React, { useState } from "react";
 import { Map, ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
+import { useT } from "@/i18n/LocaleProvider";
 
 const FONT = "var(--font-inter, system-ui)";
 
-const FUNCTIONS = [
+type T = (key: string) => string;
+
+function buildFunctions(t: T) {
+  return [
   {
     id: "govern",
     code: "GOVERN",
     color: "#16a34a",
     bg: "rgba(22,163,74,0.06)",
     border: "rgba(22,163,74,0.15)",
-    desc: "Stabilire politiche, processi e cultura organizzativa per la gestione del rischio AI",
+    desc: t("govern_desc"),
     aiActRefs: [
-      { art: "Art. 9", label: "Sistema di gestione del rischio" },
-      { art: "Art. 17", label: "Sistema di gestione della qualità" },
-      { art: "Art. 26", label: "Obblighi deployer" },
-      { art: "Art. 72", label: "Sorveglianza post-commercializzazione" },
+      { art: "Art. 9", label: t("govern_ref1") },
+      { art: "Art. 17", label: t("govern_ref2") },
+      { art: "Art. 26", label: t("govern_ref3") },
+      { art: "Art. 72", label: t("govern_ref4") },
     ],
     subcategories: [
-      "GOVERN 1 — Politiche e processi di AI risk governance",
-      "GOVERN 2 — Responsabilità e ruoli per la supervisione AI",
-      "GOVERN 3 — Cultura organizzativa e formazione",
-      "GOVERN 4 — Gestione del rischio di terze parti",
-      "GOVERN 5 — Meccanismi di feedback e miglioramento continuo",
-      "GOVERN 6 — Politiche su uso accettabile dei sistemi AI",
+      t("govern_sub1"),
+      t("govern_sub2"),
+      t("govern_sub3"),
+      t("govern_sub4"),
+      t("govern_sub5"),
+      t("govern_sub6"),
     ],
   },
   {
@@ -33,19 +37,19 @@ const FUNCTIONS = [
     color: "#b45309",
     bg: "rgba(180,83,9,0.06)",
     border: "rgba(180,83,9,0.15)",
-    desc: "Identificare e classificare il contesto, le parti interessate e i rischi specifici del sistema AI",
+    desc: t("map_desc"),
     aiActRefs: [
-      { art: "Art. 6–7", label: "Classificazione e allegato III" },
-      { art: "Art. 10", label: "Dati di addestramento e testing" },
-      { art: "Art. 13", label: "Trasparenza e informazioni" },
-      { art: "Art. 5",  label: "Pratiche proibite" },
+      { art: "Art. 6–7", label: t("map_ref1") },
+      { art: "Art. 10", label: t("map_ref2") },
+      { art: "Art. 13", label: t("map_ref3") },
+      { art: "Art. 5",  label: t("map_ref4") },
     ],
     subcategories: [
-      "MAP 1 — Contesto e scopo del sistema AI",
-      "MAP 2 — Classificazione e categorizzazione del rischio",
-      "MAP 3 — Identificazione delle parti interessate e impatti",
-      "MAP 4 — Dipendenze e supply chain AI",
-      "MAP 5 — Impatti su individui e società",
+      t("map_sub1"),
+      t("map_sub2"),
+      t("map_sub3"),
+      t("map_sub4"),
+      t("map_sub5"),
     ],
   },
   {
@@ -54,18 +58,18 @@ const FUNCTIONS = [
     color: "#7c3aed",
     bg: "rgba(124,58,237,0.06)",
     border: "rgba(124,58,237,0.15)",
-    desc: "Analizzare, valutare e monitorare i rischi AI con metodi quantitativi e qualitativi",
+    desc: t("measure_desc"),
     aiActRefs: [
-      { art: "Art. 9",  label: "Analisi e mitigazione del rischio" },
-      { art: "Art. 10", label: "Qualità dei dati" },
-      { art: "Art. 15", label: "Accuratezza e robustezza" },
-      { art: "Art. 62", label: "Notifica incidenti gravi" },
+      { art: "Art. 9",  label: t("measure_ref1") },
+      { art: "Art. 10", label: t("measure_ref2") },
+      { art: "Art. 15", label: t("measure_ref3") },
+      { art: "Art. 62", label: t("measure_ref4") },
     ],
     subcategories: [
-      "MEASURE 1 — Metriche e metodi di valutazione del rischio",
-      "MEASURE 2 — Testing e validazione del sistema AI",
-      "MEASURE 3 — Impatti su bias, equità e diritti fondamentali",
-      "MEASURE 4 — Monitoraggio continuo delle prestazioni",
+      t("measure_sub1"),
+      t("measure_sub2"),
+      t("measure_sub3"),
+      t("measure_sub4"),
     ],
   },
   {
@@ -74,21 +78,24 @@ const FUNCTIONS = [
     color: "#0369a1",
     bg: "rgba(3,105,161,0.06)",
     border: "rgba(3,105,161,0.15)",
-    desc: "Prioritizzare e trattare i rischi identificati; rispondere agli incidenti e apprendere",
+    desc: t("manage_desc"),
     aiActRefs: [
-      { art: "Art. 9",  label: "Misure di gestione del rischio" },
-      { art: "Art. 18", label: "Conservazione documentazione" },
-      { art: "Art. 61", label: "Monitoraggio post-mercato" },
-      { art: "Art. 73", label: "Notifica incidenti (deployer)" },
+      { art: "Art. 9",  label: t("manage_ref1") },
+      { art: "Art. 18", label: t("manage_ref2") },
+      { art: "Art. 61", label: t("manage_ref3") },
+      { art: "Art. 73", label: t("manage_ref4") },
     ],
     subcategories: [
-      "MANAGE 1 — Prioritizzazione e trattamento dei rischi",
-      "MANAGE 2 — Strategie di risposta e piani di contingenza",
-      "MANAGE 3 — Gestione degli incidenti e rimedi",
-      "MANAGE 4 — Aggiornamenti e miglioramento del sistema AI",
+      t("manage_sub1"),
+      t("manage_sub2"),
+      t("manage_sub3"),
+      t("manage_sub4"),
     ],
   },
-];
+  ];
+}
+
+type NistFunction = ReturnType<typeof buildFunctions>[0];
 
 function SectionHeader({ title, legalRef }: { title: string; legalRef: string }) {
   return (
@@ -107,7 +114,8 @@ function SectionHeader({ title, legalRef }: { title: string; legalRef: string })
   );
 }
 
-function FunctionCard({ fn }: { fn: typeof FUNCTIONS[0] }) {
+function FunctionCard({ fn }: { fn: NistFunction }) {
+  const t = useT("toolNist");
   const [open, setOpen] = useState(false);
 
   return (
@@ -163,7 +171,7 @@ function FunctionCard({ fn }: { fn: typeof FUNCTIONS[0] }) {
           </table>
 
           <div style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.4)", letterSpacing: "0.8px", textTransform: "uppercase", marginBottom: 8 }}>
-            Sottocategorie
+            {t("subcategories_label")}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
             {fn.subcategories.map((sub, i) => (
@@ -183,6 +191,8 @@ function FunctionCard({ fn }: { fn: typeof FUNCTIONS[0] }) {
 }
 
 export default function NistAiRmfPage() {
+  const t = useT("toolNist");
+  const functions = buildFunctions(t);
   return (
     <div style={{ fontFamily: FONT, color: "#0D1016" }}>
       <div style={{ marginBottom: 20 }}>
@@ -196,7 +206,7 @@ export default function NistAiRmfPage() {
           </h1>
         </div>
         <p style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", margin: 0 }}>
-          Mapping tra le 4 core functions del NIST AI RMF e gli obblighi dell&apos;AI Act UE
+          {t("subtitle")}
         </p>
       </div>
 
@@ -204,16 +214,16 @@ export default function NistAiRmfPage() {
         background: "#fff", borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)",
         boxShadow: "0 2px 12px rgba(0,0,0,0.06)", padding: "24px 28px",
       }}>
-        <SectionHeader title="Panoramica framework" legalRef="NIST AI RMF 1.0 · 2023" />
+        <SectionHeader title={t("sec_overview")} legalRef="NIST AI RMF 1.0 · 2023" />
 
         <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 20 }}>
           <tbody>
             {[
-              ["Framework", "NIST AI Risk Management Framework (AI RMF) 1.0"],
-              ["Emesso da", "National Institute of Standards and Technology (NIST)"],
-              ["Data pubblicazione", "Gennaio 2023"],
-              ["Compatibilità", "Volontario, complementare all'AI Act UE"],
-              ["Struttura", "4 Core Functions · 19 Categorie · 72+ Sottocategorie"],
+              [t("row_framework"), "NIST AI Risk Management Framework (AI RMF) 1.0"],
+              [t("row_issuedBy"), "National Institute of Standards and Technology (NIST)"],
+              [t("row_pubDate"), t("row_pubDate_val")],
+              [t("row_compat"), t("row_compat_val")],
+              [t("row_structure"), t("row_structure_val")],
             ].map(([label, value], i, arr) => (
               <tr key={label} style={{ borderBottom: i < arr.length - 1 ? "1px solid rgba(0,0,0,0.06)" : "none" }}>
                 <td style={{ padding: "9px 0", width: "38%", verticalAlign: "top" }}>
@@ -227,35 +237,31 @@ export default function NistAiRmfPage() {
           </tbody>
         </table>
 
-        <SectionHeader title="Core Functions — mapping AI Act" legalRef="Reg. UE 2024/1689" />
+        <SectionHeader title={t("sec_coreFunctions")} legalRef="Reg. UE 2024/1689" />
 
         <p style={{ fontSize: 12, color: "rgba(0,0,0,0.5)", marginBottom: 16, lineHeight: 1.6 }}>
-          Le 4 core functions del NIST AI RMF non si sovrappongono 1:1 all&apos;AI Act ma coprono
-          aree complementari. Espandi ogni funzione per vedere il mapping con gli articoli rilevanti.
+          {t("coreFunctions_intro")}
         </p>
 
-        {FUNCTIONS.map((fn) => (
+        {functions.map((fn) => (
           <FunctionCard key={fn.id} fn={fn} />
         ))}
 
-        <SectionHeader title="Note di utilizzo" legalRef="Informativo" />
+        <SectionHeader title={t("sec_notes")} legalRef={t("ref_info")} />
 
         <div style={{
           padding: "12px 16px", borderRadius: 8,
           background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.06)",
           fontSize: 12, color: "rgba(0,0,0,0.55)", lineHeight: 1.7,
         }}>
-          Questo mapping è orientativo. Il NIST AI RMF è un framework volontario degli Stati Uniti;
-          l&apos;AI Act è legislazione vincolante UE. Le organizzazioni che adottano entrambi possono
-          usare il RMF come struttura operativa per soddisfare i requisiti AI Act, in particolare per
-          i sistemi ad alto rischio (Allegato III).
+          {t("notes_body")}
           {" "}<a
             href="https://airc.nist.gov/RMF"
             target="_blank"
             rel="noopener noreferrer"
             style={{ color: "#0D1016", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 3 }}
           >
-            Documentazione ufficiale NIST <ExternalLink size={11} />
+            {t("notes_link")} <ExternalLink size={11} />
           </a>
         </div>
       </div>

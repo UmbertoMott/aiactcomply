@@ -156,7 +156,7 @@ export default function PrenotaDemoPage() {
               Chi eroga il servizio
             </p>
             <p style={{ fontSize: 14, fontWeight: 500, color: "#0D1016" }}>
-              Avv. Umberto Mottola — Foro di Napoli
+              L&rsquo;Avvocato — Foro di Napoli
             </p>
           </div>
           <Link

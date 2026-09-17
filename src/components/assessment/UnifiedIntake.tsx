@@ -3,6 +3,7 @@
 import React, { useState, CSSProperties } from "react";
 import { parseIntakeContext, type IntakeContext } from "@/app/actions/parseIntakeContext";
 import { patchShared } from "@/lib/assessment/assessment-helpers";
+import { useT } from "@/i18n/LocaleProvider";
 
 const T = {
   text: "#0D1016", muted: "rgba(0,0,0,0.42)", faint: "rgba(0,0,0,0.28)",
@@ -39,6 +40,7 @@ interface UnifiedIntakeProps {
 }
 
 export function UnifiedIntake({ intake, setIntake, onParsed, defaultOpen = true }: UnifiedIntakeProps) {
+  const t = useT("assessmentShared");
   const [open, setOpen] = useState(defaultOpen);
   const [freeText, setFreeText] = useState("");
   const [parseLoading, setParseLoading] = useState(false);
@@ -56,16 +58,16 @@ export function UnifiedIntake({ intake, setIntake, onParsed, defaultOpen = true 
           borderBottom: open ? `1px solid ${T.border}` : "none",
         }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: T.text }}>✦ Contesto sistema</span>
-          <span style={{ fontSize: 10, color: T.muted }}>— richiesto per la pre-compilazione AI fasi 2-3-4</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: T.text }}>✦ {t("systemContext")}</span>
+          <span style={{ fontSize: 10, color: T.muted }}>{t("systemContextSub")}</span>
           {parsed && (
             <span style={{ fontSize: 10, padding: "1px 6px", borderRadius: 4, background: T.greenBg, color: T.green, border: `1px solid ${T.greenBdr}` }}>
-              ✓ estratto da AI
+              ✓ {t("aiExtracted")}
             </span>
           )}
           {(intake.systemName || intake.processingPurpose) && !parsed && (
             <span style={{ fontSize: 10, padding: "1px 6px", borderRadius: 4, background: "rgba(0,0,0,0.04)", color: T.text, border: `1px solid ${T.border}` }}>
-              ✦ da storage
+              ✦ {t("fromStorage")}
             </span>
           )}
         </div>
@@ -76,14 +78,14 @@ export function UnifiedIntake({ intake, setIntake, onParsed, defaultOpen = true 
         <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 14 }}>
           <div style={{ padding: 12, borderRadius: 8, background: "rgba(0,0,0,0.04)", border: `1px solid ${T.border}` }}>
             <p style={{ fontSize: 11, fontWeight: 600, color: T.text, marginBottom: 6 }}>
-              ✦ Descrivi il sistema in linguaggio naturale — l'AI compila i campi automaticamente
+              ✦ {t("describeNatural")}
             </p>
             <div style={{ display: "flex", gap: 8 }}>
               <textarea
                 rows={2}
                 value={freeText}
                 onChange={e => setFreeText(e.target.value)}
-                placeholder="Es. «Sistema di selezione CV che usa ML per filtrare candidati in base a esperienze e competenze, tratta dati di 50.000 candidati l'anno tra cui minori…»"
+                placeholder={t("ph_freeText")}
                 style={{ flex: 1, padding: "7px 10px", borderRadius: 6, border: `1px solid ${T.border}`, fontSize: 11, resize: "vertical", fontFamily: "inherit", background: "#fff" }}
               />
               <button
@@ -103,7 +105,7 @@ export function UnifiedIntake({ intake, setIntake, onParsed, defaultOpen = true 
                     });
                     onParsed?.(res.intake);
                   } else {
-                    setParseError("Impossibile estrarre il contesto. Compila i campi manualmente.");
+                    setParseError(t("parseError"));
                   }
                 }}
                 style={{
@@ -114,7 +116,7 @@ export function UnifiedIntake({ intake, setIntake, onParsed, defaultOpen = true 
                   cursor: parseLoading || !freeText.trim() ? "default" : "pointer",
                   whiteSpace: "nowrap",
                 }}>
-                {parseLoading ? "✦ Parsing…" : "✦ Estrai"}
+                {parseLoading ? t("parsing") : t("extract")}
               </button>
             </div>
             {parseError && <p style={{ fontSize: 10, color: T.red, marginTop: 4 }}>{parseError}</p>}
@@ -122,55 +124,55 @@ export function UnifiedIntake({ intake, setIntake, onParsed, defaultOpen = true 
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div>
-              <Lbl required>Nome sistema AI</Lbl>
+              <Lbl required>{t("systemNameLabel")}</Lbl>
               <input
                 value={intake.systemName}
                 onChange={e => setIntake(p => ({ ...p, systemName: e.target.value }))}
-                placeholder="Es. RecruitAI v2"
+                placeholder={t("ph_systemNameAi")}
                 style={inputSt}
               />
             </div>
             <div>
-              <Lbl required>Ambito applicativo</Lbl>
+              <Lbl required>{t("scopeLabel")}</Lbl>
               <select
                 value={intake.systemScope}
                 onChange={e => setIntake(p => ({ ...p, systemScope: e.target.value as IntakeContext["systemScope"] }))}
                 style={inputSt}>
-                <option value="other">— seleziona —</option>
-                <option value="hr_recruitment">Selezione del personale</option>
-                <option value="hr_performance">Valutazione prestazioni HR</option>
-                <option value="credit_scoring">Scoring creditizio</option>
-                <option value="fraud_detection">Rilevamento frodi</option>
-                <option value="health_diagnosis">Diagnostica medica</option>
-                <option value="health_monitoring">Monitoraggio sanitario</option>
-                <option value="education_assessment">Valutazione educativa</option>
-                <option value="public_services">Servizi pubblici</option>
-                <option value="biometric_identification">Identificazione biometrica</option>
-                <option value="marketing_profiling">Profilazione marketing</option>
-                <option value="safety_critical">Sicurezza critica</option>
+                <option value="other">{t("selectPlaceholder")}</option>
+                <option value="hr_recruitment">{t("scope_hr_recruitment")}</option>
+                <option value="hr_performance">{t("scope_hr_performance")}</option>
+                <option value="credit_scoring">{t("scope_credit_scoring")}</option>
+                <option value="fraud_detection">{t("scope_fraud_detection")}</option>
+                <option value="health_diagnosis">{t("scope_health_diagnosis")}</option>
+                <option value="health_monitoring">{t("scope_health_monitoring")}</option>
+                <option value="education_assessment">{t("scope_education_assessment")}</option>
+                <option value="public_services">{t("scope_public_services")}</option>
+                <option value="biometric_identification">{t("scope_biometric_identification")}</option>
+                <option value="marketing_profiling">{t("scope_marketing_profiling")}</option>
+                <option value="safety_critical">{t("scope_safety_critical")}</option>
               </select>
             </div>
           </div>
 
           <div>
-            <Lbl required>Finalità del trattamento</Lbl>
+            <Lbl required>{t("purposeLabel")}</Lbl>
             <textarea
               rows={2}
               value={intake.processingPurpose}
               onChange={e => setIntake(p => ({ ...p, processingPurpose: e.target.value }))}
-              placeholder="Es. Filtraggio automatico dei CV per ridurre il tempo di selezione, con supervisione umana del responsabile HR"
+              placeholder={t("ph_purpose")}
               style={{ ...inputSt, resize: "vertical" }}
             />
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
             <div>
-              <Lbl>Scala interessati</Lbl>
+              <Lbl>{t("subjectScale")}</Lbl>
               <select
                 value={intake.subjectScale}
                 onChange={e => setIntake(p => ({ ...p, subjectScale: e.target.value as IntakeContext["subjectScale"] }))}
                 style={inputSt}>
-                <option value="large_scale_unknown">Non noto</option>
+                <option value="large_scale_unknown">{t("scale_unknown")}</option>
                 <option value="under_100">&lt; 100</option>
                 <option value="100_to_10k">100 – 10.000</option>
                 <option value="10k_to_1m">10.000 – 1M</option>
@@ -178,43 +180,43 @@ export function UnifiedIntake({ intake, setIntake, onParsed, defaultOpen = true 
               </select>
             </div>
             <div>
-              <Lbl>Decisioni automatizzate</Lbl>
+              <Lbl>{t("automatedDecisions")}</Lbl>
               <select
                 value={intake.automatedDecisions}
                 onChange={e => setIntake(p => ({ ...p, automatedDecisions: e.target.value as IntakeContext["automatedDecisions"] }))}
                 style={inputSt}>
-                <option value="no">No</option>
-                <option value="partial">Parziale</option>
-                <option value="yes">Sì — Art. 22 GDPR</option>
+                <option value="no">{t("no")}</option>
+                <option value="partial">{t("partial")}</option>
+                <option value="yes">{t("ad_yes")}</option>
               </select>
             </div>
             <div>
-              <Lbl>Alto rischio AI Act</Lbl>
+              <Lbl>{t("highRiskLabel")}</Lbl>
               <select
                 value={intake.highRiskAIAct}
                 onChange={e => setIntake(p => ({ ...p, highRiskAIAct: e.target.value as IntakeContext["highRiskAIAct"] }))}
                 style={inputSt}>
-                <option value="unknown">Da verificare</option>
-                <option value="yes">Sì — Annex III</option>
-                <option value="no">No</option>
+                <option value="unknown">{t("hr_unknown")}</option>
+                <option value="yes">{t("hr_yes")}</option>
+                <option value="no">{t("no")}</option>
               </select>
             </div>
           </div>
 
           <div>
-            <Lbl>Categorie dati trattati</Lbl>
+            <Lbl>{t("dataCategoriesLabel")}</Lbl>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
               {([
-                { v: "comuni", l: "Comuni" },
-                { v: "art9_salute", l: "Salute (Art. 9)" },
-                { v: "art9_origine_etnica", l: "Origine etnica (Art. 9)" },
-                { v: "art9_biometrici", l: "Biometrici (Art. 9)" },
-                { v: "art9_genetici", l: "Genetici (Art. 9)" },
-                { v: "art9_orientamento_sessuale", l: "Or. sessuale (Art. 9)" },
-                { v: "art9_religione", l: "Religione (Art. 9)" },
-                { v: "giudiziari", l: "Giudiziari" },
-                { v: "localizzazione", l: "Localizzazione" },
-                { v: "comportamentali", l: "Comportamentali" },
+                { v: "comuni", l: t("dc_comuni") },
+                { v: "art9_salute", l: t("dc_art9_salute") },
+                { v: "art9_origine_etnica", l: t("dc_art9_origine_etnica") },
+                { v: "art9_biometrici", l: t("dc_art9_biometrici") },
+                { v: "art9_genetici", l: t("dc_art9_genetici") },
+                { v: "art9_orientamento_sessuale", l: t("dc_art9_orientamento_sessuale") },
+                { v: "art9_religione", l: t("dc_art9_religione") },
+                { v: "giudiziari", l: t("dc_giudiziari") },
+                { v: "localizzazione", l: t("dc_localizzazione") },
+                { v: "comportamentali", l: t("dc_comportamentali") },
               ] as const).map(({ v, l }) => {
                 const active = intake.dataCategories.includes(v);
                 return (
@@ -239,8 +241,8 @@ export function UnifiedIntake({ intake, setIntake, onParsed, defaultOpen = true 
 
           <div style={{ display: "flex", gap: 12 }}>
             {([
-              { key: "crossBorderTransfer" as const, label: "Trasferimenti extra-UE", warn: "Art. 44 GDPR" },
-              { key: "vulnerableSubjects" as const, label: "Soggetti vulnerabili", warn: "minori, pazienti, lavoratori" },
+              { key: "crossBorderTransfer" as const, label: t("crossBorder"), warn: "Art. 44 GDPR" },
+              { key: "vulnerableSubjects" as const, label: t("vulnerableSubjects"), warn: t("vulnerableWarn") },
             ]).map(({ key, label, warn }) => (
               <button key={key} onClick={() => setIntake(p => ({ ...p, [key]: !p[key] }))}
                 style={{
@@ -260,7 +262,7 @@ export function UnifiedIntake({ intake, setIntake, onParsed, defaultOpen = true 
 
           {(!intake.systemName.trim() || !intake.processingPurpose.trim()) && (
             <p style={{ fontSize: 10, color: T.amber, padding: "5px 8px", borderRadius: 5, background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-              ⚠ Compila almeno <strong>Nome sistema</strong> e <strong>Finalità</strong> per abilitare la pre-compilazione AI
+              ⚠ {t("fillAtLeast1")} <strong>{t("systemNameShort")}</strong> {t("and")} <strong>{t("purposeShort")}</strong> {t("fillAtLeast2")}
             </p>
           )}
         </div>

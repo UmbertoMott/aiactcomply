@@ -149,7 +149,11 @@ export async function loginEmail(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (user?.id && user?.email) {
     const otpCode = await createOTPCookie(user.id);
-    await sendLoginOTPEmail(user.email, otpCode);
+    const sent = await sendLoginOTPEmail(user.email, otpCode);
+    if (!sent.ok) {
+      // Non lasciare l'utente bloccato sulla pagina di verifica senza codice.
+      return { error: "Accesso verificato, ma non è stato possibile inviare il codice via email. Riprova tra poco; se il problema persiste scrivi a connect@regulaeos.com." };
+    }
   }
 
   redirect("/verify-login-otp");

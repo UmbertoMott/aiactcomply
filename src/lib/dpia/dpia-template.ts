@@ -868,3 +868,36 @@ export const DPIA_SUBPOINTS: DpiaSubPoint[] = [
     ],
   },
 ];
+
+// ─── i18n: accessori locale-aware (namespace `dpiaGuided`) ───────────────────
+// IT → const canonici sopra. EN → chiavi risolte dal dizionario (blocco `en`).
+// I `ref`/`legalRef` (Art./WP248) restano invariati in entrambe le lingue.
+type DpiaTFn = (key: string) => string;
+
+export function getDpiaGuidedSections(locale: string, t: DpiaTFn): DpiaGuidedSection[] {
+  if (locale !== "en") return [...DPIA_GUIDED_SECTIONS];
+  return DPIA_GUIDED_SECTIONS.map(s => ({ ...s, label: t(`dsec_${s.key}`) }));
+}
+
+export function getDpiaSubpoints(locale: string, t: DpiaTFn): DpiaSubPoint[] {
+  if (locale !== "en") return [...DPIA_SUBPOINTS];
+  return DPIA_SUBPOINTS.map(sp => ({
+    ...sp,
+    label:    t(`${sp.id}_label`),
+    question: t(`${sp.id}_q`),
+    examples: sp.examples.map((_, i) => t(`${sp.id}_ex${i}`)),
+  }));
+}
+
+export function getWp248Criteria(locale: string, t: DpiaTFn): DpiaCriterion[] {
+  if (locale !== "en") return [...WP248_CRITERIA];
+  return WP248_CRITERIA.map(c => ({ ...c, label: t(`wp248_${c.id}`) }));
+}
+
+export function getDpiaTemplateMeta(
+  locale: string,
+  t: DpiaTFn,
+): { title: string; legalBasis: string; methodology: string; version: string; disclaimer: string } {
+  if (locale !== "en") return DPIA_TEMPLATE_META;
+  return { ...DPIA_TEMPLATE_META, title: t("dmeta_title"), methodology: t("dmeta_methodology"), disclaimer: t("dmeta_disclaimer") };
+}

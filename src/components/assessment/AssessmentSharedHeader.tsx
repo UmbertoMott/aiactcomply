@@ -1,6 +1,7 @@
 "use client";
 import { getAssessment } from "@/lib/assessment/assessment-helpers";
 import type { AssessmentShared } from "@/lib/assessment/assessment-schema";
+import { useT } from "@/i18n/LocaleProvider";
 
 const RISK_BADGE: Record<string, { bg: string; color: string; label: string }> = {
   unacceptable: { bg: "rgba(220,38,38,0.08)", color: "#dc2626", label: "Inaccettabile" },
@@ -10,8 +11,10 @@ const RISK_BADGE: Record<string, { bg: string; color: string; label: string }> =
 };
 
 export function AssessmentSharedHeader() {
+  const t = useT("assessmentShared");
   const shared: AssessmentShared = getAssessment().shared;
   const risk = RISK_BADGE[shared.riskLevel] ?? RISK_BADGE.minimal;
+  const riskKey = RISK_BADGE[shared.riskLevel] ? shared.riskLevel : "minimal";
 
   if (!shared.systemName) return null;
 
@@ -31,41 +34,41 @@ export function AssessmentSharedHeader() {
         <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1px",
           color: "rgba(0,0,0,0.3)", textTransform: "uppercase" as const,
           display: "block", marginBottom: 4 }}>
-          Assessment — Dati comuni
+          {t("headerKicker")}
         </span>
         <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 99,
           background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.4)",
           fontStyle: "italic" }}>
-          Sola lettura · modificabile da Classifier
+          {t("readOnly")}
         </span>
       </div>
 
-      <Field label="Sistema" value={shared.systemName} />
-      {shared.organization && <Field label="Organizzazione" value={shared.organization} />}
+      <Field label={t("systemField")} value={shared.systemName} />
+      {shared.organization && <Field label={t("organizationField")} value={shared.organization} />}
 
       <div>
-        <Label>Livello rischio</Label>
+        <Label>{t("riskLevel")}</Label>
         <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 99,
           background: risk.bg, color: risk.color, display: "inline-block" }}>
-          {risk.label}
+          {t(`risk_${riskKey}`)}
         </span>
       </div>
 
       {shared.annexIII && (
         <div>
-          <Label>Allegato III</Label>
-          <span style={{ fontSize: 11, fontWeight: 600, color: "#dc2626" }}>✓ Applicabile</span>
+          <Label>{t("annexIII")}</Label>
+          <span style={{ fontSize: 11, fontWeight: 600, color: "#dc2626" }}>✓ {t("applicable")}</span>
         </div>
       )}
 
-      {shared.purpose && <Field label="Finalità" value={shared.purpose} maxWidth={220} />}
-      {shared.legalBasis && <Field label="Base giuridica" value={shared.legalBasis} maxWidth={180} />}
+      {shared.purpose && <Field label={t("purposeField")} value={shared.purpose} maxWidth={220} />}
+      {shared.legalBasis && <Field label={t("legalBasisField")} value={shared.legalBasis} maxWidth={180} />}
 
       {shared.processesPersonalData && (
         <div>
-          <Label>Dati personali</Label>
+          <Label>{t("personalData")}</Label>
           <span style={{ fontSize: 11, color: "#92400e" }}>
-            ⚠ Sì
+            ⚠ {t("yes")}
             {shared.personalDataCategories.length > 0 &&
               ` — ${shared.personalDataCategories.slice(0, 2).join(", ")}${shared.personalDataCategories.length > 2 ? "…" : ""}`}
           </span>

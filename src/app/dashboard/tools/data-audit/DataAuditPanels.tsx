@@ -5,6 +5,9 @@ import type { DataAuditRecord, DatasetProfile, FairnessReport, Representativenes
 import { qualityScorecard } from "@/lib/data-audit/csv-profiler";
 import { computeFairness, computeRepresentativeness, type Row, MIN_CELL } from "@/lib/data-audit/fairness";
 import { analyzeFairnessNarrative } from "@/app/actions/dataAuditActions";
+import { useT } from "@/i18n/LocaleProvider";
+
+type TFn = (key: string) => string;
 
 const T = {
   text: "#0D1016", muted: "rgba(0,0,0,0.42)", faint: "rgba(0,0,0,0.22)", border: "rgba(0,0,0,0.08)",
@@ -18,17 +21,17 @@ const label: CSSProperties = { fontSize: 10, fontWeight: 600, textTransform: "up
 function scoreColor(v: number) { return v >= 90 ? T.green : v >= 70 ? T.amber : T.red; }
 
 // ═══ §2 Data Quality Scorecard ══════════════════════════════════════════════
-export function QualityScorecard({ datasets }: { datasets: DatasetProfile[] }) {
+export function QualityScorecard({ datasets, t }: { datasets: DatasetProfile[]; t: TFn }) {
   if (datasets.length === 0) return null;
   return (
     <section className="mb-6">
       <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Data Quality Scorecard</h2>
-      <p className="text-[11px] mb-3" style={{ color: T.muted }}>Caratteristiche di qualità ISO/IEC 5259 — Art. 10(3)</p>
+      <p className="text-[11px] mb-3" style={{ color: T.muted }}>{t("qs_subtitle")}</p>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {datasets.map(ds => {
           const s = qualityScorecard(ds);
           const items = [
-            { k: "Completezza", v: s.completeness }, { k: "Unicità", v: s.uniqueness }, { k: "Consistenza", v: s.consistency },
+            { k: t("qs_completeness"), v: s.completeness }, { k: t("qs_uniqueness"), v: s.uniqueness }, { k: t("qs_consistency"), v: s.consistency },
           ];
           return (
             <div key={ds.id} style={card}>
@@ -42,7 +45,7 @@ export function QualityScorecard({ datasets }: { datasets: DatasetProfile[] }) {
                 ))}
               </div>
               <div className="mt-2 text-[10px]" style={{ color: T.muted }}>
-                {ds.duplicateRowCount > 0 && <span>{ds.duplicateRowCount.toLocaleString()} righe duplicate · </span>}
+                {ds.duplicateRowCount > 0 && <span>{ds.duplicateRowCount.toLocaleString()} {t("qs_duplicateRows")} · </span>}
                 {ds.columns.reduce((a, c) => a + (c.numericStats?.outlierCount ?? 0), 0)} outlier
                 {ds.fingerprint && <span> · fp {ds.fingerprint.slice(0, 10)}…</span>}
               </div>
@@ -55,9 +58,9 @@ export function QualityScorecard({ datasets }: { datasets: DatasetProfile[] }) {
 }
 
 // ═══ §4 Fairness Panel ══════════════════════════════════════════════════════
-export function FairnessPanel({ datasets, rowsById, systemName, intendedPurpose, onReport }: {
+export function FairnessPanel({ datasets, rowsById, systemName, intendedPurpose, onReport, t }: {
   datasets: DatasetProfile[]; rowsById: Record<string, Row[]>;
-  systemName: string; intendedPurpose: string; onReport: (r: FairnessReport) => void;
+  systemName: string; intendedPurpose: string; onReport: (r: FairnessReport) => void; t: TFn;
 }) {
   const withRows = datasets.filter(d => rowsById[d.id]?.length);
   const [dsId, setDsId] = useState(withRows[0]?.id ?? "");
@@ -98,7 +101,7 @@ export function FairnessPanel({ datasets, rowsById, systemName, intendedPurpose,
       setNarrative(res.narrative);
       setAiConfirmed(false);
     } catch {
-      setNarrative("Errore nella generazione del commento AI.");
+      setNarrative(t("fp_narrativeError"));
     } finally {
       setAiLoading(false);
     }
@@ -108,53 +111,53 @@ export function FairnessPanel({ datasets, rowsById, systemName, intendedPurpose,
 
   return (
     <section className="mb-6">
-      <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Analisi di fairness — Art. 10(2)(f)</h2>
-      <p className="text-[11px] mb-3" style={{ color: T.muted }}>ISO/IEC TR 24027. Le metriche sono calcolate dai dati (deterministiche), non generate da AI.</p>
+      <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>{t("fp_title")}</h2>
+      <p className="text-[11px] mb-3" style={{ color: T.muted }}>{t("fp_subtitle")}</p>
 
       {withRows.length === 0 ? (
         <div style={{ ...card, color: T.muted }} className="text-[12px]">
-          Carica un dataset in questa sessione per calcolare la fairness. Le righe restano nel browser e non vengono salvate: dopo un ricaricamento pagina va ricaricato il file.
+          {t("fp_empty")}
         </div>
       ) : (
         <div style={card}>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
-            <div><label style={label}>Dataset</label>
+            <div><label style={label}>{t("fp_dataset")}</label>
               <select style={inp} value={dsId} onChange={e => { setDsId(e.target.value); setReport(null); }}>
                 {withRows.map(d => <option key={d.id} value={d.id}>{d.fileName} ({d.role})</option>)}
               </select></div>
-            <div><label style={label}>Colonna protetta *</label>
+            <div><label style={label}>{t("fp_protectedCol")} *</label>
               <select style={inp} value={protectedCol} onChange={e => setProtectedCol(e.target.value)}>
-                <option value="">Seleziona…</option>
+                <option value="">{t("fp_select")}</option>
                 {(sensitiveCols.length ? sensitiveCols : cols).map(c => <option key={c.name} value={c.name}>{c.name}{c.sensitiveFlagConfirmed ? " ⚠" : ""}</option>)}
               </select></div>
-            <div><label style={label}>Colonna esito *</label>
+            <div><label style={label}>{t("fp_outcomeCol")} *</label>
               <select style={inp} value={outcomeCol} onChange={e => { setOutcomeCol(e.target.value); setPositive(""); }}>
-                <option value="">Seleziona…</option>
+                <option value="">{t("fp_select")}</option>
                 {cols.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
               </select></div>
-            <div><label style={label}>Valore &quot;esito positivo&quot; *</label>
+            <div><label style={label}>{t("fp_positiveValue")} *</label>
               {outcomeValues.length ? (
                 <select style={inp} value={positive} onChange={e => setPositive(e.target.value)}>
-                  <option value="">Seleziona…</option>
+                  <option value="">{t("fp_select")}</option>
                   {outcomeValues.map(v => <option key={v} value={v}>{v}</option>)}
                 </select>
-              ) : <input style={inp} value={positive} onChange={e => setPositive(e.target.value)} placeholder="es. approvato" />}
+              ) : <input style={inp} value={positive} onChange={e => setPositive(e.target.value)} placeholder={t("fp_positivePh")} />}
             </div>
-            <div><label style={label}>Ground truth (opzionale)</label>
+            <div><label style={label}>{t("fp_groundTruth")}</label>
               <select style={inp} value={gtCol} onChange={e => setGtCol(e.target.value)}>
-                <option value="">— (EOD/equalized odds disabilitati)</option>
+                <option value="">{t("fp_gtDisabled")}</option>
                 {cols.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
               </select></div>
-            <div><label style={label}>2ª protetta — intersezionale</label>
+            <div><label style={label}>{t("fp_protected2")}</label>
               <select style={inp} value={protectedCol2} onChange={e => setProtectedCol2(e.target.value)}>
-                <option value="">— (opzionale)</option>
+                <option value="">{t("fp_optional")}</option>
                 {cols.filter(c => c.name !== protectedCol).map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
               </select></div>
           </div>
           <button onClick={run} disabled={!protectedCol || !outcomeCol || !positive}
             className="text-[12px] font-medium px-3 py-1.5 rounded-lg"
             style={{ background: T.dark, color: "#fff", border: "none", cursor: "pointer", opacity: (!protectedCol || !outcomeCol || !positive) ? 0.5 : 1 }}>
-            Calcola fairness
+            {t("fp_computeBtn")}
           </button>
 
           {report && (
@@ -163,18 +166,18 @@ export function FairnessPanel({ datasets, rowsById, systemName, intendedPurpose,
                 <Metric k="Statistical Parity Diff" v={report.statisticalParityDiff.toFixed(3)} />
                 <Metric k="Disparate Impact" v={report.disparateImpactRatio.toFixed(3)} />
                 <div className="flex flex-col">
-                  <span style={{ color: T.muted, fontSize: 10 }}>Regola dei 4/5 (DI≥0.8)</span>
+                  <span style={{ color: T.muted, fontSize: 10 }}>{t("fp_fourFifths")}</span>
                   <span style={{ color: report.fourFifthsPass ? T.green : T.red, fontWeight: 700 }}>{report.fourFifthsPass ? "PASS" : "FAIL"} <span style={{ color: T.faint, fontWeight: 400 }}></span></span>
                 </div>
                 <div className="flex flex-col">
-                  <span style={{ color: T.muted, fontSize: 10 }}>Rischio</span>
+                  <span style={{ color: T.muted, fontSize: 10 }}>{t("fp_risk")}</span>
                   <span style={{ color: riskColor[report.riskLevel], fontWeight: 700, textTransform: "uppercase" }}>{report.riskLevel}</span>
                 </div>
               </div>
 
               <table className="w-full text-[11px]" style={{ borderCollapse: "collapse" }}>
                 <thead><tr style={{ color: T.muted, textAlign: "left" }}>
-                  <th className="py-1">Gruppo</th><th>N</th><th>Selection rate</th>
+                  <th className="py-1">{t("fp_group")}</th><th>N</th><th>{t("fp_selectionRate")}</th>
                   {report.groundTruthAvailable && <><th>TPR</th><th>FPR</th></>}
                 </tr></thead>
                 <tbody>{report.groups.map(g => (
@@ -190,7 +193,7 @@ export function FairnessPanel({ datasets, rowsById, systemName, intendedPurpose,
               <div className="mt-2 text-[11px]" style={{ color: T.muted }}>
                 {report.groundTruthAvailable
                   ? <>Equal Opportunity Diff: <b>{report.equalOpportunityDiff?.toFixed(3) ?? "—"}</b> · Equalized Odds Diff: <b>{report.equalizedOddsDiff?.toFixed(3) ?? "—"}</b></>
-                  : <>Equal Opportunity / Equalized Odds: <b>non calcolabili senza colonna ground-truth</b>.</>}
+                  : <>Equal Opportunity / Equalized Odds: <b>{t("fp_notComputable")}</b>.</>}
               </div>
 
               {/* §8 Commento AI — solo su aggregati, badge ✦ fino ad accettazione */}
@@ -199,19 +202,19 @@ export function FairnessPanel({ datasets, rowsById, systemName, intendedPurpose,
                   <button onClick={genNarrative} disabled={aiLoading}
                     className="text-[12px] font-medium px-3 py-1.5 rounded-lg"
                     style={{ background: T.dark, color: "#fff", border: "none", cursor: "pointer", opacity: aiLoading ? 0.6 : 1 }}>
-                    {aiLoading ? "Generazione…" : "✦ Genera commento AI"}
+                    {aiLoading ? t("fp_generating") : `✦ ${t("fp_genComment")}`}
                   </button>
                 ) : (
                   <div style={{ background: "#fafaf9", border: `1px solid ${T.border}`, borderRadius: 8, padding: 12 }}>
                     <div className="text-[10px] mb-1" style={{ color: aiConfirmed ? T.green : T.amber, fontWeight: 600 }}>
-                      {aiConfirmed ? "✓ Confermato dall'utente" : "✦ AI — verifica e conferma"}
+                      {aiConfirmed ? `✓ ${t("fp_confirmedByUser")}` : `✦ ${t("fp_aiVerify")}`}
                     </div>
                     <p className="text-[12px]" style={{ color: T.text, lineHeight: 1.6 }}>{narrative}</p>
                     {!aiConfirmed && (
                       <button onClick={() => setAiConfirmed(true)}
                         className="text-[11px] font-medium px-2.5 py-1 rounded-md mt-2"
                         style={{ background: T.green, color: "#fff", border: "none", cursor: "pointer" }}>
-                        Accetta e conferma
+                        {t("fp_acceptConfirm")}
                       </button>
                     )}
                   </div>
@@ -220,7 +223,7 @@ export function FairnessPanel({ datasets, rowsById, systemName, intendedPurpose,
 
               {report.intersectional && (
                 <div className="mt-3">
-                  <p className="text-[11px] font-semibold" style={{ color: T.text }}>Intersezionale (min {MIN_CELL} per cella)</p>
+                  <p className="text-[11px] font-semibold" style={{ color: T.text }}>{t("fp_intersectionalPre")} {MIN_CELL} {t("fp_intersectionalPost")}</p>
                   {report.intersectionalDi !== undefined && (
                     <p className="text-[11px]" style={{ color: T.muted }}>SPD {report.intersectionalSpd?.toFixed(3)} · DI {report.intersectionalDi?.toFixed(3)}</p>
                   )}
@@ -228,7 +231,7 @@ export function FairnessPanel({ datasets, rowsById, systemName, intendedPurpose,
                     <tbody>{report.intersectional.map(c => (
                       <tr key={c.cell} style={{ borderTop: `1px solid ${T.border}`, color: c.sufficient ? T.text : T.faint }}>
                         <td className="py-1">{c.cell}</td><td>{c.size}</td>
-                        <td>{c.sufficient ? (c.selectionRate * 100).toFixed(1) + "%" : "campione insufficiente"}</td>
+                        <td>{c.sufficient ? (c.selectionRate * 100).toFixed(1) + "%" : t("fp_insufficientSample")}</td>
                       </tr>
                     ))}</tbody>
                   </table>
@@ -247,7 +250,7 @@ function Metric({ k, v }: { k: string; v: string }) {
 }
 
 // ═══ §5 Representativeness Panel ════════════════════════════════════════════
-export function RepresentativenessPanel({ datasets, rowsById, onCheck }: { datasets: DatasetProfile[]; rowsById: Record<string, Row[]>; onCheck: (c: RepresentativenessCheck) => void }) {
+export function RepresentativenessPanel({ datasets, rowsById, onCheck, t }: { datasets: DatasetProfile[]; rowsById: Record<string, Row[]>; onCheck: (c: RepresentativenessCheck) => void; t: TFn }) {
   const withRows = datasets.filter(d => rowsById[d.id]?.length);
   const [dsId, setDsId] = useState(withRows[0]?.id ?? "");
   const ds = datasets.find(d => d.id === dsId);
@@ -275,26 +278,26 @@ export function RepresentativenessPanel({ datasets, rowsById, onCheck }: { datas
 
   return (
     <section className="mb-6">
-      <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Rappresentatività vs popolazione di riferimento — Art. 10(3)</h2>
-      <p className="text-[11px] mb-3" style={{ color: T.muted }}>Total Variation Distance vs proporzioni attese dichiarate.</p>
+      <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>{t("rp_title")}</h2>
+      <p className="text-[11px] mb-3" style={{ color: T.muted }}>{t("rp_subtitle")}</p>
       {withRows.length === 0 ? (
-        <div style={{ ...card, color: T.muted }} className="text-[12px]">Carica un dataset in questa sessione per valutare la rappresentatività.</div>
+        <div style={{ ...card, color: T.muted }} className="text-[12px]">{t("rp_empty")}</div>
       ) : (
         <div style={card}>
           <div className="grid grid-cols-2 gap-3 mb-3">
-            <div><label style={label}>Dataset</label>
+            <div><label style={label}>{t("fp_dataset")}</label>
               <select style={inp} value={dsId} onChange={e => { setDsId(e.target.value); setCol(""); setCheck(null); }}>
                 {withRows.map(d => <option key={d.id} value={d.id}>{d.fileName}</option>)}
               </select></div>
-            <div><label style={label}>Colonna (carattere)</label>
+            <div><label style={label}>{t("rp_column")}</label>
               <select style={inp} value={col} onChange={e => { setCol(e.target.value); setRefPct({}); setCheck(null); }}>
-                <option value="">Seleziona…</option>
+                <option value="">{t("fp_select")}</option>
                 {(ds?.columns ?? []).filter(c => c.categoricalDistribution).map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
               </select></div>
           </div>
           {groups.length > 0 && (
             <div className="mb-3">
-              <label style={label}>Proporzioni attese (%) — popolazione di riferimento</label>
+              <label style={label}>{t("rp_expectedProps")}</label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {groups.map(g => (
                   <div key={g} className="flex items-center gap-1">
@@ -303,30 +306,30 @@ export function RepresentativenessPanel({ datasets, rowsById, onCheck }: { datas
                   </div>
                 ))}
               </div>
-              <input style={{ ...inp, marginTop: 8 }} value={source} onChange={e => setSource(e.target.value)} placeholder="Fonte del riferimento (es. ISTAT 2024, bacino d'utenza…)" />
+              <input style={{ ...inp, marginTop: 8 }} value={source} onChange={e => setSource(e.target.value)} placeholder={t("rp_sourcePh")} />
             </div>
           )}
           <button onClick={run} disabled={!col}
             className="text-[12px] font-medium px-3 py-1.5 rounded-lg"
             style={{ background: T.dark, color: "#fff", border: "none", cursor: "pointer", opacity: !col ? 0.5 : 1 }}>
-            Valuta rappresentatività
+            {t("rp_computeBtn")}
           </button>
 
           {check && (
             <div className="mt-4">
               {check.verdict === "no_reference" ? (
-                <p className="text-[12px]" style={{ color: T.amber }}>Rappresentatività non valutabile senza una popolazione di riferimento dichiarata (Art. 10(3)). Mostrata solo la distribuzione osservata.</p>
+                <p className="text-[12px]" style={{ color: T.amber }}>{t("rp_noReference")}</p>
               ) : (
                 <div className="flex gap-4 mb-2 text-[12px]">
                   <Metric k="Total Variation Distance" v={check.totalVariationDistance.toFixed(3)} />
-                  <div className="flex flex-col"><span style={{ color: T.muted, fontSize: 10 }}>Verdetto</span>
+                  <div className="flex flex-col"><span style={{ color: T.muted, fontSize: 10 }}>{t("rp_verdict")}</span>
                     <span style={{ color: verdictColor[check.verdict], fontWeight: 700 }}>
-                      {check.verdict === "representative" ? "Rappresentativo" : check.verdict === "review" ? "Da rivedere" : "Non rappresentativo"}
+                      {check.verdict === "representative" ? t("rp_representative") : check.verdict === "review" ? t("rp_toReview") : t("rp_notRepresentative")}
                     </span></div>
                 </div>
               )}
               <table className="w-full text-[11px]" style={{ borderCollapse: "collapse" }}>
-                <thead><tr style={{ color: T.muted, textAlign: "left" }}><th className="py-1">Gruppo</th><th>Osservato</th>{check.verdict !== "no_reference" && <><th>Atteso</th><th>Gap</th></>}</tr></thead>
+                <thead><tr style={{ color: T.muted, textAlign: "left" }}><th className="py-1">{t("fp_group")}</th><th>{t("rp_observed")}</th>{check.verdict !== "no_reference" && <><th>{t("rp_expected")}</th><th>Gap</th></>}</tr></thead>
                 <tbody>{check.observed.map(o => {
                   const ref = check.reference.find(r => r.group.toLowerCase() === o.group.toLowerCase());
                   const gap = check.perGroupGap.find(g => g.group.toLowerCase() === o.group.toLowerCase());
@@ -357,13 +360,14 @@ const ISO_ROWS = [
   ["Impact assessment collegato", "Art. 10(5)→27/35", "ISO/IEC 42001 §6.1.4 / §8.4"],
 ];
 export function IsoMappingTable() {
+  const t = useT("toolDataAudit");
   return (
     <section className="mb-6">
-      <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Standard applicati</h2>
-      <p className="text-[11px] mb-3" style={{ color: T.muted }}>Sigle ISO a memoria — il legale conferma prima del rilascio. Tutte.</p>
+      <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>{t("iso_title")}</h2>
+      <p className="text-[11px] mb-3" style={{ color: T.muted }}>{t("iso_subtitle")}</p>
       <div style={card}>
         <table className="w-full text-[11px]" style={{ borderCollapse: "collapse" }}>
-          <thead><tr style={{ color: T.muted, textAlign: "left" }}><th className="py-1">Pratica / metrica</th><th>AI Act</th><th>ISO/IEC</th></tr></thead>
+          <thead><tr style={{ color: T.muted, textAlign: "left" }}><th className="py-1">{t("iso_practice")}</th><th>AI Act</th><th>ISO/IEC</th></tr></thead>
           <tbody>{ISO_ROWS.map(r => (
             <tr key={r[0]} style={{ borderTop: `1px solid ${T.border}` }}>
               <td className="py-1.5" style={{ color: T.text }}>{r[0]}</td>

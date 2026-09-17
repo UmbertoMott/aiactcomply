@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { DPIAResult } from "@/lib/dossier/storage-schema";
 import type { DpiaGapCheck } from "@/app/actions/checkDpiaGaps";
 import { draftDpiaNextStepRationale } from "@/app/actions/draftDpiaNextStepRationale";
+import { useT } from "@/i18n/LocaleProvider";
 
 // ─── Design tokens (aligned with FRIA) ───────────────────────────────────────
 const T = {
@@ -205,6 +206,7 @@ export interface NextStepGuideProps {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export function NextStepGuide({ dpia, gapCheck, onNavigateToStep }: NextStepGuideProps) {
+  const t = useT("toolDpia");
   const [rationale, setRationale] = useState<string | null>(null);
   const [loadingRationale, setLoadingRationale] = useState(false);
   const [rationaleError, setRationaleError] = useState<string | null>(null);
@@ -243,8 +245,8 @@ export function NextStepGuide({ dpia, gapCheck, onNavigateToStep }: NextStepGuid
         borderRadius: 10, padding: "14px 20px", marginTop: 16,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: T.green }}>✓ DPIA completata</span>
-          <span style={{ fontSize: 11, color: T.green }}>Tutti i passi obbligatori completati</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: T.green }}>✓ {t("dnsg_completeTitle")}</span>
+          <span style={{ fontSize: 11, color: T.green }}>{t("dnsg_completeSub")}</span>
         </div>
       </div>
     );
@@ -254,8 +256,8 @@ export function NextStepGuide({ dpia, gapCheck, onNavigateToStep }: NextStepGuid
   if (dismissed) {
     return (
       <div style={{ padding: "8px 12px", border: `1px solid ${T.border}`, borderRadius: 8, marginTop: 12, display: "flex", alignItems: "center", gap: 10 }}>
-        <span style={{ fontSize: 11, color: T.faint }}>Suggerimento prossimo passo nascosto</span>
-        <button onClick={() => setDismissed(false)} style={{ fontSize: 11, color: T.muted, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>Mostra</button>
+        <span style={{ fontSize: 11, color: T.faint }}>{t("dnsg_hidden")}</span>
+        <button onClick={() => setDismissed(false)} style={{ fontSize: 11, color: T.muted, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>{t("dnsg_show")}</button>
       </div>
     );
   }
@@ -273,22 +275,22 @@ export function NextStepGuide({ dpia, gapCheck, onNavigateToStep }: NextStepGuid
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
         <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>
-          Prossimo passo consigliato
+          {t("dnsg_nextStep")}
         </span>
         <span style={{
           fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 9999,
           background: T.amberBg, border: `1px solid ${T.amberBdr}`, color: T.amber,
         }}>
-          Step {step.targetStep + 1}
+          {t("dnsg_stepWord")} {step.targetStep + 1}
         </span>
       </div>
 
       {/* Step title & description */}
       <p style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 4px" }}>
-        {step.title}
+        {t(`dnsg_${stepKey}_title`)}
       </p>
       <p style={{ fontSize: 12, color: T.muted, margin: "0 0 14px", lineHeight: 1.5 }}>
-        {step.description}
+        {t(`dnsg_${stepKey}_desc`)}
       </p>
 
       {/* AI rationale section */}
@@ -304,7 +306,7 @@ export function NextStepGuide({ dpia, gapCheck, onNavigateToStep }: NextStepGuid
             marginBottom: 14,
           }}
         >
-          {loadingRationale ? "⟳ Generazione…" : "✦ Spiega perché"}
+          {loadingRationale ? t("dnsg_generating") : t("dnsg_explainWhy")}
         </button>
       )}
 
@@ -318,7 +320,7 @@ export function NextStepGuide({ dpia, gapCheck, onNavigateToStep }: NextStepGuid
         <div style={{ marginBottom: 14, padding: "10px 12px", background: T.amberBg, border: `1px solid ${T.amberBdr}`, borderRadius: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
             <span style={{ fontSize: 10, fontWeight: 700, color: T.amber, background: "rgba(202,138,4,0.10)", padding: "2px 7px", borderRadius: 9999 }}>
-              ✦ AI — verifica e conferma
+              ✦ {t("aiVerifyConfirm")}
             </span>
           </div>
           <p style={{ fontSize: 12, color: T.text, margin: 0, lineHeight: 1.6 }}>
@@ -337,13 +339,13 @@ export function NextStepGuide({ dpia, gapCheck, onNavigateToStep }: NextStepGuid
             cursor: "pointer",
           }}
         >
-          → {step.ctaLabel}
+          → {t(`dnsg_${stepKey}_cta`)}
         </button>
         <button
           onClick={() => setDismissed(true)}
           style={{ fontSize: 11, color: T.faint, background: "none", border: "none", cursor: "pointer" }}
         >
-          Ignora per ora
+          {t("dnsg_ignoreForNow")}
         </button>
       </div>
     </div>

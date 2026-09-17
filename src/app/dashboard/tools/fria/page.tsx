@@ -9,6 +9,7 @@ import {
   AlertTriangle, Shield, Users, Activity, FileText, Download,
 } from "lucide-react";
 import SignOffPanel from "@/components/ui/SignOffPanel";
+import { useT } from "@/i18n/LocaleProvider";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import { FriaGuidedMode } from "@/components/fria/FriaGuidedMode";
 import { RightsCatalog } from "@/components/fria/RightsCatalog";
@@ -92,11 +93,12 @@ function Sel({ label, value, options, onChange, note }: {
   label: string; value: string; options: { value: string; label: string }[];
   onChange: (v: string) => void; note?: string;
 }) {
+  const t = useT("toolFria");
   return (
     <div style={{ marginBottom: 12 }}>
       <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>{label}</label>
       <select value={value} onChange={(e) => onChange(e.target.value)} style={inputSt}>
-        <option value="">— seleziona —</option>
+        <option value="">{t("selectPlaceholder")}</option>
         {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
       {note && <p style={{ fontSize: 10, color: T.faint, marginTop: 3 }}>{note}</p>}
@@ -164,6 +166,7 @@ const DEFAULT_TRIGGERS = [
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function FRIAPage() {
+  const t = useT("toolFria");
   const [doc, setDoc] = useState<FRIADocument>(() => createEmptyFRIA());
   const [phase, setPhase] = useState<Phase>("1");
   const [gapCheckResult, setGapCheckResult] = useState<FriaGapCheckResult | null>(null);
@@ -191,29 +194,29 @@ export default function FRIAPage() {
     const ctx = doc.context;
     const f = (v: string | undefined) => !!(v?.trim());
     const phases = [
-      { id: "1", label: "Contesto", legalRef: "Art. 27(2)(a)", subPoints: [
-        { label: "Nome sistema",        done: f(doc.system_name) },
-        { label: "Organizzazione",      done: f(doc.organization) },
-        { label: "Scopo previsto",      done: f(ctx.intended_purpose_explanation) },
-        { label: "Persone interessate", done: f(ctx.affected_persons) },
-        { label: "Tecnologia",          done: f(ctx.technology_overview) },
+      { id: "1", label: t("ph1"), legalRef: "Art. 27(2)(a)", subPoints: [
+        { label: t("sp_systemName"),  done: f(doc.system_name) },
+        { label: t("sp_organization"),done: f(doc.organization) },
+        { label: t("sp_purpose"),     done: f(ctx.intended_purpose_explanation) },
+        { label: t("sp_affected"),    done: f(ctx.affected_persons) },
+        { label: t("sp_technology"),  done: f(ctx.technology_overview) },
       ]},
-      { id: "2", label: "Scenari", legalRef: "Art. 27(2)(b)", subPoints: [
-        { label: "Almeno uno scenario", done: doc.scenarios.length > 0 },
-        { label: "Impatti sui diritti", done: doc.scenarios.some(s => s.right_impacts.length > 0) },
+      { id: "2", label: t("ph2"), legalRef: "Art. 27(2)(b)", subPoints: [
+        { label: t("sp_atLeastOne"),  done: doc.scenarios.length > 0 },
+        { label: t("sp_rightImpacts"),done: doc.scenarios.some(s => s.right_impacts.length > 0) },
       ]},
-      { id: "3", label: "Decisione", legalRef: "Art. 27(2)(c)", subPoints: [
-        { label: "Raccomandazione",  done: f(doc.deployment.recommendation) },
-        { label: "Responsabile",     done: f(doc.deployment.approver_name) },
-        { label: "Motivazione",      done: f(doc.deployment.decision_justification) },
+      { id: "3", label: t("ph3"), legalRef: "Art. 27(2)(c)", subPoints: [
+        { label: t("sp_recommendation"), done: f(doc.deployment.recommendation) },
+        { label: t("sp_responsible"),    done: f(doc.deployment.approver_name) },
+        { label: t("sp_justification"),  done: f(doc.deployment.decision_justification) },
       ]},
-      { id: "4", label: "Monitoraggio", legalRef: "Art. 27(2)(d)", subPoints: [
-        { label: "Elementi monitoraggio",  done: doc.monitoring.items.length > 0 },
-        { label: "Trigger aggiornamento",  done: doc.monitoring.update_triggers.length > 0 },
+      { id: "4", label: t("ph4"), legalRef: "Art. 27(2)(d)", subPoints: [
+        { label: t("sp_monItems"),    done: doc.monitoring.items.length > 0 },
+        { label: t("sp_updTriggers"), done: doc.monitoring.update_triggers.length > 0 },
       ]},
-      { id: "5", label: "Stakeholder", legalRef: "Art. 27(2)(e)", subPoints: [
-        { label: "Stakeholder mappati", done: doc.stakeholders.length > 0 },
-        { label: "Log engagement",      done: doc.engagement_log.length > 0 },
+      { id: "5", label: t("ph5"), legalRef: "Art. 27(2)(e)", subPoints: [
+        { label: t("sp_stkMapped"),   done: doc.stakeholders.length > 0 },
+        { label: t("sp_engLog"),      done: doc.engagement_log.length > 0 },
       ]},
     ];
     return phases.map(p => {
@@ -221,7 +224,7 @@ export default function FRIAPage() {
       const total = p.subPoints.length;
       return { ...p, done, total, percent: Math.round((done / total) * 100) };
     });
-  }, [doc]);
+  }, [doc, t]);
 
   // ── Sync FRIA fields → shared (idempotente, fire-and-forget) ─────────────
   function syncFriaToShared(friaDoc: FRIADocument) {
@@ -279,7 +282,7 @@ export default function FRIAPage() {
   async function handleDraftFria() {
     const classifier = readFromStorage<ClassifierResult>("classifier");
     if (!classifier?.systemName) {
-      setDraftError("Completa prima il Classifier per generare la bozza.");
+      setDraftError(t("errClassifierFirst"));
       return;
     }
     setLoadingDraft(true);
@@ -493,11 +496,11 @@ export default function FRIAPage() {
   function delMonItem(id: string) {
     setDoc((prev) => { const n = { ...prev, monitoring: { ...prev.monitoring, items: prev.monitoring.items.filter((i) => i.id !== id) }, updatedAt: new Date().toISOString() }; debounceSave(n); return n; });
   }
-  function toggleTrigger(t: string) {
+  function toggleTrigger(trg: string) {
     setDoc((prev) => {
-      const triggers = prev.monitoring.update_triggers.includes(t)
-        ? prev.monitoring.update_triggers.filter((x) => x !== t)
-        : [...prev.monitoring.update_triggers, t];
+      const triggers = prev.monitoring.update_triggers.includes(trg)
+        ? prev.monitoring.update_triggers.filter((x) => x !== trg)
+        : [...prev.monitoring.update_triggers, trg];
       const n = { ...prev, monitoring: { ...prev.monitoring, update_triggers: triggers }, updatedAt: new Date().toISOString() }; debounceSave(n); return n;
     });
   }
@@ -566,14 +569,14 @@ export default function FRIAPage() {
     patchFRIA(() => doc);
     syncCorrelatedRisksFromFRIA();
     setDossierSavedAt(completedAt);
-    showToast("FRIA salvata nel dossier di compliance");
+    showToast(t("toastSavedDossier"));
   }
   function exportReport() {
     const blob = new Blob([JSON.stringify({ export_type: "FRIA Art. 27 EU AI Act", exported_at: new Date().toISOString(), document: doc }, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url; a.download = `fria-${(doc.system_name || "doc").replace(/\s+/g, "-")}-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click(); URL.revokeObjectURL(url); showToast("FRIA esportata");
+    a.click(); URL.revokeObjectURL(url); showToast(t("toastExported"));
   }
 
   // ─── Derived ──────────────────────────────────────────────────────────────
@@ -586,22 +589,22 @@ export default function FRIAPage() {
     const c = doc.context;
     type SecId = "A" | "B" | "C";
     const sections: { id: SecId; label: string; fields: number; filled: number }[] = [
-      { id: "A", label: "A — Contesto di deployment", fields: 11,
+      { id: "A", label: t("secA"), fields: 11,
         filled: [c.intended_purpose_match, c.timeframe, c.frequency, c.legal_basis, c.dpia_done, c.main_users, c.affected_persons, c.legal_framework, c.complaint_mechanisms, c.intended_purpose_explanation, c.dpia_explanation].filter(Boolean).length },
-      { id: "B", label: "B — Caratteristiche del sistema AI", fields: 13,
+      { id: "B", label: t("secB"), fields: 13,
         filled: [c.technology_overview, c.has_generative_component, c.training_data_types, c.gdpr_provider_compliance_confidence, c.training_data_representative, c.bias_assessed, c.data_quality_sufficient, c.processes_personal_data, c.personal_data_types, c.gdpr_processing_compliant, c.controls_input_data, c.input_data_representative, c.accuracy_acceptable].filter(Boolean).length },
-      { id: "C", label: "C — Governance", fields: 5,
+      { id: "C", label: t("secC"), fields: 5,
         filled: [c.substantial_modifications_planned, c.human_oversight_assigned, c.oversight_persons_trained, c.workers_informed, c.affected_persons_informed].filter(Boolean).length },
     ];
-    const yNP = [{ value: "yes", label: "Sì" }, { value: "no", label: "No" }, { value: "partial", label: "Parzialmente" }];
-    const yN  = [{ value: "yes", label: "Sì" }, { value: "no", label: "No" }];
-    const hml = [{ value: "high", label: "Alto" }, { value: "medium", label: "Medio" }, { value: "low", label: "Basso" }];
+    const yNP = [{ value: "yes", label: t("yes") }, { value: "no", label: t("no") }, { value: "partial", label: t("partial") }];
+    const yN  = [{ value: "yes", label: t("yes") }, { value: "no", label: t("no") }];
+    const hml = [{ value: "high", label: t("high") }, { value: "medium", label: t("medium") }, { value: "low", label: t("low") }];
 
     return (
       <div>
         <div style={{ marginBottom: 24 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 1 — Analisi del contesto</h2>
-          <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Cluster A: contesto di deployment · Cluster B: caratteristiche AI · Cluster C: governance</p>
+          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>{t("p1_title")}</h2>
+          <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>{t("p1_sub")}</p>
         </div>
         <ContextCatalog onApply={(patch) => upCtx(patch)} />
         {sections.map((sec) => {
@@ -623,72 +626,72 @@ export default function FRIAPage() {
                 <div style={{ padding: "0 20px 20px" }}>
                   {sec.id === "A" && (
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 20px" }}>
-                      <Sel label="Corrispondenza con finalità prevista" value={c.intended_purpose_match}
+                      <Sel label={t("f_purposeMatch")} value={c.intended_purpose_match}
                         options={yNP} onChange={(v) => upCtx({ intended_purpose_match: v })} />
-                      <Inp label="Spiegazione" value={c.intended_purpose_explanation}
-                        onChange={(v) => upCtx({ intended_purpose_explanation: v })} ph="Descrivi eventuali discrepanze" />
-                      <Inp label="Periodo/timeframe di utilizzo" value={c.timeframe}
-                        onChange={(v) => upCtx({ timeframe: v })} ph="es. 2025–2027" />
-                      <Inp label="Frequenza d'uso" value={c.frequency}
-                        onChange={(v) => upCtx({ frequency: v })} ph="es. quotidiano, mensile" />
-                      <Txt label="Base giuridica" value={c.legal_basis}
-                        onChange={(v) => upCtx({ legal_basis: v })} rows={2} ph="es. Art. 6(1)(e) GDPR, contratto…" />
-                      <Sel label="DPIA completata" value={c.dpia_done}
-                        options={[{ value: "yes", label: "Sì" }, { value: "no", label: "No" }, { value: "in_progress", label: "In corso" }]}
+                      <Inp label={t("f_explanation")} value={c.intended_purpose_explanation}
+                        onChange={(v) => upCtx({ intended_purpose_explanation: v })} ph={t("ph_discrepancies")} />
+                      <Inp label={t("f_timeframe")} value={c.timeframe}
+                        onChange={(v) => upCtx({ timeframe: v })} ph={t("ph_timeframe")} />
+                      <Inp label={t("f_frequency")} value={c.frequency}
+                        onChange={(v) => upCtx({ frequency: v })} ph={t("ph_frequency")} />
+                      <Txt label={t("f_legalBasis")} value={c.legal_basis}
+                        onChange={(v) => upCtx({ legal_basis: v })} rows={2} ph={t("ph_legalBasis")} />
+                      <Sel label={t("f_dpiaDone")} value={c.dpia_done}
+                        options={[{ value: "yes", label: t("yes") }, { value: "no", label: t("no") }, { value: "in_progress", label: t("inProgress") }]}
                         onChange={(v) => upCtx({ dpia_done: v })} />
-                      <Inp label="Principali utilizzatori del sistema" value={c.main_users}
-                        onChange={(v) => upCtx({ main_users: v })} ph="es. HR, supervisori, operatori pubblici" />
-                      <Inp label="Persone interessate dalle decisioni" value={c.affected_persons}
-                        onChange={(v) => upCtx({ affected_persons: v })} ph="es. candidati, utenti di servizi" />
-                      <Txt label="Quadro giuridico applicabile" value={c.legal_framework}
-                        onChange={(v) => upCtx({ legal_framework: v })} rows={2} ph="Normative, regolamenti settoriali…" />
-                      <Txt label="Meccanismi di reclamo" value={c.complaint_mechanisms}
-                        onChange={(v) => upCtx({ complaint_mechanisms: v })} rows={2} ph="Dove le persone possono presentare reclamo" />
+                      <Inp label={t("f_mainUsers")} value={c.main_users}
+                        onChange={(v) => upCtx({ main_users: v })} ph={t("ph_mainUsers")} />
+                      <Inp label={t("f_affectedPersons")} value={c.affected_persons}
+                        onChange={(v) => upCtx({ affected_persons: v })} ph={t("ph_affectedPersons")} />
+                      <Txt label={t("f_legalFramework")} value={c.legal_framework}
+                        onChange={(v) => upCtx({ legal_framework: v })} rows={2} ph={t("ph_legalFramework")} />
+                      <Txt label={t("f_complaints")} value={c.complaint_mechanisms}
+                        onChange={(v) => upCtx({ complaint_mechanisms: v })} rows={2} ph={t("ph_complaints")} />
                     </div>
                   )}
                   {sec.id === "B" && (
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 20px" }}>
-                      <Txt label="Panoramica tecnologica" value={c.technology_overview}
-                        onChange={(v) => upCtx({ technology_overview: v })} rows={3} ph="Descrivi il sistema e le sue funzionalità…" />
-                      <Sel label="Componente generativa (LLM/Diffusion)" value={c.has_generative_component}
-                        options={[{ value: "yes", label: "Sì" }, { value: "no", label: "No" }, { value: "unknown", label: "Non noto" }]}
+                      <Txt label={t("f_techOverview")} value={c.technology_overview}
+                        onChange={(v) => upCtx({ technology_overview: v })} rows={3} ph={t("ph_techOverview")} />
+                      <Sel label={t("f_generative")} value={c.has_generative_component}
+                        options={[{ value: "yes", label: t("yes") }, { value: "no", label: t("no") }, { value: "unknown", label: t("unknown") }]}
                         onChange={(v) => upCtx({ has_generative_component: v })} />
-                      <Inp label="Tipi di dati di training" value={c.training_data_types}
-                        onChange={(v) => upCtx({ training_data_types: v })} ph="es. testi web, CV, immagini…" />
-                      <Sel label="Fiducia nella conformità GDPR del provider" value={c.gdpr_provider_compliance_confidence}
+                      <Inp label={t("f_trainTypes")} value={c.training_data_types}
+                        onChange={(v) => upCtx({ training_data_types: v })} ph={t("ph_trainTypes")} />
+                      <Sel label={t("f_gdprConfidence")} value={c.gdpr_provider_compliance_confidence}
                         options={hml} onChange={(v) => upCtx({ gdpr_provider_compliance_confidence: v })} />
-                      <Sel label="Dati di training rappresentativi" value={c.training_data_representative}
+                      <Sel label={t("f_trainRepresentative")} value={c.training_data_representative}
                         options={yNP} onChange={(v) => upCtx({ training_data_representative: v })} />
-                      <Sel label="Bias valutato" value={c.bias_assessed}
+                      <Sel label={t("f_biasAssessed")} value={c.bias_assessed}
                         options={yNP} onChange={(v) => upCtx({ bias_assessed: v })} />
-                      <Sel label="Qualità dei dati sufficiente" value={c.data_quality_sufficient}
+                      <Sel label={t("f_dataQuality")} value={c.data_quality_sufficient}
                         options={yNP} onChange={(v) => upCtx({ data_quality_sufficient: v })} />
-                      <Sel label="Tratta dati personali" value={c.processes_personal_data}
+                      <Sel label={t("f_processesPd")} value={c.processes_personal_data}
                         options={yN} onChange={(v) => upCtx({ processes_personal_data: v })} />
-                      <Inp label="Tipi di dati personali trattati" value={c.personal_data_types}
-                        onChange={(v) => upCtx({ personal_data_types: v })} ph="es. nome, CV, dati biometrici" />
-                      <Sel label="Trattamento GDPR conforme" value={c.gdpr_processing_compliant}
+                      <Inp label={t("f_pdTypes")} value={c.personal_data_types}
+                        onChange={(v) => upCtx({ personal_data_types: v })} ph={t("ph_pdTypes")} />
+                      <Sel label={t("f_gdprCompliant")} value={c.gdpr_processing_compliant}
                         options={yNP} onChange={(v) => upCtx({ gdpr_processing_compliant: v })} />
-                      <Sel label="Controllo sui dati in input" value={c.controls_input_data}
+                      <Sel label={t("f_controlsInput")} value={c.controls_input_data}
                         options={yN} onChange={(v) => upCtx({ controls_input_data: v })} />
-                      <Sel label="Dati in input rappresentativi" value={c.input_data_representative}
+                      <Sel label={t("f_inputRepresentative")} value={c.input_data_representative}
                         options={yNP} onChange={(v) => upCtx({ input_data_representative: v })} />
-                      <Sel label="Accuratezza accettabile" value={c.accuracy_acceptable}
+                      <Sel label={t("f_accuracy")} value={c.accuracy_acceptable}
                         options={yNP} onChange={(v) => upCtx({ accuracy_acceptable: v })} />
                     </div>
                   )}
                   {sec.id === "C" && (
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 20px" }}>
-                      <Sel label="Modifiche sostanziali pianificate" value={c.substantial_modifications_planned}
+                      <Sel label={t("f_substMods")} value={c.substantial_modifications_planned}
                         options={yN} onChange={(v) => upCtx({ substantial_modifications_planned: v })} />
-                      <Sel label="Supervisione umana assegnata" value={c.human_oversight_assigned}
+                      <Sel label={t("f_oversightAssigned")} value={c.human_oversight_assigned}
                         options={yN} onChange={(v) => upCtx({ human_oversight_assigned: v })} />
-                      <Sel label="Supervisori formati adeguatamente" value={c.oversight_persons_trained}
+                      <Sel label={t("f_oversightTrained")} value={c.oversight_persons_trained}
                         options={yNP} onChange={(v) => upCtx({ oversight_persons_trained: v })} />
-                      <Sel label="Lavoratori informati (Art. 26(7))" value={c.workers_informed}
-                        options={[{ value: "yes", label: "Sì" }, { value: "no", label: "No" }, { value: "na", label: "N/A" }]}
+                      <Sel label={t("f_workersInformed")} value={c.workers_informed}
+                        options={[{ value: "yes", label: t("yes") }, { value: "no", label: t("no") }, { value: "na", label: "N/A" }]}
                         onChange={(v) => upCtx({ workers_informed: v })} />
-                      <Sel label="Persone interessate informate" value={c.affected_persons_informed}
+                      <Sel label={t("f_affectedInformed")} value={c.affected_persons_informed}
                         options={yNP} onChange={(v) => upCtx({ affected_persons_informed: v })} />
                     </div>
                   )}
@@ -706,8 +709,8 @@ export default function FRIAPage() {
     return (
       <div>
         <div style={{ marginBottom: 20 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 2 — Sviluppo scenari e impatto</h2>
-          <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Identifica scenari tipici e worst-case. Valuta l&apos;impatto su ciascun diritto fondamentale.</p>
+          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>{t("p2_title")}</h2>
+          <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>{t("p2_sub")}</p>
         </div>
 
         {/* ── Risk Manager suggestions banner ──────────────────────────── */}
@@ -717,8 +720,7 @@ export default function FRIAPage() {
             background: "rgba(217,119,6,0.06)", border: "1px solid rgba(217,119,6,0.2)",
           }}>
             <p style={{ fontSize: 12, color: "#d97706", margin: "0 0 8px", fontWeight: 500 }}>
-              <strong>{rmScenarios.length} rischi</strong> pre-caricati dal Risk Manager.
-              Puoi aggiungerli come scenari di partenza per questa fase.
+              <strong>{rmScenarios.length} {t("rmRisksWord")}</strong> {t("rmPreloaded")}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               {rmScenarios.map((r) => (
@@ -732,7 +734,7 @@ export default function FRIAPage() {
                     borderRadius: 6, border: "1px solid rgba(217,119,6,0.3)",
                     background: "white", cursor: "pointer", color: T.amber,
                   }}>
-                  + Aggiungi scenario: {r.title}
+                  + {t("addScenarioColon")} {r.title}
                   <span style={{ marginLeft: 6, opacity: 0.6 }}>
                     ({r.likelihood} / {r.impact})
                   </span>
@@ -746,19 +748,19 @@ export default function FRIAPage() {
           <div style={{ width: 196, flexShrink: 0 }}>
             <div style={{ ...cardSt, overflow: "hidden" }}>
               <div style={{ padding: "10px 12px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>Scenari</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{t("scenariWord")}</span>
                 <button onClick={addScenario} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, background: T.text, color: "#fff", border: "none", borderRadius: 6, padding: "4px 8px", cursor: "pointer" }}>
-                  <Plus style={{ width: 11, height: 11 }} /> Nuovo
+                  <Plus style={{ width: 11, height: 11 }} /> {t("newWord")}
                 </button>
               </div>
               {doc.scenarios.length === 0 ? (
-                <div style={{ padding: "24px 12px", textAlign: "center", fontSize: 12, color: T.muted }}>Nessuno scenario</div>
+                <div style={{ padding: "24px 12px", textAlign: "center", fontSize: 12, color: T.muted }}>{t("noScenario")}</div>
               ) : (
                 doc.scenarios.map((s) => (
                   <button key={s.id} onClick={() => { setActiveScenarioId(s.id); setP2Tab("rights"); }}
                     style={{ width: "100%", padding: "10px 12px", textAlign: "left", background: activeScenarioId === s.id ? T.bg : "none", border: "none", borderBottom: `1px solid ${T.border}`, cursor: "pointer" }}>
-                    <div style={{ fontSize: 12, fontWeight: 500, color: T.text, marginBottom: 2 }}>{s.title || "Senza titolo"}</div>
-                    <div style={{ fontSize: 10, color: T.muted }}>{s.right_impacts.length} dir. · {s.type || "—"}</div>
+                    <div style={{ fontSize: 12, fontWeight: 500, color: T.text, marginBottom: 2 }}>{s.title || t("untitled")}</div>
+                    <div style={{ fontSize: 10, color: T.muted }}>{s.right_impacts.length} {t("rightsAbbrev")} · {s.type || "—"}</div>
                   </button>
                 ))
               )}
@@ -770,7 +772,7 @@ export default function FRIAPage() {
             {!activeScenario ? (
               <div style={{ ...cardSt, padding: 40, textAlign: "center" }}>
                 <AlertTriangle style={{ width: 32, height: 32, color: T.border, margin: "0 auto 12px" }} />
-                <p style={{ fontSize: 13, color: T.muted }}>Seleziona uno scenario dalla lista o creane uno nuovo</p>
+                <p style={{ fontSize: 13, color: T.muted }}>{t("selectOrCreate")}</p>
               </div>
             ) : (
               <div style={{ ...cardSt }}>
@@ -778,15 +780,15 @@ export default function FRIAPage() {
                 <div style={{ padding: "16px 20px", borderBottom: `1px solid ${T.border}` }}>
                   <div style={{ display: "flex", gap: 12, marginBottom: 10 }}>
                     <div style={{ flex: 1 }}>
-                      <label style={{ fontSize: 11, fontWeight: 500, color: T.muted, display: "block", marginBottom: 4 }}>Titolo scenario</label>
+                      <label style={{ fontSize: 11, fontWeight: 500, color: T.muted, display: "block", marginBottom: 4 }}>{t("scenarioTitle")}</label>
                       <input value={activeScenario.title} onChange={(e) => upScenario(activeScenario.id, { title: e.target.value })} style={inputSt} />
                     </div>
                     <div style={{ width: 160 }}>
-                      <label style={{ fontSize: 11, fontWeight: 500, color: T.muted, display: "block", marginBottom: 4 }}>Tipo</label>
+                      <label style={{ fontSize: 11, fontWeight: 500, color: T.muted, display: "block", marginBottom: 4 }}>{t("typeWord")}</label>
                       <select value={activeScenario.type} onChange={(e) => upScenario(activeScenario.id, { type: e.target.value as FRIAScenario["type"] })} style={inputSt}>
-                        <option value="">— tipo —</option>
-                        <option value="typical">Tipico</option>
-                        <option value="worst_case">Worst case</option>
+                        <option value="">{t("typePlaceholder")}</option>
+                        <option value="typical">{t("typeTypical")}</option>
+                        <option value="worst_case">{t("typeWorstCase")}</option>
                       </select>
                     </div>
                     <button onClick={() => delScenario(activeScenario.id)} style={{ alignSelf: "flex-end", padding: 7, borderRadius: 8, border: `1px solid ${T.redBdr}`, background: T.redBg, cursor: "pointer" }}>
@@ -794,18 +796,18 @@ export default function FRIAPage() {
                     </button>
                   </div>
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 500, color: T.muted, display: "block", marginBottom: 4 }}>Descrizione</label>
+                    <label style={{ fontSize: 11, fontWeight: 500, color: T.muted, display: "block", marginBottom: 4 }}>{t("descriptionWord")}</label>
                     <textarea value={activeScenario.description} onChange={(e) => upScenario(activeScenario.id, { description: e.target.value })} rows={2}
-                      placeholder="Descrivi lo scenario di utilizzo…" style={{ ...inputSt, resize: "vertical" }} />
+                      placeholder={t("ph_scenarioDesc")} style={{ ...inputSt, resize: "vertical" }} />
                   </div>
                 </div>
 
                 {/* Tabs */}
                 <div style={{ display: "flex", padding: "0 20px", borderBottom: `1px solid ${T.border}` }}>
-                  {([{ id: "rights", label: "Valutazione diritti" }, { id: "matrix", label: "Matrice rischi 3×3" }] as const).map((t) => (
-                    <button key={t.id} onClick={() => setP2Tab(t.id)}
-                      style={{ padding: "10px 16px", fontSize: 12, fontWeight: p2Tab === t.id ? 600 : 400, color: p2Tab === t.id ? T.text : T.muted, background: "none", border: "none", borderBottom: p2Tab === t.id ? `2px solid ${T.text}` : "2px solid transparent", cursor: "pointer" }}>
-                      {t.label}
+                  {([{ id: "rights", label: t("tabRights") }, { id: "matrix", label: t("tabMatrix") }] as const).map((tab) => (
+                    <button key={tab.id} onClick={() => setP2Tab(tab.id)}
+                      style={{ padding: "10px 16px", fontSize: 12, fontWeight: p2Tab === tab.id ? 600 : 400, color: p2Tab === tab.id ? T.text : T.muted, background: "none", border: "none", borderBottom: p2Tab === tab.id ? `2px solid ${T.text}` : "2px solid transparent", cursor: "pointer" }}>
+                      {tab.label}
                     </button>
                   ))}
                 </div>
@@ -815,7 +817,7 @@ export default function FRIAPage() {
                     {/* Catalog toggle */}
                     <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
                       <button onClick={() => setShowCatalog(v => !v)} style={{ fontSize: 11, padding: "4px 10px", borderRadius: 6, border: `1px solid ${T.border}`, background: showCatalog ? T.text : T.card, color: showCatalog ? "#fff" : T.muted, cursor: "pointer" }}>
-                        {showCatalog ? "✕ Chiudi catalogo" : "📋 Seleziona da catalogo"}
+                        {showCatalog ? t("closeCatalog") : t("selectFromCatalog")}
                       </button>
                     </div>
                     {showCatalog && (
@@ -837,7 +839,7 @@ export default function FRIAPage() {
                       return (
                         <div style={{ marginBottom: 16, padding: "10px 12px", background: T.bg, borderRadius: 8, border: `1px solid ${T.border}` }}>
                           <p style={{ fontSize: 10, fontWeight: 700, color: T.text, textTransform: "uppercase" as const, letterSpacing: "0.5px", marginBottom: 8 }}>
-                            Prioritizzazione impatti — likelihood × severità
+                            {t("prioritization")}
                           </p>
                           {sorted.map((ri, idx) => {
                             const r = FUNDAMENTAL_RIGHTS.find(f => f.id === ri.right_id);
@@ -885,7 +887,7 @@ export default function FRIAPage() {
                                       {checked && (
                                         <button onClick={() => setOpenRights((prev) => { const n = new Set(prev); n.has(right.id) ? n.delete(right.id) : n.add(right.id); return n; })}
                                           style={{ fontSize: 10, color: T.text, background: "none", border: "none", cursor: "pointer", padding: "2px 4px" }}>
-                                          {openAssess ? "chiudi ↑" : "valuta ↓"}
+                                          {openAssess ? t("collapseUp") : t("assessDown")}
                                         </button>
                                       )}
                                     </div>
@@ -896,14 +898,14 @@ export default function FRIAPage() {
                                           const sectorHints = Object.entries(right.sector_risks ?? {}).filter(([, v]) => v && v.trim().length > 0);
                                           if (sectorHints.length === 0) return null;
                                           const sectorLabel: Record<string, string> = {
-                                            biometrics: "Biometria", education: "Educazione",
-                                            employment: "Occupazione/Lavoro", essential_services: "Servizi essenziali",
-                                            law_enforcement: "Forze dell'ordine", migration: "Migrazione", justice: "Giustizia",
+                                            biometrics: t("sec_biometrics"), education: t("sec_education"),
+                                            employment: t("sec_employment"), essential_services: t("sec_essential"),
+                                            law_enforcement: t("sec_law"), migration: t("sec_migration"), justice: t("sec_justice"),
                                           };
                                           return (
                                             <div style={{ marginBottom: 14, padding: "10px 12px", borderRadius: 7, background: "rgba(0,0,0,0.04)", border: `1px solid ${T.border}` }}>
                                               <div style={{ fontSize: 10, fontWeight: 600, color: T.text, textTransform: "uppercase" as const, letterSpacing: "0.5px", marginBottom: 7 }}>
-                                                Rischi documentati ECNL/DIHR per settore
+                                                {t("ecnlSectorRisks")}
                                               </div>
                                               <div style={{ display: "flex", flexDirection: "column" as const, gap: 4 }}>
                                                 {sectorHints.map(([sector, desc]) => (
@@ -933,104 +935,104 @@ export default function FRIAPage() {
                                           }}
                                         />
                                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
-                                          <Sel label="Entità interferenza" value={impact.severity.extent_of_interference}
+                                          <Sel label={t("sev_extent")} value={impact.severity.extent_of_interference}
                                             options={[
-                                              { value: "very_serious", label: "Molto grave (nucleo del diritto)" },
-                                              { value: "serious", label: "Grave" },
-                                              { value: "moderate", label: "Moderata" },
-                                              { value: "minor", label: "Minore" },
-                                              { value: "none", label: "Nessuna" },
+                                              { value: "very_serious", label: t("ext_verySerious") },
+                                              { value: "serious", label: t("ext_serious") },
+                                              { value: "moderate", label: t("ext_moderate") },
+                                              { value: "minor", label: t("ext_minor") },
+                                              { value: "none", label: t("ext_none") },
                                             ]}
                                             onChange={(v) => upSeverity(activeScenario.id, right.id, { extent_of_interference: v as FRIASeverityAssessment["extent_of_interference"] })} />
-                                          <Sel label="Portata (scope)" value={impact.severity.scope_of_impact}
+                                          <Sel label={t("sev_scope")} value={impact.severity.scope_of_impact}
                                             options={[
-                                              { value: "systemic", label: "Sistemico" },
-                                              { value: "large_group", label: "Gruppo esteso" },
-                                              { value: "group", label: "Gruppo" },
-                                              { value: "individual", label: "Individuale" },
+                                              { value: "systemic", label: t("scope_systemic") },
+                                              { value: "large_group", label: t("scope_large") },
+                                              { value: "group", label: t("scope_group") },
+                                              { value: "individual", label: t("scope_individual") },
                                             ]}
                                             onChange={(v) => upSeverity(activeScenario.id, right.id, { scope_of_impact: v as FRIASeverityAssessment["scope_of_impact"] })} />
-                                          <Sel label="Persone interessate" value={impact.severity.persons_affected}
+                                          <Sel label={t("sev_persons")} value={impact.severity.persons_affected}
                                             options={[
-                                              { value: "very_many", label: "Moltissime" },
-                                              { value: "many", label: "Molte" },
-                                              { value: "few", label: "Poche" },
+                                              { value: "very_many", label: t("pers_veryMany") },
+                                              { value: "many", label: t("pers_many") },
+                                              { value: "few", label: t("pers_few") },
                                             ]}
                                             onChange={(v) => upSeverity(activeScenario.id, right.id, { persons_affected: v as FRIASeverityAssessment["persons_affected"] })} />
-                                          <Sel label="Gravità" value={impact.severity.gravity}
+                                          <Sel label={t("sev_gravity")} value={impact.severity.gravity}
                                             options={[
-                                              { value: "critical", label: "Critica" },
-                                              { value: "high", label: "Alta" },
-                                              { value: "medium", label: "Media" },
-                                              { value: "low", label: "Bassa" },
+                                              { value: "critical", label: t("grav_critical") },
+                                              { value: "high", label: t("grav_high") },
+                                              { value: "medium", label: t("grav_medium") },
+                                              { value: "low", label: t("grav_low") },
                                             ]}
                                             onChange={(v) => upSeverity(activeScenario.id, right.id, { gravity: v as FRIASeverityAssessment["gravity"] })} />
-                                          <Sel label="Reversibilità" value={impact.severity.irreversibility}
+                                          <Sel label={t("sev_reversibility")} value={impact.severity.irreversibility}
                                             options={[
-                                              { value: "irreversible", label: "Irreversibile" },
-                                              { value: "partially", label: "Parzialmente reversibile" },
-                                              { value: "reversible", label: "Reversibile" },
+                                              { value: "irreversible", label: t("rev_irreversible") },
+                                              { value: "partially", label: t("rev_partial") },
+                                              { value: "reversible", label: t("rev_reversible") },
                                             ]}
                                             onChange={(v) => upSeverity(activeScenario.id, right.id, { irreversibility: v as FRIASeverityAssessment["irreversibility"] })} />
                                           <div style={{ marginBottom: 12 }}>
-                                            <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>Severità calcolata</label>
+                                            <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>{t("computedSeverity")}</label>
                                             <div style={{ padding: "7px 0" }}>
                                               {impact.severity.computed_severity
                                                 ? <Badge label={impact.severity.computed_severity.toUpperCase()} color={riskColorFor(impact.severity.computed_severity)} />
-                                                : <span style={{ fontSize: 12, color: T.faint }}>— non calcolata —</span>}
+                                                : <span style={{ fontSize: 12, color: T.faint }}>{t("notComputed")}</span>}
                                             </div>
                                           </div>
-                                          <Sel label="Probabilità" value={impact.likelihood.likelihood}
+                                          <Sel label={t("sev_likelihood")} value={impact.likelihood.likelihood}
                                             options={[
-                                              { value: "almost_certain", label: "Quasi certa" },
-                                              { value: "likely", label: "Probabile" },
-                                              { value: "possible", label: "Possibile" },
-                                              { value: "negligible", label: "Trascurabile" },
+                                              { value: "almost_certain", label: t("lik_almostCertain") },
+                                              { value: "likely", label: t("lik_likely") },
+                                              { value: "possible", label: t("lik_possible") },
+                                              { value: "negligible", label: t("lik_negligible") },
                                             ]}
                                             onChange={(v) => upLikelihood(activeScenario.id, right.id, v)} />
                                           <div style={{ marginBottom: 12 }}>
-                                            <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>Priorità calcolata</label>
+                                            <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>{t("computedPriority")}</label>
                                             <div style={{ padding: "7px 0" }}>
                                               {impact.likelihood.computed_priority
                                                 ? <Badge label={impact.likelihood.computed_priority.toUpperCase()} color={riskColorFor(impact.likelihood.computed_priority)} />
                                                 : <span style={{ fontSize: 12, color: T.faint }}>— non calcolata —</span>}
                                             </div>
                                           </div>
-                                          <Sel label="Rischio residuo" value={impact.residual_risk}
-                                            options={[{ value: "acceptable", label: "Accettabile" }, { value: "review", label: "Da rivedere" }, { value: "unacceptable", label: "Inaccettabile" }]}
+                                          <Sel label={t("sev_residual")} value={impact.residual_risk}
+                                            options={[{ value: "acceptable", label: t("res_acceptable") }, { value: "review", label: t("res_review") }, { value: "unacceptable", label: t("res_unacceptable") }]}
                                             onChange={(v) => upRightImpact(activeScenario.id, right.id, { residual_risk: v as FRIARightImpact["residual_risk"] })} />
                                         </div>
-                                        <Txt label="Note" value={impact.notes} onChange={(v) => upRightImpact(activeScenario.id, right.id, { notes: v })} rows={2} ph="Osservazioni specifiche…" />
+                                        <Txt label={t("notesWord")} value={impact.notes} onChange={(v) => upRightImpact(activeScenario.id, right.id, { notes: v })} rows={2} ph={t("ph_notes")} />
                                         {/* Mitigations */}
                                         <div style={{ marginTop: 4 }}>
                                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                                            <span style={{ fontSize: 11, fontWeight: 600, color: T.text }}>Mitigazioni ({impact.mitigations.length})</span>
+                                            <span style={{ fontSize: 11, fontWeight: 600, color: T.text }}>{t("mitigationsWord")} ({impact.mitigations.length})</span>
                                             <button onClick={() => addMitigation(activeScenario.id, right.id)} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, background: T.text, color: "#fff", border: "none", borderRadius: 6, padding: "4px 8px", cursor: "pointer" }}>
-                                              <Plus style={{ width: 10, height: 10 }} /> Aggiungi
+                                              <Plus style={{ width: 10, height: 10 }} /> {t("addWord")}
                                             </button>
                                           </div>
                                           {impact.mitigations.map((m) => (
                                             <div key={m.id} style={{ marginBottom: 8, padding: 10, background: T.card, border: `1px solid ${T.border}`, borderRadius: 8 }}>
                                               <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
-                                                <input value={m.description} onChange={(e) => upMitigation(activeScenario.id, right.id, m.id, { description: e.target.value })} placeholder="Descrizione misura…" style={{ ...inputSt, flex: 1 }} />
+                                                <input value={m.description} onChange={(e) => upMitigation(activeScenario.id, right.id, m.id, { description: e.target.value })} placeholder={t("ph_measureDesc")} style={{ ...inputSt, flex: 1 }} />
                                                 <button onClick={() => delMitigation(activeScenario.id, right.id, m.id)} style={{ padding: 4, border: "none", background: "none", cursor: "pointer" }}>
                                                   <Trash2 style={{ width: 12, height: 12, color: T.red }} />
                                                 </button>
                                               </div>
                                               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 130px 1fr", gap: 6 }}>
                                                 <select value={m.category} onChange={(e) => upMitigation(activeScenario.id, right.id, m.id, { category: e.target.value as FRIAMitigationMeasure["category"] })} style={inputSt}>
-                                                  <option value="">Categoria</option>
-                                                  <option value="organizational">Organizzativa</option>
-                                                  <option value="technical">Tecnica</option>
-                                                  <option value="contractual">Contrattuale</option>
+                                                  <option value="">{t("categoryWord")}</option>
+                                                  <option value="organizational">{t("cat_organizational")}</option>
+                                                  <option value="technical">{t("cat_technical")}</option>
+                                                  <option value="contractual">{t("cat_contractual")}</option>
                                                 </select>
-                                                <input value={m.responsible} onChange={(e) => upMitigation(activeScenario.id, right.id, m.id, { responsible: e.target.value })} placeholder="Responsabile" style={inputSt} />
+                                                <input value={m.responsible} onChange={(e) => upMitigation(activeScenario.id, right.id, m.id, { responsible: e.target.value })} placeholder={t("responsibleWord")} style={inputSt} />
                                                 <input type="date" value={m.deadline} onChange={(e) => upMitigation(activeScenario.id, right.id, m.id, { deadline: e.target.value })} style={inputSt} />
                                                 <select value={m.status} onChange={(e) => upMitigation(activeScenario.id, right.id, m.id, { status: e.target.value as FRIAMitigationMeasure["status"] })} style={inputSt}>
-                                                  <option value="">Stato</option>
-                                                  <option value="planned">Pianificata</option>
-                                                  <option value="implemented">Implementata</option>
-                                                  <option value="verified">Verificata</option>
+                                                  <option value="">{t("statusWord")}</option>
+                                                  <option value="planned">{t("st_planned")}</option>
+                                                  <option value="implemented">{t("st_implemented")}</option>
+                                                  <option value="verified">{t("st_verified")}</option>
                                                 </select>
                                               </div>
                                             </div>
@@ -1040,7 +1042,7 @@ export default function FRIAPage() {
                                         {impact.severity.computed_severity && (
                                           <div style={{ marginTop: 8, padding: "8px 10px", background: T.bg, borderRadius: 6, border: `1px solid ${T.border}` }}>
                                             <p style={{ fontSize: 10, fontWeight: 600, color: T.text, marginBottom: 4 }}>
-                                              What-If: impatto residuo stimato
+                                              {t("whatIfResidual")}
                                             </p>
                                             {(() => {
                                               const implemented = impact.mitigations.filter(m => m.status === "implemented" || m.status === "verified").length;
@@ -1058,10 +1060,10 @@ export default function FRIAPage() {
                                                   {improved && <>
                                                     <span style={{ color: T.faint }}>→</span>
                                                     <span style={{ color: sevColors[residual] ?? T.muted, fontWeight: 600 }}>{residual.toUpperCase()}</span>
-                                                    <span style={{ color: T.green, fontSize: 10 }}>({implemented} mitig. attive)</span>
+                                                    <span style={{ color: T.green, fontSize: 10 }}>({implemented} {t("activeMitigations")})</span>
                                                   </>}
                                                   {!improved && (
-                                                    <span style={{ color: T.faint, fontSize: 10 }}>Nessuna mitigazione attiva — severità invariata</span>
+                                                    <span style={{ color: T.faint, fontSize: 10 }}>{t("noActiveMitigation")}</span>
                                                   )}
                                                 </div>
                                               );
@@ -1084,17 +1086,17 @@ export default function FRIAPage() {
                 {p2Tab === "matrix" && (
                   <div style={{ padding: "16px 20px" }}>
                     {activeScenario.right_impacts.length === 0 ? (
-                      <p style={{ fontSize: 13, color: T.muted, textAlign: "center", padding: 32 }}>Nessun diritto valutato. Usa il tab &quot;Valutazione diritti&quot; per iniziare.</p>
+                      <p style={{ fontSize: 13, color: T.muted, textAlign: "center", padding: 32 }}>{t("noRightAssessed")}</p>
                     ) : (
                       <div>
-                        <p style={{ fontSize: 12, color: T.muted, marginBottom: 16 }}>Matrice probabilità × severità — scenario: <strong>{activeScenario.title}</strong></p>
+                        <p style={{ fontSize: 12, color: T.muted, marginBottom: 16 }}>{t("matrixLabel")}: <strong>{activeScenario.title}</strong></p>
                         <div style={{ display: "grid", gridTemplateColumns: "80px 1fr 1fr 1fr", gap: 3 }}>
                           <div style={{ fontSize: 10, color: T.faint, textAlign: "center" }} />
-                          {["Alta severità", "Media severità", "Bassa severità"].map((h) => (
+                          {[t("colHighSev"), t("colMedSev"), t("colLowSev")].map((h) => (
                             <div key={h} style={{ padding: "6px 8px", fontSize: 11, fontWeight: 600, color: T.muted, textAlign: "center", background: T.bg, borderRadius: 6 }}>{h}</div>
                           ))}
                           {(["high", "medium", "low"] as const).map((lik) => {
-                            const rowLabel = lik === "high" ? "Alta prob." : lik === "medium" ? "Media prob." : "Bassa prob.";
+                            const rowLabel = lik === "high" ? t("rowHighProb") : lik === "medium" ? t("rowMedProb") : t("rowLowProb");
                             return [
                               <div key={`lbl-${lik}`} style={{ padding: "8px", fontSize: 11, fontWeight: 600, color: T.muted, background: T.bg, borderRadius: 6, display: "flex", alignItems: "center" }}>{rowLabel}</div>,
                               ...(["high", "medium", "low"] as const).map((sev) => {
@@ -1136,8 +1138,8 @@ export default function FRIAPage() {
     return (
       <div>
         <div style={{ marginBottom: 20 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 3 — Decisione di deployment</h2>
-          <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Valuta gli impatti residui, determina la raccomandazione e genera la sintesi pubblica.</p>
+          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>{t("p3_title")}</h2>
+          <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>{t("p3_sub")}</p>
         </div>
         <FriaGapCheck
           doc={doc}
@@ -1160,14 +1162,11 @@ export default function FRIAPage() {
               <AlertTriangle style={{ width: 16, height: 16, color: T.red, flexShrink: 0, marginTop: 1 }} />
               <div>
                 <div style={{ fontSize: 12, fontWeight: 600, color: T.red, marginBottom: 4 }}>
-                  Diritti assoluti impattati — nessun bilanciamento ammissibile
+                  {t("absoluteRightsTitle")}
                 </div>
                 <div style={{ fontSize: 12, color: "#7f1d1d", lineHeight: 1.5 }}>
-                  {names.join(", ")} sono diritti assoluti ai sensi della Carta UE e della CEDU.
-                  La loro limitazione non può essere giustificata da considerazioni di proporzionalità o necessità
-                  (cfr. ECNL/DIHR Guide to FRIA, Dec 2025, §3.2). Se il sistema AI incide su questi diritti in modo significativo,
-                  la raccomandazione deve essere <strong>non autorizzato al deployment</strong> oppure le misure di mitigazione
-                  devono eliminare completamente l&apos;impatto.
+                  {names.join(", ")} {t("absoluteRightsBody1")}
+                  {t("absoluteRightsBody2")} <strong>{t("absoluteRightsBodyBold")}</strong> {t("absoluteRightsBody3")}
                 </div>
               </div>
             </div>
@@ -1176,20 +1175,20 @@ export default function FRIAPage() {
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
           <div style={{ ...cardSt, padding: 20 }}>
-            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 16px" }}>Impatti e proporzionalità</h3>
-            <Txt label="Impatti residui dopo mitigazione" value={d.remaining_impacts_after_mitigation}
+            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 16px" }}>{t("impactsProportionality")}</h3>
+            <Txt label={t("f_remainingImpacts")} value={d.remaining_impacts_after_mitigation}
               onChange={(v) => upDeploy({ remaining_impacts_after_mitigation: v })} rows={4}
-              ph="Descrivi gli impatti che rimangono dopo le misure di mitigazione…" />
-            <Txt label="Necessità e proporzionalità (diritti qualificati)" value={d.qualified_rights_necessity_proportionality}
+              ph={t("ph_remainingImpacts")} />
+            <Txt label={t("f_necessity")} value={d.qualified_rights_necessity_proportionality}
               onChange={(v) => upDeploy({ qualified_rights_necessity_proportionality: v })} rows={4}
-              ph="Per i diritti non assoluti: perché la limitazione è necessaria e proporzionata?" />
+              ph={t("ph_necessity")} />
           </div>
           <div style={{ ...cardSt, padding: 20 }}>
-            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 16px" }}>Raccomandazione</h3>
+            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 16px" }}>{t("recommendationWord")}</h3>
             {[
-              { value: "deploy",                label: "✅ Autorizzato al deployment",        color: T.green, bg: T.greenBg, bdr: T.greenBdr },
-              { value: "deploy_with_conditions", label: "⚠ Autorizzato con condizioni",        color: T.amber, bg: T.amberBg, bdr: T.amberBdr },
-              { value: "do_not_deploy",          label: "❌ Non autorizzato al deployment",    color: T.red,   bg: T.redBg,   bdr: T.redBdr   },
+              { value: "deploy",                label: t("rec_deploy"),        color: T.green, bg: T.greenBg, bdr: T.greenBdr },
+              { value: "deploy_with_conditions", label: t("rec_conditions"),        color: T.amber, bg: T.amberBg, bdr: T.amberBdr },
+              { value: "do_not_deploy",          label: t("rec_noDeploy"),    color: T.red,   bg: T.redBg,   bdr: T.redBdr   },
             ].map((opt) => (
               <button key={opt.value} onClick={() => upDeploy({ recommendation: opt.value })}
                 style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", marginBottom: 8, borderRadius: 8, border: `1px solid ${d.recommendation === opt.value ? opt.bdr : T.border}`, background: d.recommendation === opt.value ? opt.bg : T.card, cursor: "pointer", textAlign: "left" }}>
@@ -1197,16 +1196,16 @@ export default function FRIAPage() {
               </button>
             ))}
             {d.recommendation === "deploy_with_conditions" && (
-              <Txt label="Condizioni obbligatorie" value={d.conditions} onChange={(v) => upDeploy({ conditions: v })} rows={3}
-                ph="Elenca le condizioni da soddisfare prima del deployment…" />
+              <Txt label={t("f_conditions")} value={d.conditions} onChange={(v) => upDeploy({ conditions: v })} rows={3}
+                ph={t("ph_conditions")} />
             )}
-            <Txt label="Giustificazione della decisione" value={d.decision_justification}
+            <Txt label={t("f_justification")} value={d.decision_justification}
               onChange={(v) => upDeploy({ decision_justification: v })} rows={4}
-              ph="Motivazione dettagliata della decisione…" />
+              ph={t("ph_justification")} />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <Inp label="Approvato da" value={d.approver_name} onChange={(v) => upDeploy({ approver_name: v })} ph="Nome e Cognome" />
+              <Inp label={t("f_approvedBy")} value={d.approver_name} onChange={(v) => upDeploy({ approver_name: v })} ph={t("ph_fullName")} />
               <div style={{ marginBottom: 12 }}>
-                <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>Data approvazione</label>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>{t("approvalDate")}</label>
                 <input type="date" value={d.approver_date} onChange={(e) => upDeploy({ approver_date: e.target.value })} style={inputSt} />
               </div>
             </div>
@@ -1217,31 +1216,31 @@ export default function FRIAPage() {
         <div style={{ ...cardSt, padding: 20, marginBottom: 20 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
             <div>
-              <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 2px" }}>Sintesi pubblica obbligatoria (Art. 27)</h3>
+              <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 2px" }}>{t("publicSummaryTitle")}</h3>
               {aiSummaryIsFromAI && (
                 <span style={{ fontSize: 10, fontWeight: 700, color: T.amber, background: T.amberBg, padding: "1px 7px", borderRadius: 9999 }}>
-                  ✦ AI — verifica e conferma
+                  ✦ {t("aiVerifyConfirm")}
                 </span>
               )}
             </div>
             <div style={{ display: "flex", gap: 8 }}>
               <button
-                onClick={() => { const s = generatePublicSummary(doc); upDeploy({ public_summary: s }); setAiSummaryIsFromAI(false); showToast("Sintesi generata"); }}
+                onClick={() => { const s = generatePublicSummary(doc); upDeploy({ public_summary: s }); setAiSummaryIsFromAI(false); showToast(t("toastSummaryGenerated")); }}
                 style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, background: T.bg, color: T.text, border: `1px solid ${T.border}`, borderRadius: 8, padding: "7px 14px", cursor: "pointer" }}
               >
-                <FileText style={{ width: 13, height: 13 }} /> Genera sintesi
+                <FileText style={{ width: 13, height: 13 }} /> {t("generateSummary")}
               </button>
               <button
                 onClick={handleAiPublicSummary}
                 disabled={loadingAiSummary}
                 style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, background: loadingAiSummary ? T.bg : T.text, color: loadingAiSummary ? T.muted : "#fff", border: "none", borderRadius: 8, padding: "7px 14px", cursor: loadingAiSummary ? "default" : "pointer" }}
               >
-                {loadingAiSummary ? "⟳ Generazione AI…" : "✦ Bozza AI"}
+                {loadingAiSummary ? t("aiGenerating") : t("aiDraft")}
               </button>
             </div>
           </div>
           <textarea value={d.public_summary} onChange={(e) => upDeploy({ public_summary: e.target.value })} rows={14}
-            placeholder="Clicca 'Genera sintesi' per creare automaticamente il testo basato sui dati inseriti…"
+            placeholder={t("ph_publicSummary")}
             style={{ ...inputSt, resize: "vertical", fontFamily: "monospace", fontSize: 11, lineHeight: 1.6 }} />
         </div>
 
@@ -1251,12 +1250,10 @@ export default function FRIAPage() {
             <span style={{ fontSize: 16, flexShrink: 0 }}>⚠</span>
             <div>
               <div style={{ fontSize: 12, fontWeight: 600, color: T.amber, marginBottom: 4 }}>
-                Promemoria Art. 27(2) — Notifica all&apos;autorità di vigilanza
+                {t("art27Reminder")}
               </div>
               <div style={{ fontSize: 12, color: T.text, lineHeight: 1.5 }}>
-                La raccomandazione non è &quot;deploy&quot; incondizionato. Ai sensi dell&apos;Art. 27(2) AI Act, il deployer
-                ha l&apos;obbligo di notificare l&apos;autorità nazionale di vigilanza del mercato e documentare la notifica
-                nella FRIA.
+                {t("art27ReminderBody")}
               </div>
             </div>
           </div>
@@ -1265,16 +1262,16 @@ export default function FRIAPage() {
         {/* Rischi correlati DPIA ⇄ FRIA */}
         <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)", padding: 20, marginBottom: 16 }}>
           <p style={{ fontSize: 13, fontWeight: 600, color: "#0D1016", margin: "0 0 6px" }}>
-            Rischi correlati DPIA ⇄ FRIA
+            {t("correlatedRisksTitle")}
           </p>
           <p style={{ fontSize: 11, color: "rgba(0,0,0,0.40)", margin: "0 0 14px" }}>
-            Rischi generati automaticamente dalla correlazione WP29 / DIHR. Applica le mitigazioni al Risk Manager.
+            {t("correlatedRisksSub")}
           </p>
           <CorrelatedRisksPanel />
         </div>
 
         {/* SignOff */}
-        <SignOffPanel toolKey="fria" toolLabel="FRIA Art. 27" />
+        <SignOffPanel toolKey="fria" toolLabel={t("signOffLabel")} />
       </div>
     );
   }
@@ -1285,8 +1282,8 @@ export default function FRIAPage() {
     return (
       <div>
         <div style={{ marginBottom: 20 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 4 — Piano di monitoraggio</h2>
-          <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Definisci cosa monitorare, i trigger per l&apos;aggiornamento e mantieni lo storico delle revisioni.</p>
+          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>{t("p4_title")}</h2>
+          <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>{t("p4_sub")}</p>
         </div>
 
         {/* Staleness warning */}
@@ -1295,22 +1292,21 @@ export default function FRIAPage() {
             <span style={{ fontSize: 16, flexShrink: 0 }}>⚠</span>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: T.amber, marginBottom: 4 }}>
-                FRIA da rivedere — le circostanze iniziali sono cambiate
+                {t("staleTitle")}
               </div>
               <div style={{ fontSize: 12, color: T.text, lineHeight: 1.5, marginBottom: 8 }}>
-                I dati di input (sistema, contesto, persone interessate) sono cambiati rispetto all&apos;ultima firma.
-                Verifica che la valutazione degli impatti e le misure di mitigazione siano ancora valide.
+                {t("staleBody")}
               </div>
               <button
                 onClick={() => {
                   const hash = computeFriaHash(doc);
                   writeToStorage("friaStaleness", { hash, savedAt: new Date().toISOString() });
                   setStalenessWarning(false);
-                  showToast("Baseline aggiornata");
+                  showToast(t("toastBaselineUpdated"));
                 }}
                 style={{ fontSize: 11, fontWeight: 600, padding: "4px 12px", borderRadius: 6, border: "none", background: T.text, color: "#fff", cursor: "pointer" }}
               >
-                Segna come rivisto — salva nuova baseline
+                {t("markReviewed")}
               </button>
             </div>
           </div>
@@ -1319,25 +1315,25 @@ export default function FRIAPage() {
         {/* Monitoring items */}
         <div style={{ ...cardSt, padding: 20, marginBottom: 16 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>Elementi da monitorare</h3>
+            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>{t("monItemsTitle")}</h3>
             <button onClick={addMonItem} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, background: T.text, color: "#fff", border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer" }}>
-              <Plus style={{ width: 11, height: 11 }} /> Aggiungi
+              <Plus style={{ width: 11, height: 11 }} /> {t("addWord")}
             </button>
           </div>
           {mon.items.length === 0 ? (
-            <p style={{ fontSize: 12, color: T.muted, padding: "8px 0" }}>Nessun elemento di monitoraggio definito.</p>
+            <p style={{ fontSize: 12, color: T.muted, padding: "8px 0" }}>{t("noMonItems")}</p>
           ) : (
             <div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 140px 160px 32px", gap: 8, marginBottom: 6 }}>
-                {["Cosa monitorare", "Frequenza", "Responsabile", ""].map((h) => (
+                {[t("colWhatMonitor"), t("colFrequency"), t("responsibleWord"), ""].map((h) => (
                   <div key={h} style={{ fontSize: 11, fontWeight: 600, color: T.muted }}>{h}</div>
                 ))}
               </div>
               {mon.items.map((item) => (
                 <div key={item.id} style={{ display: "grid", gridTemplateColumns: "1fr 140px 160px 32px", gap: 8, marginBottom: 6 }}>
-                  <input value={item.what} onChange={(e) => upMonItem(item.id, { what: e.target.value })} placeholder="es. Tasso di errore, bias metrics…" style={inputSt} />
-                  <input value={item.frequency} onChange={(e) => upMonItem(item.id, { frequency: e.target.value })} placeholder="es. mensile" style={inputSt} />
-                  <input value={item.responsible} onChange={(e) => upMonItem(item.id, { responsible: e.target.value })} placeholder="es. DPO" style={inputSt} />
+                  <input value={item.what} onChange={(e) => upMonItem(item.id, { what: e.target.value })} placeholder={t("ph_whatMonitor")} style={inputSt} />
+                  <input value={item.frequency} onChange={(e) => upMonItem(item.id, { frequency: e.target.value })} placeholder={t("ph_monthly")} style={inputSt} />
+                  <input value={item.responsible} onChange={(e) => upMonItem(item.id, { responsible: e.target.value })} placeholder={t("ph_dpo")} style={inputSt} />
                   <button onClick={() => delMonItem(item.id)} style={{ padding: 7, border: "none", background: "none", cursor: "pointer" }}>
                     <Trash2 style={{ width: 13, height: 13, color: T.red }} />
                   </button>
@@ -1349,12 +1345,12 @@ export default function FRIAPage() {
 
         {/* Update triggers */}
         <div style={{ ...cardSt, padding: 20, marginBottom: 16 }}>
-          <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 14px" }}>Trigger per aggiornamento FRIA</h3>
+          <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 14px" }}>{t("triggersTitle")}</h3>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
-            {DEFAULT_TRIGGERS.map((t) => (
-              <label key={t} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", borderRadius: 7, cursor: "pointer", background: mon.update_triggers.includes(t) ? "rgba(0,0,0,0.04)" : "none" }}>
-                <input type="checkbox" checked={mon.update_triggers.includes(t)} onChange={() => toggleTrigger(t)} style={{ cursor: "pointer" }} />
-                <span style={{ fontSize: 12, color: T.text }}>{t}</span>
+            {DEFAULT_TRIGGERS.map((trg) => (
+              <label key={trg} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", borderRadius: 7, cursor: "pointer", background: mon.update_triggers.includes(trg) ? "rgba(0,0,0,0.04)" : "none" }}>
+                <input type="checkbox" checked={mon.update_triggers.includes(trg)} onChange={() => toggleTrigger(trg)} style={{ cursor: "pointer" }} />
+                <span style={{ fontSize: 12, color: T.text }}>{trg}</span>
               </label>
             ))}
           </div>
@@ -1363,23 +1359,23 @@ export default function FRIAPage() {
         {/* Update history */}
         <div style={{ ...cardSt, padding: 20 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>Storico aggiornamenti</h3>
+            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>{t("updateHistoryTitle")}</h3>
             <button onClick={addUpdateRecord} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, background: T.text, color: "#fff", border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer" }}>
-              <Plus style={{ width: 11, height: 11 }} /> Nuovo record
+              <Plus style={{ width: 11, height: 11 }} /> {t("newRecord")}
             </button>
           </div>
           {mon.update_history.length === 0 ? (
-            <p style={{ fontSize: 12, color: T.muted }}>Nessuna revisione registrata.</p>
+            <p style={{ fontSize: 12, color: T.muted }}>{t("noRevision")}</p>
           ) : (
             mon.update_history.map((rec) => (
               <div key={rec.id} style={{ marginBottom: 10, padding: 14, background: T.bg, borderRadius: 8, border: `1px solid ${T.border}` }}>
                 <div style={{ display: "grid", gridTemplateColumns: "140px 1fr 1fr", gap: 8, marginBottom: 8 }}>
                   <input type="date" value={rec.date} onChange={(e) => upUpdateRecord(rec.id, { date: e.target.value })} style={inputSt} />
-                  <input value={rec.reason} onChange={(e) => upUpdateRecord(rec.id, { reason: e.target.value })} placeholder="Motivo aggiornamento" style={inputSt} />
-                  <input value={rec.updater} onChange={(e) => upUpdateRecord(rec.id, { updater: e.target.value })} placeholder="Redatto da" style={inputSt} />
+                  <input value={rec.reason} onChange={(e) => upUpdateRecord(rec.id, { reason: e.target.value })} placeholder={t("ph_updateReason")} style={inputSt} />
+                  <input value={rec.updater} onChange={(e) => upUpdateRecord(rec.id, { updater: e.target.value })} placeholder={t("ph_draftedBy")} style={inputSt} />
                 </div>
                 <textarea value={rec.summary} onChange={(e) => upUpdateRecord(rec.id, { summary: e.target.value })} rows={2}
-                  placeholder="Sintesi delle modifiche apportate…" style={{ ...inputSt, resize: "vertical" }} />
+                  placeholder={t("ph_changeSummary")} style={{ ...inputSt, resize: "vertical" }} />
               </div>
             ))
           )}
@@ -1393,8 +1389,8 @@ export default function FRIAPage() {
     return (
       <div>
         <div style={{ marginBottom: 20 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>Fase 5 — Stakeholder e coinvolgimento</h2>
-          <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>Mappa i portatori di interesse e documenta il processo di consultazione.</p>
+          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>{t("p5_title")}</h2>
+          <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>{t("p5_sub")}</p>
         </div>
 
         {/* Impatti ad alto rischio che richiedono validazione stakeholder */}
@@ -1409,14 +1405,14 @@ export default function FRIAPage() {
           return (
             <div style={{ marginBottom: 16, padding: "14px 16px", borderRadius: 10, background: T.card, border: `1px solid ${T.border}`, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Impatti ad alto rischio — validazione stakeholder</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{t("highRiskValidation")}</span>
                 {hasEngagement
-                  ? <span style={{ fontSize: 10, fontWeight: 700, color: T.green, background: T.greenBg, padding: "2px 8px", borderRadius: 9999 }}>✓ Engagement documentato</span>
-                  : <span style={{ fontSize: 10, fontWeight: 700, color: T.amber, background: T.amberBg, padding: "2px 8px", borderRadius: 9999 }}>Consultazione raccomandata</span>
+                  ? <span style={{ fontSize: 10, fontWeight: 700, color: T.green, background: T.greenBg, padding: "2px 8px", borderRadius: 9999 }}>✓ {t("engagementDocumented")}</span>
+                  : <span style={{ fontSize: 10, fontWeight: 700, color: T.amber, background: T.amberBg, padding: "2px 8px", borderRadius: 9999 }}>{t("consultationRecommended")}</span>
                 }
               </div>
               <p style={{ fontSize: 12, color: T.muted, margin: "0 0 10px", lineHeight: 1.4 }}>
-                {highImpacts.length} impatto/i ad alta severità identificati nella Fase 2. Documenta le consultazioni nel log qui sotto per validare queste valutazioni.
+                {highImpacts.length} {t("highSevIdentified")}
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {highImpacts.slice(0, 5).map((imp, i) => {
@@ -1424,15 +1420,15 @@ export default function FRIAPage() {
                   return (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderRadius: 6, background: imp.severity === "critical" ? T.redBg : T.amberBg, border: `1px solid ${imp.severity === "critical" ? T.redBdr : T.amberBdr}` }}>
                       <span style={{ fontSize: 11, fontWeight: 700, color: imp.severity === "critical" ? T.red : T.amber, minWidth: 60 }}>
-                        {imp.severity === "critical" ? "CRITICO" : "ALTO"}
+                        {imp.severity === "critical" ? t("criticalWord") : t("highWord")}
                       </span>
                       <span style={{ fontSize: 12, color: T.text }}>{rightName}</span>
-                      <span style={{ fontSize: 11, color: T.muted }}>— {imp.scenarioTitle || "Scenario"}</span>
+                      <span style={{ fontSize: 11, color: T.muted }}>— {imp.scenarioTitle || t("scenarioWord")}</span>
                     </div>
                   );
                 })}
                 {highImpacts.length > 5 && (
-                  <p style={{ fontSize: 11, color: T.faint, margin: 0 }}>+ altri {highImpacts.length - 5} impatti</p>
+                  <p style={{ fontSize: 11, color: T.faint, margin: 0 }}>+ {t("otherWord")} {highImpacts.length - 5} {t("impactsWord")}</p>
                 )}
               </div>
             </div>
@@ -1442,38 +1438,38 @@ export default function FRIAPage() {
         {/* Stakeholders */}
         <div style={{ ...cardSt, padding: 20, marginBottom: 16 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>Stakeholder ({doc.stakeholders.length})</h3>
+            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>{t("stakeholderWord")} ({doc.stakeholders.length})</h3>
             <button onClick={addStakeholder} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, background: T.text, color: "#fff", border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer" }}>
               <Plus style={{ width: 11, height: 11 }} /> Aggiungi
             </button>
           </div>
           {doc.stakeholders.length === 0 ? (
-            <p style={{ fontSize: 12, color: T.muted, padding: "8px 0" }}>Nessun stakeholder mappato.</p>
+            <p style={{ fontSize: 12, color: T.muted, padding: "8px 0" }}>{t("noStakeholder")}</p>
           ) : (
             doc.stakeholders.map((s) => (
               <div key={s.id} style={{ marginBottom: 10, padding: 14, background: T.bg, borderRadius: 8, border: `1px solid ${T.border}` }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 28px", gap: 8, marginBottom: 8 }}>
-                  <input value={s.name} onChange={(e) => upStakeholder(s.id, { name: e.target.value })} placeholder="Nome" style={inputSt} />
-                  <input value={s.organization} onChange={(e) => upStakeholder(s.id, { organization: e.target.value })} placeholder="Organizzazione" style={inputSt} />
+                  <input value={s.name} onChange={(e) => upStakeholder(s.id, { name: e.target.value })} placeholder={t("nameWord")} style={inputSt} />
+                  <input value={s.organization} onChange={(e) => upStakeholder(s.id, { organization: e.target.value })} placeholder={t("organizationWord")} style={inputSt} />
                   <select value={s.category} onChange={(e) => upStakeholder(s.id, { category: e.target.value as FRIAStakeholder["category"] })} style={inputSt}>
-                    <option value="">Categoria</option>
-                    <option value="primary_affected">Primari (soggetti interessati)</option>
-                    <option value="secondary_intermediary">Secondari (intermediari)</option>
-                    <option value="tertiary_broader">Terziari (sistema più ampio)</option>
+                    <option value="">{t("categoryWord")}</option>
+                    <option value="primary_affected">{t("stk_primary")}</option>
+                    <option value="secondary_intermediary">{t("stk_secondary")}</option>
+                    <option value="tertiary_broader">{t("stk_tertiary")}</option>
                   </select>
                   <select value={s.status} onChange={(e) => upStakeholder(s.id, { status: e.target.value as FRIAStakeholder["status"] })} style={inputSt}>
-                    <option value="">Stato</option>
-                    <option value="identified">Identificato</option>
-                    <option value="contacted">Contattato</option>
-                    <option value="consulted">Consultato</option>
-                    <option value="informed">Informato</option>
+                    <option value="">{t("statusWord")}</option>
+                    <option value="identified">{t("stk_identified")}</option>
+                    <option value="contacted">{t("stk_contacted")}</option>
+                    <option value="consulted">{t("stk_consulted")}</option>
+                    <option value="informed">{t("stk_informed")}</option>
                   </select>
                   <button onClick={() => delStakeholder(s.id)} style={{ padding: 4, border: "none", background: "none", cursor: "pointer" }}>
                     <Trash2 style={{ width: 13, height: 13, color: T.red }} />
                   </button>
                 </div>
                 <input value={s.engagement_method} onChange={(e) => upStakeholder(s.id, { engagement_method: e.target.value })}
-                  placeholder="Metodo di coinvolgimento (es. intervista, focus group, survey…)" style={inputSt} />
+                  placeholder={t("ph_engagementMethod")} style={inputSt} />
               </div>
             ))
           )}
@@ -1482,32 +1478,32 @@ export default function FRIAPage() {
         {/* Engagement log */}
         <div style={{ ...cardSt, padding: 20 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>Log di engagement ({doc.engagement_log.length})</h3>
+            <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>{t("engagementLog")} ({doc.engagement_log.length})</h3>
             <button onClick={addEngagement} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, background: T.text, color: "#fff", border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer" }}>
               <Plus style={{ width: 11, height: 11 }} /> Aggiungi
             </button>
           </div>
           {doc.engagement_log.length === 0 ? (
-            <p style={{ fontSize: 12, color: T.muted }}>Nessuna attività di engagement documentata.</p>
+            <p style={{ fontSize: 12, color: T.muted }}>{t("noEngagement")}</p>
           ) : (
             doc.engagement_log.map((e) => (
               <div key={e.id} style={{ marginBottom: 10, padding: 14, background: T.bg, borderRadius: 8, border: `1px solid ${T.border}` }}>
                 <div style={{ display: "grid", gridTemplateColumns: "130px 1fr 1fr 28px", gap: 8, marginBottom: 8 }}>
                   <input type="date" value={e.date} onChange={(ev) => upEngagement(e.id, { date: ev.target.value })} style={inputSt} />
                   <select value={e.stakeholder_id} onChange={(ev) => upEngagement(e.id, { stakeholder_id: ev.target.value })} style={inputSt}>
-                    <option value="">Stakeholder</option>
+                    <option value="">{t("stakeholderWord")}</option>
                     {doc.stakeholders.map((s) => <option key={s.id} value={s.id}>{s.name || s.id}</option>)}
                   </select>
-                  <input value={e.method} onChange={(ev) => upEngagement(e.id, { method: ev.target.value })} placeholder="Metodo (es. intervista, survey…)" style={inputSt} />
+                  <input value={e.method} onChange={(ev) => upEngagement(e.id, { method: ev.target.value })} placeholder={t("ph_method")} style={inputSt} />
                   <button onClick={() => delEngagement(e.id)} style={{ padding: 4, border: "none", background: "none", cursor: "pointer" }}>
                     <Trash2 style={{ width: 13, height: 13, color: T.red }} />
                   </button>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                   <textarea value={e.findings} onChange={(ev) => upEngagement(e.id, { findings: ev.target.value })} rows={2}
-                    placeholder="Principali evidenze emerse…" style={{ ...inputSt, resize: "vertical" }} />
+                    placeholder={t("ph_findings")} style={{ ...inputSt, resize: "vertical" }} />
                   <textarea value={e.how_incorporated} onChange={(ev) => upEngagement(e.id, { how_incorporated: ev.target.value })} rows={2}
-                    placeholder="Come sono state incorporate nella FRIA…" style={{ ...inputSt, resize: "vertical" }} />
+                    placeholder={t("ph_incorporated")} style={{ ...inputSt, resize: "vertical" }} />
                 </div>
               </div>
             ))
@@ -1539,15 +1535,15 @@ export default function FRIAPage() {
         {([
           {
             key: "form",
-            title: "Form strutturato",
-            desc: "Modulo completo Art. 27 — scenari, diritti, deployment, stakeholder.",
+            title: t("modeFormTitle"),
+            desc: t("modeFormDesc"),
             active: !guidedMode,
             onClick: () => setGuidedMode(false),
           },
           {
             key: "guided",
-            title: "FRIA guidata",
-            desc: "Modalità conversazionale DIHR/ECNL · 36 domande · documento live.",
+            title: t("modeGuidedTitle"),
+            desc: t("modeGuidedDesc"),
             active: guidedMode,
             onClick: () => setGuidedMode(true),
           },
@@ -1589,7 +1585,7 @@ export default function FRIAPage() {
             done: hasClassifier,
             href: "/dashboard/tools/classifier",
             required: true,
-            why: "Determina il livello di rischio del sistema AI",
+            why: t("why_classifier"),
           },
           {
             key: "risk",
@@ -1598,16 +1594,16 @@ export default function FRIAPage() {
             done: hasRiskMgr,
             href: "/dashboard/modules/risk-manager",
             required: false,
-            why: "Pre-carica scenari di rischio nelle fasi 2–3 della FRIA",
+            why: t("why_risk"),
           },
           {
             key: "data",
-            label: "Qualità Dati",
+            label: t("dataQualityLabel"),
             art: "Art. 10",
             done: hasDataAudit,
             href: "/dashboard/tools/data-audit",
             required: false,
-            why: "Arricchisce l'analisi con dati di governance",
+            why: t("why_data"),
           },
         ];
 
@@ -1619,7 +1615,7 @@ export default function FRIAPage() {
             {/* Header */}
             <div style={{ padding: "12px 16px", background: "rgba(0,0,0,0.025)", borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
               <p style={{ fontSize: 12, fontWeight: 700, color: "#0D1016", margin: 0, letterSpacing: "0.03em" }}>
-                SORGENTI DATI PER LA BOZZA AI
+                {t("aiDraftSources")}
               </p>
             </div>
 
@@ -1656,7 +1652,7 @@ export default function FRIAPage() {
                         <span style={{
                           fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
                           background: "rgba(220,38,38,0.08)", color: "#dc2626",
-                        }}>RICHIESTO</span>
+                        }}>{t("requiredBadge")}</span>
                       )}
                     </div>
                     <p style={{ fontSize: 11, color: "rgba(0,0,0,0.40)", margin: "1px 0 0", lineHeight: 1.3 }}>{s.why}</p>
@@ -1668,7 +1664,7 @@ export default function FRIAPage() {
                       fontSize: 11, fontWeight: 500, color: "rgba(0,0,0,0.40)",
                       textDecoration: "none", whiteSpace: "nowrap",
                     }}>
-                      Modifica →
+                      {t("editArrow")}
                     </Link>
                   ) : (
                     <Link href={s.href} style={{
@@ -1678,7 +1674,7 @@ export default function FRIAPage() {
                       color: s.required ? "#dc2626" : "#374151",
                       textDecoration: "none", whiteSpace: "nowrap",
                     }}>
-                      {s.required ? "Completa prima →" : "Migliora bozza →"}
+                      {s.required ? t("completeFirst") : t("improveDraft")}
                     </Link>
                   )}
                 </div>
@@ -1698,16 +1694,16 @@ export default function FRIAPage() {
                   cursor: (!hasClassifier || loadingDraft) ? "not-allowed" : "pointer",
                 }}
               >
-                {loadingDraft ? "Generazione bozza…" : "✦ Genera bozza AI da dati esistenti"}
+                {loadingDraft ? t("generatingDraft") : t("generateDraftFull")}
               </button>
               {!hasClassifier && (
                 <span style={{ fontSize: 11, color: "#dc2626", fontWeight: 500 }}>
-                  Completa il Classifier per sbloccare la generazione automatica
+                  {t("classifierToUnlock")}
                 </span>
               )}
               {draftGenerated && (
                 <span style={{ fontSize: 11, color: "#d97706", fontWeight: 500 }}>
-                  ✦ Bozza applicata — verifica ogni campo prima di salvare
+                  ✦ {t("draftApplied")}
                 </span>
               )}
               {draftError && (
@@ -1725,7 +1721,7 @@ export default function FRIAPage() {
         {/* DOCUMENTO header */}
         <div style={{ padding: "12px 12px 10px", borderBottom: `1px solid ${T.border}` }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-            <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>Documento</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>{t("documentWord")}</span>
             <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", fontFamily: "monospace" }}>{completeness}%</span>
           </div>
           <div style={{ width: "100%", height: 4, background: "rgba(0,0,0,0.07)", borderRadius: 2, overflow: "hidden" }}>
@@ -1734,21 +1730,21 @@ export default function FRIAPage() {
         </div>
         {/* System name + org */}
         <div style={{ padding: "12px 14px 12px", borderBottom: `1px solid ${T.border}` }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", marginBottom: 8 }}>Sistema AI</div>
-          <input value={doc.system_name} onChange={(e) => upDoc({ system_name: e.target.value })} placeholder="Nome del sistema AI"
+          <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", marginBottom: 8 }}>{t("aiSystemWord")}</div>
+          <input value={doc.system_name} onChange={(e) => upDoc({ system_name: e.target.value })} placeholder={t("ph_systemName")}
             style={{ ...inputSt, marginBottom: 6, fontSize: 13, fontWeight: 500 }} />
-          <input value={doc.organization} onChange={(e) => upDoc({ organization: e.target.value })} placeholder="Organizzazione"
+          <input value={doc.organization} onChange={(e) => upDoc({ organization: e.target.value })} placeholder={t("organizationWord")}
             style={{ ...inputSt, marginBottom: 6 }} />
-          <input value={doc.responsible_team} onChange={(e) => upDoc({ responsible_team: e.target.value })} placeholder="Team responsabile" style={{ ...inputSt, marginBottom: 6 }} />
+          <input value={doc.responsible_team} onChange={(e) => upDoc({ responsible_team: e.target.value })} placeholder={t("ph_responsibleTeam")} style={{ ...inputSt, marginBottom: 6 }} />
           <div>
-            <label style={{ display: "block", fontSize: 10, fontWeight: 500, color: T.faint, marginBottom: 3 }}>Data avvio FRIA</label>
+            <label style={{ display: "block", fontSize: 10, fontWeight: 500, color: T.faint, marginBottom: 3 }}>{t("friaStartDate")}</label>
             <input type="date" value={doc.fria_start_date} onChange={(e) => upDoc({ fria_start_date: e.target.value })} style={inputSt} />
           </div>
         </div>
 
         {/* Phase nav — FriaProgressRail style */}
         <div style={{ padding: "8px 8px", flex: 1, overflowY: "auto" as const }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", padding: "0 6px", marginBottom: 6 }}>Fasi FRIA</div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", padding: "0 6px", marginBottom: 6 }}>{t("friaPhases")}</div>
           {phaseProgress.map((p) => {
             const isActive   = phase === p.id;
             const isExpanded = expandedPhases.has(p.id);
@@ -1807,31 +1803,31 @@ export default function FRIAPage() {
 
         {/* Summary stats */}
         <div style={{ padding: "12px 14px", borderTop: `1px solid ${T.border}` }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", marginBottom: 10 }}>Riepilogo FRIA</div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", marginBottom: 10 }}>{t("friaSummary")}</div>
           <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontSize: 11, color: T.muted }}>Completezza</span>
+              <span style={{ fontSize: 11, color: T.muted }}>{t("completenessWord")}</span>
               <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{completeness}%</span>
             </div>
             <div style={{ height: 4, background: T.bg, borderRadius: 9999, overflow: "hidden" }}>
               <div style={{ height: "100%", width: `${completeness}%`, background: completeness > 75 ? T.green : completeness > 40 ? T.amber : T.red, borderRadius: 9999, transition: "width 0.3s" }} />
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontSize: 11, color: T.muted }}>Rischio globale</span>
+              <span style={{ fontSize: 11, color: T.muted }}>{t("globalRisk")}</span>
               <Badge label={overallRisk.toUpperCase()} color={riskColorFor(overallRisk)} />
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 11, color: T.muted }}>Scenari</span>
+              <span style={{ fontSize: 11, color: T.muted }}>{t("scenariWord")}</span>
               <span style={{ fontSize: 11, fontWeight: 500, color: T.text }}>{doc.scenarios.length}</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 11, color: T.muted }}>Stakeholder</span>
+              <span style={{ fontSize: 11, color: T.muted }}>{t("stakeholderWord")}</span>
               <span style={{ fontSize: 11, fontWeight: 500, color: T.text }}>{doc.stakeholders.length}</span>
             </div>
           </div>
           <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
             <button onClick={saveToDossier} style={{ flex: 1, fontSize: 11, fontWeight: 500, padding: "6px 8px", borderRadius: 7, background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
-              Salva dossier
+              {t("saveDossierShort")}
             </button>
             <button onClick={exportReport} style={{ padding: "6px 9px", borderRadius: 7, background: T.bg, border: `1px solid ${T.border}`, cursor: "pointer", display: "flex", alignItems: "center" }}>
               <Download style={{ width: 12, height: 12, color: T.muted }} />
@@ -1840,7 +1836,7 @@ export default function FRIAPage() {
           {/* Auto-save indicator */}
           {friaSaved && (
             <div style={{ marginTop: 8, fontSize: 10, color: "#16a34a", textAlign: "center" as const }}>
-              ✓ Salvato automaticamente
+              ✓ {t("autoSaved")}
             </div>
           )}
           {/* Version History */}
@@ -1859,13 +1855,13 @@ export default function FRIAPage() {
         {dossierSavedAt ? (
           <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 8, padding: "10px 14px", marginBottom: 20, background: T.greenBg, border: `1px solid ${T.greenBdr}`, fontSize: 12 }}>
             <CheckCircle style={{ width: 13, height: 13, color: T.green, flexShrink: 0 }} />
-            <span style={{ color: "#15803d" }}>FRIA salvata nel dossier · {new Date(dossierSavedAt).toLocaleDateString("it-IT")}</span>
-            <Link href="/dashboard/dossier" style={{ marginLeft: "auto", fontSize: 11, fontWeight: 500, color: T.green }}>Vedi dossier →</Link>
+            <span style={{ color: "#15803d" }}>{t("friaSavedBanner")} · {new Date(dossierSavedAt).toLocaleDateString("it-IT")}</span>
+            <Link href="/dashboard/dossier" style={{ marginLeft: "auto", fontSize: 11, fontWeight: 500, color: T.green }}>{t("viewDossier")}</Link>
           </div>
         ) : (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderRadius: 8, padding: "10px 14px", marginBottom: 20, background: T.card, border: `1px solid ${T.border}`, fontSize: 12 }}>
-            <span style={{ color: T.muted }}>Salva i risultati FRIA nel dossier di compliance (Art. 27)</span>
-            <button onClick={saveToDossier} style={{ fontSize: 11, fontWeight: 500, borderRadius: 20, padding: "4px 12px", background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>Salva nel dossier</button>
+            <span style={{ color: T.muted }}>{t("saveFriaPrompt")}</span>
+            <button onClick={saveToDossier} style={{ fontSize: 11, fontWeight: 500, borderRadius: 20, padding: "4px 12px", background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>{t("saveToDossier")}</button>
           </div>
         )}
 

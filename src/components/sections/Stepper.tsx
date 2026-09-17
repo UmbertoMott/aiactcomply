@@ -2,43 +2,51 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useT } from "@/i18n/LocaleProvider";
 
-const steps = [
-  {
-    num: "01",
-    title: "Risk Assessment automatico",
-    desc: "Descrivi il tuo sistema AI. AIComply lo classifica secondo l'AI Act — Alto, Limitato o Minimo rischio — e identifica ogni requisito applicabile in pochi minuti.",
-    tags: ["Classificazione automatica", "Gap analysis"],
-  },
-  {
-    num: "02",
-    title: "Documentazione generata",
-    desc: "Technical Documentation, Conformity Declaration, Risk Register. Generati automaticamente, sempre aggiornati, pronti per qualsiasi audit di autorità di vigilanza.",
-    tags: ["PDF / DOCX export", "Versionato"],
-  },
-  {
-    num: "03",
-    title: "Integrazione nel workflow",
-    desc: "Jira, Confluence, GitHub. I task di conformità entrano direttamente nel backlog del team. Nessun silos separato, nessuna duplicazione di lavoro.",
-    tags: ["Jira", "Confluence", "GitHub"],
-  },
-];
+type T = (key: string) => string;
 
-const riskItems = [
-  { name: "Modello credit scoring", level: "Alto rischio", color: "#ef4444", dotColor: "#ef4444" },
-  { name: "Facial recognition", level: "Alto rischio", color: "#ef4444", dotColor: "#ef4444" },
-  { name: "Chatbot customer support", level: "Limitato", color: "#f59e0b", dotColor: "#f59e0b" },
-  { name: "Content recommendation", level: "Minimo", color: "#22c55e", dotColor: "#22c55e" },
-];
+function buildSteps(t: T) {
+  return [
+    {
+      num: "01",
+      title: t("step1_title"),
+      desc: t("step1_desc"),
+      tags: t("step1_tags").split("|"),
+    },
+    {
+      num: "02",
+      title: t("step2_title"),
+      desc: t("step2_desc"),
+      tags: t("step2_tags").split("|"),
+    },
+    {
+      num: "03",
+      title: t("step3_title"),
+      desc: t("step3_desc"),
+      tags: t("step3_tags").split("|"),
+    },
+  ];
+}
 
-const visualPanels = [
+function buildRiskItems(t: T) {
+  return [
+    { name: t("riskName1"), level: t("levelHigh"), color: "#ef4444", dotColor: "#ef4444" },
+    { name: t("riskName2"), level: t("levelHigh"), color: "#ef4444", dotColor: "#ef4444" },
+    { name: t("riskName3"), level: t("levelLimited"), color: "#f59e0b", dotColor: "#f59e0b" },
+    { name: t("riskName4"), level: t("levelMinimal"), color: "#22c55e", dotColor: "#22c55e" },
+  ];
+}
+
+function buildVisualPanels(t: T, riskItems: ReturnType<typeof buildRiskItems>) {
+  return [
   // Panel 0 — Risk Assessment
   <div key="risk" className="p-5">
     <div
       className="text-[11px] mb-3 uppercase"
       style={{ color: "rgba(255,255,255,0.3)", letterSpacing: "0.5px" }}
     >
-      Sistemi rilevati
+      {t("panel0_head")}
     </div>
     <div className="flex flex-col gap-2">
       {riskItems.map(({ name, level, color, dotColor }) => (
@@ -76,10 +84,10 @@ const visualPanels = [
       }}
     >
       <div className="text-[11px] font-medium text-white/60 mb-1">
-        Assessment completato
+        {t("panel0_done")}
       </div>
       <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>
-        14 requisiti identificati · 3 gap critici · Priorità automatica
+        {t("panel0_detail")}
       </div>
     </div>
   </div>,
@@ -90,12 +98,12 @@ const visualPanels = [
       className="text-[11px] mb-3 uppercase"
       style={{ color: "rgba(255,255,255,0.3)", letterSpacing: "0.5px" }}
     >
-      Documenti generati
+      {t("panel1_head")}
     </div>
     <div className="flex flex-col gap-2">
       {[
         { name: "Technical Documentation", art: "Art. 11", done: true },
-        { name: "Conformity Declaration", art: "Allegato IV", done: true },
+        { name: "Conformity Declaration", art: t("panel1_annexIV"), done: true },
         { name: "Risk Register", art: "Art. 9", done: false },
       ].map(({ name, art, done }) => (
         <div
@@ -123,7 +131,7 @@ const visualPanels = [
             className="text-[9px]"
             style={{ color: done ? "#4ade80" : "rgba(255,255,255,0.25)" }}
           >
-            {done ? "Generato" : "In corso..."}
+            {done ? t("panel1_generated") : t("panel1_inProgress")}
           </span>
         </div>
       ))}
@@ -136,7 +144,7 @@ const visualPanels = [
         color: "rgba(255,255,255,0.4)",
       }}
     >
-      Esporta tutti in PDF / DOCX
+      {t("panel1_export")}
     </div>
   </div>,
 
@@ -146,13 +154,13 @@ const visualPanels = [
       className="text-[11px] mb-3 uppercase"
       style={{ color: "rgba(255,255,255,0.3)", letterSpacing: "0.5px" }}
     >
-      Integrazioni attive
+      {t("panel2_head")}
     </div>
     <div className="flex flex-col gap-2">
       {[
-        { name: "Jira", status: "Connesso", on: true, bg: "rgba(255,255,255,0.12)" },
-        { name: "Confluence", status: "Connesso", on: true, bg: "rgba(99,102,241,0.2)" },
-        { name: "GitHub", status: "Configura", on: false, bg: "rgba(255,255,255,0.08)" },
+        { name: "Jira", status: t("panel2_connected"), on: true, bg: "rgba(255,255,255,0.12)" },
+        { name: "Confluence", status: t("panel2_connected"), on: true, bg: "rgba(99,102,241,0.2)" },
+        { name: "GitHub", status: t("panel2_configure"), on: false, bg: "rgba(255,255,255,0.08)" },
       ].map(({ name, status, on, bg }) => (
         <div
           key={name}
@@ -193,18 +201,24 @@ const visualPanels = [
       }}
     >
       <div className="text-[11px] font-medium text-white/60 mb-1">
-        8 task creati in Jira
+        {t("panel2_tasks")}
       </div>
       <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>
-        Assegnati automaticamente ai team owner
+        {t("panel2_detail")}
       </div>
     </div>
   </div>,
-];
+  ];
+}
 
 export default function Stepper() {
+  const t = useT("stepper");
   const [activeStep, setActiveStep] = useState(0);
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const steps = buildSteps(t);
+  const riskItems = buildRiskItems(t);
+  const visualPanels = buildVisualPanels(t, riskItems);
 
   useEffect(() => {
     const observers = stepRefs.current.map((ref, i) => {
@@ -228,7 +242,7 @@ export default function Stepper() {
           className="text-[12px] font-medium uppercase mb-4"
           style={{ letterSpacing: "1.5px", color: "rgba(255,255,255,0.3)" }}
         >
-          Come funziona
+          {t("kicker")}
         </p>
         <h2
           className="mb-14 text-white"
@@ -239,7 +253,7 @@ export default function Stepper() {
             lineHeight: 1.05,
           }}
         >
-          Da zero a compliant<br />in tre passaggi.
+          {t("titleLine1")}<br />{t("titleLine2")}
         </h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
@@ -325,9 +339,9 @@ export default function Stepper() {
                   className="block w-1.5 h-1.5 rounded-full bg-white"
                   style={{ boxShadow: "0 0 8px rgba(255,255,255,0.35)" }}
                 />
-                {activeStep === 0 && "Risk Assessment — Sistema CRM AI"}
-                {activeStep === 1 && "DocuGen AI — Allegato IV"}
-                {activeStep === 2 && "Integrazioni — Workspace configurato"}
+                {activeStep === 0 && t("bar0")}
+                {activeStep === 1 && t("bar1")}
+                {activeStep === 2 && t("bar2")}
               </div>
               <AnimatePresence mode="wait">
                 <motion.div

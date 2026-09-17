@@ -4,7 +4,7 @@ import Footer from "@/components/sections/Footer";
 
 export const metadata: Metadata = {
   title: "Contatti — RegulaeOS",
-  description: "Contatta l'Avv. Umberto Mottola per attivare l'assistenza professionale alla conformità EU AI Act.",
+  description: "Contatta l'Avvocato per attivare l'assistenza professionale alla conformità EU AI Act.",
 };
 
 const SERIF = "Georgia, 'Times New Roman', serif";
@@ -110,7 +110,7 @@ export default function ContattiPage() {
                   Chi risponde
                 </p>
                 <p style={{ fontSize: 15, fontWeight: 500, color: "#0D1016", letterSpacing: "-0.2px" }}>
-                  Avv. Umberto Mottola — Foro di Napoli
+                  L&rsquo;Avvocato — Foro di Napoli
                 </p>
               </div>
             </div>
@@ -120,7 +120,7 @@ export default function ContattiPage() {
           {/* Divider */}
           <div style={{ borderTop: "1px solid rgba(0,0,0,0.07)", paddingTop: 32 }}>
             <p style={{ fontFamily: MONO, fontSize: 11, color: "rgba(0,0,0,0.35)", lineHeight: 1.65 }}>
-              Il servizio è erogato dall&rsquo;Avv. Umberto Mottola nel rispetto del Codice Deontologico
+              Il servizio è erogato dall&rsquo;Avvocato nel rispetto del Codice Deontologico
               Forense (art. 35 CDF). Risposta entro 24 ore lavorative.
             </p>
           </div>

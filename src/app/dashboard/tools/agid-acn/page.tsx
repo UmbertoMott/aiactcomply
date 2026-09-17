@@ -7,6 +7,9 @@ import {
   Building2, Lock, AlertOctagon, CheckCircle2, Clock, Phone,
 } from "lucide-react";
 import { ProhibitedPracticesArt5 } from "@/components/agid-acn/ProhibitedPracticesArt5";
+import { useT } from "@/i18n/LocaleProvider";
+
+type TFn = (key: string) => string;
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -24,150 +27,179 @@ const T = {
 
 const card = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 12 };
 
+type IconType = React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+
+// ─── Tipi ─────────────────────────────────────────────────────────────────────
+
+interface NotifyRule { trigger: string; deadline: string; article: string }
+interface Sandbox { description: string; how_to_apply: string; url: string }
+interface Authority {
+  id: string;
+  name: string;
+  fullName: string;
+  icon: IconType;
+  color: string;
+  colorBg: string;
+  colorBdr: string;
+  role: string;
+  website: string;
+  contact: string;
+  phone: string;
+  powers: string[];
+  when_to_notify: NotifyRule[];
+  sandbox: Sandbox | null;
+}
+
+interface CriminalRisk {
+  title: string;
+  article: string;
+  penalty: string;
+  aggravated: string;
+  description: string;
+  who_is_at_risk: string;
+  mitigation: string;
+  href: string;
+}
+
+interface AdminSanction {
+  violation: string;
+  max_amount: string;
+  max_pct: string;
+  severity: "critical" | "high" | "medium" | "info";
+}
+
 // ─── Dati autorità ────────────────────────────────────────────────────────────
 
-const AUTHORITIES = [
-  {
-    id: "agid",
-    name: "AGID",
-    fullName: "Agenzia per l'Italia Digitale",
-    icon: Building2,
-    color: T.blue,
-    colorBg: T.blueBg,
-    colorBdr: T.blueBdr,
-    role: "Autorità nazionale competente per l'AI Act in Italia (settore pubblico) + gestione Regulatory Sandbox AI",
-    website: "https://www.agid.gov.it",
-    contact: "protocollo@pec.agid.gov.it",
-    phone: "+39 06 85264.1",
-    powers: [
-      "Supervisione e vigilanza dei sistemi AI usati dalla PA",
-      "Gestione della Regulatory Sandbox AI italiana (Art. 57 EU AI Act)",
-      "Irrogazione sanzioni amministrative per PA e fornitori PA",
-      "Emissione di linee guida nazionali sull'uso AI nel settore pubblico",
-      "Cooperazione con la Commissione Europea e EAIA",
-    ],
-    when_to_notify: [
-      { trigger: "Incidente grave con sistema AI alto rischio usato dalla PA",     deadline: "72 ore dall'incidente",  article: "Art. 73 EU AI Act" },
-      { trigger: "Richiesta di accesso alla Regulatory Sandbox",                   deadline: "Procedura su domanda",   article: "Art. 57 EU AI Act" },
-      { trigger: "Sistema AI ad alto rischio per infrastrutture critiche",          deadline: "Prima del deploy",       article: "Art. 49 EU AI Act" },
-    ],
-    sandbox: {
-      description: "La Regulatory Sandbox AI italiana deve essere operativa entro il 2 agosto 2026 (scadenza EU AI Act Art. 57). AGID coordina la sua istituzione in collaborazione con ACN. Consente alle imprese di testare sistemi AI in un ambiente controllato con deroghe temporanee.",
-      how_to_apply: "La procedura di candidatura sarà pubblicata da AGID sul portale ufficiale. Sarà necessario presentare: descrizione del sistema, piano di testing, identificazione rischi e misure di mitigazione proposte.",
-      url: "https://www.agid.gov.it/it/aree-di-intervento/intelligenza-artificiale",
+function buildAuthorities(t: TFn): Authority[] {
+  return [
+    {
+      id: "agid",
+      name: "AGID",
+      fullName: "Agenzia per l'Italia Digitale",
+      icon: Building2,
+      color: T.blue,
+      colorBg: T.blueBg,
+      colorBdr: T.blueBdr,
+      role: t("agid_role"),
+      website: "https://www.agid.gov.it",
+      contact: "protocollo@pec.agid.gov.it",
+      phone: "+39 06 85264.1",
+      powers: [t("agid_pow1"), t("agid_pow2"), t("agid_pow3"), t("agid_pow4"), t("agid_pow5")],
+      when_to_notify: [
+        { trigger: t("agid_n1_trigger"), deadline: t("agid_n1_deadline"), article: "Art. 73 EU AI Act" },
+        { trigger: t("agid_n2_trigger"), deadline: t("agid_n2_deadline"), article: "Art. 57 EU AI Act" },
+        { trigger: t("agid_n3_trigger"), deadline: t("agid_n3_deadline"), article: "Art. 49 EU AI Act" },
+      ],
+      sandbox: {
+        description: t("agid_sandbox_desc"),
+        how_to_apply: t("agid_sandbox_apply"),
+        url: "https://www.agid.gov.it/it/aree-di-intervento/intelligenza-artificiale",
+      },
     },
-  },
-  {
-    id: "acn",
-    name: "ACN",
-    fullName: "Agenzia per la Cybersicurezza Nazionale",
-    icon: Shield,
-    color: "#0D1016",
-    colorBg: "rgba(13,16,22,0.04)",
-    colorBdr: "rgba(13,16,22,0.12)",
-    role: "Autorità nazionale per la cybersicurezza — supervisione requisiti Art. 15 EU AI Act (robustezza e sicurezza informatica)",
-    website: "https://www.acn.gov.it",
-    contact: "info@acn.gov.it / acn@pec.acn.gov.it",
-    phone: "",
-    powers: [
-      "Supervisione requisiti cybersecurity per AI ad alto rischio (Art. 15)",
-      "Gestione incidenti di sicurezza su sistemi AI critici",
-      "Emissione linee guida su adversarial attacks e model poisoning",
-      "Cooperazione con ENISA su standard di sicurezza AI",
-      "Vigilanza su NIS2 per operatori di servizi essenziali che usano AI",
-    ],
-    when_to_notify: [
-      { trigger: "Incidente di sicurezza informatica su sistema AI (operatori NIS2)", deadline: "24h prelim., 72h report completo", article: "NIS2 Art. 23"          },
-      { trigger: "Attacco adversariale documentato su sistema AI alto rischio",        deadline: "Prima possibile",                article: "Art. 15 EU AI Act"    },
-      { trigger: "Vulnerabilità critica in sistema AI infrastrutture critiche",        deadline: "Immediato",                      article: "NIS2 + Art. 15 AI Act" },
-    ],
-    sandbox: null,
-  },
-  {
-    id: "garante",
-    name: "Garante Privacy",
-    fullName: "Garante per la Protezione dei Dati Personali",
-    icon: Lock,
-    color: T.green,
-    colorBg: T.greenBg,
-    colorBdr: T.greenBdr,
-    role: "Autorità di controllo GDPR — supervisione intersezione GDPR/AI Act, DPIA obbligatorie, trattamento dati biometrici",
-    website: "https://www.garanteprivacy.it",
-    contact: "protocollo@gpdp.it / protocollo@pec.gpdp.it",
-    phone: "+39 06 696771",
-    powers: [
-      "Approvazione o blocco di trattamenti dati ad alto rischio (Art. 36 GDPR)",
-      "Sanzioni GDPR fino a €20M o 4% fatturato globale",
-      "Controllo sull'uso di dati biometrici per sistemi AI",
-      "Verifica DPIA (Art. 35 GDPR) per sistemi AI che trattano dati sensibili",
-      "Cooperazione con autorità AI nella supervisione di sistemi che trattano dati personali",
-    ],
-    when_to_notify: [
-      { trigger: "Data breach che coinvolge output di sistema AI",                    deadline: "72 ore dalla scoperta",               article: "Art. 33 GDPR"    },
-      { trigger: "Nuovo trattamento ad alto rischio senza DPIA approvata",            deadline: "Prima di iniziare il trattamento",    article: "Art. 36 GDPR"    },
-      { trigger: "Sistema AI che profila o processa dati biometrici su larga scala",  deadline: "Consultazione preventiva obbligatoria", article: "Art. 35-36 GDPR" },
-    ],
-    sandbox: null,
-  },
-] as const;
+    {
+      id: "acn",
+      name: "ACN",
+      fullName: "Agenzia per la Cybersicurezza Nazionale",
+      icon: Shield,
+      color: "#0D1016",
+      colorBg: "rgba(13,16,22,0.04)",
+      colorBdr: "rgba(13,16,22,0.12)",
+      role: t("acn_role"),
+      website: "https://www.acn.gov.it",
+      contact: "info@acn.gov.it / acn@pec.acn.gov.it",
+      phone: "",
+      powers: [t("acn_pow1"), t("acn_pow2"), t("acn_pow3"), t("acn_pow4"), t("acn_pow5")],
+      when_to_notify: [
+        { trigger: t("acn_n1_trigger"), deadline: t("acn_n1_deadline"), article: "NIS2 Art. 23" },
+        { trigger: t("acn_n2_trigger"), deadline: t("acn_n2_deadline"), article: "Art. 15 EU AI Act" },
+        { trigger: t("acn_n3_trigger"), deadline: t("acn_n3_deadline"), article: "NIS2 + Art. 15 AI Act" },
+      ],
+      sandbox: null,
+    },
+    {
+      id: "garante",
+      name: "Garante Privacy",
+      fullName: "Garante per la Protezione dei Dati Personali",
+      icon: Lock,
+      color: T.green,
+      colorBg: T.greenBg,
+      colorBdr: T.greenBdr,
+      role: t("gar_role"),
+      website: "https://www.garanteprivacy.it",
+      contact: "protocollo@gpdp.it / protocollo@pec.gpdp.it",
+      phone: "+39 06 696771",
+      powers: [t("gar_pow1"), t("gar_pow2"), t("gar_pow3"), t("gar_pow4"), t("gar_pow5")],
+      when_to_notify: [
+        { trigger: t("gar_n1_trigger"), deadline: t("gar_n1_deadline"), article: "Art. 33 GDPR" },
+        { trigger: t("gar_n2_trigger"), deadline: t("gar_n2_deadline"), article: "Art. 36 GDPR" },
+        { trigger: t("gar_n3_trigger"), deadline: t("gar_n3_deadline"), article: "Art. 35-36 GDPR" },
+      ],
+      sandbox: null,
+    },
+  ];
+}
 
 // ─── Sanzioni penali L.132/2025 ───────────────────────────────────────────────
 
-const CRIMINAL_RISKS = [
-  {
-    title: "Deepfake non consensuali",
-    article: "Art. 5 L.132/2025",
-    penalty: "Reclusione da 1 a 5 anni",
-    aggravated: "Da 2 a 7 anni se vittima è minore o il materiale è distribuito",
-    description: "Creazione o diffusione di immagini, video o audio sintetici che ritraggono una persona senza il suo consenso, in contesti sessuali o denigratori.",
-    who_is_at_risk: "Provider di sistemi di generazione immagini/video, deployer che non implementano filtri adeguati",
-    mitigation: "Implementare disclosure Art. 50, watermarking obbligatorio, controlli consenso utente",
-    href: "/dashboard/tools/art50-kit",
-  },
-  {
-    title: "Manipolazione e frode tramite AI",
-    article: "Art. 640-ter c.p. (aggravato) + L.132/2025",
-    penalty: "Reclusione da 1 a 5 anni",
-    aggravated: "Aggravante specifica se uso di AI per commettere il reato",
-    description: "Uso di sistemi AI per ingannare persone fisiche a fini di frode, manipolazione psicologica, o ottenimento illecito di vantaggi patrimoniali.",
-    who_is_at_risk: "Chiunque utilizzi chatbot o sistemi AI in modo ingannevole verso consumatori",
-    mitigation: "Disclosure obbligatoria AI, policy di uso accettabile, monitoring output",
-    href: "/dashboard/tools/transparency",
-  },
-  {
-    title: "Violazione tutela minori (under 14)",
-    article: "Art. 8 L.132/2025",
-    penalty: "Reclusione fino a 3 anni",
-    aggravated: "Sanzione accessoria: oscuramento del servizio",
-    description: "Raccolta o trattamento dati personali di minori di 14 anni tramite sistemi AI senza consenso esplicito del genitore/tutore.",
-    who_is_at_risk: "Deployer di sistemi AI consumer accessibili a minori, piattaforme educative",
-    mitigation: "Verifica età, consenso genitoriale documentato, age-gating",
-    href: "/dashboard/tools/fria",
-  },
-  {
-    title: "Reati D.Lgs. 231/2001 tramite AI",
-    article: "D.Lgs. 231/2001 + L.132/2025",
-    penalty: "Sanzione pecuniaria fino a €1.5M + interdizione attività",
-    aggravated: "Responsabilità solidale dell'ente se non adottato MOG 231 aggiornato all'AI",
-    description: "L'ente è responsabile per reati commessi tramite sistemi AI da suoi dipendenti/manager se non ha adottato un MOG 231 che includa protocolli di controllo AI.",
-    who_is_at_risk: "Tutte le società che usano sistemi AI nei processi aziendali senza MOG 231 aggiornato",
-    mitigation: "Adottare MOG 231 con sezione AI, ODV formato, protocolli di controllo documentati",
-    href: "/dashboard/tools/l132",
-  },
-];
+function buildCriminalRisks(t: TFn): CriminalRisk[] {
+  return [
+    {
+      title: t("cr1_title"),
+      article: "Art. 5 L.132/2025",
+      penalty: t("cr1_penalty"),
+      aggravated: t("cr1_aggravated"),
+      description: t("cr1_desc"),
+      who_is_at_risk: t("cr1_who"),
+      mitigation: t("cr1_mit"),
+      href: "/dashboard/tools/art50-kit",
+    },
+    {
+      title: t("cr2_title"),
+      article: "Art. 640-ter c.p. (aggravato) + L.132/2025",
+      penalty: t("cr2_penalty"),
+      aggravated: t("cr2_aggravated"),
+      description: t("cr2_desc"),
+      who_is_at_risk: t("cr2_who"),
+      mitigation: t("cr2_mit"),
+      href: "/dashboard/tools/transparency",
+    },
+    {
+      title: t("cr3_title"),
+      article: "Art. 8 L.132/2025",
+      penalty: t("cr3_penalty"),
+      aggravated: t("cr3_aggravated"),
+      description: t("cr3_desc"),
+      who_is_at_risk: t("cr3_who"),
+      mitigation: t("cr3_mit"),
+      href: "/dashboard/tools/fria",
+    },
+    {
+      title: t("cr4_title"),
+      article: "D.Lgs. 231/2001 + L.132/2025",
+      penalty: t("cr4_penalty"),
+      aggravated: t("cr4_aggravated"),
+      description: t("cr4_desc"),
+      who_is_at_risk: t("cr4_who"),
+      mitigation: t("cr4_mit"),
+      href: "/dashboard/tools/l132",
+    },
+  ];
+}
 
 // ─── Sanzioni amministrative EU AI Act ───────────────────────────────────────
 
-const ADMIN_SANCTIONS = [
-  { violation: "Pratiche AI vietate (Art. 5)",            max_amount: "€35.000.000",          max_pct: "7% fatturato mondiale annuo",      severity: "critical" as const },
-  { violation: "Obblighi sistemi alto rischio (Art. 6-49)",max_amount: "€15.000.000",          max_pct: "3% fatturato mondiale annuo",      severity: "high"     as const },
-  { violation: "Informazioni false alle autorità (Art. 82)",max_amount: "€7.500.000",          max_pct: "1% fatturato mondiale annuo",      severity: "medium"   as const },
-  { violation: "Riduzione per PMI e startup",              max_amount: "50% delle sanzioni sopra", max_pct: "Per aziende < 250 dipendenti", severity: "info"     as const },
-];
+function buildAdminSanctions(t: TFn): AdminSanction[] {
+  return [
+    { violation: t("as1_violation"), max_amount: "€35.000.000",           max_pct: t("as1_pct"), severity: "critical" },
+    { violation: t("as2_violation"), max_amount: "€15.000.000",           max_pct: t("as2_pct"), severity: "high"     },
+    { violation: t("as3_violation"), max_amount: "€7.500.000",            max_pct: t("as3_pct"), severity: "medium"   },
+    { violation: t("as4_violation"), max_amount: t("as4_amount"),         max_pct: t("as4_pct"), severity: "info"     },
+  ];
+}
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function AuthorityCard({ auth }: { auth: typeof AUTHORITIES[number] }) {
+function AuthorityCard({ auth, t }: { auth: Authority; t: TFn }) {
   const [open, setOpen] = useState(false);
   const Icon = auth.icon;
 
@@ -209,7 +241,7 @@ function AuthorityCard({ auth }: { auth: typeof AUTHORITIES[number] }) {
 
               {/* Contatti */}
               <div className="pt-4">
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: T.faint }}>Contatti</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: T.faint }}>{t("lbl_contacts")}</p>
                 <div className="space-y-1.5">
                   <a href={auth.website} target="_blank" rel="noopener noreferrer"
                     className="flex items-center gap-2 text-xs hover:underline" style={{ color: auth.color }}>
@@ -226,7 +258,7 @@ function AuthorityCard({ auth }: { auth: typeof AUTHORITIES[number] }) {
 
               {/* Poteri */}
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: T.faint }}>Poteri e competenze</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: T.faint }}>{t("lbl_powers")}</p>
                 <ul className="space-y-1.5">
                   {auth.powers.map((p, i) => (
                     <li key={i} className="flex items-start gap-2 text-xs" style={{ color: T.muted }}>
@@ -239,7 +271,7 @@ function AuthorityCard({ auth }: { auth: typeof AUTHORITIES[number] }) {
 
               {/* Quando notificare */}
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: T.faint }}>Quando devi notificare</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: T.faint }}>{t("lbl_whenNotify")}</p>
                 <div className="space-y-2">
                   {auth.when_to_notify.map((n, i) => (
                     <div key={i} className="rounded-lg px-3 py-2.5" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
@@ -257,15 +289,15 @@ function AuthorityCard({ auth }: { auth: typeof AUTHORITIES[number] }) {
               {auth.sandbox && (
                 <div className="rounded-lg px-4 py-3" style={{ background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
                   <p className="text-xs font-semibold mb-1" style={{ color: T.blue }}>
-                    🧪 Regulatory Sandbox AI — operativa
+                    {t("sandbox_title")}
                   </p>
                   <p className="text-xs leading-relaxed mb-2" style={{ color: T.muted }}>{auth.sandbox.description}</p>
                   <p className="text-xs leading-relaxed" style={{ color: T.muted }}>
-                    <strong>Come fare domanda:</strong> {auth.sandbox.how_to_apply}
+                    <strong>{t("sandbox_howto")}</strong> {auth.sandbox.how_to_apply}
                   </p>
                   <a href={auth.sandbox.url} target="_blank" rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-xs mt-2 hover:underline" style={{ color: T.blue }}>
-                    Portale AGID <ExternalLink className="w-3 h-3" />
+                    {t("sandbox_portal")} <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
               )}
@@ -277,7 +309,7 @@ function AuthorityCard({ auth }: { auth: typeof AUTHORITIES[number] }) {
   );
 }
 
-function CriminalRiskCard({ risk }: { risk: typeof CRIMINAL_RISKS[number] }) {
+function CriminalRiskCard({ risk, t }: { risk: CriminalRisk; t: TFn }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -315,21 +347,21 @@ function CriminalRiskCard({ risk }: { risk: typeof CRIMINAL_RISKS[number] }) {
             <div className="px-5 pb-5 space-y-3" style={{ borderTop: `1px solid ${T.border}` }}>
               <p className="text-xs leading-relaxed pt-4" style={{ color: T.muted }}>{risk.description}</p>
               <div className="rounded-lg px-3 py-2.5" style={{ background: T.redBg, border: `1px solid ${T.redBdr}` }}>
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: T.red }}>Aggravanti</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: T.red }}>{t("lbl_aggravating")}</p>
                 <p className="text-xs" style={{ color: "rgba(0,0,0,0.55)" }}>{risk.aggravated}</p>
               </div>
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: T.faint }}>Chi è a rischio</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: T.faint }}>{t("lbl_whoRisk")}</p>
                 <p className="text-xs" style={{ color: T.muted }}>{risk.who_is_at_risk}</p>
               </div>
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: T.faint }}>Come mitigare</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: T.faint }}>{t("lbl_howMitigate")}</p>
                 <p className="text-xs" style={{ color: T.muted }}>{risk.mitigation}</p>
               </div>
               <a href={risk.href}
                 className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg transition-colors hover:opacity-90"
                 style={{ background: T.redBg, color: T.red, border: `1px solid ${T.redBdr}` }}>
-                Vai al tool di mitigazione <ExternalLink className="w-3 h-3" />
+                {t("goMitigation")} <ExternalLink className="w-3 h-3" />
               </a>
             </div>
           </motion.div>
@@ -344,13 +376,18 @@ function CriminalRiskCard({ risk }: { risk: typeof CRIMINAL_RISKS[number] }) {
 type TabId = "authorities" | "criminal" | "sanctions";
 
 export default function AgidAcnPage() {
+  const t = useT("toolAgidAcn");
   const [tab, setTab] = useState<TabId>("authorities");
   const [art5Open, setArt5Open] = useState(false);
 
+  const AUTHORITIES = buildAuthorities(t);
+  const CRIMINAL_RISKS = buildCriminalRisks(t);
+  const ADMIN_SANCTIONS = buildAdminSanctions(t);
+
   const TABS: { id: TabId; label: string }[] = [
-    { id: "authorities", label: "Autorità di vigilanza" },
-    { id: "criminal",    label: "Rischi penali L.132"  },
-    { id: "sanctions",   label: "Sanzioni amministrative" },
+    { id: "authorities", label: t("tab_authorities") },
+    { id: "criminal",    label: t("tab_criminal")  },
+    { id: "sanctions",   label: t("tab_sanctions") },
   ];
 
   const SEVERITY_COLORS = {
@@ -367,12 +404,11 @@ export default function AgidAcnPage() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <Building2 className="w-4 h-4" style={{ color: T.blue }} />
-          <span className="text-xs font-medium" style={{ color: T.muted }}>Autorità di Vigilanza Italiane</span>
+          <span className="text-xs font-medium" style={{ color: T.muted }}>{t("headerKicker")}</span>
         </div>
         <h1 className="text-xl font-bold mb-1" style={{ color: T.text }}>AGID / ACN / Garante Privacy</h1>
         <p className="text-sm" style={{ color: T.muted }}>
-          Autorità competenti in Italia per EU AI Act, cybersicurezza e privacy.
-          Poteri sanzionatori, obblighi di notifica e rischi penali L.132/2025.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -382,11 +418,10 @@ export default function AgidAcnPage() {
           <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: T.red }} />
           <div>
             <p className="text-sm font-semibold mb-0.5" style={{ color: T.red }}>
-              L.132/2025 — Rischi penali in vigore dal 10 ottobre 2025
+              {t("l132AlertTitle")}
             </p>
             <p className="text-xs leading-relaxed" style={{ color: "rgba(0,0,0,0.55)" }}>
-              La Legge 132/2025 introduce reati specifici legati all&apos;uso dell&apos;AI in Italia, con pene fino a 7 anni di
-              reclusione. Si applica a provider e deployer che operano sul territorio italiano.
+              {t("l132AlertBody")}
             </p>
           </div>
         </div>
@@ -394,18 +429,18 @@ export default function AgidAcnPage() {
 
       {/* Tab switcher */}
       <div className="flex gap-1 p-1 rounded-xl" style={{ background: "rgba(0,0,0,0.04)" }}>
-        {TABS.map(t => (
+        {TABS.map(tb => (
           <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
+            key={tb.id}
+            onClick={() => setTab(tb.id)}
             className="flex-1 py-2 rounded-lg text-xs font-medium transition-all"
             style={{
-              background: tab === t.id ? T.card : "transparent",
-              color: tab === t.id ? T.text : T.muted,
-              boxShadow: tab === t.id ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
+              background: tab === tb.id ? T.card : "transparent",
+              color: tab === tb.id ? T.text : T.muted,
+              boxShadow: tab === tb.id ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
             }}
           >
-            {t.label}
+            {tb.label}
           </button>
         ))}
       </div>
@@ -414,7 +449,7 @@ export default function AgidAcnPage() {
       {tab === "authorities" && (
         <div className="space-y-3">
           {AUTHORITIES.map(auth => (
-            <AuthorityCard key={auth.id} auth={auth} />
+            <AuthorityCard key={auth.id} auth={auth} t={t} />
           ))}
         </div>
       )}
@@ -423,14 +458,11 @@ export default function AgidAcnPage() {
       {tab === "criminal" && (
         <div className="space-y-3">
           <div className="rounded-xl px-4 py-3" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-            <p className="text-xs leading-relaxed" style={{ color: "rgba(0,0,0,0.45)" }}>
-              <strong>Nota:</strong> Le sanzioni penali si applicano indipendentemente dall&apos;eventuale conformità
-              all&apos;EU AI Act. Un sistema tecnicamente conforme può comunque esporre a responsabilità penale se usato
-              in violazione della L.132/2025.
-            </p>
+            <p className="text-xs leading-relaxed" style={{ color: "rgba(0,0,0,0.45)" }}
+              dangerouslySetInnerHTML={{ __html: t("criminal_note") }} />
           </div>
           {CRIMINAL_RISKS.map((risk, i) => (
-            <CriminalRiskCard key={i} risk={risk} />
+            <CriminalRiskCard key={i} risk={risk} t={t} />
           ))}
         </div>
       )}
@@ -439,8 +471,7 @@ export default function AgidAcnPage() {
       {tab === "sanctions" && (
         <div className="space-y-3">
           <p className="text-sm" style={{ color: T.muted }}>
-            Sanzioni amministrative previste dall&apos;EU AI Act, applicate dalle autorità nazionali
-            (in Italia: AGID per PA, Garante per privacy).
+            {t("sanctions_intro")}
           </p>
           {ADMIN_SANCTIONS.map((s, i) => {
             const colors = SEVERITY_COLORS[s.severity];
@@ -460,11 +491,11 @@ export default function AgidAcnPage() {
                         <p className="text-sm font-semibold mb-1" style={{ color: colors.txt }}>{s.max_amount}</p>
                         <p className="text-xs" style={{ color: "rgba(0,0,0,0.55)" }}>{s.violation}</p>
                         <p className="text-[10px] mt-1.5 font-medium" style={{ color: "rgba(0,0,0,0.35)" }}>
-                          {art5Open ? "▲ Nascondi le 8 fattispecie vietate" : "▼ Vedi le 8 fattispecie vietate (Art. 5)"}
+                          {art5Open ? t("art5_hide") : t("art5_show")}
                         </p>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <p className="text-xs font-medium" style={{ color: colors.txt }}>oppure</p>
+                        <p className="text-xs font-medium" style={{ color: colors.txt }}>{t("or_word")}</p>
                         <p className="text-sm font-semibold" style={{ color: colors.txt }}>{s.max_pct}</p>
                       </div>
                     </div>
@@ -497,7 +528,7 @@ export default function AgidAcnPage() {
                     <p className="text-xs" style={{ color: "rgba(0,0,0,0.55)" }}>{s.violation}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-xs font-medium" style={{ color: colors.txt }}>oppure</p>
+                    <p className="text-xs font-medium" style={{ color: colors.txt }}>{t("or_word")}</p>
                     <p className="text-sm font-semibold" style={{ color: colors.txt }}>{s.max_pct}</p>
                   </div>
                 </div>
@@ -505,11 +536,8 @@ export default function AgidAcnPage() {
             );
           })}
           <div className="rounded-xl px-4 py-3" style={{ background: "rgba(0,0,0,0.02)", border: `1px solid ${T.border}` }}>
-            <p className="text-xs leading-relaxed" style={{ color: T.muted }}>
-              <strong>Applica il massimo</strong> tra importo fisso e percentuale del fatturato.
-              Le PMI beneficiano di riduzioni automatiche del 50%.
-              La Commissione Europea può pubblicare orientamenti sull&apos;applicazione delle sanzioni.
-            </p>
+            <p className="text-xs leading-relaxed" style={{ color: T.muted }}
+              dangerouslySetInnerHTML={{ __html: t("sanctions_footer") }} />
           </div>
         </div>
       )}

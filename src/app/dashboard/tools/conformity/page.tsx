@@ -16,6 +16,9 @@ import {
 import { submitToAuthority } from "@/lib/compliance/gateway";
 import { writeToStorage } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
+import { useT } from "@/i18n/LocaleProvider";
+
+type TFn = (key: string) => string;
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -83,14 +86,14 @@ const btnGhost: React.CSSProperties = {
 
 // ─── Stepper ─────────────────────────────────────────────────────────────────
 const STEPS = [
-  { n: 1, label: "Percorso" },
-  { n: 2, label: "Requisiti" },
-  { n: 3, label: "Dichiarazione" },
-  { n: 4, label: "CE + Reg." },
-  { n: 5, label: "Completo" },
+  { n: 1, key: "step_path" },
+  { n: 2, key: "step_req" },
+  { n: 3, key: "step_decl" },
+  { n: 4, key: "step_ce" },
+  { n: 5, key: "step_done" },
 ] as const;
 
-function Stepper({ step }: { step: number }) {
+function Stepper({ step, t }: { step: number; t: TFn }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 0, marginBottom: 32 }}>
       {STEPS.map((s, i) => {
@@ -115,7 +118,7 @@ function Stepper({ step }: { step: number }) {
                 color: completed ? C.green : active ? C.text : C.textTertiary,
                 whiteSpace: "nowrap",
               }}>
-                {s.label}
+                {t(s.key)}
               </span>
             </div>
             {i < STEPS.length - 1 && (
@@ -133,6 +136,7 @@ function Stepper({ step }: { step: number }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function ConformityPage() {
+  const t = useT("toolConformity");
   const [evidence, setEvidence] = useState<ConformityEvidence>({});
   const [path, setPath] = useState<PathDetermination | null>(null);
   const [results, setResults] = useState<AssessmentResult[]>([]);
@@ -210,7 +214,7 @@ export default function ConformityPage() {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <h2 style={{ fontSize: 18, fontWeight: 500, color: C.text, margin: 0 }}>
-          Determinazione del percorso
+          {t("step1_title")}
         </h2>
 
         {/* Auto or manual path */}
@@ -227,8 +231,8 @@ export default function ConformityPage() {
                   : <AlertTriangle size={16} color={C.amber} />}
                 <span style={{ fontSize: 13, fontWeight: 600, color: path.path === "self" ? C.green : C.amber }}>
                   {path.path === "self"
-                    ? "✓ Percorso determinato dal Classifier"
-                    : "⚠️ ORGANISMO NOTIFICATO RICHIESTO"}
+                    ? t("pathFromClassifier")
+                    : t("notifiedBodyRequired")}
                 </span>
               </div>
               <div style={{
@@ -242,7 +246,7 @@ export default function ConformityPage() {
                 letterSpacing: "0.5px",
                 marginBottom: 10,
               }}>
-                {path.path === "self" ? "AUTO-VALUTAZIONE Art. 43.2" : `ORGANISMO NOTIFICATO — ${path.applicableArticle}`}
+                {path.path === "self" ? t("selfAssessment") : `${t("notifiedBody")} — ${path.applicableArticle}`}
               </div>
               <p style={{ fontSize: 13, color: path.path === "self" ? C.green : C.amber, margin: 0 }}>
                 {path.reason}
@@ -251,16 +255,16 @@ export default function ConformityPage() {
               {path.path === "notified_body" && (
                 <>
                   <p style={{ fontSize: 12, color: C.textSecondary, marginTop: 10 }}>
-                    Puoi comunque completare la verifica interna come preparazione all&apos;audit dell&apos;organismo notificato.
+                    {t("nbPrepNote")}
                   </p>
                   <div style={{ marginTop: 12 }}>
-                    <p style={{ ...labelStyle, marginBottom: 8 }}>Organismi notificati accreditati</p>
+                    <p style={{ ...labelStyle, marginBottom: 8 }}>{t("accreditedNb")}</p>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       {[
-                        { name: "TÜV SÜD", country: "Germania", spec: "Safety, AI Systems, Machinery", url: "https://www.tuvsud.com" },
-                        { name: "Bureau Veritas", country: "Francia", spec: "Product Safety, Digital Systems", url: "https://www.bureauveritas.com" },
+                        { name: "TÜV SÜD", country: t("country_germany"), spec: "Safety, AI Systems, Machinery", url: "https://www.tuvsud.com" },
+                        { name: "Bureau Veritas", country: t("country_france"), spec: "Product Safety, Digital Systems", url: "https://www.bureauveritas.com" },
                         { name: "BSI Group", country: "UK/EU", spec: "IT Security, AI Governance", url: "https://www.bsigroup.com" },
-                        { name: "DNV", country: "Norvegia/EU", spec: "Risk Management, Digital Trust", url: "https://www.dnv.com" },
+                        { name: "DNV", country: t("country_norway"), spec: "Risk Management, Digital Trust", url: "https://www.dnv.com" },
                       ].map((nb) => (
                         <div key={nb.name} style={{
                           display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -274,7 +278,7 @@ export default function ConformityPage() {
                           </div>
                           <a href={nb.url} target="_blank" rel="noopener noreferrer"
                             style={{ color: C.textSecondary, display: "flex", alignItems: "center", gap: 4, fontSize: 11 }}>
-                            <ExternalLink size={12} /> Sito
+                            <ExternalLink size={12} /> {t("site")}
                           </a>
                         </div>
                       ))}
@@ -285,18 +289,18 @@ export default function ConformityPage() {
             </div>
           ) : (
             <div style={{ ...cardStyle, color: C.textSecondary, fontSize: 13 }}>
-              Calcolo percorso in corso...
+              {t("computingPath")}
             </div>
           )
         ) : (
           /* Manual determination */
           <div style={cardStyle}>
             <p style={{ fontSize: 13, color: C.textSecondary, marginBottom: 16 }}>
-              Il Classifier non è stato completato. Inserisci manualmente i dati per determinare il percorso.
+              {t("classifierNotDone")}
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
               <div>
-                <label style={labelStyle}>Livello di rischio</label>
+                <label style={labelStyle}>{t("riskLevel")}</label>
                 <select
                   value={manualRisk}
                   onChange={(e) => setManualRisk(e.target.value)}
@@ -311,10 +315,10 @@ export default function ConformityPage() {
                 </select>
               </div>
               <div>
-                <label style={labelStyle}>Categoria Allegato III (opzionale)</label>
+                <label style={labelStyle}>{t("annexIIICat")}</label>
                 <input
                   type="text"
-                  placeholder="es. 1. (biometrico)"
+                  placeholder={t("annexIIIPh")}
                   value={manualAnnex}
                   onChange={(e) => setManualAnnex(e.target.value)}
                   style={{
@@ -331,7 +335,7 @@ export default function ConformityPage() {
                 setPath(p);
               }}
             >
-              Determina percorso <ArrowRight size={13} />
+              {t("determinePath")} <ArrowRight size={13} />
             </button>
 
             {path && (
@@ -343,7 +347,7 @@ export default function ConformityPage() {
                 border: `1px solid ${path.path === "self" ? C.greenBorder : C.amberBorder}`,
               }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: path.path === "self" ? C.green : C.amber }}>
-                  {path.path === "self" ? "AUTO-VALUTAZIONE Art. 43.2" : "ORGANISMO NOTIFICATO RICHIESTO"}
+                  {path.path === "self" ? t("selfAssessment") : t("notifiedBodyRequiredShort")}
                 </span>
                 <p style={{ fontSize: 12, color: C.textSecondary, margin: "4px 0 0" }}>{path.reason}</p>
               </div>
@@ -360,15 +364,15 @@ export default function ConformityPage() {
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
             <Info size={14} color={C.textSecondary} />
             <span style={{ fontSize: 12, fontWeight: 600, color: C.textSecondary }}>
-              Cosa significa auto-valutazione?
+              {t("whatIsSelfAssess")}
             </span>
           </div>
           <ol style={{ margin: 0, paddingLeft: 18, display: "flex", flexDirection: "column", gap: 6 }}>
             {[
-              "Verifica interna requisiti Art. 9–17 (questo wizard)",
-              "Redazione Dichiarazione UE di Conformità (Allegato V)",
-              "Apposizione marcatura CE sul sistema/documentazione (Art. 48)",
-              "Registrazione nella banca dati UE (Art. 49)",
+              t("selfStep1"),
+              t("selfStep2"),
+              t("selfStep3"),
+              t("selfStep4"),
             ].map((item, i) => (
               <li key={i} style={{ fontSize: 12, color: C.textSecondary }}>{item}</li>
             ))}
@@ -381,7 +385,7 @@ export default function ConformityPage() {
             disabled={!path}
             onClick={() => setStep(2)}
           >
-            Avanti: Verifica requisiti <ChevronRight size={14} />
+            {t("nextReqs")} <ChevronRight size={14} />
           </button>
         </div>
       </div>
@@ -396,10 +400,10 @@ export default function ConformityPage() {
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <h2 style={{ fontSize: 18, fontWeight: 500, color: C.text, margin: 0 }}>
-            Verifica dei requisiti Art. 9–17
+            {t("step2_title")}
           </h2>
           <span style={{ fontSize: 12, color: C.textSecondary }}>
-            {verified} di {total} requisiti verificati
+            {verified} {t("ofWord")} {total} {t("reqsVerified")}
           </span>
         </div>
 
@@ -485,7 +489,7 @@ export default function ConformityPage() {
                               display: "inline-flex", alignItems: "center", gap: 4,
                             }}
                           >
-                            Completa {req.linkedToolKey} <ArrowRight size={12} />
+                            {t("complete")} {req.linkedToolKey} <ArrowRight size={12} />
                           </Link>
                         )}
                         <div>
@@ -496,12 +500,12 @@ export default function ConformityPage() {
                               [req.id]: { ...mf, confirming: !mf.confirming },
                             }))}
                           >
-                            Verifica manualmente
+                            {t("verifyManually")}
                           </button>
                           {mf.confirming && (
                             <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
                               <textarea
-                                placeholder="Descrivi come il requisito è soddisfatto..."
+                                placeholder={t("describeReqPh")}
                                 value={mf.note}
                                 onChange={(e) => setManualForms((prev) => ({
                                   ...prev,
@@ -528,7 +532,7 @@ export default function ConformityPage() {
                                     }
                                   }}
                                 />
-                                Confermo che il requisito è soddisfatto
+                                {t("confirmReqMet")}
                               </label>
                             </div>
                           )}
@@ -546,9 +550,9 @@ export default function ConformityPage() {
         <div style={cardStyle}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
             <span style={{ fontSize: 13, color: C.text, fontWeight: 500 }}>
-              {passed}/{total} requisiti verificati ({score}%)
+              {passed}/{total} {t("reqsVerified")} ({score}%)
             </span>
-            <span style={{ fontSize: 12, color: C.textSecondary }}>{failed} mancanti</span>
+            <span style={{ fontSize: 12, color: C.textSecondary }}>{failed} {t("missingWord")}</span>
           </div>
           <div style={{ height: 6, background: "rgba(0,0,0,0.06)", borderRadius: 9999, overflow: "hidden" }}>
             <div style={{
@@ -559,14 +563,14 @@ export default function ConformityPage() {
           </div>
           {score < 100 && (
             <p style={{ fontSize: 11, color: C.amber, marginTop: 8 }}>
-              ⚠️ {failed} requisiti mancanti. Puoi comunque procedere ma la dichiarazione sarà parziale.
+              ⚠️ {failed} {t("reqsMissingNote")}
             </p>
           )}
         </div>
 
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <button style={btnPrimary} onClick={() => setStep(3)}>
-            Avanti: Genera Dichiarazione <ChevronRight size={14} />
+            {t("nextDeclaration")} <ChevronRight size={14} />
           </button>
         </div>
       </div>
@@ -586,7 +590,7 @@ export default function ConformityPage() {
     };
 
     const handleCopy = () => {
-      navigator.clipboard.writeText(declaration).then(() => showToast("Copiato!"));
+      navigator.clipboard.writeText(declaration).then(() => showToast(t("toast_copied")));
     };
 
     const handleDownload = () => {
@@ -597,7 +601,7 @@ export default function ConformityPage() {
       a.download = "dichiarazione-conformita-UE.txt";
       a.click();
       URL.revokeObjectURL(url);
-      showToast("Scaricato!");
+      showToast(t("toast_downloaded"));
     };
 
     const handleSaveDossier = () => {
@@ -627,24 +631,24 @@ export default function ConformityPage() {
         },
         "conformity"
       );
-      showToast("Salvato nel dossier ✓");
+      showToast(t("toast_savedDossier"));
     };
 
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <h2 style={{ fontSize: 18, fontWeight: 500, color: C.text, margin: 0 }}>
-          Dichiarazione di Conformità UE
+          {t("step3_title")}
         </h2>
 
         {/* Signatory form */}
         <div style={cardStyle}>
-          <p style={{ ...labelStyle, marginBottom: 12 }}>Dati del firmatario</p>
+          <p style={{ ...labelStyle, marginBottom: 12 }}>{t("signatoryData")}</p>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             {([
-              { key: "companyName", label: "Ragione sociale azienda", placeholder: "Acme S.r.l." },
-              { key: "companyAddress", label: "Indirizzo (Città, Paese)", placeholder: "Milano, Italia" },
-              { key: "signatoryName", label: "Nome firmatario", placeholder: "Mario Rossi" },
-              { key: "signatoryRole", label: "Ruolo/Qualifica", placeholder: "CEO / Responsabile Conformità" },
+              { key: "companyName", label: t("companyName"), placeholder: "Acme S.r.l." },
+              { key: "companyAddress", label: t("companyAddress"), placeholder: "Milano, Italia" },
+              { key: "signatoryName", label: t("signatoryName"), placeholder: "Mario Rossi" },
+              { key: "signatoryRole", label: t("signatoryRole"), placeholder: "CEO / Responsabile Conformità" },
             ] as const).map(({ key, label, placeholder }) => (
               <div key={key}>
                 <label style={labelStyle}>{label}</label>
@@ -663,7 +667,7 @@ export default function ConformityPage() {
           </div>
           <div style={{ marginTop: 16 }}>
             <button style={btnPrimary} onClick={handleGenerate}>
-              <FileText size={13} /> Genera Dichiarazione
+              <FileText size={13} /> {t("generateDeclaration")}
             </button>
           </div>
         </div>
@@ -684,13 +688,13 @@ export default function ConformityPage() {
             />
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <button style={btnGhost} onClick={handleCopy}>
-                <Copy size={13} /> Copia testo
+                <Copy size={13} /> {t("copyText")}
               </button>
               <button style={btnGhost} onClick={handleDownload}>
-                <Download size={13} /> Scarica .txt
+                <Download size={13} /> {t("downloadTxt")}
               </button>
               <button style={btnGhost} onClick={handleSaveDossier}>
-                <BadgeCheck size={13} /> Salva nel Dossier
+                <BadgeCheck size={13} /> {t("saveToDossier")}
               </button>
             </div>
           </div>
@@ -705,15 +709,15 @@ export default function ConformityPage() {
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
             <Info size={14} color={C.textSecondary} />
             <span style={{ fontSize: 12, fontWeight: 600, color: C.textSecondary }}>
-              Dopo aver stampato la dichiarazione:
+              {t("afterPrinting")}
             </span>
           </div>
           <ol style={{ margin: 0, paddingLeft: 18, display: "flex", flexDirection: "column", gap: 4 }}>
             {[
-              "Firmala fisicamente",
-              "Conserva per 10 anni (Art. 18)",
-              "Rendila disponibile alle autorità",
-              "Allegala alla documentazione tecnica",
+              t("printStep1"),
+              t("printStep2"),
+              t("printStep3"),
+              t("printStep4"),
             ].map((item, i) => (
               <li key={i} style={{ fontSize: 12, color: C.textSecondary }}>{item}</li>
             ))}
@@ -722,7 +726,7 @@ export default function ConformityPage() {
 
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <button style={btnPrimary} onClick={() => setStep(4)}>
-            Avanti: CE Marking <ChevronRight size={14} />
+            {t("nextCe")} <ChevronRight size={14} />
           </button>
         </div>
       </div>
@@ -735,12 +739,12 @@ export default function ConformityPage() {
     const riskClass = evidence.classifier?.riskLevel || "high";
 
     const ceItems: Array<{ key: string; label: string }> = [
-      { key: "dichiarazione_firmata", label: "Dichiarazione di Conformità UE firmata" },
-      { key: "documentazione_completa", label: "Documentazione tecnica (Allegato IV) completa" },
-      { key: "identificazione", label: "Sistema identificabile univocamente (numero versione)" },
-      { key: "marcatura_apposta", label: "Marcatura CE apposta sul sistema o documentazione" },
+      { key: "dichiarazione_firmata", label: t("ce_signedDecl") },
+      { key: "documentazione_completa", label: t("ce_techDoc") },
+      { key: "identificazione", label: t("ce_identifiable") },
+      { key: "marcatura_apposta", label: t("ce_marked") },
       ...(path?.mandatoryNotifiedBody
-        ? [{ key: "certificato_notificato", label: "Certificato organismo notificato disponibile" }]
+        ? [{ key: "certificato_notificato", label: t("ce_nbCert") }]
         : []),
     ];
 
@@ -762,7 +766,7 @@ export default function ConformityPage() {
         setRegistrationRef(result.referenceNumber);
         localStorage.setItem("aicomply_registration_result", JSON.stringify(result));
       } catch (err) {
-        setRegistrationError(err instanceof Error ? err.message : "Errore durante l'invio. Riprova.");
+        setRegistrationError(err instanceof Error ? err.message : t("submitError"));
       } finally {
         setRegistering(false);
       }
@@ -814,14 +818,14 @@ export default function ConformityPage() {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <h2 style={{ fontSize: 18, fontWeight: 500, color: C.text, margin: 0 }}>
-          CE Marking e Registrazione
+          {t("step4_title")}
         </h2>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
           {/* Left: CE Marking */}
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={cardStyle}>
-              <p style={{ ...labelStyle, marginBottom: 12 }}>CE Marking — Art. 48</p>
+              <p style={{ ...labelStyle, marginBottom: 12 }}>{t("ceMarkingTitle")}</p>
 
               {/* Visual CE mark */}
               <div style={{
@@ -835,7 +839,7 @@ export default function ConformityPage() {
                   CE
                 </div>
                 <div style={{ fontSize: 11, color: C.textTertiary, marginTop: 6, letterSpacing: "0.5px" }}>
-                  Marcatura CE — AI Act
+                  {t("ceMarkAiAct")}
                 </div>
               </div>
 
@@ -869,11 +873,11 @@ export default function ConformityPage() {
               border: `1px solid ${C.amberBorder}`,
             }}>
               <p style={{ fontSize: 12, color: C.amber, margin: 0, fontWeight: 600 }}>
-                ⚠️ La marcatura CE NON può essere apposta senza:
+                ⚠️ {t("ceCannotWithout")}
               </p>
               <ol style={{ margin: "8px 0 0", paddingLeft: 18 }}>
-                <li style={{ fontSize: 12, color: C.amber }}>Dichiarazione UE firmata (Art. 47)</li>
-                <li style={{ fontSize: 12, color: C.amber }}>Completamento valutazione conformità (Art. 43)</li>
+                <li style={{ fontSize: 12, color: C.amber }}>{t("ceReq1")}</li>
+                <li style={{ fontSize: 12, color: C.amber }}>{t("ceReq2")}</li>
               </ol>
             </div>
           </div>
@@ -881,27 +885,27 @@ export default function ConformityPage() {
           {/* Right: Registration */}
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={cardStyle}>
-              <p style={{ ...labelStyle, marginBottom: 12 }}>Registrazione banca dati UE — Art. 49</p>
+              <p style={{ ...labelStyle, marginBottom: 12 }}>{t("euDbTitle")}</p>
 
               {/* Pre-filled info */}
               <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
                 <div>
-                  <p style={labelStyle}>Sistema AI</p>
+                  <p style={labelStyle}>{t("aiSystemLabel")}</p>
                   <p style={{ fontSize: 13, color: C.text, margin: 0, fontWeight: 500 }}>{systemName}</p>
                 </div>
                 <div>
-                  <p style={labelStyle}>Livello rischio</p>
+                  <p style={labelStyle}>{t("riskLevelShort")}</p>
                   <p style={{ fontSize: 13, color: C.text, margin: 0, textTransform: "capitalize" }}>{riskClass}</p>
                 </div>
               </div>
 
               {/* Documents */}
-              <p style={{ ...labelStyle, marginBottom: 8 }}>Documenti richiesti</p>
+              <p style={{ ...labelStyle, marginBottom: 8 }}>{t("requiredDocs")}</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 16 }}>
                 {[
-                  { label: "Documentazione tecnica (Allegato IV) — generata da DocuGen", done: !!evidence.docugen },
-                  { label: "Dichiarazione di Conformità UE — generata da questo tool", done: declarationGenerated },
-                  { label: "Risultati test di conformità Art. 15", done: false },
+                  { label: t("doc_techDocuGen"), done: !!evidence.docugen },
+                  { label: t("doc_declThis"), done: declarationGenerated },
+                  { label: t("doc_testResults"), done: false },
                 ].map(({ label, done }) => (
                   <div key={label} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
                     {done
@@ -919,7 +923,7 @@ export default function ConformityPage() {
                   background: C.greenBg, border: `1px solid ${C.greenBorder}`,
                 }}>
                   <p style={{ fontSize: 12, color: C.green, margin: 0, fontWeight: 600 }}>
-                    ✓ Notifica inviata — Ref: {registrationRef}
+                    ✓ {t("notifSent")} {registrationRef}
                   </p>
                 </div>
               ) : (
@@ -929,9 +933,9 @@ export default function ConformityPage() {
                   disabled={registering}
                 >
                   {registering ? (
-                    <><Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> Invio in corso...</>
+                    <><Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> {t("submitting")}</>
                   ) : (
-                    <><Shield size={13} /> Invia notifica al Garante (Art. 49/71)</>
+                    <><Shield size={13} /> {t("submitNotif")}</>
                   )}
                 </button>
               )}
@@ -950,7 +954,7 @@ export default function ConformityPage() {
               <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
                 <Info size={13} color={C.textTertiary} style={{ flexShrink: 0, marginTop: 1 }} />
                 <p style={{ fontSize: 11, color: C.textSecondary, margin: 0 }}>
-                  La lista degli organismi notificati ufficiali sarà disponibile nel{" "}
+                  {t("nandoNote")}{" "}
                   <a
                     href="https://ec.europa.eu/growth/tools-databases/nando"
                     target="_blank"
@@ -967,7 +971,7 @@ export default function ConformityPage() {
 
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <button style={btnPrimary} onClick={handleComplete}>
-            Completa Assessment <ChevronRight size={14} />
+            {t("completeAssessment")} <ChevronRight size={14} />
           </button>
         </div>
       </div>
@@ -989,17 +993,17 @@ export default function ConformityPage() {
         }}>
           <CheckCircle size={40} color={C.green} style={{ marginBottom: 12 }} />
           <h2 style={{ fontSize: 22, fontWeight: 500, color: C.green, margin: "0 0 8px" }}>
-            Conformity Assessment completato
+            {t("step5_title")}
           </h2>
           <p style={{ fontSize: 13, color: C.green, margin: 0 }}>
-            {passed}/{total} requisiti Art. 9–17 verificati
+            {passed}/{total} {t("reqsArt917Verified")}
           </p>
         </div>
 
         {/* Score bar */}
         <div style={cardStyle}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: C.text }}>Punteggio conformità</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: C.text }}>{t("conformityScore")}</span>
             <span style={{ fontSize: 12, color: C.textSecondary }}>{score}%</span>
           </div>
           <div style={{ height: 8, background: "rgba(0,0,0,0.06)", borderRadius: 9999, overflow: "hidden" }}>
@@ -1012,27 +1016,27 @@ export default function ConformityPage() {
 
         {/* Summary checklist */}
         <div style={cardStyle}>
-          <p style={{ ...labelStyle, marginBottom: 12 }}>Riepilogo assessment</p>
+          <p style={{ ...labelStyle, marginBottom: 12 }}>{t("assessmentSummary")}</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {[
               {
-                label: "Percorso",
-                value: path ? (path.path === "self" ? "Auto-valutazione Art. 43.2" : "Organismo notificato richiesto") : "Non determinato",
+                label: t("sum_path"),
+                value: path ? (path.path === "self" ? t("sum_selfAssess") : t("sum_nbRequired")) : t("sum_notDetermined"),
                 ok: !!path,
               },
               {
-                label: "Requisiti Art. 9–17",
-                value: `${passed}/${total} verificati`,
+                label: t("sum_reqs"),
+                value: `${passed}/${total} ${t("verifiedWord")}`,
                 ok: passed > 0,
               },
               {
-                label: "Dichiarazione di Conformità UE",
-                value: declarationGenerated ? "Generata" : "Da generare",
+                label: t("sum_declaration"),
+                value: declarationGenerated ? t("sum_generated") : t("sum_toGenerate"),
                 ok: declarationGenerated,
               },
               {
-                label: "Registrazione banca dati UE",
-                value: registrationRef ? `Ref: ${registrationRef}` : "Da completare",
+                label: t("sum_euDb"),
+                value: registrationRef ? `Ref: ${registrationRef}` : t("sum_toComplete"),
                 ok: !!registrationRef,
               },
             ].map(({ label, value, ok }) => (
@@ -1053,17 +1057,17 @@ export default function ConformityPage() {
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <Link href="/dashboard/dossier">
             <button style={btnPrimary}>
-              <FileText size={13} /> Genera Dossier completo
+              <FileText size={13} /> {t("generateFullDossier")}
             </button>
           </Link>
           <button style={btnGhost} onClick={() => setStep(1)}>
-            Rivedi Assessment
+            {t("reviewAssessment")}
           </button>
           <button style={btnGhost} onClick={() => {
             localStorage.removeItem("aicomply_conformity_step");
             setStep(1);
           }}>
-            Ricomincia da capo
+            {t("startOver")}
           </button>
         </div>
       </div>
@@ -1076,17 +1080,17 @@ export default function ConformityPage() {
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
         {/* Header */}
         <div style={{ marginBottom: 28 }}>
-          <p style={labelStyle}>Art. 43 AI Act</p>
+          <p style={labelStyle}>{t("kicker")}</p>
           <h1 style={{ fontSize: 24, fontWeight: 400, letterSpacing: "-0.8px", color: C.text, margin: "4px 0 8px" }}>
             Conformity Assessment
           </h1>
           <p style={{ fontSize: 13, color: C.textSecondary, margin: 0 }}>
-            Procedura di valutazione della conformità ai sensi dell&apos;Art. 43 Reg. UE 2024/1689
+            {t("subtitle")}
           </p>
         </div>
 
         {/* Stepper */}
-        <Stepper step={step} />
+        <Stepper step={step} t={t} />
 
         {/* Step content */}
         {step === 1 && <Step1 />}

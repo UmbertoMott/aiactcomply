@@ -12,6 +12,9 @@ import {
   type L132CheckArea,
 } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
+import { useT } from "@/i18n/LocaleProvider";
+
+type TFn = (key: string) => string;
 
 // ─── DB sync helpers ──────────────────────────────────────────────────────────
 async function loadAISystems(): Promise<{ id: string; name: string; risk_tier: string }[]> {
@@ -110,28 +113,28 @@ const inputStyle: React.CSSProperties = {
 
 const STATUS_META: Record<
   L132Result["overallStatus"],
-  { label: string; bg: string; color: string; border: string }
+  { labelKey: string; bg: string; color: string; border: string }
 > = {
   conforme: {
-    label: "Conforme",
+    labelKey: "st_conforme",
     bg: "rgba(22,163,74,0.08)",
     color: "#15803d",
     border: "rgba(22,163,74,0.2)",
   },
   parzialmente_conforme: {
-    label: "Parzialmente conforme",
+    labelKey: "st_parziale",
     bg: "rgba(202,138,4,0.08)",
     color: "#92400e",
     border: "rgba(202,138,4,0.2)",
   },
   non_conforme: {
-    label: "Non conforme",
+    labelKey: "st_nonConforme",
     bg: "rgba(220,38,38,0.08)",
     color: "#dc2626",
     border: "rgba(220,38,38,0.15)",
   },
   non_applicabile: {
-    label: "Non applicabile",
+    labelKey: "st_nonApplicabile",
     bg: "rgba(0,0,0,0.04)",
     color: "rgba(0,0,0,0.45)",
     border: "rgba(0,0,0,0.1)",
@@ -462,10 +465,12 @@ function CheckItem({
   label,
   value,
   onChange,
+  t,
 }: {
   label: string;
   value: boolean | null;
   onChange: (v: boolean) => void;
+  t: TFn;
 }) {
   return (
     <div
@@ -492,7 +497,7 @@ function CheckItem({
             fontSize: 9, fontWeight: 600, letterSpacing: "0.05em",
             color: value === true ? "#15803d" : "rgba(0,0,0,0.28)",
             transition: "color 0.15s",
-          }}>Sì</span>
+          }}>{t("yes")}</span>
           <button
             onClick={() => onChange(true)}
             className="w-5 h-5 rounded-full flex items-center justify-center transition-all"
@@ -500,7 +505,7 @@ function CheckItem({
               background: value === true ? "#15803d" : "rgba(0,0,0,0.06)",
               border: value === true ? "none" : "1.5px solid rgba(0,0,0,0.18)",
             }}
-            title="Conforme"
+            title={t("compliantTip")}
           >
             {value === true && (
               <CheckCircle className="h-3 w-3" style={{ color: "#fff" }} />
@@ -513,7 +518,7 @@ function CheckItem({
             fontSize: 9, fontWeight: 600, letterSpacing: "0.05em",
             color: value === false ? "#dc2626" : "rgba(0,0,0,0.28)",
             transition: "color 0.15s",
-          }}>No</span>
+          }}>{t("no")}</span>
           <button
             onClick={() => onChange(false)}
             className="w-5 h-5 rounded-full flex items-center justify-center transition-all"
@@ -521,7 +526,7 @@ function CheckItem({
               background: value === false ? "#dc2626" : "rgba(0,0,0,0.06)",
               border: value === false ? "none" : "1.5px solid rgba(0,0,0,0.18)",
             }}
-            title="Non conforme"
+            title={t("nonCompliantTip")}
           >
             {value === false && (
               <XCircle className="h-3 w-3" style={{ color: "#fff" }} />
@@ -540,10 +545,12 @@ function NotesField({
   value,
   onChange,
   placeholder,
+  t,
 }: {
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
+  t: TFn;
 }) {
   return (
     <div className="mt-3">
@@ -551,7 +558,7 @@ function NotesField({
         className="block text-[11px] font-medium mb-1"
         style={{ color: "rgba(0,0,0,0.45)" }}
       >
-        Note / documenti di supporto
+        {t("notesLabel")}
       </label>
       <textarea
         value={value}
@@ -567,6 +574,7 @@ function NotesField({
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function L132Page() {
+  const t = useT("toolL132");
   const [form, setForm] = useState<FormState>(defaultForm);
   const [toast, setToast] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -674,7 +682,7 @@ export default function L132Page() {
       "AIComply L.132/2025 Tool"
     );
     setSaved(true);
-    showToast("✓ Valutazione salvata nel Dossier");
+    showToast(t("toast_saved"));
   }
 
   return (
@@ -685,14 +693,14 @@ export default function L132Page() {
         <div className="flex items-center gap-3 rounded-lg px-4 py-2.5 mb-4 text-[12px]"
           style={{ background: "rgba(220,38,38,0.04)", border: "1px solid rgba(220,38,38,0.12)" }}>
           <Scale className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#dc2626" }} />
-          <span style={{ color: "rgba(0,0,0,0.45)" }}>Sistema AI:</span>
+          <span style={{ color: "rgba(0,0,0,0.45)" }}>{t("aiSystemLabel")}</span>
           <select
             value={aiSystemId || ""}
             onChange={(e) => setAiSystemId(e.target.value || null)}
             className="text-[12px] bg-transparent outline-none flex-1"
             style={{ color: "#0D1016" }}
           >
-            <option value="">— seleziona sistema AI —</option>
+            <option value="">{t("selectAiSystem")}</option>
             {aiSystems.map((s) => (
               <option key={s.id} value={s.id}>{s.name} ({s.risk_tier})</option>
             ))}
@@ -700,7 +708,7 @@ export default function L132Page() {
           <span className="text-[11px]" style={{
             color: dbSyncing ? "#dc2626" : dbSynced ? "#16a34a" : "rgba(0,0,0,0.3)"
           }}>
-            {dbSyncing ? "⟳ Sync..." : dbSynced ? "✓ DB salvato" : "○ Non sync"}
+            {dbSyncing ? t("dbSyncing") : dbSynced ? t("dbSaved") : t("dbNotSync")}
           </span>
         </div>
       )}
@@ -730,22 +738,20 @@ export default function L132Page() {
                   border: "1px solid rgba(220,38,38,0.15)",
                 }}
               >
-                In vigore dal 23 set 2025
+                {t("inForce")}
               </span>
             </div>
             <p
               className="text-[12px] mt-0.5"
               style={{ color: "rgba(0,0,0,0.45)" }}
             >
-              Legge 23 settembre 2025 n.132 · Normativa AI nazionale italiana
+              {t("subtitle")}
             </p>
             <p
               className="text-[11px] mt-1 leading-relaxed"
               style={{ color: "rgba(0,0,0,0.35)" }}
             >
-              Applica a qualsiasi sistema AI utilizzato in Italia. Copre
-              trasparenza HR, etichettatura contenuti, media sintetici e
-              accessibilità.
+              {t("intro")}
             </p>
           </div>
         </div>
@@ -755,9 +761,9 @@ export default function L132Page() {
       <div className="mb-4 p-5" style={card}>
         <SectionHeader
           icon={FileText}
-          title="Informazioni sistema"
-          description="Identifica il sistema AI oggetto della valutazione."
-          article="Screening"
+          title={t("sec0_title")}
+          description={t("sec0_desc")}
+          article={t("sec0_article")}
         />
         <div className="space-y-4">
           <div>
@@ -765,12 +771,12 @@ export default function L132Page() {
               className="block text-[12px] font-medium mb-1"
               style={{ color: "#0D1016" }}
             >
-              Nome del sistema AI
+              {t("systemNameLabel")}
             </label>
             <input
               value={form.systemName}
               onChange={(e) => update("systemName", e.target.value)}
-              placeholder="es. Sistema di screening CV automatizzato"
+              placeholder={t("systemNamePh")}
               style={inputStyle}
             />
           </div>
@@ -779,7 +785,7 @@ export default function L132Page() {
               className="block text-[12px] font-medium mb-1"
               style={{ color: "#0D1016" }}
             >
-              Tipo di sistema
+              {t("systemTypeLabel")}
             </label>
             <select
               value={form.systemType}
@@ -798,13 +804,13 @@ export default function L132Page() {
               className="block text-[12px] font-medium mb-2"
               style={{ color: "#0D1016" }}
             >
-              Il sistema è utilizzato in Italia o da utenti italiani?
+              {t("deployedItalyQ")}
             </label>
             <div className="flex gap-3">
               {(
                 [
-                  { v: true, label: "Sì" },
-                  { v: false, label: "No" },
+                  { v: true, label: t("yes") },
+                  { v: false, label: t("no") },
                 ] as { v: boolean; label: string }[]
               ).map(({ v, label }) => (
                 <button
@@ -839,9 +845,7 @@ export default function L132Page() {
               style={{ color: "#2563eb" }}
             />
             <p className="text-[11px]" style={{ color: "rgba(0,0,0,0.6)" }}>
-              La L.132/2025 si applica ai sistemi IA che operano o sono
-              accessibili in Italia. Se il sistema non è deployato in Italia,
-              questa valutazione non è obbligatoria.
+              {t("notDeployedNote")}
             </p>
           </div>
         )}
@@ -851,8 +855,8 @@ export default function L132Page() {
       <div className="mb-4 p-5" style={card}>
         <SectionHeader
           icon={Users}
-          title="Area 1 — Trasparenza in contesti di lavoro"
-          description="Art. 1 L.132/2025 impone di informare candidati e lavoratori quando sistemi AI sono usati in selezione, valutazione delle performance, monitoraggio o decisioni che li riguardano."
+          title={t("sec1_title")}
+          description={t("sec1_desc")}
           article="Art. 1-2"
         />
         <div
@@ -873,8 +877,7 @@ export default function L132Page() {
             onClick={(e) => e.stopPropagation()}
           />
           <p className="text-[12px] font-medium" style={{ color: "#0D1016" }}>
-            Questo sistema è usato in contesti HR (selezione, valutazione,
-            monitoraggio lavoratori)
+            {t("hrToggle")}
           </p>
         </div>
         {form.requiresHRNotice && (
@@ -882,15 +885,17 @@ export default function L132Page() {
             {HR_REQUIREMENTS.map((req, i) => (
               <CheckItem
                 key={i}
-                label={req}
+                label={t(`hr_${i}`)}
                 value={form.hrChecks[i]}
                 onChange={(v) => setCheck("hrChecks", i, v)}
+                t={t}
               />
             ))}
             <NotesField
               value={form.hrNotes}
               onChange={(v) => update("hrNotes", v)}
-              placeholder="es. Modello di informativa candidati, policy interna HR AI"
+              placeholder={t("hrNotesPh")}
+              t={t}
             />
           </div>
         )}
@@ -899,7 +904,7 @@ export default function L132Page() {
             className="text-[12px]"
             style={{ color: "rgba(0,0,0,0.35)" }}
           >
-            Area non applicabile — il sistema non è usato in contesti HR.
+            {t("hrNotApplicable")}
           </p>
         )}
       </div>
@@ -908,23 +913,25 @@ export default function L132Page() {
       <div className="mb-4 p-5" style={card}>
         <SectionHeader
           icon={FileText}
-          title="Area 2 — Etichettatura contenuti generati da AI"
-          description="L'art. 3 L.132/2025, in combinato con Art. 50 EU AI Act, richiede che i contenuti generati o significativamente modificati da AI siano chiaramente identificabili come tali."
+          title={t("sec2_title")}
+          description={t("sec2_desc")}
           article="Art. 3 + Art. 50 AIA"
         />
         <div className="space-y-2">
           {LABELING_REQUIREMENTS.map((req, i) => (
             <CheckItem
               key={i}
-              label={req}
+              label={t(`lab_${i}`)}
               value={form.labelingChecks[i]}
               onChange={(v) => setCheck("labelingChecks", i, v)}
+              t={t}
             />
           ))}
           <NotesField
             value={form.labelingNotes}
             onChange={(v) => update("labelingNotes", v)}
-            placeholder="es. Riferimento al sistema di watermarking adottato"
+            placeholder={t("labNotesPh")}
+            t={t}
           />
         </div>
       </div>
@@ -933,8 +940,8 @@ export default function L132Page() {
       <div className="mb-4 p-5" style={card}>
         <SectionHeader
           icon={AlertTriangle}
-          title="Area 3 — Media sintetici e Art. 612-quater c.p."
-          description="La L.132/2025 ha introdotto l'Art. 612-quater nel Codice Penale italiano: la creazione o diffusione non consensuale di immagini, video o audio deepfake costituisce reato penale (fino a 5 anni). Applicabile anche ai fornitori di strumenti usati per creare deepfake non consensuali."
+          title={t("sec3_title")}
+          description={t("sec3_desc")}
           article="Art. 612-quater c.p."
         />
         <div
@@ -957,8 +964,7 @@ export default function L132Page() {
             onClick={(e) => e.stopPropagation()}
           />
           <p className="text-[12px] font-medium" style={{ color: "#0D1016" }}>
-            Il sistema può generare immagini, video o audio che ritraggono
-            persone reali (deepfake, face-swap, voice cloning, ecc.)
+            {t("dfToggle")}
           </p>
         </div>
         {form.isDeepfakeRisk ? (
@@ -975,25 +981,24 @@ export default function L132Page() {
                 style={{ color: "#dc2626" }}
               />
               <p className="text-[11px]" style={{ color: "#7f1d1d" }}>
-                <strong>ATTENZIONE — Esposizione penale diretta.</strong>{" "}
-                L&apos;art. 612-quater c.p. prevede fino a 5 anni per
-                creazione/diffusione non consensuale. Come fornitore dello
-                strumento, potresti rispondere in concorso.
+                <span dangerouslySetInnerHTML={{ __html: t("dfWarning") }} />
               </p>
             </div>
             <div className="space-y-2">
               {DEEPFAKE_REQUIREMENTS.map((req, i) => (
                 <CheckItem
                   key={i}
-                  label={req}
+                  label={t(`df_${i}`)}
                   value={form.deepfakeChecks[i]}
                   onChange={(v) => setCheck("deepfakeChecks", i, v)}
+                  t={t}
                 />
               ))}
               <NotesField
                 value={form.deepfakeNotes}
                 onChange={(v) => update("deepfakeNotes", v)}
-                placeholder="es. Valutazione legale effettuata da Studio XYZ in data …"
+                placeholder={t("dfNotesPh")}
+                t={t}
               />
             </div>
           </>
@@ -1010,8 +1015,7 @@ export default function L132Page() {
               style={{ color: "#15803d" }}
             />
             <p className="text-[12px]" style={{ color: "#15803d" }}>
-              Non applicabile — nessuna esposizione diretta all&apos;art.
-              612-quater.
+              {t("dfNotApplicable")}
             </p>
           </div>
         )}
@@ -1021,23 +1025,25 @@ export default function L132Page() {
       <div className="mb-4 p-5" style={card}>
         <SectionHeader
           icon={Info}
-          title="Area 4 — Accessibilità e comunicazione comprensibile"
-          description="Art. 4 L.132/2025 richiede che le comunicazioni AI dirette a consumatori e utenti non tecnici siano in linguaggio semplice, comprensibile e accessibile secondo le norme WCAG 2.1."
+          title={t("sec4_title")}
+          description={t("sec4_desc")}
           article="Art. 4"
         />
         <div className="space-y-2">
           {ACCESSIBILITY_REQUIREMENTS.map((req, i) => (
             <CheckItem
               key={i}
-              label={req}
+              label={t(`acc_${i}`)}
               value={form.accessibilityChecks[i]}
               onChange={(v) => setCheck("accessibilityChecks", i, v)}
+              t={t}
             />
           ))}
           <NotesField
             value={form.accessibilityNotes}
             onChange={(v) => update("accessibilityNotes", v)}
-            placeholder="es. Audit WCAG 2.1 effettuato in data …, risultati disponibili in …"
+            placeholder={t("accNotesPh")}
+            t={t}
           />
         </div>
       </div>
@@ -1046,9 +1052,9 @@ export default function L132Page() {
       <div className="p-5" style={card}>
         <SectionHeader
           icon={CheckCircle}
-          title="Esito valutazione"
-          description="Riepilogo automatico basato sulle risposte fornite nelle sezioni precedenti."
-          article="Riepilogo"
+          title={t("outcomeTitle")}
+          description={t("outcomeDesc")}
+          article={t("outcomeArticle")}
         />
 
         {/* Status badge */}
@@ -1067,7 +1073,7 @@ export default function L132Page() {
           ) : (
             <AlertTriangle className="h-4 w-4" />
           )}
-          {statusMeta.label}
+          {t(statusMeta.labelKey)}
         </div>
 
         {/* Area summary chips */}
@@ -1090,7 +1096,7 @@ export default function L132Page() {
                   className="text-[11px] font-medium mb-1"
                   style={{ color: "#0D1016" }}
                 >
-                  {area.label}
+                  {t(`area_${area.areaId}`)}
                 </p>
                 {applicable ? (
                   <>
@@ -1115,7 +1121,7 @@ export default function L132Page() {
                       className="text-[10px]"
                       style={{ color: "rgba(0,0,0,0.4)" }}
                     >
-                      {checkedCount}/{total} requisiti
+                      {checkedCount}/{total} {t("requirementsWord")}
                     </p>
                   </>
                 ) : (
@@ -1123,7 +1129,7 @@ export default function L132Page() {
                     className="text-[10px]"
                     style={{ color: "rgba(0,0,0,0.35)" }}
                   >
-                    Non applicabile
+                    {t("notApplicable")}
                   </p>
                 )}
               </div>
@@ -1137,12 +1143,12 @@ export default function L132Page() {
             className="block text-[12px] font-medium mb-1"
             style={{ color: "#0D1016" }}
           >
-            Piano di remediation
+            {t("remediationLabel")}
           </label>
           <textarea
             value={form.remediation}
             onChange={(e) => update("remediation", e.target.value)}
-            placeholder="Descrivi le azioni da intraprendere per raggiungere la piena conformità, con responsabili e scadenze…"
+            placeholder={t("remediationPh")}
             rows={4}
             style={{ ...inputStyle, resize: "vertical" }}
           />
@@ -1156,7 +1162,7 @@ export default function L132Page() {
             style={{ background: "#0D1016", color: "#fff" }}
           >
             <CheckCircle className="h-4 w-4" />
-            {saved ? "Salvato ✓" : "Salva valutazione"}
+            {saved ? t("savedBtn") : t("saveBtn")}
           </button>
           <button
             onClick={() => downloadReport(result)}
@@ -1168,7 +1174,7 @@ export default function L132Page() {
             }}
           >
             <Download className="h-4 w-4" />
-            Scarica report .txt
+            {t("downloadReport")}
           </button>
         </div>
 
@@ -1197,27 +1203,19 @@ export default function L132Page() {
               padding: 0,
               borderRadius: 4,
             }}
-            aria-label="Chiudi nota legale"
+            aria-label={t("closeLegalNote")}
           >×</button>
           <p
             className="text-[12px] font-semibold mb-1"
             style={{ color: "#92400e" }}
           >
-            ⚠️ Nota legale — L.132/2025
+            ⚠️ {t("legalNoteTitle")}
           </p>
           <p
             className="text-[11px] leading-relaxed"
             style={{ color: "rgba(0,0,0,0.6)" }}
           >
-            La Legge 23 settembre 2025 n.132 è in vigore dal giorno della sua
-            pubblicazione in G.U. n.223. Le sanzioni per violazione degli
-            obblighi di trasparenza HR e etichettatura contenuti possono
-            arrivare fino al{" "}
-            <strong>3% del fatturato annuo nazionale</strong>. L&apos;art.
-            612-quater c.p. prevede{" "}
-            <strong>reclusione fino a 5 anni</strong> per i deepfake non
-            consensuali. Questa valutazione è generata da AIComply a scopo
-            informativo e non sostituisce la consulenza legale specializzata.
+            <span dangerouslySetInnerHTML={{ __html: t("legalNoteBody") }} />
           </p>
         </div>
         )}

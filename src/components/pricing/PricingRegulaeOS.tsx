@@ -114,7 +114,7 @@ export function PricingRegulaeOS() {
           textAlign: "center", color: C.sub, fontSize: 16, lineHeight: 1.6,
           margin: "16px auto 0", maxWidth: 560,
         }}>
-          Assistenza professionale in abbonamento. Il software è lo strumento; ogni valutazione è supervisionata e validata da un avvocato.
+          Assistenza professionale continuativa a retainer. Il software è lo strumento; ogni valutazione è supervisionata e validata dall&rsquo;Avvocato.
         </p>
 
         {/* Plan grid */}
@@ -227,8 +227,9 @@ export function PricingRegulaeOS() {
           textAlign: "center", color: C.sub, fontSize: 12.5, lineHeight: 1.6,
           margin: "34px auto 0", maxWidth: 720,
         }}>
-          Ogni valutazione è supervisionata e validata da un avvocato iscritto all&rsquo;albo.
-          Prezzi indicati oltre IVA. Nessun contratto annuale obbligatorio; puoi disdire quando vuoi.
+          Ogni valutazione è supervisionata e validata dall&rsquo;Avvocato iscritto all&rsquo;albo.
+          Gli importi sono la parcella per l&rsquo;assistenza professionale continuativa (oltre IVA e oneri di legge),
+          non una licenza software. L&rsquo;incarico può essere interrotto secondo i termini dell&rsquo;incarico professionale.
         </p>
       </div>
     </section>

@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Check, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
-import { FRIA_SUBPOINTS } from "@/lib/fria/fria-template";
+import { getFriaSubpoints } from "@/lib/fria/fria-template";
 import type { FriaGuidedDoc, FriaAnswer } from "@/lib/fria/fria-guided-types";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
 import { nextFriaSubPointId } from "@/lib/fria/fria-guided-progress";
 
 const T = {
@@ -32,10 +33,16 @@ function optionExamples(examples: string[], fieldType: string): Record<string, s
              : null;
   if (!opts) return null;
   const result: Record<string, string> = {};
+  // Riconosce sia i prefissi IT (valore-storage) sia quelli EN degli esempi.
+  const EN_ALIAS: Record<string, string> = { "Sì": "yes", "No": "no", "Parzialmente": "partially" };
   for (const opt of opts) {
-    const ex = examples.find(e => e.toLowerCase().startsWith(opt.toLowerCase()));
+    const alias = EN_ALIAS[opt] ?? opt.toLowerCase();
+    const ex = examples.find(e => {
+      const low = e.toLowerCase();
+      return low.startsWith(opt.toLowerCase()) || low.startsWith(alias);
+    });
     if (ex) {
-      result[opt] = ex.replace(new RegExp(`^${opt}\\s*[\\u2014\\-\\(][^)]*\\)?\\s*`, "i"), "");
+      result[opt] = ex.replace(new RegExp(`^(${opt}|${alias})\\s*[\\u2014\\-\\(][^)]*\\)?\\s*`, "i"), "");
     }
   }
   return Object.keys(result).length > 0 ? result : null;
@@ -52,6 +59,10 @@ export function FriaGuidedChat({
   doc,
   onAnswerUpdate, onNavigateToSubPoint, forcedSubPointId,
 }: FriaGuidedChatProps) {
+  const t = useT("toolFria");
+  const tg = useT("friaGuided");
+  const locale = useLocale();
+  const FRIA_SUBPOINTS = getFriaSubpoints(locale, tg);
   const allIds = FRIA_SUBPOINTS.map(sp => sp.id);
 
   const currentId = forcedSubPointId
@@ -104,8 +115,8 @@ export function FriaGuidedChat({
   if (!sp) {
     return (
       <div style={{ padding: 24, textAlign: "center", color: T.muted }}>
-        <p style={{ fontSize: 12 }}>FRIA completata — tutte le sezioni compilate.</p>
-        <p style={{ fontSize: 11, color: T.muted, marginTop: 6 }}>Chiudi il pannello per firmare il documento.</p>
+        <p style={{ fontSize: 12 }}>{t("gc_completed")}</p>
+        <p style={{ fontSize: 11, color: T.muted, marginTop: 6 }}>{t("gc_closePanel")}</p>
       </div>
     );
   }
@@ -121,7 +132,7 @@ export function FriaGuidedChat({
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: T.green }} />
-            <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>FRIA Guidata</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{t("gc_friaGuided")}</span>
           </div>
           <span style={{ fontSize: 10, color: T.muted, fontFamily: "monospace" }}>
             {currentIdx + 1} / {allIds.length}
@@ -162,7 +173,7 @@ export function FriaGuidedChat({
                 {isHovered && (
                   <button
                     onClick={() => onNavigateToSubPoint?.(s.id)}
-                    title="Modifica risposta"
+                    title={t("gc_editAnswer")}
                     style={{
                       display: "flex", alignItems: "center", gap: 4,
                       fontSize: 9, fontWeight: 600, padding: "3px 8px", borderRadius: 6,
@@ -170,7 +181,7 @@ export function FriaGuidedChat({
                       color: T.muted, cursor: "pointer",
                     }}
                   >
-                    <Pencil size={9} /> Modifica
+                    <Pencil size={9} /> {t("gc_edit")}
                   </button>
                 )}
                 <div style={{
@@ -254,7 +265,7 @@ export function FriaGuidedChat({
                       e.currentTarget.style.borderColor = T.border;
                     }}
                   >
-                    {opt}
+                    {opt === "Sì" ? t("yes") : opt === "No" ? t("no") : opt === "Parzialmente" ? t("partial") : opt}
                   </button>
                 ))}
               </div>
@@ -263,7 +274,7 @@ export function FriaGuidedChat({
             {/* Esempi come chip per testo libero */}
             {!isDone && qr.length === 0 && sp.examples.length > 0 && (
               <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 5 }}>
-                <span style={{ fontSize: 9, color: T.muted, textTransform: "uppercase", letterSpacing: "0.04em" }}>Esempi:</span>
+                <span style={{ fontSize: 9, color: T.muted, textTransform: "uppercase", letterSpacing: "0.04em" }}>{t("gc_examples")}</span>
                 {sp.examples.slice(0, 2).map((ex, i) => (
                   <button
                     key={i} onClick={() => setInput(ex)}
@@ -293,7 +304,7 @@ export function FriaGuidedChat({
               {existing!.value}
               <div style={{ marginTop: 5, display: "flex", alignItems: "center", gap: 4 }}>
                 <Check size={10} style={{ color: "rgba(255,255,255,0.55)" }} />
-                <span style={{ fontSize: 9, color: "rgba(255,255,255,0.55)" }}>Confermata</span>
+                <span style={{ fontSize: 9, color: "rgba(255,255,255,0.55)" }}>{t("gc_confirmed")}</span>
               </div>
             </div>
           </div>
@@ -309,7 +320,7 @@ export function FriaGuidedChat({
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={isDone ? "Riscrivi per modificare la risposta…" : "Scrivi qui la tua risposta… (Invio per inviare)"}
+            placeholder={isDone ? t("gc_ph_rewrite") : t("gc_ph_write")}
             rows={2}
             style={{
               flex: 1, resize: "none", border: `1px solid ${T.border}`, borderRadius: 10,
@@ -345,10 +356,10 @@ export function FriaGuidedChat({
               padding: "3px 6px", borderRadius: 5,
             }}
           >
-            <ChevronLeft size={12} /> Precedente
+            <ChevronLeft size={12} /> {t("gc_prev")}
           </button>
           <span style={{ fontSize: 9, color: T.faint }}>
-            {!sp.required && <span style={{ color: T.muted }}>facoltativo · </span>}
+            {!sp.required && <span style={{ color: T.muted }}>{t("gc_optional")} · </span>}
             {sp.label}
           </span>
           <button
@@ -361,7 +372,7 @@ export function FriaGuidedChat({
               padding: "3px 6px", borderRadius: 5,
             }}
           >
-            Successiva <ChevronRight size={12} />
+            {t("gc_next")} <ChevronRight size={12} />
           </button>
         </div>
       </div>
