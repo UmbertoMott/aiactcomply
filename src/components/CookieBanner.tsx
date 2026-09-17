@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useSyncExternalStore } from "react";
+import { useT } from "@/i18n/LocaleProvider";
 
 // ─── Tipi ────────────────────────────────────────────────────────────────────
 
@@ -85,6 +86,7 @@ const MONO  = "'DM Mono', monospace";
 const SERIF = "Georgia, 'Times New Roman', serif";
 
 export default function CookieBanner() {
+  const t = useT("cookie");
   const consentSaved = useSyncExternalStore(
     subscribeToConsent,
     getConsentSavedSnapshot,
@@ -141,7 +143,7 @@ export default function CookieBanner() {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Impostazioni cookie"
+      aria-label={t("dialogLabel")}
       style={{
         position: "fixed",
         inset: 0,
@@ -172,23 +174,22 @@ export default function CookieBanner() {
           /* ─── Banner compatto ─────────────────────────────────────────── */
           <>
             <p style={{ fontFamily: MONO, fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.35)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>
-              Cookie &amp; Privacy
+              {t("kicker")}
             </p>
             <p style={{ fontSize: 13, color: "rgba(0,0,0,0.6)", lineHeight: 1.65, marginBottom: 20 }}>
-              Usiamo cookie tecnici (necessari) e, con il tuo consenso, cookie analitici per migliorare il servizio.
-              Nessun dato viene ceduto a terzi per marketing senza esplicita accettazione.{" "}
-              <a href="/privacy" style={{ color: DARK, textDecoration: "underline" }}>Privacy</a> ·{" "}
-              <a href="/cookie-policy" style={{ color: DARK, textDecoration: "underline" }}>Cookie Policy</a>
+              {t("body")}{" "}
+              <a href="/privacy" style={{ color: DARK, textDecoration: "underline" }}>{t("privacy")}</a> ·{" "}
+              <a href="/cookie-policy" style={{ color: DARK, textDecoration: "underline" }}>{t("cookiePolicy")}</a>
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               <button onClick={acceptAll} style={btnStyle("filled")}>
-                Accetta tutti
+                {t("acceptAll")}
               </button>
               <button onClick={rejectAll} style={btnStyle("outline")}>
-                Rifiuta
+                {t("reject")}
               </button>
               <button onClick={openPrefs} style={btnStyle("ghost")}>
-                Personalizza
+                {t("customize")}
               </button>
             </div>
           </>
@@ -196,43 +197,49 @@ export default function CookieBanner() {
           /* ─── Pannello preferenze ─────────────────────────────────────── */
           <>
             <p style={{ fontFamily: SERIF, fontSize: 17, fontWeight: 700, color: DARK, marginBottom: 6 }}>
-              Impostazioni cookie
+              {t("panelTitle")}
             </p>
             <p style={{ fontSize: 12, color: "rgba(0,0,0,0.45)", lineHeight: 1.6, marginBottom: 20 }}>
-              Scegli quali categorie di cookie vuoi abilitare. I cookie necessari non possono essere disabilitati.
+              {t("panelIntro")}
             </p>
 
             {/* Categoria: Necessari */}
             <CategoryRow
-              label="Necessari"
-              desc="Sessione, sicurezza, preferenze UI. Non richiedono consenso."
+              label={t("necessaryLabel")}
+              desc={t("necessaryDesc")}
               checked={true}
               disabled={true}
               onChange={() => {}}
+              onLabel={t("switchOn")}
+              offLabel={t("switchOff")}
             />
             {/* Categoria: Analytics */}
             <CategoryRow
-              label="Analitici"
-              desc="Statistiche aggregate sull'utilizzo del sito (es. pagine visitate, sessioni)."
+              label={t("analyticsLabel")}
+              desc={t("analyticsDesc")}
               checked={analytics}
               disabled={false}
               onChange={setAnalytics}
+              onLabel={t("switchOn")}
+              offLabel={t("switchOff")}
             />
             {/* Categoria: Marketing */}
             <CategoryRow
-              label="Marketing"
-              desc="Contenuti personalizzati e retargeting pubblicitario su piattaforme terze."
+              label={t("marketingLabel")}
+              desc={t("marketingDesc")}
               checked={marketing}
               disabled={false}
               onChange={setMarketing}
+              onLabel={t("switchOn")}
+              offLabel={t("switchOff")}
             />
 
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 20 }}>
               <button onClick={saveCustom} style={btnStyle("filled")}>
-                Salva preferenze
+                {t("savePreferences")}
               </button>
               <button onClick={acceptAll} style={btnStyle("outline")}>
-                Accetta tutti
+                {t("acceptAll")}
               </button>
             </div>
           </>
@@ -245,9 +252,10 @@ export default function CookieBanner() {
 // ─── Utility components ───────────────────────────────────────────────────────
 
 function CategoryRow({
-  label, desc, checked, disabled, onChange,
+  label, desc, checked, disabled, onChange, onLabel, offLabel,
 }: {
   label: string; desc: string; checked: boolean; disabled: boolean; onChange: (v: boolean) => void;
+  onLabel: string; offLabel: string;
 }) {
   return (
     <div style={{
@@ -263,7 +271,7 @@ function CategoryRow({
         aria-checked={checked}
         disabled={disabled}
         onClick={() => !disabled && onChange(!checked)}
-        aria-label={`${label} cookie ${checked ? "attivi" : "disattivi"}`}
+        aria-label={`${label} cookie ${checked ? onLabel : offLabel}`}
         style={{
           flexShrink: 0,
           width: 40, height: 22,
