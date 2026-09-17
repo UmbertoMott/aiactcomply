@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import type { QuickScanResult } from "@/lib/quick-scan/quick-scan";
 
 // Resend è il provider principale. Fallback console.log se la chiave non è configurata.
 function getResend(): Resend | null {
@@ -204,6 +205,85 @@ export async function sendRoiReport(
     bcc: notifyEmail,
     subject: `Il tuo report ROI — Esposizione ${fig.esposizione} · RegulaeOS`,
     html,
+  });
+}
+
+// ── Quick Scan AI Act report ───────────────────────────────────────────────
+
+export async function sendQuickScanReport(
+  lead: { name: string; email: string; company: string; role?: string; marketing?: boolean },
+  result: QuickScanResult,
+  pdf: Uint8Array
+): Promise<void> {
+  const resend = getResend();
+  const notifyEmail = process.env.WAITLIST_NOTIFY_EMAIL ?? "connect@regulaeos.com";
+
+  if (!resend) {
+    console.log(
+      `[QUICK SCAN] Lead: ${lead.name} <${lead.email}> (${lead.company}) — score ${result.score}/100, gap ${result.potentialGaps}`
+    );
+    return;
+  }
+
+  const gaps = result.topGaps.map((gap) => `
+    <tr style="border-top:1px solid #e2e8f0;">
+      <td style="padding:12px 0;color:#0D1016;font-weight:700;">${escapeHtml(gap.area)}</td>
+      <td style="padding:12px 0;color:#334155;">${escapeHtml(gap.label)}</td>
+      <td style="padding:12px 0;color:#64748b;text-align:right;text-transform:uppercase;font-size:11px;">${escapeHtml(gap.severity)}</td>
+    </tr>
+  `).join("");
+
+  const html = `
+    <div style="font-family: sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; color:#0D1016;">
+      <h2 style="margin:0 0 4px;">RegulaeOS</h2>
+      <p style="color:#64748b;font-size:13px;margin:0 0 24px;">AI Act Quick Scan - report preliminare</p>
+
+      <p style="font-size:15px;line-height:1.6;">Ciao <strong>${escapeHtml(lead.name)}</strong>, il Quick Scan per <strong>${escapeHtml(lead.company)}</strong> è pronto.</p>
+
+      <div style="background:#0D1016;border-radius:14px;padding:24px;margin:22px 0;">
+        <p style="color:rgba(255,255,255,0.58);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin:0 0 8px;">Preliminary readiness</p>
+        <p style="color:#fff;font-size:38px;font-weight:700;margin:0;">${result.score}/100</p>
+        <p style="color:rgba(255,255,255,0.62);font-size:13px;margin:10px 0 0;">
+          ${result.potentialGaps} potenziali aree di rischio · ${result.documentGaps} possibili gap documentali
+        </p>
+      </div>
+
+      <p style="font-size:14px;color:#334155;line-height:1.65;margin:0 0 8px;">Principali gap emersi:</p>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin:8px 0 24px;">
+        ${gaps || `
+          <tr><td style="padding:12px 0;color:#334155;">Nessun gap prioritario emerso dal quick scan. Confermare con assessment documentale completo.</td></tr>
+        `}
+      </table>
+
+      <p style="font-size:14px;color:#334155;line-height:1.65;">
+        In allegato trovi il mini-report PDF. Il risultato è preliminare: serve a orientare il triage,
+        non sostituisce un assessment completo o una validazione professionale.
+      </p>
+
+      <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com"}/pricing"
+         style="display:inline-block;background:#0D1016;color:#fff;padding:13px 28px;border-radius:999px;text-decoration:none;font-weight:600;margin:12px 0;">
+        Run Full AI Act Assessment
+      </a>
+
+      <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
+      <p style="color:#94a3b8;font-size:11px;line-height:1.6;">
+        Ricevi questa email perché hai richiesto il report Quick Scan su regulaeos.com.
+        Preliminary assessment - not legal advice or certification.
+      </p>
+    </div>`;
+
+  await resend.emails.send({
+    from: FROM,
+    to: lead.email,
+    bcc: notifyEmail,
+    subject: `Il tuo AI Act Quick Scan - ${lead.company}`,
+    html,
+    attachments: [
+      {
+        filename: `RegulaeOS_AI_Act_Quick_Scan_${lead.company.replace(/[^a-z0-9]+/gi, "_")}.pdf`,
+        content: Buffer.from(pdf).toString("base64"),
+      },
+    ],
   });
 }
 

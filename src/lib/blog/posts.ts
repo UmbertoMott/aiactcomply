@@ -18,6 +18,96 @@ export interface BlogPost {
 
 export const POSTS: BlogPost[] = [
   {
+    slug: "ai-act-quick-scan-10-domande-gap-compliance",
+    title: "AI Act Quick Scan: 10 domande per capire se hai gap di compliance",
+    excerpt:
+      "Un funnel breve funziona meglio di un assessment infinito: 10 domande mirate, teaser del risultato e report completo via email per trasformare l'interesse AI Act in lead qualificati.",
+    date: "30 agosto 2026",
+    dateISO: "2026-08-30",
+    readTime: "6 min",
+    category: "Guide",
+    tags: ["AI Act", "quick scan", "lead generation", "Art. 50", "compliance", "assessment"],
+    metaTitle: "AI Act Quick Scan: 10 domande per trovare gap compliance | AIComply",
+    metaDescription:
+      "Come strutturare un AI Act Quick Scan efficace: 10 domande, scoring, teaser dei gap, lead capture e report personalizzato per prepararsi agli obblighi AI Act.",
+    faqSchema: [
+      {
+        q: "Un AI Act Quick Scan sostituisce un assessment legale completo?",
+        a: "No. Un quick scan serve a fare triage iniziale e a individuare segnali di rischio. L'assessment completo richiede analisi del sistema, documentazione tecnica, responsabilità di provider o deployer e validazione professionale.",
+      },
+      {
+        q: "Perché il quick scan dovrebbe essere breve?",
+        a: "Perché il primo obiettivo è ridurre l'attrito. Otto o dieci domande permettono di qualificare il rischio senza chiedere all'utente di completare un questionario pesante prima di capire se il tema lo riguarda.",
+      },
+      {
+        q: "Conviene mostrare subito il punteggio?",
+        a: "Di solito no. È più efficace mostrare un teaser del risultato, per esempio il numero di potenziali gap individuati, e chiedere email e azienda per inviare il report completo.",
+      },
+      {
+        q: "Quali sistemi dovrebbe intercettare un quick scan AI Act?",
+        a: "Almeno chatbot e assistenti virtuali, sistemi che generano contenuti sintetici, soluzioni HR, scoring, sistemi decisionali automatizzati e strumenti che possono ricadere negli obblighi di trasparenza o documentazione.",
+      },
+    ],
+    content: `
+<p class="ac-tldr">
+  <strong>TL;DR:</strong> Per partire con un funnel AI Act non serve un assessment da 60 domande. Serve un quick scan breve: 8-10 domande, logica condizionale, scoring interno e un teaser del risultato. Il report completo arriva via email. L'utente capisce subito se ha un problema, l'azienda raccoglie un lead qualificato, e il passaggio naturale diventa l'assessment completo.
+</p>
+
+<p>Il modo più semplice per trasformare l'interesse sull'AI Act in una conversazione commerciale non è pubblicare un altro PDF da scaricare.</p>
+<p>È far rispondere l'utente a poche domande concrete sul suo sistema AI.</p>
+<p>Se il flusso è breve, l'utente arriva alla fine. Se il risultato è abbastanza specifico, lascia i dati. Se il report gli mostra gap reali, la richiesta successiva non è più "spiegami cos'è l'AI Act", ma "cosa devo fare adesso?".</p>
+
+<h2>Perché partire da un quick scan</h2>
+<p>Un assessment completo è utile quando esiste già un progetto, un referente interno e una disponibilità a lavorare sulla compliance.</p>
+<p>Ma molte aziende non sono ancora lì. Hanno un chatbot, un generatore di contenuti, un sistema HR, un modello integrato in un prodotto, oppure semplicemente usano AI in processi aziendali senza sapere se stanno entrando nel perimetro dell'AI Act.</p>
+<p>Il quick scan serve esattamente a questo: non certifica, non chiude l'analisi, non sostituisce il parere professionale. Fa emergere il rischio iniziale e dà una prossima azione chiara.</p>
+
+<h2>La struttura ideale del funnel</h2>
+<p>Il flusso dovrebbe essere volutamente corto. La sequenza migliore è questa:</p>
+<p><strong>1. Entrata da LinkedIn o da una pagina risorse.</strong> Il messaggio deve promettere un risultato pratico, non una spiegazione teorica.</p>
+<p><strong>2. Quick scan da 10 domande.</strong> Le domande devono coprire tipo di sistema, ruolo dell'organizzazione, contenuti generati, impatto su persone fisiche, documentazione, logging, supervisione e owner interno.</p>
+<p><strong>3. Teaser del risultato.</strong> Prima della lead capture non serve mostrare tutto. Meglio indicare che il risultato è pronto e che sono stati identificati alcuni gap potenziali.</p>
+<p><strong>4. Email, azienda e ruolo.</strong> Solo i dati essenziali. Ogni campo in più riduce il completamento.</p>
+<p><strong>5. Report personalizzato.</strong> Il report deve tradurre le risposte in gap, priorità e prossimi step.</p>
+<p><strong>6. CTA finale.</strong> La call to action naturale è avviare l'assessment completo o prenotare una demo.</p>
+
+<h2>Le 10 domande che contano</h2>
+<p>Un buon quick scan non deve chiedere tutto. Deve intercettare i segnali che cambiano davvero la classificazione e gli obblighi.</p>
+<p><strong>1.</strong> L'organizzazione fornisce o utilizza un sistema AI?</p>
+<p><strong>2.</strong> Il sistema genera, modifica o sintetizza contenuti testuali, audio, video o immagini?</p>
+<p><strong>3.</strong> Il sistema interagisce direttamente con utenti o clienti?</p>
+<p><strong>4.</strong> L'utente viene informato quando sta interagendo con un sistema AI?</p>
+<p><strong>5.</strong> I contenuti generati o modificati dall'AI sono marcati o riconoscibili?</p>
+<p><strong>6.</strong> Esiste documentazione tecnica sul funzionamento del sistema?</p>
+<p><strong>7.</strong> Il sistema produce output che influenzano decisioni su persone fisiche?</p>
+<p><strong>8.</strong> Il sistema è usato in HR, credito, istruzione, servizi essenziali, biometria o ambiti regolati?</p>
+<p><strong>9.</strong> Esistono log, evidenze e test che dimostrano come il sistema viene controllato?</p>
+<p><strong>10.</strong> Esiste un owner interno per la remediation AI Act?</p>
+
+<h2>Il punto chiave: non mostrare tutto subito</h2>
+<p>L'errore più comune è calcolare un punteggio e mostrarlo immediatamente.</p>
+<p>Funziona meglio un teaser più controllato:</p>
+<p><strong>"Assessment pronto. Abbiamo identificato 3 potenziali gap di conformità. Inserisci la tua email aziendale per ricevere il report completo."</strong></p>
+<p>Questo mantiene alto il valore percepito senza trasformare il risultato in un numero isolato. Un punteggio del 62% non dice molto. Tre gap concreti, invece, aprono una conversazione.</p>
+
+<h2>Cosa dovrebbe contenere il report</h2>
+<p>Il report non deve essere lungo. Deve essere utile.</p>
+<p>La struttura migliore è: punteggio preliminare, gap principali, obblighi potenzialmente rilevanti, livello di priorità e prossimi step.</p>
+<p>Per esempio, se l'utente dichiara di generare contenuti sintetici senza marcatura machine-readable, il report dovrebbe evidenziare un possibile gap legato alla trasparenza Art. 50 e suggerire una verifica tecnica. Se dichiara un sistema usato in HR, il report dovrebbe segnalare la necessità di classificazione del rischio e documentazione più ampia.</p>
+
+<h2>Perché funziona per RegulaeOS</h2>
+<p>RegulaeOS non vende solo software. Vende un percorso assistito verso la conformità: triage, assessment, documentazione tecnica, DPIA, FRIA, risk register e validazione professionale.</p>
+<p>Il quick scan è il primo gradino giusto perché promette poco e consegna qualcosa di concreto. Non chiede all'utente di capire il regolamento prima di iniziare. Gli chiede di descrivere il suo sistema, poi traduce quelle risposte in un rischio leggibile.</p>
+<p>Da lì, la CTA è naturale: <a href="/scanner">provare lo scanner Art. 50</a>, <a href="/pricing">vedere i piani</a> oppure <a href="/contatti">parlare con un professionista</a>.</p>
+
+<h2>La versione MVP</h2>
+<p>Per partire basta una pagina responsive con progress bar, 8-10 domande, scoring interno, schermata teaser, lead form e schermata finale.</p>
+<p>Il backend può arrivare subito dopo: salvataggio lead, generazione del report, invio email e collegamento al CRM. Ma la prima validazione del funnel può già misurare tre cose: completamento del quiz, conversione del form e interesse verso l'assessment completo.</p>
+<p>Puoi <a href="/quick-scan">provare il Quick Scan AI Act</a> e vedere il flusso corretto: nessuna email all'inizio, teaser dopo le risposte, report completo solo dopo il form.</p>
+<p>Quando questi tre numeri sono buoni, il quick scan non è più una demo. È una porta d'ingresso commerciale.</p>
+`,
+  },
+  {
     slug: "sistema-ai-alto-rischio-annex-iii-obblighi",
     title: "Cos'è un sistema AI ad alto rischio: la guida pratica all'Annex III",
     excerpt:
