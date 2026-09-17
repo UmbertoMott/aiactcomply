@@ -9,16 +9,16 @@ import { PricingRegulaeOS } from "@/components/pricing/PricingRegulaeOS";
 
 const FAQS = [
   {
-    q: "Cosa significa 'assessment validato dall'avvocato'?",
-    a: "Ogni valutazione di conformità prodotta dalla piattaforma è revisionata da un avvocato specializzato in AI Act prima di essere finalizzata. Non ricevi solo output software, ma un parere professionale supervisionato.",
+    q: "Cosa significa 'assessment validato dall'Avvocato'?",
+    a: "Gli output della piattaforma sono elaborazioni di lavorazione interne, revisionate dall'Avvocato. Il parere e i documenti di conformità finali costituiscono prestazione professionale resa nell'ambito dell'incarico — non un semplice output software.",
   },
   {
     q: "Qual è la differenza tra Essenziale e Studio?",
-    a: "Essenziale copre 1 sistema AI con tutti gli strumenti di triage e assessment, più validazione legale degli output. Studio aggiunge pareri su richiesta, revisione documentale dell'avvocato e il dossier di conformità firmato — ideale se hai necessità di produrre documentazione formale.",
+    a: "Essenziale copre l'assistenza su 1 sistema AI con gli strumenti di triage e assessment, sotto la supervisione dell'Avvocato. Studio aggiunge pareri su richiesta, revisione documentale dell'Avvocato e il dossier di conformità firmato — ideale se hai necessità di produrre documentazione formale.",
   },
   {
-    q: "Posso cancellare in qualsiasi momento?",
-    a: "Sì. Nessun vincolo, nessuna penale. Il piano si interrompe alla fine del periodo fatturato.",
+    q: "Posso interrompere l'assistenza?",
+    a: "Sì. L'incarico professionale può essere interrotto secondo i termini concordati; l'assistenza prosegue fino alla fine del periodo di parcella in corso. Nessuna penale.",
   },
   {
     q: "Come funziona il piano Su misura?",

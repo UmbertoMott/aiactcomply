@@ -7,6 +7,9 @@ import {
   Clock, AlertOctagon, TrendingUp, Shield, Pause, Play,
 } from "lucide-react";
 import Link from "next/link";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
+
+type TFn = (key: string) => string;
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -52,23 +55,22 @@ interface HistoryEntry {
 
 // ─── Etichette metriche human-readable ────────────────────────────────────────
 
-const METRIC_LABELS: Record<string, { label: string; unit: string; icon: React.ReactNode }> = {
-  latency_p99_ms:       { label: "Latenza p99",         unit: "ms", icon: <Clock       className="w-3.5 h-3.5" /> },
-  error_rate_pct:       { label: "Tasso errori",         unit: "%",  icon: <AlertTriangle className="w-3.5 h-3.5" /> },
-  flagged_rate_pct:     { label: "Eventi flaggati",      unit: "%",  icon: <AlertOctagon  className="w-3.5 h-3.5" /> },
-  guardrail_breach_pct: { label: "Violazioni guardrail", unit: "%",  icon: <Shield        className="w-3.5 h-3.5" /> },
-  token_spike_pct:      { label: "Spike token",          unit: "%",  icon: <TrendingUp    className="w-3.5 h-3.5" /> },
+const METRIC_LABELS: Record<string, { labelKey: string; unit: string; icon: React.ReactNode }> = {
+  latency_p99_ms:       { labelKey: "m_latency",    unit: "ms", icon: <Clock       className="w-3.5 h-3.5" /> },
+  error_rate_pct:       { labelKey: "m_errorRate",  unit: "%",  icon: <AlertTriangle className="w-3.5 h-3.5" /> },
+  flagged_rate_pct:     { labelKey: "m_flagged",    unit: "%",  icon: <AlertOctagon  className="w-3.5 h-3.5" /> },
+  guardrail_breach_pct: { labelKey: "m_guardrail",  unit: "%",  icon: <Shield        className="w-3.5 h-3.5" /> },
+  token_spike_pct:      { labelKey: "m_tokenSpike", unit: "%",  icon: <TrendingUp    className="w-3.5 h-3.5" /> },
 };
 
 // ─── Alert Card ───────────────────────────────────────────────────────────────
 
-function AlertCard({ alert }: { alert: DriftAlert }) {
+function AlertCard({ alert, t }: { alert: DriftAlert; t: TFn }) {
   const isCritical = alert.severity === "critical";
-  const meta = METRIC_LABELS[alert.metric] ?? {
-    label: alert.metric,
-    unit: "",
-    icon: <Activity className="w-3.5 h-3.5" />,
-  };
+  const meta = METRIC_LABELS[alert.metric];
+  const label = meta ? t(meta.labelKey) : alert.metric;
+  const unit = meta?.unit ?? "";
+  const icon = meta?.icon ?? <Activity className="w-3.5 h-3.5" />;
 
   return (
     <motion.div
@@ -82,8 +84,8 @@ function AlertCard({ alert }: { alert: DriftAlert }) {
     >
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex items-center gap-2">
-          <span style={{ color: isCritical ? T.red : T.amber }}>{meta.icon}</span>
-          <span className="text-sm font-semibold" style={{ color: T.text }}>{meta.label}</span>
+          <span style={{ color: isCritical ? T.red : T.amber }}>{icon}</span>
+          <span className="text-sm font-semibold" style={{ color: T.text }}>{label}</span>
           <span
             className="text-[10px] font-bold px-1.5 py-0.5 rounded uppercase"
             style={{
@@ -97,10 +99,10 @@ function AlertCard({ alert }: { alert: DriftAlert }) {
         </div>
         <div className="text-right flex-shrink-0">
           <div className="text-lg font-bold" style={{ color: isCritical ? T.red : T.amber }}>
-            {alert.current}{meta.unit}
+            {alert.current}{unit}
           </div>
           <div className="text-[10px]" style={{ color: T.muted }}>
-            +{alert.deviation_pct}% vs soglia {alert.baseline}{meta.unit}
+            +{alert.deviation_pct}% {t("vsThreshold")} {alert.baseline}{unit}
           </div>
         </div>
       </div>
@@ -129,7 +131,7 @@ function AlertCard({ alert }: { alert: DriftAlert }) {
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 
-function StatusBadge({ report }: { report: DriftReport | null }) {
+function StatusBadge({ report, t }: { report: DriftReport | null; t: TFn }) {
   if (!report) return null;
 
   if (!report.is_drifting) {
@@ -140,7 +142,7 @@ function StatusBadge({ report }: { report: DriftReport | null }) {
       >
         <CheckCircle2 className="w-4 h-4" style={{ color: T.green }} />
         <span className="text-xs font-medium" style={{ color: T.green }}>
-          Nessun drift — {report.events_analyzed} eventi analizzati
+          {t("noDrift")} — {report.events_analyzed} {t("eventsAnalyzed")}
         </span>
       </div>
     );
@@ -157,9 +159,9 @@ function StatusBadge({ report }: { report: DriftReport | null }) {
     >
       <AlertTriangle className="w-4 h-4" style={{ color: criticalCount > 0 ? T.red : T.amber }} />
       <span className="text-xs font-medium" style={{ color: criticalCount > 0 ? T.red : T.amber }}>
-        {report.alerts.length} alert
-        {criticalCount > 0 ? ` (${criticalCount} critici)` : " — warning"}
-        {" · "}{report.events_analyzed} eventi
+        {report.alerts.length} {t("alerts_word")}
+        {criticalCount > 0 ? ` (${criticalCount} ${t("critical_word")})` : ` — ${t("warning_word")}`}
+        {" · "}{report.events_analyzed} {t("events_word")}
       </span>
     </div>
   );
@@ -167,13 +169,13 @@ function StatusBadge({ report }: { report: DriftReport | null }) {
 
 // ─── History Timeline ─────────────────────────────────────────────────────────
 
-function HistoryTimeline({ history }: { history: HistoryEntry[] }) {
+function HistoryTimeline({ history, t, loc }: { history: HistoryEntry[]; t: TFn; loc: string }) {
   if (history.length === 0) return null;
 
   return (
     <div>
       <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: T.faint }}>
-        Storico ultime {history.length} rilevazioni
+        {t("history_pre")} {history.length} {t("history_post")}
       </p>
       <div className="flex items-end gap-1 h-12">
         {history.map((h, i) => {
@@ -183,7 +185,7 @@ function HistoryTimeline({ history }: { history: HistoryEntry[] }) {
           return (
             <div
               key={i}
-              title={`${new Date(h.fetchedAt).toLocaleTimeString("it-IT")} — ${alertCount} alert`}
+              title={`${new Date(h.fetchedAt).toLocaleTimeString(loc)} — ${alertCount} ${t("alerts_word")}`}
               className="flex-1 rounded-sm transition-all"
               style={{
                 height: `${heightPx}px`,
@@ -195,8 +197,8 @@ function HistoryTimeline({ history }: { history: HistoryEntry[] }) {
         })}
       </div>
       <div className="flex justify-between text-[10px] mt-1" style={{ color: T.faint }}>
-        <span>{new Date(history[history.length - 1]?.fetchedAt).toLocaleTimeString("it-IT")}</span>
-        <span>ora</span>
+        <span>{new Date(history[history.length - 1]?.fetchedAt).toLocaleTimeString(loc)}</span>
+        <span>{t("now_word")}</span>
       </div>
     </div>
   );
@@ -220,6 +222,9 @@ const REFRESH_INTERVALS = [
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function DriftMonitorPage() {
+  const t = useT("toolDriftMonitor");
+  const locale = useLocale();
+  const loc = locale === "it" ? "it-IT" : "en-GB";
   const [report, setReport]           = useState<DriftReport | null>(null);
   const [history, setHistory]         = useState<HistoryEntry[]>([]);
   const [loading, setLoading]         = useState(false);
@@ -249,8 +254,8 @@ export default function DriftMonitorPage() {
       if (aiSystemId) params.set("ai_system_id", aiSystemId);
       const res = await fetch(`/api/logvault/drift?${params}`);
       if (!res.ok) {
-        if (res.status === 401) throw new Error("Sessione scaduta — effettua di nuovo il login");
-        throw new Error(`Errore API: ${res.status}`);
+        if (res.status === 401) throw new Error("SESSION_EXPIRED");
+        throw new Error(`API_ERROR:${res.status}`);
       }
       const data = (await res.json()) as DriftReport;
       setReport(data);
@@ -310,12 +315,12 @@ export default function DriftMonitorPage() {
           <div className="flex items-center gap-2 mb-1">
             <Activity className="w-4 h-4" style={{ color: T.blue }} />
             <span className="text-xs font-medium" style={{ color: T.muted }}>
-              Monitoring drift — Art. 12 / Art. 15 EU AI Act
+              {t("kicker")}
             </span>
           </div>
-          <h1 className="text-xl font-bold">Config Drift Monitor</h1>
+          <h1 className="text-xl font-bold">{t("title")}</h1>
           <p className="text-sm mt-0.5" style={{ color: T.muted }}>
-            Rilevazione automatica deviazioni: latenza, errori, guardrail, token spike.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -362,8 +367,8 @@ export default function DriftMonitorPage() {
             style={{ background: T.card, border: `1px solid ${T.border}`, color: T.muted }}
           >
             {paused
-              ? <><Play  className="w-3 h-3" /> Riprendi</>
-              : <><Pause className="w-3 h-3" /> Pausa</>
+              ? <><Play  className="w-3 h-3" /> {t("resume")}</>
+              : <><Pause className="w-3 h-3" /> {t("pause")}</>
             }
           </button>
 
@@ -375,7 +380,7 @@ export default function DriftMonitorPage() {
             style={{ background: T.card, border: `1px solid ${T.border}`, color: T.muted }}
           >
             <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />
-            {loading ? "…" : "Ora"}
+            {loading ? "…" : t("now_btn")}
           </button>
         </div>
       </div>
@@ -383,12 +388,12 @@ export default function DriftMonitorPage() {
       {/* Countdown + ultimo aggiornamento */}
       <div className="flex items-center gap-3 text-xs" style={{ color: T.faint }}>
         {lastFetch && (
-          <span>Ultimo aggiornamento: {lastFetch.toLocaleTimeString("it-IT")}</span>
+          <span>{t("lastUpdate")} {lastFetch.toLocaleTimeString(loc)}</span>
         )}
         {!paused && !loading && (
-          <span>Prossimo: {countdown}s</span>
+          <span>{t("next_pre")} {countdown}s</span>
         )}
-        {paused && <span style={{ color: T.amber }}>⏸ Polling in pausa</span>}
+        {paused && <span style={{ color: T.amber }}>{t("pollPaused")}</span>}
       </div>
 
       {/* Errore */}
@@ -398,10 +403,12 @@ export default function DriftMonitorPage() {
           style={{ background: T.redBg, border: `1px solid ${T.redBdr}` }}
         >
           <p className="text-xs" style={{ color: T.red }}>
-            {error.includes("401")
-              ? <>Sessione scaduta. <Link href="/login" className="underline">Accedi di nuovo</Link></>
+            {error.includes("SESSION_EXPIRED") || error.includes("401")
+              ? <>{t("err_sessionExpired_pre")} <Link href="/login" className="underline">{t("err_loginAgain")}</Link></>
               : error.includes("tabella") || error.includes("relation")
-              ? "Tabelle DB non trovate — esegui la migration Supabase prima di usare questo tool."
+              ? t("err_tables")
+              : error.includes("API_ERROR")
+              ? `${t("err_api")} ${error.split(":").pop()}`
               : error
             }
           </p>
@@ -409,7 +416,7 @@ export default function DriftMonitorPage() {
       )}
 
       {/* Status badge */}
-      <StatusBadge report={report} />
+      <StatusBadge report={report} t={t} />
 
       {/* Nessun log nella finestra */}
       {report?.message && !report.is_drifting && report.events_analyzed === 0 && (
@@ -419,10 +426,10 @@ export default function DriftMonitorPage() {
         >
           <Activity className="w-8 h-8 mx-auto mb-2" style={{ color: "rgba(0,0,0,0.15)" }} />
           <p className="text-sm font-medium mb-1" style={{ color: T.muted }}>
-            Nessun log nella finestra {windowHours}h
+            {t("noLog_pre")} {windowHours}h {t("noLog_post")}
           </p>
           <p className="text-xs" style={{ color: T.faint }}>
-            Configura il LogVault SDK per inviare eventi a{" "}
+            {t("noLog_hint")}{" "}
             <code
               className="text-xs px-1 py-0.5 rounded"
               style={{ background: "rgba(0,0,0,0.04)" }}
@@ -435,7 +442,7 @@ export default function DriftMonitorPage() {
             className="inline-flex items-center gap-1 mt-3 text-xs px-3 py-1.5 rounded-lg"
             style={{ background: T.blueBg, color: T.blue, border: `1px solid ${T.blueBdr}` }}
           >
-            Vai a LogVault →
+            {t("goLogVault")}
           </Link>
         </div>
       )}
@@ -450,10 +457,10 @@ export default function DriftMonitorPage() {
             className="space-y-2"
           >
             <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: T.red }}>
-              ⚠ Alert critici ({criticalAlerts.length})
+              {t("criticalAlerts_pre")} ({criticalAlerts.length})
             </p>
             {criticalAlerts.map((alert, i) => (
-              <AlertCard key={i} alert={alert} />
+              <AlertCard key={i} alert={alert} t={t} />
             ))}
           </motion.div>
         )}
@@ -469,10 +476,10 @@ export default function DriftMonitorPage() {
             className="space-y-2"
           >
             <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: T.amber }}>
-              Avvisi ({warningAlerts.length})
+              {t("warnings_pre")} ({warningAlerts.length})
             </p>
             {warningAlerts.map((alert, i) => (
-              <AlertCard key={i} alert={alert} />
+              <AlertCard key={i} alert={alert} t={t} />
             ))}
           </motion.div>
         )}
@@ -484,7 +491,7 @@ export default function DriftMonitorPage() {
           className="rounded-xl p-4"
           style={{ background: T.card, border: `1px solid ${T.border}` }}
         >
-          <HistoryTimeline history={[...history].reverse()} />
+          <HistoryTimeline history={[...history].reverse()} t={t} loc={loc} />
         </div>
       )}
 
@@ -493,12 +500,8 @@ export default function DriftMonitorPage() {
         className="rounded-xl px-4 py-3"
         style={{ background: "rgba(0,0,0,0.02)", border: `1px solid ${T.border}` }}
       >
-        <p className="text-xs leading-relaxed" style={{ color: T.muted }}>
-          <strong>Art. 12 EU AI Act</strong> — I sistemi ad alto rischio devono consentire il monitoraggio
-          automatico della performance.{" "}
-          <strong>Art. 15</strong> — Robustezza e resilienza devono essere monitorate continuativamente.{" "}
-          Alert critici non risolti entro 24h devono essere documentati nel sistema di gestione del rischio (Art. 9).
-        </p>
+        <p className="text-xs leading-relaxed" style={{ color: T.muted }}
+          dangerouslySetInnerHTML={{ __html: t("footer") }} />
       </div>
 
     </div>

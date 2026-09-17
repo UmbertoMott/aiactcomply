@@ -8,6 +8,7 @@ import {
   CheckCircle2, Circle, ExternalLink, FileText, Copy, FileDown,
 } from "lucide-react";
 import { buildTrustPassport, passportToMarkdown, type TrustPassport } from "@/lib/trust/passport-engine";
+import { useT } from "@/i18n/LocaleProvider";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -94,8 +95,9 @@ function StatementRow({ ok, title, subtitle }: { ok: boolean; title: string; sub
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function TrustPassportPage() {
+  const t = useT("toolTrustPassport");
   const [passport, setPassport] = useState<TrustPassport | null>(null);
-  const [companyName, setCompanyName] = useState("La mia azienda");
+  const [companyName, setCompanyName] = useState(() => t("companyName_default"));
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
@@ -113,7 +115,7 @@ export default function TrustPassportPage() {
     });
 
     if (!p) {
-      setError("Nessun sistema classificato. Completa prima il Classifier (Art. 6).");
+      setError(t("error_noSystem"));
       setPassport(null);
       return;
     }
@@ -147,7 +149,7 @@ export default function TrustPassportPage() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (e) {
-      alert(`Errore generazione PDF: ${e}`);
+      alert(`${t("pdf_error")} ${e}`);
     } finally {
       setPdfLoading(false);
     }
@@ -192,7 +194,7 @@ export default function TrustPassportPage() {
           </div>
           <h1 className="text-xl font-bold">AI-Trust Passport</h1>
           <p className="text-sm mt-0.5" style={{ color: T.muted }}>
-            Dichiarazione di Affidabilità AI da consegnare ai tuoi clienti — sintetica, verificabile, senza esporre segreti industriali.
+            {t("subtitle")}
           </p>
         </div>
         <button
@@ -200,7 +202,7 @@ export default function TrustPassportPage() {
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs"
           style={{ background: T.card, border: `1px solid ${T.border}`, color: T.muted }}
         >
-          <RefreshCw className="w-3 h-3" /> Rigenera
+          <RefreshCw className="w-3 h-3" /> {t("regen")}
         </button>
       </div>
 
@@ -212,7 +214,7 @@ export default function TrustPassportPage() {
           <div>
             <p className="text-xs font-semibold" style={{ color: T.amber }}>{error}</p>
             <Link href="/dashboard/tools/classifier" className="text-xs underline mt-1 inline-block" style={{ color: T.amber }}>
-              Vai al Classifier →
+              {t("goClassifier")}
             </Link>
           </div>
         </div>
@@ -223,7 +225,7 @@ export default function TrustPassportPage() {
           {/* Azienda input */}
           <div className="rounded-xl p-4" style={{ background: T.card, border: `1px solid ${T.border}` }}>
             <label className="block text-xs font-medium mb-1.5" style={{ color: T.muted }}>
-              Nome azienda da mostrare ai clienti
+              {t("company_label")}
             </label>
             <input
               type="text"
@@ -243,53 +245,53 @@ export default function TrustPassportPage() {
             </div>
             <div className="flex-1">
               <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: T.purple }}>
-                Score di Affidabilità AI
+                {t("score_label")}
               </p>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="text-4xl font-bold" style={{ color: T.text }}>{passport.overallTrustScore}</span>
                 <span className="text-sm" style={{ color: T.muted }}>/ 100</span>
               </div>
               <p className="text-xs mt-1" style={{ color: T.muted }}>
-                Sistema: <strong>{passport.systemName}</strong> · Tier: {passport.riskTier}
-                {" · "}Valido fino al {new Date(passport.validUntil).toLocaleDateString("it-IT")}
+                {t("system_word")} <strong>{passport.systemName}</strong> · {t("tier_word")} {passport.riskTier}
+                {" · "}{t("validUntil")} {new Date(passport.validUntil).toLocaleDateString("it-IT")}
               </p>
             </div>
             <div className="flex-shrink-0 text-center">
               {qrDataUrl
-                ? <img src={qrDataUrl} alt="QR verifica" className="w-24 h-24 rounded-lg bg-white p-1" />
-                : <div className="w-24 h-24 rounded-lg bg-white/10 flex items-center justify-center text-[10px]" style={{ color: T.faint }}>generazione QR…</div>
+                ? <img src={qrDataUrl} alt={t("qr_alt")} className="w-24 h-24 rounded-lg bg-white p-1" />
+                : <div className="w-24 h-24 rounded-lg bg-white/10 flex items-center justify-center text-[10px]" style={{ color: T.faint }}>{t("qr_generating")}</div>
               }
-              <p className="text-[9px] mt-1" style={{ color: T.faint }}>Scansiona per verificare</p>
+              <p className="text-[9px] mt-1" style={{ color: T.faint }}>{t("qr_scan")}</p>
             </div>
           </div>
 
           {/* 4 pillars */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-            <PillarCard label="Equità" {...passport.pillars.fairness} color={colorForScore(passport.pillars.fairness.score)} />
-            <PillarCard label="Rischio" {...passport.pillars.risk} color={colorForScore(passport.pillars.risk.score)} />
-            <PillarCard label="Robustezza" {...passport.pillars.robustness} color={colorForScore(passport.pillars.robustness.score)} />
-            <PillarCard label="Trasparenza" {...passport.pillars.transparency} color={colorForScore(passport.pillars.transparency.score)} />
+            <PillarCard label={t("pillar_fairness")} {...passport.pillars.fairness} color={colorForScore(passport.pillars.fairness.score)} />
+            <PillarCard label={t("pillar_risk")} {...passport.pillars.risk} color={colorForScore(passport.pillars.risk.score)} />
+            <PillarCard label={t("pillar_robustness")} {...passport.pillars.robustness} color={colorForScore(passport.pillars.robustness.score)} />
+            <PillarCard label={t("pillar_transparency")} {...passport.pillars.transparency} color={colorForScore(passport.pillars.transparency.score)} />
           </div>
 
           {/* Statements */}
           <div className="rounded-xl p-5" style={{ background: T.card, border: `1px solid ${T.border}` }}>
             <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: T.faint }}>
-              Garanzie di conformità che dichiari al cliente
+              {t("statements_heading")}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <StatementRow ok={passport.statements.eu_ai_act_compliant} title="EU AI Act compliant" subtitle="Reg. UE 2024/1689" />
-              <StatementRow ok={passport.statements.art_5_clear} title="Art. 5 — Nessuna pratica vietata" subtitle="Verificato dal Prohibited Checker" />
-              <StatementRow ok={passport.statements.art_10_bias_tested} title="Art. 10 — Audit bias eseguito" subtitle="Metriche di fairness misurate" />
-              <StatementRow ok={passport.statements.art_15_robustness} title="Art. 15 — Robustezza testata" subtitle="Red Team + accuracy" />
-              <StatementRow ok={passport.statements.art_50_disclosure} title="Art. 50 — Trasparenza utenti" subtitle="Disclosure implementata" />
-              <StatementRow ok={passport.statements.italian_law_132} title="L. 132/2025 Italia" subtitle="Adempimenti normativa nazionale" />
+              <StatementRow ok={passport.statements.eu_ai_act_compliant} title={t("st_euaiact")} subtitle={t("st_euaiact_sub")} />
+              <StatementRow ok={passport.statements.art_5_clear} title={t("st_art5")} subtitle={t("st_art5_sub")} />
+              <StatementRow ok={passport.statements.art_10_bias_tested} title={t("st_art10")} subtitle={t("st_art10_sub")} />
+              <StatementRow ok={passport.statements.art_15_robustness} title={t("st_art15")} subtitle={t("st_art15_sub")} />
+              <StatementRow ok={passport.statements.art_50_disclosure} title={t("st_art50")} subtitle={t("st_art50_sub")} />
+              <StatementRow ok={passport.statements.italian_law_132} title={t("st_l132")} subtitle={t("st_l132_sub")} />
             </div>
           </div>
 
           {/* Cosa NON include */}
           <div className="rounded-xl p-5" style={{ background: "rgba(0,0,0,0.02)", border: `1px solid ${T.border}` }}>
             <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: T.faint }}>
-              🔒 Cosa il Passport NON espone (tutela IP)
+              {t("notExpose_heading")}
             </p>
             <div className="flex flex-wrap gap-1.5">
               {passport.excludedFromPassport.map((item, i) => (
@@ -300,28 +302,28 @@ export default function TrustPassportPage() {
               ))}
             </div>
             <p className="text-[11px] mt-3" style={{ color: T.muted }}>
-              I dati completi restano nel Dossier Annex IV, accessibile solo alle autorità di vigilanza.
+              {t("notExpose_note")}
             </p>
           </div>
 
           {/* Verifica */}
           <div className="rounded-xl p-5" style={{ background: T.card, border: `1px solid ${T.border}` }}>
             <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: T.faint }}>
-              Identificatori verificabili
+              {t("verif_heading")}
             </p>
             <div className="space-y-2">
               <div>
-                <p className="text-[10px]" style={{ color: T.faint }}>Hash di verifica</p>
+                <p className="text-[10px]" style={{ color: T.faint }}>{t("verif_hash")}</p>
                 <code className="text-xs" style={{ color: T.text }}>{passport.verificationHash}</code>
               </div>
               <div>
-                <p className="text-[10px]" style={{ color: T.faint }}>URL registro pubblico</p>
+                <p className="text-[10px]" style={{ color: T.faint }}>{t("verif_url")}</p>
                 <div className="flex items-center gap-2">
                   <code className="text-xs flex-1 truncate" style={{ color: T.blue }}>{passport.publicRegistryUrl}</code>
                   <button onClick={copyVerificationUrl}
                     className="text-[10px] px-2 py-1 rounded flex items-center gap-1"
                     style={{ background: T.blueBg, color: T.blue, border: `1px solid ${T.blueBdr}` }}>
-                    <Copy className="w-3 h-3" /> {copied ? "Copiato!" : "Copia"}
+                    <Copy className="w-3 h-3" /> {copied ? t("copied") : t("copy")}
                   </button>
                 </div>
               </div>
@@ -334,36 +336,33 @@ export default function TrustPassportPage() {
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
               style={{ background: T.purple }}>
               <FileDown className="w-4 h-4" />
-              {pdfLoading ? "Generazione PDF..." : "Scarica PDF/A-3 firmabile"}
+              {pdfLoading ? t("pdf_loading") : t("pdf_btn")}
             </button>
             <button onClick={downloadMarkdown}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm"
               style={{ background: T.card, color: T.text, border: `1px solid ${T.border}` }}>
               <Download className="w-4 h-4" />
-              Markdown
+              {t("md_btn")}
             </button>
             <Link href="/dashboard/dossier"
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm"
               style={{ background: T.card, color: T.text, border: `1px solid ${T.border}` }}>
               <FileText className="w-4 h-4" />
-              Dossier completo (Annex IV)
+              {t("dossier_btn")}
             </Link>
             <a href={passport.publicRegistryUrl} target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm"
               style={{ background: T.card, color: T.text, border: `1px solid ${T.border}` }}>
               <ExternalLink className="w-4 h-4" />
-              Apri registro pubblico
+              {t("openRegistry")}
             </a>
           </div>
 
           {/* Disclaimer legale */}
           <div className="rounded-xl px-4 py-3" style={{ background: "rgba(0,0,0,0.02)", border: `1px solid ${T.border}` }}>
-            <p className="text-[11px] leading-relaxed" style={{ color: T.muted }}>
-              Il presente Passport è uno <strong>strumento informativo e di marketing</strong>. Non sostituisce
-              la documentazione tecnica obbligatoria (Annex IV — Art. 11) né attesta la conformità giuridica
-              integrale, che resta responsabilità del fornitore del sistema AI ex Reg. UE 2024/1689.
-              Il documento può essere allegato a contratti B2B come riassunto verificabile delle misure di compliance adottate.
-            </p>
+            <p className="text-[11px] leading-relaxed" style={{ color: T.muted }}
+              dangerouslySetInnerHTML={{ __html: t("disclaimer") }}
+            />
           </div>
         </>
       )}

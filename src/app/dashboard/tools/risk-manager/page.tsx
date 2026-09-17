@@ -18,6 +18,7 @@ import { buildRiskRegisterDocument, buildAnnexSections, shouldShowGpaiModule, ty
 import type { RiskRegisterDocument } from "@/lib/risk/risk-register-types";
 import { computeRegisterProgress, type SectionProgress } from "@/lib/risk/risk-register-progress";
 import { RiskRegisterGuidedMode } from "@/components/risk/RiskRegisterGuidedMode";
+import { useT } from "@/i18n/LocaleProvider";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -749,6 +750,7 @@ ${sections.map(s => `<h2>${s.title}</h2><p>${s.content.replace(/\n/g, "<br>")}</
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function RiskManagerPage() {
+  const t = useT("toolRiskManager");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [documentation, setDocumentation] = useState<RiskDocumentation>({});
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
@@ -966,7 +968,7 @@ export default function RiskManagerPage() {
               Risk Manager
             </h1>
             <p style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", marginTop: 4 }}>
-              Framework guidato AI — Monte Carlo, audit bitemporale, drift detection, GPAI. Ogni risposta AI include audio con voce Chirp3-HD.
+              {t("subtitle")}
             </p>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
@@ -975,7 +977,7 @@ export default function RiskManagerPage() {
               onClick={resetChat}
               style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, padding: "6px 12px", borderRadius: 20, background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.4)", border: "1px solid rgba(0,0,0,0.07)", cursor: "pointer" }}
             >
-              <RotateCcw size={12} /> Reset
+              <RotateCcw size={12} /> {t("reset")}
             </button>
           </div>
         </div>
@@ -992,7 +994,7 @@ export default function RiskManagerPage() {
               marginBottom: -1,
             }}
           >
-            Form strutturato
+            {t("tabStructured")}
           </button>
           <button
             onClick={() => setGuidedMode(true)}
@@ -1004,7 +1006,7 @@ export default function RiskManagerPage() {
               marginBottom: -1,
             }}
           >
-            Risk Register guidato
+            {t("tabGuided")}
           </button>
         </div>
       </div>
@@ -1017,7 +1019,7 @@ export default function RiskManagerPage() {
           <div style={{ padding: "12px 12px 10px", borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
               <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                Avanzamento
+                {t("progress")}
               </span>
               <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", fontFamily: "monospace" }}>
                 {progressPct}%
@@ -1039,10 +1041,10 @@ export default function RiskManagerPage() {
           <div style={{ padding: "8px 12px", borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", gap: 5 }}>
             <div style={{ display: "flex", alignItems: "flex-start", gap: 6, fontSize: 9, color: "rgba(0,0,0,0.35)" }}>
               <AlertTriangle size={10} style={{ flexShrink: 0, marginTop: 1, color: "#b45309" }} />
-              <span>I campi estratti dall&apos;AI richiedono verifica legale professionale.</span>
+              <span>{t("aiFieldsVerify")}</span>
             </div>
             <div style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", lineHeight: 1.4, paddingTop: 3, borderTop: "1px solid rgba(0,0,0,0.05)" }}>
-              La mancata conformità all&apos;Art. 9 può comportare sanzioni ai sensi degli artt. 99-101.
+              {t("art9Sanctions")}
             </div>
           </div>
         </div>
@@ -1085,14 +1087,14 @@ export default function RiskManagerPage() {
           <div style={{ padding: "8px 16px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "#f5f5f4", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#0D1016" }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: "#0D1016" }}>
-              Fase corrente: {PHASES[currentPhaseIndex]?.label}
+              {t("currentPhase")} {t(`phase_${PHASES[currentPhaseIndex]?.id}_label`)}
             </span>
             <span style={{ fontSize: 11, color: "rgba(0,0,0,0.45)" }}>
               — {PHASES[currentPhaseIndex]?.article}
             </span>
             <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4 }}>
               <FileText size={10} style={{ color: "rgba(0,0,0,0.25)" }} />
-              <span style={{ fontSize: 9, color: "rgba(0,0,0,0.25)" }}>Audio Chirp3-HD disponibile</span>
+              <span style={{ fontSize: 9, color: "rgba(0,0,0,0.25)" }}>{t("audioAvailable")}</span>
             </div>
           </div>
 
@@ -1110,7 +1112,7 @@ export default function RiskManagerPage() {
                     fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.45)",
                   }}
                 >
-                  <span>Guida fase · {PHASES[currentPhaseIndex]?.label}</span>
+                  <span>{t("phaseGuide")} · {t(`phase_${PHASES[currentPhaseIndex]?.id}_label`)}</span>
                   <span style={{ fontSize: 10 }}>{showPhaseGuide ? "▲" : "▼"}</span>
                 </button>
                 {showPhaseGuide && (
@@ -1147,7 +1149,7 @@ export default function RiskManagerPage() {
                           }}
                           title={ex.text}
                         >
-                          Esempio: {ex.label}
+                          {t("exampleWord")} {ex.label}
                         </button>
                       ))}
                     </div>
@@ -1162,7 +1164,7 @@ export default function RiskManagerPage() {
                             setCustomPhrase("");
                           }
                         }}
-                        placeholder="Oppure scrivi una risposta personalizzata…"
+                        placeholder={t("customAnswerPh")}
                         style={{
                           flex: 1, fontSize: 11, padding: "6px 10px", borderRadius: 8,
                           border: "1px solid rgba(0,0,0,0.10)", outline: "none",
@@ -1177,7 +1179,7 @@ export default function RiskManagerPage() {
                             background: "#0D1016", color: "#fff", border: "none", cursor: "pointer",
                           }}
                         >
-                          Inserisci →
+                          {t("insert")}
                         </button>
                       )}
                     </div>
@@ -1198,7 +1200,7 @@ export default function RiskManagerPage() {
               <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10 }}>
                 <div style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)", borderRadius: "14px 14px 14px 4px", padding: "10px 14px", display: "flex", alignItems: "center", gap: 8 }}>
                   <Loader2 size={13} style={{ color: "#0D1016", animation: "spin 1s linear infinite" }} />
-                  <span style={{ fontSize: 12, color: "rgba(0,0,0,0.4)" }}>Analisi in corso…</span>
+                  <span style={{ fontSize: 12, color: "rgba(0,0,0,0.4)" }}>{t("analyzing")}</span>
                 </div>
               </div>
             )}
@@ -1211,7 +1213,7 @@ export default function RiskManagerPage() {
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={`Fase: ${PHASES[currentPhaseIndex]?.subtitle} — scrivi la tua risposta…`}
+                placeholder={`${t("phaseWord")}: ${t(`phase_${PHASES[currentPhaseIndex]?.id}_sub`)} — ${t("writeAnswer")}`}
                 rows={2}
                 disabled={isLoading}
                 style={{
@@ -1239,7 +1241,7 @@ export default function RiskManagerPage() {
               </button>
             </div>
             <p style={{ fontSize: 10, color: "rgba(0,0,0,0.25)", marginTop: 6 }}>
-              Enter per inviare · Shift+Enter per andare a capo
+              {t("enterHint")}
             </p>
           </div>
         </div>

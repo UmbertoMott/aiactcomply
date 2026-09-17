@@ -18,6 +18,7 @@ import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { appendVersion, listVersions, type VersionSnapshot } from "@/lib/projects/version-history";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { ToolPhaseBar, type ToolPhase, type PhaseStatus } from "@/components/compliance/ToolPhaseBar";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
 
 const STORAGE_KEY = "docugen_state";
 
@@ -269,6 +270,9 @@ const TIMELINE_STEPS = [
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function DocuGenPage() {
+  const t = useT("toolDocugen");
+  const locale = useLocale();
+  const loc = locale === "it" ? "it-IT" : "en-GB";
   const [persisted, setPersistedRaw] = useState<DocuGenState>(() => loadState());
   const [activeSection, setActiveSection] = useState("s1");
   const [compareMode, setCompareMode] = useState(false);
@@ -455,10 +459,10 @@ export default function DocuGenPage() {
   const isFinalized = versionSnapshots[0]?.status === "finalized";
   const startedCount = doneCount + draftCount;
   const docuPhases: ToolPhase[] = [
-    { id: "aggregate", label: "Aggregazione",  sublabel: "Sorgenti dati",       anchor: "docu-aggregate" },
-    { id: "draft",     label: "Bozza",          sublabel: "Drafting assistito",  anchor: "docu-draft" },
-    { id: "validate",  label: "Validazione",    sublabel: "Revisione umana",     anchor: "docu-validate" },
-    { id: "export",    label: "Evidenza",       sublabel: "Export audit-ready",  anchor: "docu-export" },
+    { id: "aggregate", label: t("phase_aggregate"), sublabel: t("phase_aggregate_sub"), anchor: "docu-aggregate" },
+    { id: "draft",     label: t("phase_draft"),     sublabel: t("phase_draft_sub"),     anchor: "docu-draft" },
+    { id: "validate",  label: t("phase_validate"),  sublabel: t("phase_validate_sub"),  anchor: "docu-validate" },
+    { id: "export",    label: t("phase_export"),    sublabel: t("phase_export_sub"),    anchor: "docu-export" },
   ];
   const stepIndex = TIMELINE_STEPS.findIndex((s) => s.id === timelineStep);
   const docuPhaseStatus: PhaseStatus[] = [
@@ -533,14 +537,14 @@ export default function DocuGenPage() {
         }));
 
     const payload = { systemName: resolvedName, systemId: `docugen-${Date.now()}`, tier: classifierTier, sections };
-    showToast("Generazione PDF in corso…");
+    showToast(t("toast_pdfGen"));
     try {
       const res = await fetch("/api/compliance/export-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) { showToast("Errore export PDF"); return; }
+      if (!res.ok) { showToast(t("toast_pdfError")); return; }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -548,9 +552,9 @@ export default function DocuGenPage() {
       a.download = `AIComply_${resolvedName.replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-      showToast("PDF esportato ✓");
+      showToast(t("toast_pdfExported"));
     } catch {
-      showToast("Errore durante l'export PDF");
+      showToast(t("toast_pdfExportError"));
     }
   }
 
@@ -577,7 +581,7 @@ export default function DocuGenPage() {
     const a = document.createElement("a");
     a.href = url; a.download = filename; a.click();
     URL.revokeObjectURL(url);
-    showToast(`Fascicolo esportato: ${filename}`);
+    showToast(`${t("toast_dossierExported")} ${filename}`);
   }
 
   function exportMarkdown() {
@@ -599,7 +603,7 @@ export default function DocuGenPage() {
     const a = document.createElement("a");
     a.href = url; a.download = filename; a.click();
     URL.revokeObjectURL(url);
-    showToast(`Markdown esportato: ${filename}`);
+    showToast(`${t("toast_mdExported")} ${filename}`);
   }
 
   const activeS = ANNEX_IV.find((s) => s.id === activeSection)!;
@@ -615,51 +619,51 @@ export default function DocuGenPage() {
       {savedAt ? (
         <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
           style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)" }}>
-          <span style={{ color: "#15803d" }}>✓ Risultati salvati nel dossier · Aggiornato il {new Date(savedAt).toLocaleDateString("it-IT")}</span>
-          {docugenSaved && <span className="text-[10px]" style={{ color: "#15803d" }}>· Salvato automaticamente</span>}
-          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>Vedi dossier →</Link>
+          <span style={{ color: "#15803d" }}>✓ {t("dossierSaved")} · {t("updatedOn")} {new Date(savedAt).toLocaleDateString(loc)}</span>
+          {docugenSaved && <span className="text-[10px]" style={{ color: "#15803d" }}>· {t("autoSaved")}</span>}
+          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>{t("seeDossier")}</Link>
         </div>
       ) : (
         <>
           <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-1 text-[12px]"
             style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}>
             <span style={{ color: "rgba(0,0,0,0.45)" }}>
-              Salva il Fascicolo Tecnico nel dossier di compliance
-              {docugenSaved && <span className="ml-2 text-[10px]" style={{ color: "#16a34a" }}>✓ Auto-salvato</span>}
+              {t("saveHint")}
+              {docugenSaved && <span className="ml-2 text-[10px]" style={{ color: "#16a34a" }}>✓ {t("autoSavedShort")}</span>}
             </span>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <button onClick={() => { if (!workName && systemName) setWorkName(systemName); setShowSaveNote(v => !v); }}
                 className="text-[11px] rounded-full px-3 py-1 transition-opacity hover:opacity-80"
                 style={{ background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer" }}>
-                {showSaveNote ? "▲" : "Nomina e salva"}
+                {showSaveNote ? "▲" : t("nameAndSave")}
               </button>
               <button onClick={() => { if (!workName && systemName) setWorkName(systemName); setShowSaveNote(true); }} className="text-[11px] font-medium rounded-full px-3 py-1 transition-opacity hover:opacity-80"
                 style={{ background: "rgba(0,0,0,0.08)", color: "#0D1016", border: "none", cursor: "pointer" }}
                 onDoubleClick={() => saveToDossier(false)}>
-                Salva lavoro
+                {t("saveWork")}
               </button>
               <button onClick={() => saveToDossier(true)} disabled={!canFinalize}
                 className="text-[11px] font-medium rounded-full px-3 py-1 transition-opacity hover:opacity-80 disabled:opacity-40"
                 style={{ background: "#0D1016", color: "#ffffff", border: "none", cursor: canFinalize ? "pointer" : "not-allowed" }}>
-                ✓ Finalizza versione
+                ✓ {t("finalizeVersion")}
               </button>
             </div>
           </div>
           {showSaveNote && (
             <div className="mb-5 rounded-lg" style={{ padding: "10px 16px 12px", background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", gap: 8 }}>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", minWidth: 80, textTransform: "uppercase", letterSpacing: "0.04em" }}>Nome lavoro</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", minWidth: 80, textTransform: "uppercase", letterSpacing: "0.04em" }}>{t("workName")}</span>
                 <input
                   value={workName}
                   onChange={e => setWorkName(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter" && workName.trim()) saveToDossier(false); }}
-                  placeholder="Es. «Prima bozza post-audit DPO»"
+                  placeholder={t("workNamePh")}
                   style={{ flex: 1, fontSize: 11, padding: "6px 10px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", outline: "none" }}
                   autoFocus
                 />
                 <button onClick={() => saveToDossier(false)}
                   style={{ fontSize: 11, fontWeight: 700, padding: "6px 14px", borderRadius: 6, background: "#0D1016", color: "#fff", border: "none", cursor: "pointer", flexShrink: 0 }}>
-                  Salva
+                  {t("save")}
                 </button>
               </div>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -667,7 +671,7 @@ export default function DocuGenPage() {
                 <input
                   value={saveNote}
                   onChange={e => setSaveNote(e.target.value)}
-                  placeholder="Nota opzionale — es. «Aggiornato dopo audit DPO del 10/06»"
+                  placeholder={t("noteOptionalPh")}
                   style={{ flex: 1, fontSize: 11, padding: "5px 10px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016" }}
                 />
               </div>
@@ -680,20 +684,20 @@ export default function DocuGenPage() {
       {aiSystems.length > 0 && (
         <div className="flex items-center gap-3 rounded-lg px-4 py-2.5 mb-4 text-[12px]"
           style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.08)" }}>
-          <span style={{ color: "rgba(0,0,0,0.45)" }}>Sistema AI:</span>
+          <span style={{ color: "rgba(0,0,0,0.45)" }}>{t("aiSystemLabel")}</span>
           <select
             value={aiSystemId || ""}
             onChange={(e) => setAiSystemId(e.target.value || null)}
             className="text-[12px] bg-transparent outline-none"
             style={{ color: "#0D1016" }}
           >
-            <option value="">— seleziona sistema AI —</option>
+            <option value="">{t("selectAiSystem")}</option>
             {aiSystems.map((s) => (
               <option key={s.id} value={s.id}>{s.name} ({s.risk_tier})</option>
             ))}
           </select>
           <span className="ml-auto text-[11px]" style={{ color: dbSyncing ? "rgba(0,0,0,0.55)" : dbSynced ? "#16a34a" : "rgba(0,0,0,0.3)" }}>
-            {dbSyncing ? "⟳ Sincronizzando..." : dbSynced ? "✓ Salvato su DB" : "○ Non sincronizzato"}
+            {dbSyncing ? t("dbSyncing") : dbSynced ? t("dbSaved") : t("dbNotSync")}
           </span>
         </div>
       )}
@@ -704,14 +708,14 @@ export default function DocuGenPage() {
         <div>
           <p className="text-[11px] font-semibold uppercase mb-1"
             style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "1.2px" }}>
-            Art. 11 · Allegato IV
+            {t("kicker")}
           </p>
           <h1 className="text-[24px] font-medium" style={{ color: "#0D1016", letterSpacing: "-0.8px" }}>
             DocuGen AI — {classifierTier === "limited"
-              ? "Dichiarazione Art. 50"
+              ? t("titleArt50")
               : classifierTier === "minimal"
-                ? "Nota di Conformità"
-                : "Fascicolo Tecnico"}
+                ? t("titleComplianceNote")
+                : t("titleTechFile")}
           </h1>
           {classifierTier && classifierTier !== "unacceptable" && (
             <div className="flex items-center gap-2 mt-2 mb-1">
@@ -729,14 +733,14 @@ export default function DocuGenPage() {
                 textTransform: "uppercase" as const,
                 letterSpacing: "0.05em",
               }}>
-                {classifierTier === "high" ? "⬛ HIGH RISK — Allegato IV obbligatorio"
-                  : classifierTier === "limited" ? "◻ LIMITED RISK — Art. 50 Transparency Doc"
-                  : "◻ MINIMAL RISK — Codice condotta volontario"}
+                {classifierTier === "high" ? t("badge_high")
+                  : classifierTier === "limited" ? t("badge_limited")
+                  : t("badge_minimal")}
               </span>
             </div>
           )}
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-[11px]" style={{ color: "rgba(0,0,0,0.38)" }}>Lavoro:</span>
+            <span className="text-[11px]" style={{ color: "rgba(0,0,0,0.38)" }}>{t("workLabel")}</span>
             <input
               type="text"
               value={systemName}
@@ -744,7 +748,7 @@ export default function DocuGenPage() {
                 setSystemName(e.target.value);
                 setWorkName(e.target.value);
               }}
-              placeholder="Nome del lavoro…"
+              placeholder={t("workNamePlaceholder")}
               className="text-[12px] outline-none border-b bg-transparent"
               style={{ color: "#0D1016", borderBottomColor: "rgba(0,0,0,0.15)", minWidth: "220px" }}
             />
@@ -757,22 +761,22 @@ export default function DocuGenPage() {
             <GitBranch className="h-3.5 w-3.5" style={{ color: "rgba(0,0,0,0.35)" }} />
             <span style={{ color: "#0D1016", fontSize: 11 }}>
               {versionSnapshots.length > 0
-                ? `${versionSnapshots[0].tag ?? "lavoro"} · ${versionSnapshots.length} snapshot`
-                : "Nessuna versione salvata"}
+                ? `${versionSnapshots[0].tag ?? t("workWord")} · ${versionSnapshots.length} snapshot`
+                : t("noVersionSaved")}
             </span>
           </div>
 
           {versionSnapshots[0]?.status === "finalized" && (
             <span className="text-[11px] font-medium px-3 py-2 rounded-lg"
               style={{ background: "rgba(21,128,61,0.08)", color: "#15803d", border: "1px solid rgba(21,128,61,0.2)" }}>
-              ✓ Finalizzata
+              ✓ {t("finalizedBadge")}
             </span>
           )}
 
           {versionSnapshots[0]?.isSubstantialModification && (
             <span className="flex items-center gap-1 text-[11px] font-medium px-3 py-2 rounded-lg"
               style={{ background: "rgba(220,38,38,0.07)", color: "#dc2626", border: "1px solid rgba(220,38,38,0.15)" }}>
-              <AlertTriangle className="h-3 w-3" /> Modifica sostanziale
+              <AlertTriangle className="h-3 w-3" /> {t("substantialModification")}
             </span>
           )}
 
@@ -783,7 +787,7 @@ export default function DocuGenPage() {
               border: "1px solid rgba(0,0,0,0.12)", color: "rgba(0,0,0,0.6)", cursor: "pointer" }}
           >
             <History className="h-3.5 w-3.5" />
-            Storico versioni
+            {t("versionHistory")}
             {showVersionPanel ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
           </button>
 
@@ -792,14 +796,14 @@ export default function DocuGenPage() {
               className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-opacity hover:opacity-80"
               style={{ background: "#0D1016", color: "#fff", cursor: "pointer" }}>
               <Download className="h-3.5 w-3.5" />
-              Esporta {classifierTier === "limited" ? "Art. 50 PDF" : "Nota Conformità PDF"}
+              {t("exportWord")} {classifierTier === "limited" ? "Art. 50 PDF" : t("complianceNotePdf")}
             </button>
           ) : (
             <button onClick={exportFullDocument}
               className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-opacity hover:opacity-80"
               style={{ background: "#0D1016", color: "#fff", cursor: "pointer" }}>
               <Download className="h-3.5 w-3.5" />
-              Esporta JSON
+              {t("exportJson")}
             </button>
           )}
         </div>
@@ -815,9 +819,9 @@ export default function DocuGenPage() {
               if (d && typeof d === "object") setPersistedRaw({ ...DEFAULT_STATE, ...d });
               setVersionSnapshots(listVersions("docugen"));
               setShowVersionPanel(false);
-              showToast("Versione ripristinata ✓");
+              showToast(t("toast_versionRestored"));
             }}
-            sectionLabels={Object.fromEntries(ANNEX_IV.map(s => [s.id, s.title]))}
+            sectionLabels={Object.fromEntries(ANNEX_IV.map(s => [s.id, t(`ann_${s.id}_title`)]))}
           />
         </div>
       )}
@@ -827,7 +831,7 @@ export default function DocuGenPage() {
         <div className="rounded-xl p-3 mb-4 flex items-center gap-3"
           style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.12)" }}>
           <span className="text-[12px]" style={{ color: "#0D1016" }}>
-            Confronto: <strong>{versionSnapshots[0]?.tag ?? "corrente"}</strong> vs
+            {t("compareWord")} <strong>{versionSnapshots[0]?.tag ?? t("current")}</strong> vs
           </span>
           <select
             value={compareIdx}
@@ -839,7 +843,7 @@ export default function DocuGenPage() {
             ))}
           </select>
           <span className="text-[11px]" style={{ color: "rgba(0,0,0,0.35)" }}>
-            Le variazioni sostanziali sono evidenziate in rosso
+            {t("variationsHighlighted")}
           </span>
         </div>
       )}
@@ -851,7 +855,7 @@ export default function DocuGenPage() {
         status={docuPhaseStatus}
         activeIdx={stepIndex}
         progressPct={Math.round((doneCount / 9) * 100)}
-        meta={`${doneCount}/9 sezioni validate`}
+        meta={`${doneCount}/9 ${t("sectionsValidated")}`}
         onSelect={(i) => setTimelineStep(TIMELINE_STEPS[i].id)}
       />
 
@@ -862,14 +866,14 @@ export default function DocuGenPage() {
           <div style={{ border: "1px solid rgba(0,0,0,0.08)", borderRadius: 10, overflow: "hidden", marginBottom: 24 }}>
             <div style={{ padding: "10px 16px", borderBottom: "1px solid rgba(0,0,0,0.06)", background: "#fafafa" }}>
               <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.35)", textTransform: "uppercase" as const, letterSpacing: "0.08em", margin: 0 }}>
-                Sorgenti dati per la bozza AI
+                {t("sourcesForDraft")}
               </p>
             </div>
             {([
-              { label: "Classifier", art: "Art. 6", desc: "Determina il livello di rischio e la categoria del sistema AI", href: "/dashboard/tools/classifier", present: !!ghost.systemName, preview: ghost.systemName ? `Sistema: ${ghost.systemName} · Risk: ${ghost.riskLevel ?? "N/D"}` : null },
-              { label: "Risk Manager", art: "Art. 9", desc: "Pre-carica scenari di rischio nelle sezioni gestione rischi", href: "/dashboard/tools/risk-manager", present: !!ghost.risksSummary, preview: ghost.risksSummary },
-              { label: "Data Audit", art: "Art. 10", desc: "Governance dataset di addestramento e analisi bias", href: "/dashboard/tools/data-audit", present: !!ghost.datasetsSummary, preview: ghost.datasetsSummary },
-              { label: "DPIA", art: "Art. 35", desc: "Importa base giuridica e categorie di dati personali trattati", href: "/dashboard/tools/dpia", present: !!ghost.legalBasis, preview: ghost.legalBasis ? `Base giuridica: ${ghost.legalBasis?.slice(0, 80)}…` : null },
+              { label: "Classifier", art: "Art. 6", desc: t("src_classifier_desc"), href: "/dashboard/tools/classifier", present: !!ghost.systemName, preview: ghost.systemName ? `${t("systemWord")}: ${ghost.systemName} · Risk: ${ghost.riskLevel ?? "N/D"}` : null },
+              { label: "Risk Manager", art: "Art. 9", desc: t("src_risk_desc"), href: "/dashboard/tools/risk-manager", present: !!ghost.risksSummary, preview: ghost.risksSummary },
+              { label: "Data Audit", art: "Art. 10", desc: t("src_data_desc"), href: "/dashboard/tools/data-audit", present: !!ghost.datasetsSummary, preview: ghost.datasetsSummary },
+              { label: "DPIA", art: "Art. 35", desc: t("src_dpia_desc"), href: "/dashboard/tools/dpia", present: !!ghost.legalBasis, preview: ghost.legalBasis ? `${t("legalBasisWord")}: ${ghost.legalBasis?.slice(0, 80)}…` : null },
             ] as { label: string; art: string; desc: string; href: string; present: boolean; preview: string | null }[]).map((src, i, arr) => (
               <div key={src.label} style={{ display: "flex", alignItems: "center", gap: 14, padding: "13px 16px", borderBottom: i < arr.length - 1 ? "1px solid rgba(0,0,0,0.05)" : "none", background: "#fff" }}>
                 <div style={{ flexShrink: 0, width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
@@ -891,7 +895,7 @@ export default function DocuGenPage() {
                   color: src.present ? "rgba(0,0,0,0.45)" : "#fff",
                   border: src.present ? "1px solid rgba(0,0,0,0.10)" : "none",
                   cursor: "pointer", textDecoration: "none", whiteSpace: "nowrap" as const }}>
-                  {src.present ? "Modifica →" : "Migliora bozza →"}
+                  {src.present ? t("editArrow") : t("improveDraft")}
                 </a>
               </div>
             ))}
@@ -900,10 +904,10 @@ export default function DocuGenPage() {
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6 mb-4">
             {[
-              { label: "Sezioni completate", value: `${doneCount}/9`, color: "#16a34a" },
-              { label: "In lavoro", value: draftCount, color: "#0D1016" },
-              { label: "Obbligatorie vuote", value: emptyRequired.length, color: emptyRequired.length > 0 ? "#dc2626" : "#16a34a" },
-              { label: "Versioni salvate", value: versionSnapshots.length || "—", color: "rgba(0,0,0,0.5)" },
+              { label: t("stat_completed"), value: `${doneCount}/9`, color: "#16a34a" },
+              { label: t("stat_inWork"), value: draftCount, color: "#0D1016" },
+              { label: t("stat_emptyRequired"), value: emptyRequired.length, color: emptyRequired.length > 0 ? "#dc2626" : "#16a34a" },
+              { label: t("stat_savedVersions"), value: versionSnapshots.length || "—", color: "rgba(0,0,0,0.5)" },
             ].map((c) => (
               <div key={c.label} className="rounded-xl p-4"
                 style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
@@ -916,7 +920,7 @@ export default function DocuGenPage() {
           <button onClick={() => setTimelineStep("draft")}
             style={{ marginTop: 8, padding: "10px 20px", borderRadius: 8, background: "#0D1016",
               color: "#fff", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500 }}>
-            Aggrega dati →
+            {t("aggregateData")}
           </button>
         </div>
       )}
@@ -925,7 +929,7 @@ export default function DocuGenPage() {
       {timelineStep === "draft" && (
         <div>
           <p className="text-[13px] mb-4" style={{ color: "rgba(0,0,0,0.55)" }}>
-            Sezioni Allegato IV. Le sezioni auto-popolate o con dati inferiti sono pronte per la conferma.
+            {t("draftIntro")}
           </p>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
@@ -943,23 +947,23 @@ export default function DocuGenPage() {
                         background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.45)" }}>{SOURCE_BADGES[s.id] ?? s.ref}</span>
                       {s.autoSource && (
                         <span style={{ marginLeft: 4, fontSize: 9, padding: "2px 6px", borderRadius: 4,
-                          background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.45)" }}>Auto-popolata</span>
+                          background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.45)" }}>{t("autoPopulated")}</span>
                       )}
                     </div>
                     <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 99,
                       background: st === "done" ? "rgba(0,0,0,0.07)" : st === "draft" ? "rgba(0,0,0,0.05)" : "rgba(0,0,0,0.04)",
                       color: st === "done" ? "#0D1016" : st === "draft" ? "rgba(0,0,0,0.55)" : "rgba(0,0,0,0.3)" }}>
-                      {st === "done" ? "✓ Completata" : st === "draft" ? "Bozza" : "Vuota"}
+                      {st === "done" ? t("completedStatus") : st === "draft" ? t("draftStatus") : t("emptyStatus")}
                     </span>
                   </div>
-                  <p style={{ fontSize: 12, fontWeight: 600, color: "#0D1016", margin: "6px 0 2px" }}>{s.title}</p>
-                  <p style={{ fontSize: 11, color: "rgba(0,0,0,0.42)", margin: "0 0 8px" }}>{s.hint}</p>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: "#0D1016", margin: "6px 0 2px" }}>{t(`ann_${s.id}_title`)}</p>
+                  <p style={{ fontSize: 11, color: "rgba(0,0,0,0.42)", margin: "0 0 8px" }}>{t(`ann_${s.id}_hint`)}</p>
 
                   {/* Ghost inference for s1 */}
                   {hasGhostForS1 && (
                     <div style={{ background: "rgba(0,0,0,0.03)", borderRadius: 6, padding: 10, marginTop: 8 }}>
                       <p style={{ fontSize: 10, color: "rgba(0,0,0,0.4)", marginBottom: 4 }}>
-                        Il sistema ha inferito questa descrizione da Classifier:
+                        {t("inferredFromClassifier")}
                       </p>
                       <p style={{ fontSize: 12, color: "#0D1016", margin: "0 0 8px",
                         fontFamily: "Georgia, 'Times New Roman', serif" }}>
@@ -972,13 +976,13 @@ export default function DocuGenPage() {
                           }}
                           style={{ fontSize: 11, padding: "4px 12px", borderRadius: 6,
                             background: "#0D1016", color: "#fff", border: "none", cursor: "pointer" }}>
-                          ✓ Conferma
+                          ✓ {t("confirm")}
                         </button>
                         <button onClick={() => { setActiveSection("s1"); setTimelineStep("validate"); }}
                           style={{ fontSize: 11, padding: "4px 12px", borderRadius: 6,
                             background: "transparent", color: "rgba(0,0,0,0.5)",
                             border: "1px solid rgba(0,0,0,0.12)", cursor: "pointer" }}>
-                          Modifica
+                          {t("edit")}
                         </button>
                       </div>
                     </div>
@@ -988,7 +992,7 @@ export default function DocuGenPage() {
                   {hasGhostForS4 && (
                     <div style={{ background: "rgba(0,0,0,0.03)", borderRadius: 6, padding: 10, marginTop: 8 }}>
                       <p style={{ fontSize: 10, color: "rgba(0,0,0,0.4)", marginBottom: 4 }}>
-                        Il sistema ha inferito da Data Audit:
+                        {t("inferredFromDataAudit")}
                       </p>
                       <p style={{ fontSize: 12, color: "#0D1016", margin: "0 0 8px",
                         fontFamily: "Georgia, 'Times New Roman', serif" }}>
@@ -1001,13 +1005,13 @@ export default function DocuGenPage() {
                           }}
                           style={{ fontSize: 11, padding: "4px 12px", borderRadius: 6,
                             background: "#0D1016", color: "#fff", border: "none", cursor: "pointer" }}>
-                          ✓ Conferma
+                          ✓ {t("confirm")}
                         </button>
                         <button onClick={() => { setActiveSection("s4"); setTimelineStep("validate"); }}
                           style={{ fontSize: 11, padding: "4px 12px", borderRadius: 6,
                             background: "transparent", color: "rgba(0,0,0,0.5)",
                             border: "1px solid rgba(0,0,0,0.12)", cursor: "pointer" }}>
-                          Modifica
+                          {t("edit")}
                         </button>
                       </div>
                     </div>
@@ -1027,7 +1031,7 @@ export default function DocuGenPage() {
                     style={{ marginTop: 10, fontSize: 10, padding: "3px 10px", borderRadius: 5,
                       background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.5)",
                       border: "none", cursor: "pointer" }}>
-                    Apri editor →
+                    {t("openEditor")}
                   </button>
                 </div>
               );
@@ -1037,7 +1041,7 @@ export default function DocuGenPage() {
           <button onClick={() => setTimelineStep("validate")}
             style={{ marginTop: 20, padding: "10px 20px", borderRadius: 8, background: "#0D1016",
               color: "#fff", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500 }}>
-            Vai alla validazione →
+            {t("goToValidation")}
           </button>
         </div>
       )}
@@ -1048,7 +1052,7 @@ export default function DocuGenPage() {
           {/* Progress bar */}
           <div style={{ marginBottom: 16 }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-              <span style={{ fontSize: 11, color: "rgba(0,0,0,0.42)" }}>Completamento Allegato IV</span>
+              <span style={{ fontSize: 11, color: "rgba(0,0,0,0.42)" }}>{t("annexIVCompletion")}</span>
               <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016" }}>{Math.round((doneCount / 9) * 100)}%</span>
             </div>
             <div style={{ height: 4, borderRadius: 99, background: "rgba(0,0,0,0.07)", overflow: "hidden" }}>
@@ -1082,7 +1086,7 @@ export default function DocuGenPage() {
                           style={{ borderColor: s.required ? "#dc2626" : "rgba(0,0,0,0.2)" }} />}
                         <div className="flex-1 min-w-0">
                           <p className="text-[11px] truncate font-medium"
-                            style={{ color: active ? "#0D1016" : "rgba(0,0,0,0.6)" }}>{s.title}</p>
+                            style={{ color: active ? "#0D1016" : "rgba(0,0,0,0.6)" }}>{t(`ann_${s.id}_title`)}</p>
                           <p className="text-[9px]" style={{ color: "rgba(0,0,0,0.28)" }}>{s.ref}</p>
                         </div>
                       </button>
@@ -1111,15 +1115,15 @@ export default function DocuGenPage() {
                         </span>
                         {activeS.required && (
                           <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4,
-                            background: "rgba(239,68,68,0.07)", color: "#dc2626" }}>Obbligatoria</span>
+                            background: "rgba(239,68,68,0.07)", color: "#dc2626" }}>{t("required")}</span>
                         )}
                         {activeS.autoSource && (
                           <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4,
-                            background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.45)" }}>Auto-popolata ✦</span>
+                            background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.45)" }}>{t("autoPopulated")} ✦</span>
                         )}
                       </div>
-                      <h2 style={{ fontSize: 15, fontWeight: 600, color: "#0D1016", margin: "0 0 2px" }}>{activeS.title}</h2>
-                      <p style={{ fontSize: 12, color: "rgba(0,0,0,0.42)", margin: 0 }}>{activeS.hint}</p>
+                      <h2 style={{ fontSize: 15, fontWeight: 600, color: "#0D1016", margin: "0 0 2px" }}>{t(`ann_${activeSection}_title`)}</h2>
+                      <p style={{ fontSize: 12, color: "rgba(0,0,0,0.42)", margin: 0 }}>{t(`ann_${activeSection}_hint`)}</p>
                     </div>
 
                     <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0, marginLeft: 12 }}>
@@ -1127,7 +1131,7 @@ export default function DocuGenPage() {
                         style={{ fontSize: 10, padding: "4px 10px", borderRadius: 5, cursor: "pointer",
                           background: focusMode ? "#0D1016" : "rgba(0,0,0,0.05)",
                           color: focusMode ? "#fff" : "rgba(0,0,0,0.5)", border: "none" }}>
-                        {focusMode ? "⤡ Esci focus" : "⤢ Focus mode"}
+                        {focusMode ? t("exitFocus") : t("focusMode")}
                       </button>
                       {["empty", "draft", "done"].map((st) => (
                         <button key={st} onClick={() => setStatus((prev) => ({ ...prev, [activeSection]: st as "empty" | "draft" | "done" }))}
@@ -1139,7 +1143,7 @@ export default function DocuGenPage() {
                               ? (st === "done" ? "#16a34a" : st === "draft" ? "#0D1016" : "rgba(0,0,0,0.45)")
                               : "rgba(0,0,0,0.3)",
                             fontWeight: getSectionStatus(activeSection) === st ? 600 : 400 }}>
-                          {st === "done" ? "Completata" : st === "draft" ? "In lavoro" : "Vuota"}
+                          {st === "done" ? t("completedStatus") : st === "draft" ? t("inWorkStatus") : t("emptyStatus2")}
                         </button>
                       ))}
                     </div>
@@ -1150,8 +1154,8 @@ export default function DocuGenPage() {
                     <div style={{ borderRadius: 8, padding: "8px 12px", marginBottom: 12,
                       background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)",
                       color: "#dc2626", fontSize: 11 }}>
-                      ∆ Confronto con {versionSnapshots[compareIdx].tag ?? `snapshot ${compareIdx}`} del {new Date(versionSnapshots[compareIdx].savedAt).toLocaleDateString("it-IT")}
-                      {versionSnapshots[compareIdx].sectionsChanged?.includes(activeSection) && " — questa sezione è stata modificata"}
+                      ∆ {t("compareWith")} {versionSnapshots[compareIdx].tag ?? `snapshot ${compareIdx}`} {t("ofWord")} {new Date(versionSnapshots[compareIdx].savedAt).toLocaleDateString(loc)}
+                      {versionSnapshots[compareIdx].sectionsChanged?.includes(activeSection) && ` — ${t("sectionModified")}`}
                     </div>
                   )}
 
@@ -1162,14 +1166,14 @@ export default function DocuGenPage() {
                       background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)" }}>
                       <CheckCircle className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#16a34a" }} />
                       <span style={{ color: "#16a34a" }}>
-                        Contenuto auto-importato da{" "}
+                        {t("contentAutoImported")}{" "}
                         <strong>
                           {activeS.autoSource === "data-audit" ? "Data Audit (Art. 10)" :
                            activeS.autoSource === "risk-manager" ? "Risk Manager (Art. 9)" :
                            activeS.autoSource === "code" ? "Repository GitHub" :
                            activeS.autoSource === "git" ? "Git History" : "MLflow"}
                         </strong>
-                        {versionSnapshots.length > 0 && ` — versione ${version.tag}`}
+                        {versionSnapshots.length > 0 && ` — ${t("versionWord")} ${version.tag}`}
                       </span>
                     </div>
                   )}
@@ -1194,16 +1198,16 @@ export default function DocuGenPage() {
                     }}
                     onFocus={(e) => (e.target.style.borderColor = "rgba(0,0,0,0.2)")}
                     onBlur={(e) => (e.target.style.borderColor = "rgba(0,0,0,0.09)")}
-                    placeholder={activeS.placeholder || "Inserisci il contenuto della sezione..."}
+                    placeholder={t(`ann_${activeSection}_ph`) || t("sectionContentPh")}
                   />
 
                   {/* Bottom actions */}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 12 }}>
                     <div style={{ display: "flex", gap: 8 }}>
                       {[
-                        { label: "Markdown", action: exportMarkdown },
-                        { label: "JSON", action: exportFullDocument },
-                        { label: "PDF firmato", action: exportPdf },
+                        { label: t("markdown"), action: exportMarkdown },
+                        { label: t("jsonWord"), action: exportFullDocument },
+                        { label: t("signedPdf"), action: exportPdf },
                       ].map(({ label, action }) => (
                         <button key={label} onClick={action}
                           style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, padding: "6px 10px",
@@ -1214,10 +1218,10 @@ export default function DocuGenPage() {
                       ))}
                     </div>
                     {canFinalize && version.status !== "finalized" && (
-                      <button onClick={async () => { await saveToDossier(); showToast("Fascicolo finalizzato e salvato ✓"); }}
+                      <button onClick={async () => { await saveToDossier(); showToast(t("toast_finalized")); }}
                         style={{ fontSize: 12, fontWeight: 500, padding: "6px 16px", borderRadius: 20,
                           background: "#0D1016", color: "#fff", border: "none", cursor: "pointer" }}>
-                        Finalizza fascicolo →
+                        {t("finalizeDossier")}
                       </button>
                     )}
                   </div>
@@ -1227,7 +1231,7 @@ export default function DocuGenPage() {
               {/* ── AI Analysis Panels (collapsable) ── */}
               <div style={{ marginTop: 16, borderRadius: 12, padding: 16, background: "#fff", border: "1px solid rgba(0,0,0,0.07)" }}>
                 <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.3)", letterSpacing: "1px", textTransform: "uppercase", marginBottom: 12 }}>
-                  ✦ Analisi AI — Art. 11 / Annex IV
+                  ✦ {t("aiAnalysisTitle")}
                 </p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12, paddingBottom: 12, borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
                   <button disabled={annexIVLoading} onClick={async () => {
@@ -1244,7 +1248,7 @@ export default function DocuGenPage() {
                       if (res.result) setAnnexIVReport(res.result);
                     }}
                     style={{ fontSize: 11, color: "#0D1016", background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.12)", borderRadius: 5, padding: "5px 12px", cursor: "pointer" }}>
-                    {annexIVLoading ? "✦ Analisi…" : "✦ Verifica copertura Annex IV"}
+                    {annexIVLoading ? t("analyzingShort") : t("verifyAnnexCoverage")}
                   </button>
                   <button disabled={coherenceLoading} onClick={async () => {
                       setCoherenceLoading(true); setCoherenceReport(null);
@@ -1259,7 +1263,7 @@ export default function DocuGenPage() {
                       if (res.report) setCoherenceReport(res.report);
                     }}
                     style={{ fontSize: 11, color: "#0D1016", background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.12)", borderRadius: 5, padding: "5px 12px", cursor: "pointer" }}>
-                    {coherenceLoading ? "✦ Analisi…" : "✦ Verifica coerenza inter-tool"}
+                    {coherenceLoading ? t("analyzingShort") : t("verifyCoherence")}
                   </button>
                 </div>
 
@@ -1268,9 +1272,9 @@ export default function DocuGenPage() {
                   <div style={{ marginBottom: 12, padding: 12, borderRadius: 8,
                     background: annexIVReport.coverageScore >= 80 ? "rgba(22,163,74,0.04)" : "rgba(245,158,11,0.05)",
                     border: `1px solid ${annexIVReport.coverageScore >= 80 ? "rgba(22,163,74,0.2)" : "rgba(245,158,11,0.2)"}` }}>
-                    <span style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.5)", background: "rgba(0,0,0,0.06)", borderRadius: 4, padding: "2px 6px" }}>✦ AI — verifica e conferma</span>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.5)", background: "rgba(0,0,0,0.06)", borderRadius: 4, padding: "2px 6px" }}>✦ {t("aiVerify")}</span>
                     <p style={{ fontSize: 12, fontWeight: 700, margin: "6px 0 2px", color: "#0D1016" }}>
-                      Copertura Annex IV: <span style={{ color: annexIVReport.coverageScore >= 80 ? "#15803d" : "#d97706" }}>{annexIVReport.coverageScore}%</span>
+                      {t("annexCoverage")} <span style={{ color: annexIVReport.coverageScore >= 80 ? "#15803d" : "#d97706" }}>{annexIVReport.coverageScore}%</span>
                     </p>
                     <p style={{ fontSize: 11, color: "rgba(0,0,0,0.42)", marginBottom: 8 }}>{annexIVReport.summary}</p>
                     {annexIVReport.missingSections.map((ms, i) => (
@@ -1280,7 +1284,7 @@ export default function DocuGenPage() {
                         <span style={{ fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 3,
                           background: ms.priority === "obbligatorio" ? "#dc2626" : "#d97706",
                           color: "#fff", whiteSpace: "nowrap", alignSelf: "flex-start" }}>
-                          {ms.priority === "obbligatorio" ? "OBB" : "RAC"}
+                          {ms.priority === "obbligatorio" ? t("badgeReq") : t("badgeRec")}
                         </span>
                         <div>
                           <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0 }}>{ms.section}</p>
@@ -1296,9 +1300,9 @@ export default function DocuGenPage() {
                   <div style={{ marginBottom: 12, padding: 12, borderRadius: 8,
                     background: coherenceReport.coherenceScore >= 80 ? "rgba(22,163,74,0.04)" : "rgba(220,38,38,0.04)",
                     border: `1px solid ${coherenceReport.coherenceScore >= 80 ? "rgba(22,163,74,0.2)" : "rgba(220,38,38,0.2)"}` }}>
-                    <span style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.5)", background: "rgba(0,0,0,0.06)", borderRadius: 4, padding: "2px 6px" }}>✦ AI — verifica e conferma</span>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.5)", background: "rgba(0,0,0,0.06)", borderRadius: 4, padding: "2px 6px" }}>✦ {t("aiVerify")}</span>
                     <p style={{ fontSize: 12, fontWeight: 700, margin: "6px 0 2px", color: "#0D1016" }}>
-                      Coerenza inter-tool: <span style={{ color: coherenceReport.coherenceScore >= 80 ? "#15803d" : "#dc2626" }}>{coherenceReport.coherenceScore}%</span> — {coherenceReport.overallStatus.replace(/_/g, " ")}
+                      {t("interToolCoherence")} <span style={{ color: coherenceReport.coherenceScore >= 80 ? "#15803d" : "#dc2626" }}>{coherenceReport.coherenceScore}%</span> — {coherenceReport.overallStatus.replace(/_/g, " ")}
                     </p>
                     {coherenceReport.inconsistencies.map((inc, i) => (
                       <div key={i} style={{ display: "flex", gap: 6, marginBottom: 4, padding: "4px 8px", borderRadius: 5,
@@ -1320,10 +1324,10 @@ export default function DocuGenPage() {
 
                 {/* Change Impact */}
                 <div style={{ borderTop: "1px solid rgba(0,0,0,0.06)", paddingTop: 10 }}>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.5)", marginBottom: 6 }}>Hai modificato il sistema? Descrivi il cambiamento:</p>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.5)", marginBottom: 6 }}>{t("modifiedSystem")}</p>
                   <div style={{ display: "flex", gap: 8 }}>
                     <input value={changeDesc} onChange={e => setChangeDesc(e.target.value)}
-                      placeholder="Es. 'Aggiornato il modello con nuovi dati HR Q2 2026'"
+                      placeholder={t("changeDescPh")}
                       style={{ flex: 1, padding: "6px 10px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.12)", fontSize: 12 }} />
                     <button disabled={changeImpactLoading || !changeDesc.trim()} onClick={async () => {
                         setChangeImpactLoading(true); setChangeImpactReport(null);
@@ -1333,22 +1337,22 @@ export default function DocuGenPage() {
                         if (res.report) setChangeImpactReport(res.report);
                       }}
                       style={{ fontSize: 11, color: "#059669", background: "rgba(5,150,105,0.06)", border: "1px solid rgba(5,150,105,0.2)", borderRadius: 5, padding: "5px 12px", cursor: "pointer", whiteSpace: "nowrap" }}>
-                      {changeImpactLoading ? "✦ Analisi…" : "✦ Analizza impatto"}
+                      {changeImpactLoading ? t("analyzingShort") : t("analyzeImpact")}
                     </button>
                   </div>
                   {changeImpactReport && (
                     <div style={{ marginTop: 8, padding: 10, borderRadius: 8,
                       background: changeImpactReport.isSubstantialModification ? "rgba(220,38,38,0.04)" : "rgba(22,163,74,0.04)",
                       border: `1px solid ${changeImpactReport.isSubstantialModification ? "rgba(220,38,38,0.2)" : "rgba(22,163,74,0.2)"}` }}>
-                      <span style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.5)", background: "rgba(0,0,0,0.06)", borderRadius: 4, padding: "2px 6px" }}>✦ AI — verifica e conferma</span>
+                      <span style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.5)", background: "rgba(0,0,0,0.06)", borderRadius: 4, padding: "2px 6px" }}>✦ {t("aiVerify")}</span>
                       <p style={{ fontSize: 12, fontWeight: 700, margin: "6px 0 2px", color: changeImpactReport.isSubstantialModification ? "#dc2626" : "#15803d" }}>
-                        {changeImpactReport.isSubstantialModification ? "⚠ Modifica sostanziale rilevata" : "✓ Modifica non sostanziale"}
-                        {changeImpactReport.requiresNewConformityAssessment && " — richiede nuovo Conformity Assessment"}
+                        {changeImpactReport.isSubstantialModification ? t("substModDetected") : t("nonSubstMod")}
+                        {changeImpactReport.requiresNewConformityAssessment && ` — ${t("requiresNewCa")}`}
                       </p>
                       <p style={{ fontSize: 10, color: "rgba(0,0,0,0.42)", fontStyle: "italic", marginBottom: 6 }}>{changeImpactReport.substModificationBasis}</p>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                         {changeImpactReport.affectedAnnexIVSections.filter(s => s.updateRequired === "obbligatorio").map((s, i) => (
-                          <span key={i} style={{ fontSize: 10, padding: "2px 7px", borderRadius: 99, background: "rgba(220,38,38,0.1)", color: "#dc2626", border: "1px solid rgba(220,38,38,0.2)" }}>Aggiorna: {s.sectionLabel}</span>
+                          <span key={i} style={{ fontSize: 10, padding: "2px 7px", borderRadius: 99, background: "rgba(220,38,38,0.1)", color: "#dc2626", border: "1px solid rgba(220,38,38,0.2)" }}>{t("update")} {s.sectionLabel}</span>
                         ))}
                       </div>
                     </div>
@@ -1362,9 +1366,9 @@ export default function DocuGenPage() {
                   background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.15)" }}>
                   <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#dc2626" }} />
                   <p style={{ fontSize: 12, color: "#dc2626", margin: 0 }}>
-                    Finalizzazione bloccata: completa le sezioni obbligatorie{" "}
+                    {t("finalizeBlocked")}{" "}
                     <strong>{emptyRequired.map((s) => s.ref).join(", ")}</strong>{" "}
-                    prima di passare allo stato Finalized.
+                    {t("beforeFinalized")}
                   </p>
                 </div>
               )}
@@ -1374,7 +1378,7 @@ export default function DocuGenPage() {
           <button onClick={() => setTimelineStep("export")}
             style={{ marginTop: 20, padding: "10px 20px", borderRadius: 8, background: "#0D1016",
               color: "#fff", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500 }}>
-            Pronto per l&apos;export →
+            {t("readyForExport")}
           </button>
         </div>
       )}
@@ -1385,10 +1389,10 @@ export default function DocuGenPage() {
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             {[
-              { label: "Sezioni completate", value: `${doneCount}/9`, color: "#16a34a" },
-              { label: "In lavoro", value: draftCount, color: "#0D1016" },
-              { label: "Obbligatorie vuote", value: emptyRequired.length, color: emptyRequired.length > 0 ? "#dc2626" : "#16a34a" },
-              { label: "Versioni salvate", value: versionSnapshots.length || "—", color: "rgba(0,0,0,0.5)" },
+              { label: t("stat_completed"), value: `${doneCount}/9`, color: "#16a34a" },
+              { label: t("stat_inWork"), value: draftCount, color: "#0D1016" },
+              { label: t("stat_emptyRequired"), value: emptyRequired.length, color: emptyRequired.length > 0 ? "#dc2626" : "#16a34a" },
+              { label: t("stat_savedVersions"), value: versionSnapshots.length || "—", color: "rgba(0,0,0,0.5)" },
             ].map((c) => (
               <div key={c.label} style={{ borderRadius: 12, padding: 16, background: "#fff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
                 <div style={{ fontSize: 20, fontWeight: 600, color: c.color, letterSpacing: "-0.5px" }}>{c.value}</div>
@@ -1400,9 +1404,9 @@ export default function DocuGenPage() {
           {/* Export buttons */}
           <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap" }}>
             {[
-              { label: "Esporta Markdown", action: exportMarkdown },
-              { label: "Esporta JSON", action: exportFullDocument },
-              { label: "Esporta PDF firmato", action: exportPdf },
+              { label: t("exportMarkdown"), action: exportMarkdown },
+              { label: t("exportJson"), action: exportFullDocument },
+              { label: t("exportSignedPdf"), action: exportPdf },
             ].map(({ label, action }) => (
               <button key={label} onClick={action}
                 style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, padding: "10px 18px",
@@ -1416,7 +1420,7 @@ export default function DocuGenPage() {
                 background: canFinalize ? "#0D1016" : "rgba(0,0,0,0.1)",
                 color: canFinalize ? "#fff" : "rgba(0,0,0,0.3)", border: "none",
                 cursor: canFinalize ? "pointer" : "not-allowed", fontWeight: 500 }}>
-              ✓ Finalizza versione
+              ✓ {t("finalizeVersion")}
             </button>
           </div>
 
@@ -1428,9 +1432,9 @@ export default function DocuGenPage() {
                 const d = data as DocuGenState;
                 if (d && typeof d === "object") setPersistedRaw({ ...DEFAULT_STATE, ...d });
                 setVersionSnapshots(listVersions("docugen"));
-                showToast("Versione ripristinata ✓");
+                showToast(t("toast_versionRestored"));
               }}
-              sectionLabels={Object.fromEntries(ANNEX_IV.map(s => [s.id, s.title]))}
+              sectionLabels={Object.fromEntries(ANNEX_IV.map(s => [s.id, t(`ann_${s.id}_title`)]))}
             />
           </div>
 
@@ -1442,14 +1446,14 @@ export default function DocuGenPage() {
                 <button onClick={confirmDocEdit}
                   style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, padding: "5px 12px",
                     borderRadius: 6, background: "#0D1016", color: "#fff", border: "none", cursor: "pointer" }}>
-                  <CheckCircle className="h-3 w-3" /> Salva modifiche
+                  <CheckCircle className="h-3 w-3" /> {t("saveChangesDoc")}
                 </button>
               ) : (
                 <button onClick={enterDocEdit}
                   style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, padding: "5px 12px",
                     borderRadius: 6, background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.6)",
                     border: "1px solid rgba(0,0,0,0.10)", cursor: "pointer" }}>
-                  <Pencil className="h-3 w-3" /> Modifica documento
+                  <Pencil className="h-3 w-3" /> {t("editDocument")}
                 </button>
               )}
             </div>
@@ -1498,10 +1502,10 @@ export default function DocuGenPage() {
                 }}
               >
                 <h1 data-noedit="true" style={{ fontSize: 22, fontWeight: 600, color: "#0D1016", marginBottom: 4, letterSpacing: "-0.5px" }}>
-                  {systemName || "Sistema AI"}
+                  {systemName || t("aiSystemFallback")}
                 </h1>
                 <p data-noedit="true" style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", marginBottom: 32, fontFamily: "system-ui, sans-serif" }}>
-                  Fascicolo Tecnico · Art. 11 AI Act (Allegato IV) · {new Date().toLocaleDateString("it-IT")}
+                  {t("techFileSubtitle")} · {new Date().toLocaleDateString(loc)}
                 </p>
 
                 {ANNEX_IV.map((s) => (
@@ -1513,9 +1517,9 @@ export default function DocuGenPage() {
                         padding: "1px 6px", borderRadius: 4, background: "rgba(0,0,0,0.05)",
                         color: "rgba(0,0,0,0.45)" }}>{SOURCE_BADGES[s.id]}</span>
                     </div>
-                    <h2 data-noedit="true" style={{ fontSize: 14, fontWeight: 600, color: "#0D1016", marginBottom: 8 }}>{s.title}</h2>
+                    <h2 data-noedit="true" style={{ fontSize: 14, fontWeight: 600, color: "#0D1016", marginBottom: 8 }}>{t(`ann_${s.id}_title`)}</h2>
                     <p style={{ fontSize: 13, lineHeight: 1.8, color: "rgba(0,0,0,0.75)", whiteSpace: "pre-wrap", margin: 0 }}>
-                      {stripMarkdown(getContent(s.id)) || <span style={{ color: "rgba(0,0,0,0.28)", fontStyle: "italic" }}>Da compilare</span>}
+                      {stripMarkdown(getContent(s.id)) || <span style={{ color: "rgba(0,0,0,0.28)", fontStyle: "italic" }}>{t("toFill")}</span>}
                     </p>
                   </div>
                 ))}

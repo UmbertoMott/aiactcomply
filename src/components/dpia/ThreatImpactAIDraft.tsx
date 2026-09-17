@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import type { CSSProperties } from "react";
 import { draftDpiaThreat, type DpiaThreatDraft } from "@/app/actions/draftDpiaThreat";
 import type { DPIAThreat } from "@/lib/dossier/storage-schema";
+import { useT } from "@/i18n/LocaleProvider";
 
 const T = {
   text:     "#0D1016",
@@ -32,11 +33,11 @@ function computeRiskLevel(
   return "low";
 }
 
-function riskBadge(level: "low" | "medium" | "high") {
+function riskBadge(level: "low" | "medium" | "high", t: (k: string) => string) {
   const cfg = {
-    high:   { label: "Alto",  bg: T.redBg,   color: T.red,   border: T.redBdr   },
-    medium: { label: "Medio", bg: T.amberBg, color: T.amber, border: T.amberBdr },
-    low:    { label: "Basso", bg: T.greenBg, color: T.green, border: T.greenBdr },
+    high:   { label: t("riskHigh"),  bg: T.redBg,   color: T.red,   border: T.redBdr   },
+    medium: { label: t("riskMedium"), bg: T.amberBg, color: T.amber, border: T.amberBdr },
+    low:    { label: t("riskLow"), bg: T.greenBg, color: T.green, border: T.greenBdr },
   }[level];
   return (
     <span style={{
@@ -68,6 +69,7 @@ export function ThreatImpactAIDraft({
   personalDataCategories,
   onApply,
 }: ThreatImpactAIDraftProps) {
+  const t = useT("toolDpia");
   const [loading, setLoading]       = useState(false);
   const [draft, setDraft]           = useState<DpiaThreatDraft | null>(null);
   const [error, setError]           = useState<string | null>(null);
@@ -128,7 +130,7 @@ export function ThreatImpactAIDraft({
           background: T.greenBg, padding: "2px 8px", borderRadius: 9999,
           border: `1px solid ${T.greenBdr}`,
         }}>
-          ✓ Suggerimento applicato
+          ✓ {t("ta_applied")}
         </span>
       </div>
     );
@@ -143,7 +145,7 @@ export function ThreatImpactAIDraft({
           background: "rgba(202,138,4,0.10)", padding: "2px 8px",
           borderRadius: 9999, border: `1px solid ${T.amberBdr}`,
         }}>
-          ✦ AI — verifica e conferma
+          ✦ {t("aiVerifyConfirm")}
         </span>
       </div>
 
@@ -153,13 +155,13 @@ export function ThreatImpactAIDraft({
           onClick={handleGenerate}
           style={{ ...btnSt, background: "rgba(0,0,0,0.04)" }}
         >
-          ✦ Genera suggerimento AI
+          ✦ {t("ta_generate")}
         </button>
       )}
 
       {/* Loading */}
       {loading && (
-        <span style={{ fontSize: 11, color: T.muted }}>⟳ Generazione…</span>
+        <span style={{ fontSize: 11, color: T.muted }}>⟳ {t("ta_generating")}</span>
       )}
 
       {/* Error */}
@@ -178,7 +180,7 @@ export function ThreatImpactAIDraft({
         }}>
           {/* Suggested mitigation */}
           <p style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: T.amber, marginBottom: 4 }}>
-            Misura suggerita
+            {t("ta_suggestedMeasure")}
           </p>
           <p style={{ fontSize: 12, color: T.text, lineHeight: 1.55, marginBottom: 8 }}>
             {draft.suggested_mitigation}
@@ -186,8 +188,8 @@ export function ThreatImpactAIDraft({
 
           {/* Residual risk */}
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-            <span style={{ fontSize: 11, color: T.muted }}>Rischio residuo stimato:</span>
-            {riskBadge(computeRiskLevel(draft.suggested_residual_likelihood, draft.suggested_residual_severity))}
+            <span style={{ fontSize: 11, color: T.muted }}>{t("ta_estimatedResidual")}</span>
+            {riskBadge(computeRiskLevel(draft.suggested_residual_likelihood, draft.suggested_residual_severity), t)}
             <span style={{ fontSize: 10, color: T.faint }}>
               ({draft.suggested_residual_likelihood} × {draft.suggested_residual_severity})
             </span>
@@ -204,19 +206,19 @@ export function ThreatImpactAIDraft({
               onClick={handleConfirm}
               style={{ ...btnSt, background: T.text, color: "#fff", borderColor: T.text }}
             >
-              ✓ Conferma e applica
+              ✓ {t("ta_confirmApply")}
             </button>
             <button
               onClick={() => setDraft(null)}
               style={btnSt}
             >
-              ✕ Ignora
+              ✕ {t("ta_ignore")}
             </button>
             <button
               onClick={handleGenerate}
               style={btnSt}
             >
-              ↺ Rigenera
+              ↺ {t("ta_regenerate")}
             </button>
           </div>
         </div>

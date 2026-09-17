@@ -15,20 +15,23 @@ import {
   UserCheck, ChevronRight, AlertTriangle, CheckCircle2,
   Clock, RefreshCw, Plus, Info, X
 } from "lucide-react";
+import { useT } from "@/i18n/LocaleProvider";
 
 const FONT = "var(--font-inter, system-ui)";
+
+type T = (key: string) => string;
 
 type SystemWithRecord = {
   system: AISystem;
   record: DeployerDashboardRecord | null;
 };
 
-function statusBadge(status: DeployerDashboardRecord["overallStatus"]) {
+function statusBadge(status: DeployerDashboardRecord["overallStatus"], t: T) {
   const map = {
-    compliant:   { label: "Conforme",    color: "#16a34a", bg: "rgba(22,163,74,0.07)"  },
-    in_progress: { label: "In corso",    color: "#b45309", bg: "rgba(180,83,9,0.07)"   },
-    attention:   { label: "Attenzione",  color: "#dc2626", bg: "rgba(220,38,38,0.07)"  },
-    pending:     { label: "Da iniziare", color: "rgba(0,0,0,0.4)", bg: "rgba(0,0,0,0.04)" },
+    compliant:   { label: t("st_compliant"),  color: "#16a34a", bg: "rgba(22,163,74,0.07)"  },
+    in_progress: { label: t("st_inProgress"), color: "#b45309", bg: "rgba(180,83,9,0.07)"   },
+    attention:   { label: t("st_attention"),  color: "#dc2626", bg: "rgba(220,38,38,0.07)"  },
+    pending:     { label: t("st_pending"),    color: "rgba(0,0,0,0.4)", bg: "rgba(0,0,0,0.04)" },
   };
   const s = map[status];
   return (
@@ -62,6 +65,7 @@ function progressBar(done: number, total: number) {
 
 export default function DeployerDashboardPage() {
   const router = useRouter();
+  const t = useT("toolDeployer");
   const [items, setItems] = useState<SystemWithRecord[]>([]);
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
@@ -105,7 +109,7 @@ export default function DeployerDashboardPage() {
             </h1>
           </div>
           <p style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", margin: 0 }}>
-            Gestione obblighi per i sistemi AI in cui l&apos;organizzazione agisce come deployer
+            {t("subtitle")}
           </p>
         </div>
         <button
@@ -118,7 +122,7 @@ export default function DeployerDashboardPage() {
             flexShrink: 0,
           }}
         >
-          <RefreshCw size={12} /> Aggiorna
+          <RefreshCw size={12} /> {t("refresh")}
         </button>
       </div>
 
@@ -132,8 +136,7 @@ export default function DeployerDashboardPage() {
         }}>
           <Info size={13} style={{ flexShrink: 0, marginTop: 1 }} />
           <span style={{ flex: 1 }}>
-            <strong>Sanzioni Art. 99–101:</strong> Il mancato rispetto degli obblighi del deployer può comportare
-            sanzioni fino a 15 milioni di euro o il 3% del fatturato mondiale annuo.
+            <strong>{t("sanctions_strong")}</strong> {t("sanctions_text")}
           </span>
           <button
             onClick={() => setBannerDismissed(true)}
@@ -142,7 +145,7 @@ export default function DeployerDashboardPage() {
               padding: 2, color: "#713f12", opacity: 0.6, lineHeight: 1,
               display: "flex", alignItems: "center",
             }}
-            aria-label="Chiudi"
+            aria-label={t("close")}
           >
             <X size={14} />
           </button>
@@ -152,9 +155,9 @@ export default function DeployerDashboardPage() {
       {/* KPI strip */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
         {[
-          { label: "Sistemi totali",        value: totalSystems, color: "#0D1016"  },
-          { label: "Conformi",              value: compliant,    color: "#16a34a"  },
-          { label: "Richiedono attenzione", value: attention,    color: "#dc2626"  },
+          { label: t("kpi_total"),      value: totalSystems, color: "#0D1016"  },
+          { label: t("kpi_compliant"),  value: compliant,    color: "#16a34a"  },
+          { label: t("kpi_attention"),  value: attention,    color: "#dc2626"  },
         ].map((k) => (
           <div key={k.label} style={{ borderRadius: 10, padding: "14px 16px", background: "#fff", border: "1px solid rgba(0,0,0,0.07)" }}>
             <div style={{ fontSize: 22, fontWeight: 700, color: k.color, lineHeight: 1 }}>
@@ -175,10 +178,10 @@ export default function DeployerDashboardPage() {
         }}>
           <UserCheck size={24} style={{ color: "rgba(0,0,0,0.18)", margin: "0 auto 12px" }} />
           <p style={{ fontSize: 13, fontWeight: 500, color: "#0D1016", margin: "0 0 4px" }}>
-            Nessun sistema con ruolo deployer
+            {t("empty_title")}
           </p>
           <p style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", margin: "0 0 20px" }}>
-            Aggiungi sistemi AI dall&apos;inventario con ruolo &ldquo;deployer&rdquo; per iniziare.
+            {t("empty_body")}
           </p>
           <Link
             href="/dashboard/tools/inventory"
@@ -189,7 +192,7 @@ export default function DeployerDashboardPage() {
             }}
           >
             <Plus size={13} />
-            Vai all&apos;Inventario
+            {t("empty_cta")}
           </Link>
         </div>
       ) : (
@@ -221,7 +224,7 @@ export default function DeployerDashboardPage() {
                       <span style={{ fontSize: 12, fontWeight: 600, color: "#0D1016" }}>
                         {system.name}
                       </span>
-                      {statusBadge(status)}
+                      {statusBadge(status, t)}
                       <span style={{
                         fontSize: 10, padding: "1px 6px", borderRadius: 4,
                         background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.45)",
@@ -238,7 +241,7 @@ export default function DeployerDashboardPage() {
                       )}
                     </div>
                     <p style={{ fontSize: 11, color: "rgba(0,0,0,0.4)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {system.description || "Nessuna descrizione disponibile"}
+                      {system.description || t("no_description")}
                     </p>
                     {progressBar(doneCount, totalCount)}
                   </div>
@@ -248,19 +251,19 @@ export default function DeployerDashboardPage() {
                 {status === "attention" && (
                   <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 8, fontSize: 10, color: "#dc2626" }}>
                     <AlertTriangle size={11} />
-                    Obblighi non avviati — intervento richiesto
+                    {t("hint_attention")}
                   </div>
                 )}
                 {status === "compliant" && (
                   <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 8, fontSize: 10, color: "#16a34a" }}>
                     <CheckCircle2 size={11} />
-                    Tutti gli obblighi completati
+                    {t("hint_compliant")}
                   </div>
                 )}
                 {status === "in_progress" && (
                   <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 8, fontSize: 10, color: "#b45309" }}>
                     <Clock size={11} />
-                    Conformità in corso
+                    {t("hint_inProgress")}
                   </div>
                 )}
               </Link>

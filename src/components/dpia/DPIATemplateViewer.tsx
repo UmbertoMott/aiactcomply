@@ -6,6 +6,7 @@ import React from "react";
 import type { DPIAResult } from "@/lib/dossier/storage-schema";
 import { computeDpiaProgress, type DpiaStepProgress } from "@/lib/dpia/dpia-progress";
 import { ART_35_7_ELEMENTS, DPIA_TEMPLATE_META } from "@/lib/dpia/dpia-template";
+import { useT } from "@/i18n/LocaleProvider";
 
 // ─── Design tokens (aligned with DPIA tool) ──────────────────────────────────
 const T = {
@@ -47,6 +48,7 @@ function SectionTitle({ num, label, legalRef, pct: percent }: { num: number; lab
 }
 
 function FieldRow({ label, value, filled, required }: { label: string; value: string; filled: boolean; required: boolean }) {
+  const t = useT("toolDpia");
   if (!filled && !required) return null;
   return (
     <div style={{
@@ -62,7 +64,7 @@ function FieldRow({ label, value, filled, required }: { label: string; value: st
       <div style={{ flex: 1, minWidth: 0 }}>
         <p style={{ fontSize: 10, fontWeight: 600, color: T.muted, margin: "0 0 1px", textTransform: "uppercase", letterSpacing: "0.04em" }}>{label}</p>
         <p style={{ fontSize: 11, color: filled ? T.text : T.faint, margin: 0, lineHeight: 1.5, wordBreak: "break-word" }}>
-          {filled ? value : required ? "— obbligatorio —" : "— non compilato —"}
+          {filled ? value : required ? t("tv_required") : t("tv_notFilled")}
         </p>
       </div>
     </div>
@@ -102,13 +104,14 @@ function Art35CoveragePanel({ coverage, art36 }: { coverage: ReturnType<typeof c
     v === "covered" ? T.greenBdr : v === "partial" ? T.amberBdr : T.redBdr;
   const iconFor = (v: "covered" | "partial" | "missing") =>
     v === "covered" ? "✓" : v === "partial" ? "△" : "✕";
+  const t = useT("toolDpia");
   const labelFor = (v: "covered" | "partial" | "missing") =>
-    v === "covered" ? "Coperto" : v === "partial" ? "Parziale" : "Mancante";
+    v === "covered" ? t("tv_covered") : v === "partial" ? t("tv_partial") : t("tv_missing");
 
   return (
     <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: "14px 16px", marginBottom: 12 }}>
       <p style={{ fontSize: 12, fontWeight: 700, color: T.text, margin: "0 0 10px" }}>
-        Copertura elementi obbligatori Art. 35(7)
+        {t("tv_coverageTitle")}
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {ART_35_7_ELEMENTS.map(el => {
@@ -121,7 +124,7 @@ function Art35CoveragePanel({ coverage, art36 }: { coverage: ReturnType<typeof c
               <span style={{ fontSize: 13, fontWeight: 700, color: colorFor(v), minWidth: 16, flexShrink: 0 }}>{iconFor(v)}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <span style={{ fontSize: 10, fontWeight: 700, color: T.text, background: "rgba(0,0,0,0.06)", padding: "1px 6px", borderRadius: 3, marginRight: 6 }}>{el.ref}</span>
-                <span style={{ fontSize: 11, color: T.text }}>{el.label}</span>
+                <span style={{ fontSize: 11, color: T.text }}>{t(`art357_${el.id}`)}</span>
               </div>
               <span style={{ fontSize: 10, fontWeight: 600, color: colorFor(v), flexShrink: 0 }}>{labelFor(v)}</span>
             </div>
@@ -131,10 +134,10 @@ function Art35CoveragePanel({ coverage, art36 }: { coverage: ReturnType<typeof c
       {art36 && (
         <div style={{ marginTop: 10, padding: "8px 12px", borderRadius: 6, background: T.redBg, border: `1px solid ${T.redBdr}` }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: T.red, margin: 0 }}>
-            ⚠ Art. 36 — Consultazione preventiva dell'autorità di controllo richiesta
+            ⚠ {t("tv_art36Title")}
           </p>
           <p style={{ fontSize: 10, color: T.red, margin: "3px 0 0", opacity: 0.8 }}>
-            Il rischio residuo è elevato. Prima di procedere è necessaria la consultazione del Garante.
+            {t("tv_art36Body")}
           </p>
         </div>
       )}
@@ -145,13 +148,14 @@ function Art35CoveragePanel({ coverage, art36 }: { coverage: ReturnType<typeof c
 // ─── Overall Progress Header ─────────────────────────────────────────────────
 
 function ProgressHeader({ pct: percent, blockingGaps }: { pct: number; blockingGaps: string[] }) {
+  const t = useT("toolDpia");
   const color = percent >= 80 ? T.green : percent >= 40 ? T.amber : T.red;
-  const label = percent >= 80 ? "Avanzato" : percent >= 40 ? "In corso" : "Iniziale";
+  const label = percent >= 80 ? t("tv_advanced") : percent >= 40 ? t("tv_inProgress") : t("tv_initial");
   return (
     <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: "16px", marginBottom: 16 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
         <div>
-          <p style={{ fontSize: 13, fontWeight: 700, color: T.text, margin: 0 }}>{DPIA_TEMPLATE_META.title}</p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: T.text, margin: 0 }}>{t("tvmeta_title")}</p>
           <p style={{ fontSize: 10, color: T.faint, margin: "2px 0 0" }}>
             {DPIA_TEMPLATE_META.legalBasis} · {DPIA_TEMPLATE_META.methodology}
           </p>
@@ -175,7 +179,7 @@ function ProgressHeader({ pct: percent, blockingGaps }: { pct: number; blockingG
         </div>
       )}
       <p style={{ fontSize: 9, color: T.faint, margin: "10px 0 0", lineHeight: 1.4 }}>
-        {DPIA_TEMPLATE_META.disclaimer}
+        {t("tvmeta_disclaimer")}
       </p>
     </div>
   );
@@ -188,7 +192,8 @@ export interface DPIATemplateViewerProps {
 }
 
 export function DPIATemplateViewer({ doc }: DPIATemplateViewerProps) {
-  const progress = computeDpiaProgress(doc);
+  const t = useT("toolDpia");
+  const progress = computeDpiaProgress(doc, t);
 
   return (
     <div style={{ fontFamily: "var(--font-inter, system-ui)" }}>

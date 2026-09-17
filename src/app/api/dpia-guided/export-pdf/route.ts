@@ -4,7 +4,9 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
-import { DPIA_SUBPOINTS, DPIA_TEMPLATE_META } from "@/lib/dpia/dpia-template";
+import { getDpiaSubpoints, getDpiaGuidedSections, getDpiaTemplateMeta } from "@/lib/dpia/dpia-template";
+import { translate } from "@/i18n/dictionaries";
+import type { Locale } from "@/i18n/config";
 import type { DpiaGuidedDoc } from "@/lib/dpia/dpia-guided-types";
 
 const PAGE_W  = 595.28;
@@ -34,12 +36,20 @@ function sanitize(t: string): string {
 }
 
 export async function POST(req: NextRequest) {
-  let body: { doc: DpiaGuidedDoc };
+  let body: { doc: DpiaGuidedDoc; locale?: string };
   try { body = await req.json(); }
-  catch { return NextResponse.json({ error: "Body JSON non valido" }, { status: 400 }); }
+  catch { return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 }); }
 
-  const doc   = body.doc as DpiaGuidedDoc;
-  const today = new Date().toLocaleDateString("it-IT", { year: "numeric", month: "long", day: "numeric" });
+  const doc    = body.doc as DpiaGuidedDoc;
+  const locale = (body.locale === "en" ? "en" : "it") as Locale;
+  const tG = (k: string) => translate(locale, "dpiaGuided", k);
+  const tD = (k: string) => translate(locale, "toolDpia", k);
+  const SUBS = getDpiaSubpoints(locale, tG);
+  const SECS = getDpiaGuidedSections(locale, tG);
+  const META = getDpiaTemplateMeta(locale, tD);
+  const lbl = (id: string) => SUBS.find(sp => sp.id === id)?.label ?? id;
+  const secOf = (key: string) => SECS.find(s => s.key === key);
+  const today = new Date().toLocaleDateString(locale === "en" ? "en-GB" : "it-IT", { year: "numeric", month: "long", day: "numeric" });
 
   const pdfDoc = await PDFDocument.create();
   const fReg   = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -65,7 +75,7 @@ export async function POST(req: NextRequest) {
   function drawFooter() {
     const fy = 30;
     page.drawLine({ start: { x: MRG, y: fy + 14 }, end: { x: PAGE_W - MRG, y: fy + 14 }, thickness: 0.5, color: rgb(0,0,0), opacity: 0.1 });
-    page.drawText(sanitize(`AIComply · DPIA Art. 35 GDPR · ${DPIA_TEMPLATE_META.methodology}`),
+    page.drawText(sanitize(`AIComply · DPIA Art. 35 GDPR · ${META.methodology}`),
       { x: MRG, y: fy, size: 7, font: fReg, color: FAINT });
     page.drawText(String(pdfDoc.getPageCount()),
       { x: PAGE_W - MRG - 10, y: fy, size: 7, font: fReg, color: FAINT });
@@ -109,7 +119,7 @@ export async function POST(req: NextRequest) {
   }
 
   function field(label: string, value: string) {
-    const val = value || "— da compilare —";
+    const val = value || tD("pdf_toFill");
     const isEmpty = !value;
     ensureY(LINE + 4);
     drawText(label.toUpperCase(), { size: 7, font: fBold, color: MUTED });
@@ -130,28 +140,29 @@ export async function POST(req: NextRequest) {
 
   y = PAGE_H - MRG - 10;
   const sysName = doneVal(doc, "a_system_name");
-  drawText(sysName || "Sistema AI", { size: H1_SIZE, font: fBold });
+  drawText(sysName || tD("pdf_coverFallback"), { size: H1_SIZE, font: fBold });
   y -= 4;
-  drawText(DPIA_TEMPLATE_META.title, { size: 12, font: fBold, color: GREEN });
-  drawText(`${DPIA_TEMPLATE_META.legalBasis} · ${DPIA_TEMPLATE_META.methodology}`, { size: 9, color: MUTED });
-  drawText(`Generato da AIComply · ${today}`, { size: 9, color: FAINT });
+  drawText(META.title, { size: 12, font: fBold, color: GREEN });
+  drawText(`${META.legalBasis} · ${META.methodology}`, { size: 9, color: MUTED });
+  drawText(`${tD("pdf_generatedBy")} · ${today}`, { size: 9, color: FAINT });
   y -= 12;
   drawHRule();
 
   // Disclaimer
-  drawText(sanitize(DPIA_TEMPLATE_META.disclaimer), { size: 8, color: MUTED });
+  drawText(sanitize(META.disclaimer), { size: 8, color: MUTED });
   y -= 16;
 
   // ── SCREENING ──────────────────────────────────────────────────────────────
-  sectionHeader("Screening — 9 criteri WP248", "GDPR Art. 35(1) + WP248");
+  sectionHeader(secOf("screening")?.label ?? "Screening", secOf("screening")?.legalRef ?? "GDPR Art. 35(1) + WP248");
   const criterionIds = ["sc_c1","sc_c2","sc_c3","sc_c4","sc_c5","sc_c6","sc_c7","sc_c8","sc_c9"];
   for (let i = 0; i < criterionIds.length; i++) {
     const val = doneVal(doc, criterionIds[i]);
-    const applies = !val ? "—" : (val.toLowerCase().startsWith("sì") || val.toLowerCase().startsWith("si")) ? "Sì" : val.toLowerCase().startsWith("no") ? "No" : "Parzialmente";
-    const appColor = applies === "Sì" ? AMBER : applies === "No" ? GREEN : MUTED;
+    const appliesKey = !val ? "" : (val.toLowerCase().startsWith("sì") || val.toLowerCase().startsWith("si") || val.toLowerCase().startsWith("yes")) ? "yes" : val.toLowerCase().startsWith("no") ? "no" : "partial";
+    const applies = !appliesKey ? "—" : appliesKey === "yes" ? tD("yes") : appliesKey === "no" ? tD("no") : tD("partial");
+    const appColor = appliesKey === "yes" ? AMBER : appliesKey === "no" ? GREEN : MUTED;
     ensureY(LINE + 2);
     page.drawText(`${i + 1}.`, { x: MRG, y, size: FONT_S, font: fBold, color: MUTED });
-    const label = DPIA_SUBPOINTS.find(sp => sp.id === criterionIds[i])?.label ?? "";
+    const label = lbl(criterionIds[i]);
     page.drawText(sanitize(label), { x: MRG + 16, y, size: FONT_S, font: fReg, color: DARK });
     page.drawText(`[${applies}]`, { x: PAGE_W - MRG - 52, y, size: FONT_S, font: fBold, color: appColor });
     y -= LINE + 2;
@@ -160,65 +171,65 @@ export async function POST(req: NextRequest) {
   spacer();
 
   // ── SEZIONE A ──────────────────────────────────────────────────────────────
-  sectionHeader("A — Descrizione sistematica del trattamento", "GDPR Art. 35(7)(a)");
-  field("Sistema / Titolare",           doneVal(doc, "a_system_name"));
-  field("Organizzazione",               doneVal(doc, "a_organization"));
-  field("DPO",                          doneVal(doc, "a_dpo"));
-  field("Responsabili (Art. 28)",       doneVal(doc, "a_processor"));
-  field("Finalità del trattamento",     doneVal(doc, "a_processing_purposes"));
-  field("Categorie dati personali",     doneVal(doc, "a_personal_data_categories"));
-  field("Categorie particolari (Art. 9)", doneVal(doc, "a_special_categories"));
-  field("Categorie interessati",        doneVal(doc, "a_data_subjects_categories"));
-  field("Destinatari",                  doneVal(doc, "a_recipients"));
-  field("Periodo conservazione",        doneVal(doc, "a_retention_period"));
-  field("Archivi e sistemi",            doneVal(doc, "a_assets"));
+  { const sec = secOf("descr"); sectionHeader(sec?.label ?? "A", sec?.legalRef ?? "GDPR Art. 35(7)(a)"); }
+  field(lbl("a_system_name"),              doneVal(doc, "a_system_name"));
+  field(lbl("a_organization"),             doneVal(doc, "a_organization"));
+  field("DPO",                             doneVal(doc, "a_dpo"));
+  field(lbl("a_processor"),                doneVal(doc, "a_processor"));
+  field(lbl("a_processing_purposes"),      doneVal(doc, "a_processing_purposes"));
+  field(lbl("a_personal_data_categories"), doneVal(doc, "a_personal_data_categories"));
+  field(lbl("a_special_categories"),       doneVal(doc, "a_special_categories"));
+  field(lbl("a_data_subjects_categories"), doneVal(doc, "a_data_subjects_categories"));
+  field(lbl("a_recipients"),               doneVal(doc, "a_recipients"));
+  field(lbl("a_retention_period"),         doneVal(doc, "a_retention_period"));
+  field(lbl("a_assets"),                   doneVal(doc, "a_assets"));
   spacer();
 
   // ── SEZIONE B ──────────────────────────────────────────────────────────────
-  sectionHeader("B — Necessità e proporzionalità", "GDPR Art. 35(7)(b)");
-  field("Giustificazione di necessità",       doneVal(doc, "b_necessity"));
-  field("Base giuridica",                     doneVal(doc, "b_lawful_basis"));
-  field("Minimizzazione dei dati",            doneVal(doc, "b_data_minimisation"));
-  field("Limitazione conservazione",          doneVal(doc, "b_storage_limitation"));
-  field("Diritti degli interessati (Artt. 12–22)", doneVal(doc, "b_data_subject_rights"));
-  field("Proporzionalità",                    doneVal(doc, "b_proportionality"));
-  field("Clausole responsabili (Art. 28)",    doneVal(doc, "b_processor_clauses"));
-  field("Trasferimenti extra-UE",             doneVal(doc, "b_international_transfers"));
+  { const sec = secOf("necessity"); sectionHeader(sec?.label ?? "B", sec?.legalRef ?? "GDPR Art. 35(7)(b)"); }
+  field(lbl("b_necessity"),            doneVal(doc, "b_necessity"));
+  field(lbl("b_lawful_basis"),         doneVal(doc, "b_lawful_basis"));
+  field(lbl("b_data_minimisation"),    doneVal(doc, "b_data_minimisation"));
+  field(lbl("b_storage_limitation"),   doneVal(doc, "b_storage_limitation"));
+  field(lbl("b_data_subject_rights"),  doneVal(doc, "b_data_subject_rights"));
+  field(lbl("b_proportionality"),      doneVal(doc, "b_proportionality"));
+  field(lbl("b_processor_clauses"),    doneVal(doc, "b_processor_clauses"));
+  field(lbl("b_international_transfers"), doneVal(doc, "b_international_transfers"));
   spacer();
 
   // ── SEZIONE C ──────────────────────────────────────────────────────────────
-  sectionHeader("C — Valutazione dei rischi", "GDPR Art. 35(7)(c)");
-  field("Accesso illegittimo ai dati",        doneVal(doc, "c_threat_access"));
-  field("Modifica indesiderata dei dati",     doneVal(doc, "c_threat_modification"));
-  field("Scomparsa / perdita dei dati",       doneVal(doc, "c_threat_disappearance"));
-  field("Misure tecniche",                    doneVal(doc, "c_technical_measures"));
-  field("Misure organizzative",               doneVal(doc, "c_organizational_measures"));
-  field("Rischio complessivo ante-misure",    doneVal(doc, "c_overall_risk_before"));
+  { const sec = secOf("risks"); sectionHeader(sec?.label ?? "C", sec?.legalRef ?? "GDPR Art. 35(7)(c)"); }
+  field(lbl("c_threat_access"),           doneVal(doc, "c_threat_access"));
+  field(lbl("c_threat_modification"),     doneVal(doc, "c_threat_modification"));
+  field(lbl("c_threat_disappearance"),    doneVal(doc, "c_threat_disappearance"));
+  field(lbl("c_technical_measures"),      doneVal(doc, "c_technical_measures"));
+  field(lbl("c_organizational_measures"), doneVal(doc, "c_organizational_measures"));
+  field(lbl("c_overall_risk_before"),     doneVal(doc, "c_overall_risk_before"));
   spacer();
 
   // ── SEZIONE D ──────────────────────────────────────────────────────────────
-  sectionHeader("D — Parti interessate e misure residue", "WP248 Allegato 2 §D / GDPR Art. 36");
-  field("Parere del DPO",                     doneVal(doc, "d_dpo_opinion"));
-  field("Opinioni degli interessati",         doneVal(doc, "d_data_subjects_opinions"));
-  field("Rischio residuo post-misure",        doneVal(doc, "d_overall_risk_after"));
-  field("Consultazione preventiva (Art. 36)", doneVal(doc, "d_prior_consultation"));
-  field("Pianificazione riesame",             doneVal(doc, "d_review_schedule"));
+  { const sec = secOf("parties"); sectionHeader(sec?.label ?? "D", sec?.legalRef ?? "WP248 Allegato 2 §D / GDPR Art. 36"); }
+  field(lbl("d_dpo_opinion"),            doneVal(doc, "d_dpo_opinion"));
+  field(lbl("d_data_subjects_opinions"), doneVal(doc, "d_data_subjects_opinions"));
+  field(lbl("d_overall_risk_after"),     doneVal(doc, "d_overall_risk_after"));
+  field(lbl("d_prior_consultation"),     doneVal(doc, "d_prior_consultation"));
+  field(lbl("d_review_schedule"),        doneVal(doc, "d_review_schedule"));
   spacer();
 
   // ── FIRMA / CONCLUSIONE ────────────────────────────────────────────────────
-  sectionHeader("Firma e conclusione", "GDPR Art. 35 / Art. 36");
-  field("Decisione di conformità",            doneVal(doc, "e_compliant"));
-  field("Condizioni / misure aggiuntive",     doneVal(doc, "e_conditions"));
-  field("Sintesi esecutiva",                  doneVal(doc, "e_summary"));
-  field("Prossimo riesame",                   doneVal(doc, "e_next_review_date"));
+  { const sec = secOf("signoff"); sectionHeader(sec?.label ?? "Firma", sec?.legalRef ?? "GDPR Art. 35 / Art. 36"); }
+  field(lbl("e_compliant"),         doneVal(doc, "e_compliant"));
+  field(lbl("e_conditions"),        doneVal(doc, "e_conditions"));
+  field(lbl("e_summary"),           doneVal(doc, "e_summary"));
+  field(lbl("e_next_review_date"),  doneVal(doc, "e_next_review_date"));
   spacer(14);
 
   // Righe firma
   ensureY(60);
   page.drawLine({ start: { x: MRG, y: y - 20 }, end: { x: MRG + 140, y: y - 20 }, thickness: 0.5, color: MUTED });
-  page.drawText("Firma Titolare / Data", { x: MRG, y: y - 30, size: 7, font: fReg, color: MUTED });
+  page.drawText(sanitize(tD("pdf_signController")), { x: MRG, y: y - 30, size: 7, font: fReg, color: MUTED });
   page.drawLine({ start: { x: MRG + 200, y: y - 20 }, end: { x: MRG + 340, y: y - 20 }, thickness: 0.5, color: MUTED });
-  page.drawText("Firma DPO / Data", { x: MRG + 200, y: y - 30, size: 7, font: fReg, color: MUTED });
+  page.drawText(sanitize(tD("pdf_signDpo")), { x: MRG + 200, y: y - 30, size: 7, font: fReg, color: MUTED });
   y -= 50;
 
   // Hash documento

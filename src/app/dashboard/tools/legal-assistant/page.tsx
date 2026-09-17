@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { BookOpen, Scale, Send, Menu, Plus, Pencil, Trash2 } from "lucide-react";
+import { BookOpen, Scale, Send, Menu, Plus, Pencil, Trash2, Info } from "lucide-react";
 import HighlightedSourceText from "@/components/legal/HighlightedSourceText";
+import { useT } from "@/i18n/LocaleProvider";
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -230,6 +231,7 @@ function ToggleBtn({
 // ─── Main component ───────────────────────────────────────────
 
 export default function LegalAssistantPage() {
+  const tDeon = useT("deontology");
   const [layout, setLayout] = useState<LayoutMode>("split");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -781,6 +783,13 @@ export default function LegalAssistantPage() {
           <h1 className="text-2xl font-bold text-foreground">Legal Assistant</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Domande su EU AI Act, ISO 22989 e Guidelines — risposte citate con testo sorgente
+          </p>
+          <p
+            className="mt-2 inline-flex items-start gap-1.5 text-[11px] rounded-md px-2.5 py-1.5"
+            style={{ background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.55)", maxWidth: 560, lineHeight: 1.5 }}
+          >
+            <Info size={12} style={{ flexShrink: 0, marginTop: 1 }} />
+            {tDeon("legal_assistant_label")}
           </p>
         </div>
 

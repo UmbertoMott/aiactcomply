@@ -1,5 +1,6 @@
 "use client";
 import { getAssessment } from "@/lib/assessment/assessment-helpers";
+import { useT } from "@/i18n/LocaleProvider";
 
 type Tool = "dpia" | "fria" | "export";
 
@@ -21,6 +22,7 @@ function computePhase(): StepId {
 }
 
 export function AssessmentStepper({ currentTool }: { currentTool: Tool }) {
+  const t = useT("assessmentShared");
   const phase = computePhase();
   const phaseIdx = STEPS.findIndex(s => s.id === phase);
 
@@ -59,12 +61,12 @@ export function AssessmentStepper({ currentTool }: { currentTool: Tool }) {
               </span>
               <span style={{ fontSize: 12, fontWeight: 600,
                 color: isCurrent ? "#ffffff" : isDone ? "#0D1016" : "rgba(0,0,0,0.4)" }}>
-                {step.label}
+                {t(`step_${step.id}_label`)}
               </span>
             </div>
             <div style={{ fontSize: 10, paddingLeft: 24,
               color: isCurrent ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.35)" }}>
-              {step.sublabel}
+              {t(`step_${step.id}_sub`)}
             </div>
           </div>
         );

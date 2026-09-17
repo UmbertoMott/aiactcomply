@@ -15,6 +15,7 @@ import type {
   FRIAStakeholder,
 } from "@/lib/simulation/fria-engine";
 import { T, inputSt, textareaSt, selectSt, labelSt } from "./tokens";
+import { useT } from "@/i18n/LocaleProvider";
 
 type FriaTab = "scenarios" | "stakeholders" | "summary";
 
@@ -46,6 +47,7 @@ function priorityStyle(val: string): CSSProperties {
 }
 
 export function FriaBranch({ fria, onFriaChange }: FriaBranchProps) {
+  const t = useT("assessmentShared");
   const [tab, setTab] = useState<FriaTab>("scenarios");
 
   // New scenario form state
@@ -218,21 +220,21 @@ export function FriaBranch({ fria, onFriaChange }: FriaBranchProps) {
     <div style={containerSt}>
       {/* Tab navigation */}
       <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
-        {tabBtn("scenarios", "Scenari")}
-        {tabBtn("stakeholders", "Stakeholder")}
-        {tabBtn("summary", "Sintesi Art. 27")}
+        {tabBtn("scenarios", t("fb_tabScenarios"))}
+        {tabBtn("stakeholders", t("fb_tabStakeholders"))}
+        {tabBtn("summary", t("fb_tabSummary"))}
       </div>
 
       {/* Tab: Scenari */}
       {tab === "scenarios" && (
         <div>
           <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>
-            Scenari di impatto
+            {t("fb_impactScenarios")}
           </p>
 
           {fria.scenarios.length === 0 && (
             <p style={{ fontSize: 12, color: T.muted, marginBottom: 12 }}>
-              Nessuno scenario configurato. Aggiungi il primo scenario qui sotto.
+              {t("fb_noScenario")}
             </p>
           )}
 
@@ -242,28 +244,28 @@ export function FriaBranch({ fria, onFriaChange }: FriaBranchProps) {
               padding: 12, marginBottom: 12, background: T.bg,
             }}>
               <div style={{ marginBottom: 10 }}>
-                <p style={labelSt}>Titolo scenario</p>
+                <p style={labelSt}>{t("fb_scenarioTitle")}</p>
                 <input
                   style={inputSt}
                   value={scenario.title}
                   onChange={e => updateScenarioField(scenario.id, "title", e.target.value)}
-                  placeholder="Es. Profilazione automatica dei candidati..."
+                  placeholder={t("fb_ph_scenarioTitle")}
                 />
               </div>
               <div style={{ marginBottom: 10 }}>
-                <p style={labelSt}>Descrizione</p>
+                <p style={labelSt}>{t("descriptionWord")}</p>
                 <textarea
                   style={textareaSt}
                   value={scenario.description}
                   onChange={e => updateScenarioField(scenario.id, "description", e.target.value)}
-                  placeholder="Descrivi lo scenario di rischio..."
+                  placeholder={t("fb_ph_scenarioDesc")}
                 />
               </div>
 
               {scenario.right_impacts.length > 0 && (
                 <div>
                   <p style={{ fontSize: 11, fontWeight: 700, color: T.text, marginBottom: 8, textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>
-                    Impatti sui diritti
+                    {t("fb_rightsImpacts")}
                   </p>
                   {scenario.right_impacts.map(ri => {
                     const rightName = FUNDAMENTAL_RIGHTS.find(r => r.id === ri.right_id)?.name ?? ri.right_id;
@@ -278,68 +280,68 @@ export function FriaBranch({ fria, onFriaChange }: FriaBranchProps) {
 
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 8 }}>
                           <div>
-                            <p style={labelSt}>Entità interferenza</p>
+                            <p style={labelSt}>{t("fb_extent")}</p>
                             <select style={selectSt} value={ri.severity.extent_of_interference}
                               onChange={e => updateSeverityField(scenario.id, ri.right_id, "extent_of_interference", e.target.value)}>
                               <option value="">—</option>
-                              <option value="none">Nessuna</option>
-                              <option value="minor">Minore</option>
-                              <option value="moderate">Moderata</option>
-                              <option value="serious">Seria</option>
-                              <option value="very_serious">Molto seria</option>
+                              <option value="none">{t("fb_ext_none")}</option>
+                              <option value="minor">{t("fb_ext_minor")}</option>
+                              <option value="moderate">{t("fb_ext_moderate")}</option>
+                              <option value="serious">{t("fb_ext_serious")}</option>
+                              <option value="very_serious">{t("fb_ext_verySerious")}</option>
                             </select>
                           </div>
                           <div>
-                            <p style={labelSt}>Portata impatto</p>
+                            <p style={labelSt}>{t("fb_scope")}</p>
                             <select style={selectSt} value={ri.severity.scope_of_impact}
                               onChange={e => updateSeverityField(scenario.id, ri.right_id, "scope_of_impact", e.target.value)}>
                               <option value="">—</option>
-                              <option value="individual">Individuale</option>
-                              <option value="group">Gruppo</option>
-                              <option value="large_group">Gruppo ampio</option>
-                              <option value="systemic">Sistemico</option>
+                              <option value="individual">{t("fb_scope_individual")}</option>
+                              <option value="group">{t("fb_scope_group")}</option>
+                              <option value="large_group">{t("fb_scope_large")}</option>
+                              <option value="systemic">{t("fb_scope_systemic")}</option>
                             </select>
                           </div>
                           <div>
-                            <p style={labelSt}>Persone coinvolte</p>
+                            <p style={labelSt}>{t("fb_persons")}</p>
                             <select style={selectSt} value={ri.severity.persons_affected}
                               onChange={e => updateSeverityField(scenario.id, ri.right_id, "persons_affected", e.target.value)}>
                               <option value="">—</option>
-                              <option value="few">Poche</option>
-                              <option value="many">Molte</option>
-                              <option value="very_many">Moltissime</option>
+                              <option value="few">{t("fb_pers_few")}</option>
+                              <option value="many">{t("fb_pers_many")}</option>
+                              <option value="very_many">{t("fb_pers_veryMany")}</option>
                             </select>
                           </div>
                           <div>
-                            <p style={labelSt}>Gravità</p>
+                            <p style={labelSt}>{t("fb_gravity")}</p>
                             <select style={selectSt} value={ri.severity.gravity}
                               onChange={e => updateSeverityField(scenario.id, ri.right_id, "gravity", e.target.value)}>
                               <option value="">—</option>
-                              <option value="low">Bassa</option>
-                              <option value="medium">Media</option>
-                              <option value="high">Alta</option>
-                              <option value="critical">Critica</option>
+                              <option value="low">{t("sev_lowFull")}</option>
+                              <option value="medium">{t("sev_mediumFull")}</option>
+                              <option value="high">{t("sev_highFull")}</option>
+                              <option value="critical">{t("fb_critical")}</option>
                             </select>
                           </div>
                           <div>
-                            <p style={labelSt}>Reversibilità</p>
+                            <p style={labelSt}>{t("fb_reversibility")}</p>
                             <select style={selectSt} value={ri.severity.irreversibility}
                               onChange={e => updateSeverityField(scenario.id, ri.right_id, "irreversibility", e.target.value)}>
                               <option value="">—</option>
-                              <option value="reversible">Reversibile</option>
-                              <option value="partially">Parzialmente</option>
-                              <option value="irreversible">Irreversibile</option>
+                              <option value="reversible">{t("fb_rev_reversible")}</option>
+                              <option value="partially">{t("fb_rev_partial")}</option>
+                              <option value="irreversible">{t("fb_rev_irreversible")}</option>
                             </select>
                           </div>
                           <div>
-                            <p style={labelSt}>Probabilità</p>
+                            <p style={labelSt}>{t("fb_likelihood")}</p>
                             <select style={selectSt} value={ri.likelihood.likelihood}
                               onChange={e => updateLikelihood(scenario.id, ri.right_id, e.target.value)}>
                               <option value="">—</option>
-                              <option value="negligible">Trascurabile</option>
-                              <option value="possible">Possibile</option>
-                              <option value="likely">Probabile</option>
-                              <option value="almost_certain">Quasi certa</option>
+                              <option value="negligible">{t("fb_lik_negligible")}</option>
+                              <option value="possible">{t("fb_lik_possible")}</option>
+                              <option value="likely">{t("fb_lik_likely")}</option>
+                              <option value="almost_certain">{t("fb_lik_almostCertain")}</option>
                             </select>
                           </div>
                         </div>
@@ -347,34 +349,34 @@ export function FriaBranch({ fria, onFriaChange }: FriaBranchProps) {
                         <div style={{ display: "flex", gap: 16, marginBottom: 8 }}>
                           {ri.severity.computed_severity && (
                             <span style={{ fontSize: 11 }}>
-                              Severità: <span style={priorityStyle(ri.severity.computed_severity)}>{ri.severity.computed_severity}</span>
+                              {t("fb_severityWord")}: <span style={priorityStyle(ri.severity.computed_severity)}>{ri.severity.computed_severity}</span>
                             </span>
                           )}
                           {ri.likelihood.computed_priority && (
                             <span style={{ fontSize: 11 }}>
-                              Priorità: <span style={priorityStyle(ri.likelihood.computed_priority)}>{ri.likelihood.computed_priority}</span>
+                              {t("fb_priorityWord")}: <span style={priorityStyle(ri.likelihood.computed_priority)}>{ri.likelihood.computed_priority}</span>
                             </span>
                           )}
                         </div>
 
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                           <div>
-                            <p style={labelSt}>Rischio residuo</p>
+                            <p style={labelSt}>{t("fb_residualRisk")}</p>
                             <select style={selectSt} value={ri.residual_risk}
                               onChange={e => updateRightImpactField(scenario.id, ri.right_id, "residual_risk", e.target.value)}>
                               <option value="">—</option>
-                              <option value="acceptable">Accettabile</option>
-                              <option value="review">Da rivedere</option>
-                              <option value="unacceptable">Inaccettabile</option>
+                              <option value="acceptable">{t("fb_res_acceptable")}</option>
+                              <option value="review">{t("fb_res_review")}</option>
+                              <option value="unacceptable">{t("fb_res_unacceptable")}</option>
                             </select>
                           </div>
                           <div>
-                            <p style={labelSt}>Note</p>
+                            <p style={labelSt}>{t("db_notes")}</p>
                             <textarea
                               style={{ ...textareaSt, minHeight: 40 }}
                               value={ri.notes}
                               onChange={e => updateRightImpactField(scenario.id, ri.right_id, "notes", e.target.value)}
-                              placeholder="Note..."
+                              placeholder={t("db_ph_notes")}
                             />
                           </div>
                         </div>
@@ -391,28 +393,28 @@ export function FriaBranch({ fria, onFriaChange }: FriaBranchProps) {
             border: `1px dashed ${T.border}`, borderRadius: 8, padding: 12, background: T.bg,
           }}>
             <p style={{ fontSize: 12, fontWeight: 700, color: T.text, marginBottom: 10 }}>
-              Aggiungi nuovo scenario
+              {t("fb_addNewScenario")}
             </p>
             <div style={{ marginBottom: 8 }}>
-              <p style={labelSt}>Titolo</p>
+              <p style={labelSt}>{t("fb_titleWord")}</p>
               <input
                 style={inputSt}
                 value={newScenarioTitle}
                 onChange={e => setNewScenarioTitle(e.target.value)}
-                placeholder="Titolo dello scenario..."
+                placeholder={t("fb_ph_scenarioTitleShort")}
               />
             </div>
             <div style={{ marginBottom: 8 }}>
-              <p style={labelSt}>Descrizione</p>
+              <p style={labelSt}>{t("descriptionWord")}</p>
               <textarea
                 style={{ ...textareaSt, minHeight: 56 }}
                 value={newScenarioDesc}
                 onChange={e => setNewScenarioDesc(e.target.value)}
-                placeholder="Descrizione dello scenario..."
+                placeholder={t("fb_ph_scenarioDescShort")}
               />
             </div>
             <div style={{ marginBottom: 10 }}>
-              <p style={labelSt}>Diritti fondamentali coinvolti</p>
+              <p style={labelSt}>{t("fb_fundamentalRights")}</p>
               <div style={{
                 maxHeight: 140, overflowY: "auto", border: `1px solid ${T.border}`,
                 borderRadius: 6, padding: 8, background: T.card,
@@ -442,7 +444,7 @@ export function FriaBranch({ fria, onFriaChange }: FriaBranchProps) {
               onClick={addScenario}
               disabled={!newScenarioTitle.trim()}
             >
-              Aggiungi scenario
+              {t("fb_addScenario")}
             </button>
           </div>
         </div>
@@ -452,12 +454,12 @@ export function FriaBranch({ fria, onFriaChange }: FriaBranchProps) {
       {tab === "stakeholders" && (
         <div>
           <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 12 }}>
-            Stakeholder consultati
+            {t("fb_stakeholdersConsulted")}
           </p>
 
           {fria.stakeholders.length === 0 && (
             <p style={{ fontSize: 12, color: T.muted, marginBottom: 12 }}>
-              Nessuno stakeholder configurato.
+              {t("fb_noStakeholder")}
             </p>
           )}
 
@@ -468,53 +470,53 @@ export function FriaBranch({ fria, onFriaChange }: FriaBranchProps) {
             }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
                 <div>
-                  <p style={labelSt}>Nome</p>
+                  <p style={labelSt}>{t("nameWord")}</p>
                   <input
                     style={inputSt}
                     value={sh.name}
                     onChange={e => updateStakeholderField(sh.id, "name", e.target.value)}
-                    placeholder="Nome..."
+                    placeholder={t("fb_ph_name")}
                   />
                 </div>
                 <div>
-                  <p style={labelSt}>Organizzazione</p>
+                  <p style={labelSt}>{t("organizationField")}</p>
                   <input
                     style={inputSt}
                     value={sh.organization}
                     onChange={e => updateStakeholderField(sh.id, "organization", e.target.value)}
-                    placeholder="Organizzazione..."
+                    placeholder={t("fb_ph_org")}
                   />
                 </div>
                 <div>
-                  <p style={labelSt}>Categoria</p>
+                  <p style={labelSt}>{t("categoryWord")}</p>
                   <select style={selectSt} value={sh.category}
                     onChange={e => updateStakeholderField(sh.id, "category", e.target.value)}>
-                    <option value="">Non impostata</option>
-                    <option value="rights_holder">Soggetto interessato</option>
-                    <option value="civil_society">Società civile</option>
-                    <option value="regulator">Autorità</option>
-                    <option value="internal">Interno</option>
-                    <option value="expert">Esperto</option>
+                    <option value="">{t("fb_notSetF")}</option>
+                    <option value="rights_holder">{t("fb_cat_rightsHolder")}</option>
+                    <option value="civil_society">{t("fb_cat_civilSociety")}</option>
+                    <option value="regulator">{t("fb_cat_regulator")}</option>
+                    <option value="internal">{t("fb_cat_internal")}</option>
+                    <option value="expert">{t("fb_cat_expert")}</option>
                   </select>
                 </div>
                 <div>
-                  <p style={labelSt}>Metodo di coinvolgimento</p>
+                  <p style={labelSt}>{t("fb_engagementMethod")}</p>
                   <input
                     style={inputSt}
                     value={sh.engagement_method}
                     onChange={e => updateStakeholderField(sh.id, "engagement_method", e.target.value)}
-                    placeholder="Es. intervista, focus group, questionario..."
+                    placeholder={t("fb_ph_engagement")}
                   />
                 </div>
                 <div>
-                  <p style={labelSt}>Stato</p>
+                  <p style={labelSt}>{t("db_status")}</p>
                   <select style={selectSt} value={sh.status}
                     onChange={e => updateStakeholderField(sh.id, "status", e.target.value)}>
-                    <option value="">Non impostato</option>
-                    <option value="planned">Pianificato</option>
-                    <option value="contacted">Contattato</option>
-                    <option value="engaged">Coinvolto</option>
-                    <option value="completed">Completato</option>
+                    <option value="">{t("db_notSet")}</option>
+                    <option value="planned">{t("fb_st_planned")}</option>
+                    <option value="contacted">{t("fb_st_contacted")}</option>
+                    <option value="engaged">{t("fb_st_engaged")}</option>
+                    <option value="completed">{t("fb_st_completed")}</option>
                   </select>
                 </div>
                 <div style={{ display: "flex", alignItems: "flex-end" }}>
@@ -526,7 +528,7 @@ export function FriaBranch({ fria, onFriaChange }: FriaBranchProps) {
                     }}
                     onClick={() => removeStakeholder(sh.id)}
                   >
-                    Rimuovi
+                    {t("fb_remove")}
                   </button>
                 </div>
               </div>
@@ -538,40 +540,40 @@ export function FriaBranch({ fria, onFriaChange }: FriaBranchProps) {
             border: `1px dashed ${T.border}`, borderRadius: 8, padding: 12, background: T.bg,
           }}>
             <p style={{ fontSize: 12, fontWeight: 700, color: T.text, marginBottom: 10 }}>
-              Aggiungi stakeholder
+              {t("fb_addStakeholder")}
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
               <div>
-                <p style={labelSt}>Nome</p>
+                <p style={labelSt}>{t("nameWord")}</p>
                 <input
                   style={inputSt}
                   value={newStakeholder.name}
                   onChange={e => setNewStakeholder(p => ({ ...p, name: e.target.value }))}
-                  placeholder="Nome stakeholder..."
+                  placeholder={t("fb_ph_stakeholderName")}
                 />
               </div>
               <div>
-                <p style={labelSt}>Organizzazione</p>
+                <p style={labelSt}>{t("organizationField")}</p>
                 <input
                   style={inputSt}
                   value={newStakeholder.organization}
                   onChange={e => setNewStakeholder(p => ({ ...p, organization: e.target.value }))}
-                  placeholder="Organizzazione..."
+                  placeholder={t("fb_ph_org")}
                 />
               </div>
               <div>
-                <p style={labelSt}>Categoria</p>
+                <p style={labelSt}>{t("categoryWord")}</p>
                 <select
                   style={selectSt}
                   value={newStakeholder.category}
                   onChange={e => setNewStakeholder(p => ({ ...p, category: e.target.value as FRIAStakeholder["category"] }))}
                 >
-                  <option value="">Non impostata</option>
-                  <option value="rights_holder">Soggetto interessato</option>
-                  <option value="civil_society">Società civile</option>
-                  <option value="regulator">Autorità</option>
-                  <option value="internal">Interno</option>
-                  <option value="expert">Esperto</option>
+                  <option value="">{t("fb_notSetF")}</option>
+                  <option value="rights_holder">{t("fb_cat_rightsHolder")}</option>
+                  <option value="civil_society">{t("fb_cat_civilSociety")}</option>
+                  <option value="regulator">{t("fb_cat_regulator")}</option>
+                  <option value="internal">{t("fb_cat_internal")}</option>
+                  <option value="expert">{t("fb_cat_expert")}</option>
                 </select>
               </div>
             </div>
@@ -585,7 +587,7 @@ export function FriaBranch({ fria, onFriaChange }: FriaBranchProps) {
               onClick={addStakeholder}
               disabled={!newStakeholder.name.trim()}
             >
-              Aggiungi
+              {t("addWord")}
             </button>
           </div>
         </div>
@@ -595,7 +597,7 @@ export function FriaBranch({ fria, onFriaChange }: FriaBranchProps) {
       {tab === "summary" && (
         <div>
           <p style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 8 }}>
-            Sintesi pubblica (Art. 27 AI Act)
+            {t("fb_publicSummary")}
           </p>
 
           <div style={{
@@ -603,11 +605,11 @@ export function FriaBranch({ fria, onFriaChange }: FriaBranchProps) {
             border: `1px solid ${T.amberBdr}`, borderRadius: 6,
             padding: "8px 12px", marginBottom: 12, lineHeight: 1.6,
           }}>
-            Art. 27(4) AI Act: il deployer pubblica questa sintesi nel registro europeo EUDB.
+            {t("fb_art27Body")}
           </div>
 
           <div style={{ marginBottom: 12 }}>
-            <p style={labelSt}>Testo generato automaticamente</p>
+            <p style={labelSt}>{t("fb_autoGenerated")}</p>
             <textarea
               readOnly
               style={{
@@ -627,12 +629,12 @@ export function FriaBranch({ fria, onFriaChange }: FriaBranchProps) {
                 deployment: { ...prev.deployment, public_summary: autoSummary },
               }))}
             >
-              Usa testo generato
+              {t("fb_useGenerated")}
             </button>
           </div>
 
           <div>
-            <p style={labelSt}>Sintesi personalizzata (modificabile)</p>
+            <p style={labelSt}>{t("fb_customSummary")}</p>
             <textarea
               style={{ ...textareaSt, minHeight: 140 }}
               value={fria.deployment.public_summary}
@@ -640,7 +642,7 @@ export function FriaBranch({ fria, onFriaChange }: FriaBranchProps) {
                 ...prev,
                 deployment: { ...prev.deployment, public_summary: e.target.value },
               }))}
-              placeholder="Inserisci o modifica la sintesi pubblica..."
+              placeholder={t("fb_ph_publicSummary")}
             />
           </div>
         </div>

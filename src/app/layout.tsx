@@ -84,9 +84,9 @@ export default async function RootLayout({
         </Script>
         <LocaleProvider locale={locale}>
           {children}
+          <CookieBanner />
         </LocaleProvider>
         <GoogleAnalytics />
-        <CookieBanner />
       </body>
     </html>
   );

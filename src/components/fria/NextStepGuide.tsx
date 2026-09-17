@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { FRIADocument } from "@/lib/simulation/fria-engine";
 import type { FriaGapCheck } from "@/app/actions/checkFriaGaps";
 import { draftNextStepRationale } from "@/app/actions/draftNextStepRationale";
+import { useT } from "@/i18n/LocaleProvider";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const T = {
@@ -188,6 +189,7 @@ export interface NextStepGuideProps {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export function NextStepGuide({ fria, gapCheck, onNavigateToPhase }: NextStepGuideProps) {
+  const t = useT("toolFria");
   const [rationale, setRationale] = useState<string | null>(null);
   const [loadingRationale, setLoadingRationale] = useState(false);
   const [rationaleError, setRationaleError] = useState<string | null>(null);
@@ -223,8 +225,8 @@ export function NextStepGuide({ fria, gapCheck, onNavigateToPhase }: NextStepGui
     return (
       <div style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}`, borderRadius: 10, padding: "14px 20px", marginTop: 16 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: T.green }}>✓ FRIA completata</span>
-          <span style={{ fontSize: 11, color: T.green }}>Tutti i passi obbligatori completati</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: T.green }}>✓ {t("nsg_completeTitle")}</span>
+          <span style={{ fontSize: 11, color: T.green }}>{t("nsg_completeSub")}</span>
         </div>
       </div>
     );
@@ -234,8 +236,8 @@ export function NextStepGuide({ fria, gapCheck, onNavigateToPhase }: NextStepGui
   if (dismissed) {
     return (
       <div style={{ padding: "8px 12px", border: `1px solid ${T.border}`, borderRadius: 8, marginTop: 12, display: "flex", alignItems: "center", gap: 10 }}>
-        <span style={{ fontSize: 11, color: T.faint }}>Suggerimento prossimo passo nascosto</span>
-        <button onClick={() => setDismissed(false)} style={{ fontSize: 11, color: T.muted, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>Mostra</button>
+        <span style={{ fontSize: 11, color: T.faint }}>{t("nsg_hidden")}</span>
+        <button onClick={() => setDismissed(false)} style={{ fontSize: 11, color: T.muted, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>{t("nsg_show")}</button>
       </div>
     );
   }
@@ -253,22 +255,22 @@ export function NextStepGuide({ fria, gapCheck, onNavigateToPhase }: NextStepGui
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
         <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>
-          Prossimo passo consigliato
+          {t("nsg_nextStep")}
         </span>
         <span style={{
           fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 9999,
           background: T.amberBg, border: `1px solid ${T.amberBdr}`, color: T.amber,
         }}>
-          Fase {step.phase}
+          {t("nsg_phaseWord")} {step.phase}
         </span>
       </div>
 
       {/* Step title & description */}
       <p style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 4px" }}>
-        {step.title}
+        {t(`nsg_${stepKey}_title`)}
       </p>
       <p style={{ fontSize: 12, color: T.muted, margin: "0 0 14px", lineHeight: 1.5 }}>
-        {step.description}
+        {t(`nsg_${stepKey}_desc`)}
       </p>
 
       {/* AI rationale section */}
@@ -284,7 +286,7 @@ export function NextStepGuide({ fria, gapCheck, onNavigateToPhase }: NextStepGui
             marginBottom: 14,
           }}
         >
-          {loadingRationale ? "⟳ Generazione…" : "✦ Spiega perché"}
+          {loadingRationale ? t("nsg_generating") : t("nsg_explainWhy")}
         </button>
       )}
 
@@ -298,7 +300,7 @@ export function NextStepGuide({ fria, gapCheck, onNavigateToPhase }: NextStepGui
         <div style={{ marginBottom: 14, padding: "10px 12px", background: T.amberBg, border: `1px solid ${T.amberBdr}`, borderRadius: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
             <span style={{ fontSize: 10, fontWeight: 700, color: T.amber, background: "rgba(202,138,4,0.10)", padding: "2px 7px", borderRadius: 9999 }}>
-              ✦ AI — verifica e conferma
+              ✦ {t("aiVerifyConfirm")}
             </span>
           </div>
           <p style={{ fontSize: 12, color: T.text, margin: 0, lineHeight: 1.6 }}>
@@ -317,13 +319,13 @@ export function NextStepGuide({ fria, gapCheck, onNavigateToPhase }: NextStepGui
             cursor: "pointer",
           }}
         >
-          → {step.ctaLabel}
+          → {t(`nsg_${stepKey}_cta`)}
         </button>
         <button
           onClick={() => setDismissed(true)}
           style={{ fontSize: 11, color: T.faint, background: "none", border: "none", cursor: "pointer" }}
         >
-          Ignora per ora
+          {t("nsg_ignoreForNow")}
         </button>
       </div>
     </div>
