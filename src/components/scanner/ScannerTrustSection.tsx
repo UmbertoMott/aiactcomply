@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertTriangle, Shield, Zap, Lock, CheckCircle, ArrowRight } from "lucide-react";
+import { useT } from "@/i18n/LocaleProvider";
 
 const AMBER = "#b45309";
 const SERIF = "Georgia, 'Times New Roman', serif";
@@ -11,9 +12,10 @@ interface ScannerTrustSectionProps {
 }
 
 export default function ScannerTrustSection({ onScanRequest }: ScannerTrustSectionProps) {
+  const t = useT("scanner");
   return (
     <section
-      aria-label="Sanzioni Art. 50 AI Act e caratteristiche dello scanner"
+      aria-label={t("trustAria")}
       className="relative z-10 max-w-3xl mx-auto px-4 pb-24 pt-16"
       style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}
     >
@@ -39,23 +41,21 @@ export default function ScannerTrustSection({ onScanRequest }: ScannerTrustSecti
           <div>
             <div className="flex items-baseline gap-3 flex-wrap mb-2">
               <span style={{ fontSize: "clamp(22px, 3vw, 32px)", fontWeight: 400, color: "#0D1016", letterSpacing: "-1px", lineHeight: 1.05, fontFamily: SERIF }}>
-                Fino a €15.000.000
+                {t("stakeAmount")}
               </span>
               <span
                 className="text-[11px] font-bold px-3 py-1 rounded-full"
                 style={{ background: "rgba(180,83,9,0.10)", color: AMBER, letterSpacing: "0.03em", fontFamily: MONO }}
               >
-                o 3% del fatturato mondiale
+                {t("stakePct")}
               </span>
             </div>
             <div className="flex gap-4 flex-wrap mb-3 text-[11px]" style={{ color: "rgba(0,0,0,0.38)", fontFamily: MONO }}>
-              <span>Art. 50 + Art. 99(4)(g) — Reg. UE 2024/1689</span>
-              <span style={{ color: AMBER, fontWeight: 700 }}>Deadline: 2 dicembre 2026</span>
+              <span>{t("stakeRef")}</span>
+              <span style={{ color: AMBER, fontWeight: 700 }}>{t("stakeDeadline")}</span>
             </div>
             <p className="text-[13px] leading-relaxed max-w-lg" style={{ color: "rgba(0,0,0,0.52)" }}>
-              L&rsquo;obbligo di disclosure AI riguarda ogni interfaccia conversazionale, sistema di
-              raccomandazione e contenuto sintetico. Individuare subito le irregolarità è il modo
-              più semplice — e gratuito — per evitarle.
+              {t("stakeBody")}
             </p>
           </div>
         </div>
@@ -66,18 +66,18 @@ export default function ScannerTrustSection({ onScanRequest }: ScannerTrustSecti
         {[
           {
             icon: <CheckCircle aria-hidden="true" size={18} />,
-            title: "Basato sul testo ufficiale",
-            body: "5 criteri dell'Art. 50, Reg. UE 2024/1689 — nessuna interpretazione soggettiva.",
+            title: t("card1Title"),
+            body: t("card1Body"),
           },
           {
             icon: <Lock aria-hidden="true" size={18} />,
-            title: "100% anonimo",
-            body: "Nessuna registrazione. Nessun dato salvato. Solo l'URL viene analizzato.",
+            title: t("card2Title"),
+            body: t("card2Body"),
           },
           {
             icon: <Zap aria-hidden="true" size={18} />,
-            title: "Pronto in 15 secondi",
-            body: "Risultato immediato con gap rilevati e profilo di rischio sanzionatorio.",
+            title: t("card3Title"),
+            body: t("card3Body"),
           },
         ].map(({ icon, title, body }) => (
           <div
@@ -95,16 +95,16 @@ export default function ScannerTrustSection({ onScanRequest }: ScannerTrustSecti
       {/* ── 3. Come funziona (3 step) ─────────────────────────────────── */}
       <div className="mb-8">
         <p className="text-[10px] font-semibold uppercase tracking-widest mb-4" style={{ color: "rgba(0,0,0,0.38)", fontFamily: MONO }}>
-          Come funziona
+          {t("howItWorks")}
         </p>
         <div
           className="grid grid-cols-1 sm:grid-cols-3 rounded-xl overflow-hidden"
           style={{ border: "1px solid rgba(0,0,0,0.08)" }}
         >
           {[
-            { n: "01", label: "Incolla l'URL", sub: "Del sito con interfacce AI" },
-            { n: "02", label: "Analisi dei 5 criteri", sub: "Art. 50 Reg. UE 2024/1689" },
-            { n: "03", label: "Report con i fix", sub: "Gap rilevati e priorità" },
+            { n: "01", label: t("step1Label"), sub: t("step1Sub") },
+            { n: "02", label: t("step2Label"), sub: t("step2Sub") },
+            { n: "03", label: t("step3Label"), sub: t("step3Sub") },
           ].map(({ n, label, sub }, i) => (
             <div
               key={n}
@@ -127,30 +127,30 @@ export default function ScannerTrustSection({ onScanRequest }: ScannerTrustSecti
       {/* ── 4. Le sanzioni (3 fasce) ──────────────────────────────────── */}
       <div className="mb-8">
         <p className="text-[10px] font-semibold uppercase tracking-widest mb-4" style={{ color: "rgba(0,0,0,0.38)", fontFamily: MONO }}>
-          Le sanzioni — Art. 99, Reg. UE 2024/1689
+          {t("penaltiesTitle")}
         </p>
         <div className="flex flex-col gap-2">
           {([
             {
-              amount: "€7.500.000",
-              pct: "1% del fatturato mondiale",
-              desc: "Informazioni errate o incomplete fornite alle autorità di vigilanza",
+              amount: t("p1Amount"),
+              pct: t("p1Pct"),
+              desc: t("p1Desc"),
               ref: "Art. 99(5)",
               highlight: false,
               badge: null,
             },
             {
-              amount: "€15.000.000",
-              pct: "3% del fatturato mondiale",
-              desc: "Violazione degli obblighi di trasparenza e disclosure AI",
+              amount: t("p2Amount"),
+              pct: t("p2Pct"),
+              desc: t("p2Desc"),
               ref: "Art. 99(4)(g) — Art. 50",
               highlight: true,
-              badge: "Riguarda te",
+              badge: t("p2Badge"),
             },
             {
-              amount: "€35.000.000",
-              pct: "7% del fatturato mondiale",
-              desc: "Pratiche di IA vietate o sistemi GPAI non conformi",
+              amount: t("p3Amount"),
+              pct: t("p3Pct"),
+              desc: t("p3Desc"),
               ref: "Art. 99(3) — Art. 5",
               highlight: false,
               badge: null,
@@ -214,14 +214,14 @@ export default function ScannerTrustSection({ onScanRequest }: ScannerTrustSecti
           style={{ border: "1px solid rgba(0,0,0,0.10)", background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.40)" }}
         >
           <Shield aria-hidden="true" size={11} />
-          Art. 50 · Deadline: 2 dicembre 2026
+          {t("trustCtaBadge")}
         </div>
 
         <p style={{ fontSize: "clamp(20px, 2.8vw, 28px)", fontWeight: 400, color: "#0D1016", letterSpacing: "-0.9px", marginBottom: 10, fontFamily: SERIF }}>
-          Scopri in 15 secondi se rischi una sanzione
+          {t("trustCtaTitle")}
         </p>
         <p className="text-[13px] mb-7" style={{ color: "rgba(0,0,0,0.48)" }}>
-          Gratuito · anonimo · nessuna registrazione
+          {t("trustCtaSubtitle")}
         </p>
 
         <button
@@ -232,12 +232,12 @@ export default function ScannerTrustSection({ onScanRequest }: ScannerTrustSecti
           onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
           onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
         >
-          Analizza gratis
+          {t("trustCtaBtn")}
           <ArrowRight aria-hidden="true" size={14} />
         </button>
 
         <p className="mt-4 text-[11px]" style={{ color: "rgba(0,0,0,0.30)", fontFamily: MONO }}>
-          Gratis · anonimo · nessuna registrazione
+          {t("trustCtaFootnote")}
         </p>
       </div>
 
