@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Nav from "@/components/Nav";
 import { getPostBySlug, getAllPosts } from "@/lib/blog/posts";
+import { getT } from "@/i18n/server";
 import type { Metadata } from "next";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
@@ -37,6 +38,8 @@ export default async function BlogPost({ params }: Props) {
   const { slug } = await params;
   const post = getPostBySlug(slug);
   if (!post) notFound();
+
+  const t = await getT("risorse");
 
   const articleSchema = {
     "@context": "https://schema.org",
@@ -78,7 +81,7 @@ export default async function BlogPost({ params }: Props) {
             fontFamily: MONO, fontSize: 12, color: "rgba(0,0,0,0.35)",
             textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6,
           }}>
-            ← Tutte le risorse
+            ← {t("backAll")}
           </Link>
         </div>
 
@@ -94,7 +97,7 @@ export default async function BlogPost({ params }: Props) {
             </span>
             <span style={{ fontFamily: MONO, fontSize: 11, color: "rgba(0,0,0,0.28)" }}>{post.date}</span>
             <span style={{ color: "rgba(0,0,0,0.20)" }}>·</span>
-            <span style={{ fontFamily: MONO, fontSize: 11, color: "rgba(0,0,0,0.28)" }}>{post.readTime} di lettura</span>
+            <span style={{ fontFamily: MONO, fontSize: 11, color: "rgba(0,0,0,0.28)" }}>{post.readTime} {t("readSuffix")}</span>
           </div>
 
           <h1 style={{
@@ -205,10 +208,10 @@ export default async function BlogPost({ params }: Props) {
             fontSize: 22, fontWeight: 400, letterSpacing: "-0.6px",
             color: "#0D1016", marginBottom: 10,
           }}>
-            Verifica la compliance del tuo sistema AI
+            {t("postCtaTitle")}
           </p>
           <p style={{ fontSize: 14, color: "rgba(0,0,0,0.42)", marginBottom: 28 }}>
-            Lo scanner Art. 50 analizza il tuo sito o prodotto AI in pochi minuti. Gratis.
+            {t("postCtaBody")}
           </p>
           <Link href="/scanner" style={{
             display: "inline-block", fontFamily: "'DM Mono', monospace",
@@ -216,7 +219,7 @@ export default async function BlogPost({ params }: Props) {
             background: "#0D1016", borderRadius: 8,
             padding: "13px 32px", textDecoration: "none",
           }}>
-            Prova lo scanner gratuito →
+            {t("postCtaBtn")}
           </Link>
         </section>
       </div>

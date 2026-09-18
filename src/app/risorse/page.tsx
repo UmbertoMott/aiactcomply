@@ -3,6 +3,7 @@ import Nav from "@/components/Nav";
 import BookDemoBanner from "@/components/BookDemoBanner";
 import PostCard from "./PostCard";
 import { getAllPosts } from "@/lib/blog/posts";
+import { getT } from "@/i18n/server";
 import type { Metadata } from "next";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
@@ -21,8 +22,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RisorseIndex() {
+export default async function RisorseIndex() {
   const posts = getAllPosts();
+  const t = await getT("risorse");
 
   return (
     <div style={{ minHeight: "100vh", background: "#ffffff", color: "#0D1016" }}>
@@ -34,16 +36,16 @@ export default function RisorseIndex() {
           fontFamily: MONO, fontSize: 11, fontWeight: 500, letterSpacing: "1.5px",
           textTransform: "uppercase", color: "rgba(0,0,0,0.28)", marginBottom: 20,
         }}>
-          Risorse
+          {t("kicker")}
         </p>
         <h1 style={{
           fontFamily: SERIF, fontSize: "clamp(30px,4vw,48px)", fontWeight: 400,
           letterSpacing: "-2px", lineHeight: 1.08, color: "#0D1016", marginBottom: 16,
         }}>
-          Guide e aggiornamenti sull&apos;EU AI Act
+          {t("h1")}
         </h1>
         <p style={{ fontSize: 16, color: "rgba(0,0,0,0.45)", lineHeight: 1.7, maxWidth: 540, margin: "0 auto" }}>
-          Analisi normativa, scadenze, obblighi pratici. Senza paroloni.
+          {t("subtitle")}
         </p>
       </section>
 
@@ -51,7 +53,7 @@ export default function RisorseIndex() {
       <section style={{ maxWidth: 840, margin: "0 auto", padding: "0 24px 96px" }}>
         {posts.length === 0 ? (
           <p style={{ color: "rgba(0,0,0,0.30)", textAlign: "center", fontFamily: MONO, fontSize: 13 }}>
-            Nessun articolo pubblicato.
+            {t("empty")}
           </p>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))", gap: 20 }}>
@@ -65,14 +67,14 @@ export default function RisorseIndex() {
       {/* CTA */}
       <section style={{ borderTop: "1px solid rgba(0,0,0,0.07)", padding: "64px 24px", textAlign: "center" }}>
         <p style={{ fontSize: 15, color: "rgba(0,0,0,0.42)", marginBottom: 20 }}>
-          Vuoi sapere cosa ti riguarda davvero?
+          {t("ctaQuestion")}
         </p>
         <Link href="/scanner" style={{
           display: "inline-block", fontFamily: MONO, fontSize: 13, fontWeight: 500,
           color: "#ffffff", background: "#0D1016", borderRadius: 8,
           padding: "12px 28px", textDecoration: "none", letterSpacing: "0.02em",
         }}>
-          Prova lo scanner Art. 50 gratis →
+          {t("ctaBtn")}
         </Link>
       </section>
 
