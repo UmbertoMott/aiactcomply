@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useT } from "@/i18n/LocaleProvider";
 import type { BlogPost } from "@/lib/blog/posts";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
 const MONO  = "'DM Mono', monospace";
 
 export default function PostCard({ post, isNew }: { post: BlogPost; isNew: boolean }) {
+  const t = useT("risorse");
   return (
     <Link href={`/risorse/${post.slug}`} style={{ textDecoration: "none" }}>
       <article
@@ -45,7 +47,7 @@ export default function PostCard({ post, isNew }: { post: BlogPost; isNew: boole
               textTransform: "uppercase", color: "#0D1016",
               background: "rgba(0,0,0,0.07)", borderRadius: 20, padding: "3px 10px",
             }}>
-              Nuovo
+              {t("badgeNew")}
             </span>
           )}
         </div>
@@ -68,7 +70,7 @@ export default function PostCard({ post, isNew }: { post: BlogPost; isNew: boole
         }}>
           <span>{post.date}</span>
           <span>·</span>
-          <span>{post.readTime} di lettura</span>
+          <span>{post.readTime} {t("readSuffix")}</span>
         </div>
       </article>
     </Link>
