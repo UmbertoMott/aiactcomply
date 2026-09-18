@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Nav from "@/components/Nav";
 import BookDemoBanner from "@/components/BookDemoBanner";
 import ScannerTrustSection from "@/components/scanner/ScannerTrustSection";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
 import type { Art50ScanResult, Art50Signal, CriterionKey } from "@/lib/scanner/art50-detector";
 
 // ─── Design constants ─────────────────────────────────────────────────────────
@@ -29,7 +30,6 @@ const RADAR_ORDER: CriterionKey[] = [
   "language_match",
   "synthetic_media",
 ];
-const RADAR_LABELS = ["Disclosure", "Visibilità", "Machine-\nreadable", "Lingua", "Media"];
 const CX = 150, CY = 150, R_MAX = 100, R_LABEL = 128;
 
 function axisAngle(i: number) { return (-90 + i * 72) * (Math.PI / 180); }
@@ -56,6 +56,8 @@ function labelPos(i: number): { x: number; y: number } {
 }
 
 function RadarChart({ signals }: { signals: Art50Signal[] }) {
+  const t = useT("scanner");
+  const RADAR_LABELS = [t("rDisclosure"), t("rVisibility"), t("rMachine"), t("rLanguage"), t("rMedia")];
   const ratios = RADAR_ORDER.map(key => {
     const s = signals.find(sig => sig.criterion === key);
     return s ? s.score / s.maxScore : 0;
@@ -63,7 +65,7 @@ function RadarChart({ signals }: { signals: Art50Signal[] }) {
   const actualPts = polygonPoints(ratios, R_MAX);
 
   return (
-    <svg viewBox="0 0 300 300" className="w-full max-w-[260px]" aria-label="Radar di conformità">
+    <svg viewBox="0 0 300 300" className="w-full max-w-[260px]" aria-label={t("radarAria")}>
       {[0.25, 0.5, 0.75, 1].map(t => (
         <polygon
           key={t}
@@ -169,7 +171,10 @@ function ScoreCircle({ score, grade }: { score: number; grade: string }) {
 }
 
 // ─── Signal row ────────────────────────────────────────────────────────────────
+const SEVERITY_LABEL_KEY = { critical: "sevCritical", warning: "sevWarning", ok: "sevOk" } as const;
+
 function SignalRow({ signal, index }: { signal: Art50Signal; index: number }) {
+  const t = useT("scanner");
   const c = SEVERITY_COLORS[signal.severity];
   return (
     <motion.div
@@ -196,7 +201,7 @@ function SignalRow({ signal, index }: { signal: Art50Signal; index: number }) {
             className="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full"
             style={{ background: c.badge, color: c.text, fontFamily: MONO }}
           >
-            {c.label}
+            {t(SEVERITY_LABEL_KEY[signal.severity])}
           </span>
           <span className="text-[12px]" style={{ color: "rgba(0,0,0,0.45)", fontFamily: MONO }}>
             {signal.score}/{signal.maxScore}
@@ -220,7 +225,8 @@ function SignalRow({ signal, index }: { signal: Art50Signal; index: number }) {
 
 // ─── Loading state ─────────────────────────────────────────────────────────────
 function ScanLoading({ url }: { url: string }) {
-  const criteria = ["Disclosure AI", "Posizione prominente", "Machine-readable", "Lingua corretta", "Media sintetici"];
+  const t = useT("scanner");
+  const criteria = [t("loadDisclosure"), t("loadPosition"), t("loadMachine"), t("loadLanguage"), t("loadMedia")];
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -239,7 +245,7 @@ function ScanLoading({ url }: { url: string }) {
         <div className="absolute w-3 h-3 rounded-full" style={{ background: "rgba(0,0,0,0.70)" }} />
       </div>
       <p className="text-[14px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.65)", letterSpacing: "-0.3px" }}>
-        Analisi in corso…
+        {t("analyzingInProgress")}
       </p>
       <p className="text-[11px] truncate max-w-xs mx-auto mb-8" style={{ color: "rgba(0,0,0,0.32)", fontFamily: MONO }}>
         {url}
@@ -268,9 +274,11 @@ function ScanLoading({ url }: { url: string }) {
 
 // ─── Results ───────────────────────────────────────────────────────────────────
 function ScanResults({ result, onReset }: { result: Art50ScanResult; onReset: () => void }) {
+  const t = useT("scanner");
+  const locale = useLocale();
   const gradeColor = GRADE_COLOR[result.grade] ?? "#9ca3af";
   const riskColor  = RISK_COLORS[result.riskLevel];
-  const formattedDate = new Date(result.scannedAt).toLocaleString("it-IT", {
+  const formattedDate = new Date(result.scannedAt).toLocaleString(locale === "en" ? "en-GB" : "it-IT", {
     day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
   });
   const urlTrunc = result.url.length > 40 ? result.url.slice(0, 40) + "…" : result.url;
@@ -303,7 +311,7 @@ function ScanResults({ result, onReset }: { result: Art50ScanResult; onReset: ()
           style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.08)" }}
         >
           <p className="text-[11px] font-semibold uppercase tracking-widest mb-2" style={{ color: "rgba(0,0,0,0.38)", fontFamily: MONO }}>
-            Livello di rischio sanzionatorio
+            {t("riskLevelLabel")}
           </p>
           <div className="flex items-center gap-2 mb-1">
             <span className="w-2 h-2 rounded-full" style={{ background: riskColor }} />
@@ -318,12 +326,12 @@ function ScanResults({ result, onReset }: { result: Art50ScanResult; onReset: ()
             className="text-[12px] font-medium px-3 py-1.5 rounded-lg inline-block"
             style={{ background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.55)" }}
           >
-            <span style={{ color: "#dc2626" }}>{result.criticalCount} critico/i</span>
+            <span style={{ color: "#dc2626" }}>{result.criticalCount} {t("criticalLabel")}</span>
             <span style={{ color: "rgba(0,0,0,0.22)" }}> · </span>
-            <span style={{ color: "#b45309" }}>{result.warningCount} da verificare</span>
+            <span style={{ color: "#b45309" }}>{result.warningCount} {t("warningLabel")}</span>
           </div>
           <p className="mt-3 text-[10px]" style={{ color: "rgba(0,0,0,0.32)", fontFamily: MONO }}>
-            Scansione: {formattedDate} · {urlTrunc}
+            {t("scanPrefix")} {formattedDate} · {urlTrunc}
           </p>
         </div>
       </div>
@@ -333,13 +341,13 @@ function ScanResults({ result, onReset }: { result: Art50ScanResult; onReset: ()
         style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.07)" }}
       >
         <p className="text-[11px] font-semibold uppercase tracking-widest mb-5" style={{ color: "rgba(0,0,0,0.38)", fontFamily: MONO }}>
-          Profilo di conformità Art. 50
+          {t("profileTitle")}
         </p>
         <RadarChart signals={result.signals} />
       </div>
 
       <p className="text-[11px] font-semibold uppercase tracking-widest mb-3" style={{ color: "rgba(0,0,0,0.38)", fontFamily: MONO }}>
-        Analisi dettagliata
+        {t("detailedAnalysis")}
       </p>
       <div className="space-y-3 mb-8">
         {result.signals.map((s, i) => (
@@ -371,11 +379,10 @@ function ScanResults({ result, onReset }: { result: Art50ScanResult; onReset: ()
               🔒
             </div>
             <p className="font-semibold text-[15px] mb-1" style={{ color: "#0D1016", letterSpacing: "-0.3px" }}>
-              Piano di remediation completo
+              {t("remediationLocked")}
             </p>
             <p className="text-[12px] text-center max-w-xs" style={{ color: "rgba(0,0,0,0.55)", lineHeight: 1.6 }}>
-              {result.criticalCount} gap critico/i rilevato/i. Il piano dettagliato con
-              implementazione guidata è incluso nel piano Starter.
+              {t("remediationBody").replace("{count}", String(result.criticalCount))}
             </p>
           </div>
         </div>
@@ -390,16 +397,15 @@ function ScanResults({ result, onReset }: { result: Art50ScanResult; onReset: ()
           style={{ border: "1px solid rgba(0,0,0,0.10)", background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.45)" }}
         >
           <span className="block w-1.5 h-1.5 rounded-full" style={{ background: "rgba(0,0,0,0.25)" }} />
-          Piano Starter · €49/mese
+          {t("planBadge")}
         </div>
         <h3 className="text-[20px] font-medium mb-2" style={{ color: "#0D1016", letterSpacing: "-0.8px", fontFamily: SERIF }}>
           {result.score >= 80
-            ? "Genera il Registro di Implementazione Art. 50"
-            : `Risolvi ${result.criticalCount + result.warningCount} gap e genera il registro`}
+            ? t("ctaTitleHigh")
+            : t("ctaTitleGaps").replace("{count}", String(result.criticalCount + result.warningCount))}
         </h3>
         <p className="text-[13px] max-w-md mx-auto mb-6" style={{ color: "rgba(0,0,0,0.50)", lineHeight: 1.65 }}>
-          Il Registro di Implementazione Art. 50 documenta le azioni adottate ed è la base difendibile
-          in caso di ispezione di mercato (Art. 74 AI Act). Incluso nel piano Starter.
+          {t("ctaBody")}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <a
@@ -409,7 +415,7 @@ function ScanResults({ result, onReset }: { result: Art50ScanResult; onReset: ()
             onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
             onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
           >
-            Inizia gratis — 14 giorni →
+            {t("ctaStartBtn")}
           </a>
           <button
             onClick={onReset}
@@ -418,11 +424,11 @@ function ScanResults({ result, onReset }: { result: Art50ScanResult; onReset: ()
             onMouseEnter={e => ((e.currentTarget as HTMLButtonElement).style.background = "rgba(0,0,0,0.08)")}
             onMouseLeave={e => ((e.currentTarget as HTMLButtonElement).style.background = "rgba(0,0,0,0.04)")}
           >
-            Analizza un altro URL
+            {t("ctaResetBtn")}
           </button>
         </div>
         <p className="mt-4 text-[11px]" style={{ color: "rgba(0,0,0,0.32)", fontFamily: MONO }}>
-          Deadline: 2 dicembre 2026 · Multa max: 1% fatturato globale · Nessuna carta richiesta per il trial
+          {t("ctaFootnote")}
         </p>
       </div>
 
@@ -435,6 +441,7 @@ function ScanResults({ result, onReset }: { result: Art50ScanResult; onReset: ()
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
 export default function ScannerPage() {
+  const t = useT("scanner");
   const [url, setUrl]         = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState<string | null>(null);
@@ -460,9 +467,9 @@ export default function ScannerPage() {
         body: JSON.stringify({ url: target }),
       });
       const data = (await res.json()) as Art50ScanResult & { error?: string };
-      if (!res.ok || data.error) setError(data.error ?? "Errore durante la scansione.");
+      if (!res.ok || data.error) setError(data.error ?? t("errScan"));
       else setResult(data);
-    } catch { setError("Impossibile completare la scansione. Controlla la connessione."); }
+    } catch { setError(t("errConn")); }
     finally { setLoading(false); }
   }
 
@@ -482,20 +489,19 @@ export default function ScannerPage() {
               style={{ border: "1px solid rgba(0,0,0,0.10)", background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.50)" }}
             >
               <span className="block w-1.5 h-1.5 rounded-full" style={{ background: "rgba(0,0,0,0.22)" }} />
-              EU AI Act — Art. 50 · Deadline: 2 dicembre 2026
+              {t("badgeDeadline")}
             </div>
 
             <h1 style={{ fontFamily: SERIF, fontSize: "clamp(32px, 4.5vw, 56px)", fontWeight: 400, letterSpacing: "-2.5px", lineHeight: 1.05, color: "#0D1016", marginBottom: 20 }}>
-              Il tuo sito è conforme
+              {t("h1Line1")}
               <br />
               <em className="not-italic" style={{ color: "rgba(0,0,0,0.52)" }}>
-                alla disclosure AI?
+                {t("h1Line2")}
               </em>
             </h1>
 
             <p className="mb-10 max-w-md mx-auto" style={{ fontSize: "15px", fontWeight: 300, letterSpacing: "-0.2px", lineHeight: 1.7, color: "rgba(0,0,0,0.50)" }}>
-              Verifica in 15 secondi se le tue interfacce AI rispettano i 5 criteri dell&rsquo;Art. 50.
-              Obbligatorio dal 2 dicembre 2026. Nessuna registrazione richiesta.
+              {t("subtitle")}
             </p>
 
             <form onSubmit={handleScan} className="max-w-xl mx-auto">
@@ -508,7 +514,7 @@ export default function ScannerPage() {
                   type="url"
                   value={url}
                   onChange={e => setUrl(e.target.value)}
-                  placeholder="https://tuo-sito.it"
+                  placeholder={t("inputPlaceholder")}
                   required
                   disabled={loading}
                   className="scanner-input flex-1 bg-transparent outline-none px-4 py-2.5 text-[14px] disabled:opacity-50"
@@ -528,9 +534,9 @@ export default function ScannerPage() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                       </svg>
-                      Analisi…
+                      {t("analyzing")}
                     </span>
-                  ) : "Analizza gratis →"}
+                  ) : t("analyzeBtn")}
                 </button>
               </div>
             </form>
@@ -551,7 +557,7 @@ export default function ScannerPage() {
 
             {!loading && !result && (
               <div className="flex flex-wrap items-center justify-center gap-5 mt-6 text-[11px]" style={{ color: "rgba(0,0,0,0.32)", fontFamily: MONO }}>
-                {["Nessuna registrazione", "5 criteri Art. 50", "Risultato in 15s", "Scansione anonima"].map(s => (
+                {[t("chipNoReg"), t("chipCriteria"), t("chipResult"), t("chipAnon")].map(s => (
                   <span key={s} className="flex items-center gap-1.5">
                     <span className="w-1 h-1 rounded-full" style={{ background: "rgba(0,0,0,0.18)" }} />
                     {s}
