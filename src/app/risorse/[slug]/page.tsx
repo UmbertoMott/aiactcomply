@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Nav from "@/components/Nav";
 import { getPostBySlug, getAllPosts } from "@/lib/blog/posts";
-import { getT } from "@/i18n/server";
+import { getT, getLocale } from "@/i18n/server";
 import type { Metadata } from "next";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
@@ -16,7 +16,8 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const locale = await getLocale();
+  const post = getPostBySlug(slug, locale);
   if (!post) return {};
   return {
     title: post.metaTitle,
@@ -36,7 +37,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPost({ params }: Props) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const locale = await getLocale();
+  const post = getPostBySlug(slug, locale);
   if (!post) notFound();
 
   const t = await getT("risorse");

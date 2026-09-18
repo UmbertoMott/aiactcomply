@@ -1,6 +1,23 @@
 // ─── Blog post data ───────────────────────────────────────────────────────────
 // Aggiungi nuovi post in cima all'array. Il primo elemento appare in evidenza.
 
+import type { Locale } from "@/i18n/config";
+
+// Campi traducibili di un post. La versione EN vive in `en`; se assente,
+// si ricade sull'italiano.
+export interface BlogPostL10n {
+  title: string;
+  excerpt: string;
+  date: string;
+  readTime: string;
+  category: string;
+  metaTitle: string;
+  metaDescription: string;
+  content: string;
+  faqSchema: { q: string; a: string }[];
+  tags?: string[];
+}
+
 export interface BlogPost {
   slug: string;
   title: string;
@@ -14,6 +31,7 @@ export interface BlogPost {
   metaDescription: string;
   content: string;        // HTML puro — usato in dangerouslySetInnerHTML
   faqSchema: { q: string; a: string }[];
+  en?: BlogPostL10n;      // traduzione inglese (fallback: italiano)
 }
 
 export const POSTS: BlogPost[] = [
@@ -106,6 +124,93 @@ export const POSTS: BlogPost[] = [
 <p>Puoi <a href="/quick-scan">provare il Quick Scan AI Act</a> e vedere il flusso corretto: nessuna email all'inizio, teaser dopo le risposte, report completo solo dopo il form.</p>
 <p>Quando questi tre numeri sono buoni, il quick scan non è più una demo. È una porta d'ingresso commerciale.</p>
 `,
+    en: {
+      title: "AI Act Quick Scan: 10 questions to find out if you have compliance gaps",
+      excerpt:
+        "A short funnel works better than an endless assessment: 10 targeted questions, a result teaser and a full report by email to turn AI Act interest into qualified leads.",
+      date: "30 August 2026",
+      readTime: "6 min",
+      category: "Guide",
+      metaTitle: "AI Act Quick Scan: 10 questions to find compliance gaps | AIComply",
+      metaDescription:
+        "How to structure an effective AI Act Quick Scan: 10 questions, scoring, gap teaser, lead capture and a personalised report to get ready for AI Act obligations.",
+      faqSchema: [
+        {
+          q: "Does an AI Act Quick Scan replace a full legal assessment?",
+          a: "No. A quick scan is meant for initial triage and to surface risk signals. A full assessment requires system analysis, technical documentation, provider or deployer responsibilities and professional validation.",
+        },
+        {
+          q: "Why should the quick scan be short?",
+          a: "Because the first goal is to reduce friction. Eight to ten questions let you qualify the risk without asking the user to complete a heavy questionnaire before they even understand whether the topic concerns them.",
+        },
+        {
+          q: "Should you show the score right away?",
+          a: "Usually not. It is more effective to show a teaser of the result — for example the number of potential gaps found — and to ask for email and company in order to send the full report.",
+        },
+        {
+          q: "Which systems should an AI Act quick scan catch?",
+          a: "At least chatbots and virtual assistants, systems that generate synthetic content, HR solutions, scoring, automated decision systems and tools that may fall under transparency or documentation obligations.",
+        },
+      ],
+      content: `
+<p class="ac-tldr">
+  <strong>TL;DR:</strong> To launch an AI Act funnel you don't need a 60-question assessment. You need a short quick scan: 8-10 questions, conditional logic, internal scoring and a result teaser. The full report arrives by email. The user immediately understands whether they have a problem, the company collects a qualified lead, and the natural next step becomes the full assessment.
+</p>
+
+<p>The simplest way to turn AI Act interest into a commercial conversation is not to publish yet another PDF to download.</p>
+<p>It is to have the user answer a few concrete questions about their AI system.</p>
+<p>If the flow is short, the user reaches the end. If the result is specific enough, they leave their details. If the report shows them real gaps, the next request is no longer "explain what the AI Act is" but "what do I have to do now?".</p>
+
+<h2>Why start with a quick scan</h2>
+<p>A full assessment is useful when there is already a project, an internal owner and a willingness to work on compliance.</p>
+<p>But many companies aren't there yet. They have a chatbot, a content generator, an HR system, a model embedded in a product, or they simply use AI in business processes without knowing whether they are entering the scope of the AI Act.</p>
+<p>The quick scan is for exactly this: it does not certify, it does not close the analysis, it does not replace professional advice. It surfaces the initial risk and gives a clear next action.</p>
+
+<h2>The ideal funnel structure</h2>
+<p>The flow should be deliberately short. The best sequence is this:</p>
+<p><strong>1. Entry from LinkedIn or a resources page.</strong> The message must promise a practical result, not a theoretical explanation.</p>
+<p><strong>2. A 10-question quick scan.</strong> The questions must cover the type of system, the role of the organisation, generated content, impact on individuals, documentation, logging, oversight and internal owner.</p>
+<p><strong>3. Result teaser.</strong> Before lead capture there is no need to show everything. Better to indicate that the result is ready and that some potential gaps have been identified.</p>
+<p><strong>4. Email, company and role.</strong> Only the essential fields. Every extra field reduces completion.</p>
+<p><strong>5. Personalised report.</strong> The report must translate the answers into gaps, priorities and next steps.</p>
+<p><strong>6. Final CTA.</strong> The natural call to action is to start the full assessment or book a demo.</p>
+
+<h2>The 10 questions that matter</h2>
+<p>A good quick scan should not ask everything. It must catch the signals that truly change the classification and the obligations.</p>
+<p><strong>1.</strong> Does the organisation provide or use an AI system?</p>
+<p><strong>2.</strong> Does the system generate, modify or synthesise text, audio, video or image content?</p>
+<p><strong>3.</strong> Does the system interact directly with users or customers?</p>
+<p><strong>4.</strong> Is the user informed when they are interacting with an AI system?</p>
+<p><strong>5.</strong> Is AI-generated or AI-modified content marked or recognisable?</p>
+<p><strong>6.</strong> Is there technical documentation on how the system works?</p>
+<p><strong>7.</strong> Does the system produce output that influences decisions about individuals?</p>
+<p><strong>8.</strong> Is the system used in HR, credit, education, essential services, biometrics or regulated fields?</p>
+<p><strong>9.</strong> Are there logs, evidence and tests that show how the system is controlled?</p>
+<p><strong>10.</strong> Is there an internal owner for AI Act remediation?</p>
+
+<h2>The key point: don't show everything at once</h2>
+<p>The most common mistake is to compute a score and show it immediately.</p>
+<p>A more controlled teaser works better:</p>
+<p><strong>"Assessment ready. We identified 3 potential compliance gaps. Enter your work email to receive the full report."</strong></p>
+<p>This keeps the perceived value high without turning the result into an isolated number. A score of 62% doesn't say much. Three concrete gaps, on the other hand, open a conversation.</p>
+
+<h2>What the report should contain</h2>
+<p>The report doesn't have to be long. It has to be useful.</p>
+<p>The best structure is: preliminary score, main gaps, potentially relevant obligations, priority level and next steps.</p>
+<p>For example, if the user declares they generate synthetic content without machine-readable marking, the report should flag a possible gap linked to Art. 50 transparency and suggest a technical check. If they declare a system used in HR, the report should flag the need for risk classification and broader documentation.</p>
+
+<h2>Why it works for RegulaeOS</h2>
+<p>RegulaeOS doesn't just sell software. It sells an assisted path towards compliance: triage, assessment, technical documentation, DPIA, FRIA, risk register and professional validation.</p>
+<p>The quick scan is the right first step because it promises little and delivers something concrete. It doesn't ask the user to understand the regulation before starting. It asks them to describe their system, then translates those answers into readable risk.</p>
+<p>From there, the CTA is natural: <a href="/scanner">try the Art. 50 scanner</a>, <a href="/pricing">see the plans</a> or <a href="/contatti">talk to a professional</a>.</p>
+
+<h2>The MVP version</h2>
+<p>To get started, all you need is a responsive page with a progress bar, 8-10 questions, internal scoring, a teaser screen, a lead form and a final screen.</p>
+<p>The backend can come right after: lead storage, report generation, email sending and CRM connection. But the first validation of the funnel can already measure three things: quiz completion, form conversion and interest in the full assessment.</p>
+<p>You can <a href="/quick-scan">try the AI Act Quick Scan</a> and see the right flow: no email at the start, a teaser after the answers, the full report only after the form.</p>
+<p>When those three numbers are good, the quick scan is no longer a demo. It is a commercial entry point.</p>
+`,
+    },
   },
   {
     slug: "sistema-ai-alto-rischio-annex-iii-obblighi",
@@ -203,6 +308,100 @@ export const POSTS: BlogPost[] = [
 <p>AIComply è costruito per comprimere quel percorso. Il <a href="/dashboard/tools/classifier">classificatore di rischio AI</a> identifica in pochi minuti se il tuo sistema rientra nell'Annex III. Se rientra, i tool guidano articolo per articolo. Il dossier finale è esportabile e pronto per le autorità di vigilanza.</p>
 <p>Il primo assessment è pronto in meno di 48 ore. Puoi <a href="/register">iniziare adesso</a> senza aspettare dicembre 2027.</p>
 `,
+    en: {
+      title: "What a high-risk AI system is: a practical guide to Annex III",
+      excerpt:
+        "Does your HR software filter CVs with an algorithm? Does your system assign credit scores? You probably have a high-risk system. Here are the 8 sectors, the Art. 6(3) exemptions and the 7 obligations you must meet by December 2027.",
+      date: "3 June 2026",
+      readTime: "9 min",
+      category: "Guide",
+      metaTitle: "High-risk AI system: what it is, who is in scope and what to do | AIComply",
+      metaDescription:
+        "Find out whether your AI system falls under Annex III of the EU AI Act: 8 sectors, Art. 6(3) exemptions, 7 obligations and the December 2027 deadline. Practical guide updated May 2026.",
+      faqSchema: [
+        {
+          q: "Is a corporate chatbot a high-risk AI system?",
+          a: "In general, no. A customer-support chatbot does not fall under Annex III. It becomes high-risk if it plays a decisive role in decisions on job applications or granting credit. What changes is the context of use, not the type of system.",
+        },
+        {
+          q: "What happens if I classify my system incorrectly?",
+          a: "Fines up to 15 million euros or 3% of annual global turnover. Misclassification is not a minor procedural omission: it is a substantive breach of the regulation.",
+        },
+        {
+          q: "Do SMEs have reduced obligations compared to large companies?",
+          a: "The obligations are the same. SMEs benefit from proportionate fines and access to regulatory sandboxes, but there are no exemptions based on size. If the system is high-risk, Articles 9-15 apply in full.",
+        },
+        {
+          q: "Do I have to register in the EUDB database?",
+          a: "Yes, if you are the provider of a high-risk Annex III system. Registration in the EUDB database is mandatory before the system is put into service.",
+        },
+        {
+          q: "Do the Commission's May 2026 guidelines change anything?",
+          a: "The draft guidelines of 19 May 2026 do not change the text of the regulation but clarify how to apply it, with concrete examples for the eight Annex III categories and criteria for the Art. 6(3) exemptions. They are open for consultation until 23 June 2026.",
+        },
+      ],
+      content: `
+<p class="ac-tldr">
+  <strong>TL;DR:</strong> An AI system is high-risk if it operates in one of the 8 sectors of the EU AI Act's Annex III: recruitment, credit scoring, biometrics, critical infrastructure, law enforcement, justice, education, migration. If you're in scope, you have until 2 December 2027. There are seven obligations, they are heavy, and they take 6 to 18 months to meet. Ignoring them costs up to 15 million euros.
+</p>
+
+<p>Does your HR software use an algorithm to screen CVs? Does your banking system assign credit scores automatically? Does your software monitor employee performance with AI?</p>
+<p>You probably have a high-risk system. And you probably don't know it yet.</p>
+<p>The problem is not that the regulation is harsh. It's that the definition of "high-risk" in the EU AI Act doesn't work the way you'd expect. It doesn't depend on how powerful the model is. It doesn't depend on the budget you spent. It depends on where you use it and who it impacts.</p>
+<p>This guide explains the mechanism, the sectors involved, the exceptions few people know about and what you have to do if your system is in scope.</p>
+
+<h2>What is a high-risk AI system according to the EU AI Act?</h2>
+<p>An AI system is classified as high-risk when it operates in one of the eight sectors listed in <a href="https://artificialintelligenceact.eu/article/6/" target="_blank" rel="noopener">Annex III of the regulation</a>, or when it is embedded in a product subject to harmonised European legislation (Annex I) that requires a third-party conformity assessment.</p>
+<p>The second path covers industrial machinery, medical devices, lifts, radio equipment. If you make these things with embedded AI components, you are automatically in scope.</p>
+<p>The first path, the one that concerns most Italian digital companies, works like this: the AI Act lists eight areas of use. If your AI system operates in one of these areas, it is presumed high-risk. Company size doesn't matter. Whether you are provider or deployer doesn't matter. Use is what matters.</p>
+
+<h2>The 8 sectors of Annex III: are you in?</h2>
+<p>This is the list you need to know. For each category, a concrete example you might come across in an Italian company.</p>
+<p><strong>1. Biometrics.</strong> Remote biometric identification (facial recognition), biometric categorisation, emotion recognition. Example: a clock-in system with facial recognition.</p>
+<p><strong>2. Critical infrastructure.</strong> AI used in managing energy grids, water, transport, gas. Example: a predictive maintenance system for an electricity grid.</p>
+<p><strong>3. Education and vocational training.</strong> Systems that determine access to training paths, assess students, detect anomalous behaviour. Example: university software that assigns places on courses based on an automatic score.</p>
+<p><strong>4. Employment and access to work.</strong> Automatic CV screening, candidate selection, performance evaluation, decisions on promotions and dismissals. Example: any ATS that uses AI to filter applications before a human sees them.</p>
+<p><strong>5. Access to essential services.</strong> <a href="https://startbrain.ai/it/guides/ai-act/classification/" target="_blank" rel="noopener">Credit scoring</a>, insurance assessment, access to healthcare services, assessment of public benefit claims. Example: an AI model that decides whether to grant a mortgage.</p>
+<p><strong>6. Law enforcement.</strong> AI used by police and authorities to assess individual risks, analyse evidence, predict crime. Mainly concerns the public sector, not private companies.</p>
+<p><strong>7. Migration and border control.</strong> Risk assessment of people entering the EU, analysis of travel documents, asylum applications. Again, mainly the public sector.</p>
+<p><strong>8. Administration of justice and democratic processes.</strong> AI used by courts to assist in decisions, automatic arbitration systems. Concerns institutional bodies.</p>
+<p>For Italian companies, the sectors that really matter are 4 (HR) and 5 (credit and insurance). <a href="https://www.agendadigitale.eu/sicurezza/sistemi-ia-ad-alto-rischio-il-confine-incerto-che-imprese-e-pa-devono-governare/" target="_blank" rel="noopener">Most Italian SMEs</a> that use AI in these processes fall under Annex III without knowing it.</p>
+
+<h2>Watch out for Art. 6(3): when an Annex III system is not high-risk</h2>
+<p>Falling into an Annex III sector doesn't automatically mean being high-risk. There is a little-known exemption that can exclude you from the obligations.</p>
+<p><a href="https://medium.com/@lorenzo.passaro92/ai-act-e-digital-omnibus-le-esenzioni-dellart-6-3-sono-uno-scudo-o-un-illusione-247ea6b073de" target="_blank" rel="noopener">Art. 6(3)</a> provides that an Annex III system is not considered high-risk if it meets one of these four criteria:</p>
+<p><strong>1.</strong> It performs a narrow procedural task. It doesn't make decisions about people, it only processes structured data in a limited way.</p>
+<p><strong>2.</strong> It improves the result of an activity already completed by a human. It helps review a decision already made, not make a new one.</p>
+<p><strong>3.</strong> It detects patterns relative to previous decisions without influencing the final assessment. It highlights anomalies but does not replace human judgement.</p>
+<p><strong>4.</strong> It carries out a preparatory task. It prepares materials or analyses that a human uses as a starting point, with no direct impact on the decision.</p>
+<p>Careful: there's a trap. If your system performs <strong>profiling of individuals</strong>, the exemption never applies, regardless of everything else.</p>
+<p>If you think you fall under one of the four exemptions, you must document it before placing the system on the market and register it in the EUDB database. It is not enough to decide internally that you are exempt.</p>
+
+<h2>What you have to do if your system is high-risk</h2>
+<p>Seven obligations, all binding, all documented. None is optional.</p>
+<p><strong>Art. 9 — Risk management system.</strong> An iterative process that identifies, assesses and mitigates risks throughout the system's life cycle. An initial document is not enough. Risk management is continuous.</p>
+<p><strong>Art. 10 — Data governance.</strong> The datasets used for training, validation and testing must be relevant, representative and, as far as possible, free of errors. You must document where the data comes from, how it was selected, which potential biases it contains.</p>
+<p><strong>Art. 11 — Technical documentation.</strong> It must be drawn up before placing the system on the market. The format is that of Annex IV of the regulation: system architecture, data used, expected performance, tests carried out, risk mitigation measures.</p>
+<p><strong>Art. 12 — Automatic logging.</strong> The system must automatically record relevant events. The <a href="https://www.mauriziofonte.it/blog/post/ai-act-scadenza-2-agosto-2026-checklist-pmi-italiane-compliance.html" target="_blank" rel="noopener">minimum retention is 6 months</a> for Annex III systems, 3 years for biometric systems.</p>
+<p><strong>Art. 13 — Transparency towards the deployer.</strong> Whoever uses the system must receive clear instructions on capabilities, limits, expected performance, conditions of use and the human oversight measures foreseen.</p>
+<p><strong>Art. 14 — Human oversight.</strong> The system must be designed to allow effective human oversight. It must be documented who supervises, how often and with what powers.</p>
+<p><strong>Art. 15 — Accuracy, robustness and cybersecurity.</strong> The system must maintain its performance over time, be resilient to errors and attacks, and prevent automation bias.</p>
+
+<h2>When do the obligations fall due?</h2>
+<p>The deadline depends on the type of system.</p>
+<p>For <strong>standalone Annex III systems</strong> the deadline is <strong>2 December 2027</strong>. It is the result of the Omnibus agreement of 7 May 2026, which pushed the original August 2026 deadline back by 16 months.</p>
+<p>For <strong>AI systems embedded in physical products subject to harmonised legislation</strong> (Annex I) the deadline is <strong>2 August 2028</strong>.</p>
+<p>On 19 May 2026 the European Commission published the <a href="https://digital-strategy.ec.europa.eu/en/library/draft-commission-guidelines-classification-high-risk-ai-systems" target="_blank" rel="noopener">draft guidelines on the classification of high-risk systems</a>, 148 pages clarifying how to apply Art. 6. The public consultation is open until 23 June 2026.</p>
+<p>For a full picture of all the deadlines, see the <a href="/risorse/scadenze-ai-act-aggiornate-calendario-2025-2028">updated AI Act calendar after the Omnibus</a>.</p>
+
+<h2>How long does it take to become compliant?</h2>
+<p>The honest answer is: between 6 and 18 months, depending on the complexity of the system and how organised you are.</p>
+<p>The standard path requires: an initial gap analysis, drafting the technical documentation (Annex IV), building the risk management system, configuring logging, defining human oversight procedures, a DPIA if you process personal data, and registration in the EUDB database.</p>
+<p>Each step requires input from different areas: legal, technical, privacy, operations. Coordinating them without a system takes time. A lot of time.</p>
+<p>AIComply is built to compress that path. The <a href="/dashboard/tools/classifier">AI risk classifier</a> identifies in minutes whether your system falls under Annex III. If it does, the tools guide you article by article. The final dossier is exportable and ready for market surveillance authorities.</p>
+<p>The first assessment is ready in less than 48 hours. You can <a href="/register">start now</a> without waiting for December 2027.</p>
+`,
+    },
   },
   {
     slug: "scadenze-ai-act-aggiornate-calendario-2025-2028",
@@ -306,13 +505,123 @@ export const POSTS: BlogPost[] = [
 <p>AIComply è costruito per comprimere quel percorso. Il primo assessment è pronto in meno di 48 ore. I tool guidano ogni articolo del regolamento, dai check Art. 5 alla dichiarazione di conformità. Il dossier finale è esportabile e pronto per un notified body o per le autorità di vigilanza.</p>
 <p>Puoi vedere i <a href="/pricing">piani disponibili</a> o iniziare subito con lo scanner gratuito.</p>
 `,
+    en: {
+      title: "Updated AI Act deadlines: the 2025–2028 calendar after the Omnibus delay",
+      excerpt:
+        "Two deadlines have already passed. One is coming in a few months. The heaviest ones have been moved. Here is the full calendar after the Omnibus agreement of 7 May 2026.",
+      date: "2 June 2026",
+      readTime: "8 min",
+      category: "Regulation",
+      metaTitle: "AI Act deadlines 2025-2028: updated calendar after the Omnibus | AIComply",
+      metaDescription:
+        "The full EU AI Act calendar updated with the Omnibus agreement of 7 May 2026. Prohibited practices, GPAI, high-risk Annex III: what is already in force and what you can still plan for.",
+      faqSchema: [
+        {
+          q: "Does the EU AI Act also apply to Italian SMEs?",
+          a: "Yes. The regulation applies to any company that develops, distributes or uses AI systems in the European Union, regardless of size. SMEs benefit from proportionate fines and access to national regulatory sandboxes, but they are not exempt from the obligations.",
+        },
+        {
+          q: "What happens if I miss the August 2026 deadline?",
+          a: "The consequences depend on the obligation breached. For Art. 50 transparency (August 2026) the fines are up to 15 million euros or 3% of annual global turnover. The European Commission's enforcement powers over GPAI providers come into full application in August 2026.",
+        },
+        {
+          q: "Is the Omnibus delay for high-risk systems final?",
+          a: "The agreement of 7 May 2026 is still provisional. It requires formal ratification by Parliament and Council and publication in the Official Journal. The political direction, however, is settled: all the major international law firms consider the December 2027 delay for Annex III as practically certain.",
+        },
+        {
+          q: "How do I know whether my AI system is high-risk (Annex III)?",
+          a: "Annex III lists eight specific areas: biometrics, critical infrastructure, education, employment, access to essential services (credit, healthcare), law enforcement, migration, administration of justice. If your AI system operates in one of these areas, it very likely falls in scope.",
+        },
+        {
+          q: "Does the August 2025 GPAI deadline apply even if I use ChatGPT in my company?",
+          a: "No. The August 2025 GPAI obligations concern the model providers (OpenAI, Anthropic, Google). If you are a company using ChatGPT as an internal tool, you are a deployer. Your obligations depend on the type of system you build with that AI and the risk it entails.",
+        },
+      ],
+      content: `
+<p class="ac-tldr">
+  <strong>TL;DR:</strong> The EU AI Act does not have a single deadline. It has seven, and the Omnibus agreement of 7 May 2026 moved the heaviest one: high-risk AI systems (Annex III) slip from August 2026 to December 2027, 16 months more. But two obligations have already been in force for months. Ignoring them means risking up to 35 million euros. Here is the full calendar and what to do now.
+</p>
+
+<p>If you are planning your AI Act compliance around the August 2026 deadline, you might have a problem.</p>
+<p>Not because you're late. Because that date is no longer what you think it is.</p>
+<p>On 7 May 2026, the European Parliament and the Council reached a provisional agreement, the so-called <a href="https://www.gibsondunn.com/eu-ai-act-omnibus-agreement-postponed-high-risk-deadlines-and-other-key-changes/" target="_blank" rel="noopener">Digital Omnibus on AI</a>, which pushed the heaviest deadlines forward. But not all of them. Some remained. Others had already expired.</p>
+<p>This is the updated calendar. Take note of the dates that really matter for your company.</p>
+
+<h2>Which AI Act deadlines have already passed?</h2>
+<p>Two AI Act obligations are already in force. If you fall within their scope, you are already exposed to fines.</p>
+<p><strong>On 2 February 2025</strong> the provisions on <a href="https://www.cybersecurity360.it/news/ai-act-scattano-i-primi-divieti-chi-rischia-le-sanzioni-e-le-prossime-tappe/" target="_blank" rel="noopener">prohibited AI practices (Art. 5)</a> came into force. Eight types of AI system are absolutely banned: subliminal manipulation, exploitation of vulnerabilities, social scoring by public bodies, real-time biometric identification in public spaces, biometric categorisation to infer ethnicity or religion, emotion recognition at work or school, individual crime-risk prediction, and mass scraping of facial images.</p>
+<p>The fine for breaching Art. 5 is the highest in the entire regulation: <a href="https://www.avvocatitech.com/pratiche-di-intelligenza-artificiale-vietate-dallai-act-cosa-non-si-puo-fare/" target="_blank" rel="noopener">up to 35 million euros or 7% of annual global turnover</a>, whichever is higher. For SMEs the lower threshold applies.</p>
+<p><strong>On 2 August 2025</strong> the obligations for providers of general-purpose AI models (GPAI) came into effect. Those who develop or distribute models such as GPT, Claude, Gemini or equivalents must comply with <a href="https://www.lw.com/en/insights/eu-ai-act-gpai-model-obligations-in-force-and-final-gpai-code-of-practice-in-place" target="_blank" rel="noopener">obligations on technical documentation, transparency about training data and copyright compliance</a>. The European Commission's enforcement powers over these providers come into application from 2 August 2026.</p>
+
+<h2>What changed with the Digital Omnibus of May 2026?</h2>
+<p>The Omnibus moved the most feared deadline in the regulation: high-risk Annex III AI systems do not have to be compliant in August 2026, but in December 2027.</p>
+<p>The <a href="https://www.hoganlovells.com/en/publications/eu-legislators-agree-to-delay-for-highrisk-ai-rules" target="_blank" rel="noopener">measure approved on 7 May 2026</a> deferred by 16 months the compliance obligation for standalone systems classified under Annex III: recruitment, credit scoring, biometrics, critical infrastructure, law enforcement, justice, education, migration. For AI systems embedded in products subject to harmonised legislation (Annex I, such as machinery or medical devices), the deadline is instead August 2028.</p>
+<p>The agreement is still provisional. It requires formal ratification by Parliament and Council, then publication in the Official Journal. But the political direction is settled.</p>
+<p>Careful: the Omnibus is not a general extension. August 2026 remains a date loaded with obligations. Only those tied to high-risk Annex III systems change.</p>
+
+<h2>The full AI Act calendar 2024–2028</h2>
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Date</th><th>Obligation</th><th>Status</th><th>Article</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1 Aug 2024</td><td>Entry into force of the Regulation</td><td class="ac-passed">✓ Passed</td><td>Art. 113</td></tr>
+      <tr><td>2 Feb 2025</td><td>Prohibited practices (8 categories) + AI literacy</td><td class="ac-passed">✓ In force</td><td>Art. 5 + Art. 4</td></tr>
+      <tr><td>10 Oct 2025</td><td>Italian law L. 132/2025</td><td class="ac-passed">✓ In force</td><td>—</td></tr>
+      <tr><td>2 Aug 2025</td><td>GPAI obligations + national authorities</td><td class="ac-passed">✓ In force</td><td>Art. 53-55</td></tr>
+      <tr><td>2 Aug 2026</td><td>Art. 50 transparency (chatbots, AI labeling) + GPAI enforcement</td><td class="ac-soon">⚑ 6 months</td><td>Art. 50</td></tr>
+      <tr><td>2 Dec 2026</td><td>Mandatory watermarking of synthetic AI content</td><td class="ac-omnibus">↻ Omnibus</td><td>Art. 50(2)</td></tr>
+      <tr><td>2 Dec 2027</td><td>Standalone high-risk Annex III systems</td><td class="ac-omnibus">↻ Omnibus</td><td>Art. 6(2)</td></tr>
+      <tr><td>2 Aug 2028</td><td>High-risk Annex I systems (embedded in products)</td><td class="ac-omnibus">↻ Omnibus</td><td>Art. 6(1)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2>August 2026: what must you do by that date?</h2>
+<p>August 2026 has not disappeared from the calendar. Three concrete obligations remain, and the time to prepare shrinks every week.</p>
+<p><strong>First.</strong> Limited-risk AI systems that interact with individuals must comply with the Art. 50 transparency rules. If you have a chatbot on your site, a virtual assistant, a system that generates content automatically, you must inform users that they are interacting with an AI. It is not optional. It is not a best practice. It is an obligation.</p>
+<p><strong>Second.</strong> The European Commission's enforcement powers over GPAI providers come into full application. Anyone who has not put in order the technical documentation of their model, the training-data policy and copyright compliance will be exposed to inspections with fines up to <a href="https://www.dlapiper.com/en-us/insights/publications/2025/08/latest-wave-of-obligations-under-the-eu-ai-act-take-effect" target="_blank" rel="noopener">15 million euros or 3% of turnover</a>.</p>
+<p><strong>Third.</strong> The regulation becomes fully applicable. The entire sanctioning apparatus is operational. The fact that your company has until 2027 for Annex III systems does not mean it can ignore the general regulatory context.</p>
+<p>If you use AI in your business processes, the fastest way to understand what concerns you is to start from the <a href="/dashboard/tools/classifier">AI risk classifier</a> built into AIComply. It identifies your system's tier in minutes.</p>
+
+<h2>December 2026: mandatory watermarking</h2>
+<p>From 2 December 2026, anyone who generates audio, video, image or text content with AI systems must apply a machine-readable marking that identifies the content as artificial.</p>
+<p>The obligation comes from Art. 50(2) and concerns providers of systems that produce synthetic content. It does not apply only to big tech companies: if you have embedded an AI model in your platform to generate images, product copy or videos, watermarking is your obligation.</p>
+<p>The <a href="https://www.mishcon.com/news/eu-ai-act-simplified-unpacking-the-ai-omnibus-agreement-of-may-2026" target="_blank" rel="noopener">Omnibus agreement</a> shortened the transition period from six to three months relative to the regulation's entry into force, bringing the deadline to 2 December 2026 instead of August.</p>
+<p>AIComply includes a free <a href="/scanner">Art. 50 scanner</a> to check whether your systems fall under the disclosure and watermarking obligation.</p>
+
+<h2>December 2027: the real deadline for high-risk systems</h2>
+<p>If your AI system falls under Annex III, you have until 2 December 2027. But it is not an invitation to wait.</p>
+<p>Annex III systems cover eight areas: recruitment and employment management, credit scoring, biometrics, critical infrastructure, law enforcement, justice and judicial processes, education and vocational training, public services and migration. <a href="https://www.ascensys.it/blog/ai-act-pmi-agosto-2026" target="_blank" rel="noopener">Most Italian businesses</a> that use AI in HR or customer scoring fall within this scope without knowing it.</p>
+<p>Annex III compliance is not solved in a week. It requires technical documentation (Annex IV), a risk management system, data governance, logging with a minimum retention of 6 months, documented human oversight, a FRIA if you are a public authority or financial institution, a DPIA if you process personal data, and registration in the EUDB database. The whole process typically takes between 6 and 18 months.</p>
+<p>December 2027 is far away. The path is not. You can start from the <a href="/register">initial assessment</a> in less than 48 hours.</p>
+
+<h2>How long does it really take to become compliant?</h2>
+<p>The answer depends on two variables: how complex your AI system is and how organised you are in collecting the documentation.</p>
+<p>A full compliance path for an Annex III system done the traditional way requires legal advice, technical audits, drafting of documentation, gap analysis, DPIA and FRIA assessments. The market talks about 6-18 months, with costs ranging from 30,000 to 150,000 euros for a system of medium complexity.</p>
+<p>AIComply is built to compress that path. The first assessment is ready in less than 48 hours. The tools guide every article of the regulation, from the Art. 5 checks to the declaration of conformity. The final dossier is exportable and ready for a notified body or for market surveillance authorities.</p>
+<p>You can see the <a href="/pricing">available plans</a> or start now with the free scanner.</p>
+`,
+    },
   },
 ];
 
-export function getPostBySlug(slug: string): BlogPost | undefined {
-  return POSTS.find((p) => p.slug === slug);
+// Applica la traduzione richiesta sovrascrivendo i campi tradotti; slug,
+// dateISO ed eventuali campi non tradotti restano invariati.
+function localize(post: BlogPost, locale: Locale): BlogPost {
+  if (locale === "en" && post.en) {
+    const { en, ...base } = post;
+    return { ...base, ...en, tags: en.tags ?? base.tags };
+  }
+  return post;
 }
 
-export function getAllPosts(): BlogPost[] {
-  return POSTS;
+export function getPostBySlug(slug: string, locale: Locale = "it"): BlogPost | undefined {
+  const post = POSTS.find((p) => p.slug === slug);
+  return post ? localize(post, locale) : undefined;
+}
+
+export function getAllPosts(locale: Locale = "it"): BlogPost[] {
+  return POSTS.map((p) => localize(p, locale));
 }

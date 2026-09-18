@@ -3,7 +3,7 @@ import Nav from "@/components/Nav";
 import BookDemoBanner from "@/components/BookDemoBanner";
 import PostCard from "./PostCard";
 import { getAllPosts } from "@/lib/blog/posts";
-import { getT } from "@/i18n/server";
+import { getT, getLocale } from "@/i18n/server";
 import type { Metadata } from "next";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
@@ -23,7 +23,8 @@ export const metadata: Metadata = {
 };
 
 export default async function RisorseIndex() {
-  const posts = getAllPosts();
+  const locale = await getLocale();
+  const posts = getAllPosts(locale);
   const t = await getT("risorse");
 
   return (
