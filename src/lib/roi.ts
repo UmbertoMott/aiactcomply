@@ -26,8 +26,15 @@ export function computeRoi(fatturato: number, tierKey: string, probPct: number, 
   return { tier, E, rischio, costoY, netto, totRischio, totCosto, totNetto, roi };
 }
 
-export const fmtFull = (n: number) =>
-  new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
+// Locale numerico: "it" → it-IT, "en" → en-IE (euro con separatore migliaia inglese).
+const bcp47 = (locale: string) => (locale === "en" ? "en-IE" : "it-IT");
 
-export const fmtCompact = (n: number) =>
-  new Intl.NumberFormat("it-IT", { notation: "compact", style: "currency", currency: "EUR", maximumFractionDigits: 1 }).format(n);
+export const fmtFull = (n: number, locale: string = "it") =>
+  new Intl.NumberFormat(bcp47(locale), { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
+
+export const fmtCompact = (n: number, locale: string = "it") =>
+  new Intl.NumberFormat(bcp47(locale), { notation: "compact", style: "currency", currency: "EUR", maximumFractionDigits: 1 }).format(n);
+
+// Numero semplice (senza valuta) locale-aware, per moltiplicatori e percentuali.
+export const fmtNum = (n: number, locale: string = "it") =>
+  new Intl.NumberFormat(bcp47(locale)).format(n);

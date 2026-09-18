@@ -9,13 +9,14 @@ type Props = {
   value: string;                    // nome paese selezionato
   onChange: (name: string) => void;
   placeholder?: string;
+  searchPlaceholder?: string;
 };
 
 /**
  * Dropdown paese custom (la scheda di ricerca la offriamo noi, non il sistema
  * operativo). Bandierina + nome, campo di ricerca interno, lista filtrabile.
  */
-export default function CountrySelect({ value, onChange, placeholder = "Seleziona…" }: Props) {
+export default function CountrySelect({ value, onChange, placeholder = "Seleziona…", searchPlaceholder = "Cerca un paese…" }: Props) {
   const [open, setOpen]   = useState(false);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
@@ -131,7 +132,7 @@ export default function CountrySelect({ value, onChange, placeholder = "Selezion
                 value={query}
                 onChange={(e) => { setQuery(e.target.value); setActive(0); }}
                 onKeyDown={onKeyDown}
-                placeholder="Cerca un paese…"
+                placeholder={searchPlaceholder}
                 style={{
                   flex: 1, border: "none", outline: "none", background: "transparent",
                   fontSize: 13, color: "#0D1016",
