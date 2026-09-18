@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import CountrySelect from "@/components/CountrySelect";
+import { useT } from "@/i18n/LocaleProvider";
 import type { TierKey } from "@/lib/roi";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
@@ -22,6 +23,7 @@ const labelStyle: React.CSSProperties = {
 export default function RoiLeadModal({ calc, onSuccess, onClose }: {
   calc: Calc; onSuccess: () => void; onClose: () => void;
 }) {
+  const t = useT("roi");
   const [f, setF] = useState({ firstName: "", lastName: "", email: "", company: "", country: "", marketing: true });
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +33,7 @@ export default function RoiLeadModal({ calc, onSuccess, onClose }: {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!f.country) { setError("Seleziona un paese."); return; }
+    if (!f.country) { setError(t("errCountry")); return; }
     setSending(true);
     setError(null);
     try {
@@ -69,50 +71,48 @@ export default function RoiLeadModal({ calc, onSuccess, onClose }: {
           boxShadow: "0 40px 100px rgba(0,0,0,0.35)", position: "relative",
         }}
       >
-        <button onClick={onClose} aria-label="Chiudi" style={{
+        <button onClick={onClose} aria-label={t("close")} style={{
           position: "absolute", top: 18, right: 18, width: 32, height: 32,
           border: "none", background: "transparent", cursor: "pointer", color: "rgba(0,0,0,0.4)", fontSize: 22, lineHeight: 1,
         }}>×</button>
 
         <h2 style={{ fontFamily: SERIF, fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 400, letterSpacing: "-1px", lineHeight: 1.1, color: "#0D1016", marginBottom: 8, maxWidth: 460 }}>
-          Sblocca il tuo report ROI completo.
+          {t("modalTitle")}
         </h2>
         <p style={{ fontSize: 14, color: "rgba(0,0,0,0.5)", lineHeight: 1.6, marginBottom: 28, maxWidth: 480 }}>
-          Ti inviamo via email la proiezione dettagliata a 3 anni e il ritorno sulla
-          prevenzione, calcolati sui tuoi dati.
+          {t("modalBody")}
         </p>
 
         <form onSubmit={submit}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
             <div>
-              <label style={labelStyle}>Nome *</label>
-              <input required style={inputStyle} placeholder="Nome" value={f.firstName} onChange={set("firstName")} />
+              <label style={labelStyle}>{t("fldFirst")} *</label>
+              <input required style={inputStyle} placeholder={t("phFirst")} value={f.firstName} onChange={set("firstName")} />
             </div>
             <div>
-              <label style={labelStyle}>Cognome *</label>
-              <input required style={inputStyle} placeholder="Cognome" value={f.lastName} onChange={set("lastName")} />
+              <label style={labelStyle}>{t("fldLast")} *</label>
+              <input required style={inputStyle} placeholder={t("phLast")} value={f.lastName} onChange={set("lastName")} />
             </div>
             <div>
-              <label style={labelStyle}>Email aziendale *</label>
-              <input required type="email" style={inputStyle} placeholder="nome@azienda.com" value={f.email} onChange={set("email")} />
+              <label style={labelStyle}>{t("fldEmail")} *</label>
+              <input required type="email" style={inputStyle} placeholder={t("phEmail")} value={f.email} onChange={set("email")} />
             </div>
             <div>
-              <label style={labelStyle}>Azienda *</label>
-              <input required style={inputStyle} placeholder="Nome azienda" value={f.company} onChange={set("company")} />
+              <label style={labelStyle}>{t("fldCompany")} *</label>
+              <input required style={inputStyle} placeholder={t("phCompany")} value={f.company} onChange={set("company")} />
             </div>
           </div>
 
           <div style={{ marginBottom: 20 }}>
-            <label style={labelStyle}>Paese *</label>
-            <CountrySelect value={f.country} onChange={(name) => { setF((s) => ({ ...s, country: name })); setError(null); }} />
+            <label style={labelStyle}>{t("fldCountry")} *</label>
+            <CountrySelect value={f.country} onChange={(name) => { setF((s) => ({ ...s, country: name })); setError(null); }} placeholder={t("countryPlaceholder")} searchPlaceholder={t("countrySearch")} />
           </div>
 
           <label style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 18, cursor: "pointer" }}>
             <input type="checkbox" checked={f.marketing} onChange={set("marketing")}
               style={{ marginTop: 2, width: 16, height: 16, accentColor: GREEN, flexShrink: 0 }} />
             <span style={{ fontSize: 12.5, color: "rgba(0,0,0,0.5)", lineHeight: 1.5 }}>
-              Acconsento a ricevere il report e comunicazioni su servizi ed eventi RegulaeOS.
-              Posso disiscrivermi in qualsiasi momento.
+              {t("consent")}
             </span>
           </label>
 
@@ -123,12 +123,12 @@ export default function RoiLeadModal({ calc, onSuccess, onClose }: {
             letterSpacing: "0.02em", color: "#fff", background: "#0D1016", border: "none",
             borderRadius: 10, cursor: sending ? "wait" : "pointer", opacity: sending ? 0.7 : 1,
           }}>
-            {sending ? "Invio in corso…" : "Rivela il report ROI completo"}
+            {sending ? t("submitSending") : t("submitIdle")}
           </button>
 
           <p style={{ fontSize: 11.5, color: "rgba(0,0,0,0.4)", lineHeight: 1.55, marginTop: 16 }}>
-            Per come raccogliamo, usiamo e proteggiamo i tuoi dati, consulta la{" "}
-            <a href="/privacy" target="_blank" style={{ color: "rgba(0,0,0,0.6)", textDecoration: "underline" }}>Privacy Policy</a>.
+            {t("privacyPre")}
+            <a href="/privacy" target="_blank" style={{ color: "rgba(0,0,0,0.6)", textDecoration: "underline" }}>{t("privacyLink")}</a>{t("privacyPost")}
           </p>
         </form>
       </div>
