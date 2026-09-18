@@ -5,9 +5,18 @@ import Link from "next/link";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import Nav from "@/components/Nav";
 import BookDemoBanner from "@/components/BookDemoBanner";
+import { useT } from "@/i18n/LocaleProvider";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
 const MONO  = "'DM Mono', monospace";
+
+// Helpers i18n per dati serializzati "a|b|c".
+const splitPipe = (s: string) => s.split("|");
+const zipStats = (vals: string, labels: string): { val: string; label: string }[] => {
+  const v = vals.split("|");
+  const l = labels.split("|");
+  return v.map((val, i) => ({ val, label: l[i] ?? "" }));
+};
 
 // ─── Scrollspy TOC ────────────────────────────────────────────────────────────
 const TOC_ITEMS = [
@@ -286,6 +295,7 @@ interface ConversionData {
 }
 
 function ConversionBlock({ data }: { data: ConversionData }) {
+  const t = useT("products");
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
   const [hovered, setHovered] = useState(false);
@@ -302,7 +312,7 @@ function ConversionBlock({ data }: { data: ConversionData }) {
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 16, marginBottom: 40 }}>
           <div>
             <p style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.25)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>
-              Perché sceglierlo
+              {t("whyChoose")}
             </p>
             <h3 style={{
               fontFamily: SERIF,
@@ -323,9 +333,9 @@ function ConversionBlock({ data }: { data: ConversionData }) {
               borderRadius: 10, padding: "14px 20px",
               display: "flex", flexDirection: "column", gap: 4, flexShrink: 0,
             }}>
-              <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.30)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Sanzione max</span>
+              <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(255,255,255,0.30)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{t("maxFine")}</span>
               <span style={{ fontFamily: SERIF, fontSize: 28, color: "#ffffff", letterSpacing: "-1px", lineHeight: 1 }}>{data.fine}</span>
-              <span style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.30)" }}>del fatturato globale</span>
+              <span style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.30)" }}>{t("ofTurnover")}</span>
             </div>
           )}
         </div>
@@ -404,7 +414,7 @@ function ConversionBlock({ data }: { data: ConversionData }) {
               <span style={{ fontSize: 16, lineHeight: 1 }}>→</span>
             </Link>
             <p style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.20)", textAlign: "right" }}>
-              Nessuna carta di credito · Setup in 5 minuti
+              {t("noCardSetup")}
             </p>
           </div>
         </div>
@@ -426,115 +436,63 @@ function ConversionBlock({ data }: { data: ConversionData }) {
 
 // ─── Conversion data per module ────────────────────────────────────────────────
 
-const CONVERSION: Record<string, ConversionData> = {
-  "mod-triage": {
-    headline: "Sai già a quali obblighi sei soggetto?",
-    sub: "Le aziende che usano sistemi AI senza classificarli rischiano sanzioni fino a €30M o il 6% del fatturato globale. Il Triage risponde in 4 minuti.",
-    fine: "€30M",
-    stats: [
-      { val: "4 min", label: "classificazione completa — da zero al PDF" },
-      { val: "47+", label: "articoli e allegati mappati in automatico" },
-      { val: "3×", label: "livelli di rischio coperti (alto, limitato, minimo)" },
-    ],
-    checklist: [
-      "Classificazione 4 livelli AI Act",
-      "Mapping Art. 6 + Annex III automatico",
-      "Export PDF firmato per audit",
-      "Storico sessioni navigabile",
-      "Nessun legale necessario",
-      "Risultato in meno di 5 minuti",
-    ],
-    articles: ["Art. 5", "Art. 6", "Art. 51", "Annex III"],
-    ctaLabel: "Inizia il Triage gratis",
-    ctaHref: "/register",
-  },
-  "mod-legal": {
-    headline: "Domande sull'AI Act che costano €300 l'ora.",
-    sub: "Il Legal Assistant risponde in meno di 3 secondi con il testo normativo esatto. Ogni risposta cita l'articolo sorgente — nessuna allucinazione accettata.",
-    fine: "€15M",
-    stats: [
-      { val: "< 3s", label: "risposta con articolo citato e chunk verificabile" },
-      { val: "8", label: "fonti normative indicizzate (AI Act, ISO, EDPB…)" },
-      { val: "100%", label: "risposte con fonte — mai senza riferimento normativo" },
-    ],
-    checklist: [
-      "RAG su EU AI Act 2024/1689",
-      "ISO 22989 + EDPB Guidelines",
-      "Chunk sorgente sempre visibile",
-      "Badge articolo per ogni risposta",
-      "Aggiornato ai Recitals",
-      "Nessuna registrazione per provarlo",
-    ],
-    articles: ["EU AI Act", "ISO 22989", "EDPB GL", "Cons. 47"],
-    ctaLabel: "Prova il Legal Assistant",
-    ctaHref: "/register",
-  },
-  "mod-risk": {
-    headline: "FRIA e DPIA in 40 ore o in 40 minuti. Scegli.",
-    sub: "Il Risk Manager pre-compila il 70% delle sezioni dai dati già inseriti nel Triage. Tu validi, non riscrivi da zero. Export SHA-256 pronto per l'autorità di controllo.",
-    fine: "€20M",
-    stats: [
-      { val: "3-in-1", label: "FRIA + DPIA + Risk Register in un solo workspace" },
-      { val: "70%", label: "sezioni pre-compilate automaticamente dall'AI" },
-      { val: "SHA-256", label: "hash sull'export — immodificabile per audit" },
-    ],
-    checklist: [
-      "Risk Register con matrice P × S",
-      "FRIA integrata (Art. 27)",
-      "DPIA conforme GDPR + AI Act",
-      "Pre-fill dai dati Triage",
-      "Export firmato digitalmente",
-      "Correlazione rischi WP29 ↔ CFR",
-    ],
-    articles: ["Art. 9", "Art. 27", "Art. 35", "WP29"],
-    ctaLabel: "Avvia il Risk Manager",
-    ctaHref: "/register",
-  },
-  "mod-eudb": {
-    headline: "Agosto 2026: scadenza EUDB. Sei pronto?",
-    sub: "La registrazione nel database EU è obbligatoria per tutti i provider di sistemi ad alto rischio. I campi dell'Annex VIII sono già compilati dal tuo Triage.",
-    fine: "3%",
-    stats: [
-      { val: "Aug '26", label: "deadline obbligatoria EUDB per sistemi alto rischio" },
-      { val: "Annex VIII", label: "campi pre-mappati — zero copia-incolla" },
-      { val: "0", label: "errori di compilazione con i dati sincronizzati dal Triage" },
-    ],
-    checklist: [
-      "Mappatura Annex VIII automatica",
-      "Criteri eleggibilità pre-verificati",
-      "Sync dati dal Triage (zero reinserimento)",
-      "Testo consolidato sempre aggiornato",
-      "Validazione pre-invio integrata",
-      "Deadline tracker con alert",
-    ],
-    articles: ["Art. 49", "Annex VIII", "Art. 6", "Rec. 85"],
-    ctaLabel: "Registra il tuo sistema",
-    ctaHref: "/register",
-  },
-  "mod-trust": {
-    headline: "I tuoi clienti chiedono prove di conformità. Dàgliele.",
-    sub: "Una pagina pubblica verificabile con classificazione del rischio, articoli coperti e pacchetto compliance scaricabile. Online in meno di 5 minuti.",
-    stats: [
-      { val: "< 5 min", label: "da zero a pagina pubblica verificabile live" },
-      { val: "1 URL", label: "condivisibile con clienti, partner e auditor" },
-      { val: "Badge", label: "embeddabile su sito, app e documentazione tecnica" },
-    ],
-    checklist: [
-      "Pagina pubblica con URL permanente",
-      "Classificazione rischio verificabile",
-      "Pacchetto conformità scaricabile",
-      "Badge embeddabile (Art. 13)",
-      "Controllo pre-pubblicazione obbligatorio",
-      "Audit trail completo",
-    ],
-    articles: ["Art. 13", "Art. 50", "Art. 27", "Rec. 66"],
-    ctaLabel: "Crea il tuo Trust Center",
-    ctaHref: "/register",
-  },
-};
+function buildConversion(t: (k: string) => string): Record<string, ConversionData> {
+  return {
+    "mod-triage": {
+      headline: t("convTriageHeadline"),
+      sub: t("convTriageSub"),
+      fine: "€30M",
+      stats: zipStats(t("convTriageStatVals"), t("convTriageStatLabels")),
+      checklist: splitPipe(t("convTriageChecks")),
+      articles: ["Art. 5", "Art. 6", "Art. 51", "Annex III"],
+      ctaLabel: t("convTriageCta"),
+      ctaHref: "/register",
+    },
+    "mod-legal": {
+      headline: t("convLegalHeadline"),
+      sub: t("convLegalSub"),
+      fine: "€15M",
+      stats: zipStats(t("convLegalStatVals"), t("convLegalStatLabels")),
+      checklist: splitPipe(t("convLegalChecks")),
+      articles: ["EU AI Act", "ISO 22989", "EDPB GL", "Cons. 47"],
+      ctaLabel: t("convLegalCta"),
+      ctaHref: "/register",
+    },
+    "mod-risk": {
+      headline: t("convRiskHeadline"),
+      sub: t("convRiskSub"),
+      fine: "€20M",
+      stats: zipStats(t("convRiskStatVals"), t("convRiskStatLabels")),
+      checklist: splitPipe(t("convRiskChecks")),
+      articles: ["Art. 9", "Art. 27", "Art. 35", "WP29"],
+      ctaLabel: t("convRiskCta"),
+      ctaHref: "/register",
+    },
+    "mod-eudb": {
+      headline: t("convEudbHeadline"),
+      sub: t("convEudbSub"),
+      fine: "3%",
+      stats: zipStats(t("convEudbStatVals"), t("convEudbStatLabels")),
+      checklist: splitPipe(t("convEudbChecks")),
+      articles: ["Art. 49", "Annex VIII", "Art. 6", "Rec. 85"],
+      ctaLabel: t("convEudbCta"),
+      ctaHref: "/register",
+    },
+    "mod-trust": {
+      headline: t("convTrustHeadline"),
+      sub: t("convTrustSub"),
+      stats: zipStats(t("convTrustStatVals"), t("convTrustStatLabels")),
+      checklist: splitPipe(t("convTrustChecks")),
+      articles: ["Art. 13", "Art. 50", "Art. 27", "Rec. 66"],
+      ctaLabel: t("convTrustCta"),
+      ctaHref: "/register",
+    },
+  };
+}
 
 // ─── Scanner banner ───────────────────────────────────────────────────────────
 function ScannerBanner() {
+  const t = useT("products");
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -576,10 +534,10 @@ function ScannerBanner() {
               fontWeight: 400, letterSpacing: "-1px", color: "#ffffff",
               marginBottom: 12, lineHeight: 1.15,
             }}>
-              Analisi automatica del codice.<br />Zero configurazione.
+              {t("scannerTitle1")}<br />{t("scannerTitle2")}
             </h2>
             <p style={{ fontSize: 14, color: "rgba(255,255,255,0.42)", lineHeight: 1.65, maxWidth: 440 }}>
-              AST analysis in tempo reale: ogni componente AI mappato agli articoli dell&apos;AI Act. Scansione pubblica, nessuna registrazione.
+              {t("scannerDesc")}
             </p>
           </div>
           <Link href="/scanner" style={{
@@ -593,7 +551,7 @@ function ScannerBanner() {
             onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
             onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
           >
-            Prova lo Scanner →
+            {t("scannerCta")}
           </Link>
         </motion.div>
       </div>
@@ -603,10 +561,11 @@ function ScannerBanner() {
 
 // ─── Coming soon ──────────────────────────────────────────────────────────────
 function ComingSoon() {
+  const t = useT("products");
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
   const ITEMS = [
-    { label: "Qualità Dati", art: "Art. 10" },
+    { label: t("csDataQuality"), art: "Art. 10" },
     { label: "LogVault",     art: "Art. 12" },
     { label: "Post-Market",  art: "Art. 72–73" },
     { label: "Deployer Dashboard", art: "Art. 26" },
@@ -622,7 +581,7 @@ function ComingSoon() {
         >
           <p style={{ fontFamily: MONO, fontSize: 10, fontWeight: 500, letterSpacing: "1.5px",
             textTransform: "uppercase", color: "rgba(0,0,0,0.25)", marginBottom: 24 }}>
-            In arrivo
+            {t("comingSoon")}
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 32 }}>
             {ITEMS.map((item, i) => (
@@ -650,7 +609,7 @@ function ComingSoon() {
             borderBottom: "1px solid rgba(0,0,0,0.25)",
             paddingBottom: 2,
           }}>
-            Vedi i piani →
+            {t("seePlans")}
           </Link>
         </motion.div>
       </div>
@@ -659,63 +618,68 @@ function ComingSoon() {
 }
 
 // ─── Modules data ─────────────────────────────────────────────────────────────
-const MODULES: ModuleProps[] = [
-  {
-    id: "mod-triage",
-    num: "01",
-    badge: "Triage · Art. 5 · 6 · 51",
-    title: "Capisci quali obblighi ti riguardano.",
-    desc: "Quattro aree tematiche, poche domande guidate, e RegulaeOS classifica il tuo sistema — rischio inaccettabile, alto, limitato o minimo — mappandolo agli articoli e agli allegati che contano.",
-    capabilities: ["Classificazione 4 livelli", "Mapping Art. 6 + Annex III", "Export PDF", "Storico sessioni"],
-    videoSrc: "/videos/triage.mp4",
-    reverse: false,
-  },
-  {
-    id: "mod-legal",
-    num: "02",
-    badge: "Legal Assistant · 2024/1689",
-    title: "Risposte con le fonti, non opinioni.",
-    desc: "Fai una domanda sull'AI Act, su ISO 22989 o sulle Guidelines: il Legal Assistant cita il testo esatto, articolo per articolo, con il chunk sorgente sempre verificabile a fianco.",
-    capabilities: ["RAG su EU AI Act", "ISO 22989 + Guidelines", "Chunk sorgente verificabile", "Badge articolo per risposta"],
-    videoSrc: "/videos/legal.mp4",
-    videoScale: 1.0,
-    videoPosition: "center center",
-    reverse: true,
-  },
-  {
-    id: "mod-risk",
-    num: "03",
-    badge: "Risk Manager · Art. 9 · 27 · 35",
-    title: "Valutazioni d'impatto che si scrivono da sole.",
-    desc: "Risk Register, FRIA e DPIA prendono forma dai dati già raccolti negli altri moduli. RegulaeOS pre-compila le sezioni e tu validi.",
-    capabilities: ["Risk Register", "FRIA + DPIA integrate", "Pre-compilazione automatica", "Export firmato"],
-    videoSrc: "/videos/fria.mp4",
-    reverse: false,
-  },
-  {
-    id: "mod-eudb",
-    num: "04",
-    badge: "Registrazione EUDB · Art. 49",
-    title: "Pronto per il database UE, senza copia-incolla.",
-    desc: "Mappatura dei campi Annex VIII e criteri di eleggibilità pre-compilati dal Triage, da verificare contro il testo consolidato del Regolamento.",
-    capabilities: ["Annex VIII mapping", "Criteri eleggibilità", "Pre-fill da Triage", "Testo consolidato"],
-    videoSrc: "/videos/eudb.mp4",
-    reverse: true,
-  },
-  {
-    id: "mod-trust",
-    num: "05",
-    badge: "Trust Center · Art. 13 · 50",
-    title: "Dimostra la conformità in pubblico.",
-    desc: "Pubblica una pagina di trasparenza verificabile: classificazione del rischio, finalità d'uso e pacchetto di conformità esportabile, confermati prima di andare online.",
-    capabilities: ["Pagina pubblica verificabile", "Classificazione rischio", "Export pacchetto conformità", "Controllo pre-pubblicazione"],
-    videoSrc: "/videos/trust.mp4",
-    reverse: false,
-  },
-];
+function buildModules(t: (k: string) => string): ModuleProps[] {
+  return [
+    {
+      id: "mod-triage",
+      num: "01",
+      badge: t("m1Badge"),
+      title: t("m1Title"),
+      desc: t("m1Desc"),
+      capabilities: splitPipe(t("m1Caps")),
+      videoSrc: "/videos/triage.mp4",
+      reverse: false,
+    },
+    {
+      id: "mod-legal",
+      num: "02",
+      badge: t("m2Badge"),
+      title: t("m2Title"),
+      desc: t("m2Desc"),
+      capabilities: splitPipe(t("m2Caps")),
+      videoSrc: "/videos/legal.mp4",
+      videoScale: 1.0,
+      videoPosition: "center center",
+      reverse: true,
+    },
+    {
+      id: "mod-risk",
+      num: "03",
+      badge: t("m3Badge"),
+      title: t("m3Title"),
+      desc: t("m3Desc"),
+      capabilities: splitPipe(t("m3Caps")),
+      videoSrc: "/videos/fria.mp4",
+      reverse: false,
+    },
+    {
+      id: "mod-eudb",
+      num: "04",
+      badge: t("m4Badge"),
+      title: t("m4Title"),
+      desc: t("m4Desc"),
+      capabilities: splitPipe(t("m4Caps")),
+      videoSrc: "/videos/eudb.mp4",
+      reverse: true,
+    },
+    {
+      id: "mod-trust",
+      num: "05",
+      badge: t("m5Badge"),
+      title: t("m5Title"),
+      desc: t("m5Desc"),
+      capabilities: splitPipe(t("m5Caps")),
+      videoSrc: "/videos/trust.mp4",
+      reverse: false,
+    },
+  ];
+}
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
 export default function ProductsPage() {
+  const t = useT("products");
+  const MODULES = buildModules(t);
+  const CONVERSION = buildConversion(t);
   return (
     <div style={{ background: "#ffffff", minHeight: "100vh" }}>
       <style>{`
@@ -742,7 +706,7 @@ export default function ProductsPage() {
             letterSpacing: "1.5px", textTransform: "uppercase",
             color: "rgba(0,0,0,0.25)", marginBottom: 20,
           }}>
-            Il prodotto
+            {t("heroKicker")}
           </p>
           <h1 style={{
             fontFamily: SERIF,
@@ -751,14 +715,14 @@ export default function ProductsPage() {
             lineHeight: 1.02, color: "#0D1016",
             marginBottom: 24, maxWidth: 700,
           }}>
-            Ogni obbligo EU AI Act.<br />Uno strumento.
+            {t("heroTitle1")}<br />{t("heroTitle2")}
           </h1>
           <p style={{
             fontSize: 16, fontWeight: 300,
             color: "rgba(0,0,0,0.45)", lineHeight: 1.78,
             maxWidth: 480,
           }}>
-            Sei moduli integrati che coprono l&apos;intero ciclo di vita della conformità — dalla classificazione del rischio alla pagina di trasparenza pubblica.
+            {t("heroSub")}
           </p>
         </motion.div>
       </section>
@@ -791,10 +755,10 @@ export default function ProductsPage() {
           fontWeight: 400, letterSpacing: "-1.2px",
           color: "#0D1016", marginBottom: 12,
         }}>
-          Pronto a iniziare?
+          {t("readyTitle")}
         </p>
         <p style={{ fontSize: 15, color: "rgba(0,0,0,0.40)", marginBottom: 28 }}>
-          Nessuna carta di credito. Setup in 5 minuti.
+          {t("readySub")}
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           <Link href="/register" style={{
@@ -803,7 +767,7 @@ export default function ProductsPage() {
             borderRadius: 8, padding: "13px 32px",
             textDecoration: "none",
           }}>
-            Inizia gratis →
+            {t("startFree")}
           </Link>
           <Link href="/pricing" style={{
             display: "inline-block", fontFamily: MONO, fontSize: 12, fontWeight: 500,
@@ -812,7 +776,7 @@ export default function ProductsPage() {
             borderRadius: 8, padding: "13px 28px",
             textDecoration: "none",
           }}>
-            Vedi i piani
+            {t("seePlansPlain")}
           </Link>
         </div>
       </section>
