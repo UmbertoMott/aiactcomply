@@ -921,6 +921,7 @@ export default function RiskManagerPage() {
   };
 
   const resetChat = () => {
+    if (typeof window !== "undefined" && !window.confirm(t("resetConfirm"))) return;
     localStorage.removeItem(CHAT_STORAGE_KEY);
     setMessages([{
       role: "assistant",
