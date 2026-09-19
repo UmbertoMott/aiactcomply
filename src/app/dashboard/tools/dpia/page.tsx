@@ -13,7 +13,7 @@ import type { IntakeContext } from "@/app/actions/parseIntakeContext";
 import {
   Search, Database, Scale, AlertTriangle, Shield, CheckCircle2,
   ChevronLeft, ChevronRight, Plus, Trash2, Download, FileText,
-  AlertCircle, Info, Check, X,
+  AlertCircle, Info, Check, X, RotateCcw,
 } from "lucide-react";
 import {
   writeToStorage, readFromStorage,
@@ -424,6 +424,30 @@ export default function DPIAPage() {
       autosave(next);
       return next;
     });
+  }
+
+  // Reset completo del tool: azzera il documento e tutti gli stati, e persiste lo
+  // stato vuoto (autosave/DB inclusi). Richiede conferma perché è irreversibile.
+  function handleReset() {
+    if (typeof window !== "undefined" && !window.confirm(tr("resetConfirm"))) return;
+    const empty = createEmptyDPIA();
+    setDoc(empty);
+    setStep(0);
+    setSaved(false);
+    setIntake({
+      systemName: "", systemScope: "other", processingPurpose: "",
+      dataCategories: [], subjectScale: "large_scale_unknown",
+      automatedDecisions: "no", highRiskAIAct: "unknown",
+      crossBorderTransfer: false, vulnerableSubjects: false, dpiaJustification: "",
+    });
+    setAiPrefillDone(false);
+    setAiPrefillError(null);
+    setPriorConsultAIResult(null);
+    setPriorConsultAIError(null);
+    setGapCheckResult(null);
+    setStalenessDismissed(false);
+    setSavedHash(null);
+    writeToStorage("dpia", empty);
   }
 
   // ── Screening helpers ──────────────────────────────────────────────────────
@@ -1730,6 +1754,20 @@ export default function DPIAPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+          {/* Reset button */}
+          <button
+            onClick={handleReset}
+            title={tr("resetBtn")}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8,
+              border: `1px solid ${T.redBdr}`, background: T.redBg,
+              color: T.red, cursor: "pointer",
+            }}
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            <span>{tr("resetBtn")}</span>
+          </button>
           {/* Template viewer button */}
           {(() => {
             const progress = computeDpiaProgress(doc, tr);

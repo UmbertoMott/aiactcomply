@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
   ChevronDown, ChevronRight, Plus, Trash2, CheckCircle,
-  AlertTriangle, Shield, Users, Activity, FileText, Download,
+  AlertTriangle, Shield, Users, Activity, FileText, Download, RotateCcw,
 } from "lucide-react";
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import { useT } from "@/i18n/LocaleProvider";
@@ -265,6 +265,23 @@ export default function FRIAPage() {
     doc,
     (d) => patchFRIA(() => d)
   );
+
+  // Reset completo: azzera la FRIA (store condiviso + stato UI). Irreversibile.
+  function handleReset() {
+    if (typeof window !== "undefined" && !window.confirm(t("resetConfirm"))) return;
+    const empty = createEmptyFRIA();
+    patchFRIA(() => empty);
+    setDoc(empty);
+    syncFriaToShared(empty);
+    setPhase("1");
+    setGapCheckResult(null);
+    setActiveScenarioId(null);
+    setDraftGenerated(false);
+    setDraftError(null);
+    setAiSummaryIsFromAI(false);
+    setStalenessWarning(false);
+    writeToStorage("friaStaleness", { hash: "", savedAt: "" });
+  }
 
   // ── AI draft generator ────────────────────────────────────────────────────
   const [loadingDraft, setLoadingDraft] = useState(false);
@@ -1529,6 +1546,23 @@ export default function FRIAPage() {
       <SystemSelector checkProhibited={true} />
       <AssessmentStepper currentTool="fria" />
       <AssessmentSharedHeader />
+
+      {/* ── Reset ────────────────────────────────────────────────────────────── */}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
+        <button
+          onClick={handleReset}
+          title={t("resetBtn")}
+          style={{
+            display: "flex", alignItems: "center", gap: 6,
+            fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8,
+            border: `1px solid ${T.redBdr}`, background: T.redBg,
+            color: T.red, cursor: "pointer",
+          }}
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          <span>{t("resetBtn")}</span>
+        </button>
+      </div>
 
       {/* ── Mode selector ────────────────────────────────────────────────────── */}
       <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
