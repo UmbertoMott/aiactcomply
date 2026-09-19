@@ -142,7 +142,7 @@ export default function CookieBanner() {
   return (
     <div
       role="dialog"
-      aria-modal="true"
+      aria-modal="false"
       aria-label={t("dialogLabel")}
       style={{
         position: "fixed",
@@ -154,7 +154,9 @@ export default function CookieBanner() {
         padding: "0 16px 24px",
         background: "rgba(0,0,0,0.45)",
         backdropFilter: "blur(4px)",
-        pointerEvents: "all",
+        // Il velo scuro NON intercetta i click: così resta interattivo ciò che sta
+        // sotto (es. il selettore lingua nella nav). Solo il riquadro cattura i click.
+        pointerEvents: "none",
       }}
     >
       <div
@@ -167,6 +169,7 @@ export default function CookieBanner() {
           width: "100%",
           padding: "28px 28px 24px",
           outline: "none",
+          pointerEvents: "auto",
         }}
         tabIndex={-1}
       >
