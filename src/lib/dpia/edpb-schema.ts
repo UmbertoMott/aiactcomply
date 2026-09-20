@@ -124,6 +124,7 @@ export interface DpiaEdpbDoc {
   codesOfConduct: string;              // 1.4 codici di condotta approvati
 
   // ── 2. ANALISI DEL TRATTAMENTO ───────────────────────────────────────────
+  legalBasisAnalysis: string;          // 2.1.1 analisi della base giuridica per ciascuna finalità
   liftProhibition: string;             // 2.1.2 motivi per revocare il divieto (categorie particolari)
   minimisationRetention: string;       // 2.2.1 minimizzazione, destinatari, periodi di conservazione
   dataQuality: string;                 // 2.2.2 qualità dei dati
@@ -215,6 +216,7 @@ export function createEmptyDpiaEdpb(): DpiaEdpbDoc {
     assets: [],
     architecture: "",
     codesOfConduct: "",
+    legalBasisAnalysis: "",
     liftProhibition: "",
     minimisationRetention: "",
     dataQuality: "",

@@ -5,8 +5,9 @@ import { Plus, Trash2, ChevronLeft, ChevronRight, RotateCcw, Check } from "lucid
 import { useT } from "@/i18n/LocaleProvider";
 import { readFromStorage, writeToStorage } from "@/lib/dossier/storage-schema";
 import {
-  createEmptyDpiaEdpb, emptyParty, emptyPurpose, emptyAsset, emptyTeamMember,
+  createEmptyDpiaEdpb, emptyParty, emptyPurpose, emptyAsset, emptyTeamMember, emptyMeasure,
   EDPB_SECTIONS, type DpiaEdpbDoc, type EdpbParty, type EdpbPurpose, type EdpbAsset, type EdpbTeamMember,
+  type EdpbMeasure, type MeasureStatus,
 } from "@/lib/dpia/edpb-schema";
 
 const T = {
@@ -126,7 +127,9 @@ export default function DpiaEdpbForm() {
       {/* Sections */}
       {section === 0 && <Section0 doc={doc} set={set} t={t} />}
       {section === 1 && <Section1 doc={doc} set={set} t={t} />}
-      {section >= 2 && (
+      {section === 2 && <Section2 doc={doc} set={set} t={t} />}
+      {section === 3 && <Section3 doc={doc} set={set} t={t} />}
+      {section >= 4 && (
         <SectionCard title={`${section}. ${t(`sec${section}Tab`)}`}>
           <div style={{ padding: "22px 0", textAlign: "center", color: T.muted }}>
             <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{t("comingTitle")}</p>
@@ -321,6 +324,82 @@ function Section1({ doc, set, t }: { doc: DpiaEdpbDoc; set: SetFn; t: TFn }) {
 
       <SectionCard title={`1.4 · ${t("codesTitle")}`}>
         <Txt label={t("codesOfConduct")} hint={t("codesHint")} value={doc.codesOfConduct} onChange={(v) => set("codesOfConduct", v)} rows={2} />
+      </SectionCard>
+    </>
+  );
+}
+
+// Lista ripetibile di misure con stato di implementazione (2.3)
+function MeasureList({ items, onChange, t, addLabel }: { items: EdpbMeasure[]; onChange: (items: EdpbMeasure[]) => void; t: TFn; addLabel: string }) {
+  const statuses: MeasureStatus[] = ["planned", "partial", "implemented"];
+  return (
+    <div>
+      {items.map((m, i) => (
+        <div key={m.id} style={{ border: `1px solid ${T.border}`, borderRadius: 10, padding: 12, marginBottom: 10 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: T.muted }}>#{i + 1}</span>
+            <button onClick={() => onChange(items.filter((x) => x.id !== m.id))} style={{ padding: "5px 7px", borderRadius: 7, border: `1px solid ${T.redBdr}`, background: T.redBg, color: T.red, cursor: "pointer" }}><Trash2 className="h-3.5 w-3.5" /></button>
+          </div>
+          <textarea placeholder={t("measureDescription")} value={m.description} onChange={(e) => onChange(items.map((x) => x.id === m.id ? { ...x, description: e.target.value } : x))} rows={2} style={{ ...inputSt, resize: "vertical", marginBottom: 8 }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 11, color: T.muted }}>{t("measureStatus")}</span>
+            <select value={m.status} onChange={(e) => onChange(items.map((x) => x.id === m.id ? { ...x, status: e.target.value as MeasureStatus } : x))} style={{ ...inputSt, width: "auto", padding: "6px 10px" }}>
+              {statuses.map((s) => <option key={s} value={s}>{t(`status_${s}`)}</option>)}
+            </select>
+          </div>
+        </div>
+      ))}
+      <button onClick={() => onChange([...items, emptyMeasure()])} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.accent, cursor: "pointer" }}><Plus className="h-4 w-4" />{addLabel}</button>
+    </div>
+  );
+}
+
+function Section2({ doc, set, t }: { doc: DpiaEdpbDoc; set: SetFn; t: TFn }) {
+  return (
+    <>
+      <SectionCard title={`2.1.1 · ${t("legalBasisTitle")}`} subtitle={t("legalBasisHint")}>
+        <Txt label={t("legalBasisAnalysis")} value={doc.legalBasisAnalysis} onChange={(v) => set("legalBasisAnalysis", v)} rows={3} />
+      </SectionCard>
+
+      <SectionCard title={`2.1.2 · ${t("liftProhibitionTitle")}`}>
+        <Txt label={t("liftProhibition")} hint={t("liftProhibitionHint")} value={doc.liftProhibition} onChange={(v) => set("liftProhibition", v)} rows={2} />
+      </SectionCard>
+
+      <SectionCard title={`2.2 · ${t("minimisationTitle")}`} subtitle={t("minimisationHint")}>
+        <Txt label={t("minimisationRetention")} hint={t("minimisationRetentionHint")} value={doc.minimisationRetention} onChange={(v) => set("minimisationRetention", v)} rows={3} />
+        <Txt label={t("dataQuality")} hint={t("dataQualityHint")} value={doc.dataQuality} onChange={(v) => set("dataQuality", v)} rows={2} />
+      </SectionCard>
+
+      <SectionCard title={`2.3.1 · ${t("mArt5Title")}`} subtitle={t("mArt5Hint")}>
+        <MeasureList items={doc.measuresArt5} onChange={(v) => set("measuresArt5", v)} t={t} addLabel={t("addMeasure")} />
+      </SectionCard>
+      <SectionCard title={`2.3.2 · ${t("mRightsTitle")}`} subtitle={t("mRightsHint")}>
+        <MeasureList items={doc.measuresRights} onChange={(v) => set("measuresRights", v)} t={t} addLabel={t("addMeasure")} />
+      </SectionCard>
+      <SectionCard title={`2.3.3 · ${t("mOtherTitle")}`} subtitle={t("mOtherHint")}>
+        <MeasureList items={doc.measuresOther} onChange={(v) => set("measuresOther", v)} t={t} addLabel={t("addMeasure")} />
+      </SectionCard>
+      <SectionCard title={`2.3.4 · ${t("mDpbddTitle")}`} subtitle={t("mDpbddHint")}>
+        <MeasureList items={doc.measuresDpbdd} onChange={(v) => set("measuresDpbdd", v)} t={t} addLabel={t("addMeasure")} />
+      </SectionCard>
+      <SectionCard title={`2.3.5 · ${t("mSecurityTitle")}`} subtitle={t("mSecurityHint")}>
+        <MeasureList items={doc.measuresSecurity} onChange={(v) => set("measuresSecurity", v)} t={t} addLabel={t("addMeasure")} />
+      </SectionCard>
+    </>
+  );
+}
+
+function Section3({ doc, set, t }: { doc: DpiaEdpbDoc; set: SetFn; t: TFn }) {
+  return (
+    <>
+      <SectionCard title={`3.1 · ${t("impactsTitle")}`} subtitle={t("impactsHint")}>
+        <Txt label={t("impactsRightsFreedoms")} value={doc.impactsRightsFreedoms} onChange={(v) => set("impactsRightsFreedoms", v)} rows={4} />
+      </SectionCard>
+      <SectionCard title={`3.2 · ${t("necessityTitle")}`}>
+        <Txt label={t("necessity")} hint={t("necessityHint")} value={doc.necessity} onChange={(v) => set("necessity", v)} rows={3} />
+      </SectionCard>
+      <SectionCard title={`3.3 · ${t("proportionalityTitle")}`}>
+        <Txt label={t("proportionality")} hint={t("proportionalityHint")} value={doc.proportionality} onChange={(v) => set("proportionality", v)} rows={3} />
       </SectionCard>
     </>
   );
