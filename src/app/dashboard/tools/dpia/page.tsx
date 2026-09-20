@@ -6,6 +6,7 @@ import { useT } from "@/i18n/LocaleProvider";
 import { DPIATemplateViewer } from "@/components/dpia/DPIATemplateViewer";
 import { computeDpiaProgress } from "@/lib/dpia/dpia-progress";
 import { DpiaGuidedMode } from "@/components/dpia/DpiaGuidedMode";
+import DpiaEdpbForm from "@/components/dpia/DpiaEdpbForm";
 import { draftDpiaSections } from "@/app/actions/draftDpiaSections";
 import { buildComplianceContextFromStorage } from "@/hooks/useComplianceContext";
 import { checkPriorConsultation, type PriorConsultationResult } from "@/app/actions/checkPriorConsultation";
@@ -360,6 +361,8 @@ export default function DPIAPage() {
   const [showTemplateViewer, setShowTemplateViewer] = useState(false);
   // Modalità guidata vs form a 6 step
   const [guidedMode, setGuidedMode] = useState(false);
+  // Nuovo template EDPB 2026 (ricostruzione a tappe)
+  const [edpbMode, setEdpbMode] = useState(false);
   // Rail: sezioni espanse
   const [railExpanded, setRailExpanded] = useState<Set<number>>(new Set([0, 1, 2, 3, 4, 5]));
 
@@ -1690,6 +1693,25 @@ export default function DPIAPage() {
   const ghostDataAudit  = readFromStorage<DataAuditResult>("dataAudit");
 
   // ── Guided mode: layout dedicato (3 colonne, full-height) ─────────────────
+  if (edpbMode) {
+    return (
+      <div style={{ minHeight: "100vh", background: T.bg, padding: "24px 32px" }}>
+        <SystemSelector checkProhibited={true} />
+        <AssessmentStepper currentTool="dpia" />
+        <AssessmentSharedHeader />
+        <div style={{ marginBottom: 14 }}>
+          <button
+            onClick={() => setEdpbMode(false)}
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.10)", background: "#fff", color: T.text, cursor: "pointer" }}
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />{tr("edpbBackToClassic")}
+          </button>
+        </div>
+        <DpiaEdpbForm />
+      </div>
+    );
+  }
+
   if (guidedMode) {
     return (
       <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: T.bg }}>
@@ -1767,6 +1789,20 @@ export default function DPIAPage() {
           >
             <RotateCcw className="h-3.5 w-3.5" />
             <span>{tr("resetBtn")}</span>
+          </button>
+          {/* Nuovo template EDPB 2026 */}
+          <button
+            onClick={() => setEdpbMode(true)}
+            title={tr("edpbEnter")}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8,
+              border: "1px solid rgba(35,64,58,0.25)", background: "rgba(35,64,58,0.06)",
+              color: "#23403a", cursor: "pointer",
+            }}
+          >
+            <FileText className="h-3.5 w-3.5" />
+            <span>{tr("edpbEnter")}</span>
           </button>
           {/* Template viewer button */}
           {(() => {
