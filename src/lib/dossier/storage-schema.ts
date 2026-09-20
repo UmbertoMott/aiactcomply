@@ -409,6 +409,7 @@ export const STORAGE_KEYS = {
   qms:         "aicomply_qms_result",
   fria:        "aicomply_fria_result",
   dpia:        "aicomply_dpia_result",
+  dpiaEdpb:    "aicomply_dpia_edpb_result",
   l132:        "aicomply_l132_result",
   gpai:        "aicomply_gpai_result",
   conformity:  "aicomply_conformity_assessment",
