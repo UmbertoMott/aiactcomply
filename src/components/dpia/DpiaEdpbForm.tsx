@@ -6,8 +6,9 @@ import { useT } from "@/i18n/LocaleProvider";
 import { readFromStorage, writeToStorage } from "@/lib/dossier/storage-schema";
 import {
   createEmptyDpiaEdpb, emptyParty, emptyPurpose, emptyAsset, emptyTeamMember, emptyMeasure,
+  emptyRisk, emptyMitigation,
   EDPB_SECTIONS, type DpiaEdpbDoc, type EdpbParty, type EdpbPurpose, type EdpbAsset, type EdpbTeamMember,
-  type EdpbMeasure, type MeasureStatus,
+  type EdpbMeasure, type MeasureStatus, type EdpbRisk, type EdpbMitigation, type RiskLevel, type DpiaDecision,
 } from "@/lib/dpia/edpb-schema";
 
 const T = {
@@ -129,14 +130,9 @@ export default function DpiaEdpbForm() {
       {section === 1 && <Section1 doc={doc} set={set} t={t} />}
       {section === 2 && <Section2 doc={doc} set={set} t={t} />}
       {section === 3 && <Section3 doc={doc} set={set} t={t} />}
-      {section >= 4 && (
-        <SectionCard title={`${section}. ${t(`sec${section}Tab`)}`}>
-          <div style={{ padding: "22px 0", textAlign: "center", color: T.muted }}>
-            <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{t("comingTitle")}</p>
-            <p style={{ fontSize: 12 }}>{t("comingBody")}</p>
-          </div>
-        </SectionCard>
-      )}
+      {section === 4 && <Section4 doc={doc} set={set} t={t} />}
+      {section === 5 && <Section5 doc={doc} set={set} t={t} />}
+      {section === 6 && <Section6 doc={doc} set={set} t={t} />}
 
       {/* Nav footer */}
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
@@ -402,5 +398,140 @@ function Section3({ doc, set, t }: { doc: DpiaEdpbDoc; set: SetFn; t: TFn }) {
         <Txt label={t("proportionality")} hint={t("proportionalityHint")} value={doc.proportionality} onChange={(v) => set("proportionality", v)} rows={3} />
       </SectionCard>
     </>
+  );
+}
+
+function LevelSelect({ label, value, onChange, t }: { label: string; value: RiskLevel; onChange: (v: RiskLevel) => void; t: TFn }) {
+  const levels: RiskLevel[] = ["low", "medium", "high"];
+  return (
+    <Field label={label}>
+      <select value={value} onChange={(e) => onChange(e.target.value as RiskLevel)} style={inputSt}>
+        {levels.map((l) => <option key={l} value={l}>{t(`level_${l}`)}</option>)}
+      </select>
+    </Field>
+  );
+}
+
+// 4.1.3 — Lista dei rischi inerenti
+function RiskList({ items, onChange, t }: { items: EdpbRisk[]; onChange: (items: EdpbRisk[]) => void; t: TFn }) {
+  const patch = (id: string, p: Partial<EdpbRisk>) => onChange(items.map((x) => x.id === id ? { ...x, ...p } : x));
+  return (
+    <div>
+      {items.map((r, i) => (
+        <div key={r.id} style={{ border: `1px solid ${T.border}`, borderRadius: 10, padding: 14, marginBottom: 12 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: T.muted }}>{t("riskLabel")} #{i + 1}</span>
+            <button onClick={() => onChange(items.filter((x) => x.id !== r.id))} style={{ padding: "5px 7px", borderRadius: 7, border: `1px solid ${T.redBdr}`, background: T.redBg, color: T.red, cursor: "pointer" }}><Trash2 className="h-3.5 w-3.5" /></button>
+          </div>
+          <Txt label={t("riskScenario")} hint={t("riskScenarioHint")} value={r.scenario} onChange={(v) => patch(r.id, { scenario: v })} rows={2} />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <Txt label={t("riskThreat")} value={r.threat} onChange={(v) => patch(r.id, { threat: v })} rows={2} />
+            <Txt label={t("riskSource")} hint={t("riskSourceHint")} value={r.riskSource} onChange={(v) => patch(r.id, { riskSource: v })} rows={2} />
+          </div>
+          <Txt label={t("riskImpact")} hint={t("riskImpactHint")} value={r.impact} onChange={(v) => patch(r.id, { impact: v })} rows={2} />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <LevelSelect label={t("riskLikelihood")} value={r.likelihood} onChange={(v) => patch(r.id, { likelihood: v })} t={t} />
+            <LevelSelect label={t("riskSeverity")} value={r.severity} onChange={(v) => patch(r.id, { severity: v })} t={t} />
+          </div>
+          <Txt label={t("riskModulating")} hint={t("riskModulatingHint")} value={r.modulating} onChange={(v) => patch(r.id, { modulating: v })} rows={2} />
+          <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: T.text, cursor: "pointer" }}>
+            <input type="checkbox" checked={r.acceptable} onChange={(e) => patch(r.id, { acceptable: e.target.checked })} />
+            <span>{t("riskAcceptable")}</span>
+          </label>
+        </div>
+      ))}
+      <button onClick={() => onChange([...items, emptyRisk()])} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.accent, cursor: "pointer" }}><Plus className="h-4 w-4" />{t("addRisk")}</button>
+    </div>
+  );
+}
+
+// 4.2.1 — Misure di mitigazione aggiuntive
+function MitigationList({ items, onChange, t }: { items: EdpbMitigation[]; onChange: (items: EdpbMitigation[]) => void; t: TFn }) {
+  const statuses: MeasureStatus[] = ["planned", "partial", "implemented"];
+  const patch = (id: string, p: Partial<EdpbMitigation>) => onChange(items.map((x) => x.id === id ? { ...x, ...p } : x));
+  return (
+    <div>
+      {items.map((m, i) => (
+        <div key={m.id} style={{ border: `1px solid ${T.border}`, borderRadius: 10, padding: 12, marginBottom: 10 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: T.muted }}>#{i + 1}</span>
+            <button onClick={() => onChange(items.filter((x) => x.id !== m.id))} style={{ padding: "5px 7px", borderRadius: 7, border: `1px solid ${T.redBdr}`, background: T.redBg, color: T.red, cursor: "pointer" }}><Trash2 className="h-3.5 w-3.5" /></button>
+          </div>
+          <textarea placeholder={t("mitDescription")} value={m.description} onChange={(e) => patch(m.id, { description: e.target.value })} rows={2} style={{ ...inputSt, resize: "vertical", marginBottom: 8 }} />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8, alignItems: "center" }}>
+            <input placeholder={t("mitTargets")} value={m.targetsRisk} onChange={(e) => patch(m.id, { targetsRisk: e.target.value })} style={inputSt} />
+            <select value={m.status} onChange={(e) => patch(m.id, { status: e.target.value as MeasureStatus })} style={{ ...inputSt, width: "auto", padding: "6px 10px" }}>
+              {statuses.map((s) => <option key={s} value={s}>{t(`status_${s}`)}</option>)}
+            </select>
+          </div>
+        </div>
+      ))}
+      <button onClick={() => onChange([...items, emptyMitigation()])} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.accent, cursor: "pointer" }}><Plus className="h-4 w-4" />{t("addMitigation")}</button>
+    </div>
+  );
+}
+
+function Section4({ doc, set, t }: { doc: DpiaEdpbDoc; set: SetFn; t: TFn }) {
+  return (
+    <>
+      <SectionCard title={`4.1.1 · ${t("eventImpactsTitle")}`} subtitle={t("eventImpactsHint")}>
+        <Txt label={t("eventImpacts")} value={doc.eventImpacts} onChange={(v) => set("eventImpacts", v)} rows={4} />
+      </SectionCard>
+      <SectionCard title={`4.1.2 · ${t("methodTitle")}`}>
+        <Txt label={t("riskMethod")} hint={t("methodHint")} value={doc.riskMethod} onChange={(v) => set("riskMethod", v)} rows={3} />
+      </SectionCard>
+      <SectionCard title={`4.1.3 · ${t("inherentRiskTitle")}`} subtitle={t("inherentRiskHint")}>
+        <RiskList items={doc.risks} onChange={(v) => set("risks", v)} t={t} />
+      </SectionCard>
+      <SectionCard title={`4.2.1 · ${t("mitigationsTitle")}`} subtitle={t("mitigationsHint")}>
+        <MitigationList items={doc.mitigations} onChange={(v) => set("mitigations", v)} t={t} />
+      </SectionCard>
+      <SectionCard title={`4.2.2 · ${t("residualTitle")}`}>
+        <Txt label={t("residualRisk")} hint={t("residualHint")} value={doc.residualRisk} onChange={(v) => set("residualRisk", v)} rows={3} />
+      </SectionCard>
+      <SectionCard title={`4.2.3 · ${t("planTitle")}`}>
+        <Txt label={t("actionPlan")} hint={t("planHint")} value={doc.actionPlan} onChange={(v) => set("actionPlan", v)} rows={3} />
+      </SectionCard>
+    </>
+  );
+}
+
+function Section5({ doc, set, t }: { doc: DpiaEdpbDoc; set: SetFn; t: TFn }) {
+  return (
+    <>
+      <SectionCard title={`5.1 · ${t("dpoTitle")}`} subtitle={t("dpoHint")}>
+        <Txt label={t("dpoAdvice")} value={doc.dpoAdvice} onChange={(v) => set("dpoAdvice", v)} rows={3} />
+        <Txt label={t("dpoFollowUp")} hint={t("dpoFollowUpHint")} value={doc.dpoFollowUp} onChange={(v) => set("dpoFollowUp", v)} rows={2} />
+      </SectionCard>
+      <SectionCard title={`5.2 · ${t("subjectsTitle")}`} subtitle={t("subjectsHint")}>
+        <Txt label={t("dataSubjectsViews")} value={doc.dataSubjectsViews} onChange={(v) => set("dataSubjectsViews", v)} rows={3} />
+        <Txt label={t("dataSubjectsParticipation")} hint={t("subjectsParticipationHint")} value={doc.dataSubjectsParticipation} onChange={(v) => set("dataSubjectsParticipation", v)} rows={2} />
+      </SectionCard>
+    </>
+  );
+}
+
+function Section6({ doc, set, t }: { doc: DpiaEdpbDoc; set: SetFn; t: TFn }) {
+  const options: { value: DpiaDecision; label: string }[] = [
+    { value: "abandon", label: t("decisionAbandon") },
+    { value: "consult_sa", label: t("decisionConsult") },
+    { value: "proceed", label: t("decisionProceed") },
+    { value: "conditional", label: t("decisionConditional") },
+  ];
+  return (
+    <SectionCard title={`6 · ${t("conclusionTitle")}`} subtitle={t("conclusionHint")}>
+      <Field label={t("decisionLabel")}>
+        {options.map((o) => (
+          <label key={o.value} style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 8, cursor: "pointer", fontSize: 13, color: T.text }}>
+            <input type="radio" name="dpia-decision" checked={doc.decision === o.value} onChange={() => set("decision", o.value)} style={{ marginTop: 3 }} />
+            <span>{o.label}</span>
+          </label>
+        ))}
+      </Field>
+      {doc.decision === "conditional" && (
+        <Txt label={t("decisionConditions")} hint={t("decisionConditionsHint")} value={doc.decisionConditions} onChange={(v) => set("decisionConditions", v)} rows={3} />
+      )}
+      <Txt label={t("decisionJustification")} hint={t("decisionJustificationHint")} value={doc.decisionJustification} onChange={(v) => set("decisionJustification", v)} rows={2} />
+    </SectionCard>
   );
 }
