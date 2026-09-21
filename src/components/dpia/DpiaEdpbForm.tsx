@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Plus, Trash2, ChevronLeft, ChevronRight, RotateCcw, Check } from "lucide-react";
-import { useT } from "@/i18n/LocaleProvider";
+import { Plus, Trash2, ChevronLeft, ChevronRight, RotateCcw, Check, Download } from "lucide-react";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
 import { readFromStorage, writeToStorage } from "@/lib/dossier/storage-schema";
 import {
   createEmptyDpiaEdpb, emptyParty, emptyPurpose, emptyAsset, emptyTeamMember, emptyMeasure,
@@ -64,9 +64,11 @@ function SectionCard({ title, subtitle, children }: { title: string; subtitle?: 
 
 export default function DpiaEdpbForm() {
   const t = useT("dpiaEdpb");
+  const locale = useLocale();
   const [doc, setDoc] = useState<DpiaEdpbDoc>(createEmptyDpiaEdpb);
   const [section, setSection] = useState(0);
   const [saved, setSaved] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -91,6 +93,27 @@ export default function DpiaEdpbForm() {
     setDoc(empty); setSection(0); setSaved(false); writeToStorage("dpiaEdpb", empty);
   }
 
+  async function handleExport() {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      const res = await fetch("/api/dpia-edpb/export-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ doc, locale }),
+      });
+      if (!res.ok) throw new Error("export failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `DPIA_EDPB_${(doc.processingName || "dpia").replace(/[^a-zA-Z0-9-]/g, "_").slice(0, 40)}.pdf`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch { /* silenzioso: l'utente può riprovare */ }
+    finally { setExporting(false); }
+  }
+
   return (
     <div>
       {/* Header */}
@@ -103,6 +126,10 @@ export default function DpiaEdpbForm() {
           <span style={{ fontSize: 11, color: saved ? "#16a34a" : T.muted, display: "flex", alignItems: "center", gap: 4 }}>
             {saved && <Check className="h-3 w-3" />}{saved ? t("saved") : t("saving")}
           </span>
+          <button onClick={handleExport} disabled={exporting} title={t("exportPdf")}
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(35,64,58,0.25)", background: "rgba(35,64,58,0.06)", color: "#23403a", cursor: exporting ? "wait" : "pointer", opacity: exporting ? 0.6 : 1 }}>
+            <Download className="h-3.5 w-3.5" /><span>{exporting ? t("exporting") : t("exportPdf")}</span>
+          </button>
           <button onClick={handleReset} title={t("resetBtn")}
             style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: `1px solid ${T.redBdr}`, background: T.redBg, color: T.red, cursor: "pointer" }}>
             <RotateCcw className="h-3.5 w-3.5" /><span>{t("resetBtn")}</span>
