@@ -12,7 +12,9 @@ const GapItemSchema = z.object({
   cta_label: z.string(),
 });
 
-export const DpiaGapCheckSchema = z.object({
+// Non esportato: i file "use server" possono esportare solo funzioni async.
+// Il tipo derivato (DpiaGapCheck) resta esportato ed è ciò che serve altrove.
+const DpiaGapCheckSchema = z.object({
   items: z.array(GapItemSchema),
   overall_coverage: z.enum(["complete", "partial", "insufficient"]),
   critical_gaps: z.array(z.string()),

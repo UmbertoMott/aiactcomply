@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Plus, Trash2, ChevronLeft, ChevronRight, RotateCcw, Check, Download } from "lucide-react";
+import { Plus, Trash2, ChevronLeft, ChevronRight, RotateCcw, Check, Download, Sparkles } from "lucide-react";
 import { useT, useLocale } from "@/i18n/LocaleProvider";
 import { readFromStorage, writeToStorage } from "@/lib/dossier/storage-schema";
+import { draftDpiaEdpb } from "@/app/actions/draftDpiaEdpb";
 import {
   createEmptyDpiaEdpb, emptyParty, emptyPurpose, emptyAsset, emptyTeamMember, emptyMeasure,
   emptyRisk, emptyMitigation,
@@ -69,6 +70,12 @@ export default function DpiaEdpbForm() {
   const [section, setSection] = useState(0);
   const [saved, setSaved] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiName, setAiName] = useState("");
+  const [aiDesc, setAiDesc] = useState("");
+  const [aiCats, setAiCats] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -91,6 +98,54 @@ export default function DpiaEdpbForm() {
     if (typeof window !== "undefined" && !window.confirm(t("resetConfirm"))) return;
     const empty = createEmptyDpiaEdpb();
     setDoc(empty); setSection(0); setSaved(false); writeToStorage("dpiaEdpb", empty);
+  }
+
+  async function handleAiPrefill() {
+    if (aiLoading || !aiName.trim() || !aiDesc.trim()) return;
+    setAiLoading(true); setAiError(null);
+    const res = await draftDpiaEdpb({ systemName: aiName, description: aiDesc, dataCategories: aiCats, locale });
+    if ("error" in res) { setAiError(res.error); setAiLoading(false); return; }
+    const d = res;
+    const keep = (cur: string, next: string) => (cur && cur.trim() ? cur : (next || cur));
+    up((doc) => {
+      const nd: DpiaEdpbDoc = { ...doc };
+      if (!nd.processingName.trim()) nd.processingName = aiName.trim();
+      nd.personalData = keep(doc.personalData, d.personalData);
+      nd.specialCategories = keep(doc.specialCategories, d.specialCategories);
+      nd.secondaryUses = keep(doc.secondaryUses, d.secondaryUses);
+      nd.nature = keep(doc.nature, d.nature);
+      nd.scopeDesc = keep(doc.scopeDesc, d.scopeDesc);
+      nd.context = keep(doc.context, d.context);
+      nd.functionalDescription = keep(doc.functionalDescription, d.functionalDescription);
+      nd.lifecycle = {
+        collection: keep(doc.lifecycle.collection, d.lifecycle.collection),
+        use: keep(doc.lifecycle.use, d.lifecycle.use),
+        storage: keep(doc.lifecycle.storage, d.lifecycle.storage),
+        sharing: keep(doc.lifecycle.sharing, d.lifecycle.sharing),
+        deletion: keep(doc.lifecycle.deletion, d.lifecycle.deletion),
+      };
+      nd.legalBasisAnalysis = keep(doc.legalBasisAnalysis, d.legalBasisAnalysis);
+      nd.minimisationRetention = keep(doc.minimisationRetention, d.minimisationRetention);
+      nd.dataQuality = keep(doc.dataQuality, d.dataQuality);
+      nd.impactsRightsFreedoms = keep(doc.impactsRightsFreedoms, d.impactsRightsFreedoms);
+      nd.necessity = keep(doc.necessity, d.necessity);
+      nd.proportionality = keep(doc.proportionality, d.proportionality);
+      nd.eventImpacts = keep(doc.eventImpacts, d.eventImpacts);
+      nd.riskMethod = keep(doc.riskMethod, d.riskMethod);
+      // purposes: sostituisci solo se è presente il singolo placeholder vuoto
+      const purposesEmpty = doc.purposes.length <= 1 && !doc.purposes[0]?.purpose?.trim();
+      if (purposesEmpty && d.purposes.length) nd.purposes = d.purposes.map((p) => ({ ...emptyPurpose(), purpose: p.purpose, legalBasis: p.legalBasis }));
+      // misure: popola solo se la lista è vuota
+      const asMeasures = (arr: string[]) => arr.filter(Boolean).map((desc) => ({ ...emptyMeasure(), description: desc }));
+      if (!doc.measuresArt5.length && d.measuresArt5.length) nd.measuresArt5 = asMeasures(d.measuresArt5);
+      if (!doc.measuresRights.length && d.measuresRights.length) nd.measuresRights = asMeasures(d.measuresRights);
+      if (!doc.measuresSecurity.length && d.measuresSecurity.length) nd.measuresSecurity = asMeasures(d.measuresSecurity);
+      if (!doc.measuresDpbdd.length && d.measuresDpbdd.length) nd.measuresDpbdd = asMeasures(d.measuresDpbdd);
+      // rischi: popola solo se vuoto
+      if (!doc.risks.length && d.risks.length) nd.risks = d.risks.map((r) => ({ ...emptyRisk(), scenario: r.scenario, threat: r.threat, riskSource: r.riskSource, impact: r.impact, likelihood: r.likelihood, severity: r.severity }));
+      return nd;
+    });
+    setAiLoading(false); setAiOpen(false);
   }
 
   async function handleExport() {
@@ -126,6 +181,10 @@ export default function DpiaEdpbForm() {
           <span style={{ fontSize: 11, color: saved ? "#16a34a" : T.muted, display: "flex", alignItems: "center", gap: 4 }}>
             {saved && <Check className="h-3 w-3" />}{saved ? t("saved") : t("saving")}
           </span>
+          <button onClick={() => setAiOpen((v) => !v)} title={t("aiPrefill")}
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(35,64,58,0.25)", background: aiOpen ? "rgba(35,64,58,0.12)" : "rgba(35,64,58,0.06)", color: "#23403a", cursor: "pointer" }}>
+            <Sparkles className="h-3.5 w-3.5" /><span>{t("aiPrefill")}</span>
+          </button>
           <button onClick={handleExport} disabled={exporting} title={t("exportPdf")}
             style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(35,64,58,0.25)", background: "rgba(35,64,58,0.06)", color: "#23403a", cursor: exporting ? "wait" : "pointer", opacity: exporting ? 0.6 : 1 }}>
             <Download className="h-3.5 w-3.5" /><span>{exporting ? t("exporting") : t("exportPdf")}</span>
@@ -136,6 +195,29 @@ export default function DpiaEdpbForm() {
           </button>
         </div>
       </div>
+
+      {/* AI pre-fill panel */}
+      {aiOpen && (
+        <div style={{ border: `1px solid rgba(35,64,58,0.25)`, background: "rgba(35,64,58,0.04)", borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: "#23403a", marginBottom: 3, display: "flex", alignItems: "center", gap: 6 }}>
+            <Sparkles className="h-4 w-4" />{t("aiPanelTitle")}
+          </p>
+          <p style={{ fontSize: 11.5, color: T.muted, marginBottom: 12, lineHeight: 1.5 }}>{t("aiPanelHint")}</p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <Field label={t("aiSystemName")}><input value={aiName} onChange={(e) => setAiName(e.target.value)} style={inputSt} /></Field>
+            <Field label={t("aiDataCategories")}><input value={aiCats} onChange={(e) => setAiCats(e.target.value)} style={inputSt} /></Field>
+          </div>
+          <Txt label={t("aiDescription")} value={aiDesc} onChange={setAiDesc} rows={3} />
+          {aiError && <p style={{ fontSize: 12, color: T.red, marginBottom: 8 }}>{aiError}</p>}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <button onClick={handleAiPrefill} disabled={aiLoading || !aiName.trim() || !aiDesc.trim()}
+              style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, padding: "8px 16px", borderRadius: 8, border: "none", background: "#23403a", color: "#fff", cursor: (aiLoading || !aiName.trim() || !aiDesc.trim()) ? "not-allowed" : "pointer", opacity: (aiLoading || !aiName.trim() || !aiDesc.trim()) ? 0.55 : 1 }}>
+              <Sparkles className="h-4 w-4" />{aiLoading ? t("aiGenerating") : t("aiGenerate")}
+            </button>
+            <span style={{ fontSize: 11, color: T.muted }}>{t("aiFillsEmptyNote")}</span>
+          </div>
+        </div>
+      )}
 
       {/* Section tabs */}
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 18 }}>
