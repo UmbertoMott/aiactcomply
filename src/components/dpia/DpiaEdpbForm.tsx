@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Plus, Trash2, ChevronLeft, ChevronRight, RotateCcw, Check, Download, Sparkles } from "lucide-react";
+import { Plus, Trash2, ChevronLeft, ChevronRight, RotateCcw, Check, Download, Sparkles, ClipboardCheck, AlertCircle } from "lucide-react";
 import { useT, useLocale } from "@/i18n/LocaleProvider";
 import { readFromStorage, writeToStorage } from "@/lib/dossier/storage-schema";
 import { draftDpiaEdpb } from "@/app/actions/draftDpiaEdpb";
+import { computeEdpbCompleteness } from "@/lib/dpia/edpb-completeness";
 import {
   createEmptyDpiaEdpb, emptyParty, emptyPurpose, emptyAsset, emptyTeamMember, emptyMeasure,
   emptyRisk, emptyMitigation,
@@ -76,7 +77,10 @@ export default function DpiaEdpbForm() {
   const [aiCats, setAiCats] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [gapOpen, setGapOpen] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const completeness = computeEdpbCompleteness(doc);
 
   useEffect(() => {
     const stored = readFromStorage<DpiaEdpbDoc>("dpiaEdpb");
@@ -181,6 +185,13 @@ export default function DpiaEdpbForm() {
           <span style={{ fontSize: 11, color: saved ? "#16a34a" : T.muted, display: "flex", alignItems: "center", gap: 4 }}>
             {saved && <Check className="h-3 w-3" />}{saved ? t("saved") : t("saving")}
           </span>
+          <button onClick={() => setGapOpen((v) => !v)} title={t("gapCheck")}
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.12)", background: gapOpen ? "rgba(0,0,0,0.06)" : "#fff", color: T.text, cursor: "pointer" }}>
+            <ClipboardCheck className="h-3.5 w-3.5" /><span>{t("gapCheck")}</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: completeness.overallPercent >= 80 ? "#16a34a" : completeness.overallPercent >= 40 ? "#d97706" : T.muted, background: "rgba(0,0,0,0.04)", padding: "1px 6px", borderRadius: 9999 }}>
+              {completeness.overallPercent}%
+            </span>
+          </button>
           <button onClick={() => setAiOpen((v) => !v)} title={t("aiPrefill")}
             style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(35,64,58,0.25)", background: aiOpen ? "rgba(35,64,58,0.12)" : "rgba(35,64,58,0.06)", color: "#23403a", cursor: "pointer" }}>
             <Sparkles className="h-3.5 w-3.5" /><span>{t("aiPrefill")}</span>
@@ -195,6 +206,39 @@ export default function DpiaEdpbForm() {
           </button>
         </div>
       </div>
+
+      {/* Gap check panel */}
+      {gapOpen && (
+        <div style={{ border: `1px solid rgba(0,0,0,0.12)`, background: "#fff", borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: T.text, display: "flex", alignItems: "center", gap: 6 }}>
+              <ClipboardCheck className="h-4 w-4" />{t("gapCheckTitle")}
+            </p>
+            <span style={{ fontSize: 13, fontWeight: 700, color: completeness.overallPercent >= 80 ? "#16a34a" : completeness.overallPercent >= 40 ? "#d97706" : T.red }}>
+              {completeness.overallPercent}%
+            </span>
+          </div>
+          {completeness.items.every((i) => i.filled) ? (
+            <p style={{ fontSize: 12, color: "#16a34a", display: "flex", alignItems: "center", gap: 6 }}>
+              <Check className="h-4 w-4" />{t("gapNone")}
+            </p>
+          ) : (
+            <>
+              <p style={{ fontSize: 11.5, color: T.muted, marginBottom: 10 }}>{t("gapIntro")}</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                {completeness.items.filter((i) => !i.filled).map((i, idx) => (
+                  <button key={idx} onClick={() => { setSection(i.section); setGapOpen(false); }}
+                    style={{ display: "flex", alignItems: "center", gap: 8, textAlign: "left", padding: "6px 8px", borderRadius: 7, border: "1px solid rgba(0,0,0,0.06)", background: "rgba(0,0,0,0.015)", cursor: "pointer", fontSize: 12, color: T.text }}>
+                    <AlertCircle className="h-3.5 w-3.5" style={{ color: "#d97706", flexShrink: 0 }} />
+                    <span style={{ color: T.muted, fontSize: 10, fontWeight: 700 }}>{i.section} · {t(`${EDPB_SECTIONS[i.section].key}Tab`)}</span>
+                    <span>{t(i.labelKey)}</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       {/* AI pre-fill panel */}
       {aiOpen && (
