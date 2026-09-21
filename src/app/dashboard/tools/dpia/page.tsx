@@ -361,8 +361,16 @@ export default function DPIAPage() {
   const [showTemplateViewer, setShowTemplateViewer] = useState(false);
   // Modalità guidata vs form a 6 step
   const [guidedMode, setGuidedMode] = useState(false);
-  // Nuovo template EDPB 2026 (ricostruzione a tappe)
-  const [edpbMode, setEdpbMode] = useState(false);
+  // Template EDPB 2026 è ora il form DPIA principale (swap). Il form classico
+  // resta accessibile e la scelta viene ricordata per-browser.
+  const [edpbMode, setEdpbMode] = useState(true);
+  const switchMode = useCallback((toEdpb: boolean) => {
+    setEdpbMode(toEdpb);
+    try { localStorage.setItem("aicomply_dpia_form_mode", toEdpb ? "edpb" : "classic"); } catch { /* ignore */ }
+  }, []);
+  useEffect(() => {
+    try { if (localStorage.getItem("aicomply_dpia_form_mode") === "classic") setEdpbMode(false); } catch { /* ignore */ }
+  }, []);
   // Rail: sezioni espanse
   const [railExpanded, setRailExpanded] = useState<Set<number>>(new Set([0, 1, 2, 3, 4, 5]));
 
@@ -1701,7 +1709,7 @@ export default function DPIAPage() {
         <AssessmentSharedHeader />
         <div style={{ marginBottom: 14 }}>
           <button
-            onClick={() => setEdpbMode(false)}
+            onClick={() => switchMode(false)}
             style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.10)", background: "#fff", color: T.text, cursor: "pointer" }}
           >
             <ChevronLeft className="h-3.5 w-3.5" />{tr("edpbBackToClassic")}
@@ -1792,7 +1800,7 @@ export default function DPIAPage() {
           </button>
           {/* Nuovo template EDPB 2026 */}
           <button
-            onClick={() => setEdpbMode(true)}
+            onClick={() => switchMode(true)}
             title={tr("edpbEnter")}
             style={{
               display: "flex", alignItems: "center", gap: 6,
