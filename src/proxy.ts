@@ -10,7 +10,24 @@ const AI_DISCLOSURE_HEADERS: Record<string, string> = {
   "X-AI-Requires-Review": "true",
 };
 
+// Dominio canonico del sito. In produzione le URL *.vercel.app e l'apex nudo
+// (regulaeos.com) vengono reindirizzate qui, così il sito si vede solo su
+// www.regulaeos.com. Le anteprime per-PR (VERCEL_ENV=preview) NON sono toccate.
+const CANONICAL_HOST = "www.regulaeos.com";
+
 export async function proxy(request: NextRequest) {
+  // Redirect al dominio canonico — solo in produzione.
+  if (process.env.VERCEL_ENV === "production") {
+    const host = request.headers.get("host") ?? "";
+    if (host !== CANONICAL_HOST && (host.endsWith(".vercel.app") || host === "regulaeos.com")) {
+      const url = request.nextUrl.clone();
+      url.hostname = CANONICAL_HOST;
+      url.protocol = "https:";
+      url.port = "";
+      return NextResponse.redirect(url, 308);
+    }
+  }
+
   const response = await updateSession(request);
 
   // Add AI disclosure headers to all /api/ responses
