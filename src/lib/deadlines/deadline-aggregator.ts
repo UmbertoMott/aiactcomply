@@ -104,7 +104,7 @@ export function buildIncidentNotificationDeadline(system: AISystem, incident: In
   };
 }
 
-// buildProviderTransitionDeadline: exported — Art. 28
+// buildProviderTransitionDeadline: exported — Art. 25
 export function buildProviderTransitionDeadline(
   system: AISystem,
   appliesTo: AIActTier[],
@@ -154,9 +154,9 @@ export function buildProviderTransitionDeadline(
     date: deadline,
     label: `Provider Transition — ${system.name}`,
     description: verdict === "provider"
-      ? `Modifica sostanziale confermata per "${system.name}": obblighi da provider in vigore (Art. 28). Prima modifica sostanziale: ${earliestSubstDate ?? "non registrata"}. Completare le obbligazioni nel tool.`
-      : `Modifica sostanziale potenziale per "${system.name}": richiesta valutazione legale per determinare obblighi da provider (Art. 28).`,
-    article: "Art. 28",
+      ? `Modifica sostanziale confermata per "${system.name}": obblighi da provider in vigore (Art. 25). Prima modifica sostanziale: ${earliestSubstDate ?? "non registrata"}. Completare le obbligazioni nel tool.`
+      : `Modifica sostanziale potenziale per "${system.name}": richiesta valutazione legale per determinare obblighi da provider (Art. 25).`,
+    article: "Art. 25",
     applies_to: appliesTo.length ? appliesTo : (["high_risk_annex3"] as AIActTier[]),
     tool_href: "/dashboard/compliance-ops/provider-transition",
     severity: verdict === "provider" ? "critical" : "important",
@@ -212,7 +212,7 @@ export function buildDynamicDeadlines(systems: AISystem[]): AIActDeadline[] {
       dynamic.push(buildIncidentNotificationDeadline(system, incident));
     }
 
-    // 4. Provider Transition: valutazione obblighi da provider (Art. 28)
+    // 4. Provider Transition: valutazione obblighi da provider (Art. 25)
     const ptDeadline = buildProviderTransitionDeadline(system, appliesTo);
     if (ptDeadline) dynamic.push(ptDeadline);
 

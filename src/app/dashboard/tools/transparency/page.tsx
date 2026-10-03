@@ -593,7 +593,7 @@ export default function TransparencyPage() {
           <p className="text-[11px] font-semibold uppercase mb-1"
             style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "1.2px" }}>{t("headerKicker")}</p>
           <h1 className="text-[24px] font-medium" style={{ color: "#0D1016", letterSpacing: "-0.8px" }}>
-            Transparency & XAI
+            {t("h1")}
           </h1>
         </div>
         <div className="flex items-center gap-2">

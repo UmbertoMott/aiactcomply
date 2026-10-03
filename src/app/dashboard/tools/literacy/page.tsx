@@ -445,7 +445,7 @@ export default function LiteracyPage() {
             </span>
           </div>
           <h1 className="text-xl font-semibold" style={{ color: "#0D1016" }}>
-            AI Literacy — Art. 4
+            {t("h1")}
           </h1>
           <div className="flex items-center gap-2 mt-1">
             <p className="text-sm" style={{ color: "rgba(0,0,0,0.45)" }}>

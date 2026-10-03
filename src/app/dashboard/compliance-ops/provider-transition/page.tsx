@@ -76,7 +76,7 @@ function VerdictBanner({ verdict }: { verdict: Verdict }) {
       bg: "rgba(239,68,68,0.06)",
       border: "rgba(239,68,68,0.18)",
       icon: <AlertTriangle size={18} className="text-red-700" />,
-      title: "Obblighi da Provider rilevati (Art. 28)",
+      title: "Obblighi del fornitore rilevati (Art. 25 · Art. 16)",
       text: "Le risposte indicate suggeriscono che la tua organizzazione potrebbe aver assunto il ruolo di provider. Completa le obbligazioni nella sezione 3 e verifica con il team legale.",
     },
     risk: {
@@ -84,7 +84,7 @@ function VerdictBanner({ verdict }: { verdict: Verdict }) {
       border: "rgba(251,146,60,0.25)",
       icon: <HelpCircle size={18} className="text-orange-700" />,
       title: "Rischio potenziale — verifica necessaria",
-      text: "Una o più risposte 'Incerto' richiedono una valutazione legale prima di determinare se scattano obblighi da provider (Art. 28).",
+      text: "Una o più risposte 'Incerto' richiedono una valutazione legale prima di determinare se scattano obblighi del fornitore (Art. 25).",
     },
     deployer: {
       bg: "rgba(22,163,74,0.06)",
@@ -174,7 +174,7 @@ export default function ProviderTransitionPage() {
       <div style={{ marginBottom: 28 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
           <span style={{ background: "rgba(129,140,248,0.15)", color: INDIGO, borderRadius: 6, padding: "2px 10px", fontSize: 12, fontWeight: 600 }}>
-            Art. 28
+            Art. 25
           </span>
           {verdict !== "incomplete" && (
             <span style={{
@@ -187,17 +187,17 @@ export default function ProviderTransitionPage() {
           )}
         </div>
         <h1 style={{ color: TEXT, fontSize: 22, fontWeight: 700, marginBottom: 4 }}>
-          Provider Transition Alert
+          Cambio di ruolo — da deployer a fornitore
         </h1>
         <p style={{ color: MUTED, fontSize: 14, lineHeight: 1.5 }}>
-          Verifica se le modifiche apportate al sistema AI configurano un trasferimento del ruolo da deployer a provider ai sensi dell&apos;Art. 28 del Reg. (UE) 2024/1689.
+          Verifica se le modifiche apportate al sistema AI configurano un trasferimento del ruolo da deployer a provider ai sensi dell&apos;Art. 25 del Reg. (UE) 2024/1689.
         </p>
       </div>
 
-      {/* ─── SEZIONE 1: Checklist Art. 28 ─────────────────────────────────── */}
+      {/* ─── SEZIONE 1: Checklist Art. 25 ─────────────────────────────────── */}
       <section style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 24, marginBottom: 20 }}>
         <h2 style={{ color: TEXT, fontWeight: 600, fontSize: 16, marginBottom: 6 }}>
-          1. Checklist valutazione Art. 28
+          1. Checklist valutazione Art. 25
         </h2>
         <p style={{ color: MUTED, fontSize: 13, marginBottom: 20 }}>
           Rispondi a tutte le domande per determinare il tuo ruolo. Le risposte &quot;Sì&quot; ai trigger configurano potenziali obblighi da provider.
@@ -468,7 +468,7 @@ export default function ProviderTransitionPage() {
       {verdict === "provider" && (
         <section style={{ background: CARD, border: `1px solid rgba(239,68,68,0.18)`, borderRadius: 12, padding: 24, marginBottom: 20 }}>
           <h2 style={{ color: TEXT, fontWeight: 600, fontSize: 16, marginBottom: 6 }}>
-            3. Obbligazioni da Provider (Art. 28)
+            3. Obblighi del fornitore (Art. 16)
           </h2>
           <p style={{ color: MUTED, fontSize: 13, marginBottom: 16 }}>
             Completa le seguenti obbligazioni. Le voci con sorgente &quot;derivata&quot; si aggiornano automaticamente dagli altri moduli AIComply.
