@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Plus, Trash2, ChevronLeft, ChevronRight, RotateCcw, Check, Download, Sparkles, ClipboardCheck, AlertCircle, Compass, ArrowRight } from "lucide-react";
+import { Plus, Trash2, ChevronRight, RotateCcw, Check, Download, Sparkles } from "lucide-react";
 import { useT, useLocale } from "@/i18n/LocaleProvider";
 import { readFromStorage, writeToStorage } from "@/lib/dossier/storage-schema";
 import { draftDpiaEdpb } from "@/app/actions/draftDpiaEdpb";
@@ -17,6 +17,7 @@ const T = {
   bg: "#fafafa", card: "#ffffff", border: "rgba(0,0,0,0.10)",
   text: "#0D1016", muted: "rgba(0,0,0,0.5)", accent: "#23403a",
   red: "#dc2626", redBg: "rgba(220,38,38,0.06)", redBdr: "rgba(220,38,38,0.2)",
+  green: "#16a34a", amber: "#d97706", faint: "rgba(0,0,0,0.35)",
 };
 
 const inputSt: React.CSSProperties = {
@@ -77,12 +78,17 @@ export default function DpiaEdpbForm() {
   const [aiCats, setAiCats] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
-  const [gapOpen, setGapOpen] = useState(false);
-  const [guided, setGuided] = useState(false);
+  const [expanded, setExpanded] = useState<Set<number>>(new Set([0]));
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const completeness = computeEdpbCompleteness(doc);
-  const goToNextGap = () => { if (completeness.firstIncompleteSection !== null) setSection(completeness.firstIncompleteSection); };
+  const scrollToSection = (n: number) => {
+    setSection(n);
+    if (typeof document !== "undefined") document.getElementById(`edpb-sec-${n}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  const toggleExpand = (n: number) => setExpanded((prev) => { const s = new Set(prev); if (s.has(n)) s.delete(n); else s.add(n); return s; });
+  const goToNextGap = () => { if (completeness.firstIncompleteSection !== null) scrollToSection(completeness.firstIncompleteSection); };
 
   useEffect(() => {
     const stored = readFromStorage<DpiaEdpbDoc>("dpiaEdpb");
@@ -175,6 +181,12 @@ export default function DpiaEdpbForm() {
     finally { setExporting(false); }
   }
 
+  const measuresCount = doc.measuresArt5.length + doc.measuresRights.length + doc.measuresOther.length + doc.measuresDpbdd.length + doc.measuresSecurity.length;
+  const SECTIONS: { n: number; Comp: React.ComponentType<{ doc: DpiaEdpbDoc; set: SetFn; t: TFn }> }[] = [
+    { n: 0, Comp: Section0 }, { n: 1, Comp: Section1 }, { n: 2, Comp: Section2 },
+    { n: 3, Comp: Section3 }, { n: 4, Comp: Section4 }, { n: 5, Comp: Section5 }, { n: 6, Comp: Section6 },
+  ];
+
   return (
     <div>
       {/* Header */}
@@ -187,24 +199,9 @@ export default function DpiaEdpbForm() {
           <span style={{ fontSize: 11, color: saved ? "#16a34a" : T.muted, display: "flex", alignItems: "center", gap: 4 }}>
             {saved && <Check className="h-3 w-3" />}{saved ? t("saved") : t("saving")}
           </span>
-          <button onClick={() => setGuided((v) => !v)} title={t("guidedMode")}
-            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: guided ? `1.5px solid ${T.accent}` : "1px solid rgba(0,0,0,0.12)", background: guided ? "rgba(35,64,58,0.10)" : "#fff", color: guided ? T.accent : T.text, cursor: "pointer" }}>
-            <Compass className="h-3.5 w-3.5" /><span>{t("guidedMode")}</span>
-          </button>
-          <button onClick={() => setGapOpen((v) => !v)} title={t("gapCheck")}
-            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.12)", background: gapOpen ? "rgba(0,0,0,0.06)" : "#fff", color: T.text, cursor: "pointer" }}>
-            <ClipboardCheck className="h-3.5 w-3.5" /><span>{t("gapCheck")}</span>
-            <span style={{ fontSize: 10, fontWeight: 700, color: completeness.overallPercent >= 80 ? "#16a34a" : completeness.overallPercent >= 40 ? "#d97706" : T.muted, background: "rgba(0,0,0,0.04)", padding: "1px 6px", borderRadius: 9999 }}>
-              {completeness.overallPercent}%
-            </span>
-          </button>
           <button onClick={() => setAiOpen((v) => !v)} title={t("aiPrefill")}
             style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(35,64,58,0.25)", background: aiOpen ? "rgba(35,64,58,0.12)" : "rgba(35,64,58,0.06)", color: "#23403a", cursor: "pointer" }}>
             <Sparkles className="h-3.5 w-3.5" /><span>{t("aiPrefill")}</span>
-          </button>
-          <button onClick={handleExport} disabled={exporting} title={t("exportPdf")}
-            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(35,64,58,0.25)", background: "rgba(35,64,58,0.06)", color: "#23403a", cursor: exporting ? "wait" : "pointer", opacity: exporting ? 0.6 : 1 }}>
-            <Download className="h-3.5 w-3.5" /><span>{exporting ? t("exporting") : t("exportPdf")}</span>
           </button>
           <button onClick={handleReset} title={t("resetBtn")}
             style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: `1px solid ${T.redBdr}`, background: T.redBg, color: T.red, cursor: "pointer" }}>
@@ -213,82 +210,7 @@ export default function DpiaEdpbForm() {
         </div>
       </div>
 
-      {/* Guided progress banner */}
-      {guided && (
-        <div style={{ border: `1.5px solid ${T.accent}`, background: "rgba(35,64,58,0.04)", borderRadius: 12, padding: "14px 16px", marginBottom: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 10 }}>
-            <div>
-              <p style={{ fontSize: 12.5, fontWeight: 700, color: T.accent, display: "flex", alignItems: "center", gap: 6 }}>
-                <Compass className="h-4 w-4" />{t("guidedTitle")}
-              </p>
-              <p style={{ fontSize: 11, color: T.muted, marginTop: 2 }}>{t("guidedHint")}</p>
-            </div>
-            <span style={{ fontSize: 15, fontWeight: 700, color: completeness.overallPercent >= 80 ? "#16a34a" : completeness.overallPercent >= 40 ? "#d97706" : T.accent }}>{completeness.overallPercent}%</span>
-          </div>
-          {/* progress bar */}
-          <div style={{ height: 7, borderRadius: 999, background: "rgba(0,0,0,0.08)", overflow: "hidden", marginBottom: 10 }}>
-            <div style={{ height: "100%", width: `${completeness.overallPercent}%`, background: T.accent, transition: "width 0.3s ease" }} />
-          </div>
-          {/* per-section dots */}
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-            {completeness.sections.map((s) => {
-              const complete = s.done >= s.total && s.total > 0;
-              const started = s.done > 0;
-              return (
-                <button key={s.section} onClick={() => setSection(s.section)} title={t(`${EDPB_SECTIONS[s.section].key}Tab`)}
-                  style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10, fontWeight: 600, padding: "3px 8px", borderRadius: 999, cursor: "pointer",
-                    border: section === s.section ? `1.5px solid ${T.accent}` : "1px solid rgba(0,0,0,0.10)",
-                    background: complete ? "rgba(22,163,74,0.10)" : started ? "rgba(217,119,6,0.10)" : "#fff",
-                    color: complete ? "#16a34a" : started ? "#d97706" : T.muted }}>
-                  {complete ? <Check className="h-3 w-3" /> : <span>{s.section}</span>}
-                  <span>{s.done}/{s.total}</span>
-                </button>
-              );
-            })}
-          </div>
-          <button onClick={goToNextGap} disabled={completeness.firstIncompleteSection === null}
-            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, padding: "8px 16px", borderRadius: 8, border: "none",
-              background: completeness.firstIncompleteSection === null ? "rgba(22,163,74,0.9)" : T.accent, color: "#fff",
-              cursor: completeness.firstIncompleteSection === null ? "default" : "pointer" }}>
-            {completeness.firstIncompleteSection === null ? <><Check className="h-4 w-4" />{t("guidedComplete")}</> : <>{t("guidedNext")}<ArrowRight className="h-4 w-4" /></>}
-          </button>
-        </div>
-      )}
-
-      {/* Gap check panel */}
-      {gapOpen && (
-        <div style={{ border: `1px solid rgba(0,0,0,0.12)`, background: "#fff", borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-            <p style={{ fontSize: 13, fontWeight: 700, color: T.text, display: "flex", alignItems: "center", gap: 6 }}>
-              <ClipboardCheck className="h-4 w-4" />{t("gapCheckTitle")}
-            </p>
-            <span style={{ fontSize: 13, fontWeight: 700, color: completeness.overallPercent >= 80 ? "#16a34a" : completeness.overallPercent >= 40 ? "#d97706" : T.red }}>
-              {completeness.overallPercent}%
-            </span>
-          </div>
-          {completeness.items.every((i) => i.filled) ? (
-            <p style={{ fontSize: 12, color: "#16a34a", display: "flex", alignItems: "center", gap: 6 }}>
-              <Check className="h-4 w-4" />{t("gapNone")}
-            </p>
-          ) : (
-            <>
-              <p style={{ fontSize: 11.5, color: T.muted, marginBottom: 10 }}>{t("gapIntro")}</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                {completeness.items.filter((i) => !i.filled).map((i, idx) => (
-                  <button key={idx} onClick={() => { setSection(i.section); setGapOpen(false); }}
-                    style={{ display: "flex", alignItems: "center", gap: 8, textAlign: "left", padding: "6px 8px", borderRadius: 7, border: "1px solid rgba(0,0,0,0.06)", background: "rgba(0,0,0,0.015)", cursor: "pointer", fontSize: 12, color: T.text }}>
-                    <AlertCircle className="h-3.5 w-3.5" style={{ color: "#d97706", flexShrink: 0 }} />
-                    <span style={{ color: T.muted, fontSize: 10, fontWeight: 700 }}>{i.section} · {t(`${EDPB_SECTIONS[i.section].key}Tab`)}</span>
-                    <span>{t(i.labelKey)}</span>
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* AI pre-fill panel */}
+      {/* AI pre-fill panel (sorgenti dati per la bozza AI) */}
       {aiOpen && (
         <div style={{ border: `1px solid rgba(35,64,58,0.25)`, background: "rgba(35,64,58,0.04)", borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
           <p style={{ fontSize: 13, fontWeight: 700, color: "#23403a", marginBottom: 3, display: "flex", alignItems: "center", gap: 6 }}>
@@ -311,40 +233,110 @@ export default function DpiaEdpbForm() {
         </div>
       )}
 
-      {/* Section tabs */}
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 18 }}>
-        {EDPB_SECTIONS.map((s) => (
-          <button key={s.id} onClick={() => setSection(s.id)}
-            style={{
-              fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, cursor: "pointer",
-              border: section === s.id ? `1.5px solid ${T.accent}` : `1px solid ${T.border}`,
-              background: section === s.id ? "rgba(35,64,58,0.06)" : "#fff",
-              color: section === s.id ? T.accent : T.muted,
-            }}>
-            <span style={{ opacity: 0.5, marginRight: 5 }}>{s.id}</span>{t(`${s.key}Tab`)}
-          </button>
-        ))}
-      </div>
+      {/* ── Two-column layout: DOCUMENTO rail + stacked sections ── */}
+      <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
 
-      {/* Sections */}
-      {section === 0 && <Section0 doc={doc} set={set} t={t} />}
-      {section === 1 && <Section1 doc={doc} set={set} t={t} />}
-      {section === 2 && <Section2 doc={doc} set={set} t={t} />}
-      {section === 3 && <Section3 doc={doc} set={set} t={t} />}
-      {section === 4 && <Section4 doc={doc} set={set} t={t} />}
-      {section === 5 && <Section5 doc={doc} set={set} t={t} />}
-      {section === 6 && <Section6 doc={doc} set={set} t={t} />}
+        {/* Left rail */}
+        <div style={{ width: 240, flexShrink: 0, border: `1px solid ${T.border}`, borderRadius: 10, background: "#fafafa", display: "flex", flexDirection: "column", position: "sticky", top: 12, maxHeight: "calc(100vh - 32px)", overflowY: "auto" }}>
+          {/* DOCUMENTO header + progress */}
+          <div style={{ padding: "12px 12px 10px", borderBottom: `1px solid ${T.border}` }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>{t("docWord")}</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", fontFamily: "monospace" }}>{completeness.overallPercent}%</span>
+            </div>
+            <div style={{ width: "100%", height: 4, background: "rgba(0,0,0,0.07)", borderRadius: 2, overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${completeness.overallPercent}%`, background: "#0D1016", borderRadius: 2, transition: "width 0.5s ease" }} />
+            </div>
+          </div>
 
-      {/* Nav footer */}
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
-        <button disabled={section === 0} onClick={() => setSection((s) => Math.max(0, s - 1))}
-          style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "8px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: section === 0 ? "rgba(0,0,0,0.25)" : T.text, cursor: section === 0 ? "default" : "pointer" }}>
-          <ChevronLeft className="h-4 w-4" />{t("prev")}
-        </button>
-        <button disabled={section === 6} onClick={() => setSection((s) => Math.min(6, s + 1))}
-          style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "8px 14px", borderRadius: 8, border: "none", background: section === 6 ? "rgba(0,0,0,0.15)" : T.accent, color: "#fff", cursor: section === 6 ? "default" : "pointer" }}>
-          {t("next")}<ChevronRight className="h-4 w-4" />
-        </button>
+          {/* Processing name */}
+          <div style={{ padding: "12px 14px", borderBottom: `1px solid ${T.border}` }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: 6 }}>{t("processingName")}</div>
+            <input value={doc.processingName} onChange={(e) => set("processingName", e.target.value)} placeholder={t("processingNameHint")}
+              style={{ ...inputSt, fontSize: 13, fontWeight: 500 }} />
+          </div>
+
+          {/* Section nav (progress rail) */}
+          <div style={{ padding: "8px", flex: 1 }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.6px", padding: "0 6px", marginBottom: 6 }}>{t("sectionsWord")}</div>
+            {completeness.sections.map((s) => {
+              const isActive = section === s.section;
+              const isExp = expanded.has(s.section);
+              const complete = s.done >= s.total && s.total > 0;
+              const started = s.done > 0;
+              const circleColor = complete ? "#23403a" : started ? "#d97706" : "#dc2626";
+              const pct = s.total === 0 ? 0 : Math.round((s.done / s.total) * 100);
+              const pctColor = complete ? T.green : started ? T.amber : T.faint;
+              const subs = completeness.items.filter((i) => i.section === s.section);
+              return (
+                <div key={s.section} style={{ border: `1px solid ${isActive ? "rgba(35,64,58,0.20)" : complete ? "rgba(35,64,58,0.12)" : "rgba(0,0,0,0.07)"}`, background: isActive ? "rgba(35,64,58,0.06)" : "transparent", borderRadius: 8, overflow: "hidden", marginBottom: 4 }}>
+                  <button onClick={() => { scrollToSection(s.section); toggleExpand(s.section); }}
+                    style={{ width: "100%", textAlign: "left", border: "none", background: "transparent", padding: "9px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${circleColor}`, flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: 11, fontWeight: 600, color: T.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.section}. {t(`${EDPB_SECTIONS[s.section].key}Tab`)}</p>
+                      <p style={{ fontSize: 9, color: T.muted, margin: "1px 0 0" }}>{s.done}/{s.total}</p>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      <span style={{ fontSize: 9.5, fontWeight: 700, color: pctColor, fontFamily: "monospace" }}>{pct}%</span>
+                      <ChevronRight size={10} style={{ color: T.faint, transform: isExp ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                    </div>
+                  </button>
+                  <div style={{ height: 2, background: "rgba(0,0,0,0.04)" }}>
+                    <div style={{ height: "100%", width: `${pct}%`, background: circleColor, transition: "width 0.35s" }} />
+                  </div>
+                  {isExp && (
+                    <div style={{ borderTop: "1px solid rgba(0,0,0,0.05)", padding: "4px 6px 6px" }}>
+                      {subs.map((sp, i) => (
+                        <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px" }}>
+                          <div style={{ width: 10, height: 10, borderRadius: "50%", border: `1.5px solid ${sp.filled ? "#23403a" : "#dc2626"}`, flexShrink: 0 }} />
+                          <p style={{ fontSize: 10, color: sp.filled ? T.muted : T.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: sp.filled ? "line-through" : "none", opacity: sp.filled ? 0.55 : 1 }}>{t(sp.labelKey)}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Summary + actions */}
+          <div style={{ padding: "12px 14px", borderTop: `1px solid ${T.border}` }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: 10 }}>{t("summaryWord")}</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 11, color: T.muted }}>{t("purposesTitle")}</span>
+                <span style={{ fontSize: 11, fontWeight: 500, color: T.text }}>{doc.purposes.filter((p) => p.purpose.trim()).length}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 11, color: T.muted }}>{t("riskLabel")}</span>
+                <span style={{ fontSize: 11, fontWeight: 500, color: T.text }}>{doc.risks.length}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 11, color: T.muted }}>{t("measureStatus").replace(":", "")}</span>
+                <span style={{ fontSize: 11, fontWeight: 500, color: T.text }}>{measuresCount}</span>
+              </div>
+            </div>
+            <button onClick={goToNextGap} disabled={completeness.firstIncompleteSection === null}
+              style={{ width: "100%", marginTop: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "7px 10px", borderRadius: 7, border: "none", background: completeness.firstIncompleteSection === null ? "rgba(22,163,74,0.9)" : T.accent, color: "#fff", cursor: completeness.firstIncompleteSection === null ? "default" : "pointer" }}>
+              {completeness.firstIncompleteSection === null ? <><Check className="h-3.5 w-3.5" />{t("guidedComplete")}</> : <>{t("guidedNext")}<ChevronRight className="h-3.5 w-3.5" /></>}
+            </button>
+            <button onClick={handleExport} disabled={exporting}
+              style={{ width: "100%", marginTop: 6, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 11, fontWeight: 500, padding: "7px 10px", borderRadius: 7, border: `1px solid ${T.border}`, background: "#fff", color: T.text, cursor: exporting ? "wait" : "pointer", opacity: exporting ? 0.6 : 1 }}>
+              <Download className="h-3.5 w-3.5" />{exporting ? t("exporting") : t("exportPdf")}
+            </button>
+            {saved && <div style={{ marginTop: 8, fontSize: 10, color: "#16a34a", textAlign: "center" }}>✓ {t("saved")}</div>}
+          </div>
+        </div>
+
+        {/* Main content: all sections stacked */}
+        <div ref={contentRef} style={{ flex: 1, minWidth: 0, maxHeight: "calc(100vh - 32px)", overflowY: "auto", border: `1px solid ${T.border}`, borderRadius: 10, background: "#fafafa", padding: "16px 20px 48px", scrollBehavior: "smooth" }}>
+          {SECTIONS.map(({ n, Comp }) => (
+            <div key={n} id={`edpb-sec-${n}`} style={{ marginTop: n === 0 ? 0 : 20, scrollMarginTop: 12 }}>
+              <Comp doc={doc} set={set} t={t} />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
