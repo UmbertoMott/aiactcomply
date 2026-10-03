@@ -1,7 +1,7 @@
-// Provider Transition — tipi, costanti e logica di business (Art. 28 AI Act)
-// ✦ AI — verifica e conferma: TRANSITION_CHECKS, computeTransitionVerdict e PROVIDER_OBLIGATIONS
-// sono ricostruiti dalla memoria del modello a partire da PROMPT_J. Validare contro Art. 28
-// e Art. 3(23) del testo consolidato Reg. (UE) 2024/1689.
+// Cambio di ruolo deployer → fornitore — tipi, costanti e logica (Art. 25 AI Act).
+// Riferimenti al testo del Reg. (UE) 2024/1689: Art. 25(1)(a)-(c) (responsabilità
+// lungo la catena del valore), Art. 3(23) (modifica sostanziale), Art. 43(4)
+// (cambiamenti predeterminati), Art. 16 (obblighi del fornitore).
 
 export const ANSWERS_KEY = "provider_transition_answers";
 export const MODS_KEY    = "provider_transition_modifications";
@@ -43,44 +43,44 @@ export interface ProviderTransitionResultExtended {
 export const TRANSITION_CHECKS: ProviderTransitionCheck[] = [
   {
     id: "own_name",
-    question: "Hai immesso o intendi immettere il sistema sul mercato UE sotto il tuo nome commerciale o marchio?",
-    explanation: "Se il prodotto viene presentato al mercato come tuo (es. con il tuo brand sul packaging, nel contratto o nell'interfaccia) anche se sviluppato da altri, sei considerato provider.",
-    trigger_article: "Art. 28(1)(a)",
+    question: "Hai apposto (o intendi apporre) il tuo nome o marchio su un sistema AI ad alto rischio già immesso sul mercato o messo in servizio?",
+    explanation: "Chi appone il proprio nome o marchio su un sistema ad alto rischio è considerato fornitore e assume gli obblighi dell'Art. 16, fatti salvi gli accordi contrattuali che ripartiscono diversamente gli obblighi.",
+    trigger_article: "Art. 25(1)(a)",
     is_trigger: true,
   },
   {
     id: "purpose_change",
-    question: "Hai cambiato lo scopo d'uso del sistema rispetto a quello dichiarato dal provider originale nelle istruzioni operative?",
-    explanation: "Se il provider ha dichiarato che il sistema serve per X (es. screening CV) e tu lo usi per Y (es. valutazione performance dipendenti), si tratta di una modifica dello scopo previsto.",
-    trigger_article: "Art. 28(1)(b) + Art. 3(23)",
+    question: "Hai modificato la finalità prevista del sistema rispetto a quella dichiarata dal fornitore originale?",
+    explanation: "Se il sistema era già ad alto rischio, cambiarne la finalità prevista è una modifica sostanziale (Art. 25(1)(b), Art. 3(23)). Se non era ad alto rischio — anche se è un sistema per finalità generali — e con la nuova finalità lo diventa ai sensi dell'Art. 6, diventi fornitore (Art. 25(1)(c)).",
+    trigger_article: "Art. 25(1)(b)-(c)",
     is_trigger: true,
   },
   {
     id: "retraining",
-    question: "Hai ri-addestrato, fine-tunato o aggiornato il modello AI con nuovi dati o nuovi obiettivi?",
-    explanation: "Qualsiasi retraining o fine-tuning che alteri le prestazioni o il comportamento del modello è considerato modifica sostanziale, anche se limitato a uno strato del modello.",
-    trigger_article: "Art. 28(1)(b) + Art. 3(23)(a)",
+    question: "Hai ri-addestrato o fatto fine-tuning del modello in modo non previsto dalla valutazione di conformità iniziale del fornitore?",
+    explanation: "Il ri-addestramento è modifica sostanziale solo se non era previsto nella valutazione di conformità iniziale e incide sulla conformità ai requisiti del Capo III, Sezione 2 (Art. 3(23)). I cambiamenti predeterminati per i sistemi che continuano ad apprendere dopo l'immissione sul mercato non lo sono (Art. 43(4)).",
+    trigger_article: "Art. 25(1)(b) · Art. 3(23)",
     is_trigger: true,
   },
   {
     id: "performance_impact",
-    question: "Hai integrato il sistema con altri moduli, API o database in modo da alterarne le prestazioni o l'accuratezza complessiva?",
-    explanation: "L'integrazione con sistemi esterni che modifica significativamente l'output finale (es. aggiungere un layer di decisione automatica) può configurare una modifica sostanziale.",
-    trigger_article: "Art. 28(1)(b) + Art. 3(23)(b)",
+    question: "Hai integrato il sistema con altri moduli, API o basi dati in modo da alterarne prestazioni o accuratezza?",
+    explanation: "Un'integrazione costituisce modifica sostanziale se non era prevista dal fornitore e incide sulla conformità ai requisiti — ad esempio accuratezza e robustezza (Art. 15) o sorveglianza umana (Art. 14).",
+    trigger_article: "Art. 25(1)(b) · Art. 3(23)",
     is_trigger: true,
   },
   {
     id: "safety_degradation",
-    question: "Hai apportato modifiche che potrebbero ridurre la conformità del sistema ai requisiti di sicurezza o accuratezza dichiarati dal provider?",
-    explanation: "Disabilitare safety filter, modificare soglie di confidenza, rimuovere meccanismi di override umano: tutte modifiche che peggiorano la conformità configurano trigger Art. 28.",
-    trigger_article: "Art. 28(1)(b) + Art. 3(23)(c)",
+    question: "Hai disattivato o modificato misure di sicurezza, soglie o meccanismi di intervento umano previsti dal fornitore?",
+    explanation: "Disattivare filtri di sicurezza, modificare soglie di confidenza o rimuovere la possibilità di intervento umano incide sulla conformità ai requisiti del Capo III, Sezione 2: è una modifica sostanziale (Art. 3(23)).",
+    trigger_article: "Art. 25(1)(b) · Art. 3(23)",
     is_trigger: true,
   },
   {
     id: "ordinary_maintenance",
-    question: "Le modifiche apportate rientrano nella manutenzione ordinaria (patch di sicurezza, aggiornamenti UI, correzioni bug senza impatto funzionale) come definita dal provider?",
-    explanation: "La manutenzione ordinaria esplicitamente prevista nelle istruzioni del provider non configura modifica sostanziale. Ma deve essere documentata.",
-    trigger_article: "Art. 3(23) — eccezione",
+    question: "Le modifiche rientrano tra quelle previste e pianificate dal fornitore (patch di sicurezza, aggiornamenti dell'interfaccia, correzioni senza impatto funzionale)?",
+    explanation: "Le modifiche previste nella valutazione di conformità iniziale — compresi i cambiamenti predeterminati dei sistemi che continuano ad apprendere (Art. 43(4)) — non sono modifiche sostanziali. Vanno comunque documentate.",
+    trigger_article: "Art. 3(23) — esclusione",
     is_trigger: false,
   },
 ];
@@ -106,19 +106,17 @@ export const PROVIDER_OBLIGATIONS: {
   },
   {
     id: "qms",
-    label: "Sistema di gestione qualità",
+    label: "Sistema di gestione della qualità",
     art: "Art. 17",
-    href: "#",
+    href: "/dashboard/tools/qms",
     source: "manual",
-    unavailable: true,
   },
   {
     id: "conformity",
-    label: "Conformity Assessment",
+    label: "Valutazione della conformità",
     art: "Art. 43",
-    href: "#",
+    href: "/dashboard/tools/conformity",
     source: "manual",
-    unavailable: true,
   },
   {
     id: "declaration",

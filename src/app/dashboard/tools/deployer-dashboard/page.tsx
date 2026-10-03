@@ -105,7 +105,7 @@ export default function DeployerDashboardPage() {
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
             <UserCheck size={18} style={{ color: "#0D1016" }} />
             <h1 style={{ fontSize: 24, fontWeight: 500, color: "#0D1016", letterSpacing: "-0.8px", margin: 0 }}>
-              Deployer Dashboard
+              {t("h1")}
             </h1>
           </div>
           <p style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", margin: 0 }}>

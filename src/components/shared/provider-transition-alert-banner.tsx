@@ -50,13 +50,13 @@ export default function ProviderTransitionAlertBanner() {
       <div style={{ flex: 1 }}>
         <p style={{ color: "#F1F5F9", fontWeight: 600, fontSize: 13, marginBottom: 2 }}>
           {isProvider
-            ? "Provider Transition Alert — obblighi da provider rilevati (Art. 28)"
-            : "Provider Transition — verifica necessaria (Art. 28)"}
+            ? "Cambio di ruolo — obblighi del fornitore rilevati (Art. 25)"
+            : "Cambio di ruolo — verifica necessaria (Art. 25)"}
         </p>
         <p style={{ color: "#94A3B8", fontSize: 12, lineHeight: 1.5 }}>
           {isProvider
-            ? `Le modifiche apportate al sistema AI potrebbero configurare obblighi da provider ai sensi dell'Art. 28 Reg. (UE) 2024/1689.${earliest ? ` Prima modifica sostanziale: ${earliest}.` : ""}`
-            : "Una o più risposte 'Incerto' richiedono valutazione legale prima di escludere obblighi da provider (Art. 28)."
+            ? `Le modifiche apportate al sistema AI potrebbero configurare obblighi del fornitore ai sensi dell'Art. 25 Reg. (UE) 2024/1689.${earliest ? ` Prima modifica sostanziale: ${earliest}.` : ""}`
+            : "Una o più risposte 'Incerto' richiedono valutazione legale prima di escludere obblighi del fornitore (Art. 25)."
           }
         </p>
       </div>

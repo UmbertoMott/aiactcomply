@@ -167,7 +167,7 @@ export default function ResiliencePage() {
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "24px 20px 80px" }}>
         <div className="mb-4">
           <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: T.muted }}>{t("kicker")}</p>
-          <h1 className="text-[22px] font-bold" style={{ color: T.text }}>Resilience</h1>
+          <h1 className="text-[22px] font-bold" style={{ color: T.text }}>{t("h1")}</h1>
         </div>
 
         {/* Privacy */}

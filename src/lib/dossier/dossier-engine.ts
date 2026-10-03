@@ -286,10 +286,10 @@ export function getDossierSections(data: DossierData): DossierSection[] {
       status: data.authorizedRep ? "complete" : "missing",
       completedAt: data.authorizedRep?.completedAt,
     },
-    // Art. 28 — Provider Transition, rilevante per deployer che diventano provider
+    // Art. 25 — Provider Transition, rilevante per deployer che diventano provider
     {
       id: "providerTransition",
-      article: "Art. 28",
+      article: "Art. 25",
       title: "Provider Transition Check",
       href: "/dashboard/compliance-ops/provider-transition",
       status: data.providerTransition

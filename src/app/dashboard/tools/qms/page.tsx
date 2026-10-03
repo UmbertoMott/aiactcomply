@@ -262,7 +262,7 @@ export default function QMSPage() {
       )}
 
       <div className="flex items-start justify-between mb-2">
-        <h1 style={{ fontSize: 24, fontWeight: 500, letterSpacing: "-0.8px", color: "#0D1016" }}>QMS Builder</h1>
+        <h1 style={{ fontSize: 24, fontWeight: 500, letterSpacing: "-0.8px", color: "#0D1016" }}>{t("h1")}</h1>
         <input
           value={systemName}
           onChange={(e) => setSystemName(e.target.value)}
