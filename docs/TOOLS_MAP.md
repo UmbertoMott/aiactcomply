@@ -25,7 +25,6 @@ Legenda colonne:
 | Evidence Layer | `/dashboard/evidence-layer` | `app/dashboard/evidence-layer/page.tsx` | — | — | — | — | — | Raccolta prove/evidenze |
 | Notifications | `/dashboard/notifications` | `app/dashboard/notifications/page.tsx` | — | — | — | — | — | Centro notifiche |
 | Discovery | `/dashboard/discovery` | `app/dashboard/discovery/page.tsx` | — | — | — | — | — | Scoperta automatica sistemi AI |
-| Copilot | `/dashboard/copilot` | `app/dashboard/copilot/page.tsx` | — | — | — | — | — | AI assistant trasversale |
 
 ---
 
@@ -108,7 +107,6 @@ Legenda colonne:
 | **GPAI Module** | `/dashboard/modules/gpai` | `modules/gpai/page.tsx` | 1113 | 10 | 55 | 1 | 0 | Art. 14, 18, 50, 51 |
 | **XAI (Explainability)** | `/dashboard/modules/xai` | `modules/xai/page.tsx` | 1067 | 5 | 41 | 0 | 0 | Art. 10, 12, 13 |
 | **AIA Architect** | `/dashboard/modules/aia-architect` | `modules/aia-architect/page.tsx` | 1188 | 0 | 7 | 2 | 0 | Art. 10, 11, 14, 15 |
-| **Trust Labeler** | `/dashboard/modules/trust-labeler` | `modules/trust-labeler/page.tsx` | 1335 | 2 | 30 | 3 | 0 | Art. 50 — label trasparenza GPAI/chatbot |
 | **Guardian Agent** | `/dashboard/modules/guardian-agent` | `modules/guardian-agent/page.tsx` | 963 | 9 | 7 | **13** | 0 | Art. 14, 15, 86 — friction gate oversight |
 | **FRIA Module** | `/dashboard/modules/fria` | `modules/fria/page.tsx` | 5 | — | — | 0 | 0 | — | Stub/redirect |
 | **Rights Simulator** | `/dashboard/modules/rights-simulator` | `modules/rights-simulator/page.tsx` | 5 | — | — | 0 | 0 | — | Stub/redirect |
@@ -185,4 +183,3 @@ Alcune pagine hanno **due versioni**: la vecchia in `/tools/` e la nuova refacto
 | Guardian Agent | ❌ 13 blu | ✅ | ✅ |
 | Post-Market | ⚠ 4 blu | ❌ 14 verify | ✅ |
 | modules/xai | ✅ | ✅ | ✅ |
-| modules/trust-labeler | ⚠ 3 blu | ✅ | ⚠ parziale |

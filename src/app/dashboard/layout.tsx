@@ -8,7 +8,7 @@ import {
   FileArchive, TrendingUp, Database, UserCheck, ArrowRightLeft, Map, Building2,
   Landmark, Zap, Menu, X, ChevronRight, ChevronLeft, ChevronDown,
   LogOut, Settings, LayoutGrid, Siren, Home, CalendarClock, ShieldCheck, Bot,
-  Monitor, Eye, Megaphone, ClipboardCheck, BadgeCheck, Boxes, AlertTriangle, GraduationCap,
+  Monitor, Eye, Megaphone, ClipboardCheck, BadgeCheck, Boxes, AlertTriangle, GraduationCap, Activity,
 } from "lucide-react";
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { useUserRole, ROLE_LABELS } from "@/lib/hooks/useUserRole";
@@ -168,6 +168,7 @@ function buildPillars(t: T): NavPillar[] {
       { icon: CalendarClock,  label: t("nav_deadlines"),          href: "/dashboard/compliance-ops/deadlines",           art: "Timeline" },
       { icon: FileArchive,    label: "LogVault",                  href: "/dashboard/tools/logvault",                     art: "Art. 12", tooltip: t("tt_logvault") },
       { icon: TrendingUp,     label: t("nav_postMarket"),         href: "/dashboard/post-market",                        art: "Art. 72" },
+      { icon: Activity,       label: t("nav_driftMonitor"),       href: "/dashboard/tools/drift-monitor",                art: "Art. 15 · 72", tooltip: t("tt_driftMonitor") },
       { icon: Database,       label: t("nav_eudb"),               href: "/dashboard/compliance-ops/eudb",                art: "Art. 49" },
       { icon: UserCheck,      label: t("nav_authRep"),            href: "/dashboard/compliance-ops/authorized-rep",      art: "Art. 22" },
       { icon: ArrowRightLeft, label: t("nav_providerTransition"), href: "/dashboard/compliance-ops/provider-transition", art: "Art. 25", tooltip: t("tt_providerTransition") },
