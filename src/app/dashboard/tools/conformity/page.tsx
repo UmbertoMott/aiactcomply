@@ -4,7 +4,7 @@ import Link from "next/link";
 import {
   CheckCircle, XCircle, AlertTriangle, ChevronRight, ChevronDown,
   FileText, Download, Copy, ExternalLink, Shield, BadgeCheck,
-  Info, ArrowRight, Loader2,
+  Info, ArrowRight,
 } from "lucide-react";
 import {
   determineAssessmentPath, loadAllEvidence, loadConformitySnapshot,
@@ -13,7 +13,6 @@ import {
   type PathDetermination, type ConformityEvidence, type AssessmentResult,
   type ConformitySnapshot,
 } from "@/lib/conformity/conformity-engine";
-import { submitToAuthority } from "@/lib/compliance/gateway";
 import { writeToStorage } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { useT } from "@/i18n/LocaleProvider";
@@ -155,7 +154,7 @@ export default function ConformityPage() {
   const [manualForms, setManualForms] = useState<Record<string, { note: string; confirming: boolean }>>({});
   const [declarationGenerated, setDeclarationGenerated] = useState(false);
   const [ceChecklist, setCeChecklist] = useState<Record<string, boolean>>({});
-  const [registering, setRegistering] = useState(false);
+  const [registrationInput, setRegistrationInput] = useState("");
   const [registrationRef, setRegistrationRef] = useState<string>(() => {
     if (typeof window === "undefined") return "";
     try {
@@ -166,7 +165,6 @@ export default function ConformityPage() {
   const [manualRisk, setManualRisk] = useState("high");
   const [manualAnnex, setManualAnnex] = useState("");
   const [toast, setToast] = useState<string>("");
-  const [registrationError, setRegistrationError] = useState<string>("");
 
   // Persisti lo step corrente
   useEffect(() => {
@@ -754,22 +752,21 @@ export default function ConformityPage() {
       localStorage.setItem("aicomply_ce_checklist", JSON.stringify(updated));
     };
 
-    const handleRegister = async () => {
-      setRegistering(true);
-      setRegistrationError("");
-      try {
-        const docs = [
-          "Documentazione tecnica (Allegato IV)",
-          "Dichiarazione di Conformità UE",
-        ];
-        const result = await submitToAuthority(systemName, riskClass, docs);
-        setRegistrationRef(result.referenceNumber);
-        localStorage.setItem("aicomply_registration_result", JSON.stringify(result));
-      } catch (err) {
-        setRegistrationError(err instanceof Error ? err.message : t("submitError"));
-      } finally {
-        setRegistering(false);
-      }
+    // La registrazione (Art. 49) avviene nella banca dati UE (Art. 71) a cura
+    // del soggetto obbligato: qui si annota solo il numero ottenuto.
+    const handleSaveRegistration = () => {
+      const ref = registrationInput.trim();
+      if (!ref) return;
+      setRegistrationRef(ref);
+      localStorage.setItem("aicomply_registration_result", JSON.stringify({
+        referenceNumber: ref, systemName, riskClass, source: "manual", recordedAt: new Date().toISOString(),
+      }));
+    };
+
+    const handleEditRegistration = () => {
+      setRegistrationInput(registrationRef);
+      setRegistrationRef("");
+      localStorage.removeItem("aicomply_registration_result");
     };
 
     const handleComplete = () => {
@@ -921,27 +918,38 @@ export default function ConformityPage() {
                 <div style={{
                   padding: "10px 12px", borderRadius: 8,
                   background: C.greenBg, border: `1px solid ${C.greenBorder}`,
+                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
                 }}>
                   <p style={{ fontSize: 12, color: C.green, margin: 0, fontWeight: 600 }}>
-                    ✓ {t("notifSent")} {registrationRef}
+                    ✓ {t("regRecorded")} {registrationRef}
                   </p>
+                  <button onClick={handleEditRegistration}
+                    style={{ fontSize: 11, color: C.textSecondary, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
+                    {t("regEdit")}
+                  </button>
                 </div>
               ) : (
-                <button
-                  style={{ ...btnPrimary, opacity: registering ? 0.7 : 1 }}
-                  onClick={handleRegister}
-                  disabled={registering}
-                >
-                  {registering ? (
-                    <><Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> {t("submitting")}</>
-                  ) : (
-                    <><Shield size={13} /> {t("submitNotif")}</>
-                  )}
-                </button>
-              )}
-
-              {registrationError && (
-                <p style={{ fontSize: 12, color: C.red, marginTop: 8 }}>{registrationError}</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <p style={{ fontSize: 12, color: C.textSecondary, margin: 0, lineHeight: 1.5 }}>
+                    {t("regHowTo")}
+                  </p>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input
+                      value={registrationInput}
+                      onChange={(e) => setRegistrationInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") handleSaveRegistration(); }}
+                      placeholder={t("regPlaceholder")}
+                      style={{ flex: 1, fontSize: 12, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.12)", background: "#fff", color: C.text }}
+                    />
+                    <button style={{ ...btnPrimary, opacity: registrationInput.trim() ? 1 : 0.5 }}
+                      onClick={handleSaveRegistration} disabled={!registrationInput.trim()}>
+                      <Shield size={13} /> {t("regSave")}
+                    </button>
+                  </div>
+                  <Link href="/dashboard/compliance-ops/eudb" style={{ fontSize: 12, color: C.text, textDecoration: "underline" }}>
+                    {t("regPrepareLink")}
+                  </Link>
+                </div>
               )}
             </div>
 

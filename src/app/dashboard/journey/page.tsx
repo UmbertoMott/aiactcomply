@@ -231,9 +231,9 @@ const PHASES: Phase[] = [
         roles: ["provider", "deployer"],
       },
       {
-        label: "Compliance Hub",
-        href: "/dashboard/compliance-nexus",
-        art: "Art. 71",
+        label: "Scadenze",
+        href: "/dashboard/compliance-ops/deadlines",
+        art: "Timeline",
         desc: "Cruscotto scadenze, stato complessivo e linea del tempo normativa.",
         storageKey: null,
         roles: ["provider", "deployer", "importer", "distributor"],
