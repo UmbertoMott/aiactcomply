@@ -1,4 +1,5 @@
 // src/lib/inventory/ai-system.ts
+import type { RoleAnswers, RiskAnswers, Role } from "@/lib/obligations/engine"
 
 export type SystemRole =
   | "provider"
@@ -43,6 +44,11 @@ export interface AISystem {
   createdAt: string
   updatedAt: string
   source: "manual" | "ai_draft" | "import" | "clone"
+  // Classificazione guidata (lib/obligations/engine.ts) — assenti nei sistemi creati prima
+  roleAnswers?: RoleAnswers
+  riskAnswers?: RiskAnswers
+  roles?: Role[]
+  assessedAt?: string
 }
 
 const INVENTORY_KEY = "aicomply_ai_inventory"

@@ -8,7 +8,8 @@ import {
   Activity, BarChart2, Scale, Globe, Bell, Cpu,
   ClipboardCheck, Users, Zap, ScrollText, Building2,
 } from "lucide-react";
-import { loadInventory } from "@/lib/inventory/ai-system";
+import { loadInventory, updateSystem } from "@/lib/inventory/ai-system";
+import { determineRoles, assessRisk, computeObligations, formatDate, RISK_LABEL, ROLE_LABEL } from "@/lib/obligations/engine";
 import type { AISystem, SystemTier } from "@/lib/inventory/ai-system";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -76,7 +77,7 @@ const OBLIGATIONS: Obligation[] = [
     what: "Identificare, analizzare e mitigare i rischi durante tutto il ciclo di vita del sistema AI",
     icon: Shield,
     storageKey: "aicomply_risk_manager_result",
-    href: "/dashboard/modules/risk-manager",
+    href: "/dashboard/tools/risk-manager",
     toolLabel: "Risk Manager",
     tiers: ["high_risk"],
     detect: raw => {
@@ -382,6 +383,12 @@ const OBLIGATIONS: Obligation[] = [
   },
 ];
 
+// Riga della tabella: obblighi del motore (classificazione guidata) o elenco legacy per tier
+interface Row {
+  id: string; article: string; label: string; what: string; icon: React.ElementType;
+  href?: string; toolLabel?: string; status: ObStatus; meta?: string; note?: string;
+}
+
 // ─── Status chip ──────────────────────────────────────────────────────────────
 function StatusChip({ status }: { status: ObStatus }) {
   const cfg = {
@@ -407,22 +414,50 @@ export default function SystemDetailPage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const [system, setSystem] = useState<AISystem | null>(null);
-  const [obligations, setObligations] = useState<(Obligation & { status: ObStatus })[]>([]);
+  const [obligations, setObligations] = useState<Row[]>([]);
+  const [engineInfo, setEngineInfo] = useState<{ title: string; notes: string[] } | null>(null);
   const [filter, setFilter] = useState<"all" | ObStatus>("all");
 
   useEffect(() => {
     const sys = loadInventory().find(s => s.id === id);
     if (!sys) return;
     setSystem(sys);
+    if (sys.roleAnswers && sys.riskAnswers) {
+      // Classificazione guidata: obblighi da ruolo + rischio (lib/obligations/engine.ts)
+      const roleResult = determineRoles(sys.roleAnswers);
+      const risk = assessRisk(sys.riskAnswers);
+      const res = computeObligations(sys.roleAnswers, roleResult, risk, sys.riskAnswers);
+      setEngineInfo({
+        title: `${res.roles.length ? res.roles.map(r => ROLE_LABEL[r]).join(" + ") : "Nessun ruolo operativo"} · ${RISK_LABEL[risk.category]}`,
+        notes: res.notes,
+      });
+      setObligations(res.obligations.map(o => ({
+        id: o.id, article: o.article, label: o.title, what: o.what, icon: ClipboardCheck,
+        href: o.tool?.href, toolLabel: o.tool?.label, note: o.note,
+        meta: `Dal ${formatDate(o.appliesFrom)}${o.iso.length ? ` · ISO/IEC 42001: ${o.iso.join(", ")}` : ""}`,
+        status: sys.completedObligations.includes(o.id) ? "done"
+          : o.storageKey && hasData(localStorage.getItem(o.storageKey)) ? "partial" : "missing",
+      })));
+      return;
+    }
     const relevant = OBLIGATIONS.filter(o =>
       o.tiers.includes(sys.tier as OblTier)
     );
-    const withStatus = relevant.map(o => {
+    setObligations(relevant.map(o => {
       const raw = o.storageKey ? localStorage.getItem(o.storageKey) : null;
-      return { ...o, status: o.detect(raw) };
-    });
-    setObligations(withStatus);
+      return { id: o.id, article: o.article, label: o.label, what: o.what, icon: o.icon, href: o.href, toolLabel: o.toolLabel, status: o.detect(raw) };
+    }));
   }, [id]);
+
+  function toggleDone(oid: string) {
+    if (!system) return;
+    const completed = system.completedObligations.includes(oid)
+      ? system.completedObligations.filter(x => x !== oid)
+      : [...system.completedObligations, oid];
+    updateSystem(system.id, { completedObligations: completed });
+    setSystem({ ...system, completedObligations: completed });
+    setObligations(prev => prev.map(o => o.id === oid ? { ...o, status: completed.includes(oid) ? "done" : "missing" } : o));
+  }
 
   if (!system) return (
     <div style={{ padding: 48, fontFamily: "'DM Sans',sans-serif" }}>
@@ -548,15 +583,30 @@ export default function SystemDetailPage() {
         <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", justifyContent: "flex-end" }}>
           <Link href={`/dashboard/tools/inventory/${system.id}/classify`} style={{
             fontSize: 12, fontWeight: 600, padding: "7px 18px", borderRadius: 8,
-            background: system.tier === "unclassified" ? T.text : "rgba(0,0,0,0.06)",
-            color: system.tier === "unclassified" ? "white" : "#374151",
-            border: `1px solid ${system.tier === "unclassified" ? T.text : "rgba(0,0,0,0.1)"}`,
+            background: !system.assessedAt ? T.text : "rgba(0,0,0,0.06)",
+            color: !system.assessedAt ? "white" : "#374151",
+            border: `1px solid ${!system.assessedAt ? T.text : "rgba(0,0,0,0.1)"}`,
             textDecoration: "none", display: "inline-block",
           }}>
-            {system.tier === "unclassified" ? "Classifica sistema →" : "Riclassifica →"}
+            {!system.assessedAt ? "Classifica con la procedura guidata →" : "Rivedi la classificazione →"}
           </Link>
         </div>
       </div>
+
+      {engineInfo ? (
+        <div style={{ ...card, padding: "14px 20px", marginBottom: 12 }}>
+          <p style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>{engineInfo.title}</p>
+          {engineInfo.notes.map((n, i) => (
+            <p key={i} style={{ fontSize: 12, color: T.muted, margin: "6px 0 0", lineHeight: 1.5 }}>{n}</p>
+          ))}
+        </div>
+      ) : (
+        <div style={{ ...card, padding: "14px 20px", marginBottom: 12, borderColor: T.amberBdr, background: T.amberBg }}>
+          <p style={{ fontSize: 12.5, color: T.text, margin: 0, lineHeight: 1.5 }}>
+            Questo elenco è indicativo e basato solo sul livello di rischio. Usa la procedura guidata per ottenere gli obblighi esatti in base a ruolo e rischio del sistema.
+          </p>
+        </div>
+      )}
 
       {/* ── Filter tabs ── */}
       <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
@@ -631,6 +681,14 @@ export default function SystemDetailPage() {
                   <div style={{ fontSize: 11, color: T.muted, lineHeight: 1.45 }}>
                     {o.what}
                   </div>
+                  {o.note && <div style={{ fontSize: 11, color: T.amber, marginTop: 3 }}>{o.note}</div>}
+                  {o.meta && <div style={{ fontSize: 10.5, color: T.faint, marginTop: 3 }}>{o.meta}</div>}
+                  {engineInfo && (
+                    <button type="button" onClick={() => toggleDone(o.id)} style={{
+                      marginTop: 6, fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 100, cursor: "pointer",
+                      border: `1px solid ${T.border}`, background: "white", color: o.status === "done" ? T.green : T.text,
+                    }}>{o.status === "done" ? "✓ Fatto — annulla" : "Segna come fatto"}</button>
+                  )}
                 </div>
               </div>
 
@@ -638,7 +696,7 @@ export default function SystemDetailPage() {
               <StatusChip status={o.status} />
 
               {/* Tool link */}
-              <Link href={o.href} style={{
+              {o.href ? <Link href={o.href} style={{
                 display: "inline-flex", alignItems: "center", gap: 5,
                 fontSize: 11, fontWeight: 600, color: T.text,
                 textDecoration: "none", padding: "6px 12px",
@@ -648,7 +706,7 @@ export default function SystemDetailPage() {
               }}>
                 {o.toolLabel}
                 <ChevronRight size={11} />
-              </Link>
+              </Link> : <span style={{ fontSize: 11, color: T.faint }}>—</span>}
             </div>
           );
         })}

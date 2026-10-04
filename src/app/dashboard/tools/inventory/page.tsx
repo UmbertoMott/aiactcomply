@@ -258,7 +258,7 @@ function SystemCard({ system, onEdit, onClassify, onDelete }: {
           }}>
             {t("analysis360")}
           </Link>
-          {system.tier === "unclassified" ? (
+          {!system.assessedAt ? (
             <button onClick={onClassify} style={{ padding: "6px 10px", borderRadius: 7, border: "none", background: "rgba(0,0,0,0.06)", color: "#374151", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
               {t("classify")}
             </button>
@@ -321,7 +321,7 @@ const RISK_TIER_MAP: Record<string, SystemTier> = {
 type AddStep = "channel" | "describe" | "discovery" | "review"
 
 function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "channel" }: {
-  onClose: () => void; onSave: () => void; existingSystems: AISystem[]
+  onClose: () => void; onSave: (newId?: string) => void; existingSystems: AISystem[]
   initialStep?: AddStep
 }) {
   const t = useT("toolInventory")
@@ -426,7 +426,7 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
       createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
       source: step === "review" && discResults ? "import" : draft ? "ai_draft" : "manual",
     }
-    addSystem(sys); onSave()
+    addSystem(sys); onSave(sys.id)
   }
 
   const isDescribeReady = !loading && freeText.trim().length >= 15
@@ -1377,7 +1377,11 @@ export default function InventoryPage() {
 
       {/* MODAL */}
       {modal?.type === "add" && (
-        <AddSystemModal onClose={() => setModal(null)} onSave={() => { refresh(); setModal(null) }} existingSystems={systems} initialStep={modal.initialStep} />
+        <AddSystemModal onClose={() => setModal(null)} onSave={(newId) => {
+          refresh(); setModal(null)
+          // Passo successivo: classificazione guidata (ruolo → rischio → obblighi)
+          if (newId) router.push(`/dashboard/tools/inventory/${newId}/classify`)
+        }} existingSystems={systems} initialStep={modal.initialStep} />
       )}
       {modal?.type === "edit" && (
         <EditSystemModal system={modal.system} onClose={() => setModal(null)} onSave={() => { refresh(); setModal(null) }} />
