@@ -56,7 +56,7 @@ export default function ObligationsSummary({ roles, obligations, notes, riskTitl
         );
       })}
       <p style={{ fontSize: 11, color: T.faint, lineHeight: 1.5, margin: "4px 2px 0" }}>
-        Corrispondenze ISO/IEC 42001:2023 indicative (clausole e controlli dell&apos;Allegato A), da verificare sul testo della norma.
+        Corrispondenze con ISO/IEC 42001:2023 (clausole 4-10 e controlli dell&apos;Allegato A): numerazione verificata sulla norma, abbinamento con gli articoli di natura interpretativa. Il rispetto della norma non equivale alla conformità al regolamento.
       </p>
     </>
   );
