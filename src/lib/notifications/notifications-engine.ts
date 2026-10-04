@@ -51,17 +51,17 @@ export const REGULATORY_DEADLINES: RegulatoryDeadline[] = [
     id: "gpai-2025-08",
     date: "2025-08-02",
     title: "Obblighi GPAI — Art. 51-55",
-    description: "In vigore gli obblighi per provider e deployer di General Purpose AI. Se usi OpenAI, Anthropic o Google AI devi essere conforme.",
+    description: "In vigore gli obblighi per i fornitori di modelli di IA per finalità generali (Artt. 53-55). Chi usa o integra un modello di terzi non assume questi obblighi, ma deve ricevere dal fornitore le informazioni dell'Allegato XII.",
     article: "Art. 51-55",
     affectsRiskLevels: ["gpai"],
     mandatoryTools: ["/dashboard/tools/gpai"],
   },
   {
-    id: "high-risk-2026-08",
-    date: "2026-08-02",
+    id: "high-risk-annex3-2027-12",
+    date: "2027-12-02",
     title: "Sistemi ad alto rischio — Allegato III",
-    description: "Tutti i sistemi AI ad alto rischio dell'Allegato III devono essere conformi. Obblighi: Art. 9-17, registrazione banca dati UE.",
-    article: "Art. 9-17 + Art. 49",
+    description: "Si applicano gli obblighi per i sistemi ad alto rischio dell'Allegato III (Art. 113 come modificato dal Reg. (UE) 2026/1744). I sistemi già sul mercato prima di questa data sono soggetti solo se subiscono modifiche significative (Art. 111(2)).",
+    article: "Art. 9-17, 26-27, 49",
     affectsRiskLevels: ["high"],
     mandatoryTools: [
       "/dashboard/tools/risk-manager",
@@ -75,11 +75,11 @@ export const REGULATORY_DEADLINES: RegulatoryDeadline[] = [
     ],
   },
   {
-    id: "high-risk-legacy-2027-08",
-    date: "2027-08-02",
-    title: "Sistemi ad alto rischio — Allegato III pt. 6-8",
-    description: "Sistemi AI ad alto rischio già in uso prima del 2 agosto 2026 devono completare la conformità (Allegato III punti 6-8).",
-    article: "Art. 111 — Disposizioni transitorie",
+    id: "high-risk-annex1-2028-08",
+    date: "2028-08-02",
+    title: "Sistemi ad alto rischio — Allegato I",
+    description: "Si applicano gli obblighi per i sistemi ad alto rischio che sono componenti di sicurezza di prodotti disciplinati dall'Allegato I (Art. 113 come modificato dal Reg. (UE) 2026/1744).",
+    article: "Art. 6(1), Allegato I",
     affectsRiskLevels: ["high"],
     mandatoryTools: [],
   },
@@ -170,7 +170,7 @@ export function generateProgressNotifications(
   const today = new Date().toISOString();
 
   if (riskLevel === "high" || riskLevel === "High") {
-    const highRiskDeadline = REGULATORY_DEADLINES.find((d) => d.id === "high-risk-2026-08");
+    const highRiskDeadline = REGULATORY_DEADLINES.find((d) => d.id === "high-risk-annex3-2027-12");
     if (highRiskDeadline) {
       const missingTools = highRiskDeadline.mandatoryTools.filter(
         (tool) => !completedTools.some((ct) => ct.includes(tool.split("/").pop()!))
@@ -180,7 +180,7 @@ export function generateProgressNotifications(
         notifications.push({
           id: "missing-high-risk-tools",
           title: `${missingTools.length} tool obbligatori da completare`,
-          body: `Il tuo sistema è ad alto rischio (Allegato III). Hai ${missingTools.length} tool di compliance ancora da completare prima del 2 agosto 2026.`,
+          body: `Il tuo sistema è ad alto rischio (Allegato III). Hai ${missingTools.length} tool di compliance ancora da completare prima del 2 dicembre 2027 (Allegato III).`,
           priority: missingTools.length > 5 ? "critical" : "high",
           category: "tool_incomplete",
           createdAt: today,

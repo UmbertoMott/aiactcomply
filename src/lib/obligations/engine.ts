@@ -6,7 +6,10 @@
 // Passo 4: computeObligations() — gli obblighi che ne derivano, con articolo,
 //          data di applicazione (Artt. 111, 113) e corrispondenza ISO/IEC 42001.
 //
-// Fonte: Regolamento (UE) 2024/1689, testo GU L del 12.7.2024.
+// Fonte: Regolamento (UE) 2024/1689 (GU L del 12.7.2024) come modificato dal
+// Regolamento (UE) 2026/1744 "Omnibus digitale sull'IA" (GU L del 24.7.2026, in vigore dal 27.7.2026):
+// nuove date dell'Art. 113, Art. 111(2) e (4), Art. 5(1)(ba)-(bb), nuovo Art. 4, Art. 6(1 bis)-(1 quater),
+// regolamento macchine spostato nell'Allegato I, sezione B.
 // Corrispondenze con ISO/IEC 42001:2023: numerazione e titoli di clausole e
 // controlli dell'Allegato A verificati sulla prima edizione (2023-12); l'abbinamento
 // articolo ↔ clausola è interpretativo (la norma non è un'attuazione del regolamento).
@@ -112,7 +115,7 @@ export function determineRoles(a: RoleAnswers): RoleResult {
 // ─── Passo 3 · Rischio ────────────────────────────────────────────────────────
 
 export type ScopeExclusion = "military" | "scientific_research";
-export type Art5Letter = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h";
+export type Art5Letter = "a" | "b" | "ba" | "bb" | "c" | "d" | "e" | "f" | "g" | "h";
 export type Art63Condition = "a" | "b" | "c" | "d";
 export type AnnexISection = "A" | "B";
 
@@ -124,27 +127,34 @@ export interface Art5Practice {
   ref: string;
   /** Eccezione o limite previsto dal testo, se esiste */
   exception?: string;
+  /** Data di applicazione del divieto (Art. 113) */
+  appliesFrom: string;
 }
 
 export const ART5_PRACTICES: Art5Practice[] = [
-  { letter: "a", ref: "Art. 5(1)(a)",
+  { letter: "a", appliesFrom: "2025-02-02", ref: "Art. 5(1)(a)",
     question: "Usa tecniche subliminali, manipolative o ingannevoli che alterano in modo rilevante il comportamento delle persone e possono causare un danno significativo?" },
-  { letter: "b", ref: "Art. 5(1)(b)",
+  { letter: "b", appliesFrom: "2025-02-02", ref: "Art. 5(1)(b)",
     question: "Sfrutta le vulnerabilità dovute a età, disabilità o situazione sociale o economica per alterare il comportamento delle persone, con possibile danno significativo?" },
-  { letter: "c", ref: "Art. 5(1)(c)",
+  { letter: "ba", appliesFrom: "2026-12-02", ref: "Art. 5(1)(ba)",
+    question: "Genera o manipola immagini, video o audio realistici delle parti intime di una persona identificabile, o che la ritraggono in attività sessualmente esplicite, senza il suo consenso esplicito?" },
+  { letter: "bb", appliesFrom: "2026-12-02", ref: "Art. 5(1)(bb)",
+    question: "Genera o manipola materiale pedopornografico ai sensi dell'Art. 2, lettere c) ed e), della direttiva 2011/93/UE?",
+    exception: "Non vietato se si applica una causa di giustificazione (\"without right\" defence) prevista dal diritto nazionale." },
+  { letter: "c", appliesFrom: "2025-02-02", ref: "Art. 5(1)(c)",
     question: "Assegna un \"punteggio sociale\" alle persone in base al comportamento o alla personalità, con trattamenti sfavorevoli in contesti diversi o sproporzionati?" },
-  { letter: "d", ref: "Art. 5(1)(d)",
+  { letter: "d", appliesFrom: "2025-02-02", ref: "Art. 5(1)(d)",
     question: "Valuta il rischio che una persona commetta un reato basandosi solo sulla profilazione o sui tratti della personalità?",
     exception: "Non vietato se supporta una valutazione umana già basata su fatti oggettivi e verificabili connessi a un'attività criminosa." },
-  { letter: "e", ref: "Art. 5(1)(e)",
+  { letter: "e", appliesFrom: "2025-02-02", ref: "Art. 5(1)(e)",
     question: "Crea o amplia banche dati di riconoscimento facciale raccogliendo immagini del volto da internet o da telecamere in modo non mirato (scraping)?" },
-  { letter: "f", ref: "Art. 5(1)(f)",
+  { letter: "f", appliesFrom: "2025-02-02", ref: "Art. 5(1)(f)",
     question: "Deduce le emozioni delle persone sul luogo di lavoro o negli istituti di istruzione?",
     exception: "Non vietato se l'uso è destinato a motivi medici o di sicurezza." },
-  { letter: "g", ref: "Art. 5(1)(g)",
+  { letter: "g", appliesFrom: "2025-02-02", ref: "Art. 5(1)(g)",
     question: "Classifica le persone in base ai dati biometrici per dedurne razza, opinioni politiche, appartenenza sindacale, convinzioni religiose o filosofiche, vita od orientamento sessuale?",
     exception: "Non vietato per l'etichettatura o il filtraggio di set di dati biometrici acquisiti legalmente o per la categorizzazione nelle attività di contrasto." },
-  { letter: "h", ref: "Art. 5(1)(h)",
+  { letter: "h", appliesFrom: "2025-02-02", ref: "Art. 5(1)(h)",
     question: "Identifica le persone a distanza, in tempo reale, tramite dati biometrici in spazi accessibili al pubblico, a fini di attività di contrasto?",
     exception: "Ammesso solo per gli obiettivi tassativi dell'Art. 5(1)(h)(i)-(iii), con autorizzazione preventiva e le condizioni dei paragrafi 2-7." },
 ];
@@ -158,7 +168,7 @@ export interface AnnexIAct {
 
 /** Allegato I — normativa di armonizzazione dell'Unione */
 export const ANNEX_I_ACTS: AnnexIAct[] = [
-  { id: "machinery", section: "A", label: "Macchine", ref: "Dir. 2006/42/CE (sostituita dal reg. sui prodotti macchina)" },
+  
   { id: "toys", section: "A", label: "Giocattoli", ref: "Dir. 2009/48/CE" },
   { id: "recreational_craft", section: "A", label: "Imbarcazioni da diporto e moto d'acqua", ref: "Dir. 2013/53/UE" },
   { id: "lifts", section: "A", label: "Ascensori e componenti di sicurezza", ref: "Dir. 2014/33/UE" },
@@ -178,6 +188,7 @@ export const ANNEX_I_ACTS: AnnexIAct[] = [
   { id: "motor_vehicles", section: "B", label: "Veicoli a motore e loro rimorchi", ref: "Reg. (UE) 2018/858" },
   { id: "vehicle_safety", section: "B", label: "Sicurezza generale dei veicoli", ref: "Reg. (UE) 2019/2144" },
   { id: "civil_aviation", section: "B", label: "Aviazione civile (aeromobili senza equipaggio)", ref: "Reg. (UE) 2018/1139" },
+  { id: "machinery", section: "B", label: "Prodotti macchina", ref: "Reg. (UE) 2023/1230 (spostato nella sezione B dal Reg. (UE) 2026/1744)" },
 ];
 
 export interface AnnexIIIUse {
@@ -255,8 +266,11 @@ export interface RiskAnswers {
   workplace?: boolean;
   decisionsOnPersons?: boolean;
   personalData?: boolean;
-  /** Già immesso sul mercato o messo in servizio prima del 2 agosto 2026, senza modifiche significative (Art. 111(2)) */
+  /** Immesso sul mercato o messo in servizio prima della data di applicazione del Capo III
+   *  (2/12/2027 All. III, 2/8/2028 All. I) e senza modifiche significative di progettazione da allora (Art. 111(2)) */
   legacyNoSignificantChange?: boolean;
+  /** Sistema che genera contenuti sintetici già immesso sul mercato prima del 2/8/2026 (Art. 111(4)) */
+  syntheticPlacedBeforeAug2026?: boolean;
 }
 
 export type RiskCategory =
@@ -326,7 +340,7 @@ export function assessRisk(a: RiskAnswers): RiskResult {
 
   // Art. 5
   const exceptions = new Set(a.art5Exceptions ?? []);
-  const prohibited = (a.art5 ?? []).filter(l => !((["d", "f", "g", "h"] as Art5Letter[]).includes(l) && exceptions.has(l)));
+  const prohibited = (a.art5 ?? []).filter(l => !((["bb", "d", "f", "g", "h"] as Art5Letter[]).includes(l) && exceptions.has(l)));
   if (prohibited.length > 0) {
     base.category = "prohibited";
     base.prohibited = prohibited;
@@ -428,6 +442,9 @@ const D_FEB_2025 = "2025-02-02";
 const D_AUG_2025 = "2025-08-02";
 const D_AUG_2026 = "2026-08-02";
 const D_AUG_2027 = "2027-08-02";
+const D_DEC_2026 = "2026-12-02";
+const D_DEC_2027 = "2027-12-02";
+const D_AUG_2028 = "2028-08-02";
 const D_AUG_2030 = "2030-08-02";
 
 const T = {
@@ -492,27 +509,28 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
   // ── Tutti: Art. 4 ──
   if (isProvider || isDeployer) {
     add({ id: "art4-literacy", group: "all", role: "all", title: "Alfabetizzazione in materia di IA",
-      what: "Garantire, nella misura del possibile, un livello sufficiente di alfabetizzazione di chi usa o gestisce il sistema, tenendo conto di conoscenze, contesto d'uso e persone interessate.",
-      article: "Art. 4", iso: ["7.2", "7.3", "A.4.6"], appliesFrom: D_FEB_2025, tool: T.literacy, storageKey: "aicomply_literacy_result" });
+      what: "Adottare misure volte a sostenere lo sviluppo dell'alfabetizzazione in materia di IA di chi usa o gestisce il sistema, tenendo conto di conoscenze, contesto d'uso e persone interessate. Non è richiesto un livello specifico.",
+      article: "Art. 4 (testo modificato dal Reg. (UE) 2026/1744)", iso: ["7.2", "7.3", "A.4.6"], appliesFrom: D_FEB_2025, tool: T.literacy, storageKey: "aicomply_literacy_result" });
   }
 
   // ── Pratiche vietate ──
   if (risk.category === "prohibited") {
     add({ id: "art5-stop", group: "prohibited", role: "all", title: "Interrompere la pratica vietata",
       what: "Il sistema non può essere immesso sul mercato, messo in servizio o usato nella forma attuale. Interromperne l'uso o modificarlo in modo che non ricada più nell'Art. 5.",
-      article: `Art. 5(1)(${risk.prohibited.join(", ")})`, iso: ["6.1.2", "A.5.4"], appliesFrom: D_FEB_2025, tool: T.prohibited,
+      article: `Art. 5(1)(${risk.prohibited.join(", ")})`, iso: ["6.1.2", "A.5.4"],
+      appliesFrom: risk.prohibited.every(l => l === "ba" || l === "bb") ? D_DEC_2026 : D_FEB_2025, tool: T.prohibited,
       note: "Sanzione fino a 35 000 000 EUR o al 7 % del fatturato mondiale annuo (Art. 99(3))." });
     return { roles: [...roles], obligations: out, notes };
   }
 
   // ── Transitorio Art. 111(2) ──
-  let hrFrom = annexI ? D_AUG_2027 : D_AUG_2026;
+  let hrFrom = annexI ? D_AUG_2028 : D_DEC_2027;
   if (highRisk && riskAnswers.legacyNoSignificantChange) {
     if (publicAuthority) {
       hrFrom = D_AUG_2030;
-      notes.push("Sistema già in uso prima del 2 agosto 2026 senza modifiche significative: per i sistemi destinati alle autorità pubbliche, fornitori e deployer si conformano entro il 2 agosto 2030 (Art. 111(2)).");
+      notes.push("Sistema immesso sul mercato o in servizio prima della data di applicazione del Capo III e senza modifiche significative: per i sistemi destinati alle autorità pubbliche, fornitori e deployer si conformano comunque entro il 2 agosto 2030 (Art. 111(2)).");
     } else {
-      notes.push("Sistema già immesso sul mercato o in servizio prima del 2 agosto 2026: gli obblighi per l'alto rischio si applicano solo se da quella data subisce modifiche significative di progettazione (Art. 111(2)). Gli obblighi sono mostrati per pianificare l'adeguamento.");
+      notes.push(`Sistema immesso sul mercato o in servizio prima del ${formatDate(hrFrom)}: gli obblighi per l'alto rischio si applicano solo se da quella data subisce modifiche significative di progettazione (Art. 111(2), come modificato dal Reg. (UE) 2026/1744). Gli obblighi sono mostrati per pianificare l'adeguamento.`);
     }
   }
 
@@ -638,8 +656,12 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
   const t = (o: Omit<Obligation, "group" | "appliesFrom" | "iso" | "tool">) => add({ ...o, group: "transparency", appliesFrom: D_AUG_2026, iso: o.role === "provider" ? ["A.8.2"] : ["A.8.5"], tool: T.art50 });
   if (risk.art50.includes("50_1") && isProvider) t({ id: "art50-1", role: "provider", title: "Avvisare che si interagisce con un'IA",
     what: "Progettare il sistema perché le persone siano informate che stanno interagendo con un'IA, salvo che sia evidente dal contesto, al più tardi alla prima interazione.", article: "Art. 50(1), (5)" });
-  if (risk.art50.includes("50_2") && isProvider) t({ id: "art50-2", role: "provider", title: "Marcare i contenuti generati",
-    what: "Marcare gli output audio, immagine, video o testo sintetici in formato leggibile meccanicamente e rilevabili come generati o manipolati artificialmente.", article: "Art. 50(2)" });
+  if (risk.art50.includes("50_2") && isProvider) {
+    add({ id: "art50-2", role: "provider", group: "transparency", iso: ["A.8.2"], tool: T.art50,
+      appliesFrom: riskAnswers.syntheticPlacedBeforeAug2026 ? D_DEC_2026 : D_AUG_2026, title: "Marcare i contenuti generati",
+      what: "Marcare gli output audio, immagine, video o testo sintetici in formato leggibile meccanicamente e rilevabili come generati o manipolati artificialmente.",
+      article: riskAnswers.syntheticPlacedBeforeAug2026 ? "Art. 50(2); Art. 111(4)" : "Art. 50(2)" });
+  }
   if (risk.art50.includes("50_3") && isDeployer) t({ id: "art50-3", role: "deployer", title: "Informare su riconoscimento emozioni o categorizzazione biometrica",
     what: "Informare le persone esposte del funzionamento del sistema e trattare i dati nel rispetto del GDPR.", article: "Art. 50(3), (5)" });
   if (risk.art50.includes("50_4_deepfake") && isDeployer) t({ id: "art50-4-df", role: "deployer", title: "Dichiarare i deep fake",

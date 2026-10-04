@@ -257,30 +257,13 @@ export default function ConformityPage() {
                   </p>
                   <div style={{ marginTop: 12 }}>
                     <p style={{ ...labelStyle, marginBottom: 8 }}>{t("accreditedNb")}</p>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                      {[
-                        { name: "TÜV SÜD", country: t("country_germany"), spec: "Safety, AI Systems, Machinery", url: "https://www.tuvsud.com" },
-                        { name: "Bureau Veritas", country: t("country_france"), spec: "Product Safety, Digital Systems", url: "https://www.bureauveritas.com" },
-                        { name: "BSI Group", country: "UK/EU", spec: "IT Security, AI Governance", url: "https://www.bsigroup.com" },
-                        { name: "DNV", country: t("country_norway"), spec: "Risk Management, Digital Trust", url: "https://www.dnv.com" },
-                      ].map((nb) => (
-                        <div key={nb.name} style={{
-                          display: "flex", alignItems: "center", justifyContent: "space-between",
-                          background: "#fff", borderRadius: 8, padding: "8px 12px",
-                          border: "1px solid rgba(0,0,0,0.07)",
-                        }}>
-                          <div>
-                            <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{nb.name}</span>
-                            <span style={{ fontSize: 11, color: C.textTertiary, marginLeft: 8 }}>{nb.country}</span>
-                            <div style={{ fontSize: 11, color: C.textSecondary }}>{nb.spec}</div>
-                          </div>
-                          <a href={nb.url} target="_blank" rel="noopener noreferrer"
-                            style={{ color: C.textSecondary, display: "flex", alignItems: "center", gap: 4, fontSize: 11 }}>
-                            <ExternalLink size={12} /> {t("site")}
-                          </a>
-                        </div>
-                      ))}
-                    </div>
+                    <p style={{ fontSize: 12, color: C.textSecondary, lineHeight: 1.5, margin: 0 }}>
+                      {t("nbOfficialList")}{" "}
+                      <a href="https://ec.europa.eu/growth/tools-databases/nando" target="_blank" rel="noopener noreferrer"
+                        style={{ color: C.text, textDecoration: "underline", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                        NANDO <ExternalLink size={11} />
+                      </a>
+                    </p>
                   </div>
                 </>
               )}

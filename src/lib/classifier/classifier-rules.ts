@@ -12,7 +12,7 @@
 
 export interface Art5Practice {
   /** Lettera ufficiale dell'articolo */
-  letter: "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h";
+  letter: "a" | "b" | "ba" | "bb" | "c" | "d" | "e" | "f" | "g" | "h";
   ref: string;
   label: string;
   description: string;
@@ -40,11 +40,28 @@ export const ART5_PRACTICES: Art5Practice[] = [
     maxFine: "€35.000.000 o 7% fatturato mondiale",
   },
   {
+    letter: "ba",
+    ref: "Art. 5(1)(ba) EU AI Act — introdotto dal Reg. (UE) 2026/1744, dal 2 dicembre 2026",
+    label: "Contenuti intimi realistici non consensuali (app di \"nudificazione\")",
+    description:
+      "Sistemi che generano o manipolano immagini, video, audio o materiale analogo realistici delle parti intime di una persona identificabile, o che la ritraggono in attività sessualmente esplicite, senza il suo consenso libero, specifico, informato, inequivocabile ed esplicito.",
+    maxFine: "€35.000.000 o 7% fatturato mondiale",
+  },
+  {
+    letter: "bb",
+    ref: "Art. 5(1)(bb) EU AI Act — introdotto dal Reg. (UE) 2026/1744, dal 2 dicembre 2026",
+    label: "Materiale pedopornografico",
+    description:
+      "Sistemi che generano o manipolano materiale ai sensi dell'Art. 2, lettere c) ed e), della direttiva 2011/93/UE, salvo che si applichi una causa di giustificazione prevista dal diritto nazionale.",
+    exceptions: ["Causa di giustificazione (\"without right\" defence) prevista dal diritto nazionale"],
+    maxFine: "€35.000.000 o 7% fatturato mondiale",
+  },
+  {
     letter: "c",
     ref: "Art. 5(1)(c) EU AI Act",
-    label: "Social scoring da autorità pubbliche",
+    label: "Punteggio sociale (soggetti pubblici e privati)",
     description:
-      "Valutazione o classificazione di persone fisiche da parte di autorità pubbliche (o per loro conto) in base al comportamento sociale o caratteristiche personali in un periodo di tempo, con effetti sfavorevoli in contesti non correlati o trattamento ingiustificato/sproporzionato.",
+      "Valutazione o classificazione di persone fisiche, da parte di qualsiasi soggetto pubblico o privato, in base al comportamento sociale o caratteristiche personali in un periodo di tempo, con effetti sfavorevoli in contesti non correlati o trattamento ingiustificato/sproporzionato.",
     maxFine: "€35.000.000 o 7% fatturato mondiale",
   },
   {
@@ -71,10 +88,10 @@ export const ART5_PRACTICES: Art5Practice[] = [
     ref: "Art. 5(1)(f) EU AI Act",
     label: "Riconoscimento emozioni in ambito lavorativo e scolastico",
     description:
-      "Sistemi che inferiscono le emozioni di persone fisiche nei luoghi di lavoro o negli istituti scolastici. Eccezioni tassative: motivi medici documentati o sicurezza sul lavoro (es. rilevazione stati di fatica di operatori di macchinari).",
+      "Sistemi che inferiscono le emozioni di persone fisiche nell'ambito del luogo di lavoro o degli istituti di istruzione. Eccezione: uso destinato a motivi medici o di sicurezza (es. uso terapeutico, considerando 44).",
     exceptions: [
-      "Uso per motivi medici documentati",
-      "Sicurezza sul lavoro (es. rilevazione fatica operatori macchinari)",
+      "Uso destinato a motivi medici",
+      "Uso destinato a motivi di sicurezza",
     ],
     maxFine: "€35.000.000 o 7% fatturato mondiale",
   },
@@ -97,7 +114,7 @@ export const ART5_PRACTICES: Art5Practice[] = [
     description:
       "Uso di sistemi RBI (Remote Biometric Identification) in tempo reale in spazi pubblicamente accessibili a fini di contrasto. Eccezioni tassative (richiedono autorizzazione giudiziaria/amministrativa preventiva): (i) ricerca minori scomparsi o vittime di tratta; (ii) prevenzione minacce specifiche/imminenti alla vita o attacchi terroristici; (iii) identificazione di persone sospettate di reati gravi elencati nell'Allegato II.",
     exceptions: [
-      "Ricerca di minori scomparsi o vittime di tratta (con autorizzazione preventiva)",
+      "Ricerca mirata di specifiche vittime di sottrazione, tratta o sfruttamento sessuale, e ricerca di persone scomparse (con autorizzazione preventiva)",
       "Prevenzione di minaccia specifica, sostanziale e imminente alla vita o attacco terroristico (con autorizzazione preventiva)",
       "Identificazione di persona sospettata di reato grave ex Allegato II (con autorizzazione preventiva)",
     ],
@@ -184,7 +201,7 @@ export const ANNEX_III_AREAS: AnnexIIIArea[] = [
     ref: "Allegato III §6 — Art. 6(2)",
     label: "Attività di contrasto",
     description:
-      "Sistemi AI destinati a essere usati dalle autorità di polizia o per loro conto: valutazione del rischio individuale di recidiva; profilazione durante indagini; analisi di prove digitali; rilevamento deepfake; previsione di eventi criminali.",
+      "Sistemi di IA usati dalle autorità di contrasto o per loro conto: rischio di diventare vittima di reati; poligrafi e strumenti analoghi; affidabilità degli elementi probatori; rischio di reato o recidiva non basato solo sulla profilazione; profilazione nel corso di indagini (All. III, punto 6(a)-(e)).",
     examples: [
       "Analisi di rischio di recidiva per decisioni di detenzione",
       "Sistemi di analisi video per ricerca prove",
@@ -281,67 +298,31 @@ export interface AnnexIProduct {
   examples: string[];
 }
 
+// Allegato I del Reg. (UE) 2024/1689 come modificato dal Reg. (UE) 2026/1744
+// (il regolamento macchine 2023/1230 passa dalla sezione A alla sezione B).
 export const ANNEX_I_PRODUCTS: AnnexIProduct[] = [
-  {
-    id: "machinery",
-    ref: "Reg. (UE) 2023/1230 — Macchinari",
-    label: "Macchinari industriali e di consumo",
-    examples: ["Robot industriali", "Macchine utensili", "Ascensori"],
-  },
-  {
-    id: "medical_devices",
-    ref: "Reg. (UE) 2017/745 — Dispositivi medici",
-    label: "Dispositivi medici (MDR)",
-    examples: ["Software diagnostico CE", "Dispositivi impiantabili con AI"],
-  },
-  {
-    id: "ivd",
-    ref: "Reg. (UE) 2017/746 — Dispositivi medico-diagnostici in vitro",
-    label: "Dispositivi medico-diagnostici in vitro (IVDR)",
-    examples: ["Analizzatori automatici con AI", "Test diagnostici molecolari"],
-  },
-  {
-    id: "aviation",
-    ref: "Reg. (UE) 2018/1139 — Aviazione civile",
-    label: "Prodotti aeronautici",
-    examples: ["Sistemi avionici con AI", "Software di controllo volo"],
-  },
-  {
-    id: "automotive",
-    ref: "Reg. (UE) 2019/2144 — Veicoli a motore",
-    label: "Veicoli a motore e loro rimorchi",
-    examples: ["ADAS (Advanced Driver Assistance)", "Sistemi di guida autonoma"],
-  },
-  {
-    id: "marine",
-    ref: "Dir. 2014/90/UE — Attrezzature marine",
-    label: "Attrezzature marine",
-    examples: ["Sistemi di navigazione autonoma navale"],
-  },
-  {
-    id: "railway",
-    ref: "Dir. (UE) 2016/797 — Ferroviario",
-    label: "Sistema ferroviario (interoperabilità)",
-    examples: ["Sistemi di controllo treno automatizzati (ETCS)"],
-  },
-  {
-    id: "explosives",
-    ref: "Dir. 2014/28/UE — Esplosivi civili",
-    label: "Esplosivi per uso civile",
-    examples: ["Sistemi di rilevamento automatico esplosivi"],
-  },
-  {
-    id: "toys",
-    ref: "Dir. 2009/48/CE — Sicurezza dei giocattoli",
-    label: "Giocattoli",
-    examples: ["Giocattoli connessi con AI e interazione vocale"],
-  },
-  {
-    id: "lifts",
-    ref: "Dir. 2014/33/UE — Ascensori",
-    label: "Ascensori e componenti di sicurezza",
-    examples: ["Sistemi di supervisione ascensori tramite AI"],
-  },
+  // Sezione A
+  { id: "toys", ref: "All. I, sez. A — Dir. 2009/48/CE", label: "Giocattoli", examples: ["Giocattoli connessi con AI e interazione vocale"] },
+  { id: "recreational_craft", ref: "All. I, sez. A — Dir. 2013/53/UE", label: "Imbarcazioni da diporto e moto d'acqua", examples: ["Sistemi di assistenza alla navigazione da diporto"] },
+  { id: "lifts", ref: "All. I, sez. A — Dir. 2014/33/UE", label: "Ascensori e componenti di sicurezza", examples: ["Sistemi di sicurezza degli ascensori basati su AI"] },
+  { id: "atex", ref: "All. I, sez. A — Dir. 2014/34/UE", label: "Apparecchi per atmosfere potenzialmente esplosive", examples: ["Sistemi di protezione in ambienti ATEX"] },
+  { id: "radio", ref: "All. I, sez. A — Dir. 2014/53/UE", label: "Apparecchiature radio", examples: ["Dispositivi radio con funzioni di sicurezza basate su AI"] },
+  { id: "pressure", ref: "All. I, sez. A — Dir. 2014/68/UE", label: "Attrezzature a pressione", examples: ["Controllo di sicurezza di recipienti a pressione"] },
+  { id: "cableways", ref: "All. I, sez. A — Reg. (UE) 2016/424", label: "Impianti a fune", examples: ["Sistemi di sicurezza di funivie e seggiovie"] },
+  { id: "ppe", ref: "All. I, sez. A — Reg. (UE) 2016/425", label: "Dispositivi di protezione individuale", examples: ["DPI intelligenti con rilevamento dei pericoli"] },
+  { id: "gas_appliances", ref: "All. I, sez. A — Reg. (UE) 2016/426", label: "Apparecchi che bruciano carburanti gassosi", examples: ["Controllo di sicurezza di caldaie a gas"] },
+  { id: "medical_devices", ref: "All. I, sez. A — Reg. (UE) 2017/745", label: "Dispositivi medici (MDR)", examples: ["Software diagnostico CE", "Dispositivi impiantabili con AI"] },
+  { id: "ivd", ref: "All. I, sez. A — Reg. (UE) 2017/746", label: "Dispositivi medico-diagnostici in vitro (IVDR)", examples: ["Analizzatori automatici con AI", "Test diagnostici molecolari"] },
+  // Sezione B (Art. 2(2): si applicano solo l'Art. 6(1), gli Artt. 102-109 e l'Art. 112)
+  { id: "machinery", ref: "All. I, sez. B — Reg. (UE) 2023/1230", label: "Prodotti macchina", examples: ["Robot industriali", "Macchine utensili"] },
+  { id: "civil_aviation_security", ref: "All. I, sez. B — Reg. (CE) n. 300/2008", label: "Sicurezza dell'aviazione civile", examples: ["Sistemi di controllo di sicurezza aeroportuale"] },
+  { id: "two_three_wheel", ref: "All. I, sez. B — Reg. (UE) n. 168/2013", label: "Veicoli a due o tre ruote e quadricicli", examples: ["Sistemi di assistenza alla guida per motocicli"] },
+  { id: "agricultural", ref: "All. I, sez. B — Reg. (UE) n. 167/2013", label: "Veicoli agricoli e forestali", examples: ["Trattori a guida assistita"] },
+  { id: "marine", ref: "All. I, sez. B — Dir. 2014/90/UE", label: "Equipaggiamento marittimo", examples: ["Sistemi di navigazione autonoma navale"] },
+  { id: "railway", ref: "All. I, sez. B — Dir. (UE) 2016/797", label: "Sistema ferroviario (interoperabilità)", examples: ["Sistemi di controllo treno automatizzati"] },
+  { id: "motor_vehicles", ref: "All. I, sez. B — Reg. (UE) 2018/858", label: "Veicoli a motore e loro rimorchi (omologazione)", examples: ["Sistemi di guida automatizzata"] },
+  { id: "automotive", ref: "All. I, sez. B — Reg. (UE) 2019/2144", label: "Sicurezza generale dei veicoli", examples: ["ADAS (Advanced Driver Assistance)"] },
+  { id: "aviation", ref: "All. I, sez. B — Reg. (UE) 2018/1139", label: "Aviazione civile (aeromobili senza equipaggio)", examples: ["Software di controllo di droni"] },
 ];
 
 // ─── Mappa articoli → obblighi per ruolo ─────────────────────────────────────
@@ -430,7 +411,7 @@ export const ARTICLE_OBLIGATIONS: ArticleObligation[] = [
     article: "Art. 25",
     ref: "Art. 25 EU AI Act",
     description: "Provider di fatto (product manufacturer / integrator)",
-    obligation: "Chi immette sul mercato un sistema come proprio o lo modifica sostanzialmente assume gli obblighi del provider",
+    obligation: "Distributori, importatori, deployer o terzi diventano fornitori se appongono il proprio marchio, modificano in modo sostanziale o cambiano la finalità rendendo il sistema ad alto rischio (Art. 25(1))",
     applies: ["product_manufacturer"],
   },
   {
@@ -445,7 +426,7 @@ export const ARTICLE_OBLIGATIONS: ArticleObligation[] = [
     article: "Art. 27",
     ref: "Art. 27 EU AI Act",
     description: "FRIA (Fundamental Rights Impact Assessment)",
-    obligation: "Obbligatoria per i deployer che siano enti pubblici o operatori di servizi essenziali prima dell'uso",
+    obligation: "Prima del primo uso, per i deployer che sono organismi di diritto pubblico o privati che forniscono servizi pubblici, e per i deployer dei sistemi dell'All. III punto 5(b)-(c); escluso il punto 2",
     applies: ["deployer"],
     toolHref: "/dashboard/tools/fria",
   },
@@ -453,7 +434,7 @@ export const ARTICLE_OBLIGATIONS: ArticleObligation[] = [
     article: "Art. 43",
     ref: "Art. 43 EU AI Act",
     description: "Conformity Assessment",
-    obligation: "Self-assessment (Annex III salvo biometria/infrastrutture critiche/Allegato I) o Notified Body",
+    obligation: "Controllo interno (All. VI) per All. III punti 2-8; biometria (punto 1): All. VI con norme armonizzate, altrimenti All. VII con organismo notificato; Allegato I: procedura della normativa di settore",
     applies: ["provider"],
   },
   {
@@ -467,7 +448,7 @@ export const ARTICLE_OBLIGATIONS: ArticleObligation[] = [
     article: "Art. 49",
     ref: "Art. 49 EU AI Act",
     description: "Registrazione nel database EU (EUDB)",
-    obligation: "Obbligatoria per provider alto rischio prima dell'immissione sul mercato",
+    obligation: "Fornitori di sistemi All. III (49(1)) e di sistemi ritenuti non ad alto rischio ex Art. 6(3) (49(2)); deployer autorità pubbliche (49(3)); All. III punto 2 a livello nazionale (49(5))",
     applies: ["provider", "deployer"],
   },
   // GPAI
@@ -492,14 +473,14 @@ export const ARTICLE_OBLIGATIONS: ArticleObligation[] = [
     description: "Obblighi di trasparenza",
     obligation: "Disclosure chatbot; marcatura contenuti sintetici; informativa riconoscimento emozioni; marcatura testi AI di interesse pubblico",
     applies: ["provider", "deployer"],
-    deadline: "2 agosto 2026",
+    deadline: "2 agosto 2026 (Art. 50(2) per i sistemi già sul mercato: 2 dicembre 2026)",
   },
   // Sanzioni
   {
     article: "Art. 99",
     ref: "Art. 99 EU AI Act",
     description: "Sanzioni",
-    obligation: "Art.5: fino a €35M/7%; alto rischio: fino a €15M/3%; informazioni inesatte: fino a €7,5M/1%",
+    obligation: "Art. 5: fino a €35M/7%; obblighi degli operatori e Art. 50: fino a €15M/3%; informazioni inesatte: fino a €7,5M/1% (Art. 99(3)-(5))",
     applies: ["provider", "deployer", "importer", "distributor"],
   },
 ];

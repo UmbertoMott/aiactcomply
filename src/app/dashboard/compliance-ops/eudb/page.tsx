@@ -351,7 +351,7 @@ export default function EUDBCompliancePage() {
                 Art. 49 AI Act — Chi deve registrarsi nel database UE?
               </p>
               <p style={{ fontSize: 11, color: DK.muted, opacity: 0.8, margin: "4px 0 0", lineHeight: 1.5 }}>
-                Provider di sistemi Annex III, deployer pubblici (Annex III pt.1-6), provider di GPAI con rischio sistemico e authorized representative di provider non-UE devono registrarsi prima del deployment.
+                Fornitori (o loro rappresentanti autorizzati) di sistemi ad alto rischio dell&apos;Allegato III (Art. 49(1)) e di sistemi dell&apos;Allegato III ritenuti non ad alto rischio ai sensi dell&apos;Art. 6(3) (Art. 49(2)); deployer che sono autorità pubbliche (Art. 49(3)). Esclusi i sistemi dell&apos;Allegato III, punto 2, registrati a livello nazionale (Art. 49(5)). I modelli GPAI non si registrano nella banca dati UE.
               </p>
             </div>
           </div>

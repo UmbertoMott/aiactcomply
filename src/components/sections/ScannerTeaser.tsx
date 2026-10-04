@@ -329,8 +329,8 @@ export default function ScannerTeaser() {
               }}
             >
               Lo scanner Art. 50 analizza 5 criteri normativi e ti mostra esattamente
-              dove sei esposto a sanzioni. Deadline obbligatoria:{" "}
-              <span style={{ color: "rgba(255,255,255,0.65)" }}>2 dicembre 2026</span>.
+              dove sei esposto a sanzioni. Obblighi in vigore dal{" "}
+              <span style={{ color: "rgba(255,255,255,0.65)" }}>2 agosto 2026</span>.
             </motion.p>
 
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3">

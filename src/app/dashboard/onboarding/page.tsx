@@ -520,7 +520,7 @@ ${"─".repeat(68)}
 
 • Art. 50(1): obbligo disclosure per sistemi a interazione diretta
 • Art. 50(1)(a) + Considerando 132: posizione prominente e tempestiva
-• Art. 99(3): sanzione fino all'1% del fatturato annuo globale
+• Art. 99(4)(g): sanzione fino a 15 milioni di euro o al 3% del fatturato mondiale annuo
 
 ${"─".repeat(68)}
 GENERATO DA: AIComply — https://aicomply.it

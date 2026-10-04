@@ -730,12 +730,12 @@ export default function TriagePage() {
               </div>
 
               {/* Eccezioni per (d), (f), (g), (h) */}
-              {(["d", "f", "g", "h"] as const).some(l => art5Flags.includes(l)) && (
+              {(["bb", "d", "f", "g", "h"] as const).some(l => art5Flags.includes(l)) && (
                 <div className="rounded-lg p-3 space-y-2" style={{ background: T.amberBg, border: "1px solid rgba(245,158,11,0.28)" }}>
                   <p className="text-xs font-semibold" style={{ color: T.amber }}>
                     Le fattispecie (d), (f), (g), (h) hanno eccezioni tassative. Si applica qualcuna?
                   </p>
-                  {(["d", "f", "g", "h"] as const).filter(l => art5Flags.includes(l)).map(l => {
+                  {(["bb", "d", "f", "g", "h"] as const).filter(l => art5Flags.includes(l)).map(l => {
                     const practice = ART5_PRACTICES.find(p => p.letter === l)!;
                     return (
                       <div key={l}>
@@ -769,7 +769,7 @@ export default function TriagePage() {
 
                   {isGPAIModel === true && (
                     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-2 mt-2">
-                      <SectionLabel>Supera la soglia di rischio sistemico? (≥10²⁵ FLOP o designazione Commissione)</SectionLabel>
+                      <SectionLabel>Supera la soglia di rischio sistemico? (oltre 10²⁵ FLOP o designazione della Commissione)</SectionLabel>
                       {[
                         { value: true,  label: "Sì — Art. 55 (rischio sistemico) applicabile" },
                         { value: false, label: "No / Non so" },

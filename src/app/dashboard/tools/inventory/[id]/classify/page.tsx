@@ -143,7 +143,7 @@ export default function ClassifyPage() {
         </Link>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: T.text, margin: "0 0 4px", letterSpacing: "-0.4px" }}>Classifica il sistema</h1>
         <p style={{ fontSize: 13, color: T.muted, margin: "0 0 18px", lineHeight: 1.5 }}>
-          Rispondi a domande sui fatti: ruolo e rischio li ricava la piattaforma dal Regolamento (UE) 2024/1689. Alla fine trovi solo gli obblighi che riguardano questo sistema.
+          Rispondi a domande sui fatti: ruolo e rischio li ricava la piattaforma dal Regolamento (UE) 2024/1689, come modificato dal Regolamento (UE) 2026/1744 (Omnibus digitale). Alla fine trovi solo gli obblighi che riguardano questo sistema.
         </p>
 
         {/* Stepper */}
@@ -237,7 +237,7 @@ export default function ClassifyPage() {
                     <Question title="Il sistema fa una di queste cose?" hint="Pratiche vietate dall'Art. 5. Se nessuna, non selezionare nulla.">
                       {ART5_PRACTICES.map(p => (
                         <div key={p.letter}>
-                          <Choice multi label={p.question} sub={p.ref} selected={!!rk.art5?.includes(p.letter)} onClick={() => setK({ art5: toggle(rk.art5, p.letter as Art5Letter) })} />
+                          <Choice multi label={p.question} sub={p.appliesFrom > "2025-02-02" ? `${p.ref} · introdotto dal Reg. (UE) 2026/1744, si applica dal 2 dicembre 2026` : p.ref} selected={!!rk.art5?.includes(p.letter)} onClick={() => setK({ art5: toggle(rk.art5, p.letter as Art5Letter) })} />
                           {p.exception && rk.art5?.includes(p.letter) && (
                             <div style={{ margin: "6px 0 4px 26px" }}>
                               <Choice multi label={`Ricorre questo caso: ${p.exception}`} selected={!!rk.art5Exceptions?.includes(p.letter)} onClick={() => setK({ art5Exceptions: toggle(rk.art5Exceptions, p.letter as Art5Letter) })} />
@@ -247,7 +247,7 @@ export default function ClassifyPage() {
                       ))}
                     </Question>
 
-                    <Question title="È un componente di sicurezza di uno di questi prodotti, o è esso stesso il prodotto?" hint="Normativa dell'Allegato I (Art. 6(1)).">
+                    <Question title="È un componente di sicurezza di uno di questi prodotti, o è esso stesso il prodotto?" hint="Normativa dell'Allegato I (Art. 6(1)). Non è componente di sicurezza un sistema usato solo per assistenza agli utenti, ottimizzazione, efficienza, automazione o controllo qualità, salvo che un suo guasto metta a rischio salute e sicurezza (Art. 6(1 bis)-(1 ter)).">
                       <select value={rk.annexIActId ?? ""} onChange={e => setK({ annexIActId: e.target.value || null, annexIThirdParty: undefined })}
                         style={{ padding: "9px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, color: T.text, background: "white" }}>
                         <option value="">Nessuno di questi</option>
@@ -255,7 +255,7 @@ export default function ClassifyPage() {
                       </select>
                       {rk.annexIActId && (
                         <div style={{ marginTop: 8 }}>
-                          <p style={{ fontSize: 12.5, color: T.text, margin: "0 0 6px" }}>Per immetterlo sul mercato serve la valutazione di un organismo terzo secondo quella normativa?</p>
+                          <p style={{ fontSize: 12.5, color: T.text, margin: "0 0 6px" }}>Per immetterlo sul mercato serve la valutazione di un organismo terzo per i rischi per la salute e la sicurezza? (non conta se è richiesta solo per altri rischi, es. spettro radio — Art. 6(1 quater))</p>
                           <YesNo value={rk.annexIThirdParty} onChange={v => setK({ annexIThirdParty: v })} />
                         </div>
                       )}
@@ -287,7 +287,8 @@ export default function ClassifyPage() {
                       <Choice multi label="Parla o interagisce direttamente con le persone" sub="Es. chatbot, assistente vocale. Art. 50(1)." selected={!!rk.interactsWithPersons} onClick={() => setK({ interactsWithPersons: !rk.interactsWithPersons })} />
                       <Choice multi label="Genera audio, immagini, video o testi" sub="Art. 50(2)." selected={!!rk.generatesSynthetic} onClick={() => setK({ generatesSynthetic: !rk.generatesSynthetic })} />
                       {rk.generatesSynthetic && (
-                        <div style={{ marginLeft: 26 }}>
+                        <div style={{ marginLeft: 26, display: "flex", flexDirection: "column", gap: 6 }}>
+                          {ownDev && <Choice multi label="Il sistema era già sul mercato prima del 2 agosto 2026" sub="Per la marcatura il termine è il 2 dicembre 2026 (Art. 111(4))." selected={!!rk.syntheticPlacedBeforeAug2026} onClick={() => setK({ syntheticPlacedBeforeAug2026: !rk.syntheticPlacedBeforeAug2026 })} />}
                           <Choice multi label="Si limita ad assistere l'editing standard o non modifica in modo sostanziale i dati forniti" sub="In questo caso la marcatura non è richiesta (Art. 50(2))." selected={!!rk.syntheticEditingOnly} onClick={() => setK({ syntheticEditingOnly: !rk.syntheticEditingOnly })} />
                         </div>
                       )}
@@ -325,7 +326,7 @@ export default function ClassifyPage() {
                         <Choice multi label="È usato sul luogo di lavoro e riguarda i lavoratori" sub="Art. 26(7)." selected={!!rk.workplace} onClick={() => setK({ workplace: !rk.workplace })} />
                         <Choice multi label="Prende o aiuta a prendere decisioni su persone fisiche" sub="Artt. 26(11), 86." selected={!!rk.decisionsOnPersons} onClick={() => setK({ decisionsOnPersons: !rk.decisionsOnPersons })} />
                         <Choice multi label="Tratta dati personali" sub="Art. 26(9): DPIA." selected={!!rk.personalData} onClick={() => setK({ personalData: !rk.personalData })} />
-                        <Choice multi label="Era già sul mercato o in uso prima del 2 agosto 2026 e da allora non è cambiato in modo significativo" sub="Art. 111(2)." selected={!!rk.legacyNoSignificantChange} onClick={() => setK({ legacyNoSignificantChange: !rk.legacyNoSignificantChange })} />
+                        <Choice multi label={`Sarà già sul mercato o in uso prima del ${risk.category === "high_risk_annex_i" ? "2 agosto 2028" : "2 dicembre 2027"} e non subirà modifiche significative di progettazione da quella data`} sub="Art. 111(2), come modificato dal Reg. (UE) 2026/1744." selected={!!rk.legacyNoSignificantChange} onClick={() => setK({ legacyNoSignificantChange: !rk.legacyNoSignificantChange })} />
                       </Question>
                     )}
                   </>

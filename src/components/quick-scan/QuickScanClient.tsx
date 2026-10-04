@@ -242,7 +242,7 @@ export default function QuickScanClient() {
                 maxWidth: 620,
               }}
             >
-              Scopri se il tuo sistema AI ha gap prima del 2 dicembre 2026.
+              Scopri se il tuo sistema AI ha gap rispetto all&apos;AI Act.
             </h1>
 
             <p style={{ fontSize: 17, lineHeight: 1.72, color: MUTED, maxWidth: 560, margin: "0 0 30px" }}>
