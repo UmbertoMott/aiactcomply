@@ -1,10 +1,10 @@
 "use client";
-import React, { useState, useRef, useEffect, useCallback, CSSProperties } from "react";
+import React, { useState, useEffect, CSSProperties } from "react";
 import Link from "next/link";
 import {
-  Shield, CheckCircle2, Clock, Minus, AlertTriangle, StopCircle,
-  Play, Plus, X, Sparkles, Loader2, Check, Brain, Info,
-  ExternalLink, AlertCircle,
+  Shield, CheckCircle2, Clock, Minus,
+  Plus, X, Sparkles, Loader2, Check, Info,
+  ExternalLink,
 } from "lucide-react";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { ClassifierResult } from "@/lib/dossier/storage-schema";
@@ -18,15 +18,10 @@ import {
 import {
   loadOversightRecord,
   saveOversightRecord,
-  loadFrictionEvents,
-  saveFrictionEvents,
-  getSystemSuspended,
-  setSystemSuspendedStorage,
   countImplemented,
   type OversightRecord,
   type OversightRequirementRecord,
   type OversightRequirementStatus,
-  type FrictionEvent,
 } from "@/lib/oversight/oversight-types";
 import {
   suggestOversightMeasures,
@@ -107,166 +102,6 @@ function TagInput({ items, onChange, placeholder }: { items: string[]; onChange:
   );
 }
 
-// ─── Friction Gate component (migrated from original, used by automation_bias + override_non_use) ──
-
-interface FrictionGateProps {
-  events: FrictionEvent[];
-  onAddEvent: (ev: FrictionEvent) => void;
-  systemSuspended: boolean;
-  mode: "automation_bias" | "override";
-  t: TFn;
-}
-
-function FrictionGate({ events, onAddEvent, systemSuspended, mode, t }: FrictionGateProps) {
-  const [approved, setApproved] = useState(false);
-  const [frictionActive, setFrictionActive] = useState(false);
-  const [frictionReason, setFrictionReason] = useState("");
-  const [blocked, setBlocked] = useState(false);
-  const startTime = useRef(Date.now());
-
-  useEffect(() => { startTime.current = Date.now(); }, []);
-
-  function handleApprove() {
-    if (systemSuspended) return;
-    const elapsed = (Date.now() - startTime.current) / 1000;
-    if (mode === "automation_bias" && elapsed < 2.0) {
-      setFrictionActive(true);
-      onAddEvent({ id: crypto.randomUUID(), type: "friction_bypassed", timestamp: new Date().toISOString(), elapsed });
-      return;
-    }
-    setApproved(true);
-    const ev: FrictionEvent = { id: crypto.randomUUID(), type: "approved", timestamp: new Date().toISOString(), elapsed };
-    onAddEvent(ev);
-    appendEvidence("decision", { type: "Supervisione umana — Approvazione deliberata Art. 14(4)(b)", elapsed: elapsed.toFixed(2), timestamp: ev.timestamp }, "oversight");
-  }
-
-  function confirmWithReason() {
-    if (!frictionReason.trim()) return;
-    setApproved(true);
-    setFrictionActive(false);
-    const ev: FrictionEvent = { id: crypto.randomUUID(), type: "friction_bypassed", timestamp: new Date().toISOString(), elapsed: (Date.now() - startTime.current) / 1000, reason: frictionReason.trim() };
-    onAddEvent(ev);
-    appendEvidence("decision", { type: "Friction Gate superato con motivazione — Art. 14(4)(b)", motivazione: frictionReason.trim(), timestamp: ev.timestamp }, "oversight");
-    setFrictionReason("");
-  }
-
-  function blockOutput() {
-    setFrictionActive(false);
-    setBlocked(true);
-    const ev: FrictionEvent = { id: crypto.randomUUID(), type: "blocked", timestamp: new Date().toISOString(), elapsed: (Date.now() - startTime.current) / 1000, reason: frictionReason.trim() || "Output bloccato dall'operatore" };
-    onAddEvent(ev);
-    appendEvidence("decision", { type: "Output bloccato — Art. 14(4)(d)", reason: ev.reason, timestamp: ev.timestamp }, "oversight");
-    setFrictionReason("");
-  }
-
-  const recentEvents = events.slice(0, 5);
-  const frictionCount = events.filter(e => e.type === "friction_bypassed").length;
-  const frictionPct = events.length > 0 ? Math.round((frictionCount / events.length) * 100) : 0;
-  const highBias = frictionPct > 30;
-
-  return (
-    <div className="mt-4 rounded-xl p-4" style={{ background: T.bg, border: `1px solid ${T.border}` }}>
-      <p className="text-[11px] font-semibold uppercase tracking-wide mb-3" style={{ color: T.muted }}>
-        {mode === "automation_bias" ? t("fg_title_automation") : t("fg_title_override")}
-      </p>
-
-      <div className="rounded-lg p-3 mb-3" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-        <AlertTriangle className="h-4 w-4 inline mr-1 mb-0.5" style={{ color: T.amber }} />
-        <span className="text-[12px] font-medium" style={{ color: T.text }}>
-          {t("fg_scenario")}
-        </span>
-        <p className="text-[10px] mt-1" style={{ color: T.muted }}>
-          {t("fg_scenarioDesc")}
-        </p>
-      </div>
-
-      {!approved && !frictionActive && !systemSuspended && !blocked && (
-        <button onClick={handleApprove}
-          className="w-full rounded-lg text-[12px] font-medium"
-          style={{ padding: "9px 16px", background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
-          {mode === "automation_bias" ? t("fg_approveTest") : t("fg_approve")}
-        </button>
-      )}
-      {systemSuspended && !approved && (
-        <div className="text-[12px] rounded-lg p-2.5" style={{ background: T.redBg, border: `1px solid ${T.redBdr}`, color: T.red }}>
-          {t("fg_suspended")}
-        </div>
-      )}
-
-      {frictionActive && (
-        <div className="rounded-lg p-4" style={{ background: T.redBg, border: `1px solid ${T.redBdr}` }}>
-          <div className="flex items-center gap-2 mb-2">
-            <StopCircle className="h-4 w-4" style={{ color: T.red }} />
-            <span className="text-[12px] font-bold" style={{ color: T.red }}>⛔ {t("fg_activated")}</span>
-          </div>
-          <p className="text-[11px] mb-3" style={{ color: T.muted }}>
-            {t("fg_tooFast")}
-          </p>
-          <textarea value={frictionReason} onChange={e => setFrictionReason(e.target.value)}
-            placeholder={t("fg_reasonPh")}
-            style={{ ...ta, marginBottom: 10 }} rows={3} />
-          <div className="flex gap-2">
-            <button onClick={confirmWithReason} disabled={!frictionReason.trim()}
-              style={{ borderRadius: 7, background: T.text, padding: "7px 14px", fontSize: 12, fontWeight: 500, color: "#fff", border: "none", cursor: "pointer", opacity: !frictionReason.trim() ? 0.4 : 1 }}>
-              {t("fg_confirmReason")}
-            </button>
-            <button onClick={blockOutput}
-              style={{ borderRadius: 7, padding: "7px 14px", fontSize: 12, border: `1px solid ${T.redBdr}`, color: T.red, background: "transparent", cursor: "pointer" }}>
-              {t("fg_blockOutput")}
-            </button>
-          </div>
-        </div>
-      )}
-      {approved && (
-        <div className="rounded-lg p-2.5 flex items-center gap-2" style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}>
-          <CheckCircle2 className="h-4 w-4" style={{ color: T.green }} />
-          <span className="text-[12px]" style={{ color: T.green }}>{t("fg_approvedMsg")}</span>
-        </div>
-      )}
-      {blocked && (
-        <div className="rounded-lg p-2.5 flex items-center gap-2" style={{ background: T.redBg, border: `1px solid ${T.redBdr}` }}>
-          <StopCircle className="h-4 w-4" style={{ color: T.red }} />
-          <span className="text-[12px]" style={{ color: T.red }}>{t("fg_blockedMsg")}</span>
-        </div>
-      )}
-      {(approved || blocked) && (
-        <button onClick={() => { setApproved(false); setBlocked(false); setFrictionActive(false); setFrictionReason(""); startTime.current = Date.now(); }}
-          style={{ marginTop: 8, fontSize: 11, color: T.muted, background: "none", border: "none", cursor: "pointer", textDecoration: "underline", padding: 0 }}>
-          {t("fg_reset")}
-        </button>
-      )}
-
-      {/* Automation bias alert */}
-      {highBias && (
-        <div className="mt-3 rounded-lg p-2.5 flex items-start gap-2" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-          <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" style={{ color: T.amber }} />
-          <p className="text-[11px]" style={{ color: "#78350f" }}>
-            ⚠ {frictionPct}% {t("fg_highBias_of")} {events.length} {t("fg_highBias_rest")}
-          </p>
-        </div>
-      )}
-
-      {/* Mini event log */}
-      {recentEvents.length > 0 && (
-        <div className="mt-3">
-          <p className="text-[10px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: T.faint }}>{t("fg_recentEvents")}</p>
-          {recentEvents.map((ev) => (
-            <div key={ev.id} className="flex items-center gap-2 py-1" style={{ borderTop: `1px solid ${T.border}`, fontSize: 11 }}>
-              <span style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0, background: ev.type === "approved" ? T.green : ev.type === "blocked" ? T.red : T.amber }} />
-              <span style={{ flex: 1, color: T.text }}>{ev.type === "approved" ? t("fg_ev_approved") : ev.type === "blocked" ? t("fg_ev_blocked") : t("fg_ev_friction")}</span>
-              <span style={{ color: T.faint }}>{ev.elapsed.toFixed(1)}s</span>
-            </div>
-          ))}
-          <p className="text-[10px] mt-1.5" style={{ color: T.faint }}>
-            <Brain className="h-3 w-3 inline mr-1" style={{ color: T.blue }} />
-            {t("fg_note")}
-          </p>
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ─── Requirement card ─────────────────────────────────────────────────────────
 
 interface ReqCardProps {
@@ -275,14 +110,11 @@ interface ReqCardProps {
   pending: { measureDescription?: string; implementationType?: string } | null;
   onUpdate: (id: string, patch: Partial<OversightRequirementRecord>) => void;
   onAcceptAi: (id: string) => void;
-  frictionEvents: FrictionEvent[];
-  onAddFrictionEvent: (ev: FrictionEvent) => void;
-  systemSuspended: boolean;
   index: number;
   t: TFn;
 }
 
-function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, frictionEvents, onAddFrictionEvent, systemSuspended, index, t }: ReqCardProps) {
+function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, index, t }: ReqCardProps) {
   const [open, setOpen] = useState(false);
   const status = record?.status ?? "not_started";
 
@@ -388,63 +220,7 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, frictionE
             </Link>
           )}
 
-          {/* Friction Gate — embedded in automation_bias and override_non_use */}
-          {(req.id === "automation_bias_awareness" || req.id === "override_non_use") && (
-            <FrictionGate
-              events={frictionEvents}
-              onAddEvent={onAddFrictionEvent}
-              systemSuspended={systemSuspended}
-              mode={req.id === "automation_bias_awareness" ? "automation_bias" : "override"}
-              t={t}
-            />
-          )}
-
-          {/* Suspend/resume — embedded in intervention_stop */}
-          {req.id === "intervention_stop" && (
-            <InterventionStopPanel systemSuspended={systemSuspended} t={t} />
-          )}
         </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Intervention Stop panel (migrated from original suspendSystem/resumeSystem) ───
-
-function InterventionStopPanel({ systemSuspended, t }: { systemSuspended: boolean; t: TFn }) {
-  const [suspended, setSuspended] = useState(systemSuspended);
-
-  function suspend() {
-    setSuspended(true);
-    setSystemSuspendedStorage(true);
-    appendEvidence("decision", { type: "Sistema AI sospeso — Art. 14(4)(e)", suspendedAt: new Date().toISOString(), operator: "Supervisore umano" }, "oversight");
-  }
-  function resume() {
-    setSuspended(false);
-    setSystemSuspendedStorage(false);
-    appendEvidence("decision", { type: "Sistema AI riattivato — Art. 14(4)(e)", resumedAt: new Date().toISOString() }, "oversight");
-  }
-
-  return (
-    <div className="mt-4 rounded-xl p-4" style={{ background: suspended ? T.redBg : T.bg, border: `1px solid ${suspended ? T.redBdr : T.border}` }}>
-      <p className="text-[11px] font-semibold uppercase tracking-wide mb-2" style={{ color: suspended ? T.red : T.muted }}>
-        {t("is_title")}
-      </p>
-      <p className="text-[12px] mb-3 leading-relaxed" style={{ color: suspended ? T.red : T.muted }}>
-        {suspended ? t("is_suspendedDesc") : t("is_activeDesc")}
-      </p>
-      {!suspended ? (
-        <button onClick={suspend}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[12px] font-semibold"
-          style={{ background: T.red, color: "#fff", border: "none", cursor: "pointer" }}>
-          <StopCircle className="h-4 w-4" /> {t("is_suspend")}
-        </button>
-      ) : (
-        <button onClick={resume}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[12px] font-semibold"
-          style={{ background: T.green, color: "#fff", border: "none", cursor: "pointer" }}>
-          <Play className="h-4 w-4" /> {t("is_resume")}
-        </button>
       )}
     </div>
   );
@@ -574,8 +350,6 @@ export default function OversightPage() {
   const locale = useLocale();
   const loc = locale === "it" ? "it-IT" : "en-GB";
   const [record, setRecord] = useState<OversightRecord>(() => loadOversightRecord());
-  const [frictionEvents, setFrictionEvents] = useState<FrictionEvent[]>(() => loadFrictionEvents());
-  const [systemSuspended] = useState(() => getSystemSuspended());
   const [savedAt, setSavedAt] = useState<string | null>(() => readFromStorage<{ completedAt?: string }>("oversight")?.completedAt ?? null);
   const [toast, setToast] = useState<{ msg: string; kind: "ok" | "err" } | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
@@ -640,14 +414,6 @@ export default function OversightPage() {
     });
     if (patch.applicable === "yes") setShowFourEyes(true);
     if (patch.applicable === "no") setShowFourEyes(false);
-  }
-
-  function addFrictionEvent(ev: FrictionEvent) {
-    setFrictionEvents(prev => {
-      const next = [ev, ...prev].slice(0, 50);
-      saveFrictionEvents(next);
-      return next;
-    });
   }
 
   function acceptAiSuggestion(reqId: string) {
@@ -715,7 +481,7 @@ export default function OversightPage() {
       responsiblePersons: [],
       completedAt: now,
     });
-    appendEvidence("decision", { type: "Oversight Art. 14 — framework configurato", implemented, frictionEvents: frictionEvents.length, savedAt: now }, "oversight");
+    appendEvidence("decision", { type: "Oversight Art. 14 — framework configurato", implemented, savedAt: now }, "oversight");
     setSavedAt(now);
     showToast(t("toast_saved"));
   }
@@ -810,9 +576,6 @@ export default function OversightPage() {
             pending={pendingSuggestions[req.id] ?? null}
             onUpdate={updateRequirement}
             onAcceptAi={acceptAiSuggestion}
-            frictionEvents={frictionEvents}
-            onAddFrictionEvent={addFrictionEvent}
-            systemSuspended={systemSuspended}
             t={t}
           />
         ))}

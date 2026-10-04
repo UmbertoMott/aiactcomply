@@ -44,18 +44,7 @@ export const OversightRecordSchema = z.object({
 });
 export type OversightRecord = z.infer<typeof OversightRecordSchema>;
 
-// Legacy Friction Gate event (preserved from original tool)
-export interface FrictionEvent {
-  id: string;
-  type: "approved" | "friction_bypassed" | "blocked";
-  timestamp: string;
-  elapsed: number;
-  reason?: string;
-}
-
 const STORAGE_KEY = "aicomply_oversight_record_v1";
-export const EVENTS_KEY = "oversight_events"; // legacy key, kept for backward compat
-export const SUSPEND_KEY = "oversight_suspended"; // legacy key, kept for backward compat
 
 export function loadOversightRecord(): OversightRecord {
   if (typeof window === "undefined") return { requirements: [], fourEyes: { applicable: "unspecified", verifierRoles: [], status: "not_started", aiConfirmed: false } };
@@ -71,28 +60,6 @@ export function loadOversightRecord(): OversightRecord {
 export function saveOversightRecord(record: OversightRecord): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...record, updatedAt: new Date().toISOString() }));
-}
-
-export function loadFrictionEvents(): FrictionEvent[] {
-  if (typeof window === "undefined") return [];
-  try { return JSON.parse(localStorage.getItem(EVENTS_KEY) ?? "[]") as FrictionEvent[]; }
-  catch { return []; }
-}
-
-export function saveFrictionEvents(events: FrictionEvent[]): void {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(EVENTS_KEY, JSON.stringify(events));
-}
-
-export function getSystemSuspended(): boolean {
-  if (typeof window === "undefined") return false;
-  return localStorage.getItem(SUSPEND_KEY) === "1";
-}
-
-export function setSystemSuspendedStorage(suspended: boolean): void {
-  if (typeof window === "undefined") return;
-  if (suspended) localStorage.setItem(SUSPEND_KEY, "1");
-  else localStorage.removeItem(SUSPEND_KEY);
 }
 
 export function countImplemented(record: OversightRecord): number {

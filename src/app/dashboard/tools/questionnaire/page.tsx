@@ -22,7 +22,6 @@ import {
   type DPIAResult,
   type L132Result,
   type GPAIResult,
-  type XAIResult,
 } from "@/lib/dossier/storage-schema";
 import { useT } from "@/i18n/LocaleProvider";
 
@@ -71,7 +70,6 @@ interface DossierSnapshot {
   dpia:         DPIAResult         | null;
   l132:         L132Result         | null;
   gpai:         GPAIResult         | null;
-  xai:          XAIResult          | null;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -416,12 +414,13 @@ function buildQFinancialExtra(t: TFn): QQuestion[] {
     id: "q19",
     text: t("fin_q19_text"),
     category: t("cat_explainability"),
-    mapFn: ({ xai }) => {
-      if (!xai) return manual("Completare XAI Center");
+    mapFn: ({ transparency }) => {
+      const how = transparency?.instructions?.b_iv?.trim() || transparency?.instructions?.b_vii?.trim();
+      if (!how) return manual("Compilare Art. 13(3)(b)(iv) e (vii) in Trasparenza");
       return {
-        answer: `Sì — modulo XAI completato il ${formatDate(xai.completedAt)}. Documentazione disponibile nel dossier tecnico.`,
+        answer: `Sì — come indicato nelle istruzioni per l'uso (Art. 13(3)(b)(iv)-(vii)): ${how}`,
         status: "auto",
-        source: "XAI Center · Dossier",
+        source: "Trasparenza · Istruzioni per l'uso",
       };
     },
   },
@@ -644,7 +643,6 @@ export default function QuestionnairePage() {
       dpia:         readFromStorage<DPIAResult>("dpia"),
       l132:         readFromStorage<L132Result>("l132"),
       gpai:         readFromStorage<GPAIResult>("gpai"),
-      xai:          readFromStorage<XAIResult>("xai"),
     };
   }
 

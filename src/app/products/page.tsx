@@ -441,7 +441,7 @@ function buildConversion(t: (k: string) => string): Record<string, ConversionDat
     "mod-triage": {
       headline: t("convTriageHeadline"),
       sub: t("convTriageSub"),
-      fine: "€30M",
+      fine: "€35M",
       stats: zipStats(t("convTriageStatVals"), t("convTriageStatLabels")),
       checklist: splitPipe(t("convTriageChecks")),
       articles: ["Art. 5", "Art. 6", "Art. 51", "Annex III"],

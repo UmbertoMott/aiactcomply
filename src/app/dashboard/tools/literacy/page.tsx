@@ -34,7 +34,7 @@ function buildCategoryLabels(t: TFn): Record<TrainingCategory, string> {
   };
 }
 
-// ─── Ruoli aziendali Art. 4 L.132/2025 + MOG 231 ──────────────────────────────
+// ─── Ruoli aziendali coinvolti nella formazione (Art. 4) ─────────────────────────
 
 type StaffRole =
   | "dirigenti"
@@ -55,15 +55,7 @@ function buildStaffRoleLabels(t: TFn): Record<StaffRole, string> {
   };
 }
 
-// Ore minime raccomandate per ruolo (MOG 231 best practice)
-const ROLE_MIN_HOURS: Record<StaffRole, number> = {
-  dirigenti:        4,
-  manager_ai:       8,
-  developer:        6,
-  hr:               4,
-  legal_compliance: 6,
-  tutti_dipendenti: 2,
-};
+const STAFF_ROLES: StaffRole[] = ["dirigenti", "manager_ai", "developer", "hr", "legal_compliance", "tutti_dipendenti"];
 
 type TrainingSession = {
   id: string;
@@ -104,7 +96,7 @@ function formatDate(iso: string, loc: string): string {
   });
 }
 
-// ─── Calcolo compliance per ruolo ─────────────────────────────────────────────
+// ─── Ore registrate per ruolo ─────────────────────────────────────────────────
 
 function computeHoursByRole(sessions: TrainingSession[]): Record<StaffRole, number> {
   const hours: Record<StaffRole, number> = {
@@ -116,21 +108,8 @@ function computeHoursByRole(sessions: TrainingSession[]): Record<StaffRole, numb
     for (const role of (s.roles || [])) {
       hours[role] = (hours[role] || 0) + h;
     }
-    if ((s.roles || []).length > 0) {
-      hours.tutti_dipendenti += h;
-    }
   }
   return hours;
-}
-
-function computeLiteracyScore(sessions: TrainingSession[]): number {
-  const hours = computeHoursByRole(sessions);
-  const roles = Object.keys(ROLE_MIN_HOURS) as StaffRole[];
-  let met = 0;
-  for (const role of roles) {
-    if ((hours[role] || 0) >= ROLE_MIN_HOURS[role]) met++;
-  }
-  return Math.round((met / roles.length) * 100);
 }
 
 async function syncToMog231(sessions: TrainingSession[]): Promise<void> {
@@ -144,7 +123,6 @@ async function syncToMog231(sessions: TrainingSession[]): Promise<void> {
     if (!aiSystemId) return;
 
     const hoursByRole = computeHoursByRole(sessions);
-    const literacyScore = computeLiteracyScore(sessions);
 
     const partDTraining = {
       training_plan: "Formazione AI conforme Art. 4 EU AI Act + L.132/2025",
@@ -157,7 +135,6 @@ async function syncToMog231(sessions: TrainingSession[]): Promise<void> {
       })),
       hours_per_role: hoursByRole,
       next_training_date: null,
-      literacy_score: literacyScore,
     };
 
     await fetch("/api/mog231", {
@@ -167,7 +144,6 @@ async function syncToMog231(sessions: TrainingSession[]): Promise<void> {
         ai_system_id: aiSystemId,
         updates: {
           part_d_training: partDTraining,
-          ...(literacyScore >= 80 ? { l132_hr_transparency: true } : {}),
         },
       }),
     });
@@ -176,12 +152,11 @@ async function syncToMog231(sessions: TrainingSession[]): Promise<void> {
   }
 }
 
-// ─── RoleCompliancePanel ──────────────────────────────────────────────────────
+// ─── RoleHoursPanel ───────────────────────────────────────────────────────────
+// Solo un riepilogo di quanto registrato: l'Art. 4 non fissa ore minime, quindi nessun punteggio.
 
-function RoleCompliancePanel({ sessions, t }: { sessions: TrainingSession[]; t: TFn }) {
+function RoleHoursPanel({ sessions, t }: { sessions: TrainingSession[]; t: TFn }) {
   const hours = computeHoursByRole(sessions);
-  const roles = Object.keys(ROLE_MIN_HOURS) as StaffRole[];
-  const score = computeLiteracyScore(sessions);
   const STAFF_ROLE_LABELS = buildStaffRoleLabels(t);
 
   return (
@@ -189,65 +164,23 @@ function RoleCompliancePanel({ sessions, t }: { sessions: TrainingSession[]; t: 
       className="rounded-xl p-4 mb-6"
       style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}
     >
-      {/* Header con score globale */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.35)" }}>
-            {t("complianceTitle")}
-          </p>
-          <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.4)" }}>
-            {t("complianceSubtitle")}
-          </p>
-        </div>
-        <div className="text-right">
-          <div
-            className="text-2xl font-bold"
-            style={{ color: score >= 80 ? "#16a34a" : score >= 50 ? "#d97706" : "#dc2626" }}
-          >
-            {score}%
+      <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.35)" }}>
+        {t("complianceTitle")}
+      </p>
+      <p className="text-[11px] mt-0.5 mb-3" style={{ color: "rgba(0,0,0,0.4)" }}>
+        {t("complianceSubtitle")}
+      </p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        {STAFF_ROLES.map(role => (
+          <div key={role} className="rounded-lg px-3 py-2" style={{ background: "rgba(0,0,0,0.025)" }}>
+            <p className="text-[11px]" style={{ color: "rgba(0,0,0,0.5)" }}>{STAFF_ROLE_LABELS[role]}</p>
+            <p className="text-[14px] font-medium" style={{ color: "#0D1016" }}>{(hours[role] || 0).toFixed(1)} h</p>
           </div>
-          <div className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>
-            {score >= 80 ? t("statusConforme") : score >= 50 ? t("statusParziale") : t("statusInsufficiente")}
-          </div>
-        </div>
+        ))}
       </div>
-
-      {/* Barre per ruolo */}
-      <div className="space-y-2.5">
-        {roles.map(role => {
-          const done = hours[role] || 0;
-          const min = ROLE_MIN_HOURS[role];
-          const pct = Math.min((done / min) * 100, 100);
-          const ok = done >= min;
-          return (
-            <div key={role}>
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-xs" style={{ color: "rgba(0,0,0,0.6)" }}>
-                  {STAFF_ROLE_LABELS[role]}
-                </span>
-                <span className="text-[11px] font-medium" style={{ color: ok ? "#16a34a" : "rgba(0,0,0,0.4)" }}>
-                  {done.toFixed(1)}h / {min}h {t("minSuffix")}
-                </span>
-              </div>
-              <div className="h-1.5 rounded-full w-full" style={{ background: "rgba(0,0,0,0.07)" }}>
-                <div
-                  className="h-1.5 rounded-full transition-all duration-500"
-                  style={{
-                    width: `${pct}%`,
-                    background: ok ? "#16a34a" : pct > 0 ? "#d97706" : "rgba(0,0,0,0.15)",
-                  }}
-                />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {score < 100 && (
-        <p className="text-[11px] mt-3" style={{ color: "rgba(0,0,0,0.4)" }}>
-          {t("mog231Note")}
-        </p>
-      )}
+      <p className="text-[11px] mt-3" style={{ color: "rgba(0,0,0,0.4)" }}>
+        {t("mog231Note")}
+      </p>
     </div>
   );
 }
@@ -713,7 +646,7 @@ export default function LiteracyPage() {
 
       {/* ── E. Compliance per ruolo ── */}
       {sessions.length > 0 && (
-        <RoleCompliancePanel sessions={sessions} t={t} />
+        <RoleHoursPanel sessions={sessions} t={t} />
       )}
 
       {/* ── F. Sessions list ── */}
