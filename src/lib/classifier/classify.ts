@@ -42,13 +42,13 @@ export interface ClassifyAnswers {
 
   // Passo 2 — Art. 5 pratiche vietate
   /** ID delle fattispecie Art. 5 che l'utente ritiene applicabili */
-  art5Flags?: Array<"a" | "b" | "c" | "d" | "e" | "f" | "g" | "h">;
+  art5Flags?: Array<"a" | "b" | "ba" | "bb" | "c" | "d" | "e" | "f" | "g" | "h">;
   /** Eccezioni applicate (per lettere d, f, g, h) */
-  art5ExceptionsApplied?: Partial<Record<"d" | "f" | "g" | "h", boolean>>;
+  art5ExceptionsApplied?: Partial<Record<"bb" | "d" | "f" | "g" | "h", boolean>>;
 
   // Passo 3 — GPAI (Art. 51-55) — asse parallelo
   isGPAIModel?: boolean;
-  gpaiSystemicRisk?: boolean; // ≥ 10^25 FLOP o designazione Commissione
+  gpaiSystemicRisk?: boolean; // > 10^25 FLOP (Art. 51(2)) o designazione Commissione
 
   // Passo 4 — Allegato I (Art. 6(1))
   annexIProductId?: string | null;   // id del prodotto (es. "medical_devices")
@@ -206,7 +206,7 @@ export function classify(answers: ClassifyAnswers): ClassifyResult {
   const exceptionsApplied = answers.art5ExceptionsApplied ?? {};
   // Solo per (d), (f), (g), (h) esiste un'eccezione tassativa nell'AI Act
   const prohibitedWithoutException = prohibitedPractices.filter(p => {
-    if ((p.letter === "d" || p.letter === "f" || p.letter === "g" || p.letter === "h") &&
+    if ((p.letter === "bb" || p.letter === "d" || p.letter === "f" || p.letter === "g" || p.letter === "h") &&
         exceptionsApplied[p.letter] === true) {
       return false; // eccezione applicata
     }

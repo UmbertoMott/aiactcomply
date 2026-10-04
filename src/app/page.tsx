@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "RegulaeOS — Conformità EU AI Act",
     description:
-      "Classifica il rischio del tuo sistema AI, genera documentazione tecnica e gestisci gli obblighi EU AI Act. Scadenza agosto 2026.",
+      "Classifica il rischio del tuo sistema AI, genera documentazione tecnica e gestisci gli obblighi EU AI Act. Alto rischio dal 2 dicembre 2027.",
     url: BASE_URL,
     siteName: "RegulaeOS",
     images: [
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "RegulaeOS — Conformità EU AI Act",
     description:
-      "Classifica il rischio del tuo sistema AI e gestisci gli obblighi EU AI Act. Scadenza agosto 2026.",
+      "Classifica il rischio del tuo sistema AI e gestisci gli obblighi EU AI Act. Alto rischio dal 2 dicembre 2027.",
     images: [`${BASE_URL}/og-image.png`],
   },
   alternates: {

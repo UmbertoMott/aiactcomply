@@ -358,7 +358,7 @@ export async function scanUrl(url: string): Promise<Art50ScanResult> {
     criticalCount,
     warningCount,
     riskLevel,
-    sanctionEstimate: "Fino all'1% del fatturato annuo globale (Art. 99(3) AI Act)",
+    sanctionEstimate: "Fino a 15 milioni di euro o al 3% del fatturato mondiale annuo, se superiore (Art. 99(4)(g) AI Act)",
     scannedAt: new Date().toISOString(),
     disclaimer:
       "Questo strumento è indicativo e non costituisce parere legale. La conformità all'Art. 50 richiede una valutazione completa da parte di un esperto qualificato. I risultati dipendono dall'HTML pubblicamente accessibile della pagina scansionata.",

@@ -59,18 +59,18 @@ export const AI_ACT_DEADLINES: AIActDeadline[] = [
   },
   {
     id: "high_risk_annex3_full",
-    date: "2026-08-02",
+    date: "2027-12-02",
     label: "Sistemi ad alto rischio (Annex III) — piena applicazione",
     description:
       "Piena applicazione di tutti gli obblighi per i sistemi ad alto rischio elencati nell'Allegato III: gestione del rischio (Art. 9), qualità dei dati (Art. 10), documentazione tecnica (Art. 11), logging (Art. 12), trasparenza (Art. 13), supervisione umana (Art. 14), accuracy e robustezza (Art. 15), registrazione EUDB (Art. 49).",
-    article: "Art. 9-15, Art. 49, Annex III",
+    article: "Art. 9-15, Art. 49, Annex III — Art. 113 come modificato dal Reg. (UE) 2026/1744",
     applies_to: ["high_risk_annex3"],
     tool_href: "/dashboard/triage",
     severity: "critical",
   },
   {
     id: "public_authority_deployer",
-    date: "2026-08-02",
+    date: "2027-12-02",
     label: "Deployer — enti pubblici: obblighi aggiuntivi",
     description:
       "Gli enti pubblici deployer di sistemi ad alto rischio Annex III devono completare la registrazione nel database UE (Art. 26(8)) e la notifica all'autorita di vigilanza del mercato.",
@@ -81,11 +81,11 @@ export const AI_ACT_DEADLINES: AIActDeadline[] = [
   },
   {
     id: "high_risk_annex1",
-    date: "2027-08-02",
+    date: "2028-08-02",
     label: "Sistemi ad alto rischio (Annex I) — prodotti regolamentati",
     description:
-      "Applicazione agli AI systems che sono componenti di sicurezza di prodotti soggetti alla normativa elencata nell'Allegato I (macchinari, dispositivi medici, ecc.) immessi sul mercato o messi in servizio dopo questa data.",
-    article: "Art. 6(1), Annex I",
+      "Applicazione degli obblighi per l'alto rischio ai sistemi di IA che sono componenti di sicurezza di prodotti (o prodotti) disciplinati dall'Allegato I e soggetti a valutazione di terzi. I sistemi già immessi sul mercato prima di questa data sono soggetti solo se subiscono modifiche significative (Art. 111(2)).",
+    article: "Art. 6(1), Annex I — Art. 113 come modificato dal Reg. (UE) 2026/1744",
     applies_to: ["high_risk_annex1"],
     tool_href: "/dashboard/triage",
     severity: "important",
@@ -93,11 +93,11 @@ export const AI_ACT_DEADLINES: AIActDeadline[] = [
   {
     id: "gpai_systemic_full",
     date: "2027-08-02",
-    label: "GPAI con rischio sistemico — obblighi aggiuntivi",
+    label: "Modelli GPAI già sul mercato prima del 2 agosto 2025",
     description:
-      "Piena applicazione degli obblighi aggiuntivi per i modelli GPAI a rischio sistemico: valutazione dell'impatto, segnalazione incidenti gravi all'AI Office, misure di sicurezza informatica avanzate.",
-    article: "Art. 55",
-    applies_to: ["gpai_systemic"],
+      "Termine entro cui i fornitori di modelli GPAI immessi sul mercato prima del 2 agosto 2025 si conformano agli obblighi degli Artt. 53-55 (per i modelli nuovi gli obblighi si applicano dal 2 agosto 2025).",
+    article: "Art. 111(3)",
+    applies_to: ["gpai", "gpai_systemic"],
     tool_href: "/dashboard/tools/gpai",
     severity: "critical",
   },
@@ -112,14 +112,35 @@ export const AI_ACT_DEADLINES: AIActDeadline[] = [
     severity: "critical",
   },
   {
-    id: "post_market_first_report",
-    date: "2027-08-02",
-    label: "Post-Market Monitoring — primo report (stima)",
+    id: "art50_2_legacy",
+    date: "2026-12-02",
+    label: "Marcatura dei contenuti sintetici — sistemi già sul mercato",
     description:
-      "Data stimata per il primo report di monitoraggio post-market per sistemi ad alto rischio Annex III immessi sul mercato nel 2026. La periodicita esatta e soggetta a verifica contro Art. 72. La scadenza effettiva dipende dalla data di messa in servizio del singolo sistema.",
-    article: "Art. 72",
-    applies_to: ["high_risk_annex3", "gpai_systemic"],
-    tool_href: "/dashboard/post-market",
+      "I fornitori di sistemi che generano audio, immagini, video o testi sintetici immessi sul mercato prima del 2 agosto 2026 si conformano all'Art. 50(2) entro questa data. Per i sistemi nuovi l'Art. 50 si applica dal 2 agosto 2026.",
+    article: "Art. 50(2), Art. 111(4) (Reg. (UE) 2026/1744)",
+    applies_to: ["limited"],
+    tool_href: "/dashboard/tools/art50-kit",
+    severity: "important",
+  },
+  {
+    id: "art5_new_prohibitions",
+    date: "2026-12-02",
+    label: "Nuove pratiche vietate: contenuti intimi non consensuali e CSAM",
+    description:
+      "Si applicano i divieti dell'Art. 5(1)(ba) e (bb) introdotti dal Reg. (UE) 2026/1744: sistemi che generano o manipolano immagini intime realistiche di persone identificabili senza consenso, o materiale pedopornografico.",
+    article: "Art. 5(1)(ba)-(bb)",
+    applies_to: ["all"],
+    tool_href: "/dashboard/tools/prohibited",
+    severity: "critical",
+  },
+  {
+    id: "public_authority_legacy",
+    date: "2030-08-02",
+    label: "Sistemi ad alto rischio usati da autorità pubbliche — termine finale",
+    description:
+      "Fornitori e deployer di sistemi ad alto rischio destinati alle autorità pubbliche si conformano entro questa data anche se il sistema era già in uso prima dell'applicazione del Capo III.",
+    article: "Art. 111(2)",
+    applies_to: ["high_risk_annex3", "high_risk_annex1"],
     severity: "important",
   },
 ];
@@ -166,9 +187,5 @@ export const DEADLINE_ACTIONS: Record<string, { label: string; href?: string }[]
   ],
   full_regulation: [
     { label: "Verifica copertura completa di tutti i moduli AIComply", href: "/dashboard" },
-  ],
-  post_market_first_report: [
-    { label: "Configura monitoraggio post-market (Art. 72)", href: "/dashboard/post-market" },
-    { label: "Verifica data di messa in servizio in DocuGen", href: "/dashboard/tools/docugen" },
   ],
 };

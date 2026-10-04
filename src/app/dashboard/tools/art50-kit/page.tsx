@@ -208,7 +208,7 @@ export default function Art50KitPage() {
       `Punteggio Art. 50:    ${system.lastScore !== null ? system.lastScore + "/100" : "n/d"}`, "",
       "COMPONENTI DICHIARATI INSTALLATI:",
       "  - Banner disclosure AI visibile agli utenti", "  - Meta tag machine-readable (ai-disclosure)", "  - Markup strutturato JSON-LD", "",
-      "RIFERIMENTO NORMATIVO:", "  Art. 50(1)-(5) Regolamento (UE) 2024/1689 (AI Act)", "  Deadline: 2 dicembre 2026", "",
+      "RIFERIMENTO NORMATIVO:", "  Art. 50(1)-(5) Regolamento (UE) 2024/1689 (AI Act)", "  In vigore dal 2 agosto 2026; Art. 50(2) per i sistemi già sul mercato entro il 2 dicembre 2026 (Art. 111(4))", "",
       "NOTA LEGALE:", "  AI Comply non rilascia attestazioni di conformità legale.", "  Questo documento costituisce esclusivamente un registro interno.", "=".repeat(60),
       `Generato da RegulaeOS — ${new Date().toISOString()}`,
     ];

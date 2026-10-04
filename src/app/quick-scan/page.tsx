@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "AI Act Quick Scan | RegulaeOS",
     description:
-      "Quick Scan gratuito per individuare potenziali gap AI Act prima del 2 dicembre 2026.",
+      "Quick Scan gratuito per individuare potenziali gap rispetto all'AI Act.",
     type: "website",
     url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://aicomply-omega.vercel.app"}/quick-scan`,
   },

@@ -478,9 +478,9 @@ export default function DeadlinesPage() {
 
   const primarySystem = systemFilter === "all" ? systems[0] : systems.find(s => s.id === systemFilter);
 
-  // Alert Annex III — sistema high-risk + scadenza 2 agosto 2026 entro 60 giorni
-  const aug2026 = new Date("2026-08-02");
-  const daysToAnnexIII = Math.ceil((aug2026.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  // Alert Annex III — sistema high-risk + scadenza 2 dicembre 2027 (Reg. (UE) 2026/1744) entro 60 giorni
+  const annexIIIDate = new Date("2027-12-02");
+  const daysToAnnexIII = Math.ceil((annexIIIDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
   const hasHighRiskInScope = systemFilter === "all"
     ? systems.some(s => s.tier === "high_risk")
     : primarySystem?.tier === "high_risk";
@@ -579,7 +579,7 @@ export default function DeadlinesPage() {
                   Scadenza Annex III — {daysToAnnexIII} giorni
                 </p>
                 <p className="text-[12px] mt-0.5" style={{ color: MUTED }}>
-                  I sistemi ad alto rischio devono essere conformi entro il 2 agosto 2026. Verifica dossier, EUDB e documentazione tecnica.
+                  Gli obblighi per i sistemi ad alto rischio dell&apos;Allegato III si applicano dal 2 dicembre 2027. Verifica dossier, EUDB e documentazione tecnica.
                 </p>
               </div>
             </div>

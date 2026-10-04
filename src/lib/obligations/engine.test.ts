@@ -87,11 +87,11 @@ test("Pratica vietata: stop, con eccezione per motivi medici sulla lettera f)", 
   assert.notEqual(medical.risk.category, "prohibited");
 });
 
-test("Allegato I sezione A: alto rischio dal 2 agosto 2027, niente registrazione Art. 49", () => {
+test("Allegato I sezione A: alto rischio dal 2 agosto 2028 (Omnibus), niente registrazione Art. 49", () => {
   const r = run({ developer: "us", ownUse: ["market"], publicStatus: "none" }, { aiDefinition: "infers", annexIActId: "medical_devices", annexIThirdParty: true });
   assert.equal(r.risk.category, "high_risk_annex_i");
   const art9 = r.obl.obligations.find(o => o.id === "art9")!;
-  assert.equal(art9.appliesFrom, "2027-08-02");
+  assert.equal(art9.appliesFrom, "2028-08-02");
   assert.ok(!r.ids.includes("art49-1"));
 });
 
@@ -127,4 +127,31 @@ test("Sistema già in servizio prima del 2/8/2026 usato da autorità pubblica: t
 test("Sviluppo interno usato internamente: fornitore e deployer insieme", () => {
   const r = determineRoles({ developer: "us", ownUse: ["internal_use"], publicStatus: "none" });
   assert.deepEqual(r.roles.sort(), ["deployer", "provider"]);
+});
+
+test("Omnibus: Allegato III dal 2 dicembre 2027", () => {
+  const r = run(DEPLOYER, { aiDefinition: "infers", annexIII: ["4a"], profiling: true });
+  assert.equal(r.obl.obligations.find(o => o.id === "art26-1")!.appliesFrom, "2027-12-02");
+});
+
+test("Omnibus: regolamento macchine nell'Allegato I, sezione B", () => {
+  const r = run({ developer: "us", ownUse: ["market"], publicStatus: "none" }, { aiDefinition: "infers", annexIActId: "machinery", annexIThirdParty: true });
+  assert.equal(r.risk.annexIAct?.section, "B");
+  assert.ok(!r.ids.includes("art9"), "sezione B: requisiti tramite la normativa di settore");
+});
+
+test("Omnibus: nuovi divieti Art. 5(1)(ba)-(bb) dal 2 dicembre 2026", () => {
+  const r = run(DEPLOYER, { aiDefinition: "infers", art5: ["ba"] });
+  assert.equal(r.risk.category, "prohibited");
+  assert.equal(r.obl.obligations.find(o => o.id === "art5-stop")!.appliesFrom, "2026-12-02");
+  const mixed = run(DEPLOYER, { aiDefinition: "infers", art5: ["ba", "c"] });
+  assert.equal(mixed.obl.obligations.find(o => o.id === "art5-stop")!.appliesFrom, "2025-02-02");
+});
+
+test("Omnibus: marcatura Art. 50(2) entro il 2 dicembre 2026 per i sistemi già sul mercato (Art. 111(4))", () => {
+  const prov: RoleAnswers = { developer: "us", ownUse: ["market"], publicStatus: "none" };
+  const old = run(prov, { aiDefinition: "infers", generatesSynthetic: true, syntheticPlacedBeforeAug2026: true });
+  assert.equal(old.obl.obligations.find(o => o.id === "art50-2")!.appliesFrom, "2026-12-02");
+  const fresh = run(prov, { aiDefinition: "infers", generatesSynthetic: true });
+  assert.equal(fresh.obl.obligations.find(o => o.id === "art50-2")!.appliesFrom, "2026-08-02");
 });

@@ -521,7 +521,7 @@ export default function AuthorizedRepCompliancePage() {
       <div style={{ ...cardDk, padding: "10px 14px", marginBottom: 16,
         background: "rgba(0,0,0,0.04)", border: `1px solid ${DK.border}` }}>
         <p style={{ fontSize: 11, color: DK.muted, margin: 0 }}>
-          ✦ AI — verifica e conferma: condizioni di applicabilità Art. 22(1), elenco poteri conferiti Art. 22(2)(a)-(f) e testo del mandato generato sono ricostruiti dalla memoria del modello. Validare contro testo consolidato Art. 22 Reg. (UE) 2024/1689 prima della firma del mandato. Durata minima conservazione mandato dichiarata: 10 anni.
+          ✦ AI — verifica e conferma: condizioni di applicabilità Art. 22(1), elenco dei compiti conferiti Art. 22(3)(a)-(e) e testo del mandato generato sono ricostruiti dalla memoria del modello. Validare contro testo consolidato Art. 22 Reg. (UE) 2024/1689 prima della firma del mandato. Durata minima conservazione mandato dichiarata: 10 anni.
         </p>
       </div>
 
@@ -599,10 +599,10 @@ export default function AuthorizedRepCompliancePage() {
                   )}
                 </div>
                 <p style={{ fontSize: 12, color: DK.text, fontWeight: 500, margin: 0 }}>
-                  Il sistema AI è classificato come alto rischio (Annex III) o GPAI con rischio sistemico?
+                  Il sistema è ad alto rischio, oppure si tratta di un modello di IA per finalità generali?
                 </p>
                 <p style={{ fontSize: 11, color: DK.muted, margin: "4px 0 0" }}>
-                  Art. 22(1) — si applica ai tier high_risk e gpai_systemic.
+                  Art. 22(1) per i sistemi ad alto rischio (Allegati I e III); Art. 54(1) per i fornitori extra-UE di modelli GPAI, esclusi i modelli open source senza rischio sistemico (Art. 54(6)).
                 </p>
               </div>
               <RadioGroupDk value={doc.eligibility.high_risk}
@@ -1029,7 +1029,7 @@ export default function AuthorizedRepCompliancePage() {
                   <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint,
                     border: `1px solid ${DK.border}`, borderRadius: 4, padding: "1px 5px",
                     background: "rgba(0,0,0,0.05)" }}>
-                    Art. 22(2)(a)-(f)
+                    Art. 22(3)(a)-(e), 22(4)
                   </span>
                 </div>
                 <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 8, fontWeight: 500,

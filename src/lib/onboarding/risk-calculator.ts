@@ -243,12 +243,13 @@ function buildResult(level: RiskLevel, score: number, data: OnboardingData): Ris
     minimal:      "monitor",
   };
 
-  // Deadline: high-risk systems must comply by 2 Aug 2026 per Art. 111(2)
+  // Scadenze (Art. 113 come modificato dal Reg. (UE) 2026/1744): alto rischio All. III dal 2/12/2027,
+  // Art. 50 dal 2/8/2026, Art. 4 dal 2/2/2025
   const deadlineMap: Record<RiskLevel, string> = {
     unacceptable: new Date().toISOString().split("T")[0],
-    high:         "2026-08-02",
+    high:         "2027-12-02",
     limited:      "2026-08-02",
-    minimal:      "2027-08-02",
+    minimal:      "2025-02-02",
   };
 
   return {
