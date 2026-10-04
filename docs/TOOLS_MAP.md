@@ -20,7 +20,6 @@ Legenda colonne:
 | Dossier | `/dashboard/dossier` | `app/dashboard/dossier/page.tsx` | 493 | ✓ | — | 0 | 0 | Export PDF, completamento globale |
 | Post-Market | `/dashboard/post-market` | `app/dashboard/post-market/page.tsx` | 2516 | ✓ | ✓ | 4 | 14 | Monitoraggio post-deploy, Art. 72-73 |
 | Trust Center (pubblico) | `/dashboard/trust-center` | `app/dashboard/trust-center/page.tsx` | 1046 | — | — | 0 | 0 | Pagina pubblica trust |
-| Compliance Nexus | `/dashboard/compliance-nexus` | `app/dashboard/compliance-nexus/page.tsx` | — | — | — | — | — | Hub aggregazione status |
 | Journey | `/dashboard/journey` | `app/dashboard/journey/page.tsx` | — | — | — | — | — | Onboarding guidato |
 | Evidence Layer | `/dashboard/evidence-layer` | `app/dashboard/evidence-layer/page.tsx` | — | — | — | — | — | Raccolta prove/evidenze |
 | Notifications | `/dashboard/notifications` | `app/dashboard/notifications/page.tsx` | — | — | — | — | — | Centro notifiche |
@@ -104,10 +103,7 @@ Legenda colonne:
 
 | Modulo | URL | File | Righe | Storage | AI | 🔵 Blu | ⚠ Verify | Articoli principali |
 |--------|-----|------|-------|---------|----|--------|----------|---------------------|
-| **GPAI Module** | `/dashboard/modules/gpai` | `modules/gpai/page.tsx` | 1113 | 10 | 55 | 1 | 0 | Art. 14, 18, 50, 51 |
 | **XAI (Explainability)** | `/dashboard/modules/xai` | `modules/xai/page.tsx` | 1067 | 5 | 41 | 0 | 0 | Art. 10, 12, 13 |
-| **AIA Architect** | `/dashboard/modules/aia-architect` | `modules/aia-architect/page.tsx` | 1188 | 0 | 7 | 2 | 0 | Art. 10, 11, 14, 15 |
-| **Guardian Agent** | `/dashboard/modules/guardian-agent` | `modules/guardian-agent/page.tsx` | 963 | 9 | 7 | **13** | 0 | Art. 14, 15, 86 — friction gate oversight |
 | **FRIA Module** | `/dashboard/modules/fria` | `modules/fria/page.tsx` | 5 | — | — | 0 | 0 | — | Stub/redirect |
 | **Rights Simulator** | `/dashboard/modules/rights-simulator` | `modules/rights-simulator/page.tsx` | 5 | — | — | 0 | 0 | — | Stub/redirect |
 
@@ -142,7 +138,6 @@ Alcune pagine hanno **due versioni**: la vecchia in `/tools/` e la nuova refacto
 | AGID/ACN | `tools/agid-acn/page.tsx` | **10** | T.blue → neutro |
 | Legacy tools/* | `tools/authorized-rep`, `tools/provider-transition`, `tools/deployer` | **10 ciascuno** | T.blue → neutro |
 | FRIA | `tools/fria/page.tsx` | **9** | T.blue → neutro |
-| Guardian Agent | `modules/guardian-agent/page.tsx` | **13** | T.blue → neutro |
 | Post-Market | `post-market/page.tsx` | **4** | T.blue → neutro |
 
 ### ⚠ `[verify against current AI Act text]` da rimuovere
@@ -180,6 +175,5 @@ Alcune pagine hanno **due versioni**: la vecchia in `/tools/` e la nuova refacto
 | LogVault | ❌ 17 blu | ❌ 12 verify | ✅ |
 | GPAI Tool | ❌ 23 blu | ✅ | ✅ |
 | Art. 50 Kit | ❌ 20 blu | ❌ 19 verify | ✅ |
-| Guardian Agent | ❌ 13 blu | ✅ | ✅ |
 | Post-Market | ⚠ 4 blu | ❌ 14 verify | ✅ |
 | modules/xai | ✅ | ✅ | ✅ |

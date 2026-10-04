@@ -173,6 +173,8 @@ function buildPillars(t: T): NavPillar[] {
       { icon: UserCheck,      label: t("nav_authRep"),            href: "/dashboard/compliance-ops/authorized-rep",      art: "Art. 22" },
       { icon: ArrowRightLeft, label: t("nav_providerTransition"), href: "/dashboard/compliance-ops/provider-transition", art: "Art. 25", tooltip: t("tt_providerTransition") },
       { icon: ShieldCheck,    label: "Trust Center",              href: "/dashboard/compliance-ops/trust-center",        art: "Art. 13/50" },
+      { icon: BadgeCheck,     label: "Trust Passport",            href: "/dashboard/tools/trust-passport",               art: t("art_trustPassport"), tooltip: t("tt_trustPassport") },
+      { icon: ClipboardList,  label: t("nav_buyerQuestionnaire"), href: "/dashboard/tools/questionnaire",                art: t("art_buyerQuestionnaire"), tooltip: t("tt_buyerQuestionnaire") },
       { icon: Scale,          label: "L.132/2025",                href: "/dashboard/tools/l132",                         art: "PA Italy", flag: "paItaly" },
       { icon: Landmark,       label: "AGID/ACN",                  href: "/dashboard/tools/agid-acn",                     art: "PA Italy", flag: "paItaly" },
       { icon: Map,            label: "NIST AI RMF",               href: "/dashboard/tools/nist-ai-rmf",                  art: "NIST", flag: "nistEnabled" },

@@ -54,7 +54,7 @@ export const REGULATORY_DEADLINES: RegulatoryDeadline[] = [
     description: "In vigore gli obblighi per provider e deployer di General Purpose AI. Se usi OpenAI, Anthropic o Google AI devi essere conforme.",
     article: "Art. 51-55",
     affectsRiskLevels: ["gpai"],
-    mandatoryTools: ["/dashboard/modules/gpai"],
+    mandatoryTools: ["/dashboard/tools/gpai"],
   },
   {
     id: "high-risk-2026-08",
