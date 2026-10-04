@@ -7,8 +7,9 @@
 //          data di applicazione (Artt. 111, 113) e corrispondenza ISO/IEC 42001.
 //
 // Fonte: Regolamento (UE) 2024/1689, testo GU L del 12.7.2024.
-// Le corrispondenze ISO/IEC 42001:2023 sono indicative (numerazione di
-// clausole e controlli dell'Allegato A) e vanno verificate sul testo della norma.
+// Corrispondenze con ISO/IEC 42001:2023: numerazione e titoli di clausole e
+// controlli dell'Allegato A verificati sulla prima edizione (2023-12); l'abbinamento
+// articolo ↔ clausola è interpretativo (la norma non è un'attuazione del regolamento).
 //
 // File volutamente autonomo (nessun import): è usato dalle pagine e dai test.
 
@@ -492,14 +493,14 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
   if (isProvider || isDeployer) {
     add({ id: "art4-literacy", group: "all", role: "all", title: "Alfabetizzazione in materia di IA",
       what: "Garantire, nella misura del possibile, un livello sufficiente di alfabetizzazione di chi usa o gestisce il sistema, tenendo conto di conoscenze, contesto d'uso e persone interessate.",
-      article: "Art. 4", iso: ["7.2", "7.3"], appliesFrom: D_FEB_2025, tool: T.literacy, storageKey: "aicomply_literacy_result" });
+      article: "Art. 4", iso: ["7.2", "7.3", "A.4.6"], appliesFrom: D_FEB_2025, tool: T.literacy, storageKey: "aicomply_literacy_result" });
   }
 
   // ── Pratiche vietate ──
   if (risk.category === "prohibited") {
     add({ id: "art5-stop", group: "prohibited", role: "all", title: "Interrompere la pratica vietata",
       what: "Il sistema non può essere immesso sul mercato, messo in servizio o usato nella forma attuale. Interromperne l'uso o modificarlo in modo che non ricada più nell'Art. 5.",
-      article: `Art. 5(1)(${risk.prohibited.join(", ")})`, iso: ["6.1.2", "A.5"], appliesFrom: D_FEB_2025, tool: T.prohibited,
+      article: `Art. 5(1)(${risk.prohibited.join(", ")})`, iso: ["6.1.2", "A.5.4"], appliesFrom: D_FEB_2025, tool: T.prohibited,
       note: "Sanzione fino a 35 000 000 EUR o al 7 % del fatturato mondiale annuo (Art. 99(3))." });
     return { roles: [...roles], obligations: out, notes };
   }
@@ -524,7 +525,7 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
     p({ id: "art9", title: "Sistema di gestione dei rischi", what: "Istituire, documentare e mantenere un processo continuo per identificare, stimare e trattare i rischi per salute, sicurezza e diritti fondamentali lungo tutto il ciclo di vita.",
       article: "Art. 9", iso: ["6.1.2", "6.1.3", "8.2", "8.3"], tool: T.risk, storageKey: "aicomply_risk_manager_result" });
     p({ id: "art10", title: "Dati e governance dei dati", what: "Applicare pratiche di governance ai set di addestramento, convalida e prova: origine, preparazione, rappresentatività, esame e attenuazione delle distorsioni.",
-      article: "Art. 10", iso: ["A.7"], tool: T.data, storageKey: "aicomply_data_audit_result" });
+      article: "Art. 10", iso: ["A.7.2", "A.7.3", "A.7.4", "A.7.5", "A.7.6"], tool: T.data, storageKey: "aicomply_data_audit_result" });
     p({ id: "art11", title: "Documentazione tecnica", what: "Redigere prima dell'immissione sul mercato la documentazione tecnica con almeno gli elementi dell'Allegato IV e tenerla aggiornata.",
       article: "Art. 11, Allegato IV", iso: ["7.5", "A.6.2.7"], tool: T.docugen, storageKey: "aicomply_docugen_result" });
     p({ id: "art12", title: "Registrazione automatica degli eventi (log)", what: "Progettare il sistema in modo che registri automaticamente gli eventi rilevanti per tutta la sua durata.",
@@ -532,7 +533,7 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
     p({ id: "art13", title: "Istruzioni per l'uso ai deployer", what: "Fornire istruzioni chiare con finalità prevista, livello di accuratezza e metriche, limiti, rischi noti, misure di sorveglianza umana, manutenzione e gestione dei log.",
       article: "Art. 13(2)-(3)", iso: ["A.8.2"], tool: T.transparency, storageKey: "aicomply_transparency_result" });
     p({ id: "art14", title: "Progettare la sorveglianza umana", what: "Progettare il sistema perché possa essere supervisionato efficacemente: comprendere limiti, evitare l'eccessivo affidamento, ignorare o ribaltare l'output, arrestarlo in sicurezza.",
-      article: "Art. 14", iso: ["A.9.2"], tool: T.oversight, storageKey: "aicomply_oversight_result",
+      article: "Art. 14", iso: ["A.6.2.2", "A.6.2.3"], tool: T.oversight, storageKey: "aicomply_oversight_result",
       note: risk.annexIIIUses.some(u => u.id === "1a") ? "Identificazione biometrica remota: nessuna decisione senza verifica separata di almeno due persone (Art. 14(5))." : undefined });
     p({ id: "art15", title: "Accuratezza, robustezza e cibersicurezza", what: "Raggiungere livelli adeguati di accuratezza, robustezza e cibersicurezza, dichiarare le metriche nelle istruzioni e proteggere da attacchi specifici dell'IA.",
       article: "Art. 15", iso: ["A.6.2.4"], tool: T.resilience, storageKey: "aicomply_resilience_result" });
@@ -564,7 +565,7 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
     p({ id: "art16l", title: "Requisiti di accessibilità", what: "Garantire la conformità ai requisiti di accessibilità delle direttive (UE) 2016/2102 e 2019/882.",
       article: "Art. 16(l)", iso: [] });
     p({ id: "art25-4", title: "Accordi scritti con i fornitori di componenti", what: "Con i terzi che forniscono sistemi, strumenti, servizi o componenti integrati, precisare per iscritto informazioni, capacità, accesso tecnico e assistenza necessari per adempiere al regolamento.",
-      article: "Art. 25(4)", iso: ["A.10"] });
+      article: "Art. 25(4)", iso: ["A.10.2", "A.10.3"] });
     if (roleAnswers.establishedOutsideEU) {
       p({ id: "art22", title: "Nominare un rappresentante autorizzato nell'UE", what: "Prima di mettere il sistema a disposizione nell'Unione, nominare con mandato scritto un rappresentante autorizzato stabilito nell'UE, con i compiti dell'Art. 22(3).",
         article: "Art. 22", iso: [], tool: T.authRep });
@@ -585,13 +586,13 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
   if (highRisk && isDeployer) {
     const d = (o: Omit<Obligation, "group" | "role" | "appliesFrom">) => add({ ...o, group: "deployer", role: "deployer", appliesFrom: hrFrom });
     d({ id: "art26-1", title: "Uso conforme alle istruzioni", what: "Adottare misure tecniche e organizzative per usare il sistema secondo le istruzioni per l'uso del fornitore.",
-      article: "Art. 26(1)", iso: ["A.9"], tool: T.deployer });
+      article: "Art. 26(1)", iso: ["A.9.2", "A.9.4"], tool: T.deployer });
     d({ id: "art26-2", title: "Affidare la sorveglianza umana", what: "Affidare la sorveglianza umana a persone con competenza, formazione e autorità necessarie, e con il supporto necessario.",
       article: "Art. 26(2)", iso: ["5.3", "7.2", "A.3.2"], tool: T.oversight, storageKey: "aicomply_oversight_result" });
     d({ id: "art26-4", title: "Dati di input pertinenti", what: "Se controlla i dati di input, garantire che siano pertinenti e sufficientemente rappresentativi rispetto alla finalità prevista.",
-      article: "Art. 26(4)", iso: ["A.7"], tool: T.data });
+      article: "Art. 26(4)", iso: ["A.7.4"], tool: T.data });
     d({ id: "art26-5", title: "Monitorare il funzionamento", what: "Monitorare il sistema secondo le istruzioni; se presenta un rischio sospenderne l'uso e informare fornitore e autorità; in caso di incidente grave informare subito il fornitore.",
-      article: "Art. 26(5)", iso: ["9.1", "A.8.4"], tool: T.postMarket });
+      article: "Art. 26(5)", iso: ["9.1", "A.6.2.6", "A.8.4"], tool: T.postMarket });
     d({ id: "art26-6", title: "Conservare i log", what: "Conservare i log generati automaticamente sotto il proprio controllo per almeno 6 mesi, salvo diversa disposizione.",
       article: "Art. 26(6)", iso: ["A.6.2.8"], tool: T.logvault, storageKey: "aicomply_logvault_result" });
     if (riskAnswers.workplace) {
@@ -604,20 +605,20 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
     }
     if (riskAnswers.personalData) {
       d({ id: "art26-9", title: "Valutazione d'impatto sulla protezione dei dati", what: "Usare le informazioni fornite ai sensi dell'Art. 13 per effettuare la DPIA (Art. 35 GDPR).",
-        article: "Art. 26(9)", iso: ["6.1.4", "A.5"], tool: T.dpia, storageKey: "aicomply_dpia_result" });
+        article: "Art. 26(9)", iso: ["6.1.4", "A.5.2"], tool: T.dpia, storageKey: "aicomply_dpia_result" });
     }
     if (annexIII && riskAnswers.decisionsOnPersons) {
       d({ id: "art26-11", title: "Informare le persone interessate", what: "Informare le persone fisiche che sono soggette all'uso del sistema quando adotta decisioni o aiuta ad adottarle nei loro confronti.",
-        article: "Art. 26(11)", iso: ["A.8"], tool: T.transparency });
+        article: "Art. 26(11)", iso: ["A.8.5"], tool: T.transparency });
       if (!onlyPoint2) {
         d({ id: "art86", title: "Spiegazione delle singole decisioni", what: "Su richiesta, fornire spiegazioni chiare e significative sul ruolo del sistema nella decisione e sui suoi elementi principali, quando la decisione ha effetti giuridici o incide significativamente sulla persona.",
-          article: "Art. 86", iso: ["A.8"] });
+          article: "Art. 86", iso: ["A.8.5"] });
       }
     }
     const friaBySector = risk.annexIIIUses.some(u => u.id === "5b" || u.id === "5c");
     if (annexIII && !onlyPoint2 && (publicAuthority || publicService || friaBySector)) {
       d({ id: "art27", title: "Valutazione d'impatto sui diritti fondamentali (FRIA)", what: "Prima del primo uso, valutare l'impatto sui diritti fondamentali con gli elementi dell'Art. 27(1)(a)-(f) e notificarne i risultati all'autorità di vigilanza del mercato.",
-        article: "Art. 27", iso: ["6.1.4", "8.4", "A.5"], tool: T.fria, storageKey: "aicomply_fria_result" });
+        article: "Art. 27", iso: ["6.1.4", "8.4", "A.5.2", "A.5.3", "A.5.4", "A.5.5"], tool: T.fria, storageKey: "aicomply_fria_result" });
     }
   }
 
@@ -625,16 +626,16 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
   if (highRisk && roles.has("importer")) {
     add({ id: "art23", group: "importer", role: "importer", appliesFrom: hrFrom, title: "Verifiche prima dell'immissione sul mercato",
       what: "Verificare valutazione della conformità, documentazione tecnica, marcatura CE, dichiarazione UE, istruzioni e rappresentante autorizzato; indicare il proprio nome; conservare i documenti per 10 anni.",
-      article: "Art. 23", iso: ["A.10"] });
+      article: "Art. 23", iso: ["A.10.3"] });
   }
   if (highRisk && roles.has("distributor")) {
     add({ id: "art24", group: "distributor", role: "distributor", appliesFrom: hrFrom, title: "Verifiche prima della messa a disposizione",
       what: "Verificare marcatura CE, dichiarazione UE e istruzioni per l'uso; non mettere a disposizione sistemi non conformi; cooperare con le autorità.",
-      article: "Art. 24", iso: ["A.10"] });
+      article: "Art. 24", iso: ["A.10.3"] });
   }
 
   // ── Art. 50 ──
-  const t = (o: Omit<Obligation, "group" | "appliesFrom" | "iso" | "tool">) => add({ ...o, group: "transparency", appliesFrom: D_AUG_2026, iso: ["A.8"], tool: T.art50 });
+  const t = (o: Omit<Obligation, "group" | "appliesFrom" | "iso" | "tool">) => add({ ...o, group: "transparency", appliesFrom: D_AUG_2026, iso: o.role === "provider" ? ["A.8.2"] : ["A.8.5"], tool: T.art50 });
   if (risk.art50.includes("50_1") && isProvider) t({ id: "art50-1", role: "provider", title: "Avvisare che si interagisce con un'IA",
     what: "Progettare il sistema perché le persone siano informate che stanno interagendo con un'IA, salvo che sia evidente dal contesto, al più tardi alla prima interazione.", article: "Art. 50(1), (5)" });
   if (risk.art50.includes("50_2") && isProvider) t({ id: "art50-2", role: "provider", title: "Marcare i contenuti generati",
@@ -654,12 +655,12 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
     const g = (o: Omit<Obligation, "group" | "role" | "appliesFrom" | "tool">) => add({ ...o, group: "gpai", role: "provider", appliesFrom: gFrom, tool: T.gpai });
     if (!openExempt) {
       g({ id: "art53-a", title: "Documentazione tecnica del modello", what: "Redigere e aggiornare la documentazione tecnica con almeno gli elementi dell'Allegato XI, da fornire su richiesta all'ufficio per l'IA e alle autorità.", article: "Art. 53(1)(a)", iso: ["A.6.2.7"] });
-      g({ id: "art53-b", title: "Informazioni ai fornitori a valle", what: "Mettere a disposizione dei fornitori che integrano il modello le informazioni dell'Allegato XII.", article: "Art. 53(1)(b)", iso: ["A.8.2", "A.10"] });
+      g({ id: "art53-b", title: "Informazioni ai fornitori a valle", what: "Mettere a disposizione dei fornitori che integrano il modello le informazioni dell'Allegato XII.", article: "Art. 53(1)(b)", iso: ["A.8.2", "A.10.4"] });
     } else {
       notes.push("Modello con licenza libera e open source e pesi pubblici, senza rischio sistemico: esonerato dall'Art. 53(1)(a)-(b) e dall'Art. 54 (Art. 53(2), Art. 54(6)).");
     }
-    g({ id: "art53-c", title: "Politica sul diritto d'autore", what: "Attuare una politica per rispettare il diritto d'autore e, in particolare, la riserva dei diritti espressa ai sensi dell'Art. 4(3) della direttiva (UE) 2019/790.", article: "Art. 53(1)(c)", iso: ["A.7"] });
-    g({ id: "art53-d", title: "Sintesi dei contenuti di addestramento", what: "Pubblicare una sintesi sufficientemente dettagliata dei contenuti usati per l'addestramento, secondo il modello dell'ufficio per l'IA.", article: "Art. 53(1)(d)", iso: ["A.7"] });
+    g({ id: "art53-c", title: "Politica sul diritto d'autore", what: "Attuare una politica per rispettare il diritto d'autore e, in particolare, la riserva dei diritti espressa ai sensi dell'Art. 4(3) della direttiva (UE) 2019/790.", article: "Art. 53(1)(c)", iso: ["A.7.3"] });
+    g({ id: "art53-d", title: "Sintesi dei contenuti di addestramento", what: "Pubblicare una sintesi sufficientemente dettagliata dei contenuti usati per l'addestramento, secondo il modello dell'ufficio per l'IA.", article: "Art. 53(1)(d)", iso: ["A.7.5"] });
     if (roleAnswers.establishedOutsideEU && !openExempt) {
       g({ id: "art54", title: "Rappresentante autorizzato per il modello", what: "Prima di immettere il modello sul mercato dell'Unione, nominare con mandato scritto un rappresentante autorizzato stabilito nell'UE.", article: "Art. 54", iso: [] });
     }
