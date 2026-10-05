@@ -702,6 +702,59 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
   return { roles: [...roles], obligations: out, notes };
 }
 
+// ─── Tool necessari per l'insieme dei sistemi (menu e riquadro dei tool) ──────
+
+/** Tool di supporto che servono quando serve il tool principale indicato */
+const TOOL_COMPANIONS: Record<string, string[]> = {
+  [T.postMarket.href]: ["/dashboard/tools/incident", "/dashboard/tools/drift-monitor"],
+};
+
+export interface ToolNeed {
+  href: string;
+  /** Sistemi per cui il tool serve */
+  systems: string[];
+  /** Articoli degli obblighi coperti dal tool */
+  articles: string[];
+  /** Ruoli che devono adempiere */
+  roles: Role[];
+}
+
+export interface ToolNeeds {
+  /** Sistemi con classificazione guidata completata */
+  assessed: number;
+  /** Ruoli effettivi su tutti i sistemi classificati */
+  roles: Role[];
+  tools: Record<string, ToolNeed>;
+}
+
+export function toolNeeds(systems: { name: string; roleAnswers?: RoleAnswers; riskAnswers?: RiskAnswers }[]): ToolNeeds {
+  const tools: Record<string, ToolNeed> = {};
+  const roles = new Set<Role>();
+  let assessed = 0;
+  const mark = (href: string, system: string, article: string | null, role: Role | null) => {
+    const n = tools[href] ??= { href, systems: [], articles: [], roles: [] };
+    if (!n.systems.includes(system)) n.systems.push(system);
+    if (article && !n.articles.includes(article)) n.articles.push(article);
+    if (role && !n.roles.includes(role)) n.roles.push(role);
+  };
+  for (const s of systems) {
+    if (!s.roleAnswers || !s.riskAnswers) continue;
+    assessed++;
+    const rr = determineRoles(s.roleAnswers);
+    const risk = assessRisk(s.riskAnswers);
+    const res = computeObligations(s.roleAnswers, rr, risk, s.riskAnswers);
+    res.roles.forEach(r => roles.add(r));
+    for (const o of res.obligations) {
+      if (!o.tool) continue;
+      const role = o.role === "all" ? null : o.role;
+      mark(o.tool.href, s.name, o.article, role);
+      for (const c of TOOL_COMPANIONS[o.tool.href] ?? []) mark(c, s.name, o.article, role);
+    }
+    if (rr.art25Pending.length > 0 || (s.roleAnswers.art25?.length ?? 0) > 0) mark(T.transition.href, s.name, "Art. 25", "provider");
+  }
+  return { assessed, roles: [...roles], tools };
+}
+
 export const ART25_LABEL: Record<Art25Trigger, string> = {
   own_brand: "nome o marchio proprio apposto sul sistema (Art. 25(1)(a))",
   substantial_modification: "modifica sostanziale (Art. 25(1)(b))",

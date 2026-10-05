@@ -26,6 +26,25 @@ import { ProjectSwitcher } from "@/components/layout/ProjectSwitcher";
 import { ProjectMembersMenu } from "@/components/dashboard/ProjectMembersMenu";
 import { sanitizeSidebarLabel } from "@/lib/sidebar/sidebar-utils";
 import { useT, useLocale } from "@/i18n/LocaleProvider";
+import { toolNeeds, type ToolNeeds } from "@/lib/obligations/engine";
+import { loadInventory } from "@/lib/inventory/ai-system";
+import { guideForPath } from "@/lib/tools/tool-guide";
+import ToolGuide from "@/components/tools/ToolGuide";
+
+/** La home "/dashboard" è attiva solo su se stessa; le altre voci anche sulle sottopagine */
+function isOnPath(pathname: string, href: string): boolean {
+  return href === "/dashboard" ? pathname === href : pathname === href || pathname.startsWith(href + "/");
+}
+
+/** Voci sempre visibili nel menu, anche quando è filtrato sugli obblighi */
+const ALWAYS_VISIBLE = new Set([
+  "/dashboard",
+  "/dashboard/tools/inventory",
+  "/dashboard/triage",
+  "/dashboard/tools/legal-assistant",
+  "/dashboard/compliance-ops/deadlines",
+]);
+const SHOW_ALL_KEY = "aicomply_sidebar_show_all";
 
 type T = (key: string) => string;
 
@@ -151,6 +170,7 @@ function buildPillars(t: T): NavPillar[] {
   { id: "docugen", icon: FileCode, label: t("nav_docugen"), href: "/dashboard/tools/docugen", art: t("art_docugen") },
   { id: "data-audit", icon: ClipboardList, label: t("nav_dataAudit"), href: "/dashboard/tools/data-audit", art: "Art. 10", tooltip: t("tt_dataAudit") },
   { id: "transparency", icon: Megaphone, label: t("nav_transparency"), href: "/dashboard/tools/transparency", art: "Art. 13", tooltip: t("tt_transparency") },
+  { id: "art50", icon: Megaphone, label: t("nav_art50"), href: "/dashboard/tools/art50-kit", art: "Art. 50", tooltip: t("tt_art50") },
   { id: "oversight", icon: Eye, label: t("nav_oversight"), href: "/dashboard/tools/oversight", art: "Art. 14", tooltip: t("tt_oversight") },
   { id: "resilience", icon: Siren, label: t("nav_resilience"), href: "/dashboard/tools/resilience", art: "Art. 15", tooltip: t("tt_resilience") },
   { id: "qms", icon: ClipboardCheck, label: t("nav_qms"), href: "/dashboard/tools/qms", art: "Art. 17", tooltip: t("tt_qms") },
@@ -196,6 +216,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return localStorage.getItem("sidebar_collapsed") === "true";
   });
   const [dossierPct, setDossierPct] = useState(0);
+  const [needs, setNeeds] = useState<ToolNeeds | null>(null);
+  const [showAll, setShowAll] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try { return localStorage.getItem(SHOW_ALL_KEY) === "true"; } catch { return false; }
+  });
   const [trustCenterPublished, setTrustCenterPublished] = useState(false);
 
   useEffect(() => {
@@ -227,9 +252,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     });
   }
 
+  // Menu filtrato sugli obblighi dei sistemi classificati (lib/obligations/engine.ts → toolNeeds)
+  const filtering = !!needs && needs.assessed > 0 && !showAll;
+
+  function isNeeded(href: string): boolean {
+    return !filtering || ALWAYS_VISIBLE.has(href) || !!needs?.tools[href];
+  }
+
   function isChildVisible(child: NavChild): boolean {
-    if (!child.flag) return true;
-    return !!orgProfile[child.flag];
+    if (child.flag) return !!orgProfile[child.flag];
+    return isNeeded(child.href);
+  }
+
+  const hiddenCount = needs && needs.assessed > 0
+    ? pillars.flatMap((p) => p.children ?? [{ href: p.href! } as NavChild])
+        .filter((c) => !c.flag && !ALWAYS_VISIBLE.has(c.href) && !needs.tools[c.href]).length
+    : 0;
+
+  function toggleShowAll() {
+    const next = !showAll;
+    setShowAll(next);
+    try { localStorage.setItem(SHOW_ALL_KEY, String(next)); } catch { /* storage non disponibile */ }
   }
 
   function toggleCollapse() {
@@ -239,6 +282,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   useEffect(() => {
+    setNeeds(toolNeeds(loadInventory()));
     const data = aggregateDossier();
     const sections = getDossierSections(data);
     setDossierPct(getCompletionPercentage(sections));
@@ -257,9 +301,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const currentItem = pillars.flatMap((p) =>
     p.href ? [{ label: p.label, href: p.href }] : (p.children ?? [])
-  ).find((i) => pathname.startsWith(i.href));
+  ).filter((i) => isOnPath(pathname, i.href))
+    .sort((a, b) => b.href.length - a.href.length)[0];
 
   const sidebarW = collapsed ? "w-[52px]" : "w-56";
+  const currentGuide = guideForPath(pathname);
 
   return (
     <div className="flex flex-col h-screen w-full overflow-hidden" style={{ background: "#FFFFFF" }}>
@@ -348,10 +394,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {pillars.map((pillar) => {
               const isExpanded = expandedPillars.has(pillar.id);
               const isPillarActive = pillar.href
-                ? pathname.startsWith(pillar.href)
+                ? isOnPath(pathname, pillar.href)
                 : pillar.children?.some((c) => pathname.startsWith(c.href)) ?? false;
 
               if (!pillar.children) {
+                if (!isNeeded(pillar.href!)) return null;
                 const leafLink = (
                   <Link
                     key={pillar.id}
@@ -452,6 +499,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               );
             })}
 
+            {/* Filtro del menu sugli obblighi */}
+            {hiddenCount > 0 && !collapsed && (
+              <button
+                onClick={toggleShowAll}
+                className="w-full text-left mt-3 px-2 py-1.5 rounded-md text-[10.5px] transition-all"
+                style={{ color: "rgba(255,255,255,0.45)", background: "rgba(255,255,255,0.04)", cursor: "pointer" }}
+              >
+                {showAll ? t("nav_showMine") : `${t("nav_showAll")} (${hiddenCount})`}
+              </button>
+            )}
+
             {/* Settings */}
             <div className="mt-4 pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
               <Link
@@ -528,7 +586,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </>
             )}
           </div>
-          {role && (
+          {needs && needs.assessed > 0 && needs.roles.length > 0 ? (
+            <div className="ml-4 hidden lg:flex items-center gap-1.5">
+              {needs.roles.map((r) => (
+                <span
+                  key={r}
+                  className="text-[10px] px-2 py-0.5 rounded-full font-medium"
+                  style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.45)", border: "1px solid rgba(0,0,0,0.08)" }}
+                >
+                  {t(`role_${r}`)}
+                </span>
+              ))}
+              <Link href="/dashboard/tools/inventory" className="text-[10px] transition-opacity hover:opacity-70" style={{ color: "rgba(0,0,0,0.3)" }}>
+                {t("rolesFromInventory")}
+              </Link>
+            </div>
+          ) : role && (
             <div className="ml-4 hidden lg:flex items-center gap-1.5">
               <span
                 className="text-[10px] px-2 py-0.5 rounded-full font-medium"
@@ -557,7 +630,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6 w-full" style={{ background: "#FFFFFF" }}>{children}</main>
+        <main className="flex-1 overflow-y-auto p-6 w-full" style={{ background: "#FFFFFF" }}>
+          {currentGuide && <ToolGuide key={currentGuide.id} guide={currentGuide} needs={needs} />}
+          {children}
+        </main>
       </div>
       </div>
 

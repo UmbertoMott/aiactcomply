@@ -70,7 +70,9 @@ export function RiskRegisterGuidedChat({
   }, [currentId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Scorre solo il riquadro dei messaggi, non la pagina
+    const box = messagesEndRef.current?.parentElement;
+    box?.scrollTo({ top: box.scrollHeight, behavior: "smooth" });
   }, [currentId]);
 
   const handleSend = (valueOverride?: string) => {
