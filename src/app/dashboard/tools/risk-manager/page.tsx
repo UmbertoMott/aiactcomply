@@ -838,7 +838,11 @@ export default function RiskManagerPage() {
     setHydrated(true);
   }, []);
 
-  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  // Scorre solo il riquadro dei messaggi, non la pagina (la guida del tool resta visibile)
+  useEffect(() => {
+    const box = messagesEndRef.current?.parentElement;
+    box?.scrollTo({ top: box.scrollHeight, behavior: "smooth" });
+  }, [messages]);
   useEffect(() => { setShowPhaseGuide(true); setCustomPhrase(""); }, [currentPhaseIndex]);
 
   const persistState = useCallback((msgs: ChatMessage[], doc: RiskDocumentation, phaseIdx: number, completed: RiskPhaseId[]) => {

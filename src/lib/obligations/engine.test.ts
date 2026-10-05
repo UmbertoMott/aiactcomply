@@ -1,7 +1,7 @@
 // Esecuzione: node --experimental-strip-types --test src/lib/obligations/engine.test.ts
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { determineRoles, assessRisk, computeObligations, type RoleAnswers, type RiskAnswers } from "./engine.ts";
+import { determineRoles, assessRisk, computeObligations, toolNeeds, type RoleAnswers, type RiskAnswers } from "./engine.ts";
 
 function run(ra: RoleAnswers, rk: RiskAnswers) {
   const roles = determineRoles(ra);
@@ -154,4 +154,27 @@ test("Omnibus: marcatura Art. 50(2) entro il 2 dicembre 2026 per i sistemi già 
   assert.equal(old.obl.obligations.find(o => o.id === "art50-2")!.appliesFrom, "2026-12-02");
   const fresh = run(prov, { aiDefinition: "infers", generatesSynthetic: true });
   assert.equal(fresh.obl.obligations.find(o => o.id === "art50-2")!.appliesFrom, "2026-08-02");
+});
+
+test("Menu: i tool necessari derivano dagli obblighi dei sistemi classificati", () => {
+  const none = toolNeeds([{ name: "Non classificato" }]);
+  assert.equal(none.assessed, 0);
+  const n = toolNeeds([
+    { name: "Selezione CV", roleAnswers: DEPLOYER, riskAnswers: { aiDefinition: "infers", annexIII: ["4a"], profiling: true, personalData: true } },
+    { name: "ChatGPT email", roleAnswers: DEPLOYER, riskAnswers: { aiDefinition: "infers" } },
+  ]);
+  assert.equal(n.assessed, 2);
+  assert.deepEqual(n.roles, ["deployer"]);
+  assert.deepEqual(n.tools["/dashboard/tools/literacy"].systems, ["Selezione CV", "ChatGPT email"]);
+  for (const href of ["/dashboard/tools/deployer-dashboard", "/dashboard/tools/oversight", "/dashboard/tools/logvault", "/dashboard/tools/dpia", "/dashboard/post-market", "/dashboard/tools/incident"]) {
+    assert.deepEqual(n.tools[href]?.systems, ["Selezione CV"], href);
+  }
+  for (const href of ["/dashboard/tools/risk-manager", "/dashboard/tools/qms", "/dashboard/tools/conformity", "/dashboard/tools/fria"]) {
+    assert.ok(!n.tools[href], href + " non serve a un deployer privato");
+  }
+});
+
+test("Menu: chi dichiara una circostanza dell'Art. 25 vede il cambio di ruolo", () => {
+  const n = toolNeeds([{ name: "Chatbot", roleAnswers: { ...DEPLOYER, art25: ["own_brand"] }, riskAnswers: { aiDefinition: "infers", interactsWithPersons: true } }]);
+  assert.ok(n.tools["/dashboard/compliance-ops/provider-transition"]);
 });
