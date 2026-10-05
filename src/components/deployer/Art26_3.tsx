@@ -1,6 +1,6 @@
 "use client";
 
-// Art. 26(3) — Conservazione log ≥ 6 mesi — PROMPT BD
+// Art. 26(6) — Conservazione log ≥ 6 mesi — PROMPT BD
 
 import React from "react";
 import Link from "next/link";
@@ -25,7 +25,7 @@ export function Art26_3({ record, onChange }: Props) {
     <div className="space-y-3">
       <p className="text-xs text-slate-400">
         Il deployer è tenuto a conservare i log generati automaticamente dal sistema di IA per almeno 6 mesi
-        (Art. 26(3)).
+        (Art. 26(6)), nella misura in cui sono sotto il suo controllo.
       </p>
 
       <div>

@@ -478,7 +478,7 @@ export default function OversightPage() {
         .filter(r => r.status === "implemented")
         .map(r => OVERSIGHT_REQUIREMENTS.find(d => d.id === r.requirementId)?.label ?? r.requirementId),
       stopCapability: record.requirements.find(r => r.requirementId === "intervention_stop")?.status === "implemented",
-      responsiblePersons: [],
+      responsiblePersons: record.fourEyes.verifierRoles,
       completedAt: now,
     });
     appendEvidence("decision", { type: "Oversight Art. 14 — framework configurato", implemented, savedAt: now }, "oversight");

@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { GitBranch, Download, AlertTriangle, CheckCircle, Clock, History, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
-import type { DocugenResult, DataAuditResult, RiskManagerResult, ClassifierResult, DPIAResult } from "@/lib/dossier/storage-schema";
+import type { DocugenResult, DataAuditResult, RiskManagerResult, ClassifierResult, DPIAResult, TransparencyResult, ConformityResult } from "@/lib/dossier/storage-schema";
 import { loadInventory, type AISystem } from "@/lib/inventory/ai-system";
 import { checkAnnexIVGaps, type AnnexIVGapsResult } from "@/app/actions/checkAnnexIVGaps";
 import { validateDocuGenCoherence, type CoherenceReport } from "@/app/actions/validateDocuGenCoherence";
@@ -27,6 +27,31 @@ interface DocuGenState {
   status: Record<string, "empty" | "draft" | "done">;
   systemName: string;
   activeVersion: number;
+  /** 2 = sezioni s1..s9 corrispondenti ai punti 1-9 dell'Allegato IV */
+  schema?: number;
+}
+
+/**
+ * Le versioni precedenti usavano una numerazione non conforme all'Allegato IV
+ * (s2 logica, s3 specifiche, s4 dati, s5 metriche, s6 rischi, s7 modifiche, s8 norme, s9 post-market).
+ * I testi già scritti vengono spostati nel punto corretto; nulla va perso.
+ */
+function migrateToAnnexIV(old: DocuGenState): DocuGenState {
+  if (old.schema === 2) return old;
+  const c = old.content ?? {};
+  const join = (...ids: string[]) => ids.map((id) => c[id]?.trim()).filter(Boolean).join("\n\n");
+  const content: Record<string, string> = {};
+  const put = (id: string, v: string) => { if (v) content[id] = v; };
+  put("s1", join("s1"));
+  put("s2", join("s2", "s3", "s4"));
+  put("s4", join("s5"));
+  put("s5", join("s6"));
+  put("s6", join("s7"));
+  put("s7", join("s8"));
+  put("s9", join("s9"));
+  const status: Record<string, "empty" | "draft" | "done"> = {};
+  for (const id of Object.keys(content)) status[id] = "draft";
+  return { ...old, content, status, schema: 2 };
 }
 
 const DEFAULT_STATE: DocuGenState = {
@@ -34,13 +59,14 @@ const DEFAULT_STATE: DocuGenState = {
   status: {},
   systemName: "",
   activeVersion: 0,
+  schema: 2,
 };
 
 function loadState(): DocuGenState {
   if (typeof window === "undefined") return DEFAULT_STATE;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as DocuGenState) : DEFAULT_STATE;
+    return raw ? migrateToAnnexIV(JSON.parse(raw) as DocuGenState) : DEFAULT_STATE;
   } catch { return DEFAULT_STATE; }
 }
 
@@ -94,38 +120,55 @@ async function loadAISystems(): Promise<{ id: string; name: string; risk_tier: s
   } catch { return []; }
 }
 
-// Read real data from other tools' localStorage
+// Dati reali degli altri tool, proposti come bozza da confermare (mai segnati come completati)
 function readCrossToolContent(): Record<string, string> {
-  if (typeof window === "undefined") return AUTO_CONTENT;
-  const overrides: Record<string, string> = { ...AUTO_CONTENT };
-
+  const out: Record<string, string> = {};
+  if (typeof window === "undefined") return out;
   try {
     const dataAudit = readFromStorage<DataAuditResult>("dataAudit");
     if (dataAudit) {
-      overrides["data-audit"] = [
-        `**[Auto-importato da Data Audit — Art. 10]**`,
-        ``,
-        `Dataset analizzati: ${dataAudit.datasets?.map((d) => d.name).join(", ") || "N/D"}`,
-        `Qualità complessiva: ${dataAudit.overallQuality || "N/D"}`,
-        `Dati personali: ${dataAudit.datasets?.some((d) => d.personalData) ? "Sì — DPIA richiesta" : "No"}`,
+      out["data-audit"] = [
+        `Dai dati della Qualità dei dati (Art. 10):`,
+        `Set di dati analizzati: ${dataAudit.datasets?.map((d) => d.name).join(", ") || "non indicati"}`,
+        `Dati personali: ${dataAudit.datasets?.some((d) => d.personalData) ? "sì" : "no"}`,
       ].join("\n");
     }
-  } catch { /* fallback to AUTO_CONTENT */ }
-
+  } catch { /* nessun dato */ }
+  try {
+    const tr = readFromStorage<TransparencyResult>("transparency");
+    const i = tr?.instructions;
+    if (i) {
+      const parts = [
+        i.b_ii && `Accuratezza, robustezza e cibersicurezza: ${i.b_ii}`,
+        i.b_iii && `Situazioni che possono creare rischi: ${i.b_iii}`,
+        i.b_v && `Prestazioni su persone o gruppi specifici: ${i.b_v}`,
+        i.d && `Sorveglianza umana: ${i.d}`,
+        i.b_vi && `Dati di input: ${i.b_vi}`,
+      ].filter(Boolean);
+      if (parts.length) out["transparency"] = [`Dalle istruzioni per l'uso (Art. 13(3)):`, ...parts].join("\n");
+    }
+  } catch { /* nessun dato */ }
   try {
     const riskData = readFromStorage<RiskManagerResult>("riskManager");
     if (riskData) {
-      overrides["risk-manager"] = [
-        `**[Auto-importato da Risk Manager — Art. 9]**`,
-        ``,
-        `Rischi identificati: ${riskData.risks?.length || 0}`,
-        `Livello rischio complessivo: ${riskData.overallRiskLevel || "N/D"}`,
+      out["risk-manager"] = [
+        `Dal registro dei rischi (Art. 9):`,
+        `Livello di rischio complessivo: ${riskData.overallRiskLevel || "non indicato"}`,
         `Prossima revisione: ${riskData.nextReviewDate || "da pianificare"}`,
       ].join("\n");
     }
-  } catch { /* fallback to AUTO_CONTENT */ }
-
-  return overrides;
+  } catch { /* nessun dato */ }
+  try {
+    const conf = readFromStorage<ConformityResult>("conformity");
+    if (conf?.declarationGenerated) {
+      out["conformity"] = `Dichiarazione UE di conformità generata nel tool Conformità${conf.registrationRef ? ` — riferimento ${conf.registrationRef}` : ""}. Allegarne copia (Art. 47).`;
+    }
+  } catch { /* nessun dato */ }
+  try {
+    const plan = JSON.parse(localStorage.getItem("post_market_plan") ?? "null") as { label: string; frequency: string; article: string }[] | null;
+    if (plan?.length) out["post-market"] = [`Dal piano di monitoraggio (Art. 72):`, ...plan.map((c) => `• ${c.label} — ${c.frequency} (${c.article})`)].join("\n");
+  } catch { /* nessun dato */ }
+  return out;
 }
 
 // ─── Ghost Summarizer ─────────────────────────────────────────────────────────
@@ -162,81 +205,36 @@ function buildGhostData(): GhostData {
   };
 }
 
-// ─── Annex IV — 9 sections ────────────────────────────────────────────────────
-const ANNEX_IV = [
-  {
-    id: "s1", ref: "IV §1", title: "Descrizione generale",
-    required: true,
-    hint: "Uso previsto, contesto di deploy, categorie di utenti e destinatari.",
-    autoSource: null,
-    placeholder: "Il sistema analizza curriculum vitae per supportare il processo di selezione del personale nell'ambito delle assunzioni aziendali. Gli utenti destinatari sono i responsabili HR. Il sistema non adotta decisioni autonome vincolanti...",
-  },
-  {
-    id: "s2", ref: "IV §2a", title: "Logica e architettura",
-    required: true,
-    hint: "Logica generale, algoritmo, scelte progettuali chiave, architettura software.",
-    autoSource: "code",
-    placeholder: "Architettura: Transformer-based classifier (BERT-large). Pipeline: preprocessing → feature extraction → classificazione binaria. Soglia decisionale: 0.72. Framework: PyTorch 2.1, HuggingFace Transformers 4.35...",
-  },
-  {
-    id: "s3", ref: "IV §2b", title: "Specifiche di progettazione",
-    required: true,
-    hint: "Requisiti tecnici, vincoli di sistema, specifiche di input/output.",
-    autoSource: "code",
-    placeholder: "Input: file PDF/DOCX max 5MB, testo estratto UTF-8. Output: score 0–100 + feature importance top-5. Latenza max: 800ms p99. Disponibilità: 99.9%. Lingua supportata: italiano, inglese...",
-  },
-  {
-    id: "s4", ref: "IV §2c", title: "Dati di addestramento",
-    required: true,
-    hint: "Origine, governance, bias analysis — auto-importato da Data Audit.",
-    autoSource: "data-audit",
-    placeholder: "",
-  },
-  {
-    id: "s5", ref: "IV §2d", title: "Metriche di performance",
-    required: true,
-    hint: "Accuracy, precision, recall, F1 su test set. Soglie di accettazione.",
-    autoSource: "mlflow",
-    placeholder: "Accuracy: 87.3% | Precision: 84.1% | Recall: 89.7% | F1: 86.8%. Test set: 12.400 record, hold-out 20%. Evaluation date: 2025-03-15...",
-  },
-  {
-    id: "s6", ref: "IV §2e", title: "Gestione dei rischi",
-    required: true,
-    hint: "Auto-importato da Risk Manager (Art. 9).",
-    autoSource: "risk-manager",
-    placeholder: "",
-  },
-  {
-    id: "s7", ref: "IV §2f", title: "Modifiche nel ciclo di vita",
-    required: false,
-    hint: "Elenco modifiche sostanziali ex Art. 3(23) con riferimento ai commit.",
-    autoSource: "git",
-    placeholder: "v2.1.0 (2025-04-10, commit a3f9c2d): aggiornamento soglia classificazione 0.68→0.72 dopo re-training su dataset bilanciato (CTGAN). Classificata come modifica sostanziale ex Art. 3(23)...",
-  },
-  {
-    id: "s8", ref: "IV §2g", title: "Norme armonizzate",
-    required: false,
-    hint: "Standard CEN/CENELEC, ISO/IEC applicati.",
-    autoSource: null,
-    placeholder: "ISO/IEC 42001:2023 — AI Management Systems. ISO/IEC 27001:2022 — Information Security. CEN/TC 449 — AI Act harmonised standards (in corso). EN ISO 13485 (se contesto medico)...",
-  },
-  {
-    id: "s9", ref: "IV §3", title: "Sorveglianza post-market",
-    required: true,
-    hint: "Piano di monitoraggio post-deploy, KPI, soglie di allerta.",
-    autoSource: null,
-    placeholder: "Monitoring continuo: drift detection settimanale su distribuzione input. Alert se accuracy scende sotto 82% su finestra mobile 30gg. Revisione umana obbligatoria se score < 40 o > 90 (casi limite)...",
-  },
+// ─── Allegato IV — i 9 punti del contenuto minimo della documentazione tecnica ───
+const ANNEX_IV: { id: string; ref: string; title: string; required: boolean; hint: string; autoSource: string | null; placeholder: string }[] = [
+  { id: "s1", ref: "All. IV, punto 1", title: "Descrizione generale del sistema", required: true, autoSource: null,
+    hint: "Finalità prevista, fornitore e versione; interazione con hardware, software o altri sistemi di IA; versioni e requisiti di aggiornamento; forme di immissione sul mercato; hardware; interfaccia per il deployer; istruzioni per l'uso.",
+    placeholder: "" },
+  { id: "s2", ref: "All. IV, punto 2", title: "Elementi del sistema e processo di sviluppo", required: true, autoSource: "data-audit",
+    hint: "Metodi e fasi di sviluppo, anche con sistemi o strumenti di terzi; specifiche di progettazione (logica, algoritmi, scelte e ipotesi); architettura e risorse di calcolo; requisiti dei dati e set di dati; valutazione delle misure di sorveglianza umana; modifiche predeterminate; convalida e prova, con metriche e registri firmati e datati; misure di cibersicurezza.",
+    placeholder: "" },
+  { id: "s3", ref: "All. IV, punto 3", title: "Monitoraggio, funzionamento e controllo", required: true, autoSource: "transparency",
+    hint: "Capacità e limiti delle prestazioni, compresa l'accuratezza per specifiche persone o gruppi; risultati indesiderati e rischi prevedibili; misure di sorveglianza umana (Art. 14); specifiche dei dati di input.",
+    placeholder: "" },
+  { id: "s4", ref: "All. IV, punto 4", title: "Adeguatezza delle metriche di prestazione", required: true, autoSource: null,
+    hint: "Perché le metriche scelte sono adatte al sistema specifico.",
+    placeholder: "" },
+  { id: "s5", ref: "All. IV, punto 5", title: "Sistema di gestione dei rischi", required: true, autoSource: "risk-manager",
+    hint: "Descrizione dettagliata del sistema di gestione dei rischi conforme all'Art. 9.",
+    placeholder: "" },
+  { id: "s6", ref: "All. IV, punto 6", title: "Modifiche nel ciclo di vita", required: true, autoSource: null,
+    hint: "Modifiche pertinenti apportate dal fornitore al sistema durante il suo ciclo di vita.",
+    placeholder: "" },
+  { id: "s7", ref: "All. IV, punto 7", title: "Norme armonizzate e altre specifiche", required: true, autoSource: null,
+    hint: "Norme armonizzate applicate; se non applicate, le soluzioni adottate per soddisfare i requisiti del Capo III, Sezione 2, e le altre norme o specifiche tecniche pertinenti.",
+    placeholder: "" },
+  { id: "s8", ref: "All. IV, punto 8", title: "Copia della dichiarazione UE di conformità", required: true, autoSource: "conformity",
+    hint: "Copia della dichiarazione UE di conformità di cui all'Art. 47.",
+    placeholder: "" },
+  { id: "s9", ref: "All. IV, punto 9", title: "Valutazione delle prestazioni dopo l'immissione sul mercato", required: true, autoSource: "post-market",
+    hint: "Descrizione del sistema di valutazione delle prestazioni nella fase successiva all'immissione sul mercato (Art. 72), compreso il piano di monitoraggio.",
+    placeholder: "" },
 ];
-
-// ─── Auto-populated content ────────────────────────────────────────────────────
-const AUTO_CONTENT: Record<string, string> = {
-  "data-audit": `**[Auto-importato da Data Audit — Art. 10]**\n\nDataset: HR Screening Dataset (84.320 righe)\nFonte: Snowflake.prod / HR_DATA · Valido dal: 15/01/2024\n\nMetriche bias (snapshot Mag 2025):\n• Disparate Impact (DI): 0.61 ⚠ — sotto soglia 0.8 (Regola 4/5)\n• Statistical Parity Diff. (SPD): 0.32\n• Equalized Odds Diff. (EOD): 0.19\n\nProxy detector: cap_residenza → proxy etnia (67%), cod_settore → proxy genere (52%)\n\nStato: CTGAN Debiasing richiesto prima del deployment.`,
-  "risk-manager": `**[Auto-importato da Risk Manager — Art. 9]**\n\nClassificazione: Sistema ad Alto Rischio (Allegato III, punto 4 — Occupazione)\nRisk score: 7.4/10\n\nRischi identificati:\n1. Discriminazione algoritmica (CRITICO) — DI < 0.8 su genere/etnia\n2. Opacità decisionale (ALTO) — Explainability index: 0.42\n3. Data drift post-deploy (MEDIO) — Rilevato drift su distribuzione input Q1 2025\n\nMisure di mitigazione:\n• CTGAN debiasing attivo dalla v2.1.0\n• SHAP values esposti per ogni predizione\n• Sentinel agent attivo con alert settimanale`,
-  "code": `**[Auto-estratto da Repository — GitHub]**\n\nUltimo commit analizzato: a3f9c2d (main, 2025-04-10)\nFile chiave: src/models/screener.py, src/api/main.py\n\nArchitettura rilevata: BERT-large classifier\nDipendenze critiche: torch==2.1.0, transformers==4.35.3, scikit-learn==1.3.2\n\nAST Analysis: 3 endpoint AI-critical identificati\nCompliance signals: 4 (2 critici, 2 warning)`,
-  "git": `**[Auto-estratto da Git History]**\n\nv2.1.0 (a3f9c2d, 2025-04-10): Aggiornamento soglia 0.68→0.72, CTGAN integration — MODIFICA SOSTANZIALE ex Art. 3(23)\nv2.0.1 (b7e1a4c, 2025-02-28): Hotfix preprocessing multilingua — modifica non sostanziale\nv2.0.0 (c4d2f18, 2025-01-15): Major release, nuovo training set — MODIFICA SOSTANZIALE`,
-  "mlflow": `**[Auto-estratto da MLflow]**\n\nRun ID: mlf-2025-04-10-001 · Experiment: hr-screener-v2\nAccuracy: 87.3% | Precision: 84.1% | Recall: 89.7% | F1: 86.8%\nTest set: 12.400 record, hold-out 20% · Date: 2025-04-10\n\nHyperparameters: lr=2e-5, batch=32, epochs=4, max_seq=512\nArtifact: s3://mlflow-artifacts/hr-screener/v2.1.0/model.pt`,
-};
 
 // ─── Strip markdown asterisks for document display ────────────────────────────
 function stripMarkdown(text: string): string {
@@ -245,17 +243,12 @@ function stripMarkdown(text: string): string {
     .replace(/\*([^*]*)\*/g, "$1");
 }
 
-// ─── Source badges ─────────────────────────────────────────────────────────────
-const SOURCE_BADGES: Record<string, string> = {
-  "s1": "Annex IV §1",
-  "s2": "Annex IV §2a",
-  "s3": "Annex IV §2b",
-  "s4": "Art. 10 — WP248",
-  "s5": "Annex IV §2d",
-  "s6": "Art. 9 — Risk",
-  "s7": "Art. 3(23)",
-  "s8": "CEN/ISO",
-  "s9": "Art. 72 PMSS",
+// ─── Riferimenti delle sezioni ───────────────────────────────────────────────
+const SOURCE_BADGES: Record<string, string> = Object.fromEntries(ANNEX_IV.map((s) => [s.id, s.ref.replace("All. IV, punto ", "All. IV §")]));
+
+const SOURCE_LABEL: Record<string, string> = {
+  "data-audit": "Qualità dei dati (Art. 10)", "transparency": "Istruzioni per l'uso (Art. 13)",
+  "risk-manager": "Registro dei rischi (Art. 9)", "conformity": "Conformità (Art. 47)", "post-market": "Monitoraggio (Art. 72)",
 };
 
 // ─── Timeline step type ───────────────────────────────────────────────────────
@@ -351,8 +344,8 @@ export default function DocuGenPage() {
     const timer = setTimeout(async () => {
       setDbSyncing(true);
       const sectionMap: Record<string, string> = {
-        s1: "s1_general", s2: "s2_components", s3: "s3_data_governance",
-        s4: "s4_monitoring", s5: "s5_transparency", s6: "s6_performance", s7: "s7_declaration",
+        s1: "s1_general", s2: "s2_components", s3: "s4_monitoring",
+        s4: "s6_performance", s8: "s7_declaration",
       };
       const dbSection = sectionMap[activeSection];
       if (dbSection && persisted.content[activeSection]) {
@@ -441,7 +434,8 @@ export default function DocuGenPage() {
   function getSectionStatus(sectionId: string): "empty" | "draft" | "done" {
     if (status[sectionId]) return status[sectionId];
     const sec = ANNEX_IV.find((s) => s.id === sectionId)!;
-    if (sec.autoSource) return "done";
+    // Il testo proposto da altri tool resta una bozza finché l'utente non lo conferma
+    if (sec.autoSource && crossContent[sec.autoSource]) return "draft";
     return "empty";
   }
 
@@ -478,13 +472,13 @@ export default function DocuGenPage() {
 
     writeToStorage<DocugenResult>("docugen", {
       systemName: resolvedName,
-      provider: "AIComply",
+      provider: "Da indicare (Allegato IV, punto 1)",
       purpose: getContent("s1"),
       capabilities: getContent("s2"),
-      limitations: getContent("s5") || "Da compilare",
-      humanOversight: getContent("s7") || "Da compilare",
-      performanceMetrics: getContent("s6") || "Da compilare",
-      trainingData: getContent("s4") || crossContent["data-audit"],
+      limitations: getContent("s3") || "Da compilare",
+      humanOversight: getContent("s3") || "Da compilare",
+      performanceMetrics: getContent("s4") || "Da compilare",
+      trainingData: getContent("s2") || crossContent["data-audit"],
       completedAt,
     });
 
@@ -936,7 +930,7 @@ export default function DocuGenPage() {
             {ANNEX_IV.map((s) => {
               const st = getSectionStatus(s.id);
               const hasGhostForS1 = s.id === "s1" && ghost.purpose && !content["s1"];
-              const hasGhostForS4 = s.id === "s4" && ghost.datasetsSummary && !content["s4"];
+              const hasGhostForS4 = s.id === "s2" && ghost.datasetsSummary && !content["s2"];
 
               return (
                 <div key={s.id} style={{ border: "1px solid rgba(0,0,0,0.08)", borderRadius: 10, padding: "14px 16px",
@@ -972,7 +966,7 @@ export default function DocuGenPage() {
                       <div style={{ display: "flex", gap: 8 }}>
                         <button onClick={() => {
                             setContent(p => ({ ...p, s1: ghost.purpose! }));
-                            setStatus(p => ({ ...p, s1: "done" }));
+                            setStatus(p => ({ ...p, s1: "draft" }));
                           }}
                           style={{ fontSize: 11, padding: "4px 12px", borderRadius: 6,
                             background: "#0D1016", color: "#fff", border: "none", cursor: "pointer" }}>
@@ -1000,14 +994,14 @@ export default function DocuGenPage() {
                       </p>
                       <div style={{ display: "flex", gap: 8 }}>
                         <button onClick={() => {
-                            setContent(p => ({ ...p, s4: ghost.datasetsSummary! }));
-                            setStatus(p => ({ ...p, s4: "done" }));
+                            setContent(p => ({ ...p, s2: ghost.datasetsSummary! }));
+                            setStatus(p => ({ ...p, s2: "draft" }));
                           }}
                           style={{ fontSize: 11, padding: "4px 12px", borderRadius: 6,
                             background: "#0D1016", color: "#fff", border: "none", cursor: "pointer" }}>
                           ✓ {t("confirm")}
                         </button>
-                        <button onClick={() => { setActiveSection("s4"); setTimelineStep("validate"); }}
+                        <button onClick={() => { setActiveSection("s2"); setTimelineStep("validate"); }}
                           style={{ fontSize: 11, padding: "4px 12px", borderRadius: 6,
                             background: "transparent", color: "rgba(0,0,0,0.5)",
                             border: "1px solid rgba(0,0,0,0.12)", cursor: "pointer" }}>
@@ -1160,7 +1154,7 @@ export default function DocuGenPage() {
                   )}
 
                   {/* Auto-source notice */}
-                  {activeS.autoSource && (
+                  {activeS.autoSource && crossContent[activeS.autoSource] && !content[activeSection] && (
                     <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 8,
                       padding: "8px 12px", marginBottom: 12, fontSize: 11,
                       background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)" }}>
@@ -1168,10 +1162,7 @@ export default function DocuGenPage() {
                       <span style={{ color: "#16a34a" }}>
                         {t("contentAutoImported")}{" "}
                         <strong>
-                          {activeS.autoSource === "data-audit" ? "Data Audit (Art. 10)" :
-                           activeS.autoSource === "risk-manager" ? "Risk Manager (Art. 9)" :
-                           activeS.autoSource === "code" ? "Repository GitHub" :
-                           activeS.autoSource === "git" ? "Git History" : "MLflow"}
+                          {SOURCE_LABEL[activeS.autoSource] ?? activeS.autoSource}
                         </strong>
                         {versionSnapshots.length > 0 && ` — ${t("versionWord")} ${version.tag}`}
                       </span>
@@ -1239,10 +1230,11 @@ export default function DocuGenPage() {
                       const c = persisted.content;
                       const res = await checkAnnexIVGaps({
                         systemName: persisted.systemName || c["s1"] || "",
-                        provider: c["s2"] || "", purpose: c["s3"] || "",
-                        capabilities: c["s4"] || "", limitations: c["s5"] || "",
-                        humanOversight: c["s6"] || "", performanceMetrics: c["s7"] || "",
-                        trainingData: c["s8"] || "",
+                        // Campi dell'Allegato IV: punto 1 (descrizione), 2 (sviluppo e dati), 3 (capacità, limiti, sorveglianza), 4 (metriche)
+                        provider: "", purpose: c["s1"] || "",
+                        capabilities: c["s2"] || "", limitations: c["s3"] || "",
+                        humanOversight: c["s3"] || "", performanceMetrics: c["s4"] || "",
+                        trainingData: c["s2"] || "",
                       });
                       setAnnexIVLoading(false);
                       if (res.result) setAnnexIVReport(res.result);
@@ -1255,9 +1247,9 @@ export default function DocuGenPage() {
                       const ctx = buildComplianceContextFromStorage();
                       const c = persisted.content;
                       const res = await validateDocuGenCoherence({
-                        systemName: persisted.systemName, purpose: c["s3"] || "",
-                        capabilities: c["s4"] || "", limitations: c["s5"] || "",
-                        humanOversight: c["s6"] || "",
+                        systemName: persisted.systemName, purpose: c["s1"] || "",
+                        capabilities: c["s2"] || "", limitations: c["s3"] || "",
+                        humanOversight: c["s3"] || "",
                       }, ctx);
                       setCoherenceLoading(false);
                       if (res.report) setCoherenceReport(res.report);

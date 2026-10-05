@@ -1,5 +1,6 @@
 "use client";
 
+import { loadOrgProfile } from "@/lib/dossier/org-profile";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import QRCode from "qrcode";
@@ -97,7 +98,7 @@ function StatementRow({ ok, title, subtitle }: { ok: boolean; title: string; sub
 export default function TrustPassportPage() {
   const t = useT("toolTrustPassport");
   const [passport, setPassport] = useState<TrustPassport | null>(null);
-  const [companyName, setCompanyName] = useState(() => t("companyName_default"));
+  const [companyName, setCompanyName] = useState(() => loadOrgProfile().orgName || t("companyName_default"));
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");

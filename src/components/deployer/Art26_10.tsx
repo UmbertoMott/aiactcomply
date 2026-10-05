@@ -1,6 +1,6 @@
 "use client";
 
-// Art. 26(10) — Registrazione EUDB — PROMPT BD
+// Art. 26(8) — Registrazione nella banca dati UE (autorità pubbliche) — PROMPT BD
 
 import React from "react";
 import Link from "next/link";
@@ -16,8 +16,8 @@ export function Art26_10({ record, onChange }: Props) {
   return (
     <div className="space-y-3">
       <p className="text-xs text-slate-400">
-        Alcune categorie di deployer (es. autorità pubbliche) devono registrare l&apos;uso del sistema
-        nel database UE prima del deployment (Art. 26(10) / Art. 49).
+        I deployer che sono autorità pubbliche o istituzioni dell&apos;Unione registrano l&apos;uso del sistema
+        nella banca dati UE prima di usarlo (Art. 26(8) e Art. 49(3)).
       </p>
 
       <label className="flex items-center gap-2 cursor-pointer">

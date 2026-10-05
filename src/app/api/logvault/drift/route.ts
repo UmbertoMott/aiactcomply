@@ -180,15 +180,22 @@ export async function GET(req: Request) {
     generated_at: new Date().toISOString(),
   };
 
-  // Salva il report drift come log di audit
-  if (alerts.length > 0) {
+  // Salva il report drift come log di audit, una sola volta per ora per la stessa deriva
+  // (la pagina interroga questa route periodicamente)
+  const flagReason = `Drift rilevato: ${alerts.map((a) => a.metric).join(", ")}`;
+  let recentQuery = supabase.from("compliance_logs").select("id")
+    .eq("user_id", user.id).eq("event_type", "drift").eq("flag_reason", flagReason)
+    .gte("created_at", new Date(Date.now() - 60 * 60 * 1000).toISOString()).limit(1);
+  if (aiSystemId) recentQuery = recentQuery.eq("ai_system_id", aiSystemId);
+  const { data: recentSame } = alerts.length > 0 ? await recentQuery : { data: [] };
+  if (alerts.length > 0 && (recentSame ?? []).length === 0) {
     await supabase.from("compliance_logs").insert({
       ai_system_id: aiSystemId,
       user_id: user.id,
       event_type: "drift",
       flagged: alerts.some((a) => a.severity === "critical"),
       flag_severity: alerts.some((a) => a.severity === "critical") ? "critical" : "warning",
-      flag_reason: `Drift rilevato: ${alerts.map((a) => a.metric).join(", ")}`,
+      flag_reason: flagReason,
       within_guardrails: report.compliance_ok,
       metadata: { drift_report: report },
     });

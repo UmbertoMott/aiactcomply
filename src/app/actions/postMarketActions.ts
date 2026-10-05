@@ -26,11 +26,12 @@ METRICHE DEL PERIODO (${metrics.periodStart} → ${metrics.periodEnd}):
 - Totale eventi registrati: ${metrics.totalEvents}
 - Error rate: ${metrics.errorRate !== undefined ? (metrics.errorRate * 100).toFixed(2) + "%" : "non disponibile"}
 - Anomalie rilevate: ${metrics.anomalyCount ?? "n/a"}
-- Dati reali: ${metrics.hasRealData ? "sì" : "no (dati simulati/seed)"}
+- Dati reali: ${metrics.hasRealData ? "sì" : "no — nessuna metrica disponibile"}
 
 ISTRUZIONI:
 1. Scrivi un paragrafo narrativo (max 250 parole) del periodo di monitoraggio, includendo: stato generale del sistema, trend principali, eventuali criticità emerse.
 2. Identifica le anomalie da segnalare (max 3), con riferimento al Risk Register dove pertinente.
+3. Se non ci sono dati reali, NON inventare metriche né anomalie: "flaggedAnomalies" deve essere [] e la narrativa deve dire quali dati raccogliere secondo il piano.
 4. Output SOLO nel formato:
 <extract>
 {

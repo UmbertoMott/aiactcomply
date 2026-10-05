@@ -213,7 +213,7 @@ function buildSteps(
     steps.push({
       id: "l132",
       priority: "high",
-      title: "L.132/2024 — Check PA Italia",
+      title: "L. 132/2025 — Check PA Italia",
       description: "Verifica la conformità al decreto italiano sull'AI per la pubblica amministrazione.",
       href: "/dashboard/compliance/l132",
       estimatedHours: 2,

@@ -1,6 +1,6 @@
 "use client";
 
-// Art. 26(4) — Notifiche al provider di incidenti rilevanti — PROMPT BD
+// Art. 26(5) — Segnalazioni al fornitore (rischi e incidenti gravi) — PROMPT BD
 
 import React, { useState } from "react";
 import Link from "next/link";
@@ -33,8 +33,8 @@ export function Art26_4({ record, onChange }: Props) {
   return (
     <div className="space-y-3">
       <p className="text-xs text-slate-400">
-        Notifica il provider di qualsiasi malfunzionamento serio o incidente che potrebbe violare diritti fondamentali
-        o causare danni (Art. 26(4)).
+        Se il sistema presenta un rischio, informa il fornitore (o il distributore) e l&apos;autorità di vigilanza; in caso di incidente grave
+        informa immediatamente prima il fornitore, poi l&apos;importatore o il distributore e le autorità (Art. 26(5)).
       </p>
 
       {record.providerNotifications.length > 0 && (

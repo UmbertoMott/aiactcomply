@@ -1,5 +1,6 @@
 "use client";
 
+import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { useState, useRef, useCallback, useEffect } from "react";
 import {
   UserCheck, AlertTriangle, Info, CheckCircle2, Copy, Save,
@@ -410,8 +411,10 @@ export default function AuthorizedRepCompliancePage() {
   }
 
   function handleSave() {
+    // Il mandato è firmato quando la voce "firma" della checklist è spuntata
+    const mandateSigned = doc.mandate_signed || !!doc.checklist.find((i) => i.id === "firma")?.completed;
     // If mandate signed, signal to AI Inventory
-    if (doc.mandate_signed) {
+    if (mandateSigned) {
       try {
         const inv = localStorage.getItem("aicomply_ai_inventory");
         if (inv) {
@@ -427,10 +430,17 @@ export default function AuthorizedRepCompliancePage() {
       ar_name: doc.representative.ar_name,
       ar_country: doc.representative.ar_country,
       system_name: doc.system_name,
-      mandate_signed: doc.mandate_signed,
+      mandate_signed: mandateSigned,
       eudb_registered_by_ar: doc.eudb_registered_by_ar,
       completedAt: new Date().toISOString(),
     });
+    appendEvidence("decision", {
+      type: "Rappresentante autorizzato — Art. 22",
+      ar_name: doc.representative.ar_name,
+      system_name: doc.system_name,
+      mandate_signed: mandateSigned,
+      tasks_done: doc.checklist.filter((i) => i.completed).map((i) => i.article),
+    }, "authorizedRep");
     showToast("Salvato nel dossier ✓");
   }
 

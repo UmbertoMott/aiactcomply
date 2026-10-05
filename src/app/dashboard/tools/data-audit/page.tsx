@@ -385,8 +385,8 @@ export default function DataAuditPage() {
     patchRecord({ representativenessChecks: [...others, c] });
   }
 
-  function sendToDocuGen() {
-    const now = new Date().toISOString();
+  // Un solo calcolo della qualità per dossier e documentazione tecnica
+  function writeDataAuditResult(now: string) {
     const documented = countDocumented(record);
     const anyFairFail = record.fairnessReports.some(f => !f.fourFifthsPass || f.riskLevel === "high" || f.riskLevel === "critical");
     writeToStorage("dataAudit", {
@@ -408,6 +408,11 @@ export default function DataAuditPage() {
       completedAt: now,
       usesSpecialCategoriesForBias: record.specialCategories.applicable === "yes",
     });
+  }
+
+  function sendToDocuGen() {
+    const now = new Date().toISOString();
+    writeDataAuditResult(now);
     showToast(t("toast_sentDocuGen"));
     router.push("/dashboard/tools/docugen");
   }
@@ -567,17 +572,7 @@ export default function DataAuditPage() {
   function saveToDossier() {
     const now = new Date().toISOString();
     const documented = countDocumented(record);
-    writeToStorage("dataAudit", {
-      datasets: record.datasets.map(d => ({
-        name: d.fileName, source: d.role, size: `${d.rowCount} righe`,
-        biasChecked: record.specialCategories.applicable === "yes",
-        qualityScore: Math.round(100 - d.overallMissingPercentage),
-        personalData: record.specialCategories.applicable === "yes",
-        issues: d.columns.filter(c => c.missingPercentage > 20).map(c => `${c.name}: ${c.missingPercentage}% mancanti`),
-      })),
-      overallQuality: documented >= 8 ? "pass" : documented >= 5 ? "review" : "fail",
-      completedAt: now,
-    });
+    writeDataAuditResult(now);
     appendEvidence("decision", { type: "Data Audit Art. 10 — record salvato", documented, datasets: record.datasets.length, savedAt: now }, "dataAudit");
     setSavedAt(now);
     showToast(t("toast_savedDossier"));

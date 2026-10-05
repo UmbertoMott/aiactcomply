@@ -37,6 +37,7 @@ import { Art26_7 } from "@/components/deployer/Art26_7";
 import { Art26_8 } from "@/components/deployer/Art26_8";
 import { Art26_9 } from "@/components/deployer/Art26_9";
 import { Art26_10 } from "@/components/deployer/Art26_10";
+import { loadOrgProfile } from "@/lib/dossier/org-profile";
 
 const FONT = { fontFamily: "Inter, system-ui, sans-serif" };
 
@@ -49,11 +50,11 @@ const STATUS_OPTIONS: { value: ObligationStatus; label: string; color: string; b
 
 const FLAG_LABELS: Record<keyof DeployerApplicabilityFlags, string> = {
   usesHighRiskSystem: "Sistema ad alto rischio (All. III)",
-  usesInternalProcedures: "Procedure interne di controllo",
+  usesInternalProcedures: "Cooperazione con le autorità (Art. 26(12))",
   employeeImpact: "Impatto sui lavoratori",
-  biometricCategorization: "Categorizzazione biometrica / emozioni",
-  eudbRequired: "Registrazione EUDB obbligatoria (PA)",
-  rbiApplicable: "Registrazione RBI (Art. 26(10))",
+  biometricCategorization: "Decisioni su persone fisiche (Art. 26(11))",
+  eudbRequired: "Autorità pubblica: registrazione dell'uso (Art. 26(8))",
+  rbiApplicable: "Identificazione biometrica remota a posteriori (Art. 26(10))",
 };
 
 function StatusPill({ status }: { status: ObligationStatus }) {
@@ -247,7 +248,7 @@ function WorkerNoticeModule({
       const result = await draftWorkerInformationNotice({
         systemName: system.name,
         systemDescription: system.description ?? "",
-        organizationName: "Organizzazione",
+        organizationName: loadOrgProfile().orgName || "[nome dell'organizzazione]",
         deploymentContext: system.obligationsNote ?? "deployment interno",
       });
       onSave({
@@ -389,7 +390,7 @@ function RbiModule({
       <div className="flex items-center gap-2 mb-3">
         <Database size={16} style={{ color: "#0891b2" }} />
         <span className="font-semibold text-sm" style={{ color: "#0D1016" }}>
-          Registrazione RBI
+          Autorizzazione identificazione biometrica a posteriori
         </span>
         <span className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: "#ecfeff", color: "#0891b2" }}>
           Art. 26(10)
@@ -675,28 +676,28 @@ export default function DeployerSystemDetailPage() {
               <DeployerSection artRef="Art. 26(2)" title="Supervisori assegnati" status={detailRec.overseers.length > 0 ? "ok" : "pending"}>
                 <Art26_2 record={detailRec} onChange={setDetailRec} />
               </DeployerSection>
-              <DeployerSection artRef="Art. 26(3)" title="Conservazione log ≥ 6 mesi" status={detailRec.logRetentionStatus === "ok" ? "ok" : detailRec.logRetentionStatus === "not_configured" ? "pending" : detailRec.logRetentionStatus === "expired" ? "suspended" : "pending"}>
+              <DeployerSection artRef="Art. 26(6)" title="Conservazione log ≥ 6 mesi" status={detailRec.logRetentionStatus === "ok" ? "ok" : detailRec.logRetentionStatus === "not_configured" ? "pending" : detailRec.logRetentionStatus === "expired" ? "suspended" : "pending"}>
                 <Art26_3 record={detailRec} onChange={setDetailRec} />
               </DeployerSection>
-              <DeployerSection artRef="Art. 26(4)" title="Notifiche al provider" status={detailRec.providerNotifications.length > 0 ? "ok" : "not_required"}>
+              <DeployerSection artRef="Art. 26(5)" title="Segnalazioni al fornitore" status={detailRec.providerNotifications.length > 0 ? "ok" : "not_required"}>
                 <Art26_4 record={detailRec} onChange={setDetailRec} />
               </DeployerSection>
-              <DeployerSection artRef="Art. 26(5)" title="Dichiarazione uso conforme" status={detailRec.conformingUseDeclaration ? "ok" : "pending"}>
+              <DeployerSection artRef="Art. 26(1)" title="Uso conforme alle istruzioni" status={detailRec.conformingUseDeclaration ? "ok" : "pending"}>
                 <Art26_5 record={detailRec} onChange={setDetailRec} />
               </DeployerSection>
-              <DeployerSection artRef="Art. 26(6)" title="Cooperazione autorità di vigilanza" status={detailRec.authorityContact.name && detailRec.authorityContact.email ? "ok" : "pending"}>
+              <DeployerSection artRef="Art. 26(12)" title="Cooperazione con le autorità" status={detailRec.authorityContact.name && detailRec.authorityContact.email ? "ok" : "pending"}>
                 <Art26_6 record={detailRec} onChange={setDetailRec} />
               </DeployerSection>
-              <DeployerSection artRef="Art. 26(7)" title="Notifiche utenti finali" status={detailRec.endUserNotificationsStatus === "compliant" ? "ok" : detailRec.endUserNotificationsStatus === "not_required" ? "not_required" : "pending"}>
+              <DeployerSection artRef="Art. 26(11)" title="Informare le persone interessate" status={detailRec.endUserNotificationsStatus === "compliant" ? "ok" : detailRec.endUserNotificationsStatus === "not_required" ? "not_required" : "pending"}>
                 <Art26_7 record={detailRec} onChange={setDetailRec} />
               </DeployerSection>
-              <DeployerSection artRef="Art. 26(8)" title="FRIA — Valutazione diritti fondamentali" status={detailRec.friaStatus === "completed" ? "ok" : detailRec.friaStatus === "not_required" ? "not_required" : "pending"}>
+              <DeployerSection artRef="Art. 27" title="FRIA — Valutazione d&apos;impatto sui diritti fondamentali" status={detailRec.friaStatus === "completed" ? "ok" : detailRec.friaStatus === "not_required" ? "not_required" : "pending"}>
                 <Art26_8 record={detailRec} onChange={setDetailRec} />
               </DeployerSection>
-              <DeployerSection artRef="Art. 26(9)" title="Sospensione sistema" status={detailRec.systemSuspended ? "suspended" : "ok"} variant={detailRec.systemSuspended ? "critical" : "default"}>
+              <DeployerSection artRef="Art. 26(5)" title="Sospensione dell&apos;uso" status={detailRec.systemSuspended ? "suspended" : "ok"} variant={detailRec.systemSuspended ? "critical" : "default"}>
                 <Art26_9 record={detailRec} onChange={setDetailRec} />
               </DeployerSection>
-              <DeployerSection artRef="Art. 26(10)" title="Registrazione EUDB" status={detailRec.eudbRegistrationRequired ? (detailRec.eudbRegistrationStatus === "registered" ? "ok" : "pending") : "not_required"}>
+              <DeployerSection artRef="Art. 26(8)" title="Registrazione banca dati UE" status={detailRec.eudbRegistrationRequired ? (detailRec.eudbRegistrationStatus === "registered" ? "ok" : "pending") : "not_required"}>
                 <Art26_10 record={detailRec} onChange={setDetailRec} />
               </DeployerSection>
             </div>

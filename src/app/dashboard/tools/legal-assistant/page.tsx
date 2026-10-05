@@ -440,9 +440,10 @@ export default function LegalAssistantPage() {
           <Scale className="h-3.5 w-3.5 text-white" />
         </div>
         <div>
-          <div className="text-xs font-semibold text-foreground">AI Act Assistant</div>
+          <div className="text-xs font-semibold text-foreground">Assistente AI Act</div>
+          {/* Art. 50(1): chi usa la chat deve sapere che interagisce con un sistema di IA */}
           <div className="text-[9px] text-muted-foreground">
-            789 chunk · EU AI Act, ISO 22989, 3 Guidelines
+            Stai parlando con un sistema di IA · le risposte non sono consulenza legale
           </div>
         </div>
       </div>

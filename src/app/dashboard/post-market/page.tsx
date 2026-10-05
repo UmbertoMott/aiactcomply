@@ -22,6 +22,7 @@ import {
   classifyIncidentSeverity,
   DEADLINE_TYPE_LABEL,
   SEVERITY_CLASS_LABEL,
+  deadlineInfo,
 } from "@/lib/incidents/incident-classification";
 import type { ClassificationInput, SeverityClassification, NotificationDeadlineType } from "@/lib/incidents/incident-classification";
 import { INCIDENT_CATEGORIES, computeDeadline } from "@/lib/incidents/incident-rules";
@@ -132,8 +133,8 @@ AZIONI IMMEDIATE INTRAPRESE
 ${inc.actions || "Indagine avviata — aggiornamenti a seguire"}
 
 IMPEGNI
-La società si impegna a trasmettere un rapporto completo entro 15 giorni
-dalla data del presente atto (entro il ${new Date(new Date(inc.date).getTime() + 15 * 24 * 60 * 60 * 1000).toLocaleDateString("it-IT")}).
+Se la presente segnalazione è iniziale e incompleta, la società trasmetterà
+la segnalazione completa appena disponibile (Art. 73(5)).
 
 Firma: _______________________
 Ruolo: Responsabile Conformità AI
@@ -312,7 +313,7 @@ const EMPTY_FORM = {
   date: new Date().toISOString().slice(0, 10),
   severity: "high" as Severity,
   description: "",
-  authority: "AGID",
+  authority: "Da determinare",
   affectedUsers: "",
   actions: "",
 };
@@ -393,7 +394,7 @@ function PostMarketPageInner() {
           status: "draft" as IncidentStatus,
           notified: false,
           description: d.description ?? "",
-          authority: "AGID",
+          authority: "Da determinare",
           actions: "",
           createdAt: new Date().toISOString(),
           severityClassification: "malfunction" as SeverityClassification,
@@ -563,7 +564,7 @@ function PostMarketPageInner() {
       return;
     }
     const deadlineDate = addDays(eventDate, result.days);
-    const deadlineType: NotificationDeadlineType = result.days <= 2 ? "immediate_2d" : "standard_15d";
+    const deadlineType: NotificationDeadlineType = result.days <= 2 ? "immediate_2d" : result.days <= 10 ? "death_10d" : "standard_15d";
     const updated = incidents.map(i =>
       i.id === incidentId
         ? { ...i, severityClassification: "serious_incident" as SeverityClassification, notificationDeadlineType: deadlineType, notificationDeadlineDate: deadlineDate, aiConfirmed: true }
@@ -1064,14 +1065,15 @@ function PostMarketPageInner() {
                           onChange={(e) => setForm((f) => ({ ...f, authority: e.target.value }))}
                         >
                           {[
-                            "AGID",
+                            "Da determinare",
+                            "ACN — autorità di vigilanza del mercato (L. 132/2025)",
+                            "AgID — autorità di notifica (L. 132/2025)",
                             "Garante Privacy",
                             "Garante Concorrenza (AGCM)",
                             "Banca d'Italia",
                             "IVASS",
                             "Ministero della Salute",
                             "Autorità straniera",
-                            "Da determinare",
                           ].map((a) => (
                             <option key={a} value={a}>
                               {a}
@@ -1341,7 +1343,7 @@ function PostMarketPageInner() {
                     const days = getDaysRemaining(inc.date, inc.notified, inc.notificationDeadlineDate);
                     const sev = SEV_STYLE[inc.severity];
                     const isSelected = selected?.id === inc.id;
-                    const deadlineDays = inc.notificationDeadlineType === "immediate_2d" ? 2 : 15;
+                    const deadlineDays = deadlineInfo(inc.notificationDeadlineType).days;
                     const progressPct = inc.notified ? 100 : ((deadlineDays - days) / deadlineDays) * 100;
                     return (
                       <div
@@ -1837,8 +1839,8 @@ function PostMarketPageInner() {
                       const deadline = selected.notificationDeadlineDate;
                       const days = getDaysRemaining(selected.date, selected.notified, deadline);
                       const isAlert = days <= 2;
-                      const dl = selected.notificationDeadlineType === "immediate_2d" ? 2 : 15;
-                      const dlRef = selected.notificationDeadlineType === "immediate_2d" ? "Art. 73(3)" : "Art. 73(2)";
+                      const dl = deadlineInfo(selected.notificationDeadlineType).days;
+                      const dlRef = deadlineInfo(selected.notificationDeadlineType).ref;
                       return (
                         <div className="space-y-3">
                           <div style={{
@@ -2229,8 +2231,9 @@ function PostMarketPageInner() {
               <span className="font-semibold" style={{ color: "#1d4ed8" }}>Art. 72(1) —</span>{" "}
               Il fornitore istituisce e documenta un piano di monitoraggio post-market prima
               dell&apos;immissione sul mercato.{" "}
-              <span className="font-semibold" style={{ color: "#1d4ed8" }}>Art. 72(4) —</span>{" "}
-              Il fornitore riferisce all&apos;autorità di vigilanza sui risultati del monitoraggio.
+              <span className="font-semibold" style={{ color: "#1d4ed8" }}>Art. 72(2)-(3) —</span>{" "}
+              Il sistema di monitoraggio raccoglie e analizza attivamente i dati sulle prestazioni per tutta la vita del sistema;
+              il piano fa parte della documentazione tecnica (Allegato IV).
             </p>
           </div>
         </div>
@@ -2623,7 +2626,7 @@ function PostMarketPageInner() {
                   Report di monitoraggio
                 </span>
                 <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.4)" }}>
-                  Art. 72(4) — bozza AI poi confermata dal compliance officer
+                  Art. 72(2) — bozza AI da rivedere e confermare
                 </p>
               </div>
               <button

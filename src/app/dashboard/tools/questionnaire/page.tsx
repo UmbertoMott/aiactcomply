@@ -134,7 +134,7 @@ function buildQCommon(t: TFn): QQuestion[] {
       return {
         answer: `Sì — Risk assessment completato il ${formatDate(riskManager.completedAt)}. ${riskManager.risks.length} rischi identificati. Livello di rischio residuo complessivo: ${overall[riskManager.overallRiskLevel] ?? riskManager.overallRiskLevel}.`,
         status: "auto",
-        source: "Drift Detection · Dossier",
+        source: "Registro dei rischi · Dossier",
       };
     },
   },
@@ -149,13 +149,13 @@ function buildQCommon(t: TFn): QQuestion[] {
         return {
           answer: top3.map((r) => `• ${r.title}: ${r.mitigation}`).join("\n"),
           status: "auto",
-          source: "Drift Detection · Dossier",
+          source: "Registro dei rischi · Dossier",
         };
       }
       return {
         answer: "Nessun rischio significativo identificato nel risk assessment.",
         status: "partial",
-        source: "Drift Detection · Dossier (dati parziali)",
+        source: "Registro dei rischi · Dossier (dati parziali)",
       };
     },
   },
@@ -460,7 +460,7 @@ function buildQPaExtra(t: TFn): QQuestion[] {
     mapFn: ({ transparency }) => {
       if (!transparency?.userInformedOfAI) return manual("Completare Transparency + verifica CAD");
       return {
-        answer: "Sì — misure di trasparenza implementate. L'algoritmo è documentato e gli esiti spiegabili. Informativa utenti attiva.",
+        answer: "Bozza da verificare — risulta un'informativa agli utenti sull'uso dell'IA. Documentazione dell'algoritmo e spiegabilità degli esiti vanno confermate.",
         status: "partial",
         source: "Transparency · Dossier (CAD compliance richiede verifica legale separata)",
       };

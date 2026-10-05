@@ -1,7 +1,12 @@
-// EUDB auto-prefill from cross-module data — PROMPT AS
-// ✦ AI — verifica e conferma: mappatura campi Annex VIII su altri moduli
-// ricostruita dalla memoria del modello. Validare contro testo consolidato Art. 49
-// e Annex VIII Reg. (UE) 2024/1689.
+// EUDB — precompilazione dai dati degli altri moduli.
+// Art. 49 Reg. (UE) 2024/1689: (1) fornitore di sistema ad alto rischio dell'Allegato III (escluso il punto 2);
+// (2) fornitore che ha concluso che un sistema dell'Allegato III non è ad alto rischio (Art. 6(3));
+// (3) deployer autorità pubblica / istituzione dell'Unione o per loro conto. I modelli GPAI non si registrano qui.
+
+import { loadInventory } from "@/lib/inventory/ai-system";
+import { referenceSystem } from "@/lib/inventory/classifier-bridge";
+import { determineRoles, assessRisk } from "@/lib/obligations/engine";
+import { AR_RECORD_KEY } from "@/lib/authorized-rep/authorized-rep-types";
 
 export type EligibilityAnswer = "yes" | "no" | "unsure" | "";
 
@@ -9,6 +14,7 @@ export interface EUDBEligibility {
   q1_high_risk: EligibilityAnswer;
   q2_is_provider: EligibilityAnswer;
   q3_public_deployer: EligibilityAnswer;
+  /** Storicamente "GPAI sistemico"; ora: fornitore che invoca la deroga dell'Art. 6(3) (Art. 49(2)). */
   q4_gpai_systemic: EligibilityAnswer;
 }
 
@@ -77,7 +83,7 @@ export const EU_COUNTRIES = [
 export const RISK_CLASSIFICATIONS = [
   "Sistema ad alto rischio — Annex III (Art. 6(2))",
   "Sistema ad alto rischio — Annex I (Art. 6(1))",
-  "GPAI model — rischio sistemico (Art. 51)",
+  "Deroga Art. 6(3) — registrazione Art. 49(2)",
   "Sistema ad alto rischio — Annex I + Annex III",
 ];
 
@@ -202,39 +208,23 @@ export function prefillEUDBFromModules(): PrefillResult {
     eligibility: "manual", provider: "manual", system: "manual",
   };
 
-  // ── Step 1: Eligibility from Triage ──
+  // ── Step 1: idoneità dal sistema valutato nell'inventario (Passi 2-3) ──
   try {
-    const trRaw = localStorage.getItem("aicomply_triage_result") ??
-      localStorage.getItem("aicomply_classifier_result");
-    if (trRaw) {
-      const tr = JSON.parse(trRaw);
-      const tier: string = tr.riskTier ?? tr.tier ?? "";
-      const role: string = tr.role ?? "";
-
-      if (tier === "high_risk" || tier === "high_risk_annex3" || tier === "high_risk_annex1") {
-        eligibility.q1_high_risk = "yes";
-        prefillCount++;
-      } else if (tier === "minimal" || tier === "limited") {
-        eligibility.q1_high_risk = "no";
-        prefillCount++;
-      }
-
-      if (tier === "gpai_systemic") {
-        eligibility.q4_gpai_systemic = "yes";
-        prefillCount++;
-      }
-
-      if (role === "provider" || role === "authorized_rep") {
-        eligibility.q2_is_provider = "yes";
-        prefillCount++;
-      } else if (role === "deployer") {
-        eligibility.q2_is_provider = "no";
-        // q3_public_deployer requires manual answer (not derivable)
-      }
-
+    const sys = referenceSystem(loadInventory());
+    if (sys?.roleAnswers && sys.riskAnswers) {
+      const roles = determineRoles(sys.roleAnswers).roles;
+      const risk = assessRisk(sys.riskAnswers);
+      const onlyPoint2 = risk.annexIIIUses.length > 0 && risk.annexIIIUses.every(u => u.point === 2);
+      eligibility.q1_high_risk = risk.category === "high_risk_annex_iii" && !onlyPoint2 ? "yes" : "no";
+      eligibility.q2_is_provider = roles.includes("provider") ? "yes" : "no";
+      eligibility.q3_public_deployer = roles.includes("deployer") && sys.roleAnswers.publicStatus === "public_authority"
+        && risk.category === "high_risk_annex_iii" && !onlyPoint2 ? "yes" : "no";
+      eligibility.q4_gpai_systemic = risk.category === "annex_iii_exempt" && roles.includes("provider") ? "yes" : "no";
+      prefillCount += 4;
       sources.eligibility = "triage";
+      if (sys.name && !system.system_name) { system.system_name = sys.name; prefillCount++; }
     } else {
-      missingFields.push("Q1/Q2 (Triage non compilato)");
+      missingFields.push("Q1-Q4 (sistema non ancora valutato nell'inventario)");
     }
   } catch { /* silent */ }
 
@@ -256,45 +246,28 @@ export function prefillEUDBFromModules(): PrefillResult {
     }
 
     // Authorized Representative from AuthRep record
-    const arRaw = localStorage.getItem("aicomply_auth_rep_result") ??
-      localStorage.getItem("aicomply_authorized_rep");
+    const arRaw = localStorage.getItem(AR_RECORD_KEY);
     if (arRaw) {
       const ar = JSON.parse(arRaw);
       if (ar.ar_name) { provider.ar_name = ar.ar_name; provider.has_authorized_rep = true; prefillCount++; }
       if (ar.ar_address) { provider.ar_address = ar.ar_address; prefillCount++; }
       if (ar.ar_country) { provider.ar_country = ar.ar_country; prefillCount++; }
-      if (ar.ar_email) { provider.ar_email = ar.ar_email; prefillCount++; }
+      if (ar.ar_contact_email) { provider.ar_email = ar.ar_contact_email; prefillCount++; }
     }
   } catch { /* silent */ }
 
   // ── Step 3: System from Risk Manager + DocuGen ──
   try {
-    // system_name, version, intended_purpose from DocuGen Annex IV
-    const docuRaw = localStorage.getItem("aicomply_docugen_record") ??
-      localStorage.getItem("aicomply_docugen_draft");
+    // Nome e finalità prevista dalla documentazione tecnica (Allegato IV, punto 1)
+    const docuRaw = localStorage.getItem("docugen_state");
     if (docuRaw) {
-      const docu = JSON.parse(docuRaw);
+      const docu = JSON.parse(docuRaw) as { systemName?: string; content?: Record<string, string> };
       if (docu.systemName && !system.system_name) { system.system_name = docu.systemName; prefillCount++; }
-      if (docu.systemVersion && !system.system_version) { system.system_version = docu.systemVersion; prefillCount++; }
-      if (docu.intendedPurpose && !system.intended_purpose) { system.intended_purpose = docu.intendedPurpose; prefillCount++; }
-      if (docu.instructionsUrl && !system.instructions_url) { system.instructions_url = docu.instructionsUrl; prefillCount++; }
-      if (docu.technicalDocUrl && !system.technical_doc_url) { system.technical_doc_url = docu.technicalDocUrl; prefillCount++; }
-      // Conformity declaration — only if art50 completed
-      if (docu.art50_completed || docu.conformityDeclarationNumber) {
-        if (docu.conformityDeclarationNumber) {
-          system.conformity_declaration_number = docu.conformityDeclarationNumber;
-          prefillCount++;
-        }
-        if (docu.notifiedBodyCertificate) {
-          system.notified_body_certificate = docu.notifiedBodyCertificate;
-          prefillCount++;
-        }
-      } else {
-        missingFields.push("Dichiarazione di Conformità (completa Kit Art. 50 in DocuGen AI)");
-      }
+      const purpose = docu.content?.s1?.trim();
+      if (purpose && !system.intended_purpose) { system.intended_purpose = purpose.slice(0, 1000); prefillCount++; }
       sources.system = "risk_manager_docugen";
     } else {
-      missingFields.push("Dati sistema (DocuGen Annex IV non compilato)");
+      missingFields.push("Dati sistema (documentazione tecnica non compilata)");
     }
 
     // risk_classification + annex_reference from Risk Manager
@@ -309,12 +282,6 @@ export function prefillEUDBFromModules(): PrefillResult {
       missingFields.push("Classificazione rischio (Risk Manager non compilato)");
     }
 
-    // conformity from old conformity storage
-    const confRaw = localStorage.getItem("aicomply_conformity_result");
-    if (confRaw && !system.conformity_declaration_number) {
-      const conf = JSON.parse(confRaw);
-      if (conf.registrationRef) { system.conformity_declaration_number = conf.registrationRef; prefillCount++; }
-    }
   } catch { /* silent */ }
 
   return { eligibility, provider, system, sources, missingFields, prefillCount };

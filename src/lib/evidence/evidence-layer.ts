@@ -85,6 +85,24 @@ export function verifyChain(): { valid: boolean; brokenAt?: number } {
   return { valid: true };
 }
 
+// Record dimostrativi che versioni precedenti inserivano automaticamente a registro vuoto.
+const DEMO_AUTHOR = "admin@azienda.it";
+
+/** Rimuove i record dimostrativi e ricollega la catena dei record reali (hash ricalcolati). */
+export async function purgeDemoEvidence(): Promise<void> {
+  const store = getStore();
+  if (!store.some((r) => r.author === DEMO_AUTHOR)) return;
+  const kept = store.filter((r) => r.author !== DEMO_AUTHOR);
+  const rebuilt: EvidenceRecord[] = [];
+  for (const r of kept) {
+    const previousHash = rebuilt[rebuilt.length - 1]?.hash || "genesis";
+    const version = rebuilt.filter((x) => x.type === r.type).length + 1;
+    const hash = await sha256(JSON.stringify({ type: r.type, content: r.content, previousHash, version, timestamp: r.timestamp, author: r.author }));
+    rebuilt.push({ ...r, previousHash, version, hash, signature: `signed:${r.author}:${hash.slice(0, 12)}` });
+  }
+  saveStore(rebuilt);
+}
+
 export function getEvidenceCount(): Record<EvidenceType, number> {
   const store = getStore();
   const counts: Record<string, number> = {};

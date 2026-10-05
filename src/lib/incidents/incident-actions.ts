@@ -11,7 +11,7 @@ export interface IncidentEntry {
   date: string;
   severity: string;
   severityClassification?: "serious_incident" | "malfunction" | "near_miss";
-  notificationDeadlineType?: "standard_15d" | "immediate_2d" | "none";
+  notificationDeadlineType?: "standard_15d" | "death_10d" | "immediate_2d" | "none";
   notificationDeadlineDate?: string;
   notifiedAt?: string;
   status: string;

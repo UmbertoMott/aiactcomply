@@ -7,7 +7,7 @@ import {
   ChevronDown, ChevronUp, Download, X, Search,
 } from "lucide-react";
 import {
-  appendEvidence, getAllEvidence, verifyChain,
+  appendEvidence, getAllEvidence, verifyChain, purgeDemoEvidence,
   type EvidenceRecord, type EvidenceType,
 } from "@/lib/evidence/evidence-layer";
 import { EVIDENCE_TEMPLATES } from "@/lib/evidence/evidence-templates";
@@ -60,38 +60,7 @@ export default function EvidenceLayerPage() {
   }, []);
 
   useEffect(() => {
-    const existing = getAllEvidence();
-    if (existing.length === 0) {
-      Promise.all([
-        appendEvidence("adr", {
-          titolo: "Scelta modello: RandomForest vs Neural Network",
-          decisione: "Adottato RandomForest per classificazione del rischio",
-          alternative_valutate: "Neural Network scartato per scarsa interpretabilità (Art. 13)",
-          motivazione: "RandomForest offre feature importance nativa, fondamentale per SHAP",
-          conseguenze: "Accuratezza inferiore del 2% ma trasparenza molto superiore",
-          responsabile: "Team AI Engineering",
-        }, "admin@azienda.it"),
-        appendEvidence("test", {
-          nome_test: "Bias check — dataset demografici",
-          versione_modello: "v1.0.0",
-          metrica: "Disparate Impact Ratio",
-          valore_ottenuto: "0.86",
-          soglia_superamento: "≥ 0.80",
-          esito: "PASS",
-          note: "Testato su 3 gruppi protetti: genere, età, provenienza",
-        }, "admin@azienda.it"),
-        appendEvidence("monitoring", {
-          metrica: "accuracy",
-          valore_corrente: "0.94",
-          soglia_allarme: "< 0.88",
-          stato: "Nella norma",
-          periodo_misurazione: "2025-Q1",
-          azione_raccomandata: "",
-        }, "admin@azienda.it"),
-      ]).then(() => refresh());
-    } else {
-      refresh();
-    }
+    purgeDemoEvidence().then(() => refresh());
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Derived state ──────────────────────────────────────────────────────────
@@ -192,7 +161,7 @@ export default function EvidenceLayerPage() {
             </span>
           </div>
           <p style={{ fontSize: "12px", color: "rgba(0,0,0,0.42)", maxWidth: "520px" }}>
-            Archivio immutabile con hash crittografico a catena. Ogni record è legato al precedente — garantisce integrità delle prove per audit e autorità.
+            Registro delle prove con impronta (hash) a catena: ogni record è legato al precedente, così una modifica successiva si nota. È conservato nel browser: per l&apos;audit esportalo e archivialo.
           </p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">

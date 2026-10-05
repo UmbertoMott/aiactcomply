@@ -839,7 +839,7 @@ export default function RiskManagerPage() {
     } else {
       setMessages([{
         role: "assistant",
-        content: `Benvenuto nel registro dei rischi.\n\nTi guiderò attraverso 8 fasi per costruire un registro dei rischi completo ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema di IA e il contesto in cui viene utilizzato (settore, uso previsto, categorie di utenti coinvolti).`,
+        content: `Benvenuto nel registro dei rischi.\n\nTi guiderò attraverso ${PHASES.length} fasi per costruire un registro dei rischi completo ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema di IA e il contesto in cui viene utilizzato (settore, uso previsto, categorie di utenti coinvolti).`,
       }]);
     }
     setHydrated(true);
@@ -914,8 +914,24 @@ export default function RiskManagerPage() {
     } else if (result.stepComplete && currentPhaseIndex === PHASES.length - 1) {
       newCompleted = [...completedPhases, currentPhase.id];
       setCompletedPhases(newCompleted);
+      // I rischi strutturati raccolti nella fase 2 alimentano il dossier (Art. 9(2)(a)-(b))
+      const entries = newDoc.identification?.riskEntries ?? [];
+      const listed = entries.length > 0 ? [] : newDoc.identification?.risks ?? [];
       writeToStorage<RiskManagerResult>("riskManager", {
-        risks: [],
+        risks: [
+          ...entries.map((r, i) => ({
+            id: r.id ?? `R-${i + 1}`,
+            title: r.description ?? r.category ?? `Rischio ${i + 1}`,
+            likelihood: r.likelihood ?? "medium",
+            impact: r.impact ?? "medium",
+            mitigation: r.mitigations ?? "",
+            residualRisk: (r.status === "mitigated" || r.status === "accepted" ? "acceptable" : "review") as "acceptable" | "review",
+          })),
+          ...listed.map((title, i) => ({
+            id: `R-${i + 1}`, title, likelihood: "medium" as const, impact: "medium" as const,
+            mitigation: "", residualRisk: "review" as const,
+          })),
+        ],
         overallRiskLevel: newDoc.signoff?.overallRisk === "alto" ? "high" : newDoc.signoff?.overallRisk === "critico" ? "critical" : "medium",
         completedAt: new Date().toISOString(),
         nextReviewDate: newDoc.signoff?.nextReviewDate,
@@ -936,7 +952,7 @@ export default function RiskManagerPage() {
     localStorage.removeItem(CHAT_STORAGE_KEY);
     setMessages([{
       role: "assistant",
-      content: `Benvenuto nel registro dei rischi.\n\nTi guiderò attraverso 8 fasi per costruire un registro dei rischi completo ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema di IA e il contesto in cui viene utilizzato.`,
+      content: `Benvenuto nel registro dei rischi.\n\nTi guiderò attraverso ${PHASES.length} fasi per costruire un registro dei rischi completo ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema di IA e il contesto in cui viene utilizzato.`,
     }]);
     setDocumentation({});
     setCurrentPhaseIndex(0);

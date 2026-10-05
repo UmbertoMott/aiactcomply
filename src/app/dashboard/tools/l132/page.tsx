@@ -613,7 +613,7 @@ export default function L132Page() {
         l132_deepfake_compliant: form.isDeepfakeRisk
           ? form.deepfakeChecks.filter(Boolean).length >= 4
           : true,
-        l132_minors_protection: true, // gestito separatamente
+        // l132_minors_protection omesso: la tutela dei minori (art. 4(4) L. 132/2025) non è valutata qui
         l132_hr_transparency: form.requiresHRNotice
           ? form.hrChecks.every((c) => c === true)
           : true,

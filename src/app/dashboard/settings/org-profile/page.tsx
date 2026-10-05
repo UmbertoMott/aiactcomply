@@ -204,7 +204,7 @@ export default function OrgProfilePage() {
 
         <ToggleRow
           label="Pubblica Amministrazione italiana"
-          sublabel="Attiva controlli L.132/2024, requisiti AGID/ACN e FRIA obbligatoria per deployer PA."
+          sublabel="Attiva controlli L. 132/2025, requisiti AGID/ACN e FRIA obbligatoria per deployer PA."
           checked={profile.paItaly}
           onChange={(v) => updateField("paItaly", v)}
         />

@@ -7,6 +7,9 @@
 // dettagli tecnici restano nel Dossier interno.
 
 import { readFromStorage } from "@/lib/dossier/storage-schema";
+import { loadInventory } from "@/lib/inventory/ai-system";
+import { referenceSystem } from "@/lib/inventory/classifier-bridge";
+import { assessRisk } from "@/lib/obligations/engine";
 import type {
   DataAuditResult, RiskManagerResult, ResilienceResult, TransparencyResult,
   ClassifierResult,
@@ -82,10 +85,11 @@ export function buildTrustPassport(opts: {
   // Compliance statements
   const statements = {
     eu_ai_act_compliant:  overall >= 70,
-    art_5_clear:          true,    // verificato dal Prohibited Checker (assumiamo no flag)
+    art_5_clear:          art5Clear(),
+
     art_10_bias_tested:   !!dataAudit && fairness.score >= 60,
     art_15_robustness:    robustness.score >= 60,
-    art_50_disclosure:    !!transparency,
+    art_50_disclosure:    !!readFromStorage("art50"),
     italian_law_132:      !!readFromStorage("l132"),
   };
 
@@ -137,6 +141,13 @@ export function buildTrustPassport(opts: {
   };
 }
 
+/** Art. 5: vero solo se il sistema è stato valutato e nessuna pratica vietata risulta dalle risposte. */
+function art5Clear(): boolean {
+  const sys = referenceSystem(loadInventory());
+  if (!sys?.riskAnswers) return false;
+  return assessRisk(sys.riskAnswers).prohibited.length === 0;
+}
+
 // ─── Pillar computation ──────────────────────────────────────────────────────
 
 function computeFairnessScore(da: DataAuditResult | null): { score: number; status: PassportStatus; basis: string } {
@@ -150,7 +161,8 @@ function computeFairnessScore(da: DataAuditResult | null): { score: number; stat
   if (typeof r.di === "number")  { total++; if (r.di >= 0.80)  inThreshold++; }
   if (typeof r.eod === "number") { total++; if (r.eod <= 0.10) inThreshold++; }
 
-  const score = total > 0 ? Math.round((inThreshold / total) * 100) : 50;
+  if (total === 0) return { score: 0, status: "unverified", basis: "Nessuna metrica di fairness misurata" };
+  const score = Math.round((inThreshold / total) * 100);
   const status: PassportStatus = score >= 80 ? "verified" : score >= 50 ? "partial" : "unverified";
   return { score, status, basis: `${inThreshold}/${total} metriche di fairness entro soglia` };
 }
@@ -158,10 +170,10 @@ function computeFairnessScore(da: DataAuditResult | null): { score: number; stat
 function computeRiskScore(rm: RiskManagerResult | null): { score: number; status: PassportStatus; basis: string } {
   if (!rm) return { score: 0, status: "unverified", basis: "Risk Manager non completato" };
   // Tutti i rischi mitigati = score alto
-  const r = rm as { risks?: Array<{ mitigated?: boolean }>; riskScore?: number };
-  const risks = r.risks || [];
-  const mitigated = risks.filter(x => x.mitigated).length;
-  const score = risks.length > 0 ? Math.round((mitigated / risks.length) * 100) : 75;
+  const risks = rm.risks || [];
+  const mitigated = risks.filter(x => x.residualRisk === "acceptable").length;
+  if (risks.length === 0) return { score: 0, status: "unverified", basis: "Nessun rischio registrato" };
+  const score = Math.round((mitigated / risks.length) * 100);
   const status: PassportStatus = score >= 80 ? "verified" : score >= 50 ? "partial" : "unverified";
   return { score, status, basis: `${mitigated}/${risks.length} rischi mitigati` };
 }
@@ -171,7 +183,8 @@ function computeRobustnessScore(res: ResilienceResult | null): { score: number; 
   const r = res as { redTeamPassed?: number; redTeamTotal?: number; accuracyAcceptable?: boolean };
   const passed = r.redTeamPassed ?? 0;
   const total = r.redTeamTotal ?? 0;
-  let score = total > 0 ? Math.round((passed / total) * 100) : 60;
+  if (total === 0) return { score: 0, status: "unverified", basis: "Nessun test eseguito" };
+  let score = Math.round((passed / total) * 100);
   if (r.accuracyAcceptable) score = Math.min(100, score + 10);
   const status: PassportStatus = score >= 80 ? "verified" : score >= 50 ? "partial" : "unverified";
   return { score, status, basis: `Red Team: ${passed}/${total} test superati` };

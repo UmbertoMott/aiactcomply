@@ -1,6 +1,6 @@
 "use client";
 
-// Art. 26(7) — Informazioni alle persone fisiche interessate — PROMPT BD
+// Art. 26(11) — Informazioni alle persone fisiche interessate — PROMPT BD
 
 import React from "react";
 import type { DeployerRecord } from "@/types/deployer";
@@ -20,8 +20,8 @@ export function Art26_7({ record, onChange }: Props) {
   return (
     <div className="space-y-3">
       <p className="text-xs text-slate-400">
-        Le persone fisiche soggette alle decisioni del sistema di IA devono essere informate
-        del suo utilizzo (Art. 26(7)).
+        Se un sistema dell&apos;Allegato III adotta o aiuta ad adottare decisioni su persone fisiche, queste devono essere informate
+        che sono soggette al suo uso (Art. 26(11)).
       </p>
 
       <div className="space-y-2">

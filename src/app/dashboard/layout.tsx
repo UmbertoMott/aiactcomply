@@ -630,11 +630,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {ROLE_LABELS[role]}
               </span>
               <Link
-                href="/dashboard/onboarding?changeRole=1"
+                href="/dashboard/tools/inventory"
                 className="text-[10px] transition-opacity hover:opacity-70"
                 style={{ color: "rgba(0,0,0,0.3)" }}
               >
-                {t("changeRole")}
+                {t("rolesFromInventory")}
               </Link>
             </div>
           )}

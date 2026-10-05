@@ -29,11 +29,11 @@ Sistema di IA:
 
 I 6 flag condizionali (rispondi true/false per ciascuno):
 1. usesHighRiskSystem — il sistema rientra in Allegato III (alto rischio)?
-2. usesInternalProcedures — sono previste/necessarie procedure interne di controllo?
+2. usesInternalProcedures — il deployer deve cooperare con le autorità competenti (Art. 26(12))? Rispondi sempre true.
 3. employeeImpact — il sistema impatta direttamente i lavoratori (ad es. monitoraggio, selezione, valutazione)?
-4. biometricCategorization — il sistema utilizza categorizzazione biometrica o riconoscimento emozioni?
-5. eudbRequired — il deployer è un'autorità pubblica che deve registrare in EUDB (Art. 49(2))?
-6. rbiApplicable — si applica la registrazione RBI entro 48h (Art. 26(10))?
+4. biometricCategorization — il sistema (Allegato III) adotta o aiuta ad adottare decisioni su persone fisiche (Art. 26(11))?
+5. eudbRequired — il deployer è un'autorità pubblica o istituzione dell'Unione che deve registrare l'uso nella banca dati UE (Art. 26(8), Art. 49(3))?
+6. rbiApplicable — il sistema è di identificazione biometrica remota a posteriori usato nella ricerca mirata di persone in un'indagine penale (Art. 26(10))?
 
 Rispondi ESCLUSIVAMENTE nel formato JSON seguente, senza testo aggiuntivo:
 <extract>

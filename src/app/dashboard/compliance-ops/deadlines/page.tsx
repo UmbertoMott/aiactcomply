@@ -568,6 +568,16 @@ export default function DeadlinesPage() {
           </div>
         </div>
 
+        {viewMode === "ai" && showCopilot && (
+          <div className="mb-6">
+            <CopilotPanel
+              deadlines={allDeadlines}
+              systemName={systemFilter === "all" ? "tutti i sistemi" : systems.find(sy => sy.id === systemFilter)?.name ?? ""}
+              tier=""
+            />
+          </div>
+        )}
+
         {/* Alert prioritario Annex III */}
         {showUrgentBanner && (
           <div className="rounded-xl px-4 py-3 flex items-center justify-between gap-3 mb-6 flex-wrap"

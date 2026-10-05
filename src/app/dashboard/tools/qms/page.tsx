@@ -112,6 +112,9 @@ export default function QMSPage() {
   async function draftSection(sectionId: string, art: string) {
     const qmsId = artToQmsId(art);
     if (!qmsId) return;
+    // Non sovrascrivere un testo già scritto senza conferma
+    const existing = sections.find((s) => s.id === sectionId)?.content.trim();
+    if (existing && !window.confirm(t("confirmOverwrite"))) return;
     setSectionDrafting(prev => ({ ...prev, [sectionId]: true }));
     const ctx = buildComplianceContextFromStorage();
     const result = await draftQmsSection(qmsId, ctx);
@@ -186,8 +189,9 @@ export default function QMSPage() {
     writeToStorage<QMSResult>("qms", {
       qmsDocumentRef: `QMS-${systemName || "AIComply"}-v1.0-${new Date().toISOString().split("T")[0]}`,
       postMarketPlanExists,
-      internalReviewCycle: "Trimestrale",
-      responsibleManager: "AI Compliance Officer",
+      // Solo dati scritti dall'utente: il quadro di responsabilità è la lettera m) dell'Art. 17(1)
+      internalReviewCycle: "",
+      responsibleManager: (sections.find((s) => s.tplId === "accountability")?.content ?? "").split("\n")[0].slice(0, 120),
       certifications: [],
       completedAt,
     });
