@@ -150,7 +150,7 @@ function buildPillars(t: T): NavPillar[] {
   },
   { id: "docugen", icon: FileCode, label: t("nav_docugen"), href: "/dashboard/tools/docugen", art: t("art_docugen") },
   { id: "data-audit", icon: ClipboardList, label: t("nav_dataAudit"), href: "/dashboard/tools/data-audit", art: "Art. 10", tooltip: t("tt_dataAudit") },
-  { id: "transparency", icon: Megaphone, label: t("nav_transparency"), href: "/dashboard/tools/transparency", art: "Art. 13/50", tooltip: t("tt_transparency") },
+  { id: "transparency", icon: Megaphone, label: t("nav_transparency"), href: "/dashboard/tools/transparency", art: "Art. 13", tooltip: t("tt_transparency") },
   { id: "oversight", icon: Eye, label: t("nav_oversight"), href: "/dashboard/tools/oversight", art: "Art. 14", tooltip: t("tt_oversight") },
   { id: "resilience", icon: Siren, label: t("nav_resilience"), href: "/dashboard/tools/resilience", art: "Art. 15", tooltip: t("tt_resilience") },
   { id: "qms", icon: ClipboardCheck, label: t("nav_qms"), href: "/dashboard/tools/qms", art: "Art. 17", tooltip: t("tt_qms") },

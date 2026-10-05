@@ -92,7 +92,7 @@ Il Dossier aggrega automaticamente i risultati di tutti i tool completati in un 
 - Puoi esportare il dossier completo in formato JSON
 
 **Cosa contiene:**
-Risultati di tutti i tool: Classifier, Risk Manager, Data Audit, DocuGen, LogVault, Transparency, Oversight, Resilience, QMS, FRIA, DPIA, Conformity, XAI, GPAI e altri.
+Risultati di tutti i tool: Classifier, Risk Manager, Data Audit, DocuGen, LogVault, Transparency, Oversight, Resilience, QMS, FRIA, DPIA, Conformity, GPAI e altri.
 
 **Consiglio:** Completa prima tutti i tool obbligatori per il tuo livello di rischio, poi esporta il dossier per l'audit o la valutazione di conformità.`,
   },
@@ -287,28 +287,24 @@ Infrastrutture critiche, istruzione, occupazione/HR, servizi essenziali, law enf
   {
     id: "tool_transparency",
     topic: "Transparency",
-    keywords: ["transparency", "trasparenza", "art 13", "informazioni utenti", "informare", "chatbot", "deepfake", "disclosure"],
-    answer: `**Transparency — Obblighi Trasparenza (Art. 13)**
+    keywords: ["transparency", "trasparenza", "art 13", "istruzioni per l'uso", "istruzioni d'uso", "spiegabilità", "xai", "explainable"],
+    answer: `**Trasparenza — Istruzioni per l'uso (Art. 13)**
 
-📍 Menu: *Valutazioni → Transparency*
+📍 Menu: *Trasparenza*
 
-**A cosa serve:** Documenta come vengono informati gli utenti sull'utilizzo di un sistema AI. L'Art. 13 richiede che i sistemi siano trasparenti verso gli utenti.
+**A cosa serve:** Il fornitore di un sistema ad alto rischio scrive le istruzioni per l'uso da consegnare ai deployer, voce per voce secondo l'Art. 13(3), e le scarica come documento.
 
-**Cosa ti serve:**
-- Se gli utenti sono informati dell'interazione con AI (sì/no)
-- Tipo di informazioni fornite (natura AI, capacità, limitazioni, contatti)
-- Punto di contatto per domande/reclami
-- Lingue disponibili per le informazioni
+**Le voci (Art. 13(3)):**
+- (a) identità e contatti del fornitore e del rappresentante autorizzato
+- (b) finalità prevista, accuratezza/robustezza/cibersicurezza, situazioni di rischio, spiegabilità dell'output, prestazioni su gruppi specifici, dati di input e di addestramento, interpretazione dell'output
+- (c) modifiche predeterminate
+- (d) misure di sorveglianza umana (Art. 14)
+- (e) risorse, durata del ciclo di vita, manutenzione e aggiornamenti
+- (f) meccanismi di registrazione dei log (Art. 12)
 
-**Obblighi specifici per:**
-- **Chatbot/Agenti conversazionali:** Devono informare che si tratta di AI (Art. 50)
-- **Deepfake/contenuti sintetici:** Etichettatura obbligatoria
-- **Sistemi emotivi/biometrici:** Informativa specifica
+**Deployer:** deve usare il sistema conformemente alle istruzioni (Art. 26(1)).
 
-**Collegamento con L.132/2025:**
-La legge italiana aggiunge obblighi su HR (avviso ai lavoratori) e contenuti generati da AI.
-
-**Output:** Piano di trasparenza documentato.`,
+**Avvisi a chi usa un chatbot o vede contenuti generati dall'IA:** sono obblighi dell'Art. 50 → *Art. 50 kit*.`,
   },
 
   // ── OVERSIGHT ───────────────────────────────────────────────────────────────
@@ -554,38 +550,6 @@ I sistemi ad alto rischio devono essere registrati nel database EU prima dell'im
 **Output:** Score conformità + dichiarazione scaricabile + ref. registrazione.`,
   },
 
-  // ── XAI ─────────────────────────────────────────────────────────────────────
-  {
-    id: "tool_xai",
-    topic: "XAI Lab",
-    keywords: ["xai", "explainable", "spiegabilità", "interpretabilità", "black box", "spiegazione", "decisioni", "motivazioni", "lime", "shap"],
-    answer: `**XAI Lab — Spiegabilità (Explainable AI)**
-
-📍 Menu: *Monitoraggio → XAI Lab*
-
-**A cosa serve:** Valuta e documenta la capacità del sistema AI di spiegare le proprie decisioni. Collegato all'Art. 13 (trasparenza) e alle aspettative degli interessati di ricevere spiegazioni sulle decisioni automatizzate.
-
-**Cosa valuta:**
-- Score XAI complessivo del modello
-- Versione del modello analizzata
-- Flag di compliance (es: "nessuna spiegazione locale", "feature importance non disponibile")
-- Presenza di flag critici
-
-**Tecniche XAI comuni:**
-- **LIME** (Local Interpretable Model-agnostic Explanations)
-- **SHAP** (SHapley Additive exPlanations)
-- **Attention maps** (modelli transformer)
-- **Counterfactual explanations** ("Se X fosse diverso, la decisione sarebbe cambiata")
-- **Feature importance** (importanza delle variabili)
-
-**Collegamento normativo:**
-- Art. 13 AI Act: trasparenza verso gli utenti
-- Art. 22 GDPR: diritto a non essere soggetti a decisioni automatizzate
-- Art. 22(3) GDPR: diritto a spiegazioni significative
-
-**Output:** Score XAI + flag compliance nel dossier.`,
-  },
-
   // ── ROADMAP ─────────────────────────────────────────────────────────────────
   {
     id: "tool_roadmap",
@@ -801,7 +765,7 @@ Prova a chiedermi di un tool specifico come:
 - **Art. 5 Checker**, **AI Classifier**, **Risk Manager**
 - **DPIA**, **FRIA**, **Data Audit**, **DocuGen**
 - **LogVault**, **Transparency**, **Oversight**, **Resilience**
-- **QMS**, **Conformity**, **GPAI**, **XAI**
+- **QMS**, **Conformity**, **GPAI**
 - Oppure "da dove iniziare" o "quali tool sono obbligatori"`;
   }
 

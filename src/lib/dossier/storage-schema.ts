@@ -76,6 +76,9 @@ export interface TransparencyResult {
   contactPoint: string;
   languagesAvailable: string[];
   completedAt: string;
+  /** Istruzioni per l'uso Art. 13(3): chiave = lettera (a, b_i … f) */
+  instructions?: Record<string, string>;
+  systemName?: string;
 }
 
 export interface OversightResult {
@@ -265,14 +268,6 @@ export interface DeployerCheckResult {
   completedAt: string;
 }
 
-export interface XAIResult {
-  overallXAIScore: number;
-  modelVersion: string;
-  complianceFlagsCount: number;
-  hasCriticalFlags: boolean;
-  completedAt: string;
-}
-
 export interface ProhibitedCheckResult {
   answers: Record<string, "yes" | "no" | "unsure">;
   verdict: "violation" | "potential_violation" | "conditional" | "clear";
@@ -368,7 +363,6 @@ export interface DossierData {
   fria?: FRIAResult;
   dpia?: DPIAResult;
   l132?: L132Result;
-  xai?: XAIResult;
   deployer?: DeployerCheckResult;
   eudb?: EUDBResult;
   authorizedRep?: AuthRepResult;
@@ -414,7 +408,6 @@ export const STORAGE_KEYS = {
   gpai:        "aicomply_gpai_result",
   conformity:  "aicomply_conformity_assessment",
   onboarding:  "aicomply_onboarding_data",
-  xai:         "aicomply_xai_result",
   deployer:    "aicomply_deployer_result",
   eudb:        "aicomply_eudb_result",
   authorizedRep: "aicomply_authorized_rep_result",

@@ -38,9 +38,15 @@ trasparenza sufficiente a permettere ai deployer di comprendere il funzionamento
 
 Art. 13(2): Deve essere allegata un'istruzione d'uso in forma comprensibile.
 
-Art. 13(3) richiede: (a) identità del provider, (b) caratteristiche e capacità del sistema,
-(c) specifiche dei dati di training pertinenti per la valutazione della conformità,
-(d) livello di accuratezza/robustezza, (e) supervisione umana necessaria, (f) vita utile attesa.
+Art. 13(3) richiede almeno: (a) identità e contatti del fornitore e dell'eventuale rappresentante autorizzato;
+(b) caratteristiche, capacità e limiti delle prestazioni: (i) finalità prevista, (ii) accuratezza, robustezza
+e cibersicurezza (Art. 15) e circostanze che possono incidervi, (iii) circostanze di uso conforme o di uso
+improprio prevedibile che possono comportare rischi (Art. 9(2)), (iv) se del caso, capacità di spiegare l'output,
+(v) se del caso, prestazioni per specifiche persone o gruppi, (vi) se del caso, specifiche dei dati di input e
+informazioni sui set di dati di addestramento, convalida e prova, (vii) se del caso, informazioni per interpretare
+e usare l'output; (c) modifiche predeterminate dal fornitore; (d) misure di sorveglianza umana (Art. 14);
+(e) risorse computazionali e hardware, durata del ciclo di vita, manutenzione e aggiornamenti;
+(f) se del caso, meccanismi per raccogliere, conservare e interpretare i log (Art. 12).
 
 REGOLE:
 - article deve citare il sottoparagrafo specifico (es. "Art. 13(3)(a)")

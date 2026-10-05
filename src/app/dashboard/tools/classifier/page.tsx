@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import { scanRepository, classifyRisk } from "@/lib/simulation/discovery-engine";
-import { MOCK_PROJECT_FILES } from "@/lib/simulation/mock-project";
 import { matchCodeToLaw } from "@/lib/simulation/code-to-law";
 import { inferRisk, analyzeSchema, generatePolicyCard, translateToHumanText } from "@/lib/semantic/inference";
 import { AIRiskScorer, type DiscoveryData, type AnalysisOutput } from "@/lib/semantic/ai-risk-scorer";
@@ -137,7 +136,6 @@ export default function ClassifierPage() {
   const [step0NistInterest, setStep0NistInterest] = useState(false);
 
   const [phase, setPhase] = useState<"intro" | "scan" | "decision" | "result">("intro");
-  const [files] = useState(MOCK_PROJECT_FILES);
   const [result, setResult] = useState<ReturnType<typeof classifyRisk> | null>(null);
   const [selectedFile, setSelectedFile] = useState("");
   const [hasProfiling, setHasProfiling] = useState<boolean | null>(null);
@@ -145,7 +143,7 @@ export default function ClassifierPage() {
   const [signed, setSigned] = useState(false);
   const [showInference, setShowInference] = useState(false);
   const [scorerResult, setScorerResult] = useState<AnalysisOutput | null>(null);
-  const [profilingSignals, setProfilingSignals] = useState<ProfilingSignal[]>(() => scanProfiling(files));
+  const [profilingSignals, setProfilingSignals] = useState<ProfilingSignal[]>(() => []);
   const [selectedCriteria, setSelectedCriteria] = useState<string[]>([]);
   const [rationale, setRationale] = useState("");
   const [exemptionDossier, setExemptionDossier] = useState<ExemptionDossier | null>(null);
@@ -153,7 +151,6 @@ export default function ClassifierPage() {
   const [passportOpen, setPassportOpen] = useState(false);
 
   // ADDITION 2 — New state
-  const [inputMode, setInputMode] = useState<"demo" | "manual">("demo");
   const [customSystemName, setCustomSystemName] = useState("");
   const [customRequirements, setCustomRequirements] = useState("");
   const [customPythonCode, setCustomPythonCode] = useState("");
@@ -182,17 +179,13 @@ export default function ClassifierPage() {
 
   // ADDITION 4 — Derived active inputs (must precede useMemos that depend on them)
   const activeSystemName: string =
-    inputMode === "manual" && customSystemName.trim()
-      ? customSystemName.trim()
-      : "CV-Screener AI";
+    customSystemName.trim();
 
   const activeFiles: Record<string, string> =
-    inputMode === "manual" && (customRequirements.trim() || customPythonCode.trim())
-      ? {
-          ...(customRequirements.trim() ? { "requirements.txt": customRequirements } : {}),
-          ...(customPythonCode.trim() ? { "main.py": customPythonCode } : {}),
-        }
-      : files;
+    {
+      ...(customRequirements.trim() ? { "requirements.txt": customRequirements } : {}),
+      ...(customPythonCode.trim() ? { "main.py": customPythonCode } : {}),
+    };
 
   // ADDITION 6 — scanResult uses activeFiles
   const scanResult = useMemo(() => {
@@ -215,7 +208,7 @@ export default function ClassifierPage() {
     // Fall back to risk-relevant defaults only if nothing detected from code
     const fields = detectedFields.length > 0
       ? detectedFields
-      : ["gender", "age", "years_experience", "education_level", "salary", "marital_status", "face_image", "ethnicity"];
+      : [];
     return analyzeSchema(fields);
   }, [scanResult, activeFiles]);
 
@@ -229,7 +222,7 @@ export default function ClassifierPage() {
     return generatePolicyCard(activeSystemName, inferenceMatches, schemaColumns);
   }, [inferenceMatches, schemaColumns, activeSystemName]);
 
-  const lawMatches = selectedFile ? matchCodeToLaw(files[selectedFile] || "") : [];
+  const lawMatches = selectedFile ? matchCodeToLaw(activeFiles[selectedFile] || "") : [];
 
   // ADDITION 3 — Toast helper
   function showToast(msg: string) {
@@ -241,6 +234,7 @@ export default function ClassifierPage() {
   function runScan() {
     const { libraries, endpoints } = scanRepository(activeFiles);
     setPhase("scan");
+    setProfilingSignals(scanProfiling(activeFiles));
     const scorer = new AIRiskScorer();
     const discoveryData: DiscoveryData = {
       libraries: libraries.map((l) => l.name),
@@ -574,7 +568,6 @@ export default function ClassifierPage() {
                     if (!customSystemName && res.systemName) {
                       setCustomSystemName(res.systemName);
                     }
-                    setInputMode("manual");
                   }
                 }}
                 style={{
@@ -701,43 +694,8 @@ export default function ClassifierPage() {
           {/* Input mode selector */}
           <div style={{ ...cardSt, padding: 20 }}>
             <h2 style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 16 }}>{t("classificationMode")}</h2>
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <button
-                onClick={() => setInputMode("demo")}
-                style={{
-                  borderRadius: 9, border: `1px solid ${inputMode === "demo" ? T.text : T.border}`,
-                  background: inputMode === "demo" ? "rgba(0,0,0,0.04)" : T.card,
-                  padding: 16, textAlign: "left", cursor: "pointer", transition: "border-color 0.15s",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                  <Brain style={{ width: 15, height: 15, color: T.text }} />
-                  <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{t("demoProject")}</span>
-                </div>
-                <p style={{ fontSize: 11, color: T.muted, lineHeight: 1.4 }}>
-                  {t("demoProjectDesc")}
-                </p>
-              </button>
-              <button
-                onClick={() => setInputMode("manual")}
-                style={{
-                  borderRadius: 9, border: `1px solid ${inputMode === "manual" ? T.text : T.border}`,
-                  background: inputMode === "manual" ? "rgba(0,0,0,0.04)" : T.card,
-                  padding: 16, textAlign: "left", cursor: "pointer", transition: "border-color 0.15s",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                  <Code2 style={{ width: 15, height: 15, color: T.text }} />
-                  <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{t("mySystem")}</span>
-                </div>
-                <p style={{ fontSize: 11, color: T.muted, lineHeight: 1.4 }}>
-                  {t("mySystemDesc")}
-                </p>
-              </button>
-            </div>
-
             {/* Manual input fields */}
-            {inputMode === "manual" && (
+            {(
               <div className="space-y-3 border-t border-border pt-4">
                 <div>
                   <label className="text-xs text-muted-foreground mb-1 block">
@@ -894,9 +852,7 @@ export default function ClassifierPage() {
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
                 <Code2 style={{ width: 16, height: 16, color: T.text }} />
                 <h2 style={{ fontSize: 14, fontWeight: 600, color: T.text, margin: 0 }}>
-                  {inputMode === "demo"
-                    ? t("projectCvScreener")
-                    : activeSystemName || t("customProject")}
+                  {activeSystemName || t("customProject")}
                 </h2>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -906,7 +862,7 @@ export default function ClassifierPage() {
                     <span style={{ fontSize: 11, color: T.muted, fontFamily: "ui-monospace, monospace" }}>{path}</span>
                   </div>
                 ))}
-                {inputMode === "manual" && Object.keys(activeFiles).length === 0 && (
+                {Object.keys(activeFiles).length === 0 && (
                   <p style={{ fontSize: 11, color: T.amber }}>
                     {t("noFilesInserted")}
                   </p>
@@ -914,7 +870,7 @@ export default function ClassifierPage() {
               </div>
               <button
                 onClick={() => {
-                  if (inputMode === "manual" && !customSystemName.trim()) {
+                  if (!customSystemName.trim()) {
                     showToast(t("toast_enterName"));
                     return;
                   }
@@ -960,10 +916,10 @@ export default function ClassifierPage() {
             <div className="rounded-xl border border-border bg-card">
               <div className="flex items-center justify-between px-5 py-3 border-b border-border">
                 <h2 className="text-sm font-semibold text-foreground">{t("fileBrowser")}</h2>
-                <span className="text-[10px] text-muted-foreground bg-muted rounded-full px-2 py-0.5">{Object.keys(files).length} files</span>
+                <span className="text-[10px] text-muted-foreground bg-muted rounded-full px-2 py-0.5">{Object.keys(activeFiles).length} files</span>
               </div>
               <div className="divide-y divide-border/50 max-h-60 overflow-y-auto">
-                {Object.entries(files).map(([path, content]) => {
+                {Object.entries(activeFiles).map(([path, content]) => {
                   const matches = matchCodeToLaw(content);
                   const riskCount = matches.filter((m) => m.severity === "critical" || m.severity === "high").length;
                   return (
@@ -997,7 +953,7 @@ export default function ClassifierPage() {
                 <div className="grid lg:grid-cols-2">
                   <div className="border-r border-border/50">
                     <pre className="text-[10px] text-muted-foreground p-4 overflow-x-auto font-mono max-h-60 overflow-y-auto">
-                      {files[selectedFile]}
+                      {activeFiles[selectedFile]}
                     </pre>
                   </div>
                   <div className="divide-y divide-border/50 max-h-60 overflow-y-auto">
@@ -1539,7 +1495,7 @@ export default function ClassifierPage() {
           <div className="rounded-xl border border-border bg-card p-5">
             <h2 className="text-sm font-semibold text-foreground mb-3">{t("codeToLawCrossRef")}</h2>
             <div className="space-y-2">
-              {Array.from(new Set(Object.values(files).flatMap((c) => matchCodeToLaw(c).map((m) => m.article)))).slice(0, 5).map((art) => (
+              {Array.from(new Set(Object.values(activeFiles).flatMap((c) => matchCodeToLaw(c).map((m) => m.article)))).slice(0, 5).map((art) => (
                 <div key={art} className="flex items-center gap-2 text-xs text-muted-foreground py-1">
                   <Scale className="h-3.5 w-3.5 text-primary" />
                   {art}

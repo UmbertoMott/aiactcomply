@@ -5,7 +5,7 @@ import type {
   DossierData, ClassifierResult, RiskManagerResult, DataAuditResult,
   DocugenResult, LogvaultResult, TransparencyResult,
   OversightResult, ResilienceResult, QMSResult, ProhibitedCheckResult,
-  FRIAResult, ConformityResult, GPAIResult, XAIResult,
+  FRIAResult, ConformityResult, GPAIResult,
   DPIAResult, DeployerCheckResult, L132Result, EUDBResult, AuthRepResult, ProviderTransitionResult,
 } from "./storage-schema";
 
@@ -44,7 +44,6 @@ export function aggregateDossier(): DossierData {
     gpai:         readFromStorage<GPAIResult>("gpai")                    ?? undefined,
     conformity:   readFromStorage<ConformityResult>("conformity")        ?? undefined,
     fria:             readFromStorage<FRIAResult>("fria")                              ?? undefined,
-    xai:              readFromStorage<XAIResult>("xai")                               ?? undefined,
     dpia:             readFromStorage<DPIAResult>("dpia")                             ?? undefined,
     deployer:         readFromStorage<DeployerCheckResult>("deployer")                ?? undefined,
     l132:             readFromStorage<L132Result>("l132")                             ?? undefined,
@@ -225,16 +224,6 @@ export function getDossierSections(data: DossierData): DossierSection[] {
             completedAt: data.gpai?.completedAt,
           }
         : na("Modulo GPAI (Art. 51-55) applicabile solo a provider/integratori di modelli di uso generale")),
-    },
-    // XAI — applicabile a high-risk (spiegabilità è parte dei requisiti Art. 13+14)
-    {
-      id: "xai",
-      article: "Art. 13+",
-      title: "XAI — Spiegabilità e Bias",
-      href: "/dashboard/modules/xai",
-      ...(isHighRisk || tier === null
-        ? { status: data.xai ? "complete" : "missing", completedAt: data.xai?.completedAt }
-        : na("Spiegabilità (XAI) rilevante principalmente per sistemi high-risk (Art. 13-14)")),
     },
     // DPIA — dipende da trattamento dati personali, non dal tier AI (ma high-risk quasi sempre richiede DPIA)
     {

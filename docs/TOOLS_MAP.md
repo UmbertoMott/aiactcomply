@@ -23,7 +23,6 @@ Legenda colonne:
 | Journey | `/dashboard/journey` | `app/dashboard/journey/page.tsx` | — | — | — | — | — | Onboarding guidato |
 | Evidence Layer | `/dashboard/evidence-layer` | `app/dashboard/evidence-layer/page.tsx` | — | — | — | — | — | Raccolta prove/evidenze |
 | Notifications | `/dashboard/notifications` | `app/dashboard/notifications/page.tsx` | — | — | — | — | — | Centro notifiche |
-| Discovery | `/dashboard/discovery` | `app/dashboard/discovery/page.tsx` | — | — | — | — | — | Scoperta automatica sistemi AI |
 
 ---
 
@@ -52,8 +51,8 @@ Legenda colonne:
 
 | Tool | URL | File | Righe | Storage | AI | 🔵 Blu | ⚠ Verify | Articoli principali |
 |------|-----|------|-------|---------|----|--------|----------|---------------------|
-| **Transparency** | `/dashboard/tools/transparency` | `tools/transparency/page.tsx` | 778 | 8 | 13 | 1 | 0 | Art. 13 — obblighi trasparenza verso utenti |
-| **Human Oversight** | `/dashboard/tools/oversight` | `tools/oversight/page.tsx` | 867 | 8 | 29 | **10** | **7** | Art. 14 — supervisione umana |
+| **Transparency** | `/dashboard/tools/transparency` | `tools/transparency/page.tsx` | 778 | 8 | 13 | 1 | 0 | Art. 13(3) — istruzioni per l'uso per i deployer (modulo, export) |
+| **Human Oversight** | `/dashboard/tools/oversight` | `tools/oversight/page.tsx` | 867 | 8 | 29 | **10** | **7** | Art. 14 — registro misure di supervisione umana |
 | **Art. 50 Kit** | `/dashboard/tools/art50-kit` | `tools/art50-kit/page.tsx` | 839 | 4 | 54 | **20** | **19** | Art. 50 — obblighi trasparenza GPAI/chatbot |
 | **Legal Assistant** | `/dashboard/tools/legal-assistant` | `tools/legal-assistant/page.tsx` | 669 | 0 | 9 | 0 | 0 | Art. 16, 99 — RAG sull'AI Act |
 
@@ -80,7 +79,7 @@ Legenda colonne:
 | Tool | URL | File | Righe | Storage | AI | 🔵 Blu | ⚠ Verify | Articoli principali |
 |------|-----|------|-------|---------|----|--------|----------|---------------------|
 | **GPAI Assessment** | `/dashboard/tools/gpai` | `tools/gpai/page.tsx` | 1167 | 5 | 68 | **23** | 0 | Art. 49, 51 — GPAI sistemic risk |
-| **Literacy** | `/dashboard/tools/literacy` | `tools/literacy/page.tsx` | 917 | 5 | 16 | 0 | 0 | Art. 4 — formazione AI literacy |
+| **Literacy** | `/dashboard/tools/literacy` | `tools/literacy/page.tsx` | 917 | 5 | 16 | 0 | 0 | Art. 4 — registro formazione (nessun punteggio: l'Art. 4 non fissa ore minime) |
 | **AGID/ACN** | `/dashboard/tools/agid-acn` | `tools/agid-acn/page.tsx` | 472 | 0 | 42 | **10** | 0 | Art. 15, 23, 33, 35 — autorità IT |
 | **Trust Passport** | `/dashboard/tools/trust-passport` | `tools/trust-passport/page.tsx` | 372 | 0 | 5 | 3 | 0 | Art. 5, 10, 11, 50 — kit commerciale/vendita |
 | **Deployer Dashboard** | `/dashboard/tools/deployer-dashboard` | `tools/deployer-dashboard/page.tsx` | 267 | 0 | 5 | 0 | 0 | Art. 26 — obblighi deployer |
@@ -103,7 +102,6 @@ Legenda colonne:
 
 | Modulo | URL | File | Righe | Storage | AI | 🔵 Blu | ⚠ Verify | Articoli principali |
 |--------|-----|------|-------|---------|----|--------|----------|---------------------|
-| **XAI (Explainability)** | `/dashboard/modules/xai` | `modules/xai/page.tsx` | 1067 | 5 | 41 | 0 | 0 | Art. 10, 12, 13 |
 | **FRIA Module** | `/dashboard/modules/fria` | `modules/fria/page.tsx` | 5 | — | — | 0 | 0 | — | Stub/redirect |
 | **Rights Simulator** | `/dashboard/modules/rights-simulator` | `modules/rights-simulator/page.tsx` | 5 | — | — | 0 | 0 | — | Stub/redirect |
 
@@ -176,4 +174,3 @@ Alcune pagine hanno **due versioni**: la vecchia in `/tools/` e la nuova refacto
 | GPAI Tool | ❌ 23 blu | ✅ | ✅ |
 | Art. 50 Kit | ❌ 20 blu | ❌ 19 verify | ✅ |
 | Post-Market | ⚠ 4 blu | ❌ 14 verify | ✅ |
-| modules/xai | ✅ | ✅ | ✅ |

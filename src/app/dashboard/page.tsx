@@ -168,7 +168,7 @@ export default function DashboardPage() {
   const [dossierDone, setDossierDone]       = useState(0);
   const [mounted, setMounted]               = useState(false);
 
-  const [hasSources, setHasSources]         = useState(true);
+  const [hasSystems, setHasSystems]         = useState(true);
   const [discoveryDismissed, setDiscoveryDismissed] = useState(false);
   const [deadlineDismissed, setDeadlineDismissed]   = useState(true);
   const [alertDeadline, setAlertDeadline]   = useState<RegulatoryDeadline | null>(null);
@@ -177,7 +177,6 @@ export default function DashboardPage() {
   const [art73Count, setArt73Count]         = useState(0);
   const [art73Dismissed, setArt73Dismissed] = useState(false);
   const [gpaiDismissed, setGpaiDismissed]   = useState(true);
-  const [newSystemCount, setNewSystemCount] = useState(0);
 
   const [systems, setSystems]               = useState<DiscoveredSystem[]>([]);
   const [inventorySystems, setInventorySystems] = useState<AISystem[]>([]);
@@ -237,14 +236,8 @@ export default function DashboardPage() {
     setGpaiDismissed(localStorage.getItem("aicomply_gpai_banner_dismissed") === "1");
 
     try {
-      const srcRaw = localStorage.getItem("aicomply_discovery_sources");
-      const sysRaw2 = localStorage.getItem("aicomply_discovered_systems");
-      const srcs = srcRaw ? JSON.parse(srcRaw) : [];
-      const sys2 = sysRaw2 ? JSON.parse(sysRaw2) : [];
-      setHasSources(srcs.length > 0);
-      const pending = sys2.filter((s: { status: string; addedToCompliance: boolean }) =>
-        !s.addedToCompliance && s.status !== "ignored");
-      setNewSystemCount(pending.length);
+      const inv = JSON.parse(localStorage.getItem("aicomply_ai_inventory") ?? "[]");
+      setHasSystems(Array.isArray(inv) && inv.length > 0);
     } catch { /* ignore */ }
 
     const DISMISS_KEY = "aicomply_deadline_banner_dismissed_v2";
@@ -293,7 +286,7 @@ export default function DashboardPage() {
   const pctColor      = dossierPct >= 80 ? T.green : dossierPct >= 40 ? T.amber : T.text;
   const scoreLabel    = dossierPct >= 80 ? t("score_good") : dossierPct >= 40 ? t("score_improving") : t("score_action");
   const levelLabel    = dossierPct >= 80 ? t("level_high") : dossierPct >= 40 ? t("level_med") : t("level_low");
-  const showDiscovery = newSystemCount > 0 || (!hasSources && !discoveryDismissed);
+  const showDiscovery = !hasSystems && !discoveryDismissed;
   const showDeadline  = !deadlineDismissed && alertDeadline !== null;
   const showArt73     = art73Count > 0 && !art73Dismissed;
   const mainSysName   = onboardingSystem || t("mainSysName");

@@ -2,7 +2,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import React, { useRef, useEffect, useCallback } from "react"
-import { Bot, ScanSearch, PenLine, FileDown, Send, Trash2 } from "lucide-react"
+import { Bot, PenLine, FileDown, Send, Trash2 } from "lucide-react"
 import { useT } from "@/i18n/LocaleProvider"
 
 type TFn = (key: string) => string
@@ -16,10 +16,6 @@ import { draftAiSystem } from "@/app/actions/draftAiSystem"
 import type { AiSystemDraft } from "@/app/actions/draftAiSystem"
 import { matchKnownSystem } from "@/lib/inventory/known-systems"
 import { parseInventoryCsv, buildSystemFromRow } from "@/lib/inventory/csv-import"
-import {
-  simulateScan, SOURCE_CATALOG,
-  type SourceType, type DiscoverySource, type DiscoveredSystem,
-} from "@/lib/simulation/discovery-engine"
 
 // ─── Palette + guida tier ─────────────────────────────────────────────────────
 type TierCfg = {
@@ -304,21 +300,7 @@ function EmptyState({ onAdd, hasFilter }: { onAdd: () => void; hasFilter: boolea
 }
 
 // ─── AddSystemModal ───────────────────────────────────────────────────────────
-// Discovery source catalog (subset for modal — full page at /dashboard/discovery)
-const MODAL_SOURCES: Array<{ type: SourceType; label: string; placeholder: string; hint: string }> = [
-  { type: "github_repo",   label: "GitHub Repository",   placeholder: "https://github.com/org/repo",         hint: "Scansiona librerie AI, model files, endpoint" },
-  { type: "huggingface",   label: "HuggingFace Model",   placeholder: "org/model-name",                      hint: "Rileva architettura, task, licenza" },
-  { type: "npm_package",   label: "Pacchetto npm",        placeholder: "package-name@version",                hint: "Trova dipendenze AI/ML nel pacchetto" },
-  { type: "docker_image",  label: "Docker Image",         placeholder: "registry/image:tag",                  hint: "Analizza layers per modelli e API" },
-  { type: "aws_sagemaker", label: "AWS SageMaker",        placeholder: "endpoint-name",                       hint: "Importa endpoint come sistema AI" },
-  { type: "azure_ml",      label: "Azure ML",             placeholder: "workspace/model-name",                hint: "Importa deployment Azure come sistema AI" },
-]
-
-const RISK_TIER_MAP: Record<string, SystemTier> = {
-  unacceptable: "prohibited", high: "high_risk", limited: "limited", minimal: "minimal",
-}
-
-type AddStep = "channel" | "describe" | "discovery" | "review"
+type AddStep = "channel" | "describe" | "review"
 
 function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "channel" }: {
   onClose: () => void; onSave: (newId?: string) => void; existingSystems: AISystem[]
@@ -331,12 +313,6 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
   const [draft, setDraft] = React.useState<AiSystemDraft | null>(null)
   const [knownMatch, setKnownMatch] = React.useState<ReturnType<typeof matchKnownSystem>>(null)
   const [error, setError] = React.useState<string | null>(null)
-
-  // Discovery state
-  const [discSourceType, setDiscSourceType] = React.useState<SourceType>("github_repo")
-  const [discInput, setDiscInput] = React.useState("")
-  const [discScanning, setDiscScanning] = React.useState(false)
-  const [discResults, setDiscResults] = React.useState<DiscoveredSystem[] | null>(null)
 
   // Form fields
   const [name, setName] = React.useState("")
@@ -362,39 +338,6 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
     setTier(d.tier ?? "unclassified"); setTierBasis(d.tierBasis ?? "")
     setObligationsNote(d.obligationsNote ?? "")
     setAiFields(new Set(["name","owner","description","status","euNexus","role","roleBasis","tier","tierBasis","obligationsNote"]))
-  }
-
-  function applyDiscovered(sys: DiscoveredSystem) {
-    setName(sys.name)
-    setDescription(sys.description)
-    setStatus("in_production")
-    setTier(RISK_TIER_MAP[sys.inferredRiskLevel] ?? "unclassified")
-    setTierBasis(sys.inferredAnnexCategory ? `${sys.inferredAnnexCategory} — rilevato automaticamente da Discovery` : "Rilevato automaticamente — verificare")
-    setObligationsNote(sys.evidence.slice(0, 3).join("; "))
-    setAiFields(new Set(["name","description","tier","tierBasis","obligationsNote"]))
-    setStep("review")
-  }
-
-  function handleDiscoveryScan() {
-    if (!discInput.trim()) return
-    setDiscScanning(true)
-    setDiscResults(null)
-    const source: DiscoverySource = {
-      id: `modal-${Date.now()}`,
-      type: discSourceType,
-      label: discInput.trim(),
-      config: { url: discInput.trim(), repo: discInput.trim(), model: discInput.trim(), package: discInput.trim(), endpoint: discInput.trim() },
-      status: "scanning",
-    }
-    setTimeout(() => {
-      try {
-        const results = simulateScan(source)
-        setDiscResults(results.length > 0 ? results : [])
-      } catch {
-        setDiscResults([])
-      }
-      setDiscScanning(false)
-    }, 1400)
   }
 
   async function handleGenerate() {
@@ -424,19 +367,17 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
       reviewTrigger: "on substantial modification or annually",
       completedObligations: [],
       createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
-      source: step === "review" && discResults ? "import" : draft ? "ai_draft" : "manual",
+      source: draft ? "ai_draft" : "manual",
     }
     addSystem(sys); onSave(sys.id)
   }
 
   const isDescribeReady = !loading && freeText.trim().length >= 15
-  const discSrc = MODAL_SOURCES.find(s => s.type === discSourceType)!
 
   // ── Title/subtitle per step
   const titles: Record<typeof step, { title: string; sub: string; maxW: number }> = {
     channel:   { title: t("add_channel_title"), sub: t("add_channel_sub"), maxW: 520 },
     describe:  { title: t("add_describe_title"), sub: t("add_describe_sub"), maxW: 520 },
-    discovery: { title: t("add_discovery_title"), sub: t("add_discovery_sub"), maxW: 560 },
     review:    { title: t("add_review_title"), sub: t("add_review_sub"), maxW: 700 },
   }
   const { title, sub, maxW } = titles[step]
@@ -454,13 +395,6 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
               badge: t("ch_recommended"),
               desc: t("ch_ai_desc"),
               action: () => setStep("describe"),
-            },
-            {
-              key: "discovery" as const,
-              label: t("ch_discovery_label"),
-              badge: t("ch_automatic"),
-              desc: t("ch_discovery_desc"),
-              action: () => setStep("discovery"),
             },
             {
               key: "manual" as const,
@@ -523,105 +457,6 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
           <p style={{ fontSize: 11, color: "#9ca3af", marginTop: 10, textAlign: "center" }}>
             {t("aiFieldsNote")}
           </p>
-        </>
-      )}
-
-      {/* ── STEP 1b: Discovery ── */}
-      {step === "discovery" && (
-        <>
-          {/* Source type selector */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6, marginBottom: 14 }}>
-            {MODAL_SOURCES.map(src => (
-              <button key={src.type} onClick={() => { setDiscSourceType(src.type); setDiscInput(""); setDiscResults(null) }} style={{
-                padding: "8px 10px", borderRadius: 8, cursor: "pointer", textAlign: "left",
-                border: discSourceType === src.type ? "1.5px solid #0D1016" : "1px solid rgba(0,0,0,0.10)",
-                background: discSourceType === src.type ? "#0D1016" : "white",
-              }}>
-                <span style={{ fontSize: 11, fontWeight: 600, color: discSourceType === src.type ? "white" : "#0D1016", display: "block" }}>
-                  {src.label}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* Input + scan */}
-          <p style={{ fontSize: 11, color: "rgba(0,0,0,0.40)", margin: "0 0 6px" }}>{discSrc.hint}</p>
-          <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
-            <input
-              value={discInput}
-              onChange={e => { setDiscInput(e.target.value); setDiscResults(null) }}
-              placeholder={discSrc.placeholder}
-              style={{ ...INPUT_STYLE, flex: 1 }}
-            />
-            <button
-              onClick={handleDiscoveryScan}
-              disabled={!discInput.trim() || discScanning}
-              style={{
-                padding: "8px 16px", borderRadius: 8, border: "none", whiteSpace: "nowrap",
-                background: discInput.trim() && !discScanning ? "#0D1016" : "#e5e7eb",
-                color: discInput.trim() && !discScanning ? "white" : "#9ca3af",
-                fontSize: 12, fontWeight: 600, cursor: discInput.trim() && !discScanning ? "pointer" : "default",
-              }}
-            >
-              {discScanning ? t("scanning") : t("scan")}
-            </button>
-          </div>
-
-          {/* Results */}
-          {discScanning && (
-            <div style={{ padding: "20px", textAlign: "center", color: "rgba(0,0,0,0.40)", fontSize: 13 }}>
-              {t("scanningSource")}
-            </div>
-          )}
-          {discResults !== null && !discScanning && (
-            discResults.length === 0 ? (
-              <div style={{ padding: "16px", borderRadius: 8, background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.08)", textAlign: "center" }}>
-                <p style={{ fontSize: 13, color: "rgba(0,0,0,0.40)", margin: 0 }}>{t("noSystemDetected")}</p>
-                <p style={{ fontSize: 11, color: "rgba(0,0,0,0.30)", margin: "4px 0 0" }}>{t("tryOtherSource")}</p>
-              </div>
-            ) : (
-              <div>
-                <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.40)", textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: 8 }}>
-                  {discResults.length} {discResults.length > 1 ? t("systemsDetected") : t("systemDetected")}
-                </p>
-                {discResults.map(sys => (
-                  <button key={sys.id} onClick={() => applyDiscovered(sys)} style={{
-                    display: "block", width: "100%", textAlign: "left", marginBottom: 6,
-                    padding: "12px 14px", borderRadius: 8, cursor: "pointer",
-                    border: "1px solid rgba(0,0,0,0.10)", background: "white",
-                    transition: "border-color 0.15s",
-                  }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
-                      <span style={{ fontSize: 13, fontWeight: 600, color: "#0D1016" }}>{sys.name}</span>
-                      <span style={{
-                        fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 4,
-                        background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.40)",
-                      }}>
-                        {sys.confidence.toUpperCase()} {t("confidenceWord")}
-                      </span>
-                    </div>
-                    <p style={{ fontSize: 11, color: "rgba(0,0,0,0.45)", margin: "0 0 6px", lineHeight: 1.4 }}>{sys.description}</p>
-                    {sys.evidence.slice(0, 2).map((e, i) => (
-                      <span key={i} style={{
-                        display: "inline-block", fontSize: 10, padding: "2px 7px", borderRadius: 4, marginRight: 4,
-                        background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.45)",
-                      }}>{e}</span>
-                    ))}
-                    <span style={{ fontSize: 11, color: "rgba(0,0,0,0.30)", float: "right" }}>{t("importArrow")}</span>
-                  </button>
-                ))}
-              </div>
-            )
-          )}
-
-          <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-            <button onClick={() => setStep("channel")} style={{ padding: "8px 14px", borderRadius: 8, fontSize: 12, border: "1px solid rgba(0,0,0,0.10)", background: "white", color: "#374151", cursor: "pointer" }}>
-              {t("backChannels")}
-            </button>
-            <button onClick={() => { setStep("review"); setAiFields(new Set()) }} style={{ padding: "8px 14px", borderRadius: 8, fontSize: 12, border: "1px solid rgba(0,0,0,0.10)", background: "white", color: "#374151", cursor: "pointer", marginLeft: "auto" }}>
-              {t("manualEntry")}
-            </button>
-          </div>
         </>
       )}
 
@@ -1294,11 +1129,10 @@ export default function InventoryPage() {
           </button>
         </div>
 
-        {/* 3 channel cards */}
+        {/* Canali di inserimento */}
         <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
           {([
             { icon: Bot, label: t("ch_ai_label"), badge: t("ch_recommended"), desc: t("ch_ai_desc2"), step: "describe" as AddStep, primary: true },
-            { icon: ScanSearch, label: t("ch_discovery_label"), badge: t("ch_automatic"), desc: t("ch_discovery_desc2"), step: "discovery" as AddStep, primary: false },
             { icon: PenLine, label: t("ch_manual_label"), badge: t("ch_form"), desc: t("ch_manual_desc2"), step: "review" as AddStep, primary: false },
           ] as const).map((ch) => {
             const Icon = ch.icon

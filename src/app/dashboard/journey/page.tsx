@@ -45,11 +45,11 @@ const PHASES: Phase[] = [
     subtitle: "Identifica i tuoi sistemi AI e i tuoi obblighi normativi prima di tutto il resto.",
     tools: [
       {
-        label: "Discovery",
-        href: "/dashboard/discovery",
-        art: "",
-        desc: "Mappa i sistemi AI presenti nella tua infrastruttura (GitHub, AWS, Azure).",
-        storageKey: "aicomply_discovery_sources",
+        label: "Inventario",
+        href: "/dashboard/tools/inventory",
+        art: "Art. 3",
+        desc: "Elenca i sistemi di IA che sviluppi o usi e scopri ruolo, rischio e obblighi di ciascuno.",
+        storageKey: "aicomply_ai_inventory",
         roles: ["provider", "deployer"],
       },
       {
@@ -205,15 +205,6 @@ const PHASES: Phase[] = [
     title: "Certifica & Monitora",
     subtitle: "Ottieni la dichiarazione di conformità UE e attiva il monitoraggio continuo.",
     tools: [
-      {
-        label: "XAI Lab",
-        href: "/dashboard/modules/xai",
-        art: "Art. 13",
-        desc: "Analisi di spiegabilità (SHAP, LIME) e bias detection tecnico.",
-        storageKey: "aicomply_xai_result",
-        optional: true,
-        roles: ["provider"],
-      },
       {
         label: "Conformity",
         href: "/dashboard/tools/conformity",
