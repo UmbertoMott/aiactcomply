@@ -359,8 +359,14 @@ export default function DPIAPage() {
   const [savedHash, setSavedHash] = useState<string | null>(null);
   // Template viewer panel
   const [showTemplateViewer, setShowTemplateViewer] = useState(false);
-  // Modalità guidata vs form a 6 step
-  const [guidedMode, setGuidedMode] = useState(false);
+  // Modalità guidata (guida · documento · chat) come ingresso; la scelta viene ricordata
+  const [guidedMode, setGuidedModeState] = useState(() => {
+    try { return localStorage.getItem("aicomply_dpia_view") !== "form"; } catch { return true; }
+  });
+  const setGuidedMode = useCallback((v: boolean) => {
+    setGuidedModeState(v);
+    try { localStorage.setItem("aicomply_dpia_view", v ? "guided" : "form"); } catch { /* ignore */ }
+  }, []);
   // Template EDPB 2026 è ora il form DPIA principale (swap). Il form classico
   // resta accessibile e la scelta viene ricordata per-browser.
   const [edpbMode, setEdpbMode] = useState(true);
@@ -1701,25 +1707,6 @@ export default function DPIAPage() {
   const ghostDataAudit  = readFromStorage<DataAuditResult>("dataAudit");
 
   // ── Guided mode: layout dedicato (3 colonne, full-height) ─────────────────
-  if (edpbMode) {
-    return (
-      <div style={{ minHeight: "100vh", background: T.bg, padding: "24px 32px" }}>
-        <SystemSelector checkProhibited={true} />
-        <AssessmentStepper currentTool="dpia" />
-        <AssessmentSharedHeader />
-        <div style={{ marginBottom: 14 }}>
-          <button
-            onClick={() => switchMode(false)}
-            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.10)", background: "#fff", color: T.text, cursor: "pointer" }}
-          >
-            <ChevronLeft className="h-3.5 w-3.5" />{tr("edpbBackToClassic")}
-          </button>
-        </div>
-        <DpiaEdpbForm />
-      </div>
-    );
-  }
-
   if (guidedMode) {
     return (
       <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: T.bg }}>
@@ -1729,36 +1716,6 @@ export default function DPIAPage() {
           <AssessmentStepper currentTool="dpia" />
           <AssessmentSharedHeader />
         </div>
-        {/* Toggle tra le due modalità */}
-        <div style={{
-          display: "flex", alignItems: "center", gap: 6,
-          padding: "10px 20px", borderBottom: `1px solid ${T.border}`,
-          background: T.card, flexShrink: 0,
-        }}>
-          <button
-            onClick={() => setGuidedMode(false)}
-            style={{
-              display: "flex", flexDirection: "column", gap: 2,
-              padding: "9px 16px", borderRadius: 8, cursor: "pointer",
-              border: `1px solid rgba(0,0,0,0.08)`, background: "none",
-              textAlign: "left", transition: "border-color 0.15s",
-            }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(35,64,58,0.22)"; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(0,0,0,0.08)"; }}
-          >
-            <span style={{ fontSize: 11, fontWeight: 600, color: T.muted }}>{tr("modeFormTitle")}</span>
-            <span style={{ fontSize: 9, color: T.faint }}>{tr("modeFormDescShort")}</span>
-          </button>
-          <div style={{
-            display: "flex", flexDirection: "column", gap: 2,
-            padding: "9px 16px", borderRadius: 8,
-            border: `1px solid rgba(35,64,58,0.22)`,
-            background: "rgba(35,64,58,0.05)",
-          }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: T.text }}>{tr("modeGuidedTitle")}</span>
-            <span style={{ fontSize: 9, color: T.muted }}>{tr("modeGuidedDescShort")}</span>
-          </div>
-        </div>
         {/* Layout 3 colonne */}
         <div style={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
           <DpiaGuidedMode ghostClassifier={ghostClassifier} ghostDataAudit={ghostDataAudit} onExitGuidedMode={() => setGuidedMode(false)} />
@@ -1766,6 +1723,32 @@ export default function DPIAPage() {
       </div>
     );
   }
+
+  if (edpbMode) {
+    return (
+      <div style={{ minHeight: "100vh", background: T.bg, padding: "24px 32px" }}>
+        <SystemSelector checkProhibited={true} />
+        <AssessmentStepper currentTool="dpia" />
+        <AssessmentSharedHeader />
+        <div style={{ marginBottom: 14, display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <button
+            onClick={() => switchMode(false)}
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.10)", background: "#fff", color: T.text, cursor: "pointer" }}
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />{tr("edpbBackToClassic")}
+          </button>
+          <button
+            onClick={() => setGuidedMode(true)}
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "none", background: T.text, color: "#fff", cursor: "pointer" }}
+          >
+            {tr("modeGuidedTitle")} — {tr("modeGuidedDescShort")}
+          </button>
+        </div>
+        <DpiaEdpbForm />
+      </div>
+    );
+  }
+
 
   return (
     <div style={{ minHeight: "100vh", background: T.bg, padding: "24px 32px" }}>

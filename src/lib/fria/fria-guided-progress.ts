@@ -18,6 +18,8 @@ export interface GuidedFriaSectionProgress {
   legalRef: string;
   weight: number;
   percent: number;
+  /** Sezione senza voci obbligatorie: non entra nella percentuale complessiva */
+  optional: boolean;
   status: "not_started" | "in_progress" | "complete";
   detail: string;
   anchor: string;
@@ -44,7 +46,10 @@ export function computeGuidedFriaProgress(doc: FriaGuidedDoc, locale = "it", t: 
     }));
 
     const doneMandatory = required.filter(sp => doc.answers[sp.id]?.status === "done").length;
-    const percent = required.length === 0 ? 100 : Math.round((doneMandatory / required.length) * 100);
+    // Sezione senza voci obbligatorie: la percentuale riflette le risposte date, non parte da 100
+    const doneAny = subPoints.filter(sp => doc.answers[sp.id]?.status === "done").length;
+    const percent = required.length > 0 ? Math.round((doneMandatory / required.length) * 100)
+      : subPoints.length > 0 ? Math.round((doneAny / subPoints.length) * 100) : 100;
 
     const doneCount  = subPoints.filter(sp => doc.answers[sp.id]?.status === "done").length;
     const draftCount = subPoints.filter(sp => doc.answers[sp.id]?.status === "draft").length;
@@ -65,6 +70,7 @@ export function computeGuidedFriaProgress(doc: FriaGuidedDoc, locale = "it", t: 
       legalRef: sec.legalRef,
       weight: sec.weight,
       percent,
+      optional: required.length === 0,
       status,
       detail,
       anchor: sec.anchor,
@@ -72,8 +78,11 @@ export function computeGuidedFriaProgress(doc: FriaGuidedDoc, locale = "it", t: 
     };
   });
 
-  const overallPercent = Math.round(
-    sections.reduce((acc, s) => acc + (s.percent * s.weight) / 100, 0)
+  // Solo le sezioni con voci obbligatorie, con i pesi riportati a 100
+  const counted = sections.filter(sec => !sec.optional);
+  const totalWeight = counted.reduce((acc, sec) => acc + sec.weight, 0);
+  const overallPercent = totalWeight === 0 ? 0 : Math.round(
+    counted.reduce((acc, s) => acc + (s.percent * s.weight) / totalWeight, 0)
   );
 
   return { overallPercent, sections };

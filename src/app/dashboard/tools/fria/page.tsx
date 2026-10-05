@@ -291,7 +291,14 @@ export default function FRIAPage() {
   const [loadingAiSummary, setLoadingAiSummary] = useState(false);
   const [aiSummaryIsFromAI, setAiSummaryIsFromAI] = useState(false);
   const [stalenessWarning, setStalenessWarning] = useState(false);
-  const [guidedMode, setGuidedMode] = useState(false);
+  // Modalità guidata (guida · documento · chat) come ingresso; la scelta viene ricordata
+  const [guidedMode, setGuidedModeState] = useState(() => {
+    try { return localStorage.getItem("aicomply_fria_view") !== "form"; } catch { return true; }
+  });
+  const setGuidedMode = (v: boolean) => {
+    setGuidedModeState(v);
+    try { localStorage.setItem("aicomply_fria_view", v ? "guided" : "form"); } catch { /* ignore */ }
+  };
 
   // Leggi dati correlati per il banner contestuale
   const riskData   = useMemo(() => readFromStorage<RiskManagerResult>("riskManager"), []);
@@ -1534,8 +1541,16 @@ export default function FRIAPage() {
   // ─── Guided mode early return ─────────────────────────────────────────────
   if (guidedMode) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
-        <FriaGuidedMode onExitGuidedMode={() => setGuidedMode(false)} />
+      <div style={{ display: "flex", flexDirection: "column", height: "100vh", minHeight: 0 }}>
+        {/* Stessa intestazione della DPIA guidata sopra le 3 colonne */}
+        <div style={{ padding: "12px 20px 0", flexShrink: 0 }}>
+          <SystemSelector checkProhibited={true} />
+          <AssessmentStepper currentTool="fria" />
+          <AssessmentSharedHeader />
+        </div>
+        <div style={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
+          <FriaGuidedMode onExitGuidedMode={() => setGuidedMode(false)} />
+        </div>
       </div>
     );
   }
@@ -1615,7 +1630,7 @@ export default function FRIAPage() {
         const steps = [
           {
             key: "classifier",
-            label: "Classifier",
+            label: "Classificazione (inventario)",
             art: "Art. 6",
             done: hasClassifier,
             href: "/dashboard/tools/inventory",

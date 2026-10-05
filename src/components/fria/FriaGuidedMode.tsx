@@ -107,10 +107,13 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
 
   const handleSectionClick = useCallback((sectionKey: string, anchor: string) => {
     setActiveSection(sectionKey);
+    // Scorre solo il pannello del documento, non la pagina
     setTimeout(() => {
-      if (viewerRef.current) {
-        const el = viewerRef.current.querySelector(`#${anchor}`);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      const box = viewerRef.current;
+      const el = box?.querySelector(`#${anchor}`);
+      if (box && el) {
+        const top = el.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - 8;
+        box.scrollTo({ top, behavior: "smooth" });
       }
     }, 50);
   }, []);
