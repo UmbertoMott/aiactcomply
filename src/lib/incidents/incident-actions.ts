@@ -20,8 +20,27 @@ export interface IncidentEntry {
   description?: string;
 }
 
+// Incidenti dimostrativi inseriti dalle versioni precedenti del Post-market:
+// non sono dati dell'utente e vanno rimossi prima di qualsiasi lettura.
+const LEGACY_SEED_DESCRIPTIONS = new Set([
+  "Tasso di falsi positivi all'8.3% su soggetti con pigmentazione scura. Possibile discriminazione sistematica.",
+  "Utente non autorizzato ha estratto dati stipendiali via prompt injection. Violazione Art. 73.",
+]);
+
+export function purgeLegacySeedIncidents(): void {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = localStorage.getItem(INCIDENTS_STORAGE_KEY);
+    if (!raw) return;
+    const list = JSON.parse(raw) as IncidentEntry[];
+    const clean = list.filter((i) => !LEGACY_SEED_DESCRIPTIONS.has(i.description ?? ""));
+    if (clean.length !== list.length) localStorage.setItem(INCIDENTS_STORAGE_KEY, JSON.stringify(clean));
+  } catch { /* dati non leggibili: lasciati invariati */ }
+}
+
 function loadIncidentEntries(): IncidentEntry[] {
   if (typeof window === "undefined") return [];
+  purgeLegacySeedIncidents();
   try {
     const raw = localStorage.getItem(INCIDENTS_STORAGE_KEY);
     return raw ? (JSON.parse(raw) as IncidentEntry[]) : [];

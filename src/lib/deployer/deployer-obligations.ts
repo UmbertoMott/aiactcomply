@@ -78,7 +78,7 @@ export const DEPLOYER_OBLIGATIONS: readonly DeployerObligationDefinition[] = [
     supportReferences: ["Art. 73", "Art. 74"],
     alwaysApplicable: true,
     evidenceType: "linked_log",
-    linkedTool: "/dashboard/tools/incident",
+    linkedTool: "/dashboard/post-market?tab=incidents",
   },
   {
     id: "D-05",

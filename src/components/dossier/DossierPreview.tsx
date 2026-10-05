@@ -4,7 +4,7 @@
 // Uses only inline styles for print reliability (no Tailwind dependency in critical paths)
 
 import type { DossierData } from "@/lib/dossier/storage-schema";
-import { PROHIBITED_CHECKS } from "@/lib/simulation/prohibited-practices-engine";
+import { ART5_PRACTICES } from "@/lib/classifier/classifier-rules";
 
 // ─── Design tokens (inline, print-safe) ──────────────────────────────────────
 const T = {
@@ -308,16 +308,15 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
               </div>
               <Table
                 heads={["Pratica", "Articolo", "Risposta", "Esito"]}
-                rows={PROHIBITED_CHECKS.map((c) => {
-                  const ans = data.prohibited!.answers[c.id];
+                rows={ART5_PRACTICES.map((c) => {
+                  const ans = data.prohibited!.answers[c.letter];
                   const esito =
                     ans === "no"     ? <Badge color={T.green} bg={T.greenBg}>Conforme</Badge> :
-                    ans === "yes" && c.severity === "absolute" ? <Badge color={T.red} bg={T.redBg}>VIOLAZIONE</Badge> :
-                    ans === "yes"    ? <Badge color={T.orange} bg={T.orangeBg}>Rischio</Badge> :
+                    ans === "yes"    ? <Badge color={T.red} bg={T.redBg}>VIOLAZIONE</Badge> :
                     <Badge color={T.yellow} bg={T.yellowBg}>Non verificato</Badge>;
                   return [
-                    c.title,
-                    c.article,
+                    c.label,
+                    `Art. 5(1)(${c.letter})`,
                     ans === "yes" ? "Sì" : ans === "no" ? "No" : ans === "unsure" ? "Non sicuro" : "—",
                     esito,
                   ];
@@ -327,7 +326,7 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
           );
         })() : (
           <div style={{ padding: 24, textAlign: "center", color: T.light, fontSize: 12, fontStyle: "italic" }}>
-            Sezione non completata. Utilizzare il tool Art. 5 Checker per completare la verifica.
+            Sezione non completata. Completare la verifica Art. 5 nel Triage.
           </div>
         )}
       </Section>

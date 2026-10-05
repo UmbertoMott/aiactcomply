@@ -30,15 +30,16 @@ const KB: KBEntry[] = [
     id: "gen_start",
     topic: "Per iniziare",
     keywords: ["iniziare", "start", "cominciare", "primo passo", "dove", "come iniziare", "sequenza", "ordine", "percorso"],
-    answer: `**Da dove iniziare con AIComply?**
+    answer: `**Da dove iniziare?**
 
-Il percorso consigliato è sequenziale:
+Il percorso è in 4 passi, visibile in Home:
 
-1. 🔴 **Art. 5 Checker** — Prima di tutto, verifica se il tuo sistema AI rientra nelle pratiche *vietate*. Se c'è una violazione, inutile continuare.
-2. 🎯 **AI Classifier** — Classifica il livello di rischio (inaccettabile / alto / limitato / minimale). Questo determina tutti gli obblighi successivi.
-3. ⚙️ Segui la **Roadmap** (menu → Roadmap) che ti guida passo passo in base al tuo ruolo (Provider, Deployer, Importer, Distributor) e al livello di rischio emerso.
+1. 📋 **Inventario** — elenca i sistemi di IA che sviluppi, fai sviluppare o usi.
+2. 👤 **Ruolo** — per ciascun sistema rispondi a domande sui fatti: risulti fornitore, deployer, importatore o distributore (Artt. 3, 25).
+3. ⚖️ **Rischio** — domande nell'ordine del Regolamento: pratiche vietate (Art. 5), alto rischio (Art. 6, Allegati I e III), trasparenza (Art. 50), modelli per finalità generali (Capo V).
+4. ✅ **Obblighi** — l'elenco degli obblighi deriva da ruolo e rischio, con articolo, data di applicazione e tool da usare.
 
-Se il sistema è ad **alto rischio** (Allegato III), dovrai completare tutti i tool principali: Risk Manager, Data Audit, DocuGen, LogVault, Transparency, Oversight, Resilience, QMS, Conformity.`,
+Dopo la classificazione il menu mostra solo i tool che ti servono. Per una verifica veloce di un singolo caso c'è il **Triage**.`,
   },
   {
     id: "gen_aiact",
@@ -100,29 +101,24 @@ Risultati di tutti i tool: Classifier, Risk Manager, Data Audit, DocuGen, LogVau
   // ── ART. 5 CHECKER ──────────────────────────────────────────────────────────
   {
     id: "tool_prohibited",
-    topic: "Art. 5 Checker",
+    topic: "Pratiche vietate (Art. 5)",
     keywords: ["art 5", "vietato", "proibito", "pratiche vietate", "prohibited", "checker", "manipolazione", "social scoring", "biometria", "sublim"],
-    answer: `**Art. 5 Checker — Pratiche vietate**
+    answer: `**Pratiche vietate — Art. 5**
 
-📍 Menu: *Valutazioni → Art. 5 Checker*
+📍 Menu: *Triage* (passo "Sistema & Art. 5") oppure classificazione guidata del sistema nell'inventario.
 
-**A cosa serve:** Verifica se il tuo sistema AI rientra nelle 8 categorie di pratiche vietate dall'Art. 5 dell'AI Act (dal febbraio 2025).
+**Le pratiche vietate (Art. 5(1)):**
+- (a) tecniche subliminali, manipolative o ingannevoli che causano danno significativo
+- (b) sfruttamento delle vulnerabilità (età, disabilità, situazione sociale o economica)
+- (ba) e (bb) immagini intime non consensuali e materiale pedopornografico generati dall'IA — dal 2 dicembre 2026 (Reg. (UE) 2026/1744)
+- (c) punteggio sociale, da parte di soggetti pubblici o privati
+- (d) valutazione del rischio di reato basata solo su profilazione o tratti della personalità
+- (e) banche dati di riconoscimento facciale da scraping non mirato
+- (f) riconoscimento delle emozioni sul lavoro e a scuola, salvo motivi medici o di sicurezza
+- (g) categorizzazione biometrica per dedurre caratteristiche sensibili
+- (h) identificazione biometrica remota in tempo reale in spazi pubblici a fini di contrasto, salvo le eccezioni tassative
 
-**Pratiche vietate principali:**
-1. Manipolazione subliminale (al di là della coscienza)
-2. Sfruttamento vulnerabilità (età, disabilità, situazione socioeconomica)
-3. Social scoring da autorità pubbliche
-4. Riconoscimento biometrico real-time in spazi pubblici (con eccezioni)
-5. Inferenza emozioni in luoghi di lavoro/istruzione
-6. Classificazione biometrica per caratteristiche sensibili
-7. Predictive policing su base individuale
-8. Web scraping biometrico per database di riconoscimento facciale
-
-**Cosa ti serve:**
-- Descrizione del sistema AI
-- Rispondere sì/no/non so a ciascuna pratica
-
-**Risultato:** Verdict — *clear*, *conditional*, *potential violation*, *violation*.`,
+**Risultato:** l'esito è salvato nel dossier. Sanzione fino a 35 milioni € o al 7% del fatturato mondiale annuo (Art. 99(3)).`,
   },
 
   // ── AI CLASSIFIER ───────────────────────────────────────────────────────────
@@ -501,15 +497,16 @@ Tutti i soggetti che usano o distribuiscono AI in Italia, inclusi deployer e pro
 Provider che mettono a disposizione modelli GPAI nell'UE, incluse API commerciali e open source con certe condizioni.
 
 **Obblighi base (Art. 53):**
-- Documentazione tecnica del modello
-- Rispetto del copyright (training data)
-- Politica di utilizzo accettabile
+- Documentazione tecnica del modello (Allegato XI)
+- Informazioni per i fornitori a valle (Allegato XII)
+- Politica sul diritto d'autore
+- Sintesi dei contenuti di addestramento
 
 **Rischio sistemico (Art. 55) — se >10²⁵ FLOPS:**
-- Valutazione avversariale (red teaming)
-- Notifica incidenti gravi alla Commissione UE
-- Misure di cybersecurity
-- Reporting energetico
+- Valutazione del modello, incluso il test contraddittorio
+- Valutazione e attenuazione dei rischi sistemici
+- Segnalazione degli incidenti gravi all'ufficio per l'IA
+- Cibersicurezza adeguata
 
 **Cosa ti serve:**
 - Numero di modelli GPAI
@@ -553,35 +550,15 @@ I sistemi ad alto rischio devono essere registrati nel database EU prima dell'im
   // ── ROADMAP ─────────────────────────────────────────────────────────────────
   {
     id: "tool_roadmap",
-    topic: "Roadmap",
+    topic: "Percorso",
     keywords: ["roadmap", "percorso", "journey", "guida", "piano", "cosa fare", "step", "passi", "milestone"],
-    answer: `**Roadmap — Il tuo percorso di conformità**
+    answer: `**Il tuo percorso**
 
-📍 Menu: *Core → Roadmap*
+📍 *Home → Il tuo percorso in 4 passi*
 
-**A cosa serve:** Ti mostra una roadmap personalizzata in base al tuo ruolo e al livello di rischio del tuo sistema AI.
+Inventario → Ruolo → Rischio → Obblighi. Ogni passo mostra a che punto sei e porta al sistema da completare.
 
-**Struttura tipica per sistemi alto rischio (Provider):**
-1. Art. 5 Checker
-2. AI Classifier
-3. Risk Manager
-4. Data Audit
-5. DocuGen
-6. LogVault
-7. Transparency
-8. Oversight
-9. Resilience
-10. QMS Builder
-11. Conformity Assessment
-12. FRIA (se deployer pubblico)
-13. DPIA (se dati personali)
-
-**Per sistemi a rischio limitato:**
-Principalmente Art. 5 Checker → AI Classifier → Transparency → DPIA (se dati personali)
-
-**Discovery:** Prima di tutto, usa il modulo *Discovery* per mappare tutti i sistemi AI della tua organizzazione.
-
-💡 **Consiglio:** Completa sempre Art. 5 Checker e AI Classifier per primi — determinano tutto il resto.`,
+Gli obblighi di ciascun sistema sono nella sua scheda dell'inventario; il menu laterale mostra solo i tool che servono, e in cima a ogni tool la guida dice cosa fare, chi deve farlo e quando hai finito.`,
   },
 
   // ── ART. 50 KIT ──────────────────────────────────────────────────────────────

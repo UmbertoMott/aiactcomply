@@ -104,7 +104,7 @@ export const CONFORMITY_REQUIREMENTS: ConformityRequirement[] = [
     description: "Il sistema non implementa nessuna delle pratiche vietate dall'Art. 5.",
     verificationQuestion: "Hai verificato che il sistema non rientra in nessuna pratica vietata (manipolazione, social scoring, biometrica vietata, ecc.)?",
     linkedToolKey: "prohibited",
-    linkedToolHref: "/dashboard/tools/prohibited",
+    linkedToolHref: "/dashboard/triage",
     evidenceExtractor: (e) => ({
       found: !!e.prohibited,
       autoVerified: !!e.prohibited,

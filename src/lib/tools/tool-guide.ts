@@ -24,7 +24,6 @@ export const TOOL_GUIDES: ToolGuideEntry[] = [
   { id: "conformity", href: "/dashboard/tools/conformity", optional: false },
   { id: "deployer", href: "/dashboard/tools/deployer-dashboard", optional: false },
   { id: "gpai", href: "/dashboard/tools/gpai", optional: false },
-  { id: "incident", href: "/dashboard/tools/incident", optional: false },
   { id: "legal", href: "/dashboard/tools/legal-assistant", optional: true },
   { id: "deadlines", href: "/dashboard/compliance-ops/deadlines", optional: true },
   { id: "logvault", href: "/dashboard/tools/logvault", optional: false },
@@ -40,7 +39,6 @@ export const TOOL_GUIDES: ToolGuideEntry[] = [
   { id: "agid", href: "/dashboard/tools/agid-acn", optional: true },
   { id: "nist", href: "/dashboard/tools/nist-ai-rmf", optional: true },
   { id: "art50", href: "/dashboard/tools/art50-kit", optional: false },
-  { id: "prohibited", href: "/dashboard/tools/prohibited", optional: false },
   { id: "dossier", href: "/dashboard/dossier", optional: true },
   { id: "classifier", href: "/dashboard/tools/classifier", optional: true },
 ];

@@ -467,7 +467,7 @@ const T = {
   art50: { href: "/dashboard/tools/art50-kit", label: "Art. 50 Kit" },
   gpai: { href: "/dashboard/tools/gpai", label: "GPAI" },
   transition: { href: "/dashboard/compliance-ops/provider-transition", label: "Cambio di ruolo" },
-  prohibited: { href: "/dashboard/tools/prohibited", label: "Pratiche vietate" },
+  prohibited: { href: "/dashboard/triage", label: "Triage — Art. 5" },
 } as const;
 
 export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleResult, risk: RiskResult, riskAnswers: RiskAnswers): ObligationsResult {
@@ -706,7 +706,7 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
 
 /** Tool di supporto che servono quando serve il tool principale indicato */
 const TOOL_COMPANIONS: Record<string, string[]> = {
-  [T.postMarket.href]: ["/dashboard/tools/incident", "/dashboard/tools/drift-monitor"],
+  [T.postMarket.href]: ["/dashboard/tools/drift-monitor"],
 };
 
 export interface ToolNeed {

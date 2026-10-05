@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
-import type { ClassifierResult, OrgProfile } from "@/lib/dossier/storage-schema";
+import type { ClassifierResult, OrgProfile, ProhibitedCheckResult } from "@/lib/dossier/storage-schema";
 import {
   ChevronRight, ChevronLeft, AlertTriangle, Crosshair,
   CheckCircle2, ArrowRight, FileText,
@@ -374,11 +374,11 @@ function ResultView({
       {/* CTA */}
       <div className="flex gap-2 pt-1">
         <Link
-          href="/dashboard/journey"
+          href="/dashboard/tools/inventory"
           className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-medium transition-colors hover:opacity-90"
           style={{ background: T.text }}
         >
-          Vai alla Roadmap <ArrowRight className="w-4 h-4" />
+          Classifica il sistema nell&apos;inventario <ArrowRight className="w-4 h-4" />
         </Link>
         <Link
           href="/dashboard/tools/classifier"
@@ -508,6 +508,15 @@ export default function TriagePage() {
         isGPAI: r.gpai,
       };
       writeToStorage<ClassifierResult>("classifier", classifierData);
+      // Esito Art. 5 (sostituisce il vecchio tool "Pratiche vietate")
+      const flagged = art5Flags.filter(f => f !== "none");
+      const violated = flagged.filter(l => !art5Exceptions[l]);
+      writeToStorage<ProhibitedCheckResult>("prohibited", {
+        answers: Object.fromEntries(ART5_PRACTICES.map(p => [p.letter, violated.includes(p.letter) ? "yes" : "no"])),
+        verdict: violated.length > 0 ? "violation" : flagged.length > 0 ? "conditional" : "clear",
+        violatedChecks: violated.map(l => `Art. 5(1)(${l})`),
+        completedAt: new Date().toISOString(),
+      });
       if (r.gpai) {
         const orgProfile = readFromStorage<OrgProfile>("orgProfile") ?? { paItaly: false, gpaiDetected: false, nistEnabled: false };
         writeToStorage<OrgProfile>("orgProfile", { ...orgProfile, gpaiDetected: true });

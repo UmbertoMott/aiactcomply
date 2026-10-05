@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, CSSProperties } from "react";
+import { purgeLegacySeedIncidents } from "@/lib/incidents/incident-actions";
+import JourneySteps from "@/components/dashboard/JourneySteps";
 import {
   ArrowRight, X,
   FileCheck2, CalendarClock, BadgeCheck,
@@ -249,6 +251,7 @@ export default function DashboardPage() {
     }
 
     try {
+      purgeLegacySeedIncidents();
       const raw = localStorage.getItem("post_market_incidents");
       if (raw) {
         const incidents = JSON.parse(raw) as Array<{ date: string; notified: boolean }>;
@@ -396,7 +399,7 @@ export default function DashboardPage() {
               href={showArt73 ? "/dashboard/post-market"
                 : showDeadline ? "/dashboard/notifications"
                 : showDiscovery ? "/dashboard/tools/inventory"
-                : nextActions[0]?.href ?? "/dashboard/journey"}
+                : nextActions[0]?.href ?? "/dashboard/tools/inventory"}
               style={{
                 padding: "8px 16px", background: T.text, color: "#fff", borderRadius: 6,
                 fontSize: 11.5, fontWeight: 500, whiteSpace: "nowrap",
@@ -411,6 +414,9 @@ export default function DashboardPage() {
             </Link>
           </div>
         )}
+
+        {/* ── PERCORSO IN 4 PASSI (ex Journey) ────────────────────── */}
+        <JourneySteps />
 
         {/* ── STATS ───────────────────────────────────────────────── */}
         <div className="stats-grid fu-1" style={{ ...card, display: "grid", gridTemplateColumns: "repeat(4, 1fr)", marginBottom: 14, overflow: "hidden" }}>

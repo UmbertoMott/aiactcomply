@@ -44,7 +44,7 @@ export const REGULATORY_DEADLINES: RegulatoryDeadline[] = [
     description: "Le pratiche AI vietate sono operative. Verifica che il tuo sistema non ricada in nessuna delle categorie proibite.",
     article: "Art. 5",
     affectsRiskLevels: ["all"],
-    mandatoryTools: ["/dashboard/tools/prohibited"],
+    mandatoryTools: ["/dashboard/triage"],
     externalLink: "https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32024R1689",
   },
   {

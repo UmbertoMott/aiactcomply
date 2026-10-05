@@ -25,7 +25,7 @@ import {
 } from "@/lib/incidents/incident-classification";
 import type { ClassificationInput, SeverityClassification, NotificationDeadlineType } from "@/lib/incidents/incident-classification";
 import { INCIDENT_CATEGORIES, computeDeadline } from "@/lib/incidents/incident-rules";
-import { detectDraftIncidentsFromLogVault, getLinkedIncidentsForDeployerObligation } from "@/lib/incidents/incident-actions";
+import { detectDraftIncidentsFromLogVault, getLinkedIncidentsForDeployerObligation, purgeLegacySeedIncidents } from "@/lib/incidents/incident-actions";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { motion, AnimatePresence } from "framer-motion";
 import { readFromStorage } from "@/lib/dossier/storage-schema";
@@ -196,56 +196,25 @@ Data: ${new Date().toLocaleDateString("it-IT")}`;
 const INCIDENTS_KEY = "post_market_incidents";
 const PLAN_KEY = "post_market_plan";
 
-const SEED_INCIDENTS: Incident[] = [
-  {
-    id: "INC-001",
-    title: "Falso positivo screening biometrico",
-    system: "FaceID-API v2.3",
-    date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-    severity: "high",
-    status: "investigating",
-    notified: false,
-    description:
-      "Tasso di falsi positivi all'8.3% su soggetti con pigmentazione scura. Possibile discriminazione sistematica.",
-    authority: "Garante Privacy",
-    affectedUsers: "~340",
-    actions: "Sospeso il modulo biometrico, avviata analisi root cause",
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: "INC-002",
-    title: "Prompt injection riuscita su chatbot HR",
-    system: "HR-Assist LLM",
-    date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-    severity: "critical",
-    status: "pending",
-    notified: false,
-    description:
-      "Utente non autorizzato ha estratto dati stipendiali via prompt injection. Violazione Art. 73.",
-    authority: "AGID",
-    affectedUsers: "1 confermato, possibili altri",
-    actions: "Patch applicata, log estratti, indagine in corso",
-    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-];
-
 const DEFAULT_PLAN: MonitoringCheck[] = [
-  { id: "m1", label: "Monitoraggio accuratezza modello", article: "Art. 72(1)", frequency: "Settimanale", done: false, notes: "" },
-  { id: "m2", label: "Verifica drift distribuzione input", article: "Art. 72(1)", frequency: "Settimanale", done: false, notes: "" },
-  { id: "m3", label: "Audit log eventi anomali", article: "Art. 72(2)", frequency: "Mensile", done: false, notes: "" },
-  { id: "m4", label: "Revisione segnalazioni utenti", article: "Art. 72(3)", frequency: "Mensile", done: false, notes: "" },
-  { id: "m5", label: "Test bias su nuovi dati", article: "Art. 72(1)", frequency: "Trimestrale", done: false, notes: "" },
-  { id: "m6", label: "Verifica integrità catena hash Evidence Layer", article: "Art. 12", frequency: "Mensile", done: false, notes: "" },
-  { id: "m7", label: "Aggiornamento documentazione tecnica", article: "Art. 11", frequency: "Trimestrale", done: false, notes: "" },
-  { id: "m8", label: "Report post-market annuale all'autorità", article: "Art. 72(4)", frequency: "Annuale", done: false, notes: "" },
+  { id: "m1", label: "Monitoraggio accuratezza del modello", article: "Art. 72(1)-(2)", frequency: "Settimanale", done: false, notes: "" },
+  { id: "m2", label: "Verifica deriva della distribuzione degli input", article: "Art. 72(2)", frequency: "Settimanale", done: false, notes: "" },
+  { id: "m3", label: "Analisi dei log degli eventi anomali", article: "Artt. 12, 72(2)", frequency: "Mensile", done: false, notes: "" },
+  { id: "m4", label: "Raccolta e analisi delle segnalazioni dei deployer", article: "Art. 72(2)", frequency: "Mensile", done: false, notes: "" },
+  { id: "m5", label: "Test di bias su nuovi dati", article: "Art. 72(2)", frequency: "Trimestrale", done: false, notes: "" },
+  { id: "m6", label: "Analisi dell'interazione con altri sistemi di IA, se pertinente", article: "Art. 72(2)", frequency: "Trimestrale", done: false, notes: "" },
+  { id: "m7", label: "Aggiornamento della documentazione tecnica", article: "Art. 11", frequency: "Trimestrale", done: false, notes: "" },
+  { id: "m8", label: "Revisione del piano di monitoraggio (parte della documentazione tecnica)", article: "Art. 72(3)", frequency: "Annuale", done: false, notes: "" },
 ];
 
 function loadIncidents(): Incident[] {
-  if (typeof window === "undefined") return SEED_INCIDENTS;
-  const raw = localStorage.getItem(INCIDENTS_KEY);
-  if (raw) return JSON.parse(raw);
-  localStorage.setItem(INCIDENTS_KEY, JSON.stringify(SEED_INCIDENTS));
-  return SEED_INCIDENTS;
+  if (typeof window === "undefined") return [];
+  purgeLegacySeedIncidents();
+  try {
+    return JSON.parse(localStorage.getItem(INCIDENTS_KEY) ?? "[]") as Incident[];
+  } catch {
+    return [];
+  }
 }
 
 function saveIncidents(list: Incident[]) {
@@ -282,7 +251,13 @@ function loadPlan(): MonitoringCheck[] {
   if (typeof window === "undefined") return buildAdaptivePlan(DEFAULT_PLAN);
   const raw = localStorage.getItem(PLAN_KEY);
   // If user has a saved plan, merge new risk-based checks
-  const basePlan: MonitoringCheck[] = raw ? JSON.parse(raw) : DEFAULT_PLAN;
+  // Le voci predefinite riprendono etichetta e articolo aggiornati, conservando avanzamento e note
+  const basePlan: MonitoringCheck[] = raw
+    ? (JSON.parse(raw) as MonitoringCheck[]).map((c) => {
+        const d = DEFAULT_PLAN.find((x) => x.id === c.id);
+        return d ? { ...c, label: d.label, article: d.article, frequency: d.frequency } : c;
+      })
+    : DEFAULT_PLAN;
   return buildAdaptivePlan(basePlan);
 }
 

@@ -16,11 +16,10 @@ Legenda colonne:
 | Pagina | URL | File | Righe | Storage | AI | 🔵 Blu | ⚠ Verify | Note |
 |--------|-----|------|-------|---------|----|--------|----------|------|
 | Dashboard | `/dashboard` | `app/dashboard/page.tsx` | 681 | ✓ | — | 3 | 0 | Radar, quick links, scadenze |
-| Triage | `/dashboard/triage` | `app/dashboard/triage/page.tsx` | 1255 | ✓ | ✓ | 6 | 0 | Punto di partenza — classifica il sistema |
+| Triage | `/dashboard/triage` | `app/dashboard/triage/page.tsx` | 1255 | ✓ | ✓ | 6 | 0 | Verifica rapida di un caso; include la verifica Art. 5 (ex Pratiche vietate) |
 | Dossier | `/dashboard/dossier` | `app/dashboard/dossier/page.tsx` | 493 | ✓ | — | 0 | 0 | Export PDF, completamento globale |
 | Post-Market | `/dashboard/post-market` | `app/dashboard/post-market/page.tsx` | 2516 | ✓ | ✓ | 4 | 14 | Monitoraggio post-deploy, Art. 72-73 |
 | Trust Center (pubblico) | `/dashboard/trust-center` | `app/dashboard/trust-center/page.tsx` | 1046 | — | — | 0 | 0 | Pagina pubblica trust |
-| Journey | `/dashboard/journey` | `app/dashboard/journey/page.tsx` | — | — | — | — | — | Onboarding guidato |
 | Evidence Layer | `/dashboard/evidence-layer` | `app/dashboard/evidence-layer/page.tsx` | — | — | — | — | — | Raccolta prove/evidenze |
 | Notifications | `/dashboard/notifications` | `app/dashboard/notifications/page.tsx` | — | — | — | — | — | Centro notifiche |
 
@@ -34,7 +33,6 @@ Legenda colonne:
 |------|-----|------|-------|---------|----|--------|----------|---------------------|
 | **Classifier** | `/dashboard/tools/classifier` | `tools/classifier/page.tsx` | 1579 | 10 | 29 | **15** | 0 | Art. 5, 6, 25 — classificazione alto rischio |
 | **Risk Manager** | `/dashboard/tools/risk-manager` | `tools/risk-manager/page.tsx` | 944 | 6 | 32 | 1 | **13** | Art. 6, 9, 12, 51-55, 72 — gestione rischi |
-| **Prohibited Practices** | `/dashboard/tools/prohibited` | `tools/prohibited/page.tsx` | 792 | 10 | 12 | 0 | 0 | Art. 5, 50, 99(3) — pratiche vietate |
 | **Questionnaire** | `/dashboard/tools/questionnaire` | `tools/questionnaire/page.tsx` | 1015 | 20 | 45 | 0 | 0 | Art. 5, 22, 27, 35 — questionario personalizzato |
 
 ### Pillar 2 — Dati & Documentazione
@@ -62,7 +60,6 @@ Legenda colonne:
 |------|-----|------|-------|---------|----|--------|----------|---------------------|
 | **Resilience** | `/dashboard/tools/resilience` | `tools/resilience/page.tsx` | 336 | 8 | 1 | 0 | 0 | Art. 15 — accuracy, robustezza, cybersec |
 | **Drift Monitor** | `/dashboard/tools/drift-monitor` | `tools/drift-monitor/page.tsx` | 506 | 2 | 2 | 3 | 0 | Art. 9, 12, 15 — monitoraggio drift modello |
-| **Incident** | `/dashboard/tools/incident` | `tools/incident/page.tsx` | 256 | 0 | 4 | 3 | 0 | Art. 73 — notifica incidenti alle autorità |
 
 ### Pillar 5 — Conformità & Certificazione
 
@@ -174,3 +171,6 @@ Alcune pagine hanno **due versioni**: la vecchia in `/tools/` e la nuova refacto
 | GPAI Tool | ❌ 23 blu | ✅ | ✅ |
 | Art. 50 Kit | ❌ 20 blu | ❌ 19 verify | ✅ |
 | Post-Market | ⚠ 4 blu | ❌ 14 verify | ✅ |
+
+
+> Accorpati: `/dashboard/tools/prohibited` → Triage, `/dashboard/tools/incident` → Post-market (tab incidenti), `/dashboard/journey` → Home (percorso in 4 passi). I vecchi indirizzi reindirizzano.

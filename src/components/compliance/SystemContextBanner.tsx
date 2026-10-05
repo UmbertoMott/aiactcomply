@@ -78,7 +78,7 @@ export function SystemContextBanner({
           <div style={{ color: "#991B1B", fontSize: 13, lineHeight: 1.5 }}>
             Il Prohibited Checker ha rilevato una violazione dell&apos;Art. 5 AI Act.
             Completa l&apos;analisi legale prima di procedere con questo tool.{" "}
-            <a href="/dashboard/tools/prohibited" style={{ color: "#DC2626", fontWeight: 600, textDecoration: "underline" }}>
+            <a href="/dashboard/triage" style={{ color: "#DC2626", fontWeight: 600, textDecoration: "underline" }}>
               Torna al Prohibited Checker →
             </a>
           </div>
