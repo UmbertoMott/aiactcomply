@@ -31,7 +31,7 @@ export async function prioritizeDeadlines(
   ).join("\n");
 
   const prompt = `Sei un esperto di conformita AI Act UE (Reg. 2024/1689).
-Devi prioritizzare queste scadenze normative per un'organizzazione con sistema AI di tipo: ${context.tier ?? "non specificato"}.
+Devi prioritizzare queste scadenze normative per un'organizzazione con sistema di IA di tipo: ${context.tier ?? "non specificato"}.
 Sistema: ${context.systemName ?? "non specificato"}.
 
 SCADENZE:

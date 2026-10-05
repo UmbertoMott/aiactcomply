@@ -74,7 +74,7 @@ const OBLIGATIONS: Obligation[] = [
     id: "risk-mgmt",
     article: "Art. 9",
     label: "Gestione del rischio",
-    what: "Identificare, analizzare e mitigare i rischi durante tutto il ciclo di vita del sistema AI",
+    what: "Identificare, analizzare e mitigare i rischi durante tutto il ciclo di vita del sistema di IA",
     icon: Shield,
     storageKey: "aicomply_risk_manager_result",
     href: "/dashboard/tools/risk-manager",
@@ -159,7 +159,7 @@ const OBLIGATIONS: Obligation[] = [
   {
     id: "oversight",
     article: "Art. 14",
-    label: "Supervisione umana",
+    label: "Sorveglianza umana",
     what: "Progettare misure tecniche per una sorveglianza umana efficace sull'output del sistema",
     icon: Users,
     storageKey: "aicomply_oversight_result",
@@ -298,7 +298,7 @@ const OBLIGATIONS: Obligation[] = [
     id: "transparency-limited",
     article: "Art. 50",
     label: "Obblighi di trasparenza AI",
-    what: "Informare gli utenti quando interagiscono con un sistema AI (chatbot, sintesi, deepfake)",
+    what: "Informare gli utenti quando interagiscono con un sistema di IA (chatbot, sintesi, deepfake)",
     icon: Eye,
     storageKey: "aicomply_art50_result",
     href: "/dashboard/tools/art50-kit",
@@ -506,7 +506,7 @@ export default function SystemDetailPage() {
         textDecoration: "none", marginBottom: 20,
       }}>
         <ArrowLeft size={13} />
-        Inventario Sistemi AI
+        Inventario Sistemi di IA
       </Link>
 
       {/* ── Header card ── */}

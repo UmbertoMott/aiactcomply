@@ -30,8 +30,6 @@ import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { getAssessment, patchFRIA, patchShared, migrateLegacyFRIA, syncCorrelatedRisksFromFRIA } from "@/lib/assessment/assessment-helpers";
 import type { AssessmentShared } from "@/lib/assessment/assessment-schema";
 import { CorrelatedRisksPanel } from "@/components/assessment/CorrelatedRisksPanel";
-import { AssessmentSharedHeader } from "@/components/assessment/AssessmentSharedHeader";
-import { AssessmentStepper } from "@/components/assessment/AssessmentStepper";
 import {
   type FRIADocument, type FRIAScenario, type FRIARightImpact,
   type FRIASeverityAssessment, type FRIAMitigationMeasure,
@@ -156,7 +154,7 @@ const PHASES: { id: Phase; label: string; sub: string; Icon: React.ComponentType
 ];
 
 const DEFAULT_TRIGGERS = [
-  "Modifica sostanziale del sistema AI",
+  "Modifica sostanziale del sistema di IA",
   "Nuovo contesto di deployment",
   "Violazione dei diritti fondamentali rilevata",
   "Revisione annuale programmata",
@@ -578,7 +576,7 @@ export default function FRIAPage() {
     const overallRisk = getOverallFRIARisk(doc);
     const completeness = calculateFRIACompleteness(doc);
     writeToStorage<FRIAResult>("fria", {
-      systemName: doc.system_name || "Sistema AI",
+      systemName: doc.system_name || "Sistema di IA",
       organizationName: doc.organization || undefined,
       overallRisk, completeness,
       status: doc.status ?? "draft",
@@ -944,7 +942,7 @@ export default function FRIAPage() {
                                           );
                                         })()}
                                         <RightImpactAIDraft
-                                          systemName={doc.system_name || "Sistema AI"}
+                                          systemName={doc.system_name || "Sistema di IA"}
                                           systemDescription={doc.context.technology_overview || ""}
                                           riskLevel={""}
                                           scenarioTitle={activeScenario.title}
@@ -1545,8 +1543,6 @@ export default function FRIAPage() {
         {/* Stessa intestazione della DPIA guidata sopra le 3 colonne */}
         <div style={{ padding: "12px 20px 0", flexShrink: 0 }}>
           <SystemSelector checkProhibited={true} />
-          <AssessmentStepper currentTool="fria" />
-          <AssessmentSharedHeader />
         </div>
         <div style={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
           <FriaGuidedMode onExitGuidedMode={() => setGuidedMode(false)} />
@@ -1560,16 +1556,22 @@ export default function FRIAPage() {
     <div className="w-full" style={{ display: "flex", flexDirection: "column", gap: 0, minHeight: 0, fontFamily: "var(--font-inter, system-ui)" }}>
 
       <SystemSelector checkProhibited={true} />
-      <AssessmentStepper currentTool="fria" />
-      <AssessmentSharedHeader />
-
-      {/* ── Reset ────────────────────────────────────────────────────────────── */}
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
+      {/* Una sola riga di azioni: torna alla modalità guidata, esporta, ricomincia */}
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 16 }}>
+        <button
+          onClick={() => setGuidedMode(true)}
+          style={{ fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "none", background: "#0D1016", color: "#fff", cursor: "pointer" }}
+        >
+          {t("modeGuidedTitle")} — {t("modeGuidedDesc")}
+        </button>
+        <Link href="/dashboard/tools/assessment-export" style={{ fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.10)", background: "#fff", color: "#0D1016" }}>
+          {t("exportWithDpia")}
+        </Link>
         <button
           onClick={handleReset}
           title={t("resetBtn")}
           style={{
-            display: "flex", alignItems: "center", gap: 6,
+            marginLeft: "auto", display: "flex", alignItems: "center", gap: 6,
             fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8,
             border: `1px solid ${T.redBdr}`, background: T.redBg,
             color: T.red, cursor: "pointer",
@@ -1578,46 +1580,6 @@ export default function FRIAPage() {
           <RotateCcw className="h-3.5 w-3.5" />
           <span>{t("resetBtn")}</span>
         </button>
-      </div>
-
-      {/* ── Mode selector ────────────────────────────────────────────────────── */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-        {([
-          {
-            key: "form",
-            title: t("modeFormTitle"),
-            desc: t("modeFormDesc"),
-            active: !guidedMode,
-            onClick: () => setGuidedMode(false),
-          },
-          {
-            key: "guided",
-            title: t("modeGuidedTitle"),
-            desc: t("modeGuidedDesc"),
-            active: guidedMode,
-            onClick: () => setGuidedMode(true),
-          },
-        ] as { key: string; title: string; desc: string; active: boolean; onClick: () => void }[]).map((m) => (
-          <button
-            key={m.key}
-            onClick={m.onClick}
-            style={{
-              flex: 1, textAlign: "left", padding: "12px 14px", borderRadius: 10,
-              border: m.active ? "1.5px solid #23403a" : "1px solid rgba(0,0,0,0.10)",
-              background: m.active ? "rgba(35,64,58,0.05)" : "#fff",
-              cursor: m.active ? "default" : "pointer",
-              transition: "border-color 0.15s, background 0.15s",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 3 }}>
-              {m.active && (
-                <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#23403a", flexShrink: 0 }} />
-              )}
-              <p style={{ fontSize: 12, fontWeight: 700, color: "#0D1016", margin: 0 }}>{m.title}</p>
-            </div>
-            <p style={{ fontSize: 10, color: "rgba(0,0,0,0.45)", margin: 0 }}>{m.desc}</p>
-          </button>
-        ))}
       </div>
 
       {/* ── Prerequisiti + AI Draft Banner (Art. 27) ───────────────────────── */}
@@ -1908,12 +1870,7 @@ export default function FRIAPage() {
             <span style={{ color: "#15803d" }}>{t("friaSavedBanner")} · {new Date(dossierSavedAt).toLocaleDateString("it-IT")}</span>
             <Link href="/dashboard/dossier" style={{ marginLeft: "auto", fontSize: 11, fontWeight: 500, color: T.green }}>{t("viewDossier")}</Link>
           </div>
-        ) : (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderRadius: 8, padding: "10px 14px", marginBottom: 20, background: T.card, border: `1px solid ${T.border}`, fontSize: 12 }}>
-            <span style={{ color: T.muted }}>{t("saveFriaPrompt")}</span>
-            <button onClick={saveToDossier} style={{ fontSize: 11, fontWeight: 500, borderRadius: 20, padding: "4px 12px", background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>{t("saveToDossier")}</button>
-          </div>
-        )}
+        ) : null /* un solo pulsante di salvataggio: quello nel pannello a sinistra */}
 
         <div id="fase-1">{renderPhase1()}</div>
         <div id="fase-2" style={{ marginTop: 48 }}>{renderPhase2()}</div>

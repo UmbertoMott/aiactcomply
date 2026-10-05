@@ -474,7 +474,7 @@ export default function DocuGenPage() {
 
   async function saveToDossier(asFinalized = false) {
     const completedAt = new Date().toISOString();
-    const resolvedName = systemName.trim() || "Sistema AI (non specificato)";
+    const resolvedName = systemName.trim() || "Sistema di IA (non specificato)";
 
     writeToStorage<DocugenResult>("docugen", {
       systemName: resolvedName,
@@ -523,7 +523,7 @@ export default function DocuGenPage() {
   }
 
   async function exportPdf() {
-    const resolvedName = systemName.trim() || "Sistema AI";
+    const resolvedName = systemName.trim() || "Sistema di IA";
     const isLimitedOrMinimal = classifierTier === "limited" || classifierTier === "minimal";
 
     const sections = isLimitedOrMinimal
@@ -585,7 +585,7 @@ export default function DocuGenPage() {
   }
 
   function exportMarkdown() {
-    const resolvedName = systemName.trim() || "Sistema AI";
+    const resolvedName = systemName.trim() || "Sistema di IA";
     const lines: string[] = [
       `# Fascicolo Tecnico — ${resolvedName}`,
       `**Regolamento UE 2024/1689 — Art. 11, Allegato IV**`,

@@ -16,14 +16,14 @@ export async function analyzeCsvBias(
   csvPreview: string,
   systemDescription: string
 ): Promise<AiBiasReport | { error: string }> {
-  const prompt = `Sei un esperto di data governance per sistemi AI in conformità con Art. 10 EU AI Act.
+  const prompt = `Sei un esperto di data governance per sistemi di IA in conformità con Art. 10 EU AI Act.
 
 Analizza questo dataset (preview delle prime righe):
 \`\`\`csv
 ${csvPreview.slice(0, 3000)}
 \`\`\`
 
-Contesto: viene usato per addestrare/valutare il seguente sistema AI: "${systemDescription}"
+Contesto: viene usato per addestrare/valutare il seguente sistema di IA: "${systemDescription}"
 
 Analizza e rispondi con JSON che include:
 - sensitiveColumns: array di nomi di colonne che potrebbero contenere dati sensibili (età, genere, etnia, reddito, ecc.)

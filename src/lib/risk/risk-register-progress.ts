@@ -101,7 +101,7 @@ export function computeRegisterProgress(doc: RiskRegisterDocument): RegisterProg
     { label: "Area Allegato III",    done: !!(id.annexIIIArea) },
     { label: "Articoli applicabili", done: id.applicableArticles.length > 0 },
     { label: "Dati personali",       done: id.personalDataProcessed !== "unspecified" },
-    { label: "Supervisione umana",   done: id.humanOversightRequired !== undefined },
+    { label: "Sorveglianza umana",   done: id.humanOversightRequired !== undefined },
     { label: "Responsabile registro", done: !!(id.registerOwner) },
   ];
   sections.push({

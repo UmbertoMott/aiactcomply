@@ -14,7 +14,7 @@ const FAQS = [
   },
   {
     q: "Qual è la differenza tra Essenziale e Studio?",
-    a: "Essenziale copre l'assistenza su 1 sistema AI con gli strumenti di triage e assessment, sotto la supervisione dell'Avvocato. Studio aggiunge pareri su richiesta, revisione documentale dell'Avvocato e il dossier di conformità firmato — ideale se hai necessità di produrre documentazione formale.",
+    a: "Essenziale copre l'assistenza su 1 sistema di IA con gli strumenti di triage e assessment, sotto la supervisione dell'Avvocato. Studio aggiunge pareri su richiesta, revisione documentale dell'Avvocato e il dossier di conformità firmato — ideale se hai necessità di produrre documentazione formale.",
   },
   {
     q: "Posso interrompere l'assistenza?",
@@ -22,7 +22,7 @@ const FAQS = [
   },
   {
     q: "Come funziona il piano Su misura?",
-    a: "Adatto a studi legali, grandi aziende e PA con più sistemi AI da seguire. Contattaci per ricevere un'offerta personalizzata con workspace dedicati, SLA e, se necessario, il servizio di Rappresentante Autorizzato (Art. 22 AI Act).",
+    a: "Adatto a studi legali, grandi aziende e PA con più sistemi di IA da seguire. Contattaci per ricevere un'offerta personalizzata con workspace dedicati, SLA e, se necessario, il servizio di Rappresentante Autorizzato (Art. 22 AI Act).",
   },
 ];
 

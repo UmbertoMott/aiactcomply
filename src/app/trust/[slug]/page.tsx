@@ -18,12 +18,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const systemName =
       (page as unknown as Record<string, unknown>).systemName as string | undefined;
     return {
-      title: `${systemName ?? "Sistema AI"} — Trasparenza AI | AIComply`,
+      title: `${systemName ?? "Sistema di IA"} — Trasparenza AI | AIComply`,
       description:
         "Pagina di trasparenza AI conforme al Reg. (UE) 2024/1689 (AI Act) — generata con AIComply.",
       robots: page.noindex ? "noindex, nofollow" : "index, follow",
       openGraph: {
-        title: `${systemName ?? "Sistema AI"} — Trust Center`,
+        title: `${systemName ?? "Sistema di IA"} — Trust Center`,
         url: `https://aicomply.io/trust/${slug}`,
       },
     };

@@ -27,7 +27,7 @@ export async function adaptRiskToSystem(
   const prompt = `Esperto EU AI Act Art. 9. Adatta il rischio al sistema specifico. Rispondi SOLO con JSON.
 
 Rischio: "${catalogItem.title}" — ${catalogItem.description} (categoria: ${catalogItem.category})
-Sistema: "${context.systemName ?? "Sistema AI"}", ${context.systemDescription ?? ""}, tier: ${context.riskTier ?? "?"}
+Sistema: "${context.systemName ?? "Sistema di IA"}", ${context.systemDescription ?? ""}, tier: ${context.riskTier ?? "?"}
 
 JSON (tutti i campi obbligatori):
 {"adaptedTitle":"...","adaptedDescription":"...specifica al sistema...","relevanceReason":"...","suggestedLikelihood":"low|medium|high","suggestedImpact":"low|medium|high","likelihoodBasis":"...","impactBasis":"...","art9Reference":"Art. 9(?)"}`;

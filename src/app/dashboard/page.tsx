@@ -244,10 +244,6 @@ export default function DashboardPage() {
       if (dpiaG && dpiaG.overallPercent > 0 && dpiaG.overallPercent < 100) {
         acts.push({ id: "dpia", titleKey: "ip_dpia_title", subKey: "ip_dpia_sub", href: "/dashboard/tools/dpia", pct: dpiaG.overallPercent });
       }
-      const assessment = readFromStorage<object>("assessment");
-      if (assessment && Object.keys(assessment).length > 0) {
-        acts.push({ id: "assessment", titleKey: "ip_assessment_title", subKey: "ip_assessment_sub", href: "/dashboard/tools/assessment", pct: -1 });
-      }
       const rrKeys = Object.keys(localStorage).filter(k => k.includes("risk_register") && !k.includes("signoff"));
       if (rrKeys.length > 0) {
         acts.push({ id: "risk", titleKey: "ip_risk_title", subKey: "ip_risk_sub", href: "/dashboard/tools/risk-manager", pct: -1 });

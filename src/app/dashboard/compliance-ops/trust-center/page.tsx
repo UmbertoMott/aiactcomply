@@ -180,7 +180,7 @@ function PublicPreview({
                 <span style={{ color: EMERAL, fontWeight: 700, fontSize: 14 }}>AIComply Trust Center</span>
               </div>
               <h1 style={{ color: TEXT, fontSize: 20, fontWeight: 700, margin: "0 0 4px" }}>
-                {systemName || "Sistema AI"}
+                {systemName || "Sistema di IA"}
               </h1>
               {page.noindex && (
                 <p style={{ color: MUTED, fontSize: 11, marginTop: 6 }}>Questa pagina non è indicizzata dai motori di ricerca.</p>
@@ -411,7 +411,7 @@ export default function TrustCenterEditorPage() {
     setSourceData(readSourceData());
   }, [systemId]);
 
-  const systemName = sourceData.risk_tier.systemName ?? "Sistema AI";
+  const systemName = sourceData.risk_tier.systemName ?? "Sistema di IA";
   const publicUrl  = `https://aicomply.io/trust/${page.publicSlug}`;
   const localUrl   = `/trust/${page.publicSlug}`;
 
@@ -580,7 +580,7 @@ export default function TrustCenterEditorPage() {
             )}
           </div>
           <p style={{ color: MUTED, fontSize: 14 }}>
-            Pagina pubblica di trasparenza per il sistema AI — {publicSectionCount}/8 sezioni attive
+            Pagina pubblica di trasparenza per il sistema di IA — {publicSectionCount}/8 sezioni attive
           </p>
         </div>
 

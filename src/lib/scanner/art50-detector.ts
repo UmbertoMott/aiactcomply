@@ -296,7 +296,7 @@ export async function scanUrl(url: string): Promise<Art50ScanResult> {
       label: "Disclosure AI presente",
       legalRef: "Art. 50(1) AI Act",
       contextNote:
-        "L'Art. 50(1) impone che i sistemi AI a interazione diretta con persone fisiche rendano esplicita la natura artificiale del sistema. L'assenza di qualsiasi disclosure è considerata violazione diretta e non sanabile con misure tecniche minori.",
+        "L'Art. 50(1) impone che i sistemi di IA a interazione diretta con persone fisiche rendano esplicita la natura artificiale del sistema. L'assenza di qualsiasi disclosure è considerata violazione diretta e non sanabile con misure tecniche minori.",
       check: checkDisclosurePresent(html),
     },
     {

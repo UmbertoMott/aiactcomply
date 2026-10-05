@@ -1,5 +1,7 @@
 // Dossier Engine — aggregates all tool results into a unified compliance dossier
 
+import { computeEdpbCompleteness } from "@/lib/dpia/edpb-completeness";
+import type { DpiaEdpbDoc } from "@/lib/dpia/edpb-schema";
 import { readFromStorage } from "./storage-schema";
 import type {
   DossierData, ClassifierResult, RiskManagerResult, DataAuditResult,
@@ -26,7 +28,7 @@ export function aggregateDossier(): DossierData {
   return {
     meta: {
       companyName: onboarding?.companyName ?? "Azienda non specificata",
-      systemName:  onboarding?.systemName  ?? "Sistema AI",
+      systemName:  onboarding?.systemName  ?? "Sistema di IA",
       generatedAt: new Date().toISOString(),
       generatedBy: "AIComply Platform v1.0",
       version:     "1.0",
@@ -55,6 +57,8 @@ export function aggregateDossier(): DossierData {
 }
 
 export function getDossierSections(data: DossierData): DossierSection[] {
+  const edpbDoc = readFromStorage<DpiaEdpbDoc>("dpiaEdpb");
+  const edpbPercent = edpbDoc ? computeEdpbCompleteness(edpbDoc).overallPercent : 0;
   // Determina il tier e il ruolo dal risultato del classifier
   const tier = data.classifier?.riskLevel?.toLowerCase() ?? null;
   const role = data.classifier?.role?.toLowerCase() ?? null;
@@ -83,7 +87,7 @@ export function getDossierSections(data: DossierData): DossierSection[] {
     {
       id: "classifier",
       article: "Art. 6",
-      title: "Classificazione del Sistema AI",
+      title: "Classificazione del Sistema di IA",
       href: "/dashboard/tools/inventory",
       status: data.classifier ? "complete" : "missing",
       completedAt: data.classifier?.completedAt,
@@ -231,7 +235,9 @@ export function getDossierSections(data: DossierData): DossierSection[] {
       article: "Art. 35 GDPR",
       title: "DPIA — Valutazione d'Impatto Privacy",
       href: "/dashboard/tools/dpia",
-      status: data.dpia ? (data.dpia.conclusion?.completedAt ? "complete" : "partial") : "missing",
+      // DPIA guidata (aicomply_dpia_result) o modulo completo EDPB (aicomply_dpia_edpb_result)
+      status: data.dpia?.conclusion?.completedAt || edpbPercent === 100 ? "complete"
+        : data.dpia || edpbPercent > 0 ? "partial" : "missing",
       completedAt: data.dpia?.conclusion?.completedAt,
     },
     // Art. 26 — obblighi deployer, solo se ruolo è deployer

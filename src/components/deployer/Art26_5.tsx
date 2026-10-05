@@ -23,7 +23,7 @@ export function Art26_5({ record, onChange }: Props) {
         <textarea
           rows={3}
           className="w-full text-xs px-2 py-1.5 rounded border border-slate-700 bg-slate-900 text-slate-200 focus:outline-none focus:border-slate-500 resize-none"
-          placeholder="Dichiaro che il sistema AI viene utilizzato esclusivamente secondo le istruzioni d'uso fornite dal provider..."
+          placeholder="Dichiaro che il sistema di IA viene utilizzato esclusivamente secondo le istruzioni d'uso fornite dal provider..."
           value={record.conformingUseText ?? ""}
           onChange={e =>
             onChange(prev => ({

@@ -70,7 +70,7 @@ export default function TerminiPage() {
           <tbody>
             <tr>
               <td><strong>Essenziale</strong></td>
-              <td>Assistenza su 1 sistema AI, Triage, Scanner Art. 50, Risk Register, assessment validati</td>
+              <td>Assistenza su 1 sistema di IA, Triage, Scanner Art. 50, Risk Register, assessment validati</td>
               <td>Mensile automatico</td>
             </tr>
             <tr>

@@ -165,7 +165,7 @@ export default function TrustCenterPublicView({ slug, serverAccessConfig }: Prop
             Pagina di trasparenza AI
           </h1>
           <p style={{ color: MUTED, fontSize: 14, lineHeight: 1.6 }}>
-            Questo documento fornisce informazioni pubbliche sul sistema AI di questa organizzazione
+            Questo documento fornisce informazioni pubbliche sul sistema di IA di questa organizzazione
             ai sensi del Reg. (UE) 2024/1689 (AI Act).
           </p>
           {page!.noindex && (
@@ -217,7 +217,7 @@ export default function TrustCenterPublicView({ slug, serverAccessConfig }: Prop
             {page!.noindex && " · Questa pagina non è indicizzata dai motori di ricerca."}
           </p>
           <p style={{ color: "#374151", fontSize: 11, marginTop: 6 }}>
-            Le informazioni presenti in questa pagina sono fornite dall&apos;organizzazione responsabile del sistema AI.
+            Le informazioni presenti in questa pagina sono fornite dall&apos;organizzazione responsabile del sistema di IA.
             I riferimenti normativi sono da verificare contro il testo consolidato del Reg. (UE) 2024/1689.
 
           </p>

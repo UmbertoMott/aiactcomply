@@ -69,8 +69,8 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
   {
     id: "rr_system_name",
     sectionKey: "sec0",
-    label: "Nome sistema AI",
-    question: "Qual è il nome del sistema AI per cui si redige questo registro dei rischi?",
+    label: "Nome sistema di IA",
+    question: "Qual è il nome del sistema di IA per cui si redige questo registro dei rischi?",
     ref: "Art. 9(1) · §0",
     fieldType: "text",
     examples: ["Sistema di screening CV per selezione HR", "Chatbot per assistenza clienti bancaria", "Modello predittivo di scoring creditizio"],
@@ -80,17 +80,17 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     id: "rr_role",
     sectionKey: "sec0",
     label: "Ruolo (provider/deployer)",
-    question: "Qual è il tuo ruolo rispetto al sistema AI? Sei il provider (sviluppatore) o il deployer (chi lo mette in uso)?",
+    question: "Qual è il tuo ruolo rispetto al sistema di IA? Sei il provider (sviluppatore) o il deployer (chi lo mette in uso)?",
     ref: "Art. 9(1) · Art. 3",
     fieldType: "text",
-    examples: ["Provider — l'azienda ha sviluppato il sistema internamente", "Deployer — utilizziamo un sistema AI sviluppato da terzi", "Entrambi — sviluppiamo e usiamo direttamente il sistema"],
+    examples: ["Provider — l'azienda ha sviluppato il sistema internamente", "Deployer — utilizziamo un sistema di IA sviluppato da terzi", "Entrambi — sviluppiamo e usiamo direttamente il sistema"],
     required: true,
   },
   {
     id: "rr_description",
     sectionKey: "sec0",
     label: "Descrizione e scopo",
-    question: "Descrivi il sistema AI e il suo scopo principale. Cosa fa e in quale contesto viene usato?",
+    question: "Descrivi il sistema di IA e il suo scopo principale. Cosa fa e in quale contesto viene usato?",
     ref: "Art. 9(1) · §0",
     fieldType: "multiline",
     examples: [
@@ -117,7 +117,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     id: "rr_personal_data",
     sectionKey: "sec0",
     label: "Trattamento dati personali",
-    question: "Il sistema AI tratta dati personali (nome, CV, dati biometrici, comportamentali, ecc.)?",
+    question: "Il sistema di IA tratta dati personali (nome, CV, dati biometrici, comportamentali, ecc.)?",
     ref: "GDPR Art. 4 · Art. 10 AI Act",
     fieldType: "select_yn",
     examples: [
@@ -143,8 +143,8 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
   {
     id: "rr_human_oversight",
     sectionKey: "sec0",
-    label: "Supervisione umana (Art. 14)",
-    question: "È prevista supervisione umana sulle decisioni o output del sistema AI (Art. 14 AI Act)?",
+    label: "Sorveglianza umana (Art. 14)",
+    question: "È prevista sorveglianza umana sulle decisioni o output del sistema di IA (Art. 14 AI Act)?",
     ref: "Art. 14 AI Act",
     fieldType: "select_ynp",
     examples: [
@@ -173,7 +173,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     id: "rr_main_risks",
     sectionKey: "sec1",
     label: "Rischi principali identificati",
-    question: "Elenca i principali rischi identificati per questo sistema AI (almeno 3). Descrivi brevemente ciascuno.",
+    question: "Elenca i principali rischi identificati per questo sistema di IA (almeno 3). Descrivi brevemente ciascuno.",
     ref: "Art. 9(2)(a)",
     fieldType: "multiline",
     examples: [
@@ -185,7 +185,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     id: "rr_vulnerable_groups",
     sectionKey: "sec1",
     label: "Impatto su gruppi vulnerabili",
-    question: "Il sistema AI impatta in modo sproporzionato minori (< 18 anni) o altri gruppi vulnerabili (disabili, anziani, minoranze)?",
+    question: "Il sistema di IA impatta in modo sproporzionato minori (< 18 anni) o altri gruppi vulnerabili (disabili, anziani, minoranze)?",
     ref: "Art. 9(9) AI Act",
     fieldType: "select_ynp",
     examples: [
@@ -225,7 +225,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     id: "rr_lifecycle_phase",
     sectionKey: "sec1",
     label: "Fase del ciclo di vita",
-    question: "In quale fase del ciclo di vita del sistema AI si trova attualmente il registro? (sviluppo, deployment, monitoraggio, dismissione)",
+    question: "In quale fase del ciclo di vita del sistema di IA si trova attualmente il registro? (sviluppo, deployment, monitoraggio, dismissione)",
     ref: "Art. 9(1)",
     fieldType: "text",
     examples: [
@@ -241,7 +241,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     id: "rr_intended_use",
     sectionKey: "sec2",
     label: "Casi d'uso previsti",
-    question: "Descrivi i principali casi d'uso previsti del sistema AI. Chi lo usa e per fare cosa?",
+    question: "Descrivi i principali casi d'uso previsti del sistema di IA. Chi lo usa e per fare cosa?",
     ref: "Art. 9(2)(b)",
     fieldType: "multiline",
     examples: [
@@ -280,7 +280,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     id: "rr_test_metrics",
     sectionKey: "sec3",
     label: "Metriche di test definite",
-    question: "Quali metriche di accuratezza, fairness o performance sono state definite per il sistema AI?",
+    question: "Quali metriche di accuratezza, fairness o performance sono state definite per il sistema di IA?",
     ref: "Art. 9(6)-(8)",
     fieldType: "multiline",
     examples: [
@@ -292,7 +292,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     id: "rr_thresholds_met",
     sectionKey: "sec3",
     label: "Soglie rispettate",
-    question: "Il sistema AI ha superato le soglie di accettabilità definite nei test di validazione?",
+    question: "Il sistema di IA ha superato le soglie di accettabilità definite nei test di validazione?",
     ref: "Art. 9(6)-(8)",
     fieldType: "select_ynp",
     examples: [
@@ -364,7 +364,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     id: "rr_monitoring_frequency",
     sectionKey: "sec5",
     label: "Frequenza di monitoraggio",
-    question: "Con quale frequenza viene effettuato il monitoraggio del sistema AI in produzione?",
+    question: "Con quale frequenza viene effettuato il monitoraggio del sistema di IA in produzione?",
     ref: "Art. 9(2)(c) · Art. 72",
     fieldType: "text",
     examples: [
@@ -419,11 +419,11 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     id: "rr_retention",
     sectionKey: "sec7",
     label: "Policy di retention dei log",
-    question: "È stata definita una policy di retention per i log del sistema AI e per il registro dei rischi?",
+    question: "È stata definita una policy di retention per i log del sistema di IA e per il registro dei rischi?",
     ref: "Art. 12 AI Act",
     fieldType: "select_ynp",
     examples: [
-      "Sì — retention 5 anni per log del sistema AI; 10 anni per il registro dei rischi. Certificazione GDPR conforme.",
+      "Sì — retention 5 anni per log del sistema di IA; 10 anni per il registro dei rischi. Certificazione GDPR conforme.",
       "No — policy di retention non ancora definita; da allineare alla policy aziendale GDPR.",
       "Parzialmente — retention definita per i log del sistema (3 anni) ma non ancora per il registro dei rischi.",
     ],
@@ -476,7 +476,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     id: "rr_downstream",
     sectionKey: "sec8",
     label: "Dipendenze downstream",
-    question: "Sono stati mappati i sistemi o processi downstream che dipendono dagli output del sistema AI?",
+    question: "Sono stati mappati i sistemi o processi downstream che dipendono dagli output del sistema di IA?",
     ref: "ISO 23894 Annex C",
     fieldType: "select_ynp",
     examples: [
@@ -492,7 +492,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     id: "rr_risk_owner",
     sectionKey: "sec9",
     label: "Risk Owner",
-    question: "Chi è il Risk Owner del sistema AI (persona fisica responsabile del registro e delle decisioni di rischio)?",
+    question: "Chi è il Risk Owner del sistema di IA (persona fisica responsabile del registro e delle decisioni di rischio)?",
     ref: "Art. 9(1) · Art. 9(10)",
     fieldType: "text",
     examples: [
@@ -518,7 +518,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     id: "rr_overall_risk",
     sectionKey: "sec9",
     label: "Valutazione complessiva del rischio",
-    question: "Qual è la valutazione complessiva del rischio del sistema AI dopo l'applicazione delle misure?",
+    question: "Qual è la valutazione complessiva del rischio del sistema di IA dopo l'applicazione delle misure?",
     ref: "Art. 9(1)-(2)",
     fieldType: "text",
     examples: [
@@ -534,7 +534,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     id: "rr_stakeholders_internal",
     sectionKey: "comm",
     label: "Stakeholder interni coinvolti",
-    question: "Quali stakeholder interni sono stati coinvolti nel processo di risk management per questo sistema AI?",
+    question: "Quali stakeholder interni sono stati coinvolti nel processo di risk management per questo sistema di IA?",
     ref: "ISO 23894 §6.2",
     fieldType: "multiline",
     examples: [

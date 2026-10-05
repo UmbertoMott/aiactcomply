@@ -34,7 +34,7 @@ interface ExportRequest {
 
 // ─── Sezioni Art.50 (limited/minimal) ──────────────────────────────────────
 const ART50_SECTIONS = [
-  { id: "a50_1", title: "Identità del sistema AI",            article: "Art. 50(1)" },
+  { id: "a50_1", title: "Identità del sistema di IA",            article: "Art. 50(1)" },
   { id: "a50_2", title: "Capacità e limitazioni principali",  article: "Art. 50(1)" },
   { id: "a50_3", title: "Uso previsto e contesto",            article: "Art. 50(1)" },
   { id: "a50_4", title: "Interazione con persone fisiche",    article: "Art. 50(2)" },
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 })
   }
 
-  const { systemName = "Sistema AI", systemId, classifierHash, tier, sections = [] } = body
+  const { systemName = "Sistema di IA", systemId, classifierHash, tier, sections = [] } = body
 
   // ── Tier branching ──────────────────────────────────────────────────────────
   const isHighRisk = tier === "high" || tier === "unacceptable" || tier === null

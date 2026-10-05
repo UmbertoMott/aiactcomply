@@ -24,7 +24,7 @@ export function Art26_3({ record, onChange }: Props) {
   return (
     <div className="space-y-3">
       <p className="text-xs text-slate-400">
-        Il deployer è tenuto a conservare i log generati automaticamente dal sistema AI per almeno 6 mesi
+        Il deployer è tenuto a conservare i log generati automaticamente dal sistema di IA per almeno 6 mesi
         (Art. 26(3)).
       </p>
 

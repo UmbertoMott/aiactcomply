@@ -33,9 +33,9 @@ const TIERS: Tier[] = [
     eyebrow: "ESSENZIALE",
     price: "€49",
     priceSub: "/mese · canone di assistenza",
-    desc: "Per iniziare a mettere in regola un sistema AI.",
+    desc: "Per iniziare a mettere in regola un sistema di IA.",
     features: [
-      "Assistenza su 1 sistema AI",
+      "Assistenza su 1 sistema di IA",
       "Triage, Scanner Art. 50 e Risk Register",
       "Assessment validati dall'avvocato",
       "Aggiornamenti normativi",

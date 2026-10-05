@@ -36,7 +36,7 @@ export async function draftDpiaThreat(params: {
 
   const prompt = `Sei un esperto di DPIA (Data Protection Impact Assessment) ai sensi dell'Art. 35 GDPR e della metodologia WP248 rev.01.
 
-Sistema AI:
+Sistema di IA:
 - Nome: ${params.systemName}
 - Descrizione / finalità del trattamento: ${params.systemDescription}
 - Categorie di dati personali trattati: ${params.personalDataCategories}

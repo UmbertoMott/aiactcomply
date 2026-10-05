@@ -48,7 +48,7 @@ export const QUICK_SCAN_QUESTIONS: QuickScanQuestion[] = [
   {
     id: "scope",
     eyebrow: "Perimetro",
-    text: "La tua organizzazione fornisce o utilizza un sistema AI in un prodotto, servizio o processo aziendale?",
+    text: "La tua organizzazione fornisce o utilizza un sistema di IA in un prodotto, servizio o processo aziendale?",
     answers: [
       { id: "provider", text: "Sì, lo forniamo a clienti o utenti", riskWeight: 6 },
       { id: "deployer", text: "Sì, lo usiamo internamente", riskWeight: 4 },
@@ -118,7 +118,7 @@ export const QUICK_SCAN_QUESTIONS: QuickScanQuestion[] = [
   {
     id: "user_disclosure",
     eyebrow: "Disclosure",
-    text: "Gli utenti vengono informati chiaramente quando interagiscono con un sistema AI?",
+    text: "Gli utenti vengono informati chiaramente quando interagiscono con un sistema di IA?",
     answers: [
       { id: "yes", text: "Sì, sempre e in modo visibile", riskWeight: 0 },
       {
@@ -142,7 +142,7 @@ export const QUICK_SCAN_QUESTIONS: QuickScanQuestion[] = [
           area: "Disclosure utente",
           label: "Disclosure AI assente",
           severity: "critical",
-          evidence: "L'utente non viene informato dell'interazione con un sistema AI.",
+          evidence: "L'utente non viene informato dell'interazione con un sistema di IA.",
           recommendation: "Inserire una disclosure chiara prima o durante l'interazione, con linguaggio comprensibile.",
           documentGap: true,
         }],
@@ -319,7 +319,7 @@ export const QUICK_SCAN_QUESTIONS: QuickScanQuestion[] = [
           area: "Documentazione tecnica",
           label: "Documentazione assente",
           severity: "critical",
-          evidence: "Non risulta documentazione tecnica conservabile sul sistema AI.",
+          evidence: "Non risulta documentazione tecnica conservabile sul sistema di IA.",
           recommendation: "Avviare un dossier tecnico minimo con architettura, finalità, dati, output e controlli.",
           documentGap: true,
         }],

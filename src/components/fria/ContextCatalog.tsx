@@ -1,5 +1,6 @@
 "use client";
 
+import { levelLabel } from "@/lib/risk-level-label";
 import type { CSSProperties } from "react";
 import type { ClassifierResult, DataAuditResult } from "@/lib/dossier/storage-schema";
 import { readFromStorage } from "@/lib/dossier/storage-schema";
@@ -41,7 +42,7 @@ export function ContextCatalog({ onApply }: ContextCatalogProps) {
     suggestions.push({
       field: "Livello rischio AI Act",
       label: t("cc_riskLevelLabel"),
-      value: classifier.riskLevel,
+      value: levelLabel(classifier.riskLevel),
       isNote: true,
     });
   }
@@ -87,7 +88,7 @@ export function ContextCatalog({ onApply }: ContextCatalogProps) {
 
   if (classifier?.role === "deployer") {
     suggestions.push({
-      field: "Supervisione umana assegnata",
+      field: "Sorveglianza umana assegnata",
       label: t("cc_deployerLabel"),
       value: t("cc_deployerValue"),
       patch: { human_oversight_assigned: "yes" },

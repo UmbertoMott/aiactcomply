@@ -22,7 +22,7 @@ export async function proposeLabellingPlan(input: {
 }): Promise<ProposeLabellingPlanResult> {
   const prompt = `Sei un esperto di conformità AI Act UE (Reg. 2024/1689), specializzato in obblighi di trasparenza e marcatura contenuti sintetici (Art. 50(2)).
 
-Sistema AI:
+Sistema di IA:
 - Nome: ${input.systemName}
 - Tipo: ${input.systemType}
 - Finalità prevista: ${input.intendedPurpose}

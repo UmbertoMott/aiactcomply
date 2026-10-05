@@ -1,5 +1,5 @@
 // src/lib/inventory/known-systems.ts
-// Profili di partenza per sistemi AI enterprise noti.
+// Profili di partenza per sistemi di IA enterprise noti.
 // Tutti i valori sono bozze che richiedono conferma — mai classificazione definitiva.
 
 export interface KnownSystemProfile {
@@ -79,7 +79,7 @@ export const KNOWN_SYSTEMS: KnownSystemProfile[] = [
     typicalRole: "deployer",
     typicalTier: "limited",
     tierBasisHint: "Art. 50(1) — sistema che interagisce con persone fisiche (chatbot) — obblighi trasparenza",
-    obligationsHint: "Art. 50: informare l'utente che sta interagendo con un sistema AI. Obbligo attivo dal 2 agosto 2026.",
+    obligationsHint: "Art. 50: informare l'utente che sta interagendo con un sistema di IA. Obbligo attivo dal 2 agosto 2026.",
   },
 ]
 

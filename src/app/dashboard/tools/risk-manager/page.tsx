@@ -79,12 +79,12 @@ interface PhaseGuide {
 
 const PHASE_GUIDES: Partial<Record<RiskPhaseId, PhaseGuide>> = {
   scoping: {
-    goal: "Definisci il sistema AI, il suo scopo, chi lo usa e in quale contesto. Indica il tier di rischio e se tratta dati personali.",
+    goal: "Definisci il sistema di IA, il suo scopo, chi lo usa e in quale contesto. Indica il tier di rischio e se tratta dati personali.",
     examples: [
       { label: "Sì — dati personali", text: "Il sistema elabora dati personali di candidati HR (nome, CV, esperienza) su base contrattuale Art. 6(1)(b) GDPR." },
       { label: "No — dati anonimi", text: "Il sistema ottimizza routing logistico su dati di veicoli anonimizzati, nessun dato personale trattato." },
     ],
-    starters: ["Il sistema tratta dati personali?", "È richiesta supervisione umana (Art. 14)?", "Qual è il tier di rischio classificato?", "Il sistema incorpora modelli GPAI?"],
+    starters: ["Il sistema tratta dati personali?", "È richiesta sorveglianza umana (Art. 14)?", "Qual è il tier di rischio classificato?", "Il sistema incorpora modelli GPAI?"],
   },
   identification: {
     goal: "Elenca almeno 3-5 rischi concreti: bias algoritmico, opacità, perdita controllo umano. Valuta l'impatto su minori e gruppi vulnerabili (Art. 9(9)).",
@@ -764,7 +764,14 @@ export default function RiskManagerPage() {
   const [viewerAnchor, setViewerAnchor] = useState<string | null>(null);
   const [showPhaseGuide, setShowPhaseGuide] = useState(true);
   const [customPhrase, setCustomPhrase] = useState("");
-  const [guidedMode, setGuidedMode] = useState(false);
+  // Modalità guidata come ingresso, come DPIA e FRIA; la scelta viene ricordata
+  const [guidedMode, setGuidedModeState] = useState(() => {
+    try { return localStorage.getItem("aicomply_risk_view") !== "form"; } catch { return true; }
+  });
+  const setGuidedMode = (v: boolean) => {
+    setGuidedModeState(v);
+    try { localStorage.setItem("aicomply_risk_view", v ? "guided" : "form"); } catch { /* storage non disponibile */ }
+  };
   const layoutRef = useRef<HTMLDivElement>(null);
 
   // Apre il documento e scrolla alla sezione richiesta
@@ -832,7 +839,7 @@ export default function RiskManagerPage() {
     } else {
       setMessages([{
         role: "assistant",
-        content: `Benvenuto nel registro dei rischi.\n\nTi guiderò attraverso 8 fasi per costruire un registro dei rischi completo ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema AI e il contesto in cui viene utilizzato (settore, uso previsto, categorie di utenti coinvolti).`,
+        content: `Benvenuto nel registro dei rischi.\n\nTi guiderò attraverso 8 fasi per costruire un registro dei rischi completo ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema di IA e il contesto in cui viene utilizzato (settore, uso previsto, categorie di utenti coinvolti).`,
       }]);
     }
     setHydrated(true);
@@ -929,7 +936,7 @@ export default function RiskManagerPage() {
     localStorage.removeItem(CHAT_STORAGE_KEY);
     setMessages([{
       role: "assistant",
-      content: `Benvenuto nel registro dei rischi.\n\nTi guiderò attraverso 8 fasi per costruire un registro dei rischi completo ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema AI e il contesto in cui viene utilizzato.`,
+      content: `Benvenuto nel registro dei rischi.\n\nTi guiderò attraverso 8 fasi per costruire un registro dei rischi completo ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema di IA e il contesto in cui viene utilizzato.`,
     }]);
     setDocumentation({});
     setCurrentPhaseIndex(0);

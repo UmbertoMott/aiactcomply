@@ -118,7 +118,7 @@ Autorità destinataria: ${inc.authority}
 
 IDENTIFICAZIONE INCIDENTE
 ID Incidente: ${inc.id}
-Sistema AI coinvolto: ${inc.system}
+Sistema di IA coinvolto: ${inc.system}
 Data rilevamento: ${inc.date}
 Gravità: ${SEVERITY_LABEL[inc.severity].toUpperCase()}
 
@@ -151,7 +151,7 @@ Autorità destinataria: ${inc.authority}
 SEZIONE 1 — IDENTIFICAZIONE
 ═══════════════════════════════════════════════════════
 ID Incidente: ${inc.id}
-Sistema AI coinvolto: ${inc.system}
+Sistema di IA coinvolto: ${inc.system}
 Data rilevamento: ${inc.date}
 Gravità: ${SEVERITY_LABEL[inc.severity].toUpperCase()}
 Status: ${inc.status}
@@ -353,7 +353,7 @@ function PostMarketPageInner() {
 
   // Incident form AI chat
   const [incidentChatMessages, setIncidentChatMessages] = useState<IncidentChatMessage[]>([
-    { role: "assistant", content: "Ciao! Sono qui per guidarti nella segnalazione.\n\nCominciamo dalla cosa più importante: cosa è successo esattamente? Descrivi in 2-3 frasi cosa ha fatto il sistema AI, quando e quale conseguenza ha causato." }
+    { role: "assistant", content: "Ciao! Sono qui per guidarti nella segnalazione.\n\nCominciamo dalla cosa più importante: cosa è successo esattamente? Descrivi in 2-3 frasi cosa ha fatto il sistema di IA, quando e quale conseguenza ha causato." }
   ]);
   const [incidentChatInput, setIncidentChatInput] = useState("");
   const [incidentChatLoading, setIncidentChatLoading] = useState(false);
@@ -1166,7 +1166,7 @@ function PostMarketPageInner() {
                                 "Malfunzionamento che impatta numerosi utenti con danni individuali rilevanti",
                                 "Perdita significativa e non autorizzata di dati personali sensibili causata dall'AI",
                               ],
-                              examples: "Es. sistema AI HR che esclude sistematicamente candidati per origine etnica; chatbot medico che fornisce indicazioni farmacologiche errate con danni ai pazienti; sistema di scoring creditizio che nega accesso al credito a causa di bias documentato.",
+                              examples: "Es. sistema di IA HR che esclude sistematicamente candidati per origine etnica; chatbot medico che fornisce indicazioni farmacologiche errate con danni ai pazienti; sistema di scoring creditizio che nega accesso al credito a causa di bias documentato.",
                               deadline: "Notifica entro 15 giorni (Art. 73(2))",
                               deadlineSub: "dal momento in cui il provider viene a conoscenza dell'incidente (Art. 73(2))",
                               deadlineColor: "#ea580c",
@@ -2035,7 +2035,7 @@ function PostMarketPageInner() {
                   Piano di Sorveglianza Post-Market — Art. 72
                 </p>
                 <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.42)" }}>
-                  Attività di monitoraggio obbligatorie per sistemi AI ad alto rischio.
+                  Attività di monitoraggio obbligatorie per sistemi di IA ad alto rischio.
                 </p>
               </div>
               <button
@@ -2393,7 +2393,7 @@ function PostMarketPageInner() {
                       const riskRaw = localStorage.getItem("aicomply_risk_register_v1");
                       const riskRec = riskRaw ? JSON.parse(riskRaw) : null;
                       const result = await proposePMMPlan({
-                        systemName: riskRec?.systemName ?? "Sistema AI",
+                        systemName: riskRec?.systemName ?? "Sistema di IA",
                         systemRole: riskRec?.systemRole ?? "non specificato",
                         tier: riskRec?.tier ?? "high_risk",
                         riskLevel: riskRec?.overallRisk,

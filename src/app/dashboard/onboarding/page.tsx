@@ -30,7 +30,7 @@ function buildHtmlSnippet(systemName: string, systemType: SystemType): string {
   <p style="margin:0;font-size:13px;color:#475569;">
     <strong style="color:#0f172a;">Contenuto generato da intelligenza artificiale</strong>
     — Stai interagendo con <strong style="color:#0f172a;">${systemName}</strong>,
-    un sistema AI di tipo <em>${SYSTEM_TYPE_LABELS[systemType]}</em>.
+    un sistema di IA di tipo <em>${SYSTEM_TYPE_LABELS[systemType]}</em>.
     Ai sensi dell'Art. 50 del Regolamento EU AI Act (UE 2024/1689), sei informato
     che questo sistema utilizza intelligenza artificiale.
   </p>
@@ -52,7 +52,7 @@ export function AIDisclosure() {
         <strong className="text-slate-900">Contenuto generato da intelligenza artificiale</strong>
         {" — "}Stai interagendo con{" "}
         <strong className="text-slate-900">${systemName}</strong>,
-        un sistema AI di tipo <em>${SYSTEM_TYPE_LABELS[systemType]}</em>.
+        un sistema di IA di tipo <em>${SYSTEM_TYPE_LABELS[systemType]}</em>.
         Ai sensi dell&apos;Art. 50 del Regolamento EU AI Act (UE 2024/1689),
         sei informato che questo sistema utilizza intelligenza artificiale.
       </p>
@@ -74,7 +74,7 @@ function aicomply_art50_disclosure() {
   echo '<strong style="color:#0f172a;">Contenuto generato da intelligenza artificiale</strong>';
   echo ' — Stai interagendo con <strong style="color:#0f172a;">';
   echo esc_html($system_name);
-  echo '</strong>, un sistema AI di tipo <em>';
+  echo '</strong>, un sistema di IA di tipo <em>';
   echo esc_html($system_type);
   echo '</em>. Ai sensi dell\'Art. 50 del Regolamento EU AI Act (UE 2024/1689), ';
   echo 'sei informato che questo sistema utilizza intelligenza artificiale.';
@@ -254,14 +254,14 @@ function Step1({ initialUrl, onNext }: { initialUrl: string; onNext: (data: Step
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    onNext({ systemName: systemName.trim() || "Sistema AI", systemType, systemUrl });
+    onNext({ systemName: systemName.trim() || "Sistema di IA", systemType, systemUrl });
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
         <label className="block text-[12px] font-medium mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
-          Nome del sistema AI
+          Nome del sistema di IA
         </label>
         <input
           type="text"
@@ -282,7 +282,7 @@ function Step1({ initialUrl, onNext }: { initialUrl: string; onNext: (data: Step
 
       <div>
         <label className="block text-[12px] font-medium mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
-          Tipo di sistema AI
+          Tipo di sistema di IA
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {(Object.keys(SYSTEM_TYPE_LABELS) as SystemType[]).map(key => (
@@ -353,8 +353,8 @@ function Step2({ step1: { systemName, systemType }, onNext }: { step1: Step1Data
   };
 
   const instructions: Record<SnippetTab, string> = {
-    html:      "Inserisci questo snippet all'inizio del <body>, prima del contenuto principale. La disclosure deve essere visibile prima che l'utente interagisca con il sistema AI.",
-    react:     "Aggiungi il componente AIDisclosure all'inizio del layout principale o del componente che contiene il sistema AI.",
+    html:      "Inserisci questo snippet all'inizio del <body>, prima del contenuto principale. La disclosure deve essere visibile prima che l'utente interagisca con il sistema di IA.",
+    react:     "Aggiungi il componente AIDisclosure all'inizio del layout principale o del componente che contiene il sistema di IA.",
     wordpress: "Incolla questo codice nel file functions.php del tuo tema. La funzione si aggancia a wp_body_open.",
   };
 
@@ -417,7 +417,7 @@ function Step2({ step1: { systemName, systemType }, onNext }: { step1: Step1Data
         }}
       >
         <span style={{ color: "#b45309", fontWeight: 600 }}>📋 Nota legale —</span>{" "}
-        La disclosure deve essere mostrata <em>prima o al momento</em> dell&apos;interazione con il sistema AI,
+        La disclosure deve essere mostrata <em>prima o al momento</em> dell&apos;interazione con il sistema di IA,
         in posizione prominente e nella lingua dell&apos;utente (Art. 50(1) + Considerando 132 AI Act).
       </div>
 

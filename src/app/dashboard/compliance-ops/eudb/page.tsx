@@ -680,9 +680,9 @@ export default function EUDBCompliancePage() {
           </pre>
         </SectionCard>
 
-        <SectionCard title="Annex VIII — Sezione B: Sistema AI" article="Annex VIII §4-8">
+        <SectionCard title="Annex VIII — Sezione B: Sistema di IA" article="Annex VIII §4-8">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-            <span style={{ fontSize: 11, color: DK.muted }}>Dati del sistema AI</span>
+            <span style={{ fontSize: 11, color: DK.muted }}>Dati del sistema di IA</span>
             <button onClick={() => copySection("b")} style={{ display: "flex", alignItems: "center", gap: 5,
               padding: "4px 10px", borderRadius: 6, fontSize: 10, cursor: "pointer",
               background: copiedSection === "b" ? DK.greenBg : "rgba(0,0,0,0.05)",

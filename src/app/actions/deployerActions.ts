@@ -4,7 +4,7 @@ import type { DeployerApplicabilityFlags } from "@/lib/deployer/deployer-types";
 import type { AISystem } from "@/lib/inventory/ai-system";
 
 // ── assessDeployerApplicability ────────────────────────────────────────────
-// Propone i flag di applicabilità per un sistema AI dal punto di vista
+// Propone i flag di applicabilità per un sistema di IA dal punto di vista
 // del deployer (Art. 26). Output: JSON con i 6 flag booleani + rationale.
 
 export interface ApplicabilityAssessmentResult {
@@ -17,9 +17,9 @@ export async function assessDeployerApplicability(
   system: Pick<AISystem, "name" | "description" | "tier" | "tierBasis" | "role" | "obligationsNote">
 ): Promise<ApplicabilityAssessmentResult> {
   const prompt = `Sei un esperto di conformità AI Act UE (Reg. 2024/1689).
-Analizza il seguente sistema AI dal punto di vista del DEPLOYER (Art. 26) e proponi i flag di applicabilità degli obblighi condizionali.
+Analizza il seguente sistema di IA dal punto di vista del DEPLOYER (Art. 26) e proponi i flag di applicabilità degli obblighi condizionali.
 
-Sistema AI:
+Sistema di IA:
 - Nome: ${system.name}
 - Descrizione: ${system.description ?? "n.d."}
 - Tier di rischio: ${system.tier}
@@ -96,16 +96,16 @@ export async function draftWorkerInformationNotice(input: {
 Redigi una bozza di INFORMATIVA AI PER I LAVORATORI ai sensi dell'Art. 26(7) del Regolamento AI Act.
 
 Dati del sistema:
-- Nome sistema AI: ${input.systemName}
+- Nome sistema di IA: ${input.systemName}
 - Descrizione: ${input.systemDescription}
 - Organizzazione deployer: ${input.organizationName}
 - Contesto di deployment: ${input.deploymentContext}
 
 L'informativa deve:
 1. Essere in italiano formale
-2. Indicare il sistema AI utilizzato e il suo scopo
+2. Indicare il sistema di IA utilizzato e il suo scopo
 3. Spiegare come interagisce con i lavoratori
-4. Descrivere le misure di supervisione umana
+4. Descrivere le misure di sorveglianza umana
 5. Indicare i diritti dei lavoratori e i referenti per domande
 6. Contenere la dicitura normativa
 7. Essere pronta per la comunicazione sindacale / HR

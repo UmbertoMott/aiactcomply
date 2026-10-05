@@ -396,7 +396,7 @@ export const DPIA_SUBPOINTS: DpiaSubPoint[] = [
   {
     id: "a_system_name", sectionKey: "descr",
     label: "Nome del sistema e titolare",
-    question: "Qual è il nome del sistema AI/trattamento e chi è il titolare del trattamento?",
+    question: "Qual è il nome del sistema di IA/trattamento e chi è il titolare del trattamento?",
     ref: "GDPR Art. 35(7)(a)",
     fieldPath: "description.system_name",
     fieldType: "text",

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 
-/** Chiave globale che identifica il sistema AI attivo */
+/** Chiave globale che identifica il sistema di IA attivo */
 const ACTIVE_SYSTEM_KEY = "aicomply_active_system_id";
 
 /** Legge il systemId attivo dal localStorage — "default" se assente */

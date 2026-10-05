@@ -357,7 +357,7 @@ function WorkerNoticeModule({
       ) : (
         <p className="text-xs" style={{ color: "#6b7280" }}>
           Genera una bozza di informativa da inviare ai lavoratori e ai rappresentanti sindacali
-          prima del deployment del sistema AI.
+          prima del deployment del sistema di IA.
         </p>
       )}
     </div>
@@ -819,7 +819,7 @@ export default function DeployerSystemDetailPage() {
               </span>
             </div>
             <p className="text-xs mb-3" style={{ color: "#6b7280" }}>
-              Come autorità pubblica che effettua il deployment di un sistema AI ad alto rischio,
+              Come autorità pubblica che effettua il deployment di un sistema di IA ad alto rischio,
               sei tenuto a registrare il sistema nel database EU AI Act prima dell&apos;uso.{" "}
               <span style={{ color: "#9ca3af" }}></span>
             </p>

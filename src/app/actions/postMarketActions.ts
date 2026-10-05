@@ -14,7 +14,7 @@ export async function draftPostMarketReport(
 ): Promise<DraftReportResult> {
   const prompt = `Sei un esperto di conformità AI Act UE (Reg. 2024/1689), specializzato in Post-Market Monitoring (Art. 72).
 
-Stai redigendo un report di monitoraggio post-market per un sistema AI ad alto rischio.
+Stai redigendo un report di monitoraggio post-market per un sistema di IA ad alto rischio.
 
 PIANO DI MONITORAGGIO ATTIVO:
 - Descrizione sistema: ${plan.pmmSystemDescription || "non specificato"}
@@ -72,7 +72,7 @@ export async function proposePMMPlan(input: {
   tier: string;
   riskLevel?: string;
 }): Promise<ProposePMMPlanResult> {
-  const prompt = `Sei un esperto di conformità AI Act UE. Proponi un Piano di Monitoraggio Post-Market (PMM) per un sistema AI ad alto rischio ai sensi dell'Art. 72.
+  const prompt = `Sei un esperto di conformità AI Act UE. Proponi un Piano di Monitoraggio Post-Market (PMM) per un sistema di IA ad alto rischio ai sensi dell'Art. 72.
 
 Sistema: "${input.systemName}"
 Ruolo: ${input.systemRole}

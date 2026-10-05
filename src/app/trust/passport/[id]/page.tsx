@@ -110,7 +110,7 @@ export default async function PublicPassportPage({ params, searchParams }: PageP
           <ul className="space-y-2 text-sm" style={{ color: T.muted }}>
             <li className="flex items-start gap-2">
               <Award className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: T.purple }} />
-              <span><strong style={{ color: "#fff" }}>Bias testato</strong> — il sistema AI è stato sottoposto ad audit di equità con metriche standard (OFI, SPD, DI, EOD)</span>
+              <span><strong style={{ color: "#fff" }}>Bias testato</strong> — il sistema di IA è stato sottoposto ad audit di equità con metriche standard (OFI, SPD, DI, EOD)</span>
             </li>
             <li className="flex items-start gap-2">
               <Award className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: T.purple }} />

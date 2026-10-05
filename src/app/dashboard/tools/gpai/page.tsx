@@ -107,7 +107,7 @@ interface QualificationCheck {
 const QUALIFICATION_CHECKS: QualificationCheck[] = [
   {
     id: "uses_foundation_model",
-    question: "Il tuo sistema AI usa come componente un modello foundation di un altro provider (es. OpenAI GPT, Anthropic Claude, Google Gemini, Meta Llama, Mistral, ecc.)?",
+    question: "Il tuo sistema di IA usa come componente un modello foundation di un altro provider (es. OpenAI GPT, Anthropic Claude, Google Gemini, Meta Llama, Mistral, ecc.)?",
     explanation: "Se chiami API di modelli esterni o integri un modello pre-addestrato nel tuo prodotto, sei un downstream provider rispetto a quel modello. Questo non ti rende GPAI provider, ma comporta obblighi specifici su come usi la documentazione fornita dal provider upstream.",
     impact: "downstream",
   },

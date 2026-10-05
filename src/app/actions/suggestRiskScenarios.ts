@@ -26,16 +26,16 @@ export async function suggestRiskScenarios(
     return { error: "CONTEXT_MISSING" };
   }
 
-  const prompt = `Sei un esperto di risk management per sistemi AI in conformità con l'Art. 9 EU AI Act.
+  const prompt = `Sei un esperto di risk management per sistemi di IA in conformità con l'Art. 9 EU AI Act.
 
-Sistema AI da analizzare:
-- Nome: ${context.systemName ?? "Sistema AI"}
+Sistema di IA da analizzare:
+- Nome: ${context.systemName ?? "Sistema di IA"}
 - Descrizione: ${context.systemDescription ?? "nessuna descrizione"}
 - Livello di rischio: ${context.riskTier}
 - Allegato III applicabile: ${context.annexIII ? "sì" : "no"}
 - Articoli applicabili: ${context.applicableArticles?.join(", ") ?? "non determinati"}
 
-Genera 4-5 scenari di rischio specifici per questo sistema AI, conformi all'Art. 9(4) EU AI Act
+Genera 4-5 scenari di rischio specifici per questo sistema di IA, conformi all'Art. 9(4) EU AI Act
 che richiede di considerare i gruppi vulnerabili.
 
 Per ogni scenario indica:

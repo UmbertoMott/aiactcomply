@@ -323,7 +323,7 @@ VAT/P.IVA: ${r.ar_vat_number || "[DA INSERIRE]"}
 ${SEP}
 OGGETTO DEL MANDATO
 ${SEP}
-Sistema AI: ${doc.system_name    || "[DA INSERIRE]"} -- Versione ${doc.system_version || "[DA INSERIRE]"}
+Sistema di IA: ${doc.system_name    || "[DA INSERIRE]"} -- Versione ${doc.system_version || "[DA INSERIRE]"}
 Riferimento normativo: ${doc.annex_reference || "[DA INSERIRE]"}
 Decorrenza: ${doc.mandate_start_date || "[DA INSERIRE]"}
 Durata: ${durationLine}
@@ -358,6 +358,6 @@ Authorized Representative: _________________________ Data: _____________
 Nome e qualifica: _________________________
 
 [Il presente mandato deve essere firmato da entrambe le parti e conservato per tutta la durata
-della commercializzazione del sistema AI nell'UE e per almeno 10 anni successivi
+della commercializzazione del sistema di IA nell'UE e per almeno 10 anni successivi
 — Art. 22(1)+(3)]`.trim();
 }

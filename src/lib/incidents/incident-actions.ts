@@ -89,7 +89,7 @@ export function detectDraftIncidentsFromLogVault(systemId?: string): IncidentEnt
       .map((l) => ({
         id: `LV-${l.id ?? Math.random().toString(36).slice(2, 8).toUpperCase()}`,
         systemId: l.systemId ?? systemId,
-        system: l.systemId ?? systemId ?? "Sistema AI (da LogVault)",
+        system: l.systemId ?? systemId ?? "Sistema di IA (da LogVault)",
         date: (l.timestamp ?? l.importedAt ?? new Date().toISOString()).slice(0, 10),
         severity: l.severity ?? "high",
         severityClassification: "malfunction" as const,

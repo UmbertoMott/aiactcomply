@@ -252,7 +252,7 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
           <tbody>
             {[
               { art: "Art. 5",  title: "Verifica Pratiche Vietate",               status: data.prohibited   ? "complete" : "missing" },
-              { art: "Art. 6",  title: "Classificazione del Sistema AI",           status: data.classifier   ? "complete" : "missing" },
+              { art: "Art. 6",  title: "Classificazione del Sistema di IA",           status: data.classifier   ? "complete" : "missing" },
               { art: "Art. 9",  title: "Gestione del Rischio",                     status: data.riskManager  ? "complete" : "missing" },
               { art: "Art. 10", title: "Audit Dataset e Governance Dati",          status: data.dataAudit    ? "complete" : "missing" },
               { art: "Art. 11", title: "Documentazione Tecnica (Allegato IV)",     status: data.docugen      ? "complete" : "missing" },
@@ -333,7 +333,7 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
       </Section>
 
       {/* ── ART. 6 — CLASSIFICAZIONE ── */}
-      <Section id="sec-classifier" article="Art. 6" title="Classificazione del Sistema AI"
+      <Section id="sec-classifier" article="Art. 6" title="Classificazione del Sistema di IA"
         subtitle="Classificazione ai sensi dell'Art. 6 e dell'Allegato III del Reg. UE 2024/1689."
         completedAt={data.classifier?.completedAt}>
         {data.classifier ? (() => {
@@ -461,7 +461,7 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
             <InfoRow label="Scopo e finalità"     value={n(data.docugen.purpose)} />
             <InfoRow label="Capacità"             value={n(data.docugen.capabilities)} />
             <InfoRow label="Limitazioni"          value={n(data.docugen.limitations)} />
-            <InfoRow label="Supervisione umana"   value={n(data.docugen.humanOversight)} />
+            <InfoRow label="Sorveglianza umana"   value={n(data.docugen.humanOversight)} />
             <InfoRow label="Metriche di performance" value={n(data.docugen.performanceMetrics)} />
             <InfoRow label="Dati di addestramento"   value={n(data.docugen.trainingData)} />
           </>
@@ -507,7 +507,7 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
         completedAt={data.transparency?.completedAt}>
         {data.transparency ? (
           <>
-            <InfoRow label="Utenti informati del sistema AI" value={data.transparency.userInformedOfAI ? "✓ Sì" : "✕ No"} />
+            <InfoRow label="Utenti informati del sistema di IA" value={data.transparency.userInformedOfAI ? "✓ Sì" : "✕ No"} />
             <InfoRow label="Punto di contatto"  value={n(data.transparency.contactPoint)} />
             <InfoRow label="Lingue disponibili"
               value={

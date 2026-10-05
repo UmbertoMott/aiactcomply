@@ -29,7 +29,7 @@ export function generateEudbXml(draft: EudbDraft): string {
     <Role>${escapeXml(draft.providerRole)}</Role>
   </Provider>
 
-  <!-- Allegato VIII — Sezione B: Informazioni sul Sistema AI -->
+  <!-- Allegato VIII — Sezione B: Informazioni sul Sistema di IA -->
   <AISystem>
     <Name>${escapeXml(draft.systemName)}</Name>
     <Version>${escapeXml(draft.systemVersion)}</Version>

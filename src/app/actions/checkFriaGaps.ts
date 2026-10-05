@@ -76,7 +76,7 @@ Verifica TUTTI gli elementi obbligatori:
 2. Art. 27(1)(b) — Periodo/frequenza di utilizzo del sistema
 3. Art. 27(1)(c) — Categorie di persone fisiche e gruppi interessati nel contesto specifico di deployment
 4. Art. 27(1)(d) — Rischi specifici di danno per i diritti e le libertà fondamentali, considerando anche i minori e le persone vulnerabili
-5. Art. 27(1)(e) — Misure di supervisione umana pianificate per l'implementazione
+5. Art. 27(1)(e) — Misure di sorveglianza umana pianificate per l'implementazione
 6. Art. 27(1)(f) — Misure da adottare se i rischi si materializzano, inclusi meccanismi di reclamo e rimedi
 7. Art. 27(2) — Notifica all'autorità di vigilanza del mercato (obbligo se raccomandazione non è "deploy" incondizionato)
 8. Art. 27(4) — Coordinamento con DPIA GDPR (la DPIA non sostituisce la FRIA ma deve essere coerente)

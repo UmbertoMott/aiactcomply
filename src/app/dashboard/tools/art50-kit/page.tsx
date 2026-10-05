@@ -201,7 +201,7 @@ export default function Art50KitPage() {
   function downloadRegistro(system: Art50System) {
     const lines = [
       "REGISTRO DI IMPLEMENTAZIONE ART. 50 — AI ACT (UE) 2024/1689", "=".repeat(60), "",
-      `ID Registro:          ${system.registroId}`, `Sistema AI:           ${system.name}`,
+      `ID Registro:          ${system.registroId}`, `Sistema di IA:           ${system.name}`,
       `Tipologia:            ${TYPE_LABELS[system.type]}`, `URL:                  ${system.url || "non specificato"}`,
       `Data registrazione:   ${new Date(system.createdAt).toLocaleDateString("it-IT", { day: "2-digit", month: "long", year: "numeric" })}`,
       `Ultimo scan:          ${system.lastScannedAt ? new Date(system.lastScannedAt).toLocaleDateString("it-IT", { day: "2-digit", month: "long", year: "numeric" }) : "non eseguito"}`,

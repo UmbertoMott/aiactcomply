@@ -432,7 +432,7 @@ export default function LogVaultPage() {
 
   // Read classifier context
   const cls = typeof window !== "undefined" ? readFromStorage<ClassifierResult>("classifier") : null;
-  const systemName = cls?.systemName ?? "Sistema AI";
+  const systemName = cls?.systemName ?? "Sistema di IA";
   const intendedPurpose = cls?.systemDescription ?? "";
   const riskTier = cls?.riskLevel ?? "n.d.";
 

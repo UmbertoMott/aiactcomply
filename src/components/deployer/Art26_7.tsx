@@ -11,7 +11,7 @@ interface Props {
 }
 
 const OPTIONS: { value: DeployerRecord["endUserNotificationsStatus"]; label: string; desc: string }[] = [
-  { value: "compliant",    label: "Conforme",      desc: "Le persone fisiche sono informate dell'uso del sistema AI" },
+  { value: "compliant",    label: "Conforme",      desc: "Le persone fisiche sono informate dell'uso del sistema di IA" },
   { value: "pending",      label: "In corso",      desc: "Processo di notifica in fase di implementazione" },
   { value: "not_required", label: "Non richiesto", desc: "Tipo di sistema escluso dall'obbligo di notifica" },
 ];
@@ -20,7 +20,7 @@ export function Art26_7({ record, onChange }: Props) {
   return (
     <div className="space-y-3">
       <p className="text-xs text-slate-400">
-        Le persone fisiche soggette alle decisioni del sistema AI devono essere informate
+        Le persone fisiche soggette alle decisioni del sistema di IA devono essere informate
         del suo utilizzo (Art. 26(7)).
       </p>
 

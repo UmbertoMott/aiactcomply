@@ -120,7 +120,7 @@ export const CONFORMITY_REQUIREMENTS: ConformityRequirement[] = [
     id: "req-art9",
     article: "Art. 9",
     title: "Sistema di gestione dei rischi",
-    description: "È stato implementato e documentato un sistema iterativo di gestione dei rischi per l'intero ciclo di vita del sistema AI.",
+    description: "È stato implementato e documentato un sistema iterativo di gestione dei rischi per l'intero ciclo di vita del sistema di IA.",
     verificationQuestion: "Il Risk Manager è stato completato e i rischi residui sono a livello accettabile?",
     linkedToolKey: "riskManager",
     linkedToolHref: "/dashboard/tools/risk-manager",
@@ -207,7 +207,7 @@ export const CONFORMITY_REQUIREMENTS: ConformityRequirement[] = [
     id: "req-art14",
     article: "Art. 14",
     title: "Sorveglianza umana",
-    description: "Sono predisposte misure che consentono alle persone fisiche di sorvegliare efficacemente il sistema AI durante il suo utilizzo.",
+    description: "Sono predisposte misure che consentono alle persone fisiche di sorvegliare efficacemente il sistema di IA durante il suo utilizzo.",
     verificationQuestion: "Il meccanismo di oversight umano e la capacità di intervento/stop sono documentati?",
     linkedToolKey: "oversight",
     linkedToolHref: "/dashboard/tools/oversight",
@@ -241,7 +241,7 @@ export const CONFORMITY_REQUIREMENTS: ConformityRequirement[] = [
     id: "req-art17",
     article: "Art. 17",
     title: "Sistema di gestione della qualità",
-    description: "Il provider ha implementato un sistema di gestione della qualità che copre tutti gli aspetti del ciclo di vita del sistema AI.",
+    description: "Il provider ha implementato un sistema di gestione della qualità che copre tutti gli aspetti del ciclo di vita del sistema di IA.",
     verificationQuestion: "Il QMS Builder è stato completato con almeno le sezioni obbligatorie?",
     linkedToolKey: "qms",
     linkedToolHref: "/dashboard/tools/qms",
@@ -302,7 +302,7 @@ export function generateDeclarationOfConformity(
 ): string {
   const today = new Date();
   const docId = `DCU-${today.getFullYear()}-${Date.now().toString(36).toUpperCase().slice(-6)}`;
-  const systemName = evidence.docugen?.systemName || evidence.classifier?.systemName || "Sistema AI";
+  const systemName = evidence.docugen?.systemName || evidence.classifier?.systemName || "Sistema di IA";
   const provider = evidence.docugen?.provider || companyName;
 
   return `DICHIARAZIONE DI CONFORMITÀ UE
@@ -326,7 +326,7 @@ Documento n. ${docId}
    La presente dichiarazione di conformità è rilasciata sotto la responsabilità
    esclusiva del produttore sopra indicato.
 
-   Il sistema AI descritto al punto 1 è conforme al Regolamento UE 2024/1689
+   Il sistema di IA descritto al punto 1 è conforme al Regolamento UE 2024/1689
    (Intelligenza Artificiale — AI Act) e in particolare agli articoli:
    Art. 5 (assenza pratiche vietate), Art. 9 (gestione rischi),
    Art. 10 (dati e governance), Art. 11 (documentazione tecnica),

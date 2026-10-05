@@ -55,7 +55,7 @@ export default function ProviderTransitionAlertBanner() {
         </p>
         <p style={{ color: "#94A3B8", fontSize: 12, lineHeight: 1.5 }}>
           {isProvider
-            ? `Le modifiche apportate al sistema AI potrebbero configurare obblighi del fornitore ai sensi dell'Art. 25 Reg. (UE) 2024/1689.${earliest ? ` Prima modifica sostanziale: ${earliest}.` : ""}`
+            ? `Le modifiche apportate al sistema di IA potrebbero configurare obblighi del fornitore ai sensi dell'Art. 25 Reg. (UE) 2024/1689.${earliest ? ` Prima modifica sostanziale: ${earliest}.` : ""}`
             : "Una o più risposte 'Incerto' richiedono valutazione legale prima di escludere obblighi del fornitore (Art. 25)."
           }
         </p>

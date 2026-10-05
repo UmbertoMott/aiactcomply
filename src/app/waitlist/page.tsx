@@ -263,7 +263,7 @@ function WaitlistForm() {
                     onFocus={(e) => (e.currentTarget.style.borderColor = "#6366f1")}
                     onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(0,0,0,0.12)")}
                   >
-                    <option value="" disabled>Sistemi AI usati *</option>
+                    <option value="" disabled>Sistemi di IA usati *</option>
                     <option value="1">1</option>
                     <option value="2-5">2–5</option>
                     <option value="6-20">6–20</option>

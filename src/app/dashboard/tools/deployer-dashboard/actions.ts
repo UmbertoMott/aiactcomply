@@ -17,7 +17,7 @@ export async function extractInstructionsInsights(
   rawText: string
 ): Promise<InstructionsInsights> {
   const prompt = `
-Analizza questo documento "Instructions for Use" di un sistema AI ad alto rischio (EU AI Act Art. 13).
+Analizza questo documento "Instructions for Use" di un sistema di IA ad alto rischio (EU AI Act Art. 13).
 Estrai esattamente:
 1. LIMITI OPERATIVI: contesti o condizioni in cui il sistema NON deve essere usato
 2. PARAMETRI INPUT CORRETTI: formato, range e qualità degli input ammessi

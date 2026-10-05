@@ -49,7 +49,7 @@ function savePrefs(p: { viewMode: "ai" | "chronological"; filterStatus?: Deadlin
 
 /**
  * Ruolo e filtro-sistema sono preferenze dell'utente che naviga la pagina,
- * non dati legati a un singolo sistema AI — restano globali (non scoped
+ * non dati legati a un singolo sistema di IA — restano globali (non scoped
  * per systemId) per evitare che l'utente debba ri-selezionarli ad ogni
  * cambio di sistema attivo.
  */
@@ -598,7 +598,7 @@ export default function DeadlinesPage() {
             <div>
               <p className="text-sm font-medium mb-1" style={{ color: TEXT }}>Scadenze personalizzate non disponibili</p>
               <p className="text-[12px] leading-relaxed" style={{ color: MUTED }}>
-                Stai visualizzando solo le scadenze che si applicano a tutti i sistemi AI.
+                Stai visualizzando solo le scadenze che si applicano a tutti i sistemi di IA.
                 Completa il <Link href="/dashboard/triage" className="underline" style={{ color: "#0D1016" }}>Triage</Link> o
                 aggiungi sistemi all&apos;<Link href="/dashboard/tools/inventory" className="underline" style={{ color: "#0D1016" }}>Inventario</Link> per scadenze filtrate per il tuo tier normativo.
               </p>

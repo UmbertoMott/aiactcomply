@@ -26,7 +26,7 @@ export async function proposeEmotionBiometricTriage(input: {
   description: string;
 }): Promise<ProposeEmotionBiometricTriageResult> {
   const prompt = `Sei un esperto di conformità AI Act UE (Reg. 2024/1689), specializzato nell'Art. 5 — pratiche vietate.
-Devi analizzare un sistema AI e proporre una valutazione iniziale (triage) per due specifiche pratiche vietate.
+Devi analizzare un sistema di IA e proporre una valutazione iniziale (triage) per due specifiche pratiche vietate.
 
 SISTEMA AI DA ANALIZZARE:
 - Nome: ${input.systemName}

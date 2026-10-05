@@ -423,7 +423,7 @@ export default function DataAuditPage() {
   const [sanctionsBannerDismissed, setSanctionsBannerDismissed] = useState(false);
 
   const cls = typeof window !== "undefined" ? readFromStorage<ClassifierResult>("classifier") : null;
-  const systemName = cls?.systemName ?? "Sistema AI";
+  const systemName = cls?.systemName ?? "Sistema di IA";
   const systemDescription = cls?.systemDescription ?? "";
   const riskTier = cls?.riskLevel ?? "n.d.";
 

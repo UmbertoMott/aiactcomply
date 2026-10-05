@@ -268,6 +268,6 @@ Scansiona il QR code per verificare in tempo reale la validità del passport sul
 
 ---
 
-*Documento generato dalla piattaforma AIComply secondo lo standard EU AI Act. La presente dichiarazione non sostituisce la documentazione tecnica completa (Annex IV) né attesta la conformità giuridica integrale, che resta responsabilità del fornitore del sistema AI.*
+*Documento generato dalla piattaforma AIComply secondo lo standard EU AI Act. La presente dichiarazione non sostituisce la documentazione tecnica completa (Annex IV) né attesta la conformità giuridica integrale, che resta responsabilità del fornitore del sistema di IA.*
 `;
 }

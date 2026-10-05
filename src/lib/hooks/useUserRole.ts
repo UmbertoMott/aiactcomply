@@ -13,10 +13,10 @@ export const ROLE_LABELS: Record<NonNullable<UserRole>, string> = {
 };
 
 export const ROLE_DESCRIPTIONS: Record<NonNullable<UserRole>, string> = {
-  provider:    "Sviluppi o immetti sul mercato un sistema AI",
-  deployer:    "Usi un sistema AI di terzi nel tuo contesto",
-  importer:    "Porti in EU un sistema AI sviluppato fuori UE",
-  distributor: "Rendi disponibile un sistema AI senza modificarlo",
+  provider:    "Sviluppi o immetti sul mercato un sistema di IA",
+  deployer:    "Usi un sistema di IA di terzi nel tuo contesto",
+  importer:    "Porti in EU un sistema di IA sviluppato fuori UE",
+  distributor: "Rendi disponibile un sistema di IA senza modificarlo",
 };
 
 export function useUserRole() {

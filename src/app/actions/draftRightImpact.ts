@@ -28,7 +28,7 @@ export async function draftRightImpact(params: {
 }): Promise<RightImpactDraft | { error: string }> {
   const prompt = `Sei un esperto di FRIA (Fundamental Rights Impact Assessment, Art. 27 EU AI Act).
 
-Sistema AI:
+Sistema di IA:
 - Nome: ${params.systemName}
 - Descrizione: ${params.systemDescription}
 - Risk level: ${params.riskLevel}

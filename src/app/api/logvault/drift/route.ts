@@ -1,5 +1,5 @@
 // src/app/api/logvault/drift/route.ts
-// Real-time drift detection per sistemi AI — Art. 12 EU AI Act
+// Real-time drift detection per sistemi di IA — Art. 12 EU AI Act
 // Analizza gli ultimi N log e rileva deviazioni dai parametri di conformità
 
 import { createClient } from "@/lib/supabase/server";
@@ -142,7 +142,7 @@ export async function GET(req: Request) {
       deviation_pct: Math.round(((breachRate - THRESHOLDS.guardrail_breach_pct) / THRESHOLDS.guardrail_breach_pct) * 100),
       severity: "critical",
       description: `${guardrailBreaches} violazioni guardrail (${breachRate.toFixed(1)}%). Richiede revisione immediata.`,
-      art_reference: "Art. 14 — Supervisione umana: guardrail breach requires human review",
+      art_reference: "Art. 14 — Sorveglianza umana: guardrail breach requires human review",
     });
   }
 

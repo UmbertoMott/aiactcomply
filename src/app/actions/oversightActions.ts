@@ -30,9 +30,9 @@ export async function suggestOversightMeasures(input: {
     (r, i) => `${i + 1}. id="${r.id}" — ${r.label} (${r.primaryReference})`
   ).join("\n");
 
-  const prompt = `Sei un esperto di conformità AI Act UE (Reg. 2024/1689), specializzato in Art. 14 (supervisione umana per sistemi AI ad alto rischio).
+  const prompt = `Sei un esperto di conformità AI Act UE (Reg. 2024/1689), specializzato in Art. 14 (sorveglianza umana per sistemi di IA ad alto rischio).
 
-Sistema AI da analizzare:
+Sistema di IA da analizzare:
 - Nome: ${input.systemName}
 - Descrizione: ${input.systemDescription}
 - Tier di rischio: ${input.riskTier}
@@ -122,7 +122,7 @@ export async function assessFourEyesApplicability(input: {
   riskTier?: string;
 }): Promise<FourEyesApplicabilityResult> {
   const prompt = `Sei un esperto di AI Act UE (Reg. 2024/1689).
-Devi determinare se il seguente sistema AI rientra nell'Allegato III punto 1(a) — cioè se è un sistema di identificazione biometrica e/o categorizzazione biometrica — ai fini dell'applicazione della verifica a due persone di cui all'Art. 14(5).
+Devi determinare se il seguente sistema di IA rientra nell'Allegato III punto 1(a) — cioè se è un sistema di identificazione biometrica e/o categorizzazione biometrica — ai fini dell'applicazione della verifica a due persone di cui all'Art. 14(5).
 
 Sistema:
 - Nome: ${input.systemName}

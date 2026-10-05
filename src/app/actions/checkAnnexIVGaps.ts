@@ -41,7 +41,7 @@ export async function checkAnnexIVGaps(
 Verifica se la documentazione tecnica fornita copre tutti i requisiti dell'Allegato IV.
 
 Allegato IV richiede (elenco non esaustivo):
-1. Descrizione generale del sistema AI
+1. Descrizione generale del sistema di IA
 2. Descrizione degli elementi del sistema e del processo di sviluppo
 3. Informazioni dettagliate sulle performance del sistema
 4. Descrizione del processo di monitoraggio, funzionamento e controllo
@@ -59,7 +59,7 @@ Documentazione analizzata:
 - Scopo: "${documentContent.purpose}"
 - Capacità: "${documentContent.capabilities}"
 - Limitazioni: "${documentContent.limitations}"
-- Supervisione umana: "${documentContent.humanOversight}"
+- Sorveglianza umana: "${documentContent.humanOversight}"
 - Metriche performance: "${documentContent.performanceMetrics}"
 - Dati training: "${documentContent.trainingData}"
 

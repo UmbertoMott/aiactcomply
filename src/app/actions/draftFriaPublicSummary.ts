@@ -31,7 +31,7 @@ export async function draftFriaPublicSummary(
 Devi redigere una sintesi pubblica ai sensi dell'Art. 27 del Regolamento UE sull'Intelligenza Artificiale (AI Act).
 
 Dati della FRIA (Valutazione d'Impatto sui Diritti Fondamentali):
-- Sistema AI: ${doc.system_name || "Sistema AI non specificato"}
+- Sistema di IA: ${doc.system_name || "Sistema di IA non specificato"}
 - Organizzazione: ${doc.organization || "non specificata"}
 - Scopo previsto: ${doc.context.intended_purpose_explanation || "non specificato"}
 - Categorie di persone interessate: ${doc.context.affected_persons || "non specificato"}
@@ -42,7 +42,7 @@ Dati della FRIA (Valutazione d'Impatto sui Diritti Fondamentali):
 - Principali misure di mitigazione: ${mitigationDescriptions}
 
 Genera una sintesi pubblica in italiano che copra obbligatoriamente questi 5 punti:
-1. Sistema valutato: descrivi il sistema AI, la sua finalità e il contesto di utilizzo
+1. Sistema valutato: descrivi il sistema di IA, la sua finalità e il contesto di utilizzo
 2. Categorie di persone interessate: chi è soggetto all'utilizzo del sistema
 3. Principali rischi identificati: i rischi sui diritti fondamentali emersi dalla valutazione
 4. Misure adottate: le misure di mitigazione implementate per ridurre i rischi

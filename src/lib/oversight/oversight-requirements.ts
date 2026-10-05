@@ -1,4 +1,4 @@
-// Art. 14 AI Act — 5 requisiti operativi di supervisione umana + modulo condizionale
+// Art. 14 AI Act — 5 requisiti operativi di sorveglianza umana + modulo condizionale
 // La numerazione 14(4)(a)-(e) riflette la struttura del testo disponibile al team;
 // verificare con il testo AI Act consolidato prima del rilascio.
 // è obbligatorio su ogni citazione normativa.
@@ -20,7 +20,7 @@ export const OVERSIGHT_REQUIREMENTS = [
     label: "Comprensione delle capacità e dei limiti del sistema",
     primaryReference: "Art. 14(4)(a)",
     description:
-      "Il supervisore deve comprendere le capacità e i limiti del sistema AI, inclusi i failure mode noti e gli indicatori di anomalia, così da riconoscere output inattesi o situazioni in cui il sistema non è affidabile.",
+      "Il supervisore deve comprendere le capacità e i limiti del sistema di IA, inclusi i failure mode noti e gli indicatori di anomalia, così da riconoscere output inattesi o situazioni in cui il sistema non è affidabile.",
     linkedTool: "ai-literacy",
     linkedToolLabel: "AI Literacy (Art. 4)",
     linkedToolPath: "/dashboard/tools/literacy",
@@ -31,7 +31,7 @@ export const OVERSIGHT_REQUIREMENTS = [
     label: "Consapevolezza del rischio di affidamento automatico (automation bias)",
     primaryReference: "Art. 14(4)(b)",
     description:
-      "Il supervisore deve essere consapevole della tendenza a fare eccessivo affidamento sugli output del sistema AI (automation bias), specialmente quando gli output appaiono con alta confidenza.",
+      "Il supervisore deve essere consapevole della tendenza a fare eccessivo affidamento sugli output del sistema di IA (automation bias), specialmente quando gli output appaiono con alta confidenza.",
     linkedTool: null,
     linkedToolLabel: null,
     linkedToolPath: null,

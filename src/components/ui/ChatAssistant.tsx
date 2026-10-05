@@ -69,11 +69,11 @@ AIComply copre tutti gli obblighi attraverso i suoi tool.`,
     keywords: ["ruolo", "provider", "deployer", "fornitore", "distributore", "importer", "importatore", "chi sono", "mio ruolo"],
     answer: `**Ruoli AI Act — chi sei?**
 
-🏭 **Provider (Fornitore):** Sviluppa e immette sul mercato sistemi AI. Ha gli obblighi più ampi: documentazione tecnica, QMS, conformity assessment, registrazione EU.
+🏭 **Provider (Fornitore):** Sviluppa e immette sul mercato sistemi di IA. Ha gli obblighi più ampi: documentazione tecnica, QMS, conformity assessment, registrazione EU.
 
-🏢 **Deployer (Operatore/Utilizzatore):** Usa il sistema AI in un contesto professionale. Deve fare FRIA (settore pubblico), DPIA (se dati personali), supervisione umana.
+🏢 **Deployer (Operatore/Utilizzatore):** Usa il sistema di IA in un contesto professionale. Deve fare FRIA (settore pubblico), DPIA (se dati personali), sorveglianza umana.
 
-📦 **Importer:** Importa da paesi terzi sistemi AI ad alto rischio. Verifica la conformità del provider straniero.
+📦 **Importer:** Importa da paesi terzi sistemi di IA ad alto rischio. Verifica la conformità del provider straniero.
 
 🛒 **Distributor:** Distribuisce senza modificare. Obblighi limitati: verifica marcatura CE, documentazione presente.
 
@@ -146,7 +146,7 @@ Alla fine trovi solo gli obblighi che riguardano quel sistema, con articolo, dat
 
 📍 Menu: *Valutazioni → Risk Manager*
 
-**A cosa serve:** Identifica, valuta e gestisce i rischi del sistema AI come richiesto dall'Art. 9 (obbligatorio per sistemi alto rischio).
+**A cosa serve:** Identifica, valuta e gestisce i rischi del sistema di IA come richiesto dall'Art. 9 (obbligatorio per sistemi alto rischio).
 
 **Metodologia:** Matrice rischi likelihood × impact
 - Likelihood: bassa / media / alta
@@ -180,7 +180,7 @@ Alla fine trovi solo gli obblighi che riguardano quel sistema, con articolo, dat
 
 📍 Menu: *Valutazioni → Data Audit*
 
-**A cosa serve:** Documenta e verifica la qualità, la provenienza e la correttezza dei dataset usati per training, validazione e test del sistema AI. Obbligatorio per sistemi alto rischio (Art. 10).
+**A cosa serve:** Documenta e verifica la qualità, la provenienza e la correttezza dei dataset usati per training, validazione e test del sistema di IA. Obbligatorio per sistemi alto rischio (Art. 10).
 
 **Per ogni dataset ti serve:**
 - Nome del dataset
@@ -211,14 +211,14 @@ Alla fine trovi solo gli obblighi che riguardano quel sistema, con articolo, dat
 
 📍 Menu: *Valutazioni → DocuGen AI*
 
-**A cosa serve:** Genera la documentazione tecnica obbligatoria per sistemi AI ad alto rischio secondo l'Art. 11 e l'Allegato IV dell'AI Act.
+**A cosa serve:** Genera la documentazione tecnica obbligatoria per sistemi di IA ad alto rischio secondo l'Art. 11 e l'Allegato IV dell'AI Act.
 
 **Informazioni necessarie:**
 - Nome sistema e provider/fornitore
 - Scopo e finalità del sistema
 - Capacità e funzionalità principali
 - Limitazioni note (casi non gestiti, contesti non supportati)
-- Meccanismi di supervisione umana previsti
+- Meccanismi di sorveglianza umana previsti
 - Metriche di performance (accuratezza, precision, recall, ecc.)
 - Descrizione dei dati di training
 
@@ -227,7 +227,7 @@ Alla fine trovi solo gli obblighi che riguardano quel sistema, con articolo, dat
 2. Architettura e componenti
 3. Dati di training e validazione
 4. Capacità e limiti di accuratezza
-5. Misure di supervisione umana
+5. Misure di sorveglianza umana
 6. Identificazione dei rischi
 
 **Output:** Documento strutturato pronto per audit e dossier tecnico.`,
@@ -242,7 +242,7 @@ Alla fine trovi solo gli obblighi che riguardano quel sistema, con articolo, dat
 
 📍 Menu: *Valutazioni → LogVault*
 
-**A cosa serve:** Configura e documenta il sistema di logging obbligatorio per i sistemi AI ad alto rischio. L'Art. 12 richiede che i sistemi generino automaticamente log degli eventi rilevanti.
+**A cosa serve:** Configura e documenta il sistema di logging obbligatorio per i sistemi di IA ad alto rischio. L'Art. 12 richiede che i sistemi generino automaticamente log degli eventi rilevanti.
 
 **Cosa configurare:**
 - Abilitare/disabilitare il logging
@@ -294,12 +294,12 @@ Alla fine trovi solo gli obblighi che riguardano quel sistema, con articolo, dat
   {
     id: "tool_oversight",
     topic: "Oversight",
-    keywords: ["oversight", "supervisione", "supervisione umana", "art 14", "human oversight", "controllo", "intervento umano", "stop"],
+    keywords: ["oversight", "supervisione", "sorveglianza umana", "art 14", "human oversight", "controllo", "intervento umano", "stop"],
     answer: `**Oversight — Supervisione Umana (Art. 14)**
 
 📍 Menu: *Valutazioni → Oversight*
 
-**A cosa serve:** Documenta i meccanismi di supervisione umana del sistema AI come richiesto dall'Art. 14 (obbligatorio per sistemi alto rischio).
+**A cosa serve:** Documenta i meccanismi di sorveglianza umana del sistema di IA come richiesto dall'Art. 14 (obbligatorio per sistemi alto rischio).
 
 **Cosa ti serve:**
 - Meccanismo di supervisione (es: revisione post-hoc, approvazione pre-decisione, monitoraggio continuo)
@@ -314,7 +314,7 @@ Alla fine trovi solo gli obblighi che riguardano quel sistema, con articolo, dat
 
 **Art. 14(4):** I deployer devono assegnare supervisori con competenze adeguate.
 
-**Output:** Piano di supervisione umana documentato nel dossier.`,
+**Output:** Piano di sorveglianza umana documentato nel dossier.`,
   },
 
   // ── RESILIENCE ──────────────────────────────────────────────────────────────
@@ -326,7 +326,7 @@ Alla fine trovi solo gli obblighi che riguardano quel sistema, con articolo, dat
 
 📍 Menu: *Valutazioni → Resilience*
 
-**A cosa serve:** Documenta accuratezza, robustezza e sicurezza informatica del sistema AI. Obbligatorio per sistemi alto rischio (Art. 15).
+**A cosa serve:** Documenta accuratezza, robustezza e sicurezza informatica del sistema di IA. Obbligatorio per sistemi alto rischio (Art. 15).
 
 **Cosa ti serve:**
 - Metrica di accuratezza principale (es: 94.2% accuracy su test set)
@@ -359,7 +359,7 @@ Alla fine trovi solo gli obblighi che riguardano quel sistema, con articolo, dat
 
 📍 Menu: *Valutazioni → QMS Builder*
 
-**A cosa serve:** Documenta il Sistema di Gestione della Qualità (SGQ/QMS) obbligatorio per i **Provider** di sistemi AI ad alto rischio (Art. 17).
+**A cosa serve:** Documenta il Sistema di Gestione della Qualità (SGQ/QMS) obbligatorio per i **Provider** di sistemi di IA ad alto rischio (Art. 17).
 
 **Cosa ti serve:**
 - Riferimento al documento QMS esistente (es: ISO 9001, ISO/IEC 42001)
@@ -390,7 +390,7 @@ Il QMS include il piano di monitoraggio post-immissione in commercio.
 
 📍 Menu: *Valutazioni → FRIA*
 
-**A cosa serve:** Valuta l'impatto del sistema AI sui diritti fondamentali (Carta UE dei diritti fondamentali). Obbligatorio per **Deployer del settore pubblico** e deployer privati che gestiscono servizi pubblici.
+**A cosa serve:** Valuta l'impatto del sistema di IA sui diritti fondamentali (Carta UE dei diritti fondamentali). Obbligatorio per **Deployer del settore pubblico** e deployer privati che gestiscono servizi pubblici.
 
 **5 Fasi ECNL/DIHR:**
 1. **Contesto** — Descrizione sistema, settore, popolazione, quadro legale, contesto istituzionale
@@ -455,13 +455,13 @@ Dignità umana, privacy, non discriminazione, giusto processo, libertà di espre
 
 **4 Aree di valutazione:**
 
-1. **Trasparenza HR** — Se il sistema AI è usato in ambito lavorativo (selezione, valutazione performance), devono essere informati i lavoratori e le rappresentanze sindacali prima dell'uso.
+1. **Trasparenza HR** — Se il sistema di IA è usato in ambito lavorativo (selezione, valutazione performance), devono essere informati i lavoratori e le rappresentanze sindacali prima dell'uso.
 
 2. **Etichettatura contenuti** — I contenuti generati da AI (testi, immagini, audio, video) devono essere chiaramente etichettati come tali.
 
 3. **Rischio Deepfake** — Sistemi che generano o modificano immagini/video di persone reali: obblighi specifici di consenso e disclosure.
 
-4. **Accessibilità** — I sistemi AI devono rispettare i requisiti di accessibilità (WCAG 2.1 AA).
+4. **Accessibilità** — I sistemi di IA devono rispettare i requisiti di accessibilità (WCAG 2.1 AA).
 
 **Chi deve farlo:**
 Tutti i soggetti che usano o distribuiscono AI in Italia, inclusi deployer e provider.
@@ -498,7 +498,7 @@ Provider che mettono a disposizione modelli GPAI nell'UE, incluse API commercial
 **Cosa ti serve:**
 - Numero di modelli GPAI
 - Se c'è rischio sistemico (capacità di calcolo training)
-- Ruoli: provider modello, provider sistema AI basato su GPAI, o entrambi
+- Ruoli: provider modello, provider sistema di IA basato su GPAI, o entrambi
 - Obblighi completati / totale
 
 **Output:** Stato compliance GPAI nel dossier.`,
@@ -513,7 +513,7 @@ Provider che mettono a disposizione modelli GPAI nell'UE, incluse API commercial
 
 📍 Menu: *Valutazioni → Conformity*
 
-**A cosa serve:** Completa la valutazione di conformità dell'AI Act e genera la Dichiarazione di Conformità UE. È il passo finale per immettere un sistema AI ad alto rischio sul mercato.
+**A cosa serve:** Completa la valutazione di conformità dell'AI Act e genera la Dichiarazione di Conformità UE. È il passo finale per immettere un sistema di IA ad alto rischio sul mercato.
 
 **2 Percorsi:**
 - **Self-assessment:** Per sistemi Allegato III (eccetto biometria/infrastrutture critiche). Il provider attesta autonomamente la conformità.
@@ -523,7 +523,7 @@ Provider che mettono a disposizione modelli GPAI nell'UE, incluse API commercial
 Risk Manager ✓ → Data Audit ✓ → DocuGen ✓ → LogVault ✓ → Transparency ✓ → Oversight ✓ → Resilience ✓ → QMS ✓
 
 **La dichiarazione di conformità include (Art. 47):**
-- Identificazione sistema AI
+- Identificazione sistema di IA
 - Dichiarazione di rispetto dell'AI Act
 - Riferimenti a standard tecnici armonizzati
 - Firma del rappresentante legale
@@ -560,7 +560,7 @@ Gli obblighi di ciascun sistema sono nella sua scheda dell'inventario; il menu l
 **A cosa serve:** Verifica e documenta la conformità agli obblighi di trasparenza verso gli utenti finali (Art. 50 AI Act), in vigore da agosto 2026.
 
 **Obblighi Art. 50:**
-1. **Chatbot/Agenti AI:** Informare l'utente che sta interagendo con un sistema AI (a meno che non sia ovvio)
+1. **Chatbot/Agenti AI:** Informare l'utente che sta interagendo con un sistema di IA (a meno che non sia ovvio)
 2. **Contenuti sintetici (deepfake):** Etichettare i contenuti generati/modificati da AI in modo da essere distinguibili
 3. **AI emotiva:** Informare le persone che il sistema rileva o inferisce emozioni
 4. **Biometria categorizzante:** Informare le persone coinvolte
@@ -583,17 +583,17 @@ La normativa italiana aggiunge etichettatura obbligatoria per contenuti AI nel s
 
 📍 Menu: *Valutazioni → AI Literacy*
 
-**A cosa serve:** Documenta le misure adottate per garantire un adeguato livello di alfabetizzazione AI al personale che lavora con sistemi AI. L'Art. 4 dell'AI Act richiede che provider e deployer adottino misure per garantire literacy adeguata.
+**A cosa serve:** Documenta le misure adottate per garantire un adeguato livello di alfabetizzazione AI al personale che lavora con sistemi di IA. L'Art. 4 dell'AI Act richiede che provider e deployer adottino misure per garantire literacy adeguata.
 
 **Chi deve essere formato:**
-- Personale che usa o supervisiona sistemi AI
+- Personale che usa o supervisiona sistemi di IA
 - Manager responsabili di decisioni basate su AI
 - Team di sviluppo e deployment
 - Addetti alla compliance AI
 
 **Contenuti minimi della formazione:**
-- Funzionamento dei sistemi AI usati
-- Limiti e rischi dei sistemi AI
+- Funzionamento dei sistemi di IA usati
+- Limiti e rischi dei sistemi di IA
 - Come riconoscere output errati o distorti
 - Obblighi normativi applicabili
 - Come segnalare problemi
@@ -665,7 +665,7 @@ Garantisce che il documento/valutazione sia stato rivisto e approvato da una per
 
 📍 Menu: *Monitoraggio → Post-Market*
 
-**A cosa serve:** Monitora le performance e gli incidenti dei sistemi AI già in produzione. L'Art. 72 richiede ai provider di sistemi alto rischio di implementare un piano di monitoraggio post-market.
+**A cosa serve:** Monitora le performance e gli incidenti dei sistemi di IA già in produzione. L'Art. 72 richiede ai provider di sistemi alto rischio di implementare un piano di monitoraggio post-market.
 
 **Cosa monitorare:**
 - Performance del sistema nel tempo (drift)

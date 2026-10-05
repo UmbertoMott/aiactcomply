@@ -14,7 +14,7 @@ export async function suggestEventSeverity(
   eventDescription: string,
   systemRiskLevel: string
 ): Promise<EventSeveritySuggestion | { error: string }> {
-  const prompt = `Sei un esperto di incident management per sistemi AI (Art. 12 e Art. 73 EU AI Act).
+  const prompt = `Sei un esperto di incident management per sistemi di IA (Art. 12 e Art. 73 EU AI Act).
 
 Evento da classificare: "${eventDescription}"
 Risk level del sistema: ${systemRiskLevel}

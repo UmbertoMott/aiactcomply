@@ -38,7 +38,7 @@ export const DEPLOYER_OBLIGATIONS: readonly DeployerObligationDefinition[] = [
   // ── Always applicable (5) ──────────────────────────────────────────────────
   {
     id: "D-01",
-    label: "Verifica conformità sistema AI",
+    label: "Verifica conformità sistema di IA",
     description:
       "Verificare che il fornitore abbia prodotto tutta la documentazione tecnica e la dichiarazione di conformità UE prima del deployment.",
     primaryReference: "Art. 26(1) AI Act",
@@ -51,7 +51,7 @@ export const DEPLOYER_OBLIGATIONS: readonly DeployerObligationDefinition[] = [
     id: "D-02",
     label: "Uso conforme alle istruzioni",
     description:
-      "Garantire che il sistema AI venga utilizzato esclusivamente secondo le istruzioni d'uso e il campo di applicazione previsto dal fornitore.",
+      "Garantire che il sistema di IA venga utilizzato esclusivamente secondo le istruzioni d'uso e il campo di applicazione previsto dal fornitore.",
     primaryReference: "Art. 26(2) AI Act",
     supportReferences: ["Art. 13(3)", "Art. 26(6)"],
     alwaysApplicable: true,
@@ -60,9 +60,9 @@ export const DEPLOYER_OBLIGATIONS: readonly DeployerObligationDefinition[] = [
   },
   {
     id: "D-03",
-    label: "Supervisione umana",
+    label: "Sorveglianza umana",
     description:
-      "Assegnare personale qualificato per la supervisione umana del sistema AI durante il funzionamento, con competenze tecniche adeguate — in conformità ai 5 requisiti operativi Art. 14(4)(a)-(e).",
+      "Assegnare personale qualificato per la sorveglianza umana del sistema di IA durante il funzionamento, con competenze tecniche adeguate — in conformità ai 5 requisiti operativi Art. 14(4)(a)-(e).",
     primaryReference: "Art. 26(5) AI Act",
     supportReferences: ["Art. 14(4)(a)-(e)"],
     alwaysApplicable: true,
@@ -84,7 +84,7 @@ export const DEPLOYER_OBLIGATIONS: readonly DeployerObligationDefinition[] = [
     id: "D-05",
     label: "Log e conservazione dati",
     description:
-      "Conservare i log generati dal sistema AI per il periodo minimo stabilito dalla normativa applicabile e garantirne l'integrità.",
+      "Conservare i log generati dal sistema di IA per il periodo minimo stabilito dalla normativa applicabile e garantirne l'integrità.",
     primaryReference: "Art. 26(6) AI Act",
     supportReferences: ["Art. 12(1)", "Art. 19"],
     alwaysApplicable: true,
@@ -109,7 +109,7 @@ export const DEPLOYER_OBLIGATIONS: readonly DeployerObligationDefinition[] = [
     id: "D-07",
     label: "FRIA — Valutazione impatto diritti fondamentali",
     description:
-      "Effettuare una valutazione d'impatto sui diritti fondamentali prima del deployment di sistemi AI ad alto rischio per uso pubblico.",
+      "Effettuare una valutazione d'impatto sui diritti fondamentali prima del deployment di sistemi di IA ad alto rischio per uso pubblico.",
     primaryReference: "Art. 27 AI Act",
     supportReferences: ["Art. 26(1)", "All. III"],
     alwaysApplicable: false,
@@ -121,7 +121,7 @@ export const DEPLOYER_OBLIGATIONS: readonly DeployerObligationDefinition[] = [
     id: "D-08",
     label: "Informativa ai lavoratori",
     description:
-      "Informare in modo trasparente e con anticipo i lavoratori e i rappresentanti sindacali sull'uso di sistemi AI che li riguardano.",
+      "Informare in modo trasparente e con anticipo i lavoratori e i rappresentanti sindacali sull'uso di sistemi di IA che li riguardano.",
     primaryReference: "Art. 26(7) AI Act",
     supportReferences: ["Considerando 89"],
     alwaysApplicable: false,
@@ -145,7 +145,7 @@ export const DEPLOYER_OBLIGATIONS: readonly DeployerObligationDefinition[] = [
     id: "D-10",
     label: "Registrazione EUDB (autorità pubbliche)",
     description:
-      "Registrare il sistema AI nel database EU AI Act (EUDB) prima del deployment, se si è un'autorità pubblica che utilizza sistemi ad alto rischio.",
+      "Registrare il sistema di IA nel database EU AI Act (EUDB) prima del deployment, se si è un'autorità pubblica che utilizza sistemi ad alto rischio.",
     primaryReference: "Art. 49(2) AI Act",
     supportReferences: ["Art. 26(1)", "Art. 71"],
     alwaysApplicable: false,
@@ -157,7 +157,7 @@ export const DEPLOYER_OBLIGATIONS: readonly DeployerObligationDefinition[] = [
     id: "D-11",
     label: "Registrazione RBI",
     description:
-      "Registrare il sistema AI nel database RBI (Regulatory Burden Inventory) entro 48 ore dall'inizio del deployment, se applicabile.",
+      "Registrare il sistema di IA nel database RBI (Regulatory Burden Inventory) entro 48 ore dall'inizio del deployment, se applicabile.",
     primaryReference: "Art. 26(10) AI Act",
     supportReferences: ["Art. 49"],
     alwaysApplicable: false,

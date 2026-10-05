@@ -63,7 +63,7 @@ const HR_REQUIREMENTS = [
   "Gli interessati (candidati/dipendenti) sono informati dell'uso dell'AI prima che avvenga",
   "L'informativa specifica quali dati sono elaborati e con quale logica",
   "Esiste una procedura per richiedere revisione umana delle decisioni automatizzate",
-  "Il sistema non viene usato come unico fattore decisionale vincolante senza supervisione umana",
+  "Il sistema non viene usato come unico fattore decisionale vincolante senza sorveglianza umana",
   "La documentazione di questa informativa è conservata per almeno 5 anni",
 ];
 
@@ -599,7 +599,7 @@ export default function L132Page() {
         setForm((f) => ({ ...f, systemName: cls.systemName! }));
       }
     }
-    // Carica sistemi AI dal DB
+    // Carica sistemi di IA dal DB
     loadAISystems().then(setAiSystems);
   }, []);
 

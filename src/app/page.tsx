@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     "EU AI Act compliance",
     "conformità AI Act",
     "software EU AI Act",
-    "classificazione sistema AI",
+    "classificazione sistema di IA",
     "documentazione tecnica AI",
     "AI Act obblighi",
     "AI governance platform",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "RegulaeOS — Conformità EU AI Act",
     description:
-      "Classifica il rischio del tuo sistema AI, genera documentazione tecnica e gestisci gli obblighi EU AI Act. Alto rischio dal 2 dicembre 2027.",
+      "Classifica il rischio del tuo sistema di IA, genera documentazione tecnica e gestisci gli obblighi EU AI Act. Alto rischio dal 2 dicembre 2027.",
     url: BASE_URL,
     siteName: "RegulaeOS",
     images: [
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "RegulaeOS — Conformità EU AI Act",
     description:
-      "Classifica il rischio del tuo sistema AI e gestisci gli obblighi EU AI Act. Alto rischio dal 2 dicembre 2027.",
+      "Classifica il rischio del tuo sistema di IA e gestisci gli obblighi EU AI Act. Alto rischio dal 2 dicembre 2027.",
     images: [`${BASE_URL}/og-image.png`],
   },
   alternates: {
@@ -107,7 +107,7 @@ const jsonLd = {
           price: "49",
           priceCurrency: "EUR",
           priceSpecification: { "@type": "UnitPriceSpecification", billingDuration: "P1M" },
-          description: "1 sistema AI, compliance Art. 50 completa",
+          description: "1 sistema di IA, compliance Art. 50 completa",
         },
         {
           "@type": "Offer",
@@ -115,7 +115,7 @@ const jsonLd = {
           price: "199",
           priceCurrency: "EUR",
           priceSpecification: { "@type": "UnitPriceSpecification", billingDuration: "P1M" },
-          description: "5 sistemi AI, dossier completo, Legal Assistant RAG",
+          description: "5 sistemi di IA, dossier completo, Legal Assistant RAG",
         },
       ],
       author: {

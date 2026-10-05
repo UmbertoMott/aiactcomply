@@ -211,7 +211,7 @@ export function generateProgressNotifications(
     notifications.push({
       id: "no-tools-started",
       title: "Inizia il tuo percorso di compliance",
-      body: "Non hai ancora completato nessun tool. Inizia dal Classifier per capire il livello di rischio del tuo sistema AI.",
+      body: "Non hai ancora completato nessun tool. Inizia dal Classifier per capire il livello di rischio del tuo sistema di IA.",
       priority: "medium",
       category: "tool_incomplete",
       createdAt: today,

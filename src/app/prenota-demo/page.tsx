@@ -75,7 +75,7 @@ export default function PrenotaDemoPage() {
             Vedi come lavora l&rsquo;avvocato con lo strumento.
           </h1>
           <p style={{ fontSize: 16, lineHeight: 1.7, color: "rgba(0,0,0,0.55)", maxWidth: 440 }}>
-            In 30 minuti analizziamo insieme il tuo sistema AI e ti mostriamo come
+            In 30 minuti analizziamo insieme il tuo sistema di IA e ti mostriamo come
             predisponiamo il primo assessment di conformità al Regolamento EU AI Act
             (2024/1689): risk assessment, FRIA, DPIA e documentazione tecnica.
           </p>

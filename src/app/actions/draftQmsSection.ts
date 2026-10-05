@@ -37,7 +37,7 @@ export async function draftQmsSection(
 - Accuracy metric: ${context.accuracyMetric ?? "non misurata"}
 - Provider: ${context.providerName ?? "[DA COMPLETARE]"}`
 
-  const prompt = `Sei un esperto di Quality Management System per sistemi AI ad alto rischio ai sensi dell'Art. 17 EU AI Act.
+  const prompt = `Sei un esperto di Quality Management System per sistemi di IA ad alto rischio ai sensi dell'Art. 17 EU AI Act.
 
 SEZIONE DA REDIGERE: ${section.label} (${section.article})
 

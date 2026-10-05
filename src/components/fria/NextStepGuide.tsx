@@ -56,7 +56,7 @@ const STEP_DEFS: Record<StepKey, NextStepDef> = {
   "1_governance": {
     key: "1_governance", phase: "1",
     title: "Documenta la sorveglianza umana",
-    description: "Indica il responsabile della supervisione umana del sistema (Art. 27(1)(e)).",
+    description: "Indica il responsabile della sorveglianza umana del sistema (Art. 27(1)(e)).",
     ctaLabel: "Vai a Fase 1 — Contesto",
   },
   "2_scenarios": {
@@ -212,7 +212,7 @@ export function NextStepGuide({ fria, gapCheck, onNavigateToPhase }: NextStepGui
     const r = await draftNextStepRationale({
       stepKey,
       stepTitle: step.title,
-      systemName: fria.system_name || "Sistema AI",
+      systemName: fria.system_name || "Sistema di IA",
       friaSummary: buildFriaSummary(fria),
     });
     setLoadingRationale(false);

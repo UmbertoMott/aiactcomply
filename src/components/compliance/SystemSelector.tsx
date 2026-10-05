@@ -62,7 +62,7 @@ export function SystemSelector({ checkProhibited = true }: SystemSelectorProps) 
         style={{ background: "#F8FAFC", border: "1px solid rgba(0,0,0,0.07)" }}
       >
         <span style={{ color: "rgba(0,0,0,0.42)" }}>
-          Nessun sistema AI nell&apos;inventario.
+          Nessun sistema di IA nell&apos;inventario.
         </span>
         <a
           href="/dashboard/tools/inventory"

@@ -5,7 +5,7 @@
 export const RESILIENCE_PILLARS = [
   { id: "accuracy",      label: "Accuratezza e metriche dichiarate",             reference: "Art. 15(3) [Reg. (UE) 2024/1689]", linkedTool: "transparency",  linkedPath: "/dashboard/tools/transparency" },
   { id: "robustness",    label: "Robustezza (errori, guasti, dati fuori distribuzione, cicli di retroazione)", reference: "Art. 15(4) [Reg. (UE) 2024/1689]", linkedTool: "risk-manager", linkedPath: "/dashboard/tools/risk-manager" },
-  { id: "cybersecurity", label: "Cybersicurezza del sistema AI",                  reference: "Art. 15(5) [Reg. (UE) 2024/1689]", linkedTool: "risk-manager", linkedPath: "/dashboard/tools/risk-manager" },
+  { id: "cybersecurity", label: "Cybersicurezza del sistema di IA",                  reference: "Art. 15(5) [Reg. (UE) 2024/1689]", linkedTool: "risk-manager", linkedPath: "/dashboard/tools/risk-manager" },
 ] as const;
 export type ResiliencePillarId = (typeof RESILIENCE_PILLARS)[number]["id"];
 

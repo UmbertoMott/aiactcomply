@@ -349,7 +349,7 @@ export async function sendWaitlistNotification(entry: {
             <td style="padding:8px 0;">${escapeHtml(entry.role ?? "—")}</td>
           </tr>
           <tr style="border-bottom:1px solid #e2e8f0;">
-            <td style="padding:8px 0;color:#64748b;">Sistemi AI</td>
+            <td style="padding:8px 0;color:#64748b;">Sistemi di IA</td>
             <td style="padding:8px 0;">${escapeHtml(entry.ai_systems)}</td>
           </tr>
           <tr>

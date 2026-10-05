@@ -31,7 +31,7 @@ export async function draftGovernancePracticeDocumentation(input: {
 
   const prompt = `Sei un esperto di conformità AI Act UE (Reg. 2024/1689), specializzato in qualità e governance dei dati (Art. 10).
 
-Sistema AI in analisi:
+Sistema di IA in analisi:
 - Nome: ${input.systemName}
 - Descrizione: ${input.systemDescription}
 - Tier di rischio: ${input.riskTier}
@@ -96,7 +96,7 @@ export async function analyzeBiasIndicators(input: {
 
   const prompt = `Sei un esperto di equità algoritmica e conformità AI Act UE (Art. 10(2)(f)).
 
-Sistema AI:
+Sistema di IA:
 - Nome: ${input.systemName}
 - Finalità prevista: ${input.intendedPurpose}
 
@@ -154,7 +154,7 @@ export async function analyzeFairnessNarrative(input: {
 
   const prompt = `Sei un esperto di equità algoritmica e conformità AI Act UE (Art. 10(2)(f), Art. 10(3)).
 
-Sistema AI: ${input.systemName}. Finalità: ${input.intendedPurpose}.
+Sistema di IA: ${input.systemName}. Finalità: ${input.intendedPurpose}.
 
 Report di fairness (metriche aggregate deterministiche — nessun dato grezzo) sul carattere protetto "${f.protectedColumn}", esito "${f.outcomeColumn}" (valore positivo "${f.positiveOutcomeValue}"):
 Gruppi:

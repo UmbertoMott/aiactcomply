@@ -1,0 +1,26 @@
+// Glossario: termini della versione italiana ufficiale del Reg. (UE) 2024/1689 (AI Act),
+// da usare in tutti i testi dell'app. Chiave = termine da evitare, valore = termine ufficiale.
+// Riferimenti: Art. 3 (definizioni) e titoli degli articoli citati.
+export const GLOSSARY: { use: string; avoid: string[]; ref: string }[] = [
+  { use: "sistema di IA", avoid: ["sistema AI", "sistema di AI"], ref: "Art. 3(1)" },
+  { use: "fornitore", avoid: ["provider"], ref: "Art. 3(3)" },
+  { use: "deployer", avoid: ["utilizzatore", "utente professionale"], ref: "Art. 3(4)" },
+  { use: "rappresentante autorizzato", avoid: ["rappresentante legale"], ref: "Art. 3(5)" },
+  { use: "importatore", avoid: ["importer"], ref: "Art. 3(6)" },
+  { use: "distributore", avoid: ["distributor"], ref: "Art. 3(7)" },
+  { use: "immissione sul mercato", avoid: ["placing on the market"], ref: "Art. 3(9)" },
+  { use: "messa in servizio", avoid: ["deployment", "go-live"], ref: "Art. 3(11)" },
+  { use: "finalità prevista", avoid: ["intended purpose", "scopo previsto"], ref: "Art. 3(12)" },
+  { use: "modifica sostanziale", avoid: ["substantial modification"], ref: "Art. 3(23)" },
+  { use: "dati di addestramento", avoid: ["dati di training", "training data"], ref: "Art. 3(29)" },
+  { use: "incidente grave", avoid: ["serious incident"], ref: "Art. 3(49)" },
+  { use: "alfabetizzazione in materia di IA", avoid: ["AI literacy"], ref: "Art. 3(56), Art. 4" },
+  { use: "modello di IA per finalità generali", avoid: ["GPAI model"], ref: "Art. 3(63)" },
+  { use: "sorveglianza umana", avoid: ["supervisione umana", "human oversight"], ref: "Art. 14" },
+  { use: "valutazione della conformità", avoid: ["conformity assessment"], ref: "Art. 3(20), Art. 43" },
+  { use: "istruzioni per l'uso", avoid: ["instructions for use"], ref: "Art. 3(15), Art. 13" },
+  { use: "sistema di gestione dei rischi", avoid: ["risk manager", "risk management system"], ref: "Art. 9" },
+  { use: "sistema di gestione della qualità", avoid: ["QMS"], ref: "Art. 17" },
+  { use: "monitoraggio successivo all'immissione sul mercato", avoid: ["post-market monitoring"], ref: "Art. 3(25), Art. 72" },
+  { use: "valutazione d'impatto sui diritti fondamentali", avoid: ["FRIA (senza spiegazione)"], ref: "Art. 27" },
+];

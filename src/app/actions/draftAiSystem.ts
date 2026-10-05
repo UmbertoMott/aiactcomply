@@ -34,7 +34,7 @@ export async function draftAiSystem(
     ? `\n\nSistemi già in inventario (per rilevare duplicati o similarità):\n${existingSystems.map(s => `- ${s.id}: ${s.name} — ${s.description}`).join("\n")}`
     : ""
 
-  const prompt = `Sei un esperto di EU AI Act (Reg. UE 2024/1689). Analizza questa descrizione di sistema AI e genera un record di inventario pre-compilato.
+  const prompt = `Sei un esperto di EU AI Act (Reg. UE 2024/1689). Analizza questa descrizione di sistema di IA e genera un record di inventario pre-compilato.
 
 Data di oggi: ${today}
 
