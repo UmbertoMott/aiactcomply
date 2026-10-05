@@ -216,7 +216,7 @@ export function generateProgressNotifications(
       category: "tool_incomplete",
       createdAt: today,
       actionLabel: "Inizia con Classifier",
-      actionHref: "/dashboard/tools/classifier",
+      actionHref: "/dashboard/tools/inventory",
       icon: "Play",
     });
   }

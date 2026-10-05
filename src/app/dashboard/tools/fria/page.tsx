@@ -1617,7 +1617,7 @@ export default function FRIAPage() {
             label: "Classifier",
             art: "Art. 6",
             done: hasClassifier,
-            href: "/dashboard/tools/classifier",
+            href: "/dashboard/tools/inventory",
             required: true,
             why: t("why_classifier"),
           },

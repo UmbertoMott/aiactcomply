@@ -2,6 +2,7 @@
 // Classificazione guidata di un sistema: Ruolo → Rischio → Obblighi.
 // Tutta la logica giuridica sta in lib/obligations/engine.ts; qui solo domande e resa.
 import React, { useEffect, useMemo, useState } from "react";
+import { syncClassifierFromInventory } from "@/lib/inventory/classifier-bridge";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
@@ -118,6 +119,9 @@ export default function ClassifyPage() {
       roleBasis: roleResult.basis.join(" "), tierBasis: `${RISK_LABEL[risk.category]}. ${risk.rationale.join(" ")}`,
       dualRoleFlag: roles.length > 1, obligationsAssessed: true,
     });
+    // Il sistema appena classificato diventa quello attivo per gli altri tool
+    try { localStorage.setItem("aicomply_active_system_id", system.id); } catch { /* storage non disponibile */ }
+    syncClassifierFromInventory();
   }
 
   if (notFound) return (

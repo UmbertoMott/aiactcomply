@@ -31,7 +31,6 @@ Legenda colonne:
 
 | Tool | URL | File | Righe | Storage | AI | 🔵 Blu | ⚠ Verify | Articoli principali |
 |------|-----|------|-------|---------|----|--------|----------|---------------------|
-| **Classifier** | `/dashboard/tools/classifier` | `tools/classifier/page.tsx` | 1579 | 10 | 29 | **15** | 0 | Art. 5, 6, 25 — classificazione alto rischio |
 | **Risk Manager** | `/dashboard/tools/risk-manager` | `tools/risk-manager/page.tsx` | 944 | 6 | 32 | 1 | **13** | Art. 6, 9, 12, 51-55, 72 — gestione rischi |
 | **Questionnaire** | `/dashboard/tools/questionnaire` | `tools/questionnaire/page.tsx` | 1015 | 20 | 45 | 0 | 0 | Art. 5, 22, 27, 35 — questionario personalizzato |
 
@@ -173,4 +172,4 @@ Alcune pagine hanno **due versioni**: la vecchia in `/tools/` e la nuova refacto
 | Post-Market | ⚠ 4 blu | ❌ 14 verify | ✅ |
 
 
-> Accorpati: `/dashboard/tools/prohibited` → Triage, `/dashboard/tools/incident` → Post-market (tab incidenti), `/dashboard/journey` → Home (percorso in 4 passi). I vecchi indirizzi reindirizzano.
+> Accorpati: `/dashboard/tools/prohibited` → Triage, `/dashboard/tools/incident` → Post-market (tab incidenti), `/dashboard/journey` → Home (percorso in 4 passi), `/dashboard/tools/classifier` → Inventario (classificazione guidata per sistema; il vecchio risultato `aicomply_classifier_result` è ricavato dal sistema attivo). I vecchi indirizzi reindirizzano.

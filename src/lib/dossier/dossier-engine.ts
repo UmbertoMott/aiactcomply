@@ -84,7 +84,7 @@ export function getDossierSections(data: DossierData): DossierSection[] {
       id: "classifier",
       article: "Art. 6",
       title: "Classificazione del Sistema AI",
-      href: "/dashboard/tools/classifier",
+      href: "/dashboard/tools/inventory",
       status: data.classifier ? "complete" : "missing",
       completedAt: data.classifier?.completedAt,
     },

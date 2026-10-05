@@ -5,7 +5,7 @@ import { useT } from "@/i18n/LocaleProvider";
 type Tool = "dpia" | "fria" | "export";
 
 const STEPS = [
-  { id: "intake",       label: "Intake",      sublabel: "Dati sistema",    href: "/dashboard/tools/classifier" },
+  { id: "intake",       label: "Intake",      sublabel: "Dati sistema",    href: "/dashboard/tools/inventory" },
   { id: "analysis",    label: "Analisi",     sublabel: "DPIA + FRIA",     href: null },
   { id: "mitigations", label: "Mitigazioni", sublabel: "Rischi correlati", href: null },
   { id: "export",      label: "Export",      sublabel: "PDF DPO",          href: "/dashboard/tools/assessment-export" },

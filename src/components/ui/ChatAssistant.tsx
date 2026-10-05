@@ -124,30 +124,17 @@ Risultati di tutti i tool: Classifier, Risk Manager, Data Audit, DocuGen, LogVau
   // ── AI CLASSIFIER ───────────────────────────────────────────────────────────
   {
     id: "tool_classifier",
-    topic: "AI Classifier",
-    keywords: ["classifier", "classificatore", "rischio", "alto rischio", "limitato", "minimale", "allegato iii", "annex", "livello", "categoria", "art 6"],
-    answer: `**AI Classifier — Classificazione del rischio**
+    topic: "Classificazione del sistema",
+    keywords: ["classifier", "classificatore", "classificare", "rischio", "alto rischio", "limitato", "minimale", "allegato iii", "annex", "livello", "categoria", "art 6", "ruolo"],
+    answer: `**Classificazione del sistema**
 
-📍 Menu: *Valutazioni → AI Classifier*
+📍 *Inventario → Classifica* (su ciascun sistema)
 
-**A cosa serve:** Determina il livello di rischio del sistema AI secondo l'Art. 6 e l'Allegato III dell'AI Act.
+Rispondi a domande sui fatti in due parti:
+- **Ruolo** — chi ha sviluppato il sistema e come lo usi: fornitore, deployer, importatore o distributore (Artt. 3, 25).
+- **Rischio** — nell'ordine del Regolamento: pratiche vietate (Art. 5), alto rischio (Art. 6 e Allegati I e III, con la deroga dell'Art. 6(3) se non c'è profilazione), trasparenza (Art. 50), modelli per finalità generali (Capo V).
 
-**Livelli di rischio:**
-- 🚫 **Inaccettabile** → pratica vietata
-- 🔴 **Alto rischio** → obblighi Art. 9-17 + conformity
-- 🟡 **Rischio limitato** → obblighi trasparenza (Art. 50)
-- 🟢 **Rischio minimale** → nessun obbligo specifico
-
-**Allegato III (settori alto rischio):**
-Infrastrutture critiche, istruzione, occupazione/HR, servizi essenziali, law enforcement, migrazione/asilo, giustizia, dispositivi medici, veicoli autonomi.
-
-**Cosa ti serve:**
-- Nome e descrizione del sistema
-- Settore di applicazione
-- Funzioni principali del sistema
-- Se fa parte di un prodotto regolamentato (Allegato II)
-
-**Output:** Risk level + articoli applicabili + flag Allegato III.`,
+Alla fine trovi solo gli obblighi che riguardano quel sistema, con articolo, data di applicazione e tool da usare. Il sistema classificato diventa quello di riferimento per gli altri tool.`,
   },
 
   // ── RISK MANAGER ────────────────────────────────────────────────────────────

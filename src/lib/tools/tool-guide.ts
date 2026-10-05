@@ -40,7 +40,6 @@ export const TOOL_GUIDES: ToolGuideEntry[] = [
   { id: "nist", href: "/dashboard/tools/nist-ai-rmf", optional: true },
   { id: "art50", href: "/dashboard/tools/art50-kit", optional: false },
   { id: "dossier", href: "/dashboard/dossier", optional: true },
-  { id: "classifier", href: "/dashboard/tools/classifier", optional: true },
 ];
 
 /** Voce della guida per il percorso corrente (prefisso più lungo) */

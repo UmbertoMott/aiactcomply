@@ -1,5 +1,6 @@
 // src/lib/inventory/ai-system.ts
 import type { RoleAnswers, RiskAnswers, Role } from "@/lib/obligations/engine"
+import { determineRoles, assessRisk, computeObligations } from "@/lib/obligations/engine"
 
 export type SystemRole =
   | "provider"
@@ -89,12 +90,10 @@ export function nextSystemId(): string {
   return `sys-${String(max + 1).padStart(3, "0")}`
 }
 
+/** Obblighi del sistema secondo il motore (lib/obligations/engine.ts); zero se non ancora classificato */
 export function computeObligationCount(system: AISystem): { total: number; done: number } {
-  const totals: Record<SystemTier, number> = {
-    prohibited: 0, high_risk: 10, limited: 3,
-    minimal: 0, gpai: 6, gpai_systemic: 8, unclassified: 0
-  }
-  const total = totals[system.tier] ?? 0
-  const done = system.completedObligations.length
-  return { total, done }
+  if (!system.roleAnswers || !system.riskAnswers) return { total: 0, done: 0 }
+  const ids = computeObligations(system.roleAnswers, determineRoles(system.roleAnswers), assessRisk(system.riskAnswers), system.riskAnswers)
+    .obligations.map(o => o.id)
+  return { total: ids.length, done: ids.filter(id => system.completedObligations.includes(id)).length }
 }

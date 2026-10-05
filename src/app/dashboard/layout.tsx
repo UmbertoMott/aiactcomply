@@ -28,6 +28,7 @@ import { sanitizeSidebarLabel } from "@/lib/sidebar/sidebar-utils";
 import { useT, useLocale } from "@/i18n/LocaleProvider";
 import { toolNeeds, type ToolNeeds } from "@/lib/obligations/engine";
 import { loadInventory } from "@/lib/inventory/ai-system";
+import { migrateLegacyClassifier, syncClassifierFromInventory } from "@/lib/inventory/classifier-bridge";
 import { guideForPath } from "@/lib/tools/tool-guide";
 import ToolGuide from "@/components/tools/ToolGuide";
 
@@ -281,6 +282,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   useEffect(() => {
+    migrateLegacyClassifier();
+    syncClassifierFromInventory();
     setNeeds(toolNeeds(loadInventory()));
     const data = aggregateDossier();
     const sections = getDossierSections(data);

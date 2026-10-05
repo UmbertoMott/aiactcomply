@@ -6,7 +6,7 @@ import { readFromStorage, STORAGE_KEYS } from "@/lib/dossier/storage-schema"
 type StorageKey = keyof typeof STORAGE_KEYS
 
 const AXES: { key: StorageKey; label: string; full: string; href: string }[] = [
-  { key: "classifier",   label: "Classif.",  full: "Classificazione",    href: "/dashboard/tools/classifier" },
+  { key: "classifier",   label: "Classif.",  full: "Classificazione",    href: "/dashboard/tools/inventory" },
   { key: "riskManager", label: "Risk",       full: "Risk Manager",        href: "/dashboard/tools/risk-manager" },
   { key: "dataAudit",   label: "Dati",       full: "Audit Dati",          href: "/dashboard/tools/data-audit" },
   { key: "transparency",label: "Traspar.",    full: "Trasparenza",         href: "/dashboard/tools/transparency" },
