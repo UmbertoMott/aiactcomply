@@ -63,7 +63,7 @@ function buildFunctions(t: T) {
       { art: "Art. 9",  label: t("measure_ref1") },
       { art: "Art. 10", label: t("measure_ref2") },
       { art: "Art. 15", label: t("measure_ref3") },
-      { art: "Art. 62", label: t("measure_ref4") },
+      { art: "Art. 73", label: t("measure_ref4") },
     ],
     subcategories: [
       t("measure_sub1"),
@@ -82,7 +82,7 @@ function buildFunctions(t: T) {
     aiActRefs: [
       { art: "Art. 9",  label: t("manage_ref1") },
       { art: "Art. 18", label: t("manage_ref2") },
-      { art: "Art. 61", label: t("manage_ref3") },
+      { art: "Art. 72", label: t("manage_ref3") },
       { art: "Art. 73", label: t("manage_ref4") },
     ],
     subcategories: [

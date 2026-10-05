@@ -190,7 +190,7 @@ export default function ProviderTransitionPage() {
           Cambio di ruolo — da deployer a fornitore
         </h1>
         <p style={{ color: MUTED, fontSize: 14, lineHeight: 1.5 }}>
-          Verifica se le modifiche apportate al sistema AI configurano un trasferimento del ruolo da deployer a provider ai sensi dell&apos;Art. 25 del Reg. (UE) 2024/1689.
+          Verifica se le modifiche apportate al sistema di IA configurano un trasferimento del ruolo da deployer a provider ai sensi dell&apos;Art. 25 del Reg. (UE) 2024/1689.
         </p>
       </div>
 
@@ -415,7 +415,7 @@ export default function ProviderTransitionPage() {
                       style={{ width: "100%", background: "#f3f4f6", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "6px 8px", color: TEXT, fontSize: 13 }}
                     >
                       <option value="manual">Manuale</option>
-                      <option value="logvault_auto">LogVault Auto</option>
+                      <option value="logvault_auto">Registro dei log (automatico)</option>
                     </select>
                   </div>
                   <div>

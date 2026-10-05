@@ -113,7 +113,7 @@ export default function ComplianceJourneyDashboard() {
       {/* Steps list */}
       {steps.length === 0 ? (
         <p style={{ fontSize: 13, color: T.muted, textAlign: "center", padding: "12px 0" }}>
-          Classifica il tuo sistema AI per ricevere un piano personalizzato.
+          Classifica il tuo sistema di IA per ricevere un piano personalizzato.
         </p>
       ) : (
         <div className="space-y-2">

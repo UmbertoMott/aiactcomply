@@ -63,7 +63,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "ai_system_id required" }, { status: 400 });
   }
 
-  // Verifica ownership sistema AI
+  // Verifica ownership sistema di IA
   const { data: system } = await supabase
     .from("ai_systems")
     .select("id")

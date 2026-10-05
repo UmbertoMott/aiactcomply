@@ -57,13 +57,13 @@ export const SECTION_META: Record<TrustCenterSectionId, TrustCenterSectionMeta> 
     id: "oversight",
     label: "Misure di sorveglianza umana",
     article: "Art. 14",
-    sourceModule: "Oversight (Art. 14)",
+    sourceModule: "Sorveglianza umana (Art. 14)",
   },
   transparency: {
     id: "transparency",
     label: "Informazioni di trasparenza",
     article: "Art. 50(1)/(2)/(3)/(4)",
-    sourceModule: "Art. 50 Kit",
+    sourceModule: "Avvisi e marcature IA (Art. 50)",
   },
   conformity: {
     id: "conformity",
@@ -286,10 +286,19 @@ export function readSourceData(): TrustCenterSourceData {
     const a50Raw = localStorage.getItem("aicomply_art50_record_v1");
     if (a50Raw) {
       const a50 = JSON.parse(a50Raw) as Record<string, unknown>;
-      const sc = (a50.selfCompliance ?? []) as { status?: string; area?: string }[];
-      s.transparency.activeDisclosures = sc
-        .filter(i => i.status === "compliant")
-        .map(i => i.area ?? "");
+      // Misure del cliente per i suoi sistemi (non l'autoconformità della piattaforma)
+      const recs = Object.values((a50.systemRecords ?? {}) as Record<string, {
+        directInteraction?: unknown;
+        syntheticContentLabels?: { contentType?: string; labellingMethod?: string }[];
+        deepfakeDisclosure?: { applicable?: string; disclosureMechanism?: string };
+      }>);
+      const active = new Set<string>();
+      for (const r of recs) {
+        if (r.directInteraction) active.add("Informativa di interazione con un sistema di IA (Art. 50(1))");
+        if ((r.syntheticContentLabels ?? []).some(l => l.labellingMethod && l.labellingMethod !== "none")) active.add("Marcatura dei contenuti generati (Art. 50(2))");
+        if (r.deepfakeDisclosure?.applicable === "yes" && r.deepfakeDisclosure.disclosureMechanism) active.add("Dichiarazione dei deep fake (Art. 50(4))");
+      }
+      s.transparency.activeDisclosures = [...active];
       s.transparency.complete = s.transparency.activeDisclosures.length > 0;
     }
   } catch { /* silent */ }

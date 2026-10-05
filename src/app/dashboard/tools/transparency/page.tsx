@@ -128,7 +128,7 @@ export default function TransparencyPage() {
     setNoticeError(false);
     setNoticeResult(null);
     const payload = Object.fromEntries(FIELDS.map(f => [f.ref, fields[f.id] ?? ""]));
-    const res = await processTransparencyNotice(payload, active?.name ?? "Sistema AI");
+    const res = await processTransparencyNotice(payload, active?.name ?? "Sistema di IA");
     setNoticeLoading(false);
     if (res.error || !res.result) setNoticeError(true);
     else setNoticeResult(res.result);

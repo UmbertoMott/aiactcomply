@@ -31,7 +31,7 @@ export async function draftFria(
 
   const prompt = `Sei un esperto di valutazione impatto sui diritti fondamentali (Art. 27 EU AI Act).
 
-Dati disponibili sul sistema AI:
+Dati disponibili sul sistema di IA:
 - Nome: ${systemName}
 - Descrizione: ${systemDescription}
 - Livello di rischio: ${riskLevel}

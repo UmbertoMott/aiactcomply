@@ -1,5 +1,5 @@
 // src/app/api/ai-systems/route.ts
-// Registro centrale sistemi AI dell'organizzazione
+// Registro centrale sistemi di IA dell'organizzazione
 
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
@@ -33,7 +33,7 @@ export async function GET(req: Request) {
   return NextResponse.json({ data });
 }
 
-// POST /api/ai-systems — registra nuovo sistema AI
+// POST /api/ai-systems — registra nuovo sistema di IA
 export async function POST(req: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

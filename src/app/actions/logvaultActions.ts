@@ -172,7 +172,7 @@ export async function analyzeLogCoverage(input: {
 
   const prompt = `Sei un esperto di conformità AI Act UE (Reg. 2024/1689), specializzato in requisiti di logging (Art. 12).
 
-Sistema AI:
+Sistema di IA:
 - Nome: ${input.systemName}
 - Finalità prevista: ${input.intendedPurpose}
 - Tier di rischio: ${input.riskTier}

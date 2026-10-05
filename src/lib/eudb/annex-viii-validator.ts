@@ -28,7 +28,7 @@ const REQUIRED_SECTION_A: Array<{ field: keyof EudbDraft; label: string; artRef:
 ];
 
 const REQUIRED_SECTION_B: Array<{ field: keyof EudbDraft; label: string; artRef: string }> = [
-  { field: "systemName",        label: "Nome sistema AI",        artRef: "Allegato VIII(B)(1)" },
+  { field: "systemName",        label: "Nome sistema di IA",        artRef: "Allegato VIII(B)(1)" },
   { field: "intendedPurpose",   label: "Scopo d'uso previsto",   artRef: "Allegato VIII(B)(3)" },
   { field: "annexIIIReference", label: "Categoria Allegato III", artRef: "Allegato VIII(B)(4)" },
 ];

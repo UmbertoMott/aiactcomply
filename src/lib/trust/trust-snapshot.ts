@@ -220,7 +220,7 @@ export function buildSnapshot(slug: string): TrustSnapshot {
   return {
     slug,
     publishedAt: new Date().toISOString(),
-    systemName: systemNameFromTrust || classifier?.systemName || "Sistema AI",
+    systemName: systemNameFromTrust || classifier?.systemName || "Sistema di IA",
     companyName: slug,
     riskLevel,
     conformityScore,

@@ -7,7 +7,7 @@ type StorageKey = keyof typeof STORAGE_KEYS
 
 const AXES: { key: StorageKey; label: string; full: string; href: string }[] = [
   { key: "classifier",   label: "Classif.",  full: "Classificazione",    href: "/dashboard/tools/inventory" },
-  { key: "riskManager", label: "Risk",       full: "Risk Manager",        href: "/dashboard/tools/risk-manager" },
+  { key: "riskManager", label: "Risk",       full: "Registro dei rischi",        href: "/dashboard/tools/risk-manager" },
   { key: "dataAudit",   label: "Dati",       full: "Audit Dati",          href: "/dashboard/tools/data-audit" },
   { key: "transparency",label: "Traspar.",    full: "Trasparenza",         href: "/dashboard/tools/transparency" },
   { key: "oversight",   label: "Oversight",  full: "Human Oversight",     href: "/dashboard/tools/oversight" },

@@ -43,7 +43,7 @@ export interface ProviderTransitionResultExtended {
 export const TRANSITION_CHECKS: ProviderTransitionCheck[] = [
   {
     id: "own_name",
-    question: "Hai apposto (o intendi apporre) il tuo nome o marchio su un sistema AI ad alto rischio già immesso sul mercato o messo in servizio?",
+    question: "Hai apposto (o intendi apporre) il tuo nome o marchio su un sistema di IA ad alto rischio già immesso sul mercato o messo in servizio?",
     explanation: "Chi appone il proprio nome o marchio su un sistema ad alto rischio è considerato fornitore e assume gli obblighi dell'Art. 16, fatti salvi gli accordi contrattuali che ripartiscono diversamente gli obblighi.",
     trigger_article: "Art. 25(1)(a)",
     is_trigger: true,

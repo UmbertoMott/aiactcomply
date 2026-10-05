@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   Shield, Plus, RefreshCw, Download, AlertTriangle,
   CheckCircle, XCircle, Clock, ExternalLink, FileText,
-  Trash2, Wand2, Sparkles, Loader2, Check, ChevronDown, X, Info,
+  Trash2, Wand2, Sparkles, Loader2, Check,
 } from "lucide-react";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import { loadInventory, AISystem } from "@/lib/inventory/ai-system";
@@ -77,18 +77,6 @@ function buildContentTypes(t: TFn): { value: ContentType; label: string }[] {
   ];
 }
 
-// ─── Self-compliance status badge ──────────────────────────────────────────────
-function StatusBadge({ status, t }: { status: SelfComplianceStatus; t: TFn }) {
-  const map: Record<SelfComplianceStatus, { label: string; color: string; bg: string }> = {
-    compliant: { label: t("st_compliant"), color: T.green, bg: T.greenBg },
-    partial:   { label: t("st_partial"),  color: T.amber, bg: T.amberBg },
-    gap:       { label: t("st_gap"),       color: T.red,   bg: T.redBg   },
-    "n/a":     { label: t("st_na"),        color: T.faint, bg: T.bg      },
-  };
-  const s = map[status];
-  return <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ color: s.color, background: s.bg }}>{s.label}</span>;
-}
-
 // ─── Labelling method warning ─────────────────────────────────────────────────
 function NonConformWarning({ method, exemptionClaimed, t }: { method: LabellingMethod; exemptionClaimed?: string; t: TFn }) {
   const { machineReadable } = LABELLING_METHOD_CAPABILITIES[method];
@@ -126,14 +114,12 @@ export default function Art50KitPage() {
 
   // Self-compliance state
   const [selfItems, setSelfItems] = useState<SelfComplianceItem[]>([]);
-  const [selfTab, setSelfTab] = useState<"client" | "self">("client");
 
   // AI copilot
   const [proposing, setProposing] = useState<string | null>(null);
   const [pendingProposals, setPendingProposals] = useState<Record<string, { contentType: ContentType; suggestedMethod: LabellingMethod; rationale: string; exemptionId?: string; exemptionJustification?: string }[]>>({});
 
   const [toast, setToast] = useState<string | null>(null);
-  const [selfBannerDismissed, setSelfBannerDismissed] = useState(false);
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(null), 3000); }
 
@@ -198,16 +184,28 @@ export default function Art50KitPage() {
     if (activeSystem?.id === id) setActiveSystem(null);
   }
 
+  // Solo le misure effettivamente registrate per il sistema, non un elenco fisso
+  function registroMeasures(systemId: string): string[] {
+    const rec = getSystemRecord(art50Record, systemId);
+    const out: string[] = [];
+    if (rec.directInteraction) out.push(`  - Informativa di interazione con l'IA (Art. 50(1)): ${rec.directInteraction.status ?? "stato non indicato"}`);
+    for (const l of rec.syntheticContentLabels) {
+      out.push(`  - Marcatura ${l.contentType} (Art. 50(2)): ${l.labellingMethod}${l.machineReadable ? ", leggibile da dispositivi" : ""}${l.exemptionClaimed ? ` — esenzione: ${l.exemptionClaimed}` : ""}`);
+    }
+    if (rec.deepfakeDisclosure?.applicable === "yes") out.push(`  - Deep fake (Art. 50(4)): ${rec.deepfakeDisclosure.disclosureMechanism || "modalità non indicata"}`);
+    return out.length > 0 ? out : ["  Nessuna misura ancora registrata"];
+  }
+
   function downloadRegistro(system: Art50System) {
     const lines = [
       "REGISTRO DI IMPLEMENTAZIONE ART. 50 — AI ACT (UE) 2024/1689", "=".repeat(60), "",
-      `ID Registro:          ${system.registroId}`, `Sistema AI:           ${system.name}`,
+      `ID Registro:          ${system.registroId}`, `Sistema di IA:           ${system.name}`,
       `Tipologia:            ${TYPE_LABELS[system.type]}`, `URL:                  ${system.url || "non specificato"}`,
       `Data registrazione:   ${new Date(system.createdAt).toLocaleDateString("it-IT", { day: "2-digit", month: "long", year: "numeric" })}`,
       `Ultimo scan:          ${system.lastScannedAt ? new Date(system.lastScannedAt).toLocaleDateString("it-IT", { day: "2-digit", month: "long", year: "numeric" }) : "non eseguito"}`,
       `Punteggio Art. 50:    ${system.lastScore !== null ? system.lastScore + "/100" : "n/d"}`, "",
-      "COMPONENTI DICHIARATI INSTALLATI:",
-      "  - Banner disclosure AI visibile agli utenti", "  - Meta tag machine-readable (ai-disclosure)", "  - Markup strutturato JSON-LD", "",
+      "MISURE REGISTRATE (dichiarate dall'utente in questo kit):",
+      ...registroMeasures(system.id), "",
       "RIFERIMENTO NORMATIVO:", "  Art. 50(1)-(5) Regolamento (UE) 2024/1689 (AI Act)", "  In vigore dal 2 agosto 2026; Art. 50(2) per i sistemi già sul mercato entro il 2 dicembre 2026 (Art. 111(4))", "",
       "NOTA LEGALE:", "  AI Comply non rilascia attestazioni di conformità legale.", "  Questo documento costituisce esclusivamente un registro interno.", "=".repeat(60),
       `Generato da RegulaeOS — ${new Date().toISOString()}`,
@@ -222,7 +220,7 @@ export default function Art50KitPage() {
     if (rec.selectedContentTypes.length === 0) { showToast(t("toast_selectContentType")); return; }
     setProposing(system.id);
     try {
-      const result = await proposeLabellingPlan({ systemName: system.name, intendedPurpose: "", contentTypes: rec.selectedContentTypes, systemType: TYPE_LABELS[system.type] });
+      const result = await proposeLabellingPlan({ systemName: system.name, intendedPurpose: inventorySystems.find(s => s.name === system.name)?.description ?? "", contentTypes: rec.selectedContentTypes, systemType: TYPE_LABELS[system.type] });
       setPendingProposals(prev => ({ ...prev, [system.id]: result.proposals.map(p => ({ contentType: p.contentType as ContentType, suggestedMethod: p.suggestedMethod as LabellingMethod, rationale: p.rationale, exemptionId: p.exemptionId, exemptionJustification: p.exemptionJustification })) }));
     } catch (e) { showToast(e instanceof Error ? e.message : t("aiError")); }
     finally { setProposing(null); }
@@ -251,19 +249,6 @@ export default function Art50KitPage() {
     setPendingProposals(prev => ({ ...prev, [systemId]: (prev[systemId] ?? []).filter(pr => pr.contentType !== contentType) }));
   }
 
-  // ── Self-compliance ─────────────────────────────────────────────────────────
-  function updateSelfItem(id: string, patch: Partial<SelfComplianceItem>) {
-    const updated = selfItems.map(i => i.id === id ? { ...i, ...patch } : i);
-    setSelfItems(updated);
-    const newRec = { ...art50Record, selfCompliance: updated };
-    saveArt50Record(newRec);
-    setArt50Record(newRec);
-  }
-
-  // Aggregate self-compliance status
-  const selfGaps = selfItems.filter(i => i.status === "gap").length;
-  const selfPartial = selfItems.filter(i => i.status === "partial").length;
-  const selfCompliant = selfItems.filter(i => i.status === "compliant").length;
 
   return (
     <div className="max-w-4xl mx-auto space-y-5" style={FONT}>
@@ -307,35 +292,21 @@ export default function Art50KitPage() {
         </div>
       </div>
 
-      {/* ── Tab switcher ─────────────────────────────────────────────────────── */}
-      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: "rgba(0,0,0,0.04)" }}>
-        {([
-          { v: "client" as const, l: t("tab_client") },
-          { v: "self" as const, l: `${t("tab_self")}${selfGaps > 0 ? ` · ${selfGaps} gap` : ""}` },
-        ]).map(tb => (
-          <button key={tb.v} onClick={() => setSelfTab(tb.v)}
-            className="text-[12px] font-medium px-4 py-1.5 rounded-lg transition-all"
-            style={{ background: selfTab === tb.v ? T.card : "transparent", color: selfTab === tb.v ? T.text : T.muted, boxShadow: selfTab === tb.v ? "0 1px 3px rgba(0,0,0,0.08)" : "none" }}>
-            {tb.l}
-          </button>
-        ))}
-      </div>
-
       {/* ══════════════════════════════════════════════════════════════════════
           CLIENT TAB — sistemi del cliente
       ══════════════════════════════════════════════════════════════════════ */}
-      {selfTab === "client" && (
+      {(
         <>
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-semibold" style={{ color: T.text }}>Art. 50 Kit</h1>
+              <h1 className="text-xl font-semibold" style={{ color: T.text }}>Avvisi e marcature IA — Art. 50</h1>
               <p className="text-sm mt-0.5" style={{ color: T.muted }}>
                 {t("clientSubtitle")} · {systems.length} {systems.length !== 1 ? t("systemsRegistered") : t("systemRegistered")}
               </p>
             </div>
             <div className="flex gap-2">
-              <Link href="/dashboard/onboarding" className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium" style={{ border: `1px solid ${T.border}`, color: T.muted, background: T.card }}>
+              <Link href="/dashboard/tools/inventory" className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium" style={{ border: `1px solid ${T.border}`, color: T.muted, background: T.card }}>
                 <Wand2 size={14} /> {t("guidedSetup")}
               </Link>
               <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white" style={{ background: T.text }}>
@@ -754,130 +725,10 @@ export default function Art50KitPage() {
         </>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          SELF-COMPLIANCE TAB — autoconformità RegulaeOS
-      ══════════════════════════════════════════════════════════════════════ */}
-      {selfTab === "self" && (
-        <div className="space-y-5">
-          <div>
-            <h2 className="text-xl font-semibold" style={{ color: T.text }}>{t("selfTitle")}</h2>
-            <p className="text-sm mt-1" style={{ color: T.muted }}>
-              {t("selfDesc")}
-            </p>
-          </div>
-
-          {/* Status summary */}
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { label: t("summaryCompliant"), value: selfCompliant, color: T.green, bg: T.greenBg },
-              { label: t("summaryPartial"), value: selfPartial,  color: T.amber, bg: T.amberBg },
-              { label: t("summaryGap"),      value: selfGaps,      color: T.red,   bg: T.redBg   },
-            ].map(s => (
-              <div key={s.label} className="rounded-xl p-4 text-center" style={{ background: s.bg, border: `1px solid ${s.color}30` }}>
-                <div className="text-2xl font-bold" style={{ color: s.color }}>{s.value}</div>
-                <div className="text-[11px]" style={{ color: s.color }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Art. 50(1)/(5) — direct interaction disclosure (Legal Assistant, chat) */}
-          <div>
-            <h3 className="text-[12px] font-semibold mb-3" style={{ color: T.text }}>
-              {t("self_50_1_title")}
-            </h3>
-            {!selfBannerDismissed && (
-              <div className="rounded-xl p-4 mb-4 relative" style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.09)" }}>
-                <button
-                  onClick={() => setSelfBannerDismissed(true)}
-                  style={{ position: "absolute", top: 10, right: 10, background: "none", border: "none", cursor: "pointer", color: "rgba(0,0,0,0.28)", padding: 2, display: "flex", alignItems: "center", justifyContent: "center" }}
-                  aria-label={t("close")}
-                >
-                  <X size={13} />
-                </button>
-                <div className="flex items-start gap-2 pr-5">
-                  <Info size={13} className="mt-0.5 flex-shrink-0" style={{ color: "rgba(0,0,0,0.38)" }} />
-                  <p className="text-[11px] leading-relaxed" style={{ color: T.muted }}>
-                    {t("self_50_1_banner")}
-                  </p>
-                </div>
-              </div>
-            )}
-            <div className="space-y-2">
-              {selfItems.filter(i => i.obligationId === "direct_interaction_disclosure").map(item => (
-                <SelfComplianceCard key={item.id} item={item} onUpdate={updateSelfItem} t={t} />
-              ))}
-            </div>
-          </div>
-
-          {/* Art. 50(2) — machine-readable on exports */}
-          <div>
-            <h3 className="text-[12px] font-semibold mb-3" style={{ color: T.text }}>
-              {t("self_50_2_title")}
-            </h3>
-            <div className="rounded-xl p-4 mb-4" style={{ background: T.bg, border: `1px solid ${T.border}` }}>
-              <p className="text-[11px] leading-relaxed" style={{ color: T.muted }}
-                dangerouslySetInnerHTML={{ __html: t("self_50_2_desc") }} />
-            </div>
-            <div className="space-y-2">
-              {selfItems.filter(i => i.obligationId === "synthetic_content_marking").map(item => (
-                <SelfComplianceCard key={item.id} item={item} onUpdate={updateSelfItem} t={t} />
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Toast */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg" style={{ background: T.text, color: "#fff" }}>
           ✓ {toast}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Self compliance card ─────────────────────────────────────────────────────
-function SelfComplianceCard({ item, onUpdate, t }: { item: SelfComplianceItem; onUpdate: (id: string, patch: Partial<SelfComplianceItem>) => void; t: TFn }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="rounded-xl border" style={{ background: "#fff", borderColor: "rgba(0,0,0,0.08)" }}>
-      <button className="w-full flex items-center gap-3 p-3 text-left" onClick={() => setOpen(v => !v)}>
-        <div className="flex-shrink-0">
-          {item.status === "compliant" ? <CheckCircle size={14} style={{ color: "#15803d" }} /> :
-           item.status === "gap" ? <XCircle size={14} style={{ color: "#dc2626" }} /> :
-           item.status === "partial" ? <AlertTriangle size={14} style={{ color: "#d97706" }} /> :
-           <X size={14} style={{ color: "rgba(0,0,0,0.22)" }} />}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[12px] font-medium" style={{ color: "#0D1016" }}>{item.area}</span>
-            <StatusBadge status={item.status} t={t} />
-          </div>
-        </div>
-        <ChevronDown size={12} style={{ color: "rgba(0,0,0,0.22)", transform: open ? "rotate(180deg)" : "none" }} />
-      </button>
-      {open && (
-        <div className="px-3 pb-3 border-t" style={{ borderColor: "#f3f4f6" }}>
-          {item.remediationNotes && !item.evidence && (
-            <div className="mt-2 rounded-lg p-2.5 mb-2" style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.08)" }}>
-              <p className="text-[11px] leading-relaxed" style={{ color: "rgba(0,0,0,0.55)" }}>{item.remediationNotes}</p>
-            </div>
-          )}
-          <div className="mt-2 mb-2">
-            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: "rgba(0,0,0,0.42)" }}>{t("complianceEvidence")}</label>
-            <textarea rows={2} value={item.evidence ?? ""} onChange={e => onUpdate(item.id, { evidence: e.target.value })} placeholder={t("describeMeasurePh")} style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)", fontSize: 12, color: "#0D1016", background: "#fff", outline: "none", resize: "vertical" }} />
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            {(["compliant", "partial", "gap", "n/a"] as SelfComplianceStatus[]).map(s => {
-              const l = { compliant: "Conforme", partial: "Parziale", gap: "Gap", "n/a": "N/A" };
-              const active = item.status === s;
-              return <button key={s} onClick={() => onUpdate(item.id, { status: s })} className="text-[11px] px-2.5 py-1 rounded-lg border"
-                style={{ borderColor: active ? "#0D1016" : "rgba(0,0,0,0.08)", background: active ? "rgba(13,16,22,0.05)" : "transparent", color: active ? "#0D1016" : "rgba(0,0,0,0.42)", cursor: "pointer", fontWeight: active ? 600 : 400 }}>
-                {l[s]}
-              </button>;
-            })}
-          </div>
         </div>
       )}
     </div>

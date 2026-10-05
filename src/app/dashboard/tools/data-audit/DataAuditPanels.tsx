@@ -384,7 +384,7 @@ export function IsoMappingTable() {
 // ═══ §9 Export JSON (Data Governance Statement) ═════════════════════════════
 export function exportDataGovernanceJSON(record: DataAuditRecord) {
   const statement = {
-    kind: "Data Governance Statement (Art. 10 / Allegato IV)",
+    kind: "Dichiarazione sulla governance dei dati (Art. 10 / Allegato IV)",
     generatedAt: new Date().toISOString(),
     record,
   };

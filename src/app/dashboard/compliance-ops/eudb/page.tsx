@@ -183,7 +183,7 @@ function DkField({ label, article, children, span2, aiBadge }: {
           <span style={{ fontSize: 9, fontWeight: 700, color: DK.muted,
             background: "rgba(0,0,0,0.04)", border: `1px solid ${DK.border}`,
             borderRadius: 4, padding: "1px 5px" }}>
-            ✦ AI
+            precompilato
           </span>
         )}
       </div>
@@ -212,7 +212,7 @@ function SectionCard({ title, article, aiBadge, children }: {
           <span style={{ fontSize: 9, fontWeight: 700, color: DK.muted,
             background: "rgba(0,0,0,0.04)", border: `1px solid ${DK.border}`,
             borderRadius: 5, padding: "2px 7px" }}>
-            ✦ AI — verifica e conferma
+            precompilato — verifica
           </span>
         )}
       </div>
@@ -302,7 +302,7 @@ export default function EUDBCompliancePage() {
   const eStatus = eligibilityStatus(doc.eligibility);
   const stepLabels = [
     "Eleggibilità",
-    sectionErrors.sectionA > 0 ? `Provider (${sectionErrors.sectionA})` : "Provider",
+    sectionErrors.sectionA > 0 ? `Fornitore (${sectionErrors.sectionA})` : "Fornitore",
     sectionErrors.sectionB > 0 ? `Sistema (${sectionErrors.sectionB})` : "Sistema",
     sectionErrors.allegati > 0 ? `Pacchetto (${sectionErrors.allegati})` : "Pacchetto",
   ];
@@ -313,29 +313,30 @@ export default function EUDBCompliancePage() {
   const questions: { key: keyof EUDBEligibility; text: string; note?: string; prefillSource?: string }[] = [
     {
       key: "q1_high_risk",
-      text: "Il sistema è classificato come ad alto rischio (Annex I o Annex III)?",
-      prefillSource: prefill?.sources.eligibility === "triage" ? "Precompilato da Triage" : undefined,
+      text: "Il sistema è ad alto rischio ai sensi dell'Allegato III (escluso il punto 2, infrastrutture critiche)?",
+      note: "I prodotti dell'Allegato I non si registrano qui; i sistemi del punto 2 si registrano a livello nazionale (Art. 49(5)).",
+      prefillSource: prefill?.sources.eligibility === "triage" ? "Dalla valutazione del sistema" : undefined,
     },
     {
       key: "q2_is_provider",
-      text: "Sei il provider (sviluppatore/produttore) o l'authorized representative nell'UE?",
-      prefillSource: prefill?.sources.eligibility === "triage" ? "Precompilato da Triage" : undefined,
+      text: "Sei il fornitore del sistema (o il suo rappresentante autorizzato)?",
+      prefillSource: prefill?.sources.eligibility === "triage" ? "Dalla valutazione del sistema" : undefined,
     },
     {
       key: "q3_public_deployer",
-      text: "(Solo deployer) Sei un organismo pubblico che usa il sistema in ambiti Annex III pt.1-6?",
-      note: "Es. enti pubblici in selezione personale, servizi sociali, istruzione, giustizia. Esenzione Art. 49(2) per sicurezza nazionale.",
+      text: "(Solo deployer) Sei un'autorità pubblica o un'istituzione dell'Unione, o agisci per loro conto, e usi un sistema ad alto rischio dell'Allegato III?",
+      note: "Art. 26(8) e 49(3). Per i punti 1, 6 e 7 (biometria, attività di contrasto, migrazione) la registrazione è nella sezione non pubblica (Art. 49(4)).",
     },
     {
       key: "q4_gpai_systemic",
-      text: "Il sistema è un GPAI model con rischio sistemico (Art. 51)?",
-      note: "Art. 51: modelli GPAI con capabilities > 10^25 FLOPs o con impatto sistemico accertato.",
+      text: "Sei un fornitore che ha concluso che un sistema dell'Allegato III non è ad alto rischio (deroga Art. 6(3))?",
+      note: "Anche in questo caso il sistema va registrato prima dell'immissione sul mercato (Art. 49(2)). I modelli di IA per finalità generali non si registrano nella banca dati UE.",
     },
   ];
 
   function renderStep1() {
     const bannerConfig = {
-      required:     { bg: DK.greenBg,  bdr: DK.greenBdr, col: DK.green, Icon: CheckCircle2,   text: "Registrazione EUDB obbligatoria — Art. 49(1)" },
+      required:     { bg: DK.greenBg,  bdr: DK.greenBdr, col: DK.green, Icon: CheckCircle2,   text: "Registrazione nella banca dati UE obbligatoria — Art. 49" },
       not_required: { bg: "rgba(0,0,0,0.03)", bdr: DK.border, col: DK.muted, Icon: Info,  text: "La registrazione EUDB non è obbligatoria per questo sistema" },
       unsure:       { bg: DK.amberBg,  bdr: DK.amberBdr, col: DK.amber, Icon: AlertTriangle,  text: "Incertezza — consulta il Legal Assistant" },
       incomplete:   null,
@@ -366,7 +367,7 @@ export default function EUDBCompliancePage() {
                   {q.prefillSource && (
                     <span style={{ fontSize: 9, color: DK.muted, background: "rgba(0,0,0,0.04)",
                       border: `1px solid ${DK.border}`, borderRadius: 4, padding: "1px 5px", fontWeight: 600 }}>
-                      ✦ AI — {q.prefillSource}
+                      {q.prefillSource}
                     </span>
                   )}
                 </div>
@@ -412,7 +413,7 @@ export default function EUDBCompliancePage() {
               <Sparkles size={13} style={{ color: DK.muted, flexShrink: 0, marginTop: 1 }} />
               <div style={{ flex: 1 }}>
                 <p style={{ fontSize: 11, color: DK.muted, fontWeight: 600, margin: 0 }}>
-                  ✦ AI ha precompilato {prefill.prefillCount} campi da AI Inventory / profilo azienda. Verifica e conferma prima di proseguire.
+                  Precompilati {prefill.prefillCount} campi dall&apos;inventario e dal profilo azienda. Verifica prima di proseguire.
                 </p>
                 <button onClick={() => setShowPrefillDetail(v => !v)}
                   style={{ fontSize: 10, color: DK.muted, background: "none", border: "none",
@@ -519,7 +520,7 @@ export default function EUDBCompliancePage() {
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <Sparkles size={13} style={{ color: DK.muted, flexShrink: 0 }} />
               <p style={{ fontSize: 11, color: DK.muted, fontWeight: 600, margin: 0 }}>
-                ✦ AI ha precompilato i campi sistema da Risk Manager e DocuGen Annex IV. Verifica e conferma.
+                Campi del sistema copiati dalla valutazione e dalla documentazione tecnica. Verifica prima di proseguire.
               </p>
             </div>
             {prefill.missingFields.length > 0 && (
@@ -595,7 +596,7 @@ export default function EUDBCompliancePage() {
               border: `1px solid ${DK.amberBdr}`, marginBottom: 12 }}>
               <p style={{ fontSize: 11, color: DK.amber, margin: 0 }}>
                 Documentazione di conformità non disponibile — completa lo step &quot;Kit Art. 50&quot; in{" "}
-                <a href="/dashboard/tools/docugen" style={{ color: DK.amber }}>DocuGen AI</a>{" "}
+                <a href="/dashboard/tools/docugen" style={{ color: DK.amber }}>Documentazione tecnica</a>{" "}
                 per il prefill automatico.
               </p>
             </div>
@@ -680,9 +681,9 @@ export default function EUDBCompliancePage() {
           </pre>
         </SectionCard>
 
-        <SectionCard title="Annex VIII — Sezione B: Sistema AI" article="Annex VIII §4-8">
+        <SectionCard title="Annex VIII — Sezione B: Sistema di IA" article="Annex VIII §4-8">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-            <span style={{ fontSize: 11, color: DK.muted }}>Dati del sistema AI</span>
+            <span style={{ fontSize: 11, color: DK.muted }}>Dati del sistema di IA</span>
             <button onClick={() => copySection("b")} style={{ display: "flex", alignItems: "center", gap: 5,
               padding: "4px 10px", borderRadius: 6, fontSize: 10, cursor: "pointer",
               background: copiedSection === "b" ? DK.greenBg : "rgba(0,0,0,0.05)",
@@ -894,7 +895,7 @@ export default function EUDBCompliancePage() {
       <div style={{ ...cardDk, padding: "10px 14px", marginBottom: 16,
         background: "rgba(0,0,0,0.04)", border: `1px solid ${DK.border}` }}>
         <p style={{ fontSize: 11, color: DK.muted, margin: 0 }}>
-          ✦ AI — verifica e conferma: mappatura campi Annex VIII, criteri Q1-Q4 e scadenza EUDB ricostruiti dalla memoria del modello. Validare contro testo consolidato Art. 49 e Annex VIII Reg. (UE) 2024/1689 prima della registrazione effettiva sul portale EC.
+          I campi seguono l&apos;Allegato VIII, sezioni A e C. La registrazione effettiva si fa sul portale della Commissione: questo documento serve a prepararla.
         </p>
       </div>
 

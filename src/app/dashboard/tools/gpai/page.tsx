@@ -107,7 +107,7 @@ interface QualificationCheck {
 const QUALIFICATION_CHECKS: QualificationCheck[] = [
   {
     id: "uses_foundation_model",
-    question: "Il tuo sistema AI usa come componente un modello foundation di un altro provider (es. OpenAI GPT, Anthropic Claude, Google Gemini, Meta Llama, Mistral, ecc.)?",
+    question: "Il tuo sistema di IA usa come componente un modello foundation di un altro provider (es. OpenAI GPT, Anthropic Claude, Google Gemini, Meta Llama, Mistral, ecc.)?",
     explanation: "Se chiami API di modelli esterni o integri un modello pre-addestrato nel tuo prodotto, sei un downstream provider rispetto a quel modello. Questo non ti rende GPAI provider, ma comporta obblighi specifici su come usi la documentazione fornita dal provider upstream.",
     impact: "downstream",
   },
@@ -585,7 +585,7 @@ export default function GPAIAssessmentPage() {
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-          <h1 style={{ fontSize: 24, fontWeight: 500, letterSpacing: "-0.8px", color: "#0D1016", margin: 0 }}>GPAI Assessment</h1>
+          <h1 style={{ fontSize: 24, fontWeight: 500, letterSpacing: "-0.8px", color: "#0D1016", margin: 0 }}>Modelli per finalità generali — Capo V</h1>
           <span style={{ fontSize: 11, fontWeight: 600, color: T.blue, background: T.blueBg, border: `1px solid ${T.blueBdr}`, borderRadius: 6, padding: "2px 8px" }}>
             Art. 51-55
           </span>
@@ -1063,7 +1063,7 @@ export default function GPAIAssessmentPage() {
               <div style={{ marginTop: 14, display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {[
                   { href: "/dashboard/tools/risk-manager", label: "Risk Manager (Art. 9)" },
-                  { href: "/dashboard/tools/docugen",      label: "DocuGen (Art. 11)" },
+                  { href: "/dashboard/tools/docugen",      label: "Documentazione tecnica (Art. 11)" },
                   { href: "/dashboard/tools/fria",         label: "FRIA (Art. 27)" },
                 ].map(l => (
                   <Link key={l.href} href={l.href} style={{

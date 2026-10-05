@@ -17,7 +17,7 @@ export default function InformativaAIPage() {
           RegulaeOS integra sistemi di AI generativa per supportare la compliance normativa.
         </div>
 
-        <h2>1. Sistemi AI utilizzati nella piattaforma</h2>
+        <h2>1. Sistemi di IA utilizzati nella piattaforma</h2>
         <table>
           <thead>
             <tr>
@@ -42,7 +42,7 @@ export default function InformativaAIPage() {
             </tr>
             <tr>
               <td><strong>Triage classificazione</strong></td>
-              <td>Classificazione del livello di rischio del sistema AI descritto dall&apos;utente</td>
+              <td>Classificazione del livello di rischio del sistema di IA descritto dall&apos;utente</td>
               <td>Logica rule-based + LLM di supporto</td>
               <td>Limitato — Art. 50 AI Act</td>
             </tr>
@@ -51,7 +51,7 @@ export default function InformativaAIPage() {
 
         <h2>2. Limitazioni e disclaimer</h2>
         <p>
-          I sistemi AI integrati in RegulaeOS sono strumenti di <strong>supporto operativo</strong>,
+          I sistemi di IA integrati in RegulaeOS sono strumenti di <strong>supporto operativo</strong>,
           non sistemi decisionali autonomi. In particolare:
         </p>
         <ul>
@@ -75,7 +75,7 @@ export default function InformativaAIPage() {
           </li>
         </ul>
 
-        <h2>3. Supervisione umana e validazione professionale</h2>
+        <h2>3. Sorveglianza umana e validazione professionale</h2>
         <p>
           Ogni output AI presentato nella piattaforma è chiaramente etichettato come generato da AI
           e richiede conferma esplicita dell&apos;utente prima di essere salvato o esportato.
@@ -91,7 +91,7 @@ export default function InformativaAIPage() {
 
         <h2>4. Dati usati per l'AI</h2>
         <p>
-          I contenuti inseriti dall&apos;utente nei tool (es. descrizione del sistema AI, rischi, misure)
+          I contenuti inseriti dall&apos;utente nei tool (es. descrizione del sistema di IA, rischi, misure)
           possono essere inviati a provider AI terzi (es. API OpenAI o Anthropic) per la generazione
           delle risposte. Tali dati vengono trattati come descritto nell&apos;<a href="/privacy">Informativa Privacy</a>{" "}
           e non sono utilizzati per addestrare modelli di terzi, in virtù delle condizioni contrattuali
@@ -107,7 +107,7 @@ export default function InformativaAIPage() {
 
         <h2>6. Contatti</h2>
         <p>
-          Per segnalazioni relative al comportamento dei sistemi AI o per richiedere maggiori informazioni:
+          Per segnalazioni relative al comportamento dei sistemi di IA o per richiedere maggiori informazioni:
           {" "}<a href="mailto:ai@regulaeos.com">ai@regulaeos.com</a>.
         </p>
 

@@ -24,7 +24,7 @@ export const FUNDAMENTAL_RIGHTS: FundamentalRight[] = [
     charter_art: "Art. 1 Carta UE",
     title: "Dignità umana",
     name: "Dignità umana",
-    description: "Ogni persona ha diritto al rispetto della propria dignità. Il sistema AI non deve trattare le persone come meri oggetti di classificazione o scoring.",
+    description: "Ogni persona ha diritto al rispetto della propria dignità. Il sistema di IA non deve trattare le persone come meri oggetti di classificazione o scoring.",
     is_absolute: true,
     triggerQuestions: [
       "Il sistema classifica o valuta persone in modo che potrebbe risultare degradante?",
@@ -51,7 +51,7 @@ export const FUNDAMENTAL_RIGHTS: FundamentalRight[] = [
     ],
     mitigationExamples: [
       "Revisione giuridica del contesto applicativo",
-      "Divieto contrattuale di utilizzo in contesti di detenzione senza supervisione umana",
+      "Divieto contrattuale di utilizzo in contesti di detenzione senza sorveglianza umana",
     ],
   },
   {
@@ -123,10 +123,10 @@ export const FUNDAMENTAL_RIGHTS: FundamentalRight[] = [
     charter_art: "Art. 47 Carta UE",
     title: "Diritto a un rimedio effettivo",
     name: "Rimedio effettivo",
-    description: "Le persone soggette a decisioni del sistema AI devono poter contestarle e ricevere spiegazione e revisione da parte di un umano.",
+    description: "Le persone soggette a decisioni del sistema di IA devono poter contestarle e ricevere spiegazione e revisione da parte di un umano.",
     is_absolute: false,
     triggerQuestions: [
-      "Le persone sanno che una decisione è stata presa da un sistema AI?",
+      "Le persone sanno che una decisione è stata presa da un sistema di IA?",
       "Esiste un canale per contestare le decisioni automatizzate?",
       "È garantita la revisione umana su richiesta?",
       "I tempi di risposta ai ricorsi sono definiti e ragionevoli?",
@@ -145,7 +145,7 @@ export const FUNDAMENTAL_RIGHTS: FundamentalRight[] = [
     charter_art: "Art. 15, 27-31 Carta UE",
     title: "Diritti del lavoro",
     name: "Diritti del lavoro",
-    description: "I lavoratori hanno diritto a condizioni di lavoro dignitose. Il sistema AI non può essere usato per sorveglianza indebita, discriminazione nelle assunzioni, o per determinare automaticamente condizioni lavorative senza supervisione umana.",
+    description: "I lavoratori hanno diritto a condizioni di lavoro dignitose. Il sistema di IA non può essere usato per sorveglianza indebita, discriminazione nelle assunzioni, o per determinare automaticamente condizioni lavorative senza sorveglianza umana.",
     is_absolute: false,
     triggerQuestions: [
       "Il sistema monitora le performance o il comportamento dei lavoratori?",
@@ -167,7 +167,7 @@ export const FUNDAMENTAL_RIGHTS: FundamentalRight[] = [
     charter_art: "Art. 11 Carta UE",
     title: "Libertà di espressione e di informazione",
     name: "Libertà di espressione",
-    description: "Ogni individuo ha diritto alla libertà di espressione. Il sistema AI non deve essere usato per censurare o filtrare contenuti in modo discriminatorio.",
+    description: "Ogni individuo ha diritto alla libertà di espressione. Il sistema di IA non deve essere usato per censurare o filtrare contenuti in modo discriminatorio.",
     is_absolute: false,
     triggerQuestions: [
       "Il sistema filtra, classifica o rimuove contenuti di utenti?",
@@ -186,7 +186,7 @@ export const FUNDAMENTAL_RIGHTS: FundamentalRight[] = [
     charter_art: "Art. 24 Carta UE / UNCRC",
     title: "Diritti dei minori",
     name: "Diritti dei minori",
-    description: "I minori godono di protezione speciale. I sistemi AI che li riguardano devono mettere al primo posto il loro superiore interesse.",
+    description: "I minori godono di protezione speciale. I sistemi di IA che li riguardano devono mettere al primo posto il loro superiore interesse.",
     is_absolute: false,
     triggerQuestions: [
       "Il sistema può interagire con o prendere decisioni su minori?",
@@ -550,7 +550,7 @@ export function computePriority(severity: string, likelihood: string): string {
  * Generate a plain-language public summary from the document.
  */
 export function generatePublicSummary(doc: FRIADocument): string {
-  const systemName = doc.system_name || "il sistema AI";
+  const systemName = doc.system_name || "il sistema di IA";
   const org = doc.organization || "l'organizzazione";
   const scenarioCount = doc.scenarios.length;
   const impactedRights = [

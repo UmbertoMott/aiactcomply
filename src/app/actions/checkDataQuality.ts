@@ -49,7 +49,7 @@ Fonte: "${datasetInfo.source}"
 Processo di labeling: "${datasetInfo.labelingProcess || "non specificato"}"
 Copertura geografica: "${datasetInfo.geoCoverage || "non specificata"}"
 Contiene dati personali: ${datasetInfo.personalData ? "sì" : "no"}
-Scopo del sistema AI: "${systemPurpose}"
+Scopo del sistema di IA: "${systemPurpose}"
 
 Formato JSON:
 {

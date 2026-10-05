@@ -105,7 +105,7 @@ export function FriaProgressRail({
                     {idx + 1}. {sec.label}
                   </p>
                   <p style={{ fontSize: 9, color: T.muted, margin: 0, marginTop: 1 }}>
-                    {doneCount}/{totalCount} · {sec.legalRef}
+                    {doneCount}/{totalCount} · {sec.legalRef}{sec.optional ? " · facoltativa" : ""}
                   </p>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>

@@ -30,9 +30,9 @@ export async function suggestOversightMeasures(input: {
     (r, i) => `${i + 1}. id="${r.id}" — ${r.label} (${r.primaryReference})`
   ).join("\n");
 
-  const prompt = `Sei un esperto di conformità AI Act UE (Reg. 2024/1689), specializzato in Art. 14 (supervisione umana per sistemi AI ad alto rischio).
+  const prompt = `Sei un esperto di conformità AI Act UE (Reg. 2024/1689), specializzato in Art. 14 (sorveglianza umana per sistemi di IA ad alto rischio).
 
-Sistema AI da analizzare:
+Sistema di IA da analizzare:
 - Nome: ${input.systemName}
 - Descrizione: ${input.systemDescription}
 - Tier di rischio: ${input.riskTier}
@@ -46,7 +46,7 @@ Per ciascuno dei 5 requisiti operativi Art. 14(4) elencati di seguito, proponi:
 2. implementationTypeRationale: motivazione breve (1 frase, italiano)
 3. measureDescription: 2-4 frasi concrete e specifiche per questo sistema — NON placeholder generici.
    - Per intervention_stop: descrivi esattamente lo "stato sicuro" operativo (es. cosa succede alle decisioni in sospeso, chi può riattivare, entro quanto)
-   - Per automation_bias_awareness: descrivi misure concrete (es. obbligo di visualizzare confidence score, rotazione operatori, audit periodicoPer tutte le citazioni includi il suffisso:
+   - Per automation_bias_awareness: descrivi misure concrete (es. obbligo di visualizzare confidence score, rotazione operatori, audit periodico)
 
 I 5 requisiti:
 ${requirementsList}
@@ -122,7 +122,7 @@ export async function assessFourEyesApplicability(input: {
   riskTier?: string;
 }): Promise<FourEyesApplicabilityResult> {
   const prompt = `Sei un esperto di AI Act UE (Reg. 2024/1689).
-Devi determinare se il seguente sistema AI rientra nell'Allegato III punto 1(a) — cioè se è un sistema di identificazione biometrica e/o categorizzazione biometrica — ai fini dell'applicazione della verifica a due persone di cui all'Art. 14(5).
+Devi determinare se il seguente sistema di IA rientra nell'Allegato III punto 1(a) — cioè se è un sistema di identificazione biometrica remota — ai fini dell'applicazione della verifica a due persone di cui all'Art. 14(5).
 
 Sistema:
 - Nome: ${input.systemName}
@@ -134,11 +134,11 @@ Rispondi SOLO con JSON:
 <extract>
 {
   "applicable": "yes|no|unspecified",
-  "rationale": "Motivazione breve (1-2 frasi in italiano). Concludi con"
+  "rationale": "Motivazione breve (1-2 frasi in italiano)."
 }
 </extract>
 
-Usa "yes" solo se il sistema identifica o categorizza persone fisiche tramite dati biometrici (volto, voce, impronta, andatura ecc.). Usa "no" se chiaramente non è un sistema biometrico. Usa "unspecified" se l'informazione è insufficiente.`;
+Usa "yes" solo se il sistema è di identificazione biometrica remota (Allegato III, punto 1(a)): in quel caso l'Art. 14(5) richiede la verifica separata di almeno due persone fisiche. Usa "no" se chiaramente non è un sistema biometrico. Usa "unspecified" se l'informazione è insufficiente.`;
 
   const raw = await generateText(prompt);
   const match = raw.match(/<extract>([\s\S]*?)<\/extract>/);

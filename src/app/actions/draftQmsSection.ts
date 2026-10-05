@@ -2,24 +2,8 @@
 import { generateText } from "@/lib/rag/rag-vertex"
 import { z } from "zod"
 import type { GlobalComplianceContext } from "@/hooks/useComplianceContext"
+import { QMS_SECTIONS, type QmsSectionId } from "@/lib/qms/qms-sections"
 
-export const QMS_SECTIONS = [
-  { id: "a", label: "Strategia di conformità normativa",                  article: "Art. 17(1)(a)" },
-  { id: "b", label: "Tecniche, procedure e azioni sistematiche",          article: "Art. 17(1)(b)" },
-  { id: "c", label: "Tecniche di progettazione e sviluppo",               article: "Art. 17(1)(c)" },
-  { id: "d", label: "Procedure di validazione e test pre-deployment",     article: "Art. 17(1)(d)" },
-  { id: "e", label: "Capacità tecniche e standard applicati",             article: "Art. 17(1)(e)" },
-  { id: "f", label: "Gestione dei dati (Art. 10)",                        article: "Art. 17(1)(f)" },
-  { id: "g", label: "Piano di gestione del rischio (Art. 9)",             article: "Art. 17(1)(g)" },
-  { id: "h", label: "Post-market monitoring (Art. 72)",                   article: "Art. 17(1)(h)" },
-  { id: "i", label: "Procedure incidenti gravi (Art. 73)",                article: "Art. 17(1)(i)" },
-  { id: "j", label: "Comunicazione con autorità e notified body",         article: "Art. 17(1)(j)" },
-  { id: "k", label: "Accessibilità e istruzioni per gli utenti",          article: "Art. 17(1)(k)" },
-  { id: "l", label: "Responsabilità e autorizzazioni interne",            article: "Art. 17(1)(l)" },
-  { id: "m", label: "Politiche di sorveglianza e revisione QMS",          article: "Art. 17(1)(m)" },
-] as const
-
-export type QmsSectionId = typeof QMS_SECTIONS[number]["id"]
 
 const QmsSectionDraftSchema = z.object({
   sectionId: z.string(),
@@ -53,7 +37,7 @@ export async function draftQmsSection(
 - Accuracy metric: ${context.accuracyMetric ?? "non misurata"}
 - Provider: ${context.providerName ?? "[DA COMPLETARE]"}`
 
-  const prompt = `Sei un esperto di Quality Management System per sistemi AI ad alto rischio ai sensi dell'Art. 17 EU AI Act.
+  const prompt = `Sei un esperto di Quality Management System per sistemi di IA ad alto rischio ai sensi dell'Art. 17 EU AI Act.
 
 SEZIONE DA REDIGERE: ${section.label} (${section.article})
 

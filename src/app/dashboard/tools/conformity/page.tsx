@@ -1,4 +1,8 @@
 "use client";
+import { loadOrgProfile } from "@/lib/dossier/org-profile";
+import { loadInventory } from "@/lib/inventory/ai-system";
+import { referenceSystem } from "@/lib/inventory/classifier-bridge";
+import { assessRisk } from "@/lib/obligations/engine";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
@@ -147,7 +151,7 @@ export default function ConformityPage() {
   });
   const [declaration, setDeclaration] = useState<string>("");
   const [signatoryForm, setSignatoryForm] = useState({
-    companyName: "", companyAddress: "", signatoryName: "", signatoryRole: "",
+    companyName: loadOrgProfile().orgName ?? "", companyAddress: "", signatoryName: "", signatoryRole: "",
   });
   const [snapshot, setSnapshot] = useState<ConformitySnapshot | null>(null);
   const [expandedReq, setExpandedReq] = useState<string | null>(null);
@@ -178,7 +182,12 @@ export default function ConformityPage() {
     const snap = loadConformitySnapshot();
     setSnapshot(snap);
 
-    if (ev.classifier) {
+    // Percorso dal sistema valutato nell'inventario; in alternativa dal vecchio risultato del classificatore
+    const sys = referenceSystem(loadInventory());
+    if (sys?.riskAnswers) {
+      const r = assessRisk(sys.riskAnswers);
+      setPath(determineAssessmentPath(r.annexIIIUses[0]?.ref ?? null, r.category));
+    } else if (ev.classifier) {
       const p = determineAssessmentPath(
         ev.classifier.annexIII ? (ev.classifier.applicableArticles?.[0] ?? null) : null,
         ev.classifier.riskLevel
@@ -564,7 +573,7 @@ export default function ConformityPage() {
       const decl = generateDeclarationOfConformity(
         evidence, results,
         signatoryForm.companyName, signatoryForm.companyAddress,
-        signatoryForm.signatoryName, signatoryForm.signatoryRole
+        signatoryForm.signatoryName, signatoryForm.signatoryRole, path
       );
       setDeclaration(decl);
       setDeclarationGenerated(true);
@@ -1073,7 +1082,7 @@ export default function ConformityPage() {
         <div style={{ marginBottom: 28 }}>
           <p style={labelStyle}>{t("kicker")}</p>
           <h1 style={{ fontSize: 24, fontWeight: 400, letterSpacing: "-0.8px", color: C.text, margin: "4px 0 8px" }}>
-            Conformity Assessment
+            Valutazione della conformità
           </h1>
           <p style={{ fontSize: 13, color: C.textSecondary, margin: 0 }}>
             {t("subtitle")}

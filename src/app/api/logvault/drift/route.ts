@@ -1,5 +1,5 @@
 // src/app/api/logvault/drift/route.ts
-// Real-time drift detection per sistemi AI — Art. 12 EU AI Act
+// Real-time drift detection per sistemi di IA — Art. 12 EU AI Act
 // Analizza gli ultimi N log e rileva deviazioni dai parametri di conformità
 
 import { createClient } from "@/lib/supabase/server";
@@ -142,7 +142,7 @@ export async function GET(req: Request) {
       deviation_pct: Math.round(((breachRate - THRESHOLDS.guardrail_breach_pct) / THRESHOLDS.guardrail_breach_pct) * 100),
       severity: "critical",
       description: `${guardrailBreaches} violazioni guardrail (${breachRate.toFixed(1)}%). Richiede revisione immediata.`,
-      art_reference: "Art. 14 — Supervisione umana: guardrail breach requires human review",
+      art_reference: "Art. 14 — Sorveglianza umana: guardrail breach requires human review",
     });
   }
 
@@ -180,15 +180,22 @@ export async function GET(req: Request) {
     generated_at: new Date().toISOString(),
   };
 
-  // Salva il report drift come log di audit
-  if (alerts.length > 0) {
+  // Salva il report drift come log di audit, una sola volta per ora per la stessa deriva
+  // (la pagina interroga questa route periodicamente)
+  const flagReason = `Drift rilevato: ${alerts.map((a) => a.metric).join(", ")}`;
+  let recentQuery = supabase.from("compliance_logs").select("id")
+    .eq("user_id", user.id).eq("event_type", "drift").eq("flag_reason", flagReason)
+    .gte("created_at", new Date(Date.now() - 60 * 60 * 1000).toISOString()).limit(1);
+  if (aiSystemId) recentQuery = recentQuery.eq("ai_system_id", aiSystemId);
+  const { data: recentSame } = alerts.length > 0 ? await recentQuery : { data: [] };
+  if (alerts.length > 0 && (recentSame ?? []).length === 0) {
     await supabase.from("compliance_logs").insert({
       ai_system_id: aiSystemId,
       user_id: user.id,
       event_type: "drift",
       flagged: alerts.some((a) => a.severity === "critical"),
       flag_severity: alerts.some((a) => a.severity === "critical") ? "critical" : "warning",
-      flag_reason: `Drift rilevato: ${alerts.map((a) => a.metric).join(", ")}`,
+      flag_reason: flagReason,
       within_guardrails: report.compliance_ok,
       metadata: { drift_report: report },
     });

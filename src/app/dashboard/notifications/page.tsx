@@ -585,7 +585,7 @@ export default function NotificationsPage() {
               </span>
             ) : (
               <span className="flex items-center gap-2">
-                Timeline AI Act
+                Scadenze AI Act
               </span>
             )}
           </button>
@@ -722,7 +722,7 @@ export default function NotificationsPage() {
               },
               {
                 key: "redTeam" as const,
-                label: "Notifiche risultati red-team",
+                label: "Notifiche sui test contraddittori",
                 desc: "Alert quando i test di red-team rilevano problemi",
                 disabled: false,
               },

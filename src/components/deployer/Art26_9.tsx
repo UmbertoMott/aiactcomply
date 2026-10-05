@@ -1,6 +1,6 @@
 "use client";
 
-// Art. 26(9) — Sospensione sistema per rischio grave — PROMPT BD
+// Art. 26(5) — Sospensione dell'uso in caso di rischio — PROMPT BD
 
 import React, { useState } from "react";
 import type { DeployerRecord } from "@/types/deployer";
@@ -49,7 +49,7 @@ export function Art26_9({ record, onChange }: Props) {
     <div className="space-y-3">
       <p className="text-xs text-slate-400">
         Se il sistema presenta rischi gravi o inattesi per la sicurezza o i diritti fondamentali,
-        sospendilo immediatamente e notifica il fornitore (Art. 26(9)).
+        sospendine l&apos;uso e informa il fornitore e l&apos;autorità di vigilanza (Art. 26(5)).
       </p>
       <textarea
         value={reason}

@@ -10,8 +10,8 @@ import { generateText } from "@/lib/rag/rag-vertex";
 
 // Campi che l'AI può suggerire (field_target → descrizione)
 const EXTRACTABLE_FIELDS: Record<string, string> = {
-  "classifier.systemName":       "Nome del sistema AI",
-  "classifier.systemDescription":"Descrizione del sistema AI",
+  "classifier.systemName":       "Nome del sistema di IA",
+  "classifier.systemDescription":"Descrizione del sistema di IA",
   "classifier.intendedPurpose":  "Scopo previsto / uso inteso",
   "classifier.sector":           "Settore di applicazione",
   "riskManager.intendedPurpose": "Scopo previsto (Risk Manager)",

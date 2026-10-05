@@ -33,7 +33,7 @@ export const ANNEX_III_RISK_KEYWORDS: Record<string, string[]> = {
 
 // These keywords make a risk relevant regardless of the Annex III area (Art. 9 cross-cutting)
 export const ALWAYS_RELEVANT_KEYWORDS = [
-  "supervisione umana",
+  "sorveglianza umana",
   "oversight",
   "accuratezza",
   "robustezza",

@@ -22,7 +22,7 @@ export const EVIDENCE_TEMPLATES: EvidenceTemplate[] = [
   {
     key: "adr",
     label: "ADR — Architectural Decision",
-    description: "Documenta le decisioni architetturali del sistema AI e le alternative valutate.",
+    description: "Documenta le decisioni architetturali del sistema di IA e le alternative valutate.",
     article: "Art. 9 / Art. 17",
     color: "#6366f1",
     fields: [
@@ -37,7 +37,7 @@ export const EVIDENCE_TEMPLATES: EvidenceTemplate[] = [
   {
     key: "log",
     label: "Log di Sistema",
-    description: "Registro automatico o manuale degli eventi rilevanti del sistema AI.",
+    description: "Registro automatico o manuale degli eventi rilevanti del sistema di IA.",
     article: "Art. 12",
     color: "#0ea5e9",
     fields: [
@@ -51,7 +51,7 @@ export const EVIDENCE_TEMPLATES: EvidenceTemplate[] = [
   {
     key: "decision",
     label: "Decisione ad Alto Impatto",
-    description: "Traccia le decisioni prese dal sistema AI che impattano persone fisiche.",
+    description: "Traccia le decisioni prese dal sistema di IA che impattano persone fisiche.",
     article: "Art. 13 / Art. 14",
     color: "#f59e0b",
     fields: [
@@ -66,7 +66,7 @@ export const EVIDENCE_TEMPLATES: EvidenceTemplate[] = [
   {
     key: "audit",
     label: "Audit di Conformità",
-    description: "Verbale di audit interno o esterno sulla conformità del sistema AI.",
+    description: "Verbale di audit interno o esterno sulla conformità del sistema di IA.",
     article: "Art. 9 / Art. 43",
     color: "#10b981",
     fields: [

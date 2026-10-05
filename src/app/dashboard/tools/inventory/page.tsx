@@ -38,7 +38,7 @@ const TIER_CONFIG: Record<SystemTier, TierCfg> = {
     article: "Art. 6 + Allegato III AI Act",
     what: "Il sistema prende o influenza decisioni che impattano significativamente persone fisiche in settori sensibili elencati nell'Allegato III (occupazione, istruzione, servizi essenziali, forze dell'ordine, migrazione, giustizia, infrastrutture critiche).",
     examples: ["AI per la pre-selezione dei CV", "Sistema di scoring del credito bancario", "AI per l'assegnazione di sussidi di disoccupazione", "Diagnosi medica assistita da AI", "AI per la valutazione del rischio di recidiva penale"],
-    obligations: ["Documentazione tecnica completa (Art. 11 + Allegato IV)", "FRIA — Valutazione impatto diritti fondamentali (Art. 27)", "Risk Register Art. 9", "Supervisione umana obbligatoria (Art. 14)", "Registrazione nel database EU (Art. 49)", "Conformità assessment prima del deployment"],
+    obligations: ["Documentazione tecnica completa (Art. 11 + Allegato IV)", "FRIA — Valutazione impatto diritti fondamentali (Art. 27)", "Risk Register Art. 9", "Sorveglianza umana obbligatoria (Art. 14)", "Registrazione nel database EU (Art. 49)", "Conformità assessment prima del deployment"],
   },
   limited: {
     label: "Limitato", bg: "rgba(217,119,6,0.07)", border: "rgba(217,119,6,0.25)", text: "#d97706", dot: "#d97706",
@@ -79,12 +79,12 @@ const TIER_CONFIG: Record<SystemTier, TierCfg> = {
 
 // ─── Guida ruolo ──────────────────────────────────────────────────────────────
 const ROLE_GUIDE: Record<string, { what: string; example: string; article: string }> = {
-  provider:             { article: "Art. 3(3)", what: "Hai sviluppato o fatto sviluppare il sistema AI e lo metti a disposizione sul mercato o in servizio — anche per uso proprio.", example: "Hai addestrato o customizzato il modello; sei il titolare del sistema." },
-  deployer:             { article: "Art. 3(4)", what: "Usi un sistema AI sviluppato da altri nell'ambito della tua attività professionale, per produrre effetti su persone fisiche.", example: "Hai acquistato o integrato un sistema AI di un fornitore terzo nel tuo processo aziendale." },
-  importer:             { article: "Art. 3(6)", what: "Stabilito nell'UE, metti a disposizione sul mercato UE un sistema AI sviluppato fuori UE.", example: "Rivenditore europeo di un sistema AI di un'azienda americana o asiatica." },
-  distributor:          { article: "Art. 3(7)", what: "Rendi disponibile sul mercato un sistema AI sviluppato da altri, senza modificarlo (altrimenti diventi provider).", example: "Marketplace o rivenditore che distribuisce AI senza modificarne il funzionamento." },
+  provider:             { article: "Art. 3(3)", what: "Hai sviluppato o fatto sviluppare il sistema di IA e lo metti a disposizione sul mercato o in servizio — anche per uso proprio.", example: "Hai addestrato o customizzato il modello; sei il titolare del sistema." },
+  deployer:             { article: "Art. 3(4)", what: "Usi un sistema di IA sviluppato da altri nell'ambito della tua attività professionale, per produrre effetti su persone fisiche.", example: "Hai acquistato o integrato un sistema di IA di un fornitore terzo nel tuo processo aziendale." },
+  importer:             { article: "Art. 3(6)", what: "Stabilito nell'UE, metti a disposizione sul mercato UE un sistema di IA sviluppato fuori UE.", example: "Rivenditore europeo di un sistema di IA di un'azienda americana o asiatica." },
+  distributor:          { article: "Art. 3(7)", what: "Rendi disponibile sul mercato un sistema di IA sviluppato da altri, senza modificarlo (altrimenti diventi provider).", example: "Marketplace o rivenditore che distribuisce AI senza modificarne il funzionamento." },
   authorized_rep:       { article: "Art. 3(5)", what: "Persona fisica o giuridica stabilita nell'UE che agisce per conto di un provider extra-UE.", example: "Ufficio europeo di un'azienda AI americana, nominato come rappresentante ufficiale UE." },
-  product_manufacturer: { article: "Art. 25(1)(b)", what: "Produttore di un prodotto che incorpora un sistema AI come componente, che mette a disposizione il prodotto finale.", example: "Casa automobilistica che integra AI nel sistema di guida assistita." },
+  product_manufacturer: { article: "Art. 25(1)(b)", what: "Produttore di un prodotto che incorpora un sistema di IA come componente, che mette a disposizione il prodotto finale.", example: "Casa automobilistica che integra AI nel sistema di guida assistita." },
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -92,7 +92,7 @@ const STATUS_LABELS: Record<string, string> = {
   in_production: "In produzione", deprecated: "Deprecato",
 }
 const ROLE_LABELS: Record<string, string> = {
-  provider: "Provider", deployer: "Deployer", importer: "Importatore",
+  provider: "Fornitore", deployer: "Deployer", importer: "Importatore",
   distributor: "Distributore", authorized_rep: "Rapp. autorizzato",
   product_manufacturer: "Prod. prodotto",
 }
@@ -993,7 +993,7 @@ function ImportCsvModal({ onClose, onSave }: { onClose: () => void; onSave: () =
   }
 
   const exampleCsv = `name,owner,description,status
-HireVue Video Interview,HR,Sistema AI per valutazione video candidati nella selezione,in_production
+HireVue Video Interview,HR,Sistema di IA per valutazione video candidati nella selezione,in_production
 GitHub Copilot,Engineering,Assistente AI alla scrittura di codice,in_production
 Chatbot Supporto Clienti,Customer Care,Assistente virtuale basato su GPT-4 per il sito,in_production`
 

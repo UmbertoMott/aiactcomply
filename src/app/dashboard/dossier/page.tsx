@@ -326,7 +326,7 @@ export default function DossierPage() {
               <input
                 value={metaSystem}
                 onChange={(e) => setMetaSystem(e.target.value)}
-                placeholder="Nome sistema AI"
+                placeholder="Nome sistema di IA"
                 className="rounded-lg px-2.5 py-1.5 text-[12px] focus:outline-none"
                 style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.1)", color: "#0D1016", width: "200px" }}
               />

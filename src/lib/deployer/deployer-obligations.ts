@@ -35,71 +35,72 @@ export interface DeployerObligationDefinition {
 }
 
 export const DEPLOYER_OBLIGATIONS: readonly DeployerObligationDefinition[] = [
-  // ── Always applicable (5) ──────────────────────────────────────────────────
+  // Paragrafi dell'Art. 26 Reg. (UE) 2024/1689 e obblighi collegati del deployer.
+  // ── Sempre applicabili a un deployer di sistema ad alto rischio ──────────────
   {
     id: "D-01",
-    label: "Verifica conformità sistema AI",
+    label: "Uso conforme alle istruzioni per l'uso",
     description:
-      "Verificare che il fornitore abbia prodotto tutta la documentazione tecnica e la dichiarazione di conformità UE prima del deployment.",
+      "Adottare misure tecniche e organizzative idonee a garantire che il sistema sia usato conformemente alle istruzioni per l'uso del fornitore.",
     primaryReference: "Art. 26(1) AI Act",
-    supportReferences: ["Art. 13", "Art. 11", "All. IV"],
+    supportReferences: ["Art. 13"],
     alwaysApplicable: true,
-    evidenceType: "document_upload",
-    linkedTool: "/dashboard/tools/risk-manager",
+    evidenceType: "internal_procedure",
+    linkedTool: "/dashboard/tools/transparency",
   },
   {
     id: "D-02",
-    label: "Uso conforme alle istruzioni",
+    label: "Affidare la sorveglianza umana",
     description:
-      "Garantire che il sistema AI venga utilizzato esclusivamente secondo le istruzioni d'uso e il campo di applicazione previsto dal fornitore.",
+      "Affidare la sorveglianza umana a persone fisiche con la competenza, la formazione e l'autorità necessarie, e con il sostegno necessario.",
     primaryReference: "Art. 26(2) AI Act",
-    supportReferences: ["Art. 13(3)", "Art. 26(6)"],
-    alwaysApplicable: true,
-    evidenceType: "internal_procedure",
-    linkedTool: null,
-  },
-  {
-    id: "D-03",
-    label: "Supervisione umana",
-    description:
-      "Assegnare personale qualificato per la supervisione umana del sistema AI durante il funzionamento, con competenze tecniche adeguate — in conformità ai 5 requisiti operativi Art. 14(4)(a)-(e).",
-    primaryReference: "Art. 26(5) AI Act",
-    supportReferences: ["Art. 14(4)(a)-(e)"],
+    supportReferences: ["Art. 14", "Art. 4"],
     alwaysApplicable: true,
     evidenceType: "person_assignment",
     linkedTool: "/dashboard/tools/oversight",
   },
   {
-    id: "D-04",
-    label: "Segnalazione gravi incidenti",
+    id: "D-03",
+    label: "Monitorare il funzionamento e segnalare",
     description:
-      "Notificare al fornitore e alle autorità competenti qualsiasi grave incidente o malfunzionamento individuato, entro i termini previsti.",
-    primaryReference: "Art. 26(6) AI Act",
-    supportReferences: ["Art. 73", "Art. 74"],
+      "Monitorare il sistema secondo le istruzioni; se presenta un rischio, informare fornitore o distributore e autorità di vigilanza e sospenderne l'uso; in caso di incidente grave informare immediatamente prima il fornitore, poi importatore o distributore e autorità.",
+    primaryReference: "Art. 26(5) AI Act",
+    supportReferences: ["Art. 72", "Art. 73", "Art. 79(1)"],
     alwaysApplicable: true,
     evidenceType: "linked_log",
     linkedTool: "/dashboard/post-market?tab=incidents",
   },
   {
-    id: "D-05",
-    label: "Log e conservazione dati",
+    id: "D-04",
+    label: "Conservare i log per almeno 6 mesi",
     description:
-      "Conservare i log generati dal sistema AI per il periodo minimo stabilito dalla normativa applicabile e garantirne l'integrità.",
+      "Conservare i log generati automaticamente dal sistema, nella misura in cui sono sotto il proprio controllo, per un periodo adeguato e comunque di almeno sei mesi, salvo diversa disposizione.",
     primaryReference: "Art. 26(6) AI Act",
-    supportReferences: ["Art. 12(1)", "Art. 19"],
+    supportReferences: ["Art. 12", "Art. 19"],
     alwaysApplicable: true,
     evidenceType: "retention_policy",
     linkedTool: "/dashboard/tools/logvault",
   },
+  {
+    id: "D-05",
+    label: "Dati di input pertinenti",
+    description:
+      "Nella misura in cui esercita il controllo sui dati di input, garantire che siano pertinenti e sufficientemente rappresentativi rispetto alla finalità prevista.",
+    primaryReference: "Art. 26(4) AI Act",
+    supportReferences: ["Art. 10"],
+    alwaysApplicable: true,
+    evidenceType: "internal_procedure",
+    linkedTool: "/dashboard/tools/data-audit",
+  },
 
-  // ── Conditional (6) ───────────────────────────────────────────────────────
+  // ── Applicabili in base al caso ───────────────────────────────────────────
   {
     id: "D-06",
-    label: "Procedure interne di controllo",
+    label: "Cooperare con le autorità",
     description:
-      "Implementare e documentare procedure interne per garantire il rispetto continuativo del regolamento durante l'utilizzo del sistema.",
-    primaryReference: "Art. 26(2) AI Act",
-    supportReferences: ["Art. 9"],
+      "Cooperare con le autorità competenti in qualsiasi azione intrapresa in relazione al sistema.",
+    primaryReference: "Art. 26(12) AI Act",
+    supportReferences: [],
     alwaysApplicable: false,
     applicabilityField: "usesInternalProcedures",
     evidenceType: "internal_procedure",
@@ -107,11 +108,11 @@ export const DEPLOYER_OBLIGATIONS: readonly DeployerObligationDefinition[] = [
   },
   {
     id: "D-07",
-    label: "FRIA — Valutazione impatto diritti fondamentali",
+    label: "FRIA — Valutazione d'impatto sui diritti fondamentali",
     description:
-      "Effettuare una valutazione d'impatto sui diritti fondamentali prima del deployment di sistemi AI ad alto rischio per uso pubblico.",
+      "Prima dell'uso, se il deployer è un organismo di diritto pubblico o un ente privato che fornisce servizi pubblici, o usa sistemi dell'Allegato III, punto 5(b) e (c) (non per i sistemi del punto 2).",
     primaryReference: "Art. 27 AI Act",
-    supportReferences: ["Art. 26(1)", "All. III"],
+    supportReferences: ["All. III"],
     alwaysApplicable: false,
     applicabilityField: "usesHighRiskSystem",
     evidenceType: "linked_report",
@@ -119,11 +120,11 @@ export const DEPLOYER_OBLIGATIONS: readonly DeployerObligationDefinition[] = [
   },
   {
     id: "D-08",
-    label: "Informativa ai lavoratori",
+    label: "Informare i lavoratori",
     description:
-      "Informare in modo trasparente e con anticipo i lavoratori e i rappresentanti sindacali sull'uso di sistemi AI che li riguardano.",
+      "Prima di mettere in servizio o usare il sistema sul luogo di lavoro, il deployer datore di lavoro informa i rappresentanti dei lavoratori e i lavoratori interessati.",
     primaryReference: "Art. 26(7) AI Act",
-    supportReferences: ["Considerando 89"],
+    supportReferences: [],
     alwaysApplicable: false,
     applicabilityField: "employeeImpact",
     evidenceType: "notice_text",
@@ -131,23 +132,23 @@ export const DEPLOYER_OBLIGATIONS: readonly DeployerObligationDefinition[] = [
   },
   {
     id: "D-09",
-    label: "Divieto categorizzazione biometrica / emozioni",
+    label: "Informare le persone soggette alle decisioni",
     description:
-      "Non utilizzare sistemi di categorizzazione biometrica o riconoscimento delle emozioni nei contesti vietati. Documentare l'eccezione se applicabile.",
-    primaryReference: "Art. 26(8) AI Act",
-    supportReferences: ["Art. 5(1)(b)"],
+      "Il deployer di un sistema dell'Allegato III che adotta o aiuta ad adottare decisioni su persone fisiche le informa che sono soggette all'uso del sistema.",
+    primaryReference: "Art. 26(11) AI Act",
+    supportReferences: ["Art. 86"],
     alwaysApplicable: false,
     applicabilityField: "biometricCategorization",
-    evidenceType: "authorization_reference",
+    evidenceType: "notice_text",
     linkedTool: null,
   },
   {
     id: "D-10",
-    label: "Registrazione EUDB (autorità pubbliche)",
+    label: "Registrazione nella banca dati UE (autorità pubbliche)",
     description:
-      "Registrare il sistema AI nel database EU AI Act (EUDB) prima del deployment, se si è un'autorità pubblica che utilizza sistemi ad alto rischio.",
-    primaryReference: "Art. 49(2) AI Act",
-    supportReferences: ["Art. 26(1)", "Art. 71"],
+      "Il deployer che è autorità pubblica o istituzione dell'Unione si registra e registra l'uso del sistema nella banca dati UE; se il sistema non vi è registrato, non lo usa e informa fornitore o distributore.",
+    primaryReference: "Art. 26(8) AI Act",
+    supportReferences: ["Art. 49(3)", "Art. 71"],
     alwaysApplicable: false,
     applicabilityField: "eudbRequired",
     evidenceType: "registration_reference",
@@ -155,14 +156,14 @@ export const DEPLOYER_OBLIGATIONS: readonly DeployerObligationDefinition[] = [
   },
   {
     id: "D-11",
-    label: "Registrazione RBI",
+    label: "Identificazione biometrica remota a posteriori: autorizzazione",
     description:
-      "Registrare il sistema AI nel database RBI (Regulatory Burden Inventory) entro 48 ore dall'inizio del deployment, se applicabile.",
+      "Per l'uso di un sistema di identificazione biometrica remota a posteriori nella ricerca mirata di persone in un'indagine penale, chiedere l'autorizzazione all'autorità giudiziaria o amministrativa prima dell'uso o senza ritardo e comunque entro 48 ore.",
     primaryReference: "Art. 26(10) AI Act",
-    supportReferences: ["Art. 49"],
+    supportReferences: [],
     alwaysApplicable: false,
     applicabilityField: "rbiApplicable",
-    evidenceType: "registration_reference",
+    evidenceType: "authorization_reference",
     linkedTool: null,
   },
 ] as const;

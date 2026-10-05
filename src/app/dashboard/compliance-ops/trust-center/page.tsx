@@ -1,5 +1,6 @@
 "use client";
 
+import { levelLabel } from "@/lib/risk-level-label";
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
@@ -179,7 +180,7 @@ function PublicPreview({
                 <span style={{ color: EMERAL, fontWeight: 700, fontSize: 14 }}>AIComply Trust Center</span>
               </div>
               <h1 style={{ color: TEXT, fontSize: 20, fontWeight: 700, margin: "0 0 4px" }}>
-                {systemName || "Sistema AI"}
+                {systemName || "Sistema di IA"}
               </h1>
               {page.noindex && (
                 <p style={{ color: MUTED, fontSize: 11, marginTop: 6 }}>Questa pagina non è indicizzata dai motori di ricerca.</p>
@@ -349,7 +350,7 @@ function SectionCard({
 function SourceSummary({ id, sourceData }: { id: TrustCenterSectionId; sourceData: TrustCenterSourceData }) {
   switch (id) {
     case "risk_tier":
-      return <span style={{ color: TEXT, fontSize: 12 }}>{sourceData.risk_tier.riskTier ?? "—"} · {sourceData.risk_tier.systemName ?? "—"}</span>;
+      return <span style={{ color: TEXT, fontSize: 12 }}>{levelLabel(sourceData.risk_tier.riskTier)} · {sourceData.risk_tier.systemName ?? "—"}</span>;
     case "intended_use":
       return <span style={{ color: TEXT, fontSize: 12 }}>{(sourceData.intended_use.finalityDescription ?? "").slice(0, 100)}{sourceData.intended_use.finalityDescription && sourceData.intended_use.finalityDescription.length > 100 ? "…" : ""}</span>;
     case "oversight":
@@ -410,7 +411,7 @@ export default function TrustCenterEditorPage() {
     setSourceData(readSourceData());
   }, [systemId]);
 
-  const systemName = sourceData.risk_tier.systemName ?? "Sistema AI";
+  const systemName = sourceData.risk_tier.systemName ?? "Sistema di IA";
   const publicUrl  = `https://aicomply.io/trust/${page.publicSlug}`;
   const localUrl   = `/trust/${page.publicSlug}`;
 
@@ -571,7 +572,7 @@ export default function TrustCenterEditorPage() {
         <div style={{ marginBottom: 24 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
             <ShieldCheck size={20} style={{ color: EMERAL }} />
-            <h1 style={{ color: TEXT, fontSize: 22, fontWeight: 700, margin: 0 }}>Trust Center</h1>
+            <h1 style={{ color: TEXT, fontSize: 22, fontWeight: 700, margin: 0 }}>Pagina pubblica di conformità</h1>
             {page.isPublished && (
               <span style={{ background: "rgba(52,211,153,0.12)", color: EMERAL, border: "1px solid rgba(52,211,153,0.3)", borderRadius: 6, padding: "2px 10px", fontSize: 12, fontWeight: 600 }}>
                 Pubblicato
@@ -579,7 +580,7 @@ export default function TrustCenterEditorPage() {
             )}
           </div>
           <p style={{ color: MUTED, fontSize: 14 }}>
-            Pagina pubblica di trasparenza per il sistema AI — {publicSectionCount}/8 sezioni attive
+            Pagina pubblica di trasparenza per il sistema di IA — {publicSectionCount}/8 sezioni attive
           </p>
         </div>
 

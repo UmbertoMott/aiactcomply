@@ -1,6 +1,6 @@
 "use client";
 
-// Art. 26(8) — FRIA (Fundamental Rights Impact Assessment) — PROMPT BD
+// Art. 27 — FRIA (valutazione d'impatto sui diritti fondamentali) — PROMPT BD
 
 import React from "react";
 import Link from "next/link";
@@ -23,8 +23,8 @@ export function Art26_8({ record, onChange }: Props) {
   return (
     <div className="space-y-3">
       <p className="text-xs text-slate-400">
-        Il deployer di un sistema ad alto rischio che impatta persone fisiche deve condurre
-        una FRIA prima del deployment (Art. 26(8)).
+        Prima del primo uso, la FRIA è obbligatoria per organismi di diritto pubblico, enti privati che forniscono servizi pubblici
+        e deployer di sistemi dell&apos;Allegato III, punto 5, lettere b) e c) (Art. 27).
       </p>
 
       <div className="space-y-2">

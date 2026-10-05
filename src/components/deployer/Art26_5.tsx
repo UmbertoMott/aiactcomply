@@ -1,6 +1,6 @@
 "use client";
 
-// Art. 26(5) — Dichiarazione di uso conforme — PROMPT BD
+// Art. 26(1) — Uso conforme alle istruzioni — PROMPT BD
 
 import React from "react";
 import type { DeployerRecord } from "@/types/deployer";
@@ -14,8 +14,8 @@ export function Art26_5({ record, onChange }: Props) {
   return (
     <div className="space-y-3">
       <p className="text-xs text-slate-400">
-        Il deployer non deve modificare il sistema oltre l&apos;uso previsto dal provider
-        e deve dichiararlo formalmente (Art. 26(5)).
+        Il deployer adotta misure tecniche e organizzative per usare il sistema conformemente alle istruzioni per l&apos;uso
+        del fornitore (Art. 26(1)). La dichiarazione interna documenta queste misure.
       </p>
 
       <div>
@@ -23,7 +23,7 @@ export function Art26_5({ record, onChange }: Props) {
         <textarea
           rows={3}
           className="w-full text-xs px-2 py-1.5 rounded border border-slate-700 bg-slate-900 text-slate-200 focus:outline-none focus:border-slate-500 resize-none"
-          placeholder="Dichiaro che il sistema AI viene utilizzato esclusivamente secondo le istruzioni d'uso fornite dal provider..."
+          placeholder="Dichiaro che il sistema di IA viene utilizzato esclusivamente secondo le istruzioni d'uso fornite dal provider..."
           value={record.conformingUseText ?? ""}
           onChange={e =>
             onChange(prev => ({

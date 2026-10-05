@@ -27,20 +27,20 @@ export async function draftWorkerNotification(
   }
 
   const prompt = `Sei un esperto di EU AI Act Art. 26(7) — informazione ai lavoratori.
-Redigi una bozza di notifica ai lavoratori per l'introduzione di un sistema AI ad alto rischio.
+Redigi una bozza di notifica ai lavoratori per l'introduzione di un sistema di IA ad alto rischio.
 
 Art. 26(7): Il deployer deve informare i rappresentanti dei lavoratori e i lavoratori interessati
-prima dell'introduzione di sistemi AI ad alto rischio sul posto di lavoro, nel rispetto del
+prima dell'introduzione di sistemi di IA ad alto rischio sul posto di lavoro, nel rispetto del
 diritto dell'Unione e nazionale in materia di informazione e consultazione.
 
 La notifica deve essere chiara, comprensibile e includere: scopo del sistema, impatto sul lavoro,
-misure di supervisione umana, diritti dei lavoratori.
+misure di sorveglianza umana, diritti dei lavoratori.
 
 REGOLE OBBLIGATORIE:
 - notificationText deve essere in italiano, professionale ma comprensibile
 - Rispondi SOLO con JSON valido
 
-Sistema AI: "${systemName}"
+Sistema di IA: "${systemName}"
 Scopo: "${systemPurpose}"
 Contesto deployment: "${deploymentContext}"
 Ruoli coinvolti: "${affectedRoles || "lavoratori interessati"}"

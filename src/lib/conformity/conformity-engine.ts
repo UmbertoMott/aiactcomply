@@ -16,52 +16,69 @@ export interface PathDetermination {
   annexIIIPoints: number[];
 }
 
+/** Punto dell'Allegato III da una stringa ("1a", "All. III, punto 1(a)", "1. Biometria"…). */
+function annexIIIPoint(annexCategory: string | null): number | null {
+  if (!annexCategory) return null;
+  const c = annexCategory.toLowerCase();
+  const m = c.match(/punto\s*(\d)/) ?? c.match(/^\s*(\d)/);
+  if (m) return Number(m[1]);
+  if (c.includes("biometr")) return 1;
+  return null;
+}
+
+// Art. 43 Reg. (UE) 2024/1689:
+// (1) Allegato III, punto 1: Allegato VI solo se il fornitore ha applicato integralmente norme armonizzate
+//     o specifiche comuni; altrimenti Allegato VII con organismo notificato.
+// (2) Allegato III, punti 2-8: controllo interno (Allegato VI), senza organismo notificato.
+// (3) Allegato I, sezione A: procedura prevista dalla normativa di settore.
 export function determineAssessmentPath(
   annexCategory: string | null,
   riskLevel: string
 ): PathDetermination {
-  if (!riskLevel || riskLevel === "Minimal" || riskLevel === "Limited" || riskLevel === "minimal" || riskLevel === "limited") {
+  const level = (riskLevel || "").toLowerCase();
+  if (!level || level === "minimal" || level === "limited" || level === "transparency") {
     return {
       path: "self",
-      reason: "Sistemi a rischio limitato o minimo non richiedono valutazione formale ex Art. 43. Applicabili solo obblighi di trasparenza (Art. 50).",
+      reason: "Per i sistemi non ad alto rischio non è prevista una valutazione della conformità ai sensi dell'Art. 43. Restano, se applicabili, gli obblighi di trasparenza dell'Art. 50.",
       mandatoryNotifiedBody: false,
       applicableArticle: "Art. 50",
       annexIIIPoints: [],
     };
   }
-  if (annexCategory?.includes("1.") || annexCategory?.toLowerCase().includes("biometr")) {
+  if (level === "prohibited") {
+    return {
+      path: "undetermined",
+      reason: "Il sistema rientra in una pratica vietata (Art. 5): non può essere immesso sul mercato, messo in servizio o usato, quindi non c'è valutazione della conformità da fare.",
+      mandatoryNotifiedBody: false,
+      applicableArticle: "Art. 5",
+      annexIIIPoints: [],
+    };
+  }
+  if (level.includes("annex_i") && !level.includes("annex_iii")) {
     return {
       path: "notified_body",
-      reason: "I sistemi di identificazione biometrica remota in spazi pubblici (Allegato III punto 1) richiedono valutazione di conformità da parte di un organismo notificato ai sensi dell'Art. 43.1.",
+      reason: "Il sistema è un prodotto (o componente di sicurezza) dell'Allegato I, sezione A: segui la procedura di valutazione della normativa di settore, che include i requisiti del capo III, sezione 2 (Art. 43(3)). L'organismo notificato è quello previsto da quella normativa.",
+      mandatoryNotifiedBody: false,
+      applicableArticle: "Art. 43(3)",
+      annexIIIPoints: [],
+    };
+  }
+  const point = annexIIIPoint(annexCategory);
+  if (point === 1) {
+    return {
+      path: "notified_body",
+      reason: "Biometria (Allegato III, punto 1): puoi usare il controllo interno (Allegato VI) solo se hai applicato integralmente norme armonizzate o specifiche comuni; altrimenti serve l'organismo notificato (Allegato VII). Finché le norme armonizzate non sono pubblicate, considera l'organismo notificato (Art. 43(1)).",
       mandatoryNotifiedBody: true,
-      applicableArticle: "Art. 43.1",
+      applicableArticle: "Art. 43(1)",
       annexIIIPoints: [1],
-    };
-  }
-  if (annexCategory?.includes("6.") || annexCategory?.toLowerCase().includes("law enforcement") || annexCategory?.toLowerCase().includes("contrasto")) {
-    return {
-      path: "notified_body",
-      reason: "I sistemi usati da autorità di contrasto (Allegato III punto 6) richiedono valutazione da organismo notificato ai sensi dell'Art. 43.1.",
-      mandatoryNotifiedBody: true,
-      applicableArticle: "Art. 43.1",
-      annexIIIPoints: [6],
-    };
-  }
-  if (annexCategory?.includes("7.") || annexCategory?.toLowerCase().includes("migrazione") || annexCategory?.toLowerCase().includes("frontiera")) {
-    return {
-      path: "notified_body",
-      reason: "I sistemi per migrazione e controllo delle frontiere (Allegato III punto 7) richiedono valutazione da organismo notificato.",
-      mandatoryNotifiedBody: true,
-      applicableArticle: "Art. 43.1",
-      annexIIIPoints: [7],
     };
   }
   return {
     path: "self",
-    reason: "Il tuo sistema rientra nell'Allegato III ma non nelle categorie che richiedono organismo notificato. Puoi procedere con l'auto-valutazione ai sensi dell'Art. 43.2.",
+    reason: "Per i sistemi dell'Allegato III, punti 2-8, si applica il controllo interno (Allegato VI): nessun organismo notificato (Art. 43(2)).",
     mandatoryNotifiedBody: false,
-    applicableArticle: "Art. 43.2",
-    annexIIIPoints: [],
+    applicableArticle: "Art. 43(2)",
+    annexIIIPoints: point ? [point] : [],
   };
 }
 
@@ -120,7 +137,7 @@ export const CONFORMITY_REQUIREMENTS: ConformityRequirement[] = [
     id: "req-art9",
     article: "Art. 9",
     title: "Sistema di gestione dei rischi",
-    description: "È stato implementato e documentato un sistema iterativo di gestione dei rischi per l'intero ciclo di vita del sistema AI.",
+    description: "È stato implementato e documentato un sistema iterativo di gestione dei rischi per l'intero ciclo di vita del sistema di IA.",
     verificationQuestion: "Il Risk Manager è stato completato e i rischi residui sono a livello accettabile?",
     linkedToolKey: "riskManager",
     linkedToolHref: "/dashboard/tools/risk-manager",
@@ -207,7 +224,7 @@ export const CONFORMITY_REQUIREMENTS: ConformityRequirement[] = [
     id: "req-art14",
     article: "Art. 14",
     title: "Sorveglianza umana",
-    description: "Sono predisposte misure che consentono alle persone fisiche di sorvegliare efficacemente il sistema AI durante il suo utilizzo.",
+    description: "Sono predisposte misure che consentono alle persone fisiche di sorvegliare efficacemente il sistema di IA durante il suo utilizzo.",
     verificationQuestion: "Il meccanismo di oversight umano e la capacità di intervento/stop sono documentati?",
     linkedToolKey: "oversight",
     linkedToolHref: "/dashboard/tools/oversight",
@@ -241,7 +258,7 @@ export const CONFORMITY_REQUIREMENTS: ConformityRequirement[] = [
     id: "req-art17",
     article: "Art. 17",
     title: "Sistema di gestione della qualità",
-    description: "Il provider ha implementato un sistema di gestione della qualità che copre tutti gli aspetti del ciclo di vita del sistema AI.",
+    description: "Il provider ha implementato un sistema di gestione della qualità che copre tutti gli aspetti del ciclo di vita del sistema di IA.",
     verificationQuestion: "Il QMS Builder è stato completato con almeno le sezioni obbligatorie?",
     linkedToolKey: "qms",
     linkedToolHref: "/dashboard/tools/qms",
@@ -298,82 +315,64 @@ export function generateDeclarationOfConformity(
   companyName: string,
   companyAddress: string,
   signatoryName: string,
-  signatoryRole: string
+  signatoryRole: string,
+  path?: PathDetermination | null
 ): string {
   const today = new Date();
   const docId = `DCU-${today.getFullYear()}-${Date.now().toString(36).toUpperCase().slice(-6)}`;
-  const systemName = evidence.docugen?.systemName || evidence.classifier?.systemName || "Sistema AI";
-  const provider = evidence.docugen?.provider || companyName;
+  const systemName = evidence.docugen?.systemName || evidence.classifier?.systemName || "[nome del sistema]";
+  const procedure = path?.applicableArticle === "Art. 43(3)"
+    ? "Procedura della normativa di settore (Art. 43(3))"
+    : path?.mandatoryNotifiedBody
+      ? "Allegato VII — valutazione del sistema di gestione della qualità e della documentazione tecnica con organismo notificato (Art. 43(1))"
+      : "Allegato VI — controllo interno (Art. 43(2))";
+  const nbLine = path?.mandatoryNotifiedBody || path?.applicableArticle === "Art. 43(3)"
+    ? "   Organismo notificato: [nome] — numero di identificazione: [XXXX]\n   Procedura seguita: " + procedure + "\n   Certificato n.: [XXX] del [data]"
+    : "   Non applicabile — " + procedure;
 
   return `DICHIARAZIONE DI CONFORMITÀ UE
-Allegato V — Regolamento UE 2024/1689 (AI Act)
+Art. 47 e Allegato V — Regolamento (UE) 2024/1689
 Documento n. ${docId}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1. SISTEMA AI
+1. SISTEMA DI IA (nome, tipo e riferimento univoco)
    Nome: ${systemName}
-   Provider/Fornitore: ${provider}
-   Versione: ${evidence.docugen?.systemName ? "v1.0" : "N/D"}
-   Descrizione: ${evidence.docugen?.purpose || "[Inserire descrizione]"}
+   Tipo / versione: [indicare]
+   Riferimento che consente l'identificazione e la tracciabilità: [indicare]
 
-2. PROVIDER/PRODUTTORE
-   Ragione sociale: ${companyName}
-   Indirizzo: ${companyAddress}
-   Rappresentante UE (se applicabile): [Inserire se non stabilito in UE]
+2. FORNITORE (o rappresentante autorizzato)
+   Nome: ${companyName || "[ragione sociale]"}
+   Indirizzo: ${companyAddress || "[indirizzo]"}
 
-3. OGGETTO DELLA DICHIARAZIONE
-   La presente dichiarazione di conformità è rilasciata sotto la responsabilità
-   esclusiva del produttore sopra indicato.
+3. La presente dichiarazione di conformità UE è rilasciata sotto la responsabilità
+   esclusiva del fornitore.
 
-   Il sistema AI descritto al punto 1 è conforme al Regolamento UE 2024/1689
-   (Intelligenza Artificiale — AI Act) e in particolare agli articoli:
-   Art. 5 (assenza pratiche vietate), Art. 9 (gestione rischi),
-   Art. 10 (dati e governance), Art. 11 (documentazione tecnica),
-   Art. 12 (registrazione), Art. 13 (trasparenza), Art. 14 (sorveglianza umana),
-   Art. 15 (accuratezza e robustezza), Art. 17 (sistema qualità).
+4. Il sistema di IA descritto al punto 1 è conforme al Regolamento (UE) 2024/1689
+   e, se del caso, alla seguente altra normativa dell'Unione: [indicare o "nessuna"].
 
-4. PROCEDURE DI VALUTAZIONE DELLA CONFORMITÀ APPLICATE
-   Procedura: Auto-valutazione ai sensi dell'Art. 43.2
-   Allegato applicabile: Allegato VI — Controllo interno
-   ${assessmentResults.every((r) => r.evidenceStatus.autoVerified)
-     ? "Verifica effettuata tramite piattaforma AIComply con evidenze documentali."
-     : "Verifica effettuata con combinazione di tool automatizzati e verifica manuale."}
+5. Se il sistema tratta dati personali: il sistema è conforme al Regolamento (UE) 2016/679
+   e, se del caso, al Regolamento (UE) 2018/1725 e alla Direttiva (UE) 2016/680. [eliminare se non applicabile]
 
-5. RIFERIMENTI A NORME ARMONIZZATE E SPECIFICHE COMUNI
-   [Inserire riferimenti alle norme EN/ISO applicate, es. ISO/IEC 42001:2023]
+6. Norme armonizzate o specifiche comuni applicate: [indicare o "nessuna"]
 
-6. ORGANISMO NOTIFICATO (se applicabile)
-   ☐ Non applicabile — auto-valutazione Art. 43.2
-   ☐ Organismo notificato: [Nome] — N. identificativo: [XXXX]
-      Certificato n.: [XXX] del [data]
+7. Organismo notificato e procedura di valutazione della conformità:
+${nbLine}
 
-7. INFORMAZIONI COMPLEMENTARI
-   Data di prima immissione sul mercato/messa in servizio: [data]
-   Periodo di conservazione: 10 anni dalla data di immissione (Art. 18)
+8. Luogo e data di rilascio: _____________, ${today.toLocaleDateString("it-IT")}
+   Nome e funzione del firmatario: ${signatoryName || "[nome]"}, ${signatoryRole || "[funzione]"}
+   Per conto di: ${companyName || "[ragione sociale]"}
+   Firma: _________________________________
 
-   Requisiti verificati:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Nota interna (non fa parte della dichiarazione) — requisiti del capo III, sezione 2, verificati:
 ${assessmentResults.map((r) => {
   const req = CONFORMITY_REQUIREMENTS.find((cr) => cr.id === r.requirementId);
   const status = (r.evidenceStatus.found || r.manualOverride) ? "✓" : "✗";
   return `   ${status} ${req?.article} — ${req?.title}`;
 }).join("\n")}
-
-8. FIRMA
-   Luogo e data: _____________, ${today.toLocaleDateString("it-IT")}
-
-   Nome: ${signatoryName}
-   Ruolo: ${signatoryRole}
-
-   Firma: _________________________________
-
-   Timbro aziendale: [  ]
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Documento generato da AIComply Platform — aicomply.eu
-Rif. normativo: Reg. UE 2024/1689, Art. 47 + Allegato V
-ID documento: ${docId}
-Data generazione: ${today.toISOString()}`;
+La dichiarazione va conservata per 10 anni dall'immissione sul mercato o dalla messa in servizio (Art. 47(1)).
+ID documento: ${docId}`;
 }
 
 export const CONFORMITY_STORAGE_KEY = "aicomply_conformity_assessment";

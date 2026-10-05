@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { getAssessment } from "@/lib/assessment/assessment-helpers";
 import type { Assessment, CorrelatedRisk } from "@/lib/assessment/assessment-schema";
-import { AssessmentStepper } from "@/components/assessment/AssessmentStepper";
 import { AssessmentSharedHeader } from "@/components/assessment/AssessmentSharedHeader";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { Download } from "lucide-react";
@@ -183,7 +182,6 @@ export default function AssessmentExportPage() {
   return (
     <div className="w-full" style={{ fontFamily: "system-ui, sans-serif" }}>
       <SystemSelector checkProhibited={true} />
-      <AssessmentStepper currentTool="export" />
 
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between",
         flexWrap: "wrap" as const, gap: 12, marginBottom: 20 }}>

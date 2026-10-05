@@ -44,6 +44,11 @@ const ALWAYS_VISIBLE = new Set([
   "/dashboard/triage",
   "/dashboard/tools/legal-assistant",
   "/dashboard/compliance-ops/deadlines",
+  // Strumenti facoltativi: sempre disponibili, non derivano da un obbligo
+  "/dashboard/compliance-ops/trust-center",
+  "/dashboard/tools/trust-passport",
+  "/dashboard/tools/questionnaire",
+  "/dashboard/tools/nist-ai-rmf",
 ]);
 const SHOW_ALL_KEY = "aicomply_sidebar_show_all";
 
@@ -60,8 +65,11 @@ type NavChild = {
   tooltip?: string;
 };
 
+type NavSection = "start" | "obligations" | "after" | "optional";
+
 type NavPillar = {
   id: string;
+  section: NavSection;
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
   label: string;
   art?: string;
@@ -153,53 +161,51 @@ function SidebarTooltip({ text, children }: { text: string; children: React.Reac
 
 function buildPillars(t: T): NavPillar[] {
   return [
-  { id: "dashboard", icon: Home, label: t("nav_dashboard"), href: "/dashboard" },
-  { id: "inventory", icon: LayoutGrid, label: t("nav_inventory"), href: "/dashboard/tools/inventory", art: "ISO 42001", tooltip: t("tt_inventory") },
-  { id: "triage", icon: Crosshair, label: "Triage", href: "/dashboard/triage", art: "Art. 5-6 · 50" },
-  { id: "literacy", icon: GraduationCap, label: t("nav_literacy"), href: "/dashboard/tools/literacy", art: "Art. 4", tooltip: t("tt_literacy") },
+  // ── Inizio: inventario, verifica rapida, scadenze ──
+  { id: "dashboard", section: "start", icon: Home, label: t("nav_dashboard"), href: "/dashboard" },
+  { id: "inventory", section: "start", icon: LayoutGrid, label: t("nav_inventory"), href: "/dashboard/tools/inventory", art: "Artt. 3, 6, 25", tooltip: t("tt_inventory") },
+  { id: "triage", section: "start", icon: Crosshair, label: "Triage", href: "/dashboard/triage", art: "Art. 5-6 · 50" },
+  { id: "deadlines", section: "start", icon: CalendarClock, label: t("nav_deadlines"), href: "/dashboard/compliance-ops/deadlines", art: "Artt. 111-113" },
+  // ── I tuoi obblighi (filtrati sugli obblighi dei sistemi classificati) ──
+  { id: "literacy", section: "obligations", icon: GraduationCap, label: t("nav_literacy"), href: "/dashboard/tools/literacy", art: "Art. 4", tooltip: t("tt_literacy") },
+  { id: "risk-manager", section: "obligations", icon: Zap, label: t("nav_riskRegister"), href: "/dashboard/tools/risk-manager", art: "Art. 9" },
+  { id: "data-audit", section: "obligations", icon: ClipboardList, label: t("nav_dataAudit"), href: "/dashboard/tools/data-audit", art: "Art. 10", tooltip: t("tt_dataAudit") },
+  { id: "docugen", section: "obligations", icon: FileCode, label: t("nav_docugen"), href: "/dashboard/tools/docugen", art: t("art_docugen") },
+  { id: "logvault", section: "obligations", icon: FileArchive, label: t("nav_logvault"), href: "/dashboard/tools/logvault", art: "Art. 12", tooltip: t("tt_logvault") },
+  { id: "transparency", section: "obligations", icon: Megaphone, label: t("nav_transparency"), href: "/dashboard/tools/transparency", art: "Art. 13", tooltip: t("tt_transparency") },
+  { id: "oversight", section: "obligations", icon: Eye, label: t("nav_oversight"), href: "/dashboard/tools/oversight", art: "Art. 14", tooltip: t("tt_oversight") },
+  { id: "resilience", section: "obligations", icon: Siren, label: t("nav_resilience"), href: "/dashboard/tools/resilience", art: "Art. 15", tooltip: t("tt_resilience") },
+  { id: "qms", section: "obligations", icon: ClipboardCheck, label: t("nav_qms"), href: "/dashboard/tools/qms", art: "Art. 17", tooltip: t("tt_qms") },
+  { id: "authRep", section: "obligations", icon: UserCheck, label: t("nav_authRep"), href: "/dashboard/compliance-ops/authorized-rep", art: "Art. 22" },
+  { id: "transition", section: "obligations", icon: ArrowRightLeft, label: t("nav_providerTransition"), href: "/dashboard/compliance-ops/provider-transition", art: "Art. 25", tooltip: t("tt_providerTransition") },
+  { id: "deployer", section: "obligations", icon: UserCheck, label: t("nav_deployer"), href: "/dashboard/tools/deployer-dashboard", art: "Art. 26" },
+  { id: "dpia", section: "obligations", icon: ShieldAlert, label: "DPIA", href: "/dashboard/tools/dpia", art: "Art. 26(9) · GDPR 35" },
+  { id: "fria", section: "obligations", icon: BookMarked, label: "FRIA", href: "/dashboard/tools/fria", art: "Art. 27" },
+  { id: "conformity", section: "obligations", icon: BadgeCheck, label: t("nav_conformity"), href: "/dashboard/tools/conformity", art: "Artt. 43-48", tooltip: t("tt_conformity") },
+  { id: "eudb", section: "obligations", icon: Database, label: t("nav_eudb"), href: "/dashboard/compliance-ops/eudb", art: "Art. 49" },
+  { id: "art50", section: "obligations", icon: Megaphone, label: t("nav_art50"), href: "/dashboard/tools/art50-kit", art: "Art. 50", tooltip: t("tt_art50") },
+  { id: "gpai", section: "obligations", icon: Boxes, label: t("nav_gpai"), href: "/dashboard/tools/gpai", art: "Art. 51-55", tooltip: t("tt_gpai") },
   {
-    id: "risk",
-    icon: ShieldAlert,
-    label: t("nav_riskGroup"),
-    art: "Art. 9 · 27",
+    id: "italy", section: "obligations", icon: Landmark, label: t("nav_italyGroup"), art: "L. 132/2025",
     children: [
-      { icon: Zap,         label: t("nav_riskRegister"), href: "/dashboard/tools/risk-manager", art: "Art. 9"  },
-      { icon: BookMarked,  label: "FRIA",                href: "/dashboard/tools/fria",         art: "Art. 27" },
-      { icon: ShieldAlert, label: "DPIA",                href: "/dashboard/tools/dpia",         art: "GDPR 35" },
+      { icon: Scale,    label: "L.132/2025", href: "/dashboard/tools/l132",     art: "Italia", flag: "paItaly" },
+      { icon: Landmark, label: "AGID/ACN",   href: "/dashboard/tools/agid-acn", art: "Italia", flag: "paItaly" },
     ],
   },
-  { id: "docugen", icon: FileCode, label: t("nav_docugen"), href: "/dashboard/tools/docugen", art: t("art_docugen") },
-  { id: "data-audit", icon: ClipboardList, label: t("nav_dataAudit"), href: "/dashboard/tools/data-audit", art: "Art. 10", tooltip: t("tt_dataAudit") },
-  { id: "transparency", icon: Megaphone, label: t("nav_transparency"), href: "/dashboard/tools/transparency", art: "Art. 13", tooltip: t("tt_transparency") },
-  { id: "art50", icon: Megaphone, label: t("nav_art50"), href: "/dashboard/tools/art50-kit", art: "Art. 50", tooltip: t("tt_art50") },
-  { id: "oversight", icon: Eye, label: t("nav_oversight"), href: "/dashboard/tools/oversight", art: "Art. 14", tooltip: t("tt_oversight") },
-  { id: "resilience", icon: Siren, label: t("nav_resilience"), href: "/dashboard/tools/resilience", art: "Art. 15", tooltip: t("tt_resilience") },
-  { id: "qms", icon: ClipboardCheck, label: t("nav_qms"), href: "/dashboard/tools/qms", art: "Art. 17", tooltip: t("tt_qms") },
-  { id: "conformity", icon: BadgeCheck, label: t("nav_conformity"), href: "/dashboard/tools/conformity", art: "Art. 43", tooltip: t("tt_conformity") },
-  { id: "deployer", icon: UserCheck, label: t("nav_deployer"), href: "/dashboard/tools/deployer-dashboard", art: "Art. 26" },
-  { id: "gpai", icon: Boxes, label: t("nav_gpai"), href: "/dashboard/tools/gpai", art: "Art. 51-55", tooltip: t("tt_gpai") },
-  { id: "post-market", icon: TrendingUp, label: t("nav_postMarket"), href: "/dashboard/post-market", art: "Art. 72-73", tooltip: t("tt_postMarket") },
-  { id: "legal-assistant", icon: Bot, label: t("nav_legalAssistant"), href: "/dashboard/tools/legal-assistant", art: "RAG", tooltip: t("tt_legalAssistant") },
+  // ── Dopo l'immissione sul mercato ──
+  { id: "post-market", section: "after", icon: TrendingUp, label: t("nav_postMarket"), href: "/dashboard/post-market", art: "Art. 72-73", tooltip: t("tt_postMarket") },
+  { id: "drift-monitor", section: "after", icon: Activity, label: t("nav_driftMonitor"), href: "/dashboard/tools/drift-monitor", art: "Art. 15 · 72", tooltip: t("tt_driftMonitor") },
+  // ── Strumenti facoltativi ──
+  { id: "legal-assistant", section: "optional", icon: Bot, label: t("nav_legalAssistant"), href: "/dashboard/tools/legal-assistant", art: "RAG", tooltip: t("tt_legalAssistant") },
   {
-    id: "compliance",
-    icon: Scale,
-    label: t("nav_opsGroup"),
-    art: "Art. 12–73",
+    id: "customers", section: "optional", icon: ShieldCheck, label: t("nav_customersGroup"), art: t("optionalBadge"),
     children: [
-      { icon: CalendarClock,  label: t("nav_deadlines"),          href: "/dashboard/compliance-ops/deadlines",           art: "Timeline" },
-      { icon: FileArchive,    label: "LogVault",                  href: "/dashboard/tools/logvault",                     art: "Art. 12", tooltip: t("tt_logvault") },
-      { icon: Activity,       label: t("nav_driftMonitor"),       href: "/dashboard/tools/drift-monitor",                art: "Art. 15 · 72", tooltip: t("tt_driftMonitor") },
-      { icon: Database,       label: t("nav_eudb"),               href: "/dashboard/compliance-ops/eudb",                art: "Art. 49" },
-      { icon: UserCheck,      label: t("nav_authRep"),            href: "/dashboard/compliance-ops/authorized-rep",      art: "Art. 22" },
-      { icon: ArrowRightLeft, label: t("nav_providerTransition"), href: "/dashboard/compliance-ops/provider-transition", art: "Art. 25", tooltip: t("tt_providerTransition") },
-      { icon: ShieldCheck,    label: "Trust Center",              href: "/dashboard/compliance-ops/trust-center",        art: "Art. 13/50" },
-      { icon: BadgeCheck,     label: "Trust Passport",            href: "/dashboard/tools/trust-passport",               art: t("art_trustPassport"), tooltip: t("tt_trustPassport") },
-      { icon: ClipboardList,  label: t("nav_buyerQuestionnaire"), href: "/dashboard/tools/questionnaire",                art: t("art_buyerQuestionnaire"), tooltip: t("tt_buyerQuestionnaire") },
-      { icon: Scale,          label: "L.132/2025",                href: "/dashboard/tools/l132",                         art: "PA Italy", flag: "paItaly" },
-      { icon: Landmark,       label: "AGID/ACN",                  href: "/dashboard/tools/agid-acn",                     art: "PA Italy", flag: "paItaly" },
-      { icon: Map,            label: "NIST AI RMF",               href: "/dashboard/tools/nist-ai-rmf",                  art: "NIST", flag: "nistEnabled" },
+      { icon: ShieldCheck,   label: t("nav_trustCenter"),        href: "/dashboard/compliance-ops/trust-center", art: "Art. 13/50" },
+      { icon: BadgeCheck,    label: t("nav_trustPassport"),      href: "/dashboard/tools/trust-passport",        art: t("art_trustPassport"), tooltip: t("tt_trustPassport") },
+      { icon: ClipboardList, label: t("nav_buyerQuestionnaire"), href: "/dashboard/tools/questionnaire",         art: t("art_buyerQuestionnaire"), tooltip: t("tt_buyerQuestionnaire") },
     ],
   },
+  { id: "nist", section: "optional", icon: Map, label: "NIST AI RMF", href: "/dashboard/tools/nist-ai-rmf", art: "NIST" },
   ];
 }
 
@@ -393,7 +399,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
 
             {/* 5 Pilastri */}
-            {pillars.map((pillar) => {
+            {pillars.filter((p) => p.children ? p.children.some(isChildVisible) : isNeeded(p.href!)).map((pillar, idx, list) => {
+              // Intestazione del blocco quando cambia sezione
+              const header = !collapsed && pillar.section !== "start" && list[idx - 1]?.section !== pillar.section ? (
+                <p key={`h-${pillar.section}`} className="px-2 mt-4 mb-1 text-[9.5px] font-semibold uppercase" style={{ color: "rgba(255,255,255,0.35)", letterSpacing: "0.9px" }}>
+                  {t(`navSection_${pillar.section}`)}
+                </p>
+              ) : null;
+              return <React.Fragment key={pillar.id}>{header}{(() => {
               const isExpanded = expandedPillars.has(pillar.id);
               const isPillarActive = pillar.href
                 ? isOnPath(pathname, pillar.href)
@@ -499,6 +512,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   )}
                 </div>
               );
+            })()}</React.Fragment>;
             })}
 
             {/* Filtro del menu sugli obblighi */}
@@ -616,11 +630,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {ROLE_LABELS[role]}
               </span>
               <Link
-                href="/dashboard/onboarding?changeRole=1"
+                href="/dashboard/tools/inventory"
                 className="text-[10px] transition-opacity hover:opacity-70"
                 style={{ color: "rgba(0,0,0,0.3)" }}
               >
-                {t("changeRole")}
+                {t("rolesFromInventory")}
               </Link>
             </div>
           )}

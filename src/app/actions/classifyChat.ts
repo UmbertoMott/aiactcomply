@@ -21,9 +21,9 @@ export interface ClassifyChatResponse {
   error?: string;
 }
 
-const SYSTEM_PROMPT = `Sei un esperto EU AI Act integrato in AIComply, specializzato nella classificazione dei sistemi AI ai sensi del Regolamento UE 2024/1689.
+const SYSTEM_PROMPT = `Sei un esperto EU AI Act integrato in AIComply, specializzato nella classificazione dei sistemi di IA ai sensi del Regolamento UE 2024/1689.
 
-Il tuo obiettivo è guidare l'utente a classificare correttamente il suo sistema AI attraverso una conversazione strutturata in 3 fasi:
+Il tuo obiettivo è guidare l'utente a classificare correttamente il suo sistema di IA attraverso una conversazione strutturata in 3 fasi:
 
 FASE 1 — COMPRENSIONE DEL SISTEMA
 Chiedi: cosa fa il sistema? Chi lo usa? In quale contesto professionale o pubblico viene utilizzato? Quali decisioni prende o supporta? Chi sono le persone fisiche impattate?
@@ -87,7 +87,7 @@ export async function classifyChat(
 ): Promise<ClassifyChatResponse> {
   // Estrai la query dalla conversazione recente per il recupero RAG
   const lastUserMessages = messages.filter(m => m.role === "user").slice(-3).map(m => m.content).join(" ");
-  const ragQuery = lastUserMessages || `classificazione sistema AI AI Act tier ruolo ${systemName}`;
+  const ragQuery = lastUserMessages || `classificazione sistema di IA AI Act tier ruolo ${systemName}`;
 
   // Recupera contesto normativo dal corpus indicizzato
   let normativeContext = "";

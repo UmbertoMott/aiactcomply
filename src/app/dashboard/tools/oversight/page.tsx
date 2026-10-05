@@ -433,7 +433,7 @@ export default function OversightPage() {
     try {
       const cls = readFromStorage<ClassifierResult>("classifier");
       const result = await suggestOversightMeasures({
-        systemName: cls?.systemName ?? "Sistema AI",
+        systemName: cls?.systemName ?? "Sistema di IA",
         systemDescription: cls?.systemDescription ?? "",
         riskTier: cls?.riskLevel ?? "high",
       });
@@ -455,7 +455,7 @@ export default function OversightPage() {
     try {
       const cls = readFromStorage<ClassifierResult>("classifier");
       const result = await assessFourEyesApplicability({
-        systemName: cls?.systemName ?? "Sistema AI",
+        systemName: cls?.systemName ?? "Sistema di IA",
         systemDescription: cls?.systemDescription ?? "",
         riskTier: cls?.riskLevel,
       });
@@ -478,7 +478,7 @@ export default function OversightPage() {
         .filter(r => r.status === "implemented")
         .map(r => OVERSIGHT_REQUIREMENTS.find(d => d.id === r.requirementId)?.label ?? r.requirementId),
       stopCapability: record.requirements.find(r => r.requirementId === "intervention_stop")?.status === "implemented",
-      responsiblePersons: [],
+      responsiblePersons: record.fourEyes.verifierRoles,
       completedAt: now,
     });
     appendEvidence("decision", { type: "Oversight Art. 14 — framework configurato", implemented, savedAt: now }, "oversight");
@@ -489,7 +489,7 @@ export default function OversightPage() {
   const implementedCount = countImplemented(record);
   const fourEyesDone = record.fourEyes.applicable === "yes" && record.fourEyes.status === "implemented";
   const cls = typeof window !== "undefined" ? readFromStorage<ClassifierResult>("classifier") : null;
-  const systemName = cls?.systemName ?? "Sistema AI";
+  const systemName = cls?.systemName ?? "Sistema di IA";
   const systemDescription = cls?.systemDescription ?? "";
 
   return (

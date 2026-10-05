@@ -46,7 +46,7 @@ Art. 11(1): La documentazione tecnica deve essere accurata e riflettere lo stato
 Tipi di incoerenza da cercare:
 - Tier di rischio dichiarato in DocuGen ≠ tier dal Classificatore
 - Dati personali in DocuGen ≠ risultati Data Audit
-- Supervisione umana in DocuGen ≠ configurazione Oversight
+- Sorveglianza umana in DocuGen ≠ configurazione Oversight
 - Sistema descritto come GPAI ma contesto non lo indica
 
 REGOLE:

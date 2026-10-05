@@ -178,7 +178,7 @@ const SUGGESTIONS: { label: string; query: string }[] = [
   },
   {
     label: "Valutazione conformità",
-    query: "Come si svolge la procedura di valutazione della conformità per i sistemi AI ad alto rischio ai sensi del Regolamento UE 2024/1689?",
+    query: "Come si svolge la procedura di valutazione della conformità per i sistemi di IA ad alto rischio ai sensi del Regolamento UE 2024/1689?",
   },
 ];
 
@@ -186,12 +186,12 @@ const SUGGESTIONS: { label: string; query: string }[] = [
 
 const EU_ACT_SECTIONS: { label: string; ref: string; query: string }[] = [
   { label: "Pratiche proibite", ref: "Art. 5", query: "Quali pratiche AI sono vietate dall'Art. 5 dell'EU AI Act?" },
-  { label: "Classificazione alto rischio", ref: "Art. 6–7", query: "Come si classificano i sistemi AI ad alto rischio secondo l'EU AI Act?" },
-  { label: "Requisiti tecnici", ref: "Art. 8–15", query: "Quali requisiti tecnici devono rispettare i sistemi AI ad alto rischio?" },
-  { label: "Obblighi fornitori", ref: "Art. 16", query: "Quali sono gli obblighi dei fornitori di sistemi AI ad alto rischio?" },
-  { label: "Obblighi deployer", ref: "Art. 26", query: "Quali sono gli obblighi dei deployer di sistemi AI?" },
+  { label: "Classificazione alto rischio", ref: "Art. 6–7", query: "Come si classificano i sistemi di IA ad alto rischio secondo l'EU AI Act?" },
+  { label: "Requisiti tecnici", ref: "Art. 8–15", query: "Quali requisiti tecnici devono rispettare i sistemi di IA ad alto rischio?" },
+  { label: "Obblighi fornitori", ref: "Art. 16", query: "Quali sono gli obblighi dei fornitori di sistemi di IA ad alto rischio?" },
+  { label: "Obblighi deployer", ref: "Art. 26", query: "Quali sono gli obblighi dei deployer di sistemi di IA?" },
   { label: "FRIA", ref: "Art. 27", query: "Quando è obbligatoria la Fundamental Rights Impact Assessment (FRIA) ai sensi dell'Art. 27?" },
-  { label: "Conformità e certificazione", ref: "Art. 43–49", query: "Come funziona la procedura di valutazione della conformità per sistemi AI ad alto rischio?" },
+  { label: "Conformità e certificazione", ref: "Art. 43–49", query: "Come funziona la procedura di valutazione della conformità per sistemi di IA ad alto rischio?" },
   { label: "Modelli GPAI", ref: "Art. 51–56", query: "Quali obblighi hanno i fornitori di modelli AI general purpose (GPAI)?" },
   { label: "Governance e vigilanza", ref: "Art. 64–70", query: "Come funziona la governance dell'EU AI Act e le strutture di vigilanza nazionale?" },
   { label: "Sanzioni", ref: "Art. 99–101", query: "Quali sanzioni prevede l'EU AI Act per la non conformità?" },
@@ -440,9 +440,10 @@ export default function LegalAssistantPage() {
           <Scale className="h-3.5 w-3.5 text-white" />
         </div>
         <div>
-          <div className="text-xs font-semibold text-foreground">AI Act Assistant</div>
+          <div className="text-xs font-semibold text-foreground">Assistente AI Act</div>
+          {/* Art. 50(1): chi usa la chat deve sapere che interagisce con un sistema di IA */}
           <div className="text-[9px] text-muted-foreground">
-            789 chunk · EU AI Act, ISO 22989, 3 Guidelines
+            Stai parlando con un sistema di IA · le risposte non sono consulenza legale
           </div>
         </div>
       </div>

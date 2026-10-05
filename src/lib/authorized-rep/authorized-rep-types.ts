@@ -323,7 +323,7 @@ VAT/P.IVA: ${r.ar_vat_number || "[DA INSERIRE]"}
 ${SEP}
 OGGETTO DEL MANDATO
 ${SEP}
-Sistema AI: ${doc.system_name    || "[DA INSERIRE]"} -- Versione ${doc.system_version || "[DA INSERIRE]"}
+Sistema di IA: ${doc.system_name    || "[DA INSERIRE]"} -- Versione ${doc.system_version || "[DA INSERIRE]"}
 Riferimento normativo: ${doc.annex_reference || "[DA INSERIRE]"}
 Decorrenza: ${doc.mandate_start_date || "[DA INSERIRE]"}
 Durata: ${durationLine}
@@ -331,14 +331,18 @@ Durata: ${durationLine}
 ${SEP}
 POTERI CONFERITI
 ${SEP}
-Il Provider conferisce all'AR i seguenti poteri, in conformità all'Art. 22(2) del Regolamento (UE) 2024/1689:
+Il Provider conferisce all'AR il mandato di eseguire i seguenti compiti (Art. 22(3) del Regolamento (UE) 2024/1689):
 
-(a) Registrazione nel database UE (EUDB) ai sensi dell'Art. 49 per conto del Provider
-(b) Verifica e custodia della dichiarazione di conformità UE e della documentazione tecnica
-(c) Trasmissione alle autorità di vigilanza di tutte le informazioni e documentazione richiesta
-(d) Notifica immediata al Provider di qualsiasi richiesta, indagine o azione correttiva delle autorità
-(e) Cooperazione piena con le autorità di vigilanza del mercato per qualsiasi azione correttiva
-(f) Facoltà di terminare il presente mandato con notifica alle autorità competenti qualora il Provider agisca in violazione degli obblighi del Regolamento (UE) 2024/1689
+(a) verificare che la dichiarazione di conformità UE e la documentazione tecnica siano state redatte e che il Provider abbia eseguito un'adeguata procedura di valutazione della conformità;
+(b) tenere a disposizione delle autorità competenti e delle autorità o organismi nazionali, per 10 anni dall'immissione sul mercato o dalla messa in servizio, i dati di contatto del Provider, una copia della dichiarazione di conformità UE, la documentazione tecnica e, se del caso, il certificato dell'organismo notificato;
+(c) fornire all'autorità competente, su richiesta motivata, tutte le informazioni e la documentazione necessarie a dimostrare la conformità, compreso l'accesso ai log generati automaticamente nella misura in cui sono sotto il controllo del Provider;
+(d) cooperare con le autorità competenti, su richiesta motivata, in qualsiasi azione intrapresa in relazione al sistema, in particolare per ridurne e attenuarne i rischi;
+(e) se del caso, adempiere agli obblighi di registrazione dell'Art. 49(1) o, se la registrazione è effettuata dal Provider, verificare la correttezza delle informazioni dell'Allegato VIII, sezione A, punto 3.
+
+Il mandato consente all'AR di essere interpellato, in aggiunta o in sostituzione del Provider, dalle autorità competenti su tutte le questioni relative alla conformità al Regolamento.
+L'AR pone fine al mandato se ritiene o ha motivo di ritenere che il Provider agisca in modo contrario ai propri obblighi, e ne informa immediatamente l'autorità di vigilanza del mercato competente e, se del caso, l'organismo notificato (Art. 22(4)).
+
+Clausola contrattuale ulteriore (non prevista dall'Art. 22): l'AR informa senza ritardo il Provider di qualsiasi richiesta o indagine delle autorità.
 
 ${SEP}
 OBBLIGHI DEL PROVIDER
@@ -358,6 +362,6 @@ Authorized Representative: _________________________ Data: _____________
 Nome e qualifica: _________________________
 
 [Il presente mandato deve essere firmato da entrambe le parti e conservato per tutta la durata
-della commercializzazione del sistema AI nell'UE e per almeno 10 anni successivi
+della commercializzazione del sistema di IA nell'UE e per almeno 10 anni successivi
 — Art. 22(1)+(3)]`.trim();
 }

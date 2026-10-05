@@ -175,7 +175,7 @@ interface ChatResponse {
 
 const PHASE_PROMPTS: Record<RiskPhaseId, string> = {
   scoping: `Stai guidando lo STEP 1 — SCOPING (Art. 9(1) AI Act; supporto Art. 6, Allegato III).
-Obiettivi (§0 Template): nome sistema, ruolo (provider/deployer), descrizione e finalità, tier di rischio, area Allegato III, articoli applicabili, dati personali trattati (e base giuridica se sì), supervisione umana richiesta (Art. 14), risk owner del registro.
+Obiettivi (§0 Template): nome sistema, ruolo (provider/deployer), descrizione e finalità, tier di rischio, area Allegato III, articoli applicabili, dati personali trattati (e base giuridica se sì), sorveglianza umana richiesta (Art. 14), risk owner del registro.
 Chiedi anche: (a) criteri di accettabilità del rischio (risk appetite): es. "nessun rischio alto sui diritti fondamentali è accettabile senza misure"; (b) ambito e contesto d'uso: deployment, utenti finali, ambiente operativo; (c) fase del ciclo di vita attuale (design/sviluppo/deployment/monitoraggio/dismissione).
 Aggiungi anche il triage GPAI: "Il sistema incorpora un modello GPAI con rischio sistemico (Art. 51)?" — salva in incorporatesGpaiModel.
 Quando hai sufficienti informazioni includi <extract> (compila SOLO i campi comunicati):
@@ -221,7 +221,7 @@ Includi <extract> quando completo:
 { "traceability": { "versionsTracked": 3, "lastAuditDate": "2026-06-13", "changes": ["..."], "retentionPolicy": "5 anni", "qmsIntegration": "..." } }`,
 
   dismissal: `Stai guidando lo STEP 9 — DISMISSIONE E RITIRO (ISO 23894 Annex C; Art. 9 AI Act).
-Obiettivi (§8 Template): identificare i rischi specifici della fase di dismissione del sistema AI. Guida l'utente su: (a) rischi da cancellazione/anonimizzazione dei dati residui; (b) dipendenze a valle verso altri sistemi o clienti che usano gli output; (c) procedure di migrazione dati se necessario; (d) obblighi di comunicazione del ritiro ai deployer e agli interessati.
+Obiettivi (§8 Template): identificare i rischi specifici della fase di dismissione del sistema di IA. Guida l'utente su: (a) rischi da cancellazione/anonimizzazione dei dati residui; (b) dipendenze a valle verso altri sistemi o clienti che usano gli output; (c) procedure di migrazione dati se necessario; (d) obblighi di comunicazione del ritiro ai deployer e agli interessati.
 Includi <extract> quando i rischi di dismissione sono definiti:
 { "dismissal": { "dismissalRisks": "...", "dataDeletion": "...", "downstreamDependencies": "...", "communicationToDeployers": "..." } }`,
 

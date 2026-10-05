@@ -1,5 +1,6 @@
 "use client";
 
+import { levelLabel } from "@/lib/risk-level-label";
 import React, { useState, useRef, useEffect, useCallback, CSSProperties } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -45,62 +46,6 @@ const FONT: CSSProperties = { fontFamily: "Inter, system-ui, sans-serif" };
 const card: CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
 const inp: CSSProperties = { width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, color: T.text, background: T.card, outline: "none" };
 const ta: CSSProperties = { ...inp, resize: "vertical" as const };
-
-// ─── Kill Switch (Art. 14 — preserved from original) ─────────────────────────
-function KillSwitch({ onActivate, t }: { onActivate: () => void; t: TFn }) {
-  const [holding, setHolding] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [activated, setActivated] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const startHold = () => {
-    if (activated) return;
-    setHolding(true);
-    intervalRef.current = setInterval(() => {
-      setProgress(p => {
-        if (p >= 100) { clearInterval(intervalRef.current!); setActivated(true); setHolding(false); return 100; }
-        return p + 3.4;
-      });
-    }, 100);
-  };
-  const stopHold = () => { if (activated) return; clearInterval(intervalRef.current!); setHolding(false); setProgress(0); };
-  useEffect(() => { if (activated) onActivate(); }, [activated]); // eslint-disable-line
-  useEffect(() => () => clearInterval(intervalRef.current!), []);
-
-  return (
-    <div className="rounded-xl p-4 flex flex-col items-center gap-3"
-      style={{ background: activated ? T.redBg : "rgba(0,0,0,0.02)", border: `1px solid ${activated ? T.redBdr : T.border}` }}>
-      <p className="text-[10px] font-semibold uppercase" style={{ color: T.faint, letterSpacing: "1px" }}>Kill Switch — Art. 14</p>
-      <div className="relative">
-        <motion.button
-          onMouseDown={startHold} onMouseUp={stopHold} onMouseLeave={stopHold}
-          onTouchStart={startHold} onTouchEnd={stopHold}
-          animate={{ scale: holding ? 0.93 : 1 }}
-          transition={{ type: "spring", stiffness: 400, damping: 20 }}
-          className="w-16 h-16 rounded-full flex items-center justify-center select-none"
-          style={{ background: activated ? T.red : holding ? "#b91c1c" : T.text, cursor: activated ? "not-allowed" : "pointer", boxShadow: holding ? "0 0 0 6px rgba(220,38,38,0.15)" : "0 2px 8px rgba(0,0,0,0.2)" }}>
-          <span className="text-white text-[10px] font-bold text-center leading-tight select-none">
-            {activated ? t("ks_stopActive") : t("ks_holdStop")}
-          </span>
-        </motion.button>
-        {holding && (
-          <svg className="absolute inset-0 w-16 h-16 pointer-events-none" style={{ transform: "rotate(-90deg)" }}>
-            <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(220,38,38,0.2)" strokeWidth="3" />
-            <circle cx="32" cy="32" r="28" fill="none" stroke={T.red} strokeWidth="3"
-              strokeDasharray={`${2 * Math.PI * 28}`}
-              strokeDashoffset={`${2 * Math.PI * 28 * (1 - progress / 100)}`}
-              style={{ transition: "stroke-dashoffset 0.1s linear" }} />
-          </svg>
-        )}
-      </div>
-      <p className="text-[10px] text-center" style={{ color: T.faint }}>
-        {activated ? t("ks_stopped") :
-         holding ? `${t("ks_releasing")} ${Math.round(progress)}%` :
-         t("ks_hold3s")}
-      </p>
-    </div>
-  );
-}
 
 // ─── Coverage badge ───────────────────────────────────────────────────────────
 function CoverageBadge({ covered, t }: { covered: CoverageStatus; t: TFn }) {
@@ -410,7 +355,6 @@ export default function LogVaultPage() {
   const [record, setRecord] = useScopedStorage<LogVaultRecord>("logvault_config", EMPTY_RECORD);
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
   const [savedAt, setSavedAt] = useState<string | null>(() => readFromStorage<LogvaultResult>("logvault")?.completedAt ?? null);
-  const [killActive, setKillActive] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
 
   // Import state
@@ -431,7 +375,7 @@ export default function LogVaultPage() {
 
   // Read classifier context
   const cls = typeof window !== "undefined" ? readFromStorage<ClassifierResult>("classifier") : null;
-  const systemName = cls?.systemName ?? "Sistema AI";
+  const systemName = cls?.systemName ?? "Sistema di IA";
   const intendedPurpose = cls?.systemDescription ?? "";
   const riskTier = cls?.riskLevel ?? "n.d.";
 
@@ -617,7 +561,8 @@ export default function LogVaultPage() {
     const allFields = getAllDetectedFields(record);
     writeToStorage<LogvaultResult>("logvault", {
       loggingEnabled: record.loggingCapabilityConfirmed === "yes",
-      retentionDays: 180,
+      // Periodo indicato dall'utente (mesi → giorni); 0 se non ancora indicato
+      retentionDays: Math.round((record.retention.retentionPolicyMonths ?? 0) * 30),
       loggedEvents: allFields,
       storageLocation: `LogVault — ${record.importedLogSets.length} set di log importati`,
       accessControl: "Analisi struttura log — dati aggregati, nessun log grezzo persistito",
@@ -671,8 +616,8 @@ export default function LogVaultPage() {
       <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
         <div>
           <p className="text-[11px] font-semibold uppercase mb-0.5" style={{ color: T.faint, letterSpacing: "1.2px" }}>{t("kicker")}</p>
-          <h1 className="text-2xl font-semibold" style={{ color: T.text, letterSpacing: "-0.6px" }}>LogVault</h1>
-          {cls && <p className="text-[11px] mt-1" style={{ color: T.muted }}>{cls.systemName} · Tier {cls.riskLevel}</p>}
+          <h1 className="text-2xl font-semibold" style={{ color: T.text, letterSpacing: "-0.6px" }}>Registro dei log</h1>
+          {cls && <p className="text-[11px] mt-1" style={{ color: T.muted }}>{cls.systemName} · rischio {levelLabel(cls.riskLevel)}</p>}
         </div>
         <div className="flex gap-2 items-center">
           <button onClick={() => setShowConfig(v => !v)}
@@ -726,12 +671,8 @@ export default function LogVaultPage() {
         )}
       </AnimatePresence>
 
-      {/* Kill switch (right side) + Art. 12(1) triage side by side */}
+      {/* Art. 12(1) triage */}
       <div className="flex gap-4 mb-6 flex-wrap">
-        <div className="flex-shrink-0">
-          <KillSwitch onActivate={() => setKillActive(true)} t={t} />
-          {killActive && <p className="text-[10px] mt-1 text-center" style={{ color: T.red }}>{t("ks_loggingRecommended")}</p>}
-        </div>
 
         {/* Art. 12(1) triage */}
         <div className="flex-1 min-w-0 rounded-xl p-4" style={card}>

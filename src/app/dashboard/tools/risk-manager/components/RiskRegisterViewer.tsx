@@ -128,7 +128,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
 
   // ── §0 — Scoping e criteri di rischio ────────────────────────────────────────
   const scopingRows: Array<[string, string | undefined]> = [
-    ["Nome del sistema AI", id.systemName],
+    ["Nome del sistema di IA", id.systemName],
     ["Provider / Deployer (ruolo)", id.providerDeployerRole],
     ["Descrizione e finalità prevista", id.descriptionAndPurpose],
     ["Tier di rischio", id.riskTier !== "unclassified" ? (TIER_LABELS[id.riskTier] ?? id.riskTier) : undefined],
@@ -136,7 +136,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
     ["Articoli AI Act applicabili", id.applicableArticles?.length ? id.applicableArticles.join(", ") : undefined],
     ["Dati personali trattati", id.personalDataProcessed === "unspecified" ? undefined : id.personalDataProcessed === "yes" ? "Sì" : "No"],
     ["Base giuridica", id.legalBasis],
-    ["Supervisione umana richiesta (Art. 14)", id.humanOversightRequired === undefined ? undefined : id.humanOversightRequired ? "Sì" : "No"],
+    ["Sorveglianza umana richiesta (Art. 14)", id.humanOversightRequired === undefined ? undefined : id.humanOversightRequired ? "Sì" : "No"],
     ["Responsabile del registro (risk owner)", id.registerOwner],
     ["Incorpora modello GPAI (Art. 51)", id.incorporatesGpaiModel === "unspecified" ? undefined : id.incorporatesGpaiModel === "yes" ? "Sì" : "No"],
     ["Fase del ciclo di vita coperta", id.lifeCyclePhase],

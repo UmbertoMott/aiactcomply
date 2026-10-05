@@ -80,7 +80,7 @@ function VerifyForm() {
       if (scanUrl)      onboardParams.set("url",      scanUrl);
       if (scanScore)    onboardParams.set("score",    scanScore);
       if (scanCritical) onboardParams.set("critical", scanCritical);
-      formData.set("redirectTo", `/dashboard/onboarding?${onboardParams.toString()}`);
+      formData.set("redirectTo", `/dashboard/tools/inventory?${onboardParams.toString()}`);
     }
 
     const result = await verifyOTP(formData);

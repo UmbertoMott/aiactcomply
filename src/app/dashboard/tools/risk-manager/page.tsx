@@ -79,12 +79,12 @@ interface PhaseGuide {
 
 const PHASE_GUIDES: Partial<Record<RiskPhaseId, PhaseGuide>> = {
   scoping: {
-    goal: "Definisci il sistema AI, il suo scopo, chi lo usa e in quale contesto. Indica il tier di rischio e se tratta dati personali.",
+    goal: "Definisci il sistema di IA, il suo scopo, chi lo usa e in quale contesto. Indica il tier di rischio e se tratta dati personali.",
     examples: [
       { label: "Sì — dati personali", text: "Il sistema elabora dati personali di candidati HR (nome, CV, esperienza) su base contrattuale Art. 6(1)(b) GDPR." },
       { label: "No — dati anonimi", text: "Il sistema ottimizza routing logistico su dati di veicoli anonimizzati, nessun dato personale trattato." },
     ],
-    starters: ["Il sistema tratta dati personali?", "È richiesta supervisione umana (Art. 14)?", "Qual è il tier di rischio classificato?", "Il sistema incorpora modelli GPAI?"],
+    starters: ["Il sistema tratta dati personali?", "È richiesta sorveglianza umana (Art. 14)?", "Qual è il tier di rischio classificato?", "Il sistema incorpora modelli GPAI?"],
   },
   identification: {
     goal: "Elenca almeno 3-5 rischi concreti: bias algoritmico, opacità, perdita controllo umano. Valuta l'impatto su minori e gruppi vulnerabili (Art. 9(9)).",
@@ -611,7 +611,7 @@ function ChatBubble({ message, index, onSpeak, isPlaying }: {
               <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                 <Shield size={10} style={{ color: "#0D1016" }} />
                 <span style={{ fontSize: 9, color: "#0D1016", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                  Risk Manager AI
+                  Assistente del registro dei rischi
                 </span>
               </div>
               <button
@@ -764,7 +764,14 @@ export default function RiskManagerPage() {
   const [viewerAnchor, setViewerAnchor] = useState<string | null>(null);
   const [showPhaseGuide, setShowPhaseGuide] = useState(true);
   const [customPhrase, setCustomPhrase] = useState("");
-  const [guidedMode, setGuidedMode] = useState(false);
+  // Modalità guidata come ingresso, come DPIA e FRIA; la scelta viene ricordata
+  const [guidedMode, setGuidedModeState] = useState(() => {
+    try { return localStorage.getItem("aicomply_risk_view") !== "form"; } catch { return true; }
+  });
+  const setGuidedMode = (v: boolean) => {
+    setGuidedModeState(v);
+    try { localStorage.setItem("aicomply_risk_view", v ? "guided" : "form"); } catch { /* storage non disponibile */ }
+  };
   const layoutRef = useRef<HTMLDivElement>(null);
 
   // Apre il documento e scrolla alla sezione richiesta
@@ -832,7 +839,7 @@ export default function RiskManagerPage() {
     } else {
       setMessages([{
         role: "assistant",
-        content: `Benvenuto nel Risk Manager AI Act di AIComply.\n\nTi guiderò attraverso 8 fasi per costruire un Risk Register completo ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema AI e il contesto in cui viene utilizzato (settore, uso previsto, categorie di utenti coinvolti).`,
+        content: `Benvenuto nel registro dei rischi.\n\nTi guiderò attraverso ${PHASES.length} fasi per costruire un registro dei rischi completo ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema di IA e il contesto in cui viene utilizzato (settore, uso previsto, categorie di utenti coinvolti).`,
       }]);
     }
     setHydrated(true);
@@ -907,8 +914,24 @@ export default function RiskManagerPage() {
     } else if (result.stepComplete && currentPhaseIndex === PHASES.length - 1) {
       newCompleted = [...completedPhases, currentPhase.id];
       setCompletedPhases(newCompleted);
+      // I rischi strutturati raccolti nella fase 2 alimentano il dossier (Art. 9(2)(a)-(b))
+      const entries = newDoc.identification?.riskEntries ?? [];
+      const listed = entries.length > 0 ? [] : newDoc.identification?.risks ?? [];
       writeToStorage<RiskManagerResult>("riskManager", {
-        risks: [],
+        risks: [
+          ...entries.map((r, i) => ({
+            id: r.id ?? `R-${i + 1}`,
+            title: r.description ?? r.category ?? `Rischio ${i + 1}`,
+            likelihood: r.likelihood ?? "medium",
+            impact: r.impact ?? "medium",
+            mitigation: r.mitigations ?? "",
+            residualRisk: (r.status === "mitigated" || r.status === "accepted" ? "acceptable" : "review") as "acceptable" | "review",
+          })),
+          ...listed.map((title, i) => ({
+            id: `R-${i + 1}`, title, likelihood: "medium" as const, impact: "medium" as const,
+            mitigation: "", residualRisk: "review" as const,
+          })),
+        ],
         overallRiskLevel: newDoc.signoff?.overallRisk === "alto" ? "high" : newDoc.signoff?.overallRisk === "critico" ? "critical" : "medium",
         completedAt: new Date().toISOString(),
         nextReviewDate: newDoc.signoff?.nextReviewDate,
@@ -929,7 +952,7 @@ export default function RiskManagerPage() {
     localStorage.removeItem(CHAT_STORAGE_KEY);
     setMessages([{
       role: "assistant",
-      content: `Benvenuto nel Risk Manager AI Act di AIComply.\n\nTi guiderò attraverso 8 fasi per costruire un Risk Register completo ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema AI e il contesto in cui viene utilizzato.`,
+      content: `Benvenuto nel registro dei rischi.\n\nTi guiderò attraverso ${PHASES.length} fasi per costruire un registro dei rischi completo ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema di IA e il contesto in cui viene utilizzato.`,
     }]);
     setDocumentation({});
     setCurrentPhaseIndex(0);
@@ -970,7 +993,7 @@ export default function RiskManagerPage() {
               Art. 9 · Reg. UE 2024/1689
             </p>
             <h1 style={{ fontSize: 24, fontWeight: 500, color: "#0D1016", letterSpacing: "-0.8px", margin: 0 }}>
-              Risk Manager
+              Registro dei rischi
             </h1>
             <p style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", marginTop: 4 }}>
               {t("subtitle")}

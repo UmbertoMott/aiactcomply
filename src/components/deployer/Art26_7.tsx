@@ -1,6 +1,6 @@
 "use client";
 
-// Art. 26(7) — Informazioni alle persone fisiche interessate — PROMPT BD
+// Art. 26(11) — Informazioni alle persone fisiche interessate — PROMPT BD
 
 import React from "react";
 import type { DeployerRecord } from "@/types/deployer";
@@ -11,7 +11,7 @@ interface Props {
 }
 
 const OPTIONS: { value: DeployerRecord["endUserNotificationsStatus"]; label: string; desc: string }[] = [
-  { value: "compliant",    label: "Conforme",      desc: "Le persone fisiche sono informate dell'uso del sistema AI" },
+  { value: "compliant",    label: "Conforme",      desc: "Le persone fisiche sono informate dell'uso del sistema di IA" },
   { value: "pending",      label: "In corso",      desc: "Processo di notifica in fase di implementazione" },
   { value: "not_required", label: "Non richiesto", desc: "Tipo di sistema escluso dall'obbligo di notifica" },
 ];
@@ -20,8 +20,8 @@ export function Art26_7({ record, onChange }: Props) {
   return (
     <div className="space-y-3">
       <p className="text-xs text-slate-400">
-        Le persone fisiche soggette alle decisioni del sistema AI devono essere informate
-        del suo utilizzo (Art. 26(7)).
+        Se un sistema dell&apos;Allegato III adotta o aiuta ad adottare decisioni su persone fisiche, queste devono essere informate
+        che sono soggette al suo uso (Art. 26(11)).
       </p>
 
       <div className="space-y-2">

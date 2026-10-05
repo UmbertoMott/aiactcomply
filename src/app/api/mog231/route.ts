@@ -44,8 +44,8 @@ function detectCriticalGaps(data: Record<string, unknown>): string[] {
   const gaps: string[] = [];
 
   if (!data.l132_deepfake_compliant)
-    gaps.push("⚠️ Rischio penale: deepfake non consensuali — reclusione fino a 5 anni (Art. L.132)");
-  if (!data.l132_minors_protection)
+    gaps.push("⚠️ Rischio penale: deepfake non consensuali — reclusione da 1 a 5 anni (art. 612-quater c.p., introdotto dalla L. 132/2025)");
+  if (data.l132_minors_protection === false)
     gaps.push("⚠️ Tutela minori under 14: consenso genitoriale obbligatorio non implementato");
   if (!data.l132_hr_transparency)
     gaps.push("⚠️ Trasparenza HR: mancata informativa su uso AI nelle decisioni lavorative");
@@ -100,7 +100,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "ai_system_id required" }, { status: 400 });
   }
 
-  // Verifica ownership sistema AI
+  // Verifica ownership sistema di IA
   const { data: system } = await supabase
     .from("ai_systems")
     .select("id, is_high_risk")

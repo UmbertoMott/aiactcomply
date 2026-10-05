@@ -62,7 +62,7 @@ export const AI_ACT_DEADLINES: AIActDeadline[] = [
     date: "2027-12-02",
     label: "Sistemi ad alto rischio (Annex III) — piena applicazione",
     description:
-      "Piena applicazione di tutti gli obblighi per i sistemi ad alto rischio elencati nell'Allegato III: gestione del rischio (Art. 9), qualità dei dati (Art. 10), documentazione tecnica (Art. 11), logging (Art. 12), trasparenza (Art. 13), supervisione umana (Art. 14), accuracy e robustezza (Art. 15), registrazione EUDB (Art. 49).",
+      "Piena applicazione di tutti gli obblighi per i sistemi ad alto rischio elencati nell'Allegato III: gestione del rischio (Art. 9), qualità dei dati (Art. 10), documentazione tecnica (Art. 11), logging (Art. 12), trasparenza (Art. 13), sorveglianza umana (Art. 14), accuracy e robustezza (Art. 15), registrazione EUDB (Art. 49).",
     article: "Art. 9-15, Art. 49, Annex III — Art. 113 come modificato dal Reg. (UE) 2026/1744",
     applies_to: ["high_risk_annex3"],
     tool_href: "/dashboard/triage",

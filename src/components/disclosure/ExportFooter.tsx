@@ -53,7 +53,7 @@ export function buildExportFooterText({
     `DOCUMENTO ASSISTITO DA IA — BOZZA INTERNA DI LAVORAZIONE`,
     `Piattaforma: ${platform} v${version} | ID Output: ${outputId}`,
     `Modello AI: ${model} | Generato il: ${dt}`,
-    `Operatore: ${companyName} | Sistema AI: ${systemName}`,
+    `Operatore: ${companyName} | Sistema di IA: ${systemName}`,
     ``,
     `⚠ AVVERTENZA LEGALE: Il presente documento è una bozza interna di lavorazione,`,
     `elaborata con il supporto di un sistema di intelligenza artificiale ai sensi`,

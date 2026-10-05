@@ -185,7 +185,7 @@ export function RiskRegisterGuidedMode({ onExitGuidedMode }: RiskRegisterGuidedM
         flexShrink: 0,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <p style={{ fontSize: 12, fontWeight: 700, color: T.text, margin: 0 }}>Risk Register guidato</p>
+          <p style={{ fontSize: 12, fontWeight: 700, color: T.text, margin: 0 }}>Registro dei rischi guidato</p>
           <span style={{ fontSize: 10, color: T.muted }}>
             Art. 9 AI Act · {progress.overallPercent}% completato
           </span>

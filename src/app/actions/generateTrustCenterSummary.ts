@@ -14,10 +14,10 @@ const TIER_LABELS: Record<string, string> = {
   high_risk_annex1: "Sistema classificato ad alto rischio secondo l'Allegato I del Reg. (UE) 2024/1689",
   gpai:             "Sistema di IA per uso generale (GPAI) ai sensi del Reg. (UE) 2024/1689",
   gpai_systemic:    "Sistema di IA per uso generale con rischio sistemico ai sensi del Reg. (UE) 2024/1689",
-  limited:          "Sistema AI a rischio limitato ai sensi del Reg. (UE) 2024/1689",
-  minimal:          "Sistema AI a rischio minimo ai sensi del Reg. (UE) 2024/1689",
-  prohibited:       "Sistema AI potenzialmente vietato — in fase di valutazione normativa",
-  unclassified:     "Sistema AI — classificazione del rischio in corso",
+  limited:          "Sistema di IA a rischio limitato ai sensi del Reg. (UE) 2024/1689",
+  minimal:          "Sistema di IA a rischio minimo ai sensi del Reg. (UE) 2024/1689",
+  prohibited:       "Sistema di IA potenzialmente vietato — in fase di valutazione normativa",
+  unclassified:     "Sistema di IA — classificazione del rischio in corso",
 };
 
 const FREQ_LABELS: Record<string, string> = {
@@ -43,15 +43,15 @@ export async function generateTrustCenterSummary(
       if (!complete || !riskTier) {
         return notComplete("Dati non disponibili — completa la classificazione nel Triage o nell'AI Inventory per poter pubblicare questa sezione.");
       }
-      const tierLabel = TIER_LABELS[riskTier] ?? `Sistema AI (livello: ${riskTier})`;
+      const tierLabel = TIER_LABELS[riskTier] ?? `Sistema di IA (livello: ${riskTier})`;
       const roleLabel = role === "provider" ? "sviluppato e commercializzato da questa organizzazione"
         : role === "deployer" ? "utilizzato da questa organizzazione"
         : role === "authorized_rep" ? "rappresentato da questa organizzazione come Authorized Representative"
         : "";
-      const prompt = `Sei un esperto di conformità AI Act UE (Reg. 2024/1689). Scrivi 2-3 frasi chiare e non tecniche per comunicare la classificazione del rischio di un sistema AI a un pubblico esterno (clienti, partner, regolatori).
+      const prompt = `Sei un esperto di conformità AI Act UE (Reg. 2024/1689). Scrivi 2-3 frasi chiare e non tecniche per comunicare la classificazione del rischio di un sistema di IA a un pubblico esterno (clienti, partner, regolatori).
 
 Dati:
-- Nome sistema: ${systemName ?? "sistema AI"}
+- Nome sistema: ${systemName ?? "sistema di IA"}
 - Classificazione: ${tierLabel}
 - Ruolo organizzazione: ${roleLabel || "non specificato"}
 
@@ -70,7 +70,7 @@ Scrivi il testo della sezione "Classificazione del rischio" per il Trust Center:
       if (!complete || !finalityDescription) {
         return notComplete("Dati non disponibili — completa la sezione Annex IV §1-2 in DocuGen AI per poter pubblicare questa sezione.");
       }
-      const prompt = `Sei un esperto di conformità AI Act UE. Scrivi 2-4 frasi per comunicare la finalità e l'ambito di utilizzo di un sistema AI a un pubblico esterno.
+      const prompt = `Sei un esperto di conformità AI Act UE. Scrivi 2-4 frasi per comunicare la finalità e l'ambito di utilizzo di un sistema di IA a un pubblico esterno.
 
 Finalità prevista (Annex IV §1): ${finalityDescription}
 Ambito applicativo (Annex IV §2): ${applicativeScope ?? "non specificato"}
@@ -93,7 +93,7 @@ Scrivi il testo della sezione "Finalità e ambito di utilizzo previsto" per il T
       const measuresList = implementedMeasures
         .map((m, i) => `${i + 1}. ${m.description}`)
         .join("\n");
-      const prompt = `Sei un esperto di conformità AI Act UE. Scrivi 2-4 frasi per comunicare le misure di sorveglianza umana adottate per un sistema AI ad alto rischio.
+      const prompt = `Sei un esperto di conformità AI Act UE. Scrivi 2-4 frasi per comunicare le misure di sorveglianza umana adottate per un sistema di IA ad alto rischio.
 
 Misure implementate (Art. 14 Reg. (UE) 2024/1689):
 ${measuresList}
@@ -114,7 +114,7 @@ Scrivi il testo della sezione "Misure di sorveglianza umana" per il Trust Center
         return notComplete("Dati non disponibili — attiva e conferma le disclosure richieste nell'Art. 50 Kit per poter pubblicare questa sezione.");
       }
       const discList = activeDisclosures.filter(Boolean).join(", ");
-      const prompt = `Sei un esperto di conformità AI Act UE. Scrivi 2-3 frasi per comunicare le misure di trasparenza adottate per un sistema AI ai sensi dell'Art. 50 del Reg. (UE) 2024/1689.
+      const prompt = `Sei un esperto di conformità AI Act UE. Scrivi 2-3 frasi per comunicare le misure di trasparenza adottate per un sistema di IA ai sensi dell'Art. 50 del Reg. (UE) 2024/1689.
 
 Disclosure attive: ${discList}
 
@@ -133,7 +133,7 @@ Scrivi il testo della sezione "Informazioni di trasparenza" per il Trust Center:
       if (!complete || !declarationDrafted) {
         return notComplete("Dati non disponibili — redigi la Dichiarazione di Conformità UE in DocuGen AI (Art. 47-48) per poter pubblicare questa sezione.");
       }
-      const prompt = `Sei un esperto di conformità AI Act UE. Scrivi 2-3 frasi per comunicare lo stato della dichiarazione di conformità UE di un sistema AI.
+      const prompt = `Sei un esperto di conformità AI Act UE. Scrivi 2-3 frasi per comunicare lo stato della dichiarazione di conformità UE di un sistema di IA.
 
 Dati:
 - Dichiarazione di Conformità UE redatta: ${declarationDrafted ? "Sì" : "No"}
@@ -153,7 +153,7 @@ Scrivi il testo della sezione "Stato della dichiarazione di conformità" per il 
       if (!complete || !registrationNumber) {
         return notComplete("Dati non disponibili — completa la registrazione EUDB (Art. 49) per ottenere il numero di registrazione e poter pubblicare questa sezione.");
       }
-      const text = `Il sistema AI è registrato nella banca dati europea dei sistemi AI ad alto rischio (EU AI Database) ai sensi dell'Art. 49 del Reg. (UE) 2024/1689. Numero di registrazione: ${registrationNumber}.`;
+      const text = `Il sistema di IA è registrato nella banca dati europea dei sistemi di IA ad alto rischio (EU AI Database) ai sensi dell'Art. 49 del Reg. (UE) 2024/1689. Numero di registrazione: ${registrationNumber}.`;
       return { text, aiConfirmed: false, sourceComplete: true };
     }
 
@@ -163,7 +163,7 @@ Scrivi il testo della sezione "Stato della dichiarazione di conformità" per il 
         return notComplete("Dati non disponibili — completa il Piano di Monitoraggio Post-Market (Art. 72) per poter pubblicare questa sezione.");
       }
       const freqLabel = FREQ_LABELS[frequency ?? ""] ?? frequency ?? "non specificata";
-      const prompt = `Sei un esperto di conformità AI Act UE. Scrivi 2-3 frasi per comunicare l'impegno di monitoraggio post-market di un sistema AI ad alto rischio.
+      const prompt = `Sei un esperto di conformità AI Act UE. Scrivi 2-3 frasi per comunicare l'impegno di monitoraggio post-market di un sistema di IA ad alto rischio.
 
 Dati:
 - Metodologia di monitoraggio: ${methodology}

@@ -129,7 +129,7 @@ export function ProjectSwitcher() {
           {/* Nessun progetto */}
           {projects.length === 0 && !creating && (
             <div className="px-3 py-4 text-center text-[11px]" style={{ color: "rgba(0,0,0,0.35)" }}>
-              Nessun progetto. Creane uno per separare i dati dei tuoi sistemi AI.
+              Nessun progetto. Creane uno per separare i dati dei tuoi sistemi di IA.
             </div>
           )}
 
@@ -208,7 +208,7 @@ export function ProjectSwitcher() {
               <div className="px-3 py-2 flex items-center gap-1.5">
                 <input
                   autoFocus
-                  placeholder="Nome sistema AI…"
+                  placeholder="Nome sistema di IA…"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   onKeyDown={(e) => {

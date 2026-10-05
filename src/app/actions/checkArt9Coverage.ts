@@ -39,7 +39,7 @@ REGOLE OBBLIGATORIE:
 - coverageScore 0-100: 100 = copertura completa per quel tier
 - Rispondi SOLO con JSON valido, nessun testo fuori dal JSON
 
-Sistema: "${context.systemName ?? "Sistema AI"}"
+Sistema: "${context.systemName ?? "Sistema di IA"}"
 Tier: ${context.riskTier ?? "non determinato"}
 
 Rischi già identificati (${existingRisks.length}):

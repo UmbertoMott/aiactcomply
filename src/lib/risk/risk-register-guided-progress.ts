@@ -16,6 +16,8 @@ export interface GuidedRRSectionProgress {
   legalRef: string;
   weight: number;
   percent: number;
+  /** Sezione senza voci obbligatorie: non entra nella percentuale complessiva */
+  optional: boolean;
   status: "not_started" | "in_progress" | "complete";
   detail: string;
   anchor: string;
@@ -40,7 +42,10 @@ export function computeGuidedRRProgress(doc: RiskRegisterGuidedDoc): GuidedRRPro
     }));
 
     const doneMandatory = required.filter(sp => doc.answers[sp.id]?.status === "done").length;
-    const percent = required.length === 0 ? 100 : Math.round((doneMandatory / required.length) * 100);
+    // Sezione senza voci obbligatorie: la percentuale riflette le risposte date, non parte da 100
+    const doneAny = subPoints.filter(sp => doc.answers[sp.id]?.status === "done").length;
+    const percent = required.length > 0 ? Math.round((doneMandatory / required.length) * 100)
+      : subPoints.length > 0 ? Math.round((doneAny / subPoints.length) * 100) : 100;
 
     const doneCount    = subPoints.filter(sp => doc.answers[sp.id]?.status === "done").length;
     const pendingCount = subPoints.filter(sp => doc.answers[sp.id]?.status === "pending").length;
@@ -61,6 +66,7 @@ export function computeGuidedRRProgress(doc: RiskRegisterGuidedDoc): GuidedRRPro
       legalRef: sec.legalRef,
       weight:   subPoints.length,
       percent,
+      optional: required.length === 0,
       status,
       detail,
       anchor:   sec.anchor,
@@ -68,9 +74,10 @@ export function computeGuidedRRProgress(doc: RiskRegisterGuidedDoc): GuidedRRPro
     };
   });
 
-  const totalWeight = sections.reduce((s, sec) => s + sec.weight, 0);
+  const counted = sections.filter(sec => !sec.optional);
+  const totalWeight = counted.reduce((s, sec) => s + sec.weight, 0);
   const overallPercent = totalWeight === 0 ? 0 : Math.round(
-    sections.reduce((acc, s) => acc + (s.percent * s.weight) / totalWeight, 0)
+    counted.reduce((acc, s) => acc + (s.percent * s.weight) / totalWeight, 0)
   );
 
   return { overallPercent, sections };

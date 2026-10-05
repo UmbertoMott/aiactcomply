@@ -13,7 +13,7 @@ export async function draftNextStepRationale(params: {
 }): Promise<NextStepRationale | { error: string }> {
   const prompt = `Sei un esperto di AI Act EU (Reg. 2024/1689) e metodologie FRIA (Fundamental Rights Impact Assessment, DIHR/ECNL).
 
-Il sistema AI valutato si chiama: ${params.systemName}
+Il sistema di IA valutato si chiama: ${params.systemName}
 Stato attuale della FRIA: ${params.friaSummary}
 Prossimo step raccomandato: ${params.stepTitle}
 

@@ -6,6 +6,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import type { ToolNeeds } from "@/lib/obligations/engine";
 import type { ToolGuideEntry } from "@/lib/tools/tool-guide";
 import { useT } from "@/i18n/LocaleProvider";
+import ToolObligationCheck from "@/components/tools/ToolObligationCheck";
 
 const COLLAPSED_KEY = "aicomply_tool_guide_collapsed";
 
@@ -64,6 +65,7 @@ export default function ToolGuide({ guide, needs }: { guide: ToolGuideEntry; nee
         <span className="text-[11px] flex-1 min-w-0 truncate" style={{ color: need ? "#15803d" : "rgba(0,0,0,0.5)" }}>
           {collapsed ? fit : null}
         </span>
+        {collapsed && !guide.optional && <ToolObligationCheck href={guide.href} compact />}
         <button
           onClick={toggle}
           className="flex items-center gap-1 text-[11px] flex-shrink-0"
@@ -86,6 +88,7 @@ export default function ToolGuide({ guide, needs }: { guide: ToolGuideEntry; nee
           <p className="text-[11px] mt-3 pt-2.5" style={{ color: "rgba(0,0,0,0.55)", borderTop: "1px solid rgba(0,0,0,0.06)", lineHeight: 1.5 }}>
             {fit}
           </p>
+          {!guide.optional && <ToolObligationCheck href={guide.href} />}
         </div>
       )}
     </section>

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Download, X, Pencil, Check, Bold, Italic, Underline, Highlighter } from "lucide-react";
+import { Download, Pencil, Check, Bold, Italic, Underline, Highlighter } from "lucide-react";
 import { readFromStorage, writeToStorage } from "@/lib/dossier/storage-schema";
 import type { ClassifierResult, DataAuditResult } from "@/lib/dossier/storage-schema";
 import { patchDPIA, patchShared } from "@/lib/assessment/assessment-helpers";
@@ -54,14 +54,15 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
   const [stale, setStale]                       = useState(false);
   const [lastSaved, setLastSaved]               = useState<Date | null>(null);
 
-  // ── Documento: visibile solo se cliccato dal rail ─────────────────────────
-  const [viewerOpen, setViewerOpen] = useState(false);
-  const [docWidth, setDocWidth]     = useState(380);
+  // ── Documento: sempre visibile, come nella FRIA guidata (guida · documento · chat) ──
+  // null = metà dello spazio disponibile; diventa un numero quando l'utente trascina il divisore
+  const [docWidth, setDocWidth]     = useState<number | null>(null);
   const [isResizing, setIsResizing] = useState(false);
   const [editing, setEditing]       = useState(false);
   const [editedHtml, setEditedHtml] = useState<string | null>(null);
 
   const layoutRef = useRef<HTMLDivElement>(null);
+  const docPaneRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const editRef   = useRef<HTMLDivElement>(null);
@@ -96,21 +97,11 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
     setEditing(false);
   };
 
-  // Al primo click apertura: divide lo spazio disponibile a metà
-  const openViewer = useCallback(() => {
-    if (!viewerOpen) {
-      const total = layoutRef.current?.clientWidth ?? 1200;
-      const avail = total - RAIL_W - SPLITTER;
-      setDocWidth(Math.max(280, Math.floor(avail / 2)));
-    }
-    setViewerOpen(true);
-  }, [viewerOpen]);
-
   const startResize = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     setIsResizing(true);
     const startX     = e.clientX;
-    const startWidth = docWidth;
+    const startWidth = docWidth ?? docPaneRef.current?.clientWidth ?? 380;
     const onMove = (ev: MouseEvent) => {
       const total = layoutRef.current?.clientWidth ?? 1200;
       const max   = (total - RAIL_W - SPLITTER) * 0.70;
@@ -166,15 +157,16 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
 
   const handleSectionClick = useCallback((sectionKey: string, anchor: string) => {
     setActiveSection(sectionKey);
-    openViewer();
-    // scroll al anchor dopo che il viewer è montato
+    // Scorre solo il pannello del documento, non la pagina
     setTimeout(() => {
-      if (viewerRef.current) {
-        const el = viewerRef.current.querySelector(`#${anchor}`);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      const box = viewerRef.current;
+      const el = box?.querySelector(`#${anchor}`);
+      if (box && el) {
+        const top = el.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - 8;
+        box.scrollTo({ top, behavior: "smooth" });
       }
     }, 50);
-  }, [openViewer]);
+  }, []);
 
   const handleSubPointClick = useCallback((subPointId: string) => {
     setForcedSubPointId(subPointId);
@@ -286,11 +278,11 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
           />
         </div>
 
-        {/* CENTRO — Documento live (solo se viewerOpen) */}
-        {viewerOpen && (
+        {/* CENTRO — Documento live */}
+        {(
           <>
-            <div style={{
-              width: docWidth, flexShrink: 0, minWidth: 260, maxWidth: "65%",
+            <div ref={docPaneRef} style={{
+              width: docWidth ?? `calc((100% - ${RAIL_W + SPLITTER}px) / 2)`, flexShrink: 0, minWidth: 260, maxWidth: "65%",
               display: "flex", flexDirection: "column",
               border: "none", borderLeft: `1px solid ${T.border}`,
               overflow: "hidden", background: T.card,
@@ -355,20 +347,6 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
                   {editing ? <Check size={12} /> : <Pencil size={12} />}
                 </button>
 
-                <button
-                  onClick={() => { setViewerOpen(false); setEditing(false); }}
-                  title={t("gm_closeDocument")}
-                  style={{
-                    flexShrink: 0, width: 24, height: 24, borderRadius: 12,
-                    background: "rgba(0,0,0,0.05)", border: "none", cursor: "pointer",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    color: "rgba(0,0,0,0.45)",
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.10)")}
-                  onMouseLeave={e => (e.currentTarget.style.background = "rgba(0,0,0,0.05)")}
-                >
-                  <X size={12} />
-                </button>
               </div>
 
               {/* Contenuto scrollabile */}

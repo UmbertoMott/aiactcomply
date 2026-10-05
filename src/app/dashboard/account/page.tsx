@@ -9,7 +9,7 @@ export default function AccountPage() {
     <div className="max-w-xl mx-auto py-10 px-4 space-y-8">
       <div>
         <h1 className="mb-1" style={{ fontSize: "24px", fontWeight: 600, letterSpacing: "-0.5px", color: "#0D1016" }}>
-          Settings
+          Impostazioni
         </h1>
         <p className="text-[13px]" style={{ color: "rgba(0,0,0,0.45)" }}>
           Configurazione organizzazione e preferenze di compliance.

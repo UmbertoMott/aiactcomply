@@ -37,7 +37,7 @@ const TIER_CFG: Record<string, { label: string; color: string; bg: string; bdr: 
 };
 
 const ROLE_LABELS: Record<string, string> = {
-  provider: "Provider", deployer: "Deployer", importer: "Importatore",
+  provider: "Fornitore", deployer: "Deployer", importer: "Importatore",
   distributor: "Distributore", authorized_rep: "Rapp. autorizzato",
   product_manufacturer: "Prod. prodotto",
 };
@@ -74,11 +74,11 @@ const OBLIGATIONS: Obligation[] = [
     id: "risk-mgmt",
     article: "Art. 9",
     label: "Gestione del rischio",
-    what: "Identificare, analizzare e mitigare i rischi durante tutto il ciclo di vita del sistema AI",
+    what: "Identificare, analizzare e mitigare i rischi durante tutto il ciclo di vita del sistema di IA",
     icon: Shield,
     storageKey: "aicomply_risk_manager_result",
     href: "/dashboard/tools/risk-manager",
-    toolLabel: "Risk Manager",
+    toolLabel: "Registro dei rischi",
     tiers: ["high_risk"],
     detect: raw => {
       const d = tryParse(raw);
@@ -96,7 +96,7 @@ const OBLIGATIONS: Obligation[] = [
     icon: Database,
     storageKey: "aicomply_data_audit_result",
     href: "/dashboard/tools/data-audit",
-    toolLabel: "Data Audit",
+    toolLabel: "Qualità dei dati",
     tiers: ["high_risk"],
     detect: raw => {
       const d = tryParse(raw);
@@ -113,7 +113,7 @@ const OBLIGATIONS: Obligation[] = [
     icon: FileText,
     storageKey: "aicomply_docugen_result",
     href: "/dashboard/tools/docugen",
-    toolLabel: "DocuGen",
+    toolLabel: "Documentazione tecnica",
     tiers: ["high_risk", "gpai", "gpai_systemic"],
     detect: raw => {
       const d = tryParse(raw);
@@ -130,7 +130,7 @@ const OBLIGATIONS: Obligation[] = [
     icon: ScrollText,
     storageKey: "aicomply_logvault_result",
     href: "/dashboard/tools/logvault",
-    toolLabel: "LogVault",
+    toolLabel: "Registro dei log",
     tiers: ["high_risk"],
     detect: raw => {
       const d = tryParse(raw);
@@ -159,7 +159,7 @@ const OBLIGATIONS: Obligation[] = [
   {
     id: "oversight",
     article: "Art. 14",
-    label: "Supervisione umana",
+    label: "Sorveglianza umana",
     what: "Progettare misure tecniche per una sorveglianza umana efficace sull'output del sistema",
     icon: Users,
     storageKey: "aicomply_oversight_result",
@@ -298,11 +298,11 @@ const OBLIGATIONS: Obligation[] = [
     id: "transparency-limited",
     article: "Art. 50",
     label: "Obblighi di trasparenza AI",
-    what: "Informare gli utenti quando interagiscono con un sistema AI (chatbot, sintesi, deepfake)",
+    what: "Informare gli utenti quando interagiscono con un sistema di IA (chatbot, sintesi, deepfake)",
     icon: Eye,
     storageKey: "aicomply_art50_result",
     href: "/dashboard/tools/art50-kit",
-    toolLabel: "Art. 50 Kit",
+    toolLabel: "Avvisi e marcature IA",
     tiers: ["limited"],
     detect: raw => {
       const d = tryParse(raw);
@@ -506,7 +506,7 @@ export default function SystemDetailPage() {
         textDecoration: "none", marginBottom: 20,
       }}>
         <ArrowLeft size={13} />
-        Inventario Sistemi AI
+        Inventario Sistemi di IA
       </Link>
 
       {/* ── Header card ── */}

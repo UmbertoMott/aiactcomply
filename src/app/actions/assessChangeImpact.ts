@@ -27,7 +27,7 @@ export async function assessChangeImpact(
     return { report: null, error: "MISSING_INPUT" };
   }
 
-  const prompt = `Sei un esperto di EU AI Act — modifiche ai sistemi AI ad alto rischio.
+  const prompt = `Sei un esperto di EU AI Act — modifiche ai sistemi di IA ad alto rischio.
 Valuta quale impatto ha una modifica descritta sulla documentazione Annex IV e sulla conformità.
 
 Art. 6(3): Se il sistema subisce una modifica sostanziale, deve essere considerato un nuovo sistema
@@ -38,7 +38,7 @@ Indicatori di modifica sostanziale:
 - Cambio dell'intended purpose
 - Retraining o fine-tuning sostanziale del modello
 - Cambio delle performance oltre le soglie documentate
-- Modifica dei meccanismi di supervisione umana
+- Modifica dei meccanismi di sorveglianza umana
 - Cambio dei dati di training che altera il comportamento
 
 Le 12 sezioni Annex IV da verificare:
