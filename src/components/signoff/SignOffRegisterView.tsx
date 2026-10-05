@@ -165,7 +165,7 @@ export function SignOffRegisterView({ scopeId }: SignOffRegisterViewProps) {
       >
         <Shield className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "rgba(0,0,0,0.4)" }} />
         <span className="text-[11px] font-medium" style={{ color: "rgba(0,0,0,0.55)" }}>
-          Registro Sign-off (Bucket A)
+          Registro delle approvazioni
         </span>
         {records.length > 0 && (
           <span style={{ fontSize: 10, fontWeight: 600, padding: "1px 6px", borderRadius: 4, background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.45)" }}>

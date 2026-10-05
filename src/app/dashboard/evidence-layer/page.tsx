@@ -182,7 +182,7 @@ export default function EvidenceLayerPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <h1 style={{ fontSize: "22px", fontWeight: 600, letterSpacing: "-0.5px", color: "#0D1016" }}>
-              Evidence Layer
+              Registro delle evidenze
             </h1>
             <span
               className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
@@ -619,7 +619,7 @@ export default function EvidenceLayerPage() {
                     className="w-full py-2.5 rounded-lg text-[13px] font-semibold transition-all"
                     style={{ background: saving ? "rgba(13,16,22,0.5)" : "#0D1016", color: "#ffffff" }}
                   >
-                    {saving ? "Salvataggio…" : "Salva su Evidence Layer"}
+                    {saving ? "Salvataggio…" : "Salva nel registro delle evidenze"}
                   </button>
                   <button
                     onClick={() => setPanelOpen(false)}

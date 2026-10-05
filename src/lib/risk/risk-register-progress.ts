@@ -174,7 +174,7 @@ export function computeRegisterProgress(doc: RiskRegisterDocument): RegisterProg
     { label: "Rappresentante legale", done: !!(so?.legalRepresentative.signed) },
   ];
   sections.push({
-    key: "signOff", label: "Sign-off", weight: 15,
+    key: "signOff", label: "Approvazione", weight: 15,
     percent: Math.round((signedCount / 3) * 100),
     detail: `${signedCount}/3 firme`,
     subPoints: signOffSubPoints,

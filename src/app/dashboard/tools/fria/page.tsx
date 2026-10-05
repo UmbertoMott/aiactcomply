@@ -1,5 +1,6 @@
 "use client";
 
+import { levelLabel } from "@/lib/risk-level-label";
 import { useState, useRef, useEffect, useMemo } from "react";
 import type { CSSProperties } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -866,7 +867,7 @@ export default function FRIAPage() {
                                 <span style={{ fontSize: 10, fontWeight: 700, color: T.faint, minWidth: 18 }}>#{idx + 1}</span>
                                 <span style={{ fontSize: 11, color: T.text, flex: 1 }}>{r?.name ?? ri.right_id}</span>
                                 <span style={{ fontSize: 10, fontWeight: 600, color: sevColors[priority] ?? T.muted, background: "rgba(0,0,0,0.04)", padding: "1px 6px", borderRadius: 9999 }}>
-                                  {priority?.toUpperCase()}
+                                  {levelLabel(priority).toUpperCase()}
                                 </span>
                               </div>
                             );
@@ -995,7 +996,7 @@ export default function FRIAPage() {
                                             <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>{t("computedSeverity")}</label>
                                             <div style={{ padding: "7px 0" }}>
                                               {impact.severity.computed_severity
-                                                ? <Badge label={impact.severity.computed_severity.toUpperCase()} color={riskColorFor(impact.severity.computed_severity)} />
+                                                ? <Badge label={levelLabel(impact.severity.computed_severity).toUpperCase()} color={riskColorFor(impact.severity.computed_severity)} />
                                                 : <span style={{ fontSize: 12, color: T.faint }}>{t("notComputed")}</span>}
                                             </div>
                                           </div>
@@ -1011,7 +1012,7 @@ export default function FRIAPage() {
                                             <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, marginBottom: 4 }}>{t("computedPriority")}</label>
                                             <div style={{ padding: "7px 0" }}>
                                               {impact.likelihood.computed_priority
-                                                ? <Badge label={impact.likelihood.computed_priority.toUpperCase()} color={riskColorFor(impact.likelihood.computed_priority)} />
+                                                ? <Badge label={levelLabel(impact.likelihood.computed_priority).toUpperCase()} color={riskColorFor(impact.likelihood.computed_priority)} />
                                                 : <span style={{ fontSize: 12, color: T.faint }}>— non calcolata —</span>}
                                             </div>
                                           </div>
@@ -1072,11 +1073,11 @@ export default function FRIAPage() {
                                               return (
                                                 <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11 }}>
                                                   <span style={{ color: sevColors[impact.severity.computed_severity] ?? T.muted, fontWeight: 600 }}>
-                                                    {impact.severity.computed_severity.toUpperCase()}
+                                                    {levelLabel(impact.severity.computed_severity).toUpperCase()}
                                                   </span>
                                                   {improved && <>
                                                     <span style={{ color: T.faint }}>→</span>
-                                                    <span style={{ color: sevColors[residual] ?? T.muted, fontWeight: 600 }}>{residual.toUpperCase()}</span>
+                                                    <span style={{ color: sevColors[residual] ?? T.muted, fontWeight: 600 }}>{levelLabel(residual).toUpperCase()}</span>
                                                     <span style={{ color: T.green, fontSize: 10 }}>({implemented} {t("activeMitigations")})</span>
                                                   </>}
                                                   {!improved && (
@@ -1623,7 +1624,7 @@ export default function FRIAPage() {
           },
           {
             key: "risk",
-            label: "Risk Manager",
+            label: "Registro dei rischi",
             art: "Art. 9",
             done: hasRiskMgr,
             href: "/dashboard/modules/risk-manager",
@@ -1848,7 +1849,7 @@ export default function FRIAPage() {
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ fontSize: 11, color: T.muted }}>{t("globalRisk")}</span>
-              <Badge label={overallRisk.toUpperCase()} color={riskColorFor(overallRisk)} />
+              <Badge label={levelLabel(overallRisk).toUpperCase()} color={riskColorFor(overallRisk)} />
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span style={{ fontSize: 11, color: T.muted }}>{t("scenariWord")}</span>

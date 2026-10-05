@@ -86,7 +86,7 @@ function buildSteps(
     steps.push({
       id: "gpai_assessment",
       priority: "critical",
-      title: "GPAI Assessment (Art. 53–55)",
+      title: "Valutazione GPAI (Artt. 53-55)",
       description: "Valuta gli obblighi specifici per i modelli di uso generale: trasparenza, test, documentazione.",
       href: "/dashboard/risk/gpai-assessment",
       estimatedHours: 4,
@@ -146,7 +146,7 @@ function buildSteps(
     steps.push({
       id: "oversight",
       priority: "high",
-      title: "Human Oversight (Art. 14)",
+      title: "Sorveglianza umana (Art. 14)",
       description: "Definisci i meccanismi di supervisione umana e i punti di intervento.",
       href: "/dashboard/tools/docugen",
       estimatedHours: 2,
@@ -164,7 +164,7 @@ function buildSteps(
     steps.push({
       id: "conformity",
       priority: "medium",
-      title: "Conformity Assessment (Art. 43)",
+      title: "Valutazione della conformità (Art. 43)",
       description: "Completa la valutazione di conformità e la dichiarazione di conformità UE.",
       href: "/dashboard/compliance/conformity",
       estimatedHours: 3,

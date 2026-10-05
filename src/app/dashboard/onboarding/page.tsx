@@ -689,7 +689,7 @@ function OnboardingWizard() {
         <div>
           <h1 className="text-xl font-semibold" style={{ color: "#0D1016", letterSpacing: "-0.5px" }}>
             Conformità Art. 50
-            <span className="font-normal ml-1.5" style={{ color: "rgba(0,0,0,0.3)" }}>— setup guidato</span>
+            <span className="font-normal ml-1.5" style={{ color: "rgba(0,0,0,0.3)" }}>— configurazione guidata</span>
           </h1>
           <p className="mt-0.5 text-[12px]" style={{ color: "rgba(0,0,0,0.4)" }}>
             {STEP_LABELS[step]}
@@ -773,7 +773,7 @@ function OnboardingWizard() {
           className="underline hover:opacity-70 transition-opacity"
           style={{ color: "rgba(0,0,0,0.4)" }}
         >
-          Dashboard → Tool → Art. 50 Kit
+          Home → Tool → Avvisi e marcature IA
         </button>
         .
       </p>

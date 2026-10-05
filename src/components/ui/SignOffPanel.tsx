@@ -242,7 +242,7 @@ export default function SignOffPanel({
         <Hash className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" style={{ color: "rgba(0,0,0,0.3)" }} />
         <div>
           <p className="text-[10px] font-medium mb-0.5" style={{ color: "rgba(0,0,0,0.45)" }}>
-            Hash documento · {documentVersion}
+            Impronta del documento · {documentVersion}
           </p>
           <p className="text-[11px] font-mono" style={{ color: "rgba(0,0,0,0.5)" }}>
             {contentHash ? shortHash(contentHash) : "…calcolo in corso"}

@@ -53,6 +53,7 @@ import type { AISystem } from "@/lib/inventory/ai-system";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Severity = "critical" | "high" | "medium" | "low";
+const SEVERITY_LABEL: Record<Severity, string> = { critical: "Critica", high: "Alta", medium: "Media", low: "Bassa" };
 type IncidentStatus = "draft" | "pending" | "reported" | "investigating" | "report_complete" | "resolved" | "closed";
 
 type Incident = {
@@ -119,7 +120,7 @@ IDENTIFICAZIONE INCIDENTE
 ID Incidente: ${inc.id}
 Sistema AI coinvolto: ${inc.system}
 Data rilevamento: ${inc.date}
-Gravità: ${inc.severity.toUpperCase()}
+Gravità: ${SEVERITY_LABEL[inc.severity].toUpperCase()}
 
 DESCRIZIONE DELL'INCIDENTE
 ${inc.description}
@@ -152,7 +153,7 @@ SEZIONE 1 — IDENTIFICAZIONE
 ID Incidente: ${inc.id}
 Sistema AI coinvolto: ${inc.system}
 Data rilevamento: ${inc.date}
-Gravità: ${inc.severity.toUpperCase()}
+Gravità: ${SEVERITY_LABEL[inc.severity].toUpperCase()}
 Status: ${inc.status}
 
 ═══════════════════════════════════════════════════════
@@ -286,7 +287,7 @@ const STATUS_COLOR: Record<IncidentStatus, string> = {
 
 const STATUS_LABEL: Record<IncidentStatus, string> = {
   draft: "Bozza",
-  pending: "Pending",
+  pending: "In attesa",
   reported: "Segnalato",
   investigating: "In indagine",
   report_complete: "Rapporto completo",
@@ -611,7 +612,7 @@ function PostMarketPageInner() {
       `Titolo: ${inc.title}`,
       `Sistema: ${inc.system}`,
       `Data rilevamento: ${inc.date}`,
-      `Gravità: ${inc.severity.toUpperCase()}`,
+      `Gravità: ${SEVERITY_LABEL[inc.severity].toUpperCase()}`,
       `Status: ${STATUS_LABEL[inc.status]}`,
       `Autorità: ${inc.authority}`,
       `Utenti impattati: ${inc.affectedUsers || "—"}`,
@@ -909,7 +910,7 @@ function PostMarketPageInner() {
                       transition: "all 0.12s",
                     }}
                   >
-                    {s === "all" ? "Tutti" : s.charAt(0).toUpperCase() + s.slice(1)}
+                    {s === "all" ? "Tutti" : SEVERITY_LABEL[s as Severity] ?? s}
                   </button>
                 ))}
               </div>
@@ -934,7 +935,7 @@ function PostMarketPageInner() {
                     }}
                   >
                     {s === "pending"
-                      ? "Pending"
+                      ? "In attesa"
                       : s === "investigating"
                       ? "In indagine"
                       : "Risolti"}
@@ -1114,7 +1115,7 @@ function PostMarketPageInner() {
                                 transition: "all 0.12s",
                               }}
                             >
-                              {s.charAt(0).toUpperCase() + s.slice(1)}
+                              {SEVERITY_LABEL[s as Severity] ?? s}
                             </button>
                           );
                         })}
@@ -1134,7 +1135,7 @@ function PostMarketPageInner() {
                           {/* Rows */}
                           {[
                             {
-                              sev: "Critical",
+                              sev: "Critica",
                               color: "#dc2626",
                               bg: "rgba(220,38,38,0.06)",
                               border: "rgba(220,38,38,0.12)",
@@ -1153,7 +1154,7 @@ function PostMarketPageInner() {
                               action: "Notifica urgente + sospensione sistema raccomandata",
                             },
                             {
-                              sev: "High",
+                              sev: "Alta",
                               color: "#ea580c",
                               bg: "rgba(234,88,12,0.05)",
                               border: "rgba(234,88,12,0.12)",
@@ -1172,7 +1173,7 @@ function PostMarketPageInner() {
                               action: "Apertura fascicolo + notifica all'autorità competente",
                             },
                             {
-                              sev: "Medium",
+                              sev: "Media",
                               color: "#d97706",
                               bg: "rgba(217,119,6,0.04)",
                               border: "rgba(217,119,6,0.12)",
@@ -1191,7 +1192,7 @@ function PostMarketPageInner() {
                               action: "Apertura indagine interna + aggiornamento Risk Register",
                             },
                             {
-                              sev: "Low",
+                              sev: "Bassa",
                               color: "#16a34a",
                               bg: "rgba(22,163,74,0.04)",
                               border: "rgba(22,163,74,0.12)",

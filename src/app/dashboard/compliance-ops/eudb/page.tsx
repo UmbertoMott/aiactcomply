@@ -302,7 +302,7 @@ export default function EUDBCompliancePage() {
   const eStatus = eligibilityStatus(doc.eligibility);
   const stepLabels = [
     "Eleggibilità",
-    sectionErrors.sectionA > 0 ? `Provider (${sectionErrors.sectionA})` : "Provider",
+    sectionErrors.sectionA > 0 ? `Fornitore (${sectionErrors.sectionA})` : "Fornitore",
     sectionErrors.sectionB > 0 ? `Sistema (${sectionErrors.sectionB})` : "Sistema",
     sectionErrors.allegati > 0 ? `Pacchetto (${sectionErrors.allegati})` : "Pacchetto",
   ];
@@ -595,7 +595,7 @@ export default function EUDBCompliancePage() {
               border: `1px solid ${DK.amberBdr}`, marginBottom: 12 }}>
               <p style={{ fontSize: 11, color: DK.amber, margin: 0 }}>
                 Documentazione di conformità non disponibile — completa lo step &quot;Kit Art. 50&quot; in{" "}
-                <a href="/dashboard/tools/docugen" style={{ color: DK.amber }}>DocuGen AI</a>{" "}
+                <a href="/dashboard/tools/docugen" style={{ color: DK.amber }}>Documentazione tecnica</a>{" "}
                 per il prefill automatico.
               </p>
             </div>

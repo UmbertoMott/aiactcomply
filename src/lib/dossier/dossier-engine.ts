@@ -279,7 +279,7 @@ export function getDossierSections(data: DossierData): DossierSection[] {
     {
       id: "providerTransition",
       article: "Art. 25",
-      title: "Provider Transition Check",
+      title: "Verifica del cambio di ruolo",
       href: "/dashboard/compliance-ops/provider-transition",
       status: data.providerTransition
         ? (data.providerTransition.verdict === "deployer" ? "complete" : "partial")

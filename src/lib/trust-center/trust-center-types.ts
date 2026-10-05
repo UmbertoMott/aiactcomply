@@ -57,13 +57,13 @@ export const SECTION_META: Record<TrustCenterSectionId, TrustCenterSectionMeta> 
     id: "oversight",
     label: "Misure di sorveglianza umana",
     article: "Art. 14",
-    sourceModule: "Oversight (Art. 14)",
+    sourceModule: "Sorveglianza umana (Art. 14)",
   },
   transparency: {
     id: "transparency",
     label: "Informazioni di trasparenza",
     article: "Art. 50(1)/(2)/(3)/(4)",
-    sourceModule: "Art. 50 Kit",
+    sourceModule: "Avvisi e marcature IA (Art. 50)",
   },
   conformity: {
     id: "conformity",

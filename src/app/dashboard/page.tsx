@@ -615,7 +615,7 @@ export default function DashboardPage() {
             {
               href:  "/dashboard/tools/trust-center",
               Icon:  BadgeCheck,
-              title: "Trust Center",
+              title: "Pagina pubblica di conformità",
               sub:   t("card_trust_sub"),
               accent: T.text,
             },

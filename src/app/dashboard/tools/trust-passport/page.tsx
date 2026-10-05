@@ -190,9 +190,9 @@ export default function TrustPassportPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <ShieldCheck className="w-4 h-4" style={{ color: T.purple }} />
-            <span className="text-xs font-medium" style={{ color: T.muted }}>Selling Kit</span>
+            <span className="text-xs font-medium" style={{ color: T.muted }}>Kit per la vendita</span>
           </div>
-          <h1 className="text-xl font-bold">AI-Trust Passport</h1>
+          <h1 className="text-xl font-bold">Dichiarazione di affidabilità IA</h1>
           <p className="text-sm mt-0.5" style={{ color: T.muted }}>
             {t("subtitle")}
           </p>

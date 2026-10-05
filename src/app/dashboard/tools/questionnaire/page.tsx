@@ -283,14 +283,14 @@ function buildQCommon(t: TFn): QQuestion[] {
     text: t("q12_text"),
     category: t("cat_euConformity"),
     mapFn: ({ conformity }) => {
-      if (!conformity) return manual("Completare Conformity Assessment");
+      if (!conformity) return manual("Completare la valutazione della conformità");
       const answer = conformity.declarationGenerated
         ? `Sì — Dichiarazione di Conformità UE emessa. Score: ${conformity.score}% (${conformity.passed}/${conformity.total} requisiti). ${conformity.registrationRef ? `Registro EUDB: ${conformity.registrationRef}.` : "Registrazione EUDB in corso."}`
         : `Dichiarazione di Conformità non ancora emessa. Completamento al ${conformity.score}%.`;
       return {
         answer,
         status: conformity.declarationGenerated ? "auto" : "partial",
-        source: "Conformity Assessment · Dossier",
+        source: "Valutazione della conformità · Dossier",
       };
     },
   },

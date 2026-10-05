@@ -37,7 +37,7 @@ const TIER_CFG: Record<string, { label: string; color: string; bg: string; bdr: 
 };
 
 const ROLE_LABELS: Record<string, string> = {
-  provider: "Provider", deployer: "Deployer", importer: "Importatore",
+  provider: "Fornitore", deployer: "Deployer", importer: "Importatore",
   distributor: "Distributore", authorized_rep: "Rapp. autorizzato",
   product_manufacturer: "Prod. prodotto",
 };
@@ -78,7 +78,7 @@ const OBLIGATIONS: Obligation[] = [
     icon: Shield,
     storageKey: "aicomply_risk_manager_result",
     href: "/dashboard/tools/risk-manager",
-    toolLabel: "Risk Manager",
+    toolLabel: "Registro dei rischi",
     tiers: ["high_risk"],
     detect: raw => {
       const d = tryParse(raw);
@@ -96,7 +96,7 @@ const OBLIGATIONS: Obligation[] = [
     icon: Database,
     storageKey: "aicomply_data_audit_result",
     href: "/dashboard/tools/data-audit",
-    toolLabel: "Data Audit",
+    toolLabel: "Qualità dei dati",
     tiers: ["high_risk"],
     detect: raw => {
       const d = tryParse(raw);
@@ -113,7 +113,7 @@ const OBLIGATIONS: Obligation[] = [
     icon: FileText,
     storageKey: "aicomply_docugen_result",
     href: "/dashboard/tools/docugen",
-    toolLabel: "DocuGen",
+    toolLabel: "Documentazione tecnica",
     tiers: ["high_risk", "gpai", "gpai_systemic"],
     detect: raw => {
       const d = tryParse(raw);
@@ -130,7 +130,7 @@ const OBLIGATIONS: Obligation[] = [
     icon: ScrollText,
     storageKey: "aicomply_logvault_result",
     href: "/dashboard/tools/logvault",
-    toolLabel: "LogVault",
+    toolLabel: "Registro dei log",
     tiers: ["high_risk"],
     detect: raw => {
       const d = tryParse(raw);
@@ -302,7 +302,7 @@ const OBLIGATIONS: Obligation[] = [
     icon: Eye,
     storageKey: "aicomply_art50_result",
     href: "/dashboard/tools/art50-kit",
-    toolLabel: "Art. 50 Kit",
+    toolLabel: "Avvisi e marcature IA",
     tiers: ["limited"],
     detect: raw => {
       const d = tryParse(raw);

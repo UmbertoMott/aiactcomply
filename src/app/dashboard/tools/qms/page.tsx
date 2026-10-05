@@ -3,7 +3,8 @@
 import { Trash2, FileText, CheckCircle, Download, Plus, Sparkles } from "lucide-react";
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import { useState, useEffect } from "react";
-import { draftQmsSection, QMS_SECTIONS, type QmsSectionId } from "@/app/actions/draftQmsSection";
+import { draftQmsSection } from "@/app/actions/draftQmsSection";
+import { QMS_SECTIONS, type QmsSectionId } from "@/lib/qms/qms-sections";
 import { buildComplianceContextFromStorage } from "@/hooks/useComplianceContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";

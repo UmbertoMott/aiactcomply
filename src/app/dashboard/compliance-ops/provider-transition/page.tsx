@@ -415,7 +415,7 @@ export default function ProviderTransitionPage() {
                       style={{ width: "100%", background: "#f3f4f6", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "6px 8px", color: TEXT, fontSize: 13 }}
                     >
                       <option value="manual">Manuale</option>
-                      <option value="logvault_auto">LogVault Auto</option>
+                      <option value="logvault_auto">Registro dei log (automatico)</option>
                     </select>
                   </div>
                   <div>

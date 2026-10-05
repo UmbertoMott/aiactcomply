@@ -329,7 +329,7 @@ export default function Art50KitPage() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-semibold" style={{ color: T.text }}>Art. 50 Kit</h1>
+              <h1 className="text-xl font-semibold" style={{ color: T.text }}>Avvisi e marcature IA — Art. 50</h1>
               <p className="text-sm mt-0.5" style={{ color: T.muted }}>
                 {t("clientSubtitle")} · {systems.length} {systems.length !== 1 ? t("systemsRegistered") : t("systemRegistered")}
               </p>

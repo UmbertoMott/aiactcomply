@@ -8,7 +8,7 @@ const STEPS = [
   { id: "intake",       label: "Intake",      sublabel: "Dati sistema",    href: "/dashboard/tools/inventory" },
   { id: "analysis",    label: "Analisi",     sublabel: "DPIA + FRIA",     href: null },
   { id: "mitigations", label: "Mitigazioni", sublabel: "Rischi correlati", href: null },
-  { id: "export",      label: "Export",      sublabel: "PDF DPO",          href: "/dashboard/tools/assessment-export" },
+  { id: "export",      label: "Esporta",     sublabel: "PDF DPO",          href: "/dashboard/tools/assessment-export" },
 ] as const;
 
 type StepId = (typeof STEPS)[number]["id"];

@@ -12,7 +12,7 @@ const GapItemSchema = z.object({
   cta_label: z.string(),           // es. "Vai a Fase 1 — Contesto"
 });
 
-export const FriaGapCheckSchema = z.object({
+const FriaGapCheckSchema = z.object({
   items: z.array(GapItemSchema),
   overall_coverage: z.enum(["complete", "partial", "insufficient"]),
   critical_gaps: z.array(z.string()),

@@ -871,8 +871,8 @@ export default function DocuGenPage() {
             </div>
             {([
               { label: "Classifier", art: "Art. 6", desc: t("src_classifier_desc"), href: "/dashboard/tools/inventory", present: !!ghost.systemName, preview: ghost.systemName ? `${t("systemWord")}: ${ghost.systemName} · Risk: ${ghost.riskLevel ?? "N/D"}` : null },
-              { label: "Risk Manager", art: "Art. 9", desc: t("src_risk_desc"), href: "/dashboard/tools/risk-manager", present: !!ghost.risksSummary, preview: ghost.risksSummary },
-              { label: "Data Audit", art: "Art. 10", desc: t("src_data_desc"), href: "/dashboard/tools/data-audit", present: !!ghost.datasetsSummary, preview: ghost.datasetsSummary },
+              { label: "Registro dei rischi", art: "Art. 9", desc: t("src_risk_desc"), href: "/dashboard/tools/risk-manager", present: !!ghost.risksSummary, preview: ghost.risksSummary },
+              { label: "Qualità dei dati", art: "Art. 10", desc: t("src_data_desc"), href: "/dashboard/tools/data-audit", present: !!ghost.datasetsSummary, preview: ghost.datasetsSummary },
               { label: "DPIA", art: "Art. 35", desc: t("src_dpia_desc"), href: "/dashboard/tools/dpia", present: !!ghost.legalBasis, preview: ghost.legalBasis ? `${t("legalBasisWord")}: ${ghost.legalBasis?.slice(0, 80)}…` : null },
             ] as { label: string; art: string; desc: string; href: string; present: boolean; preview: string | null }[]).map((src, i, arr) => (
               <div key={src.label} style={{ display: "flex", alignItems: "center", gap: 14, padding: "13px 16px", borderBottom: i < arr.length - 1 ? "1px solid rgba(0,0,0,0.05)" : "none", background: "#fff" }}>

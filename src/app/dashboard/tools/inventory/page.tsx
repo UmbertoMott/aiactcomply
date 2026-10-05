@@ -92,7 +92,7 @@ const STATUS_LABELS: Record<string, string> = {
   in_production: "In produzione", deprecated: "Deprecato",
 }
 const ROLE_LABELS: Record<string, string> = {
-  provider: "Provider", deployer: "Deployer", importer: "Importatore",
+  provider: "Fornitore", deployer: "Deployer", importer: "Importatore",
   distributor: "Distributore", authorized_rep: "Rapp. autorizzato",
   product_manufacturer: "Prod. prodotto",
 }

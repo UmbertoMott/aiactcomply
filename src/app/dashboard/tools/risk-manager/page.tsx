@@ -611,7 +611,7 @@ function ChatBubble({ message, index, onSpeak, isPlaying }: {
               <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                 <Shield size={10} style={{ color: "#0D1016" }} />
                 <span style={{ fontSize: 9, color: "#0D1016", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                  Risk Manager AI
+                  Assistente del registro dei rischi
                 </span>
               </div>
               <button
@@ -832,7 +832,7 @@ export default function RiskManagerPage() {
     } else {
       setMessages([{
         role: "assistant",
-        content: `Benvenuto nel Risk Manager AI Act di AIComply.\n\nTi guiderò attraverso 8 fasi per costruire un Risk Register completo ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema AI e il contesto in cui viene utilizzato (settore, uso previsto, categorie di utenti coinvolti).`,
+        content: `Benvenuto nel registro dei rischi.\n\nTi guiderò attraverso 8 fasi per costruire un registro dei rischi completo ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema AI e il contesto in cui viene utilizzato (settore, uso previsto, categorie di utenti coinvolti).`,
       }]);
     }
     setHydrated(true);
@@ -929,7 +929,7 @@ export default function RiskManagerPage() {
     localStorage.removeItem(CHAT_STORAGE_KEY);
     setMessages([{
       role: "assistant",
-      content: `Benvenuto nel Risk Manager AI Act di AIComply.\n\nTi guiderò attraverso 8 fasi per costruire un Risk Register completo ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema AI e il contesto in cui viene utilizzato.`,
+      content: `Benvenuto nel registro dei rischi.\n\nTi guiderò attraverso 8 fasi per costruire un registro dei rischi completo ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema AI e il contesto in cui viene utilizzato.`,
     }]);
     setDocumentation({});
     setCurrentPhaseIndex(0);
@@ -970,7 +970,7 @@ export default function RiskManagerPage() {
               Art. 9 · Reg. UE 2024/1689
             </p>
             <h1 style={{ fontSize: 24, fontWeight: 500, color: "#0D1016", letterSpacing: "-0.8px", margin: 0 }}>
-              Risk Manager
+              Registro dei rischi
             </h1>
             <p style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", marginTop: 4 }}>
               {t("subtitle")}

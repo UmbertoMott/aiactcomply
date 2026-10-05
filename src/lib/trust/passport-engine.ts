@@ -132,7 +132,7 @@ export function buildTrustPassport(opts: {
       "Architettura tecnica dettagliata",
       "Identificatori di persone testate",
       "Metriche raw dei dataset",
-      "Risultati Red Team specifici",
+      "Risultati specifici dei test contraddittori",
     ],
   };
 }

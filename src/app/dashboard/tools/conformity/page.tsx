@@ -1073,7 +1073,7 @@ export default function ConformityPage() {
         <div style={{ marginBottom: 28 }}>
           <p style={labelStyle}>{t("kicker")}</p>
           <h1 style={{ fontSize: 24, fontWeight: 400, letterSpacing: "-0.8px", color: C.text, margin: "4px 0 8px" }}>
-            Conformity Assessment
+            Valutazione della conformità
           </h1>
           <p style={{ fontSize: 13, color: C.textSecondary, margin: 0 }}>
             {t("subtitle")}

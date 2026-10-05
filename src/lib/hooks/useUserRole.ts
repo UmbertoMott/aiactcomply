@@ -6,7 +6,7 @@ export type UserRole = "provider" | "deployer" | "importer" | "distributor" | nu
 const ROLE_KEY = "aicomply_user_role";
 
 export const ROLE_LABELS: Record<NonNullable<UserRole>, string> = {
-  provider:    "Provider",
+  provider:    "Fornitore",
   deployer:    "Deployer",
   importer:    "Importatore",
   distributor: "Distributore",

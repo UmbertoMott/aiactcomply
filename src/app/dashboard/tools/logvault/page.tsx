@@ -1,5 +1,6 @@
 "use client";
 
+import { levelLabel } from "@/lib/risk-level-label";
 import React, { useState, useRef, useEffect, useCallback, CSSProperties } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -671,8 +672,8 @@ export default function LogVaultPage() {
       <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
         <div>
           <p className="text-[11px] font-semibold uppercase mb-0.5" style={{ color: T.faint, letterSpacing: "1.2px" }}>{t("kicker")}</p>
-          <h1 className="text-2xl font-semibold" style={{ color: T.text, letterSpacing: "-0.6px" }}>LogVault</h1>
-          {cls && <p className="text-[11px] mt-1" style={{ color: T.muted }}>{cls.systemName} · Tier {cls.riskLevel}</p>}
+          <h1 className="text-2xl font-semibold" style={{ color: T.text, letterSpacing: "-0.6px" }}>Registro dei log</h1>
+          {cls && <p className="text-[11px] mt-1" style={{ color: T.muted }}>{cls.systemName} · rischio {levelLabel(cls.riskLevel)}</p>}
         </div>
         <div className="flex gap-2 items-center">
           <button onClick={() => setShowConfig(v => !v)}

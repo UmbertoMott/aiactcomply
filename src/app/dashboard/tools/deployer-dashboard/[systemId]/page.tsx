@@ -661,7 +661,7 @@ export default function DeployerSystemDetailPage() {
           >
             <div className="flex items-center gap-2">
               <span className="font-mono text-[10px] text-slate-500 bg-slate-800/60 px-1.5 py-0.5 rounded">Art. 26</span>
-              <span className="text-sm font-semibold text-slate-200">Checklist Operativa Deployer</span>
+              <span className="text-sm font-semibold text-slate-200">Lista di controllo del deployer</span>
               <span className="text-[10px] text-slate-500">10 paragrafi</span>
             </div>
             {detailOpen ? <ChevronUp size={14} className="text-slate-500" /> : <ChevronDown size={14} className="text-slate-500" />}

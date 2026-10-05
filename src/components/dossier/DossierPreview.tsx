@@ -3,6 +3,7 @@
 // DossierPreview — renders as both screen preview and print document
 // Uses only inline styles for print reliability (no Tailwind dependency in critical paths)
 
+import { levelLabel } from "@/lib/risk-level-label";
 import type { DossierData } from "@/lib/dossier/storage-schema";
 import { ART5_PRACTICES } from "@/lib/obligations/engine";
 
@@ -211,7 +212,7 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
               {[
                 { label: "Generato il", value: fmtDate(meta.generatedAt) },
                 { label: "Versione",    value: meta.version },
-                { label: "Livello di rischio", value: riskLevel !== "—" ? riskLevel.toUpperCase() : "—" },
+                { label: "Livello di rischio", value: riskLevel !== "—" ? levelLabel(riskLevel).toUpperCase() : "—" },
               ].map((item) => (
                 <div key={item.label}>
                   <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 4 }}>
@@ -342,7 +343,7 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
               <InfoRow label="Nome sistema" value={n(data.classifier.systemName)} />
               <InfoRow label="Descrizione" value={n(data.classifier.systemDescription)} />
               <InfoRow label="Livello di rischio"
-                value={<Badge color={rc2.color} bg={rc2.bg}>{data.classifier.riskLevel.toUpperCase()}</Badge>} />
+                value={<Badge color={rc2.color} bg={rc2.bg}>{levelLabel(data.classifier.riskLevel).toUpperCase()}</Badge>} />
               <InfoRow label="Allegato III" value={data.classifier.annexIII ? "⚠️ Sì — obblighi specifici applicabili" : "No"} />
               {data.classifier.annexIII && (
                 <div style={{ padding: "10px 14px", background: T.orangeBg, borderRadius: 4, marginTop: 12, marginBottom: 12, fontSize: 11 }}>
@@ -379,7 +380,7 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
           return (
             <>
               <InfoRow label="Livello rischio complessivo"
-                value={<Badge color={orc.color} bg={orc.bg}>{data.riskManager.overallRiskLevel.toUpperCase()}</Badge>} />
+                value={<Badge color={orc.color} bg={orc.bg}>{levelLabel(data.riskManager.overallRiskLevel).toUpperCase()}</Badge>} />
               <div style={{ marginTop: 16 }}>
                 {data.riskManager.risks.length > 0 ? (
                   <Table
@@ -423,7 +424,7 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
           return (
             <>
               <InfoRow label="Qualità complessiva"
-                value={<Badge color={qrc.color} bg={qrc.bg}>{data.dataAudit.overallQuality.toUpperCase()}</Badge>} />
+                value={<Badge color={qrc.color} bg={qrc.bg}>{levelLabel(data.dataAudit.overallQuality).toUpperCase()}</Badge>} />
               <div style={{ marginTop: 16 }}>
                 <Table
                   heads={["Dataset", "Fonte", "Dimensione", "Bias verificato", "Qualità", "Dati personali"]}
@@ -637,7 +638,7 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: T.muted }}>
             Appendice
           </span>
-          <h2 style={{ fontSize: 22, fontWeight: 700, marginTop: 4 }}>Timeline Normativa — AI Act</h2>
+          <h2 style={{ fontSize: 22, fontWeight: 700, marginTop: 4 }}>Scadenze normative — AI Act</h2>
         </div>
         <Table
           heads={["Data", "Obbligo", "Stato"]}
