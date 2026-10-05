@@ -121,6 +121,8 @@ export type AnnexISection = "A" | "B";
 
 export interface Art5Practice {
   letter: Art5Letter;
+  /** Etichetta breve, per elenchi e dossier */
+  label: string;
   /** Formulazione semplice per la domanda */
   question: string;
   /** Rinvio sintetico al testo */
@@ -132,29 +134,29 @@ export interface Art5Practice {
 }
 
 export const ART5_PRACTICES: Art5Practice[] = [
-  { letter: "a", appliesFrom: "2025-02-02", ref: "Art. 5(1)(a)",
+  { letter: "a", label: "Manipolazione subliminale o ingannevole", appliesFrom: "2025-02-02", ref: "Art. 5(1)(a)",
     question: "Usa tecniche subliminali, manipolative o ingannevoli che alterano in modo rilevante il comportamento delle persone e possono causare un danno significativo?" },
-  { letter: "b", appliesFrom: "2025-02-02", ref: "Art. 5(1)(b)",
+  { letter: "b", label: "Sfruttamento delle vulnerabilità", appliesFrom: "2025-02-02", ref: "Art. 5(1)(b)",
     question: "Sfrutta le vulnerabilità dovute a età, disabilità o situazione sociale o economica per alterare il comportamento delle persone, con possibile danno significativo?" },
-  { letter: "ba", appliesFrom: "2026-12-02", ref: "Art. 5(1)(ba)",
+  { letter: "ba", label: "Contenuti intimi realistici non consensuali", appliesFrom: "2026-12-02", ref: "Art. 5(1)(ba)",
     question: "Genera o manipola immagini, video o audio realistici delle parti intime di una persona identificabile, o che la ritraggono in attività sessualmente esplicite, senza il suo consenso esplicito?" },
-  { letter: "bb", appliesFrom: "2026-12-02", ref: "Art. 5(1)(bb)",
+  { letter: "bb", label: "Materiale pedopornografico", appliesFrom: "2026-12-02", ref: "Art. 5(1)(bb)",
     question: "Genera o manipola materiale pedopornografico ai sensi dell'Art. 2, lettere c) ed e), della direttiva 2011/93/UE?",
     exception: "Non vietato se si applica una causa di giustificazione (\"without right\" defence) prevista dal diritto nazionale." },
-  { letter: "c", appliesFrom: "2025-02-02", ref: "Art. 5(1)(c)",
+  { letter: "c", label: "Punteggio sociale (soggetti pubblici e privati)", appliesFrom: "2025-02-02", ref: "Art. 5(1)(c)",
     question: "Assegna un \"punteggio sociale\" alle persone in base al comportamento o alla personalità, con trattamenti sfavorevoli in contesti diversi o sproporzionati?" },
-  { letter: "d", appliesFrom: "2025-02-02", ref: "Art. 5(1)(d)",
+  { letter: "d", label: "Previsione di reati basata solo su profilazione", appliesFrom: "2025-02-02", ref: "Art. 5(1)(d)",
     question: "Valuta il rischio che una persona commetta un reato basandosi solo sulla profilazione o sui tratti della personalità?",
     exception: "Non vietato se supporta una valutazione umana già basata su fatti oggettivi e verificabili connessi a un'attività criminosa." },
-  { letter: "e", appliesFrom: "2025-02-02", ref: "Art. 5(1)(e)",
+  { letter: "e", label: "Scraping non mirato di immagini facciali", appliesFrom: "2025-02-02", ref: "Art. 5(1)(e)",
     question: "Crea o amplia banche dati di riconoscimento facciale raccogliendo immagini del volto da internet o da telecamere in modo non mirato (scraping)?" },
-  { letter: "f", appliesFrom: "2025-02-02", ref: "Art. 5(1)(f)",
+  { letter: "f", label: "Riconoscimento delle emozioni a lavoro e a scuola", appliesFrom: "2025-02-02", ref: "Art. 5(1)(f)",
     question: "Deduce le emozioni delle persone sul luogo di lavoro o negli istituti di istruzione?",
     exception: "Non vietato se l'uso è destinato a motivi medici o di sicurezza." },
-  { letter: "g", appliesFrom: "2025-02-02", ref: "Art. 5(1)(g)",
+  { letter: "g", label: "Categorizzazione biometrica per attributi sensibili", appliesFrom: "2025-02-02", ref: "Art. 5(1)(g)",
     question: "Classifica le persone in base ai dati biometrici per dedurne razza, opinioni politiche, appartenenza sindacale, convinzioni religiose o filosofiche, vita od orientamento sessuale?",
     exception: "Non vietato per l'etichettatura o il filtraggio di set di dati biometrici acquisiti legalmente o per la categorizzazione nelle attività di contrasto." },
-  { letter: "h", appliesFrom: "2025-02-02", ref: "Art. 5(1)(h)",
+  { letter: "h", label: "Identificazione biometrica remota in tempo reale a fini di contrasto", appliesFrom: "2025-02-02", ref: "Art. 5(1)(h)",
     question: "Identifica le persone a distanza, in tempo reale, tramite dati biometrici in spazi accessibili al pubblico, a fini di attività di contrasto?",
     exception: "Ammesso solo per gli obiettivi tassativi dell'Art. 5(1)(h)(i)-(iii), con autorizzazione preventiva e le condizioni dei paragrafi 2-7." },
 ];

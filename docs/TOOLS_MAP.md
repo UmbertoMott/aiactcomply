@@ -16,7 +16,7 @@ Legenda colonne:
 | Pagina | URL | File | Righe | Storage | AI | 🔵 Blu | ⚠ Verify | Note |
 |--------|-----|------|-------|---------|----|--------|----------|------|
 | Dashboard | `/dashboard` | `app/dashboard/page.tsx` | 681 | ✓ | — | 3 | 0 | Radar, quick links, scadenze |
-| Triage | `/dashboard/triage` | `app/dashboard/triage/page.tsx` | 1255 | ✓ | ✓ | 6 | 0 | Verifica rapida di un caso; include la verifica Art. 5 (ex Pratiche vietate) |
+| Triage | `/dashboard/triage` | `app/dashboard/triage/page.tsx` | 1255 | ✓ | ✓ | 6 | 0 | Verifica rapida di un caso con le stesse domande e lo stesso motore della classificazione guidata (`components/obligations/ClassifyWizard.tsx`); salva la verifica Art. 5 e può salvare il caso nell'inventario |
 | Dossier | `/dashboard/dossier` | `app/dashboard/dossier/page.tsx` | 493 | ✓ | — | 0 | 0 | Export PDF, completamento globale |
 | Post-Market | `/dashboard/post-market` | `app/dashboard/post-market/page.tsx` | 2516 | ✓ | ✓ | 4 | 14 | Monitoraggio post-deploy, Art. 72-73 |
 | Trust Center (pubblico) | `/dashboard/trust-center` | `app/dashboard/trust-center/page.tsx` | 1046 | — | — | 0 | 0 | Pagina pubblica trust |

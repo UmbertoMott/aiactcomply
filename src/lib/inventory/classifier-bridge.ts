@@ -3,8 +3,11 @@
 // obblighi. Molti tool leggono ancora il vecchio risultato, che ora viene ricavato dal sistema
 // attivo classificato nell'inventario, così esiste una sola fonte.
 
-import { loadInventory, addSystem, nextSystemId, type AISystem, type SystemTier } from "./ai-system";
-import { determineRoles, assessRisk, computeObligations, isHighRisk, legacyRole } from "@/lib/obligations/engine";
+import { loadInventory, addSystem, updateSystem, nextSystemId, type AISystem, type SystemTier } from "./ai-system";
+import {
+  determineRoles, assessRisk, computeObligations, isHighRisk, legacyRole, legacyTier, RISK_LABEL,
+  type RoleAnswers, type RiskAnswers, type RoleResult, type RiskResult, type ObligationsResult,
+} from "@/lib/obligations/engine";
 import { writeToStorage, readFromStorage, type ClassifierResult } from "@/lib/dossier/storage-schema";
 
 const ACTIVE_SYSTEM_KEY = "aicomply_active_system_id";
@@ -84,4 +87,17 @@ export function migrateLegacyClassifier(): void {
       completedObligations: [], createdAt: now, updatedAt: now, source: "import",
     });
   } catch { /* dati non leggibili: nessuna migrazione */ }
+}
+
+/** Salva risposte ed esito sul sistema e lo rende il sistema attivo */
+export function saveAssessment(systemId: string, { ra, rk, roleResult, risk, result }: { ra: RoleAnswers; rk: RiskAnswers; roleResult: RoleResult; risk: RiskResult; result: ObligationsResult }) {
+  const roles = result.roles;
+  updateSystem(systemId, {
+    roleAnswers: ra, riskAnswers: rk, roles, assessedAt: new Date().toISOString(),
+    role: legacyRole(roles), tier: legacyTier(risk),
+    roleBasis: roleResult.basis.join(" "), tierBasis: `${RISK_LABEL[risk.category]}. ${risk.rationale.join(" ")}`,
+    dualRoleFlag: roles.length > 1, obligationsAssessed: true,
+  });
+  try { localStorage.setItem("aicomply_active_system_id", systemId); } catch { /* storage non disponibile */ }
+  syncClassifierFromInventory();
 }

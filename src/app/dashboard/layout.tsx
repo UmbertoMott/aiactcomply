@@ -155,7 +155,7 @@ function buildPillars(t: T): NavPillar[] {
   return [
   { id: "dashboard", icon: Home, label: t("nav_dashboard"), href: "/dashboard" },
   { id: "inventory", icon: LayoutGrid, label: t("nav_inventory"), href: "/dashboard/tools/inventory", art: "ISO 42001", tooltip: t("tt_inventory") },
-  { id: "triage", icon: Crosshair, label: "Triage", href: "/dashboard/triage", art: "Art. 5/6/51" },
+  { id: "triage", icon: Crosshair, label: "Triage", href: "/dashboard/triage", art: "Art. 5-6 · 50" },
   { id: "literacy", icon: GraduationCap, label: t("nav_literacy"), href: "/dashboard/tools/literacy", art: "Art. 4", tooltip: t("tt_literacy") },
   {
     id: "risk",
