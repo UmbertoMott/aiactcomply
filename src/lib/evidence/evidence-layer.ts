@@ -103,6 +103,22 @@ export async function purgeDemoEvidence(): Promise<void> {
   saveStore(rebuilt);
 }
 
+/**
+ * Verifica completa: ricalcola l'impronta di ogni record e controlla il collegamento al precedente.
+ * Rileva sia un record modificato sia una catena spezzata.
+ */
+export async function verifyChainDeep(): Promise<{ valid: boolean; brokenAt?: number; reason?: "hash" | "link" }> {
+  const store = getStore();
+  for (let i = 0; i < store.length; i++) {
+    const r = store[i];
+    const expectedPrev = i === 0 ? "genesis" : store[i - 1].hash;
+    if (r.previousHash !== expectedPrev) return { valid: false, brokenAt: i, reason: "link" };
+    const hash = await sha256(JSON.stringify({ type: r.type, content: r.content, previousHash: r.previousHash, version: r.version, timestamp: r.timestamp, author: r.author }));
+    if (hash !== r.hash) return { valid: false, brokenAt: i, reason: "hash" };
+  }
+  return { valid: true };
+}
+
 export function getEvidenceCount(): Record<EvidenceType, number> {
   const store = getStore();
   const counts: Record<string, number> = {};

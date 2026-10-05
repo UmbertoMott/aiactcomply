@@ -1,4 +1,7 @@
 import { STORAGE_KEYS, readFromStorage } from "@/lib/dossier/storage-schema";
+import { loadInventory } from "@/lib/inventory/ai-system";
+import { referenceSystem } from "@/lib/inventory/classifier-bridge";
+import { assessRisk } from "@/lib/obligations/engine";
 import type {
   ClassifierResult, RiskManagerResult, DataAuditResult,
   DocugenResult, LogvaultResult, TransparencyResult,
@@ -111,167 +114,238 @@ export interface ConformityEvidence {
   oversight?: OversightResult | null;
   resilience?: ResilienceResult | null;
   qms?: QMSResult | null;
+  art5?: "clear" | "prohibited" | null;
+  annexIVFilled?: string[];
+  qmsLettersDone?: string[];
 }
+
+// Controlli minimi sul CONTENUTO (non sulla sola presenza di un salvataggio).
+// Non sostituiscono il giudizio di chi firma la dichiarazione: indicano cosa manca.
+
+const TRANSPARENCY_REQUIRED = ["a", "b_i", "b_ii", "b_iii", "c", "d", "e"] as const; // Art. 13(3), voci non "se del caso"
+const ANNEX_IV_REQUIRED = ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s9"] as const;  // il punto 8 è la copia della dichiarazione
+const QMS_LETTERS = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m"] as const;
+
+const missing = (all: readonly string[], have: readonly string[]) => all.filter((x) => !have.includes(x));
 
 export const CONFORMITY_REQUIREMENTS: ConformityRequirement[] = [
   {
     id: "req-art5",
     article: "Art. 5",
     title: "Assenza di pratiche vietate",
-    description: "Il sistema non implementa nessuna delle pratiche vietate dall'Art. 5.",
-    verificationQuestion: "Hai verificato che il sistema non rientra in nessuna pratica vietata (manipolazione, social scoring, biometrica vietata, ecc.)?",
-    linkedToolKey: "prohibited",
-    linkedToolHref: "/dashboard/triage",
+    description: "Il sistema non rientra in nessuna delle pratiche vietate dall'Art. 5.",
+    verificationQuestion: "Il sistema è stato valutato nell'inventario e non risulta alcuna pratica vietata?",
+    linkedToolKey: null,
+    linkedToolHref: "/dashboard/tools/inventory",
     evidenceExtractor: (e) => ({
-      found: !!e.prohibited,
-      autoVerified: !!e.prohibited,
-      summary: e.prohibited
-        ? e.prohibited.verdict === "clear"
-          ? "✓ Verifica Art. 5 completata — nessuna pratica vietata rilevata"
-          : `⚠️ Verifica Art. 5 completata — verdict: ${e.prohibited.verdict}`
-        : "Tool Art. 5 Checker non completato",
-      completedAt: e.prohibited?.completedAt,
+      found: e.art5 === "clear",
+      autoVerified: e.art5 === "clear",
+      summary: e.art5 === "clear" ? "✓ Valutazione del sistema: nessuna pratica vietata"
+        : e.art5 === "prohibited" ? "✗ Il sistema rientra in una pratica vietata: non può essere immesso sul mercato"
+        : "Sistema non ancora valutato nell'inventario (Passo 3)",
     }),
   },
   {
     id: "req-art9",
     article: "Art. 9",
     title: "Sistema di gestione dei rischi",
-    description: "È stato implementato e documentato un sistema iterativo di gestione dei rischi per l'intero ciclo di vita del sistema di IA.",
-    verificationQuestion: "Il Risk Manager è stato completato e i rischi residui sono a livello accettabile?",
+    description: "Rischi noti e prevedibili identificati, stimati e trattati, con rischio residuo accettabile (Art. 9(2) e 9(5)).",
+    verificationQuestion: "Ogni rischio registrato ha una misura di trattamento e un rischio residuo accettabile?",
     linkedToolKey: "riskManager",
     linkedToolHref: "/dashboard/tools/risk-manager",
-    evidenceExtractor: (e) => ({
-      found: !!e.riskManager,
-      autoVerified: !!e.riskManager,
-      summary: e.riskManager
-        ? `✓ Risk Manager completato — livello complessivo: ${e.riskManager.overallRiskLevel}`
-        : "Risk Manager non completato — obbligatorio per Art. 9",
-      completedAt: e.riskManager?.completedAt,
-    }),
+    evidenceExtractor: (e) => {
+      const risks = e.riskManager?.risks ?? [];
+      const noMeasure = risks.filter((r) => !r.mitigation?.trim()).length;
+      const unacceptable = risks.filter((r) => r.residualRisk === "unacceptable").length;
+      const ok = risks.length > 0 && noMeasure === 0 && unacceptable === 0;
+      return {
+        found: ok, autoVerified: ok,
+        summary: !e.riskManager ? "Registro dei rischi non compilato"
+          : risks.length === 0 ? "Nessun rischio registrato: il registro è vuoto"
+          : ok ? `✓ ${risks.length} rischi, tutti con misura e rischio residuo accettabile`
+          : `${risks.length} rischi: ${noMeasure} senza misura, ${unacceptable} con rischio residuo non accettabile`,
+        completedAt: e.riskManager?.completedAt,
+      };
+    },
   },
   {
     id: "req-art10",
     article: "Art. 10",
-    title: "Governance dati e dataset",
-    description: "I dataset usati per training, validazione e test soddisfano i requisiti di qualità, sono documentati e privi di bias significativi.",
-    verificationQuestion: "Il Data Audit è stato completato con esito positivo (qualità: pass)?",
+    title: "Dati e governance dei dati",
+    description: "I dataset di addestramento, convalida e prova sono documentati e verificati per qualità ed eventuali distorsioni (Art. 10(2)-(3)).",
+    verificationQuestion: "Almeno un dataset è stato analizzato e l'esito complessivo non è negativo?",
     linkedToolKey: "dataAudit",
     linkedToolHref: "/dashboard/tools/data-audit",
-    evidenceExtractor: (e) => ({
-      found: !!e.dataAudit,
-      autoVerified: !!e.dataAudit,
-      summary: e.dataAudit
-        ? `✓ Data Audit completato — qualità: ${e.dataAudit.overallQuality}`
-        : "Data Audit non completato — obbligatorio per Art. 10",
-      completedAt: e.dataAudit?.completedAt,
-    }),
+    evidenceExtractor: (e) => {
+      const ds = e.dataAudit?.datasets ?? [];
+      const ok = ds.length > 0 && e.dataAudit?.overallQuality !== "fail";
+      return {
+        found: ok, autoVerified: ok,
+        summary: !e.dataAudit ? "Qualità dei dati non analizzata"
+          : ds.length === 0 ? "Nessun dataset analizzato"
+          : ok ? `✓ ${ds.length} dataset analizzati — esito: ${e.dataAudit.overallQuality === "pass" ? "positivo" : "da rivedere"}`
+          : `✗ ${ds.length} dataset analizzati — esito negativo (distorsioni o qualità insufficiente)`,
+        completedAt: e.dataAudit?.completedAt,
+      };
+    },
   },
   {
     id: "req-art11",
     article: "Art. 11 + Allegato IV",
     title: "Documentazione tecnica",
-    description: "La documentazione tecnica conforme all'Allegato IV è stata redatta e viene mantenuta aggiornata.",
-    verificationQuestion: "DocuGen AI è stato completato e la documentazione tecnica è pronta?",
-    linkedToolKey: "docugen",
+    description: "La documentazione tecnica copre i punti dell'Allegato IV.",
+    verificationQuestion: "I punti 1-7 e 9 dell'Allegato IV sono compilati?",
+    linkedToolKey: null,
     linkedToolHref: "/dashboard/tools/docugen",
-    evidenceExtractor: (e) => ({
-      found: !!e.docugen,
-      autoVerified: !!e.docugen,
-      summary: e.docugen
-        ? `✓ Documentazione tecnica generata per: ${e.docugen.systemName}`
-        : "DocuGen non completato — documentazione tecnica obbligatoria",
-      completedAt: e.docugen?.completedAt,
-    }),
+    evidenceExtractor: (e) => {
+      const miss = missing(ANNEX_IV_REQUIRED, e.annexIVFilled ?? []);
+      const ok = miss.length === 0;
+      return {
+        found: ok, autoVerified: ok,
+        summary: ok ? "✓ Punti 1-7 e 9 dell'Allegato IV compilati"
+          : `Punti dell'Allegato IV ancora vuoti: ${miss.map((x) => x.slice(1)).join(", ")}`,
+      };
+    },
   },
   {
     id: "req-art12",
-    article: "Art. 12",
-    title: "Registrazione automatica log",
-    description: "Il sistema è configurato per registrare automaticamente eventi rilevanti durante il suo funzionamento.",
-    verificationQuestion: "LogVault è configurato con retention adeguata e logging degli eventi critici?",
+    article: "Art. 12 + Art. 19",
+    title: "Registrazione automatica degli eventi",
+    description: "Il sistema registra automaticamente gli eventi (Art. 12) e i log sono conservati per almeno 6 mesi (Art. 19(1)).",
+    verificationQuestion: "La registrazione è confermata e la conservazione è di almeno 6 mesi?",
     linkedToolKey: "logvault",
     linkedToolHref: "/dashboard/tools/logvault",
-    evidenceExtractor: (e) => ({
-      found: !!e.logvault,
-      autoVerified: !!e.logvault,
-      summary: e.logvault
-        ? e.logvault.loggingEnabled
-          ? `✓ Logging abilitato — retention: ${e.logvault.retentionDays} giorni`
-          : "⚠️ LogVault configurato ma logging disabilitato"
-        : "LogVault non completato — logging obbligatorio",
-      completedAt: e.logvault?.completedAt,
-    }),
+    evidenceExtractor: (e) => {
+      const lv = e.logvault;
+      const ok = !!lv && lv.loggingEnabled && lv.retentionDays >= 180;
+      return {
+        found: ok, autoVerified: ok,
+        summary: !lv ? "Registro dei log non compilato"
+          : !lv.loggingEnabled ? "Capacità di registrazione non confermata"
+          : lv.retentionDays < 180 ? `Conservazione indicata inferiore a 6 mesi (${lv.retentionDays} giorni)`
+          : `✓ Registrazione confermata — conservazione ${lv.retentionDays} giorni`,
+        completedAt: lv?.completedAt,
+      };
+    },
   },
   {
     id: "req-art13",
     article: "Art. 13",
-    title: "Trasparenza verso gli utenti",
-    description: "Il sistema è sufficientemente trasparente da consentire agli utenti di interpretare i risultati e usarlo in modo appropriato.",
-    verificationQuestion: "Le informative di trasparenza verso gli utenti sono state predisposte?",
+    title: "Istruzioni per l'uso",
+    description: "Le istruzioni per l'uso contengono le informazioni dell'Art. 13(3).",
+    verificationQuestion: "Le voci obbligatorie dell'Art. 13(3) sono compilate?",
     linkedToolKey: "transparency",
     linkedToolHref: "/dashboard/tools/transparency",
-    evidenceExtractor: (e) => ({
-      found: !!e.transparency,
-      autoVerified: !!e.transparency,
-      summary: e.transparency
-        ? `✓ Trasparenza configurata — lingue: ${e.transparency.languagesAvailable?.join(", ") || "N/D"}`
-        : "Tool Trasparenza non completato",
-      completedAt: e.transparency?.completedAt,
-    }),
+    evidenceExtractor: (e) => {
+      const ins = e.transparency?.instructions ?? {};
+      const have = Object.keys(ins).filter((k) => (ins[k] ?? "").trim().length > 0);
+      const miss = missing(TRANSPARENCY_REQUIRED, have);
+      const ok = !!e.transparency && miss.length === 0;
+      return {
+        found: ok, autoVerified: ok,
+        summary: !e.transparency ? "Istruzioni per l'uso non compilate"
+          : ok ? "✓ Voci obbligatorie dell'Art. 13(3) compilate"
+          : `Voci dell'Art. 13(3) mancanti: ${miss.map((k) => `(${k.replace("_", ")(")})`).join(", ")}`,
+        completedAt: e.transparency?.completedAt,
+      };
+    },
   },
   {
     id: "req-art14",
     article: "Art. 14",
     title: "Sorveglianza umana",
-    description: "Sono predisposte misure che consentono alle persone fisiche di sorvegliare efficacemente il sistema di IA durante il suo utilizzo.",
-    verificationQuestion: "Il meccanismo di oversight umano e la capacità di intervento/stop sono documentati?",
+    description: "Misure di sorveglianza che consentono di capire, interpretare, non usare o ignorare l'output e interrompere il sistema (Art. 14(4)).",
+    verificationQuestion: "I requisiti dell'Art. 14(4) sono attuati, inclusa la possibilità di arresto?",
     linkedToolKey: "oversight",
     linkedToolHref: "/dashboard/tools/oversight",
-    evidenceExtractor: (e) => ({
-      found: !!e.oversight,
-      autoVerified: !!e.oversight,
-      summary: e.oversight
-        ? `✓ Oversight configurato — stop capability: ${e.oversight.stopCapability ? "sì" : "no"}`
-        : "Tool Oversight non completato — obbligatorio per Art. 14",
-      completedAt: e.oversight?.completedAt,
-    }),
+    evidenceExtractor: (e) => {
+      const ov = e.oversight;
+      const n = ov?.humanInterventionPoints.length ?? 0;
+      const ok = !!ov && ov.stopCapability && n >= 5;
+      return {
+        found: ok, autoVerified: ok,
+        summary: !ov ? "Sorveglianza umana non compilata"
+          : ok ? "✓ Requisiti Art. 14(4)(a)-(e) attuati"
+          : `${n}/5 requisiti dell'Art. 14(4) attuati${ov.stopCapability ? "" : "; arresto (lettera e) non attuato"}`,
+        completedAt: ov?.completedAt,
+      };
+    },
   },
   {
     id: "req-art15",
     article: "Art. 15",
-    title: "Accuratezza, robustezza e cybersecurity",
-    description: "Il sistema è sufficientemente accurato, robusto e sicuro rispetto alla destinazione d'uso.",
-    verificationQuestion: "Il Red Teaming (Resilience) è stato completato con punteggio difesa accettabile?",
+    title: "Accuratezza, robustezza e cibersicurezza",
+    description: "Livelli di accuratezza dichiarati, robustezza provata e misure di cibersicurezza (Art. 15(1)-(5)).",
+    verificationQuestion: "L'accuratezza raggiunge la soglia dichiarata, la robustezza è provata e ci sono misure di cibersicurezza?",
     linkedToolKey: "resilience",
     linkedToolHref: "/dashboard/tools/resilience",
-    evidenceExtractor: (e) => ({
-      found: !!e.resilience,
-      autoVerified: !!e.resilience,
-      summary: e.resilience
-        ? `✓ Resilience testata — accuratezza: ${e.resilience.accuracyMetric}%`
-        : "Tool Resilience non completato — obbligatorio per Art. 15",
-      completedAt: e.resilience?.completedAt,
-    }),
+    evidenceExtractor: (e) => {
+      const r = e.resilience;
+      const meetsThreshold = !!r && (r.accuracyThreshold === undefined || r.accuracyMetric >= r.accuracyThreshold);
+      const ok = !!r && r.robustnessTested && r.accuracyMetric > 0 && meetsThreshold && r.cybersecurityMeasures.length > 0;
+      const gaps = r ? [
+        !r.robustnessTested && "robustezza non provata",
+        !(r.accuracyMetric > 0) && "accuratezza non misurata",
+        r.accuracyMetric > 0 && !meetsThreshold && `accuratezza ${r.accuracyMetric}% sotto la soglia ${r.accuracyThreshold}%`,
+        r.cybersecurityMeasures.length === 0 && "nessuna misura di cibersicurezza",
+      ].filter(Boolean) : [];
+      return {
+        found: ok, autoVerified: ok,
+        summary: !r ? "Prove di robustezza non eseguite"
+          : ok ? `✓ Accuratezza ${r.accuracyMetric}%, robustezza provata, ${r.cybersecurityMeasures.length} misure di cibersicurezza`
+          : `Da completare: ${gaps.join("; ")}`,
+        completedAt: r?.completedAt,
+      };
+    },
   },
   {
     id: "req-art17",
     article: "Art. 17",
     title: "Sistema di gestione della qualità",
-    description: "Il provider ha implementato un sistema di gestione della qualità che copre tutti gli aspetti del ciclo di vita del sistema di IA.",
-    verificationQuestion: "Il QMS Builder è stato completato con almeno le sezioni obbligatorie?",
+    description: "Il sistema di gestione della qualità copre gli aspetti dell'Art. 17(1)(a)-(m), in modo proporzionato alle dimensioni del fornitore (Art. 17(2)).",
+    verificationQuestion: "Tutte le lettere (a)-(m) dell'Art. 17(1) sono segnate come completate?",
     linkedToolKey: "qms",
     linkedToolHref: "/dashboard/tools/qms",
-    evidenceExtractor: (e) => ({
-      found: !!e.qms,
-      autoVerified: !!e.qms,
-      summary: e.qms
-        ? `✓ QMS documentato — ref: ${e.qms.qmsDocumentRef}`
-        : "QMS Builder non completato — obbligatorio per Art. 17",
-      completedAt: e.qms?.completedAt,
-    }),
+    evidenceExtractor: (e) => {
+      const miss = missing(QMS_LETTERS, e.qmsLettersDone ?? []);
+      const ok = miss.length === 0;
+      return {
+        found: ok, autoVerified: ok,
+        summary: ok ? "✓ Lettere (a)-(m) dell'Art. 17(1) completate"
+          : `Lettere dell'Art. 17(1) da completare: ${miss.join(", ")}`,
+        completedAt: e.qms?.completedAt,
+      };
+    },
   },
 ];
+
+/** Punti dell'Allegato IV con testo (stato DocuGen). */
+function readAnnexIVFilled(): string[] {
+  try {
+    const raw = localStorage.getItem("docugen_state");
+    const content = raw ? (JSON.parse(raw) as { content?: Record<string, string> }).content ?? {} : {};
+    return Object.keys(content).filter((k) => (content[k] ?? "").trim().length > 0);
+  } catch { return []; }
+}
+
+/** Lettere dell'Art. 17(1) segnate come completate nel QMS. */
+function readQmsLettersDone(): string[] {
+  try {
+    const raw = localStorage.getItem("qms_sections");
+    const sections = raw ? (JSON.parse(raw) as { art?: string; completed?: boolean; content?: string }[]) : [];
+    return sections
+      .filter((s) => s.completed && (s.content ?? "").trim().length > 0)
+      .map((s) => s.art?.match(/17\(1\)\(([a-m])\)/)?.[1])
+      .filter((x): x is string => !!x);
+  } catch { return []; }
+}
+
+/** Art. 5 dal sistema valutato nell'inventario. */
+function readArt5(): "clear" | "prohibited" | null {
+  const sys = referenceSystem(loadInventory());
+  if (!sys?.riskAnswers) return null;
+  return assessRisk(sys.riskAnswers).prohibited.length > 0 ? "prohibited" : "clear";
+}
 
 export function loadAllEvidence(): ConformityEvidence {
   return {
@@ -285,6 +359,9 @@ export function loadAllEvidence(): ConformityEvidence {
     oversight: readFromStorage<OversightResult>("oversight"),
     resilience: readFromStorage<ResilienceResult>("resilience"),
     qms: readFromStorage<QMSResult>("qms"),
+    ...(typeof window !== "undefined"
+      ? { art5: readArt5(), annexIVFilled: readAnnexIVFilled(), qmsLettersDone: readQmsLettersDone() }
+      : {}),
   };
 }
 

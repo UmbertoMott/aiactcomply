@@ -103,7 +103,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     id: "rr_risk_tier",
     sectionKey: "sec0",
     label: "Livello di rischio AI Act",
-    question: "Quale livello di rischio AI Act è stato assegnato al sistema dalla classificazione preliminare (Classifier)?",
+    question: "In quale categoria di rischio AI Act rientra il sistema secondo la valutazione nell'inventario (Passo 3)?",
     ref: "Art. 6 · Allegato III",
     fieldType: "text",
     examples: [
@@ -580,6 +580,45 @@ export function createEmptyRiskRegisterGuidedDoc(): RiskRegisterGuidedDoc {
     currentSubPointId: RISK_REGISTER_SUBPOINTS[0].id,
     inputHash: null,
   };
+}
+
+/**
+ * Precompila lo scoping (§0) con i dati già stabiliti nell'inventario (Passi 2-3).
+ * Non sovrascrive risposte esistenti; il punto corrente diventa la prima domanda senza risposta.
+ */
+export function prefillGuidedFromSystem(
+  doc: RiskRegisterGuidedDoc,
+  sys: { name: string; description?: string; roles: string; category: string } | null,
+): RiskRegisterGuidedDoc {
+  if (!sys) return doc;
+  const now = new Date().toISOString();
+  const values: Record<string, string | undefined> = {
+    rr_system_name: sys.name,
+    rr_role: sys.roles || undefined,
+    rr_description: sys.description?.trim() || undefined,
+    rr_risk_tier: sys.category,
+  };
+  const answers = { ...doc.answers };
+  for (const [id, value] of Object.entries(values)) {
+    if (value && answers[id]?.status !== "done") {
+      answers[id] = { value, source: "manual", aiConfirmed: true, status: "done", updatedAt: now };
+    }
+  }
+  const firstOpen = RISK_REGISTER_SUBPOINTS.find((sp) => answers[sp.id]?.status !== "done")?.id ?? null;
+  const current = doc.currentSubPointId && answers[doc.currentSubPointId]?.status !== "done" ? doc.currentSubPointId : firstOpen;
+  return { ...doc, answers, currentSubPointId: current };
+}
+
+/** Rischi del dossier (Art. 9) dalle risposte guidate: un rischio per riga di "rr_main_risks". */
+export function guidedRisksForDossier(doc: RiskRegisterGuidedDoc): {
+  id: string; title: string; likelihood: "medium"; impact: "medium"; mitigation: string; residualRisk: "acceptable" | "review" | "unacceptable";
+}[] {
+  const a = (id: string) => doc.answers[id]?.status === "done" ? doc.answers[id].value : "";
+  const residualText = a("rr_residual_risk").toLowerCase();
+  const residual = residualText.includes("non accettabil") ? "unacceptable" : residualText.includes("accettabil") ? "acceptable" : "review";
+  return a("rr_main_risks")
+    .split(/\n|;/).map((l) => l.replace(/^\s*([-•*]|\d+[.)])\s*/, "").trim()).filter((l) => l.length > 3)
+    .map((title, i) => ({ id: `R-${i + 1}`, title, likelihood: "medium" as const, impact: "medium" as const, mitigation: a("rr_measures"), residualRisk: residual }));
 }
 
 // ─── Mapper: risposta guidata → RiskRegisterDocument (patch parziale) ─────────

@@ -33,7 +33,7 @@ Criterio di semplificazione: ogni tool fa una sola cosa, quella che chiede un ar
 | **Norma** | Art. 26: (1) uso conforme alle istruzioni; (2) sorveglianza umana; (4) dati di input; (5) monitoraggio, sospensione e incidenti; (6) log per almeno 6 mesi; (7) lavoratori; (8) autorità pubbliche e registrazione (Art. 49(3)); (10) identificazione biometrica remota a posteriori, con autorizzazione entro 48 ore; (11) informare le persone soggette alle decisioni; (12) cooperazione. FRIA: Art. 27. ISO 42001: A.9.2-A.9.4 uso responsabile, A.10.2 ripartizione delle responsabilità. |
 | **Prima** | Gli 11 obblighi e i 10 riquadri di dettaglio citavano paragrafi sbagliati. Ad esempio i log erano indicati come 26(3), la FRIA come 26(8) e la registrazione come 26(10). Il nome dell'organizzazione era fisso ("Organizzazione"). |
 | **Corretto** | L'elenco degli obblighi, i riquadri `Art26_*.tsx`, le etichette e il prompt AI ora seguono i paragrafi effettivi. Il nome dell'organizzazione viene dal profilo azienda. |
-| **Da fare** | Supervisori, stato FRIA e periodo di conservazione dei log vengono ancora chiesti qui: andrebbero letti dai tool Sorveglianza, FRIA e Registro dei log. |
+| **Fatto (secondo intervento)** | Sorveglianza umana, conservazione dei log, FRIA e registrazione nella banca dati UE non si chiedono più qui: il dettaglio Art. 26 mostra lo stato letto dai rispettivi tool, con il link per completarli. Per FRIA (Art. 27) e registrazione (Art. 26(8)) indica anche se sono richieste per quel sistema. |
 
 ## Registro dei log (LogVault)
 
@@ -66,7 +66,7 @@ Criterio di semplificazione: ogni tool fa una sola cosa, quella che chiede un ar
 | **Norma** | Art. 43: (1) biometria dell'Allegato III, punto 1: Allegato VI solo con norme armonizzate applicate integralmente, altrimenti Allegato VII con organismo notificato; (2) punti 2-8: controllo interno (Allegato VI); (3) Allegato I: procedura di settore. Art. 47 e Allegato V (contenuto della dichiarazione, punti 1-8). Art. 48 (marcatura CE). ISO 42001: 9.2 audit interno, A.6.2.4 verifica e convalida. |
 | **Prima** | I punti 6 e 7 (attività di contrasto, migrazione) venivano mandati all'organismo notificato, che invece non è richiesto. La dichiarazione diceva sempre "Art. 43.2 / Allegato VI" e non seguiva l'Allegato V. Ad esempio mancava la frase sul GDPR. |
 | **Corretto** | Il percorso viene calcolato dal sistema valutato nell'inventario, secondo l'Art. 43(1), (2) e (3). Una pratica vietata non ha percorso. La dichiarazione segue i punti 1-8 dell'Allegato V e indica la procedura effettiva. La ragione sociale viene dal profilo azienda. |
-| **Da fare** | La verifica controlla ancora solo che gli altri tool abbiano salvato qualcosa, non il contenuto. |
+| **Fatto (secondo intervento)** | La verifica controlla il contenuto. Art. 5 dalla valutazione del sistema. Art. 9: ogni rischio con misura e rischio residuo accettabile. Art. 10: almeno un dataset con esito non negativo. Allegato IV: punti 1-7 e 9 compilati. Art. 12 e 19: registrazione confermata e conservazione di almeno 6 mesi. Art. 13(3): voci obbligatorie compilate. Art. 14(4): cinque requisiti, arresto compreso. Art. 15: accuratezza sopra la soglia, robustezza provata, misure di cibersicurezza. Art. 17(1): lettere (a)-(m). Per ogni requisito il tool dice cosa manca. |
 
 ## Monitoraggio post-commercializzazione e incidenti gravi
 
@@ -107,7 +107,7 @@ Criterio di semplificazione: ogni tool fa una sola cosa, quella che chiede un ar
 | **Norma** | Art. 9(1)-(10). ISO 42001: 6.1.2 valutazione del rischio, 6.1.3 trattamento del rischio, 8.2-8.3. Guida di riferimento: ISO/IEC 23894. |
 | **Prima** | Al termine della modalità guidata il dossier riceveva `risks: []`. Il messaggio iniziale parlava di 8 fasi, ma sono 11. |
 | **Corretto** | I rischi raccolti nella fase 2 arrivano al dossier, con probabilità, impatto, mitigazione e rischio residuo. Il numero di fasi è calcolato. |
-| **Da fare** | Nome, ruolo e categoria di rischio vengono ancora chiesti nella chat: andrebbero precompilati dall'inventario. |
+| **Fatto (secondo intervento)** | Nome, ruolo, descrizione e categoria di rischio sono precompilati dall'inventario, sia nella modalità guidata sia nella chat, che parte direttamente dall'identificazione dei rischi (Art. 9(2)(a)). Le risposte della modalità guidata arrivano al dossier. |
 
 ## Qualità dei dati (Data Audit)
 
@@ -153,10 +153,10 @@ Criterio di semplificazione: ogni tool fa una sola cosa, quella che chiede un ar
 
 ---
 
-## Semplificazioni proposte (passi successivi)
+## Semplificazioni del secondo intervento
 
-1. **Il deployer legge, non chiede.** Supervisori (dalla Sorveglianza), FRIA, conservazione dei log ed EUDB andrebbero letti dai rispettivi tool. Ogni riquadro Art. 26 diventerebbe un semplice stato con un link.
-2. **La conformità controlla il contenuto.** Per ogni requisito, un controllo minimo sul contenuto. Esempio: Allegato IV punto 2 compilato e registro dei rischi con almeno un rischio trattato.
-3. **Un solo registro di prove.** Registro delle evidenze, firma e dossier vanno unificati, con l'esportazione come unica "prova" per l'audit.
-4. **Tre tool clienti in uno.** Trust Passport, Trust Center e Questionario leggono gli stessi dati: possono diventare un'unica pagina con tre schede.
-5. **Registro dei rischi precompilato.** Nome, ruolo e categoria vengono dall'inventario; la chat parte direttamente dall'identificazione dei rischi.
+1. **Il deployer legge, non chiede.** Fatto: vedi "Obblighi del deployer".
+2. **La conformità controlla il contenuto.** Fatto: vedi "Valutazione della conformità".
+3. **Un solo pacchetto di prove.** Dossier e registro delle evidenze esportano lo stesso "Pacchetto per l'audit". Il pacchetto contiene il dossier, le firme di DPIA e FRIA, il registro delle evidenze con verifica completa della catena e l'impronta SHA-256 dell'intero pacchetto. La verifica ricalcola l'impronta di ogni record, quindi rileva anche un record modificato e non solo una catena spezzata.
+4. **Tre tool clienti in uno.** Questionari, passaporto di affidabilità e pagina pubblica sono schede di un'unica pagina, "Per i clienti" (`/dashboard/tools/clients`). I vecchi indirizzi reindirizzano lì.
+5. **Registro dei rischi precompilato.** Fatto: vedi "Registro dei rischi".

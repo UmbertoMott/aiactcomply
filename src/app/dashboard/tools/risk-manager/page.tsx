@@ -1,6 +1,9 @@
 "use client";
 export const maxDuration = 60;
 
+import { loadInventory } from "@/lib/inventory/ai-system";
+import { referenceSystem } from "@/lib/inventory/classifier-bridge";
+import { determineRoles, assessRisk, ROLE_LABEL, RISK_LABEL } from "@/lib/obligations/engine";
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import ProviderTransitionAlertBanner from "@/components/shared/provider-transition-alert-banner";
 import {
@@ -747,6 +750,36 @@ ${sections.map(s => `<h2>${s.title}</h2><p>${s.content.replace(/\n/g, "<br>")}</
   );
 }
 
+// ─── Avvio dall'inventario ───────────────────────────────────────────────────
+// Nome, ruolo e categoria di rischio sono già stati stabiliti nei Passi 2-3:
+// lo scoping si precompila e la chat parte dall'identificazione dei rischi.
+function initialChatState(): { messages: ChatMessage[]; documentation: RiskDocumentation; phaseIndex: number; completed: RiskPhaseId[] } {
+  const sys = referenceSystem(loadInventory());
+  if (sys?.roleAnswers && sys.riskAnswers) {
+    const roles = determineRoles(sys.roleAnswers).roles.map((r) => ROLE_LABEL[r]).join(", ");
+    const category = RISK_LABEL[assessRisk(sys.riskAnswers).category];
+    const documentation: RiskDocumentation = {
+      scoping: { systemName: sys.name, context: sys.description, classification: category, scope: roles ? `Ruolo: ${roles}` : undefined, article: "Art. 9(1)" },
+    };
+    return {
+      documentation,
+      phaseIndex: 1,
+      completed: ["scoping"],
+      messages: [{
+        role: "assistant",
+        content: `Benvenuto nel registro dei rischi.\n\nHo ripreso dall'inventario il sistema "${sys.name}" (${category}${roles ? `; ruolo: ${roles}` : ""}): lo scoping è già compilato.\n\nPartiamo dall'identificazione dei rischi (Art. 9(2)(a)): quali rischi noti e ragionevolmente prevedibili può causare il sistema per la salute, la sicurezza o i diritti fondamentali, usato come previsto?`,
+      }],
+    };
+  }
+  return {
+    documentation: {}, phaseIndex: 0, completed: [],
+    messages: [{
+      role: "assistant",
+      content: `Benvenuto nel registro dei rischi.\n\nTi guiderò attraverso ${PHASES.length} fasi per costruire un registro dei rischi ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema di IA e il contesto in cui viene utilizzato (settore, uso previsto, categorie di utenti coinvolti). Se lo valuti prima nell'inventario, questa fase si compila da sola.`,
+    }],
+  };
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function RiskManagerPage() {
@@ -809,7 +842,7 @@ export default function RiskManagerPage() {
 
   const classifierData = readFromStorage<ClassifierResult>("classifier");
   const systemContext = {
-    systemName: classifierData?.systemName,
+    systemName: documentation.scoping?.systemName ?? classifierData?.systemName,
     riskLevel: classifierData?.riskLevel,
     isGPAI: classifierData?.isGPAI,
   };
@@ -837,10 +870,11 @@ export default function RiskManagerPage() {
       setCompletedPhases(saved.completedPhases);
       setDocEdits(saved.docEdits ?? {});
     } else {
-      setMessages([{
-        role: "assistant",
-        content: `Benvenuto nel registro dei rischi.\n\nTi guiderò attraverso ${PHASES.length} fasi per costruire un registro dei rischi completo ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema di IA e il contesto in cui viene utilizzato (settore, uso previsto, categorie di utenti coinvolti).`,
-      }]);
+      const init = initialChatState();
+      setMessages(init.messages);
+      setDocumentation(init.documentation);
+      setCurrentPhaseIndex(init.phaseIndex);
+      setCompletedPhases(init.completed);
     }
     setHydrated(true);
   }, []);
@@ -950,13 +984,11 @@ export default function RiskManagerPage() {
   const resetChat = () => {
     if (typeof window !== "undefined" && !window.confirm(t("resetConfirm"))) return;
     localStorage.removeItem(CHAT_STORAGE_KEY);
-    setMessages([{
-      role: "assistant",
-      content: `Benvenuto nel registro dei rischi.\n\nTi guiderò attraverso ${PHASES.length} fasi per costruire un registro dei rischi completo ai sensi dell'Art. 9 Reg. UE 2024/1689.\n\nCominciamo con lo Scoping: indica il nome del sistema di IA e il contesto in cui viene utilizzato.`,
-    }]);
-    setDocumentation({});
-    setCurrentPhaseIndex(0);
-    setCompletedPhases([]);
+    const init = initialChatState();
+    setMessages(init.messages);
+    setDocumentation(init.documentation);
+    setCurrentPhaseIndex(init.phaseIndex);
+    setCompletedPhases(init.completed);
     setDocEdits({});
     setViewerOpen(false);
     setViewerAnchor(null);

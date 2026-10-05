@@ -3,7 +3,11 @@ import React, { useState, useRef, useCallback } from "react";
 import { Download, X } from "lucide-react";
 import { readFromStorage, writeToStorage } from "@/lib/dossier/storage-schema";
 import type { RiskRegisterGuidedDoc, RiskRegisterAnswer } from "@/lib/risk/risk-register-guided-types";
-import { createEmptyRiskRegisterGuidedDoc, RISK_REGISTER_SECTIONS, RISK_REGISTER_SUBPOINTS } from "@/lib/risk/risk-register-guided-types";
+import { createEmptyRiskRegisterGuidedDoc, RISK_REGISTER_SECTIONS, RISK_REGISTER_SUBPOINTS, prefillGuidedFromSystem, guidedRisksForDossier } from "@/lib/risk/risk-register-guided-types";
+import type { RiskManagerResult } from "@/lib/dossier/storage-schema";
+import { loadInventory } from "@/lib/inventory/ai-system";
+import { referenceSystem } from "@/lib/inventory/classifier-bridge";
+import { determineRoles, assessRisk, ROLE_LABEL, RISK_LABEL } from "@/lib/obligations/engine";
 import { computeGuidedRRProgress } from "@/lib/risk/risk-register-guided-progress";
 import { RiskRegisterProgressRail } from "./RiskRegisterProgressRail";
 import { RiskRegisterGuidedChat } from "./RiskRegisterGuidedChat";
@@ -78,7 +82,15 @@ interface RiskRegisterGuidedModeProps {
 export function RiskRegisterGuidedMode({ onExitGuidedMode }: RiskRegisterGuidedModeProps) {
   const [doc, setDoc] = useState<RiskRegisterGuidedDoc>(() => {
     const saved = readFromStorage<RiskRegisterGuidedDoc>("riskRegisterGuided");
-    return saved ?? createEmptyRiskRegisterGuidedDoc();
+    // Nome, ruolo e categoria vengono dall'inventario: non si chiedono di nuovo
+    const sys = referenceSystem(loadInventory());
+    const known = sys?.roleAnswers && sys.riskAnswers ? {
+      name: sys.name,
+      description: sys.description,
+      roles: determineRoles(sys.roleAnswers).roles.map((r) => ROLE_LABEL[r]).join(", "),
+      category: RISK_LABEL[assessRisk(sys.riskAnswers).category],
+    } : null;
+    return prefillGuidedFromSystem(saved ?? createEmptyRiskRegisterGuidedDoc(), known);
   });
 
   const [activeSection, setActiveSection]       = useState<string | null>(null);
@@ -96,6 +108,15 @@ export function RiskRegisterGuidedMode({ onExitGuidedMode }: RiskRegisterGuidedM
 
   const saveDoc = useCallback((next: RiskRegisterGuidedDoc) => {
     writeToStorage("riskRegisterGuided", next);
+    // Le risposte alimentano anche il dossier (Art. 9), come la modalità chat
+    const risks = guidedRisksForDossier(next);
+    if (risks.length > 0) {
+      writeToStorage<RiskManagerResult>("riskManager", {
+        risks,
+        overallRiskLevel: risks.some((r) => r.residualRisk === "unacceptable") ? "high" : "medium",
+        completedAt: new Date().toISOString(),
+      });
+    }
     setDoc(next);
     setLastSaved(new Date());
   }, []);

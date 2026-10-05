@@ -45,9 +45,7 @@ const ALWAYS_VISIBLE = new Set([
   "/dashboard/tools/legal-assistant",
   "/dashboard/compliance-ops/deadlines",
   // Strumenti facoltativi: sempre disponibili, non derivano da un obbligo
-  "/dashboard/compliance-ops/trust-center",
-  "/dashboard/tools/trust-passport",
-  "/dashboard/tools/questionnaire",
+  "/dashboard/tools/clients",
   "/dashboard/tools/nist-ai-rmf",
 ]);
 const SHOW_ALL_KEY = "aicomply_sidebar_show_all";
@@ -197,14 +195,7 @@ function buildPillars(t: T): NavPillar[] {
   { id: "drift-monitor", section: "after", icon: Activity, label: t("nav_driftMonitor"), href: "/dashboard/tools/drift-monitor", art: "Art. 15 · 72", tooltip: t("tt_driftMonitor") },
   // ── Strumenti facoltativi ──
   { id: "legal-assistant", section: "optional", icon: Bot, label: t("nav_legalAssistant"), href: "/dashboard/tools/legal-assistant", art: "RAG", tooltip: t("tt_legalAssistant") },
-  {
-    id: "customers", section: "optional", icon: ShieldCheck, label: t("nav_customersGroup"), art: t("optionalBadge"),
-    children: [
-      { icon: ShieldCheck,   label: t("nav_trustCenter"),        href: "/dashboard/compliance-ops/trust-center", art: "Art. 13/50" },
-      { icon: BadgeCheck,    label: t("nav_trustPassport"),      href: "/dashboard/tools/trust-passport",        art: t("art_trustPassport"), tooltip: t("tt_trustPassport") },
-      { icon: ClipboardList, label: t("nav_buyerQuestionnaire"), href: "/dashboard/tools/questionnaire",         art: t("art_buyerQuestionnaire"), tooltip: t("tt_buyerQuestionnaire") },
-    ],
-  },
+  { id: "customers", section: "optional", icon: ShieldCheck, label: t("nav_customersGroup"), href: "/dashboard/tools/clients", art: t("optionalBadge"), tooltip: t("tt_customers") },
   { id: "nist", section: "optional", icon: Map, label: "NIST AI RMF", href: "/dashboard/tools/nist-ai-rmf", art: "NIST" },
   ];
 }
@@ -227,7 +218,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (typeof window === "undefined") return false;
     try { return localStorage.getItem(SHOW_ALL_KEY) === "true"; } catch { return false; }
   });
-  const [trustCenterPublished, setTrustCenterPublished] = useState(false);
 
   useEffect(() => {
     setLayoutMounted(true);
@@ -294,14 +284,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const data = aggregateDossier();
     const sections = getDossierSections(data);
     setDossierPct(getCompletionPercentage(sections));
-    // Trust Center published state
-    try {
-      const raw = localStorage.getItem("aicomply_trust_center_v1");
-      if (raw) {
-        const pages = JSON.parse(raw) as Record<string, { isPublished?: boolean }>;
-        setTrustCenterPublished(Object.values(pages).some(p => p.isPublished));
-      }
-    } catch { /* silent */ }
   }, [pathname]);
 
   if (!layoutMounted) return null;
@@ -496,11 +478,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                               {!collapsed && <span className="truncate">{sanitizeSidebarLabel(child.label)}</span>}
                             </div>
                             {!collapsed && (
-                              child.href === "/dashboard/compliance-ops/trust-center" && trustCenterPublished
-                                ? <span className="text-[9px] px-1 py-0.5 rounded border" style={{ background: "rgba(6,78,59,0.4)", color: "#6ee7b7", borderColor: "rgba(52,211,153,0.3)" }}>{t("published")}</span>
-                                : child.art
-                                  ? <span className="text-[9px] px-1 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}>{sanitizeSidebarLabel(child.art)}</span>
-                                  : null
+                              child.art
+                                ? <span className="text-[9px] px-1 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}>{sanitizeSidebarLabel(child.art)}</span>
+                                : null
                             )}
                           </Link>
                         );

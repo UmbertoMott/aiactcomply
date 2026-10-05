@@ -27,7 +27,7 @@ const BADGE: Record<SectionStatus, { label: string; cls: string }> = {
   ok:           { label: "✓ Completo",   cls: "text-green-400 bg-green-900/30 border-green-800/50" },
   pending:      { label: "In attesa",    cls: "text-yellow-400 bg-yellow-900/30 border-yellow-800/50" },
   suspended:    { label: "SOSPESO",      cls: "text-red-300 bg-red-900/50 border-red-800/60" },
-  not_required: { label: "N/A",          cls: "text-slate-500 bg-slate-800/40 border-slate-700/50" },
+  not_required: { label: "Non richiesto", cls: "text-slate-500 bg-slate-800/40 border-slate-700/50" },
 };
 
 export function DeployerSection({ artRef, title, status, children, defaultOpen = false }: Props) {
