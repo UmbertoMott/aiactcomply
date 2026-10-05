@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { ClassifierResult, OrgProfile, ProhibitedCheckResult } from "@/lib/dossier/storage-schema";
+import { referenceSystem } from "@/lib/inventory/classifier-bridge";
 import {
   ChevronRight, ChevronLeft, AlertTriangle, Crosshair,
   CheckCircle2, ArrowRight, FileText,
@@ -381,7 +382,7 @@ function ResultView({
           Classifica il sistema nell&apos;inventario <ArrowRight className="w-4 h-4" />
         </Link>
         <Link
-          href="/dashboard/tools/classifier"
+          href="/dashboard/tools/inventory"
           className="px-4 py-3 rounded-xl text-sm transition-colors flex items-center justify-center hover:shadow-sm"
           style={{ border: `1px solid ${T.border}`, background: "rgba(0,0,0,0.04)", color: T.text }}
         >
@@ -507,7 +508,8 @@ export default function TriagePage() {
         role: rl ?? undefined,
         isGPAI: r.gpai,
       };
-      writeToStorage<ClassifierResult>("classifier", classifierData);
+      // Se nell'inventario c'è un sistema classificato, il risultato di riferimento resta quello
+      if (!referenceSystem()) writeToStorage<ClassifierResult>("classifier", classifierData);
       // Esito Art. 5 (sostituisce il vecchio tool "Pratiche vietate")
       const flagged = art5Flags.filter(f => f !== "none");
       const violated = flagged.filter(l => !art5Exceptions[l]);

@@ -213,7 +213,7 @@ export default function TrustPassportPage() {
           <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: T.amber }} />
           <div>
             <p className="text-xs font-semibold" style={{ color: T.amber }}>{error}</p>
-            <Link href="/dashboard/tools/classifier" className="text-xs underline mt-1 inline-block" style={{ color: T.amber }}>
+            <Link href="/dashboard/tools/inventory" className="text-xs underline mt-1 inline-block" style={{ color: T.amber }}>
               {t("goClassifier")}
             </Link>
           </div>

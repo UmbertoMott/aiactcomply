@@ -106,7 +106,7 @@ export function SystemContextBanner({
             Completa prima l&apos;<strong>AI Classifier (Art. 6)</strong> per pre-popolare automaticamente
             nome sistema e livello di rischio in questo tool.
           </div>
-          <a href="/dashboard/tools/classifier" style={{
+          <a href="/dashboard/tools/inventory" style={{
             fontSize: 12,
             color: "#3B82F6",
             fontWeight: 600,
@@ -146,7 +146,7 @@ export function SystemContextBanner({
         <strong>Tier:</strong> {riskLevel}
       </div>
       <button
-        onClick={onEditClassifier ?? (() => { window.location.href = "/dashboard/tools/classifier"; })}
+        onClick={onEditClassifier ?? (() => { window.location.href = "/dashboard/tools/inventory"; })}
         style={{
           fontSize: 11,
           color: colors.text,

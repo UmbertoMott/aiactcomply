@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { loadInventory } from "@/lib/inventory/ai-system";
 import type { AISystem } from "@/lib/inventory/ai-system";
+import { syncClassifierFromInventory } from "@/lib/inventory/classifier-bridge";
 
 export const ACTIVE_SYSTEM_KEY = "aicomply_active_system_id";
 
@@ -21,6 +22,7 @@ export function useActiveSystem() {
   const setActiveSystem = useCallback((id: string) => {
     setActiveIdState(id);
     localStorage.setItem(ACTIVE_SYSTEM_KEY, id);
+    syncClassifierFromInventory();
   }, []);
 
   const active = systems.find((s) => s.id === activeId) ?? null;

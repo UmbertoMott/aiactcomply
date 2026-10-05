@@ -11,23 +11,17 @@ import {
   AlertCircle, CheckCircle2, TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
-import { isOnboardingDone } from "@/components/onboarding/OnboardingWizard";
 import { aggregateDossier, getDossierSections, getCompletionPercentage, getCompletedCount } from "@/lib/dossier/dossier-engine";
 import { REGULATORY_DEADLINES, daysUntil, type RegulatoryDeadline } from "@/lib/notifications/notifications-engine";
 import { getAllEvidence, type EvidenceRecord } from "@/lib/evidence/evidence-layer";
 import { useUserRole } from "@/lib/hooks/useUserRole";
-import { readFromStorage, type ClassifierResult } from "@/lib/dossier/storage-schema";
+import { readFromStorage } from "@/lib/dossier/storage-schema";
 import { loadInventory, computeObligationCount } from "@/lib/inventory/ai-system";
 import type { AISystem } from "@/lib/inventory/ai-system";
 import { useT, useLocale } from "@/i18n/LocaleProvider";
 
 type TFn = (key: string) => string;
 
-const OnboardingWizard = dynamic(
-  () => import("@/components/onboarding/OnboardingWizard"),
-  { ssr: false }
-);
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 
@@ -146,11 +140,6 @@ function ScoreBar({ pct }: { pct: number }) {
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-interface DiscoveredSystem {
-  id: string; name: string; status: string;
-  addedToCompliance: boolean; riskLevel?: string;
-}
-
 interface InProgressActivity {
   id: string;
   titleKey: string;
@@ -165,7 +154,6 @@ export default function DashboardPage() {
   const { role } = useUserRole();
   const t = useT("dashHome");
   const locale = useLocale();
-  const [showWizard, setShowWizard]         = useState(false);
   const [dossierPct, setDossierPct]         = useState(0);
   const [dossierDone, setDossierDone]       = useState(0);
   const [mounted, setMounted]               = useState(false);
@@ -180,9 +168,7 @@ export default function DashboardPage() {
   const [art73Dismissed, setArt73Dismissed] = useState(false);
   const [gpaiDismissed, setGpaiDismissed]   = useState(true);
 
-  const [systems, setSystems]               = useState<DiscoveredSystem[]>([]);
   const [inventorySystems, setInventorySystems] = useState<AISystem[]>([]);
-  const [onboardingSystem, setOnboardingSystem] = useState<string>("");
   const [nextActions, setNextActions]       = useState<{ id: string; title: string; article: string; href: string }[]>([]);
   const [deadlines, setDeadlines]           = useState<{ deadline: RegulatoryDeadline; days: number }[]>([]);
   const [recentEvidence, setRecentEvidence] = useState<EvidenceRecord[]>([]);
@@ -190,7 +176,6 @@ export default function DashboardPage() {
 
   useEffect(() => {
     setMounted(true);
-    if (!isOnboardingDone()) setShowWizard(true);
 
     const data     = aggregateDossier();
     const sections = getDossierSections(data);
@@ -202,21 +187,6 @@ export default function DashboardPage() {
         .map(s => ({ id: s.id, title: s.title, article: s.article, href: s.href }))
     );
 
-    try {
-      const ob = localStorage.getItem("aicomply_onboarding_data");
-      if (ob) { const p = JSON.parse(ob); setOnboardingSystem(p?.systemName || ""); }
-    } catch { /* ignore */ }
-
-    try {
-      const classifier = readFromStorage<ClassifierResult>("classifier");
-      const sysRaw = localStorage.getItem("aicomply_discovered_systems");
-      const sys: DiscoveredSystem[] = sysRaw ? JSON.parse(sysRaw) : [];
-      setSystems(sys.filter(s => s.status !== "ignored").map(s => ({
-        ...s,
-        riskLevel: classifier?.systemName && classifier.systemName.toLowerCase() === s.name.toLowerCase()
-          ? classifier.riskLevel : s.riskLevel,
-      })));
-    } catch { /* ignore */ }
     try { setInventorySystems(loadInventory()); } catch { /* ignore */ }
 
     const today = new Date();
@@ -292,12 +262,13 @@ export default function DashboardPage() {
   const showDiscovery = !hasSystems && !discoveryDismissed;
   const showDeadline  = !deadlineDismissed && alertDeadline !== null;
   const showArt73     = art73Count > 0 && !art73Dismissed;
-  const mainSysName   = onboardingSystem || t("mainSysName");
-  const classifier    = typeof window !== "undefined" ? readFromStorage<ClassifierResult>("classifier") : null;
   const hasInventory  = inventorySystems.length > 0;
-  const showMainSys   = !hasInventory && systems.length === 0 && isOnboardingDone();
-  const totalSystems  = hasInventory ? inventorySystems.length
-    : systems.length > 0 ? systems.length : showMainSys ? 1 : 0;
+  // Conteggi dal motore degli obblighi, solo sui sistemi con classificazione guidata
+  const assessedSystems = inventorySystems.filter(s => s.roleAnswers && s.riskAnswers);
+  const assessedCount   = assessedSystems.length;
+  const highRiskCount   = assessedSystems.filter(s => s.tier === "high_risk" || s.tier === "prohibited").length;
+  const openObligations = assessedSystems.reduce((n, s) => { const c = computeObligationCount(s); return n + c.total - c.done; }, 0);
+  const totalSystems  = inventorySystems.length;
   // Tier → RISK_CFG key adapter
   const TIER_RISK: Record<string, string> = {
     prohibited: "unacceptable", high_risk: "high",
@@ -315,7 +286,6 @@ export default function DashboardPage() {
 
   return (
     <>
-      {showWizard && <OnboardingWizard onComplete={() => setShowWizard(false)} />}
 
       <style>{`
         @keyframes fadeUp {
@@ -426,14 +396,15 @@ export default function DashboardPage() {
               label: t("stat_systems"),
               value: totalSystems,
               sub: totalSystems > 0
-                ? `${systems.filter(s => s.riskLevel === "high" || s.riskLevel === "unacceptable").length} ${t("stat_systems_sub")}`
+                ? `${highRiskCount} ${t("stat_systems_sub")}`
                 : t("stat_startDiscovery"),
             },
             {
               Icon: AlertCircle,
               label: t("stat_openObl"),
-              value: nextActions.length,
-              sub: nextActions.length > 0 ? `${Math.min(nextActions.length, 2)} ${t("stat_obl_urgent")}` : t("stat_obl_none"),
+              value: assessedCount > 0 ? openObligations : "—",
+              sub: assessedCount === 0 ? t("stat_obl_classify")
+                : openObligations > 0 ? t("stat_obl_urgent").replace("{k}", String(assessedCount)) : t("stat_obl_none"),
             },
             {
               Icon: FileCheck2,
@@ -515,9 +486,11 @@ export default function DashboardPage() {
                 {/* Inventory systems (primary source) */}
                 {hasInventory && inventorySystems.slice(0, 4).map((sys, i) => {
                   const { total: oblTotal, done: oblDone } = computeObligationCount(sys);
-                  const invPct = oblTotal > 0 ? Math.round(oblDone / oblTotal * 100) : dossierPct;
-                  const invStatus = sys.status === "in_production" && oblDone === oblTotal ? "compliant"
-                    : sys.status === "deprecated" ? "review" : "active";
+                  const assessed = !!(sys.roleAnswers && sys.riskAnswers);
+                  const invPct = oblTotal > 0 ? Math.round(oblDone / oblTotal * 100) : 0;
+                  // "Conforme" solo se tutti gli obblighi del motore sono segnati come fatti
+                  const invStatus = !assessed ? t("toClassify")
+                    : oblTotal > 0 && oblDone === oblTotal ? "compliant" : oblTotal === 0 ? t("st_noObligations") : "active";
                   return (
                     <Link key={sys.id} href={`/dashboard/tools/inventory/${sys.id}`} style={{ textDecoration: "none" }}>
                       <div className="sys-row" style={{
@@ -529,51 +502,16 @@ export default function DashboardPage() {
                         <div>
                           <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 2 }}>{sys.name}</p>
                           <p style={{ fontSize: 10, color: T.faint }}>
-                            {sys.tier !== "unclassified" ? (TIER_RISK[sys.tier] === "unacceptable" ? t("risk_prohibited") : TIER_RISK[sys.tier] === "high" ? t("risk_highShort") : sys.tier === "gpai" ? "GPAI" : t("risk_limitedShort")) : t("toClassify")}
-                            {(sys.tier === "high_risk" || sys.tier === "prohibited") ? ` ${t("suffix_annexIII4")}` : ` ${t("suffix_art50")}`}
+                            {assessed ? t("row_obl").replace("{d}", String(oblDone)).replace("{t}", String(oblTotal)) : t("toClassify")}
                           </p>
                         </div>
-                        <RiskBadge level={TIER_RISK[sys.tier]} />
+                        <RiskBadge level={assessed ? TIER_RISK[sys.tier] : undefined} />
                         <StatusBadge status={invStatus} />
-                        <ScoreBar pct={invPct > 0 ? invPct : dossierPct} />
+                        <ScoreBar pct={invPct} />
                       </div>
                     </Link>
                   );
                 })}
-                {/* Discovery fallback (when no inventory) */}
-                {!hasInventory && showMainSys && systems.length === 0 && (
-                  <div className="sys-row" style={{ display: "grid", gridTemplateColumns: "1fr 140px 120px 160px", columnGap: 24, padding: "13px 18px", alignItems: "center", borderBottom: `1px solid ${T.border}`, transition: "background 0.15s" }}>
-                    <div>
-                      <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 2 }}>{mainSysName}</p>
-                      <p style={{ fontSize: 10, color: T.faint }}>
-                        {classifier?.riskLevel && RISK_CFG[classifier.riskLevel] ? t(RISK_CFG[classifier.riskLevel].labelKey) : t("classified")}
-                        {(classifier?.riskLevel === "high" || classifier?.riskLevel === "unacceptable") ? ` ${t("suffix_annexIII4")}` : ` ${t("suffix_art50")}`}
-                      </p>
-                    </div>
-                    <RiskBadge level={classifier?.riskLevel} />
-                    <StatusBadge status="active" />
-                    <ScoreBar pct={dossierPct} />
-                  </div>
-                )}
-                {!hasInventory && systems.slice(0, 4).map((sys, i) => (
-                  <div key={sys.id} className="sys-row" style={{
-                    display: "grid", gridTemplateColumns: "1fr 140px 120px 160px", columnGap: 24,
-                    padding: "13px 18px", alignItems: "center",
-                    borderBottom: i < Math.min(3, systems.length - 1) ? `1px solid ${T.border}` : "none",
-                    transition: "background 0.15s",
-                  }}>
-                    <div>
-                      <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 2 }}>{sys.name}</p>
-                      <p style={{ fontSize: 10, color: T.faint }}>
-                        {sys.riskLevel && RISK_CFG[sys.riskLevel] ? t(RISK_CFG[sys.riskLevel].labelKey) : sys.riskLevel ? "—" : t("toClassify")}
-                        {(sys.riskLevel === "high" || sys.riskLevel === "unacceptable") ? ` ${t("suffix_annexIII4")}` : ` ${t("suffix_art50")}`}
-                      </p>
-                    </div>
-                    <RiskBadge level={sys.riskLevel} />
-                    <StatusBadge status={sys.status} />
-                    <ScoreBar pct={dossierPct} />
-                  </div>
-                ))}
               </>
             )}
 

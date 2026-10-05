@@ -870,7 +870,7 @@ export default function DocuGenPage() {
               </p>
             </div>
             {([
-              { label: "Classifier", art: "Art. 6", desc: t("src_classifier_desc"), href: "/dashboard/tools/classifier", present: !!ghost.systemName, preview: ghost.systemName ? `${t("systemWord")}: ${ghost.systemName} · Risk: ${ghost.riskLevel ?? "N/D"}` : null },
+              { label: "Classifier", art: "Art. 6", desc: t("src_classifier_desc"), href: "/dashboard/tools/inventory", present: !!ghost.systemName, preview: ghost.systemName ? `${t("systemWord")}: ${ghost.systemName} · Risk: ${ghost.riskLevel ?? "N/D"}` : null },
               { label: "Risk Manager", art: "Art. 9", desc: t("src_risk_desc"), href: "/dashboard/tools/risk-manager", present: !!ghost.risksSummary, preview: ghost.risksSummary },
               { label: "Data Audit", art: "Art. 10", desc: t("src_data_desc"), href: "/dashboard/tools/data-audit", present: !!ghost.datasetsSummary, preview: ghost.datasetsSummary },
               { label: "DPIA", art: "Art. 35", desc: t("src_dpia_desc"), href: "/dashboard/tools/dpia", present: !!ghost.legalBasis, preview: ghost.legalBasis ? `${t("legalBasisWord")}: ${ghost.legalBasis?.slice(0, 80)}…` : null },
