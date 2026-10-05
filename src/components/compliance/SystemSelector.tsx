@@ -85,7 +85,7 @@ export function SystemSelector({ checkProhibited = true }: SystemSelectorProps) 
         <AlertTriangle size={16} color="#DC2626" className="flex-shrink-0 mt-0.5" />
         <div className="flex-1 text-[12px]" style={{ color: "#991B1B" }}>
           <strong>Sistema vietato (Art. 5)</strong> — Completa l&apos;analisi legale prima di procedere.{" "}
-          <a href="/dashboard/tools/prohibited" style={{ color: "#DC2626", fontWeight: 600 }}>
+          <a href="/dashboard/triage" style={{ color: "#DC2626", fontWeight: 600 }}>
             Vai al Prohibited Checker →
           </a>
         </div>

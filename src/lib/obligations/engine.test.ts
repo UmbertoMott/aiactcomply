@@ -166,7 +166,7 @@ test("Menu: i tool necessari derivano dagli obblighi dei sistemi classificati", 
   assert.equal(n.assessed, 2);
   assert.deepEqual(n.roles, ["deployer"]);
   assert.deepEqual(n.tools["/dashboard/tools/literacy"].systems, ["Selezione CV", "ChatGPT email"]);
-  for (const href of ["/dashboard/tools/deployer-dashboard", "/dashboard/tools/oversight", "/dashboard/tools/logvault", "/dashboard/tools/dpia", "/dashboard/post-market", "/dashboard/tools/incident"]) {
+  for (const href of ["/dashboard/tools/deployer-dashboard", "/dashboard/tools/oversight", "/dashboard/tools/logvault", "/dashboard/tools/dpia", "/dashboard/post-market", "/dashboard/tools/drift-monitor"]) {
     assert.deepEqual(n.tools[href]?.systems, ["Selezione CV"], href);
   }
   for (const href of ["/dashboard/tools/risk-manager", "/dashboard/tools/qms", "/dashboard/tools/conformity", "/dashboard/tools/fria"]) {

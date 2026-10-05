@@ -726,7 +726,7 @@ export default function Art50KitPage() {
                             {t("art50_3_desc")}
                           </p>
                           <div className="flex gap-3 flex-wrap">
-                            <Link href="/dashboard/tools/prohibited" className="inline-flex items-center gap-1 text-[11px] font-medium" style={{ color: T.blue }}>
+                            <Link href="/dashboard/triage" className="inline-flex items-center gap-1 text-[11px] font-medium" style={{ color: T.blue }}>
                               <ExternalLink size={11} /> {t("art50_3_link1")}
                             </Link>
                             <Link href="/dashboard/tools/deployer-dashboard" className="inline-flex items-center gap-1 text-[11px] font-medium" style={{ color: T.blue }}>

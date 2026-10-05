@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { purgeLegacySeedIncidents } from "@/lib/incidents/incident-actions";
 import Link from "next/link";
 import { ChevronRight, X } from "lucide-react";
 
@@ -16,6 +17,7 @@ export default function Art73Alert() {
 
   useEffect(() => {
     try {
+      purgeLegacySeedIncidents();
       const raw = localStorage.getItem("post_market_incidents");
       if (!raw) return;
       const incidents = JSON.parse(raw) as Array<{

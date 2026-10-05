@@ -76,7 +76,7 @@ export function getDossierSections(data: DossierData): DossierSection[] {
       id: "prohibited",
       article: "Art. 5",
       title: "Verifica Pratiche Vietate",
-      href: "/dashboard/tools/prohibited",
+      href: "/dashboard/triage",
       status: data.prohibited ? "complete" : "missing",
       completedAt: data.prohibited?.completedAt,
     },

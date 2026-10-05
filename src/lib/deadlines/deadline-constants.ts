@@ -12,7 +12,7 @@ export const AI_ACT_DEADLINES: AIActDeadline[] = [
       "Entrata in vigore del divieto assoluto delle pratiche vietate Art. 5 (manipolazione subliminale, social scoring, identificazione biometrica real-time non autorizzata, ecc.) e degli obblighi di alfabetizzazione AI Art. 4.",
     article: "Art. 5, Art. 4",
     applies_to: ["all"],
-    tool_href: "/dashboard/tools/prohibited",
+    tool_href: "/dashboard/triage",
     severity: "critical",
   },
   {
@@ -130,7 +130,7 @@ export const AI_ACT_DEADLINES: AIActDeadline[] = [
       "Si applicano i divieti dell'Art. 5(1)(ba) e (bb) introdotti dal Reg. (UE) 2026/1744: sistemi che generano o manipolano immagini intime realistiche di persone identificabili senza consenso, o materiale pedopornografico.",
     article: "Art. 5(1)(ba)-(bb)",
     applies_to: ["all"],
-    tool_href: "/dashboard/tools/prohibited",
+    tool_href: "/dashboard/triage",
     severity: "critical",
   },
   {
@@ -147,7 +147,7 @@ export const AI_ACT_DEADLINES: AIActDeadline[] = [
 
 export const DEADLINE_ACTIONS: Record<string, { label: string; href?: string }[]> = {
   prohibited_practices: [
-    { label: "Verifica pratiche vietate (Art. 5 Checker)", href: "/dashboard/tools/prohibited" },
+    { label: "Verifica pratiche vietate nel Triage (Art. 5)", href: "/dashboard/triage" },
     { label: "Programma alfabetizzazione AI per il personale (Art. 4)", href: "/dashboard/tools/literacy" },
   ],
   gpai_obligations: [
