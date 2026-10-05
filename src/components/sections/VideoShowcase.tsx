@@ -25,6 +25,10 @@ function useInView(threshold = 0.1) {
   return { ref, visible };
 }
 
+// Su smartphone i video si scaricano solo quando entrano nello schermo (preload="none");
+// fino ad allora si vede il primo fotogramma in JPEG.
+const posterFor = (src: string) => src.replace("/videos/", "/videos/posters/").replace(/\.mp4$/, ".jpg");
+
 // ─── VIDEO ROW ────────────────────────────────────────────────────────────────
 
 interface RowProps {
@@ -82,11 +86,11 @@ function VideoRow({ badge, title, desc, chips, videoSrc, zoom = 1, zoomX = 50, p
             {[0,1,2].map(i => <div key={i} style={{ width: 10, height: 10, borderRadius: "50%", background: "rgba(0,0,0,0.15)" }} />)}
           </div>
           <div style={{ flex: 1, height: 20, borderRadius: 4, background: "rgba(0,0,0,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.25)" }}>aicomply.it</span>
+            <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.25)" }}>regulaeos.com</span>
           </div>
         </div>
         <div style={{ aspectRatio: "16/9", overflow: "hidden" }}>
-          <video ref={videoRef} src={videoSrc} muted loop playsInline preload="auto"
+          <video ref={videoRef} src={videoSrc} poster={posterFor(videoSrc)} muted loop playsInline preload="none"
             style={{ width: `${zoom*100}%`, height: `${zoom*100}%`, objectFit: "cover", display: "block", marginLeft: zoom>1 ? `-${(zoom-1)*(zoomX/100)*100}%` : "0", marginTop: zoom>1 ? `-${(zoom-1)*10}%` : "0" }}
           />
         </div>
@@ -122,7 +126,7 @@ function TriageMockup() {
           {[0,1,2].map(i => <div key={i} style={{ width: 9, height: 9, borderRadius: "50%", background: "rgba(255,255,255,0.12)" }} />)}
         </div>
         <div style={{ flex: 1, height: 18, borderRadius: 3, background: "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <span style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.2)" }}>aicomply.it/triage/risultato</span>
+          <span style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.2)" }}>regulaeos.com/triage/risultato</span>
         </div>
       </div>
       <div style={{ padding: "22px 20px" }}>
@@ -256,7 +260,7 @@ function RiskMockup() {
           {[0,1,2].map(i => <div key={i} style={{ width: 9, height: 9, borderRadius: "50%", background: "rgba(255,255,255,0.12)" }} />)}
         </div>
         <div style={{ flex: 1, height: 18, borderRadius: 3, background: "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <span style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.2)" }}>aicomply.it/risk-manager</span>
+          <span style={{ fontFamily: MONO, fontSize: 8, color: "rgba(255,255,255,0.2)" }}>regulaeos.com/risk-manager</span>
         </div>
       </div>
       <div style={{ padding: "10px 16px 8px", display: "grid", gridTemplateColumns: "1fr 70px 54px", gap: 8, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
@@ -486,7 +490,7 @@ function LegalVideoRow({ badge, title, desc, chips, videoSrc, reverse }: Omit<Ro
             {[0,1,2].map(i => <div key={i} style={{ width: 10, height: 10, borderRadius: "50%", background: "rgba(0,0,0,0.15)" }} />)}
           </div>
           <div style={{ flex: 1, height: 20, borderRadius: 4, background: "rgba(0,0,0,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.25)" }}>aicomply.it / legal-assistant</span>
+            <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.25)" }}>regulaeos.com / legal-assistant</span>
           </div>
         </div>
         {/* Video con pan leggero sinistra→destra: scale 1.08 (impercettibile, testo nitido) */}
@@ -494,10 +498,11 @@ function LegalVideoRow({ badge, title, desc, chips, videoSrc, reverse }: Omit<Ro
           <video
             ref={videoRef}
             src={videoSrc}
+            poster={posterFor(videoSrc)}
             muted
             loop
             playsInline
-            preload="auto"
+            preload="none"
             style={{
               width: "100%",
               height: "100%",

@@ -33,6 +33,7 @@ export default function Nav() {
   const t = useT("nav");
   const [scrolled, setScrolled] = useState(false);
   const [resOpen, setResOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Contenuti del mega-menu Risorse (etichette tradotte, href reali).
@@ -97,24 +98,58 @@ export default function Nav() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <LanguageToggle />
+        <div className="flex items-center gap-2 md:gap-3">
+          <div className="hidden md:block"><LanguageToggle /></div>
           <Link
             href="/login"
-            className="text-[13px] transition-colors hover:text-[#0D1016]"
+            className="hidden md:inline text-[13px] transition-colors hover:text-[#0D1016]"
             style={{ color: "rgba(0,0,0,0.42)" }}
           >
             {t("login")}
           </Link>
           <Link
             href="/prenota-demo"
-            className="inline-flex text-[13px] font-medium rounded-full px-5 py-2 transition-opacity hover:opacity-80"
+            className="inline-flex items-center whitespace-nowrap text-[13px] font-medium rounded-full px-4 md:px-5 py-2.5 md:py-2 transition-opacity hover:opacity-80"
             style={{ background: "#0D1016", color: "#ffffff", letterSpacing: "-0.2px" }}
           >
             {t("bookDemo")}
           </Link>
+          {/* Menu su smartphone: le voci della barra non entrano nello schermo */}
+          <button
+            type="button"
+            className="md:hidden inline-flex items-center justify-center"
+            aria-label={mobileOpen ? t("closeMenu") : t("openMenu")}
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((v) => !v)}
+            style={{ width: 44, height: 44, marginRight: -8, background: "none", border: "none", color: "#0D1016", cursor: "pointer" }}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              {mobileOpen
+                ? <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                : <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />}
+            </svg>
+          </button>
         </div>
       </div>
+
+      {mobileOpen && (
+        <div className="md:hidden" style={{ borderTop: "1px solid rgba(0,0,0,0.07)", marginTop: 14, paddingTop: 6 }}>
+          {[
+            { href: "/products", label: t("product") },
+            { href: "/pricing", label: t("pricing") },
+            { href: "/scanner", label: t("scanner") },
+            { href: "/risorse", label: t("resources") },
+            { href: "/roi", label: t("roiToolLabel") },
+            { href: "/login", label: t("login") },
+          ].map((l) => (
+            <Link key={l.href} href={l.href} onClick={() => setMobileOpen(false)}
+              style={{ display: "flex", alignItems: "center", minHeight: 48, fontSize: 16, color: "#0D1016", textDecoration: "none", borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
+              {l.label}
+            </Link>
+          ))}
+          <div style={{ paddingTop: 14, paddingBottom: 4 }}><LanguageToggle /></div>
+        </div>
+      )}
 
       {/* ── Mega-menu panel ── */}
       {resOpen && (

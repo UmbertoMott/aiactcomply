@@ -59,16 +59,25 @@ export default function Footer() {
             </p>
           </div>
 
+          {/* Su smartphone i link hanno un'area di tocco di almeno 36 px */}
+          <style>{`
+            @media (max-width: 768px) {
+              .footer-list { gap: 0 !important; }
+              .footer-link { display: inline-block; padding: 10px 0 !important; font-size: 13px !important; }
+            }
+          `}</style>
+
           {/* Prodotto */}
           <nav aria-label={t("colService")} style={{ flex: "1 1 140px" }}>
             <p style={{ fontFamily: MONO, fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 14 }}>
               {t("colService")}
             </p>
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+            <ul className="footer-list" style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
               {PRODUCT_LINKS.map(l => (
                 <li key={l.href}>
                   <Link
                     href={l.href}
+                    className="footer-link"
                     style={{ fontFamily: MONO, fontSize: 12, color: "rgba(255,255,255,0.5)", textDecoration: "none", transition: "color 0.15s" }}
                     onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.9)")}
                     onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.5)")}
@@ -85,11 +94,12 @@ export default function Footer() {
             <p style={{ fontFamily: MONO, fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 14 }}>
               {t("colLegal")}
             </p>
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+            <ul className="footer-list" style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
               {LEGAL_LINKS.map(l => (
                 <li key={l.href}>
                   <Link
                     href={l.href}
+                    className="footer-link"
                     style={{ fontFamily: MONO, fontSize: 12, color: "rgba(255,255,255,0.5)", textDecoration: "none", transition: "color 0.15s" }}
                     onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.9)")}
                     onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.5)")}
@@ -100,6 +110,7 @@ export default function Footer() {
               ))}
               <li>
                 <button
+                  className="footer-link"
                   onClick={openCookieSettings}
                   aria-label={t("cookieSettingsAria")}
                   style={{

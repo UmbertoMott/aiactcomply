@@ -44,13 +44,7 @@ function StatCol({
 }) {
   const count = useCountUp(stat.raw, 1200, inView);
   return (
-    <div
-      style={{
-        flex: 1,
-        padding: "36px 40px",
-        borderRight: isLast ? "none" : "1px solid rgba(0,0,0,0.07)",
-      }}
-    >
+    <div className={`stats-col${isLast ? " stats-col-last" : ""}`} style={{ flex: 1 }}>
       <p
         style={{
           fontSize: 10,
@@ -113,8 +107,19 @@ export default function Stats() {
     <section
       style={{ background: "#ffffff", borderTop: "1px solid rgba(0,0,0,0.07)" }}
     >
-      <div className="max-w-5xl mx-auto px-8" ref={ref}>
-        <div style={{ display: "flex" }}>
+      {/* Su smartphone le tre colonne diventano righe */}
+      <style>{`
+        .stats-row { display: flex; }
+        .stats-col { padding: 36px 40px; border-right: 1px solid rgba(0,0,0,0.07); }
+        .stats-col-last { border-right: none; }
+        @media (max-width: 768px) {
+          .stats-row { flex-direction: column; }
+          .stats-col { padding: 28px 0; border-right: none; border-bottom: 1px solid rgba(0,0,0,0.07); }
+          .stats-col-last { border-bottom: none; }
+        }
+      `}</style>
+      <div className="max-w-5xl mx-auto px-6 md:px-8" ref={ref}>
+        <div className="stats-row">
           {stats.map((stat, i) => (
             <StatCol
               key={stat.label}
