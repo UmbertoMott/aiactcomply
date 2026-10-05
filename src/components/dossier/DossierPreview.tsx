@@ -4,7 +4,7 @@
 // Uses only inline styles for print reliability (no Tailwind dependency in critical paths)
 
 import type { DossierData } from "@/lib/dossier/storage-schema";
-import { ART5_PRACTICES } from "@/lib/classifier/classifier-rules";
+import { ART5_PRACTICES } from "@/lib/obligations/engine";
 
 // ─── Design tokens (inline, print-safe) ──────────────────────────────────────
 const T = {
