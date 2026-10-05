@@ -1,5 +1,6 @@
 "use client";
 
+import { downloadAuditPackage } from "@/lib/evidence/audit-package";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
@@ -161,40 +162,13 @@ export default function DossierPage() {
     }
   }
 
-  function handleExportJSON() {
+  // Un solo pacchetto di prove: dossier + firme + registro delle evidenze verificato
+  async function handleExportJSON() {
     if (!data) return;
-    const exportPayload = {
-      export_type: "AIComply Dossier Export — Reg. UE 2024/1689",
-      exported_at: new Date().toISOString(),
-      meta: data.meta,
-      completion: { pct, done, total: sections.length },
-      sections: sections.map((s) => ({
-        id: s.id,
-        article: s.article,
-        title: s.title,
-        status: s.status,
-        completedAt: s.completedAt ?? null,
-      })),
-      data,
-    };
-    const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `dossier-${data.meta.systemName.replace(/\s+/g, "-")}-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    appendEvidence(
-      "adr",
-      {
-        type: "Dossier di Compliance — Export JSON",
-        systemName: data.meta.systemName,
-        completionPct: pct,
-        exportedAt: new Date().toISOString(),
-      },
-      "dossier"
-    );
-    showToast("Dossier esportato come JSON");
+    const res = await downloadAuditPackage(`pacchetto-prove-${data.meta.systemName.replace(/\s+/g, "-")}`);
+    showToast(res.valid
+      ? `Pacchetto esportato — ${res.total} evidenze, catena integra`
+      : "Pacchetto esportato — ATTENZIONE: la catena delle evidenze risulta alterata");
   }
 
   function handleSaveMeta() {
@@ -301,7 +275,7 @@ export default function DossierPage() {
                 className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium hover:opacity-75 transition-opacity"
                 style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)", color: "rgba(0,0,0,0.55)", cursor: "pointer" }}
               >
-                <Download size={11} /> Esporta JSON
+                <Download size={11} /> Pacchetto per l&apos;audit
               </button>
               <button
                 onClick={handleExportPdf}

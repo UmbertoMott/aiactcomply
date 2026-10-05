@@ -609,7 +609,7 @@ export default function DashboardPage() {
               accent: criticalDeadlines.length > 0 ? T.amber : T.text,
             },
             {
-              href:  "/dashboard/tools/trust-center",
+              href:  "/dashboard/tools/clients?tab=trust-center",
               Icon:  BadgeCheck,
               title: "Pagina pubblica di conformità",
               sub:   t("card_trust_sub"),

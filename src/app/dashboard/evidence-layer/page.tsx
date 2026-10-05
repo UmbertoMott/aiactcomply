@@ -1,5 +1,6 @@
 "use client";
 
+import { downloadAuditPackage } from "@/lib/evidence/audit-package";
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -7,7 +8,7 @@ import {
   ChevronDown, ChevronUp, Download, X, Search,
 } from "lucide-react";
 import {
-  appendEvidence, getAllEvidence, verifyChain, purgeDemoEvidence,
+  appendEvidence, getAllEvidence, verifyChain, verifyChainDeep, purgeDemoEvidence,
   type EvidenceRecord, type EvidenceType,
 } from "@/lib/evidence/evidence-layer";
 import { EVIDENCE_TEMPLATES } from "@/lib/evidence/evidence-templates";
@@ -57,6 +58,8 @@ export default function EvidenceLayerPage() {
   const refresh = useCallback(() => {
     setRecords(getAllEvidence());
     setChainStatus(verifyChain());
+    // Verifica completa: ricalcola anche le impronte dei record
+    verifyChainDeep().then(setChainStatus);
   }, []);
 
   useEffect(() => {
@@ -125,20 +128,9 @@ export default function EvidenceLayerPage() {
     setTimeout(() => setToast(t => ({ ...t, visible: false })), 3000);
   }
 
-  function exportChain() {
-    const data = {
-      exported_at: new Date().toISOString(),
-      chain_valid: chainStatus.valid,
-      total_records: records.length,
-      records: getAllEvidence(),
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement("a");
-    a.href     = url;
-    a.download = `evidence-chain-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+  // Esporta lo stesso pacchetto del dossier: un'unica prova da archiviare
+  async function exportChain() {
+    await downloadAuditPackage("pacchetto-prove");
   }
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -170,7 +162,7 @@ export default function EvidenceLayerPage() {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all"
             style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.1)", color: "rgba(0,0,0,0.6)" }}
           >
-            <Download className="h-3.5 w-3.5" /> Esporta Chain
+            <Download className="h-3.5 w-3.5" /> Pacchetto per l&apos;audit
           </button>
           <button
             onClick={() => openPanel()}

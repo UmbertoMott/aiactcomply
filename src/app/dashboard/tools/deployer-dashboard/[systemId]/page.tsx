@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { loadInventory, type AISystem } from "@/lib/inventory/ai-system";
@@ -28,15 +28,12 @@ import {
 import { loadDeployerRecord, saveDeployerRecord, type DeployerRecord } from "@/types/deployer";
 import { DeployerSection } from "@/components/deployer/DeployerSection";
 import { Art26_1 } from "@/components/deployer/Art26_1";
-import { Art26_2 } from "@/components/deployer/Art26_2";
-import { Art26_3 } from "@/components/deployer/Art26_3";
 import { Art26_4 } from "@/components/deployer/Art26_4";
 import { Art26_5 } from "@/components/deployer/Art26_5";
 import { Art26_6 } from "@/components/deployer/Art26_6";
 import { Art26_7 } from "@/components/deployer/Art26_7";
-import { Art26_8 } from "@/components/deployer/Art26_8";
 import { Art26_9 } from "@/components/deployer/Art26_9";
-import { Art26_10 } from "@/components/deployer/Art26_10";
+import { linkedDeployerStatus, type LinkedStatus } from "@/lib/deployer/linked-status";
 import { loadOrgProfile } from "@/lib/dossier/org-profile";
 
 const FONT = { fontFamily: "Inter, system-ui, sans-serif" };
@@ -524,6 +521,9 @@ export default function DeployerSystemDetailPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Obblighi adempiuti in altri tool: letti da lì, non richiesti di nuovo
+  const linked = useMemo(() => (system ? linkedDeployerStatus(system) : null), [system]);
+
   function patchRecord(patch: Partial<DeployerDashboardRecord>) {
     if (!record) return;
     const updated: DeployerDashboardRecord = {
@@ -654,7 +654,7 @@ export default function DeployerSystemDetailPage() {
       </div>
 
       {/* ── Art. 26 Dettaglio Operativo (PROMPT BD) ── */}
-      {detailRec && (
+      {detailRec && linked && (
         <section className="mb-6">
           <button
             onClick={() => setDetailOpen(v => !v)}
@@ -673,11 +673,11 @@ export default function DeployerSystemDetailPage() {
               <DeployerSection artRef="Art. 26(1)" title="Istruzioni d&apos;uso" status={detailRec.instructionsRead ? "ok" : "pending"}>
                 <Art26_1 record={detailRec} onChange={setDetailRec} />
               </DeployerSection>
-              <DeployerSection artRef="Art. 26(2)" title="Supervisori assegnati" status={detailRec.overseers.length > 0 ? "ok" : "pending"}>
-                <Art26_2 record={detailRec} onChange={setDetailRec} />
+              <DeployerSection artRef="Art. 26(2)" title="Sorveglianza umana" status={linked.oversight.state}>
+                <LinkedBody status={linked.oversight} />
               </DeployerSection>
-              <DeployerSection artRef="Art. 26(6)" title="Conservazione log ≥ 6 mesi" status={detailRec.logRetentionStatus === "ok" ? "ok" : detailRec.logRetentionStatus === "not_configured" ? "pending" : detailRec.logRetentionStatus === "expired" ? "suspended" : "pending"}>
-                <Art26_3 record={detailRec} onChange={setDetailRec} />
+              <DeployerSection artRef="Art. 26(6)" title="Conservazione log ≥ 6 mesi" status={linked.logs.state}>
+                <LinkedBody status={linked.logs} />
               </DeployerSection>
               <DeployerSection artRef="Art. 26(5)" title="Segnalazioni al fornitore" status={detailRec.providerNotifications.length > 0 ? "ok" : "not_required"}>
                 <Art26_4 record={detailRec} onChange={setDetailRec} />
@@ -691,14 +691,14 @@ export default function DeployerSystemDetailPage() {
               <DeployerSection artRef="Art. 26(11)" title="Informare le persone interessate" status={detailRec.endUserNotificationsStatus === "compliant" ? "ok" : detailRec.endUserNotificationsStatus === "not_required" ? "not_required" : "pending"}>
                 <Art26_7 record={detailRec} onChange={setDetailRec} />
               </DeployerSection>
-              <DeployerSection artRef="Art. 27" title="FRIA — Valutazione d&apos;impatto sui diritti fondamentali" status={detailRec.friaStatus === "completed" ? "ok" : detailRec.friaStatus === "not_required" ? "not_required" : "pending"}>
-                <Art26_8 record={detailRec} onChange={setDetailRec} />
+              <DeployerSection artRef="Art. 27" title="FRIA — Valutazione d&apos;impatto sui diritti fondamentali" status={linked.fria.state}>
+                <LinkedBody status={linked.fria} />
               </DeployerSection>
               <DeployerSection artRef="Art. 26(5)" title="Sospensione dell&apos;uso" status={detailRec.systemSuspended ? "suspended" : "ok"} variant={detailRec.systemSuspended ? "critical" : "default"}>
                 <Art26_9 record={detailRec} onChange={setDetailRec} />
               </DeployerSection>
-              <DeployerSection artRef="Art. 26(8)" title="Registrazione banca dati UE" status={detailRec.eudbRegistrationRequired ? (detailRec.eudbRegistrationStatus === "registered" ? "ok" : "pending") : "not_required"}>
-                <Art26_10 record={detailRec} onChange={setDetailRec} />
+              <DeployerSection artRef="Art. 26(8)" title="Registrazione banca dati UE" status={linked.eudb.state}>
+                <LinkedBody status={linked.eudb} />
               </DeployerSection>
             </div>
           )}
@@ -843,6 +843,17 @@ export default function DeployerSystemDetailPage() {
           </div>
         </section>
       )}
+    </div>
+  );
+}
+
+function LinkedBody({ status }: { status: LinkedStatus }) {
+  return (
+    <div className="flex items-center justify-between gap-3 flex-wrap">
+      <p className="text-xs text-slate-400">{status.summary}</p>
+      <Link href={status.href} className="text-xs font-medium underline" style={{ color: "#2563eb" }}>
+        {status.linkLabel} →
+      </Link>
     </div>
   );
 }
