@@ -57,7 +57,7 @@ export const RISK_REGISTER_SECTIONS: RiskRegisterGuidedSection[] = [
   { key: "sec5", label: "§5 — Monitoraggio Post-Market", legalRef: "Art. 9(2)(c)",     anchor: "rr-sec5"  },
   { key: "sec7", label: "§7 — Tracciabilità",            legalRef: "Art. 12, 17",      anchor: "rr-sec7"  },
   { key: "sec8", label: "§8 — Dismissione",              legalRef: "ISO 23894 Ann. C", anchor: "rr-sec8"  },
-  { key: "sec9", label: "§9 — Sign-off",                 legalRef: "Art. 9(10)",       anchor: "rr-sec9"  },
+  { key: "sec9", label: "§9 — Sign-off",                 legalRef: "Art. 9(1)",        anchor: "rr-sec9"  },
   { key: "comm", label: "Comunicazione",                 legalRef: "ISO 23894 §6.2",   anchor: "rr-comm"  },
 ] as const;
 
@@ -407,7 +407,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     sectionKey: "sec7",
     label: "Versionamento del registro",
     question: "Il registro dei rischi è soggetto a controllo di versione (Git, sistema documentale, ecc.)?",
-    ref: "Art. 9(1) · Art. 12",
+    ref: "Art. 9(1) · Art. 17(1)(k)",
     fieldType: "select_yn",
     examples: [
       "Sì — versioning via Git con tag semantico (v1.0, v1.1…). Ogni modifica tracciata con autore e data.",
@@ -420,7 +420,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     sectionKey: "sec7",
     label: "Policy di retention dei log",
     question: "È stata definita una policy di retention per i log del sistema di IA e per il registro dei rischi?",
-    ref: "Art. 12 AI Act",
+    ref: "Art. 19(1) (fornitore) / Art. 26(6) (deployer)",
     fieldType: "select_ynp",
     examples: [
       "Sì — retention 5 anni per log del sistema di IA; 10 anni per il registro dei rischi. Certificazione GDPR conforme.",
@@ -493,7 +493,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     sectionKey: "sec9",
     label: "Risk Owner",
     question: "Chi è il Risk Owner del sistema di IA (persona fisica responsabile del registro e delle decisioni di rischio)?",
-    ref: "Art. 9(1) · Art. 9(10)",
+    ref: "Art. 9(1)",
     fieldType: "text",
     examples: [
       "Mario Rossi — CTO / Chief Technology Officer — designato Risk Owner in data 01/03/2025",
@@ -506,7 +506,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     sectionKey: "sec9",
     label: "Compliance / Legale",
     question: "Chi è il responsabile Compliance o Legale che ha validato il registro dei rischi?",
-    ref: "Art. 9(10)",
+    ref: "Art. 9(1)",
     fieldType: "text",
     examples: [
       "Avv. Laura Verdi — Responsabile Legal & Compliance — revisione e validazione in data 15/03/2025",

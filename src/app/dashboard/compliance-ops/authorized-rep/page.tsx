@@ -220,11 +220,11 @@ function ChecklistRowDk({ item, eudbResult, docuGenCompleted, onChange }: {
               border: `1px solid ${docuGenCompleted ? DK.greenBdr : DK.amberBdr}` }}>
               {docuGenCompleted ? (
                 <span style={{ fontSize: 11, color: DK.green }}>
-                  ✓ Disponibile — Kit Art. 50 completato in DocuGen
+                  ✓ Disponibile — Documentazione tecnica (Art. 11, Allegato IV) completata in DocuGen
                 </span>
               ) : (
                 <span style={{ fontSize: 11, color: DK.amber }}>
-                  ⚠ Kit Art. 50 non ancora completato —{" "}
+                  ⚠ Documentazione tecnica (Art. 11, Allegato IV) non ancora completata —{" "}
                   <Link href="/dashboard/tools/docugen" style={{ color: DK.amber }}>
                     Completa in DocuGen AI
                   </Link>
@@ -515,7 +515,7 @@ export default function AuthorizedRepCompliancePage() {
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
           <UserCheck size={16} style={{ color: DK.muted }} />
           <h1 style={{ fontSize: 22, fontWeight: 400, letterSpacing: "-0.5px", color: DK.text, margin: 0 }}>
-            Authorized Representative
+            Rappresentante autorizzato
           </h1>
           <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 7px", borderRadius: 10,
             background: "rgba(0,0,0,0.04)", color: DK.muted, border: `1px solid ${DK.border}` }}>
@@ -523,7 +523,7 @@ export default function AuthorizedRepCompliancePage() {
           </span>
         </div>
         <p style={{ fontSize: 12, color: DK.muted, margin: 0 }}>
-          Nomina dell&apos;Authorized Representative per provider non-UE — Reg. (UE) 2024/1689
+          Nomina del rappresentante autorizzato per fornitori non UE — Reg. (UE) 2024/1689
         </p>
       </div>
 
@@ -531,7 +531,7 @@ export default function AuthorizedRepCompliancePage() {
       <div style={{ ...cardDk, padding: "10px 14px", marginBottom: 16,
         background: "rgba(0,0,0,0.04)", border: `1px solid ${DK.border}` }}>
         <p style={{ fontSize: 11, color: DK.muted, margin: 0 }}>
-          ✦ AI — verifica e conferma: condizioni di applicabilità Art. 22(1), elenco dei compiti conferiti Art. 22(3)(a)-(e) e testo del mandato generato sono ricostruiti dalla memoria del modello. Validare contro testo consolidato Art. 22 Reg. (UE) 2024/1689 prima della firma del mandato. Durata minima conservazione mandato dichiarata: 10 anni.
+          ✦ AI — verifica e conferma: condizioni di applicabilità Art. 22(1), elenco dei compiti conferiti Art. 22(3)(a)-(e) e testo del mandato generato sono ricostruiti dalla memoria del modello. Validare contro testo consolidato Art. 22 Reg. (UE) 2024/1689 prima della firma del mandato. L&apos;Art. 22(1) richiede la nomina mediante mandato scritto; il periodo di 10 anni (Art. 22(3)(b)) riguarda i dati di contatto del fornitore, la copia della dichiarazione di conformità UE, la documentazione tecnica e l&apos;eventuale certificato, non il mandato in sé.
         </p>
       </div>
 
@@ -612,7 +612,7 @@ export default function AuthorizedRepCompliancePage() {
                   Il sistema è ad alto rischio, oppure si tratta di un modello di IA per finalità generali?
                 </p>
                 <p style={{ fontSize: 11, color: DK.muted, margin: "4px 0 0" }}>
-                  Art. 22(1) per i sistemi ad alto rischio (Allegati I e III); Art. 54(1) per i fornitori extra-UE di modelli GPAI, esclusi i modelli open source senza rischio sistemico (Art. 54(6)).
+                  Art. 22(1) per i sistemi ad alto rischio (Allegato I, sezione A, e Allegato III; per i sistemi dell&apos;Allegato I, sezione B, l&apos;Art. 22 non si applica — Art. 2(2), come sostituito dal Reg. (UE) 2026/1744); Art. 54(1) per i fornitori extra-UE di modelli GPAI, esclusi i modelli open source senza rischio sistemico (Art. 54(6)).
                 </p>
               </div>
               <RadioGroupDk value={doc.eligibility.high_risk}
@@ -630,7 +630,7 @@ export default function AuthorizedRepCompliancePage() {
             display: "flex", alignItems: "center", gap: 8 }}>
             <AlertTriangle size={14} style={{ color: DK.orange, flexShrink: 0 }} />
             <p style={{ fontSize: 12, color: DK.orange, fontWeight: 500, margin: 0 }}>
-              Authorized Representative obbligatorio — compila il mandato nelle sezioni sottostanti (Art. 22(1))
+              Rappresentante autorizzato obbligatorio — compila il mandato nelle sezioni sottostanti (Art. 22(1))
             </p>
           </div>
         )}
@@ -697,7 +697,7 @@ export default function AuthorizedRepCompliancePage() {
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <AlertTriangle size={13} style={{ color: DK.red, flexShrink: 0 }} />
                   <p style={{ fontSize: 11, color: DK.red, margin: 0 }}>
-                    L&apos;Authorized Representative deve essere stabilito in uno Stato Membro dell&apos;UE (Art. 22(1)). Il paese attualmente selezionato blocca la generazione del mandato.
+                    Il rappresentante autorizzato deve essere stabilito in uno Stato Membro dell&apos;UE (Art. 22(1)). Il paese attualmente selezionato blocca la generazione del mandato.
                   </p>
                 </div>
               </div>
@@ -760,7 +760,7 @@ export default function AuthorizedRepCompliancePage() {
                   <UserCheck size={11} style={{ color: DK.muted }} />
                   <p style={{ fontSize: 11, fontWeight: 700, color: DK.muted,
                     textTransform: "uppercase", letterSpacing: "0.6px", margin: 0 }}>
-                    Authorized Representative
+                    Rappresentante autorizzato
                   </p>
                   <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: DK.faint, border: `1px solid ${DK.border}`,
                     borderRadius: 4, padding: "1px 5px", background: "rgba(0,0,0,0.05)" }}>
@@ -952,7 +952,7 @@ export default function AuthorizedRepCompliancePage() {
                 <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                   <Shield size={13} style={{ color: DK.muted }} />
                   <p style={{ fontSize: 12, fontWeight: 600, color: DK.text, margin: 0 }}>
-                    Compiti obbligatori Art. 22(2-5)
+                    Compiti obbligatori Art. 22(3)-(4)
                   </p>
                 </div>
                 <button
@@ -1086,7 +1086,7 @@ export default function AuthorizedRepCompliancePage() {
             </div>
           </div>
 
-          <SignOffPanel toolKey="authorized-rep" toolLabel="Authorized Representative — Art. 22" />
+          <SignOffPanel toolKey="authorized-rep" toolLabel="Rappresentante autorizzato — Art. 22" />
         </>
         </fieldset>
       )}

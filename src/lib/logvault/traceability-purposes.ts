@@ -28,7 +28,7 @@ export const TRACEABILITY_PURPOSES: readonly TraceabilityPurposeDefinition[] = [
   },
   {
     id: "post_market_monitoring",
-    label: "Facilitare il monitoraggio post-commercializzazione",
+    label: "Facilitare il monitoraggio successivo all'immissione sul mercato",
     reference: "Art. 12(2)(b) [Reg. (UE) 2024/1689]",
     crossReference: "Art. 72 [Reg. (UE) 2024/1689]",
     linkedToolPath: "/dashboard/tools/post-market",

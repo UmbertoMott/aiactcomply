@@ -186,7 +186,8 @@ export default function ConformityPage() {
     const sys = referenceSystem(loadInventory());
     if (sys?.riskAnswers) {
       const r = assessRisk(sys.riskAnswers);
-      setPath(determineAssessmentPath(r.annexIIIUses[0]?.ref ?? null, r.category));
+      setPath(determineAssessmentPath(r.annexIIIUses[0]?.ref ?? null, r.category,
+        !!sys.riskAnswers.annexIActId && sys.riskAnswers.annexIThirdParty === true));
     } else if (ev.classifier) {
       const p = determineAssessmentPath(
         ev.classifier.annexIII ? (ev.classifier.applicableArticles?.[0] ?? null) : null,

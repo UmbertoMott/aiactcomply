@@ -42,8 +42,11 @@ export interface EUDBSystemData {
   annex_reference: string;
   conformity_declaration_number: string;
   instructions_url: string;
+  /** Non richiesto dall'Allegato VIII: riferimento interno. */
   technical_doc_url: string;
   notified_body_certificate: string;
+  /** Allegato VIII, sezione A, punto 13: indirizzo internet per ulteriori informazioni (facoltativo). */
+  info_url?: string;
 }
 
 export interface EUDBDoc {
@@ -80,9 +83,9 @@ export const EU_COUNTRIES = [
   "Norvegia (SEE)", "Islanda (SEE)", "Liechtenstein (SEE)", "Svizzera", "Altro",
 ];
 
+// Art. 49(1)-(2): si registrano i sistemi dell'Allegato III (esclusi i prodotti del solo Allegato I).
 export const RISK_CLASSIFICATIONS = [
   "Sistema ad alto rischio — Annex III (Art. 6(2))",
-  "Sistema ad alto rischio — Annex I (Art. 6(1))",
   "Deroga Art. 6(3) — registrazione Art. 49(2)",
   "Sistema ad alto rischio — Annex I + Annex III",
 ];
@@ -138,42 +141,66 @@ export function eligibilityStatus(e: EUDBEligibility): "required" | "not_require
   return "not_required";
 }
 
+/** Intestazioni delle tre parti dell'export (usate dalla pagina EUDB per suddividere l'anteprima). */
+export const ANNEX_VIII_PARTS = {
+  provider: "PARTE 1",
+  system: "PARTE 2",
+  documents: "PARTE 3",
+} as const;
+
 export function generateAnnexVIII(doc: EUDBDoc): string {
   const p = doc.provider;
   const s = doc.system;
+  // Art. 49(2): sistemi dell'Allegato III ritenuti non ad alto rischio (Art. 6(3)) → Allegato VIII, sezione B
+  const derogation = s.risk_classification.includes("6(3)");
+  const sec = derogation ? "B" : "A";
+  const pt = (a: string, b?: string) => derogation ? (b ? `[sez. B, punto ${b}]` : "[non richiesto in sez. B]") : `[sez. A, punto ${a}]`;
   const regStatusLabel =
     s.registration_status === "new" ? "Prima registrazione" :
     s.registration_status === "update" ? "Aggiornamento" : "Ritiro dal mercato";
-  return `ANNEX VIII — INFORMAZIONI PER LA REGISTRAZIONE NEL DATABASE UE (Art. 49)
+  const systemStatus = s.registration_status === "withdrawal"
+    ? "non più immesso sul mercato / in servizio (o richiamato)"
+    : "[DA INDICARE: sul mercato o in servizio]";
+  const documents = derogation
+    ? `Per i sistemi registrati a norma dell'Art. 49(2) l'Allegato VIII, sezione B, non richiede certificato,
+dichiarazione di conformità UE né istruzioni per l'uso. Indicare invece la o le condizioni dell'Art. 6(3)
+sulla base delle quali il sistema non è ritenuto ad alto rischio [sez. B, punto 6].
+(I punti 7 e 9 della sezione B sono soppressi dal Reg. (UE) 2026/1744.)`
+    : `Certificato dell'organismo notificato (tipo, numero, scadenza, nome o numero dell'organismo) ${pt("8")}: ${s.notified_body_certificate || "Non applicabile"}
+Copia scannerizzata del certificato ${pt("9")}: ${s.notified_body_certificate ? "[DA ALLEGARE]" : "Non applicabile"}
+Copia della dichiarazione di conformità UE (Art. 47) ${pt("11")}: ${s.conformity_declaration_number ? `[DA ALLEGARE] — rif. ${s.conformity_declaration_number}` : "[DA ALLEGARE]"}
+Istruzioni per l'uso in formato elettronico ${pt("12")}: ${s.instructions_url || "[DA INSERIRE]"}
+Indirizzo internet per ulteriori informazioni (facoltativo) ${pt("13")}: ${s.info_url || "—"}
+URL documentazione tecnica (riferimento interno, non richiesto dall'Allegato VIII): ${s.technical_doc_url || "—"}`;
+
+  return `ALLEGATO VIII, SEZIONE ${sec} — INFORMAZIONI PER LA REGISTRAZIONE NELLA BANCA DATI UE (Art. 49(${derogation ? "2" : "1"}))
 Regolamento (UE) 2024/1689 — Generato da RegulaeOS il ${new Date().toLocaleDateString("it-IT")}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SEZIONE A — DATI DEL PROVIDER / AUTHORIZED REPRESENTATIVE
+${ANNEX_VIII_PARTS.provider} — FORNITORE E RAPPRESENTANTE AUTORIZZATO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Provider: ${p.provider_name || "[DA INSERIRE]"}
+Fornitore ${pt("1", "1")}: ${p.provider_name || "[DA INSERIRE]"}
 Indirizzo: ${p.provider_address || "[DA INSERIRE]"}, ${p.provider_country || "[DA INSERIRE]"}
-Referente: ${p.contact_name || "[DA INSERIRE]"} | ${p.contact_email || "[DA INSERIRE]"} | ${p.contact_phone || "[DA INSERIRE]"}
+Dati di contatto: ${p.contact_name || "[DA INSERIRE]"} | ${p.contact_email || "[DA INSERIRE]"} | ${p.contact_phone || "[DA INSERIRE]"}
 ${p.has_authorized_rep
-  ? `\nAuthorized Representative: ${p.ar_name || "[DA INSERIRE]"}\nIndirizzo AR: ${p.ar_address || "[DA INSERIRE]"}, ${p.ar_country || "[DA INSERIRE]"}\nEmail AR: ${p.ar_email || "[DA INSERIRE]"}`
-  : "Authorized Representative: Non applicabile (provider stabilito in UE)"}
+  ? `\nRappresentante autorizzato ${pt("3", "3")}: ${p.ar_name || "[DA INSERIRE]"}\nIndirizzo: ${p.ar_address || "[DA INSERIRE]"}, ${p.ar_country || "[DA INSERIRE]"}\nEmail: ${p.ar_email || "[DA INSERIRE]"}`
+  : `Rappresentante autorizzato ${pt("3", "3")}: non applicabile (fornitore stabilito nell'UE)`}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SEZIONE B — DATI DEL SISTEMA AI
+${ANNEX_VIII_PARTS.system} — SISTEMA DI IA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Denominazione: ${s.system_name || "[DA INSERIRE]"} — Versione ${s.system_version || "[DA INSERIRE]"}
-Scopo previsto: ${s.intended_purpose || "[DA INSERIRE]"}
-Stato registrazione: ${regStatusLabel}
-Classificazione rischio: ${s.risk_classification || "[DA INSERIRE]"}
-Riferimento normativo: ${s.annex_reference || "[DA INSERIRE]"}
-Stati membri: ${s.member_states.length > 0 ? s.member_states.join(", ") : "[DA INSERIRE]"}
+Denominazione commerciale ${pt("4", "4")}: ${s.system_name || "[DA INSERIRE]"} — Versione ${s.system_version || "[DA INSERIRE]"}
+Finalità prevista ${pt("5", "5")}: ${s.intended_purpose || "[DA INSERIRE]"}
+Status del sistema ${pt("7", "8")}: ${systemStatus}
+Stati membri ${pt("10")}: ${s.member_states.length > 0 ? s.member_states.join(", ") : "[DA INSERIRE]"}
+Tipo di operazione: ${regStatusLabel}
+Classificazione (riferimento interno): ${s.risk_classification || "[DA INSERIRE]"}
+Caso d'uso dell'Allegato III: ${s.annex_reference || "[DA INSERIRE]"}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SEZIONE C — DOCUMENTAZIONE DI CONFORMITÀ
+${ANNEX_VIII_PARTS.documents} — CERTIFICATI, DICHIARAZIONE E ISTRUZIONI
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-N. Dichiarazione di Conformità UE: ${s.conformity_declaration_number || "[DA INSERIRE]"}
-URL Istruzioni per l'uso: ${s.instructions_url || "[DA INSERIRE]"}
-URL Documentazione Tecnica (Annex VIII): ${s.technical_doc_url || "[DA INSERIRE]"}
-Certificato Notified Body: ${s.notified_body_certificate || "Non applicabile"}
+${documents}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 NUMERO REGISTRAZIONE EUDB (dopo upload)

@@ -161,7 +161,7 @@ function readCrossToolContent(): Record<string, string> {
   try {
     const conf = readFromStorage<ConformityResult>("conformity");
     if (conf?.declarationGenerated) {
-      out["conformity"] = `Dichiarazione UE di conformità generata nel tool Conformità${conf.registrationRef ? ` — riferimento ${conf.registrationRef}` : ""}. Allegarne copia (Art. 47).`;
+      out["conformity"] = `Dichiarazione di conformità UE generata nel tool Conformità${conf.registrationRef ? ` — riferimento ${conf.registrationRef}` : ""}. Allegarne copia (Art. 47).`;
     }
   } catch { /* nessun dato */ }
   try {
@@ -228,8 +228,8 @@ const ANNEX_IV: { id: string; ref: string; title: string; required: boolean; hin
   { id: "s7", ref: "All. IV, punto 7", title: "Norme armonizzate e altre specifiche", required: true, autoSource: null,
     hint: "Norme armonizzate applicate; se non applicate, le soluzioni adottate per soddisfare i requisiti del Capo III, Sezione 2, e le altre norme o specifiche tecniche pertinenti.",
     placeholder: "" },
-  { id: "s8", ref: "All. IV, punto 8", title: "Copia della dichiarazione UE di conformità", required: true, autoSource: "conformity",
-    hint: "Copia della dichiarazione UE di conformità di cui all'Art. 47.",
+  { id: "s8", ref: "All. IV, punto 8", title: "Copia della dichiarazione di conformità UE", required: true, autoSource: "conformity",
+    hint: "Copia della dichiarazione di conformità UE di cui all'Art. 47.",
     placeholder: "" },
   { id: "s9", ref: "All. IV, punto 9", title: "Valutazione delle prestazioni dopo l'immissione sul mercato", required: true, autoSource: "post-market",
     hint: "Descrizione del sistema di valutazione delle prestazioni nella fase successiva all'immissione sul mercato (Art. 72), compreso il piano di monitoraggio.",

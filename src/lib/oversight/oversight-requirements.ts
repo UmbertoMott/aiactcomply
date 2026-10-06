@@ -76,11 +76,11 @@ export type OversightRequirementId = (typeof OVERSIGHT_REQUIREMENTS)[number]["id
 
 export const FOUR_EYES_MODULE = {
   id: "four_eyes_biometric",
-  label: "Verifica a due persone per identificazione biometrica",
+  label: "Verifica a due persone per identificazione biometrica remota",
   primaryReference: "Art. 14(5)",
-  supportReference: "Annex III punto 1(a)",
+  supportReference: "Allegato III, punto 1, lettera a)",
   description:
-    "Per i sistemi di identificazione biometrica di cui all'Annex III punto 1(a), nessuna azione o decisione può essere presa dal deployer sulla base dell'identificazione prodotta dal sistema, salvo verifica e conferma separata da parte di almeno due persone fisiche con competenza, formazione e autorità necessarie — Art. 14(5).",
+    "Per i sistemi di identificazione biometrica remota di cui all'Allegato III, punto 1, lettera a), nessuna azione o decisione può essere presa dal deployer sulla base dell'identificazione prodotta dal sistema, salvo verifica e conferma separata da parte di almeno due persone fisiche con competenza, formazione e autorità necessarie — Art. 14(5).",
 } as const;
 
 export const MEASURE_IMPLEMENTATION_TYPE_LABELS: Record<string, string> = {

@@ -57,7 +57,7 @@ const PHASES: Phase[] = [
   { id: "gap_check",      label: "7. Gap Check Art. 9",          subtitle: "§6 verifica di copertura",       article: "Art. 9(2)(a)-(d), 9(6)-(9)", docSection: "§6" },
   { id: "traceability",   label: "8. Tracciabilità",             subtitle: "§7 versionamento e QMS",         article: "Art. 9(1)-(2)",           supportRef: "Art. 12, 17",            docSection: "§7" },
   { id: "dismissal",      label: "9. Dismissione / Ritiro",      subtitle: "§8 rischi di fine vita",         article: "Art. 9",                  supportRef: "ISO 23894 Annex C",                                           docSection: "§8" },
-  { id: "signoff",        label: "10. Approvazione e Firme",     subtitle: "§9 sign-off finale",             article: "Art. 9(1) + 9(10)",      docSection: "§9" },
+  { id: "signoff",        label: "10. Approvazione e Firme",     subtitle: "§9 sign-off finale",             article: "Art. 9(1)",               docSection: "§9" },
   { id: "communication",  label: "11. Comunicazione",            subtitle: "Trasversale — ISO 23894 §6.2",  article: "ISO 23894 §6.2",                                               docSection: "Trasversale" },
 ];
 
@@ -138,7 +138,7 @@ const PHASE_GUIDES: Partial<Record<RiskPhaseId, PhaseGuide>> = {
     starters: ["Qual è il coverage score stimato?", "Quali requisiti Art. 9 non sono ancora coperti?", "Ci sono gap obbligatori da colmare prima del rilascio?"],
   },
   traceability: {
-    goal: "Definisci la policy di versionamento del risk register, il periodo di retention dei log (Art. 12) e l'integrazione con il QMS aziendale (Art. 17).",
+    goal: "Definisci la policy di versionamento del risk register, il periodo di conservazione dei log (Art. 19(1) / Art. 26(6)) e l'integrazione con il QMS aziendale (Art. 17).",
     examples: [
       { label: "Versionamento attivo", text: "Versione v1.0 approvata. Log automatici via Git. Retention 5 anni. Integrato nel QMS ISO 9001." },
       { label: "Nessun QMS", text: "Il sistema di gestione rischi è standalone — non integrato in un QMS formale. Raccomandato allineamento Art. 17." },
@@ -304,9 +304,9 @@ const SECTION_ANCHORS: Record<string, string> = {
 const SECTION_LEGAL_REFS: Record<string, string> = {
   identification: "Art. 9(2)(a)",
   risks:          "Art. 9(2)(b)",
-  gapCheck:       "Art. 9(2)(c)",
-  reviewLog:      "Art. 9(7)",
-  signOff:        "Art. 9(9)",
+  gapCheck:       "Art. 9(2)",
+  reviewLog:      "Art. 9(2)",
+  signOff:        "Art. 9(1)",
 };
 
 function SectionRow({ section, onOpen, index }: { section: SectionProgress; onOpen: (anchor: string) => void; index: number }) {

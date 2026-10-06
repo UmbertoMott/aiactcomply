@@ -54,7 +54,8 @@ export const ImportedLogSetSchema = z.object({
 });
 export type ImportedLogSet = z.infer<typeof ImportedLogSetSchema>;
 
-// ── §5 Ritenzione calcolata (Art. 26(6) / Art. 12) ─────────────────
+// ── §5 Ritenzione calcolata — log di cui all'Art. 12(1); conservazione per almeno sei mesi:
+//    fornitore Art. 19(1), deployer Art. 26(6) ─────────────────
 export const RetentionAssessmentSchema = z.object({
   role: z.enum(["provider", "deployer", "unspecified"]).default("unspecified"),
   retentionPolicyMonths: z.number().optional(),

@@ -437,7 +437,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
       )}
 
       {/* ── §9 — Approvazione, firme e finalizzazione ───────────────────────── */}
-      <SectionTitle sectionId="sec-signoff" num="§9" title="Approvazione, firme e finalizzazione" article="Art. 9(1) + 9(10)" />
+      <SectionTitle sectionId="sec-signoff" num="§9" title="Approvazione, firme e finalizzazione" article="Art. 9(1)" />
       {doc.signOff ? (
         <>
           {doc.signOff.otherRegimesIntegration && (

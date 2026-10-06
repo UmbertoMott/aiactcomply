@@ -26,7 +26,7 @@ export interface AuthRepDoc {
   provider_country: string;
   provider_address: string;
   provider_contact_email: string;
-  // Authorized Representative — shared record
+  // Rappresentante autorizzato — shared record
   representative: AuthorizedRepresentativeRecord;
   // System — prefilled from DocuGen / Risk Manager
   system_name: string;
@@ -73,13 +73,13 @@ export function makeChecklist(): ARChecklistItem[] {
     },
     {
       id: "doc_conformity",
-      label: "Verificato che dichiarazione UE e documentazione tecnica siano redatte e la valutazione della conformità eseguita",
+      label: "Verificato che dichiarazione di conformità UE e documentazione tecnica siano redatte e la valutazione della conformità eseguita",
       article: "Art. 22(3)(a)",
       completed: false, notes: "", evidenceValue: "",
     },
     {
       id: "doc_technical",
-      label: "Dati del fornitore, dichiarazione UE, documentazione tecnica ed eventuale certificato a disposizione delle autorità per 10 anni",
+      label: "Dati del fornitore, dichiarazione di conformità UE, documentazione tecnica ed eventuale certificato a disposizione delle autorità per 10 anni",
       article: "Art. 22(3)(b)",
       completed: false, notes: "", evidenceValue: "",
     },
@@ -109,8 +109,8 @@ export function makeChecklist(): ARChecklistItem[] {
     },
     {
       id: "firma",
-      label: "Mandato firmato da entrambe le parti e archiviato (conservazione min. 10 anni)",
-      article: "Art. 22(1)+(3)",
+      label: "Mandato scritto conferito e archiviato; copia fornita alle autorità di vigilanza del mercato su richiesta",
+      article: "Art. 22(1) + 22(3)",
       completed: false, notes: "",
       evidenceLabel: "Data firma", evidenceValue: "",
     },
@@ -301,7 +301,7 @@ export function generateMandate(doc: AuthRepDoc): string {
     ? "Tempo indeterminato"
     : `Fino al ${doc.mandate_end_date ?? "[DA INSERIRE]"}`;
 
-  return `MANDATO DI AUTHORIZED REPRESENTATIVE
+  return `MANDATO SCRITTO DI RAPPRESENTANTE AUTORIZZATO
 ai sensi dell'Art. 22 del Regolamento (UE) 2024/1689 (AI Act)
 
 Generato da RegulaeOS il ${new Date().toLocaleDateString("it-IT")}
@@ -314,7 +314,7 @@ ${doc.provider_name     || "[DA INSERIRE]"}
 ${doc.provider_address  || "[DA INSERIRE]"} -- ${doc.provider_country || "[DA INSERIRE]"}
 Email: ${doc.provider_contact_email || "[DA INSERIRE]"}
 
-AUTHORIZED REPRESENTATIVE (mandatario):
+RAPPRESENTANTE AUTORIZZATO (mandatario):
 ${r.ar_name    || "[DA INSERIRE]"}
 ${r.ar_address || "[DA INSERIRE]"} -- ${r.ar_country || "[DA INSERIRE]"} (Unione Europea)
 Referente: ${r.ar_contact_name || "[DA INSERIRE]"} | ${r.ar_contact_email || "[DA INSERIRE]"} | ${r.ar_contact_phone || "[DA INSERIRE]"}
@@ -340,6 +340,7 @@ Il Provider conferisce all'AR il mandato di eseguire i seguenti compiti (Art. 22
 (e) se del caso, adempiere agli obblighi di registrazione dell'Art. 49(1) o, se la registrazione è effettuata dal Provider, verificare la correttezza delle informazioni dell'Allegato VIII, sezione A, punto 3.
 
 Il mandato consente all'AR di essere interpellato, in aggiunta o in sostituzione del Provider, dalle autorità competenti su tutte le questioni relative alla conformità al Regolamento.
+L'AR fornisce una copia del presente mandato alle autorità di vigilanza del mercato, su richiesta, in una delle lingue ufficiali delle istituzioni dell'Unione indicata dall'autorità competente (Art. 22(3)).
 L'AR pone fine al mandato se ritiene o ha motivo di ritenere che il Provider agisca in modo contrario ai propri obblighi, e ne informa immediatamente l'autorità di vigilanza del mercato competente e, se del caso, l'organismo notificato (Art. 22(4)).
 
 Clausola contrattuale ulteriore (non prevista dall'Art. 22): l'AR informa senza ritardo il Provider di qualsiasi richiesta o indagine delle autorità.
@@ -358,10 +359,10 @@ ${SEP}
 Provider: _________________________ Data: _____________
 Nome e qualifica: _________________________
 
-Authorized Representative: _________________________ Data: _____________
+Rappresentante autorizzato: _________________________ Data: _____________
 Nome e qualifica: _________________________
 
-[Il presente mandato deve essere firmato da entrambe le parti e conservato per tutta la durata
-della commercializzazione del sistema di IA nell'UE e per almeno 10 anni successivi
-— Art. 22(1)+(3)]`.trim();
+[L'Art. 22(1) richiede che la nomina avvenga mediante mandato scritto. La firma di entrambe le parti
+è prassi consigliata. Il periodo di 10 anni dall'immissione sul mercato o dalla messa in servizio riguarda
+i documenti di cui alla lettera b) (Art. 22(3)(b)); si consiglia di conservare il mandato per lo stesso periodo.]`.trim();
 }
