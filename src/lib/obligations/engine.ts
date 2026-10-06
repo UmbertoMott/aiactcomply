@@ -43,7 +43,7 @@ export type Role = "provider" | "deployer" | "importer" | "distributor";
 
 export const ROLE_LABEL: Record<Role, string> = {
   provider: "Fornitore",
-  deployer: "Deployer (utilizzatore)",
+  deployer: "Deployer",
   importer: "Importatore",
   distributor: "Distributore",
 };
@@ -139,7 +139,7 @@ export const ART5_PRACTICES: Art5Practice[] = [
   { letter: "b", label: "Sfruttamento delle vulnerabilità", appliesFrom: "2025-02-02", ref: "Art. 5(1)(b)",
     question: "Sfrutta le vulnerabilità dovute a età, disabilità o situazione sociale o economica per alterare il comportamento delle persone, con possibile danno significativo?" },
   { letter: "ba", label: "Contenuti intimi realistici non consensuali", appliesFrom: "2026-12-02", ref: "Art. 5(1)(ba)",
-    question: "Genera o manipola immagini, video o audio realistici delle parti intime di una persona identificabile, o che la ritraggono in attività sessualmente esplicite, senza il suo consenso esplicito?" },
+    question: "Genera o manipola immagini, video o audio realistici delle parti intime di una persona fisica riconoscibile, o di una persona riconoscibile che partecipi ad atti sessualmente espliciti, senza il suo consenso liberamente prestato, specifico, informato e inequivocabile? (Vedi i limiti dell'Art. 5(1 bis) e (1 ter).)" },
   { letter: "bb", label: "Materiale pedopornografico", appliesFrom: "2026-12-02", ref: "Art. 5(1)(bb)",
     question: "Genera o manipola materiale pedopornografico ai sensi dell'Art. 2, lettere c) ed e), della direttiva 2011/93/UE?",
     exception: "Non vietato se si applica una causa di giustificazione (\"without right\" defence) prevista dal diritto nazionale." },
@@ -226,7 +226,7 @@ export const ANNEX_III_USES: AnnexIIIUse[] = [
 export const ART63_CONDITIONS: { id: Art63Condition; label: string }[] = [
   { id: "a", label: "Esegue un compito procedurale limitato (es. trasforma dati non strutturati in strutturati, classifica documenti, rileva duplicati)" },
   { id: "b", label: "Migliora il risultato di un'attività umana già completata (es. migliora il linguaggio di un testo già redatto)" },
-  { id: "c", label: "Rileva schemi decisionali o deviazioni da schemi precedenti, senza sostituire o influenzare la valutazione umana senza adeguata revisione" },
+  { id: "c", label: "Rileva schemi decisionali o deviazioni da schemi precedenti, senza sostituire o influenzare la valutazione umana precedentemente completata senza un'adeguata revisione umana" },
   { id: "d", label: "Esegue un compito solo preparatorio rispetto a una valutazione rilevante (es. indicizzazione, ricerca, traduzione di documenti)" },
 ];
 
@@ -363,7 +363,7 @@ export function assessRisk(a: RiskAnswers): RiskResult {
     base.category = "high_risk_annex_i";
     base.annexIAct = act;
     base.rationale.push(`Componente di sicurezza di un prodotto (o prodotto) disciplinato da ${act.ref}, soggetto a valutazione della conformità da parte di terzi: alto rischio (Art. 6(1), Allegato I, sezione ${act.section}).`);
-    if (act.section === "B") base.rationale.push("Per la sezione B dell'Allegato I si applicano solo l'Art. 6(1), gli Artt. 102-109 e l'Art. 112 (Art. 2(2)): i requisiti operano tramite la normativa di settore.");
+    if (act.section === "B") base.rationale.push("Per la sezione B dell'Allegato I si applicano unicamente l'Art. 6(1), l'Art. 60 bis e gli Artt. 102-112; gli Artt. 57-59 solo nella misura in cui i requisiti siano integrati nella normativa di settore (Art. 2(2), come sostituito dal Reg. (UE) 2026/1744).");
     return withOpenSource(base, a);
   }
 
@@ -377,7 +377,7 @@ export function assessRisk(a: RiskAnswers): RiskResult {
       base.rationale.push(`Caso d'uso dell'Allegato III (${uses.map(u => u.ref).join("; ")}) con profilazione di persone fisiche: sempre ad alto rischio (Art. 6(3), terzo comma).`);
     } else if (a.art63 && a.art63 !== "none") {
       base.category = "annex_iii_exempt";
-      base.rationale.push(`Caso d'uso dell'Allegato III (${uses.map(u => u.ref).join("; ")}), ma ricorre la condizione dell'Art. 6(3), lettera ${a.art63}): non ad alto rischio. Il fornitore documenta la valutazione prima dell'immissione o messa in servizio e registra il sistema (Art. 6(4), Art. 49(2)).`);
+      base.rationale.push(`Caso d'uso dell'Allegato III (${uses.map(u => u.ref).join("; ")}), ma ricorre la condizione dell'Art. 6(3), lettera ${a.art63}): non ad alto rischio, purché il sistema non presenti un rischio significativo di danno per la salute, la sicurezza o i diritti fondamentali (Art. 6(3), primo comma). Il fornitore documenta la valutazione prima dell'immissione o messa in servizio e registra il sistema (Art. 6(4), Art. 49(2)).`);
     } else {
       base.category = "high_risk_annex_iii";
       base.rationale.push(`Caso d'uso dell'Allegato III: ${uses.map(u => u.ref).join("; ")} — alto rischio (Art. 6(2)).`);
@@ -538,7 +538,7 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
 
   // ── Fornitore di sistema ad alto rischio ──
   if (highRisk && isProvider && annexISectionB) {
-    notes.push("Allegato I, sezione B: i requisiti per l'alto rischio sono recepiti attraverso la normativa di settore e i relativi atti delegati o di esecuzione (Art. 2(2), Artt. 102-109). Seguire le procedure dell'atto di settore.");
+    notes.push("Allegato I, sezione B: i requisiti per l'alto rischio sono recepiti attraverso la normativa di settore e i relativi atti delegati o di esecuzione (Art. 2(2) come modificato dal Reg. (UE) 2026/1744; Artt. 60 bis, 102-112). Seguire le procedure dell'atto di settore.");
   }
   if (highRisk && isProvider && !annexISectionB) {
     const p = (o: Omit<Obligation, "group" | "role" | "appliesFrom">) => add({ ...o, group: "provider", role: "provider", appliesFrom: hrFrom });
@@ -566,7 +566,7 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
     p({ id: "art43", title: "Valutazione della conformità", what: annexI
         ? "Seguire la procedura di valutazione della conformità prevista dalla normativa di settore dell'Allegato I, includendovi i requisiti del capo III, sezione 2 (Art. 43(3))."
         : risk.annexIIIUses.some(u => u.point === 1)
-          ? "Biometria (Allegato III, punto 1): controllo interno (Allegato VI) se applicate norme armonizzate o specifiche comuni, altrimenti procedura con organismo notificato (Allegato VII) (Art. 43(1))."
+          ? "Biometria (Allegato III, punto 1): se sono applicate integralmente norme armonizzate o specifiche comuni il fornitore sceglie tra controllo interno (Allegato VI) e organismo notificato (Allegato VII); altrimenti Allegato VII (Art. 43(1))."
           : "Controllo interno secondo l'Allegato VI, senza organismo notificato (Art. 43(2)).",
       article: "Art. 43", iso: ["9.2"], tool: T.conformity, storageKey: "aicomply_conformity_result" });
     p({ id: "art47-48", title: "Dichiarazione di conformità UE e marcatura CE", what: "Redigere la dichiarazione UE (Allegato V), conservarla 10 anni e apporre la marcatura CE, digitale se il sistema è fornito digitalmente.",
@@ -594,16 +594,19 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
 
   // ── Fornitore: deroga Art. 6(3) ──
   if (risk.category === "annex_iii_exempt" && isProvider) {
-    add({ id: "art6-4", group: "provider", role: "provider", appliesFrom: D_AUG_2026, title: "Documentare la valutazione di non alto rischio",
+    // Art. 6(4) è nel Capo III, sezione 1: si applica con l'Allegato III (Art. 113(c) modificato).
+    // L'Art. 49(2) (sezione 5) presuppone la valutazione dell'Art. 6(4): stessa data, per coerenza.
+    add({ id: "art6-4", group: "provider", role: "provider", appliesFrom: D_DEC_2027, title: "Documentare la valutazione di non alto rischio",
       what: "Documentare la valutazione prima dell'immissione sul mercato o messa in servizio e fornirla alle autorità su richiesta.",
       article: "Art. 6(4)", iso: ["6.1.4", "7.5"] });
-    add({ id: "art49-2", group: "provider", role: "provider", appliesFrom: D_AUG_2026, title: "Registrazione nella banca dati UE",
+    add({ id: "art49-2", group: "provider", role: "provider", appliesFrom: D_DEC_2027, title: "Registrazione nella banca dati UE",
       what: "Registrarsi e registrare il sistema nella banca dati UE con le informazioni dell'Allegato VIII, sezione B, incluse le condizioni dell'Art. 6(3) invocate.",
       article: "Art. 49(2)", iso: [], tool: T.eudb });
   }
 
   // ── Deployer di sistema ad alto rischio ──
-  if (highRisk && isDeployer) {
+  // Allegato I, sezione B: si applicano solo gli articoli dell'Art. 2(2) modificato, non gli Artt. 23, 24, 26, 27
+  if (highRisk && isDeployer && !annexISectionB) {
     const d = (o: Omit<Obligation, "group" | "role" | "appliesFrom">) => add({ ...o, group: "deployer", role: "deployer", appliesFrom: hrFrom });
     d({ id: "art26-1", title: "Uso conforme alle istruzioni", what: "Adottare misure tecniche e organizzative per usare il sistema secondo le istruzioni per l'uso del fornitore.",
       article: "Art. 26(1)", iso: ["A.9.2", "A.9.4"], tool: T.deployer });
@@ -611,7 +614,7 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
       article: "Art. 26(2)", iso: ["5.3", "7.2", "A.3.2"], tool: T.oversight, storageKey: "aicomply_oversight_result" });
     d({ id: "art26-4", title: "Dati di input pertinenti", what: "Se controlla i dati di input, garantire che siano pertinenti e sufficientemente rappresentativi rispetto alla finalità prevista.",
       article: "Art. 26(4)", iso: ["A.7.4"], tool: T.data });
-    d({ id: "art26-5", title: "Monitorare il funzionamento", what: "Monitorare il sistema secondo le istruzioni; se presenta un rischio sospenderne l'uso e informare fornitore e autorità; in caso di incidente grave informare subito il fornitore.",
+    d({ id: "art26-5", title: "Monitorare il funzionamento", what: "Monitorare il sistema secondo le istruzioni; se presenta un rischio sospenderne l'uso e informare fornitore e autorità; in caso di incidente grave informare immediatamente prima il fornitore e poi l'importatore o il distributore e le autorità.",
       article: "Art. 26(5)", iso: ["9.1", "A.6.2.6", "A.8.4"], tool: T.postMarket });
     d({ id: "art26-6", title: "Conservare i log", what: "Conservare i log generati automaticamente sotto il proprio controllo per almeno 6 mesi, salvo diversa disposizione.",
       article: "Art. 26(6)", iso: ["A.6.2.8"], tool: T.logvault, storageKey: "aicomply_logvault_result" });
@@ -643,12 +646,12 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
   }
 
   // ── Importatore / distributore ──
-  if (highRisk && roles.has("importer")) {
+  if (highRisk && roles.has("importer") && !annexISectionB) {
     add({ id: "art23", group: "importer", role: "importer", appliesFrom: hrFrom, title: "Verifiche prima dell'immissione sul mercato",
       what: "Verificare valutazione della conformità, documentazione tecnica, marcatura CE, dichiarazione UE, istruzioni e rappresentante autorizzato; indicare il proprio nome; conservare i documenti per 10 anni.",
       article: "Art. 23", iso: ["A.10.3"] });
   }
-  if (highRisk && roles.has("distributor")) {
+  if (highRisk && roles.has("distributor") && !annexISectionB) {
     add({ id: "art24", group: "distributor", role: "distributor", appliesFrom: hrFrom, title: "Verifiche prima della messa a disposizione",
       what: "Verificare marcatura CE, dichiarazione UE e istruzioni per l'uso; non mettere a disposizione sistemi non conformi; cooperare con le autorità.",
       article: "Art. 24", iso: ["A.10.3"] });
@@ -667,7 +670,7 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
   if (risk.art50.includes("50_3") && isDeployer) t({ id: "art50-3", role: "deployer", title: "Informare su riconoscimento emozioni o categorizzazione biometrica",
     what: "Informare le persone esposte del funzionamento del sistema e trattare i dati nel rispetto del GDPR.", article: "Art. 50(3), (5)" });
   if (risk.art50.includes("50_4_deepfake") && isDeployer) t({ id: "art50-4-df", role: "deployer", title: "Dichiarare i deep fake",
-    what: "Rendere noto che immagini, audio o video sono stati generati o manipolati artificialmente; per opere manifestamente artistiche, creative o satiriche basta rivelarne l'esistenza senza ostacolarne la fruizione.", article: "Art. 50(4), primo comma" });
+    what: "Rendere noto che immagini, audio o video sono stati generati o manipolati artificialmente; per opere manifestamente artistiche, creative, satiriche o fittizie basta rivelarne l'esistenza senza ostacolarne la fruizione.", article: "Art. 50(4), primo comma" });
   if (risk.art50.includes("50_4_text") && isDeployer) t({ id: "art50-4-txt", role: "deployer", title: "Dichiarare i testi generati di interesse pubblico",
     what: "Rendere noto che il testo pubblicato per informare il pubblico su questioni di interesse pubblico è stato generato o manipolato artificialmente.", article: "Art. 50(4), secondo comma" });
 
