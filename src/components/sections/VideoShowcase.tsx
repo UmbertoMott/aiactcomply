@@ -772,6 +772,8 @@ export default function VideoShowcase() {
             padding: 40px 20px !important;
             min-height: 0 !important;
           }
+          /* Su smartphone il contenuto entra in dissolvenza, senza spostarsi di lato */
+          .interstitial-row > div > div { transform: none !important; }
           /* FlowTrio */
           .trio-grid { grid-template-columns: 1fr !important; }
           /* ProductHero: padding ridotto */

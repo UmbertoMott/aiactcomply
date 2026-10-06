@@ -152,6 +152,9 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      {/* overflow-x: clip taglia ogni sbordo orizzontale (animazioni che entrano di lato)
+          senza creare un contenitore di scorrimento: la barra in alto resta "sticky". */}
+      <div style={{ overflowX: "clip" }}>
       <Nav />
       <main>
         <Hero />
@@ -167,6 +170,7 @@ export default function Home() {
         <CtaFinal />
       </main>
       <Footer />
+      </div>
     </>
   );
 }
