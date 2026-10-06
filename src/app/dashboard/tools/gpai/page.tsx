@@ -1028,7 +1028,7 @@ export default function GPAIAssessmentPage() {
               </div>
 
               {/* Visual chain */}
-              <div style={{ fontFamily: "monospace", fontSize: 12, color: T.muted, background: T.bg, border: `1px solid ${T.border}`, borderRadius: 8, padding: "12px 16px", marginBottom: 14, lineHeight: 1.9 }}>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: T.muted, background: T.bg, border: `1px solid ${T.border}`, borderRadius: 8, padding: "12px 16px", marginBottom: 14, lineHeight: 1.9 }}>
                 <div style={{ color: T.blue, fontWeight: 700 }}>{t("chain_gpaiProvider")}</div>
                 <div>&nbsp; ├── {t("chain_gpai_resp1")}</div>
                 <div>&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {t("chain_gpai_resp2")}</div>

@@ -135,7 +135,7 @@ export default function TransparencyPage() {
   }
 
   return (
-    <div className="w-full" style={{ fontFamily: "var(--font-inter, system-ui)" }}>
+    <div className="w-full" style={{ fontFamily: "inherit" }}>
       <SystemSelector checkProhibited={true} />
 
       {/* Header */}

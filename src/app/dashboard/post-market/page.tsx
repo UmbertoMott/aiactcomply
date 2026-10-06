@@ -1597,7 +1597,7 @@ function PostMarketPageInner() {
                       placeholder="Descrivi cosa è successo…"
                       rows={2}
                       disabled={incidentChatLoading}
-                      style={{ flex: 1, fontSize: 12, padding: "8px 12px", borderRadius: 10, border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", resize: "none", outline: "none", fontFamily: "var(--font-inter, system-ui)", background: "#fff", lineHeight: 1.5, opacity: incidentChatLoading ? 0.5 : 1 }}
+                      style={{ flex: 1, fontSize: 12, padding: "8px 12px", borderRadius: 10, border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", resize: "none", outline: "none", fontFamily: "inherit", background: "#fff", lineHeight: 1.5, opacity: incidentChatLoading ? 0.5 : 1 }}
                     />
                     <button
                       disabled={!incidentChatInput.trim() || incidentChatLoading}

@@ -182,7 +182,7 @@ export function DpiaGuidedChat({
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: T.green }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{t("dgcx_guided")}</span>
           </div>
-          <span style={{ fontSize: 10, color: T.muted, fontFamily: "monospace" }}>
+          <span style={{ fontSize: 10, color: T.muted, fontFamily: "var(--font-mono)" }}>
             {currentIdx + 1} / {allIds.length}
           </span>
         </div>
@@ -352,7 +352,7 @@ export function DpiaGuidedChat({
                       onClick={() => { handleSend(customPhrase.trim()); setCustomPhrase(""); }}
                       style={{
                         fontSize: 10, fontWeight: 700, padding: "5px 10px", borderRadius: 8,
-                        background: T.green, color: "#fff", border: "none", cursor: "pointer", flexShrink: 0,
+                        background: T.text, color: "#fff", border: "none", cursor: "pointer", flexShrink: 0,
                       }}
                     >
                       Invia →
@@ -419,7 +419,7 @@ export function DpiaGuidedChat({
               <div style={{ display: "flex", gap: 6 }}>
                 <button
                   onClick={() => handleSend(aiDraft)}
-                  style={{ flex: 1, padding: "6px 0", borderRadius: 7, border: "none", background: T.green, color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer" }}
+                  style={{ flex: 1, padding: "6px 0", borderRadius: 7, border: "none", background: T.text, color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer" }}
                 >
                   ✓ Usa
                 </button>

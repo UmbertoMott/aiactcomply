@@ -30,7 +30,7 @@ export function aggregateDossier(): DossierData {
       companyName: onboarding?.companyName ?? "Azienda non specificata",
       systemName:  onboarding?.systemName  ?? "Sistema di IA",
       generatedAt: new Date().toISOString(),
-      generatedBy: "AIComply Platform v1.0",
+      generatedBy: "RegulaeOS v1.0",
       version:     "1.0",
     },
     prohibited:   readFromStorage<ProhibitedCheckResult>("prohibited")  ?? undefined,

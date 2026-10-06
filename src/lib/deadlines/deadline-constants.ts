@@ -186,6 +186,6 @@ export const DEADLINE_ACTIONS: Record<string, { label: string; href?: string }[]
     { label: "Prepara valutazione sicurezza avanzata", href: "/dashboard/tools/risk-manager" },
   ],
   full_regulation: [
-    { label: "Verifica copertura completa di tutti i moduli AIComply", href: "/dashboard" },
+    { label: "Verifica copertura completa di tutti i moduli RegulaeOS", href: "/dashboard" },
   ],
 };

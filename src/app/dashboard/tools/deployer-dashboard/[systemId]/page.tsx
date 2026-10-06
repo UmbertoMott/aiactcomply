@@ -1,4 +1,5 @@
 "use client";
+import { levelLabel } from "@/lib/risk-level-label";
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -36,7 +37,7 @@ import { Art26_9 } from "@/components/deployer/Art26_9";
 import { linkedDeployerStatus, type LinkedStatus } from "@/lib/deployer/linked-status";
 import { loadOrgProfile } from "@/lib/dossier/org-profile";
 
-const FONT = { fontFamily: "Inter, system-ui, sans-serif" };
+const FONT = { fontFamily: "inherit" };
 
 const STATUS_OPTIONS: { value: ObligationStatus; label: string; color: string; bg: string }[] = [
   { value: "not_started", label: "Non avviato", color: "#6b7280", bg: "#f9fafb" },
@@ -296,7 +297,7 @@ function WorkerNoticeModule({
             onClick={generate}
             disabled={loading}
             className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg"
-            style={{ background: "#7c3aed", color: "#fff", opacity: loading ? 0.7 : 1 }}
+            style={{ background: "#0D1016", color: "#fff", opacity: loading ? 0.7 : 1 }}
           >
             {loading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
             {notice?.generated ? "Rigenera" : "Genera bozza AI"}
@@ -623,7 +624,7 @@ export default function DeployerSystemDetailPage() {
             <UserCheck size={18} style={{ color: "#2563eb" }} />
             <h1 className="text-lg font-bold">{system.name}</h1>
             <span className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: "#f3f4f6", color: "#6b7280" }}>
-              {system.tier}
+              {levelLabel(system.tier)}
             </span>
             {saved && (
               <span className="text-[11px] flex items-center gap-1" style={{ color: "#16a34a" }}>
@@ -658,14 +659,14 @@ export default function DeployerSystemDetailPage() {
         <section className="mb-6">
           <button
             onClick={() => setDetailOpen(v => !v)}
-            className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-slate-700/50 bg-slate-900/60 mb-1 hover:bg-slate-900/80 transition-colors"
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-black/10 bg-white mb-1 hover:bg-black/[0.03] transition-colors"
           >
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] text-slate-500 bg-slate-800/60 px-1.5 py-0.5 rounded">Art. 26</span>
-              <span className="text-sm font-semibold text-slate-200">Lista di controllo del deployer</span>
-              <span className="text-[10px] text-slate-500">10 paragrafi</span>
+              <span className="font-mono text-[10px] text-black/50 bg-black/[0.05] px-1.5 py-0.5 rounded">Art. 26</span>
+              <span className="text-sm font-semibold text-[#0D1016]">Lista di controllo del deployer</span>
+              <span className="text-[10px] text-black/50">10 paragrafi</span>
             </div>
-            {detailOpen ? <ChevronUp size={14} className="text-slate-500" /> : <ChevronDown size={14} className="text-slate-500" />}
+            {detailOpen ? <ChevronUp size={14} className="text-black/50" /> : <ChevronDown size={14} className="text-black/50" />}
           </button>
 
           {detailOpen && (
@@ -715,7 +716,7 @@ export default function DeployerSystemDetailPage() {
             onClick={runAiAssessment}
             disabled={aiLoading}
             className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg"
-            style={{ background: "#2563eb", color: "#fff", opacity: aiLoading ? 0.7 : 1 }}
+            style={{ background: "#0D1016", color: "#fff", opacity: aiLoading ? 0.7 : 1 }}
           >
             {aiLoading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
             Valuta con AI
@@ -850,7 +851,7 @@ export default function DeployerSystemDetailPage() {
 function LinkedBody({ status }: { status: LinkedStatus }) {
   return (
     <div className="flex items-center justify-between gap-3 flex-wrap">
-      <p className="text-xs text-slate-400">{status.summary}</p>
+      <p className="text-xs text-black/60">{status.summary}</p>
       <Link href={status.href} className="text-xs font-medium underline" style={{ color: "#2563eb" }}>
         {status.linkLabel} →
       </Link>

@@ -174,7 +174,7 @@ function DkField({ label, article, children, span2, aiBadge }: {
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
         <label style={{ fontSize: 11, color: DK.muted, fontWeight: 500 }}>{label}</label>
         {article && (
-          <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint, borderRadius: 4,
+          <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: DK.faint, borderRadius: 4,
             padding: "1px 5px", border: `1px solid ${DK.border}`, background: "rgba(0,0,0,0.04)" }}>
             {article}
           </span>
@@ -201,7 +201,7 @@ function SectionCard({ title, article, aiBadge, children }: {
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <p style={{ fontSize: 13, fontWeight: 600, color: DK.text, margin: 0 }}>{title}</p>
           {article && (
-            <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint,
+            <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: DK.faint,
               border: `1px solid ${DK.border}`, borderRadius: 4, padding: "1px 6px",
               background: "rgba(0,0,0,0.04)" }}>
               {article}
@@ -676,7 +676,7 @@ export default function EUDBCompliancePage() {
           <pre style={{ margin: 0, padding: 12, borderRadius: 8, background: DK.card2,
             border: `1px solid ${DK.border}`, fontSize: 10, lineHeight: 1.7, color: DK.text,
             overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-word",
-            fontFamily: "ui-monospace, monospace" }}>
+            fontFamily: "var(--font-mono)" }}>
             {sectionA}
           </pre>
         </SectionCard>
@@ -695,7 +695,7 @@ export default function EUDBCompliancePage() {
           <pre style={{ margin: 0, padding: 12, borderRadius: 8, background: DK.card2,
             border: `1px solid ${DK.border}`, fontSize: 10, lineHeight: 1.7, color: DK.text,
             overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-word",
-            fontFamily: "ui-monospace, monospace" }}>
+            fontFamily: "var(--font-mono)" }}>
             {sectionB}
           </pre>
         </SectionCard>
@@ -714,7 +714,7 @@ export default function EUDBCompliancePage() {
           <pre style={{ margin: 0, padding: 12, borderRadius: 8, background: DK.card2,
             border: `1px solid ${DK.border}`, fontSize: 10, lineHeight: 1.7, color: DK.text,
             overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-word",
-            fontFamily: "ui-monospace, monospace" }}>
+            fontFamily: "var(--font-mono)" }}>
             {sectionC}
           </pre>
         </SectionCard>
@@ -731,7 +731,7 @@ export default function EUDBCompliancePage() {
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11 }}>
                   <span style={{ color: DK.red, fontWeight: 700 }}>×</span>
                   <span style={{ color: DK.muted, flex: 1 }}>{err.message}</span>
-                  <span style={{ fontFamily: "monospace", fontSize: 9, color: DK.faint }}>{err.artRef}</span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: DK.faint }}>{err.artRef}</span>
                 </div>
               ))}
             </div>
@@ -881,7 +881,7 @@ export default function EUDBCompliancePage() {
           <h1 style={{ fontSize: 22, fontWeight: 400, letterSpacing: "-0.5px", color: DK.text, margin: 0 }}>
             Registrazione EUDB
           </h1>
-          <span style={{ fontSize: 9, fontFamily: "monospace", padding: "2px 7px", borderRadius: 10,
+          <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 7px", borderRadius: 10,
             background: "rgba(0,0,0,0.04)", color: DK.muted, border: `1px solid ${DK.border}` }}>
             Art. 49
           </span>

@@ -626,7 +626,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6 w-full" style={{ background: "#FFFFFF" }}>
+        <main className="dash-main flex-1 overflow-y-auto p-6 w-full" style={{ background: "#FFFFFF" }}>
           {currentGuide && <ToolGuide key={currentGuide.id} guide={currentGuide} needs={needs} />}
           {children}
         </main>

@@ -25,8 +25,8 @@ function InsightCard({
 }) {
   const colorMap = {
     orange: "text-orange-400 border-orange-800/40 bg-orange-950/20",
-    green:  "text-green-400 border-green-800/40 bg-green-950/20",
-    red:    "text-red-400 border-red-800/40 bg-red-950/20",
+    green:  "text-green-700 border-green-200 bg-green-50",
+    red:    "text-red-600 border-red-200 bg-red-50",
   };
   return (
     <div className={`rounded-lg border p-3 ${colorMap[color]}`}>
@@ -34,11 +34,11 @@ function InsightCard({
         {icon} {title}
       </p>
       {items.length === 0 ? (
-        <p className="text-xs text-slate-500 italic">Nessun elemento estratto.</p>
+        <p className="text-xs text-black/50 italic">Nessun elemento estratto.</p>
       ) : (
         <ul className="space-y-1">
           {items.map((item, i) => (
-            <li key={i} className="text-xs text-slate-300">• {item}</li>
+            <li key={i} className="text-xs text-[#0D1016]">• {item}</li>
           ))}
         </ul>
       )}
@@ -77,29 +77,29 @@ export function Art26_1({ record, onChange }: Props) {
         />
         <label
           htmlFor="instructions-upload"
-          className="flex flex-col items-center justify-center border-2 border-dashed border-slate-700 rounded-lg p-5 cursor-pointer hover:border-slate-600 transition-colors"
+          className="flex flex-col items-center justify-center border-2 border-dashed border-black/10 rounded-lg p-5 cursor-pointer hover:border-black/25 transition-colors"
         >
-          <Upload className="h-5 w-5 mb-2 text-slate-600" />
-          <span className="text-sm text-slate-400 hover:text-slate-300 transition-colors">
+          <Upload className="h-5 w-5 mb-2 text-black/40" />
+          <span className="text-sm text-black/60 hover:text-[#0D1016] transition-colors">
             {fileName ? fileName : "Carica Instructions for Use (PDF, TXT, DOCX)"}
           </span>
-          <span className="text-xs text-slate-600 mt-1">Analisi automatica con AI</span>
+          <span className="text-xs text-black/40 mt-1">Analisi automatica con AI</span>
         </label>
       </div>
 
       {/* AI spinner */}
       {isAnalyzing && (
-        <div className="flex items-center gap-2 text-sm text-slate-400">
-          <span className="animate-spin text-indigo-400">✦</span>
+        <div className="flex items-center gap-2 text-sm text-black/60">
+          <span className="animate-spin text-[#0D1016]">✦</span>
           Analisi in corso...
-          <span className="text-xs text-slate-600">✦ AI — verifica e conferma</span>
+          <span className="text-xs text-black/40">✦ AI — verifica e conferma</span>
         </div>
       )}
 
       {/* AI output */}
       {insights && !isAnalyzing && (
         <div className="space-y-3">
-          <p className="text-xs text-yellow-400 font-medium">
+          <p className="text-xs text-amber-700 font-medium">
             ✦ AI — verifica e conferma prima di procedere
           </p>
           <InsightCard
@@ -132,8 +132,8 @@ export function Art26_1({ record, onChange }: Props) {
                   updatedAt: new Date().toISOString(),
                 }));
               }}
-              className="w-full rounded-lg bg-black border border-slate-700 text-slate-300
-                         hover:bg-slate-900 hover:border-slate-600 transition-colors
+              className="w-full rounded-lg bg-black border border-black/10 text-[#0D1016]
+                         hover:bg-black/[0.03] hover:border-black/25 transition-colors
                          py-2.5 text-sm font-medium"
             >
               Conferma lettura e accettazione istruzioni
@@ -144,7 +144,7 @@ export function Art26_1({ record, onChange }: Props) {
 
       {/* Stato lettura confermata */}
       {record.instructionsRead && (
-        <div className="flex items-center gap-2 text-xs text-green-400">
+        <div className="flex items-center gap-2 text-xs text-green-700">
           <Check size={12} />
           Lette il{" "}
           {new Date(record.instructionsReadAt!).toLocaleDateString("it-IT", {
@@ -164,7 +164,7 @@ export function Art26_1({ record, onChange }: Props) {
               updatedAt: new Date().toISOString(),
             }))
           }
-          className="text-xs text-slate-500 hover:text-slate-400 underline transition-colors"
+          className="text-xs text-black/50 hover:text-black/70 underline transition-colors"
         >
           Conferma lettura manuale (senza analisi AI)
         </button>

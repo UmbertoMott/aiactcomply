@@ -5,7 +5,7 @@ import { type NextRequest, NextResponse } from "next/server";
 // Injected on all /api/* routes that return AI-generated content.
 const AI_DISCLOSURE_HEADERS: Record<string, string> = {
   "X-AI-Generated":       "true",
-  "X-AI-Platform":        `AIComply/${process.env.NEXT_PUBLIC_APP_VERSION ?? "0.1.0"}`,
+  "X-AI-Platform":        `RegulaeOS/${process.env.NEXT_PUBLIC_APP_VERSION ?? "0.1.0"}`,
   "X-AI-Regulation":      "EU-AI-Act-2024/1689-Art50",
   "X-AI-Requires-Review": "true",
 };

@@ -131,3 +131,14 @@ body {
     box-shadow: 0 0 40px rgba(59, 130, 246, 0.12), 0 0 80px rgba(59, 130, 246, 0.05);
   }
 }
+
+/* Area riservata: un solo stile per il titolo di ogni pagina, qualunque tool
+   (esclusi i titoli dei documenti nelle anteprime: .doc-title) */
+.dash-main h1:not(.doc-title) {
+  font-family: inherit !important;
+  font-size: 22px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.3px !important;
+  line-height: 1.25 !important;
+  color: #0D1016 !important;
+}

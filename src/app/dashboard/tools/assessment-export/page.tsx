@@ -180,7 +180,7 @@ export default function AssessmentExportPage() {
   const { shared, dpia, fria, correlatedRisks, meta } = assessment;
 
   return (
-    <div className="w-full" style={{ fontFamily: "system-ui, sans-serif" }}>
+    <div className="w-full" style={{ fontFamily: "inherit" }}>
       <SystemSelector checkProhibited={true} />
 
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between",
@@ -347,11 +347,11 @@ export default function AssessmentExportPage() {
       <div style={{ ...cardSt, padding: "48px 64px", maxWidth: 700, margin: "0 auto 40px",
         fontFamily: "Georgia, 'Times New Roman', serif" }}>
         <h1 style={{ fontSize: 20, fontWeight: 600, color: T.text, marginBottom: 4,
-          fontFamily: "system-ui, sans-serif" }}>
+          fontFamily: "inherit" }}>
           {shared.systemName || t("systemAI_default")}
         </h1>
         <p style={{ fontSize: 11, color: T.muted, marginBottom: 24,
-          fontFamily: "system-ui, sans-serif", letterSpacing: "0.3px" }}>
+          fontFamily: "inherit", letterSpacing: "0.3px" }}>
           {t("doc_subtitle")}{" "}
           {new Date().toLocaleDateString("it-IT", { year: "numeric", month: "long", day: "numeric" })}
         </p>

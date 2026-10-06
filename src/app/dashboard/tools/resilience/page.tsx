@@ -163,7 +163,7 @@ export default function ResiliencePage() {
   const verdictColor: Record<string, string> = { ok: T.green, review: T.amber, critical: T.red };
 
   return (
-    <div style={{ background: T.bg, minHeight: "100vh", fontFamily: "Inter, system-ui, sans-serif" }}>
+    <div style={{ background: T.bg, minHeight: "100vh", fontFamily: "inherit" }}>
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "24px 20px 80px" }}>
         <div className="mb-4">
           <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: T.muted }}>{t("kicker")}</p>
@@ -371,7 +371,7 @@ export default function ResiliencePage() {
           <div style={card}>
             <p className="text-[11px] mb-3" style={{ color: T.muted }}>
               {t("ev_desc")}
-              {record.fingerprint && <span style={{ fontFamily: "monospace" }}> · fp {record.fingerprint.slice(0, 10)}…</span>}
+              {record.fingerprint && <span style={{ fontFamily: "var(--font-mono)" }}> · fp {record.fingerprint.slice(0, 10)}…</span>}
             </p>
             <div className="flex flex-wrap gap-2 items-center">
               <FinalExportGate>

@@ -28,7 +28,7 @@ export default function AiaArchitectUI() {
             className="w-4 h-4 rounded"
             style={{ background: "linear-gradient(135deg,#3b82f6,#6366f1)" }}
           />
-          AIComply
+          RegulaeOS
         </div>
         <div
           className="text-[9px] font-semibold uppercase mb-1.5"

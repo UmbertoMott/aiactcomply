@@ -304,7 +304,7 @@ export function generateMandate(doc: AuthRepDoc): string {
   return `MANDATO DI AUTHORIZED REPRESENTATIVE
 ai sensi dell'Art. 22 del Regolamento (UE) 2024/1689 (AI Act)
 
-Generato da AIComply il ${new Date().toLocaleDateString("it-IT")}
+Generato da RegulaeOS il ${new Date().toLocaleDateString("it-IT")}
 
 ${SEP}
 PARTI

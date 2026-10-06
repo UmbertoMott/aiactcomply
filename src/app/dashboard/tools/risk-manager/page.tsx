@@ -269,14 +269,14 @@ function PhaseRow({
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
             fontSize: 11.5, fontWeight: 600,
-            fontFamily: "var(--font-inter, system-ui)",
+            fontFamily: "inherit",
             color: status === "complete" ? "#15803d" : "#0D1016",
             whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
           }}>
             {phase.label}
           </div>
           <div style={{
-            fontSize: 10, fontFamily: "var(--font-inter, system-ui)",
+            fontSize: 10, fontFamily: "inherit",
             color: "rgba(0,0,0,0.4)",
             whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
           }}>
@@ -339,7 +339,7 @@ function SectionRow({ section, onOpen, index }: { section: SectionProgress; onOp
           </p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <span style={{ fontSize: 9.5, fontWeight: 700, color: pctColor, fontFamily: "monospace" }}>{section.percent}%</span>
+          <span style={{ fontSize: 9.5, fontWeight: 700, color: pctColor, fontFamily: "var(--font-mono)" }}>{section.percent}%</span>
           <ChevronRight size={10} style={{ color: "rgba(0,0,0,0.22)", transform: expanded ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
         </div>
       </button>
@@ -391,7 +391,7 @@ class ViewerErrorBoundary extends React.Component<
             <button onClick={this.props.onClose} style={{ fontSize: 12, background: "none", border: "none", cursor: "pointer", color: "rgba(0,0,0,0.4)" }}>✕</button>
           </div>
           <div style={{ flex: 1, padding: 20, display: "flex", flexDirection: "column", gap: 8 }}>
-            <p style={{ fontSize: 12, color: "#991b1b", margin: 0, fontFamily: "monospace", background: "#FEE2E2", padding: "8px 12px", borderRadius: 6 }}>{this.state.error}</p>
+            <p style={{ fontSize: 12, color: "#991b1b", margin: 0, fontFamily: "var(--font-mono)", background: "#FEE2E2", padding: "8px 12px", borderRadius: 6 }}>{this.state.error}</p>
             <p style={{ fontSize: 11, color: "rgba(0,0,0,0.45)", margin: 0 }}>Ricarica la pagina o resetta la conversazione per ripristinare.</p>
           </div>
         </div>
@@ -488,7 +488,7 @@ function PhaseDocColumn({
   };
 
   const docHeader = (
-    <div data-noedit="true" style={{ marginBottom: 20, paddingBottom: 14, borderBottom: "2px solid #0D1016", fontFamily: "var(--font-inter, system-ui, sans-serif)" }}>
+    <div data-noedit="true" style={{ marginBottom: 20, paddingBottom: 14, borderBottom: "2px solid #0D1016", fontFamily: "inherit" }}>
       <p style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.38)", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px" }}>
         Art. 9 · Reg. UE 2024/1689 — Sistema di gestione dei rischi
       </p>
@@ -501,7 +501,7 @@ function PhaseDocColumn({
   const docFooter = (
     <div style={{ borderTop: "1px solid rgba(0,0,0,0.12)", marginTop: 20, paddingTop: 8 }}>
       <p style={{ fontSize: 9, color: "rgba(0,0,0,0.4)", fontStyle: "italic", margin: 0 }}>
-        Generato da AIComply · {new Date().toLocaleDateString("it-IT")} ·
+        Generato da RegulaeOS · {new Date().toLocaleDateString("it-IT")} ·
       </p>
     </div>
   );
@@ -675,7 +675,7 @@ function ExportMenu({ documentation, systemName }: { documentation: RiskDocument
   function exportMarkdown() {
     const lines = ["# Risk Register — AI Act Art. 9", `**Sistema**: ${name}`, `**Data**: ${date}`, ""];
     buildSections().forEach(s => { lines.push(`## ${s.title}`, s.content, ""); });
-    lines.push("---\n* — Generato da AIComply*");
+    lines.push("---\n* — Generato da RegulaeOS*");
     const blob = new Blob([lines.join("\n")], { type: "text/markdown" });
     const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `RiskRegister_${name}_${date}.md` });
     a.click(); URL.revokeObjectURL(a.href);
@@ -709,9 +709,9 @@ p{margin:4pt 0;line-height:1.5}
 .footer{font-size:8pt;color:#999;margin-top:24pt;border-top:1px solid #ddd;padding-top:8pt}
 </style></head><body>
 <h1>Risk Register — AI Act Art. 9</h1>
-<p class="meta">Sistema: ${name} &nbsp;·&nbsp; Data: ${date} &nbsp;·&nbsp; Generato da AIComply</p>
+<p class="meta">Sistema: ${name} &nbsp;·&nbsp; Data: ${date} &nbsp;·&nbsp; Generato da RegulaeOS</p>
 ${sections.map(s => `<h2>${s.title}</h2><p>${s.content.replace(/\n/g, "<br>")}</p>`).join("\n")}
-<p class="footer"> — Documento generato da AIComply. Richiedere verifica legale professionale prima dell&apos;utilizzo.</p>
+<p class="footer"> — Documento generato da RegulaeOS. Richiedere verifica legale professionale prima dell&apos;utilizzo.</p>
 </body></html>`;
     const blob = new Blob([html], { type: "application/msword" });
     const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `RiskRegister_${name}_${date}.doc` });
@@ -999,7 +999,7 @@ export default function RiskManagerPage() {
 
   if (guidedMode) {
     return (
-      <div style={{ fontFamily: "var(--font-inter, system-ui)", background: "#ffffff", height: "calc(100vh - 4rem)", display: "flex", flexDirection: "column" }}>
+      <div style={{ fontFamily: "inherit", background: "#ffffff", height: "calc(100vh - 4rem)", display: "flex", flexDirection: "column" }}>
         <SystemSelector />
         <ProviderTransitionAlertBanner />
         <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
@@ -1013,7 +1013,7 @@ export default function RiskManagerPage() {
   const hasContent = completedPhases.length > 0 || Object.keys(documentation).length > 0;
 
   return (
-    <div style={{ fontFamily: "var(--font-inter, system-ui)", background: "#ffffff", height: "calc(100vh - 4rem)", display: "flex", flexDirection: "column" }}>
+    <div style={{ fontFamily: "inherit", background: "#ffffff", height: "calc(100vh - 4rem)", display: "flex", flexDirection: "column" }}>
       <SystemSelector />
       <ProviderTransitionAlertBanner />
 
@@ -1081,7 +1081,7 @@ export default function RiskManagerPage() {
               <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                 {t("progress")}
               </span>
-              <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", fontFamily: "monospace" }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", fontFamily: "var(--font-mono)" }}>
                 {progressPct}%
               </span>
             </div>
@@ -1279,7 +1279,7 @@ export default function RiskManagerPage() {
                 style={{
                   flex: 1, fontSize: 13, padding: "10px 14px", borderRadius: 10,
                   border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", resize: "none",
-                  outline: "none", fontFamily: "var(--font-inter, system-ui)",
+                  outline: "none", fontFamily: "inherit",
                   background: "#ffffff", lineHeight: 1.5,
                   opacity: isLoading ? 0.5 : 1,
                 }}

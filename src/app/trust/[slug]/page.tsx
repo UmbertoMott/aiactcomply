@@ -18,9 +18,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const systemName =
       (page as unknown as Record<string, unknown>).systemName as string | undefined;
     return {
-      title: `${systemName ?? "Sistema di IA"} — Trasparenza AI | AIComply`,
+      title: `${systemName ?? "Sistema di IA"} — Trasparenza AI | RegulaeOS`,
       description:
-        "Pagina di trasparenza AI conforme al Reg. (UE) 2024/1689 (AI Act) — generata con AIComply.",
+        "Pagina di trasparenza AI conforme al Reg. (UE) 2024/1689 (AI Act) — generata con RegulaeOS.",
       robots: page.noindex ? "noindex, nofollow" : "index, follow",
       openGraph: {
         title: `${systemName ?? "Sistema di IA"} — Trust Center`,
@@ -30,10 +30,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: "Trust Center — AIComply",
-    description: "Pagina di trasparenza AI generata con AIComply — Reg. (UE) 2024/1689",
+    title: "Trust Center — RegulaeOS",
+    description: "Pagina di trasparenza AI generata con RegulaeOS — Reg. (UE) 2024/1689",
     robots: "noindex, nofollow",
-    openGraph: { title: "Trust Center — AIComply", url: `https://aicomply.io/trust/${slug}` },
+    openGraph: { title: "Trust Center — RegulaeOS", url: `https://aicomply.io/trust/${slug}` },
   };
 }
 

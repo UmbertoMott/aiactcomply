@@ -43,7 +43,7 @@ export function RiskRegisterProgressRail({
           <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
             Avanzamento
           </span>
-          <span style={{ fontSize: 11, fontWeight: 600, color: T.text, fontFamily: "monospace" }}>
+          <span style={{ fontSize: 11, fontWeight: 600, color: T.text, fontFamily: "var(--font-mono)" }}>
             {pct}%
           </span>
         </div>
@@ -94,7 +94,7 @@ export function RiskRegisterProgressRail({
                   </p>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ fontSize: 9.5, fontWeight: 700, color: secColor, fontFamily: "monospace" }}>
+                  <span style={{ fontSize: 9.5, fontWeight: 700, color: secColor, fontFamily: "var(--font-mono)" }}>
                     {sec.percent}%
                   </span>
                   <ChevronRight

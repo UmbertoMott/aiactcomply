@@ -122,7 +122,7 @@ export function RiskRegisterGuidedChat({
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: T.green }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>Risk Register Guidato</span>
           </div>
-          <span style={{ fontSize: 10, color: T.muted, fontFamily: "monospace" }}>
+          <span style={{ fontSize: 10, color: T.muted, fontFamily: "var(--font-mono)" }}>
             {currentIdx + 1} / {allIds.length}
           </span>
         </div>

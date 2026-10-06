@@ -21,7 +21,7 @@ export interface ClassifyChatResponse {
   error?: string;
 }
 
-const SYSTEM_PROMPT = `Sei un esperto EU AI Act integrato in AIComply, specializzato nella classificazione dei sistemi di IA ai sensi del Regolamento UE 2024/1689.
+const SYSTEM_PROMPT = `Sei un esperto EU AI Act integrato in RegulaeOS, specializzato nella classificazione dei sistemi di IA ai sensi del Regolamento UE 2024/1689.
 
 Il tuo obiettivo è guidare l'utente a classificare correttamente il suo sistema di IA attraverso una conversazione strutturata in 3 fasi:
 

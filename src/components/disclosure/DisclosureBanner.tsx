@@ -8,8 +8,8 @@ import { useState } from "react";
 import { X } from "lucide-react";
 
 const copy = {
-  it: "I contenuti di AIComply sono generati con il supporto dell'intelligenza artificiale — Art. 50 Reg. UE 2024/1689. Richiedono sempre revisione legale prima dell'uso ufficiale.",
-  en: "AIComply content is AI-assisted — Art. 50 Reg. (EU) 2024/1689. Always requires legal review before official use.",
+  it: "I contenuti di RegulaeOS sono generati con il supporto dell'intelligenza artificiale — Art. 50 Reg. UE 2024/1689. Richiedono sempre revisione legale prima dell'uso ufficiale.",
+  en: "RegulaeOS content is AI-assisted — Art. 50 Reg. (EU) 2024/1689. Always requires legal review before official use.",
 };
 
 interface DisclosureBannerProps {

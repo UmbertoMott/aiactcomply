@@ -787,7 +787,7 @@ function ClassifyModal({ system, onClose, onSave }: {
               <div style={{ marginBottom: 14, padding: "12px 14px", borderRadius: 9, background: tierCfg.bg, border: `1px solid ${tierCfg.border}` }}>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 7, marginBottom: 6 }}>
                   <span style={{ fontSize: 12, fontWeight: 700, color: tierCfg.text }}>{t(`tier_${tier}_label`)}</span>
-                  <span style={{ fontSize: 9, color: "#9ca3af", fontFamily: "monospace" }}>{tierCfg.article}</span>
+                  <span style={{ fontSize: 9, color: "#9ca3af", fontFamily: "var(--font-mono)" }}>{tierCfg.article}</span>
                 </div>
                 <p style={{ fontSize: 11.5, color: "#374151", margin: "0 0 8px", lineHeight: 1.5 }}>{t(`tier_${tier}_what`)}</p>
                 <p style={{ fontSize: 9.5, fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 4px" }}>{t("typicalExamples")}</p>
@@ -1018,7 +1018,7 @@ Chatbot Supporto Clienti,Customer Care,Assistente virtuale basato su GPT-4 per i
         onChange={e => { setCsvText(e.target.value); setPreview([]); setError(null) }}
         placeholder={"name,owner,description,status\nWorkday ATS,HR,Sistema ATS per screening CV,in_production"}
         rows={6}
-        style={{ ...INPUT_STYLE, resize: "vertical", fontFamily: "monospace", fontSize: 12, lineHeight: 1.5 }}
+        style={{ ...INPUT_STYLE, resize: "vertical", fontFamily: "var(--font-mono)", fontSize: 12, lineHeight: 1.5 }}
       />
       {error && <p style={{ fontSize: 12, color: "#dc2626", margin: "6px 0 0" }}>{error}</p>}
 

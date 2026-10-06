@@ -42,7 +42,7 @@ const T = {
   blue: "#0D1016", blueBg: "rgba(0,0,0,0.05)", blueBdr: "rgba(0,0,0,0.12)",
   violet: "#7c3aed", violetBg: "rgba(124,58,237,0.05)", violetBdr: "rgba(124,58,237,0.16)",
 } as const;
-const FONT: CSSProperties = { fontFamily: "Inter, system-ui, sans-serif" };
+const FONT: CSSProperties = { fontFamily: "inherit" };
 const card: CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
 const inp: CSSProperties = { width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, color: T.text, background: T.card, outline: "none" };
 const ta: CSSProperties = { ...inp, resize: "vertical" as const };

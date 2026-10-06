@@ -19,7 +19,7 @@ const OPTIONS: { value: DeployerRecord["endUserNotificationsStatus"]; label: str
 export function Art26_7({ record, onChange }: Props) {
   return (
     <div className="space-y-3">
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-black/60">
         Se un sistema dell&apos;Allegato III adotta o aiuta ad adottare decisioni su persone fisiche, queste devono essere informate
         che sono soggette al suo uso (Art. 26(11)).
       </p>
@@ -41,8 +41,8 @@ export function Art26_7({ record, onChange }: Props) {
               className="mt-0.5"
             />
             <div>
-              <p className="text-sm text-slate-300 font-medium">{opt.label}</p>
-              <p className="text-xs text-slate-500">{opt.desc}</p>
+              <p className="text-sm text-[#0D1016] font-medium">{opt.label}</p>
+              <p className="text-xs text-black/50">{opt.desc}</p>
             </div>
           </label>
         ))}

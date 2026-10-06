@@ -46,7 +46,7 @@ function LivePreview({ doc }: { doc: RiskRegisterGuidedDoc }) {
         <h1 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, color: T.text, letterSpacing: "-0.5px" }}>
           Risk Register — Art. 9 EU AI Act
         </h1>
-        <p style={{ fontSize: 10, fontFamily: "monospace", color: T.muted, marginBottom: 24, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+        <p style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: T.muted, marginBottom: 24, textTransform: "uppercase", letterSpacing: "0.06em" }}>
           ISO/IEC 23894 · Reg. (UE) 2024/1689
         </p>
 
@@ -55,12 +55,12 @@ function LivePreview({ doc }: { doc: RiskRegisterGuidedDoc }) {
             <h2 style={{ fontSize: 13, fontWeight: 700, color: T.text, borderBottom: "1.5px solid rgba(0,0,0,0.10)", paddingBottom: 6, marginBottom: 12, letterSpacing: "-0.2px" }}>
               {sec.label}
             </h2>
-            <p style={{ fontSize: 9, fontFamily: "monospace", color: T.muted, marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            <p style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: T.muted, marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.06em" }}>
               {sec.legalRef}
             </p>
             {items.map(sp => (
               <div key={sp.id} style={{ marginBottom: 14 }}>
-                <p style={{ fontSize: 10, fontFamily: "monospace", fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 3 }}>
+                <p style={{ fontSize: 10, fontFamily: "var(--font-mono)", fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 3 }}>
                   {sp.label}
                 </p>
                 <p style={{ fontSize: 12.5, color: T.text, lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>
@@ -221,7 +221,7 @@ export function RiskRegisterGuidedMode({ onExitGuidedMode }: RiskRegisterGuidedM
               style={{
                 display: "flex", alignItems: "center", gap: 6,
                 padding: "6px 12px", borderRadius: 7,
-                border: `1px solid ${T.green}`, background: T.green,
+                border: `1px solid ${T.text}`, background: T.text,
                 cursor: "pointer", fontSize: 11, fontWeight: 700, color: "#fff",
               }}
             >

@@ -89,7 +89,7 @@ export function IntegrityCard({ logSets, t }: { logSets: ImportedLogSet[]; t: TF
                 <p className="text-[10px]" style={{ color: T.muted }}>{t("i_noHashFields")}</p>
               ) : null}
               {ls.fingerprint && (
-                <p className="text-[10px] mt-2" style={{ color: T.faint, fontFamily: "monospace" }}>
+                <p className="text-[10px] mt-2" style={{ color: T.faint, fontFamily: "var(--font-mono)" }}>
                   fingerprint {ls.fingerprint.slice(0, 8)}… · {ls.analyzedAt?.slice(0, 10)}
                 </p>
               )}

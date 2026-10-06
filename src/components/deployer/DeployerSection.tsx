@@ -17,17 +17,17 @@ interface Props {
 }
 
 const SECTION_STYLE: Record<SectionStatus, string> = {
-  ok:           "border-slate-700/50 bg-slate-900/60",
-  pending:      "border-yellow-800/40 bg-yellow-950/10",
-  suspended:    "border-red-800/50 bg-red-950/20",
-  not_required: "border-slate-800/30 bg-slate-900/30 opacity-60",
+  ok:           "border-black/10 bg-white",
+  pending:      "border-amber-200 bg-amber-50/50",
+  suspended:    "border-red-200 bg-red-50",
+  not_required: "border-black/[0.06] bg-white opacity-60",
 };
 
 const BADGE: Record<SectionStatus, { label: string; cls: string }> = {
-  ok:           { label: "✓ Completo",   cls: "text-green-400 bg-green-900/30 border-green-800/50" },
-  pending:      { label: "In attesa",    cls: "text-yellow-400 bg-yellow-900/30 border-yellow-800/50" },
-  suspended:    { label: "SOSPESO",      cls: "text-red-300 bg-red-900/50 border-red-800/60" },
-  not_required: { label: "Non richiesto", cls: "text-slate-500 bg-slate-800/40 border-slate-700/50" },
+  ok:           { label: "✓ Completo",   cls: "text-green-700 bg-green-50 border-green-200" },
+  pending:      { label: "In attesa",    cls: "text-amber-700 bg-amber-50 border-amber-200" },
+  suspended:    { label: "SOSPESO",      cls: "text-red-700 bg-red-50 border-red-200" },
+  not_required: { label: "Non richiesto", cls: "text-black/50 bg-black/[0.04] border-black/10" },
 };
 
 export function DeployerSection({ artRef, title, status, children, defaultOpen = false }: Props) {
@@ -41,20 +41,20 @@ export function DeployerSection({ artRef, title, status, children, defaultOpen =
         onClick={() => setOpen(v => !v)}
       >
         <div className="flex items-center gap-2.5">
-          <span className="font-mono text-[10px] text-slate-500 bg-slate-800/60 px-1.5 py-0.5 rounded">
+          <span className="font-mono text-[10px] text-black/50 bg-black/[0.05] px-1.5 py-0.5 rounded">
             {artRef}
           </span>
-          <h3 className="text-sm font-medium text-slate-200">{title}</h3>
+          <h3 className="text-sm font-medium text-[#0D1016]">{title}</h3>
         </div>
         <div className="flex items-center gap-2">
           <span className={cn("font-mono text-[10px] px-2 py-0.5 rounded border", badge.cls)}>
             {badge.label}
           </span>
-          <span className="text-slate-600 text-xs">{open ? "▲" : "▼"}</span>
+          <span className="text-black/40 text-xs">{open ? "▲" : "▼"}</span>
         </div>
       </button>
       {open && (
-        <div className="px-4 pb-4 border-t border-slate-700/30">
+        <div className="px-4 pb-4 border-t border-black/[0.06]">
           <div className="pt-3">
             {children}
           </div>

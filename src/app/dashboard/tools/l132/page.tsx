@@ -392,7 +392,7 @@ function buildReportText(r: L132Result): string {
     "  · WCAG 2.1 — Web Content Accessibility Guidelines",
     "  · Garante Privacy — Linee Guida AI in contesti lavorativi (2024)",
     "═══════════════════════════════════════════════════════════",
-    "  Generato da AIComply · aicomply.eu",
+    "  Generato da RegulaeOS · aicomply.eu",
     "═══════════════════════════════════════════════════════════",
   ];
   return lines.join("\n");
@@ -679,7 +679,7 @@ export default function L132Page() {
         overallStatus: result.overallStatus,
         systemName: result.systemName,
       },
-      "AIComply L.132/2025 Tool"
+      "RegulaeOS L.132/2025 Tool"
     );
     setSaved(true);
     showToast(t("toast_saved"));

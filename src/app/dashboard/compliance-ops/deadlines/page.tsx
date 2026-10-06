@@ -24,7 +24,7 @@ const BG3  = "#F3F4F6";
 const TEXT = "#0D1016";
 const MUTED= "rgba(0,0,0,0.45)";
 const BORDER = "rgba(0,0,0,0.08)";
-const FONT: CSSProperties = { fontFamily: "Inter, system-ui, sans-serif" };
+const FONT: CSSProperties = { fontFamily: "inherit" };
 
 const SEV: Record<string, { color: string; bg: string; border: string }> = {
   critical:      { color: "#DC2626", bg: "rgba(220,38,38,0.06)", border: "rgba(220,38,38,0.2)" },

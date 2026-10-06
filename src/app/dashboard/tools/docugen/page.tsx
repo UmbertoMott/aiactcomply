@@ -556,7 +556,7 @@ export default function DocuGenPage() {
     const resolvedName = systemName.trim() || "sistema-ai";
     const doc = {
       meta: {
-        format: "AIComply Fascicolo Tecnico — Annex IV",
+        format: "RegulaeOS Fascicolo Tecnico — Annex IV",
         regulation: "Regolamento UE 2024/1689 — Art. 11",
         systemName: resolvedName,
         version: versionSnapshots[0]?.tag ?? "draft",
@@ -604,7 +604,7 @@ export default function DocuGenPage() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="w-full" style={{ fontFamily: "system-ui, sans-serif" }}>
+    <div className="w-full" style={{ fontFamily: "inherit" }}>
 
       <SystemSelector checkProhibited={true} />
       <ProviderTransitionAlertBanner />
@@ -1496,16 +1496,16 @@ export default function DocuGenPage() {
                 <h1 data-noedit="true" style={{ fontSize: 22, fontWeight: 600, color: "#0D1016", marginBottom: 4, letterSpacing: "-0.5px" }}>
                   {systemName || t("aiSystemFallback")}
                 </h1>
-                <p data-noedit="true" style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", marginBottom: 32, fontFamily: "system-ui, sans-serif" }}>
+                <p data-noedit="true" style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", marginBottom: 32, fontFamily: "inherit" }}>
                   {t("techFileSubtitle")} · {new Date().toLocaleDateString(loc)}
                 </p>
 
                 {ANNEX_IV.map((s) => (
                   <div key={s.id} style={{ marginBottom: 28, paddingBottom: 28, borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
                     <div data-noedit="true" style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                      <span style={{ fontSize: 10, fontFamily: "system-ui, sans-serif",
+                      <span style={{ fontSize: 10, fontFamily: "inherit",
                         color: "rgba(0,0,0,0.38)", fontWeight: 600 }}>{s.ref}</span>
-                      <span style={{ fontSize: 10, fontFamily: "system-ui, sans-serif",
+                      <span style={{ fontSize: 10, fontFamily: "inherit",
                         padding: "1px 6px", borderRadius: 4, background: "rgba(0,0,0,0.05)",
                         color: "rgba(0,0,0,0.45)" }}>{SOURCE_BADGES[s.id]}</span>
                     </div>

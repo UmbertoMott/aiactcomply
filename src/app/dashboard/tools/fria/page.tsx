@@ -1264,7 +1264,7 @@ export default function FRIAPage() {
           </div>
           <textarea value={d.public_summary} onChange={(e) => upDeploy({ public_summary: e.target.value })} rows={14}
             placeholder={t("ph_publicSummary")}
-            style={{ ...inputSt, resize: "vertical", fontFamily: "monospace", fontSize: 11, lineHeight: 1.6 }} />
+            style={{ ...inputSt, resize: "vertical", fontFamily: "var(--font-mono)", fontSize: 11, lineHeight: 1.6 }} />
         </div>
 
         {/* Art. 27(2) — Notifica autorità di vigilanza */}
@@ -1553,7 +1553,7 @@ export default function FRIAPage() {
 
   // ─── Main render ──────────────────────────────────────────────────────────
   return (
-    <div className="w-full" style={{ display: "flex", flexDirection: "column", gap: 0, minHeight: 0, fontFamily: "var(--font-inter, system-ui)" }}>
+    <div className="w-full" style={{ display: "flex", flexDirection: "column", gap: 0, minHeight: 0, fontFamily: "inherit" }}>
 
       <SystemSelector checkProhibited={true} />
       {/* Una sola riga di azioni: torna alla modalità guidata, esporta, ricomincia */}
@@ -1734,7 +1734,7 @@ export default function FRIAPage() {
         <div style={{ padding: "12px 12px 10px", borderBottom: `1px solid ${T.border}` }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
             <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>{t("documentWord")}</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", fontFamily: "monospace" }}>{completeness}%</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", fontFamily: "var(--font-mono)" }}>{completeness}%</span>
           </div>
           <div style={{ width: "100%", height: 4, background: "rgba(0,0,0,0.07)", borderRadius: 2, overflow: "hidden" }}>
             <div style={{ height: "100%", width: `${completeness}%`, background: "#0D1016", borderRadius: 2, transition: "width 0.5s ease" }} />
@@ -1787,7 +1787,7 @@ export default function FRIAPage() {
                     </p>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <span style={{ fontSize: 9.5, fontWeight: 700, color: pctColor, fontFamily: "monospace" }}>{p.percent}%</span>
+                    <span style={{ fontSize: 9.5, fontWeight: 700, color: pctColor, fontFamily: "var(--font-mono)" }}>{p.percent}%</span>
                     <ChevronRight size={10} style={{ color: T.faint, transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                   </div>
                 </button>
