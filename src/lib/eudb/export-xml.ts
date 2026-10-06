@@ -50,7 +50,7 @@ export function generateEudbXml(draft: EudbDraft): string {
     <InternalSystemId>${escapeXml(draft.systemId)}</InternalSystemId>
     <LastUpdated>${escapeXml(draft.lastUpdated)}</LastUpdated>
     <SubmissionStatus>${escapeXml(draft.submissionStatus)}</SubmissionStatus>
-    <GeneratedBy>AIComply v2</GeneratedBy>
+    <GeneratedBy>RegulaeOS v2</GeneratedBy>
   </RegistrationMetadata>
 
 </EUAIActRegistration>`.trim();
@@ -73,7 +73,7 @@ export function downloadEudbJson(draft: EudbDraft): void {
   const payload = {
     exportedAt: new Date().toISOString(),
     schema: "eudb-annex-viii-v1",
-    generatedBy: "AIComply v2",
+    generatedBy: "RegulaeOS v2",
     provider: {
       name: draft.providerName,
       address: draft.providerAddress,

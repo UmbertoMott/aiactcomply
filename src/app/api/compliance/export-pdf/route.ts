@@ -185,7 +185,7 @@ export async function POST(req: NextRequest) {
       thickness: 0.5, color: rgb(0, 0, 0), opacity: 0.1,
     })
     page.drawText(
-      sanitize(`AIComply · ${sanitize(systemName)} · Reg. UE 2024/1689`),
+      sanitize(`RegulaeOS · ${sanitize(systemName)} · Reg. UE 2024/1689`),
       { x: MARGIN, y: footerY, size: 7, font: fontReg, color: rgb(0.6, 0.6, 0.6) }
     )
     const pageNum = String(pdfDoc.getPageCount())
@@ -218,7 +218,7 @@ export async function POST(req: NextRequest) {
     size: 10, font: fontReg, color: rgb(0.42, 0.42, 0.42)
   })
   y -= 4
-  drawText(`Generato da AIComply · ${today}`, {
+  drawText(`Generato da RegulaeOS · ${today}`, {
     size: 9, font: fontReg, color: rgb(0.6, 0.6, 0.6)
   })
   y -= 16
@@ -280,7 +280,7 @@ export async function POST(req: NextRequest) {
   ensureSpace(100)
   y -= 10
   drawHRule(rgb(0, 0, 0), 0.15)
-  drawText(sanitize(`${templateLabel} — Documento Verificabile AIComply`), { size: 10, font: fontBold })
+  drawText(sanitize(`${templateLabel} — Documento Verificabile RegulaeOS`), { size: 10, font: fontBold })
   y -= 4
   drawText(`SHA-256: ${contentHash}`, { size: 8, font: fontMono, color: rgb(0.22, 0.22, 0.22) })
   if (classifierHash) {

@@ -38,7 +38,7 @@ export function sha256(payload: Uint8Array | string): string {
 }
 
 /**
- * Genera lo stream XMP con metadati custom AIComply.
+ * Genera lo stream XMP con metadati custom RegulaeOS.
  * Schema namespace: http://aicomply.app/schema/evidence#
  */
 export function buildXmpMetadata(input: DossierExportInput, contentHash: string, jsonHash: string, jsonFilename: string): string {
@@ -46,7 +46,7 @@ export function buildXmpMetadata(input: DossierExportInput, contentHash: string,
   const articles = input.articleCoverage.join(", ");
 
   return `<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
-<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="AIComply XMP Toolkit 1.0">
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="RegulaeOS XMP Toolkit 1.0">
   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
     <rdf:Description rdf:about=""
       xmlns:dc="http://purl.org/dc/elements/1.1/"
@@ -55,9 +55,9 @@ export function buildXmpMetadata(input: DossierExportInput, contentHash: string,
       xmlns:aic="http://aicomply.app/schema/evidence#">
 
       <dc:title><rdf:Alt><rdf:li xml:lang="x-default">Dossier Annex IV — ${escapeXml(input.systemName)}</rdf:li></rdf:Alt></dc:title>
-      <dc:creator><rdf:Seq><rdf:li>AIComply Platform</rdf:li></rdf:Seq></dc:creator>
+      <dc:creator><rdf:Seq><rdf:li>RegulaeOS</rdf:li></rdf:Seq></dc:creator>
       <dc:date><rdf:Seq><rdf:li>${now}</rdf:li></rdf:Seq></dc:date>
-      <xmp:CreatorTool>AIComply v1.0</xmp:CreatorTool>
+      <xmp:CreatorTool>RegulaeOS v1.0</xmp:CreatorTool>
       <pdfaid:part>3</pdfaid:part>
       <pdfaid:conformance>B</pdfaid:conformance>
 
@@ -108,8 +108,8 @@ export async function exportDossierToPdfA3(input: DossierExportInput): Promise<P
   const pdfDoc = await PDFDocument.create();
   pdfDoc.setTitle(`Dossier Annex IV — ${input.systemName}`);
   pdfDoc.setAuthor(input.signatoryName);
-  pdfDoc.setProducer("AIComply Platform");
-  pdfDoc.setCreator("AIComply v1.0");
+  pdfDoc.setProducer("RegulaeOS");
+  pdfDoc.setCreator("RegulaeOS v1.0");
 
   // Pagina copertina
   const page = pdfDoc.addPage([595.28, 841.89]);  // A4 portrait

@@ -158,7 +158,7 @@ export default function TrustCenterPublicView({ slug, serverAccessConfig }: Prop
         <div style={{ marginBottom: 40 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
             <ShieldCheck size={20} style={{ color: EMERAL }} />
-            <span style={{ color: EMERAL, fontWeight: 700, fontSize: 15 }}>AIComply Trust Center</span>
+            <span style={{ color: EMERAL, fontWeight: 700, fontSize: 15 }}>RegulaeOS Trust Center</span>
           </div>
 
           <h1 style={{ color: TEXT, fontSize: 28, fontWeight: 700, margin: "0 0 8px", letterSpacing: "-0.5px" }}>
@@ -212,7 +212,7 @@ export default function TrustCenterPublicView({ slug, serverAccessConfig }: Prop
         <div style={{ marginTop: 48, paddingTop: 24, borderTop: `1px solid ${BORDER}` }}>
           <p style={{ color: "#4b5563", fontSize: 12, lineHeight: 1.6 }}>
             Pagina generata da{" "}
-            <span style={{ color: INDIGO }}>AIComply</span>
+            <span style={{ color: INDIGO }}>RegulaeOS</span>
             {" "}· Ultimo aggiornamento: {lastUpdated}
             {page!.noindex && " · Questa pagina non è indicizzata dai motori di ricerca."}
           </p>

@@ -263,7 +263,7 @@ export default function Hero() {
       {/* ── Full-bleed video hero ── */}
       <section
         className="relative overflow-hidden"
-        style={{ minHeight: "88vh", display: "flex", flexDirection: "column" }}
+        style={{ minHeight: "88svh", display: "flex", flexDirection: "column" }}
       >
         {/* Background video */}
         <video

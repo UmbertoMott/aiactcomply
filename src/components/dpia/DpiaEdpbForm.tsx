@@ -225,7 +225,7 @@ export default function DpiaEdpbForm() {
           {aiError && <p style={{ fontSize: 12, color: T.red, marginBottom: 8 }}>{aiError}</p>}
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <button onClick={handleAiPrefill} disabled={aiLoading || !aiName.trim() || !aiDesc.trim()}
-              style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, padding: "8px 16px", borderRadius: 8, border: "none", background: "#23403a", color: "#fff", cursor: (aiLoading || !aiName.trim() || !aiDesc.trim()) ? "not-allowed" : "pointer", opacity: (aiLoading || !aiName.trim() || !aiDesc.trim()) ? 0.55 : 1 }}>
+              style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, padding: "8px 16px", borderRadius: 8, border: "none", background: "#0D1016", color: "#fff", cursor: (aiLoading || !aiName.trim() || !aiDesc.trim()) ? "not-allowed" : "pointer", opacity: (aiLoading || !aiName.trim() || !aiDesc.trim()) ? 0.55 : 1 }}>
               <Sparkles className="h-4 w-4" />{aiLoading ? t("aiGenerating") : t("aiGenerate")}
             </button>
             <span style={{ fontSize: 11, color: T.muted }}>{t("aiFillsEmptyNote")}</span>
@@ -242,7 +242,7 @@ export default function DpiaEdpbForm() {
           <div style={{ padding: "12px 12px 10px", borderBottom: `1px solid ${T.border}` }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
               <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>{t("docWord")}</span>
-              <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", fontFamily: "monospace" }}>{completeness.overallPercent}%</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", fontFamily: "var(--font-mono)" }}>{completeness.overallPercent}%</span>
             </div>
             <div style={{ width: "100%", height: 4, background: "rgba(0,0,0,0.07)", borderRadius: 2, overflow: "hidden" }}>
               <div style={{ height: "100%", width: `${completeness.overallPercent}%`, background: "#0D1016", borderRadius: 2, transition: "width 0.5s ease" }} />
@@ -278,7 +278,7 @@ export default function DpiaEdpbForm() {
                       <p style={{ fontSize: 9, color: T.muted, margin: "1px 0 0" }}>{s.done}/{s.total}</p>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                      <span style={{ fontSize: 9.5, fontWeight: 700, color: pctColor, fontFamily: "monospace" }}>{pct}%</span>
+                      <span style={{ fontSize: 9.5, fontWeight: 700, color: pctColor, fontFamily: "var(--font-mono)" }}>{pct}%</span>
                       <ChevronRight size={10} style={{ color: T.faint, transform: isExp ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                     </div>
                   </button>

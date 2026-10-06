@@ -13,7 +13,7 @@ export async function complianceChat(
   userMessage: string,
   context: ChatContext
 ): Promise<{ answer: string } | { error: string }> {
-  const systemPrompt = `Sei un esperto di conformità EU AI Act integrato in AIComply.
+  const systemPrompt = `Sei un esperto di conformità EU AI Act integrato in RegulaeOS.
 Rispondi in italiano, in modo conciso e pratico (max 4 frasi).
 Cita sempre l'articolo di riferimento quando è rilevante.
 

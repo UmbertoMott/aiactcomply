@@ -187,7 +187,7 @@ export default function QMSPage() {
       (s) => (s.tplId === "monitoring" || s.title.toLowerCase().includes("monitoraggio")) && s.completed
     );
     writeToStorage<QMSResult>("qms", {
-      qmsDocumentRef: `QMS-${systemName || "AIComply"}-v1.0-${new Date().toISOString().split("T")[0]}`,
+      qmsDocumentRef: `QMS-${systemName || "RegulaeOS"}-v1.0-${new Date().toISOString().split("T")[0]}`,
       postMarketPlanExists,
       // Solo dati scritti dall'utente: il quadro di responsabilità è la lettera m) dell'Art. 17(1)
       internalReviewCycle: "",
@@ -250,14 +250,14 @@ export default function QMSPage() {
     <div className="w-full">
       {savedAt ? (
         <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
-          style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)", fontFamily: "var(--font-inter, system-ui)" }}>
+          style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)", fontFamily: "inherit" }}>
           <CheckCircle size={13} strokeWidth={1.5} style={{ color: "#15803d" }} />
           <span style={{ color: "#15803d" }}>✓ {t("savedBanner")} {new Date(savedAt).toLocaleDateString("it-IT")}</span>
           <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>{t("seeDossier")}</Link>
         </div>
       ) : (
         <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[12px]"
-          style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", fontFamily: "var(--font-inter, system-ui)" }}>
+          style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", fontFamily: "inherit" }}>
           <span style={{ color: "rgba(0,0,0,0.45)" }}>{t("saveHint")}</span>
           <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1 hover:opacity-80"
             style={{ background: "#0D1016", color: "#ffffff", border: "none", cursor: "pointer" }}>

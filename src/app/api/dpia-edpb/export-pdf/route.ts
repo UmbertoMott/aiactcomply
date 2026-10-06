@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
   function drawFooter() {
     const fy = 30;
     page.drawLine({ start: { x: MRG, y: fy + 14 }, end: { x: PAGE_W - MRG, y: fy + 14 }, thickness: 0.5, color: rgb(0, 0, 0), opacity: 0.1 });
-    page.drawText(sanitize("AIComply - DPIA Art. 35 GDPR - EDPB Template 2026"), { x: MRG, y: fy, size: 7, font: fReg, color: FAINT });
+    page.drawText(sanitize("RegulaeOS - DPIA Art. 35 GDPR - EDPB Template 2026"), { x: MRG, y: fy, size: 7, font: fReg, color: FAINT });
     page.drawText(String(pdfDoc.getPageCount()), { x: PAGE_W - MRG - 10, y: fy, size: 7, font: fReg, color: FAINT });
   }
   function newPage() { page = pdfDoc.addPage([PAGE_W, PAGE_H]); y = PAGE_H - MRG; drawFooter(); }

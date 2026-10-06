@@ -569,7 +569,7 @@ function buildTxt(template: QTemplate, answers: QAnswer[], systemName: string): 
   const lines: string[] = [
     "═══════════════════════════════════════════════════════════",
     `  QUESTIONARIO CONFORMITÀ AI — ${template.label.toUpperCase()}`,
-    `  Generato da AIComply · ${date}`,
+    `  Generato da RegulaeOS · ${date}`,
     "═══════════════════════════════════════════════════════════",
     "",
     `  Fornitore: ${systemName || "da inserire"}`,
@@ -592,7 +592,7 @@ function buildTxt(template: QTemplate, answers: QAnswer[], systemName: string): 
 
   lines.push(
     "── NOTE ──────────────────────────────────────────────────",
-    "  Questo documento è stato generato automaticamente da AIComply sulla base",
+    "  Questo documento è stato generato automaticamente da RegulaeOS sulla base",
     "  del dossier di conformità EU AI Act. Le risposte contrassegnate \"Manuale\"",
     "  richiedono integrazione da parte del team legale/tecnico prima dell'invio.",
     "",

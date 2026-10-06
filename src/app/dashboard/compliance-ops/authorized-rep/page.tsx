@@ -93,7 +93,7 @@ function DkField({ label, article, aiBadge, children, span2 }: {
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
         <label style={{ fontSize: 11, color: DK.muted, fontWeight: 500 }}>{label}</label>
         {article && (
-          <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint, borderRadius: 4,
+          <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: DK.faint, borderRadius: 4,
             padding: "1px 5px", border: `1px solid ${DK.border}`, background: "rgba(0,0,0,0.05)" }}>
             {article}
           </span>
@@ -162,7 +162,7 @@ function ChecklistRowDk({ item, eudbResult, docuGenCompleted, onChange }: {
         <span style={{ flex: 1, fontSize: 12, color: item.completed ? DK.green : DK.text, fontWeight: 500 }}>
           {item.label}
         </span>
-        <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint,
+        <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: DK.faint,
           border: `1px solid ${DK.border}`, borderRadius: 4, padding: "1px 5px",
           background: "rgba(0,0,0,0.05)", flexShrink: 0, marginRight: 4 }}>
           {item.article}
@@ -497,7 +497,7 @@ export default function AuthorizedRepCompliancePage() {
             <Link href="/dashboard/tools/docugen"
               style={{ fontSize: 11, color: DK.muted, display: "inline-flex", alignItems: "center", gap: 4 }}>
               → Vai a DocuGen AI per completare la documentazione
-              <span style={{ fontFamily: "monospace", fontSize: 9, color: DK.faint }}>Art. 11</span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: DK.faint }}>Art. 11</span>
             </Link>
           </div>
           <button
@@ -517,7 +517,7 @@ export default function AuthorizedRepCompliancePage() {
           <h1 style={{ fontSize: 22, fontWeight: 400, letterSpacing: "-0.5px", color: DK.text, margin: 0 }}>
             Authorized Representative
           </h1>
-          <span style={{ fontSize: 9, fontFamily: "monospace", padding: "2px 7px", borderRadius: 10,
+          <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 7px", borderRadius: 10,
             background: "rgba(0,0,0,0.04)", color: DK.muted, border: `1px solid ${DK.border}` }}>
             Art. 22
           </span>
@@ -541,7 +541,7 @@ export default function AuthorizedRepCompliancePage() {
         <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 16 }}>
           <Info size={13} style={{ color: DK.muted }} />
           <p style={{ fontSize: 13, fontWeight: 600, color: DK.text, margin: 0 }}>Sezione 1 — Verifica applicabilità</p>
-          <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint, border: `1px solid ${DK.border}`,
+          <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: DK.faint, border: `1px solid ${DK.border}`,
             borderRadius: 4, padding: "1px 5px", background: "rgba(0,0,0,0.05)" }}>
             Art. 22(1)
           </span>
@@ -713,7 +713,7 @@ export default function AuthorizedRepCompliancePage() {
                     textTransform: "uppercase", letterSpacing: "0.6px", margin: 0 }}>
                     Provider (mandante)
                   </p>
-                  <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint, border: `1px solid ${DK.border}`,
+                  <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: DK.faint, border: `1px solid ${DK.border}`,
                     borderRadius: 4, padding: "1px 5px", background: "rgba(0,0,0,0.05)" }}>
                     Art. 22(1)
                   </span>
@@ -762,7 +762,7 @@ export default function AuthorizedRepCompliancePage() {
                     textTransform: "uppercase", letterSpacing: "0.6px", margin: 0 }}>
                     Authorized Representative
                   </p>
-                  <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint, border: `1px solid ${DK.border}`,
+                  <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: DK.faint, border: `1px solid ${DK.border}`,
                     borderRadius: 4, padding: "1px 5px", background: "rgba(0,0,0,0.05)" }}>
                     Art. 22(1)+(3)
                   </span>
@@ -834,7 +834,7 @@ export default function AuthorizedRepCompliancePage() {
               <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 14 }}>
                 <Globe size={13} style={{ color: DK.muted }} />
                 <p style={{ fontSize: 12, fontWeight: 600, color: DK.text, margin: 0 }}>Sistema coperto dal mandato</p>
-                <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint, border: `1px solid ${DK.border}`,
+                <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: DK.faint, border: `1px solid ${DK.border}`,
                   borderRadius: 4, padding: "1px 5px", background: "rgba(0,0,0,0.05)" }}>
                   Annex VIII §4-5
                 </span>
@@ -984,7 +984,7 @@ export default function AuthorizedRepCompliancePage() {
                     />
                     <div>
                       <span style={{ color: DK.text }}>{d.duty}</span>
-                      <span style={{ marginLeft: 6, fontFamily: "monospace", fontSize: 9, color: DK.faint }}>{d.artRef}</span>
+                      <span style={{ marginLeft: 6, fontFamily: "var(--font-mono)", fontSize: 9, color: DK.faint }}>{d.artRef}</span>
                     </div>
                   </label>
                 ))}
@@ -1036,7 +1036,7 @@ export default function AuthorizedRepCompliancePage() {
                   <p style={{ fontSize: 12, fontWeight: 600, color: DK.text, margin: 0 }}>
                     Checklist obblighi AR
                   </p>
-                  <span style={{ fontSize: 9, fontFamily: "monospace", color: DK.faint,
+                  <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: DK.faint,
                     border: `1px solid ${DK.border}`, borderRadius: 4, padding: "1px 5px",
                     background: "rgba(0,0,0,0.05)" }}>
                     Art. 22(3)(a)-(e), 22(4)

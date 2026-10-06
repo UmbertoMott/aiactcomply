@@ -124,9 +124,9 @@ export async function sendIntegrityAlert(report: IntegrityReport): Promise<void>
     });
 
     await transporter.sendMail({
-      from: process.env.SMTP_FROM ?? "AIComply <noreply@aicomply.local>",
+      from: process.env.SMTP_FROM ?? "RegulaeOS <noreply@aicomply.local>",
       to: alertEmail,
-      subject: `🚨 [AIComply] Violazione integrità audit trail — ${report.failedRecords.length} record`,
+      subject: `🚨 [RegulaeOS] Violazione integrità audit trail — ${report.failedRecords.length} record`,
       text: [
         "ALERT: Audit trail integrity verification FAILED",
         "",

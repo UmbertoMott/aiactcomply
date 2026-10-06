@@ -45,7 +45,7 @@ export const POSTS: BlogPost[] = [
     readTime: "6 min",
     category: "Guide",
     tags: ["AI Act", "quick scan", "lead generation", "Art. 50", "compliance", "assessment"],
-    metaTitle: "AI Act Quick Scan: 10 domande per trovare gap compliance | AIComply",
+    metaTitle: "AI Act Quick Scan: 10 domande per trovare gap compliance | RegulaeOS",
     metaDescription:
       "Come strutturare un AI Act Quick Scan efficace: 10 domande, scoring, teaser dei gap, lead capture e report personalizzato per prepararsi agli obblighi AI Act.",
     faqSchema: [
@@ -131,7 +131,7 @@ export const POSTS: BlogPost[] = [
       date: "30 August 2026",
       readTime: "6 min",
       category: "Guide",
-      metaTitle: "AI Act Quick Scan: 10 questions to find compliance gaps | AIComply",
+      metaTitle: "AI Act Quick Scan: 10 questions to find compliance gaps | RegulaeOS",
       metaDescription:
         "How to structure an effective AI Act Quick Scan: 10 questions, scoring, gap teaser, lead capture and a personalised report to get ready for AI Act obligations.",
       faqSchema: [
@@ -222,7 +222,7 @@ export const POSTS: BlogPost[] = [
     readTime: "9 min",
     category: "Guide",
     tags: ["AI Act", "alto rischio", "Annex III", "Art. 6", "compliance", "obblighi"],
-    metaTitle: "Sistema AI ad alto rischio: cos'è, chi rientra e cosa fare | AIComply",
+    metaTitle: "Sistema AI ad alto rischio: cos'è, chi rientra e cosa fare | RegulaeOS",
     metaDescription:
       "Scopri se il tuo sistema AI rientra nell'Annex III dell'EU AI Act: 8 settori, esenzioni Art. 6(3), 7 obblighi e scadenza dicembre 2027. Guida pratica aggiornata maggio 2026.",
     faqSchema: [
@@ -305,7 +305,7 @@ export const POSTS: BlogPost[] = [
 <p>La risposta onesta è: tra 6 e 18 mesi, a seconda della complessità del sistema e di quanto sei organizzato.</p>
 <p>Il percorso standard richiede: una gap analysis iniziale, la redazione della documentazione tecnica (Annex IV), la costruzione del risk management system, la configurazione del logging, la definizione delle procedure di supervisione umana, una DPIA se tratti dati personali, la registrazione nel database EUDB.</p>
 <p>Ogni passaggio richiede contributi da aree diverse: legale, tecnica, privacy, operations. Coordinarli senza un sistema richiede tempo. Molto tempo.</p>
-<p>AIComply è costruito per comprimere quel percorso. Il <a href="/dashboard/tools/classifier">classificatore di rischio AI</a> identifica in pochi minuti se il tuo sistema rientra nell'Annex III. Se rientra, i tool guidano articolo per articolo. Il dossier finale è esportabile e pronto per le autorità di vigilanza.</p>
+<p>RegulaeOS è costruito per comprimere quel percorso. Il <a href="/dashboard/tools/classifier">classificatore di rischio AI</a> identifica in pochi minuti se il tuo sistema rientra nell'Annex III. Se rientra, i tool guidano articolo per articolo. Il dossier finale è esportabile e pronto per le autorità di vigilanza.</p>
 <p>Il primo assessment è pronto in meno di 48 ore. Puoi <a href="/register">iniziare adesso</a> senza aspettare dicembre 2027.</p>
 `,
     en: {
@@ -315,7 +315,7 @@ export const POSTS: BlogPost[] = [
       date: "3 June 2026",
       readTime: "9 min",
       category: "Guide",
-      metaTitle: "High-risk AI system: what it is, who is in scope and what to do | AIComply",
+      metaTitle: "High-risk AI system: what it is, who is in scope and what to do | RegulaeOS",
       metaDescription:
         "Find out whether your AI system falls under Annex III of the EU AI Act: 8 sectors, Art. 6(3) exemptions, 7 obligations and the December 2027 deadline. Practical guide updated May 2026.",
       faqSchema: [
@@ -398,7 +398,7 @@ export const POSTS: BlogPost[] = [
 <p>The honest answer is: between 6 and 18 months, depending on the complexity of the system and how organised you are.</p>
 <p>The standard path requires: an initial gap analysis, drafting the technical documentation (Annex IV), building the risk management system, configuring logging, defining human oversight procedures, a DPIA if you process personal data, and registration in the EUDB database.</p>
 <p>Each step requires input from different areas: legal, technical, privacy, operations. Coordinating them without a system takes time. A lot of time.</p>
-<p>AIComply is built to compress that path. The <a href="/dashboard/tools/classifier">AI risk classifier</a> identifies in minutes whether your system falls under Annex III. If it does, the tools guide you article by article. The final dossier is exportable and ready for market surveillance authorities.</p>
+<p>RegulaeOS is built to compress that path. The <a href="/dashboard/tools/classifier">AI risk classifier</a> identifies in minutes whether your system falls under Annex III. If it does, the tools guide you article by article. The final dossier is exportable and ready for market surveillance authorities.</p>
 <p>The first assessment is ready in less than 48 hours. You can <a href="/register">start now</a> without waiting for December 2027.</p>
 `,
     },
@@ -414,7 +414,7 @@ export const POSTS: BlogPost[] = [
     category: "Normativa",
     tags: ["AI Act", "scadenze", "compliance", "Omnibus", "alto rischio"],
     metaTitle:
-      "Scadenze AI Act 2025-2028: calendario aggiornato dopo l'Omnibus | AIComply",
+      "Scadenze AI Act 2025-2028: calendario aggiornato dopo l'Omnibus | RegulaeOS",
     metaDescription:
       "Il calendario completo dell'EU AI Act aggiornato con l'accordo Omnibus del 7 maggio 2026. Pratiche vietate, GPAI, alto rischio Annex III: cosa è già in vigore e cosa puoi ancora pianificare.",
     faqSchema: [
@@ -485,13 +485,13 @@ export const POSTS: BlogPost[] = [
 <p><strong>Primo.</strong> I sistemi AI a rischio limitato che interagiscono con persone fisiche devono rispettare le regole di trasparenza Art. 50. Se hai un chatbot sul sito, un assistente virtuale, un sistema che genera contenuti automaticamente, devi informare gli utenti che stanno interagendo con un'AI. Non è facoltativo. Non è una buona pratica. È un obbligo.</p>
 <p><strong>Secondo.</strong> I poteri sanzionatori della Commissione Europea sui provider GPAI entrano in piena applicazione. Chi non ha messo in ordine la documentazione tecnica del proprio modello, la policy sui dati di addestramento e la conformità copyright si troverà esposto a ispezioni con sanzioni fino a <a href="https://www.dlapiper.com/en-us/insights/publications/2025/08/latest-wave-of-obligations-under-the-eu-ai-act-take-effect" target="_blank" rel="noopener">15 milioni di euro o il 3% del fatturato</a>.</p>
 <p><strong>Terzo.</strong> Il regolamento diventa pienamente applicabile. L'intero apparato sanzionatorio è operativo. Il fatto che la tua azienda abbia tempo fino al 2027 per i sistemi Annex III non significa che possa ignorare il contesto normativo generale.</p>
-<p>Se usi AI nei tuoi processi aziendali, il modo più rapido per capire cosa ti riguarda è partire dal <a href="/dashboard/tools/classifier">classificatore di rischio AI</a> integrato in AIComply. Identifica il tier del tuo sistema in pochi minuti.</p>
+<p>Se usi AI nei tuoi processi aziendali, il modo più rapido per capire cosa ti riguarda è partire dal <a href="/dashboard/tools/classifier">classificatore di rischio AI</a> integrato in RegulaeOS. Identifica il tier del tuo sistema in pochi minuti.</p>
 
 <h2>Dicembre 2026: il watermarking obbligatorio</h2>
 <p>Dal 2 dicembre 2026, chi genera contenuti audio, video, immagini o testo con sistemi AI deve applicare una marcatura machine-readable che identifichi il contenuto come artificiale.</p>
 <p>L'obbligo viene dall'Art. 50(2) e riguarda i provider di sistemi che producono contenuti sintetici. Non si applica solo alle grandi tech company: se hai integrato un modello AI nella tua piattaforma per generare immagini, testi di prodotto o video, il watermarking è tuo obbligo.</p>
 <p>L'<a href="https://www.mishcon.com/news/eu-ai-act-simplified-unpacking-the-ai-omnibus-agreement-of-may-2026" target="_blank" rel="noopener">accordo Omnibus</a> ha accorciato il periodo transitorio da sei a tre mesi rispetto alla data di entrata in vigore del regolamento, portando la scadenza al 2 dicembre 2026 invece di agosto.</p>
-<p>AIComply include uno <a href="/scanner">scanner Art. 50 gratuito</a> per verificare se i tuoi sistemi rientrano nell'obbligo di disclosure e watermarking.</p>
+<p>RegulaeOS include uno <a href="/scanner">scanner Art. 50 gratuito</a> per verificare se i tuoi sistemi rientrano nell'obbligo di disclosure e watermarking.</p>
 
 <h2>Dicembre 2027: la vera scadenza per i sistemi ad alto rischio</h2>
 <p>Se il tuo sistema AI rientra nell'Annex III, hai tempo fino al 2 dicembre 2027. Ma non è un invito ad aspettare.</p>
@@ -502,7 +502,7 @@ export const POSTS: BlogPost[] = [
 <h2>Quanto tempo ci vuole davvero per essere conformi?</h2>
 <p>La risposta dipende da due variabili: quanto è complesso il tuo sistema AI e quanto sei organizzato nella raccolta della documentazione.</p>
 <p>Un percorso di conformità completo per un sistema Annex III fatto in modo tradizionale richiede consulenze legali, audit tecnici, redazione di documentazione, gap analysis, assessment DPIA e FRIA. Il mercato parla di 6-18 mesi, con costi che variano dai 30.000 ai 150.000 euro per un sistema di media complessità.</p>
-<p>AIComply è costruito per comprimere quel percorso. Il primo assessment è pronto in meno di 48 ore. I tool guidano ogni articolo del regolamento, dai check Art. 5 alla dichiarazione di conformità. Il dossier finale è esportabile e pronto per un notified body o per le autorità di vigilanza.</p>
+<p>RegulaeOS è costruito per comprimere quel percorso. Il primo assessment è pronto in meno di 48 ore. I tool guidano ogni articolo del regolamento, dai check Art. 5 alla dichiarazione di conformità. Il dossier finale è esportabile e pronto per un notified body o per le autorità di vigilanza.</p>
 <p>Puoi vedere i <a href="/pricing">piani disponibili</a> o iniziare subito con lo scanner gratuito.</p>
 `,
     en: {
@@ -512,7 +512,7 @@ export const POSTS: BlogPost[] = [
       date: "2 June 2026",
       readTime: "8 min",
       category: "Regulation",
-      metaTitle: "AI Act deadlines 2025-2028: updated calendar after the Omnibus | AIComply",
+      metaTitle: "AI Act deadlines 2025-2028: updated calendar after the Omnibus | RegulaeOS",
       metaDescription:
         "The full EU AI Act calendar updated with the Omnibus agreement of 7 May 2026. Prohibited practices, GPAI, high-risk Annex III: what is already in force and what you can still plan for.",
       faqSchema: [
@@ -583,13 +583,13 @@ export const POSTS: BlogPost[] = [
 <p><strong>First.</strong> Limited-risk AI systems that interact with individuals must comply with the Art. 50 transparency rules. If you have a chatbot on your site, a virtual assistant, a system that generates content automatically, you must inform users that they are interacting with an AI. It is not optional. It is not a best practice. It is an obligation.</p>
 <p><strong>Second.</strong> The European Commission's enforcement powers over GPAI providers come into full application. Anyone who has not put in order the technical documentation of their model, the training-data policy and copyright compliance will be exposed to inspections with fines up to <a href="https://www.dlapiper.com/en-us/insights/publications/2025/08/latest-wave-of-obligations-under-the-eu-ai-act-take-effect" target="_blank" rel="noopener">15 million euros or 3% of turnover</a>.</p>
 <p><strong>Third.</strong> The regulation becomes fully applicable. The entire sanctioning apparatus is operational. The fact that your company has until 2027 for Annex III systems does not mean it can ignore the general regulatory context.</p>
-<p>If you use AI in your business processes, the fastest way to understand what concerns you is to start from the <a href="/dashboard/tools/classifier">AI risk classifier</a> built into AIComply. It identifies your system's tier in minutes.</p>
+<p>If you use AI in your business processes, the fastest way to understand what concerns you is to start from the <a href="/dashboard/tools/classifier">AI risk classifier</a> built into RegulaeOS. It identifies your system's tier in minutes.</p>
 
 <h2>December 2026: mandatory watermarking</h2>
 <p>From 2 December 2026, anyone who generates audio, video, image or text content with AI systems must apply a machine-readable marking that identifies the content as artificial.</p>
 <p>The obligation comes from Art. 50(2) and concerns providers of systems that produce synthetic content. It does not apply only to big tech companies: if you have embedded an AI model in your platform to generate images, product copy or videos, watermarking is your obligation.</p>
 <p>The <a href="https://www.mishcon.com/news/eu-ai-act-simplified-unpacking-the-ai-omnibus-agreement-of-may-2026" target="_blank" rel="noopener">Omnibus agreement</a> shortened the transition period from six to three months relative to the regulation's entry into force, bringing the deadline to 2 December 2026 instead of August.</p>
-<p>AIComply includes a free <a href="/scanner">Art. 50 scanner</a> to check whether your systems fall under the disclosure and watermarking obligation.</p>
+<p>RegulaeOS includes a free <a href="/scanner">Art. 50 scanner</a> to check whether your systems fall under the disclosure and watermarking obligation.</p>
 
 <h2>December 2027: the real deadline for high-risk systems</h2>
 <p>If your AI system falls under Annex III, you have until 2 December 2027. But it is not an invitation to wait.</p>
@@ -600,7 +600,7 @@ export const POSTS: BlogPost[] = [
 <h2>How long does it really take to become compliant?</h2>
 <p>The answer depends on two variables: how complex your AI system is and how organised you are in collecting the documentation.</p>
 <p>A full compliance path for an Annex III system done the traditional way requires legal advice, technical audits, drafting of documentation, gap analysis, DPIA and FRIA assessments. The market talks about 6-18 months, with costs ranging from 30,000 to 150,000 euros for a system of medium complexity.</p>
-<p>AIComply is built to compress that path. The first assessment is ready in less than 48 hours. The tools guide every article of the regulation, from the Art. 5 checks to the declaration of conformity. The final dossier is exportable and ready for a notified body or for market surveillance authorities.</p>
+<p>RegulaeOS is built to compress that path. The first assessment is ready in less than 48 hours. The tools guide every article of the regulation, from the Art. 5 checks to the declaration of conformity. The final dossier is exportable and ready for a notified body or for market surveillance authorities.</p>
 <p>You can see the <a href="/pricing">available plans</a> or start now with the free scanner.</p>
 `,
     },

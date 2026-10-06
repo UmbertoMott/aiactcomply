@@ -24,7 +24,7 @@ const card = {
   border: "1px solid rgba(0,0,0,0.07)",
   boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
 };
-const font = { fontFamily: "var(--font-inter, system-ui)" };
+const font = { fontFamily: "inherit" };
 
 // ─── Status icon ──────────────────────────────────────────────────────────────
 function StatusIcon({ status }: { status: DossierSection["status"] }) {
@@ -60,7 +60,7 @@ function ProgressRing({ pct }: { pct: number }) {
         style={{ transition: "stroke-dashoffset 0.6s ease" }}
       />
       <text x={44} y={44} textAnchor="middle" dominantBaseline="central"
-        style={{ fontSize: 18, fontWeight: 700, fill: "#0D1016", fontFamily: "system-ui" }}>
+        style={{ fontSize: 18, fontWeight: 700, fill: "#0D1016", fontFamily: "inherit" }}>
         {pct}%
       </text>
     </svg>

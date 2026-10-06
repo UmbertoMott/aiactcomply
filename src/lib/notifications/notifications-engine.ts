@@ -1,4 +1,4 @@
-// Notifications Engine — AIComply
+// Notifications Engine — RegulaeOS
 
 export type NotificationPriority = "critical" | "high" | "medium" | "info";
 export type NotificationCategory =

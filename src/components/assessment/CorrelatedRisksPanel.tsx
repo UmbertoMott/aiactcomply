@@ -79,7 +79,7 @@ export function CorrelatedRisksPanel() {
               <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 10 }}>
                 {r.refs.map((ref, i) => (
                   <span key={i} style={{
-                    fontSize: 9, padding: "1px 6px", borderRadius: 4, fontFamily: "monospace",
+                    fontSize: 9, padding: "1px 6px", borderRadius: 4, fontFamily: "var(--font-mono)",
                     background: "rgba(0,0,0,0.03)", color: "rgba(0,0,0,0.50)",
                     border: "1px solid rgba(0,0,0,0.07)",
                   }}>

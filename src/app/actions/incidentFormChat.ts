@@ -49,7 +49,7 @@ const FIELD_LABELS: Record<IncidentSuggestField, string> = {
   date: "Data rilevamento",
 };
 
-const SYSTEM_PROMPT = `Sei un esperto EU AI Act Art. 73 integrato in AIComply. Il tuo compito è raccogliere le informazioni per segnalare correttamente un incidente grave ai sensi dell'Art. 73 Reg. UE 2024/1689.
+const SYSTEM_PROMPT = `Sei un esperto EU AI Act Art. 73 integrato in RegulaeOS. Il tuo compito è raccogliere le informazioni per segnalare correttamente un incidente grave ai sensi dell'Art. 73 Reg. UE 2024/1689.
 
 FLUSSO GUIDA PROATTIVO — segui questo ordine basandoti sui campi già compilati:
 1. DESCRIZIONE mancante → chiedi: "Cosa è successo esattamente? Descrivi l'evento in 2-3 frasi: cosa ha fatto il sistema di IA, quando, con quale conseguenza."

@@ -650,7 +650,7 @@ export default function DashboardPage() {
                 <Link key={act.id} href={act.href} style={{ ...card, padding: "14px 16px", display: "block", textDecoration: "none", transition: "box-shadow 0.15s" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
                     <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, margin: 0 }}>{t(act.titleKey)}</p>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: T.muted, fontFamily: "monospace" }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: T.muted, fontFamily: "var(--font-mono)" }}>
                       {act.pct >= 0 ? `${act.pct}%` : t("ip_inProgress")}
                     </span>
                   </div>

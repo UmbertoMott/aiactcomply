@@ -17,7 +17,7 @@ import {
 } from "@/lib/risk/risk-register-progress";
 import type { AnnexSection } from "@/lib/risk/risk-register-mapper";
 
-const SANS = "var(--font-inter, system-ui)";
+const SANS = "inherit";
 
 // ─── Components ────────────────────────────────────────────────────────────────
 

@@ -57,7 +57,7 @@ export default function MachineMarkers({ outputId = "", generatedAt }: MachineMa
     const jsonLd = {
       "@context": "https://schema.org",
       "@type": "CreativeWork",
-      "name": "AIComply Compliance Document",
+      "name": "RegulaeOS Compliance Document",
       "description": "AI-assisted compliance documentation under EU AI Act",
       "identifier": outputId,
       "dateCreated": ts,

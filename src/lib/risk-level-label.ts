@@ -3,6 +3,7 @@ const LEVEL_IT: Record<string, string> = {
   unacceptable: "inaccettabile", prohibited: "vietato", critical: "critico", very_high: "molto alto",
   high: "alto", medium: "medio", limited: "limitato", low: "basso", minimal: "minimo", negligible: "trascurabile",
   pass: "adeguata", review: "da rivedere", fail: "inadeguata",
+  high_risk: "alto rischio", gpai: "GPAI", gpai_systemic: "GPAI con rischio sistemico", unclassified: "non classificato",
 };
 
 export function levelLabel(level: string | null | undefined): string {

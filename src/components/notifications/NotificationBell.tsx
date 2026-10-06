@@ -35,7 +35,7 @@ const MONO: React.CSSProperties = {
 };
 
 const SANS: React.CSSProperties = {
-  fontFamily: "var(--font-dm-sans, system-ui, sans-serif)",
+  fontFamily: "inherit",
 };
 
 // Colore accento per la striscia sinistra — niente blu, solo semantica neutra/rossa/ambra

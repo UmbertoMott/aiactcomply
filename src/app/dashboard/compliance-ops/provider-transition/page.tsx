@@ -471,7 +471,7 @@ export default function ProviderTransitionPage() {
             3. Obblighi del fornitore (Art. 16)
           </h2>
           <p style={{ color: MUTED, fontSize: 13, marginBottom: 16 }}>
-            Completa le seguenti obbligazioni. Le voci con sorgente &quot;derivata&quot; si aggiornano automaticamente dagli altri moduli AIComply.
+            Completa le seguenti obbligazioni. Le voci con sorgente &quot;derivata&quot; si aggiornano automaticamente dagli altri moduli RegulaeOS.
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {PROVIDER_OBLIGATIONS.map(obl => {

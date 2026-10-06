@@ -66,20 +66,20 @@ function Section({
       <div style={{ borderBottom: `2px solid ${T.ink}`, paddingBottom: 16, marginBottom: 24 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: T.muted, fontFamily: "system-ui, sans-serif" }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: T.muted, fontFamily: "inherit" }}>
               {article}
             </span>
             <h2 style={{ fontSize: 22, fontWeight: 700, marginTop: 4, marginBottom: 0, letterSpacing: "-0.3px" }}>
               {title}
             </h2>
             {subtitle && (
-              <p style={{ fontSize: 11, color: T.muted, marginTop: 6, fontStyle: "italic", fontFamily: "system-ui, sans-serif" }}>
+              <p style={{ fontSize: 11, color: T.muted, marginTop: 6, fontStyle: "italic", fontFamily: "inherit" }}>
                 {subtitle}
               </p>
             )}
           </div>
           {completedAt && (
-            <span style={{ fontSize: 10, color: T.light, fontFamily: "system-ui, sans-serif", whiteSpace: "nowrap", marginTop: 4 }}>
+            <span style={{ fontSize: 10, color: T.light, fontFamily: "inherit", whiteSpace: "nowrap", marginTop: 4 }}>
               Completato: {fmtDate(completedAt)}
             </span>
           )}
@@ -93,7 +93,7 @@ function Section({
 // ─── Table helpers ────────────────────────────────────────────────────────────
 function Table({ heads, rows }: { heads: string[]; rows: React.ReactNode[][] }) {
   return (
-    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, fontFamily: "system-ui, sans-serif" }}>
+    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, fontFamily: "inherit" }}>
       <thead>
         <tr style={{ background: T.pageBg }}>
           {heads.map((h, i) => (
@@ -120,7 +120,7 @@ function Table({ heads, rows }: { heads: string[]; rows: React.ReactNode[][] }) 
 
 function Badge({ color, bg, children }: { color: string; bg: string; children: React.ReactNode }) {
   return (
-    <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 4, background: bg, color, fontSize: 10, fontWeight: 700, fontFamily: "system-ui, sans-serif", letterSpacing: "0.5px", textTransform: "uppercase" }}>
+    <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 4, background: bg, color, fontSize: 10, fontWeight: 700, fontFamily: "inherit", letterSpacing: "0.5px", textTransform: "uppercase" }}>
       {children}
     </span>
   );
@@ -128,7 +128,7 @@ function Badge({ color, bg, children }: { color: string; bg: string; children: R
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div style={{ display: "flex", gap: 12, marginBottom: 8, fontSize: 12, fontFamily: "system-ui, sans-serif" }}>
+    <div style={{ display: "flex", gap: 12, marginBottom: 8, fontSize: 12, fontFamily: "inherit" }}>
       <span style={{ minWidth: 180, color: T.muted, fontWeight: 600 }}>{label}</span>
       <span style={{ color: T.ink, flex: 1 }}>{value}</span>
     </div>
@@ -168,7 +168,7 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
       style={{
         background: T.white,
         color: T.ink,
-        fontFamily: "system-ui, -apple-system, sans-serif",
+        fontFamily: "inherit",
         fontSize: 12,
         lineHeight: 1.6,
       }}
@@ -188,7 +188,7 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
         }}
       >
         {/* Top: logo */}
-        <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.4px", fontFamily: "system-ui, sans-serif" }}>
+        <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.4px", fontFamily: "inherit" }}>
           AI<span style={{ color: "rgba(255,255,255,0.3)", fontWeight: 300 }}>Comply</span>
         </div>
 
@@ -200,7 +200,7 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
           <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", marginBottom: 12 }}>
             Regolamento UE 2024/1689 — AI Act
           </p>
-          <h1 style={{ fontSize: 36, fontWeight: 300, letterSpacing: "-1.5px", marginBottom: 8, color: T.white }}>
+          <h1 className="doc-title" style={{ fontSize: 36, fontWeight: 300, letterSpacing: "-1.5px", marginBottom: 8, color: T.white }}>
             {n(meta.systemName)}
           </h1>
           <p style={{ fontSize: 16, color: "rgba(255,255,255,0.55)", marginBottom: 32 }}>
@@ -235,7 +235,7 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
       {/* ── TABLE OF CONTENTS ── */}
       <div
         className="dossier-toc"
-        style={{ pageBreakAfter: "always", padding: "40px 48px", fontFamily: "system-ui, sans-serif" }}
+        style={{ pageBreakAfter: "always", padding: "40px 48px", fontFamily: "inherit" }}
       >
         <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 24, letterSpacing: "-0.5px" }}>Indice</h2>
 
@@ -632,7 +632,7 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
       {/* ── APPENDICE — TIMELINE NORMATIVA ── */}
       <div
         className="dossier-section"
-        style={{ pageBreakBefore: "always", padding: "40px 48px", fontFamily: "system-ui, sans-serif" }}
+        style={{ pageBreakBefore: "always", padding: "40px 48px", fontFamily: "inherit" }}
       >
         <div style={{ borderBottom: `2px solid ${T.ink}`, paddingBottom: 16, marginBottom: 24 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: T.muted }}>
@@ -654,14 +654,14 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
       {/* ── DICHIARAZIONE DI CONFORMITÀ ── */}
       <div
         className="dossier-section"
-        style={{ pageBreakBefore: "always", padding: "40px 48px", fontFamily: "system-ui, sans-serif" }}
+        style={{ pageBreakBefore: "always", padding: "40px 48px", fontFamily: "inherit" }}
       >
         <div style={{ borderBottom: `2px solid ${T.ink}`, paddingBottom: 16, marginBottom: 24 }}>
           <h2 style={{ fontSize: 22, fontWeight: 700 }}>Dichiarazione di Conformità</h2>
         </div>
 
         <p style={{ fontSize: 12, lineHeight: 1.8, color: T.ink, marginBottom: 32 }}>
-          Il presente dossier è stato generato dalla piattaforma AIComply in data{" "}
+          Il presente dossier è stato generato dalla piattaforma RegulaeOS in data{" "}
           <strong>{fmtDate(meta.generatedAt)}</strong>. I contenuti riflettono le informazioni
           inserite dall&apos;organizzazione <strong>{n(meta.companyName)}</strong> e costituiscono
           documentazione interna ai fini della conformità al Regolamento UE 2024/1689 (AI Act).
@@ -688,7 +688,7 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
 
         <div style={{ marginTop: 64, paddingTop: 24, borderTop: `1px solid ${T.border}`, textAlign: "center" }}>
           <p style={{ fontSize: 10, color: T.light }}>
-            AIComply Platform v{meta.version} · Reg. UE 2024/1689 · {meta.generatedBy}
+            RegulaeOS v{meta.version} · Reg. UE 2024/1689 · {meta.generatedBy}
           </p>
         </div>
       </div>

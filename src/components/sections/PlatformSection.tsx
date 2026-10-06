@@ -69,7 +69,7 @@ export default function PlatformSection() {
   return (
     <section
       ref={sectionRef}
-      className="px-12 py-24"
+      className="px-5 py-16 md:px-12 md:py-24"
       style={{ background: "#FAFAF9", borderTop: "1px solid rgba(0,0,0,0.07)", position: "relative", overflow: "hidden" }}
     >
       <style>{`
@@ -80,6 +80,16 @@ export default function PlatformSection() {
         @keyframes cursorBlink {
           0%, 100% { opacity: 1 }
           50% { opacity: 0 }
+        }
+        .plat-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 48px; }
+        .plat-grid { grid-template-columns: repeat(4, 1fr); }
+        .plat-desc { padding: 20px 24px; gap: 24px; }
+        @media (max-width: 768px) {
+          .plat-header { flex-direction: column; align-items: flex-start; margin-bottom: 28px; }
+          .plat-grid { grid-template-columns: repeat(2, 1fr); }
+          .plat-card { padding: 16px 14px !important; min-height: 72px !important; }
+          .plat-desc { padding: 16px 18px; gap: 14px; min-height: 168px; align-items: flex-start !important; }
+          .plat-desc-counter { display: none; }
         }
       `}</style>
 
@@ -113,7 +123,7 @@ export default function PlatformSection() {
       <div className="max-w-5xl mx-auto" style={{ position: "relative", zIndex: 1 }}>
 
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 48 }}>
+        <div className="plat-header">
           <div>
             <p
               className="text-[12px] font-medium uppercase mb-5"
@@ -150,7 +160,7 @@ export default function PlatformSection() {
                 setPaused(true);
               }}
               style={{
-                width: 32, height: 32, borderRadius: "50%",
+                width: 40, height: 40, borderRadius: "50%",
                 border: "1px solid rgba(0,0,0,0.12)",
                 background: "transparent",
                 cursor: "pointer",
@@ -173,7 +183,7 @@ export default function PlatformSection() {
                 setPaused(true);
               }}
               style={{
-                width: 32, height: 32, borderRadius: "50%",
+                width: 40, height: 40, borderRadius: "50%",
                 border: "1px solid rgba(0,0,0,0.12)",
                 background: "transparent",
                 cursor: "pointer",
@@ -193,9 +203,9 @@ export default function PlatformSection() {
         <div
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
+          className="plat-grid"
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
             border: "1px solid rgba(0,0,0,0.08)",
             borderRadius: 12,
             overflow: "hidden",
@@ -211,6 +221,7 @@ export default function PlatformSection() {
                 initial={{ opacity: 0, y: 14 }}
                 animate={sectionVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
                 transition={{ duration: 0.4, delay: diagonalDelay(i) }}
+                className="plat-card"
                 onClick={() => {
                   setActiveIdx(i);
                   setProgressKey(k => k + 1);
@@ -320,11 +331,10 @@ export default function PlatformSection() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
+              className="plat-desc"
               style={{
-                padding: "20px 24px",
                 display: "flex",
                 alignItems: "center",
-                gap: 24,
               }}
             >
               <div
@@ -355,6 +365,7 @@ export default function PlatformSection() {
                 </p>
               </div>
               <div
+                className="plat-desc-counter"
                 style={{
                   fontFamily: MONO,
                   fontSize: 10,

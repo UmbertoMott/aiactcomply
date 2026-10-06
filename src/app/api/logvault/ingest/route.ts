@@ -169,7 +169,7 @@ export async function POST(req: Request) {
 export async function GET() {
   return NextResponse.json({
     status: "ok",
-    service: "AIComply LogVault",
+    service: "RegulaeOS LogVault",
     version: "1.0.0",
     spec: "EU AI Act Art. 12",
   });

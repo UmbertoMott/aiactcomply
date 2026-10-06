@@ -14,8 +14,8 @@ interface PageProps {
 }
 
 export const metadata: Metadata = {
-  title: "Verifica AI-Trust Passport — AIComply",
-  description: "Verifica pubblica di un AI-Trust Passport rilasciato dalla piattaforma AIComply secondo standard EU AI Act.",
+  title: "Verifica AI-Trust Passport — RegulaeOS",
+  description: "Verifica pubblica di un AI-Trust Passport rilasciato dalla piattaforma RegulaeOS secondo standard EU AI Act.",
   robots: { index: false, follow: false },  // registro non indicizzato dai motori di ricerca
 };
 
@@ -45,7 +45,7 @@ export default async function PublicPassportPage({ params, searchParams }: PageP
         <div className="flex items-center gap-3 mb-2">
           <ShieldCheck className="w-6 h-6" style={{ color: T.purple }} />
           <span className="text-sm font-semibold tracking-widest uppercase" style={{ color: T.purple }}>
-            AIComply · Public Registry
+            RegulaeOS · Public Registry
           </span>
         </div>
         <h1 className="text-3xl font-bold mb-2">Verifica AI-Trust Passport</h1>
@@ -70,8 +70,8 @@ export default async function PublicPassportPage({ params, searchParams }: PageP
               </p>
               <p className="text-sm" style={{ color: T.muted }}>
                 {isValidFormat
-                  ? "Il formato dell'identificatore corrisponde allo schema AIComply. Per la verifica completa contattare il fornitore del sistema o l'autorità di vigilanza."
-                  : "L'ID fornito non rispetta il formato AIComply (deve essere una stringa esadecimale di 16 caratteri)."}
+                  ? "Il formato dell'identificatore corrisponde allo schema RegulaeOS. Per la verifica completa contattare il fornitore del sistema o l'autorità di vigilanza."
+                  : "L'ID fornito non rispetta il formato RegulaeOS (deve essere una stringa esadecimale di 16 caratteri)."}
               </p>
             </div>
           </div>
@@ -96,7 +96,7 @@ export default async function PublicPassportPage({ params, searchParams }: PageP
             )}
             <div>
               <p className="text-[10px]" style={{ color: T.muted }}>Registry Standard</p>
-              <code className="text-xs">AIComply Public Registry v1.0</code>
+              <code className="text-xs">RegulaeOS Public Registry v1.0</code>
             </div>
           </div>
         </div>
@@ -147,7 +147,7 @@ export default async function PublicPassportPage({ params, searchParams }: PageP
           <Link href="/"
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium"
             style={{ background: T.purple, color: "#fff" }}>
-            Scopri AIComply
+            Scopri RegulaeOS
             <ExternalLink className="w-4 h-4" />
           </Link>
           <Link href="/risorse"
@@ -159,7 +159,7 @@ export default async function PublicPassportPage({ params, searchParams }: PageP
 
         {/* Footer */}
         <p className="text-[11px] mt-12 pt-6 border-t" style={{ color: T.muted, borderColor: T.border }}>
-          AIComply Public Registry — registro pubblico delle dichiarazioni di affidabilità AI.
+          RegulaeOS Public Registry — registro pubblico delle dichiarazioni di affidabilità AI.
           Non costituisce database ufficiale UE (EUDB Art. 49), che resta gestito dalla Commissione Europea.
           I dati visualizzati sono aggregati e non espongono informazioni sensibili o segreti industriali.
         </p>

@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useT } from "@/i18n/LocaleProvider";
 
-const FONT = "var(--font-inter, system-ui)";
+const FONT = "inherit";
 
 type T = (key: string) => string;
 
@@ -56,7 +56,7 @@ function progressBar(done: number, total: number) {
           transition: "width 0.4s",
         }} />
       </div>
-      <span style={{ fontSize: 10, color: "rgba(0,0,0,0.4)", fontFamily: "monospace" }}>
+      <span style={{ fontSize: 10, color: "rgba(0,0,0,0.4)", fontFamily: "var(--font-mono)" }}>
         {done}/{total}
       </span>
     </div>

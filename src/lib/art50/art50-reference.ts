@@ -6,7 +6,7 @@ export interface Art50ObligationDefinition {
   id: string;
   label: string;
   reference: string;
-  appliesToSelf: boolean; // true = obbligo si applica anche ad AIComply stessa
+  appliesToSelf: boolean; // true = obbligo si applica anche ad RegulaeOS stessa
 }
 
 export const ART50_OBLIGATIONS: readonly Art50ObligationDefinition[] = [
@@ -70,7 +70,7 @@ export const DEEPFAKE_EXEMPTIONS = [
   },
 ] as const;
 
-// Inventario interazioni AI Copilot di AIComply — per autoconformità Art. 50
+// Inventario interazioni AI Copilot di RegulaeOS — per autoconformità Art. 50
 // (aggiornare manualmente quando si aggiungono nuove Server Actions AI)
 export const AICOMPLY_AI_INTERACTIONS = [
   { id: "legal_assistant", area: "Legal Assistant / Compliance Chat", obligationId: "direct_interaction_disclosure", description: "Interfaccia conversazionale — utente interagisce direttamente con AI" },

@@ -46,7 +46,7 @@ const T = {
   violet:  "#7c3aed",  violetBg: "rgba(124,58,237,0.05)", violetBdr:"rgba(124,58,237,0.16)",
 } as const;
 
-const FONT: CSSProperties = { fontFamily: "Inter, system-ui, sans-serif" };
+const FONT: CSSProperties = { fontFamily: "inherit" };
 const card: CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
 const inp: CSSProperties = { width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, color: T.text, background: T.card, outline: "none" };
 const ta: CSSProperties = { ...inp, resize: "vertical" as const };
@@ -157,7 +157,7 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, index, t 
               )}
               <button onClick={() => onAcceptAi(req.id)}
                 className="mt-2 flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded"
-                style={{ background: T.violet, color: "#fff", border: "none", cursor: "pointer" }}>
+                style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
                 <Check size={12} /> {t("acceptApply")}
               </button>
             </div>
@@ -558,7 +558,7 @@ export default function OversightPage() {
           {aiError && <span className="text-[11px]" style={{ color: T.red }}>{aiError}</span>}
           <button onClick={runAiSuggest} disabled={aiLoading}
             className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg"
-            style={{ background: T.violet, color: "#fff", border: "none", cursor: "pointer", opacity: aiLoading ? 0.7 : 1 }}>
+            style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer", opacity: aiLoading ? 0.7 : 1 }}>
             {aiLoading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
             {Object.keys(pendingSuggestions).length > 0 ? t("aiRegen") : t("aiDraftAll")}
           </button>

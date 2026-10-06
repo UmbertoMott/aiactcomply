@@ -1,5 +1,5 @@
 // src/app/api/cicd/scan/route.ts
-// Webhook endpoint per GitHub Action AIComply Scanner (Progetto C)
+// Webhook endpoint per GitHub Action RegulaeOS Scanner (Progetto C)
 // Riceve risultati scansione e li salva nel compliance log
 
 import { createClient } from "@/lib/supabase/server";

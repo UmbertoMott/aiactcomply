@@ -158,7 +158,7 @@ function PublicPreview({
             <div key={c} style={{ width: 10, height: 10, borderRadius: "50%", background: c }} />
           ))}
         </div>
-        <span style={{ color: MUTED, fontSize: 11, fontFamily: "monospace" }}>
+        <span style={{ color: MUTED, fontSize: 11, fontFamily: "var(--font-mono)" }}>
           aicomply.io/trust/{page.publicSlug.slice(0, 12)}…
         </span>
       </div>
@@ -177,9 +177,9 @@ function PublicPreview({
             <div style={{ marginBottom: 24, paddingBottom: 16, borderBottom: `1px solid ${BORDER}` }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                 <ShieldCheck size={18} style={{ color: EMERAL }} />
-                <span style={{ color: EMERAL, fontWeight: 700, fontSize: 14 }}>AIComply Trust Center</span>
+                <span style={{ color: EMERAL, fontWeight: 700, fontSize: 14 }}>RegulaeOS Trust Center</span>
               </div>
-              <h1 style={{ color: TEXT, fontSize: 20, fontWeight: 700, margin: "0 0 4px" }}>
+              <h1 className="doc-title" style={{ color: TEXT, fontSize: 20, fontWeight: 700, margin: "0 0 4px" }}>
                 {systemName || "Sistema di IA"}
               </h1>
               {page.noindex && (
@@ -195,7 +195,7 @@ function PublicPreview({
                 <div key={id} style={{ marginBottom: 20, paddingBottom: 20, borderBottom: `1px solid ${BORDER}` }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
                     <h2 style={{ color: TEXT, fontSize: 15, fontWeight: 600, margin: 0 }}>{meta.label}</h2>
-                    <span style={{ color: MUTED, fontSize: 10, fontFamily: "monospace", background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "2px 6px", flexShrink: 0, marginLeft: 8 }}>
+                    <span style={{ color: MUTED, fontSize: 10, fontFamily: "var(--font-mono)", background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "2px 6px", flexShrink: 0, marginLeft: 8 }}>
                       {meta.article}
                     </span>
                   </div>
@@ -213,7 +213,7 @@ function PublicPreview({
             {/* Footer */}
             <div style={{ paddingTop: 8 }}>
               <p style={{ color: "rgba(0,0,0,0.40)", fontSize: 11 }}>
-                Pagina generata da AIComply · Ultimo aggiornamento: {new Date(latestPublicSectionDate(page)).toLocaleDateString("it-IT")}
+                Pagina generata da RegulaeOS · Ultimo aggiornamento: {new Date(latestPublicSectionDate(page)).toLocaleDateString("it-IT")}
                 {page.noindex && " · Questa pagina non è indicizzata dai motori di ricerca."}
               </p>
             </div>
@@ -258,7 +258,7 @@ function SectionCard({
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
         <div>
           <p style={{ color: TEXT, fontWeight: 600, fontSize: 14, margin: "0 0 2px" }}>{meta.label}</p>
-          <span style={{ color: MUTED, fontSize: 10, fontFamily: "monospace", background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "1px 6px" }}>
+          <span style={{ color: MUTED, fontSize: 10, fontFamily: "var(--font-mono)", background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "1px 6px" }}>
             {meta.article}
           </span>
         </div>
@@ -694,7 +694,7 @@ export default function TrustCenterEditorPage() {
             <div>
               {/* URL row */}
               <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 14 }}>
-                <div style={{ flex: 1, background: "rgba(0,0,0,0.03)", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", fontSize: 12, color: page.isPublished ? TEXT : MUTED, fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div style={{ flex: 1, background: "rgba(0,0,0,0.03)", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", fontSize: 12, color: page.isPublished ? TEXT : MUTED, fontFamily: "var(--font-mono)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {publicUrl}
                 </div>
                 <button
@@ -750,7 +750,7 @@ export default function TrustCenterEditorPage() {
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
             <Lock size={14} style={{ color: MUTED }} />
             <span style={{ color: TEXT, fontWeight: 600, fontSize: 13 }}>Visibilità pubblica</span>
-            <span style={{ color: MUTED, fontFamily: "monospace", fontSize: 10, background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "1px 6px" }}>Art. 13</span>
+            <span style={{ color: MUTED, fontFamily: "var(--font-mono)", fontSize: 10, background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "1px 6px" }}>Art. 13</span>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: page.accessConfig.visibility !== "public" ? 14 : 0 }}>
             {(["public", "restricted", "invite_only"] as TrustCenterVisibility[]).map(v => (

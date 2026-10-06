@@ -10,5 +10,5 @@ export function getSystemVersion(): string {
 }
 
 export function getPlatformName(): string {
-  return "AIComply";
+  return "RegulaeOS";
 }

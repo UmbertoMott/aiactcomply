@@ -61,7 +61,7 @@ Il Regolamento UE 2024/1689 (AI Act) è il primo quadro normativo completo sull'
 - 🟡 **Rischio limitato** — obblighi trasparenza
 - 🟢 **Rischio minimale** — liberi
 
-AIComply copre tutti gli obblighi attraverso i suoi tool.`,
+RegulaeOS copre tutti gli obblighi attraverso i suoi tool.`,
   },
   {
     id: "gen_ruoli",
@@ -77,13 +77,13 @@ AIComply copre tutti gli obblighi attraverso i suoi tool.`,
 
 🛒 **Distributor:** Distribuisce senza modificare. Obblighi limitati: verifica marcatura CE, documentazione presente.
 
-Puoi cambiare il tuo ruolo in AIComply dal menu in alto → "cambia".`,
+Il ruolo si stabilisce per ogni sistema, nell'inventario (Passo 2).`,
   },
   {
     id: "gen_dossier",
     topic: "Dossier",
     keywords: ["dossier", "completamento", "percentuale", "export", "download", "report", "archivio", "documentazione"],
-    answer: `**Il Dossier AIComply**
+    answer: `**Il Dossier RegulaeOS**
 
 Il Dossier aggrega automaticamente i risultati di tutti i tool completati in un unico documento strutturato.
 
@@ -635,7 +635,7 @@ L'Evidence Layer è consultabile per dimostrare che la compliance è stata effet
     keywords: ["firma", "sign off", "approvazione", "revisore", "dpo", "legale", "approvare", "firmare"],
     answer: `**Firma del revisore (Sign-Off)**
 
-Ogni tool principale di AIComply include un pannello di **firma del revisore** nella sezione conclusiva.
+Ogni tool principale di RegulaeOS include un pannello di **firma del revisore** nella sezione conclusiva.
 
 **A cosa serve:**
 Garantisce che il documento/valutazione sia stato rivisto e approvato da una persona qualificata prima di essere inserito nel dossier. Richiesto per audit e dimostrazioni di conformità.
@@ -717,7 +717,7 @@ function score(query: string, entry: KBEntry): number {
 }
 
 function findAnswer(query: string): string {
-  if (!query.trim()) return "Puoi chiedermi informazioni su qualsiasi tool di AIComply o sulla procedura di conformità AI Act!";
+  if (!query.trim()) return "Puoi chiedermi informazioni su qualsiasi tool di RegulaeOS o sulla procedura di conformità AI Act!";
 
   const scored = KB.map(e => ({ entry: e, s: score(query, e) }))
     .sort((a, b) => b.s - a.s);
@@ -802,7 +802,7 @@ export default function ChatAssistant() {
       id: "welcome",
       role: "assistant",
       ts: Date.now(),
-      text: `**Ciao! Sono l'assistente AIComply** 👋
+      text: `**Ciao! Sono l'assistente RegulaeOS** 👋
 
 Sono qui per guidarti nel percorso di conformità all'**EU AI Act** e alle normative correlate (GDPR, L.132/2025).
 
@@ -912,8 +912,8 @@ Come posso aiutarti?`,
           opacity: open ? 0.6 : 1,
         }}
         onClick={() => { setOpen(o => !o); setMinimized(false); }}
-        aria-label="Assistente AIComply"
-        title="Assistente AIComply"
+        aria-label="Assistente RegulaeOS"
+        title="Assistente RegulaeOS"
       >
         {open
           ? <X style={{ width: 16, height: 16, color: "#fff" }} />
@@ -942,7 +942,7 @@ Come posso aiutarti?`,
           </div>
           <div style={{ flex: 1 }}>
             <p style={{ fontSize: 13, fontWeight: 600, color: "#fff", lineHeight: 1.2 }}>
-              Assistente AIComply
+              Assistente RegulaeOS
             </p>
             <p style={{ fontSize: 10, color: "rgba(255,255,255,0.45)", marginTop: 1 }}>
               AI Act · GDPR · L.132/2025

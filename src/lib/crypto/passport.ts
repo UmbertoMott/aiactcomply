@@ -86,7 +86,7 @@ export function generatePassport(
     data_schema_version: "1.0.4",
   };
 
-  const legalDeclaration = `I, AIComply Classifier v2.0, declare that the AI system "${systemName}" has been analyzed according to the Regolamento UE 2024/1689 (AI Act). Classification: ${riskLevel}. Profiling check: ${profilingStatus}. Exemption: ${exemptionStatus}. This passport is cryptographically bound to the specific software version identified by Git commit ${technicalFingerprint.git_sha.slice(0, 12)}.`;
+  const legalDeclaration = `I, RegulaeOS Classifier v2.0, declare that the AI system "${systemName}" has been analyzed according to the Regolamento UE 2024/1689 (AI Act). Classification: ${riskLevel}. Profiling check: ${profilingStatus}. Exemption: ${exemptionStatus}. This passport is cryptographically bound to the specific software version identified by Git commit ${technicalFingerprint.git_sha.slice(0, 12)}.`;
 
   const payloadToSign = JSON.stringify({ passportId, auditTrail, technicalFingerprint, legalDeclaration });
   const signature = `signed:ed25519:${COMPANY_KEYS.keyId}:${simpleHash(payloadToSign)}`;

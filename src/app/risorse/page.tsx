@@ -57,7 +57,7 @@ export default async function RisorseIndex() {
             {t("empty")}
           </p>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))", gap: 20 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(360px, 100%), 1fr))", gap: 20 }}>
             {posts.map((post, i) => (
               <PostCard key={post.slug} post={post} isNew={i === 0} />
             ))}

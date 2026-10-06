@@ -211,7 +211,7 @@ export function SignatureConfirmation({ signature, onRevoke }: ConfirmationProps
         <p style={{ fontSize: 11, color: DK.muted, margin: 0 }}>
           Data: {new Date(signature.signedAt).toLocaleString("it-IT")}
         </p>
-        <p style={{ fontSize: 9, color: DK.faint, fontFamily: "monospace", margin: "4px 0 0",
+        <p style={{ fontSize: 9, color: DK.faint, fontFamily: "var(--font-mono)", margin: "4px 0 0",
           wordBreak: "break-all" }}>
           Hash: {signature.integrityHash}
         </p>

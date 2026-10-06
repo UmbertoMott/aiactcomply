@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Map, ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
 import { useT } from "@/i18n/LocaleProvider";
 
-const FONT = "var(--font-inter, system-ui)";
+const FONT = "inherit";
 
 type T = (key: string) => string;
 

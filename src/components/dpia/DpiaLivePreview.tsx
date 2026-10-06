@@ -30,7 +30,7 @@ const DOC = {
 
 import { useT, useLocale } from "@/i18n/LocaleProvider";
 
-const SANS = "var(--font-inter, system-ui, sans-serif)";
+const SANS = "inherit";
 
 function doneValue(doc: DpiaGuidedDoc, id: string): string | null {
   const a = doc.answers[id];
@@ -417,7 +417,7 @@ export function DpiaLivePreview({ doc, activeSection }: DpiaLivePreviewProps) {
           <p style={{ fontSize: 9, fontWeight: 700, color: DOC.muted, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px", fontFamily: SANS }}>
             {DPIA_TEMPLATE_META.legalBasis}
           </p>
-          <h1 style={{ fontSize: 17, fontWeight: 700, color: DOC.text, margin: "0 0 6px", fontFamily: SANS }}>
+          <h1 className="doc-title" style={{ fontSize: 17, fontWeight: 700, color: DOC.text, margin: "0 0 6px", fontFamily: SANS }}>
             {DPIA_TEMPLATE_META.title}
           </h1>
           <p style={{ fontSize: 10, color: DOC.muted, margin: 0, fontFamily: SANS }}>

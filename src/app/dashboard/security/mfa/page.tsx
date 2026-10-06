@@ -44,7 +44,7 @@ export default function MFAPage() {
     const supabase = createClient();
     if (!supabase) { setError("Configurazione non disponibile."); setLoading(false); return; }
 
-    const { data, error: enrollError } = await supabase.auth.mfa.enroll({ factorType: "totp", issuer: "AIComply" });
+    const { data, error: enrollError } = await supabase.auth.mfa.enroll({ factorType: "totp", issuer: "RegulaeOS" });
     if (enrollError || !data) {
       setError(enrollError?.message ?? "Errore durante l'attivazione.");
       setLoading(false);

@@ -904,7 +904,7 @@ export default function LegalAssistantPage() {
                 >
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>{s.label}</p>
-                    <p style={{ fontSize: 9, color: "rgba(0,0,0,0.42)", margin: 0, marginTop: 2, fontFamily: "monospace" }}>{s.ref}</p>
+                    <p style={{ fontSize: 9, color: "rgba(0,0,0,0.42)", margin: 0, marginTop: 2, fontFamily: "var(--font-mono)" }}>{s.ref}</p>
                   </div>
                 </button>
               ))

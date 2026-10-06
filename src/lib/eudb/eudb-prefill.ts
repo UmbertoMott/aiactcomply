@@ -145,7 +145,7 @@ export function generateAnnexVIII(doc: EUDBDoc): string {
     s.registration_status === "new" ? "Prima registrazione" :
     s.registration_status === "update" ? "Aggiornamento" : "Ritiro dal mercato";
   return `ANNEX VIII — INFORMAZIONI PER LA REGISTRAZIONE NEL DATABASE UE (Art. 49)
-Regolamento (UE) 2024/1689 — Generato da AIComply il ${new Date().toLocaleDateString("it-IT")}
+Regolamento (UE) 2024/1689 — Generato da RegulaeOS il ${new Date().toLocaleDateString("it-IT")}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 SEZIONE A — DATI DEL PROVIDER / AUTHORIZED REPRESENTATIVE

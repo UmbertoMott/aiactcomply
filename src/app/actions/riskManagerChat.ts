@@ -269,7 +269,7 @@ export async function riskManagerChat(
     .map(k => `- ${k}: completata`)
     .join("\n") || "nessuna fase completata";
 
-  const systemPrompt = `Sei un esperto EU AI Act integrato in AIComply Risk Manager.
+  const systemPrompt = `Sei un esperto EU AI Act integrato in RegulaeOS Risk Manager.
 Rispondi in italiano. Sii conciso (max 5 frasi). Cita gli articoli AI Act rilevanti.
 
 SISTEMA: ${systemContext.systemName ?? "non specificato"} | Risk: ${systemContext.riskLevel ?? "N/D"} | GPAI: ${systemContext.isGPAI ? "Sì" : "No"}

@@ -259,7 +259,7 @@ async function readBodyCapped(res: Response, maxBytes: number): Promise<string> 
 
 export async function scanUrl(url: string): Promise<Art50ScanResult> {
   let response = await fetch(url, {
-    headers: { "User-Agent": "AIComply-Art50-Scanner/1.0" },
+    headers: { "User-Agent": "RegulaeOS-Art50-Scanner/1.0" },
     signal: AbortSignal.timeout(8000),
     redirect: "manual",
   });
@@ -271,7 +271,7 @@ export async function scanUrl(url: string): Promise<Art50ScanResult> {
       throw new Error(`Redirect bloccato: destinazione non sicura`);
     }
     response = await fetch(location, {
-      headers: { "User-Agent": "AIComply-Art50-Scanner/1.0" },
+      headers: { "User-Agent": "RegulaeOS-Art50-Scanner/1.0" },
       signal: AbortSignal.timeout(8000),
       redirect: "manual",
     });

@@ -13,7 +13,7 @@ export default function DashboardError({
   }, [error]);
 
   return (
-    <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "Inter, system-ui, sans-serif" }}>
+    <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "inherit" }}>
       <div style={{ maxWidth: 640, width: "100%", background: "#fff", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 14, padding: 28 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
           <span style={{ fontSize: 22 }}>⚠️</span>
