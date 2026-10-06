@@ -109,7 +109,7 @@ export default function Nav() {
           </Link>
           <Link
             href="/prenota-demo"
-            className="inline-flex items-center whitespace-nowrap text-[13px] font-medium rounded-full px-4 md:px-5 py-2.5 md:py-2 transition-opacity hover:opacity-80"
+            className="hidden md:inline-flex items-center whitespace-nowrap text-[13px] font-medium rounded-full px-5 py-2 transition-opacity hover:opacity-80"
             style={{ background: "#0D1016", color: "#ffffff", letterSpacing: "-0.2px" }}
           >
             {t("bookDemo")}
@@ -147,6 +147,11 @@ export default function Nav() {
               {l.label}
             </Link>
           ))}
+          {/* Su smartphone "Prenota demo" sta qui, non nella barra */}
+          <Link href="/prenota-demo" onClick={() => setMobileOpen(false)}
+            style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 48, marginTop: 14, borderRadius: 999, background: "#0D1016", color: "#ffffff", fontSize: 15, fontWeight: 500, textDecoration: "none" }}>
+            {t("bookDemo")}
+          </Link>
           <div style={{ paddingTop: 14, paddingBottom: 4 }}><LanguageToggle /></div>
         </div>
       )}
