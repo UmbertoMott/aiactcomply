@@ -23,7 +23,7 @@ export function LogQualityCard({ logSets, t }: { logSets: ImportedLogSet[]; t: T
   return (
     <section className="mb-6">
       <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>{t("q_title")}</h2>
-      <p className="text-[11px] mb-3" style={{ color: T.muted }}>ISO/IEC 42001 A.9 (event logs) · ISO/IEC 27001 A.8.15 (logging)</p>
+      <p className="text-[11px] mb-3" style={{ color: T.muted }}>ISO/IEC 42001 A.6.2.8 (event logs) · ISO/IEC 27001 A.8.15 (logging)</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {logSets.map(ls => {
           const q = ls.qualityFindings;
@@ -185,12 +185,12 @@ export function RetentionPanel({ record, onChange, t }: { record: LogVaultRecord
 
 // ═══ §10 Tabella mappatura ISO ══════════════════════════════════════════════
 const ISO_ROWS = [
-  ["Registrazione eventi / event logs", "Art. 12(1), Art. 19", "ISO/IEC 42001 A.9; 27001 A.8.15"],
-  ["Copertura finalità di tracciabilità", "Art. 12(2)(a-c)", "ISO/IEC 42001 §8.4; A.9"],
+  ["Registrazione eventi / event logs", "Art. 12(1), Art. 19", "ISO/IEC 42001 A.6.2.8; 27001 A.8.15"],
+  ["Copertura finalità di tracciabilità", "Art. 12(2)(a-c)", "ISO/IEC 42001 A.6.2.8; A.6.2.6"],
   ["Qualità/continuità (gap, duplicati)", "Art. 12", "ISO/IEC 27001 A.8.15; 5259"],
   ["Verifica integrità / hash-chain", "Art. 12(1)", "ISO/IEC 27037"],
-  ["Ritenzione log", "Art. 26(6)", "ISO/IEC 42001 A.9; policy interna"],
-  ["Log biometrici", "Art. 12(3)(a-d)", "ISO/IEC 42001 A.9 + Art. 14(5)"],
+  ["Conservazione dei log", "Art. 19(1), Art. 26(6)", "ISO/IEC 42001 A.6.2.8; policy interna"],
+  ["Log biometrici", "Art. 12(3)(a-d)", "ISO/IEC 42001 A.6.2.8 + Art. 14(5)"],
 ];
 export function LogIsoTable() {
   const t = useT("toolLogvault");

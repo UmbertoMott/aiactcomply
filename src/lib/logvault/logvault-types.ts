@@ -16,7 +16,7 @@ export const TraceabilityCoverageRecordSchema = z.object({
 });
 export type TraceabilityCoverageRecord = z.infer<typeof TraceabilityCoverageRecordSchema>;
 
-// ── §4 Qualità & continuità (ISO/IEC 42001 A.9 / 27001 A.8.15) ──────
+// ── §4 Qualità & continuità (ISO/IEC 42001 A.6.2.8 / 27001 A.8.15) ──────
 export const LogQualityFindingsSchema = z.object({
   timestampValidPct: z.number(),
   outOfOrderCount: z.number(),
