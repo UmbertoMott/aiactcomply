@@ -583,7 +583,7 @@ La normativa italiana aggiunge etichettatura obbligatoria per contenuti AI nel s
 
 📍 Menu: *Valutazioni → AI Literacy*
 
-**A cosa serve:** Documenta le misure adottate per garantire un adeguato livello di alfabetizzazione AI al personale che lavora con sistemi di IA. L'Art. 4 dell'AI Act richiede che provider e deployer adottino misure per garantire literacy adeguata.
+**A cosa serve:** Documenta le misure adottate per sostenere l'alfabetizzazione in materia di IA del personale che lavora con sistemi di IA. L'Art. 4 dell'AI Act, come modificato dal Reg. (UE) 2026/1744, chiede a fornitori e deployer di adottare misure volte a sostenerne lo sviluppo, senza imporre un livello specifico.
 
 **Chi deve essere formato:**
 - Personale che usa o supervisiona sistemi di IA

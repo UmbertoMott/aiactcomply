@@ -187,11 +187,11 @@ const ART53_OBLIGATIONS: Art53Obligation[] = [
   },
   {
     id: "eudb_registration",
-    label: "Registrazione nel database UE",
-    article: "Art. 53(1)(e) → Art. 49",
-    description: "I GPAI provider devono registrarsi nel database UE. Categoria specifica per GPAI nel portale EC.",
-    note: "Usa il tool EUDB Registration per generare il pacchetto Annex VIII.",
-    href: "/dashboard/compliance-ops/eudb",
+    label: "Notifica alla Commissione (modelli con rischio sistemico)",
+    article: "Art. 52(1)",
+    description: "Se il modello soddisfa la condizione dell'Art. 51(1)(a), o è noto che la soddisferà, il fornitore lo notifica alla Commissione senza ritardo e in ogni caso entro due settimane.",
+    note: "I modelli di IA per finalità generali non si registrano nella banca dati UE dell'Art. 71: la registrazione dell'Art. 49 riguarda i sistemi ad alto rischio.",
+    href: "/dashboard/tools/gpai",
   },
 ];
 
@@ -255,7 +255,7 @@ const ART55_OBLIGATIONS: Art55Obligation[] = [
     id: "code_of_practice",
     label: "Adesione al GPAI Code of Practice",
     article: "Art. 56",
-    description: "I provider con rischio sistemico possono dimostrare conformità ad Art. 55 aderendo al GPAI Code of Practice (marzo 2025). In alternativa, devono dimostrare conformità equivalente.",
+    description: "I provider con rischio sistemico possono dimostrare conformità ad Art. 55 facendo affidamento su codici di buone pratiche (Art. 56) fino alla pubblicazione di una norma armonizzata; in alternativa dimostrano la conformità con mezzi adeguati alternativi (Art. 55(2)).",
     status_options: ["Aderente", "Conformità equivalente documentata", "In valutazione", "Non aderente"],
     note: "Il Code of Practice è gestito dall’AI Office. Adesione tramite: https://code-of-practice.ec.europa.eu",
   },

@@ -14,12 +14,13 @@ export type EvidenceType =
   | "internal_procedure";
 
 export interface DeployerApplicabilityFlags {
-  usesHighRiskSystem: boolean;         // Art. 26(1) — sistema ad alto rischio (Allegato III)
-  usesInternalProcedures: boolean;     // Art. 26(2) — procedure interne di controllo
-  employeeImpact: boolean;             // Art. 26(7) — impatto sui lavoratori
-  biometricCategorization: boolean;    // Art. 26(8) — categorizzazione biometrica o riconoscimento emozioni
-  eudbRequired: boolean;               // Art. 49 — registrazione EUDB obbligatoria (autorità pubbliche)
-  rbiApplicable: boolean;              // Art. 26(10) — registrazione nel database RBI
+  // Nomi dei campi storici (persistiti); il significato attuale è nel commento.
+  usesHighRiskSystem: boolean;         // Art. 27 — FRIA richiesta (enti pubblici, servizi pubblici, Allegato III, 5(b)-(c))
+  usesInternalProcedures: boolean;     // Art. 26(12) — cooperazione con le autorità (sempre dovuta)
+  employeeImpact: boolean;             // Art. 26(7) — informare i lavoratori
+  biometricCategorization: boolean;    // Art. 26(11) — decisioni su persone fisiche (sistemi Allegato III)
+  eudbRequired: boolean;               // Art. 26(8), 49(3) — deployer autorità pubblica: registrazione dell'uso
+  rbiApplicable: boolean;              // Art. 26(10) — identificazione biometrica remota a posteriori: autorizzazione entro 48 ore
 }
 
 export interface DeployerObligationDefinition {
@@ -101,8 +102,7 @@ export const DEPLOYER_OBLIGATIONS: readonly DeployerObligationDefinition[] = [
       "Cooperare con le autorità competenti in qualsiasi azione intrapresa in relazione al sistema.",
     primaryReference: "Art. 26(12) AI Act",
     supportReferences: [],
-    alwaysApplicable: false,
-    applicabilityField: "usesInternalProcedures",
+    alwaysApplicable: true,
     evidenceType: "internal_procedure",
     linkedTool: null,
   },
@@ -110,7 +110,7 @@ export const DEPLOYER_OBLIGATIONS: readonly DeployerObligationDefinition[] = [
     id: "D-07",
     label: "FRIA — Valutazione d'impatto sui diritti fondamentali",
     description:
-      "Prima dell'uso, se il deployer è un organismo di diritto pubblico o un ente privato che fornisce servizi pubblici, o usa sistemi dell'Allegato III, punto 5(b) e (c) (non per i sistemi del punto 2).",
+      "Prima del primo uso: obbligatoria solo per organismi di diritto pubblico, enti privati che forniscono servizi pubblici e deployer dei sistemi dell'Allegato III, punto 5, lettere b) e c). Non si applica ai sistemi del punto 2.",
     primaryReference: "Art. 27 AI Act",
     supportReferences: ["All. III"],
     alwaysApplicable: false,

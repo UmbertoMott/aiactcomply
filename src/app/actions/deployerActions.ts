@@ -28,7 +28,7 @@ Sistema di IA:
 - Note obblighi: ${system.obligationsNote ?? "n.d."}
 
 I 6 flag condizionali (rispondi true/false per ciascuno):
-1. usesHighRiskSystem — il sistema rientra in Allegato III (alto rischio)?
+1. usesHighRiskSystem — la FRIA dell'Art. 27 è richiesta? (sì solo se il deployer è un organismo di diritto pubblico, un ente privato che fornisce servizi pubblici, o usa sistemi dell'Allegato III, punto 5, lettere b) o c); mai per il punto 2)
 2. usesInternalProcedures — il deployer deve cooperare con le autorità competenti (Art. 26(12))? Rispondi sempre true.
 3. employeeImpact — il sistema impatta direttamente i lavoratori (ad es. monitoraggio, selezione, valutazione)?
 4. biometricCategorization — il sistema (Allegato III) adotta o aiuta ad adottare decisioni su persone fisiche (Art. 26(11))?

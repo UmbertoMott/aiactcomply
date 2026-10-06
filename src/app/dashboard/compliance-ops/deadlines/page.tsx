@@ -595,7 +595,7 @@ export default function DeadlinesPage() {
             </div>
             <span className="font-mono text-[11px] px-2 py-1 rounded flex-shrink-0"
               style={{ background: "rgba(217,119,6,0.1)", color: "#92400e", border: "1px solid rgba(217,119,6,0.25)" }}>
-              Art. 6–51
+              Capo III, sez. 1-3 (Artt. 6-27)
             </span>
           </div>
         )}

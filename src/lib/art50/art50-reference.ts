@@ -42,7 +42,7 @@ export const ART50_OBLIGATIONS: readonly Art50ObligationDefinition[] = [
   },
 ] as const satisfies readonly Art50ObligationDefinition[];
 
-// Eccezioni Art. 50(2) — ✦ AI — verifica e conferma sulla formulazione esatta.
+// Eccezioni Art. 50(2), verificate sul testo ufficiale (Reg. (UE) 2024/1689).
 export const SYNTHETIC_CONTENT_EXEMPTIONS = [
   {
     id: "assistive_editing",
@@ -58,15 +58,20 @@ export const SYNTHETIC_CONTENT_EXEMPTIONS = [
   },
 ] as const;
 
-// Eccezioni Art. 50(4) — ✦ AI — verifica e conferma sulla formulazione esatta.
+// Art. 50(4): primo comma (deep fake) e secondo comma (testi su questioni di interesse pubblico),
+// due obblighi distinti, ciascuno con le proprie eccezioni.
 export const DEEPFAKE_EXEMPTIONS = [
   {
+    id: "law_enforcement_df",
+    label: "Deep fake — uso autorizzato dalla legge per accertare, prevenire, indagare o perseguire reati: l'obbligo non si applica (primo comma)",
+  },
+  {
     id: "artistic_creative_satirical",
-    label: "Contenuto parte di un'opera o programma evidentemente artistico, creativo, satirico, fittizio o analogo — obbligo limitato alla divulgazione dell'esistenza del contenuto generato/manipolato in modo che non comprometta la fruizione dell'opera",
+    label: "Deep fake parte di un'opera o di un programma manifestamente artistici, creativi, satirici o fittizi — basta rivelare l'esistenza del contenuto generato o manipolato, senza ostacolare l'esposizione o il godimento dell'opera (primo comma)",
   },
   {
     id: "editorial_text",
-    label: "Testo pubblicato per informare il pubblico su questioni di interesse pubblico, soggetto a revisione umana o controllo editoriale, con responsabilità editoriale in capo a persona fisica/giuridica — l'obbligo di disclosure non si applica",
+    label: "Testo (non deep fake) pubblicato per informare il pubblico su questioni di interesse pubblico, sottoposto a revisione umana o controllo editoriale con responsabilità editoriale di una persona fisica o giuridica: l'obbligo del secondo comma non si applica",
   },
 ] as const;
 

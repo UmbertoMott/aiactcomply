@@ -71,8 +71,8 @@ type Incident = {
   authority: string;
   affectedUsers?: string;
   actions: string;
-  rootCause?: string;      // Sezione 4 — Rapporto completo Art. 73(4)
-  finalMeasures?: string;  // Sezione 6 — Rapporto completo Art. 73(4)
+  rootCause?: string;      // Sezione 4 — Rapporto completo Art. 73(5)
+  finalMeasures?: string;  // Sezione 6 — Rapporto completo Art. 73(5)
   createdAt: string;
   // PROMPT AR — classificazione Art. 73
   severityClassification?: SeverityClassification;
@@ -143,7 +143,7 @@ Data: ${new Date().toLocaleDateString("it-IT")}`;
 
 function generateFullReport(inc: Incident): string {
   return `RAPPORTO COMPLETO — INCIDENTE GRAVE
-Ai sensi dell'Art. 73(4) del Regolamento (UE) 2024/1689
+Ai sensi dell'Art. 73(5) del Regolamento (UE) 2024/1689
 
 Data rapporto: ${new Date().toLocaleDateString("it-IT")}
 Autorità destinataria: ${inc.authority}
@@ -185,7 +185,7 @@ ${inc.finalMeasures || "[CAMPO OBBLIGATORIO - Compilare prima di generare il rap
 ═══════════════════════════════════════════════════════
 SEZIONE 7 — DICHIARAZIONE
 ═══════════════════════════════════════════════════════
-Il presente rapporto è redatto in conformità all'Art. 73(4) del Regolamento (UE) 2024/1689
+Il presente rapporto è redatto in conformità all'Art. 73(5) del Regolamento (UE) 2024/1689
 e costituisce il rapporto completo a seguito della notifica preliminare del ${inc.date}.
 
 Firma: _______________________
@@ -1160,7 +1160,7 @@ function PostMarketPageInner() {
                               color: "#ea580c",
                               bg: "rgba(234,88,12,0.05)",
                               border: "rgba(234,88,12,0.12)",
-                              ref: "Art. 73(2) + Art. 3(49)(a)(b)(c)",
+                              ref: "Art. 73(2) + Art. 3(49)(a), (c), (d)",
                               criteria: [
                                 "Danno grave ma non immediato alla salute fisica o mentale",
                                 "Violazione grave di diritti fondamentali (es. discriminazione sistematica, profilazione illecita)",
@@ -1179,7 +1179,7 @@ function PostMarketPageInner() {
                               color: "#d97706",
                               bg: "rgba(217,119,6,0.04)",
                               border: "rgba(217,119,6,0.12)",
-                              ref: "Art. 9 — monitoraggio post-market",
+                              ref: "Art. 72(2) — monitoraggio successivo all'immissione sul mercato",
                               criteria: [
                                 "Malfunzionamento significativo senza danno immediato a persone",
                                 "Potenziale violazione normativa in corso di accertamento",
@@ -1915,7 +1915,7 @@ function PostMarketPageInner() {
                               </button>
                             </div>
                             <p style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", lineHeight: 1.5, margin: 0 }}>
-                              Reg. (UE) 2024/1689 Art. 73. La notifica preliminare deve essere seguita da rapporto completo (Art. 73(4)) compilabile nello step 5.
+                              Reg. (UE) 2024/1689 Art. 73. La notifica preliminare deve essere seguita da rapporto completo (Art. 73(5)) compilabile nello step 5.
                             </p>
                           </>
                         )}
@@ -1970,7 +1970,7 @@ function PostMarketPageInner() {
                                 a.click();
                                 URL.revokeObjectURL(url);
                                 updateIncidentField(selected.id, "status", "report_complete");
-                                void appendEvidence("incident", { type: "Post-Market Report Completo Art. 73(4)", incidentId: selected.id, system: selected.system, generatedAt: new Date().toISOString() }, "post-market");
+                                void appendEvidence("incident", { type: "Rapporto completo Art. 73(5)", incidentId: selected.id, system: selected.system, generatedAt: new Date().toISOString() }, "post-market");
                               }}
                               style={{
                                 width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
@@ -1981,7 +1981,7 @@ function PostMarketPageInner() {
                               }}
                             >
                               <Download className="h-3.5 w-3.5" />
-                              {canGenerate ? "Genera Rapporto Completo Art. 73(4)" : "Compila le sezioni obbligatorie"}
+                              {canGenerate ? "Genera rapporto completo Art. 73(5)" : "Compila le sezioni obbligatorie"}
                             </button>
                           );
                         })()}
@@ -2229,8 +2229,8 @@ function PostMarketPageInner() {
           >
             <p className="text-[11px] leading-relaxed" style={{ color: "rgba(0,0,0,0.55)" }}>
               <span className="font-semibold" style={{ color: "#1d4ed8" }}>Art. 72(1) —</span>{" "}
-              Il fornitore istituisce e documenta un piano di monitoraggio post-market prima
-              dell&apos;immissione sul mercato.{" "}
+              Il fornitore istituisce e documenta un sistema di monitoraggio successivo all&apos;immissione sul mercato,
+              proporzionato alla natura del sistema e ai suoi rischi.{" "}
               <span className="font-semibold" style={{ color: "#1d4ed8" }}>Art. 72(2)-(3) —</span>{" "}
               Il sistema di monitoraggio raccoglie e analizza attivamente i dati sulle prestazioni per tutta la vita del sistema;
               il piano fa parte della documentazione tecnica (Allegato IV).

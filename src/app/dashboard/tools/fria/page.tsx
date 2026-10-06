@@ -193,27 +193,27 @@ export default function FRIAPage() {
     const ctx = doc.context;
     const f = (v: string | undefined) => !!(v?.trim());
     const phases = [
-      { id: "1", label: t("ph1"), legalRef: "Art. 27(2)(a)", subPoints: [
+      { id: "1", label: t("ph1"), legalRef: "Art. 27(1)(a)-(c)", subPoints: [
         { label: t("sp_systemName"),  done: f(doc.system_name) },
         { label: t("sp_organization"),done: f(doc.organization) },
         { label: t("sp_purpose"),     done: f(ctx.intended_purpose_explanation) },
         { label: t("sp_affected"),    done: f(ctx.affected_persons) },
         { label: t("sp_technology"),  done: f(ctx.technology_overview) },
       ]},
-      { id: "2", label: t("ph2"), legalRef: "Art. 27(2)(b)", subPoints: [
+      { id: "2", label: t("ph2"), legalRef: "Art. 27(1)(d)", subPoints: [
         { label: t("sp_atLeastOne"),  done: doc.scenarios.length > 0 },
         { label: t("sp_rightImpacts"),done: doc.scenarios.some(s => s.right_impacts.length > 0) },
       ]},
-      { id: "3", label: t("ph3"), legalRef: "Art. 27(2)(c)", subPoints: [
+      { id: "3", label: t("ph3"), legalRef: "Art. 27(1)(e)-(f)", subPoints: [
         { label: t("sp_recommendation"), done: f(doc.deployment.recommendation) },
         { label: t("sp_responsible"),    done: f(doc.deployment.approver_name) },
         { label: t("sp_justification"),  done: f(doc.deployment.decision_justification) },
       ]},
-      { id: "4", label: t("ph4"), legalRef: "Art. 27(2)(d)", subPoints: [
+      { id: "4", label: t("ph4"), legalRef: "Art. 27(2)", subPoints: [
         { label: t("sp_monItems"),    done: doc.monitoring.items.length > 0 },
         { label: t("sp_updTriggers"), done: doc.monitoring.update_triggers.length > 0 },
       ]},
-      { id: "5", label: t("ph5"), legalRef: "Art. 27(2)(e)", subPoints: [
+      { id: "5", label: t("ph5"), legalRef: "Buona prassi (non richiesto dall'Art. 27)", subPoints: [
         { label: t("sp_stkMapped"),   done: doc.stakeholders.length > 0 },
         { label: t("sp_engLog"),      done: doc.engagement_log.length > 0 },
       ]},
@@ -1267,8 +1267,8 @@ export default function FRIAPage() {
             style={{ ...inputSt, resize: "vertical", fontFamily: "var(--font-mono)", fontSize: 11, lineHeight: 1.6 }} />
         </div>
 
-        {/* Art. 27(2) — Notifica autorità di vigilanza */}
-        {(d.recommendation === "deploy_with_conditions" || d.recommendation === "do_not_deploy") && (
+        {/* Art. 27(3) — Notifica dei risultati all'autorità di vigilanza: sempre dovuta (salvo Art. 46(1)) */}
+        {(
           <div style={{ marginBottom: 16, padding: "12px 16px", borderRadius: 8, background: T.amberBg, border: `1px solid ${T.amberBdr}`, display: "flex", gap: 10, alignItems: "flex-start" }}>
             <span style={{ fontSize: 16, flexShrink: 0 }}>⚠</span>
             <div>

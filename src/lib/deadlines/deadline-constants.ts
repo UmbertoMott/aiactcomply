@@ -50,10 +50,10 @@ export const AI_ACT_DEADLINES: AIActDeadline[] = [
   {
     id: "codes_of_practice",
     date: "2025-05-02",
-    label: "Codici di condotta GPAI",
+    label: "Codici di buone pratiche GPAI",
     description:
-      "Scadenza per la prima versione dei codici di condotta GPAI sviluppati dall'AI Office europeo con stakeholder.",
-    article: "Art. 56",
+      "I codici di buone pratiche per i modelli di IA per finalità generali devono essere pronti al più tardi entro il 2 maggio 2025 (Art. 56(9)). Non vanno confusi con i codici di condotta dell'Art. 95.",
+    article: "Art. 56(9)",
     applies_to: ["gpai", "gpai_systemic"],
     severity: "informational",
   },

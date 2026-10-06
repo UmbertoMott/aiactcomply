@@ -3,28 +3,21 @@
 import type { AIActDeadline, AIActTier } from "./deadline-types";
 import type { AISystem } from "@/lib/inventory/ai-system";
 import { getOpenSevereIncidentEntries, type IncidentEntry } from "@/lib/incidents/incident-actions";
+import { deadlineInfo } from "@/lib/incidents/incident-classification";
+import { determineRoles, assessRisk, computeObligations } from "@/lib/obligations/engine";
 
 function isEligibleForPostMarket(system: AISystem): boolean {
   return system.tier === "high_risk" || system.tier === "gpai_systemic";
 }
 
-// Exported — consumed by EUDB wizard (PROMPT AS) and deadline page badge
+// Exported — consumed by EUDB wizard and deadline page badge.
+// Registrazione nella banca dati UE solo nei casi dell'Art. 49: fornitore di sistema dell'Allegato III
+// (49(1)) o in deroga Art. 6(3) (49(2)); deployer autorità pubblica (49(3) e 26(8)). I modelli GPAI non si registrano.
 export function requiresEUDBRegistration(system: AISystem): boolean {
-  // Rispecchia la logica di Step 1 (Q1/Q2) — validare contro Art. 49(1)/(3)
-  const isHighRiskProvider =
-    (system.role === "provider" || system.role === "authorized_rep") &&
-    (system.tier === "high_risk" || system.tier === "gpai_systemic");
-  const isDeployerPublicAuthority =
-    system.role === "deployer" && system.tier === "high_risk";
-  // Check national security exemption from EUDB draft
-  try {
-    const draftRaw = typeof window !== "undefined" ? localStorage.getItem("aicomply_eudb_draft_v2") : null;
-    if (draftRaw) {
-      const draft = JSON.parse(draftRaw);
-      if (draft?.eligibility?.q3_public_deployer === "yes") return false; // esenzione sicurezza nazionale
-    }
-  } catch { /* silent */ }
-  return isHighRiskProvider || isDeployerPublicAuthority;
+  if (!system.roleAnswers || !system.riskAnswers) return false;
+  const ids = computeObligations(system.roleAnswers, determineRoles(system.roleAnswers), assessRisk(system.riskAnswers), system.riskAnswers)
+    .obligations.map((o) => o.id);
+  return ids.includes("art49-1") || ids.includes("art49-2") || ids.includes("art26-8");
 }
 
 // Exported — consumed by buildDynamicDeadlines + EUDB wizard
@@ -85,15 +78,13 @@ function tierToAppliesTo(tier: AISystem["tier"]): AIActTier[] {
 // buildIncidentNotificationDeadline: exported for use in per-incident deadline cards
 export function buildIncidentNotificationDeadline(system: AISystem, incident: IncidentEntry): AIActDeadline {
   const appliesTo = tierToAppliesTo(system.tier);
-  const is2d = incident.notificationDeadlineType === "immediate_2d";
+  const dl = deadlineInfo(incident.notificationDeadlineType);
   return {
     id: `incident_notification_${incident.id}`,
-    date: incident.notificationDeadlineDate ?? addDays(incident.date, is2d ? 2 : 15),
+    date: incident.notificationDeadlineDate ?? addDays(incident.date, dl.days),
     label: `Notifica incidente grave — ${system.name}`,
     description: incident.description ?? `Scadenza notifica incidente ${incident.id} per il sistema "${system.name}". Verificare termine esatto.`,
-    article: is2d
-      ? "Art. 73(3)"
-      : "Art. 73(2)",
+    article: dl.ref,
     applies_to: appliesTo.length ? appliesTo : ["high_risk_annex3", "high_risk_annex1", "gpai_systemic"] as AIActTier[],
     tool_href: `/dashboard/post-market?tab=incidents&incident=${incident.id}`,
     severity: "critical",
@@ -173,7 +164,7 @@ export function buildDynamicDeadlines(systems: AISystem[]): AIActDeadline[] {
   for (const system of systems) {
     const appliesTo = tierToAppliesTo(system.tier);
 
-    // 1. Post-Market: primo report 12 mesi dopo la messa in servizio (Art. 72)
+    // 1. Monitoraggio: riesame interno a 12 mesi. L'Art. 72 non fissa una periodicità: è una scadenza di buona prassi.
     const riskRaw = typeof window !== "undefined" ? localStorage.getItem("aicomply_risk_register_v1") : null;
     const riskRec = riskRaw ? (() => { try { return JSON.parse(riskRaw); } catch { return null; } })() : null;
     const inServiceDate: string | undefined = riskRec?.signoff?.nextReviewDate;
@@ -182,8 +173,8 @@ export function buildDynamicDeadlines(systems: AISystem[]): AIActDeadline[] {
       dynamic.push({
         id: `post_market_${system.id}`,
         date: addMonths(inServiceDate, 12),
-        label: `Post-Market: primo report — ${system.name}`,
-        description: `Primo report di monitoraggio post-market per il sistema "${system.name}". Data calcolata come in_service_date + 12 mesi. Verificare periodicita esatta contro Art. 72.`,
+        label: `Riesame del monitoraggio (scadenza interna) — ${system.name}`,
+        description: `Riesame interno del monitoraggio successivo all'immissione sul mercato di "${system.name}", 12 mesi dopo l'ultima revisione. L'Art. 72 chiede un monitoraggio attivo e continuo, senza una periodicità fissa: questa data è una buona prassi, non un termine di legge.`,
         article: "Art. 72",
         applies_to: appliesTo,
         tool_href: "/dashboard/post-market",

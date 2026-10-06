@@ -47,7 +47,7 @@ const STATUS_OPTIONS: { value: ObligationStatus; label: string; color: string; b
 ];
 
 const FLAG_LABELS: Record<keyof DeployerApplicabilityFlags, string> = {
-  usesHighRiskSystem: "Sistema ad alto rischio (All. III)",
+  usesHighRiskSystem: "FRIA richiesta (Art. 27)",
   usesInternalProcedures: "Cooperazione con le autorità (Art. 26(12))",
   employeeImpact: "Impatto sui lavoratori",
   biometricCategorization: "Decisioni su persone fisiche (Art. 26(11))",
@@ -651,7 +651,7 @@ export default function DeployerSystemDetailPage() {
         style={{ background: "#fef9c3", border: "1px solid #fde047", color: "#713f12" }}
       >
         <Info size={14} className="mt-0.5 flex-shrink-0" />
-        Sanzioni Art. 99–101: fino a 15 milioni € o 3% fatturato mondiale per inadempienza deployer.
+        Sanzioni Art. 99(4)(e): fino a 15 milioni € o 3% del fatturato mondiale annuo per gli obblighi del deployer (per PMI e start-up l'importo più basso, Art. 99(6)).
       </div>
 
       {/* ── Art. 26 Dettaglio Operativo (PROMPT BD) ── */}
@@ -817,13 +817,13 @@ export default function DeployerSystemDetailPage() {
               <Database size={16} style={{ color: "#2563eb" }} />
               <span className="font-semibold text-sm">Registrazione EUDB</span>
               <span className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: "#eff6ff", color: "#2563eb" }}>
-                Art. 49(2)
+                Art. 26(8), 49(3)
               </span>
             </div>
             <p className="text-xs mb-3" style={{ color: "#6b7280" }}>
-              Come autorità pubblica che effettua il deployment di un sistema di IA ad alto rischio,
-              sei tenuto a registrare il sistema nel database EU AI Act prima dell&apos;uso.{" "}
-              <span style={{ color: "#9ca3af" }}></span>
+              Come autorità pubblica deployer di un sistema ad alto rischio dell&apos;Allegato III, prima dell&apos;uso
+              ti registri nella banca dati UE, selezioni il sistema e ne registri l&apos;uso. Se il sistema non è registrato,
+              non lo usi e informi il fornitore o il distributore (Art. 26(8), Art. 49(3)).
             </p>
             <textarea
               rows={3}
