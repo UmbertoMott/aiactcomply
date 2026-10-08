@@ -81,7 +81,6 @@ export const AICOMPLY_AI_INTERACTIONS = [
   { id: "legal_assistant", area: "Legal Assistant / Compliance Chat", obligationId: "direct_interaction_disclosure", description: "Interfaccia conversazionale — utente interagisce direttamente con AI" },
   { id: "suggest_oversight_measures", area: "Oversight — suggestOversightMeasures", obligationId: "synthetic_content_marking", description: "Bozze misure Art. 14 generate da AI Copilot" },
   { id: "draft_governance_doc", area: "Data Audit — draftGovernancePracticeDocumentation", obligationId: "synthetic_content_marking", description: "Documentazione pratica governance generata da AI" },
-  { id: "analyze_log_coverage", area: "LogVault — analyzeLogCoverage", obligationId: "synthetic_content_marking", description: "Analisi copertura log generata da AI" },
   { id: "assess_four_eyes", area: "Oversight — assessFourEyesApplicability", obligationId: "synthetic_content_marking", description: "Valutazione applicabilità modulo four-eyes generata da AI" },
   { id: "draft_dpia", area: "DocuGen — draftDpiaSections", obligationId: "synthetic_content_marking", description: "Sezioni DPIA generate da AI Copilot" },
   { id: "draft_fria", area: "DocuGen — draftFria", obligationId: "synthetic_content_marking", description: "FRIA generata da AI Copilot" },
@@ -89,6 +88,5 @@ export const AICOMPLY_AI_INTERACTIONS = [
   { id: "risk_manager_chat", area: "Risk Manager — riskManagerChat", obligationId: "direct_interaction_disclosure", description: "Chat guidata Risk Manager con AI" },
   { id: "deployer_applicability", area: "Deployer Dashboard — assessDeployerApplicability", obligationId: "synthetic_content_marking", description: "Valutazione applicabilità obblighi deployer" },
   { id: "draft_worker_notice", area: "Deployer Dashboard — draftWorkerInformationNotice", obligationId: "synthetic_content_marking", description: "Informativa lavoratori Art. 26(7) generata da AI" },
-  { id: "suggest_event_severity", area: "LogVault — suggestEventSeverity", obligationId: "synthetic_content_marking", description: "Classificazione severity eventi generata da AI" },
   { id: "analyze_bias", area: "Data Audit — analyzeBiasIndicators", obligationId: "synthetic_content_marking", description: "Analisi bias Art. 10(2)(f) generata da AI" },
 ] as const;

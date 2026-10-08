@@ -710,9 +710,7 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
 // ─── Tool necessari per l'insieme dei sistemi (menu e riquadro dei tool) ──────
 
 /** Tool di supporto che servono quando serve il tool principale indicato */
-const TOOL_COMPANIONS: Record<string, string[]> = {
-  [T.postMarket.href]: ["/dashboard/tools/drift-monitor"],
-};
+const TOOL_COMPANIONS: Record<string, string[]> = {};
 
 export interface ToolNeed {
   href: string;

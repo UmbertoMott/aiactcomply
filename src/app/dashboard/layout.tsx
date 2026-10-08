@@ -8,7 +8,7 @@ import {
   FileArchive, TrendingUp, Database, UserCheck, ArrowRightLeft, Map, Building2,
   Landmark, Zap, Menu, X, ChevronRight, ChevronLeft, ChevronDown,
   LogOut, Settings, LayoutGrid, Siren, Home, CalendarClock, ShieldCheck, Bot,
-  Monitor, Eye, Megaphone, ClipboardCheck, BadgeCheck, Boxes, GraduationCap, Activity,
+  Monitor, Eye, Megaphone, ClipboardCheck, BadgeCheck, Boxes, GraduationCap,
 } from "lucide-react";
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { useUserRole, ROLE_LABELS } from "@/lib/hooks/useUserRole";
@@ -192,7 +192,6 @@ function buildPillars(t: T): NavPillar[] {
   },
   // ── Dopo l'immissione sul mercato ──
   { id: "post-market", section: "after", icon: TrendingUp, label: t("nav_postMarket"), href: "/dashboard/post-market", art: "Art. 72-73", tooltip: t("tt_postMarket") },
-  { id: "drift-monitor", section: "after", icon: Activity, label: t("nav_driftMonitor"), href: "/dashboard/tools/drift-monitor", art: "Art. 15 · 72", tooltip: t("tt_driftMonitor") },
   // ── Strumenti facoltativi ──
   { id: "legal-assistant", section: "optional", icon: Bot, label: t("nav_legalAssistant"), href: "/dashboard/tools/legal-assistant", tooltip: t("tt_legalAssistant") },
   { id: "customers", section: "optional", icon: ShieldCheck, label: t("nav_customersGroup"), href: "/dashboard/tools/clients", art: t("optionalBadge"), tooltip: t("tt_customers") },
