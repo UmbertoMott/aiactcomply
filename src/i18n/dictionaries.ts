@@ -1,4 +1,5 @@
 import type { Locale } from "./config";
+import { TOOL_DICTIONARIES } from "./tools";
 
 // Dizionari di traduzione, organizzati per namespace (sezione) → chiave → testo.
 // Precisione legale: i riferimenti agli articoli (Art. 50, Art. 99…) restano
@@ -7932,9 +7933,12 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
 };
 
 // Traduce con fallback: locale richiesto → italiano → la chiave stessa.
+// I testi dei tool (src/i18n/tools/*) hanno la precedenza per la stessa lingua.
 export function translate(locale: Locale, ns: string, key: string): string {
   return (
+    TOOL_DICTIONARIES[locale]?.[ns]?.[key] ??
     DICTIONARIES[locale]?.[ns]?.[key] ??
+    TOOL_DICTIONARIES.it?.[ns]?.[key] ??
     DICTIONARIES.it?.[ns]?.[key] ??
     key
   );
