@@ -8,8 +8,9 @@
 // estratto caricato come prova è letto solo nel browser e non viene inviato
 // ai server (se ne salvano solo nome file, numero di voci, periodo e nomi dei campi).
 
-import React, { useEffect, useRef, useState, type CSSProperties } from "react";
-import { CheckCircle2, Circle, Upload, X, ShieldCheck, AlertTriangle } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { CheckCircle2, Upload, X } from "lucide-react";
+import { INK, LINE, fieldStyle as input, ToolHeader, Choice, CheckRow as Check, Note, Step, PrimaryButton, SecondaryButton } from "@/components/tools/ToolUi";
 import { writeToStorage } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
 import { analyzeLogSet, MAX_LOG_FILE_BYTES } from "@/lib/logvault/log-analyzer";
@@ -172,66 +173,6 @@ const TXT = {
 
 type Key = keyof typeof TXT.it;
 
-// ─── Stile ────────────────────────────────────────────────────────────────────
-
-const INK = "#0D1016";
-const LINE = "rgba(0,0,0,0.08)";
-const input: CSSProperties = {
-  width: "100%", padding: "8px 10px", borderRadius: 8, border: `1px solid ${LINE}`,
-  fontSize: 13, color: INK, background: "#fff", outline: "none", fontFamily: "inherit",
-};
-
-function Choice({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      style={{
-        padding: "6px 14px", borderRadius: 999, fontSize: 13, cursor: "pointer", fontFamily: "inherit",
-        border: `1px solid ${active ? INK : LINE}`, background: active ? INK : "#fff", color: active ? "#fff" : INK,
-      }}
-    >
-      {children}
-    </button>
-  );
-}
-
-function Check({ checked, onChange, label }: { checked: boolean; onChange: () => void; label: string }) {
-  return (
-    <label style={{ display: "flex", gap: 10, alignItems: "flex-start", cursor: "pointer", fontSize: 13, color: INK, lineHeight: 1.5 }}>
-      <input type="checkbox" checked={checked} onChange={onChange} style={{ marginTop: 3, accentColor: INK }} />
-      <span>{label}</span>
-    </label>
-  );
-}
-
-function Step({ n, title, refText, done, children }: { n: number; title: string; refText?: string; done: boolean; children: React.ReactNode }) {
-  return (
-    <section style={{ display: "flex", gap: 14, padding: "20px 0", borderTop: `1px solid ${LINE}` }}>
-      <div style={{ flexShrink: 0, paddingTop: 1 }}>
-        {done ? <CheckCircle2 size={18} color="#15803d" /> : <Circle size={18} color={INK} strokeWidth={1.5} />}
-      </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: INK, margin: 0 }}>
-          <span style={{ marginRight: 6 }}>{n}.</span>{title}
-          {refText && <span style={{ fontSize: 11, fontWeight: 400, marginLeft: 8 }}>{refText}</span>}
-        </h2>
-        <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>{children}</div>
-      </div>
-    </section>
-  );
-}
-
-function Note({ children, warn }: { children: React.ReactNode; warn?: boolean }) {
-  return (
-    <p style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 12.5, lineHeight: 1.5, margin: 0, color: warn ? "#b45309" : INK }}>
-      {warn && <AlertTriangle size={14} style={{ flexShrink: 0, marginTop: 2 }} />}
-      <span>{children}</span>
-    </p>
-  );
-}
-
 // ─── Pagina ───────────────────────────────────────────────────────────────────
 
 export default function LogRegisterPage() {
@@ -352,12 +293,7 @@ export default function LogRegisterPage() {
 
   return (
     <div style={{ maxWidth: 760, color: INK }}>
-      <h1 style={{ margin: 0 }}>{t("title")}</h1>
-      <p style={{ fontSize: 13, margin: "6px 0 14px", lineHeight: 1.5 }}>{t("sub")}</p>
-      <p style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 12.5, lineHeight: 1.5, margin: "0 0 20px" }}>
-        <ShieldCheck size={15} style={{ flexShrink: 0, marginTop: 1 }} />
-        <span>{t("privacy")}</span>
-      </p>
+      <ToolHeader title={t("title")} subtitle={t("sub")} note={t("privacy")} />
 
       <SystemSelector checkProhibited={false} />
 
@@ -435,12 +371,9 @@ export default function LogRegisterPage() {
             <input style={input} placeholder={t("q5_doc")} aria-label={t("q5_doc")} value={rec.proofDoc} onChange={(e) => patch({ proofDoc: e.target.value })} />
             {!rec.sample ? (
               <div>
-                <button
-                  type="button" onClick={() => fileRef.current?.click()} disabled={reading}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "7px 14px", borderRadius: 8, border: `1px solid ${LINE}`, background: "#fff", color: INK, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}
-                >
+                <SecondaryButton onClick={() => fileRef.current?.click()} disabled={reading}>
                   <Upload size={14} /> {t("q5_file")}
-                </button>
+                </SecondaryButton>
                 <input
                   ref={fileRef} type="file" accept=".json,.ndjson,.jsonl,.csv,.tsv" hidden
                   onChange={(e) => { const f = e.target.files?.[0]; if (f) void onFile(f); }}
@@ -484,15 +417,7 @@ export default function LogRegisterPage() {
               </div>
             )}
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 14 }}>
-              <button
-                type="button" onClick={() => void save()} disabled={!complete}
-                style={{
-                  padding: "9px 18px", borderRadius: 8, border: "none", fontSize: 13, fontWeight: 500, fontFamily: "inherit",
-                  background: complete ? INK : "rgba(0,0,0,0.08)", color: complete ? "#fff" : INK, cursor: complete ? "pointer" : "not-allowed",
-                }}
-              >
-                {t("save")}
-              </button>
+              <PrimaryButton onClick={() => void save()} disabled={!complete}>{t("save")}</PrimaryButton>
               {(justSaved || rec.savedAt) && (
                 <span style={{ fontSize: 12.5, display: "inline-flex", alignItems: "center", gap: 6 }}>
                   <CheckCircle2 size={14} color="#15803d" /> {t("saved")}{rec.savedAt ? ` · ${fmtDate(rec.savedAt)}` : ""}

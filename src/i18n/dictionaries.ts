@@ -1670,7 +1670,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       toastExported: "Documento scaricato",
     },
     toolOversight: {
-      title: "Sorveglianza umana — Art. 14",
+      title: "Sorveglianza umana",
       subtitle: "Sorveglianza umana dei sistemi ad alto rischio: progettazione a cura del fornitore (Art. 14) e affidamento a persone competenti a cura del deployer (Art. 26(2)).",
       dossierSaved: "Salvato nel dossier",
       seeDossier: "Vedi dossier →",
