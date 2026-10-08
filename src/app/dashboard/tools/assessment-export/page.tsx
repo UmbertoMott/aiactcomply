@@ -10,8 +10,8 @@ import { useT } from "@/i18n/LocaleProvider";
 
 const T = {
   text:    "#0D1016",
-  muted:   "rgba(0,0,0,0.42)",
-  faint:   "rgba(0,0,0,0.28)",
+  muted:   "#0D1016",
+  faint:   "#0D1016",
   border:  "rgba(0,0,0,0.08)",
   card:    "#ffffff",
   bgAlt:   "#FAFAF9",
@@ -23,7 +23,7 @@ const T = {
 const cardSt = {
   background: T.card,
   border: `1px solid ${T.border}`,
-  borderRadius: 12,
+  borderRadius: 8,
   padding: "20px 24px",
   marginBottom: 16,
 } as const;
@@ -38,7 +38,7 @@ const SEV: Record<string, { bg: string; color: string }> = {
 function SevBadge({ s }: { s: string }) {
   const c = SEV[s] ?? SEV.low;
   return (
-    <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 99,
+    <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 99,
       background: c.bg, color: c.color, textTransform: "uppercase" as const }}>
       {s}
     </span>
@@ -49,8 +49,8 @@ function SectionTitle({ tag, title, count }: { tag: string; title: string; count
   const t = useT("toolAssessmentExport");
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-      <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1px",
-        color: "rgba(0,0,0,0.3)", textTransform: "uppercase" as const,
+      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px",
+        color: "#0D1016", textTransform: "uppercase" as const,
         padding: "2px 7px", borderRadius: 4, background: "rgba(0,0,0,0.05)" }}>
         {tag}
       </span>
@@ -171,7 +171,7 @@ export default function AssessmentExportPage() {
 
   if (!assessment) {
     return (
-      <div style={{ padding: 32, color: "rgba(0,0,0,0.42)", fontSize: 13 }}>
+      <div style={{ padding: 32, color: "#0D1016", fontSize: 13 }}>
         {t("loading")}
       </div>
     );
@@ -187,25 +187,25 @@ export default function AssessmentExportPage() {
         flexWrap: "wrap" as const, gap: 12, marginBottom: 20 }}>
         <div>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1.2px",
-            color: "rgba(0,0,0,0.3)", textTransform: "uppercase" as const, marginBottom: 4 }}>
+            color: "#0D1016", textTransform: "uppercase" as const, marginBottom: 4 }}>
             {t("kicker")}
           </p>
           <h1 style={{ fontSize: 22, fontWeight: 600, color: T.text, letterSpacing: "-0.5px", margin: 0 }}>
             {shared.systemName || t("systemAI_default")} {t("title_suffix")}
           </h1>
-          <p style={{ fontSize: 12, color: T.muted, marginTop: 4 }}>
+          <p style={{ fontSize: 13, color: T.muted, marginTop: 4 }}>
             v{meta.version} · {t("updated")} {new Date(meta.updatedAt).toLocaleDateString("it-IT")}
           </p>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <button onClick={exportJSON}
-            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, padding: "8px 14px",
-              borderRadius: 8, border: "1px solid rgba(0,0,0,0.12)", background: T.card,
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, padding: "8px 14px",
+              borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)", background: T.card,
               color: T.muted, cursor: "pointer" }}>
             <Download size={13} /> JSON
           </button>
           <button onClick={exportPDF} disabled={exporting}
-            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, padding: "8px 14px",
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, padding: "8px 14px",
               borderRadius: 8, border: "none", background: "#0D1016",
               color: "#ffffff", cursor: exporting ? "wait" : "pointer", opacity: exporting ? 0.7 : 1 }}>
             <Download size={13} /> {exporting ? t("pdf_generating") : t("pdf_btn")}
@@ -244,11 +244,11 @@ export default function AssessmentExportPage() {
           ].map(f => (
             <div key={f.label} style={{ padding: "8px 12px", background: T.bgAlt,
               borderRadius: 8, border: "1px solid rgba(0,0,0,0.05)" }}>
-              <div style={{ fontSize: 10, color: T.faint, fontWeight: 600,
+              <div style={{ fontSize: 11, color: T.faint, fontWeight: 600,
                 textTransform: "uppercase" as const, letterSpacing: "0.6px", marginBottom: 3 }}>
                 {f.label}
               </div>
-              <div style={{ fontSize: 12, color: T.text }}>{String(f.value)}</div>
+              <div style={{ fontSize: 13, color: T.text }}>{String(f.value)}</div>
             </div>
           ))}
         </div>
@@ -261,7 +261,7 @@ export default function AssessmentExportPage() {
               <div key={th.id} style={{ display: "flex", gap: 8, marginBottom: 6, padding: "6px 10px",
                 background: T.bgAlt, borderRadius: 8, border: "1px solid rgba(0,0,0,0.05)" }}>
                 <SevBadge s={th.risk_level} />
-                <span style={{ fontSize: 12, color: T.text }}>{th.description || th.source}</span>
+                <span style={{ fontSize: 13, color: T.text }}>{th.description || th.source}</span>
               </div>
             ))}
             {dpia.risks.threats.length > 5 && (
@@ -276,22 +276,22 @@ export default function AssessmentExportPage() {
         <SectionTitle tag="FRIA · AI Act Art. 27" title={t("sec_fria_title")}
           count={fria.scenarios.length} />
         {fria.scenarios.length === 0 ? (
-          <p style={{ fontSize: 12, color: T.muted, fontStyle: "italic" }}>
+          <p style={{ fontSize: 13, color: T.muted, fontStyle: "italic" }}>
             {t("fria_empty")}
           </p>
         ) : (
           fria.scenarios.map(scenario => (
             <div key={scenario.id} style={{ marginBottom: 12, padding: "10px 14px",
-              background: T.bgAlt, borderRadius: 10, border: "1px solid rgba(0,0,0,0.06)" }}>
+              background: T.bgAlt, borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                 <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{scenario.title}</span>
-                <span style={{ fontSize: 10, color: T.muted }}>
+                <span style={{ fontSize: 11, color: T.muted }}>
                   {scenario.right_impacts.length} {t("rights_impacted")}
                 </span>
               </div>
               <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
                 {scenario.right_impacts.slice(0, 6).map(ri => (
-                  <span key={ri.right_id} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 99,
+                  <span key={ri.right_id} style={{ fontSize: 11, padding: "2px 8px", borderRadius: 99,
                     background: "rgba(0,0,0,0.05)", color: T.muted }}>
                     {ri.right_id} · {ri.likelihood.computed_priority}
                   </span>
@@ -307,25 +307,25 @@ export default function AssessmentExportPage() {
         <SectionTitle tag={t("sec_corr_tag")} title={t("sec_corr_title")}
           count={correlatedRisks.length} />
         {correlatedRisks.length === 0 ? (
-          <p style={{ fontSize: 12, color: T.muted, fontStyle: "italic" }}>
+          <p style={{ fontSize: 13, color: T.muted, fontStyle: "italic" }}>
             {t("corr_empty")}
           </p>
         ) : (
           <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
             {correlatedRisks.map((cr: CorrelatedRisk) => (
-              <div key={cr.id} style={{ padding: "10px 14px", borderRadius: 10,
-                border: "1px solid rgba(0,0,0,0.07)", background: T.bgAlt }}>
+              <div key={cr.id} style={{ padding: "10px 14px", borderRadius: 8,
+                border: "1px solid rgba(0,0,0,0.08)", background: T.bgAlt }}>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 6 }}>
                   <SevBadge s={cr.severity} />
-                  <span style={{ fontSize: 12, color: T.text, flex: 1 }}>{cr.description}</span>
-                  <span style={{ fontSize: 10, color: T.faint, flexShrink: 0 }}>
+                  <span style={{ fontSize: 13, color: T.text, flex: 1 }}>{cr.description}</span>
+                  <span style={{ fontSize: 11, color: T.faint, flexShrink: 0 }}>
                     {cr.sourceView === "both" ? "DPIA + FRIA" : cr.sourceView.toUpperCase()}
                   </span>
                 </div>
                 {cr.refs.length > 0 && (
                   <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4, marginBottom: 4 }}>
                     {cr.refs.map((ref, i) => (
-                      <span key={i} style={{ fontSize: 9, fontWeight: 600, padding: "1px 7px", borderRadius: 99,
+                      <span key={i} style={{ fontSize: 11, fontWeight: 600, padding: "1px 7px", borderRadius: 99,
                         background: "rgba(0,0,0,0.06)", color: T.muted }}>
                         {ref.framework}: {ref.citation}
                       </span>
@@ -333,7 +333,7 @@ export default function AssessmentExportPage() {
                   </div>
                 )}
                 {cr.mitigation?.appliedToRegister && (
-                  <div style={{ fontSize: 10, color: T.green, marginTop: 4 }}>
+                  <div style={{ fontSize: 11, color: T.green, marginTop: 4 }}>
                     {t("mitig_applied")} {cr.mitigation.registerRiskId}
                   </div>
                 )}
@@ -356,14 +356,14 @@ export default function AssessmentExportPage() {
           {new Date().toLocaleDateString("it-IT", { year: "numeric", month: "long", day: "numeric" })}
         </p>
         <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)", paddingTop: 24 }}>
-          <h2 style={{ fontSize: 14, fontWeight: 600, color: T.text, marginBottom: 8 }}>
+          <h2 style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 8 }}>
             {t("doc_execSummary")}
           </h2>
-          <p style={{ fontSize: 13, lineHeight: 1.8, color: "rgba(0,0,0,0.72)" }}>
+          <p style={{ fontSize: 13, lineHeight: 1.8, color: "#0D1016" }}>
             {shared.purpose || t("doc_purposeFallback")}
           </p>
           {shared.legalBasis && (
-            <p style={{ fontSize: 13, lineHeight: 1.8, color: "rgba(0,0,0,0.72)", marginTop: 8 }}>
+            <p style={{ fontSize: 13, lineHeight: 1.8, color: "#0D1016", marginTop: 8 }}>
               {t("doc_legalBasis")} {shared.legalBasis}.
               {" "}{t("doc_riskClass")} {shared.riskLevel}.
               {" "}{t("doc_rightsImpacted")}{" "}
@@ -375,7 +375,7 @@ export default function AssessmentExportPage() {
 
       {toast && (
         <div style={{ position: "fixed", bottom: 24, right: 24, zIndex: 50,
-          background: "#0D1016", color: "#fff", borderRadius: 12, padding: "12px 16px",
+          background: "#0D1016", color: "#fff", borderRadius: 8, padding: "12px 16px",
           fontSize: 13, boxShadow: "0 4px 24px rgba(0,0,0,0.15)" }}>
           {toast}
         </div>

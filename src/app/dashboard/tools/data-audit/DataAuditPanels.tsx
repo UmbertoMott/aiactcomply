@@ -10,13 +10,13 @@ import { useT } from "@/i18n/LocaleProvider";
 type TFn = (key: string) => string;
 
 const T = {
-  text: "#0D1016", muted: "rgba(0,0,0,0.42)", faint: "rgba(0,0,0,0.22)", border: "rgba(0,0,0,0.08)",
+  text: "#0D1016", muted: "#0D1016", faint: "#0D1016", border: "rgba(0,0,0,0.08)",
   card: "#fff", bg: "#f9f9fb",
   red: "#dc2626", amber: "#d97706", green: "#15803d", dark: "#0D1016",
 } as const;
-const card: CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, padding: 16 };
-const inp: CSSProperties = { width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, color: T.text, background: T.card, outline: "none" };
-const label: CSSProperties = { fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: T.muted, marginBottom: 5, display: "block" };
+const card: CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: 16 };
+const inp: CSSProperties = { width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, color: T.text, background: T.card, outline: "none" };
+const label: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: T.muted, marginBottom: 5, display: "block" };
 
 function scoreColor(v: number) { return v >= 90 ? T.green : v >= 70 ? T.amber : T.red; }
 
@@ -25,7 +25,7 @@ export function QualityScorecard({ datasets, t }: { datasets: DatasetProfile[]; 
   if (datasets.length === 0) return null;
   return (
     <section className="mb-6">
-      <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Data Quality Scorecard</h2>
+      <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Punteggio di qualità dei dati</h2>
       <p className="text-[11px] mb-3" style={{ color: T.muted }}>{t("qs_subtitle")}</p>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {datasets.map(ds => {
@@ -39,12 +39,12 @@ export function QualityScorecard({ datasets, t }: { datasets: DatasetProfile[]; 
               <div className="flex gap-3">
                 {items.map(it => (
                   <div key={it.k} className="flex-1">
-                    <div className="text-[18px] font-bold" style={{ color: scoreColor(it.v) }}>{it.v}</div>
-                    <div className="text-[10px]" style={{ color: T.muted }}>{it.k}</div>
+                    <div className="text-[15px] font-bold" style={{ color: scoreColor(it.v) }}>{it.v}</div>
+                    <div className="text-[11px]" style={{ color: T.muted }}>{it.k}</div>
                   </div>
                 ))}
               </div>
-              <div className="mt-2 text-[10px]" style={{ color: T.muted }}>
+              <div className="mt-2 text-[11px]" style={{ color: T.muted }}>
                 {ds.duplicateRowCount > 0 && <span>{ds.duplicateRowCount.toLocaleString()} {t("qs_duplicateRows")} · </span>}
                 {ds.columns.reduce((a, c) => a + (c.numericStats?.outlierCount ?? 0), 0)} outlier
                 {ds.fingerprint && <span> · fp {ds.fingerprint.slice(0, 10)}…</span>}
@@ -115,7 +115,7 @@ export function FairnessPanel({ datasets, rowsById, systemName, intendedPurpose,
       <p className="text-[11px] mb-3" style={{ color: T.muted }}>{t("fp_subtitle")}</p>
 
       {withRows.length === 0 ? (
-        <div style={{ ...card, color: T.muted }} className="text-[12px]">
+        <div style={{ ...card, color: T.muted }} className="text-[13px]">
           {t("fp_empty")}
         </div>
       ) : (
@@ -155,22 +155,22 @@ export function FairnessPanel({ datasets, rowsById, systemName, intendedPurpose,
               </select></div>
           </div>
           <button onClick={run} disabled={!protectedCol || !outcomeCol || !positive}
-            className="text-[12px] font-medium px-3 py-1.5 rounded-lg"
+            className="text-[13px] font-medium px-3 py-1.5 rounded-lg"
             style={{ background: T.dark, color: "#fff", border: "none", cursor: "pointer", opacity: (!protectedCol || !outcomeCol || !positive) ? 0.5 : 1 }}>
             {t("fp_computeBtn")}
           </button>
 
           {report && (
             <div className="mt-4">
-              <div className="flex flex-wrap gap-4 mb-3 text-[12px]">
+              <div className="flex flex-wrap gap-4 mb-3 text-[13px]">
                 <Metric k="Statistical Parity Diff" v={report.statisticalParityDiff.toFixed(3)} />
                 <Metric k="Disparate Impact" v={report.disparateImpactRatio.toFixed(3)} />
                 <div className="flex flex-col">
-                  <span style={{ color: T.muted, fontSize: 10 }}>{t("fp_fourFifths")}</span>
+                  <span style={{ color: T.muted, fontSize: 11 }}>{t("fp_fourFifths")}</span>
                   <span style={{ color: report.fourFifthsPass ? T.green : T.red, fontWeight: 700 }}>{report.fourFifthsPass ? "PASS" : "FAIL"} <span style={{ color: T.faint, fontWeight: 400 }}></span></span>
                 </div>
                 <div className="flex flex-col">
-                  <span style={{ color: T.muted, fontSize: 10 }}>{t("fp_risk")}</span>
+                  <span style={{ color: T.muted, fontSize: 11 }}>{t("fp_risk")}</span>
                   <span style={{ color: riskColor[report.riskLevel], fontWeight: 700, textTransform: "uppercase" }}>{report.riskLevel}</span>
                 </div>
               </div>
@@ -200,16 +200,16 @@ export function FairnessPanel({ datasets, rowsById, systemName, intendedPurpose,
               <div className="mt-3 pt-3" style={{ borderTop: `1px solid ${T.border}` }}>
                 {!narrative ? (
                   <button onClick={genNarrative} disabled={aiLoading}
-                    className="text-[12px] font-medium px-3 py-1.5 rounded-lg"
+                    className="text-[13px] font-medium px-3 py-1.5 rounded-lg"
                     style={{ background: T.dark, color: "#fff", border: "none", cursor: "pointer", opacity: aiLoading ? 0.6 : 1 }}>
                     {aiLoading ? t("fp_generating") : `✦ ${t("fp_genComment")}`}
                   </button>
                 ) : (
-                  <div style={{ background: "#fafaf9", border: `1px solid ${T.border}`, borderRadius: 8, padding: 12 }}>
-                    <div className="text-[10px] mb-1" style={{ color: aiConfirmed ? T.green : T.amber, fontWeight: 600 }}>
+                  <div style={{ background: "#FAFAF9", border: `1px solid ${T.border}`, borderRadius: 8, padding: 12 }}>
+                    <div className="text-[11px] mb-1" style={{ color: aiConfirmed ? T.green : T.amber, fontWeight: 600 }}>
                       {aiConfirmed ? `✓ ${t("fp_confirmedByUser")}` : `✦ ${t("fp_aiVerify")}`}
                     </div>
-                    <p className="text-[12px]" style={{ color: T.text, lineHeight: 1.6 }}>{narrative}</p>
+                    <p className="text-[13px]" style={{ color: T.text, lineHeight: 1.6 }}>{narrative}</p>
                     {!aiConfirmed && (
                       <button onClick={() => setAiConfirmed(true)}
                         className="text-[11px] font-medium px-2.5 py-1 rounded-md mt-2"
@@ -246,7 +246,7 @@ export function FairnessPanel({ datasets, rowsById, systemName, intendedPurpose,
 }
 
 function Metric({ k, v }: { k: string; v: string }) {
-  return <div className="flex flex-col"><span style={{ color: T.muted, fontSize: 10 }}>{k}</span><span style={{ fontWeight: 700 }}>{v}</span></div>;
+  return <div className="flex flex-col"><span style={{ color: T.muted, fontSize: 11 }}>{k}</span><span style={{ fontWeight: 700 }}>{v}</span></div>;
 }
 
 // ═══ §5 Representativeness Panel ════════════════════════════════════════════
@@ -281,7 +281,7 @@ export function RepresentativenessPanel({ datasets, rowsById, onCheck, t }: { da
       <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>{t("rp_title")}</h2>
       <p className="text-[11px] mb-3" style={{ color: T.muted }}>{t("rp_subtitle")}</p>
       {withRows.length === 0 ? (
-        <div style={{ ...card, color: T.muted }} className="text-[12px]">{t("rp_empty")}</div>
+        <div style={{ ...card, color: T.muted }} className="text-[13px]">{t("rp_empty")}</div>
       ) : (
         <div style={card}>
           <div className="grid grid-cols-2 gap-3 mb-3">
@@ -310,7 +310,7 @@ export function RepresentativenessPanel({ datasets, rowsById, onCheck, t }: { da
             </div>
           )}
           <button onClick={run} disabled={!col}
-            className="text-[12px] font-medium px-3 py-1.5 rounded-lg"
+            className="text-[13px] font-medium px-3 py-1.5 rounded-lg"
             style={{ background: T.dark, color: "#fff", border: "none", cursor: "pointer", opacity: !col ? 0.5 : 1 }}>
             {t("rp_computeBtn")}
           </button>
@@ -318,18 +318,18 @@ export function RepresentativenessPanel({ datasets, rowsById, onCheck, t }: { da
           {check && (
             <div className="mt-4">
               {check.verdict === "no_reference" ? (
-                <p className="text-[12px]" style={{ color: T.amber }}>{t("rp_noReference")}</p>
+                <p className="text-[13px]" style={{ color: T.amber }}>{t("rp_noReference")}</p>
               ) : (
-                <div className="flex gap-4 mb-2 text-[12px]">
+                <div className="flex gap-4 mb-2 text-[13px]">
                   <Metric k="Total Variation Distance" v={check.totalVariationDistance.toFixed(3)} />
-                  <div className="flex flex-col"><span style={{ color: T.muted, fontSize: 10 }}>{t("rp_verdict")}</span>
+                  <div className="flex flex-col"><span style={{ color: T.muted, fontSize: 11 }}>{t("rp_verdict")}</span>
                     <span style={{ color: verdictColor[check.verdict], fontWeight: 700 }}>
                       {check.verdict === "representative" ? t("rp_representative") : check.verdict === "review" ? t("rp_toReview") : t("rp_notRepresentative")}
                     </span></div>
                 </div>
               )}
               <table className="w-full text-[11px]" style={{ borderCollapse: "collapse" }}>
-                <thead><tr style={{ color: T.muted, textAlign: "left" }}><th className="py-1">{t("fp_group")}</th><th>{t("rp_observed")}</th>{check.verdict !== "no_reference" && <><th>{t("rp_expected")}</th><th>Gap</th></>}</tr></thead>
+                <thead><tr style={{ color: T.muted, textAlign: "left" }}><th className="py-1">{t("fp_group")}</th><th>{t("rp_observed")}</th>{check.verdict !== "no_reference" && <><th>{t("rp_expected")}</th><th>Scarto</th></>}</tr></thead>
                 <tbody>{check.observed.map(o => {
                   const ref = check.reference.find(r => r.group.toLowerCase() === o.group.toLowerCase());
                   const gap = check.perGroupGap.find(g => g.group.toLowerCase() === o.group.toLowerCase());
@@ -352,12 +352,12 @@ export function RepresentativenessPanel({ datasets, rowsById, onCheck, t }: { da
 // ═══ §10 Tabella mappatura ISO ══════════════════════════════════════════════
 const ISO_ROWS = [
   ["Completezza, unicità, consistenza, outlier", "Art. 10(3)", "ISO/IEC 5259 (data quality ML)"],
-  ["Provenance, origine, finalità raccolta", "Art. 10(2)(b)", "ISO/IEC 42001 Annex A.4.3"],
+  ["Provenienza, origine, finalità raccolta", "Art. 10(2)(b)", "ISO/IEC 42001 Annex A.4.3"],
   ["Preparazione (annotazione, pulizia…)", "Art. 10(2)(c)", "ISO/IEC 5259-3; ISO/IEC 8183"],
-  ["Esame bias / fairness metrics", "Art. 10(2)(f)", "ISO/IEC TR 24027 (bias in AI)"],
+  ["Esame dei bias / metriche di equità", "Art. 10(2)(f)", "ISO/IEC TR 24027 (bias in AI)"],
   ["Rappresentatività vs riferimento", "Art. 10(3)", "ISO/IEC TR 24027; ISO/IEC 5259"],
   ["Categorie particolari", "Art. 10(5)", "ISO/IEC 42001 A.4.3 + Art. 9 GDPR"],
-  ["Impact assessment collegato", "Art. 10(5)→27/35", "ISO/IEC 42001 §6.1.4 / §8.4"],
+  ["Valutazione d'impatto collegata", "Art. 10(5)→27/35", "ISO/IEC 42001 §6.1.4 / §8.4"],
 ];
 export function IsoMappingTable() {
   const t = useT("toolDataAudit");

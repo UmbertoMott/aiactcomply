@@ -7,13 +7,13 @@ import { useT, useLocale } from "@/i18n/LocaleProvider";
 const DOC = {
   bg:        "#ffffff",
   pageBg:    "#f5f4f0",
-  text:      "#1a1a1a",
-  muted:     "rgba(0,0,0,0.38)",
+  text:      "#0D1016",
+  muted:     "#0D1016",
   border:    "rgba(0,0,0,0.10)",
   headerBg:  "#0D1016",
   headerFg:  "#ffffff",
   sectionBg: "#f0eeea",
-  labelFg:   "rgba(0,0,0,0.50)",
+  labelFg:   "#0D1016",
   empty:     "rgba(0,0,0,0.18)",
   emptyBg:   "rgba(0,0,0,0.03)",
   green:     "#23403a",
@@ -45,21 +45,21 @@ function Placeholder({ label }: { label: string }) {
 // Layout tabellare identico al Risk Register: label bold sinistra | valore destra
 function Field({ label, value, placeholder, ref: refText }: { label: string; value: string | null; placeholder: string; ref?: string }) {
   return (
-    <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+    <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
       <td data-noedit="true" style={{
         padding: "8px 12px 8px 0",
         fontWeight: 700, color: "#0D1016",
         width: "40%", verticalAlign: "top",
-        fontSize: 12.5, lineHeight: 1.5,
+        fontSize: 13, lineHeight: 1.5,
       }}>
         {label}
         {refText && (
-          <span style={{ display: "block", fontSize: 8.5, color: DOC.muted, fontWeight: 400, marginTop: 2, fontFamily: SANS }}>
+          <span style={{ display: "block", fontSize: 11, color: DOC.muted, fontWeight: 400, marginTop: 2, fontFamily: SANS }}>
             {refText}
           </span>
         )}
       </td>
-      <td style={{ padding: "8px 0", color: DOC.text, lineHeight: 1.6, fontSize: 12.5, verticalAlign: "top" }}>
+      <td style={{ padding: "8px 0", color: DOC.text, lineHeight: 1.6, fontSize: 13, verticalAlign: "top" }}>
         {value
           ? <span style={{ whiteSpace: "pre-wrap" }}>{value}</span>
           : <Placeholder label={placeholder} />
@@ -79,7 +79,7 @@ function SectionHeader({ id, title, legalRef }: { id: string; title: string; leg
       display: "flex", alignItems: "center", justifyContent: "space-between",
     }}>
       <span style={{ fontSize: 13, fontWeight: 700, fontFamily: SANS }}>{title}</span>
-      <span style={{ fontSize: 9.5, opacity: 0.5, letterSpacing: "0.05em", fontFamily: SANS, whiteSpace: "nowrap", marginLeft: 12 }}>
+      <span style={{ fontSize: 11, opacity: 0.5, letterSpacing: "0.05em", fontFamily: SANS, whiteSpace: "nowrap", marginLeft: 12 }}>
         {legalRef}
       </span>
     </div>
@@ -104,19 +104,19 @@ export function FriaLivePreview({ doc }: FriaLivePreviewProps) {
     <div style={{
       background: DOC.bg, borderRadius: 8, padding: "28px 32px",
       border: "1px solid rgba(0,0,0,0.08)",
-      boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+      boxShadow: "none",
       fontFamily: "Georgia, 'Times New Roman', serif",
       fontSize: 13, color: DOC.text, lineHeight: 1.7,
     }}>
       {/* Intestazione documento */}
       <div data-noedit="true" style={{ marginBottom: 20, paddingBottom: 14, borderBottom: `2px solid ${DOC.headerBg}` }}>
-        <p style={{ fontSize: 9, fontWeight: 700, color: DOC.muted, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px", fontFamily: SANS }}>
+        <p style={{ fontSize: 11, fontWeight: 700, color: DOC.muted, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px", fontFamily: SANS }}>
           {FRIA_TEMPLATE_META.legalBasis}
         </p>
-        <h1 className="doc-title" style={{ fontSize: 17, fontWeight: 700, color: DOC.text, margin: "0 0 6px", fontFamily: SANS }}>
+        <h1 className="doc-title" style={{ fontSize: 15, fontWeight: 700, color: DOC.text, margin: "0 0 6px", fontFamily: SANS }}>
           {FRIA_TEMPLATE_META.title}
         </h1>
-        <p style={{ fontSize: 10, color: DOC.muted, margin: 0, fontFamily: SANS }}>
+        <p style={{ fontSize: 11, color: DOC.muted, margin: 0, fontFamily: SANS }}>
           {t("lp_methodology")}: {FRIA_TEMPLATE_META.methodology} · {t("lp_version")} {FRIA_TEMPLATE_META.version}
         </p>
       </div>
@@ -126,9 +126,9 @@ export function FriaLivePreview({ doc }: FriaLivePreviewProps) {
         <div data-noedit="true" style={{
           position: "relative",
           background: DOC.amberBg, border: `1px solid ${DOC.amberBdr}`,
-          borderRadius: 5, padding: "8px 12px 8px 12px", marginBottom: 18,
+          borderRadius: 4, padding: "8px 12px 8px 12px", marginBottom: 18,
         }}>
-          <p style={{ fontSize: 10, color: DOC.amber, margin: 0, fontFamily: SANS, lineHeight: 1.5, paddingRight: 20 }}>
+          <p style={{ fontSize: 11, color: DOC.amber, margin: 0, fontFamily: SANS, lineHeight: 1.5, paddingRight: 20 }}>
             <strong>{t("lp_warning")}:</strong> {FRIA_TEMPLATE_META.disclaimer}
           </p>
           <button
@@ -136,7 +136,7 @@ export function FriaLivePreview({ doc }: FriaLivePreviewProps) {
             style={{
               position: "absolute", top: 5, right: 7,
               background: "none", border: "none", cursor: "pointer",
-              fontSize: 14, lineHeight: 1, color: DOC.amber, opacity: 0.7, padding: "1px 3px",
+              fontSize: 13, lineHeight: 1, color: DOC.amber, opacity: 0.7, padding: "1px 3px",
             }}
             title={t("lp_closeWarning")}
           >
@@ -180,7 +180,7 @@ export function FriaLivePreview({ doc }: FriaLivePreviewProps) {
           { label: t("lp_date"), value: "" },
         ].map(f => (
           <div key={f.label}>
-            <p style={{ fontSize: 9, fontWeight: 700, color: DOC.labelFg, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 16px" }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: DOC.labelFg, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 16px" }}>
               {f.label}
             </p>
             <div style={{ borderBottom: `1px solid ${DOC.border}`, height: 24 }} />

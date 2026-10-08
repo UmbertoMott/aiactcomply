@@ -4,17 +4,18 @@ import { Send, Check, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import { getDpiaSubpoints } from "@/lib/dpia/dpia-template";
 import type { DpiaGuidedDoc, DpiaAnswer } from "@/lib/dpia/dpia-guided-types";
 import { useT, useLocale } from "@/i18n/LocaleProvider";
+import { plainRef } from "@/lib/ui/plain-label";
 import { nextSubPointId } from "@/lib/dpia/dpia-guided-progress";
 import { draftDpiaSubPointAnswer } from "@/app/actions/draftDpiaSubPointAnswer";
 import type { ClassifierResult, DataAuditResult } from "@/lib/dossier/storage-schema";
 
 const T = {
   text:     "#0D1016",
-  muted:    "rgba(0,0,0,0.42)",
-  faint:    "rgba(0,0,0,0.22)",
+  muted:    "#0D1016",
+  faint:    "#0D1016",
   border:   "rgba(0,0,0,0.08)",
   card:     "#ffffff",
-  bg:       "#f5f5f4",
+  bg:       "#ffffff",
   green:    "#23403a",
   greenBg:  "rgba(35,64,58,0.08)",
   greenBdr: "rgba(35,64,58,0.20)",
@@ -164,7 +165,7 @@ export function DpiaGuidedChat({
   if (!sp) {
     return (
       <div style={{ padding: 24, textAlign: "center", color: T.muted }}>
-        <p style={{ fontSize: 12 }}>{t("dgcx_completed")}</p>
+        <p style={{ fontSize: 13 }}>{t("dgcx_completed")}</p>
       </div>
     );
   }
@@ -180,9 +181,9 @@ export function DpiaGuidedChat({
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: T.green }} />
-            <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{t("dgcx_guided")}</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: T.text }}>{t("dgcx_guided")}</span>
           </div>
-          <span style={{ fontSize: 10, color: T.muted, fontFamily: "var(--font-mono)" }}>
+          <span style={{ fontSize: 11, color: T.muted, fontFamily: "var(--font-mono)" }}>
             {currentIdx + 1} / {allIds.length}
           </span>
         </div>
@@ -226,7 +227,7 @@ export function DpiaGuidedChat({
                     title={t("gc_editAnswer")}
                     style={{
                       display: "flex", alignItems: "center", gap: 4,
-                      fontSize: 9, fontWeight: 600, padding: "3px 8px", borderRadius: 6,
+                      fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 6,
                       border: `1px solid ${T.border}`, background: T.card,
                       color: T.muted, cursor: "pointer",
                     }}
@@ -252,9 +253,11 @@ export function DpiaGuidedChat({
             background: T.card, border: `1px solid ${T.border}`,
             borderRadius: "12px 12px 12px 3px", padding: "10px 14px", maxWidth: "90%",
           }}>
-            <div style={{ fontSize: 9, fontWeight: 700, color: T.green, marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.04em" }}>
-              {sp.ref}
-            </div>
+            {plainRef(sp.ref) && (
+              <div style={{ fontSize: 11, fontWeight: 500, color: "rgba(13,16,22,0.55)", marginBottom: 5 }}>
+                {plainRef(sp.ref)}
+              </div>
+            )}
             <p style={{ fontSize: 13, fontWeight: 500, color: T.text, margin: 0, lineHeight: 1.5 }}>
               {sp.question}
             </p>
@@ -267,10 +270,10 @@ export function DpiaGuidedChat({
                 <div style={{
                   marginTop: 10, padding: "9px 11px",
                   background: "rgba(0,0,0,0.025)", borderRadius: 8,
-                  border: "1px solid rgba(0,0,0,0.06)",
+                  border: "1px solid rgba(0,0,0,0.08)",
                   display: "flex", flexDirection: "column", gap: 5,
                 }}>
-                  <span style={{ fontSize: 9, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                     Esempi
                   </span>
                   {qr.map(opt => {
@@ -279,13 +282,13 @@ export function DpiaGuidedChat({
                     return (
                       <div key={opt} style={{ display: "flex", gap: 7, alignItems: "flex-start" }}>
                         <span style={{
-                          fontSize: 9.5, fontWeight: 700, color: T.text,
+                          fontSize: 11, fontWeight: 700, color: T.text,
                           flexShrink: 0, minWidth: 70,
                           paddingTop: 1,
                         }}>
                           {opt === "Sì" ? t("yes") : opt === "No" ? t("no") : opt === "Parzialmente" ? t("partial") : opt}:
                         </span>
-                        <span style={{ fontSize: 10.5, color: T.muted, lineHeight: 1.45, fontStyle: "italic" }}>
+                        <span style={{ fontSize: 11, color: T.muted, lineHeight: 1.45, fontStyle: "italic" }}>
                           {ex.length > 110 ? ex.slice(0, 107) + "…" : ex}
                         </span>
                       </div>
@@ -341,8 +344,8 @@ export function DpiaGuidedChat({
                     placeholder={t("dgcx_ph_custom")}
                     style={{
                       flex: 1, fontSize: 11, padding: "6px 10px", borderRadius: 8,
-                      border: "1px solid rgba(0,0,0,0.10)", color: T.text,
-                      outline: "none", background: "#fafaf9",
+                      border: "1px solid rgba(0,0,0,0.08)", color: T.text,
+                      outline: "none", background: "#FAFAF9",
                     }}
                     onFocus={e => (e.target.style.borderColor = "rgba(35,64,58,0.35)")}
                     onBlur={e => (e.target.style.borderColor = "rgba(0,0,0,0.10)")}
@@ -351,7 +354,7 @@ export function DpiaGuidedChat({
                     <button
                       onClick={() => { handleSend(customPhrase.trim()); setCustomPhrase(""); }}
                       style={{
-                        fontSize: 10, fontWeight: 700, padding: "5px 10px", borderRadius: 8,
+                        fontSize: 11, fontWeight: 700, padding: "5px 10px", borderRadius: 8,
                         background: T.text, color: "#fff", border: "none", cursor: "pointer", flexShrink: 0,
                       }}
                     >
@@ -365,15 +368,15 @@ export function DpiaGuidedChat({
             {/* Esempi come chip (solo per testo libero) */}
             {!isDone && qr.length === 0 && sp.examples.length > 0 && (
               <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 5 }}>
-                <span style={{ fontSize: 9, color: T.muted, textTransform: "uppercase", letterSpacing: "0.04em" }}>{t("gc_examples")}</span>
+                <span style={{ fontSize: 11, color: T.muted, textTransform: "uppercase", letterSpacing: "0.04em" }}>{t("gc_examples")}</span>
                 {sp.examples.slice(0, 2).map((ex, i) => (
                   <button
                     key={i} onClick={() => setInput(ex)}
                     style={{
                       textAlign: "left", border: `1px solid ${T.border}`,
-                      borderRadius: 7, padding: "6px 9px",
-                      background: "rgba(0,0,0,0.02)", color: T.text,
-                      fontSize: 10.5, lineHeight: 1.4, cursor: "pointer",
+                      borderRadius: 8, padding: "6px 9px",
+                      background: "#FAFAF9", color: T.text,
+                      fontSize: 11, lineHeight: 1.4, cursor: "pointer",
                     }}
                   >
                     {ex.length > 110 ? ex.slice(0, 107) + "…" : ex}
@@ -394,12 +397,12 @@ export function DpiaGuidedChat({
             <div style={{
               maxWidth: "85%", background: T.text,
               borderRadius: "12px 12px 3px 12px",
-              padding: "10px 14px", fontSize: 12, color: "#ffffff", lineHeight: 1.5, whiteSpace: "pre-wrap",
+              padding: "10px 14px", fontSize: 13, color: "#ffffff", lineHeight: 1.5, whiteSpace: "pre-wrap",
             }}>
               {existing!.value}
               <div style={{ marginTop: 5, display: "flex", alignItems: "center", gap: 4 }}>
                 <Check size={10} style={{ color: "rgba(255,255,255,0.55)" }} />
-                <span style={{ fontSize: 9, color: "rgba(255,255,255,0.55)" }}>{t("gc_confirmed")}</span>
+                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)" }}>{t("gc_confirmed")}</span>
               </div>
             </div>
           </div>
@@ -412,20 +415,20 @@ export function DpiaGuidedChat({
               maxWidth: "92%", background: T.amberBg,
               border: `1px solid ${T.amberBdr}`, borderRadius: "12px 12px 12px 3px", padding: "10px 14px",
             }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: T.amber, marginBottom: 6 }}>{AI_BADGE}</div>
-              <p style={{ fontSize: 12, color: T.text, margin: "0 0 10px", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: T.amber, marginBottom: 6 }}>{AI_BADGE}</div>
+              <p style={{ fontSize: 13, color: T.text, margin: "0 0 10px", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
                 {aiDraft}
               </p>
               <div style={{ display: "flex", gap: 6 }}>
                 <button
                   onClick={() => handleSend(aiDraft)}
-                  style={{ flex: 1, padding: "6px 0", borderRadius: 7, border: "none", background: T.text, color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer" }}
+                  style={{ flex: 1, padding: "6px 0", borderRadius: 8, border: "none", background: T.text, color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer" }}
                 >
                   ✓ Usa
                 </button>
                 <button
                   onClick={() => { setAiDraft(null); }}
-                  style={{ padding: "6px 10px", borderRadius: 7, border: `1px solid ${T.border}`, background: "none", color: T.muted, fontSize: 11, cursor: "pointer" }}
+                  style={{ padding: "6px 10px", borderRadius: 8, border: `1px solid ${T.border}`, background: "none", color: T.muted, fontSize: 11, cursor: "pointer" }}
                 >
                   ✕
                 </button>
@@ -435,7 +438,7 @@ export function DpiaGuidedChat({
         )}
 
         {aiError && (
-          <p style={{ fontSize: 10, color: "#b91c1c", margin: 0, padding: "6px 10px", background: "rgba(185,28,28,0.06)", borderRadius: 6 }}>
+          <p style={{ fontSize: 11, color: "#b91c1c", margin: 0, padding: "6px 10px", background: "rgba(185,28,28,0.06)", borderRadius: 6 }}>
             {aiError}
           </p>
         )}
@@ -453,8 +456,8 @@ export function DpiaGuidedChat({
             placeholder={isDone ? t("dgcx_ph_edit") : `${t("dgcx_answerPrefix")}: ${sp.label}…`}
             rows={2}
             style={{
-              flex: 1, fontSize: 12.5, padding: "10px 13px",
-              borderRadius: 10, border: "1px solid rgba(0,0,0,0.12)",
+              flex: 1, fontSize: 13, padding: "10px 13px",
+              borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)",
               color: T.text, resize: "none", outline: "none",
               fontFamily: "inherit", background: "#ffffff", lineHeight: 1.5,
             }}
@@ -468,7 +471,7 @@ export function DpiaGuidedChat({
               flexShrink: 0, width: 38, height: 38,
               background: input.trim() ? T.green : "rgba(0,0,0,0.06)",
               color: input.trim() ? "#fff" : T.faint,
-              border: "none", borderRadius: 10,
+              border: "none", borderRadius: 8,
               cursor: input.trim() ? "pointer" : "not-allowed",
               display: "flex", alignItems: "center", justifyContent: "center",
               transition: "background 0.15s",
@@ -485,14 +488,14 @@ export function DpiaGuidedChat({
             disabled={currentIdx === 0}
             style={{
               display: "flex", alignItems: "center", gap: 4,
-              fontSize: 10, color: currentIdx === 0 ? T.faint : T.muted,
+              fontSize: 11, color: currentIdx === 0 ? T.faint : T.muted,
               background: "none", border: "none", cursor: currentIdx === 0 ? "default" : "pointer",
-              padding: "3px 6px", borderRadius: 5,
+              padding: "3px 6px", borderRadius: 4,
             }}
           >
             <ChevronLeft size={12} /> {t("gc_prev")}
           </button>
-          <span style={{ fontSize: 9, color: T.faint, maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "center" }}>
+          <span style={{ fontSize: 11, color: T.faint, maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "center" }}>
             {sp?.label}
           </span>
           <button
@@ -500,15 +503,15 @@ export function DpiaGuidedChat({
             disabled={currentIdx === allIds.length - 1}
             style={{
               display: "flex", alignItems: "center", gap: 4,
-              fontSize: 10, color: currentIdx === allIds.length - 1 ? T.faint : T.muted,
+              fontSize: 11, color: currentIdx === allIds.length - 1 ? T.faint : T.muted,
               background: "none", border: "none", cursor: currentIdx === allIds.length - 1 ? "default" : "pointer",
-              padding: "3px 6px", borderRadius: 5,
+              padding: "3px 6px", borderRadius: 4,
             }}
           >
             {t("gc_next")} <ChevronRight size={12} />
           </button>
         </div>
-        <p style={{ fontSize: 9, color: T.faint, marginTop: 5, textAlign: "center", marginBottom: 0 }}>
+        <p style={{ fontSize: 11, color: T.faint, marginTop: 5, textAlign: "center", marginBottom: 0 }}>
           Enter per inviare · Shift+Enter per andare a capo
         </p>
       </div>

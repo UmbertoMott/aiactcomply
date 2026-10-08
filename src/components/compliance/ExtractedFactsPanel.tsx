@@ -30,7 +30,7 @@ interface ExtractedFactsPanelProps {
 
 const T = {
   border: "rgba(0,0,0,0.08)",
-  muted: "rgba(0,0,0,0.42)",
+  muted: "#0D1016",
   amber: "#92400e",
   amberBg: "rgba(202,138,4,0.07)",
   amberBdr: "rgba(202,138,4,0.22)",
@@ -111,12 +111,12 @@ function FactRow({
         <div style={{ flex: 1, minWidth: 0 }}>
           {/* Field name + confidence */}
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-            <span style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.55)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", textTransform: "uppercase", letterSpacing: "0.04em" }}>
               {fact.field_target}
             </span>
             <span
               style={{
-                fontSize: 9, padding: "1px 5px", borderRadius: 4,
+                fontSize: 11, padding: "1px 5px", borderRadius: 4,
                 background: confidence >= 80 ? T.greenBg : T.amberBg,
                 color: confidence >= 80 ? T.green : T.amber,
                 border: `1px solid ${confidence >= 80 ? T.greenBdr : T.amberBdr}`,
@@ -125,7 +125,7 @@ function FactRow({
               {confidence}%
             </span>
             {fact.status === "suggested" && (
-              <span style={{ fontSize: 9, color: T.amber, fontWeight: 600 }}>✦ AI — verifica e conferma</span>
+              <span style={{ fontSize: 11, color: T.amber, fontWeight: 600 }}>✦ AI — verifica e conferma</span>
             )}
           </div>
 
@@ -136,12 +136,12 @@ function FactRow({
               onChange={e => setEditValue(e.target.value)}
               rows={3}
               style={{
-                width: "100%", fontSize: 12, padding: "6px 8px", borderRadius: 6,
+                width: "100%", fontSize: 13, padding: "6px 8px", borderRadius: 6,
                 border: `1px solid ${T.border}`, resize: "vertical", outline: "none",
               }}
             />
           ) : (
-            <p style={{ fontSize: 12, color: "#0D1016", margin: 0, wordBreak: "break-word" }}>
+            <p style={{ fontSize: 13, color: "#0D1016", margin: 0, wordBreak: "break-word" }}>
               {fact.status === "edited" ? fact.edited_value : fact.suggested_value}
             </p>
           )}
@@ -149,7 +149,7 @@ function FactRow({
           {/* Source excerpt toggle */}
           <button
             onClick={() => setShowExcerpt(v => !v)}
-            style={{ fontSize: 10, color: T.muted, background: "none", border: "none", cursor: "pointer", padding: "4px 0 0", display: "flex", alignItems: "center", gap: 3 }}
+            style={{ fontSize: 11, color: T.muted, background: "none", border: "none", cursor: "pointer", padding: "4px 0 0", display: "flex", alignItems: "center", gap: 3 }}
           >
             {showExcerpt ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
             Estratto dal documento{fact.source_location ? ` — ${fact.source_location}` : ""}
@@ -159,7 +159,7 @@ function FactRow({
             <blockquote
               style={{
                 margin: "6px 0 0", padding: "5px 8px", borderLeft: `2px solid ${T.amberBdr}`,
-                fontSize: 10, color: T.muted, fontStyle: "italic", wordBreak: "break-word",
+                fontSize: 11, color: T.muted, fontStyle: "italic", wordBreak: "break-word",
               }}
             >
               {fact.source_excerpt}
@@ -174,7 +174,7 @@ function FactRow({
               onClick={handleConfirm}
               disabled={loading}
               style={{
-                fontSize: 10, fontWeight: 600, padding: "3px 8px", borderRadius: 5,
+                fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 4,
                 background: T.green, color: "#fff", border: "none", cursor: "pointer",
                 opacity: loading ? 0.5 : 1,
               }}
@@ -184,7 +184,7 @@ function FactRow({
             <button
               onClick={() => setEditing(v => !v)}
               style={{
-                fontSize: 10, padding: "3px 8px", borderRadius: 5,
+                fontSize: 11, padding: "3px 8px", borderRadius: 4,
                 background: T.blueBg, color: T.blue, border: `1px solid rgba(29,78,216,0.16)`,
                 cursor: "pointer", display: "flex", alignItems: "center", gap: 3,
               }}
@@ -196,7 +196,7 @@ function FactRow({
               onClick={handleReject}
               disabled={loading}
               style={{
-                fontSize: 10, padding: "3px 8px", borderRadius: 5,
+                fontSize: 11, padding: "3px 8px", borderRadius: 4,
                 background: T.redBg, color: T.red, border: "1px solid rgba(220,38,38,0.18)",
                 cursor: "pointer", opacity: loading ? 0.5 : 1,
               }}
@@ -248,7 +248,7 @@ export function ExtractedFactsPanel({ documentId, onFactConfirmed }: ExtractedFa
 
   if (loading) {
     return (
-      <p style={{ fontSize: 11, color: "rgba(0,0,0,0.4)", padding: "8px 0" }}>
+      <p style={{ fontSize: 11, color: "#0D1016", padding: "8px 0" }}>
         Caricamento fatti estratti…
       </p>
     );
@@ -256,7 +256,7 @@ export function ExtractedFactsPanel({ documentId, onFactConfirmed }: ExtractedFa
 
   if (facts.length === 0) {
     return (
-      <p style={{ fontSize: 11, color: "rgba(0,0,0,0.4)", padding: "8px 0" }}>
+      <p style={{ fontSize: 11, color: "#0D1016", padding: "8px 0" }}>
         Nessun fatto estratto da questo documento.
       </p>
     );
@@ -272,12 +272,12 @@ export function ExtractedFactsPanel({ documentId, onFactConfirmed }: ExtractedFa
           Fatti estratti dal documento
         </p>
         {pending > 0 && (
-          <span style={{ fontSize: 10, padding: "2px 7px", borderRadius: 10, background: T.amberBg, color: T.amber, border: `1px solid ${T.amberBdr}` }}>
+          <span style={{ fontSize: 11, padding: "2px 7px", borderRadius: 8, background: T.amberBg, color: T.amber, border: `1px solid ${T.amberBdr}` }}>
             {pending} da verificare
           </span>
         )}
         {confirmed > 0 && (
-          <span style={{ fontSize: 10, padding: "2px 7px", borderRadius: 10, background: T.greenBg, color: T.green, border: `1px solid ${T.greenBdr}` }}>
+          <span style={{ fontSize: 11, padding: "2px 7px", borderRadius: 8, background: T.greenBg, color: T.green, border: `1px solid ${T.greenBdr}` }}>
             {confirmed} confermati
           </span>
         )}
@@ -286,11 +286,11 @@ export function ExtractedFactsPanel({ documentId, onFactConfirmed }: ExtractedFa
       {pending > 0 && (
         <div
           style={{
-            padding: "7px 10px", borderRadius: 7, marginBottom: 10,
+            padding: "7px 10px", borderRadius: 8, marginBottom: 10,
             background: T.amberBg, border: `1px solid ${T.amberBdr}`,
           }}
         >
-          <p style={{ fontSize: 10, color: T.amber, margin: 0 }}>
+          <p style={{ fontSize: 11, color: T.amber, margin: 0 }}>
             <strong>✦ AI — verifica e conferma</strong> — I valori suggeriti non vengono applicati automaticamente. Conferma o modifica ogni fatto prima che venga usato.
           </p>
         </div>

@@ -53,9 +53,27 @@ function saveSettings(s: NotifSettings): void {
 
 type FilterType = "all" | "unread" | "critical" | "deadline" | "tool";
 
+// Nomi leggibili degli strumenti (al posto dello slug dell'URL)
+const TOOL_LABEL: Record<string, string> = {
+  triage: "Triage",
+  gpai: "Modelli GPAI",
+  "risk-manager": "Gestione dei rischi",
+  "data-audit": "Qualità dei dati",
+  docugen: "Documentazione tecnica",
+  logvault: "Registro dei log",
+  transparency: "Trasparenza",
+  oversight: "Sorveglianza umana",
+  resilience: "Robustezza e cibersicurezza",
+  qms: "Sistema qualità",
+};
+function toolLabel(path: string): string {
+  const slug = path.split("/").pop() ?? path;
+  return TOOL_LABEL[slug] ?? slug;
+}
+
 const categoryLabel: Record<NotificationCategory, string> = {
   deadline: "Scadenza",
-  tool_incomplete: "Tool",
+  tool_incomplete: "Strumenti",
   risk_alert: "Rischio",
   gpai: "GPAI",
   system: "Sistema",
@@ -161,13 +179,13 @@ function TimelineItem({
 
       {/* Card */}
       <div
-        className="flex-1 rounded-xl p-4 mb-4"
+        className="flex-1 rounded-lg p-4 mb-4"
         style={{
           background: isUrgent ? "rgba(220,38,38,0.02)" : "#ffffff",
           border: isUrgent
             ? "1px solid rgba(220,38,38,0.15)"
-            : "1px solid rgba(0,0,0,0.07)",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+            : "1px solid rgba(0,0,0,0.08)",
+          boxShadow: "none",
           opacity: isFuture ? 0.75 : 1,
         }}
       >
@@ -176,7 +194,7 @@ function TimelineItem({
           <div>
             <div className="flex items-center gap-2 mb-0.5">
               <span
-                className="text-[10px] font-semibold rounded-full px-2 py-0.5"
+                className="text-[11px] font-semibold rounded-full px-2 py-0.5"
                 style={{
                   background: isPast
                     ? "rgba(22,163,74,0.1)"
@@ -189,8 +207,8 @@ function TimelineItem({
                 {isPast ? "✓ PASSATA" : isUrgent ? "URGENTE" : "IN ARRIVO"}
               </span>
               <span
-                className="text-[10px] rounded px-1.5 py-0.5"
-                style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.4)" }}
+                className="text-[11px] rounded px-1.5 py-0.5"
+                style={{ background: "rgba(0,0,0,0.05)", color: "#0D1016" }}
               >
                 {deadline.article}
               </span>
@@ -198,7 +216,7 @@ function TimelineItem({
             <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
               {deadline.title}
             </p>
-            <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.45)" }}>
+            <p className="text-[11px] mt-0.5" style={{ color: "#0D1016" }}>
               {deadlineDate.toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" })}
             </p>
           </div>
@@ -212,14 +230,14 @@ function TimelineItem({
               >
                 {days}
               </div>
-              <div className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>
+              <div className="text-[11px]" style={{ color: "#0D1016" }}>
                 giorni
               </div>
             </div>
           )}
         </div>
 
-        <p className="text-[12px] mb-3" style={{ color: "rgba(0,0,0,0.5)" }}>
+        <p className="text-[13px] mb-3" style={{ color: "#0D1016" }}>
           {deadline.description}
         </p>
 
@@ -227,10 +245,10 @@ function TimelineItem({
         {totalTools > 0 && (
           <div className="mb-3">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.4)" }}>
-                Tool completati: {completedCount}/{totalTools}
+              <span className="text-[11px]" style={{ color: "#0D1016" }}>
+                Strumenti completati: {completedCount}/{totalTools}
               </span>
-              <span className="text-[10px] font-medium" style={{ color: pct === 100 ? "#15803d" : "rgba(0,0,0,0.4)" }}>
+              <span className="text-[11px] font-medium" style={{ color: pct === 100 ? "#15803d" : "rgba(0,0,0,0.4)" }}>
                 {pct}%
               </span>
             </div>
@@ -255,14 +273,14 @@ function TimelineItem({
                 <Link
                   key={tool}
                   href={tool}
-                  className="flex items-center gap-1 text-[10px] rounded-full px-2 py-0.5"
+                  className="flex items-center gap-1 text-[11px] rounded-full px-2 py-0.5"
                   style={{
                     background: done ? "rgba(22,163,74,0.1)" : "rgba(0,0,0,0.06)",
                     color: done ? "#15803d" : "rgba(0,0,0,0.45)",
                     textDecoration: "none",
                   }}
                 >
-                  {done ? "✓" : "○"} {tool.split("/").pop()}
+                  {done ? "✓" : "○"} {toolLabel(tool)}
                 </Link>
               );
             })}
@@ -279,7 +297,7 @@ function TimelineItem({
               color: "#ffffff",
             }}
           >
-            {isPast ? "Verifica retroattiva" : "Vai al tool"} <ArrowRight size={11} />
+            {isPast ? "Verifica retroattiva" : "Vai allo strumento"} <ArrowRight size={11} />
           </Link>
         )}
       </div>
@@ -301,13 +319,13 @@ function NotifCard({
   const isRead = !!n.readAt;
   return (
     <div
-      className="rounded-xl p-4 mb-3"
+      className="rounded-lg p-4 mb-3"
       style={{
         background: priorityBg(n.priority, isRead),
-        border: "1px solid rgba(0,0,0,0.07)",
+        border: "1px solid rgba(0,0,0,0.08)",
         borderLeft: `3px solid ${priorityBorderColor(n.priority)}`,
         opacity: isRead ? 0.65 : 1,
-        boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+        boxShadow: "none",
       }}
     >
       {/* Content */}
@@ -315,20 +333,20 @@ function NotifCard({
         <p className="text-[13px] font-medium mb-0.5" style={{ color: isRead ? "rgba(0,0,0,0.45)" : "#0D1016" }}>
           {n.title}
         </p>
-        <p className="text-[12px] mb-2" style={{ color: "rgba(0,0,0,0.45)" }}>
+        <p className="text-[13px] mb-2" style={{ color: "#0D1016" }}>
           {n.body}
         </p>
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2">
             {n.relatedArticle && (
               <span
-                className="text-[9px] rounded px-1.5 py-0.5"
-                style={{ background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.4)" }}
+                className="text-[11px] rounded px-1.5 py-0.5"
+                style={{ background: "rgba(0,0,0,0.06)", color: "#0D1016" }}
               >
                 {n.relatedArticle}
               </span>
             )}
-            <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.3)" }}>
+            <span className="text-[11px]" style={{ color: "#0D1016" }}>
               {categoryLabel[n.category]} · {relativeTime(n.createdAt)}
             </span>
           </div>
@@ -336,8 +354,8 @@ function NotifCard({
             {!isRead && (
               <button
                 onClick={() => onRead(n.id)}
-                className="text-[10px] px-2 py-0.5 rounded"
-                style={{ color: "rgba(0,0,0,0.4)", background: "rgba(0,0,0,0.05)" }}
+                className="text-[11px] px-2 py-0.5 rounded"
+                style={{ color: "#0D1016", background: "rgba(0,0,0,0.05)" }}
               >
                 Segna letta
               </button>
@@ -354,7 +372,7 @@ function NotifCard({
             <button
               onClick={() => onDismiss(n.id)}
               className="p-1 rounded"
-              style={{ color: "rgba(0,0,0,0.3)" }}
+              style={{ color: "#0D1016" }}
               title="Rimuovi"
             >
               <X className="h-3.5 w-3.5" />
@@ -550,8 +568,8 @@ export default function NotificationsPage() {
         >
           Notifiche e Scadenze
         </h1>
-        <p className="text-[13px]" style={{ color: "rgba(0,0,0,0.42)" }}>
-          Rimani aggiornato sulle scadenze AI Act e completa i tool in tempo.
+        <p className="text-[13px]" style={{ color: "#0D1016" }}>
+          Rimani aggiornato sulle scadenze AI Act e completa gli strumenti in tempo.
         </p>
       </div>
 
@@ -564,11 +582,11 @@ export default function NotificationsPage() {
           <button
             key={t}
             onClick={() => setTab(t)}
-            className="px-4 py-1.5 rounded-md text-[12px] font-medium transition-all"
+            className="px-4 py-1.5 rounded-md text-[13px] font-medium transition-all"
             style={
               tab === t
                 ? { background: "#ffffff", color: "#0D1016", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }
-                : { color: "rgba(0,0,0,0.45)" }
+                : { color: "#0D1016" }
             }
           >
             {t === "notifications" ? (
@@ -576,7 +594,7 @@ export default function NotificationsPage() {
                 Notifiche
                 {unreadCount > 0 && (
                   <span
-                    className="text-[9px] rounded-full px-1.5 py-0.5 font-semibold"
+                    className="text-[11px] rounded-full px-1.5 py-0.5 font-semibold"
                     style={{ background: "#dc2626", color: "#fff" }}
                   >
                     {unreadCount}
@@ -598,11 +616,11 @@ export default function NotificationsPage() {
           {/* Critical banner */}
           {filter === "critical" && criticalCount > 0 && (
             <div
-              className="rounded-xl px-4 py-3 mb-4 flex items-center gap-2"
+              className="rounded-lg px-4 py-3 mb-4 flex items-center gap-2"
               style={{ background: "rgba(220,38,38,0.05)", border: "1px solid rgba(220,38,38,0.2)" }}
             >
               <AlertTriangle className="h-4 w-4 flex-shrink-0" style={{ color: "#dc2626" }} />
-              <p className="text-[12px]" style={{ color: "#dc2626" }}>
+              <p className="text-[13px]" style={{ color: "#dc2626" }}>
                 ⚠️ Hai {criticalCount} notifich{criticalCount === 1 ? "a critica che richiede" : "e critiche che richiedono"} attenzione immediata.
               </p>
             </div>
@@ -619,10 +637,10 @@ export default function NotificationsPage() {
                   style={
                     filter === f
                       ? { background: "#0D1016", color: "#ffffff" }
-                      : { background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.5)" }
+                      : { background: "rgba(0,0,0,0.06)", color: "#0D1016" }
                   }
                 >
-                  {{ all: "Tutte", unread: "Non lette", critical: "Critiche", deadline: "Scadenze", tool: "Tool" }[f]}
+                  {{ all: "Tutte", unread: "Non lette", critical: "Critiche", deadline: "Scadenze", tool: "Strumenti" }[f]}
                 </button>
               ))}
             </div>
@@ -630,14 +648,14 @@ export default function NotificationsPage() {
               <button
                 onClick={handleMarkAllRead}
                 className="text-[11px] px-3 py-1 rounded-full"
-                style={{ background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.5)" }}
+                style={{ background: "rgba(0,0,0,0.06)", color: "#0D1016" }}
               >
                 Segna tutte lette
               </button>
               <button
                 onClick={handleDismissRead}
                 className="text-[11px] px-3 py-1 rounded-full"
-                style={{ background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.5)" }}
+                style={{ background: "rgba(0,0,0,0.06)", color: "#0D1016" }}
               >
                 Rimuovi lette
               </button>
@@ -645,7 +663,7 @@ export default function NotificationsPage() {
                 <button
                   onClick={handleRestoreDismissed}
                   className="text-[11px] px-3 py-1 rounded-full transition-colors"
-                  style={{ background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.5)" }}
+                  style={{ background: "rgba(0,0,0,0.06)", color: "#0D1016" }}
                   title="Ripristina le notifiche rimosse"
                 >
                   Ripristina rimosse ({dismissed.length})
@@ -658,10 +676,10 @@ export default function NotificationsPage() {
           {filtered.length === 0 ? (
             <div className="text-center py-16">
               <Bell className="h-8 w-8 mx-auto mb-3" style={{ color: "rgba(0,0,0,0.15)" }} />
-              <p className="text-[13px] font-medium" style={{ color: "rgba(0,0,0,0.35)" }}>
+              <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
                 Nessuna notifica
               </p>
-              <p className="text-[11px] mt-1" style={{ color: "rgba(0,0,0,0.25)" }}>
+              <p className="text-[11px] mt-1" style={{ color: "#0D1016" }}>
                 {filter !== "all" ? "Prova a cambiare il filtro." : "Tutte le scadenze appariranno qui."}
               </p>
               {dismissed.length > 0 && (
@@ -685,7 +703,7 @@ export default function NotificationsPage() {
       {/* ── TAB 2: TIMELINE ── */}
       {tab === "timeline" && (
         <div>
-          <p className="text-[12px] mb-6" style={{ color: "rgba(0,0,0,0.4)" }}>
+          <p className="text-[13px] mb-6" style={{ color: "#0D1016" }}>
             Tutte le scadenze normative dell'AI Act in ordine cronologico.
           </p>
           {/* Mobile: standard left-line timeline. Desktop: same */}
@@ -698,38 +716,38 @@ export default function NotificationsPage() {
       )}
 
       {/* ── SETTINGS (always visible at bottom) ── */}
-      <div id="settings" className="mt-10 pt-8" style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}>
-        <h2 className="text-[14px] font-medium mb-4" style={{ color: "#0D1016" }}>
+      <div id="settings" className="mt-10 pt-8" style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
+        <h2 className="text-[13px] font-medium mb-4" style={{ color: "#0D1016" }}>
           Impostazioni notifiche
         </h2>
         {settings ? (
           <div
-            className="rounded-xl p-5"
-            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+            className="rounded-lg p-5"
+            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "none" }}
           >
             {[
               {
                 key: "deadlines" as const,
                 label: "Notifiche scadenze normative",
-                desc: "Alert automatici per le scadenze AI Act",
+                desc: "Avvisi automatici per le scadenze AI Act",
                 disabled: false,
               },
               {
                 key: "toolIncomplete" as const,
-                label: "Notifiche tool incompleti",
-                desc: "Promemoria per i tool non ancora completati",
+                label: "Notifiche strumenti incompleti",
+                desc: "Promemoria per gli strumenti non ancora completati",
                 disabled: false,
               },
               {
                 key: "redTeam" as const,
                 label: "Notifiche sui test contraddittori",
-                desc: "Alert quando i test di red-team rilevano problemi",
+                desc: "Avvisi quando i test contraddittori (red team) rilevano problemi",
                 disabled: false,
               },
               {
                 key: "criticalAlert" as const,
-                label: "Alert rischio critico",
-                desc: "Obbligatorio per compliance — non disabilitabile",
+                label: "Avvisi di rischio critico",
+                desc: "Obbligatorio per la conformità — non disattivabile",
                 disabled: true,
               },
             ].map((row) => (
@@ -742,14 +760,14 @@ export default function NotificationsPage() {
                   <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
                     {row.label}
                   </p>
-                  <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.4)" }}>
+                  <p className="text-[11px] mt-0.5" style={{ color: "#0D1016" }}>
                     {row.desc}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   {row.disabled && (
                     <span
-                      className="text-[9px] rounded-full px-2 py-0.5"
+                      className="text-[11px] rounded-full px-2 py-0.5"
                       style={{ background: "rgba(22,163,74,0.1)", color: "#15803d" }}
                     >
                       Sempre attivo

@@ -202,13 +202,14 @@ export function computeRetention(logSets: ImportedLogSet[], role: RetentionAsses
     : undefined;
 
   let verdict: RetentionAssessment["verdict"] = "unknown";
-  const minMonths = role === "deployer" ? 6 : undefined; // Art. 26(6)
-  if (policyMonths !== undefined && minMonths !== undefined) {
+  // Minimo di sei mesi sia per il fornitore (Art. 19(1)) sia per il deployer (Art. 26(6)),
+  // salvo diversa disposizione del diritto dell'Unione o nazionale. Poiché la soglia è
+  // identica per entrambi i ruoli, si applica anche quando il ruolo non è specificato.
+  const minMonths = 6;
+  if (policyMonths !== undefined) {
     verdict = policyMonths < minMonths ? "below_minimum"
       : spanMonths !== undefined && spanMonths > policyMonths ? "policy_below_span"
       : "pass";
-  } else if (policyMonths !== undefined && spanMonths !== undefined) {
-    verdict = spanMonths > policyMonths ? "policy_below_span" : "pass";
   }
   return { role, retentionPolicyMonths: policyMonths, retentionSpanMonths: spanMonths, verdict };
 }

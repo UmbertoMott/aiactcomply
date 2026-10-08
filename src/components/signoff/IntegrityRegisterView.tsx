@@ -23,38 +23,38 @@ function SealRow({ seal }: { seal: IntegritySeal }) {
         className="flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-black/[0.015] transition-colors"
         onClick={() => setExpanded(e => !e)}
       >
-        <Lock className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" style={{ color: "#23403a" }} />
+        <Lock className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" style={{ color: "#0D1016" }} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[12px] font-medium" style={{ color: "#0D1016" }}>
+            <span className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
               {seal.toolKey}
             </span>
-            <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.4)" }}>
+            <span className="text-[11px]" style={{ color: "#0D1016" }}>
               Batch: {seal.logRef}
             </span>
             {seal.qualifiedTimestamp && (
               <span style={{
-                fontSize: 9, fontWeight: 600, padding: "1px 5px", borderRadius: 4,
-                background: "rgba(35,64,58,0.08)", color: "#23403a",
+                fontSize: 11, fontWeight: 600, padding: "1px 5px", borderRadius: 4,
+                background: "rgba(35,64,58,0.08)", color: "#0D1016",
               }}>TSQ</span>
             )}
           </div>
           <div className="flex items-center gap-2 mt-1">
-            <Hash className="h-3 w-3" style={{ color: "rgba(0,0,0,0.25)" }} />
-            <span className="text-[10px] font-mono" style={{ color: "rgba(0,0,0,0.38)" }}>
+            <Hash className="h-3 w-3" style={{ color: "#0D1016" }} />
+            <span className="text-[11px] font-mono" style={{ color: "#0D1016" }}>
               {shortHash(seal.contentHash)}
             </span>
-            <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.25)" }}>·</span>
-            <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.4)" }}>
+            <span className="text-[11px]" style={{ color: "#0D1016" }}>·</span>
+            <span className="text-[11px]" style={{ color: "#0D1016" }}>
               {fmtDate(seal.sealedAt)}
             </span>
-            <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.25)" }}>·</span>
-            <span className="text-[10px]" style={{ color: "#b45309" }}>
+            <span className="text-[11px]" style={{ color: "#0D1016" }}>·</span>
+            <span className="text-[11px]" style={{ color: "#b45309" }}>
               retention: {fmtDate(seal.retentionUntil)}
             </span>
           </div>
         </div>
-        <div style={{ color: "rgba(0,0,0,0.25)", flexShrink: 0, paddingTop: 2 }}>
+        <div style={{ color: "#0D1016", flexShrink: 0, paddingTop: 2 }}>
           {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
         </div>
       </div>
@@ -88,8 +88,8 @@ function SealRow({ seal }: { seal: IntegritySeal }) {
 function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div>
-      <p style={{ fontSize: 9, fontWeight: 600, color: "rgba(0,0,0,0.38)", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 2px" }}>{label}</p>
-      <p style={{ fontSize: 10, color: "rgba(0,0,0,0.55)", fontFamily: mono ? "monospace" : undefined, wordBreak: "break-all" }}>{value}</p>
+      <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 2px" }}>{label}</p>
+      <p style={{ fontSize: 11, color: "#0D1016", fontFamily: mono ? "monospace" : undefined, wordBreak: "break-all" }}>{value}</p>
     </div>
   );
 }
@@ -127,22 +127,22 @@ export function IntegrityRegisterView({ scopeId }: IntegrityRegisterViewProps) {
   };
 
   return (
-    <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(0,0,0,0.07)", background: "#fff" }}>
+    <div className="rounded-lg border overflow-hidden" style={{ borderColor: "rgba(0,0,0,0.07)", background: "#fff" }}>
       <button
         onClick={() => setExpanded(v => !v)}
         className="w-full flex items-center gap-2 px-4 py-3 text-left transition-colors"
-        style={{ background: expanded ? "rgba(0,0,0,0.015)" : "#fff", borderBottom: expanded ? "1px solid rgba(0,0,0,0.06)" : "none" }}
+        style={{ background: expanded ? "rgba(0,0,0,0.015)" : "#fff", borderBottom: expanded ? "1px solid rgba(0,0,0,0.08)" : "none" }}
       >
-        <Lock className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "rgba(0,0,0,0.4)" }} />
-        <span className="text-[11px] font-medium" style={{ color: "rgba(0,0,0,0.55)" }}>
+        <Lock className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#0D1016" }} />
+        <span className="text-[11px] font-medium" style={{ color: "#0D1016" }}>
           Registro Integrità Sigilli (Bucket B)
         </span>
         {seals.length > 0 && (
-          <span style={{ fontSize: 10, fontWeight: 600, padding: "1px 6px", borderRadius: 4, background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.45)" }}>
+          <span style={{ fontSize: 11, fontWeight: 600, padding: "1px 6px", borderRadius: 4, background: "rgba(0,0,0,0.05)", color: "#0D1016" }}>
             {seals.length} sigilli
           </span>
         )}
-        <span className="ml-auto" style={{ color: "rgba(0,0,0,0.3)" }}>
+        <span className="ml-auto" style={{ color: "#0D1016" }}>
           {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
         </span>
       </button>
@@ -150,10 +150,10 @@ export function IntegrityRegisterView({ scopeId }: IntegrityRegisterViewProps) {
       {expanded && (
         <div>
           {/* Verifica integrità */}
-          <div className="px-4 py-2 flex items-center gap-3" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+          <div className="px-4 py-2 flex items-center gap-3" style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
             <button
               onClick={load}
-              style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", gap: 4, fontSize: 11 }}
+              style={{ background: "none", border: "none", cursor: "pointer", color: "#0D1016", display: "flex", alignItems: "center", gap: 4, fontSize: 11 }}
             >
               <RefreshCw size={12} /> Aggiorna
             </button>
@@ -180,9 +180,9 @@ export function IntegrityRegisterView({ scopeId }: IntegrityRegisterViewProps) {
               <Loader2 size={20} className="animate-spin" style={{ color: "rgba(0,0,0,0.2)" }} />
             </div>
           ) : seals.length === 0 ? (
-            <div className="px-4 py-6 text-center" style={{ color: "rgba(0,0,0,0.3)" }}>
+            <div className="px-4 py-6 text-center" style={{ color: "#0D1016" }}>
               <Lock size={20} style={{ margin: "0 auto 8px", opacity: 0.3 }} />
-              <p style={{ fontSize: 12 }}>Nessun sigillo registrato</p>
+              <p style={{ fontSize: 13 }}>Nessun sigillo registrato</p>
               <p style={{ fontSize: 11, marginTop: 4 }}>I sigilli vengono creati alla finalizzazione dei batch di log.</p>
             </div>
           ) : (

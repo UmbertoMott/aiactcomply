@@ -99,7 +99,7 @@ export const PROVIDER_OBLIGATIONS: {
 }[] = [
   {
     id: "docugen",
-    label: "Documentazione tecnica (Annex IV)",
+    label: "Documentazione tecnica (Allegato IV)",
     art: "Art. 11",
     href: "/dashboard/tools/docugen",
     source: "derived",

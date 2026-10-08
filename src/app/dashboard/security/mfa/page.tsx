@@ -108,7 +108,7 @@ export default function MFAPage() {
       <h1 className="text-2xl font-semibold mb-2" style={{ color: "#0D1016" }}>
         Autenticazione a due fattori (TOTP)
       </h1>
-      <p className="text-[13px] mb-8" style={{ color: "rgba(0,0,0,0.5)" }}>
+      <p className="text-[13px] mb-8" style={{ color: "#0D1016" }}>
         Proteggi il tuo account richiedendo un codice dall&apos;app authenticator ad ogni accesso.
       </p>
 
@@ -124,16 +124,16 @@ export default function MFAPage() {
       )}
 
       {step === "loading" && (
-        <p className="text-[13px]" style={{ color: "rgba(0,0,0,0.4)" }}>Caricamento...</p>
+        <p className="text-[13px]" style={{ color: "#0D1016" }}>Caricamento...</p>
       )}
 
       {step === "enrolled" && (
-        <div className="rounded-xl p-5 space-y-4" style={{ border: "1px solid rgba(0,0,0,0.1)" }}>
+        <div className="rounded-lg p-5 space-y-4" style={{ border: "1px solid rgba(0,0,0,0.08)" }}>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm" style={{ background: "#dcfce7", color: "#16a34a" }}>✓</div>
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-[13px]" style={{ background: "#dcfce7", color: "#16a34a" }}>✓</div>
             <div>
-              <p className="text-[14px] font-medium" style={{ color: "#0D1016" }}>2FA attivo</p>
-              <p className="text-[12px]" style={{ color: "rgba(0,0,0,0.45)" }}>App authenticator configurata</p>
+              <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>2FA attivo</p>
+              <p className="text-[13px]" style={{ color: "#0D1016" }}>App authenticator configurata</p>
             </div>
           </div>
           <button
@@ -147,9 +147,9 @@ export default function MFAPage() {
       )}
 
       {step === "unenroll-confirm" && (
-        <div className="rounded-xl p-5 space-y-4" style={{ border: "1px solid #fecaca", background: "#fef2f2" }}>
-          <p className="text-[14px] font-medium" style={{ color: "#0D1016" }}>Sei sicuro?</p>
-          <p className="text-[13px]" style={{ color: "rgba(0,0,0,0.55)" }}>
+        <div className="rounded-lg p-5 space-y-4" style={{ border: "1px solid #fecaca", background: "#fef2f2" }}>
+          <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>Sei sicuro?</p>
+          <p className="text-[13px]" style={{ color: "#0D1016" }}>
             Disattivare il 2FA rende il tuo account meno sicuro. Potrai riattivarlo in qualsiasi momento.
           </p>
           <div className="flex gap-3">
@@ -173,8 +173,8 @@ export default function MFAPage() {
       )}
 
       {step === "setup-start" && (
-        <div className="rounded-xl p-5 space-y-4" style={{ border: "1px solid rgba(0,0,0,0.1)" }}>
-          <p className="text-[13px]" style={{ color: "rgba(0,0,0,0.55)" }}>
+        <div className="rounded-lg p-5 space-y-4" style={{ border: "1px solid rgba(0,0,0,0.08)" }}>
+          <p className="text-[13px]" style={{ color: "#0D1016" }}>
             Installa <strong>Google Authenticator</strong>, <strong>Authy</strong> o <strong>Microsoft Authenticator</strong> sul tuo smartphone, poi clicca su Attiva.
           </p>
           <button
@@ -190,9 +190,9 @@ export default function MFAPage() {
 
       {step === "setup-verify" && (
         <div className="space-y-6">
-          <div className="rounded-xl p-5 space-y-4" style={{ border: "1px solid rgba(0,0,0,0.1)" }}>
+          <div className="rounded-lg p-5 space-y-4" style={{ border: "1px solid rgba(0,0,0,0.08)" }}>
             <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>1. Scansiona il codice QR</p>
-            <p className="text-[12px]" style={{ color: "rgba(0,0,0,0.5)" }}>
+            <p className="text-[13px]" style={{ color: "#0D1016" }}>
               Apri la tua app authenticator e inquadra il QR code qui sotto.
             </p>
             {qrCode && (
@@ -201,12 +201,12 @@ export default function MFAPage() {
                 <img src={qrCode} alt="QR Code TOTP" width={180} height={180} className="rounded-lg" />
               </div>
             )}
-            <p className="text-[11px] text-center" style={{ color: "rgba(0,0,0,0.4)" }}>
+            <p className="text-[11px] text-center" style={{ color: "#0D1016" }}>
               Chiave manuale: <span className="font-mono">{secret}</span>
             </p>
           </div>
 
-          <div className="rounded-xl p-5 space-y-4" style={{ border: "1px solid rgba(0,0,0,0.1)" }}>
+          <div className="rounded-lg p-5 space-y-4" style={{ border: "1px solid rgba(0,0,0,0.08)" }}>
             <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>2. Inserisci il codice a 6 cifre</p>
             <input
               type="text"
@@ -216,7 +216,7 @@ export default function MFAPage() {
               onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
               placeholder="000000"
               className="w-full rounded-lg px-4 py-2.5 text-center text-xl font-bold tracking-widest outline-none"
-              style={{ border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016" }}
+              style={{ border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016" }}
             />
             <button
               onClick={verifyEnrollment}

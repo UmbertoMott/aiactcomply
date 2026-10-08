@@ -16,7 +16,7 @@ export const TraceabilityCoverageRecordSchema = z.object({
 });
 export type TraceabilityCoverageRecord = z.infer<typeof TraceabilityCoverageRecordSchema>;
 
-// ── §4 Qualità & continuità (ISO/IEC 42001 A.9 / 27001 A.8.15) ──────
+// ── §4 Qualità & continuità (ISO/IEC 42001 A.6.2.8 / 27001 A.8.15) ──────
 export const LogQualityFindingsSchema = z.object({
   timestampValidPct: z.number(),
   outOfOrderCount: z.number(),
@@ -54,7 +54,8 @@ export const ImportedLogSetSchema = z.object({
 });
 export type ImportedLogSet = z.infer<typeof ImportedLogSetSchema>;
 
-// ── §5 Ritenzione calcolata (Art. 26(6) / Art. 12) ─────────────────
+// ── §5 Ritenzione calcolata — log di cui all'Art. 12(1); conservazione per almeno sei mesi:
+//    fornitore Art. 19(1), deployer Art. 26(6) ─────────────────
 export const RetentionAssessmentSchema = z.object({
   role: z.enum(["provider", "deployer", "unspecified"]).default("unspecified"),
   retentionPolicyMonths: z.number().optional(),

@@ -583,7 +583,7 @@ La normativa italiana aggiunge etichettatura obbligatoria per contenuti AI nel s
 
 📍 Menu: *Valutazioni → AI Literacy*
 
-**A cosa serve:** Documenta le misure adottate per garantire un adeguato livello di alfabetizzazione AI al personale che lavora con sistemi di IA. L'Art. 4 dell'AI Act richiede che provider e deployer adottino misure per garantire literacy adeguata.
+**A cosa serve:** Documenta le misure adottate per sostenere l'alfabetizzazione in materia di IA del personale che lavora con sistemi di IA. L'Art. 4 dell'AI Act, come modificato dal Reg. (UE) 2026/1744, chiede a fornitori e deployer di adottare misure volte a sostenerne lo sviluppo, senza imporre un livello specifico.
 
 **Chi deve essere formato:**
 - Personale che usa o supervisiona sistemi di IA
@@ -750,7 +750,7 @@ function renderMd(text: string): React.ReactNode[] {
     }
     if (line.startsWith("**") && line.endsWith("**") && !line.slice(2, -2).includes("**")) {
       result.push(
-        <p key={key++} style={{ fontWeight: 700, fontSize: 12, color: "#0D1016", marginBottom: 2 }}>
+        <p key={key++} style={{ fontWeight: 700, fontSize: 13, color: "#0D1016", marginBottom: 2 }}>
           {line.slice(2, -2)}
         </p>
       );
@@ -766,7 +766,7 @@ function renderMd(text: string): React.ReactNode[] {
     const isBullet = line.trimStart().startsWith("-") || /^\d+\.\s/.test(line.trimStart()) || /^[🔴🟡🟢🚫🏭🏢📦🛒⚠️💡📍]/.test(line.trim());
     result.push(
       <p key={key++} style={{
-        fontSize: 12,
+        fontSize: 13,
         lineHeight: 1.65,
         color: "#0D1016",
         marginBottom: isBullet ? 1 : 3,
@@ -870,7 +870,7 @@ Come posso aiutarti?`,
     right: 24,
     width: panelW,
     height: minimized ? "auto" : 580,
-    borderRadius: 16,
+    borderRadius: 8,
     background: "#ffffff",
     boxShadow: "0 8px 40px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08)",
     display: "flex",
@@ -933,7 +933,7 @@ Come posso aiutarti?`,
           flexShrink: 0,
         }}>
           <div style={{
-            width: 32, height: 32, borderRadius: 16,
+            width: 32, height: 32, borderRadius: 8,
             background: "rgba(255,255,255,0.1)",
             display: "flex", alignItems: "center", justifyContent: "center",
             flexShrink: 0,
@@ -944,7 +944,7 @@ Come posso aiutarti?`,
             <p style={{ fontSize: 13, fontWeight: 600, color: "#fff", lineHeight: 1.2 }}>
               Assistente RegulaeOS
             </p>
-            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.45)", marginTop: 1 }}>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", marginTop: 1 }}>
               AI Act · GDPR · L.132/2025
             </p>
           </div>
@@ -994,11 +994,11 @@ Come posso aiutarti?`,
                     color: msg.role === "user" ? "#fff" : "#0D1016",
                   }}>
                     {msg.role === "user"
-                      ? <p style={{ fontSize: 12, lineHeight: 1.5, color: "#fff", margin: 0 }}>{msg.text}</p>
+                      ? <p style={{ fontSize: 13, lineHeight: 1.5, color: "#fff", margin: 0 }}>{msg.text}</p>
                       : <div>{renderMd(msg.text)}</div>
                     }
                   </div>
-                  <span style={{ fontSize: 10, color: "rgba(0,0,0,0.28)", marginTop: 3, paddingLeft: msg.role === "user" ? 0 : 4 }}>
+                  <span style={{ fontSize: 11, color: "#0D1016", marginTop: 3, paddingLeft: msg.role === "user" ? 0 : 4 }}>
                     {new Date(msg.ts).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
                   </span>
                 </div>
@@ -1017,7 +1017,7 @@ Come posso aiutarti?`,
                   }}>
                     {[0, 1, 2].map(i => (
                       <span key={i} style={{
-                        width: 6, height: 6, borderRadius: 3,
+                        width: 6, height: 6, borderRadius: 4,
                         background: "#0D1016",
                         opacity: 0.35,
                         animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite`,
@@ -1038,14 +1038,14 @@ Come posso aiutarti?`,
                 gap: 6,
                 flexWrap: "wrap",
                 flexShrink: 0,
-                borderTop: "1px solid rgba(0,0,0,0.06)",
+                borderTop: "1px solid rgba(0,0,0,0.08)",
               }}>
                 {QUICK_ACTIONS.slice(0, 5).map(q => (
                   <button key={q} onClick={() => sendMessage(q)}
                     style={{
                       fontSize: 11, padding: "4px 9px",
                       borderRadius: 20,
-                      border: "1px solid rgba(0,0,0,0.1)",
+                      border: "1px solid rgba(0,0,0,0.08)",
                       background: "#fff",
                       color: "#0D1016",
                       cursor: "pointer",
@@ -1064,12 +1064,12 @@ Come posso aiutarti?`,
             {/* Input */}
             <div style={{
               padding: "10px 12px",
-              borderTop: "1px solid rgba(0,0,0,0.07)",
+              borderTop: "1px solid rgba(0,0,0,0.08)",
               display: "flex",
               gap: 8,
               alignItems: "center",
               flexShrink: 0,
-              background: "#fafafa",
+              background: "#FAFAF9",
             }}>
               <input
                 ref={inputRef}
@@ -1081,8 +1081,8 @@ Come posso aiutarti?`,
                   flex: 1,
                   padding: "8px 12px",
                   borderRadius: 20,
-                  border: "1px solid rgba(0,0,0,0.1)",
-                  fontSize: 12,
+                  border: "1px solid rgba(0,0,0,0.08)",
+                  fontSize: 13,
                   color: "#0D1016",
                   background: "#fff",
                   outline: "none",

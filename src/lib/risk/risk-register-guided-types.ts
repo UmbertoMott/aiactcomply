@@ -49,15 +49,15 @@ export interface RiskRegisterGuidedDoc {
 // ─── Sezioni ──────────────────────────────────────────────────────────────────
 
 export const RISK_REGISTER_SECTIONS: RiskRegisterGuidedSection[] = [
-  { key: "sec0", label: "§0 — Scoping",                  legalRef: "Art. 9(1)",        anchor: "rr-sec0"  },
+  { key: "sec0", label: "§0 — Ambito e criteri",         legalRef: "Art. 9(1)",        anchor: "rr-sec0"  },
   { key: "sec1", label: "§1 — Identificazione Rischi",   legalRef: "Art. 9(2)(a)",     anchor: "rr-sec1"  },
   { key: "sec2", label: "§2 — Stima e Valutazione",      legalRef: "Art. 9(2)(b)",     anchor: "rr-sec2"  },
   { key: "sec3", label: "§3 — Test e Validazione",       legalRef: "Art. 9(6)-(8)",    anchor: "rr-sec3"  },
   { key: "sec4", label: "§4 — Trattamento Rischio",      legalRef: "Art. 9(4)-(5)",    anchor: "rr-sec4"  },
-  { key: "sec5", label: "§5 — Monitoraggio Post-Market", legalRef: "Art. 9(2)(c)",     anchor: "rr-sec5"  },
+  { key: "sec5", label: "§5 — Monitoraggio sul mercato", legalRef: "Art. 9(2)(c)",     anchor: "rr-sec5"  },
   { key: "sec7", label: "§7 — Tracciabilità",            legalRef: "Art. 12, 17",      anchor: "rr-sec7"  },
   { key: "sec8", label: "§8 — Dismissione",              legalRef: "ISO 23894 Ann. C", anchor: "rr-sec8"  },
-  { key: "sec9", label: "§9 — Sign-off",                 legalRef: "Art. 9(10)",       anchor: "rr-sec9"  },
+  { key: "sec9", label: "§9 — Approvazione",             legalRef: "Art. 9(1)",        anchor: "rr-sec9"  },
   { key: "comm", label: "Comunicazione",                 legalRef: "ISO 23894 §6.2",   anchor: "rr-comm"  },
 ] as const;
 
@@ -203,9 +203,9 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     ref: "Art. 9(2)(a) · Art. 10",
     fieldType: "select_ynp",
     examples: [
-      "Sì — analisi preliminare ha rilevato underrepresentation di candidati con nomi di origine straniera nel dataset di training",
-      "No — dataset bilanciato per genere e nazionalità; test fairness superati con DI score ≥ 0.85",
-      "Parzialmente — bias potenziale sulla variabile 'gap occupazionale' non ancora completamente mitigato",
+      "Sì — una prima analisi ha mostrato che nei dati usati per addestrare il sistema i candidati con nomi stranieri sono pochi",
+      "No — i dati sono equilibrati per genere e nazionalità e i test non hanno mostrato disparità di trattamento",
+      "Parzialmente — i periodi senza lavoro nel CV potrebbero penalizzare alcuni candidati; il problema non è ancora del tutto risolto",
     ],
     required: true,
   },
@@ -280,11 +280,11 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     id: "rr_test_metrics",
     sectionKey: "sec3",
     label: "Metriche di test definite",
-    question: "Quali metriche di accuratezza, fairness o performance sono state definite per il sistema di IA?",
+    question: "Come viene misurato se il sistema di IA funziona bene e tratta tutti in modo equo?",
     ref: "Art. 9(6)-(8)",
     fieldType: "multiline",
     examples: [
-      "Accuratezza: ≥ 85% su validation set hold-out (20% del dataset).\nFairness: Disparate Impact ≥ 0.8 per genere e nazionalità.\nPrecisione: ≥ 80%, Recall: ≥ 75% per il task di classificazione.",
+      "Correttezza: il sistema deve dare la risposta giusta in almeno 85 casi su 100, verificati su casi che non ha mai visto.\nEquità: i risultati non devono cambiare in modo rilevante tra uomini e donne o tra italiani e stranieri.",
     ],
     required: true,
   },
@@ -292,27 +292,27 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     id: "rr_thresholds_met",
     sectionKey: "sec3",
     label: "Soglie rispettate",
-    question: "Il sistema di IA ha superato le soglie di accettabilità definite nei test di validazione?",
+    question: "Nei test, il sistema di IA ha raggiunto i risultati minimi richiesti?",
     ref: "Art. 9(6)-(8)",
     fieldType: "select_ynp",
     examples: [
-      "Sì — tutte le metriche definite sono state superate nel test su dataset hold-out. Deployment autorizzato.",
-      "No — il Disparate Impact score è 0.72, sotto la soglia di 0.8. Deployment bloccato pending debiasing.",
-      "Parzialmente — accuratezza OK (88%), ma fairness per nazionalità ancora in corso di valutazione.",
+      "Sì — nei test il sistema ha raggiunto tutti i risultati minimi richiesti. L'uso è autorizzato.",
+      "No — il sistema scarta più spesso i candidati stranieri. L'uso è sospeso finché il fornitore non corregge il problema.",
+      "Parzialmente — il sistema risponde correttamente in 88 casi su 100, ma l'equità per nazionalità è ancora da verificare.",
     ],
     required: true,
   },
   {
     id: "rr_worst_case",
     sectionKey: "sec3",
-    label: "Scenario worst-case testato",
-    question: "È stato testato uno scenario worst-case (uso estremo, dataset avverso, attacchi adversariali)?",
+    label: "Prova nel caso peggiore",
+    question: "Il sistema è stato provato nelle condizioni più sfavorevoli (uso estremo, dati insoliti, tentativi di manipolazione)?",
     ref: "Art. 9(8)",
     fieldType: "select_ynp",
     examples: [
-      "Sì — test con dataset sintetico avverso (solo minoranze): DI score = 0.65; pianificate misure di mitigazione aggiuntive.",
-      "No — test worst-case non ancora eseguito; da pianificare entro 90 giorni dal deployment.",
-      "Parzialmente — test su dataset sbilanciato eseguito; test adversariale non ancora completato.",
+      "Sì — provato con casi costruiti apposta per metterlo in difficoltà: in alcuni casi tratta peggio le minoranze, quindi abbiamo previsto misure aggiuntive.",
+      "No — la prova nel caso peggiore non è ancora stata fatta; va pianificata entro 90 giorni dall'avvio.",
+      "Parzialmente — provato con dati insoliti; la prova contro tentativi di manipolazione non è ancora conclusa.",
     ],
     required: false,
   },
@@ -326,7 +326,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     ref: "Art. 9(2)(d) · Art. 9(4)-(5)",
     fieldType: "text",
     examples: [
-      "Modifica: retraining del modello con CTGAN debiasing + eliminazione feature proxy (variabile 'cap_residenza').",
+      "Modifica: il fornitore riaddestra il sistema e il CAP di residenza non viene più usato per valutare i candidati.",
       "Condivisione: trasferimento parziale del rischio tramite clausola contrattuale con il provider del modello AI.",
       "Ritenzione: rischio residuo basso accettato con monitoraggio mensile e revisione trimestrale.",
     ],
@@ -340,7 +340,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     ref: "Art. 9(4)-(5)",
     fieldType: "multiline",
     examples: [
-      "1. Revisione umana obbligatoria per i 50 candidati con score ± 50 punti dalla soglia di esclusione.\n2. Eliminazione feature proxy (gap occupazionale > 12 mesi) dal modello.\n3. Audit fairness trimestrale con report al DPO.\n4. Formazione obbligatoria per i recruiter sull'uso e i limiti del sistema.",
+      "1. Un selezionatore ricontrolla sempre i candidati vicini alla soglia di esclusione.\n2. I periodi senza lavoro nel CV non vengono più usati per valutare i candidati.\n3. Ogni tre mesi si verifica che il sistema tratti tutti in modo equo, con un resoconto al DPO.\n4. Formazione obbligatoria per i selezionatori sull'uso e i limiti del sistema.",
     ],
     required: true,
   },
@@ -353,7 +353,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     fieldType: "text",
     examples: [
       "Rischio residuo: MEDIO. Bias su 'gap occupazionale' parzialmente mitigato; monitoraggio trimestrale attivo.",
-      "Rischio residuo: BASSO. Tutte le misure implementate; test fairness superati post-retraining.",
+      "Rischio residuo: BASSO. Tutte le misure sono attive e i nuovi test non mostrano disparità di trattamento.",
       "Rischio residuo: ALTO. Misure di mitigazione pianificate ma non ancora implementate — deployment in sospeso.",
     ],
     required: true,
@@ -368,21 +368,21 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     ref: "Art. 9(2)(c) · Art. 72",
     fieldType: "text",
     examples: [
-      "Monitoraggio automatico mensile via pipeline Airflow (PSI + drift detection). Report trimestrale al risk owner.",
-      "Monitoraggio continuo su metriche di accuratezza + revisione semestrale completa da parte del team AI.",
+      "Ogni mese il responsabile controlla a campione i risultati del sistema; ogni tre mesi invia un breve resoconto al responsabile del rischio.",
+      "Controllo continuo degli errori segnalati dagli utenti e revisione completa ogni sei mesi.",
     ],
     required: true,
   },
   {
     id: "rr_drift_detection",
     sectionKey: "sec5",
-    label: "Drift detection (PSI)",
-    question: "È stato definito un threshold PSI (Population Stability Index) per la rilevazione del data drift?",
+    label: "Soglie di allarme",
+    question: "Sono stati definiti i segnali che indicano che il sistema sta peggiorando nel tempo (ad esempio più errori o più reclami)?",
     ref: "Art. 9(2)(c) · ISO 23894",
     fieldType: "select_yn",
     examples: [
-      "Sì — PSI < 0.1: modello stabile. PSI 0.1-0.2: monitoraggio aumentato. PSI > 0.2: revisione urgente e sospensione del modello.",
-      "No — threshold PSI non ancora definito; da formalizzare entro 60 giorni dal deployment.",
+      "Sì — se gli errori o i reclami aumentano in modo evidente, i controlli si intensificano; se il peggioramento è grave, il sistema viene sospeso e si avvia una revisione urgente.",
+      "No — i segnali di allarme non sono ancora definiti; vanno stabiliti entro 60 giorni dall'avvio.",
     ],
     required: true,
   },
@@ -407,7 +407,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     sectionKey: "sec7",
     label: "Versionamento del registro",
     question: "Il registro dei rischi è soggetto a controllo di versione (Git, sistema documentale, ecc.)?",
-    ref: "Art. 9(1) · Art. 12",
+    ref: "Art. 9(1) · Art. 17(1)(k)",
     fieldType: "select_yn",
     examples: [
       "Sì — versioning via Git con tag semantico (v1.0, v1.1…). Ogni modifica tracciata con autore e data.",
@@ -420,7 +420,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     sectionKey: "sec7",
     label: "Policy di retention dei log",
     question: "È stata definita una policy di retention per i log del sistema di IA e per il registro dei rischi?",
-    ref: "Art. 12 AI Act",
+    ref: "Art. 19(1) (fornitore) / Art. 26(6) (deployer)",
     fieldType: "select_ynp",
     examples: [
       "Sì — retention 5 anni per log del sistema di IA; 10 anni per il registro dei rischi. Certificazione GDPR conforme.",
@@ -493,7 +493,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     sectionKey: "sec9",
     label: "Risk Owner",
     question: "Chi è il Risk Owner del sistema di IA (persona fisica responsabile del registro e delle decisioni di rischio)?",
-    ref: "Art. 9(1) · Art. 9(10)",
+    ref: "Art. 9(1)",
     fieldType: "text",
     examples: [
       "Mario Rossi — CTO / Chief Technology Officer — designato Risk Owner in data 01/03/2025",
@@ -506,7 +506,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     sectionKey: "sec9",
     label: "Compliance / Legale",
     question: "Chi è il responsabile Compliance o Legale che ha validato il registro dei rischi?",
-    ref: "Art. 9(10)",
+    ref: "Art. 9(1)",
     fieldType: "text",
     examples: [
       "Avv. Laura Verdi — Responsabile Legal & Compliance — revisione e validazione in data 15/03/2025",
@@ -524,7 +524,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     examples: [
       "MEDIO — rischio residuo accettabile con misure di mitigazione in vigore e monitoraggio trimestrale attivo.",
       "BASSO — tutte le misure implementate, test superati, deployment autorizzato senza condizioni.",
-      "ALTO — misure di mitigazione non ancora completate; deployment condizionato al completamento del debiasing.",
+      "ALTO — misure non ancora completate; l'uso è autorizzato solo dopo che il fornitore avrà corretto le disparità di trattamento.",
     ],
     required: true,
   },
@@ -666,7 +666,7 @@ export function mapGuidedToRiskRegister(doc: RiskRegisterGuidedDoc): Partial<Ris
 
   const monitoringDetails: RiskRegisterDocument["monitoringDetails"] = {
     monitoringFrequency:      a("rr_monitoring_frequency"),
-    alertThreshold:           a("rr_drift_detection") === "Sì" ? "PSI > 0.2" : undefined,
+    alertThreshold:           a("rr_drift_detection") === "Sì" ? "Segnali di allarme definiti (aumento di errori o reclami)" : undefined,
     postMarketPlan:           a("rr_postmarket_plan"),
   };
 

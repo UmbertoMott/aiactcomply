@@ -32,7 +32,7 @@ import { useRouter } from "next/navigation";
 import { ToolPhaseBar, PhaseHeading, NextPhaseCta, useActivePhase, type ToolPhase, type PhaseStatus } from "@/components/compliance/ToolPhaseBar";
 import { SectionEmptyState } from "@/components/compliance/SectionEmptyState";
 import {
-  QualityScorecard, FairnessPanel, RepresentativenessPanel, exportDataGovernanceJSON,
+  QualityScorecard, FairnessPanel, RepresentativenessPanel,
 } from "./DataAuditPanels";
 import {
   draftGovernancePracticeDocumentation,
@@ -44,7 +44,7 @@ type TFn = (key: string) => string;
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 const T = {
-  text: "#0D1016", muted: "rgba(0,0,0,0.42)", faint: "rgba(0,0,0,0.22)", border: "rgba(0,0,0,0.08)",
+  text: "#0D1016", muted: "#0D1016", faint: "#0D1016", border: "rgba(0,0,0,0.08)",
   card: "#fff", bg: "#f9f9fb",
   red: "#dc2626", redBg: "rgba(220,38,38,0.06)", redBdr: "rgba(220,38,38,0.18)",
   amber: "#d97706", amberBg: "rgba(202,138,4,0.07)", amberBdr: "rgba(202,138,4,0.22)",
@@ -53,8 +53,8 @@ const T = {
   violet: "#0D1016", violetBg: "rgba(0,0,0,0.04)", violetBdr: "rgba(0,0,0,0.12)",
 } as const;
 const FONT: CSSProperties = { fontFamily: "inherit" };
-const card: CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
-const inp: CSSProperties = { width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, color: T.text, background: T.card, outline: "none" };
+const card: CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, boxShadow: "none" };
+const inp: CSSProperties = { width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, color: T.text, background: T.card, outline: "none" };
 const ta: CSSProperties = { ...inp, resize: "vertical" as const };
 
 // ─── Dataset upload component ─────────────────────────────────────────────────
@@ -109,12 +109,12 @@ function DatasetUpload({ role, roleLabel, optional, profile, onProfile, onRemove
     const sensitiveCount = profile.columns.filter(c => c.flaggedAsSensitive).length;
     const highMissing = profile.columns.filter(c => c.missingPercentage > 20);
     return (
-      <div className="rounded-xl p-4" style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}>
+      <div className="rounded-lg p-4" style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}>
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <CheckCircle2 size={14} style={{ color: T.green }} />
-              <span className="text-[12px] font-semibold truncate" style={{ color: T.green }}>{profile.fileName}</span>
+              <span className="text-[13px] font-semibold truncate" style={{ color: T.green }}>{profile.fileName}</span>
             </div>
             <div className="flex flex-wrap gap-3 text-[11px]" style={{ color: T.muted }}>
               <span>{profile.rowCount.toLocaleString()} {t("rowsWord")}</span>
@@ -152,7 +152,7 @@ function DatasetUpload({ role, roleLabel, optional, profile, onProfile, onRemove
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
-        className="rounded-xl border-2 border-dashed flex flex-col items-center justify-center p-6 cursor-pointer transition-colors"
+        className="rounded-lg border-2 border-dashed flex flex-col items-center justify-center p-6 cursor-pointer transition-colors"
         style={{ borderColor: dragging ? T.blue : T.border, background: dragging ? T.blueBg : T.bg }}
       >
         {parsing ? (
@@ -160,9 +160,9 @@ function DatasetUpload({ role, roleLabel, optional, profile, onProfile, onRemove
         ) : (
           <Upload size={20} className="mb-2" style={{ color: T.muted }} />
         )}
-        <p className="text-[12px] font-medium" style={{ color: T.text }}>
+        <p className="text-[13px] font-medium" style={{ color: T.text }}>
           {parsing ? t("analyzing") : `Dataset ${roleLabel}`}
-          {optional && <span className="ml-1 text-[10px]" style={{ color: T.muted }}>{t("notMandatory")}</span>}
+          {optional && <span className="ml-1 text-[11px]" style={{ color: T.muted }}>{t("notMandatory")}</span>}
         </p>
         <p className="text-[11px]" style={{ color: T.muted }}>
           {parsing ? t("profilingColumns") : t("dropHint")}
@@ -187,7 +187,7 @@ function ColumnTable({ profile, onConfirmSensitive, t }: { profile: DatasetProfi
       <button onClick={() => setOpen(v => !v)} className="flex items-center gap-1.5 text-[11px] font-medium" style={{ color: T.blue, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
         <ChevronDown size={12} style={{ transform: open ? "rotate(180deg)" : "none" }} />
         {open ? t("hide") : t("show")} {t("columnProfile")} ({profile.columnCount})
-        {flagged.length > 0 && <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-semibold" style={{ background: T.amberBg, color: T.amber }}>⚠ {flagged.length} {t("sensitiveShort")}</span>}
+        {flagged.length > 0 && <span className="ml-1 px-1.5 py-0.5 rounded text-[11px] font-semibold" style={{ background: T.amberBg, color: T.amber }}>⚠ {flagged.length} {t("sensitiveShort")}</span>}
       </button>
       {open && (
         <div className="mt-2 overflow-x-auto rounded-lg border" style={{ borderColor: T.border }}>
@@ -206,7 +206,7 @@ function ColumnTable({ profile, onConfirmSensitive, t }: { profile: DatasetProfi
                     <span className="block truncate">{col.name}</span>
                   </td>
                   <td className="px-3 py-2">
-                    <span className="px-1.5 py-0.5 rounded text-[10px] font-mono" style={{ background: T.bg, color: T.muted }}>{col.inferredType}</span>
+                    <span className="px-1.5 py-0.5 rounded text-[11px] font-mono" style={{ background: T.bg, color: T.muted }}>{col.inferredType}</span>
                   </td>
                   <td className="px-3 py-2">
                     <span style={{ color: col.missingPercentage > 20 ? T.red : col.missingPercentage > 5 ? T.amber : T.green, fontWeight: col.missingPercentage > 20 ? 600 : 400 }}>
@@ -224,16 +224,16 @@ function ColumnTable({ profile, onConfirmSensitive, t }: { profile: DatasetProfi
                   <td className="px-3 py-2">
                     {col.flaggedAsSensitive ? (
                       col.sensitiveFlagConfirmed ? (
-                        <span className="text-[10px] font-semibold" style={{ color: T.amber }}>✓ {t("confirmed")}</span>
+                        <span className="text-[11px] font-semibold" style={{ color: T.amber }}>✓ {t("confirmed")}</span>
                       ) : (
                         <div className="flex items-center gap-1 flex-wrap">
-                          <span className="text-[10px] font-semibold" style={{ color: T.violet }}>✦ AI ({col.sensitiveCategoryGuess})</span>
+                          <span className="text-[11px] font-semibold" style={{ color: T.violet }}>✦ AI ({col.sensitiveCategoryGuess})</span>
                           <button onClick={() => onConfirmSensitive(col.name, true)}
-                            className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: T.amberBg, color: T.amber, border: `1px solid ${T.amberBdr}`, cursor: "pointer" }}>
+                            className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: T.amberBg, color: T.amber, border: `1px solid ${T.amberBdr}`, cursor: "pointer" }}>
                             {t("confirm")}
                           </button>
                           <button onClick={() => onConfirmSensitive(col.name, false)}
-                            className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: T.bg, color: T.muted, border: `1px solid ${T.border}`, cursor: "pointer" }}>
+                            className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: T.bg, color: T.muted, border: `1px solid ${T.border}`, cursor: "pointer" }}>
                             {t("no")}
                           </button>
                         </div>
@@ -277,7 +277,7 @@ function PracticeCard({ def, rec, pending, onUpdate, onAcceptAi, onDraft, drafti
   const s = statusMap[status];
 
   return (
-    <div className="rounded-xl border" style={{ background: T.card, borderColor: status === "documented" ? "#86efac" : T.border }}>
+    <div className="rounded-lg border" style={{ background: T.card, borderColor: status === "documented" ? "#86efac" : T.border }}>
       <button className="w-full flex items-start gap-3 p-4 text-left" onClick={() => setOpen(v => !v)}>
         <div className="mt-0.5">
           {status === "documented" ? <CheckCircle2 size={15} style={{ color: T.green }} /> :
@@ -287,15 +287,15 @@ function PracticeCard({ def, rec, pending, onUpdate, onAcceptAi, onDraft, drafti
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>{def.reference.split(" ")[0]} {def.reference.split(" ")[1]}</span>
-            <span className="text-[12px] font-semibold" style={{ color: T.text }}>{def.label}</span>
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ color: s.color, background: `${s.color}10` }}>{s.label}</span>
-            {pending && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: T.violetBg, color: T.violet }}>✦ AI</span>}
-            {def.source !== "manual" && <span className="text-[10px] px-1 rounded" style={{ background: T.bg, color: T.muted }}>{t("computed")}</span>}
+            <span className="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>{def.reference.split(" ")[0]} {def.reference.split(" ")[1]}</span>
+            <span className="text-[13px] font-semibold" style={{ color: T.text }}>{def.label}</span>
+            <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-full" style={{ color: s.color, background: `${s.color}10` }}>{s.label}</span>
+            {pending && <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: T.violetBg, color: T.violet }}>✦ AI</span>}
+            {def.source !== "manual" && <span className="text-[11px] px-1 rounded" style={{ background: T.bg, color: T.muted }}>{t("computed")}</span>}
           </div>
-          <p className="text-[10px] mt-0.5" style={{ color: T.faint }}>{def.reference}</p>
+          <p className="text-[11px] mt-0.5" style={{ color: T.faint }}>{def.reference}</p>
         </div>
-        <span className="text-[10px] flex-shrink-0" style={{ color: T.faint }}>{open ? "▲" : "▼"}</span>
+        <span className="text-[11px] flex-shrink-0" style={{ color: T.faint }}>{open ? "▲" : "▼"}</span>
       </button>
 
       {open && (
@@ -303,7 +303,7 @@ function PracticeCard({ def, rec, pending, onUpdate, onAcceptAi, onDraft, drafti
           {/* Computed summary (stats-based, no AI badge needed) */}
           {computedSummary && (
             <div className="mt-3 rounded-lg p-3 mb-3" style={{ background: T.bg, border: `1px solid ${T.border}` }}>
-              <p className="text-[10px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: T.muted }}>
+              <p className="text-[11px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: T.muted }}>
                 {t("autoStatSummary")}
               </p>
               {computedSummary}
@@ -314,7 +314,7 @@ function PracticeCard({ def, rec, pending, onUpdate, onAcceptAi, onDraft, drafti
           {pending && (
             <div className="mt-3 rounded-lg p-3 mb-3" style={{ background: T.violetBg, border: `1px solid ${T.violetBdr}` }}>
               <p className="text-[11px] font-semibold mb-1.5" style={{ color: T.violet }}>✦ {t("aiVerify")}</p>
-              <p className="text-[12px] whitespace-pre-wrap leading-relaxed" style={{ color: T.text }}>{pending}</p>
+              <p className="text-[13px] whitespace-pre-wrap leading-relaxed" style={{ color: T.text }}>{pending}</p>
               <button onClick={() => onAcceptAi(def.id)}
                 className="mt-2 flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded"
                 style={{ background: T.violet, color: "#fff", border: "none", cursor: "pointer" }}>
@@ -325,7 +325,7 @@ function PracticeCard({ def, rec, pending, onUpdate, onAcceptAi, onDraft, drafti
 
           {/* Documentation textarea */}
           <div className="mt-3 mb-3">
-            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("documentation")}</label>
+            <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("documentation")}</label>
             <textarea rows={4} value={rec?.documentation ?? ""}
               onChange={e => onUpdate(def.id, { documentation: e.target.value })}
               placeholder={def.computedHint ?? t("documentPracticePh")}
@@ -620,7 +620,7 @@ export default function DataAuditPage() {
           </ul>
           {biasAnalyses.length > 0 && !biasAnalysisAccepted && (
             <div className="mt-2 rounded-lg p-2.5" style={{ background: T.violetBg, border: `1px solid ${T.violetBdr}` }}>
-              <p className="text-[10px] font-semibold mb-1" style={{ color: T.violet }}>✦ {t("aiVerify")}</p>
+              <p className="text-[11px] font-semibold mb-1" style={{ color: T.violet }}>✦ {t("aiVerify")}</p>
               {biasAnalyses.map((a, i) => (
                 <div key={i} className="mb-2">
                   <p className="text-[11px] font-semibold" style={{ color: T.text }}>{a.columnName}</p>
@@ -657,12 +657,12 @@ export default function DataAuditPage() {
 
       {/* Dossier banner */}
       {savedAt ? (
-        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-4 text-[12px]" style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}>
+        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-4 text-[13px]" style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}>
           <span style={{ color: T.green }}>✓ {t("savedDossier")} · {new Date(savedAt).toLocaleDateString(loc)}</span>
           <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium" style={{ color: T.green }}>{t("seeDossier")}</Link>
         </div>
       ) : (
-        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-4 text-[12px]" style={{ background: T.card, border: `1px solid ${T.border}` }}>
+        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-4 text-[13px]" style={{ background: T.card, border: `1px solid ${T.border}` }}>
           <span style={{ color: T.muted }}>{t("saveHint")}</span>
           <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>{t("save")}</button>
         </div>
@@ -675,7 +675,7 @@ export default function DataAuditPage() {
           <h1 className="text-xl font-bold" style={{ color: T.text }}>{t("title")}</h1>
           <span className="text-[11px] font-medium px-2 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>Art. 10</span>
         </div>
-        <p className="text-[12px]" style={{ color: T.muted }}>
+        <p className="text-[13px]" style={{ color: T.muted }}>
           {t("subtitle")}
         </p>
         {cls && (
@@ -687,10 +687,10 @@ export default function DataAuditPage() {
       </div>
 
       {/* Art. 10(6) triage */}
-      <div className="rounded-xl p-4 mb-5" style={{ ...card }}>
+      <div className="rounded-lg p-4 mb-5" style={{ ...card }}>
         <div className="flex items-center gap-2 mb-2">
           <Info size={14} style={{ color: T.blue }} />
-          <span className="text-[12px] font-semibold" style={{ color: T.text }}>{t("devApproachTitle")}</span>
+          <span className="text-[13px] font-semibold" style={{ color: T.text }}>{t("devApproachTitle")}</span>
         </div>
         <p className="text-[11px] mb-3" style={{ color: T.muted }}>
           {t("devApproachDesc")}
@@ -702,7 +702,7 @@ export default function DataAuditPage() {
           ] as const).map(opt => (
             <button key={opt.v}
               onClick={() => patchRecord({ developmentApproach: opt.v })}
-              className="text-[12px] px-3 py-1.5 rounded-lg border"
+              className="text-[13px] px-3 py-1.5 rounded-lg border"
               style={{
                 borderColor: record.developmentApproach === opt.v ? T.blue : T.border,
                 background: record.developmentApproach === opt.v ? T.blueBg : "transparent",
@@ -768,7 +768,7 @@ export default function DataAuditPage() {
         {anyConfirmedSensitive && (
           <div className="mt-4 flex items-center gap-3">
             <button onClick={runBiasAnalysis} disabled={biasAnalyzing}
-              className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg"
+              className="flex items-center gap-1.5 text-[13px] font-medium px-3 py-1.5 rounded-lg"
               style={{ background: T.violet, color: "#fff", border: "none", cursor: "pointer", opacity: biasAnalyzing ? 0.7 : 1 }}>
               {biasAnalyzing ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
               {t("biasAnalysisBtn")}
@@ -813,7 +813,7 @@ export default function DataAuditPage() {
           sub={t("ph4_sub")} />
         {/* Avanzamento pratiche — contestuale alla fase, non più in cima alla pagina */}
         <div className="flex items-center gap-3 mb-4">
-          <span className="text-lg font-bold" style={{ color: evidenzaDone ? T.green : T.text }}>{documentedNow}/{totalPractices}</span>
+          <span className="text-[15px] font-bold" style={{ color: evidenzaDone ? T.green : T.text }}>{documentedNow}/{totalPractices}</span>
           <div className="flex-1">
             <div className="text-[11px] font-medium mb-1" style={{ color: T.muted }}>{t("practicesDocumented")}</div>
             <div className="h-1.5 rounded-full" style={{ background: T.border }}>
@@ -852,13 +852,13 @@ export default function DataAuditPage() {
             </span>
             <div className="flex-1 h-px" style={{ background: T.border }} />
           </div>
-          <div className="rounded-xl border-2 p-4 mb-6" style={{ background: T.card, borderColor: T.violet }}>
+          <div className="rounded-lg border-2 p-4 mb-6" style={{ background: T.card, borderColor: T.violet }}>
             <div className="flex items-center gap-2 mb-1">
               <AlertCircle size={16} style={{ color: T.violet }} />
-              <span className="font-semibold text-sm" style={{ color: T.text }}>{SPECIAL_CATEGORIES_MODULE.label}</span>
+              <span className="font-semibold text-[13px]" style={{ color: T.text }}>{SPECIAL_CATEGORIES_MODULE.label}</span>
               <span className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: T.violetBg, color: T.violet }}>{SPECIAL_CATEGORIES_MODULE.primaryReference}</span>
             </div>
-            <p className="text-[12px] mb-4 leading-relaxed" style={{ color: T.muted }}>{SPECIAL_CATEGORIES_MODULE.description}</p>
+            <p className="text-[13px] mb-4 leading-relaxed" style={{ color: T.muted }}>{SPECIAL_CATEGORIES_MODULE.description}</p>
 
             {/* Confirmed sensitive columns */}
             {anyConfirmedSensitive && (
@@ -900,10 +900,10 @@ export default function DataAuditPage() {
 
             {/* Cross-links to DPIA and FRIA */}
             <div className="flex gap-3 flex-wrap">
-              <Link href="/dashboard/tools/dpia" className="inline-flex items-center gap-1 text-[12px] font-medium" style={{ color: T.blue }}>
+              <Link href="/dashboard/tools/dpia" className="inline-flex items-center gap-1 text-[13px] font-medium" style={{ color: T.blue }}>
                 <ExternalLink size={12} /> DPIA — Art. 35 GDPR
               </Link>
-              <Link href="/dashboard/tools/fria" className="inline-flex items-center gap-1 text-[12px] font-medium" style={{ color: T.blue }}>
+              <Link href="/dashboard/tools/fria" className="inline-flex items-center gap-1 text-[13px] font-medium" style={{ color: T.blue }}>
                 <ExternalLink size={12} /> FRIA — Art. 27 AI Act
               </Link>
             </div>
@@ -913,7 +913,7 @@ export default function DataAuditPage() {
 
       {/* Sanctions note */}
       {!sanctionsBannerDismissed && (
-        <div className="flex items-start gap-2 p-3 rounded-lg mb-4 text-xs" style={{ background: "#fef9c3", border: "1px solid #fde047", color: "#713f12" }}>
+        <div className="flex items-start gap-2 p-3 rounded-lg mb-4 text-[11px]" style={{ background: "#fef9c3", border: "1px solid #fde047", color: "#713f12" }}>
           <Info size={14} className="mt-0.5 flex-shrink-0" />
           <span style={{ flex: 1 }} dangerouslySetInnerHTML={{ __html: t("sanctions") }} />
           <button
@@ -932,18 +932,13 @@ export default function DataAuditPage() {
         <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>{t("evidenceStatement")}</h2>
         <p className="text-[11px] mb-3" style={{ color: T.muted }}>{t("evidenceStatementDesc")}</p>
         <div className="flex flex-wrap gap-2">
-          <button onClick={() => exportDataGovernanceJSON(record)}
-            className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg"
-            style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
-            <FileText size={13} /> {t("exportJson")}
-          </button>
           <button onClick={() => window.print()}
-            className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg"
+            className="flex items-center gap-1.5 text-[13px] font-medium px-3 py-1.5 rounded-lg"
             style={{ background: "#fff", color: T.text, border: `1px solid ${T.border}`, cursor: "pointer" }}>
             <FileText size={13} /> {t("printPdf")}
           </button>
           <button onClick={sendToDocuGen} disabled={record.datasets.length === 0}
-            className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg"
+            className="flex items-center gap-1.5 text-[13px] font-medium px-3 py-1.5 rounded-lg"
             style={{ background: "#fff", color: T.text, border: `1px solid ${T.border}`, cursor: "pointer", opacity: record.datasets.length === 0 ? 0.5 : 1 }}>
             <ExternalLink size={13} /> {t("sendToDocuGen")}
           </button>
@@ -953,7 +948,7 @@ export default function DataAuditPage() {
       {/* Save */}
       <div className="flex justify-end">
         <button onClick={saveToDossier}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[12px] font-medium"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13px] font-medium"
           style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
           <CheckCircle2 className="h-3.5 w-3.5" /> {t("saveToDossier")}
         </button>
@@ -961,7 +956,7 @@ export default function DataAuditPage() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg"
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-[13px] font-medium shadow-lg"
           style={{ background: T.text, color: "#fff" }}>
           ✓ {toast}
         </div>

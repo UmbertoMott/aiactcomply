@@ -57,7 +57,7 @@ const PHASES: Phase[] = [
   { id: "gap_check",      label: "7. Gap Check Art. 9",          subtitle: "§6 verifica di copertura",       article: "Art. 9(2)(a)-(d), 9(6)-(9)", docSection: "§6" },
   { id: "traceability",   label: "8. Tracciabilità",             subtitle: "§7 versionamento e QMS",         article: "Art. 9(1)-(2)",           supportRef: "Art. 12, 17",            docSection: "§7" },
   { id: "dismissal",      label: "9. Dismissione / Ritiro",      subtitle: "§8 rischi di fine vita",         article: "Art. 9",                  supportRef: "ISO 23894 Annex C",                                           docSection: "§8" },
-  { id: "signoff",        label: "10. Approvazione e Firme",     subtitle: "§9 sign-off finale",             article: "Art. 9(1) + 9(10)",      docSection: "§9" },
+  { id: "signoff",        label: "10. Approvazione e Firme",     subtitle: "§9 sign-off finale",             article: "Art. 9(1)",               docSection: "§9" },
   { id: "communication",  label: "11. Comunicazione",            subtitle: "Trasversale — ISO 23894 §6.2",  article: "ISO 23894 §6.2",                                               docSection: "Trasversale" },
 ];
 
@@ -106,42 +106,42 @@ const PHASE_GUIDES: Partial<Record<RiskPhaseId, PhaseGuide>> = {
     starters: ["Quante persone sono impattate mensilmente?", "Quali usi impropri sono prevedibili?", "Il rischio rientra nel risk appetite aziendale?"],
   },
   testing: {
-    goal: "Definisci metriche di accuratezza/fairness, soglie accettabili e criteri di rilascio in produzione (Art. 9(8)).",
+    goal: "Indica come è stato verificato che il sistema funzioni bene e tratti tutti in modo equo, e quali risultati minimi servono prima di usarlo (Art. 9(8)).",
     examples: [
-      { label: "Metriche definite", text: "Accuratezza ≥90%, Disparate Impact ≥0.8, test su dataset validation set hold-out 20%." },
-      { label: "Soglia non rispettata", text: "Il DI score è 0.72 — sotto soglia. Il modello non può essere rilasciato senza debiasing." },
+      { label: "Verifiche superate", text: "Il fornitore ha testato il sistema su casi reali: risponde correttamente in almeno 9 casi su 10 e i risultati sono simili per uomini e donne." },
+      { label: "Risultato insufficiente", text: "Nei test il sistema scarta più spesso i candidati stranieri. Non lo usiamo finché il fornitore non corregge il problema." },
     ],
-    starters: ["Quali metriche di fairness sono state usate?", "Il modello ha superato il test su dataset di validazione?", "Qual è la soglia di accuratezza minima accettabile?"],
+    starters: ["Come è stato verificato che il sistema tratti tutti in modo equo?", "Il sistema ha superato i test prima dell'uso?", "Qual è il livello minimo di correttezza accettabile?"],
   },
   mitigation: {
     goal: "Scegli l'opzione di trattamento (Modifica/Evitamento/Condivisione/Ritenzione) e definisci le misure concrete seguendo la gerarchia Art. 9(5).",
     examples: [
-      { label: "Design-mitigation", text: "Eliminazione feature proxy (cap_residenza) dal dataset. Retraining con CTGAN debiasing. Testing fairness post-modifica." },
+      { label: "Modifica del sistema", text: "Il CAP di residenza non viene più usato per valutare i candidati, perché può portare a discriminazioni. Dopo la modifica il sistema è stato ricontrollato." },
       { label: "Controllo", text: "Revisione umana obbligatoria per i 20 candidati con score più vicino alla soglia di esclusione." },
     ],
     starters: ["Quale opzione di trattamento è stata scelta?", "Quali misure tecniche sono state adottate?", "Chi è il responsabile delle misure di mitigazione?"],
   },
   monitoring: {
-    goal: "Definisci frequenza monitoraggio, soglia PSI per drift detection e trigger di revisione del risk register.",
+    goal: "Indica ogni quanto si controlla che il sistema continui a funzionare bene e quali segnali fanno scattare una revisione del registro.",
     examples: [
-      { label: "PSI stabile", text: "PSI < 0.1 — modello stabile. Monitoraggio mensile automatico via pipeline Airflow." },
-      { label: "Trigger revisione", text: "PSI > 0.2 rilevato dopo aggiornamento dataset: revisione urgente avviata, modello sospeso temporaneamente." },
+      { label: "Controllo regolare", text: "Ogni mese il responsabile verifica a campione i risultati del sistema e segnala eventuali errori o reclami ricevuti." },
+      { label: "Revisione straordinaria", text: "Dopo un aggiornamento del fornitore i risultati sono peggiorati: abbiamo sospeso l'uso del sistema e avviato una revisione." },
     ],
-    starters: ["Qual è la frequenza di monitoraggio pianificata?", "È stato definito il PSI threshold?", "Cosa scatena una revisione straordinaria del risk register?"],
+    starters: ["Ogni quanto viene controllato il sistema?", "Quali segnali fanno scattare un controllo straordinario?", "Cosa provoca una revisione del registro dei rischi?"],
   },
   gap_check: {
-    goal: "Verifica che tutti i requisiti Art. 9(2)(a)-(d) + (6)-(9) siano coperti. Assegna un coverage score 0-100 e identifica le aree mancanti.",
+    goal: "Verifica che tutti i requisiti dell'Art. 9 siano coperti e indica cosa manca ancora.",
     examples: [
-      { label: "Copertura alta", text: "Coverage score: 85/100. Area mancante: Art. 9(9) impatto gruppi vulnerabili non ancora documentato." },
+      { label: "Quasi completo", text: "Quasi tutti i punti sono coperti. Manca ancora la valutazione dell'impatto su minori e persone vulnerabili (Art. 9(9))." },
       { label: "Gap critico", text: "Art. 9(2)(c) monitoraggio post-market non definito — gap obbligatorio da colmare prima del deployment." },
     ],
-    starters: ["Qual è il coverage score stimato?", "Quali requisiti Art. 9 non sono ancora coperti?", "Ci sono gap obbligatori da colmare prima del rilascio?"],
+    starters: ["Quanto è completo il registro, secondo te?", "Quali requisiti dell'Art. 9 non sono ancora coperti?", "Ci sono lacune da colmare prima dell'uso?"],
   },
   traceability: {
-    goal: "Definisci la policy di versionamento del risk register, il periodo di retention dei log (Art. 12) e l'integrazione con il QMS aziendale (Art. 17).",
+    goal: "Definisci la policy di versionamento del risk register, il periodo di conservazione dei log (Art. 19(1) / Art. 26(6)) e l'integrazione con il QMS aziendale (Art. 17).",
     examples: [
-      { label: "Versionamento attivo", text: "Versione v1.0 approvata. Log automatici via Git. Retention 5 anni. Integrato nel QMS ISO 9001." },
-      { label: "Nessun QMS", text: "Il sistema di gestione rischi è standalone — non integrato in un QMS formale. Raccomandato allineamento Art. 17." },
+      { label: "Versioni tracciate", text: "Versione 1.0 approvata il 10/03/2026. Ogni modifica viene registrata con data e autore. I registri si conservano per 5 anni nel sistema qualità aziendale." },
+      { label: "Nessun sistema qualità", text: "Il registro dei rischi è gestito a parte e non rientra in un sistema di gestione della qualità. Va collegato (Art. 17)." },
     ],
     starters: ["Il risk register è integrato nel QMS aziendale?", "Qual è la policy di retention dei log?", "Come vengono tracciate le versioni del registro?"],
   },
@@ -156,8 +156,8 @@ const PHASE_GUIDES: Partial<Record<RiskPhaseId, PhaseGuide>> = {
   signoff: {
     goal: "Raccogli i nominativi per il sign-off (risk owner, compliance/legale, rappresentante legale) e la valutazione complessiva del rischio.",
     examples: [
-      { label: "Approvazione completa", text: "Risk owner: Mario Rossi (CTO). Compliance: Avv. Anna Bianchi. Overall risk: MEDIO — accettabile con misure in vigore." },
-      { label: "Approvazione condizionata", text: "Approvazione condizionata: deployment autorizzato solo dopo completamento del debiasing (entro 30/09/2026)." },
+      { label: "Approvazione completa", text: "Responsabile del rischio: Mario Rossi (CTO). Compliance: Avv. Anna Bianchi. Rischio complessivo: medio, accettabile con le misure in vigore." },
+      { label: "Approvazione condizionata", text: "Uso autorizzato solo dopo che il fornitore avrà corretto le disparità di trattamento emerse nei test (entro il 30/09/2026)." },
     ],
     starters: ["Chi è il risk owner del sistema?", "Qual è la valutazione complessiva del rischio (overall risk)?", "C'è un'approvazione condizionata con azioni pendenti?"],
   },
@@ -268,7 +268,7 @@ function PhaseRow({
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
-            fontSize: 11.5, fontWeight: 600,
+            fontSize: 11, fontWeight: 600,
             fontFamily: "inherit",
             color: status === "complete" ? "#15803d" : "#0D1016",
             whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
@@ -276,15 +276,15 @@ function PhaseRow({
             {phase.label}
           </div>
           <div style={{
-            fontSize: 10, fontFamily: "inherit",
-            color: "rgba(0,0,0,0.4)",
+            fontSize: 11, fontFamily: "inherit",
+            color: "#0D1016",
             whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
           }}>
             {phase.subtitle}
           </div>
         </div>
         {hasData && (
-          <ChevronRight size={11} style={{ flexShrink: 0, color: "rgba(0,0,0,0.25)" }} />
+          <ChevronRight size={11} style={{ flexShrink: 0, color: "#0D1016" }} />
         )}
       </button>
     </div>
@@ -304,9 +304,9 @@ const SECTION_ANCHORS: Record<string, string> = {
 const SECTION_LEGAL_REFS: Record<string, string> = {
   identification: "Art. 9(2)(a)",
   risks:          "Art. 9(2)(b)",
-  gapCheck:       "Art. 9(2)(c)",
-  reviewLog:      "Art. 9(7)",
-  signOff:        "Art. 9(9)",
+  gapCheck:       "Art. 9(2)",
+  reviewLog:      "Art. 9(2)",
+  signOff:        "Art. 9(1)",
 };
 
 function SectionRow({ section, onOpen, index }: { section: SectionProgress; onOpen: (anchor: string) => void; index: number }) {
@@ -334,12 +334,12 @@ function SectionRow({ section, onOpen, index }: { section: SectionProgress; onOp
           <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {index + 1}. {section.label}
           </p>
-          <p style={{ fontSize: 9, color: "rgba(0,0,0,0.42)", margin: 0, marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <p style={{ fontSize: 11, color: "#0D1016", margin: 0, marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {doneCount}/{section.subPoints.length} · {legalRef}
           </p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <span style={{ fontSize: 9.5, fontWeight: 700, color: pctColor, fontFamily: "var(--font-mono)" }}>{section.percent}%</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: pctColor, fontFamily: "var(--font-mono)" }}>{section.percent}%</span>
           <ChevronRight size={10} style={{ color: "rgba(0,0,0,0.22)", transform: expanded ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
         </div>
       </button>
@@ -349,12 +349,12 @@ function SectionRow({ section, onOpen, index }: { section: SectionProgress; onOp
       {expanded && section.subPoints.length > 0 && (
         <div style={{ borderTop: "1px solid rgba(0,0,0,0.05)", padding: "4px 6px 6px 6px" }}>
           {section.subPoints.map((sp, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 4px", borderRadius: 5 }}>
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 4px", borderRadius: 4 }}>
               <div style={{ flexShrink: 0 }}>
                 <div style={{ width: 10, height: 10, borderRadius: "50%", border: `1.5px solid ${sp.done ? "#23403a" : "#dc2626"}` }} />
               </div>
               <p style={{
-                fontSize: 10, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                fontSize: 11, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                 color: sp.done ? "rgba(0,0,0,0.42)" : "#0D1016",
                 textDecoration: sp.done ? "line-through" : "none",
                 opacity: sp.done ? 0.55 : 1,
@@ -385,14 +385,14 @@ class ViewerErrorBoundary extends React.Component<
   render() {
     if (this.state.error) {
       return (
-        <div style={{ height: "100%", display: "flex", flexDirection: "column", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, overflow: "hidden", background: "#ffffff" }}>
-          <div style={{ padding: "8px 12px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "#fafafa", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: "#991b1b" }}>Errore visualizzazione documento</span>
-            <button onClick={this.props.onClose} style={{ fontSize: 12, background: "none", border: "none", cursor: "pointer", color: "rgba(0,0,0,0.4)" }}>✕</button>
+        <div style={{ height: "100%", display: "flex", flexDirection: "column", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden", background: "#ffffff" }}>
+          <div style={{ padding: "8px 12px", borderBottom: "1px solid rgba(0,0,0,0.08)", background: "#FAFAF9", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: "#991b1b" }}>Errore visualizzazione documento</span>
+            <button onClick={this.props.onClose} style={{ fontSize: 13, background: "none", border: "none", cursor: "pointer", color: "#0D1016" }}>✕</button>
           </div>
           <div style={{ flex: 1, padding: 20, display: "flex", flexDirection: "column", gap: 8 }}>
-            <p style={{ fontSize: 12, color: "#991b1b", margin: 0, fontFamily: "var(--font-mono)", background: "#FEE2E2", padding: "8px 12px", borderRadius: 6 }}>{this.state.error}</p>
-            <p style={{ fontSize: 11, color: "rgba(0,0,0,0.45)", margin: 0 }}>Ricarica la pagina o resetta la conversazione per ripristinare.</p>
+            <p style={{ fontSize: 13, color: "#991b1b", margin: 0, fontFamily: "var(--font-mono)", background: "#FEE2E2", padding: "8px 12px", borderRadius: 6 }}>{this.state.error}</p>
+            <p style={{ fontSize: 11, color: "#0D1016", margin: 0 }}>Ricarica la pagina o resetta la conversazione per ripristinare.</p>
           </div>
         </div>
       );
@@ -479,7 +479,7 @@ function PhaseDocColumn({
     background: "#ffffff",
     borderRadius: 4,
     border: editing ? "1px solid rgba(13,16,22,0.35)" : "1px solid rgba(0,0,0,0.08)",
-    boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
+    boxShadow: "none",
     padding: "28px 32px",
     fontFamily: "Georgia, 'Times New Roman', serif",
     flex: 1,
@@ -489,18 +489,18 @@ function PhaseDocColumn({
 
   const docHeader = (
     <div data-noedit="true" style={{ marginBottom: 20, paddingBottom: 14, borderBottom: "2px solid #0D1016", fontFamily: "inherit" }}>
-      <p style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.38)", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px" }}>
+      <p style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px" }}>
         Art. 9 · Reg. UE 2024/1689 — Sistema di gestione dei rischi
       </p>
-      <h1 style={{ fontSize: 17, fontWeight: 700, color: "#0D1016", margin: "0 0 6px", fontFamily: "inherit" }}>
+      <h1 style={{ fontSize: 15, fontWeight: 700, color: "#0D1016", margin: "0 0 6px", fontFamily: "inherit" }}>
         Registro dei Rischi{registerDoc.identification.systemName ? ` — ${registerDoc.identification.systemName}` : ""}
       </h1>
     </div>
   );
 
   const docFooter = (
-    <div style={{ borderTop: "1px solid rgba(0,0,0,0.12)", marginTop: 20, paddingTop: 8 }}>
-      <p style={{ fontSize: 9, color: "rgba(0,0,0,0.4)", fontStyle: "italic", margin: 0 }}>
+    <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)", marginTop: 20, paddingTop: 8 }}>
+      <p style={{ fontSize: 11, color: "#0D1016", fontStyle: "italic", margin: 0 }}>
         Generato da RegulaeOS · {new Date().toLocaleDateString("it-IT")} ·
       </p>
     </div>
@@ -509,16 +509,16 @@ function PhaseDocColumn({
   return (
     <div style={{
       height: "100%", display: "flex", flexDirection: "column",
-      border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10,
+      border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8,
       overflow: "hidden", background: "#ffffff", minWidth: 0,
     }}>
       {/* Header colonna */}
-      <div style={{ padding: "8px 12px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "#fafafa", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+      <div style={{ padding: "8px 12px", borderBottom: "1px solid rgba(0,0,0,0.08)", background: "#FAFAF9", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
         <div style={{ minWidth: 0, flex: 1 }}>
-          <p style={{ fontSize: 9, fontWeight: 600, color: "rgba(0,0,0,0.35)", letterSpacing: "0.8px", textTransform: "uppercase", margin: 0 }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", letterSpacing: "0.8px", textTransform: "uppercase", margin: 0 }}>
             Art. 9 · Documento
           </p>
-          <p style={{ fontSize: 12, fontWeight: 700, color: "#0D1016", margin: "1px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: "#0D1016", margin: "1px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             Registro dei Rischi
           </p>
         </div>
@@ -545,10 +545,10 @@ function PhaseDocColumn({
           onClick={onClose}
           title="Chiudi documento"
           style={{
-            flexShrink: 0, width: 24, height: 24, borderRadius: 12,
+            flexShrink: 0, width: 24, height: 24, borderRadius: 8,
             background: "rgba(0,0,0,0.05)", border: "none", cursor: "pointer",
             display: "flex", alignItems: "center", justifyContent: "center",
-            color: "rgba(0,0,0,0.45)", fontSize: 12,
+            color: "#0D1016", fontSize: 13,
           }}
           onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.1)")}
           onMouseLeave={e => (e.currentTarget.style.background = "rgba(0,0,0,0.05)")}
@@ -558,7 +558,7 @@ function PhaseDocColumn({
       </div>
 
       {/* Corpo — pagina stile documento */}
-      <div ref={scrollContainerRef} style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#FAFAFA", display: "flex", flexDirection: "column" }}>
+      <div ref={scrollContainerRef} style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#FAFAF9", display: "flex", flexDirection: "column" }}>
         {editing ? (
           /* Modalità modifica: contentEditable puro, nessun componente React dentro */
           <div style={docStyle}>
@@ -607,13 +607,13 @@ function ChatBubble({ message, index, onSpeak, isPlaying }: {
           fontSize: 13, lineHeight: 1.55,
           background: isUser ? "#0D1016" : "#f5f5f4",
           color: isUser ? "#ffffff" : "#0D1016",
-          border: isUser ? "none" : "1px solid rgba(0,0,0,0.07)",
+          border: isUser ? "none" : "1px solid rgba(0,0,0,0.08)",
         }}>
           {!isUser && (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                 <Shield size={10} style={{ color: "#0D1016" }} />
-                <span style={{ fontSize: 9, color: "#0D1016", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                <span style={{ fontSize: 11, color: "#0D1016", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
                   Assistente del registro dei rischi
                 </span>
               </div>
@@ -623,7 +623,7 @@ function ChatBubble({ message, index, onSpeak, isPlaying }: {
                 style={{
                   display: "flex", alignItems: "center", gap: 5,
                   padding: "3px 10px", marginLeft: 8,
-                  fontSize: 10, fontWeight: 500,
+                  fontSize: 11, fontWeight: 500,
                   borderRadius: 20, cursor: "pointer",
                   background: isPlaying ? "#0D1016" : "rgba(0,0,0,0.05)",
                   color: isPlaying ? "#ffffff" : "rgba(0,0,0,0.45)",
@@ -723,12 +723,12 @@ ${sections.map(s => `<h2>${s.title}</h2><p>${s.content.replace(/\n/g, "<br>")}</
     <div ref={ref} style={{ position: "relative" }}>
       <button
         onClick={() => setOpen(o => !o)}
-        style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, padding: "6px 12px", borderRadius: 20, background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.6)", border: "none", cursor: "pointer" }}
+        style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, padding: "6px 12px", borderRadius: 20, background: "rgba(0,0,0,0.06)", color: "#0D1016", border: "none", cursor: "pointer" }}
       >
         <Download size={12} /> Esporta <ChevronDown size={10} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
       </button>
       {open && (
-        <div style={{ position: "absolute", right: 0, top: "calc(100% + 4px)", background: "#ffffff", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.08)", zIndex: 50, minWidth: 160, overflow: "hidden" }}>
+        <div style={{ position: "absolute", right: 0, top: "calc(100% + 4px)", background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.08)", zIndex: 50, minWidth: 160, overflow: "hidden" }}>
           {[
             { label: "PDF", icon: "📄", action: exportPDF },
             { label: "Word (.doc)", icon: "📝", action: exportWord },
@@ -737,7 +737,7 @@ ${sections.map(s => `<h2>${s.title}</h2><p>${s.content.replace(/\n/g, "<br>")}</
             <button
               key={item.label}
               onClick={item.action}
-              style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "9px 14px", fontSize: 12, color: "#0D1016", background: "transparent", border: "none", cursor: "pointer", textAlign: "left" }}
+              style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "9px 14px", fontSize: 13, color: "#0D1016", background: "transparent", border: "none", cursor: "pointer", textAlign: "left" }}
               onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.04)")}
               onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
             >
@@ -797,14 +797,9 @@ export default function RiskManagerPage() {
   const [viewerAnchor, setViewerAnchor] = useState<string | null>(null);
   const [showPhaseGuide, setShowPhaseGuide] = useState(true);
   const [customPhrase, setCustomPhrase] = useState("");
-  // Modalità guidata come ingresso, come DPIA e FRIA; la scelta viene ricordata
-  const [guidedMode, setGuidedModeState] = useState(() => {
-    try { return localStorage.getItem("aicomply_risk_view") !== "form"; } catch { return true; }
-  });
-  const setGuidedMode = (v: boolean) => {
-    setGuidedModeState(v);
-    try { localStorage.setItem("aicomply_risk_view", v ? "guided" : "form"); } catch { /* storage non disponibile */ }
-  };
+  // Si entra sempre nella procedura guidata, come DPIA e FRIA; il modulo completo si apre
+  // solo dal link "Modifica tutte le risposte" (la vecchia scelta salvata non conta più)
+  const [guidedMode, setGuidedMode] = useState(true);
   const layoutRef = useRef<HTMLDivElement>(null);
 
   // Apre il documento e scrolla alla sezione richiesta
@@ -995,8 +990,7 @@ export default function RiskManagerPage() {
     setInput("");
   };
 
-  if (!hydrated) return null;
-
+  // La procedura guidata non dipende dallo stato della chat: si mostra subito
   if (guidedMode) {
     return (
       <div style={{ fontFamily: "inherit", background: "#ffffff", height: "calc(100vh - 4rem)", display: "flex", flexDirection: "column" }}>
@@ -1005,6 +999,16 @@ export default function RiskManagerPage() {
         <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
           <RiskRegisterGuidedMode onExitGuidedMode={() => setGuidedMode(false)} />
         </div>
+      </div>
+    );
+  }
+
+  // Modulo completo: finché lo stato salvato non è caricato mostra un segnaposto leggero
+  // (non una pagina vuota)
+  if (!hydrated) {
+    return (
+      <div style={{ fontFamily: "inherit", background: "#ffffff", height: "calc(100vh - 4rem)", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, color: "#0D1016", fontSize: 13 }}>
+        <Loader2 size={14} className="animate-spin" /> Caricamento del registro dei rischi…
       </div>
     );
   }
@@ -1021,13 +1025,13 @@ export default function RiskManagerPage() {
       <div style={{ paddingBottom: 16 }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginTop: 12 }}>
           <div>
-            <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.3)", letterSpacing: "1.2px", textTransform: "uppercase", marginBottom: 4 }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", letterSpacing: "1.2px", textTransform: "uppercase", marginBottom: 4 }}>
               Art. 9 · Reg. UE 2024/1689
             </p>
             <h1 style={{ fontSize: 24, fontWeight: 500, color: "#0D1016", letterSpacing: "-0.8px", margin: 0 }}>
               Registro dei rischi
             </h1>
-            <p style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", marginTop: 4 }}>
+            <p style={{ fontSize: 13, color: "#0D1016", marginTop: 4 }}>
               {t("subtitle")}
             </p>
           </div>
@@ -1035,38 +1039,24 @@ export default function RiskManagerPage() {
             {hasContent && <ExportMenu documentation={documentation} systemName={systemContext.systemName} />}
             <button
               onClick={resetChat}
-              style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, padding: "6px 12px", borderRadius: 20, background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.4)", border: "1px solid rgba(0,0,0,0.07)", cursor: "pointer" }}
+              style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, padding: "6px 12px", borderRadius: 20, background: "rgba(0,0,0,0.04)", color: "#0D1016", border: "1px solid rgba(0,0,0,0.08)", cursor: "pointer" }}
             >
               <RotateCcw size={12} /> {t("reset")}
             </button>
           </div>
         </div>
 
-        {/* Tab switcher: Form completo / Risk Register guidato */}
-        <div style={{ display: "flex", gap: 0, borderBottom: "1px solid rgba(0,0,0,0.08)", marginTop: 8 }}>
-          <button
-            onClick={() => setGuidedMode(false)}
-            style={{
-              padding: "8px 16px", fontSize: 12, fontWeight: !guidedMode ? 700 : 500,
-              color: !guidedMode ? "#0D1016" : "rgba(0,0,0,0.42)",
-              background: "none", border: "none", cursor: "pointer",
-              borderBottom: !guidedMode ? "2px solid #0D1016" : "2px solid transparent",
-              marginBottom: -1,
-            }}
-          >
-            {t("tabStructured")}
-          </button>
+        {/* Ritorno alla procedura guidata (unica modalità principale) */}
+        <div style={{ marginTop: 8 }}>
           <button
             onClick={() => setGuidedMode(true)}
             style={{
-              padding: "8px 16px", fontSize: 12, fontWeight: guidedMode ? 700 : 500,
-              color: guidedMode ? "#0D1016" : "rgba(0,0,0,0.42)",
+              padding: 0, fontSize: 11, color: "#0D1016",
               background: "none", border: "none", cursor: "pointer",
-              borderBottom: guidedMode ? "2px solid #0D1016" : "2px solid transparent",
-              marginBottom: -1,
+              textDecoration: "underline", textUnderlineOffset: 2,
             }}
           >
-            {t("tabGuided")}
+            ← {t("backToGuided")}
           </button>
         </div>
       </div>
@@ -1075,10 +1065,10 @@ export default function RiskManagerPage() {
       <div ref={layoutRef} style={{ display: "flex", flex: 1, minHeight: 0, gap: 12, overflow: "hidden" }}>
 
         {/* LEFT — progress */}
-        <div style={{ width: 256, flexShrink: 0, display: "flex", flexDirection: "column", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, overflow: "hidden", background: "#fafafa" }}>
-          <div style={{ padding: "12px 12px 10px", borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+        <div style={{ width: 256, flexShrink: 0, display: "flex", flexDirection: "column", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden", background: "#FAFAF9" }}>
+          <div style={{ padding: "12px 12px 10px", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-              <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                 {t("progress")}
               </span>
               <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", fontFamily: "var(--font-mono)" }}>
@@ -1098,12 +1088,12 @@ export default function RiskManagerPage() {
           </div>
 
           {/* Footer sidebar: verifica legale + nota Art. 99-101 (non interattiva) */}
-          <div style={{ padding: "8px 12px", borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", gap: 5 }}>
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 6, fontSize: 9, color: "rgba(0,0,0,0.35)" }}>
+          <div style={{ padding: "8px 12px", borderTop: "1px solid rgba(0,0,0,0.08)", display: "flex", flexDirection: "column", gap: 5 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 6, fontSize: 11, color: "#0D1016" }}>
               <AlertTriangle size={10} style={{ flexShrink: 0, marginTop: 1, color: "#b45309" }} />
               <span>{t("aiFieldsVerify")}</span>
             </div>
-            <div style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", lineHeight: 1.4, paddingTop: 3, borderTop: "1px solid rgba(0,0,0,0.05)" }}>
+            <div style={{ fontSize: 11, color: "#0D1016", lineHeight: 1.4, paddingTop: 3, borderTop: "1px solid rgba(0,0,0,0.05)" }}>
               {t("art9Sanctions")}
             </div>
           </div>
@@ -1130,7 +1120,7 @@ export default function RiskManagerPage() {
               style={{
                 width: 6, flexShrink: 0, cursor: "col-resize",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                borderRadius: 3,
+                borderRadius: 4,
                 background: isResizing ? "rgba(0,0,0,0.12)" : "transparent",
                 transition: isResizing ? "none" : "background 0.15s",
               }}
@@ -1143,18 +1133,18 @@ export default function RiskManagerPage() {
         )}
 
         {/* RIGHT — chat */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, overflow: "hidden", minWidth: 0 }}>
-          <div style={{ padding: "8px 16px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "#f5f5f4", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden", minWidth: 0 }}>
+          <div style={{ padding: "8px 16px", borderBottom: "1px solid rgba(0,0,0,0.08)", background: "#f5f5f4", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#0D1016" }} />
-            <span style={{ fontSize: 12, fontWeight: 700, color: "#0D1016" }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: "#0D1016" }}>
               {t("currentPhase")} {t(`phase_${PHASES[currentPhaseIndex]?.id}_label`)}
             </span>
-            <span style={{ fontSize: 11, color: "rgba(0,0,0,0.45)" }}>
+            <span style={{ fontSize: 11, color: "#0D1016" }}>
               — {PHASES[currentPhaseIndex]?.article}
             </span>
             <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4 }}>
-              <FileText size={10} style={{ color: "rgba(0,0,0,0.25)" }} />
-              <span style={{ fontSize: 9, color: "rgba(0,0,0,0.25)" }}>{t("audioAvailable")}</span>
+              <FileText size={10} style={{ color: "#0D1016" }} />
+              <span style={{ fontSize: 11, color: "#0D1016" }}>{t("audioAvailable")}</span>
             </div>
           </div>
 
@@ -1163,21 +1153,21 @@ export default function RiskManagerPage() {
             const guide = PHASE_GUIDES[PHASES[currentPhaseIndex]?.id as RiskPhaseId];
             if (!guide) return null;
             return (
-              <div style={{ borderBottom: "1px solid rgba(0,0,0,0.06)", background: "#fafafa", flexShrink: 0 }}>
+              <div style={{ borderBottom: "1px solid rgba(0,0,0,0.08)", background: "#FAFAF9", flexShrink: 0 }}>
                 <button
                   onClick={() => setShowPhaseGuide(v => !v)}
                   style={{
                     width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
                     padding: "8px 16px", background: "transparent", border: "none", cursor: "pointer",
-                    fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.45)",
+                    fontSize: 11, fontWeight: 600, color: "#0D1016",
                   }}
                 >
                   <span>{t("phaseGuide")} · {t(`phase_${PHASES[currentPhaseIndex]?.id}_label`)}</span>
-                  <span style={{ fontSize: 10 }}>{showPhaseGuide ? "▲" : "▼"}</span>
+                  <span style={{ fontSize: 11 }}>{showPhaseGuide ? "▲" : "▼"}</span>
                 </button>
                 {showPhaseGuide && (
                   <div style={{ padding: "0 16px 12px" }}>
-                    <p style={{ fontSize: 11, color: "rgba(0,0,0,0.55)", margin: "0 0 8px", lineHeight: 1.5 }}>
+                    <p style={{ fontSize: 11, color: "#0D1016", margin: "0 0 8px", lineHeight: 1.5 }}>
                       {guide.goal}
                     </p>
                     {/* Starter questions */}
@@ -1187,7 +1177,7 @@ export default function RiskManagerPage() {
                           key={i}
                           onClick={() => setInput(s)}
                           style={{
-                            fontSize: 10, padding: "4px 10px", borderRadius: 20,
+                            fontSize: 11, padding: "4px 10px", borderRadius: 20,
                             background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.08)",
                             color: "#0D1016", cursor: "pointer", fontWeight: 500,
                           }}
@@ -1203,8 +1193,8 @@ export default function RiskManagerPage() {
                           key={i}
                           onClick={() => setInput(ex.text)}
                           style={{
-                            fontSize: 10, padding: "4px 10px", borderRadius: 20,
-                            background: "rgba(13,16,22,0.06)", border: "1px solid rgba(0,0,0,0.10)",
+                            fontSize: 11, padding: "4px 10px", borderRadius: 20,
+                            background: "rgba(13,16,22,0.06)", border: "1px solid rgba(0,0,0,0.08)",
                             color: "#0D1016", cursor: "pointer", textAlign: "left", fontWeight: 500,
                           }}
                           title={ex.text}
@@ -1227,7 +1217,7 @@ export default function RiskManagerPage() {
                         placeholder={t("customAnswerPh")}
                         style={{
                           flex: 1, fontSize: 11, padding: "6px 10px", borderRadius: 8,
-                          border: "1px solid rgba(0,0,0,0.10)", outline: "none",
+                          border: "1px solid rgba(0,0,0,0.08)", outline: "none",
                           background: "#fff", color: "#0D1016",
                         }}
                       />
@@ -1235,7 +1225,7 @@ export default function RiskManagerPage() {
                         <button
                           onClick={() => { setInput(customPhrase.trim()); setCustomPhrase(""); }}
                           style={{
-                            fontSize: 10, fontWeight: 700, padding: "5px 10px", borderRadius: 8,
+                            fontSize: 11, fontWeight: 700, padding: "5px 10px", borderRadius: 8,
                             background: "#0D1016", color: "#fff", border: "none", cursor: "pointer",
                           }}
                         >
@@ -1258,16 +1248,16 @@ export default function RiskManagerPage() {
             ))}
             {isLoading && (
               <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10 }}>
-                <div style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)", borderRadius: "14px 14px 14px 4px", padding: "10px 14px", display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.08)", borderRadius: "14px 14px 14px 4px", padding: "10px 14px", display: "flex", alignItems: "center", gap: 8 }}>
                   <Loader2 size={13} style={{ color: "#0D1016", animation: "spin 1s linear infinite" }} />
-                  <span style={{ fontSize: 12, color: "rgba(0,0,0,0.4)" }}>{t("analyzing")}</span>
+                  <span style={{ fontSize: 13, color: "#0D1016" }}>{t("analyzing")}</span>
                 </div>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
-          <div style={{ padding: "12px 16px", borderTop: "1px solid rgba(0,0,0,0.07)", flexShrink: 0 }}>
+          <div style={{ padding: "12px 16px", borderTop: "1px solid rgba(0,0,0,0.08)", flexShrink: 0 }}>
             <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
               <textarea
                 value={input}
@@ -1277,8 +1267,8 @@ export default function RiskManagerPage() {
                 rows={2}
                 disabled={isLoading}
                 style={{
-                  flex: 1, fontSize: 13, padding: "10px 14px", borderRadius: 10,
-                  border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", resize: "none",
+                  flex: 1, fontSize: 13, padding: "10px 14px", borderRadius: 8,
+                  border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", resize: "none",
                   outline: "none", fontFamily: "inherit",
                   background: "#ffffff", lineHeight: 1.5,
                   opacity: isLoading ? 0.5 : 1,
@@ -1293,14 +1283,14 @@ export default function RiskManagerPage() {
                   flexShrink: 0, width: 40, height: 40,
                   background: (!input.trim() || isLoading) ? "rgba(0,0,0,0.06)" : "#0D1016",
                   color: (!input.trim() || isLoading) ? "rgba(0,0,0,0.25)" : "#ffffff",
-                  border: "none", borderRadius: 10, cursor: (!input.trim() || isLoading) ? "not-allowed" : "pointer",
+                  border: "none", borderRadius: 8, cursor: (!input.trim() || isLoading) ? "not-allowed" : "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.15s",
                 }}
               >
                 <Send size={15} />
               </button>
             </div>
-            <p style={{ fontSize: 10, color: "rgba(0,0,0,0.25)", marginTop: 6 }}>
+            <p style={{ fontSize: 11, color: "#0D1016", marginTop: 6 }}>
               {t("enterHint")}
             </p>
           </div>

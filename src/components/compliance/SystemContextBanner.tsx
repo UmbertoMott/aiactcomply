@@ -63,7 +63,7 @@ export function SystemContextBanner({
       <div style={{
         background: "#FEF2F2",
         border: "1px solid #FECACA",
-        borderRadius: 10,
+        borderRadius: 8,
         padding: "14px 18px",
         display: "flex",
         alignItems: "flex-start",
@@ -72,7 +72,7 @@ export function SystemContextBanner({
       }}>
         <AlertTriangle size={20} color="#DC2626" style={{ flexShrink: 0, marginTop: 2 }} />
         <div>
-          <div style={{ fontWeight: 700, color: "#7F1D1D", fontSize: 14, marginBottom: 4 }}>
+          <div style={{ fontWeight: 700, color: "#7F1D1D", fontSize: 13, marginBottom: 4 }}>
             ⛔ Sistema classificato come pratica vietata (Art. 5)
           </div>
           <div style={{ color: "#991B1B", fontSize: 13, lineHeight: 1.5 }}>
@@ -94,7 +94,7 @@ export function SystemContextBanner({
         <div style={{
           background: "#F8FAFC",
           border: "1px solid #E2E8F0",
-          borderRadius: 10,
+          borderRadius: 8,
           padding: "14px 18px",
           display: "flex",
           alignItems: "center",
@@ -102,12 +102,12 @@ export function SystemContextBanner({
           marginBottom: 20,
         }}>
           <Info size={18} color="#64748B" style={{ flexShrink: 0 }} />
-          <div style={{ color: "#475569", fontSize: 13, flex: 1 }}>
+          <div style={{ color: "#0D1016", fontSize: 13, flex: 1 }}>
             Completa prima l&apos;<strong>AI Classifier (Art. 6)</strong> per pre-popolare automaticamente
             nome sistema e livello di rischio in questo tool.
           </div>
           <a href="/dashboard/tools/inventory" style={{
-            fontSize: 12,
+            fontSize: 13,
             color: "#3B82F6",
             fontWeight: 600,
             textDecoration: "none",
@@ -126,13 +126,13 @@ export function SystemContextBanner({
 
   // ── Banner 3: coloured — classifier data present ──────────────────────────
   const riskLevel = classifier.riskLevel ?? "Unknown";
-  const colors = RISK_COLORS[riskLevel] ?? { bg: "#F8FAFC", text: "#374151", border: "#E5E7EB" };
+  const colors = RISK_COLORS[riskLevel] ?? { bg: "#F8FAFC", text: "#0D1016", border: "#E5E7EB" };
 
   return (
     <div style={{
       background: colors.bg,
       border: `1px solid ${colors.border}`,
-      borderRadius: 10,
+      borderRadius: 8,
       padding: "12px 18px",
       display: "flex",
       alignItems: "center",

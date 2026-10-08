@@ -8,8 +8,8 @@ import type { DigitalSignature } from "@/types/authorized-rep";
 
 const DK = {
   text: "#0D1016",
-  muted: "rgba(0,0,0,0.40)",
-  faint: "rgba(0,0,0,0.30)",
+  muted: "#0D1016",
+  faint: "#0D1016",
   border: "rgba(0,0,0,0.10)",
   card: "#ffffff",
   card2: "#f3f4f6",
@@ -26,7 +26,7 @@ const DK = {
 
 const inp = {
   width: "100%", padding: "7px 10px", borderRadius: 8,
-  border: `1px solid ${DK.border}`, fontSize: 12,
+  border: `1px solid ${DK.border}`, fontSize: 13,
   color: DK.text, background: DK.card2, outline: "none",
 } as const;
 
@@ -153,14 +153,14 @@ export function DigitalSignaturePad({ mandateId, onSign, disabled }: Props) {
           }}
         />
         {!hasDrawn && (
-          <p style={{ fontSize: 10, color: DK.faint, textAlign: "center", marginTop: 4 }}>
+          <p style={{ fontSize: 11, color: DK.faint, textAlign: "center", marginTop: 4 }}>
             Firma nell&apos;area sopra (opzionale)
           </p>
         )}
       </div>
 
       {/* Legal disclaimer */}
-      <p style={{ fontSize: 10, color: DK.faint, lineHeight: 1.5, margin: 0 }}>
+      <p style={{ fontSize: 11, color: DK.faint, lineHeight: 1.5, margin: 0 }}>
         ⚠ Questa firma digitale NON ha valore legale equiparabile a una firma qualificata eIDAS.
         Firmando, il Rappresentante Autorizzato conferma di aver letto e accettato tutti gli obblighi
         previsti dall&apos;Art. 22 EU AI Act. La firma è accompagnata da timestamp e hash di integrità
@@ -171,7 +171,7 @@ export function DigitalSignaturePad({ mandateId, onSign, disabled }: Props) {
         onClick={handleConfirm}
         disabled={!canSign || signing}
         style={{
-          width: "100%", padding: "9px", borderRadius: 8, fontSize: 12,
+          width: "100%", padding: "9px", borderRadius: 8, fontSize: 13,
           fontWeight: 600, cursor: canSign ? "pointer" : "not-allowed",
           background: canSign ? "#0D1016" : "rgba(0,0,0,0.05)",
           color: canSign ? "#fff" : DK.faint,
@@ -191,15 +191,15 @@ interface ConfirmationProps {
 
 export function SignatureConfirmation({ signature, onRevoke }: ConfirmationProps) {
   return (
-    <div style={{ borderRadius: 10, border: `1px solid ${DK.greenBdr}`, background: DK.greenBg, padding: 14 }}>
+    <div style={{ borderRadius: 8, border: `1px solid ${DK.greenBdr}`, background: DK.greenBg, padding: 14 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-        <p style={{ fontSize: 12, fontWeight: 600, color: DK.green, margin: 0 }}>
+        <p style={{ fontSize: 13, fontWeight: 600, color: DK.green, margin: 0 }}>
           ✓ Mandato firmato digitalmente
         </p>
         {onRevoke && (
           <button
             onClick={onRevoke}
-            style={{ fontSize: 10, color: DK.red, background: "none", border: "none", cursor: "pointer" }}>
+            style={{ fontSize: 11, color: DK.red, background: "none", border: "none", cursor: "pointer" }}>
             Revoca firma
           </button>
         )}
@@ -211,7 +211,7 @@ export function SignatureConfirmation({ signature, onRevoke }: ConfirmationProps
         <p style={{ fontSize: 11, color: DK.muted, margin: 0 }}>
           Data: {new Date(signature.signedAt).toLocaleString("it-IT")}
         </p>
-        <p style={{ fontSize: 9, color: DK.faint, fontFamily: "var(--font-mono)", margin: "4px 0 0",
+        <p style={{ fontSize: 11, color: DK.faint, fontFamily: "var(--font-mono)", margin: "4px 0 0",
           wordBreak: "break-all" }}>
           Hash: {signature.integrityHash}
         </p>

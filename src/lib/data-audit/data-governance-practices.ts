@@ -61,7 +61,7 @@ export const DATA_GOVERNANCE_PRACTICES: readonly DataGovernancePracticeDefinitio
     source: "manual",
     linkedTool: "risk-manager",
     linkedToolPath: "/dashboard/tools/risk-manager",
-    linkedToolLabel: "Risk Manager (step mitigation) — Art. 9",
+    linkedToolLabel: "Gestione dei rischi (mitigazione) — Art. 9",
   },
   {
     id: "data_gaps",
@@ -87,15 +87,15 @@ export const DATA_GOVERNANCE_PRACTICES: readonly DataGovernancePracticeDefinitio
 
 export const SPECIAL_CATEGORIES_MODULE = {
   id: "special_categories",
-  label: "Trattamento di categorie particolari di dati personali per bias detection",
-  primaryReference: "Art. 10(5) [Reg. (UE) 2024/1689]",
+  label: "Trattamento di categorie particolari di dati personali per rilevare distorsioni (bias)",
+  primaryReference: "Art. 4 bis, par. 1 [Reg. (UE) 2024/1689, come modificato dal Reg. (UE) 2026/1744]",
   supportReference: "Art. 9 GDPR [Reg. (UE) 2016/679]",
   description:
-    "Il trattamento di categorie particolari di dati personali ai fini del rilevamento e della correzione di bias è ammesso, nel rispetto dell'Art. 10(5) [Reg. (UE) 2024/1689], con misure tecniche appropriate quali la pseudonimizzazione. Documentare la base giuridica e le garanzie adottate.",
+    "Il trattamento di categorie particolari di dati personali ai fini del rilevamento e della correzione di bias è ammesso, nel rispetto dell'Art. 4 bis, par. 1 [Reg. (UE) 2024/1689, come modificato dal Reg. (UE) 2026/1744], con misure tecniche appropriate quali la pseudonimizzazione. Documentare la base giuridica e le garanzie adottate.",
 } as const;
 
 // Euristica colonne sensibili — solo suggerimento, mai classificazione definitiva.
-// L'utente deve sempre confermare prima che il modulo Art. 10(5) venga attivato.
+// L'utente deve sempre confermare prima che il modulo Art. 4 bis venga attivato.
 export const SENSITIVE_COLUMN_HINTS = [
   "genere", "gender", "sesso", "sex",
   "età", "eta", "age", "data di nascita", "birth",

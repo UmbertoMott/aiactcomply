@@ -27,7 +27,7 @@ const BADGE: Record<SectionStatus, { label: string; cls: string }> = {
   ok:           { label: "✓ Completo",   cls: "text-green-700 bg-green-50 border-green-200" },
   pending:      { label: "In attesa",    cls: "text-amber-700 bg-amber-50 border-amber-200" },
   suspended:    { label: "SOSPESO",      cls: "text-red-700 bg-red-50 border-red-200" },
-  not_required: { label: "Non richiesto", cls: "text-black/50 bg-black/[0.04] border-black/10" },
+  not_required: { label: "Non richiesto", cls: "text-[#0D1016] bg-black/[0.04] border-black/10" },
 };
 
 export function DeployerSection({ artRef, title, status, children, defaultOpen = false }: Props) {
@@ -35,22 +35,22 @@ export function DeployerSection({ artRef, title, status, children, defaultOpen =
   const badge = BADGE[status];
 
   return (
-    <div className={cn("rounded-xl border transition-colors", SECTION_STYLE[status])}>
+    <div className={cn("rounded-lg border transition-colors", SECTION_STYLE[status])}>
       <button
         className="w-full flex items-center justify-between p-4 text-left"
         onClick={() => setOpen(v => !v)}
       >
         <div className="flex items-center gap-2.5">
-          <span className="font-mono text-[10px] text-black/50 bg-black/[0.05] px-1.5 py-0.5 rounded">
+          <span className="font-mono text-[11px] text-[#0D1016] bg-black/[0.05] px-1.5 py-0.5 rounded">
             {artRef}
           </span>
-          <h3 className="text-sm font-medium text-[#0D1016]">{title}</h3>
+          <h3 className="text-[13px] font-medium text-[#0D1016]">{title}</h3>
         </div>
         <div className="flex items-center gap-2">
-          <span className={cn("font-mono text-[10px] px-2 py-0.5 rounded border", badge.cls)}>
+          <span className={cn("font-mono text-[11px] px-2 py-0.5 rounded border", badge.cls)}>
             {badge.label}
           </span>
-          <span className="text-black/40 text-xs">{open ? "▲" : "▼"}</span>
+          <span className="text-[#0D1016] text-[11px]">{open ? "▲" : "▼"}</span>
         </div>
       </button>
       {open && (

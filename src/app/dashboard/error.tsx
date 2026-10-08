@@ -14,17 +14,17 @@ export default function DashboardError({
 
   return (
     <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "inherit" }}>
-      <div style={{ maxWidth: 640, width: "100%", background: "#fff", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 14, padding: 28 }}>
+      <div style={{ maxWidth: 640, width: "100%", background: "#fff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, padding: 28 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
           <span style={{ fontSize: 22 }}>⚠️</span>
-          <h2 style={{ fontSize: 18, fontWeight: 700, color: "#0D1016", margin: 0 }}>Errore nella pagina</h2>
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: "#0D1016", margin: 0 }}>Errore nella pagina</h2>
         </div>
-        <p style={{ fontSize: 13, color: "rgba(0,0,0,0.55)", marginBottom: 14 }}>
+        <p style={{ fontSize: 13, color: "#0D1016", marginBottom: 14 }}>
           Si è verificato un errore durante il caricamento di questo strumento. Dettaglio tecnico:
         </p>
         <pre style={{
-          background: "#0D1016", color: "#f87171", fontSize: 12, lineHeight: 1.5,
-          padding: 14, borderRadius: 10, overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-word", margin: 0,
+          background: "#0D1016", color: "#f87171", fontSize: 13, lineHeight: 1.5,
+          padding: 14, borderRadius: 8, overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-word", margin: 0,
         }}>
           {error?.name}: {error?.message}
           {error?.digest ? `\n\ndigest: ${error.digest}` : ""}

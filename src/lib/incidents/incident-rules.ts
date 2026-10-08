@@ -9,39 +9,48 @@ export interface IncidentCategory {
   deadlineArtRef: string;
 }
 
+// Incidente grave: Art. 3(49), lettere a)-d). Termini: Art. 73(2) 15 giorni; 73(3) 2 giorni per
+// infrazione diffusa (Art. 3(61)) o incidente della lettera b); 73(4) 10 giorni in caso di decesso.
 export const INCIDENT_CATEGORIES: IncidentCategory[] = [
   {
     id: "death",
-    label: "Morte di una persona",
-    articleRef: "Art. 3(49)(d)",
+    label: "Decesso di una persona",
+    articleRef: "Art. 3(49)(a)",
     deadlineDays: 10,
     deadlineArtRef: "Art. 73(4)",
   },
   {
     id: "serious_health",
-    label: "Danno grave e irreversibile alla salute",
+    label: "Gravi danni alla salute di una persona",
     articleRef: "Art. 3(49)(a)",
     deadlineDays: 15,
     deadlineArtRef: "Art. 73(2)",
   },
   {
     id: "critical_infra",
-    label: "Danno grave a infrastrutture critiche",
-    articleRef: "Art. 73(3)",
+    label: "Perturbazione grave e irreversibile della gestione o del funzionamento di infrastrutture critiche",
+    articleRef: "Art. 3(49)(b)",
+    deadlineDays: 2,
+    deadlineArtRef: "Art. 73(3)",
+  },
+  {
+    id: "widespread",
+    label: "Infrazione diffusa (più Stati membri)",
+    articleRef: "Art. 3(61)",
     deadlineDays: 2,
     deadlineArtRef: "Art. 73(3)",
   },
   {
     id: "fundamental_rights",
-    label: "Violazione grave dei diritti fondamentali",
-    articleRef: "Art. 3(49)(b)",
+    label: "Violazione degli obblighi del diritto dell'Unione a tutela dei diritti fondamentali",
+    articleRef: "Art. 3(49)(c)",
     deadlineDays: 15,
     deadlineArtRef: "Art. 73(2)",
   },
   {
     id: "property_env",
-    label: "Danno grave a proprietà o ambiente",
-    articleRef: "Art. 3(49)(c)",
+    label: "Gravi danni alle cose o all'ambiente",
+    articleRef: "Art. 3(49)(d)",
     deadlineDays: 15,
     deadlineArtRef: "Art. 73(2)",
   },

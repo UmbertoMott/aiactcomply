@@ -1,987 +1,432 @@
 "use client";
 
-import { levelLabel } from "@/lib/risk-level-label";
-import React, { useState, useRef, useEffect, useCallback, CSSProperties } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Download, Shield, RefreshCw, AlertTriangle, CheckCircle,
-  ChevronDown, ChevronUp, Info, Upload, FileText, Sparkles, Loader2,
-  Check, ExternalLink, X, Plus, Hash,
-} from "lucide-react";
-import Link from "next/link";
-import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
-import type { LogvaultResult, ClassifierResult } from "@/lib/dossier/storage-schema";
-import { suggestEventSeverity } from "@/app/actions/suggestEventSeverity";
-import { analyzeLogCoverage } from "@/app/actions/logvaultActions";
-import { analyzeLogSet, MAX_LOG_FILE_BYTES, MAX_ENTRIES } from "@/lib/logvault/log-analyzer";
-import {
-  CoverageFillRatePanel, LogQualityCard, IntegrityCard, RetentionPanel, exportLogConformityJSON,
-} from "./LogVaultPanels";
-import { ToolPhaseBar, PhaseHeading, NextPhaseCta, useActivePhase, type ToolPhase, type PhaseStatus } from "@/components/compliance/ToolPhaseBar";
-import { SectionEmptyState } from "@/components/logvault/SectionEmptyState";
+// Registro dei log — Artt. 12, 19 e 26(6) Reg. (UE) 2024/1689
+// Testi verificati sul testo ufficiale IT; non modificati dal Reg. (UE) 2026/1744.
+//
+// Il tool raccoglie la PROVA che il sistema registra gli eventi e che i log
+// sono conservati. RegulaeOS non riceve e non conserva i log: l'eventuale
+// estratto caricato come prova è letto solo nel browser e non viene inviato
+// ai server (se ne salvano solo nome file, numero di voci, periodo e nomi dei campi).
+
+import React, { useEffect, useRef, useState } from "react";
+import { CheckCircle2, Upload, X } from "lucide-react";
+import { INK, LINE, fieldStyle as input, ToolHeader, Choice, CheckRow as Check, Note, Step, PrimaryButton, SecondaryButton } from "@/components/tools/ToolUi";
+import { writeToStorage } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
+import { analyzeLogSet, MAX_LOG_FILE_BYTES } from "@/lib/logvault/log-analyzer";
+import { FIELD_NAME_HINTS } from "@/lib/logvault/traceability-purposes";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
-import { TRACEABILITY_PURPOSES, BIOMETRIC_LOG_REQUIREMENTS, FIELD_NAME_HINTS, MAX_LOG_FILE_SIZE_BYTES } from "@/lib/logvault/traceability-purposes";
-import {
-  getAllDetectedFields, countCovered,
-  type LogVaultRecord, type ImportedLogSet, type CoverageStatus,
-  type TraceabilityCoverageRecord, type BiometricLogRequirementCoverage,
-} from "@/lib/logvault/logvault-types";
+import { useActiveSystem } from "@/lib/hooks/useActiveSystem";
 import { useScopedStorage } from "@/lib/hooks/useScopedStorage";
-import { useT, useLocale } from "@/i18n/LocaleProvider";
+import { useLocale } from "@/i18n/LocaleProvider";
 
-type TFn = (key: string) => string;
+// ─── Modello dati (solo risposte e riepilogo della prova, mai log grezzi) ─────
 
-// ─── Tokens ───────────────────────────────────────────────────────────────────
-const T = {
-  text: "#0D1016", muted: "rgba(0,0,0,0.42)", faint: "rgba(0,0,0,0.22)", border: "rgba(0,0,0,0.08)",
-  card: "#fff", bg: "#f9f9fb",
-  red: "#dc2626", redBg: "rgba(220,38,38,0.06)", redBdr: "rgba(220,38,38,0.18)",
-  amber: "#d97706", amberBg: "rgba(202,138,4,0.07)", amberBdr: "rgba(202,138,4,0.22)",
-  green: "#15803d", greenBg: "rgba(22,163,74,0.06)", greenBdr: "rgba(22,163,74,0.18)",
-  blue: "#0D1016", blueBg: "rgba(0,0,0,0.05)", blueBdr: "rgba(0,0,0,0.12)",
-  violet: "#7c3aed", violetBg: "rgba(124,58,237,0.05)", violetBdr: "rgba(124,58,237,0.16)",
-} as const;
-const FONT: CSSProperties = { fontFamily: "inherit" };
-const card: CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
-const inp: CSSProperties = { width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, color: T.text, background: T.card, outline: "none" };
-const ta: CSSProperties = { ...inp, resize: "vertical" as const };
+type YesNo = "yes" | "no" | "unknown" | "";
+type Role = "provider" | "deployer" | "";
+type Keeper = "us" | "provider" | "other" | "";
 
-// ─── Coverage badge ───────────────────────────────────────────────────────────
-function CoverageBadge({ covered, t }: { covered: CoverageStatus; t: TFn }) {
-  const map = {
-    yes: { label: t("cov_yes"), color: T.green, bg: T.greenBg },
-    partial: { label: t("cov_partial"), color: T.amber, bg: T.amberBg },
-    no: { label: t("cov_no"), color: T.red, bg: T.redBg },
-    unspecified: { label: t("cov_unspecified"), color: T.faint, bg: T.bg },
-  };
-  const s = map[covered];
-  return (
-    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ color: s.color, background: s.bg }}>{s.label}</span>
-  );
+interface SampleSummary {
+  fileName: string;
+  entryCount: number;
+  fields: string[];
+  from?: string;
+  to?: string;
 }
 
-// ─── Traceability purpose card ────────────────────────────────────────────────
-interface PurposeCardProps {
-  def: typeof TRACEABILITY_PURPOSES[number];
-  rec: TraceabilityCoverageRecord | undefined;
-  pendingProposal?: { proposedCovered: "yes" | "partial" | "no"; evidenceFields: string[]; rationale: string } | null;
-  onUpdate: (id: string, patch: Partial<TraceabilityCoverageRecord>) => void;
-  onAcceptAi: (id: string) => void;
-  allDetectedFields: string[];
+interface LogRecord {
+  role: Role;
+  automatic: YesNo;
+  events: string[];          // id finalità Art. 12(2) e, se biometrico, Art. 12(3)
+  biometric: YesNo;
+  keeper: Keeper;
+  location: string;
+  responsible: string;
+  months: string;            // testo per non perdere l'input parziale
+  proofDoc: string;          // documento di riferimento (es. istruzioni per l'uso)
+  sample: SampleSummary | null;
+  savedAt?: string;
 }
 
-function PurposeCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDetectedFields, t }: PurposeCardProps & { t: TFn }) {
-  const [open, setOpen] = useState(false);
-  const covered = rec?.covered ?? "unspecified";
-
-  // Heuristic field detection
-  const hints = FIELD_NAME_HINTS[def.id] ?? [];
-  const matchedFields = allDetectedFields.filter(f => hints.some(h => f.toLowerCase().includes(h)));
-
-  return (
-    <div className="rounded-xl border" style={{ background: T.card, borderColor: covered === "yes" ? "#86efac" : covered === "partial" ? "#fcd34d" : T.border }}>
-      <button className="w-full flex items-start gap-3 p-4 text-left" onClick={() => setOpen(v => !v)}>
-        <div className="mt-0.5">
-          {covered === "yes" ? <CheckCircle size={15} style={{ color: T.green }} /> :
-           covered === "partial" ? <AlertTriangle size={15} style={{ color: T.amber }} /> :
-           covered === "no" ? <X size={15} style={{ color: T.red }} /> :
-           <Shield size={15} style={{ color: T.faint }} />}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>
-              {def.reference.split(" ").slice(0, 2).join(" ")}
-            </span>
-            <span className="text-[12px] font-semibold" style={{ color: T.text }}>{def.label}</span>
-            <CoverageBadge covered={covered} t={t} />
-            {pendingProposal && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: T.violetBg, color: T.violet }}>✦ AI</span>}
-          </div>
-          <p className="text-[10px] mt-0.5" style={{ color: T.faint }}>{def.crossReference}</p>
-          {matchedFields.length > 0 && covered === "unspecified" && (
-            <p className="text-[11px] mt-1" style={{ color: T.amber }}>
-              ⚠ {t("pc_relevantFieldsDetected")} {matchedFields.join(", ")}
-            </p>
-          )}
-        </div>
-        <span className="text-[10px] flex-shrink-0" style={{ color: T.faint }}>{open ? "▲" : "▼"}</span>
-      </button>
-
-      {open && (
-        <div className="px-4 pb-4 border-t" style={{ borderColor: "#f3f4f6" }}>
-          {/* AI proposal */}
-          {pendingProposal && (
-            <div className="mt-3 rounded-lg p-3 mb-3" style={{ background: T.violetBg, border: `1px solid ${T.violetBdr}` }}>
-              <p className="text-[11px] font-semibold mb-1" style={{ color: T.violet }}>✦ {t("aiVerify")}</p>
-              <p className="text-[12px] mb-1" style={{ color: T.text }}>{pendingProposal.rationale}</p>
-              {pendingProposal.evidenceFields.length > 0 && (
-                <p className="text-[11px]" style={{ color: T.muted }}>
-                  {t("fieldsWord")} {pendingProposal.evidenceFields.join(", ")}
-                </p>
-              )}
-              <div className="flex items-center gap-1.5 mt-2">
-                <span className="text-[11px]" style={{ color: T.muted }}>{t("proposedCoverage")}</span>
-                <CoverageBadge covered={pendingProposal.proposedCovered} t={t} />
-              </div>
-              <button onClick={() => onAcceptAi(def.id)}
-                className="mt-2 flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded"
-                style={{ background: T.violet, color: "#fff", border: "none", cursor: "pointer" }}>
-                <Check size={11} /> {t("acceptApply")}
-              </button>
-            </div>
-          )}
-
-          {/* Heuristic matched fields suggestion */}
-          {matchedFields.length > 0 && covered === "unspecified" && !pendingProposal && (
-            <div className="mt-3 rounded-lg p-3 mb-3" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-              <p className="text-[11px] font-semibold mb-1" style={{ color: T.amber }}>
-                ⚠ {t("pc_relevantFieldsImported")}
-              </p>
-              <p className="text-[11px]" style={{ color: T.text }}>{matchedFields.join(", ")}</p>
-              <div className="flex gap-2 mt-2">
-                <button onClick={() => onUpdate(def.id, { covered: "partial", evidenceFields: matchedFields })}
-                  className="text-[11px] px-2 py-0.5 rounded" style={{ background: T.amberBg, color: T.amber, border: `1px solid ${T.amberBdr}`, cursor: "pointer" }}>
-                  {t("pc_markPartial")}
-                </button>
-                <button onClick={() => onUpdate(def.id, { covered: "yes", evidenceFields: matchedFields })}
-                  className="text-[11px] px-2 py-0.5 rounded" style={{ background: T.greenBg, color: T.green, border: `1px solid ${T.greenBdr}`, cursor: "pointer" }}>
-                  {t("pc_confirmCovered")}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Coverage selector */}
-          <div className="mt-3 mb-2">
-            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1.5" style={{ color: T.muted }}>{t("coverage")}</label>
-            <div className="flex gap-2 flex-wrap">
-              {(["yes", "partial", "no", "unspecified"] as CoverageStatus[]).map(s => {
-                const labels: Record<CoverageStatus, string> = { yes: t("cov_yes"), partial: t("cov_partial"), no: t("cov_no"), unspecified: t("cov_unspecified") };
-                const active = covered === s;
-                return (
-                  <button key={s} onClick={() => onUpdate(def.id, { covered: s })}
-                    className="text-[11px] px-2.5 py-1 rounded-lg border"
-                    style={{ borderColor: active ? T.blue : T.border, background: active ? T.blueBg : "transparent", color: active ? T.blue : T.muted, fontWeight: active ? 600 : 400, cursor: "pointer" }}>
-                    {labels[s]}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Evidence fields */}
-          <div className="mb-3">
-            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("evidenceFieldsComma")}</label>
-            <input type="text" value={rec?.evidenceFields?.join(", ") ?? ""}
-              onChange={e => onUpdate(def.id, { evidenceFields: e.target.value.split(",").map(s => s.trim()).filter(Boolean) })}
-              placeholder={t("pc_evFieldsPh")}
-              style={inp} />
-          </div>
-
-          <div className="mb-3">
-            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("notesWord")}</label>
-            <textarea rows={2} value={rec?.notes ?? ""}
-              onChange={e => onUpdate(def.id, { notes: e.target.value })}
-              placeholder={t("pc_notesPh")}
-              style={ta} />
-          </div>
-
-          {/* Cross-link */}
-          <Link href={def.linkedToolPath} className="inline-flex items-center gap-1 text-[11px] font-medium" style={{ color: T.blue }}>
-            <ExternalLink size={11} /> {def.linkedToolLabel}
-          </Link>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Biometric requirement card ───────────────────────────────────────────────
-interface BiometricCardProps {
-  def: typeof BIOMETRIC_LOG_REQUIREMENTS[number];
-  rec: BiometricLogRequirementCoverage | undefined;
-  pendingProposal?: { proposedCovered: "yes" | "partial" | "no"; evidenceFields: string[]; rationale: string } | null;
-  onUpdate: (id: string, patch: Partial<BiometricLogRequirementCoverage>) => void;
-  onAcceptAi: (id: string) => void;
-  allDetectedFields: string[];
-  verifierRoles?: string[];
-}
-
-function BiometricCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDetectedFields, verifierRoles, t }: BiometricCardProps & { t: TFn }) {
-  const [open, setOpen] = useState(false);
-  const covered = rec?.covered ?? "unspecified";
-  const hints = FIELD_NAME_HINTS[def.id] ?? [];
-  const matched = allDetectedFields.filter(f => hints.some(h => f.toLowerCase().includes(h)));
-
-  return (
-    <div className="rounded-xl border" style={{ background: T.card, borderColor: covered === "yes" ? "#86efac" : covered === "partial" ? "#fcd34d" : T.border }}>
-      <button className="w-full flex items-start gap-3 p-3 text-left" onClick={() => setOpen(v => !v)}>
-        <div className="mt-0.5">
-          {covered === "yes" ? <CheckCircle size={13} style={{ color: T.green }} /> :
-           covered === "partial" ? <AlertTriangle size={13} style={{ color: T.amber }} /> :
-           covered === "no" ? <X size={13} style={{ color: T.red }} /> :
-           <Shield size={13} style={{ color: T.faint }} />}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] font-mono px-1 py-0.5 rounded" style={{ background: T.bg, color: T.muted }}>{def.reference.split(" ").slice(0, 2).join(" ")}</span>
-            <span className="text-[11px] font-medium" style={{ color: T.text }}>{def.label}</span>
-            <CoverageBadge covered={covered} t={t} />
-            {pendingProposal && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: T.violetBg, color: T.violet }}>✦ AI</span>}
-          </div>
-        </div>
-        <span style={{ color: T.faint, fontSize: 10 }}>{open ? "▲" : "▼"}</span>
-      </button>
-
-      {open && (
-        <div className="px-3 pb-3 border-t" style={{ borderColor: "#f3f4f6" }}>
-          {/* Verifier roles cross-check (Art. 12(3)(d) only) */}
-          {def.id === "verifier_identity" && verifierRoles && verifierRoles.length > 0 && (
-            <div className="mt-2 rounded-lg p-2.5 mb-2" style={{ background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
-              <p className="text-[11px] font-semibold mb-1" style={{ color: T.blue }}>
-                {t("bc_oversightCompare")}
-              </p>
-              <p className="text-[11px]" style={{ color: T.muted }}>
-                {t("bc_verifierRoles")} <strong>{verifierRoles.join(", ")}</strong>
-              </p>
-              {matched.length > 0 && (
-                <p className="text-[11px] mt-1" style={{ color: T.text }}>
-                  {t("bc_logsContainPre")} <strong>{matched[0]}</strong> {t("bc_logsContainPost")}
-                </p>
-              )}
-            </div>
-          )}
-
-          {pendingProposal && (
-            <div className="mt-2 rounded-lg p-2.5 mb-2" style={{ background: T.violetBg, border: `1px solid ${T.violetBdr}` }}>
-              <p className="text-[11px] font-semibold mb-1" style={{ color: T.violet }}>✦ {t("aiVerify")}</p>
-              <p className="text-[11px]" style={{ color: T.text }}>{pendingProposal.rationale}</p>
-              {pendingProposal.evidenceFields.length > 0 && <p className="text-[11px] mt-1" style={{ color: T.muted }}>{t("fieldsWord")} {pendingProposal.evidenceFields.join(", ")}</p>}
-              <button onClick={() => onAcceptAi(def.id)}
-                className="mt-1.5 flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded"
-                style={{ background: T.violet, color: "#fff", border: "none", cursor: "pointer" }}>
-                <Check size={10} /> {t("accept")}
-              </button>
-            </div>
-          )}
-
-          {matched.length > 0 && covered === "unspecified" && !pendingProposal && (
-            <div className="mt-2 rounded-lg p-2 mb-2" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-              <p className="text-[11px] font-semibold" style={{ color: T.amber }}>{t("bc_fieldDetected")} {matched.join(", ")}</p>
-              <div className="flex gap-1 mt-1">
-                <button onClick={() => onUpdate(def.id, { covered: "partial", evidenceField: matched[0] })}
-                  className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: T.amberBg, color: T.amber, border: `1px solid ${T.amberBdr}`, cursor: "pointer" }}>{t("cov_partial")}</button>
-                <button onClick={() => onUpdate(def.id, { covered: "yes", evidenceField: matched[0] })}
-                  className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: T.greenBg, color: T.green, border: `1px solid ${T.greenBdr}`, cursor: "pointer" }}>{t("bc_confirm")}</button>
-              </div>
-            </div>
-          )}
-
-          <div className="flex gap-2 flex-wrap mt-2 mb-2">
-            {(["yes", "partial", "no", "unspecified"] as CoverageStatus[]).map(s => {
-              const labels: Record<CoverageStatus, string> = { yes: t("yesShort"), partial: t("cov_partial"), no: t("noShort"), unspecified: t("cov_unspecified") };
-              const active = covered === s;
-              return (
-                <button key={s} onClick={() => onUpdate(def.id, { covered: s })}
-                  className="text-[11px] px-2 py-0.5 rounded border"
-                  style={{ borderColor: active ? T.blue : T.border, background: active ? T.blueBg : "transparent", color: active ? T.blue : T.muted, cursor: "pointer" }}>
-                  {labels[s]}
-                </button>
-              );
-            })}
-          </div>
-
-          <div>
-            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("bc_evidenceField")}</label>
-            <input type="text" value={rec?.evidenceField ?? ""}
-              onChange={e => onUpdate(def.id, { evidenceField: e.target.value })}
-              placeholder={t("bc_evFieldPh")}
-              style={inp} />
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Log set import card ──────────────────────────────────────────────────────
-function LogSetCard({ logSet, onRemove, t, loc }: { logSet: ImportedLogSet; onRemove: () => void; t: TFn; loc: string }) {
-  return (
-    <div className="rounded-lg p-3" style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}>
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 mb-0.5">
-            <FileText size={12} style={{ color: T.green }} />
-            <span className="text-[11px] font-semibold truncate" style={{ color: T.green }}>{logSet.fileName}</span>
-            <span className="text-[10px] px-1 rounded" style={{ background: T.bg, color: T.muted }}>{logSet.format.toUpperCase()}</span>
-          </div>
-          <div className="flex flex-wrap gap-3 text-[10px]" style={{ color: T.muted }}>
-            <span>{logSet.entryCount.toLocaleString()} {t("entriesWord")}</span>
-            <span>{logSet.detectedFields.length} {t("fieldsCountWord")}</span>
-            {logSet.dateRangeStart && (
-              <span>
-                {new Date(logSet.dateRangeStart).toLocaleDateString(loc)} – {new Date(logSet.dateRangeEnd!).toLocaleDateString(loc)}
-              </span>
-            )}
-          </div>
-          {logSet.detectedFields.length > 0 && (
-            <p className="text-[10px] mt-1 truncate" style={{ color: T.faint }}>
-              {t("fieldsWord")} {logSet.detectedFields.slice(0, 8).join(", ")}{logSet.detectedFields.length > 8 ? `... +${logSet.detectedFields.length - 8}` : ""}
-            </p>
-          )}
-        </div>
-        <button onClick={onRemove} style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}>
-          <X size={13} style={{ color: T.muted }} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-const EMPTY_RECORD: LogVaultRecord = {
-  loggingCapabilityConfirmed: "unspecified",
-  importedLogSets: [],
-  traceabilityCoverage: [],
-  biometricLogging: { applicable: "unspecified", requirementCoverage: [] },
-  retention: { role: "unspecified", verdict: "unknown" },
+const EMPTY: LogRecord = {
+  role: "", automatic: "", events: [], biometric: "", keeper: "",
+  location: "", responsible: "", months: "", proofDoc: "", sample: null,
 };
 
+const PURPOSES = ["risk_identification", "post_market_monitoring", "deployer_monitoring"] as const;
+const BIOMETRIC = ["usage_period", "reference_database", "matched_input_data", "verifier_identity"] as const;
 
-// ─── Main page ────────────────────────────────────────────────────────────────
-export default function LogVaultPage() {
-  const t = useT("toolLogvault");
+// ─── Testi ────────────────────────────────────────────────────────────────────
+
+const TXT = {
+  it: {
+    title: "Registro dei log",
+    sub: "Dimostra che il sistema registra gli eventi in automatico e che i log sono conservati.",
+    privacy: "RegulaeOS non riceve né conserva i log del sistema: la conservazione resta a carico del fornitore o del deployer (Artt. 19 e 26(6)).",
+    role_q: "Per questo sistema sei",
+    provider: "Fornitore", deployer: "Deployer",
+    provider_hint: "Hai sviluppato il sistema o lo metti sul mercato con il tuo nome.",
+    deployer_hint: "Usi il sistema sotto la tua autorità.",
+    q1: "Il sistema registra gli eventi in automatico mentre funziona?",
+    q1_ref: "Art. 12(1)",
+    yes: "Sì", no: "No", unknown: "Non so",
+    q1_no_provider: "È un requisito dei sistemi ad alto rischio: il sistema deve consentire la registrazione automatica degli eventi per tutta la sua durata.",
+    q1_no_deployer: "Chiedilo al fornitore: le istruzioni per l'uso devono spiegare come raccogliere, conservare e interpretare i log (Art. 13(3)(f)).",
+    q2: "Quali eventi registra?",
+    q2_ref: "Art. 12(2)",
+    q2_hint_deployer: "Rispondi in base alle istruzioni per l'uso del fornitore.",
+    ev_risk_identification: "Errori, anomalie e situazioni che possono creare un rischio o una modifica sostanziale",
+    ev_post_market_monitoring: "Dati utili a controllare il funzionamento nel tempo (monitoraggio dopo l'immissione sul mercato)",
+    ev_deployer_monitoring: "Dati utili a chi usa il sistema per sorvegliarne il funzionamento",
+    q_bio: "È un sistema di identificazione biometrica a distanza?",
+    q_bio_ref: "Allegato III, punto 1(a)",
+    q_bio_list: "In questo caso i log devono contenere almeno:",
+    ev_usage_period: "Data e ora di inizio e fine di ogni utilizzo",
+    ev_reference_database: "La banca dati usata per il confronto",
+    ev_matched_input_data: "I dati di input che hanno dato una corrispondenza",
+    ev_verifier_identity: "Chi ha verificato i risultati (Art. 14(5))",
+    q3: "Dove sono conservati i log e chi li custodisce?",
+    keeper_q: "Chi conserva i log",
+    keeper_us: "Noi", keeper_provider: "Il fornitore", keeper_other: "Un altro soggetto per nostro conto",
+    location: "Dove (es. server aziendale, servizio cloud, gestionale del fornitore)",
+    responsible: "Persona o funzione responsabile",
+    q4: "Per quanto tempo li conservi?",
+    q4_ref_provider: "Art. 19(1)", q4_ref_deployer: "Art. 26(6)",
+    months: "mesi",
+    q4_short: "Il minimo è 6 mesi, salvo norme diverse, in particolare sulla protezione dei dati personali.",
+    q4_keeper_provider: "Se i log non sono sotto il tuo controllo l'obbligo di conservazione è del fornitore. Indica comunque per quanto li conserva, se lo sai.",
+    q5: "Prova",
+    q5_opt: "facoltativa",
+    q5_doc: "Documento di riferimento (es. istruzioni per l'uso, cap. 5; procedura interna di conservazione)",
+    q5_file: "Carica un estratto di log",
+    q5_file_hint: "Il file viene letto solo sul tuo computer e non è inviato a RegulaeOS. Usa un estratto senza dati personali. Formati: .json, .ndjson, .csv, .tsv.",
+    sample_entries: "voci", sample_period: "periodo", sample_fields: "campi",
+    sample_match: "Campi trovati per gli eventi indicati",
+    sample_nomatch: "nessun campo riconosciuto: controlla a mano",
+    remove: "Rimuovi",
+    err_size: "File troppo grande", err_type: "Formato non supportato", err_empty: "Nessuna voce leggibile nel file", err_read: "Impossibile leggere il file",
+    status: "Esito",
+    complete: "Completo: puoi salvare nel dossier.",
+    missing: "Da completare",
+    m_role: "indica il tuo ruolo", m_auto: "conferma che il sistema registra gli eventi", m_events: "indica quali eventi registra",
+    m_bio: "rispondi sulla biometria", m_bio_ev: "conferma i dati biometrici richiesti", m_keeper: "indica chi conserva i log",
+    m_loc: "indica dove sono conservati", m_months: "indica per quanto tempo", m_min: "porta la conservazione ad almeno 6 mesi",
+    save: "Salva nel dossier", saved: "Salvato nel dossier",
+    noSystem: "Scegli o aggiungi un sistema per iniziare.",
+  },
+  en: {
+    title: "Log register",
+    sub: "Show that the system records events automatically and that logs are kept.",
+    privacy: "RegulaeOS does not receive or store the system's logs: keeping them remains the provider's or deployer's duty (Arts. 19 and 26(6)).",
+    role_q: "For this system you are the",
+    provider: "Provider", deployer: "Deployer",
+    provider_hint: "You developed the system or place it on the market under your name.",
+    deployer_hint: "You use the system under your authority.",
+    q1: "Does the system record events automatically while it runs?",
+    q1_ref: "Art. 12(1)",
+    yes: "Yes", no: "No", unknown: "Don't know",
+    q1_no_provider: "This is a requirement for high-risk systems: the system must allow automatic recording of events over its lifetime.",
+    q1_no_deployer: "Ask the provider: the instructions for use must explain how to collect, store and interpret logs (Art. 13(3)(f)).",
+    q2: "Which events does it record?",
+    q2_ref: "Art. 12(2)",
+    q2_hint_deployer: "Answer based on the provider's instructions for use.",
+    ev_risk_identification: "Errors, anomalies and situations that may create a risk or a substantial modification",
+    ev_post_market_monitoring: "Data to check operation over time (post-market monitoring)",
+    ev_deployer_monitoring: "Data that lets the user monitor the system's operation",
+    q_bio: "Is it a remote biometric identification system?",
+    q_bio_ref: "Annex III, point 1(a)",
+    q_bio_list: "In that case logs must contain at least:",
+    ev_usage_period: "Start and end date and time of each use",
+    ev_reference_database: "The reference database used for matching",
+    ev_matched_input_data: "The input data that led to a match",
+    ev_verifier_identity: "Who verified the results (Art. 14(5))",
+    q3: "Where are logs kept and who keeps them?",
+    keeper_q: "Who keeps the logs",
+    keeper_us: "Us", keeper_provider: "The provider", keeper_other: "Another party on our behalf",
+    location: "Where (e.g. company server, cloud service, provider's platform)",
+    responsible: "Responsible person or function",
+    q4: "How long do you keep them?",
+    q4_ref_provider: "Art. 19(1)", q4_ref_deployer: "Art. 26(6)",
+    months: "months",
+    q4_short: "The minimum is 6 months, unless other law provides otherwise, in particular data protection law.",
+    q4_keeper_provider: "If logs are not under your control the retention duty lies with the provider. Still state how long they keep them, if you know.",
+    q5: "Evidence",
+    q5_opt: "optional",
+    q5_doc: "Reference document (e.g. instructions for use, ch. 5; internal retention procedure)",
+    q5_file: "Upload a log excerpt",
+    q5_file_hint: "The file is read only on your computer and is not sent to RegulaeOS. Use an excerpt without personal data. Formats: .json, .ndjson, .csv, .tsv.",
+    sample_entries: "entries", sample_period: "period", sample_fields: "fields",
+    sample_match: "Fields found for the selected events",
+    sample_nomatch: "no recognised field: check manually",
+    remove: "Remove",
+    err_size: "File too large", err_type: "Unsupported format", err_empty: "No readable entries in the file", err_read: "Could not read the file",
+    status: "Result",
+    complete: "Complete: you can save it to the dossier.",
+    missing: "Still to do",
+    m_role: "state your role", m_auto: "confirm the system records events", m_events: "state which events it records",
+    m_bio: "answer the biometric question", m_bio_ev: "confirm the required biometric data", m_keeper: "state who keeps the logs",
+    m_loc: "state where they are kept", m_months: "state how long", m_min: "raise retention to at least 6 months",
+    save: "Save to dossier", saved: "Saved to dossier",
+    noSystem: "Choose or add a system to start.",
+  },
+} as const;
+
+type Key = keyof typeof TXT.it;
+
+// ─── Pagina ───────────────────────────────────────────────────────────────────
+
+export default function LogRegisterPage() {
   const locale = useLocale();
-  const loc = locale === "it" ? "it-IT" : "en-GB";
-  const [record, setRecord] = useScopedStorage<LogVaultRecord>("logvault_config", EMPTY_RECORD);
-  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
-  const [savedAt, setSavedAt] = useState<string | null>(() => readFromStorage<LogvaultResult>("logvault")?.completedAt ?? null);
-  const [showConfig, setShowConfig] = useState(false);
+  const tx = TXT[locale === "en" ? "en" : "it"];
+  const t = (k: Key) => tx[k];
 
-  // Import state
-  const [uploading, setUploading] = useState(false);
-  const [uploadWarnings, setUploadWarnings] = useState<string[]>([]);
-  const [previewSamples, setPreviewSamples] = useState<Record<string, Record<string, string>[]>>({});
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { active } = useActiveSystem();
+  const [rec, setRec] = useScopedStorage<LogRecord>("logregister", EMPTY);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [reading, setReading] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  // AI copilot
-  const [analyzing, setAnalyzing] = useState(false);
-  const [aiProposals, setAiProposals] = useState<Record<string, { proposedCovered: "yes" | "partial" | "no"; evidenceFields: string[]; rationale: string }>>({});
-  const [aiSafeStateSuggestion, setAiSafeStateSuggestion] = useState<string | null>(null);
+  // Ruolo proposto dall'inventario, modificabile
+  useEffect(() => {
+    if (!rec.role && (active?.role === "provider" || active?.role === "deployer")) {
+      setRec((r) => ({ ...r, role: active.role as Role }));
+    }
+  }, [active?.role, rec.role, setRec]);
 
-  // AI severity (preserved from original)
-  const [eventDesc, setEventDesc] = useState("");
-  const [severitySuggestion, setSeveritySuggestion] = useState<{ severity: string; rationale: string; regulatoryFlag?: string | null } | null>(null);
-  const [loadingSeverity, setLoadingSeverity] = useState(false);
+  function patch(p: Partial<LogRecord>) {
+    setJustSaved(false);
+    setRec((r) => ({ ...r, ...p }));
+  }
+  function toggleEvent(id: string) {
+    patch({ events: rec.events.includes(id) ? rec.events.filter((e) => e !== id) : [...rec.events, id] });
+  }
 
-  // Read classifier context
-  const cls = typeof window !== "undefined" ? readFromStorage<ClassifierResult>("classifier") : null;
-  const systemName = cls?.systemName ?? "Sistema di IA";
-  const intendedPurpose = cls?.systemDescription ?? "";
-  const riskTier = cls?.riskLevel ?? "n.d.";
-
-  const phases: ToolPhase[] = [
-    { id: "carica",    label: t("phase_carica"),    sublabel: t("phase_carica_sub"),    anchor: "fase-carica" },
-    { id: "copertura", label: t("phase_copertura"), sublabel: t("phase_copertura_sub"), anchor: "fase-copertura" },
-    { id: "verifica",  label: t("phase_verifica"),  sublabel: t("phase_verifica_sub"),  anchor: "fase-verifica" },
-    { id: "evidenza",  label: t("phase_evidenza"),  sublabel: t("phase_evidenza_sub"),  anchor: "fase-export" },
-  ];
-  const phaseIdx = record.importedLogSets.length === 0 ? 0
-    : record.retention.role !== "unspecified" ? 3
-    : record.traceabilityCoverage.some(c => c.evidenceFields.length > 0) ? 2 : 1;
-
-  // ── Stato reale per fase (la ✓ riflette il lavoro fatto, non lo scroll) ──
-  const logsIn = record.importedLogSets.length > 0;
-  const coveredCount = countCovered(record);
-  const retentionSet = record.retention.role !== "unspecified";
-  const phaseStatus: PhaseStatus[] = [
-    logsIn ? "done" : "active",
-    coveredCount >= 3 ? "done" : logsIn ? "active" : "todo",
-    retentionSet ? "done" : logsIn ? "active" : "todo",
-    (coveredCount >= 3 && retentionSet) ? "active" : "todo",
-  ];
-  const phasesDone = phaseStatus.filter(s => s === "done").length;
-  const overallPct = Math.round(
-    (phaseStatus.reduce((a, s) => a + (s === "done" ? 1 : s === "active" ? 0.5 : 0), 0) / phases.length) * 100
-  );
-
-  // ── Scroll-spy robusto (hook condiviso): evidenzia la fase in viewport ──
-  const activePhase = useActivePhase(phases.map(p => p.anchor));
-
-  // Read Oversight fourEyes for biometric applicability
-  function getOversightFourEyes() {
-    if (typeof window === "undefined") return null;
+  async function onFile(file: File) {
+    setFileError(null);
+    if (file.size > MAX_LOG_FILE_BYTES) { setFileError(`${t("err_size")} (max ${Math.round(MAX_LOG_FILE_BYTES / 1024 / 1024)} MB)`); return; }
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+    if (!["json", "ndjson", "jsonl", "csv", "tsv"].includes(ext)) { setFileError(t("err_type")); return; }
+    setReading(true);
     try {
-      const raw = localStorage.getItem("aicomply_oversight_record_v1");
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      return parsed?.fourEyes ?? null;
-    } catch { return null; }
-  }
-
-  const oversightFourEyes = getOversightFourEyes();
-  const biometricApplicable = record.biometricLogging.applicable !== "unspecified"
-    ? record.biometricLogging.applicable
-    : oversightFourEyes?.applicable !== "unspecified"
-    ? oversightFourEyes?.applicable
-    : "unspecified";
-  const verifierRoles: string[] = oversightFourEyes?.verifierRoles ?? [];
-
-  // Fonte di verità unica per gli empty-state pre-upload
-  const logsImported = record.importedLogSets.length > 0;
-  const biometricApplicableBool = biometricApplicable === "yes";
-
-  // Read Oversight intervention_stop safe state
-  function getOversightSafeState(): string | undefined {
-    if (typeof window === "undefined") return undefined;
-    try {
-      const raw = localStorage.getItem("aicomply_oversight_record_v1");
-      if (!raw) return undefined;
-      const parsed = JSON.parse(raw);
-      const req = (parsed?.requirements ?? []).find((r: { requirementId: string; measureDescription?: string }) => r.requirementId === "intervention_stop");
-      return req?.measureDescription ?? undefined;
-    } catch { return undefined; }
-  }
-
-  function showToast(msg: string, type: "success" | "error" = "success") {
-    setToast({ msg, type }); setTimeout(() => setToast(null), 3000);
-  }
-
-  function patchRecord(patch: Partial<LogVaultRecord>) {
-    setRecord(prev => ({ ...prev, ...patch, updatedAt: new Date().toISOString() }));
-  }
-
-  // ── Import handling ────────────────────────────────────────────────────────
-  async function handleFileImport(file: File) {
-    if (file.size > MAX_LOG_FILE_BYTES) { showToast(`${t("toast_tooLarge")} (max ${MAX_LOG_FILE_BYTES / 1024 / 1024} MB)`, "error"); return; }
-    const ext = file.name.split(".").pop()?.toLowerCase();
-    if (!["json", "ndjson", "jsonl", "csv", "tsv"].includes(ext ?? "")) { showToast(t("toast_unsupported"), "error"); return; }
-
-    setUploading(true);
-    try {
-      const text = await file.text();
-      // Analisi interamente client-side: le voci grezze non lasciano mai il browser.
-      const { logSet, entries } = await analyzeLogSet(crypto.randomUUID(), file.name, text);
-      if (logSet.entryCount === 0) { showToast(t("toast_noValidEntries"), "error"); return; }
-
-      // Preview: solo ≤5 voci, in sessione, mai persistite
-      const preview = entries.slice(0, 5).map(e => Object.fromEntries(Object.entries(e).map(([k, v]) => [k, v == null ? "" : String(v)])));
-      setPreviewSamples(prev => ({ ...prev, [logSet.id]: preview }));
-      const warns: string[] = [];
-      if (logSet.sampledFrom) warns.push(`${t("warn_sampledPre")} ${MAX_ENTRIES.toLocaleString()} ${t("warn_sampledMid")} ${logSet.sampledFrom.toLocaleString()} ${t("warn_sampledPost")}`);
-      if (logSet.notes) warns.push(logSet.notes);
-      setUploadWarnings(warns);
-
-      patchRecord({ importedLogSets: [...record.importedLogSets, logSet] });
-      showToast(`${logSet.entryCount.toLocaleString()} ${t("toast_entriesImported")} — ${logSet.detectedFields.length} ${t("toast_fieldsDetected")}`);
-    } catch (e) {
-      showToast(e instanceof Error ? e.message : t("toast_parseError"), "error");
+      // Lettura e analisi solo nel browser: le voci non lasciano il dispositivo e non vengono salvate.
+      const { logSet } = await analyzeLogSet(crypto.randomUUID(), file.name, await file.text());
+      if (logSet.entryCount === 0) { setFileError(t("err_empty")); return; }
+      patch({ sample: { fileName: file.name, entryCount: logSet.entryCount, fields: logSet.detectedFields, from: logSet.dateRangeStart, to: logSet.dateRangeEnd } });
+    } catch {
+      setFileError(t("err_read"));
     } finally {
-      setUploading(false);
+      setReading(false);
+      if (fileRef.current) fileRef.current.value = "";
     }
   }
 
-  function removeLogSet(id: string) {
-    patchRecord({ importedLogSets: record.importedLogSets.filter(ls => ls.id !== id) });
-    setPreviewSamples(prev => { const n = { ...prev }; delete n[id]; return n; });
-  }
+  // ── Stato ──
+  const isProvider = rec.role === "provider";
+  const monthsNum = Number(rec.months.replace(",", "."));
+  const monthsSet = rec.months.trim() !== "" && Number.isFinite(monthsNum) && monthsNum > 0;
+  const retentionDutyIsOurs = isProvider || rec.keeper !== "provider";
+  const tooShort = monthsSet && monthsNum < 6 && retentionDutyIsOurs;
+  const bioEventsOk = rec.biometric !== "yes" || BIOMETRIC.every((b) => rec.events.includes(b));
 
-  // ── Coverage management ────────────────────────────────────────────────────
-  function updatePurpose(id: string, patch: Partial<TraceabilityCoverageRecord>) {
-    const existing = record.traceabilityCoverage.find(c => c.purposeId === id);
-    const updated = { purposeId: id, covered: "unspecified" as CoverageStatus, evidenceFields: [], aiConfirmed: false, ...existing, ...patch };
-    const traceabilityCoverage = record.traceabilityCoverage.some(c => c.purposeId === id)
-      ? record.traceabilityCoverage.map(c => c.purposeId === id ? updated : c)
-      : [...record.traceabilityCoverage, updated];
-    patchRecord({ traceabilityCoverage });
-  }
+  const missing: string[] = [];
+  if (!rec.role) missing.push(t("m_role"));
+  if (rec.automatic !== "yes") missing.push(t("m_auto"));
+  if (!PURPOSES.some((p) => rec.events.includes(p))) missing.push(t("m_events"));
+  if (!rec.biometric || rec.biometric === "unknown") missing.push(t("m_bio"));
+  if (!bioEventsOk) missing.push(t("m_bio_ev"));
+  if (!rec.keeper) missing.push(t("m_keeper"));
+  if (!rec.location.trim()) missing.push(t("m_loc"));
+  if (!monthsSet && retentionDutyIsOurs) missing.push(t("m_months"));
+  if (tooShort) missing.push(t("m_min"));
+  const complete = missing.length === 0;
 
-  function acceptPurposeAi(id: string) {
-    const p = aiProposals[id];
-    if (!p) return;
-    updatePurpose(id, { covered: p.proposedCovered, evidenceFields: p.evidenceFields, aiConfirmed: true });
-    setAiProposals(prev => { const n = { ...prev }; delete n[id]; return n; });
-  }
+  const stepDone = {
+    role: !!rec.role,
+    auto: rec.automatic === "yes",
+    events: PURPOSES.some((p) => rec.events.includes(p)) && !!rec.biometric && rec.biometric !== "unknown" && bioEventsOk,
+    where: !!rec.keeper && !!rec.location.trim(),
+    months: (monthsSet || !retentionDutyIsOurs) && !tooShort,
+    proof: !!rec.sample || !!rec.proofDoc.trim(),
+  };
 
-  function updateBiometric(id: string, patch: Partial<BiometricLogRequirementCoverage>) {
-    const reqs = record.biometricLogging.requirementCoverage;
-    const existing = reqs.find(r => r.requirementId === id);
-    const updated = { requirementId: id, covered: "unspecified" as CoverageStatus, aiConfirmed: false, ...existing, ...patch };
-    const requirementCoverage = reqs.some(r => r.requirementId === id)
-      ? reqs.map(r => r.requirementId === id ? updated : r)
-      : [...reqs, updated];
-    patchRecord({ biometricLogging: { ...record.biometricLogging, requirementCoverage } });
-  }
+  // Campi dell'estratto che sembrano coprire gli eventi indicati (solo suggerimento)
+  const matches = rec.sample
+    ? rec.events.map((id) => {
+        const hints = FIELD_NAME_HINTS[id] ?? [];
+        const found = rec.sample!.fields.filter((f) => hints.some((h) => f.toLowerCase().includes(h)));
+        return { id, found };
+      })
+    : [];
 
-  function acceptBiometricAi(id: string) {
-    const p = aiProposals[id];
-    if (!p) return;
-    updateBiometric(id, { covered: p.proposedCovered, evidenceField: p.evidenceFields[0], aiConfirmed: true });
-    setAiProposals(prev => { const n = { ...prev }; delete n[id]; return n; });
-  }
-
-  // ── AI copilot ─────────────────────────────────────────────────────────────
-  async function runAiAnalysis() {
-    setAnalyzing(true);
-    try {
-      const allFields = getAllDetectedFields(record);
-      const safeState = getOversightSafeState();
-      const result = await analyzeLogCoverage({
-        detectedFields: allFields,
-        systemName,
-        intendedPurpose,
-        riskTier,
-        includeBiometric: biometricApplicable === "yes",
-        oversightSafeStateDescription: safeState,
-      });
-      const proposals: typeof aiProposals = {};
-      for (const p of result.proposals) {
-        proposals[p.purposeOrRequirementId] = { proposedCovered: p.proposedCovered, evidenceFields: p.evidenceFields, rationale: p.rationale };
-      }
-      setAiProposals(proposals);
-      if (result.safeStateSuggestion) setAiSafeStateSuggestion(result.safeStateSuggestion);
-    } catch (e) {
-      showToast(e instanceof Error ? e.message : t("aiError"), "error");
-    } finally {
-      setAnalyzing(false);
-    }
-  }
-
-  // ── AI severity (preserved from original) ──────────────────────────────────
-  async function handleDescriptionBlur(description: string) {
-    if (description.length < 20) return;
-    setLoadingSeverity(true);
-    const result = await suggestEventSeverity(description, riskTier);
-    setLoadingSeverity(false);
-    if (!("error" in result)) setSeveritySuggestion(result);
-  }
-
-  // ── Save to dossier ────────────────────────────────────────────────────────
-  function saveToDossier() {
-    const completedAt = new Date().toISOString();
-    const allFields = getAllDetectedFields(record);
-    writeToStorage<LogvaultResult>("logvault", {
-      loggingEnabled: record.loggingCapabilityConfirmed === "yes",
-      // Periodo indicato dall'utente (mesi → giorni); 0 se non ancora indicato
-      retentionDays: Math.round((record.retention.retentionPolicyMonths ?? 0) * 30),
-      loggedEvents: allFields,
-      storageLocation: `LogVault — ${record.importedLogSets.length} set di log importati`,
-      accessControl: "Analisi struttura log — dati aggregati, nessun log grezzo persistito",
-      completedAt,
+  async function save() {
+    const now = new Date().toISOString();
+    const events = rec.events.map((id) => tx[`ev_${id}` as Key] ?? id);
+    writeToStorage("logvault", {
+      loggingEnabled: rec.automatic === "yes",
+      retentionDays: monthsSet ? Math.round(monthsNum * 30) : 0,
+      loggedEvents: events,
+      storageLocation: rec.location.trim(),
+      accessControl: rec.responsible.trim(),
+      completedAt: now,
     });
-    appendEvidence("log", {
-      type: "LogVault — Analisi copertura Art. 12",
-      loggingConfirmed: record.loggingCapabilityConfirmed,
-      logSets: record.importedLogSets.length,
-      totalEntries: record.importedLogSets.reduce((s, l) => s + l.entryCount, 0),
-      detectedFields: allFields.length,
-      purposesCovered: countCovered(record),
-      biometricApplicable: biometricApplicable,
-      savedAt: completedAt,
+    await appendEvidence("log", {
+      type: "Registro dei log — Artt. 12, 19, 26(6)",
+      system: active?.name ?? "",
+      role: rec.role,
+      automaticLogging: rec.automatic,
+      events,
+      biometric: rec.biometric,
+      keeper: rec.keeper,
+      storageLocation: rec.location.trim(),
+      responsible: rec.responsible.trim(),
+      retentionMonths: monthsSet ? monthsNum : null,
+      referenceDocument: rec.proofDoc.trim() || null,
+      sample: rec.sample ? { file: rec.sample.fileName, entries: rec.sample.entryCount, fields: rec.sample.fields.length, from: rec.sample.from ?? null, to: rec.sample.to ?? null } : null,
+      savedAt: now,
     }, "logvault");
-    setSavedAt(completedAt);
-    showToast(t("toast_saved"));
+    setRec((r) => ({ ...r, savedAt: now }));
+    setJustSaved(true);
   }
 
-  const allDetectedFields = getAllDetectedFields(record);
-  const covered = countCovered(record);
-  const biometricUncovered = biometricApplicable === "yes"
-    ? record.biometricLogging.requirementCoverage.filter(r => r.covered === "no").length
-    : 0;
-  const allBiometricIds = BIOMETRIC_LOG_REQUIREMENTS.map(r => r.id);
-  const totalBiometricUncovered = biometricApplicable === "yes"
-    ? allBiometricIds.filter(id => {
-        const rec = record.biometricLogging.requirementCoverage.find(r => r.requirementId === id);
-        return !rec || rec.covered === "no";
-      }).length
-    : 0;
+  const fmtDate = (s?: string) => (s ? new Date(s).toLocaleDateString(locale === "en" ? "en-GB" : "it-IT") : "?");
 
   return (
-    <div className="w-full" style={FONT}>
-      <SystemSelector checkProhibited={true} />
+    <div style={{ maxWidth: 760, color: INK }}>
+      <ToolHeader title={t("title")} subtitle={t("sub")} note={t("privacy")} />
 
-      {/* Dossier banner */}
-      {savedAt ? (
-        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-4 text-[12px]" style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}>
-          <span style={{ color: T.green }}>✓ {t("savedDossier")} · {new Date(savedAt).toLocaleDateString(loc)}</span>
-          <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium" style={{ color: T.green }}>{t("seeDossier")}</Link>
-        </div>
+      <SystemSelector checkProhibited={false} />
+
+      {!active ? (
+        <p style={{ fontSize: 13 }}>{t("noSystem")}</p>
       ) : (
-        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-4 text-[12px]" style={{ background: T.card, border: `1px solid ${T.border}` }}>
-          <span style={{ color: T.muted }}>{t("saveHint")}</span>
-          <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>{t("save")}</button>
-        </div>
-      )}
-
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
-        <div>
-          <p className="text-[11px] font-semibold uppercase mb-0.5" style={{ color: T.faint, letterSpacing: "1.2px" }}>{t("kicker")}</p>
-          <h1 className="text-2xl font-semibold" style={{ color: T.text, letterSpacing: "-0.6px" }}>Registro dei log</h1>
-          {cls && <p className="text-[11px] mt-1" style={{ color: T.muted }}>{cls.systemName} · rischio {levelLabel(cls.riskLevel)}</p>}
-        </div>
-        <div className="flex gap-2 items-center">
-          <button onClick={() => setShowConfig(v => !v)}
-            className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg font-medium"
-            style={{ background: showConfig ? "rgba(220,38,38,0.06)" : T.bg, border: `1px solid ${showConfig ? "rgba(220,38,38,0.18)" : T.border}`, color: showConfig ? T.red : T.muted }}>
-            <AlertTriangle size={13} />
-            {t("reportEvent")}
-            {showConfig ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-          </button>
-          <button
-            onClick={() => {
-              const allFields = getAllDetectedFields(record);
-              const report = { tipo: "LogVault — Evidence Export Art. 12", data: new Date().toISOString(), sistema: systemName, campiRilevati: allFields, setImportati: record.importedLogSets.map(ls => ({ file: ls.fileName, formato: ls.format, voci: ls.entryCount, campi: ls.detectedFields, intervallo: `${ls.dateRangeStart ?? "?"} – ${ls.dateRangeEnd ?? "?"}` })), finalitaCopertura: record.traceabilityCoverage };
-              const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a"); a.href = url; a.download = `logvault-evidence-${Date.now()}.json`; a.click(); URL.revokeObjectURL(url);
-            }}
-            className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg"
-            style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
-            <Download size={13} /> {t("exportEvidence")}
-          </button>
-        </div>
-      </div>
-
-      {/* Config panel (AI severity from original) */}
-      <AnimatePresence>
-        {showConfig && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden mb-4">
-            <div className="rounded-xl p-4" style={card}>
-              <div className="flex items-start gap-2.5 mb-3">
-                <AlertTriangle size={15} style={{ color: T.red, flexShrink: 0, marginTop: 1 }} />
-                <div>
-                  <p className="text-[13px] font-semibold" style={{ color: T.text }}>{t("reportAnomalyTitle")}</p>
-                  <p className="text-[11px] mt-0.5 leading-relaxed" style={{ color: T.muted }}>{t("reportAnomalyDesc")}</p>
-                </div>
-              </div>
-              <textarea value={eventDesc} onChange={e => { setEventDesc(e.target.value); setSeveritySuggestion(null); }}
-                onBlur={e => handleDescriptionBlur(e.target.value)}
-                placeholder={t("reportAnomalyPh")}
-                rows={3} style={ta} />
-              {loadingSeverity && <p className="text-[11px] mt-1" style={{ color: T.muted }}>{t("classifyingAi")}</p>}
-              {severitySuggestion && (
-                <div className="mt-2 rounded-lg p-2.5" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-                  <p className="text-[12px] font-semibold" style={{ color: T.amber }}>{t("severityDetected")} <strong>{severitySuggestion.severity.toUpperCase()}</strong></p>
-                  <p className="text-[11px] mt-0.5" style={{ color: T.muted }}>{severitySuggestion.rationale}</p>
-                  {severitySuggestion.regulatoryFlag && <p className="text-[11px] mt-0.5" style={{ color: T.red }}>⚠ {severitySuggestion.regulatoryFlag}</p>}
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Art. 12(1) triage */}
-      <div className="flex gap-4 mb-6 flex-wrap">
-
-        {/* Art. 12(1) triage */}
-        <div className="flex-1 min-w-0 rounded-xl p-4" style={card}>
-          <div className="flex items-center gap-2 mb-2">
-            <Info size={14} style={{ color: T.blue }} />
-            <span className="text-[12px] font-semibold" style={{ color: T.text }}>{t("triageTitle")}</span>
-          </div>
-          <p className="text-[11px] mb-3 leading-relaxed" style={{ color: T.muted }}>
-            {t("triageQuestion")}
-          </p>
-          <div className="flex gap-2 flex-wrap">
-            {([
-              { v: "yes" as const, l: t("triage_yes") },
-              { v: "no" as const, l: t("triage_no") },
-            ]).map(opt => (
-              <button key={opt.v} onClick={() => patchRecord({ loggingCapabilityConfirmed: opt.v })}
-                className="text-[12px] px-3 py-2 rounded-lg border"
-                style={{
-                  borderColor: record.loggingCapabilityConfirmed === opt.v ? T.blue : T.border,
-                  background: record.loggingCapabilityConfirmed === opt.v ? T.blueBg : "transparent",
-                  color: record.loggingCapabilityConfirmed === opt.v ? T.blue : T.muted,
-                  fontWeight: record.loggingCapabilityConfirmed === opt.v ? 600 : 400,
-                  cursor: "pointer",
-                }}>
-                {opt.l}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* "No logging" guide */}
-      {record.loggingCapabilityConfirmed === "no" && (
-        <div className="rounded-xl p-4 mb-6" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-          <p className="text-[12px] font-semibold mb-2" style={{ color: T.amber }}>
-            ⚠ {t("noLogTitle")}
-          </p>
-          <p className="text-[11px] leading-relaxed" style={{ color: T.text }}>
-            {t("noLogBody")}
-          </p>
-          <p className="text-[11px] mt-2" style={{ color: T.muted }}>
-            {t("noLogRef")}
-          </p>
-        </div>
-      )}
-
-      {/* Main content — show only if logging confirmed */}
-      {record.loggingCapabilityConfirmed === "yes" && (
         <>
-          {/* Privacy notice */}
-          <div className="flex items-start gap-2 rounded-lg p-3 mb-5 text-[11px]" style={{ background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
-            <Shield size={12} className="mt-0.5 flex-shrink-0" style={{ color: T.blue }} />
-            <span style={{ color: T.muted }}>
-              <span dangerouslySetInnerHTML={{ __html: t("privacyNotice") }} />
-            </span>
-          </div>
-
-          {/* ── Scaletta guidata — stati reali, scroll-spy, avanzamento persistente ── */}
-          <ToolPhaseBar
-            phases={phases}
-            currentIdx={phaseIdx}
-            status={phaseStatus}
-            activeIdx={activePhase}
-            progressPct={overallPct}
-            meta={`${phasesDone}/${phases.length} ${t("phasesWord")} · ${coveredCount}/3 ${t("purposesWord")}`}
-          />
-
-          {/* ── Import section ─────────────────────────────────────────────── */}
-          <section id="fase-carica" style={{ scrollMarginTop: 72 }} className="mb-6">
-            <PhaseHeading n={1} title={t("ph1_title")} done={logsIn}
-              sub={logsIn ? t("ph1_subDone") : t("ph1_sub")} />
-            <h2 className="text-[13px] font-semibold mb-3" style={{ color: T.text }}>{t("importRealLogs")}</h2>
-
-            {/* Existing log sets */}
-            {record.importedLogSets.length > 0 && (
-              <div className="space-y-2 mb-3">
-                {record.importedLogSets.map(ls => (
-                  <LogSetCard key={ls.id} logSet={ls} onRemove={() => removeLogSet(ls.id)} t={t} loc={loc} />
-                ))}
-              </div>
-            )}
-
-            {/* Upload warnings */}
-            {uploadWarnings.length > 0 && (
-              <div className="rounded-lg p-3 mb-3" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-                {uploadWarnings.map((w, i) => <p key={i} className="text-[11px]" style={{ color: T.amber }}>⚠ {w}</p>)}
-              </div>
-            )}
-
-            {/* Drop zone */}
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              onDragOver={e => e.preventDefault()}
-              onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFileImport(f); }}
-              className="rounded-xl border-2 border-dashed flex flex-col items-center justify-center p-6 cursor-pointer"
-              style={{ borderColor: T.border, background: T.bg }}>
-              {uploading ? <Loader2 size={20} className="animate-spin mb-2" style={{ color: T.blue }} /> : <Upload size={20} className="mb-2" style={{ color: T.muted }} />}
-              <p className="text-[12px] font-medium" style={{ color: T.text }}>{uploading ? t("analyzing") : t("dropHint")}</p>
-              <p className="text-[11px]" style={{ color: T.muted }}>{t("formats")}</p>
-              <p className="text-[11px] mt-1" style={{ color: T.faint }}>{t("rawNotSaved")}</p>
-              <input ref={fileInputRef} type="file" accept=".json,.ndjson,.jsonl,.csv,.tsv" className="hidden"
-                onChange={e => { const f = e.target.files?.[0]; if (f) handleFileImport(f); e.currentTarget.value = ""; }} />
+          <Step n={1} title={t("role_q")} done={stepDone.role}>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <Choice active={rec.role === "provider"} onClick={() => patch({ role: "provider" })}>{t("provider")}</Choice>
+              <Choice active={rec.role === "deployer"} onClick={() => patch({ role: "deployer" })}>{t("deployer")}</Choice>
             </div>
+            {rec.role && <Note>{t(isProvider ? "provider_hint" : "deployer_hint")}</Note>}
+          </Step>
 
-            {/* Summary stats */}
-            {record.importedLogSets.length > 0 && (
-              <div className="grid grid-cols-3 gap-3 mt-3">
-                {[
-                  { label: t("stat_logSets"), value: record.importedLogSets.length },
-                  { label: t("stat_totalEntries"), value: record.importedLogSets.reduce((s, l) => s + l.entryCount, 0).toLocaleString() },
-                  { label: t("stat_fieldsDetected"), value: allDetectedFields.length },
-                ].map(s => (
-                  <div key={s.label} className="rounded-lg p-3" style={card}>
-                    <div className="text-lg font-semibold" style={{ color: T.text }}>{s.value}</div>
-                    <div className="text-[10px]" style={{ color: T.muted }}>{s.label}</div>
-                  </div>
+          <Step n={2} title={t("q1")} refText={t("q1_ref")} done={stepDone.auto}>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {(["yes", "no", "unknown"] as const).map((v) => (
+                <Choice key={v} active={rec.automatic === v} onClick={() => patch({ automatic: v })}>{t(v)}</Choice>
+              ))}
+            </div>
+            {(rec.automatic === "no" || rec.automatic === "unknown") && (
+              <Note warn>{t(isProvider ? "q1_no_provider" : "q1_no_deployer")}</Note>
+            )}
+          </Step>
+
+          <Step n={3} title={t("q2")} refText={t("q2_ref")} done={stepDone.events}>
+            {!isProvider && rec.role && <Note>{t("q2_hint_deployer")}</Note>}
+            {PURPOSES.map((id) => (
+              <Check key={id} checked={rec.events.includes(id)} onChange={() => toggleEvent(id)} label={t(`ev_${id}` as Key)} />
+            ))}
+            <div style={{ marginTop: 6 }}>
+              <p style={{ fontSize: 13, margin: "0 0 8px" }}>
+                {t("q_bio")} <span style={{ fontSize: 11, marginLeft: 6 }}>{t("q_bio_ref")}</span>
+              </p>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {(["no", "yes", "unknown"] as const).map((v) => (
+                  <Choice key={v} active={rec.biometric === v} onClick={() => patch({ biometric: v })}>{t(v)}</Choice>
                 ))}
               </div>
+            </div>
+            {rec.biometric === "yes" && (
+              <>
+                <Note>{t("q_bio_list")} <span style={{ fontSize: 11 }}>Art. 12(3)</span></Note>
+                {BIOMETRIC.map((id) => (
+                  <Check key={id} checked={rec.events.includes(id)} onChange={() => toggleEvent(id)} label={t(`ev_${id}` as Key)} />
+                ))}
+              </>
             )}
-          </section>
+          </Step>
 
-          {/* ── Traceability purposes (Art. 12(2)(a)-(c)) ─────────────────── */}
-          <section className="mb-6">
-            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <Step n={4} title={t("q3")} done={stepDone.where}>
+            <p style={{ fontSize: 13, margin: 0 }}>{t("keeper_q")}</p>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <Choice active={rec.keeper === "us"} onClick={() => patch({ keeper: "us" })}>{t("keeper_us")}</Choice>
+              {!isProvider && <Choice active={rec.keeper === "provider"} onClick={() => patch({ keeper: "provider" })}>{t("keeper_provider")}</Choice>}
+              <Choice active={rec.keeper === "other"} onClick={() => patch({ keeper: "other" })}>{t("keeper_other")}</Choice>
+            </div>
+            <input style={input} placeholder={t("location")} aria-label={t("location")} value={rec.location} onChange={(e) => patch({ location: e.target.value })} />
+            <input style={input} placeholder={t("responsible")} aria-label={t("responsible")} value={rec.responsible} onChange={(e) => patch({ responsible: e.target.value })} />
+          </Step>
+
+          <Step n={5} title={t("q4")} refText={t(isProvider ? "q4_ref_provider" : "q4_ref_deployer")} done={stepDone.months}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <input
+                style={{ ...input, width: 90 }} inputMode="decimal" aria-label={t("months")}
+                value={rec.months} onChange={(e) => patch({ months: e.target.value.replace(/[^\d.,]/g, "") })}
+              />
+              <span style={{ fontSize: 13 }}>{t("months")}</span>
+            </div>
+            {!retentionDutyIsOurs ? <Note>{t("q4_keeper_provider")}</Note> : <Note warn={tooShort}>{t("q4_short")}</Note>}
+          </Step>
+
+          <Step n={6} title={`${t("q5")} (${t("q5_opt")})`} done={stepDone.proof}>
+            <input style={input} placeholder={t("q5_doc")} aria-label={t("q5_doc")} value={rec.proofDoc} onChange={(e) => patch({ proofDoc: e.target.value })} />
+            {!rec.sample ? (
               <div>
-                <h2 className="text-[13px] font-semibold" style={{ color: T.text }}>
-                  {t("traceabilityTitle")}
-                </h2>
-                <p className="text-[11px] mt-0.5" style={{ color: T.muted }}>{covered}/3 {t("purposesEvaluated")}</p>
-              </div>
-              <button onClick={runAiAnalysis} disabled={analyzing || !logsImported}
-                className="flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-lg"
-                style={{ background: "#0D1016", color: "#fff", border: "none", cursor: logsImported ? "pointer" : "not-allowed", opacity: (analyzing || !logsImported) ? 0.5 : 1 }}>
-                {analyzing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                {t("aiCoverageAnalysis")}
-              </button>
-            </div>
-
-            {logsImported ? (
-              <div className="space-y-2">
-                {TRACEABILITY_PURPOSES.map(def => (
-                  <PurposeCard
-                    key={def.id}
-                    def={def}
-                    rec={record.traceabilityCoverage.find(c => c.purposeId === def.id)}
-                    pendingProposal={aiProposals[def.id] ?? null}
-                    onUpdate={updatePurpose}
-                    onAcceptAi={acceptPurposeAi}
-                    allDetectedFields={allDetectedFields}
-                    t={t}
-                  />
-                ))}
+                <SecondaryButton onClick={() => fileRef.current?.click()} disabled={reading}>
+                  <Upload size={14} /> {t("q5_file")}
+                </SecondaryButton>
+                <input
+                  ref={fileRef} type="file" accept=".json,.ndjson,.jsonl,.csv,.tsv" hidden
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) void onFile(f); }}
+                />
+                <Note>{t("q5_file_hint")}</Note>
+                {fileError && <Note warn>{fileError}</Note>}
               </div>
             ) : (
-              <SectionEmptyState message={t("empty_traceability")} />
-            )}
-
-            {/* AI safe state suggestion */}
-            {aiSafeStateSuggestion && (
-              <div className="mt-3 rounded-lg p-3" style={{ background: T.violetBg, border: `1px solid ${T.violetBdr}` }}>
-                <p className="text-[11px] font-semibold mb-1" style={{ color: T.violet }}>✦ {t("aiVerifySafeState")}</p>
-                <p className="text-[11px] leading-relaxed" style={{ color: T.text }}>{aiSafeStateSuggestion}</p>
-                <button onClick={() => setAiSafeStateSuggestion(null)} className="text-[10px] mt-1" style={{ color: T.muted, background: "none", border: "none", cursor: "pointer" }}>{t("close")}</button>
-              </div>
-            )}
-          </section>
-
-          {/* ── §2 copertura fill-rate ── */}
-          <div id="fase-copertura" style={{ scrollMarginTop: 72 }} className="mb-6">
-            <PhaseHeading n={2} title={t("ph2_title")} done={coveredCount >= 3}
-              sub={t("ph2_sub")} />
-            {logsImported ? (
-              <>
-                <CoverageFillRatePanel record={record} t={t} />
-                <NextPhaseCta label={t("cta_toVerifica")} anchor="fase-verifica" />
-              </>
-            ) : (
-              <SectionEmptyState message={t("empty_coverage")} />
-            )}
-          </div>
-          {/* ── §3 verifica: qualità · integrità · ritenzione ── */}
-          <div id="fase-verifica" style={{ scrollMarginTop: 72 }} className="mb-6">
-            <PhaseHeading n={3} title={t("ph3_title")} done={retentionSet}
-              sub={t("ph3_sub")} />
-            {logsImported ? (
-              <>
-                <LogQualityCard logSets={record.importedLogSets} t={t} />
-                <IntegrityCard logSets={record.importedLogSets} t={t} />
-              </>
-            ) : (
-              <SectionEmptyState message={t("empty_verifica")} />
-            )}
-            {logsImported ? (
-              <>
-                <RetentionPanel record={record} onChange={(r) => patchRecord({ retention: r })} t={t} />
-                {retentionSet && <NextPhaseCta label={t("cta_toEvidenza")} anchor="fase-export" />}
-              </>
-            ) : (
-              <div className="mt-4"><SectionEmptyState message={t("empty_retention")} /></div>
-            )}
-          </div>
-
-          {/* ── Retention notes ────────────────────────────────────────────── */}
-          <section className="mb-6 rounded-xl p-4" style={card}>
-            <h2 className="text-[12px] font-semibold mb-1" style={{ color: T.text }}>
-              {t("retentionNotesTitle")}
-            </h2>
-            <p className="text-[11px] mb-3" style={{ color: T.muted }}>
-              {t("retentionNotesDesc")}
-            </p>
-            <textarea rows={3} value={record.retentionNotes ?? ""}
-              onChange={e => patchRecord({ retentionNotes: e.target.value })}
-              placeholder={t("retentionNotesPh")}
-              style={ta} />
-            <div className="mt-2">
-              <Link href="/dashboard/tools/deployer-dashboard" className="inline-flex items-center gap-1 text-[11px] font-medium" style={{ color: T.blue }}>
-                <ExternalLink size={11} /> {t("deployerLink")}
-              </Link>
-            </div>
-          </section>
-
-          {/* ── Modulo condizionale Art. 12(3) biometrico — solo se Annex III 1(a) ── */}
-          {biometricApplicableBool && (
-            <section className="mb-6">
-              <div className="flex items-center gap-3 my-4">
-                <div className="flex-1 h-px" style={{ background: T.border }} />
-                <span className="text-[11px] font-semibold uppercase tracking-wide px-2" style={{ color: T.violet }}>{t("bioModuleTitle")}</span>
-                <div className="flex-1 h-px" style={{ background: T.border }} />
-              </div>
-              {logsImported ? (
-                <div className="rounded-xl border-2 p-4" style={{ background: T.card, borderColor: T.violet }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Shield size={15} style={{ color: T.violet }} />
-                    <span className="font-semibold text-sm" style={{ color: T.text }}>{t("bioMinReqTitle")}</span>
-                  </div>
-                  {totalBiometricUncovered > 0 && (
-                    <div className="rounded-lg p-3 mb-3" style={{ background: T.redBg, border: `1px solid ${T.redBdr}` }}>
-                      <p className="text-[12px] font-semibold" style={{ color: T.red }}>
-                        {t("bioUncoveredPre")} {totalBiometricUncovered}/4 {t("bioUncoveredPost")}
-                      </p>
-                      <p className="text-[11px] mt-1" style={{ color: T.muted }}>{t("bioUncoveredHint")}</p>
-                    </div>
-                  )}
-                  <div className="space-y-2">
-                    {BIOMETRIC_LOG_REQUIREMENTS.map(def => (
-                      <BiometricCard
-                        key={def.id}
-                        def={def}
-                        rec={record.biometricLogging.requirementCoverage.find(r => r.requirementId === def.id)}
-                        pendingProposal={aiProposals[def.id] ?? null}
-                        onUpdate={updateBiometric}
-                        onAcceptAi={acceptBiometricAi}
-                        allDetectedFields={allDetectedFields}
-                        verifierRoles={verifierRoles.length > 0 ? verifierRoles : undefined}
-                        t={t}
-                      />
+              <div style={{ fontSize: 13, lineHeight: 1.6 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <strong style={{ fontWeight: 600 }}>{rec.sample.fileName}</strong>
+                  <button type="button" onClick={() => patch({ sample: null })} aria-label={t("remove")} title={t("remove")}
+                    style={{ background: "none", border: "none", cursor: "pointer", color: INK, padding: 2, display: "inline-flex" }}>
+                    <X size={14} />
+                  </button>
+                </div>
+                <div>
+                  {rec.sample.entryCount.toLocaleString()} {t("sample_entries")} · {t("sample_period")} {fmtDate(rec.sample.from)} – {fmtDate(rec.sample.to)} · {rec.sample.fields.length} {t("sample_fields")}
+                </div>
+                {matches.length > 0 && (
+                  <div style={{ marginTop: 6 }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 600 }}>{t("sample_match")}</div>
+                    {matches.map((m) => (
+                      <div key={m.id} style={{ fontSize: 12.5 }}>
+                        {t(`ev_${m.id}` as Key)}: {m.found.length ? m.found.join(", ") : t("sample_nomatch")}
+                      </div>
                     ))}
                   </div>
-                </div>
-              ) : (
-                <SectionEmptyState message={t("empty_biometric")} />
+                )}
+              </div>
+            )}
+          </Step>
+
+          <section style={{ padding: "20px 0", borderTop: `1px solid ${LINE}` }}>
+            <h2 style={{ fontSize: 15, fontWeight: 600, margin: "0 0 8px" }}>{t("status")}</h2>
+            {complete ? (
+              <Note>{t("complete")}</Note>
+            ) : (
+              <div style={{ fontSize: 13, lineHeight: 1.6 }}>
+                <span>{t("missing")}: </span>{missing.join(" · ")}
+              </div>
+            )}
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 14 }}>
+              <PrimaryButton onClick={() => void save()} disabled={!complete}>{t("save")}</PrimaryButton>
+              {(justSaved || rec.savedAt) && (
+                <span style={{ fontSize: 12.5, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <CheckCircle2 size={14} color="#15803d" /> {t("saved")}{rec.savedAt ? ` · ${fmtDate(rec.savedAt)}` : ""}
+                </span>
               )}
-            </section>
-          )}
-
-          <div id="fase-export" style={{ scrollMarginTop: 72 }}>
-            <PhaseHeading n={4} title={t("ph4_title")} done={coveredCount >= 3 && retentionSet}
-              sub={t("ph4_sub")} />
-          </div>
-
-          {/* ── §9 Export Log Conformity Statement ── */}
-          <section className="mb-6 rounded-xl p-4" style={card}>
-            <h2 className="text-[12px] font-semibold mb-1" style={{ color: T.text }}>{t("evidenceTitle")}</h2>
-            <p className="text-[11px] mb-3" style={{ color: T.muted }}>{t("evidenceDesc")}</p>
-            <div className="flex flex-wrap gap-2">
-              <button onClick={() => exportLogConformityJSON(record)}
-                className="text-[12px] font-medium px-3 py-1.5 rounded-lg"
-                style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
-                {t("exportJson")}
-              </button>
-              <button onClick={() => window.print()}
-                className="text-[12px] font-medium px-3 py-1.5 rounded-lg"
-                style={{ background: "#fff", color: T.text, border: `1px solid ${T.border}`, cursor: "pointer" }}>
-                {t("printPdf")}
-              </button>
             </div>
           </section>
-
-          {/* Save */}
-          <div className="flex justify-end">
-            <button onClick={saveToDossier} className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[12px] font-medium"
-              style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
-              <CheckCircle size={14} /> {t("saveToDossier")}
-            </button>
-          </div>
         </>
       )}
-
-
-      {/* Toast */}
-      <AnimatePresence>
-        {toast && (
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }}
-            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg"
-            style={{ background: toast.type === "error" ? "rgba(220,38,38,0.95)" : T.text, color: "#fff" }}>
-            {toast.type === "error" ? "⚠" : "✓"} {toast.msg}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

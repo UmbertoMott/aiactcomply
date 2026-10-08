@@ -104,10 +104,10 @@ function SectionHeader({ title, legalRef }: { title: string; legalRef: string })
       background: "#0D1016", borderRadius: 6, padding: "11px 18px",
       margin: "20px 0 12px",
     }}>
-      <span style={{ fontSize: 12, fontWeight: 600, color: "#fff", letterSpacing: "0.3px" }}>
+      <span style={{ fontSize: 13, fontWeight: 600, color: "#fff", letterSpacing: "0.3px" }}>
         {title}
       </span>
-      <span style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", fontWeight: 500, letterSpacing: "0.5px" }}>
+      <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", fontWeight: 500, letterSpacing: "0.5px" }}>
         {legalRef}
       </span>
     </div>
@@ -121,7 +121,7 @@ function FunctionCard({ fn }: { fn: NistFunction }) {
   return (
     <div style={{
       border: `1px solid ${fn.border}`,
-      borderRadius: 10,
+      borderRadius: 8,
       overflow: "hidden",
       marginBottom: 10,
     }}>
@@ -134,13 +134,13 @@ function FunctionCard({ fn }: { fn: NistFunction }) {
         }}
       >
         <span style={{
-          fontSize: 10, fontWeight: 700, padding: "3px 9px", borderRadius: 4,
+          fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 4,
           color: fn.color, background: `${fn.color}18`, border: `1px solid ${fn.border}`,
           letterSpacing: "0.8px", flexShrink: 0, marginTop: 1,
         }}>
           {fn.code}
         </span>
-        <span style={{ flex: 1, fontSize: 12.5, color: "#0D1016", lineHeight: 1.5 }}>
+        <span style={{ flex: 1, fontSize: 13, color: "#0D1016", lineHeight: 1.5 }}>
           {fn.desc}
         </span>
         <span style={{ color: fn.color, flexShrink: 0, marginTop: 2 }}>
@@ -156,13 +156,13 @@ function FunctionCard({ fn }: { fn: NistFunction }) {
                 <tr key={i} style={{ borderBottom: i < fn.aiActRefs.length - 1 ? "1px solid rgba(0,0,0,0.05)" : "none" }}>
                   <td style={{ padding: "7px 0", width: "28%", verticalAlign: "top" }}>
                     <span style={{
-                      fontSize: 10, fontWeight: 600, color: fn.color,
+                      fontSize: 11, fontWeight: 600, color: fn.color,
                       background: `${fn.color}12`, padding: "2px 7px", borderRadius: 4,
                     }}>
                       {ref.art}
                     </span>
                   </td>
-                  <td style={{ padding: "7px 0", fontSize: 12, color: "#0D1016", verticalAlign: "top" }}>
+                  <td style={{ padding: "7px 0", fontSize: 13, color: "#0D1016", verticalAlign: "top" }}>
                     {ref.label}
                   </td>
                 </tr>
@@ -170,14 +170,14 @@ function FunctionCard({ fn }: { fn: NistFunction }) {
             </tbody>
           </table>
 
-          <div style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.4)", letterSpacing: "0.8px", textTransform: "uppercase", marginBottom: 8 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", letterSpacing: "0.8px", textTransform: "uppercase", marginBottom: 8 }}>
             {t("subcategories_label")}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
             {fn.subcategories.map((sub, i) => (
               <div key={i} style={{
-                fontSize: 11.5, color: "rgba(0,0,0,0.65)", padding: "5px 10px",
-                background: "rgba(0,0,0,0.02)", borderRadius: 5,
+                fontSize: 11, color: "#0D1016", padding: "5px 10px",
+                background: "#FAFAF9", borderRadius: 4,
                 borderLeft: `2px solid ${fn.border}`,
               }}>
                 {sub}
@@ -196,7 +196,7 @@ export default function NistAiRmfPage() {
   return (
     <div style={{ fontFamily: FONT, color: "#0D1016" }}>
       <div style={{ marginBottom: 20 }}>
-        <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.3)", letterSpacing: "1.2px", textTransform: "uppercase", marginBottom: 4 }}>
+        <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", letterSpacing: "1.2px", textTransform: "uppercase", marginBottom: 4 }}>
           NIST AI RMF 1.0
         </p>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
@@ -205,14 +205,14 @@ export default function NistAiRmfPage() {
             NIST AI Risk Management Framework
           </h1>
         </div>
-        <p style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", margin: 0 }}>
+        <p style={{ fontSize: 13, color: "#0D1016", margin: 0 }}>
           {t("subtitle")}
         </p>
       </div>
 
       <div style={{
         background: "#fff", borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)",
-        boxShadow: "0 2px 12px rgba(0,0,0,0.06)", padding: "24px 28px",
+        boxShadow: "none", padding: "24px 28px",
       }}>
         <SectionHeader title={t("sec_overview")} legalRef="NIST AI RMF 1.0 · 2023" />
 
@@ -225,11 +225,11 @@ export default function NistAiRmfPage() {
               [t("row_compat"), t("row_compat_val")],
               [t("row_structure"), t("row_structure_val")],
             ].map(([label, value], i, arr) => (
-              <tr key={label} style={{ borderBottom: i < arr.length - 1 ? "1px solid rgba(0,0,0,0.06)" : "none" }}>
+              <tr key={label} style={{ borderBottom: i < arr.length - 1 ? "1px solid rgba(0,0,0,0.08)" : "none" }}>
                 <td style={{ padding: "9px 0", width: "38%", verticalAlign: "top" }}>
-                  <span style={{ fontSize: 12.5, fontWeight: 600, color: "#0D1016" }}>{label}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: "#0D1016" }}>{label}</span>
                 </td>
-                <td style={{ padding: "9px 0", fontSize: 12.5, color: "rgba(0,0,0,0.7)" }}>
+                <td style={{ padding: "9px 0", fontSize: 13, color: "#0D1016" }}>
                   {value}
                 </td>
               </tr>
@@ -239,7 +239,7 @@ export default function NistAiRmfPage() {
 
         <SectionHeader title={t("sec_coreFunctions")} legalRef="Reg. UE 2024/1689" />
 
-        <p style={{ fontSize: 12, color: "rgba(0,0,0,0.5)", marginBottom: 16, lineHeight: 1.6 }}>
+        <p style={{ fontSize: 13, color: "#0D1016", marginBottom: 16, lineHeight: 1.6 }}>
           {t("coreFunctions_intro")}
         </p>
 
@@ -251,8 +251,8 @@ export default function NistAiRmfPage() {
 
         <div style={{
           padding: "12px 16px", borderRadius: 8,
-          background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.06)",
-          fontSize: 12, color: "rgba(0,0,0,0.55)", lineHeight: 1.7,
+          background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.08)",
+          fontSize: 13, color: "#0D1016", lineHeight: 1.7,
         }}>
           {t("notes_body")}
           {" "}<a

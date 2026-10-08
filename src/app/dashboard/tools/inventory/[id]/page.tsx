@@ -15,25 +15,25 @@ import type { AISystem, SystemTier } from "@/lib/inventory/ai-system";
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const T = {
   text:     "#0D1016",
-  muted:    "rgba(0,0,0,0.40)",
-  faint:    "rgba(0,0,0,0.22)",
+  muted:    "#0D1016",
+  faint:    "#0D1016",
   border:   "rgba(0,0,0,0.08)",
   card:     "#ffffff",
   bg:       "#FAFAFA",
   green:    "#16a34a", greenBg: "rgba(22,163,74,0.08)",   greenBdr: "rgba(22,163,74,0.20)",
   amber:    "#d97706", amberBg: "rgba(217,119,6,0.08)",   amberBdr: "rgba(217,119,6,0.20)",
   red:      "#dc2626", redBg:   "rgba(220,38,38,0.07)",   redBdr:   "rgba(220,38,38,0.20)",
-  gray:     "#6b7280", grayBg:  "rgba(0,0,0,0.04)",       grayBdr:  "rgba(0,0,0,0.10)",
+  gray:     "#0D1016", grayBg:  "rgba(0,0,0,0.04)",       grayBdr:  "rgba(0,0,0,0.10)",
 };
 
 const TIER_CFG: Record<string, { label: string; color: string; bg: string; bdr: string }> = {
   prohibited:    { label: "Vietato",          color: "#dc2626", bg: "rgba(220,38,38,0.08)",  bdr: "rgba(220,38,38,0.25)" },
   high_risk:     { label: "Alto rischio",     color: "#ea580c", bg: "rgba(234,88,12,0.08)",  bdr: "rgba(234,88,12,0.25)" },
   limited:       { label: "Rischio limitato", color: "#d97706", bg: "rgba(217,119,6,0.08)",  bdr: "rgba(217,119,6,0.25)" },
-  minimal:       { label: "Rischio minimale", color: "#16a34a", bg: "rgba(22,163,74,0.08)",  bdr: "rgba(22,163,74,0.25)" },
+  minimal:       { label: "Rischio minimo", color: "#16a34a", bg: "rgba(22,163,74,0.08)",  bdr: "rgba(22,163,74,0.25)" },
   gpai:          { label: "GPAI",             color: "#7c3aed", bg: "rgba(124,58,237,0.07)", bdr: "rgba(124,58,237,0.22)" },
   gpai_systemic: { label: "GPAI Sistemico",   color: "#6d28d9", bg: "rgba(109,40,217,0.08)", bdr: "rgba(109,40,217,0.25)" },
-  unclassified:  { label: "Non classificato", color: "#6b7280", bg: "rgba(0,0,0,0.05)",      bdr: "rgba(0,0,0,0.12)" },
+  unclassified:  { label: "Non classificato", color: "#0D1016", bg: "rgba(0,0,0,0.05)",      bdr: "rgba(0,0,0,0.12)" },
 };
 
 const ROLE_LABELS: Record<string, string> = {
@@ -164,7 +164,7 @@ const OBLIGATIONS: Obligation[] = [
     icon: Users,
     storageKey: "aicomply_oversight_result",
     href: "/dashboard/tools/oversight",
-    toolLabel: "Supervisione",
+    toolLabel: "Sorveglianza umana",
     tiers: ["high_risk"],
     detect: raw => {
       const d = tryParse(raw);
@@ -194,11 +194,11 @@ const OBLIGATIONS: Obligation[] = [
     id: "qms",
     article: "Art. 17",
     label: "Sistema gestione qualità",
-    what: "Implementare un QMS per garantire la conformità continua ai requisiti dell'AI Act",
+    what: "Implementare un sistema di gestione della qualità per garantire la conformità continua ai requisiti dell'AI Act",
     icon: ClipboardCheck,
     storageKey: "aicomply_qms_result",
     href: "/dashboard/tools/qms",
-    toolLabel: "QMS",
+    toolLabel: "Sistema qualità",
     tiers: ["high_risk"],
     detect: raw => {
       const d = tryParse(raw);
@@ -279,12 +279,12 @@ const OBLIGATIONS: Obligation[] = [
   {
     id: "eudb",
     article: "Art. 49",
-    label: "Registrazione EUDB",
-    what: "Registrare il sistema nell'EU AI database prima dell'immissione sul mercato UE",
+    label: "Registrazione nella banca dati UE",
+    what: "Registrare il sistema nella banca dati UE prima dell'immissione sul mercato UE",
     icon: Globe,
     storageKey: "aicomply_eudb_result",
     href: "/dashboard/compliance-ops/eudb",
-    toolLabel: "EUDB",
+    toolLabel: "Banca dati UE",
     tiers: ["high_risk"],
     detect: raw => {
       const d = tryParse(raw);
@@ -315,7 +315,7 @@ const OBLIGATIONS: Obligation[] = [
     id: "gpai-transparency",
     article: "Art. 53",
     label: "Trasparenza GPAI",
-    what: "Pubblicare sommario dati di addestramento, policy copyright, istruzioni per l'integrazione",
+    what: "Pubblicare sommario dati di addestramento, politica sul diritto d'autore, istruzioni per l'integrazione",
     icon: Cpu,
     storageKey: "aicomply_gpai_result",
     href: "/dashboard/tools/gpai",
@@ -332,7 +332,7 @@ const OBLIGATIONS: Obligation[] = [
     id: "gpai-safety",
     article: "Art. 55",
     label: "Sicurezza modelli sistemici",
-    what: "Adversarial testing, red-teaming, piano di segnalazione incidenti e misure cybersecurity",
+    what: "Test contraddittori (red teaming), piano di segnalazione incidenti e misure di cibersicurezza",
     icon: Shield,
     storageKey: "aicomply_resilience_result",
     href: "/dashboard/tools/resilience",
@@ -348,12 +348,12 @@ const OBLIGATIONS: Obligation[] = [
   {
     id: "post-market",
     article: "Art. 72",
-    label: "Monitoraggio post-market",
-    what: "Piano di sorveglianza continua delle performance e segnalazione incidenti gravi",
+    label: "Monitoraggio dopo l'immissione sul mercato",
+    what: "Piano di sorveglianza continua delle prestazioni e segnalazione incidenti gravi",
     icon: Activity,
     storageKey: "aicomply_incident_result",
     href: "/dashboard/post-market",
-    toolLabel: "Post-Market",
+    toolLabel: "Monitoraggio dopo l'immissione sul mercato",
     tiers: ["high_risk"],
     detect: raw => {
       const d = tryParse(raw);
@@ -371,7 +371,7 @@ const OBLIGATIONS: Obligation[] = [
     icon: Bell,
     storageKey: "aicomply_incident_result",
     href: "/dashboard/post-market",
-    toolLabel: "Post-Market",
+    toolLabel: "Monitoraggio dopo l'immissione sul mercato",
     tiers: ["high_risk", "gpai_systemic"],
     detect: raw => {
       const d = tryParse(raw);
@@ -461,7 +461,7 @@ export default function SystemDetailPage() {
 
   if (!system) return (
     <div style={{ padding: 48, fontFamily: "'DM Sans',sans-serif" }}>
-      <p style={{ color: T.muted, fontSize: 14 }}>
+      <p style={{ color: T.muted, fontSize: 13 }}>
         Sistema non trovato.{" "}
         <Link href="/dashboard/tools/inventory" style={{ color: T.text, fontWeight: 600, textDecoration: "underline" }}>
           Torna all&apos;inventario
@@ -483,7 +483,7 @@ export default function SystemDetailPage() {
 
   const card: React.CSSProperties = {
     background: T.card, border: `1px solid ${T.border}`,
-    borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+    borderRadius: 8, boxShadow: "none",
   };
 
   const FILTER_OPTS = [
@@ -502,7 +502,7 @@ export default function SystemDetailPage() {
       {/* Breadcrumb */}
       <Link href="/dashboard/tools/inventory" style={{
         display: "inline-flex", alignItems: "center", gap: 6,
-        fontSize: 12, fontWeight: 500, color: T.muted,
+        fontSize: 13, fontWeight: 500, color: T.muted,
         textDecoration: "none", marginBottom: 20,
       }}>
         <ArrowLeft size={13} />
@@ -528,7 +528,7 @@ export default function SystemDetailPage() {
                   fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 100,
                   background: "rgba(234,88,12,0.08)", color: "#ea580c",
                   border: "1px solid rgba(234,88,12,0.20)",
-                }}>Dual-role</span>
+                }}>Doppio ruolo</span>
               )}
             </div>
             <h1 style={{ fontSize: 22, fontWeight: 700, color: T.text, margin: "0 0 4px", letterSpacing: "-0.5px" }}>
@@ -543,9 +543,9 @@ export default function SystemDetailPage() {
           {/* Score */}
           <div style={{ textAlign: "center", flexShrink: 0 }}>
             <div style={{ fontSize: 40, fontWeight: 200, color: scoreColor, lineHeight: 1, letterSpacing: "-2px" }}>
-              {pct}<span style={{ fontSize: 18, fontWeight: 300 }}>%</span>
+              {pct}<span style={{ fontSize: 15, fontWeight: 300 }}>%</span>
             </div>
-            <div style={{ fontSize: 9, color: T.faint, fontWeight: 700, letterSpacing: "0.1em", marginTop: 3 }}>
+            <div style={{ fontSize: 11, color: T.faint, fontWeight: 700, letterSpacing: "0.1em", marginTop: 3 }}>
               CONFORMITÀ
             </div>
           </div>
@@ -572,7 +572,7 @@ export default function SystemDetailPage() {
               <div style={{ fontSize: 22, fontWeight: 700, color: s.color, letterSpacing: "-0.5px", lineHeight: 1 }}>
                 {s.count}
               </div>
-              <div style={{ fontSize: 9, color: T.faint, fontWeight: 700, letterSpacing: "0.07em", marginTop: 3 }}>
+              <div style={{ fontSize: 11, color: T.faint, fontWeight: 700, letterSpacing: "0.07em", marginTop: 3 }}>
                 {s.label}
               </div>
             </div>
@@ -580,9 +580,9 @@ export default function SystemDetailPage() {
         </div>
 
         {/* Classify CTA */}
-        <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", justifyContent: "flex-end" }}>
+        <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid rgba(0,0,0,0.08)", display: "flex", justifyContent: "flex-end" }}>
           <Link href={`/dashboard/tools/inventory/${system.id}/classify`} style={{
-            fontSize: 12, fontWeight: 600, padding: "7px 18px", borderRadius: 8,
+            fontSize: 13, fontWeight: 600, padding: "7px 18px", borderRadius: 8,
             background: !system.assessedAt ? T.text : "rgba(0,0,0,0.06)",
             color: !system.assessedAt ? "white" : "#374151",
             border: `1px solid ${!system.assessedAt ? T.text : "rgba(0,0,0,0.1)"}`,
@@ -597,12 +597,12 @@ export default function SystemDetailPage() {
         <div style={{ ...card, padding: "14px 20px", marginBottom: 12 }}>
           <p style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>{engineInfo.title}</p>
           {engineInfo.notes.map((n, i) => (
-            <p key={i} style={{ fontSize: 12, color: T.muted, margin: "6px 0 0", lineHeight: 1.5 }}>{n}</p>
+            <p key={i} style={{ fontSize: 13, color: T.muted, margin: "6px 0 0", lineHeight: 1.5 }}>{n}</p>
           ))}
         </div>
       ) : (
         <div style={{ ...card, padding: "14px 20px", marginBottom: 12, borderColor: T.amberBdr, background: T.amberBg }}>
-          <p style={{ fontSize: 12.5, color: T.text, margin: 0, lineHeight: 1.5 }}>
+          <p style={{ fontSize: 13, color: T.text, margin: 0, lineHeight: 1.5 }}>
             Questo elenco è indicativo e basato solo sul livello di rischio. Usa la procedura guidata per ottenere gli obblighi esatti in base a ruolo e rischio del sistema.
           </p>
         </div>
@@ -634,7 +634,7 @@ export default function SystemDetailPage() {
           borderBottom: `1px solid ${T.border}`,
         }}>
           {["ARTICOLO", "OBBLIGO AI ACT", "STATO", "STRUMENTO"].map(h => (
-            <span key={h} style={{ fontSize: 9, fontWeight: 700, color: T.faint, letterSpacing: "0.08em" }}>{h}</span>
+            <span key={h} style={{ fontSize: 11, fontWeight: 700, color: T.faint, letterSpacing: "0.08em" }}>{h}</span>
           ))}
         </div>
 
@@ -657,7 +657,7 @@ export default function SystemDetailPage() {
             }}>
               {/* Article pill */}
               <span style={{
-                fontSize: 10, fontWeight: 700, color: T.muted,
+                fontSize: 11, fontWeight: 700, color: T.muted,
                 padding: "3px 8px", borderRadius: 6,
                 background: "rgba(0,0,0,0.035)", border: `1px solid ${T.border}`,
                 display: "inline-block", whiteSpace: "nowrap",
@@ -682,7 +682,7 @@ export default function SystemDetailPage() {
                     {o.what}
                   </div>
                   {o.note && <div style={{ fontSize: 11, color: T.amber, marginTop: 3 }}>{o.note}</div>}
-                  {o.meta && <div style={{ fontSize: 10.5, color: T.faint, marginTop: 3 }}>{o.meta}</div>}
+                  {o.meta && <div style={{ fontSize: 11, color: T.faint, marginTop: 3 }}>{o.meta}</div>}
                   {engineInfo && (
                     <button type="button" onClick={() => toggleDone(o.id)} style={{
                       marginTop: 6, fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 100, cursor: "pointer",
@@ -715,9 +715,9 @@ export default function SystemDetailPage() {
       {/* ── Normative basis ── */}
       {(system.tierBasis || system.obligationsNote) && (
         <div style={{
-          padding: "13px 18px", borderRadius: 10,
-          background: "rgba(0,0,0,0.02)", border: `1px solid ${T.border}`,
-          fontSize: 12, color: T.muted, lineHeight: 1.6,
+          padding: "13px 18px", borderRadius: 8,
+          background: "#FAFAF9", border: `1px solid ${T.border}`,
+          fontSize: 13, color: T.muted, lineHeight: 1.6,
         }}>
           {system.tierBasis && (
             <p style={{ margin: "0 0 4px" }}>

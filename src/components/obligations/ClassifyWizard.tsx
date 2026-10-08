@@ -12,12 +12,12 @@ import {
 } from "@/lib/obligations/engine";
 
 const T = {
-  text: "#0D1016", muted: "rgba(0,0,0,0.45)", faint: "rgba(0,0,0,0.25)",
+  text: "#0D1016", muted: "#0D1016", faint: "#0D1016",
   border: "rgba(0,0,0,0.08)", card: "#ffffff", bg: "#FAFAF9",
   red: "#dc2626", amber: "#b45309", green: "#15803d",
 } as const;
 
-const card: React.CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, padding: "20px 22px", marginBottom: 12 };
+const card: React.CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: "20px 22px", marginBottom: 12 };
 
 type Step = 0 | 1 | 2;
 const STEPS = ["Il tuo ruolo", "Il livello di rischio", "I tuoi obblighi"];
@@ -27,8 +27,8 @@ const STEPS = ["Il tuo ruolo", "Il livello di rischio", "I tuoi obblighi"];
 function Question({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
     <div style={card}>
-      <p style={{ fontSize: 14, fontWeight: 600, color: T.text, margin: "0 0 4px" }}>{title}</p>
-      {hint && <p style={{ fontSize: 12, color: T.muted, margin: "0 0 12px", lineHeight: 1.5 }}>{hint}</p>}
+      <p style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 4px" }}>{title}</p>
+      {hint && <p style={{ fontSize: 13, color: T.muted, margin: "0 0 12px", lineHeight: 1.5 }}>{hint}</p>}
       <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: hint ? 0 : 10 }}>{children}</div>
     </div>
   );
@@ -38,17 +38,17 @@ function Choice({ label, sub, selected, onClick, multi }: { label: string; sub?:
   return (
     <button type="button" onClick={onClick} style={{
       display: "flex", gap: 10, alignItems: "flex-start", textAlign: "left", width: "100%",
-      padding: "10px 12px", borderRadius: 9, cursor: "pointer",
+      padding: "10px 12px", borderRadius: 8, cursor: "pointer",
       border: `1px solid ${selected ? T.text : T.border}`, background: selected ? "rgba(0,0,0,0.035)" : "white",
     }}>
       <span style={{
         width: 16, height: 16, marginTop: 1, flexShrink: 0, borderRadius: multi ? 4 : 999,
-        border: `1.5px solid ${selected ? T.text : "rgba(0,0,0,0.25)"}`, background: selected ? T.text : "white",
+        border: `1.5px solid ${selected ? T.text : "#0D1016"}`, background: selected ? T.text : "white",
         display: "flex", alignItems: "center", justifyContent: "center",
       }}>{selected && <Check size={11} color="white" strokeWidth={3} />}</span>
       <span>
         <span style={{ fontSize: 13, color: T.text, display: "block", lineHeight: 1.45 }}>{label}</span>
-        {sub && <span style={{ fontSize: 11.5, color: T.muted, display: "block", marginTop: 2, lineHeight: 1.45 }}>{sub}</span>}
+        {sub && <span style={{ fontSize: 11, color: T.muted, display: "block", marginTop: 2, lineHeight: 1.45 }}>{sub}</span>}
       </span>
     </button>
   );
@@ -73,8 +73,8 @@ function ResultBox({ title, color, lines }: { title: string; color: string; line
   return (
     <div style={{ ...card, borderColor: color, background: "white" }}>
       <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: T.muted, margin: "0 0 4px" }}>ESITO PROVVISORIO</p>
-      <p style={{ fontSize: 16, fontWeight: 700, color, margin: "0 0 8px" }}>{title}</p>
-      {lines.map((l, i) => <p key={i} style={{ fontSize: 12.5, color: T.text, margin: "0 0 4px", lineHeight: 1.5 }}>{l}</p>)}
+      <p style={{ fontSize: 15, fontWeight: 700, color, margin: "0 0 8px" }}>{title}</p>
+      {lines.map((l, i) => <p key={i} style={{ fontSize: 13, color: T.text, margin: "0 0 4px", lineHeight: 1.5 }}>{l}</p>)}
     </div>
   );
 }
@@ -127,11 +127,11 @@ export default function ClassifyWizard({ initialRole = {}, initialRisk = {}, onP
             const enabled = i === 0 || (i === 1 && roleReady) || (i === 2 && roleReady && riskReady);
             return (
               <button key={label} type="button" disabled={!enabled} onClick={() => { persist(); setStep(i as Step); }} style={{
-                flex: 1, textAlign: "left", padding: "10px 12px", borderRadius: 9, cursor: enabled ? "pointer" : "default",
+                flex: 1, textAlign: "left", padding: "10px 12px", borderRadius: 8, cursor: enabled ? "pointer" : "default",
                 border: `1px solid ${step === i ? T.text : T.border}`, background: step === i ? T.text : "white",
                 color: step === i ? "white" : enabled ? T.text : T.faint,
               }}>
-                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", opacity: 0.7 }}>PASSO {i + 1}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", opacity: 0.7 }}>PASSO {i + 1}</span>
                 <span style={{ display: "block", fontSize: 13, fontWeight: 600 }}>{label}</span>
               </button>
             );
@@ -230,7 +230,7 @@ export default function ClassifyWizard({ initialRole = {}, initialRisk = {}, onP
                       </select>
                       {rk.annexIActId && (
                         <div style={{ marginTop: 8 }}>
-                          <p style={{ fontSize: 12.5, color: T.text, margin: "0 0 6px" }}>Per immetterlo sul mercato serve la valutazione di un organismo terzo per i rischi per la salute e la sicurezza? (non conta se è richiesta solo per altri rischi, es. spettro radio — Art. 6(1 quater))</p>
+                          <p style={{ fontSize: 13, color: T.text, margin: "0 0 6px" }}>Per immetterlo sul mercato serve la valutazione di un organismo terzo per i rischi per la salute e la sicurezza? (non conta se è richiesta solo per altri rischi, es. spettro radio — Art. 6(1 quater))</p>
                           <YesNo value={rk.annexIThirdParty} onChange={v => setK({ annexIThirdParty: v })} />
                         </div>
                       )}
@@ -321,18 +321,18 @@ export default function ClassifyWizard({ initialRole = {}, initialRisk = {}, onP
         {/* Navigazione */}
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: 16 }}>
           <button type="button" disabled={step === 0} onClick={() => { persist(); setStep((step - 1) as Step); }} style={{
-            fontSize: 13, padding: "9px 16px", borderRadius: 9, border: `1px solid ${T.border}`, background: "white",
+            fontSize: 13, padding: "9px 16px", borderRadius: 8, border: `1px solid ${T.border}`, background: "white",
             color: step === 0 ? T.faint : T.text, cursor: step === 0 ? "default" : "pointer",
           }}>Indietro</button>
           {step < 2 ? (
             <button type="button" disabled={step === 0 ? !roleReady : !riskReady} onClick={() => { persist(); setStep((step + 1) as Step); }} style={{
-              fontSize: 13, fontWeight: 600, padding: "9px 18px", borderRadius: 9, border: "none",
-              background: (step === 0 ? roleReady : riskReady) ? T.text : "rgba(0,0,0,0.15)", color: "white",
+              fontSize: 13, fontWeight: 600, padding: "9px 18px", borderRadius: 8, border: "none",
+              background: (step === 0 ? roleReady : riskReady) ? T.text : "#0D1016", color: "white",
               cursor: (step === 0 ? roleReady : riskReady) ? "pointer" : "default", display: "inline-flex", alignItems: "center", gap: 6,
             }}>Avanti <ArrowRight size={14} /></button>
           ) : (
             <button type="button" disabled={finishDisabled} onClick={() => onFinish(state)} style={{
-              fontSize: 13, fontWeight: 600, padding: "9px 18px", borderRadius: 9, border: "none",
+              fontSize: 13, fontWeight: 600, padding: "9px 18px", borderRadius: 8, border: "none",
               background: finishDisabled ? "rgba(0,0,0,0.15)" : T.text, color: "white", cursor: finishDisabled ? "default" : "pointer",
             }}>{finishLabel}</button>
           )}

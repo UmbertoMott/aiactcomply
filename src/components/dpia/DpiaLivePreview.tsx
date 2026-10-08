@@ -8,13 +8,13 @@ import { getWp248Criteria } from "@/lib/dpia/dpia-template";
 const DOC = {
   bg:        "#ffffff",
   pageBg:    "#f5f4f0",
-  text:      "#1a1a1a",
-  muted:     "rgba(0,0,0,0.38)",
+  text:      "#0D1016",
+  muted:     "#0D1016",
   border:    "rgba(0,0,0,0.10)",
   headerBg:  "#0D1016",
   headerFg:  "#ffffff",
   sectionBg: "#f0eeea",
-  labelFg:   "rgba(0,0,0,0.50)",
+  labelFg:   "#0D1016",
   empty:     "rgba(0,0,0,0.18)",
   emptyBg:   "rgba(0,0,0,0.03)",
   green:     "#23403a",
@@ -51,16 +51,16 @@ function Placeholder({ label }: { label: string }) {
 // Layout tabellare identico al Risk Register: label bold sinistra | valore destra
 function Field({ label, value, placeholder }: { label: string; value: string | null; placeholder: string }) {
   return (
-    <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+    <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
       <td data-noedit="true" style={{
         padding: "8px 12px 8px 0",
         fontWeight: 700, color: "#0D1016",
         width: "40%", verticalAlign: "top",
-        fontSize: 12.5, lineHeight: 1.5,
+        fontSize: 13, lineHeight: 1.5,
       }}>
         {label}
       </td>
-      <td style={{ padding: "8px 0", color: DOC.text, lineHeight: 1.6, fontSize: 12.5, verticalAlign: "top" }}>
+      <td style={{ padding: "8px 0", color: DOC.text, lineHeight: 1.6, fontSize: 13, verticalAlign: "top" }}>
         {value
           ? <span style={{ whiteSpace: "pre-wrap" }}>{value}</span>
           : <Placeholder label={placeholder} />
@@ -91,7 +91,7 @@ function SectionHeader({ id, title, legalRef }: { id: string; title: string; leg
       display: "flex", alignItems: "center", justifyContent: "space-between",
     }}>
       <span style={{ fontSize: 13, fontWeight: 700, fontFamily: SANS }}>{title}</span>
-      <span style={{ fontSize: 9.5, opacity: 0.5, letterSpacing: "0.05em", fontFamily: SANS, whiteSpace: "nowrap", marginLeft: 12 }}>
+      <span style={{ fontSize: 11, opacity: 0.5, letterSpacing: "0.05em", fontFamily: SANS, whiteSpace: "nowrap", marginLeft: 12 }}>
         {legalRef}
       </span>
     </div>
@@ -119,7 +119,7 @@ function ScreeningSection({ doc }: { doc: DpiaGuidedDoc }) {
   return (
     <>
       <SectionHeader id="sec-screening" title={t("dlp_screeningTitle")} legalRef="GDPR Art. 35(1) + WP248" />
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 10, marginBottom: 8 }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, marginBottom: 8 }}>
         <thead>
           <tr style={{ background: DOC.sectionBg }}>
             <th style={{ padding: "5px 8px", textAlign: "left", fontWeight: 600, width: "5%", border: `1px solid ${DOC.border}` }}>#</th>
@@ -134,7 +134,7 @@ function ScreeningSection({ doc }: { doc: DpiaGuidedDoc }) {
               <td style={{ padding: "4px 8px", border: `1px solid ${DOC.border}`, color: DOC.muted }}>{r.idx + 1}</td>
               <td style={{ padding: "4px 8px", border: `1px solid ${DOC.border}` }}>
                 <span style={{ fontWeight: r.applies === "yes" ? 600 : 400 }}>{criterionLabel(r.idx)}</span>
-                <span style={{ fontSize: 8, color: DOC.muted, marginLeft: 4 }}>{criterionRef(r.idx)}</span>
+                <span style={{ fontSize: 11, color: DOC.muted, marginLeft: 4 }}>{criterionRef(r.idx)}</span>
               </td>
               <td style={{ padding: "4px 8px", border: `1px solid ${DOC.border}`, textAlign: "center" }}>
                 {r.applies === "yes"     ? <span style={{ color: DOC.amber, fontWeight: 700 }}>{t("yes")}</span>
@@ -143,14 +143,14 @@ function ScreeningSection({ doc }: { doc: DpiaGuidedDoc }) {
                  : <Placeholder label="?" />}
               </td>
               <td style={{ padding: "4px 8px", border: `1px solid ${DOC.border}`, color: DOC.text }}>
-                {r.val ? <span style={{ fontSize: 10 }}>{r.val.length > 120 ? r.val.slice(0, 117) + "…" : r.val}</span> : <Placeholder label={t("dlp_answer")} />}
+                {r.val ? <span style={{ fontSize: 11 }}>{r.val.length > 120 ? r.val.slice(0, 117) + "…" : r.val}</span> : <Placeholder label={t("dlp_answer")} />}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
       {metCount >= 2 && (
-        <p style={{ fontSize: 10, fontWeight: 700, color: DOC.amber, margin: "0 0 4px", padding: "4px 8px", background: DOC.amberBg, borderRadius: 3 }}>
+        <p style={{ fontSize: 11, fontWeight: 700, color: DOC.amber, margin: "0 0 4px", padding: "4px 8px", background: DOC.amberBg, borderRadius: 4 }}>
           ⚠ {metCount}/9 {t("dlp_criteriaMet")}
         </p>
       )}
@@ -207,7 +207,7 @@ function NecessitySection({ doc }: { doc: DpiaGuidedDoc }) {
         </tbody>
       </table>
       <div style={{ height: 1, background: DOC.border, margin: "10px 0" }} />
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 10 }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
         <thead>
           <tr style={{ background: DOC.sectionBg }}>
             <th style={{ padding: "4px 8px", textAlign: "left", border: `1px solid ${DOC.border}` }}>{t("colPrinciple")}</th>
@@ -245,7 +245,7 @@ function RisksSection({ doc }: { doc: DpiaGuidedDoc }) {
   return (
     <>
       <SectionHeader id="sec-risks" title={t("dlp_secC")} legalRef="GDPR Art. 35(7)(c)" />
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 10, marginBottom: 10 }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, marginBottom: 10 }}>
         <thead>
           <tr style={{ background: DOC.sectionBg }}>
             <th style={{ padding: "4px 8px", textAlign: "left", border: `1px solid ${DOC.border}`, width: "25%" }}>{t("dlp_fearedEvent")}</th>
@@ -256,7 +256,7 @@ function RisksSection({ doc }: { doc: DpiaGuidedDoc }) {
           {threats.map(th => (
             <tr key={th.id}>
               <td style={{ padding: "4px 8px", border: `1px solid ${DOC.border}`, fontWeight: 600 }}>
-                {th.label}<br /><span style={{ fontSize: 8, color: DOC.muted, fontWeight: 400 }}>{th.cat}</span>
+                {th.label}<br /><span style={{ fontSize: 11, color: DOC.muted, fontWeight: 400 }}>{th.cat}</span>
               </td>
               <td style={{ padding: "4px 8px", border: `1px solid ${DOC.border}` }}>
                 {doneValue(doc, th.id) ?? <Placeholder label={t("dlp_ph_scenario")} />}
@@ -314,10 +314,10 @@ function PartiesSection({ doc }: { doc: DpiaGuidedDoc }) {
       </div>
       {priorConsult?.toLowerCase().startsWith("sì") && (
         <div style={{ padding: "6px 10px", borderRadius: 4, background: DOC.redBg, border: `1px solid ${DOC.redBdr}`, marginBottom: 8 }}>
-          <p style={{ fontSize: 10, fontWeight: 700, color: DOC.red, margin: 0 }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: DOC.red, margin: 0 }}>
             ⚠ {t("dlp_art36Title")}
           </p>
-          <p style={{ fontSize: 9, color: DOC.red, margin: "2px 0 0", opacity: 0.8 }}>
+          <p style={{ fontSize: 11, color: DOC.red, margin: "2px 0 0", opacity: 0.8 }}>
             {t("dlp_art36Body")}
 
           </p>
@@ -349,7 +349,7 @@ function SignoffSection({ doc }: { doc: DpiaGuidedDoc }) {
     <>
       <SectionHeader id="sec-signoff" title={t("dlp_secSignoff")} legalRef="GDPR Art. 35 / Art. 36" />
       <div style={{
-        padding: "8px 12px", borderRadius: 4, fontSize: 12, fontWeight: 700, marginBottom: 10,
+        padding: "8px 12px", borderRadius: 4, fontSize: 13, fontWeight: 700, marginBottom: 10,
         color: compliantColor,
         background: compliant ? (compliantColor === DOC.red ? DOC.redBg : compliantColor === DOC.amber ? DOC.amberBg : DOC.greenBg) : DOC.emptyBg,
         border: `1px solid ${compliant ? (compliantColor === DOC.red ? DOC.redBdr : compliantColor === DOC.amber ? DOC.amberBdr : DOC.greenBdr) : DOC.border}`,
@@ -373,7 +373,7 @@ function SignoffSection({ doc }: { doc: DpiaGuidedDoc }) {
           t("lp_date2"),
         ].map(label => (
           <div key={label}>
-            <p style={{ fontSize: 9, fontWeight: 700, color: DOC.labelFg, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 16px" }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: DOC.labelFg, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 16px" }}>
               {label}
             </p>
             <div style={{ borderBottom: `1px solid ${DOC.border}`, height: 24 }} />
@@ -382,7 +382,7 @@ function SignoffSection({ doc }: { doc: DpiaGuidedDoc }) {
       </div>
 
       <div style={{ marginTop: 12 }}>
-        <p style={{ fontSize: 9, color: DOC.muted, margin: 0 }}>
+        <p style={{ fontSize: 11, color: DOC.muted, margin: 0 }}>
           {DPIA_TEMPLATE_META.disclaimer}
         </p>
       </div>
@@ -404,23 +404,23 @@ export function DpiaLivePreview({ doc, activeSection }: DpiaLivePreviewProps) {
   const DPIA_TEMPLATE_META = getDpiaTemplateMeta(locale, tg);
   void activeSection;
   return (
-    <div style={{ background: "#FAFAFA", minHeight: "100%", padding: "16px" }}>
+    <div style={{ background: "#FAFAF9", minHeight: "100%", padding: "16px" }}>
       <div style={{
         background: DOC.bg, borderRadius: 8, padding: "28px 32px",
         border: "1px solid rgba(0,0,0,0.08)",
-        boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+        boxShadow: "none",
         fontFamily: "Georgia, 'Times New Roman', serif",
         fontSize: 13, color: DOC.text, lineHeight: 1.7,
       }}>
         {/* Intestazione documento */}
         <div data-noedit="true" style={{ marginBottom: 20, paddingBottom: 14, borderBottom: `2px solid ${DOC.headerBg}` }}>
-          <p style={{ fontSize: 9, fontWeight: 700, color: DOC.muted, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px", fontFamily: SANS }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: DOC.muted, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px", fontFamily: SANS }}>
             {DPIA_TEMPLATE_META.legalBasis}
           </p>
-          <h1 className="doc-title" style={{ fontSize: 17, fontWeight: 700, color: DOC.text, margin: "0 0 6px", fontFamily: SANS }}>
+          <h1 className="doc-title" style={{ fontSize: 15, fontWeight: 700, color: DOC.text, margin: "0 0 6px", fontFamily: SANS }}>
             {DPIA_TEMPLATE_META.title}
           </h1>
-          <p style={{ fontSize: 10, color: DOC.muted, margin: 0, fontFamily: SANS }}>
+          <p style={{ fontSize: 11, color: DOC.muted, margin: 0, fontFamily: SANS }}>
             {t("lp_methodology2")}: {DPIA_TEMPLATE_META.methodology}
           </p>
         </div>

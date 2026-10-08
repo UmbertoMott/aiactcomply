@@ -10,8 +10,8 @@ type TFn = (key: string) => string;
 // ─── Design tokens (allineati alla pagina AGID/ACN) ──────────────────────────
 const T = {
   text:    "#0D1016",
-  muted:   "rgba(0,0,0,0.45)",
-  faint:   "rgba(0,0,0,0.28)",
+  muted:   "#0D1016",
+  faint:   "#0D1016",
   border:  "rgba(0,0,0,0.07)",
   card:    "#ffffff",
   // Rosso tenue per il divieto (unico colore semantico reale ammesso)
@@ -23,7 +23,7 @@ const T = {
 
 const MONO: React.CSSProperties = {
   fontFamily: "'DM Mono', monospace",
-  fontSize: 10,
+  fontSize: 11,
   letterSpacing: "0.04em",
 };
 
@@ -88,7 +88,7 @@ function PracticeRow({ p, t }: { p: Practice; t: TFn }) {
         </span>
 
         <div className="flex-1 min-w-0">
-          <p className="text-[12px] font-semibold" style={{ color: T.text }}>
+          <p className="text-[13px] font-semibold" style={{ color: T.text }}>
             {p.title}
           </p>
           <p className="text-[11px] mt-0.5 leading-relaxed" style={{ color: T.muted }}>
@@ -115,7 +115,7 @@ function PracticeRow({ p, t }: { p: Practice; t: TFn }) {
               style={{ borderTop: `1px solid ${T.border}`, paddingTop: 12 }}
             >
               {/* Descrizione normativa */}
-              <p className="text-[11px] leading-relaxed" style={{ color: "rgba(0,0,0,0.55)" }}>
+              <p className="text-[11px] leading-relaxed" style={{ color: "#0D1016" }}>
                 {p.description}
               </p>
 
@@ -125,7 +125,7 @@ function PracticeRow({ p, t }: { p: Practice; t: TFn }) {
                 style={{ background: T.rowBg, border: `1px solid ${T.border}` }}
               >
                 <p
-                  className="text-[10px] font-semibold uppercase mb-1"
+                  className="text-[11px] font-semibold uppercase mb-1"
                   style={{ ...MONO, color: T.faint }}
                 >
                   {t("art5_example_lbl")}
@@ -138,7 +138,7 @@ function PracticeRow({ p, t }: { p: Practice; t: TFn }) {
               {/* Chi è a rischio */}
               <div>
                 <p
-                  className="text-[10px] font-semibold uppercase mb-1"
+                  className="text-[11px] font-semibold uppercase mb-1"
                   style={{ ...MONO, color: T.faint }}
                 >
                   {t("lbl_whoRisk")}
@@ -168,15 +168,15 @@ export function ProhibitedPracticesArt5() {
     <div className="space-y-3 mt-3">
       {/* Banner rischio inaccettabile */}
       <div
-        className="flex items-start gap-3 rounded-xl px-4 py-3"
+        className="flex items-start gap-3 rounded-lg px-4 py-3"
         style={{ background: T.redBg, border: `1px solid ${T.redBdr}` }}
       >
         <AlertOctagon size={15} style={{ color: T.red, flexShrink: 0, marginTop: 1 }} />
         <div>
-          <p className="text-[12px] font-semibold mb-0.5" style={{ color: T.red }}>
+          <p className="text-[13px] font-semibold mb-0.5" style={{ color: T.red }}>
             {t("art5_banner_title")}
           </p>
-          <p className="text-[11px] leading-relaxed" style={{ color: "rgba(0,0,0,0.50)" }}
+          <p className="text-[11px] leading-relaxed" style={{ color: "#0D1016" }}
             dangerouslySetInnerHTML={{ __html: t("art5_banner_body") }} />
         </div>
       </div>
@@ -190,7 +190,7 @@ export function ProhibitedPracticesArt5() {
 
       {/* Nota metodologica */}
       <p
-        className="text-[10px] leading-relaxed"
+        className="text-[11px] leading-relaxed"
         style={{ ...MONO, color: T.faint }}
       >
         {t("art5_source")}

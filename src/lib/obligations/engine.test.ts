@@ -119,7 +119,7 @@ test("GPAI open source senza rischio sistemico: esonero da 53(1)(a)-(b) ma non d
   assert.ok(sys.ids.includes("art53-a") && sys.ids.includes("art55") && sys.ids.includes("art52"));
 });
 
-test("Sistema già in servizio prima del 2/8/2026 usato da autorità pubblica: termine 2/8/2030", () => {
+test("Sistema già in servizio prima dell'applicazione del Capo III (2/12/2027 per l'Allegato III) usato da autorità pubblica: termine 2/8/2030", () => {
   const r = run({ ...DEPLOYER, publicStatus: "public_authority" }, { aiDefinition: "infers", annexIII: ["5a"], profiling: true, legacyNoSignificantChange: true });
   assert.equal(r.obl.obligations.find(o => o.id === "art26-1")!.appliesFrom, "2030-08-02");
 });
@@ -166,7 +166,7 @@ test("Menu: i tool necessari derivano dagli obblighi dei sistemi classificati", 
   assert.equal(n.assessed, 2);
   assert.deepEqual(n.roles, ["deployer"]);
   assert.deepEqual(n.tools["/dashboard/tools/literacy"].systems, ["Selezione CV", "ChatGPT email"]);
-  for (const href of ["/dashboard/tools/deployer-dashboard", "/dashboard/tools/oversight", "/dashboard/tools/logvault", "/dashboard/tools/dpia", "/dashboard/post-market", "/dashboard/tools/drift-monitor"]) {
+  for (const href of ["/dashboard/tools/deployer-dashboard", "/dashboard/tools/oversight", "/dashboard/tools/logvault", "/dashboard/tools/dpia", "/dashboard/post-market"]) {
     assert.deepEqual(n.tools[href]?.systems, ["Selezione CV"], href);
   }
   for (const href of ["/dashboard/tools/risk-manager", "/dashboard/tools/qms", "/dashboard/tools/conformity", "/dashboard/tools/fria"]) {
@@ -177,4 +177,10 @@ test("Menu: i tool necessari derivano dagli obblighi dei sistemi classificati", 
 test("Menu: chi dichiara una circostanza dell'Art. 25 vede il cambio di ruolo", () => {
   const n = toolNeeds([{ name: "Chatbot", roleAnswers: { ...DEPLOYER, art25: ["own_brand"] }, riskAnswers: { aiDefinition: "infers", interactsWithPersons: true } }]);
   assert.ok(n.tools["/dashboard/compliance-ops/provider-transition"]);
+});
+
+test("Allegato I, sezione B: al deployer non si applicano gli Artt. 26-27 (Art. 2(2) come modificato dal Reg. 2026/1744)", () => {
+  const r = run(DEPLOYER, { aiDefinition: "infers", annexIActId: "two_three_wheel", annexIThirdParty: true });
+  assert.equal(r.risk.category, "high_risk_annex_i");
+  assert.ok(!r.ids.some(id => id.startsWith("art26") || id === "art27"));
 });

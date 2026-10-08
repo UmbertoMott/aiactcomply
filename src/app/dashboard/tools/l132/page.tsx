@@ -85,7 +85,7 @@ const DEEPFAKE_REQUIREMENTS = [
 ];
 
 const ACCESSIBILITY_REQUIREMENTS = [
-  "Le spiegazioni fornite dal sistema sono comprensibili per un utente non tecnico (readability score target: ≤ licenza media)",
+  "Le spiegazioni fornite dal sistema sono comprensibili per un utente non tecnico (obiettivo di leggibilità: ≤ licenza media)",
   "L'interfaccia è accessibile (contrasto colori, screen reader, navigazione da tastiera)",
   "In caso di decisione automatizzata che impatta l'utente, è fornita una spiegazione in linguaggio non tecnico",
   "I messaggi di errore e le limitazioni del sistema sono comunicati chiaramente",
@@ -95,8 +95,8 @@ const ACCESSIBILITY_REQUIREMENTS = [
 
 const card: React.CSSProperties = {
   background: "#ffffff",
-  border: "1px solid rgba(0,0,0,0.07)",
-  boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+  border: "1px solid rgba(0,0,0,0.08)",
+  boxShadow: "none",
   borderRadius: "12px",
 };
 
@@ -104,8 +104,8 @@ const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "7px 10px",
   borderRadius: "8px",
-  border: "1px solid rgba(0,0,0,0.07)",
-  fontSize: "12px",
+  border: "1px solid rgba(0,0,0,0.08)",
+  fontSize: 13,
   color: "#0D1016",
   background: "#fff",
   outline: "none",
@@ -136,7 +136,7 @@ const STATUS_META: Record<
   non_applicabile: {
     labelKey: "st_nonApplicabile",
     bg: "rgba(0,0,0,0.04)",
-    color: "rgba(0,0,0,0.45)",
+    color: "#0D1016",
     border: "rgba(0,0,0,0.1)",
   },
 };
@@ -434,24 +434,24 @@ function SectionHeader({
         <div>
           <div className="flex items-center gap-2">
             <h2
-              className="text-[14px] font-semibold"
+              className="text-[13px] font-semibold"
               style={{ color: "#0D1016" }}
             >
               {title}
             </h2>
             <span
-              className="text-[10px] px-1.5 py-0.5 rounded font-medium"
+              className="text-[11px] px-1.5 py-0.5 rounded font-medium"
               style={{
                 background: "rgba(0,0,0,0.05)",
-                color: "rgba(0,0,0,0.45)",
+                color: "#0D1016",
               }}
             >
               {article}
             </span>
           </div>
           <p
-            className="text-[12px] mt-0.5 leading-relaxed"
-            style={{ color: "rgba(0,0,0,0.55)" }}
+            className="text-[13px] mt-0.5 leading-relaxed"
+            style={{ color: "#0D1016" }}
           >
             {description}
           </p>
@@ -487,14 +487,14 @@ function CheckItem({
             ? "1px solid rgba(22,163,74,0.15)"
             : value === false
             ? "1px solid rgba(220,38,38,0.12)"
-            : "1px solid rgba(0,0,0,0.06)",
+            : "1px solid rgba(0,0,0,0.08)",
       }}
     >
       <div className="flex items-end gap-2 mt-0.5 flex-shrink-0">
         {/* Sì */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
           <span style={{
-            fontSize: 9, fontWeight: 600, letterSpacing: "0.05em",
+            fontSize: 11, fontWeight: 600, letterSpacing: "0.05em",
             color: value === true ? "#15803d" : "rgba(0,0,0,0.28)",
             transition: "color 0.15s",
           }}>{t("yes")}</span>
@@ -515,7 +515,7 @@ function CheckItem({
         {/* No */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
           <span style={{
-            fontSize: 9, fontWeight: 600, letterSpacing: "0.05em",
+            fontSize: 11, fontWeight: 600, letterSpacing: "0.05em",
             color: value === false ? "#dc2626" : "rgba(0,0,0,0.28)",
             transition: "color 0.15s",
           }}>{t("no")}</span>
@@ -534,7 +534,7 @@ function CheckItem({
           </button>
         </div>
       </div>
-      <p className="text-[12px] leading-relaxed" style={{ color: "#0D1016" }}>
+      <p className="text-[13px] leading-relaxed" style={{ color: "#0D1016" }}>
         {label}
       </p>
     </div>
@@ -556,7 +556,7 @@ function NotesField({
     <div className="mt-3">
       <label
         className="block text-[11px] font-medium mb-1"
-        style={{ color: "rgba(0,0,0,0.45)" }}
+        style={{ color: "#0D1016" }}
       >
         {t("notesLabel")}
       </label>
@@ -690,14 +690,14 @@ export default function L132Page() {
 
       {/* ── DB Sync Banner ─────────────────────────────────────────────────── */}
       {aiSystems.length > 0 && (
-        <div className="flex items-center gap-3 rounded-lg px-4 py-2.5 mb-4 text-[12px]"
+        <div className="flex items-center gap-3 rounded-lg px-4 py-2.5 mb-4 text-[13px]"
           style={{ background: "rgba(220,38,38,0.04)", border: "1px solid rgba(220,38,38,0.12)" }}>
           <Scale className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#dc2626" }} />
-          <span style={{ color: "rgba(0,0,0,0.45)" }}>{t("aiSystemLabel")}</span>
+          <span style={{ color: "#0D1016" }}>{t("aiSystemLabel")}</span>
           <select
             value={aiSystemId || ""}
             onChange={(e) => setAiSystemId(e.target.value || null)}
-            className="text-[12px] bg-transparent outline-none flex-1"
+            className="text-[13px] bg-transparent outline-none flex-1"
             style={{ color: "#0D1016" }}
           >
             <option value="">{t("selectAiSystem")}</option>
@@ -717,7 +717,7 @@ export default function L132Page() {
       <div className="mb-6">
         <div className="flex items-start gap-3">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+            className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
             style={{ background: "rgba(13,16,22,0.06)" }}
           >
             <Scale className="h-5 w-5" style={{ color: "#0D1016" }} />
@@ -725,13 +725,13 @@ export default function L132Page() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h1
-                className="text-[18px] font-semibold"
+                className="text-[15px] font-semibold"
                 style={{ color: "#0D1016" }}
               >
                 L.132/2025 — AI Italia
               </h1>
               <span
-                className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
                 style={{
                   background: "rgba(220,38,38,0.08)",
                   color: "#dc2626",
@@ -742,14 +742,14 @@ export default function L132Page() {
               </span>
             </div>
             <p
-              className="text-[12px] mt-0.5"
-              style={{ color: "rgba(0,0,0,0.45)" }}
+              className="text-[13px] mt-0.5"
+              style={{ color: "#0D1016" }}
             >
               {t("subtitle")}
             </p>
             <p
               className="text-[11px] mt-1 leading-relaxed"
-              style={{ color: "rgba(0,0,0,0.35)" }}
+              style={{ color: "#0D1016" }}
             >
               {t("intro")}
             </p>
@@ -768,7 +768,7 @@ export default function L132Page() {
         <div className="space-y-4">
           <div>
             <label
-              className="block text-[12px] font-medium mb-1"
+              className="block text-[13px] font-medium mb-1"
               style={{ color: "#0D1016" }}
             >
               {t("systemNameLabel")}
@@ -782,7 +782,7 @@ export default function L132Page() {
           </div>
           <div>
             <label
-              className="block text-[12px] font-medium mb-1"
+              className="block text-[13px] font-medium mb-1"
               style={{ color: "#0D1016" }}
             >
               {t("systemTypeLabel")}
@@ -801,7 +801,7 @@ export default function L132Page() {
           </div>
           <div>
             <label
-              className="block text-[12px] font-medium mb-2"
+              className="block text-[13px] font-medium mb-2"
               style={{ color: "#0D1016" }}
             >
               {t("deployedItalyQ")}
@@ -816,13 +816,13 @@ export default function L132Page() {
                 <button
                   key={label}
                   onClick={() => update("deployedInItaly", v)}
-                  className="px-5 py-2 rounded-lg text-[12px] font-medium transition-all"
+                  className="px-5 py-2 rounded-lg text-[13px] font-medium transition-all"
                   style={
                     form.deployedInItaly === v
                       ? { background: "#0D1016", color: "#fff" }
                       : {
                           background: "rgba(0,0,0,0.05)",
-                          color: "rgba(0,0,0,0.55)",
+                          color: "#0D1016",
                         }
                   }
                 >
@@ -844,7 +844,7 @@ export default function L132Page() {
               className="h-4 w-4 flex-shrink-0 mt-0.5"
               style={{ color: "#2563eb" }}
             />
-            <p className="text-[11px]" style={{ color: "rgba(0,0,0,0.6)" }}>
+            <p className="text-[11px]" style={{ color: "#0D1016" }}>
               {t("notDeployedNote")}
             </p>
           </div>
@@ -865,7 +865,7 @@ export default function L132Page() {
             background: form.requiresHRNotice
               ? "rgba(0,0,0,0.03)"
               : "rgba(0,0,0,0.02)",
-            border: "1px solid rgba(0,0,0,0.07)",
+            border: "1px solid rgba(0,0,0,0.08)",
           }}
           onClick={() => update("requiresHRNotice", !form.requiresHRNotice)}
         >
@@ -876,7 +876,7 @@ export default function L132Page() {
             className="rounded"
             onClick={(e) => e.stopPropagation()}
           />
-          <p className="text-[12px] font-medium" style={{ color: "#0D1016" }}>
+          <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
             {t("hrToggle")}
           </p>
         </div>
@@ -901,8 +901,8 @@ export default function L132Page() {
         )}
         {!form.requiresHRNotice && (
           <p
-            className="text-[12px]"
-            style={{ color: "rgba(0,0,0,0.35)" }}
+            className="text-[13px]"
+            style={{ color: "#0D1016" }}
           >
             {t("hrNotApplicable")}
           </p>
@@ -952,7 +952,7 @@ export default function L132Page() {
               : "rgba(0,0,0,0.02)",
             border: form.isDeepfakeRisk
               ? "1px solid rgba(220,38,38,0.15)"
-              : "1px solid rgba(0,0,0,0.07)",
+              : "1px solid rgba(0,0,0,0.08)",
           }}
           onClick={() => update("isDeepfakeRisk", !form.isDeepfakeRisk)}
         >
@@ -963,7 +963,7 @@ export default function L132Page() {
             className="rounded"
             onClick={(e) => e.stopPropagation()}
           />
-          <p className="text-[12px] font-medium" style={{ color: "#0D1016" }}>
+          <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
             {t("dfToggle")}
           </p>
         </div>
@@ -1014,7 +1014,7 @@ export default function L132Page() {
               className="h-4 w-4 flex-shrink-0"
               style={{ color: "#15803d" }}
             />
-            <p className="text-[12px]" style={{ color: "#15803d" }}>
+            <p className="text-[13px]" style={{ color: "#15803d" }}>
               {t("dfNotApplicable")}
             </p>
           </div>
@@ -1088,8 +1088,8 @@ export default function L132Page() {
                 key={area.areaId}
                 className="rounded-lg p-3"
                 style={{
-                  background: "rgba(0,0,0,0.02)",
-                  border: "1px solid rgba(0,0,0,0.06)",
+                  background: "#FAFAF9",
+                  border: "1px solid rgba(0,0,0,0.08)",
                 }}
               >
                 <p
@@ -1118,16 +1118,16 @@ export default function L132Page() {
                       />
                     </div>
                     <p
-                      className="text-[10px]"
-                      style={{ color: "rgba(0,0,0,0.4)" }}
+                      className="text-[11px]"
+                      style={{ color: "#0D1016" }}
                     >
                       {checkedCount}/{total} {t("requirementsWord")}
                     </p>
                   </>
                 ) : (
                   <p
-                    className="text-[10px]"
-                    style={{ color: "rgba(0,0,0,0.35)" }}
+                    className="text-[11px]"
+                    style={{ color: "#0D1016" }}
                   >
                     {t("notApplicable")}
                   </p>
@@ -1140,7 +1140,7 @@ export default function L132Page() {
         {/* Remediation */}
         <div className="mb-5">
           <label
-            className="block text-[12px] font-medium mb-1"
+            className="block text-[13px] font-medium mb-1"
             style={{ color: "#0D1016" }}
           >
             {t("remediationLabel")}
@@ -1158,7 +1158,7 @@ export default function L132Page() {
         <div className="flex gap-3 flex-wrap">
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-[12px] font-medium transition-all"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13px] font-medium transition-all"
             style={{ background: "#0D1016", color: "#fff" }}
           >
             <CheckCircle className="h-4 w-4" />
@@ -1166,7 +1166,7 @@ export default function L132Page() {
           </button>
           <button
             onClick={() => downloadReport(result)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-[12px] font-medium transition-all"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13px] font-medium transition-all"
             style={{
               background: "rgba(0,0,0,0.05)",
               color: "#0D1016",
@@ -1198,7 +1198,7 @@ export default function L132Page() {
               border: "none",
               cursor: "pointer",
               color: "rgba(146,64,14,0.5)",
-              fontSize: 16,
+              fontSize: 15,
               lineHeight: 1,
               padding: 0,
               borderRadius: 4,
@@ -1206,14 +1206,14 @@ export default function L132Page() {
             aria-label={t("closeLegalNote")}
           >×</button>
           <p
-            className="text-[12px] font-semibold mb-1"
+            className="text-[13px] font-semibold mb-1"
             style={{ color: "#92400e" }}
           >
             ⚠️ {t("legalNoteTitle")}
           </p>
           <p
             className="text-[11px] leading-relaxed"
-            style={{ color: "rgba(0,0,0,0.6)" }}
+            style={{ color: "#0D1016" }}
           >
             <span dangerouslySetInnerHTML={{ __html: t("legalNoteBody") }} />
           </p>
@@ -1224,7 +1224,7 @@ export default function L132Page() {
       {/* Toast */}
       {toast && (
         <div
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-lg text-[12px] font-medium shadow-lg z-50"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-lg text-[13px] font-medium shadow-lg z-50"
           style={{ background: "#0D1016", color: "#fff", whiteSpace: "nowrap" }}
         >
           {toast}

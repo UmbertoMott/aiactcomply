@@ -28,7 +28,6 @@ export const TOOL_GUIDES: ToolGuideEntry[] = [
   { id: "deadlines", href: "/dashboard/compliance-ops/deadlines", optional: true },
   { id: "logvault", href: "/dashboard/tools/logvault", optional: false },
   { id: "postmarket", href: "/dashboard/post-market", optional: false },
-  { id: "drift", href: "/dashboard/tools/drift-monitor", optional: false },
   { id: "eudb", href: "/dashboard/compliance-ops/eudb", optional: false },
   { id: "authrep", href: "/dashboard/compliance-ops/authorized-rep", optional: false },
   { id: "transition", href: "/dashboard/compliance-ops/provider-transition", optional: false },

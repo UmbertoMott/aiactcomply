@@ -13,10 +13,10 @@ import { useT, useLocale } from "@/i18n/LocaleProvider";
 
 const T = {
   border: "rgba(0,0,0,0.08)",
-  bg:     "#f8f8f7",
+  bg:     "#ffffff",
   card:   "#ffffff",
   text:   "#0D1016",
-  muted:  "rgba(0,0,0,0.42)",
+  muted:  "#0D1016",
   green:  "#23403a",
   amber:  "#b45309",
 } as const;
@@ -79,6 +79,10 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
   };
 
   const progress = computeGuidedFriaProgress(doc, locale, tg);
+  // Documento vuoto: niente anteprima finché non c'è almeno una risposta (o la si chiede)
+  const [previewRequested, setPreviewRequested] = useState(false);
+  const hasAnswers = Object.values(doc.answers).some(a => a?.status === "done");
+  const previewVisible = hasAnswers || previewRequested;
 
   const saveDoc = useCallback((next: FriaGuidedDoc) => {
     writeToStorage("friaGuided", next);
@@ -107,6 +111,7 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
 
   const handleSectionClick = useCallback((sectionKey: string, anchor: string) => {
     setActiveSection(sectionKey);
+    setPreviewRequested(true);
     // Scorre solo il pannello del documento, non la pagina
     setTimeout(() => {
       const box = viewerRef.current;
@@ -157,23 +162,32 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
         flexShrink: 0,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <p style={{ fontSize: 12, fontWeight: 700, color: T.text, margin: 0 }}>{t("gm_friaGuided")}</p>
-          <span style={{ fontSize: 10, color: T.muted }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: T.text, margin: 0 }}>{t("gm_friaGuided")}</p>
+          <span style={{ fontSize: 11, color: T.muted }}>
             Art. 27 AI Act · {progress.overallPercent}% {t("gm_completed")}
           </span>
           {lastSaved && (
-            <span style={{ fontSize: 9, color: T.green }}>✓ {t("gm_autoSaved")}</span>
+            <span style={{ fontSize: 11, color: T.green }}>✓ {t("gm_autoSaved")}</span>
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {!previewVisible && (
+            <button
+              onClick={() => setPreviewRequested(true)}
+              style={{
+                background: "none", border: "none", padding: 0, cursor: "pointer",
+                fontSize: 11, color: T.text, textDecoration: "underline", textUnderlineOffset: 2,
+              }}
+            >
+              {t("gm_showPreview")}
+            </button>
+          )}
           {onExitGuidedMode && (
             <button
               onClick={onExitGuidedMode}
               style={{
-                display: "flex", alignItems: "center", gap: 6,
-                padding: "6px 12px", borderRadius: 7,
-                border: `1px solid ${T.text}`, background: T.text,
-                cursor: "pointer", fontSize: 11, fontWeight: 700, color: "#fff",
+                background: "none", border: "none", padding: 0, cursor: "pointer",
+                fontSize: 11, color: "rgba(13,16,22,0.65)", textDecoration: "underline", textUnderlineOffset: 2,
               }}
             >
               {t("gm_goToForm")}
@@ -184,7 +198,7 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
             disabled={pdfLoading || progress.overallPercent < 5}
             style={{
               display: "flex", alignItems: "center", gap: 6,
-              padding: "6px 12px", borderRadius: 7,
+              padding: "6px 12px", borderRadius: 8,
               border: `1px solid rgba(0,0,0,0.10)`, background: T.card,
               cursor: progress.overallPercent < 5 ? "default" : "pointer",
               fontSize: 11, fontWeight: 600,
@@ -202,10 +216,9 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
         {/* SINISTRA — Rail avanzamento */}
         <div style={{
           width: RAIL_W, flexShrink: 0,
-          border: `1px solid rgba(0,0,0,0.07)`,
-          borderRadius: 10,
+          borderRight: `1px solid rgba(0,0,0,0.08)`,
           overflow: "hidden", display: "flex", flexDirection: "column",
-          background: "#fafafa",
+          background: "#ffffff",
         }}>
           <FriaProgressRail
             progress={progress}
@@ -216,8 +229,8 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
           />
         </div>
 
-        {/* CENTRO — Documento live */}
-        <>
+        {/* CENTRO — Documento live (nascosto finché il documento è vuoto) */}
+        {previewVisible && <>
           <div style={{
               flex: 1, minWidth: 0,
               display: "flex", flexDirection: "column",
@@ -227,14 +240,14 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
               {/* Header documento */}
               <div style={{
                 padding: "8px 12px", borderBottom: `1px solid rgba(0,0,0,0.07)`,
-                background: "#fafafa", display: "flex", alignItems: "center", gap: 6, flexShrink: 0,
+                background: "#ffffff", display: "flex", alignItems: "center", gap: 6, flexShrink: 0,
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 9, fontWeight: 600, color: "rgba(0,0,0,0.35)", letterSpacing: "0.8px", textTransform: "uppercase", margin: 0 }}>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", letterSpacing: "0.8px", textTransform: "uppercase", margin: 0 }}>
                     Art. 27 AI Act · {t("gm_documentWord")}
                   </p>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: T.text, margin: "1px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    FRIA — DIHR/ECNL 2025
+                  <p style={{ fontSize: 13, fontWeight: 700, color: T.text, margin: "1px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    FRIA
                   </p>
                 </div>
 
@@ -252,10 +265,10 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
                         onMouseDown={e => { e.preventDefault(); exec(b.cmd, b.val); }}
                         title={b.title}
                         style={{
-                          width: 24, height: 24, borderRadius: 5, border: "none",
+                          width: 24, height: 24, borderRadius: 4, border: "none",
                           background: "transparent", cursor: "pointer",
                           display: "flex", alignItems: "center", justifyContent: "center",
-                          color: "rgba(0,0,0,0.55)",
+                          color: "#0D1016",
                         }}
                         onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.07)")}
                         onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
@@ -287,7 +300,7 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
               </div>
 
               {/* Contenuto scrollabile */}
-              <div ref={viewerRef} style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#FAFAFA" }}>
+              <div ref={viewerRef} style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#FAFAF9" }}>
                 {editing ? (
                   <div
                     ref={editRef}
@@ -299,7 +312,7 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
                       fontSize: 13, color: T.text, lineHeight: 1.7,
                       background: T.card, borderRadius: 8, padding: "28px 32px",
                       border: "1px solid rgba(13,16,22,0.25)",
-                      boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                      boxShadow: "none",
                     }}
                   />
                 ) : editedHtml ? (
@@ -311,7 +324,7 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
                       fontSize: 13, color: T.text, lineHeight: 1.7,
                       background: T.card, borderRadius: 8, padding: "28px 32px",
                       border: "1px solid rgba(0,0,0,0.08)",
-                      boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                      boxShadow: "none",
                     }}
                   />
                 ) : (
@@ -322,7 +335,7 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
               </div>
             </div>
 
-        </>
+        </>}
 
         {/* DESTRA — Chat guidata */}
         <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>

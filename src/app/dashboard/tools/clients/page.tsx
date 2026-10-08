@@ -21,10 +21,10 @@ function ClientsHub() {
 
   return (
     <div>
-      <div className="flex gap-1 p-1 rounded-xl w-fit mb-5" style={{ background: "rgba(0,0,0,0.04)" }}>
+      <div className="flex gap-1 p-1 rounded-lg w-fit mb-5" style={{ background: "rgba(0,0,0,0.04)" }}>
         {TABS.map((id) => (
           <button key={id} type="button" onClick={() => router.replace(`/dashboard/tools/clients?tab=${id}`)}
-            className="text-[12px] font-medium px-4 py-1.5 rounded-lg"
+            className="text-[13px] font-medium px-4 py-1.5 rounded-lg"
             style={{
               background: tab === id ? "#fff" : "transparent",
               color: tab === id ? "#0D1016" : "rgba(0,0,0,0.5)",

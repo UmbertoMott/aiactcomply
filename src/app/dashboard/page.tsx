@@ -27,21 +27,21 @@ type TFn = (key: string) => string;
 
 const T = {
   text:    "#0D1016",
-  muted:   "rgba(0,0,0,0.40)",
-  faint:   "rgba(0,0,0,0.22)",
+  muted:   "#0D1016",
+  faint:   "#0D1016",
   border:  "rgba(0,0,0,0.08)",
   card:    "#ffffff",
   red:     "#dc2626",   redBg:   "rgba(220,38,38,0.06)",   redBdr:  "rgba(220,38,38,0.18)",
   amber:   "#b45309",   amberBg: "rgba(245,158,11,0.06)",  amberBdr:"rgba(245,158,11,0.2)",
   green:   "#059669",   greenBg: "rgba(5,150,105,0.06)",   greenBdr:"rgba(5,150,105,0.18)",
-  gray:    "#6b7280",   grayBg:  "rgba(0,0,0,0.04)",
+  gray:    "#0D1016",   grayBg:  "rgba(0,0,0,0.04)",
 } as const;
 
 const card: CSSProperties = {
   background: T.card,
   border: `1px solid ${T.border}`,
-  borderRadius: 10,
-  boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.015)",
+  borderRadius: 8,
+  boxShadow: "none",
 };
 
 // ── Risk config ───────────────────────────────────────────────────────────────
@@ -81,7 +81,7 @@ function relTime(iso: string, t: TFn): string {
 function RiskBadge({ level }: { level?: string }) {
   const t = useT("dashHome");
   const cfg = level ? RISK_CFG[level] : null;
-  if (!cfg) return <span style={{ fontSize: 10, color: T.faint }}>—</span>;
+  if (!cfg) return <span style={{ fontSize: 11, color: T.faint }}>—</span>;
   return (
     <span style={{
       display: "inline-flex", alignItems: "center", gap: 5,
@@ -122,15 +122,15 @@ function ScoreBar({ pct }: { pct: number }) {
   const color = pct >= 80 ? T.green : pct >= 40 ? T.amber : T.red;
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-      <div style={{ flex: 1, height: 5, borderRadius: 3, background: "rgba(0,0,0,0.06)", overflow: "hidden" }}>
+      <div style={{ flex: 1, height: 5, borderRadius: 4, background: "rgba(0,0,0,0.06)", overflow: "hidden" }}>
         <div style={{
-          height: "100%", borderRadius: 3, background: color,
+          height: "100%", borderRadius: 4, background: color,
           width: `${pct > 0 ? Math.max(pct, 4) : 0}%`,
           transition: "width 0.8s ease",
         }} />
       </div>
       <span style={{
-        fontSize: 12, fontWeight: 700, color: T.text,
+        fontSize: 13, fontWeight: 700, color: T.text,
         minWidth: 34, textAlign: "right",
         letterSpacing: "-0.5px", fontVariantNumeric: "tabular-nums",
       }}>{pct}%</span>
@@ -306,13 +306,13 @@ export default function DashboardPage() {
         {/* ── HEADER ──────────────────────────────────────────────── */}
         <div className="fu" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 22 }}>
           <div>
-            <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.8px", textTransform: "uppercase", color: T.faint, marginBottom: 7 }}>
+            <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.8px", textTransform: "uppercase", color: T.faint, marginBottom: 7 }}>
               {nowStr}
             </p>
             <h1 style={{ fontSize: 27, fontWeight: 400, letterSpacing: "-0.9px", color: T.text, lineHeight: 1.1, marginBottom: 5 }}>
               {t("title")}
             </h1>
-            <p style={{ fontSize: 12, color: T.muted }}>
+            <p style={{ fontSize: 13, color: T.muted }}>
               {role === "deployer" ? t("role_deployer")
                 : role === "distributor" ? t("role_distributor")
                 : t("role_default")}
@@ -328,9 +328,9 @@ export default function DashboardPage() {
               <span style={{ fontSize: 24, fontWeight: 300, color: "rgba(0,0,0,0.18)", letterSpacing: "-1px" }}>/100</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end", marginTop: 5 }}>
-              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: T.faint }}>{levelLabel}</span>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: T.faint }}>{levelLabel}</span>
               <span style={{ width: 3, height: 3, borderRadius: "50%", background: T.faint, display: "inline-block" }} />
-              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: pctColor }}>{scoreLabel}</span>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: pctColor }}>{scoreLabel}</span>
             </div>
             <div style={{ height: 2, width: 100, background: "rgba(0,0,0,0.06)", borderRadius: 1, marginTop: 7, marginLeft: "auto" }}>
               <div style={{ height: 2, width: `${dossierPct}%`, maxWidth: 100, background: pctColor, borderRadius: 1, transition: "width 0.8s ease" }} />
@@ -348,7 +348,7 @@ export default function DashboardPage() {
             borderLeft: `3px solid ${T.text}`,
           }}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 3 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 3 }}>
                 {showArt73 ? `${t("b_art73_pre")} ${art73MinDays} ${t("b_days")}`
                   : showDeadline ? alertDeadline!.title
                   : showDiscovery ? t("b_discovery_title")
@@ -368,7 +368,7 @@ export default function DashboardPage() {
                 : nextActions[0]?.href ?? "/dashboard/tools/inventory"}
               style={{
                 padding: "8px 16px", background: T.text, color: "#fff", borderRadius: 6,
-                fontSize: 11.5, fontWeight: 500, whiteSpace: "nowrap",
+                fontSize: 11, fontWeight: 500, whiteSpace: "nowrap",
                 display: "inline-flex", alignItems: "center", gap: 6, flexShrink: 0,
                 letterSpacing: "-0.1px",
               }}>
@@ -422,7 +422,7 @@ export default function DashboardPage() {
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 10 }}>
                 <Icon size={11} style={{ color: T.faint }} />
-                <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.9px", textTransform: "uppercase", color: T.faint }}>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.9px", textTransform: "uppercase", color: T.faint }}>
                   {label}
                 </span>
               </div>
@@ -430,9 +430,9 @@ export default function DashboardPage() {
                 <span style={{ fontSize: 34, fontWeight: 200, letterSpacing: "-1.5px", color: T.text, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
                   {value}
                 </span>
-                {unit && <span style={{ fontSize: 14, fontWeight: 400, color: T.muted }}>{unit}</span>}
+                {unit && <span style={{ fontSize: 13, fontWeight: 400, color: T.muted }}>{unit}</span>}
               </div>
-              <p style={{ fontSize: 10, color: T.faint, lineHeight: 1.4 }}>{sub}</p>
+              <p style={{ fontSize: 11, color: T.faint, lineHeight: 1.4 }}>{sub}</p>
             </div>
           ))}
         </div>
@@ -446,11 +446,11 @@ export default function DashboardPage() {
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <Cpu size={13} style={{ color: T.faint }} />
                 <div>
-                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.9px", textTransform: "uppercase", color: T.faint }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.9px", textTransform: "uppercase", color: T.faint }}>
                     {t("tbl_title")}
                   </span>
                   {totalSystems > 0 && (
-                    <span style={{ fontSize: 9, color: T.faint, marginLeft: 8 }}>
+                    <span style={{ fontSize: 11, color: T.faint, marginLeft: 8 }}>
                       {Math.min(4, totalSystems)} / {totalSystems}
                     </span>
                   )}
@@ -461,7 +461,7 @@ export default function DashboardPage() {
             {/* Col headers */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 140px 120px 160px", columnGap: 24, padding: "8px 18px", background: "rgba(0,0,0,0.015)", borderBottom: `1px solid ${T.border}` }}>
               {[t("col_system"), t("col_risk"), t("col_status"), t("col_dossier")].map(h => (
-                <span key={h} style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase", color: T.faint }}>
+                <span key={h} style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase", color: T.faint }}>
                   {h}
                 </span>
               ))}
@@ -473,7 +473,7 @@ export default function DashboardPage() {
                 <Server size={28} style={{ color: "rgba(0,0,0,0.08)", margin: "0 auto 10px" }} />
                 <p style={{ fontSize: 13, color: T.muted, marginBottom: 12 }}>{t("empty_systems")}</p>
                 <Link href="/dashboard/tools/inventory"
-                  style={{ fontSize: 12, fontWeight: 500, color: "#fff", background: T.text, padding: "8px 16px", borderRadius: 6, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  style={{ fontSize: 13, fontWeight: 500, color: "#fff", background: T.text, padding: "8px 16px", borderRadius: 6, display: "inline-flex", alignItems: "center", gap: 6 }}>
                   {t("go_inventory")} <ArrowRight size={12} />
                 </Link>
               </div>
@@ -496,8 +496,8 @@ export default function DashboardPage() {
                         transition: "background 0.15s", cursor: "pointer",
                       }}>
                         <div>
-                          <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 2 }}>{sys.name}</p>
-                          <p style={{ fontSize: 10, color: T.faint }}>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 2 }}>{sys.name}</p>
+                          <p style={{ fontSize: 11, color: T.faint }}>
                             {assessed ? t("row_obl").replace("{d}", String(oblDone)).replace("{t}", String(oblTotal)) : t("toClassify")}
                           </p>
                         </div>
@@ -514,7 +514,7 @@ export default function DashboardPage() {
             <div style={{ padding: "11px 18px", borderTop: totalSystems > 0 ? `1px solid ${T.border}` : "none" }}>
               <Link href="/dashboard/tools/inventory"
                 style={{
-                  fontSize: 11.5, fontWeight: 500, color: T.text,
+                  fontSize: 11, fontWeight: 500, color: T.text,
                   display: "inline-flex", alignItems: "center", gap: 7,
                   padding: "7px 12px", borderRadius: 6,
                   border: `1px solid ${T.border}`, background: "rgba(0,0,0,0.01)",
@@ -531,14 +531,14 @@ export default function DashboardPage() {
           <div style={{ ...card, overflow: "hidden" }}>
             <div style={{ padding: "12px 18px 10px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", gap: 7 }}>
               <History size={12} style={{ color: T.faint }} />
-              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.9px", textTransform: "uppercase", color: T.faint }}>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.9px", textTransform: "uppercase", color: T.faint }}>
                 {t("act_recent")}
               </span>
             </div>
 
             {recentEvidence.length === 0 ? (
               <div style={{ padding: "24px 18px" }}>
-                <p style={{ fontSize: 12, color: T.faint }}>{t("act_none")}</p>
+                <p style={{ fontSize: 13, color: T.faint }}>{t("act_none")}</p>
               </div>
             ) : (
               recentEvidence.map((ev, i) => {
@@ -564,10 +564,10 @@ export default function DashboardPage() {
                         <Icon size={12} style={{ color: cfgColor }} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 11.5, fontWeight: 600, color: T.text, marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <p style={{ fontSize: 11, fontWeight: 600, color: T.text, marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           {toolName}
                         </p>
-                        <p style={{ fontSize: 10, color: T.faint }}>
+                        <p style={{ fontSize: 11, color: T.faint }}>
                           {artLabel ? `${artLabel} · ` : ""}{evLabel} · {relTime(ev.timestamp, t)}
                         </p>
                       </div>
@@ -579,7 +579,7 @@ export default function DashboardPage() {
 
             <div style={{ padding: "11px 18px", borderTop: recentEvidence.length > 0 ? `1px solid ${T.border}` : "none" }}>
               <Link href="/dashboard/evidence-layer"
-                style={{ fontSize: 11.5, fontWeight: 500, color: T.text, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                style={{ fontSize: 11, fontWeight: 500, color: T.text, display: "inline-flex", alignItems: "center", gap: 6 }}>
                 <History size={11} style={{ color: T.faint }} />
                 {t("act_fullLog")}
                 <ArrowRight size={11} style={{ color: T.faint }} />
@@ -632,7 +632,7 @@ export default function DashboardPage() {
                   {title}
                 </p>
               </div>
-              <p style={{ fontSize: 10, color: T.faint, paddingLeft: 43 }}>{sub}</p>
+              <p style={{ fontSize: 11, color: T.faint, paddingLeft: 43 }}>{sub}</p>
             </Link>
           ))}
 
@@ -642,15 +642,15 @@ export default function DashboardPage() {
         {inProgress.length > 0 && (
           <div style={{ marginTop: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-              <span style={{ fontSize: 10, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>{t("ip_title")}</span>
-              <span style={{ fontSize: 10, color: T.faint }}>{inProgress.length} {t("ip_count")}</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>{t("ip_title")}</span>
+              <span style={{ fontSize: 11, color: T.faint }}>{inProgress.length} {t("ip_count")}</span>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(inProgress.length, 4)}, 1fr)`, gap: 10 }}>
               {inProgress.map(act => (
                 <Link key={act.id} href={act.href} style={{ ...card, padding: "14px 16px", display: "block", textDecoration: "none", transition: "box-shadow 0.15s" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                    <p style={{ fontSize: 12.5, fontWeight: 600, color: T.text, margin: 0 }}>{t(act.titleKey)}</p>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: T.muted, fontFamily: "var(--font-mono)" }}>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>{t(act.titleKey)}</p>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: T.muted, fontFamily: "var(--font-mono)" }}>
                       {act.pct >= 0 ? `${act.pct}%` : t("ip_inProgress")}
                     </span>
                   </div>
@@ -659,8 +659,8 @@ export default function DashboardPage() {
                       <div style={{ height: "100%", background: T.text, borderRadius: 2, width: `${act.pct}%`, transition: "width 0.5s" }} />
                     </div>
                   )}
-                  <p style={{ fontSize: 10, color: T.faint, margin: 0, marginBottom: 10 }}>{t(act.subKey)}</p>
-                  <div style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 10.5, fontWeight: 500, color: T.text }}>
+                  <p style={{ fontSize: 11, color: T.faint, margin: 0, marginBottom: 10 }}>{t(act.subKey)}</p>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 500, color: T.text }}>
                     {t("ip_resume")} <ArrowRight size={10} />
                   </div>
                 </Link>

@@ -161,7 +161,7 @@ function readCrossToolContent(): Record<string, string> {
   try {
     const conf = readFromStorage<ConformityResult>("conformity");
     if (conf?.declarationGenerated) {
-      out["conformity"] = `Dichiarazione UE di conformità generata nel tool Conformità${conf.registrationRef ? ` — riferimento ${conf.registrationRef}` : ""}. Allegarne copia (Art. 47).`;
+      out["conformity"] = `Dichiarazione di conformità UE generata nel tool Conformità${conf.registrationRef ? ` — riferimento ${conf.registrationRef}` : ""}. Allegarne copia (Art. 47).`;
     }
   } catch { /* nessun dato */ }
   try {
@@ -228,8 +228,8 @@ const ANNEX_IV: { id: string; ref: string; title: string; required: boolean; hin
   { id: "s7", ref: "All. IV, punto 7", title: "Norme armonizzate e altre specifiche", required: true, autoSource: null,
     hint: "Norme armonizzate applicate; se non applicate, le soluzioni adottate per soddisfare i requisiti del Capo III, Sezione 2, e le altre norme o specifiche tecniche pertinenti.",
     placeholder: "" },
-  { id: "s8", ref: "All. IV, punto 8", title: "Copia della dichiarazione UE di conformità", required: true, autoSource: "conformity",
-    hint: "Copia della dichiarazione UE di conformità di cui all'Art. 47.",
+  { id: "s8", ref: "All. IV, punto 8", title: "Copia della dichiarazione di conformità UE", required: true, autoSource: "conformity",
+    hint: "Copia della dichiarazione di conformità UE di cui all'Art. 47.",
     placeholder: "" },
   { id: "s9", ref: "All. IV, punto 9", title: "Valutazione delle prestazioni dopo l'immissione sul mercato", required: true, autoSource: "post-market",
     hint: "Descrizione del sistema di valutazione delle prestazioni nella fase successiva all'immissione sul mercato (Art. 72), compreso il piano di monitoraggio.",
@@ -611,24 +611,24 @@ export default function DocuGenPage() {
 
       {/* Dossier saved banner */}
       {savedAt ? (
-        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[13px]"
           style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)" }}>
           <span style={{ color: "#15803d" }}>✓ {t("dossierSaved")} · {t("updatedOn")} {new Date(savedAt).toLocaleDateString(loc)}</span>
-          {docugenSaved && <span className="text-[10px]" style={{ color: "#15803d" }}>· {t("autoSaved")}</span>}
+          {docugenSaved && <span className="text-[11px]" style={{ color: "#15803d" }}>· {t("autoSaved")}</span>}
           <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>{t("seeDossier")}</Link>
         </div>
       ) : (
         <>
-          <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-1 text-[12px]"
-            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}>
-            <span style={{ color: "rgba(0,0,0,0.45)" }}>
+          <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-1 text-[13px]"
+            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)" }}>
+            <span style={{ color: "#0D1016" }}>
               {t("saveHint")}
-              {docugenSaved && <span className="ml-2 text-[10px]" style={{ color: "#16a34a" }}>✓ {t("autoSavedShort")}</span>}
+              {docugenSaved && <span className="ml-2 text-[11px]" style={{ color: "#16a34a" }}>✓ {t("autoSavedShort")}</span>}
             </span>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <button onClick={() => { if (!workName && systemName) setWorkName(systemName); setShowSaveNote(v => !v); }}
                 className="text-[11px] rounded-full px-3 py-1 transition-opacity hover:opacity-80"
-                style={{ background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer" }}>
+                style={{ background: "rgba(0,0,0,0.06)", color: "#0D1016", border: "none", cursor: "pointer" }}>
                 {showSaveNote ? "▲" : t("nameAndSave")}
               </button>
               <button onClick={() => { if (!workName && systemName) setWorkName(systemName); setShowSaveNote(true); }} className="text-[11px] font-medium rounded-full px-3 py-1 transition-opacity hover:opacity-80"
@@ -644,15 +644,15 @@ export default function DocuGenPage() {
             </div>
           </div>
           {showSaveNote && (
-            <div className="mb-5 rounded-lg" style={{ padding: "10px 16px 12px", background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", gap: 8 }}>
+            <div className="mb-5 rounded-lg" style={{ padding: "10px 16px 12px", background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", display: "flex", flexDirection: "column", gap: 8 }}>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", minWidth: 80, textTransform: "uppercase", letterSpacing: "0.04em" }}>{t("workName")}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", minWidth: 80, textTransform: "uppercase", letterSpacing: "0.04em" }}>{t("workName")}</span>
                 <input
                   value={workName}
                   onChange={e => setWorkName(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter" && workName.trim()) saveToDossier(false); }}
                   placeholder={t("workNamePh")}
-                  style={{ flex: 1, fontSize: 11, padding: "6px 10px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", outline: "none" }}
+                  style={{ flex: 1, fontSize: 11, padding: "6px 10px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", outline: "none" }}
                   autoFocus
                 />
                 <button onClick={() => saveToDossier(false)}
@@ -661,12 +661,12 @@ export default function DocuGenPage() {
                 </button>
               </div>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <Clock size={11} style={{ color: "rgba(0,0,0,0.3)", flexShrink: 0, marginLeft: 80 }} />
+                <Clock size={11} style={{ color: "#0D1016", flexShrink: 0, marginLeft: 80 }} />
                 <input
                   value={saveNote}
                   onChange={e => setSaveNote(e.target.value)}
                   placeholder={t("noteOptionalPh")}
-                  style={{ flex: 1, fontSize: 11, padding: "5px 10px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016" }}
+                  style={{ flex: 1, fontSize: 11, padding: "5px 10px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016" }}
                 />
               </div>
             </div>
@@ -676,13 +676,13 @@ export default function DocuGenPage() {
 
       {/* DB Sync Banner */}
       {aiSystems.length > 0 && (
-        <div className="flex items-center gap-3 rounded-lg px-4 py-2.5 mb-4 text-[12px]"
-          style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.08)" }}>
-          <span style={{ color: "rgba(0,0,0,0.45)" }}>{t("aiSystemLabel")}</span>
+        <div className="flex items-center gap-3 rounded-lg px-4 py-2.5 mb-4 text-[13px]"
+          style={{ background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.08)" }}>
+          <span style={{ color: "#0D1016" }}>{t("aiSystemLabel")}</span>
           <select
             value={aiSystemId || ""}
             onChange={(e) => setAiSystemId(e.target.value || null)}
-            className="text-[12px] bg-transparent outline-none"
+            className="text-[13px] bg-transparent outline-none"
             style={{ color: "#0D1016" }}
           >
             <option value="">{t("selectAiSystem")}</option>
@@ -701,11 +701,11 @@ export default function DocuGenPage() {
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
           <p className="text-[11px] font-semibold uppercase mb-1"
-            style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "1.2px" }}>
+            style={{ color: "#0D1016", letterSpacing: "1.2px" }}>
             {t("kicker")}
           </p>
           <h1 className="text-[24px] font-medium" style={{ color: "#0D1016", letterSpacing: "-0.8px" }}>
-            DocuGen AI — {classifierTier === "limited"
+            {classifierTier === "limited"
               ? t("titleArt50")
               : classifierTier === "minimal"
                 ? t("titleComplianceNote")
@@ -714,7 +714,7 @@ export default function DocuGenPage() {
           {classifierTier && classifierTier !== "unacceptable" && (
             <div className="flex items-center gap-2 mt-2 mb-1">
               <span style={{
-                fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 5,
+                fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 4,
                 background: classifierTier === "high"
                   ? "rgba(220,38,38,0.08)" : classifierTier === "limited"
                     ? "rgba(202,138,4,0.08)" : "rgba(22,163,74,0.08)",
@@ -734,7 +734,7 @@ export default function DocuGenPage() {
             </div>
           )}
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-[11px]" style={{ color: "rgba(0,0,0,0.38)" }}>{t("workLabel")}</span>
+            <span className="text-[11px]" style={{ color: "#0D1016" }}>{t("workLabel")}</span>
             <input
               type="text"
               value={systemName}
@@ -743,16 +743,16 @@ export default function DocuGenPage() {
                 setWorkName(e.target.value);
               }}
               placeholder={t("workNamePlaceholder")}
-              className="text-[12px] outline-none border-b bg-transparent"
+              className="text-[13px] outline-none border-b bg-transparent"
               style={{ color: "#0D1016", borderBottomColor: "rgba(0,0,0,0.15)", minWidth: "220px" }}
             />
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-[12px]"
-            style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)" }}>
-            <GitBranch className="h-3.5 w-3.5" style={{ color: "rgba(0,0,0,0.35)" }} />
+          <div className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-[13px]"
+            style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.08)" }}>
+            <GitBranch className="h-3.5 w-3.5" style={{ color: "#0D1016" }} />
             <span style={{ color: "#0D1016", fontSize: 11 }}>
               {versionSnapshots.length > 0
                 ? `${versionSnapshots[0].tag ?? t("workWord")} · ${versionSnapshots.length} snapshot`
@@ -778,7 +778,7 @@ export default function DocuGenPage() {
             onClick={() => setShowVersionPanel(v => !v)}
             className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-colors"
             style={{ background: showVersionPanel ? "rgba(0,0,0,0.07)" : "#fff",
-              border: "1px solid rgba(0,0,0,0.12)", color: "rgba(0,0,0,0.6)", cursor: "pointer" }}
+              border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", cursor: "pointer" }}
           >
             <History className="h-3.5 w-3.5" />
             {t("versionHistory")}
@@ -793,11 +793,11 @@ export default function DocuGenPage() {
               {t("exportWord")} {classifierTier === "limited" ? "Art. 50 PDF" : t("complianceNotePdf")}
             </button>
           ) : (
-            <button onClick={exportFullDocument}
+            <button onClick={exportPdf}
               className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-opacity hover:opacity-80"
               style={{ background: "#0D1016", color: "#fff", cursor: "pointer" }}>
               <Download className="h-3.5 w-3.5" />
-              {t("exportJson")}
+              {t("exportSignedPdf")}
             </button>
           )}
         </div>
@@ -822,21 +822,21 @@ export default function DocuGenPage() {
 
       {/* ── Compare mode banner ── */}
       {compareMode && (
-        <div className="rounded-xl p-3 mb-4 flex items-center gap-3"
-          style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.12)" }}>
-          <span className="text-[12px]" style={{ color: "#0D1016" }}>
+        <div className="rounded-lg p-3 mb-4 flex items-center gap-3"
+          style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)" }}>
+          <span className="text-[13px]" style={{ color: "#0D1016" }}>
             {t("compareWord")} <strong>{versionSnapshots[0]?.tag ?? t("current")}</strong> vs
           </span>
           <select
             value={compareIdx}
             onChange={(e) => setCompareIdx(Number(e.target.value))}
-            className="text-[12px] rounded px-2 py-1 outline-none"
-            style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016" }}>
+            className="text-[13px] rounded px-2 py-1 outline-none"
+            style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016" }}>
             {versionSnapshots.slice(1).map((v, i) => (
               <option key={v.id} value={i + 1}>{v.tag ?? `snapshot ${i + 1}`}</option>
             ))}
           </select>
-          <span className="text-[11px]" style={{ color: "rgba(0,0,0,0.35)" }}>
+          <span className="text-[11px]" style={{ color: "#0D1016" }}>
             {t("variationsHighlighted")}
           </span>
         </div>
@@ -857,14 +857,14 @@ export default function DocuGenPage() {
       {timelineStep === "aggregate" && (
         <div>
           {/* Ghost sources — FRIA style */}
-          <div style={{ border: "1px solid rgba(0,0,0,0.08)", borderRadius: 10, overflow: "hidden", marginBottom: 24 }}>
-            <div style={{ padding: "10px 16px", borderBottom: "1px solid rgba(0,0,0,0.06)", background: "#fafafa" }}>
-              <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.35)", textTransform: "uppercase" as const, letterSpacing: "0.08em", margin: 0 }}>
+          <div style={{ border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden", marginBottom: 24 }}>
+            <div style={{ padding: "10px 16px", borderBottom: "1px solid rgba(0,0,0,0.08)", background: "#FAFAF9" }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", textTransform: "uppercase" as const, letterSpacing: "0.08em", margin: 0 }}>
                 {t("sourcesForDraft")}
               </p>
             </div>
             {([
-              { label: "Classifier", art: "Art. 6", desc: t("src_classifier_desc"), href: "/dashboard/tools/inventory", present: !!ghost.systemName, preview: ghost.systemName ? `${t("systemWord")}: ${ghost.systemName} · Risk: ${ghost.riskLevel ?? "N/D"}` : null },
+              { label: "Triage", art: "Art. 6", desc: t("src_classifier_desc"), href: "/dashboard/tools/inventory", present: !!ghost.systemName, preview: ghost.systemName ? `${t("systemWord")}: ${ghost.systemName} · ${t("riskWordShort")}: ${ghost.riskLevel ?? "N/D"}` : null },
               { label: "Registro dei rischi", art: "Art. 9", desc: t("src_risk_desc"), href: "/dashboard/tools/risk-manager", present: !!ghost.risksSummary, preview: ghost.risksSummary },
               { label: "Qualità dei dati", art: "Art. 10", desc: t("src_data_desc"), href: "/dashboard/tools/data-audit", present: !!ghost.datasetsSummary, preview: ghost.datasetsSummary },
               { label: "DPIA", art: "Art. 35", desc: t("src_dpia_desc"), href: "/dashboard/tools/dpia", present: !!ghost.legalBasis, preview: ghost.legalBasis ? `${t("legalBasisWord")}: ${ghost.legalBasis?.slice(0, 80)}…` : null },
@@ -873,21 +873,21 @@ export default function DocuGenPage() {
                 <div style={{ flexShrink: 0, width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
                   background: src.present ? "rgba(22,163,74,0.08)" : "transparent",
                   border: src.present ? "1.5px solid rgba(22,163,74,0.35)" : "1.5px solid rgba(0,0,0,0.18)" }}>
-                  {src.present && <span style={{ fontSize: 10, color: "#16a34a", fontWeight: 700 }}>✓</span>}
+                  {src.present && <span style={{ fontSize: 11, color: "#16a34a", fontWeight: 700 }}>✓</span>}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: "#0D1016" }}>{src.label}</span>
-                    <span style={{ fontSize: 9, fontWeight: 600, padding: "1px 6px", borderRadius: 4, background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.45)" }}>{src.art}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#0D1016" }}>{src.label}</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, padding: "1px 6px", borderRadius: 4, background: "rgba(0,0,0,0.06)", color: "#0D1016" }}>{src.art}</span>
                   </div>
-                  <p style={{ fontSize: 11, color: "rgba(0,0,0,0.42)", margin: 0 }}>
+                  <p style={{ fontSize: 11, color: "#0D1016", margin: 0 }}>
                     {src.present && src.preview ? src.preview : src.desc}
                   </p>
                 </div>
-                <a href={src.href} style={{ flexShrink: 0, fontSize: 11, fontWeight: 500, padding: "5px 12px", borderRadius: 7,
+                <a href={src.href} style={{ flexShrink: 0, fontSize: 11, fontWeight: 500, padding: "5px 12px", borderRadius: 8,
                   background: src.present ? "transparent" : "#0D1016",
                   color: src.present ? "rgba(0,0,0,0.45)" : "#fff",
-                  border: src.present ? "1px solid rgba(0,0,0,0.10)" : "none",
+                  border: src.present ? "1px solid rgba(0,0,0,0.08)" : "none",
                   cursor: "pointer", textDecoration: "none", whiteSpace: "nowrap" as const }}>
                   {src.present ? t("editArrow") : t("improveDraft")}
                 </a>
@@ -901,12 +901,12 @@ export default function DocuGenPage() {
               { label: t("stat_completed"), value: `${doneCount}/9`, color: "#16a34a" },
               { label: t("stat_inWork"), value: draftCount, color: "#0D1016" },
               { label: t("stat_emptyRequired"), value: emptyRequired.length, color: emptyRequired.length > 0 ? "#dc2626" : "#16a34a" },
-              { label: t("stat_savedVersions"), value: versionSnapshots.length || "—", color: "rgba(0,0,0,0.5)" },
+              { label: t("stat_savedVersions"), value: versionSnapshots.length || "—", color: "#0D1016" },
             ].map((c) => (
-              <div key={c.label} className="rounded-xl p-4"
-                style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+              <div key={c.label} className="rounded-lg p-4"
+                style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "none" }}>
                 <div className="text-[20px] font-semibold" style={{ color: c.color, letterSpacing: "-0.5px" }}>{c.value}</div>
-                <div className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.38)" }}>{c.label}</div>
+                <div className="text-[11px] mt-0.5" style={{ color: "#0D1016" }}>{c.label}</div>
               </div>
             ))}
           </div>
@@ -922,7 +922,7 @@ export default function DocuGenPage() {
       {/* ── Step 2: Intelligent Drafting ── */}
       {timelineStep === "draft" && (
         <div>
-          <p className="text-[13px] mb-4" style={{ color: "rgba(0,0,0,0.55)" }}>
+          <p className="text-[13px] mb-4" style={{ color: "#0D1016" }}>
             {t("draftIntro")}
           </p>
 
@@ -933,33 +933,33 @@ export default function DocuGenPage() {
               const hasGhostForS4 = s.id === "s2" && ghost.datasetsSummary && !content["s2"];
 
               return (
-                <div key={s.id} style={{ border: "1px solid rgba(0,0,0,0.08)", borderRadius: 10, padding: "14px 16px",
+                <div key={s.id} style={{ border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, padding: "14px 16px",
                   background: st === "done" ? "#FAFAF9" : "#fff" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
                     <div>
-                      <span style={{ fontSize: 9, fontWeight: 600, padding: "2px 6px", borderRadius: 4,
-                        background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.45)" }}>{SOURCE_BADGES[s.id] ?? s.ref}</span>
+                      <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 6px", borderRadius: 4,
+                        background: "rgba(0,0,0,0.06)", color: "#0D1016" }}>{SOURCE_BADGES[s.id] ?? s.ref}</span>
                       {s.autoSource && (
-                        <span style={{ marginLeft: 4, fontSize: 9, padding: "2px 6px", borderRadius: 4,
-                          background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.45)" }}>{t("autoPopulated")}</span>
+                        <span style={{ marginLeft: 4, fontSize: 11, padding: "2px 6px", borderRadius: 4,
+                          background: "rgba(0,0,0,0.06)", color: "#0D1016" }}>{t("autoPopulated")}</span>
                       )}
                     </div>
-                    <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 99,
+                    <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 99,
                       background: st === "done" ? "rgba(0,0,0,0.07)" : st === "draft" ? "rgba(0,0,0,0.05)" : "rgba(0,0,0,0.04)",
                       color: st === "done" ? "#0D1016" : st === "draft" ? "rgba(0,0,0,0.55)" : "rgba(0,0,0,0.3)" }}>
                       {st === "done" ? t("completedStatus") : st === "draft" ? t("draftStatus") : t("emptyStatus")}
                     </span>
                   </div>
-                  <p style={{ fontSize: 12, fontWeight: 600, color: "#0D1016", margin: "6px 0 2px" }}>{t(`ann_${s.id}_title`)}</p>
-                  <p style={{ fontSize: 11, color: "rgba(0,0,0,0.42)", margin: "0 0 8px" }}>{t(`ann_${s.id}_hint`)}</p>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: "#0D1016", margin: "6px 0 2px" }}>{t(`ann_${s.id}_title`)}</p>
+                  <p style={{ fontSize: 11, color: "#0D1016", margin: "0 0 8px" }}>{t(`ann_${s.id}_hint`)}</p>
 
                   {/* Ghost inference for s1 */}
                   {hasGhostForS1 && (
-                    <div style={{ background: "rgba(0,0,0,0.03)", borderRadius: 6, padding: 10, marginTop: 8 }}>
-                      <p style={{ fontSize: 10, color: "rgba(0,0,0,0.4)", marginBottom: 4 }}>
+                    <div style={{ background: "#FAFAF9", borderRadius: 6, padding: 10, marginTop: 8 }}>
+                      <p style={{ fontSize: 11, color: "#0D1016", marginBottom: 4 }}>
                         {t("inferredFromClassifier")}
                       </p>
-                      <p style={{ fontSize: 12, color: "#0D1016", margin: "0 0 8px",
+                      <p style={{ fontSize: 13, color: "#0D1016", margin: "0 0 8px",
                         fontFamily: "Georgia, 'Times New Roman', serif" }}>
                         {ghost.purpose}
                       </p>
@@ -974,8 +974,8 @@ export default function DocuGenPage() {
                         </button>
                         <button onClick={() => { setActiveSection("s1"); setTimelineStep("validate"); }}
                           style={{ fontSize: 11, padding: "4px 12px", borderRadius: 6,
-                            background: "transparent", color: "rgba(0,0,0,0.5)",
-                            border: "1px solid rgba(0,0,0,0.12)", cursor: "pointer" }}>
+                            background: "transparent", color: "#0D1016",
+                            border: "1px solid rgba(0,0,0,0.08)", cursor: "pointer" }}>
                           {t("edit")}
                         </button>
                       </div>
@@ -984,11 +984,11 @@ export default function DocuGenPage() {
 
                   {/* Ghost inference for s4 */}
                   {hasGhostForS4 && (
-                    <div style={{ background: "rgba(0,0,0,0.03)", borderRadius: 6, padding: 10, marginTop: 8 }}>
-                      <p style={{ fontSize: 10, color: "rgba(0,0,0,0.4)", marginBottom: 4 }}>
+                    <div style={{ background: "#FAFAF9", borderRadius: 6, padding: 10, marginTop: 8 }}>
+                      <p style={{ fontSize: 11, color: "#0D1016", marginBottom: 4 }}>
                         {t("inferredFromDataAudit")}
                       </p>
-                      <p style={{ fontSize: 12, color: "#0D1016", margin: "0 0 8px",
+                      <p style={{ fontSize: 13, color: "#0D1016", margin: "0 0 8px",
                         fontFamily: "Georgia, 'Times New Roman', serif" }}>
                         {ghost.datasetsSummary}
                       </p>
@@ -1003,8 +1003,8 @@ export default function DocuGenPage() {
                         </button>
                         <button onClick={() => { setActiveSection("s2"); setTimelineStep("validate"); }}
                           style={{ fontSize: 11, padding: "4px 12px", borderRadius: 6,
-                            background: "transparent", color: "rgba(0,0,0,0.5)",
-                            border: "1px solid rgba(0,0,0,0.12)", cursor: "pointer" }}>
+                            background: "transparent", color: "#0D1016",
+                            border: "1px solid rgba(0,0,0,0.08)", cursor: "pointer" }}>
                           {t("edit")}
                         </button>
                       </div>
@@ -1013,7 +1013,7 @@ export default function DocuGenPage() {
 
                   {/* Preview content if done */}
                   {st !== "empty" && !hasGhostForS1 && !hasGhostForS4 && (
-                    <p style={{ fontSize: 11, color: "rgba(0,0,0,0.45)", margin: "6px 0 0",
+                    <p style={{ fontSize: 11, color: "#0D1016", margin: "6px 0 0",
                       fontFamily: "Georgia, 'Times New Roman', serif",
                       overflow: "hidden", display: "-webkit-box",
                       WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const }}>
@@ -1022,8 +1022,8 @@ export default function DocuGenPage() {
                   )}
 
                   <button onClick={() => { setActiveSection(s.id); setTimelineStep("validate"); }}
-                    style={{ marginTop: 10, fontSize: 10, padding: "3px 10px", borderRadius: 5,
-                      background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.5)",
+                    style={{ marginTop: 10, fontSize: 11, padding: "3px 10px", borderRadius: 4,
+                      background: "rgba(0,0,0,0.05)", color: "#0D1016",
                       border: "none", cursor: "pointer" }}>
                     {t("openEditor")}
                   </button>
@@ -1046,7 +1046,7 @@ export default function DocuGenPage() {
           {/* Progress bar */}
           <div style={{ marginBottom: 16 }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-              <span style={{ fontSize: 11, color: "rgba(0,0,0,0.42)" }}>{t("annexIVCompletion")}</span>
+              <span style={{ fontSize: 11, color: "#0D1016" }}>{t("annexIVCompletion")}</span>
               <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016" }}>{Math.round((doneCount / 9) * 100)}%</span>
             </div>
             <div style={{ height: 4, borderRadius: 99, background: "rgba(0,0,0,0.07)", overflow: "hidden" }}>
@@ -1059,7 +1059,7 @@ export default function DocuGenPage() {
             {/* Sidebar sezioni */}
             {!focusMode && (
               <div style={{ width: 200, flexShrink: 0 }}>
-                <div style={{ borderRadius: 10, overflow: "hidden", border: "1px solid rgba(0,0,0,0.07)" }}>
+                <div style={{ borderRadius: 8, overflow: "hidden", border: "1px solid rgba(0,0,0,0.08)" }}>
                   {ANNEX_IV.map((s) => {
                     const st = getSectionStatus(s.id);
                     const active = activeSection === s.id;
@@ -1075,13 +1075,13 @@ export default function DocuGenPage() {
                           outline: "none",
                         }}>
                         {st === "done"  && <CheckCircle className="h-3 w-3 flex-shrink-0" style={{ color: "#16a34a" }} />}
-                        {st === "draft" && <Clock className="h-3 w-3 flex-shrink-0" style={{ color: "rgba(0,0,0,0.4)" }} />}
+                        {st === "draft" && <Clock className="h-3 w-3 flex-shrink-0" style={{ color: "#0D1016" }} />}
                         {st === "empty" && <div className="w-3 h-3 rounded-full flex-shrink-0 border"
                           style={{ borderColor: s.required ? "#dc2626" : "rgba(0,0,0,0.2)" }} />}
                         <div className="flex-1 min-w-0">
                           <p className="text-[11px] truncate font-medium"
                             style={{ color: active ? "#0D1016" : "rgba(0,0,0,0.6)" }}>{t(`ann_${s.id}_title`)}</p>
-                          <p className="text-[9px]" style={{ color: "rgba(0,0,0,0.28)" }}>{s.ref}</p>
+                          <p className="text-[11px]" style={{ color: "#0D1016" }}>{s.ref}</p>
                         </div>
                       </button>
                     );
@@ -1096,40 +1096,40 @@ export default function DocuGenPage() {
                 <motion.div key={activeSection}
                   initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }} transition={{ duration: 0.18 }}
-                  style={{ borderRadius: 12, padding: 20, background: "#fff",
-                    border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+                  style={{ borderRadius: 8, padding: 20, background: "#fff",
+                    border: "1px solid rgba(0,0,0,0.08)", boxShadow: "none" }}>
 
                   {/* Section header */}
                   <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
                     <div>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                        <span style={{ fontSize: 9, fontWeight: 600, padding: "2px 7px", borderRadius: 99,
-                          background: "rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.55)" }}>
+                        <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 7px", borderRadius: 99,
+                          background: "rgba(0,0,0,0.07)", color: "#0D1016" }}>
                           {SOURCE_BADGES[activeSection] ?? activeS.ref}
                         </span>
                         {activeS.required && (
-                          <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4,
+                          <span style={{ fontSize: 11, padding: "2px 6px", borderRadius: 4,
                             background: "rgba(239,68,68,0.07)", color: "#dc2626" }}>{t("required")}</span>
                         )}
                         {activeS.autoSource && (
-                          <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4,
-                            background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.45)" }}>{t("autoPopulated")} ✦</span>
+                          <span style={{ fontSize: 11, padding: "2px 6px", borderRadius: 4,
+                            background: "rgba(0,0,0,0.05)", color: "#0D1016" }}>{t("autoPopulated")} ✦</span>
                         )}
                       </div>
                       <h2 style={{ fontSize: 15, fontWeight: 600, color: "#0D1016", margin: "0 0 2px" }}>{t(`ann_${activeSection}_title`)}</h2>
-                      <p style={{ fontSize: 12, color: "rgba(0,0,0,0.42)", margin: 0 }}>{t(`ann_${activeSection}_hint`)}</p>
+                      <p style={{ fontSize: 13, color: "#0D1016", margin: 0 }}>{t(`ann_${activeSection}_hint`)}</p>
                     </div>
 
                     <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0, marginLeft: 12 }}>
                       <button onClick={() => setFocusMode(f => !f)}
-                        style={{ fontSize: 10, padding: "4px 10px", borderRadius: 5, cursor: "pointer",
+                        style={{ fontSize: 11, padding: "4px 10px", borderRadius: 4, cursor: "pointer",
                           background: focusMode ? "#0D1016" : "rgba(0,0,0,0.05)",
                           color: focusMode ? "#fff" : "rgba(0,0,0,0.5)", border: "none" }}>
                         {focusMode ? t("exitFocus") : t("focusMode")}
                       </button>
                       {["empty", "draft", "done"].map((st) => (
                         <button key={st} onClick={() => setStatus((prev) => ({ ...prev, [activeSection]: st as "empty" | "draft" | "done" }))}
-                          style={{ fontSize: 10, padding: "4px 10px", borderRadius: 20, cursor: "pointer", border: "none",
+                          style={{ fontSize: 11, padding: "4px 10px", borderRadius: 20, cursor: "pointer", border: "none",
                             background: getSectionStatus(activeSection) === st
                               ? (st === "done" ? "rgba(22,163,74,0.12)" : st === "draft" ? "rgba(0,0,0,0.10)" : "rgba(0,0,0,0.07)")
                               : "rgba(0,0,0,0.04)",
@@ -1182,7 +1182,7 @@ export default function DocuGenPage() {
                       width: "100%", borderRadius: 8, padding: "12px 16px",
                       fontSize: focusMode ? 16 : 13, lineHeight: 1.8,
                       outline: "none", resize: "none",
-                      background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.09)",
+                      background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.08)",
                       color: "#0D1016", minHeight: focusMode ? "400px" : "220px",
                       fontFamily: "Georgia, 'Times New Roman', serif",
                       boxSizing: "border-box",
@@ -1202,15 +1202,15 @@ export default function DocuGenPage() {
                       ].map(({ label, action }) => (
                         <button key={label} onClick={action}
                           style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, padding: "6px 10px",
-                            borderRadius: 6, background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)",
-                            color: "rgba(0,0,0,0.45)", cursor: "pointer" }}>
+                            borderRadius: 6, background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.08)",
+                            color: "#0D1016", cursor: "pointer" }}>
                           <Download className="h-3 w-3" /> {label}
                         </button>
                       ))}
                     </div>
                     {canFinalize && version.status !== "finalized" && (
                       <button onClick={async () => { await saveToDossier(); showToast(t("toast_finalized")); }}
-                        style={{ fontSize: 12, fontWeight: 500, padding: "6px 16px", borderRadius: 20,
+                        style={{ fontSize: 13, fontWeight: 500, padding: "6px 16px", borderRadius: 20,
                           background: "#0D1016", color: "#fff", border: "none", cursor: "pointer" }}>
                         {t("finalizeDossier")}
                       </button>
@@ -1220,11 +1220,11 @@ export default function DocuGenPage() {
               </AnimatePresence>
 
               {/* ── AI Analysis Panels (collapsable) ── */}
-              <div style={{ marginTop: 16, borderRadius: 12, padding: 16, background: "#fff", border: "1px solid rgba(0,0,0,0.07)" }}>
-                <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.3)", letterSpacing: "1px", textTransform: "uppercase", marginBottom: 12 }}>
+              <div style={{ marginTop: 16, borderRadius: 8, padding: 16, background: "#fff", border: "1px solid rgba(0,0,0,0.08)" }}>
+                <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", letterSpacing: "1px", textTransform: "uppercase", marginBottom: 12 }}>
                   ✦ {t("aiAnalysisTitle")}
                 </p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12, paddingBottom: 12, borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12, paddingBottom: 12, borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
                   <button disabled={annexIVLoading} onClick={async () => {
                       setAnnexIVLoading(true); setAnnexIVReport(null);
                       const c = persisted.content;
@@ -1239,7 +1239,7 @@ export default function DocuGenPage() {
                       setAnnexIVLoading(false);
                       if (res.result) setAnnexIVReport(res.result);
                     }}
-                    style={{ fontSize: 11, color: "#0D1016", background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.12)", borderRadius: 5, padding: "5px 12px", cursor: "pointer" }}>
+                    style={{ fontSize: 11, color: "#0D1016", background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 4, padding: "5px 12px", cursor: "pointer" }}>
                     {annexIVLoading ? t("analyzingShort") : t("verifyAnnexCoverage")}
                   </button>
                   <button disabled={coherenceLoading} onClick={async () => {
@@ -1254,7 +1254,7 @@ export default function DocuGenPage() {
                       setCoherenceLoading(false);
                       if (res.report) setCoherenceReport(res.report);
                     }}
-                    style={{ fontSize: 11, color: "#0D1016", background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.12)", borderRadius: 5, padding: "5px 12px", cursor: "pointer" }}>
+                    style={{ fontSize: 11, color: "#0D1016", background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 4, padding: "5px 12px", cursor: "pointer" }}>
                     {coherenceLoading ? t("analyzingShort") : t("verifyCoherence")}
                   </button>
                 </div>
@@ -1264,23 +1264,23 @@ export default function DocuGenPage() {
                   <div style={{ marginBottom: 12, padding: 12, borderRadius: 8,
                     background: annexIVReport.coverageScore >= 80 ? "rgba(22,163,74,0.04)" : "rgba(245,158,11,0.05)",
                     border: `1px solid ${annexIVReport.coverageScore >= 80 ? "rgba(22,163,74,0.2)" : "rgba(245,158,11,0.2)"}` }}>
-                    <span style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.5)", background: "rgba(0,0,0,0.06)", borderRadius: 4, padding: "2px 6px" }}>✦ {t("aiVerify")}</span>
-                    <p style={{ fontSize: 12, fontWeight: 700, margin: "6px 0 2px", color: "#0D1016" }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", background: "rgba(0,0,0,0.06)", borderRadius: 4, padding: "2px 6px" }}>✦ {t("aiVerify")}</span>
+                    <p style={{ fontSize: 13, fontWeight: 700, margin: "6px 0 2px", color: "#0D1016" }}>
                       {t("annexCoverage")} <span style={{ color: annexIVReport.coverageScore >= 80 ? "#15803d" : "#d97706" }}>{annexIVReport.coverageScore}%</span>
                     </p>
-                    <p style={{ fontSize: 11, color: "rgba(0,0,0,0.42)", marginBottom: 8 }}>{annexIVReport.summary}</p>
+                    <p style={{ fontSize: 11, color: "#0D1016", marginBottom: 8 }}>{annexIVReport.summary}</p>
                     {annexIVReport.missingSections.map((ms, i) => (
-                      <div key={i} style={{ display: "flex", gap: 6, marginBottom: 4, padding: "4px 8px", borderRadius: 5,
+                      <div key={i} style={{ display: "flex", gap: 6, marginBottom: 4, padding: "4px 8px", borderRadius: 4,
                         background: ms.priority === "obbligatorio" ? "rgba(220,38,38,0.04)" : "rgba(245,158,11,0.04)",
                         border: `1px solid ${ms.priority === "obbligatorio" ? "rgba(220,38,38,0.15)" : "rgba(245,158,11,0.15)"}` }}>
-                        <span style={{ fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 3,
+                        <span style={{ fontSize: 11, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
                           background: ms.priority === "obbligatorio" ? "#dc2626" : "#d97706",
                           color: "#fff", whiteSpace: "nowrap", alignSelf: "flex-start" }}>
                           {ms.priority === "obbligatorio" ? t("badgeReq") : t("badgeRec")}
                         </span>
                         <div>
                           <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0 }}>{ms.section}</p>
-                          <p style={{ fontSize: 10, color: "rgba(0,0,0,0.42)", margin: "1px 0 0", fontStyle: "italic" }}>{ms.annexIVRef}</p>
+                          <p style={{ fontSize: 11, color: "#0D1016", margin: "1px 0 0", fontStyle: "italic" }}>{ms.annexIVRef}</p>
                         </div>
                       </div>
                     ))}
@@ -1292,22 +1292,22 @@ export default function DocuGenPage() {
                   <div style={{ marginBottom: 12, padding: 12, borderRadius: 8,
                     background: coherenceReport.coherenceScore >= 80 ? "rgba(22,163,74,0.04)" : "rgba(220,38,38,0.04)",
                     border: `1px solid ${coherenceReport.coherenceScore >= 80 ? "rgba(22,163,74,0.2)" : "rgba(220,38,38,0.2)"}` }}>
-                    <span style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.5)", background: "rgba(0,0,0,0.06)", borderRadius: 4, padding: "2px 6px" }}>✦ {t("aiVerify")}</span>
-                    <p style={{ fontSize: 12, fontWeight: 700, margin: "6px 0 2px", color: "#0D1016" }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", background: "rgba(0,0,0,0.06)", borderRadius: 4, padding: "2px 6px" }}>✦ {t("aiVerify")}</span>
+                    <p style={{ fontSize: 13, fontWeight: 700, margin: "6px 0 2px", color: "#0D1016" }}>
                       {t("interToolCoherence")} <span style={{ color: coherenceReport.coherenceScore >= 80 ? "#15803d" : "#dc2626" }}>{coherenceReport.coherenceScore}%</span> — {coherenceReport.overallStatus.replace(/_/g, " ")}
                     </p>
                     {coherenceReport.inconsistencies.map((inc, i) => (
-                      <div key={i} style={{ display: "flex", gap: 6, marginBottom: 4, padding: "4px 8px", borderRadius: 5,
+                      <div key={i} style={{ display: "flex", gap: 6, marginBottom: 4, padding: "4px 8px", borderRadius: 4,
                         background: inc.severity === "critical" ? "rgba(220,38,38,0.04)" : "rgba(245,158,11,0.04)",
                         border: `1px solid ${inc.severity === "critical" ? "rgba(220,38,38,0.15)" : "rgba(245,158,11,0.15)"}` }}>
-                        <span style={{ fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 3,
+                        <span style={{ fontSize: 11, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
                           background: inc.severity === "critical" ? "#dc2626" : inc.severity === "warning" ? "#d97706" : "#6b7280",
                           color: "#fff", whiteSpace: "nowrap", alignSelf: "flex-start" }}>{inc.severity}</span>
                         <div>
                           <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0 }}>
-                            {inc.field}: <span style={{ color: "#dc2626" }}>{inc.docuGenValue}</span> vs <span style={{ color: "rgba(0,0,0,0.55)" }}>{inc.sourceContext}: {inc.contextValue}</span>
+                            {inc.field}: <span style={{ color: "#dc2626" }}>{inc.docuGenValue}</span> vs <span style={{ color: "#0D1016" }}>{inc.sourceContext}: {inc.contextValue}</span>
                           </p>
-                          <p style={{ fontSize: 10, color: "rgba(0,0,0,0.42)", margin: "1px 0 0", fontStyle: "italic" }}>{inc.art11Reference}</p>
+                          <p style={{ fontSize: 11, color: "#0D1016", margin: "1px 0 0", fontStyle: "italic" }}>{inc.art11Reference}</p>
                         </div>
                       </div>
                     ))}
@@ -1315,12 +1315,12 @@ export default function DocuGenPage() {
                 )}
 
                 {/* Change Impact */}
-                <div style={{ borderTop: "1px solid rgba(0,0,0,0.06)", paddingTop: 10 }}>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.5)", marginBottom: 6 }}>{t("modifiedSystem")}</p>
+                <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)", paddingTop: 10 }}>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", marginBottom: 6 }}>{t("modifiedSystem")}</p>
                   <div style={{ display: "flex", gap: 8 }}>
                     <input value={changeDesc} onChange={e => setChangeDesc(e.target.value)}
                       placeholder={t("changeDescPh")}
-                      style={{ flex: 1, padding: "6px 10px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.12)", fontSize: 12 }} />
+                      style={{ flex: 1, padding: "6px 10px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.08)", fontSize: 13 }} />
                     <button disabled={changeImpactLoading || !changeDesc.trim()} onClick={async () => {
                         setChangeImpactLoading(true); setChangeImpactReport(null);
                         const ctx = buildComplianceContextFromStorage();
@@ -1328,7 +1328,7 @@ export default function DocuGenPage() {
                         setChangeImpactLoading(false);
                         if (res.report) setChangeImpactReport(res.report);
                       }}
-                      style={{ fontSize: 11, color: "#059669", background: "rgba(5,150,105,0.06)", border: "1px solid rgba(5,150,105,0.2)", borderRadius: 5, padding: "5px 12px", cursor: "pointer", whiteSpace: "nowrap" }}>
+                      style={{ fontSize: 11, color: "#059669", background: "rgba(5,150,105,0.06)", border: "1px solid rgba(5,150,105,0.2)", borderRadius: 4, padding: "5px 12px", cursor: "pointer", whiteSpace: "nowrap" }}>
                       {changeImpactLoading ? t("analyzingShort") : t("analyzeImpact")}
                     </button>
                   </div>
@@ -1336,15 +1336,15 @@ export default function DocuGenPage() {
                     <div style={{ marginTop: 8, padding: 10, borderRadius: 8,
                       background: changeImpactReport.isSubstantialModification ? "rgba(220,38,38,0.04)" : "rgba(22,163,74,0.04)",
                       border: `1px solid ${changeImpactReport.isSubstantialModification ? "rgba(220,38,38,0.2)" : "rgba(22,163,74,0.2)"}` }}>
-                      <span style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.5)", background: "rgba(0,0,0,0.06)", borderRadius: 4, padding: "2px 6px" }}>✦ {t("aiVerify")}</span>
-                      <p style={{ fontSize: 12, fontWeight: 700, margin: "6px 0 2px", color: changeImpactReport.isSubstantialModification ? "#dc2626" : "#15803d" }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", background: "rgba(0,0,0,0.06)", borderRadius: 4, padding: "2px 6px" }}>✦ {t("aiVerify")}</span>
+                      <p style={{ fontSize: 13, fontWeight: 700, margin: "6px 0 2px", color: changeImpactReport.isSubstantialModification ? "#dc2626" : "#15803d" }}>
                         {changeImpactReport.isSubstantialModification ? t("substModDetected") : t("nonSubstMod")}
                         {changeImpactReport.requiresNewConformityAssessment && ` — ${t("requiresNewCa")}`}
                       </p>
-                      <p style={{ fontSize: 10, color: "rgba(0,0,0,0.42)", fontStyle: "italic", marginBottom: 6 }}>{changeImpactReport.substModificationBasis}</p>
+                      <p style={{ fontSize: 11, color: "#0D1016", fontStyle: "italic", marginBottom: 6 }}>{changeImpactReport.substModificationBasis}</p>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                         {changeImpactReport.affectedAnnexIVSections.filter(s => s.updateRequired === "obbligatorio").map((s, i) => (
-                          <span key={i} style={{ fontSize: 10, padding: "2px 7px", borderRadius: 99, background: "rgba(220,38,38,0.1)", color: "#dc2626", border: "1px solid rgba(220,38,38,0.2)" }}>{t("update")} {s.sectionLabel}</span>
+                          <span key={i} style={{ fontSize: 11, padding: "2px 7px", borderRadius: 99, background: "rgba(220,38,38,0.1)", color: "#dc2626", border: "1px solid rgba(220,38,38,0.2)" }}>{t("update")} {s.sectionLabel}</span>
                         ))}
                       </div>
                     </div>
@@ -1354,10 +1354,10 @@ export default function DocuGenPage() {
 
               {/* Finalize blocker */}
               {!canFinalize && (
-                <div style={{ marginTop: 12, borderRadius: 12, padding: "12px 16px", display: "flex", alignItems: "flex-start", gap: 8,
+                <div style={{ marginTop: 12, borderRadius: 8, padding: "12px 16px", display: "flex", alignItems: "flex-start", gap: 8,
                   background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.15)" }}>
                   <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#dc2626" }} />
-                  <p style={{ fontSize: 12, color: "#dc2626", margin: 0 }}>
+                  <p style={{ fontSize: 13, color: "#dc2626", margin: 0 }}>
                     {t("finalizeBlocked")}{" "}
                     <strong>{emptyRequired.map((s) => s.ref).join(", ")}</strong>{" "}
                     {t("beforeFinalized")}
@@ -1384,11 +1384,11 @@ export default function DocuGenPage() {
               { label: t("stat_completed"), value: `${doneCount}/9`, color: "#16a34a" },
               { label: t("stat_inWork"), value: draftCount, color: "#0D1016" },
               { label: t("stat_emptyRequired"), value: emptyRequired.length, color: emptyRequired.length > 0 ? "#dc2626" : "#16a34a" },
-              { label: t("stat_savedVersions"), value: versionSnapshots.length || "—", color: "rgba(0,0,0,0.5)" },
+              { label: t("stat_savedVersions"), value: versionSnapshots.length || "—", color: "#0D1016" },
             ].map((c) => (
-              <div key={c.label} style={{ borderRadius: 12, padding: 16, background: "#fff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+              <div key={c.label} style={{ borderRadius: 8, padding: 16, background: "#fff", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "none" }}>
                 <div style={{ fontSize: 20, fontWeight: 600, color: c.color, letterSpacing: "-0.5px" }}>{c.value}</div>
-                <div style={{ fontSize: 11, marginTop: 2, color: "rgba(0,0,0,0.38)" }}>{c.label}</div>
+                <div style={{ fontSize: 11, marginTop: 2, color: "#0D1016" }}>{c.label}</div>
               </div>
             ))}
           </div>
@@ -1401,14 +1401,14 @@ export default function DocuGenPage() {
               { label: t("exportSignedPdf"), action: exportPdf },
             ].map(({ label, action }) => (
               <button key={label} onClick={action}
-                style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, padding: "10px 18px",
-                  borderRadius: 8, background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.1)",
+                style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, padding: "10px 18px",
+                  borderRadius: 8, background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.08)",
                   color: "#0D1016", cursor: "pointer", fontWeight: 500 }}>
                 <Download className="h-3.5 w-3.5" /> {label}
               </button>
             ))}
             <button onClick={() => saveToDossier(true)} disabled={!canFinalize}
-              style={{ fontSize: 12, padding: "10px 18px", borderRadius: 8,
+              style={{ fontSize: 13, padding: "10px 18px", borderRadius: 8,
                 background: canFinalize ? "#0D1016" : "rgba(0,0,0,0.1)",
                 color: canFinalize ? "#fff" : "rgba(0,0,0,0.3)", border: "none",
                 cursor: canFinalize ? "pointer" : "not-allowed", fontWeight: 500 }}>
@@ -1431,7 +1431,7 @@ export default function DocuGenPage() {
           </div>
 
           {/* Document preview — editable */}
-          <div style={{ background: "#FAFAFA", padding: "16px", borderRadius: 8 }}>
+          <div style={{ background: "#FAFAF9", padding: "16px", borderRadius: 8 }}>
             {/* Toolbar */}
             <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
               {docEditing ? (
@@ -1443,8 +1443,8 @@ export default function DocuGenPage() {
               ) : (
                 <button onClick={enterDocEdit}
                   style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, padding: "5px 12px",
-                    borderRadius: 6, background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.6)",
-                    border: "1px solid rgba(0,0,0,0.10)", cursor: "pointer" }}>
+                    borderRadius: 6, background: "rgba(0,0,0,0.06)", color: "#0D1016",
+                    border: "1px solid rgba(0,0,0,0.08)", cursor: "pointer" }}>
                   <Pencil className="h-3 w-3" /> {t("editDocument")}
                 </button>
               )}
@@ -1459,7 +1459,7 @@ export default function DocuGenPage() {
                 style={{
                   background: "#ffffff", borderRadius: 8, padding: "28px 32px",
                   border: "1px solid rgba(13,16,22,0.25)",
-                  boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                  boxShadow: "none",
                   outline: "none", minHeight: 400,
                   fontFamily: "Georgia, 'Times New Roman', serif",
                   fontSize: 13, color: "#0D1016", lineHeight: 1.7,
@@ -1474,7 +1474,7 @@ export default function DocuGenPage() {
                 style={{
                   background: "#ffffff", borderRadius: 8, padding: "28px 32px",
                   border: "1px solid rgba(0,0,0,0.08)",
-                  boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                  boxShadow: "none",
                   fontFamily: "Georgia, 'Times New Roman', serif",
                   fontSize: 13, color: "#0D1016", lineHeight: 1.7,
                 }}
@@ -1488,7 +1488,7 @@ export default function DocuGenPage() {
                 style={{
                   background: "#ffffff", borderRadius: 8, padding: "28px 32px",
                   border: "1px solid rgba(0,0,0,0.08)",
-                  boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                  boxShadow: "none",
                   fontFamily: "Georgia, 'Times New Roman', serif",
                   fontSize: 13, color: "#0D1016", lineHeight: 1.7,
                 }}
@@ -1496,22 +1496,22 @@ export default function DocuGenPage() {
                 <h1 data-noedit="true" style={{ fontSize: 22, fontWeight: 600, color: "#0D1016", marginBottom: 4, letterSpacing: "-0.5px" }}>
                   {systemName || t("aiSystemFallback")}
                 </h1>
-                <p data-noedit="true" style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", marginBottom: 32, fontFamily: "inherit" }}>
+                <p data-noedit="true" style={{ fontSize: 13, color: "#0D1016", marginBottom: 32, fontFamily: "inherit" }}>
                   {t("techFileSubtitle")} · {new Date().toLocaleDateString(loc)}
                 </p>
 
                 {ANNEX_IV.map((s) => (
-                  <div key={s.id} style={{ marginBottom: 28, paddingBottom: 28, borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+                  <div key={s.id} style={{ marginBottom: 28, paddingBottom: 28, borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
                     <div data-noedit="true" style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                      <span style={{ fontSize: 10, fontFamily: "inherit",
-                        color: "rgba(0,0,0,0.38)", fontWeight: 600 }}>{s.ref}</span>
-                      <span style={{ fontSize: 10, fontFamily: "inherit",
+                      <span style={{ fontSize: 11, fontFamily: "inherit",
+                        color: "#0D1016", fontWeight: 600 }}>{s.ref}</span>
+                      <span style={{ fontSize: 11, fontFamily: "inherit",
                         padding: "1px 6px", borderRadius: 4, background: "rgba(0,0,0,0.05)",
-                        color: "rgba(0,0,0,0.45)" }}>{SOURCE_BADGES[s.id]}</span>
+                        color: "#0D1016" }}>{SOURCE_BADGES[s.id]}</span>
                     </div>
-                    <h2 data-noedit="true" style={{ fontSize: 14, fontWeight: 600, color: "#0D1016", marginBottom: 8 }}>{t(`ann_${s.id}_title`)}</h2>
-                    <p style={{ fontSize: 13, lineHeight: 1.8, color: "rgba(0,0,0,0.75)", whiteSpace: "pre-wrap", margin: 0 }}>
-                      {stripMarkdown(getContent(s.id)) || <span style={{ color: "rgba(0,0,0,0.28)", fontStyle: "italic" }}>{t("toFill")}</span>}
+                    <h2 data-noedit="true" style={{ fontSize: 13, fontWeight: 600, color: "#0D1016", marginBottom: 8 }}>{t(`ann_${s.id}_title`)}</h2>
+                    <p style={{ fontSize: 13, lineHeight: 1.8, color: "#0D1016", whiteSpace: "pre-wrap", margin: 0 }}>
+                      {stripMarkdown(getContent(s.id)) || <span style={{ color: "#0D1016", fontStyle: "italic" }}>{t("toFill")}</span>}
                     </p>
                   </div>
                 ))}
@@ -1523,7 +1523,7 @@ export default function DocuGenPage() {
 
       {/* ── Toast ── */}
       {toast && (
-        <div style={{ position: "fixed", bottom: 24, right: 24, zIndex: 50, borderRadius: 12,
+        <div style={{ position: "fixed", bottom: 24, right: 24, zIndex: 50, borderRadius: 8,
           padding: "12px 16px", fontSize: 13, boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
           background: "#0D1016", color: "#fff", border: "1px solid rgba(255,255,255,0.08)" }}>
           {toast}

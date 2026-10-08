@@ -22,14 +22,14 @@ export default function LegalLayout({ title, lastUpdated, children }: Props) {
           maxWidth: 760,
           margin: "0 auto",
           padding: "64px 24px 40px",
-          borderBottom: "1px solid rgba(0,0,0,0.07)",
+          borderBottom: "1px solid rgba(0,0,0,0.08)",
         }}>
           <Link
             href="/"
             style={{
               fontFamily: MONO,
               fontSize: 11,
-              color: "rgba(0,0,0,0.35)",
+              color: "#0D1016",
               textDecoration: "none",
               letterSpacing: "0.06em",
               display: "inline-flex",
@@ -51,7 +51,7 @@ export default function LegalLayout({ title, lastUpdated, children }: Props) {
           }}>
             {title}
           </h1>
-          <p style={{ fontFamily: MONO, fontSize: 11, color: "rgba(0,0,0,0.35)", letterSpacing: "0.04em" }}>
+          <p style={{ fontFamily: MONO, fontSize: 11, color: "#0D1016", letterSpacing: "0.04em" }}>
             Ultimo aggiornamento: {lastUpdated}
           </p>
         </div>

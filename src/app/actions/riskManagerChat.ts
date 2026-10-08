@@ -225,7 +225,7 @@ Obiettivi (§8 Template): identificare i rischi specifici della fase di dismissi
 Includi <extract> quando i rischi di dismissione sono definiti:
 { "dismissal": { "dismissalRisks": "...", "dataDeletion": "...", "downstreamDependencies": "...", "communicationToDeployers": "..." } }`,
 
-  signoff: `Stai guidando lo STEP 10 — APPROVAZIONE, FIRME E FINALIZZAZIONE (Art. 9(1) + Art. 9(10) AI Act).
+  signoff: `Stai guidando lo STEP 10 — APPROVAZIONE, FIRME E FINALIZZAZIONE (Art. 9(1) AI Act; l'Art. 9(10) solo se il fornitore è soggetto ad altri regimi UE di gestione dei rischi).
 Obiettivi (§9 Template): raccogliere nominativi per il sign-off (risk owner, responsabile compliance/legale, rappresentante legale), valutazione complessiva del rischio, data prossima revisione. Se il provider è già soggetto ad altri obblighi di risk management (es. dispositivi medici, macchine), documentare come i processi si integrano/combinano — salva in otherRegimesIntegration.
 Presenta un sommario strutturato. Includi <extract>:
 { "signoff": { "overallRisk": "...", "recommendation": "...", "nextReviewDate": "...", "otherRegimesIntegration": "...", "signOff": { "riskOwner": { "name": "...", "signed": false }, "complianceLegal": { "name": "...", "signed": false }, "legalRepresentative": { "name": "...", "signed": false } } } }`,

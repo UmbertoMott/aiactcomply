@@ -36,7 +36,9 @@ function annexIIIPoint(annexCategory: string | null): number | null {
 // (3) Allegato I, sezione A: procedura prevista dalla normativa di settore.
 export function determineAssessmentPath(
   annexCategory: string | null,
-  riskLevel: string
+  riskLevel: string,
+  /** true se il sistema è anche disciplinato dalla normativa dell'Allegato I, sezione A (Art. 43(3), ultimo comma) */
+  alsoAnnexI?: boolean
 ): PathDetermination {
   const level = (riskLevel || "").toLowerCase();
   if (!level || level === "minimal" || level === "limited" || level === "transparency") {
@@ -57,20 +59,25 @@ export function determineAssessmentPath(
       annexIIIPoints: [],
     };
   }
-  if (level.includes("annex_i") && !level.includes("annex_iii")) {
+  // Categorie dell'engine: "high_risk_annex_i" / "high_risk_annex_iii". "annex_i" non seguito da "i"
+  // individua l'Allegato I; se il sistema rientra anche nell'Allegato III prevale comunque la
+  // procedura settoriale (Art. 43(3), ultimo comma, come sostituito dal Reg. (UE) 2026/1744).
+  const isAnnexI = alsoAnnexI === true || /annex_i(?!i)/.test(level);
+  if (isAnnexI) {
+    const point = annexIIIPoint(annexCategory);
     return {
       path: "notified_body",
-      reason: "Il sistema è un prodotto (o componente di sicurezza) dell'Allegato I, sezione A: segui la procedura di valutazione della normativa di settore, che include i requisiti del capo III, sezione 2 (Art. 43(3)). L'organismo notificato è quello previsto da quella normativa.",
+      reason: "Il sistema è un prodotto (o componente di sicurezza) disciplinato dalla normativa dell'Allegato I, sezione A: segui la pertinente procedura di valutazione della conformità prevista da tale normativa, di cui fanno parte i requisiti del capo III, sezione 2. Si deve altresì procedere alla valutazione del sistema di gestione della qualità (Art. 17) e si applica l'Allegato VII, punti 3, 4.3, 4.4 e 4.5, punto 4.6, quinto comma, e punto 5 (Art. 43(3), primo comma). Se il sistema rientra anche in una categoria dell'Allegato III, segui comunque la procedura della normativa dell'Allegato I, sezione A (Art. 43(3), ultimo comma). L'organismo notificato è quello previsto da quella normativa. Per i prodotti dell'Allegato I, sezione B, l'Art. 43 non si applica (Art. 2(2)).",
       mandatoryNotifiedBody: false,
       applicableArticle: "Art. 43(3)",
-      annexIIIPoints: [],
+      annexIIIPoints: point ? [point] : [],
     };
   }
   const point = annexIIIPoint(annexCategory);
   if (point === 1) {
     return {
       path: "notified_body",
-      reason: "Biometria (Allegato III, punto 1): puoi usare il controllo interno (Allegato VI) solo se hai applicato integralmente norme armonizzate o specifiche comuni; altrimenti serve l'organismo notificato (Allegato VII). Finché le norme armonizzate non sono pubblicate, considera l'organismo notificato (Art. 43(1)).",
+      reason: "Biometria (Allegato III, punto 1): se hai applicato integralmente le norme armonizzate (Art. 40) o, ove applicabili, le specifiche comuni (Art. 41), puoi scegliere tra il controllo interno (Allegato VI) e la procedura con organismo notificato (Allegato VII). Se non esistono norme armonizzate né specifiche comuni, o le hai applicate solo in parte o non le hai applicate, devi seguire l'Allegato VII con l'organismo notificato (Art. 43(1), secondo comma). Finché le norme armonizzate non sono pubblicate, considera quindi necessario l'organismo notificato.",
       mandatoryNotifiedBody: true,
       applicableArticle: "Art. 43(1)",
       annexIIIPoints: [1],

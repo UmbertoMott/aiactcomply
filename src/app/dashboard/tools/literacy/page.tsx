@@ -161,24 +161,24 @@ function RoleHoursPanel({ sessions, t }: { sessions: TrainingSession[]; t: TFn }
 
   return (
     <div
-      className="rounded-xl p-4 mb-6"
-      style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}
+      className="rounded-lg p-4 mb-6"
+      style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)" }}
     >
-      <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.35)" }}>
+      <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#0D1016" }}>
         {t("complianceTitle")}
       </p>
-      <p className="text-[11px] mt-0.5 mb-3" style={{ color: "rgba(0,0,0,0.4)" }}>
+      <p className="text-[11px] mt-0.5 mb-3" style={{ color: "#0D1016" }}>
         {t("complianceSubtitle")}
       </p>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         {STAFF_ROLES.map(role => (
           <div key={role} className="rounded-lg px-3 py-2" style={{ background: "rgba(0,0,0,0.025)" }}>
-            <p className="text-[11px]" style={{ color: "rgba(0,0,0,0.5)" }}>{STAFF_ROLE_LABELS[role]}</p>
-            <p className="text-[14px] font-medium" style={{ color: "#0D1016" }}>{(hours[role] || 0).toFixed(1)} h</p>
+            <p className="text-[11px]" style={{ color: "#0D1016" }}>{STAFF_ROLE_LABELS[role]}</p>
+            <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>{(hours[role] || 0).toFixed(1)} h</p>
           </div>
         ))}
       </div>
-      <p className="text-[11px] mt-3" style={{ color: "rgba(0,0,0,0.4)" }}>
+      <p className="text-[11px] mt-3" style={{ color: "#0D1016" }}>
         {t("mog231Note")}
       </p>
     </div>
@@ -356,7 +356,7 @@ export default function LiteracyPage() {
     width: "100%",
     padding: "8px 12px",
     borderRadius: 8,
-    border: "1px solid rgba(0,0,0,0.12)",
+    border: "1px solid rgba(0,0,0,0.08)",
     background: "#ffffff",
     fontSize: 13,
     color: "#0D1016",
@@ -381,7 +381,7 @@ export default function LiteracyPage() {
             {t("h1")}
           </h1>
           <div className="flex items-center gap-2 mt-1">
-            <p className="text-sm" style={{ color: "rgba(0,0,0,0.45)" }}>
+            <p className="text-[13px]" style={{ color: "#0D1016" }}>
               {t("subtitle")}
             </p>
             <DBStatusBadge source={dbSource} />
@@ -390,11 +390,11 @@ export default function LiteracyPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={exportRegistro}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium transition-colors"
             style={{
               background: "#ffffff",
-              border: "1px solid rgba(0,0,0,0.12)",
-              color: "rgba(0,0,0,0.65)",
+              border: "1px solid rgba(0,0,0,0.08)",
+              color: "#0D1016",
             }}
           >
             <Download className="h-4 w-4" />
@@ -402,7 +402,7 @@ export default function LiteracyPage() {
           </button>
           <button
             onClick={() => setShowForm(v => !v)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition-opacity hover:opacity-90"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium text-white transition-opacity hover:opacity-90"
             style={{ background: "#0D1016" }}
           >
             <Plus className="h-4 w-4" />
@@ -421,12 +421,12 @@ export default function LiteracyPage() {
         ].map(({ icon: Icon, label, value }) => (
           <div
             key={label}
-            className="rounded-xl p-4"
-            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}
+            className="rounded-lg p-4"
+            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)" }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <Icon className="h-3.5 w-3.5" style={{ color: "rgba(0,0,0,0.35)" }} />
-              <span className="text-[11px] font-medium" style={{ color: "rgba(0,0,0,0.45)" }}>
+              <Icon className="h-3.5 w-3.5" style={{ color: "#0D1016" }} />
+              <span className="text-[11px] font-medium" style={{ color: "#0D1016" }}>
                 {label}
               </span>
             </div>
@@ -445,17 +445,17 @@ export default function LiteracyPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="rounded-xl p-5"
-            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.09)" }}
+            className="rounded-lg p-5"
+            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)" }}
           >
-            <h3 className="text-sm font-semibold mb-4" style={{ color: "#0D1016" }}>
+            <h3 className="text-[13px] font-semibold mb-4" style={{ color: "#0D1016" }}>
               {t("newSession")}
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Title */}
               <div className="md:col-span-2">
-                <label className="block text-xs font-medium mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
+                <label className="block text-[11px] font-medium mb-1.5" style={{ color: "#0D1016" }}>
                   {t("titleLabel")} *
                 </label>
                 <input
@@ -469,7 +469,7 @@ export default function LiteracyPage() {
 
               {/* Date */}
               <div>
-                <label className="block text-xs font-medium mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
+                <label className="block text-[11px] font-medium mb-1.5" style={{ color: "#0D1016" }}>
                   {t("dateLabel")} *
                 </label>
                 <input
@@ -482,7 +482,7 @@ export default function LiteracyPage() {
 
               {/* Duration */}
               <div>
-                <label className="block text-xs font-medium mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
+                <label className="block text-[11px] font-medium mb-1.5" style={{ color: "#0D1016" }}>
                   {t("durationLabel")}
                 </label>
                 <input
@@ -497,7 +497,7 @@ export default function LiteracyPage() {
 
               {/* Category */}
               <div className="md:col-span-2">
-                <label className="block text-xs font-medium mb-2" style={{ color: "rgba(0,0,0,0.55)" }}>
+                <label className="block text-[11px] font-medium mb-2" style={{ color: "#0D1016" }}>
                   {t("categoryLabel")}
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -506,11 +506,11 @@ export default function LiteracyPage() {
                       key={cat}
                       type="button"
                       onClick={() => setFCategory(cat)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                      className="px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all"
                       style={
                         fCategory === cat
                           ? { background: "#0D1016", color: "#ffffff", border: "1px solid #0D1016" }
-                          : { background: "#ffffff", color: "rgba(0,0,0,0.55)", border: "1px solid rgba(0,0,0,0.12)" }
+                          : { background: "#ffffff", color: "#0D1016", border: "1px solid rgba(0,0,0,0.08)" }
                       }
                     >
                       {CATEGORY_LABELS[cat]}
@@ -521,7 +521,7 @@ export default function LiteracyPage() {
 
               {/* Trainer */}
               <div>
-                <label className="block text-xs font-medium mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
+                <label className="block text-[11px] font-medium mb-1.5" style={{ color: "#0D1016" }}>
                   {t("trainerLabel")}
                 </label>
                 <input
@@ -535,9 +535,9 @@ export default function LiteracyPage() {
 
               {/* Ruoli coinvolti */}
               <div className="md:col-span-2">
-                <label className="block text-xs font-medium mb-2" style={{ color: "rgba(0,0,0,0.55)" }}>
+                <label className="block text-[11px] font-medium mb-2" style={{ color: "#0D1016" }}>
                   {t("rolesLabel")}{" "}
-                  <span style={{ color: "rgba(0,0,0,0.35)" }}>{t("selectAll")}</span>
+                  <span style={{ color: "#0D1016" }}>{t("selectAll")}</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {(Object.keys(STAFF_ROLE_LABELS) as StaffRole[]).map(role => {
@@ -551,10 +551,10 @@ export default function LiteracyPage() {
                             prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role],
                           )
                         }
-                        className="px-3 py-1.5 rounded-lg text-xs font-medium border transition-all"
+                        className="px-3 py-1.5 rounded-lg text-[11px] font-medium border transition-all"
                         style={{
                           background: selected ? "rgba(13,16,22,0.08)" : "transparent",
-                          border: selected ? "1px solid rgba(13,16,22,0.25)" : "1px solid rgba(0,0,0,0.1)",
+                          border: selected ? "1px solid rgba(13,16,22,0.25)" : "1px solid rgba(0,0,0,0.08)",
                           color: selected ? "#0D1016" : "rgba(0,0,0,0.45)",
                         }}
                       >
@@ -567,7 +567,7 @@ export default function LiteracyPage() {
 
               {/* Attendees */}
               <div>
-                <label className="block text-xs font-medium mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
+                <label className="block text-[11px] font-medium mb-1.5" style={{ color: "#0D1016" }}>
                   {t("attendeesLabel")}
                 </label>
                 <input
@@ -581,7 +581,7 @@ export default function LiteracyPage() {
 
               {/* Notes */}
               <div className="md:col-span-2">
-                <label className="block text-xs font-medium mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
+                <label className="block text-[11px] font-medium mb-1.5" style={{ color: "#0D1016" }}>
                   {t("notesLabel")}
                 </label>
                 <textarea
@@ -598,11 +598,11 @@ export default function LiteracyPage() {
               <button
                 type="button"
                 onClick={() => { setShowForm(false); setFTitle(""); setFNotes(""); }}
-                className="px-4 py-2 rounded-lg text-sm transition-colors"
+                className="px-4 py-2 rounded-lg text-[13px] transition-colors"
                 style={{
                   background: "#ffffff",
-                  border: "1px solid rgba(0,0,0,0.12)",
-                  color: "rgba(0,0,0,0.55)",
+                  border: "1px solid rgba(0,0,0,0.08)",
+                  color: "#0D1016",
                 }}
               >
                 {t("cancel")}
@@ -611,7 +611,7 @@ export default function LiteracyPage() {
                 type="button"
                 onClick={addSession}
                 disabled={!fTitle.trim() || !fDate}
-                className="px-5 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-40 transition-opacity hover:opacity-90"
+                className="px-5 py-2 rounded-lg text-[13px] font-medium text-white disabled:opacity-40 transition-opacity hover:opacity-90"
                 style={{ background: "#0D1016" }}
               >
                 {t("registerSession")}
@@ -624,19 +624,19 @@ export default function LiteracyPage() {
       {/* ── D. Empty state ── */}
       {sessions.length === 0 && !showForm && (
         <div
-          className="rounded-xl py-16 text-center"
+          className="rounded-lg py-16 text-center"
           style={{ border: "2px dashed rgba(0,0,0,0.1)", background: "#ffffff" }}
         >
           <GraduationCap className="h-10 w-10 mx-auto mb-4" style={{ color: "rgba(0,0,0,0.18)" }} />
-          <p className="font-medium" style={{ color: "rgba(0,0,0,0.55)" }}>
+          <p className="font-medium" style={{ color: "#0D1016" }}>
             {t("noSessions")}
           </p>
-          <p className="text-sm mt-1 max-w-xs mx-auto" style={{ color: "rgba(0,0,0,0.35)" }}>
+          <p className="text-[13px] mt-1 max-w-xs mx-auto" style={{ color: "#0D1016" }}>
             {t("noSessionsDesc")}
           </p>
           <button
             onClick={() => setShowForm(true)}
-            className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity"
+            className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13px] font-medium text-white hover:opacity-90 transition-opacity"
             style={{ background: "#0D1016" }}
           >
             <Plus className="h-4 w-4" /> {t("registerFirstSession")}
@@ -659,8 +659,8 @@ export default function LiteracyPage() {
               return (
                 <div
                   key={session.id}
-                  className="rounded-xl overflow-hidden"
-                  style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}
+                  className="rounded-lg overflow-hidden"
+                  style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)" }}
                 >
                   {/* Row header */}
                   <button
@@ -669,10 +669,10 @@ export default function LiteracyPage() {
                   >
                     {/* Index circle */}
                     <div
-                      className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold"
+                      className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-semibold"
                       style={{
                         background: "rgba(0,0,0,0.05)",
-                        color: "rgba(0,0,0,0.45)",
+                        color: "#0D1016",
                       }}
                     >
                       {i + 1}
@@ -681,17 +681,17 @@ export default function LiteracyPage() {
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-medium" style={{ color: "#0D1016" }}>
+                        <span className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
                           {session.title}
                         </span>
                         <span
-                          className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-                          style={{ background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.45)" }}
+                          className="text-[11px] font-medium px-2 py-0.5 rounded-full"
+                          style={{ background: "rgba(0,0,0,0.06)", color: "#0D1016" }}
                         >
                           {CATEGORY_LABELS[session.category]}
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 mt-1 text-xs" style={{ color: "rgba(0,0,0,0.4)" }}>
+                      <div className="flex items-center gap-3 mt-1 text-[11px]" style={{ color: "#0D1016" }}>
                         <span>{formatDate(session.date, loc)}</span>
                         <span>·</span>
                         <span>{session.durationMinutes} min</span>
@@ -716,13 +716,13 @@ export default function LiteracyPage() {
                       <button
                         onClick={e => { e.stopPropagation(); deleteSession(session.id); }}
                         className="p-1.5 rounded-lg transition-colors hover:bg-red-50"
-                        style={{ color: "rgba(0,0,0,0.25)" }}
+                        style={{ color: "#0D1016" }}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                       {isOpen
-                        ? <ChevronUp  className="h-4 w-4" style={{ color: "rgba(0,0,0,0.3)" }} />
-                        : <ChevronDown className="h-4 w-4" style={{ color: "rgba(0,0,0,0.3)" }} />
+                        ? <ChevronUp  className="h-4 w-4" style={{ color: "#0D1016" }} />
+                        : <ChevronDown className="h-4 w-4" style={{ color: "#0D1016" }} />
                       }
                     </div>
                   </button>
@@ -738,11 +738,11 @@ export default function LiteracyPage() {
                         className="overflow-hidden"
                       >
                         <div
-                          className="px-5 pb-5 pt-2 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm"
-                          style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}
+                          className="px-5 pb-5 pt-2 grid grid-cols-1 md:grid-cols-2 gap-4 text-[13px]"
+                          style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}
                         >
                           <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(0,0,0,0.35)" }}>
+                            <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: "#0D1016" }}>
                               {t("sessionDetails")}
                             </p>
                             {[
@@ -752,22 +752,22 @@ export default function LiteracyPage() {
                               [t("trainerWord"),  session.trainer || "—"],
                             ].map(([k, v]) => (
                               <div key={k} className="flex gap-3 mb-1.5">
-                                <span className="w-24 flex-shrink-0 text-xs" style={{ color: "rgba(0,0,0,0.38)" }}>{k}</span>
-                                <span className="text-xs font-medium" style={{ color: "#0D1016" }}>{v}</span>
+                                <span className="w-24 flex-shrink-0 text-[11px]" style={{ color: "#0D1016" }}>{k}</span>
+                                <span className="text-[11px] font-medium" style={{ color: "#0D1016" }}>{v}</span>
                               </div>
                             ))}
                           </div>
                           <div>
                             {(session.roles || []).length > 0 && (
                               <>
-                                <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(0,0,0,0.35)" }}>
+                                <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: "#0D1016" }}>
                                   {t("rolesInvolved")}
                                 </p>
                                 <div className="flex flex-wrap gap-1.5 mb-3">
                                   {(session.roles || []).map(r => (
                                     <span
                                       key={r}
-                                      className="text-[10px] font-medium px-2 py-0.5 rounded-full"
+                                      className="text-[11px] font-medium px-2 py-0.5 rounded-full"
                                       style={{ background: "rgba(13,16,22,0.07)", color: "#0D1016" }}
                                     >
                                       {STAFF_ROLE_LABELS[r]}
@@ -778,15 +778,15 @@ export default function LiteracyPage() {
                             )}
                           {session.attendees.length > 0 && (
                               <>
-                                <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(0,0,0,0.35)" }}>
+                                <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: "#0D1016" }}>
                                   {t("attendeesWord")} ({session.attendees.length})
                                 </p>
                                 <div className="flex flex-wrap gap-1.5">
                                   {session.attendees.map(a => (
                                     <span
                                       key={a}
-                                      className="text-xs px-2 py-0.5 rounded-full"
-                                      style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.6)" }}
+                                      className="text-[11px] px-2 py-0.5 rounded-full"
+                                      style={{ background: "rgba(0,0,0,0.05)", color: "#0D1016" }}
                                     >
                                       {a}
                                     </span>
@@ -796,10 +796,10 @@ export default function LiteracyPage() {
                             )}
                             {session.notes && (
                               <>
-                                <p className="text-[10px] font-semibold uppercase tracking-wider mb-2 mt-3" style={{ color: "rgba(0,0,0,0.35)" }}>
+                                <p className="text-[11px] font-semibold uppercase tracking-wider mb-2 mt-3" style={{ color: "#0D1016" }}>
                                   {t("notesWord")}
                                 </p>
-                                <p className="text-xs leading-relaxed" style={{ color: "rgba(0,0,0,0.55)" }}>
+                                <p className="text-[11px] leading-relaxed" style={{ color: "#0D1016" }}>
                                   {session.notes}
                                 </p>
                               </>
@@ -817,7 +817,7 @@ export default function LiteracyPage() {
 
       {/* ── F. Legal callout box ── */}
       <div
-        className="rounded-xl px-4 py-3.5 text-sm leading-relaxed"
+        className="rounded-lg px-4 py-3.5 text-[13px] leading-relaxed"
         style={{
           background: "rgba(245,158,11,0.06)",
           border: "1px solid rgba(245,158,11,0.25)",
@@ -826,7 +826,7 @@ export default function LiteracyPage() {
         <span style={{ color: "#92400e" }}>
           📋 <strong>{t("calloutTitle")}</strong> —
         </span>{" "}
-        <span style={{ color: "rgba(0,0,0,0.6)" }}>
+        <span style={{ color: "#0D1016" }}>
           {t("calloutBody")}
         </span>
       </div>
@@ -838,7 +838,7 @@ export default function LiteracyPage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
-            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg"
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-[13px] font-medium shadow-lg"
             style={{
               background: toast.type === "error" ? "rgba(220,38,38,0.95)" : "#0D1016",
               color: "#ffffff",

@@ -5,7 +5,7 @@ export function PrefilledBadge({ source }: { source: string }) {
   return (
     <span style={{
       display: "inline-block",
-      fontSize: 10,
+      fontSize: 11,
       background: "rgba(217,119,6,0.08)",
       color: "#d97706",
       border: "1px solid rgba(217,119,6,0.2)",

@@ -93,8 +93,8 @@ export function ToolPhaseBar({
     }}>
       <div style={{
         display: "flex", gap: 0,
-        border: "1px solid rgba(0,0,0,0.08)", borderRadius: 10, overflow: "hidden",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.05)", background: "#fff",
+        border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden",
+        boxShadow: "none", background: "#fff",
       }}>
         {phases.map((step, i) => {
           // Stato di completamento reale (se fornito), altrimenti fallback storico.
@@ -119,7 +119,7 @@ export function ToolPhaseBar({
                 <span style={{
                   width: 18, height: 18, borderRadius: "50%",
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 10, fontWeight: 700, flexShrink: 0,
+                  fontSize: 11, fontWeight: 700, flexShrink: 0,
                   background: isCurrent ? "#ffffff" : isDone ? GREEN_BG : st === "active" ? "rgba(0,0,0,0.10)" : "rgba(0,0,0,0.06)",
                   color: isCurrent ? "#0D1016" : isDone ? GREEN : st === "active" ? "#0D1016" : "rgba(0,0,0,0.35)",
                   border: isDone && !isCurrent ? "1px solid rgba(22,163,74,0.35)" : "1px solid transparent",
@@ -128,13 +128,13 @@ export function ToolPhaseBar({
                   {isDone ? "✓" : i + 1}
                 </span>
                 <span style={{
-                  fontSize: 12, fontWeight: 600,
+                  fontSize: 13, fontWeight: 600,
                   color: isCurrent ? "#ffffff" : isDone ? GREEN : st === "active" ? "#0D1016" : "rgba(0,0,0,0.4)",
                 }}>
                   {step.label}
                 </span>
               </div>
-              <div style={{ fontSize: 10, paddingLeft: 24, color: isCurrent ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.35)" }}>
+              <div style={{ fontSize: 11, paddingLeft: 24, color: isCurrent ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.35)" }}>
                 {step.sublabel}
               </div>
             </button>
@@ -154,7 +154,7 @@ export function ToolPhaseBar({
             }} />
           </div>
           {meta && (
-            <span style={{ fontSize: 10, fontWeight: 600, color: progressPct >= 100 ? GREEN : "rgba(0,0,0,0.45)", whiteSpace: "nowrap" }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: progressPct >= 100 ? GREEN : "rgba(0,0,0,0.45)", whiteSpace: "nowrap" }}>
               {meta}
             </span>
           )}
@@ -175,12 +175,12 @@ export function PhaseHeading({ n, title, sub, done }: { n: number; title: string
         color: done ? GREEN : "#fff",
         border: done ? "1.5px solid rgba(22,163,74,0.4)" : "1.5px solid transparent",
         display: "inline-flex", alignItems: "center", justifyContent: "center",
-        fontSize: 14, fontWeight: 700, flexShrink: 0,
+        fontSize: 13, fontWeight: 700, flexShrink: 0,
         transition: "background 160ms ease, color 160ms ease",
       }}>{done ? "✓" : n}</span>
       <div>
         <div style={{ fontSize: 15, fontWeight: 700, color: "#0D1016", letterSpacing: "-0.2px" }}>{title}</div>
-        {sub && <div style={{ fontSize: 11, color: "rgba(0,0,0,0.42)" }}>{sub}</div>}
+        {sub && <div style={{ fontSize: 11, color: "#0D1016" }}>{sub}</div>}
       </div>
     </div>
   );
@@ -194,9 +194,9 @@ export function NextPhaseCta({ label, anchor }: { label: string; anchor: string 
         onClick={() => document.getElementById(anchor)?.scrollIntoView({ behavior: "smooth", block: "start" })}
         style={{
           display: "inline-flex", alignItems: "center", gap: 6,
-          fontSize: 12, fontWeight: 500, padding: "7px 14px", borderRadius: 8,
-          background: "transparent", color: "rgba(0,0,0,0.55)",
-          border: "1px solid rgba(0,0,0,0.12)", cursor: "pointer",
+          fontSize: 13, fontWeight: 500, padding: "7px 14px", borderRadius: 8,
+          background: "transparent", color: "#0D1016",
+          border: "1px solid rgba(0,0,0,0.08)", cursor: "pointer",
           transition: "background 160ms ease, color 160ms ease",
         }}
         onMouseEnter={e => { e.currentTarget.style.background = "#0D1016"; e.currentTarget.style.color = "#fff"; }}

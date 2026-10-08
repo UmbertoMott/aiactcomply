@@ -42,7 +42,7 @@ export const ART50_OBLIGATIONS: readonly Art50ObligationDefinition[] = [
   },
 ] as const satisfies readonly Art50ObligationDefinition[];
 
-// Eccezioni Art. 50(2) — ✦ AI — verifica e conferma sulla formulazione esatta.
+// Eccezioni Art. 50(2), verificate sul testo ufficiale (Reg. (UE) 2024/1689).
 export const SYNTHETIC_CONTENT_EXEMPTIONS = [
   {
     id: "assistive_editing",
@@ -58,15 +58,20 @@ export const SYNTHETIC_CONTENT_EXEMPTIONS = [
   },
 ] as const;
 
-// Eccezioni Art. 50(4) — ✦ AI — verifica e conferma sulla formulazione esatta.
+// Art. 50(4): primo comma (deep fake) e secondo comma (testi su questioni di interesse pubblico),
+// due obblighi distinti, ciascuno con le proprie eccezioni.
 export const DEEPFAKE_EXEMPTIONS = [
   {
+    id: "law_enforcement_df",
+    label: "Deep fake — uso autorizzato dalla legge per accertare, prevenire, indagare o perseguire reati: l'obbligo non si applica (primo comma)",
+  },
+  {
     id: "artistic_creative_satirical",
-    label: "Contenuto parte di un'opera o programma evidentemente artistico, creativo, satirico, fittizio o analogo — obbligo limitato alla divulgazione dell'esistenza del contenuto generato/manipolato in modo che non comprometta la fruizione dell'opera",
+    label: "Deep fake parte di un'opera o di un programma manifestamente artistici, creativi, satirici o fittizi — basta rivelare l'esistenza del contenuto generato o manipolato, senza ostacolare l'esposizione o il godimento dell'opera (primo comma)",
   },
   {
     id: "editorial_text",
-    label: "Testo pubblicato per informare il pubblico su questioni di interesse pubblico, soggetto a revisione umana o controllo editoriale, con responsabilità editoriale in capo a persona fisica/giuridica — l'obbligo di disclosure non si applica",
+    label: "Testo (non deep fake) pubblicato per informare il pubblico su questioni di interesse pubblico, sottoposto a revisione umana o controllo editoriale con responsabilità editoriale di una persona fisica o giuridica: l'obbligo del secondo comma non si applica",
   },
 ] as const;
 
@@ -76,7 +81,6 @@ export const AICOMPLY_AI_INTERACTIONS = [
   { id: "legal_assistant", area: "Legal Assistant / Compliance Chat", obligationId: "direct_interaction_disclosure", description: "Interfaccia conversazionale — utente interagisce direttamente con AI" },
   { id: "suggest_oversight_measures", area: "Oversight — suggestOversightMeasures", obligationId: "synthetic_content_marking", description: "Bozze misure Art. 14 generate da AI Copilot" },
   { id: "draft_governance_doc", area: "Data Audit — draftGovernancePracticeDocumentation", obligationId: "synthetic_content_marking", description: "Documentazione pratica governance generata da AI" },
-  { id: "analyze_log_coverage", area: "LogVault — analyzeLogCoverage", obligationId: "synthetic_content_marking", description: "Analisi copertura log generata da AI" },
   { id: "assess_four_eyes", area: "Oversight — assessFourEyesApplicability", obligationId: "synthetic_content_marking", description: "Valutazione applicabilità modulo four-eyes generata da AI" },
   { id: "draft_dpia", area: "DocuGen — draftDpiaSections", obligationId: "synthetic_content_marking", description: "Sezioni DPIA generate da AI Copilot" },
   { id: "draft_fria", area: "DocuGen — draftFria", obligationId: "synthetic_content_marking", description: "FRIA generata da AI Copilot" },
@@ -84,6 +88,5 @@ export const AICOMPLY_AI_INTERACTIONS = [
   { id: "risk_manager_chat", area: "Risk Manager — riskManagerChat", obligationId: "direct_interaction_disclosure", description: "Chat guidata Risk Manager con AI" },
   { id: "deployer_applicability", area: "Deployer Dashboard — assessDeployerApplicability", obligationId: "synthetic_content_marking", description: "Valutazione applicabilità obblighi deployer" },
   { id: "draft_worker_notice", area: "Deployer Dashboard — draftWorkerInformationNotice", obligationId: "synthetic_content_marking", description: "Informativa lavoratori Art. 26(7) generata da AI" },
-  { id: "suggest_event_severity", area: "LogVault — suggestEventSeverity", obligationId: "synthetic_content_marking", description: "Classificazione severity eventi generata da AI" },
   { id: "analyze_bias", area: "Data Audit — analyzeBiasIndicators", obligationId: "synthetic_content_marking", description: "Analisi bias Art. 10(2)(f) generata da AI" },
 ] as const;

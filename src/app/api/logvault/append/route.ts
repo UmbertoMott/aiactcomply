@@ -1,52 +1,16 @@
-// src/app/api/logvault/append/route.ts
-// API Route protetta per append server-side dei log (Art. 12 EU AI Act)
-// L'hashing SHA-256 avviene qui, sul server — non nel browser
+import { NextResponse } from "next/server";
 
-import { NextRequest, NextResponse } from "next/server";
-import { appendLogDB, type LogLevel } from "@/lib/db/logvault";
+// Servizio dismesso: RegulaeOS non riceve né conserva i log dei sistemi di IA dei clienti.
+// La conservazione dei log resta a carico del fornitore o del deployer (Artt. 19 e 26(6) Reg. (UE) 2024/1689).
+const GONE = {
+  error: "Servizio dismesso: RegulaeOS non riceve né conserva i log dei sistemi di IA. Conserva i log nei tuoi sistemi (Artt. 19 e 26(6) Reg. (UE) 2024/1689).",
+  code: "gone",
+};
 
-const VALID_LEVELS: LogLevel[] = ["info", "warning", "error", "critical"];
+export function GET() {
+  return NextResponse.json(GONE, { status: 410 });
+}
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = (await request.json()) as {
-      event?: string;
-      level?: string;
-      agent?: string;
-    };
-
-    if (!body.event || typeof body.event !== "string") {
-      return NextResponse.json(
-        { error: "Campo 'event' obbligatorio (stringa)" },
-        { status: 400 }
-      );
-    }
-
-    if (!body.level || !VALID_LEVELS.includes(body.level as LogLevel)) {
-      return NextResponse.json(
-        { error: `Campo 'level' deve essere uno di: ${VALID_LEVELS.join(", ")}` },
-        { status: 400 }
-      );
-    }
-
-    const entry = await appendLogDB(
-      body.event.slice(0, 1000), // max 1000 chars
-      body.level as LogLevel,
-      (body.agent ?? "user").slice(0, 100)
-    );
-
-    return NextResponse.json({ success: true, entry }, { status: 201 });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-
-    if (message.includes("Not authenticated")) {
-      return NextResponse.json({ error: "Non autorizzato" }, { status: 401 });
-    }
-
-    console.error("[LogVault API]", message);
-    return NextResponse.json(
-      { error: "Errore interno durante il salvataggio del log" },
-      { status: 500 }
-    );
-  }
+export function POST() {
+  return NextResponse.json(GONE, { status: 410 });
 }

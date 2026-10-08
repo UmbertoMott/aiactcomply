@@ -2,13 +2,14 @@
 import React, { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import type { GuidedRRProgress } from "@/lib/risk/risk-register-guided-progress";
+import { plainLabel, plainRef } from "@/lib/ui/plain-label";
 
 const T = {
   text:     "#0D1016",
-  muted:    "rgba(0,0,0,0.42)",
-  faint:    "rgba(0,0,0,0.22)",
+  muted:    "#0D1016",
+  faint:    "#0D1016",
   border:   "rgba(0,0,0,0.08)",
-  bg:       "#fafafa",
+  bg:       "#ffffff",
   green:    "#23403a",
   greenBg:  "rgba(35,64,58,0.06)",
   greenBdr: "rgba(35,64,58,0.20)",
@@ -40,7 +41,7 @@ export function RiskRegisterProgressRail({
       {/* Header */}
       <div style={{ padding: "12px 12px 10px", borderBottom: `1px solid ${T.border}` }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-          <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", textTransform: "uppercase", letterSpacing: "0.08em" }}>
             Avanzamento
           </span>
           <span style={{ fontSize: 11, fontWeight: 600, color: T.text, fontFamily: "var(--font-mono)" }}>
@@ -63,8 +64,8 @@ export function RiskRegisterProgressRail({
 
           return (
             <div key={sec.key} style={{
-              border: `1px solid ${isActive ? T.greenBdr : sec.percent === 100 ? "rgba(35,64,58,0.12)" : "rgba(0,0,0,0.07)"}`,
-              background: isActive ? T.greenBg : "#fff",
+              border: `1px solid ${isActive ? T.greenBdr : "transparent"}`,
+              background: isActive ? T.greenBg : "transparent",
               borderRadius: 8,
               overflow: "hidden",
               marginBottom: 10,
@@ -87,14 +88,14 @@ export function RiskRegisterProgressRail({
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: 11, fontWeight: 600, color: T.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {idx + 1}. {sec.label}
+                    {idx + 1}. {plainLabel(sec.label)}
                   </p>
-                  <p style={{ fontSize: 9, color: T.muted, margin: 0, marginTop: 1 }}>
-                    {doneCount}/{totalCount} · {sec.legalRef}{sec.optional ? " · facoltativa" : ""}
+                  <p style={{ fontSize: 11, color: T.muted, margin: 0, marginTop: 1 }}>
+                    {doneCount}/{totalCount}{plainRef(sec.legalRef) ? ` · ${plainRef(sec.legalRef)}` : ""}{sec.optional ? " · facoltativa" : ""}
                   </p>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ fontSize: 9.5, fontWeight: 700, color: secColor, fontFamily: "var(--font-mono)" }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: secColor, fontFamily: "var(--font-mono)" }}>
                     {sec.percent}%
                   </span>
                   <ChevronRight
@@ -116,7 +117,7 @@ export function RiskRegisterProgressRail({
                       onClick={() => { onSubPointClick(sp.id); }}
                       style={{
                         display: "flex", alignItems: "center", gap: 6,
-                        padding: "4px 4px", borderRadius: 5, width: "100%",
+                        padding: "4px 4px", borderRadius: 4, width: "100%",
                         textAlign: "left", border: "none", background: "transparent",
                         cursor: "pointer",
                       }}
@@ -130,7 +131,7 @@ export function RiskRegisterProgressRail({
                         }
                       </div>
                       <p style={{
-                        fontSize: 10, color: sp.status === "done" ? T.muted : T.text,
+                        fontSize: 11, color: sp.status === "done" ? T.muted : T.text,
                         margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                         textDecoration: sp.status === "done" ? "line-through" : "none",
                         opacity: sp.status === "done" ? 0.55 : 1,

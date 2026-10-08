@@ -69,7 +69,7 @@ const TIER_CONFIG: Record<SystemTier, TierCfg> = {
     obligations: ["Tutti gli obblighi GPAI base (Art. 53)", "Valutazione e mitigazione rischi sistemici (Art. 55(1)(a))", "Test avversariali red-team obbligatori (Art. 55(1)(b))", "Segnalazione incidenti gravi alla Commissione EU (Art. 55(1)(c))", "Misure di cybersecurity (Art. 55(1)(d))"],
   },
   unclassified: {
-    label: "Non classificato", bg: "rgba(0,0,0,0.04)", border: "rgba(0,0,0,0.12)", text: "#6b7280", dot: "#9ca3af",
+    label: "Non classificato", bg: "rgba(0,0,0,0.04)", border: "rgba(0,0,0,0.12)", text: "#0D1016", dot: "#9ca3af",
     article: "Da determinare",
     what: "Non hai ancora completato la classificazione di questo sistema. Finché rimane non classificato, non puoi generare documentazione di conformità per esso.",
     examples: ["Sistema in fase di valutazione iniziale", "Sistema appena aggiunto all'inventario", "Sistema per cui è in corso una consulenza legale sulla classificazione"],
@@ -98,8 +98,8 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 const INPUT_STYLE: React.CSSProperties = {
-  width: "100%", padding: "8px 10px", borderRadius: 7,
-  border: "1px solid rgba(0,0,0,0.12)", fontSize: 13,
+  width: "100%", padding: "8px 10px", borderRadius: 8,
+  border: "1px solid rgba(0,0,0,0.08)", fontSize: 13,
   outline: "none", boxSizing: "border-box", background: "white",
 }
 
@@ -108,7 +108,7 @@ function AiBadge() {
   const t = useT("toolInventory")
   return (
     <span style={{
-      fontSize: 10, fontWeight: 600, padding: "1px 6px", borderRadius: 3,
+      fontSize: 11, fontWeight: 600, padding: "1px 6px", borderRadius: 4,
       background: "rgba(217,119,6,0.08)", color: "#d97706",
       border: "1px solid rgba(217,119,6,0.15)",
     }}>
@@ -121,7 +121,7 @@ function AiBadge() {
 function FieldLabel({ label, showAi }: { label: string; showAi: boolean }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
-      <span style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>{label}</span>
+      <span style={{ fontSize: 13, fontWeight: 600, color: "#0D1016" }}>{label}</span>
       {showAi && <AiBadge />}
     </div>
   )
@@ -144,20 +144,20 @@ function ModalShell({
       onClick={e => e.target === e.currentTarget && onClose()}
     >
       <div style={{
-        background: "white", borderRadius: 16, width: "100%",
+        background: "white", borderRadius: 8, width: "100%",
         maxWidth, maxHeight: "90vh", overflowY: "auto",
         boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
       }}>
         <div style={{
-          padding: "18px 22px 14px", borderBottom: "1px solid rgba(0,0,0,0.07)",
+          padding: "18px 22px 14px", borderBottom: "1px solid rgba(0,0,0,0.08)",
           display: "flex", justifyContent: "space-between", alignItems: "center",
           position: "sticky", top: 0, background: "white", zIndex: 1,
         }}>
           <div>
-            <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>{title}</h2>
-            {subtitle && <p style={{ fontSize: 12, color: "#9ca3af", margin: "3px 0 0" }}>{subtitle}</p>}
+            <h2 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>{title}</h2>
+            {subtitle && <p style={{ fontSize: 13, color: "#0D1016", margin: "3px 0 0" }}>{subtitle}</p>}
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#9ca3af" }}>✕</button>
+          <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#0D1016" }}>✕</button>
         </div>
         <div style={{ padding: "20px 22px" }}>{children}</div>
       </div>
@@ -178,36 +178,36 @@ function SystemCard({ system, onEdit, onClassify, onDelete }: {
     : false
 
   return (
-    <div style={{ background: "white", borderRadius: 12, border: `1px solid ${cfg.border}`, overflow: "hidden" }}>
+    <div style={{ background: "white", borderRadius: 8, border: `1px solid ${cfg.border}`, overflow: "hidden" }}>
       <div style={{ height: 4, background: cfg.dot }} />
       <div style={{ padding: "14px 16px" }}>
         {/* Badges */}
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 6 }}>
           <span style={{
-            fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 4,
+            fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4,
             background: cfg.bg, color: cfg.text, border: `1px solid ${cfg.border}`,
           }}>
             {t(`tier_${system.tier}_label`).toUpperCase()}
           </span>
           {system.dualRoleFlag && (
             <span style={{
-              fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 4,
+              fontSize: 11, fontWeight: 600, padding: "2px 7px", borderRadius: 4,
               background: "rgba(234,88,12,0.08)", color: "#ea580c", border: "1px solid rgba(234,88,12,0.2)",
             }}>⚠ Dual-role</span>
           )}
           {needsReview && (
             <span style={{
-              fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 4,
+              fontSize: 11, fontWeight: 600, padding: "2px 7px", borderRadius: 4,
               background: "rgba(220,38,38,0.07)", color: "#dc2626", border: "1px solid rgba(220,38,38,0.15)",
             }}>{t("reviewIn30")}</span>
           )}
         </div>
-        <h3 style={{ fontSize: 14, fontWeight: 700, margin: "0 0 2px", color: "#111" }}>{system.name}</h3>
-        <p style={{ fontSize: 11, color: "#9ca3af", margin: "0 0 10px" }}>
+        <h3 style={{ fontSize: 13, fontWeight: 700, margin: "0 0 2px", color: "#0D1016" }}>{system.name}</h3>
+        <p style={{ fontSize: 11, color: "#0D1016", margin: "0 0 10px" }}>
           {system.id} · {system.owner || "—"} · {t(`status_${system.status}`)}
         </p>
         <p style={{
-          fontSize: 12, color: "#6b7280", margin: "0 0 12px",
+          fontSize: 13, color: "#0D1016", margin: "0 0 12px",
           display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
         }}>
           {system.description || t("noDescription")}
@@ -215,7 +215,7 @@ function SystemCard({ system, onEdit, onClassify, onDelete }: {
         {/* Role + EU Nexus */}
         <div style={{ display: "flex", gap: 6, marginBottom: 12, flexWrap: "wrap" }}>
           {system.role && (
-            <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 4, background: "rgba(0,0,0,0.04)", color: "#374151", border: "1px solid rgba(0,0,0,0.08)" }}>
+            <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 4, background: "rgba(0,0,0,0.04)", color: "#0D1016", border: "1px solid rgba(0,0,0,0.08)" }}>
               {t(`roleLabel_${system.role}`)}
             </span>
           )}
@@ -232,12 +232,12 @@ function SystemCard({ system, onEdit, onClassify, onDelete }: {
         {total > 0 && (
           <div style={{ marginBottom: 14 }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-              <span style={{ fontSize: 11, color: "#9ca3af" }}>{t("obligationsCompleted")}</span>
+              <span style={{ fontSize: 11, color: "#0D1016" }}>{t("obligationsCompleted")}</span>
               <span style={{ fontSize: 11, color: pct === 100 ? "#16a34a" : "#374151", fontWeight: 600 }}>{done}/{total}</span>
             </div>
-            <div style={{ height: 5, borderRadius: 3, background: "#f3f4f6", overflow: "hidden" }}>
+            <div style={{ height: 5, borderRadius: 4, background: "#FAFAF9", overflow: "hidden" }}>
               <div style={{
-                height: "100%", borderRadius: 3, width: `${pct}%`,
+                height: "100%", borderRadius: 4, width: `${pct}%`,
                 background: pct === 100 ? "#16a34a" : pct >= 60 ? "#d97706" : "#dc2626",
                 transition: "width 0.3s ease",
               }} />
@@ -245,30 +245,30 @@ function SystemCard({ system, onEdit, onClassify, onDelete }: {
           </div>
         )}
         {/* Azioni */}
-        <div style={{ display: "flex", gap: 6, borderTop: "1px solid rgba(0,0,0,0.06)", paddingTop: 12 }}>
+        <div style={{ display: "flex", gap: 6, borderTop: "1px solid rgba(0,0,0,0.08)", paddingTop: 12 }}>
           <Link href={`/dashboard/tools/inventory/${system.id}`} style={{
-            flex: 1, padding: "6px", borderRadius: 7, textAlign: "center",
-            fontSize: 12, fontWeight: 600, textDecoration: "none",
+            flex: 1, padding: "6px", borderRadius: 8, textAlign: "center",
+            fontSize: 13, fontWeight: 600, textDecoration: "none",
             border: "none", background: "#111", color: "white", cursor: "pointer",
             display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4,
           }}>
             {t("analysis360")}
           </Link>
           {!system.assessedAt ? (
-            <button onClick={onClassify} style={{ padding: "6px 10px", borderRadius: 7, border: "none", background: "rgba(0,0,0,0.06)", color: "#374151", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+            <button onClick={onClassify} style={{ padding: "6px 10px", borderRadius: 8, border: "none", background: "rgba(0,0,0,0.06)", color: "#0D1016", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
               {t("classify")}
             </button>
           ) : (
-            <button onClick={onClassify} style={{ padding: "6px 10px", borderRadius: 7, fontSize: 12, border: "1px solid rgba(0,0,0,0.1)", background: "white", color: "#374151", cursor: "pointer" }}>
+            <button onClick={onClassify} style={{ padding: "6px 10px", borderRadius: 8, fontSize: 13, border: "1px solid rgba(0,0,0,0.08)", background: "white", color: "#0D1016", cursor: "pointer" }}>
               {t("reclassify")}
             </button>
           )}
-          <button onClick={onEdit} style={{ padding: "6px 10px", borderRadius: 7, fontSize: 12, border: "1px solid rgba(0,0,0,0.1)", background: "white", color: "#374151", cursor: "pointer" }}>
+          <button onClick={onEdit} style={{ padding: "6px 10px", borderRadius: 8, fontSize: 13, border: "1px solid rgba(0,0,0,0.08)", background: "white", color: "#0D1016", cursor: "pointer" }}>
             {t("edit")}
           </button>
           <button
             onClick={() => { if (confirm(`${t("confirmDelete")} "${system.name}"?`)) onDelete() }}
-            style={{ padding: "6px 8px", borderRadius: 7, border: "1px solid rgba(220,38,38,0.2)", background: "rgba(220,38,38,0.04)", color: "#dc2626", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+            style={{ padding: "6px 8px", borderRadius: 8, border: "1px solid rgba(220,38,38,0.2)", background: "rgba(220,38,38,0.04)", color: "#dc2626", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
           ><Trash2 size={13} /></button>
         </div>
       </div>
@@ -280,12 +280,12 @@ function SystemCard({ system, onEdit, onClassify, onDelete }: {
 function EmptyState({ onAdd, hasFilter }: { onAdd: () => void; hasFilter: boolean }) {
   const t = useT("toolInventory")
   return (
-    <div style={{ textAlign: "center", padding: "60px 20px", background: "white", borderRadius: 14, border: "1px dashed rgba(0,0,0,0.12)" }}>
+    <div style={{ textAlign: "center", padding: "60px 20px", background: "white", borderRadius: 8, border: "1px dashed rgba(0,0,0,0.12)" }}>
       <p style={{ fontSize: 32, marginBottom: 12 }}>📋</p>
       <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 6 }}>
         {hasFilter ? t("emptyFiltered") : t("emptyTitle")}
       </p>
-      <p style={{ fontSize: 13, color: "#6b7280", maxWidth: 400, margin: "0 auto 20px" }}>
+      <p style={{ fontSize: 13, color: "#0D1016", maxWidth: 400, margin: "0 auto 20px" }}>
         {hasFilter
           ? t("emptyFilteredDesc")
           : t("emptyDesc")}
@@ -406,8 +406,8 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
           ].map((ch, i) => (
             <button key={ch.key} onClick={ch.action} style={{
               display: "flex", alignItems: "flex-start", gap: 14, width: "100%",
-              padding: "14px 16px", borderRadius: 10, cursor: "pointer", textAlign: "left",
-              border: i === 0 ? "1.5px solid #0D1016" : "1px solid rgba(0,0,0,0.10)",
+              padding: "14px 16px", borderRadius: 8, cursor: "pointer", textAlign: "left",
+              border: i === 0 ? "1.5px solid #0D1016" : "1px solid rgba(0,0,0,0.08)",
               background: i === 0 ? "#0D1016" : "white",
               transition: "border-color 0.15s, background 0.15s",
             }}>
@@ -415,16 +415,16 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: i === 0 ? "white" : "#0D1016" }}>{ch.label}</span>
                   <span style={{
-                    fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 4,
+                    fontSize: 11, fontWeight: 700, padding: "2px 6px", borderRadius: 4,
                     background: i === 0 ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.06)",
                     color: i === 0 ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.40)",
                   }}>{ch.badge}</span>
                 </div>
-                <p style={{ fontSize: 12, color: i === 0 ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.45)", margin: 0, lineHeight: 1.45 }}>
+                <p style={{ fontSize: 13, color: i === 0 ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.45)", margin: 0, lineHeight: 1.45 }}>
                   {ch.desc}
                 </p>
               </div>
-              <span style={{ fontSize: 16, color: i === 0 ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.20)", flexShrink: 0, marginTop: 2 }}>→</span>
+              <span style={{ fontSize: 15, color: i === 0 ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.20)", flexShrink: 0, marginTop: 2 }}>→</span>
             </button>
           ))}
         </div>
@@ -440,7 +440,7 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
             rows={5}
             style={{ ...INPUT_STYLE, resize: "vertical", fontFamily: "inherit", lineHeight: 1.55 }}
           />
-          {error && <p style={{ fontSize: 12, color: "#dc2626", margin: "6px 0 0" }}>{error}</p>}
+          {error && <p style={{ fontSize: 13, color: "#dc2626", margin: "6px 0 0" }}>{error}</p>}
           <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
             <button onClick={handleGenerate} disabled={!isDescribeReady} style={{
               flex: 1, padding: "10px", borderRadius: 8, border: "none",
@@ -450,11 +450,11 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
             }}>
               {loading ? t("analyzing") : t("analyzeAiFill")}
             </button>
-            <button onClick={() => setStep("channel")} style={{ padding: "10px 14px", borderRadius: 8, fontSize: 13, border: "1px solid rgba(0,0,0,0.12)", background: "white", color: "#374151", cursor: "pointer" }}>
+            <button onClick={() => setStep("channel")} style={{ padding: "10px 14px", borderRadius: 8, fontSize: 13, border: "1px solid rgba(0,0,0,0.08)", background: "white", color: "#0D1016", cursor: "pointer" }}>
               {t("backChannels")}
             </button>
           </div>
-          <p style={{ fontSize: 11, color: "#9ca3af", marginTop: 10, textAlign: "center" }}>
+          <p style={{ fontSize: 11, color: "#0D1016", marginTop: 10, textAlign: "center" }}>
             {t("aiFieldsNote")}
           </p>
         </>
@@ -469,11 +469,11 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
               background: draft.confidenceLevel === "high" ? "rgba(22,163,74,0.05)" : "rgba(217,119,6,0.05)",
               border: `1px solid ${draft.confidenceLevel === "high" ? "rgba(22,163,74,0.2)" : "rgba(217,119,6,0.2)"}`,
             }}>
-              <p style={{ fontSize: 12, margin: 0, color: draft.confidenceLevel === "high" ? "#16a34a" : "#d97706" }}>
+              <p style={{ fontSize: 13, margin: 0, color: draft.confidenceLevel === "high" ? "#16a34a" : "#d97706" }}>
                 <strong>{t("aiConfidence")} {draft.confidenceLevel.toUpperCase()}</strong> — {draft.confidenceNote}
               </p>
               {draft.knownVendor && (
-                <p style={{ fontSize: 11, color: "#6b7280", margin: "4px 0 0" }}>
+                <p style={{ fontSize: 11, color: "#0D1016", margin: "4px 0 0" }}>
                   {t("recognizedSystem")} <strong>{draft.knownVendor}</strong>
                 </p>
               )}
@@ -482,7 +482,7 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
           {/* Banner sistema noto */}
           {knownMatch?.warningNote && (
             <div style={{ padding: "10px 14px", borderRadius: 8, marginBottom: 18, background: "rgba(234,88,12,0.05)", border: "1px solid rgba(234,88,12,0.2)" }}>
-              <p style={{ fontSize: 12, color: "#ea580c", margin: 0 }}>⚠ {knownMatch.warningNote}</p>
+              <p style={{ fontSize: 13, color: "#ea580c", margin: 0 }}>⚠ {knownMatch.warningNote}</p>
             </div>
           )}
 
@@ -510,9 +510,9 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
             </div>
             <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: 10 }}>
               <input type="checkbox" id="euNexusAdd" checked={euNexus} onChange={e => { setEuNexus(e.target.checked); removeAiField("euNexus") }} style={{ width: 16, height: 16 }} />
-              <label htmlFor="euNexusAdd" style={{ fontSize: 13, color: "#374151" }}>
+              <label htmlFor="euNexusAdd" style={{ fontSize: 13, color: "#0D1016" }}>
                 {t("euNexusFull")}
-                {aiFields.has("euNexus") && <span style={{ fontSize: 10, color: "#d97706", marginLeft: 6, fontWeight: 600 }}>✦ AI</span>}
+                {aiFields.has("euNexus") && <span style={{ fontSize: 11, color: "#d97706", marginLeft: 6, fontWeight: 600 }}>✦ AI</span>}
               </label>
             </div>
             <div>
@@ -554,7 +554,7 @@ function AddSystemModal({ onClose, onSave, existingSystems, initialStep = "chann
           </div>
 
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20, gap: 8 }}>
-            <button onClick={() => setStep("describe")} style={{ padding: "9px 16px", borderRadius: 8, fontSize: 13, border: "1px solid rgba(0,0,0,0.12)", background: "white", color: "#374151", cursor: "pointer" }}>
+            <button onClick={() => setStep("describe")} style={{ padding: "9px 16px", borderRadius: 8, fontSize: 13, border: "1px solid rgba(0,0,0,0.08)", background: "white", color: "#0D1016", cursor: "pointer" }}>
               {t("rewriteDescription")}
             </button>
             <button
@@ -624,11 +624,11 @@ function EditSystemModal({ system, onClose, onSave }: {
         </div>
         <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: 10 }}>
           <input type="checkbox" id="euNexusEdit" checked={euNexus} onChange={e => setEuNexus(e.target.checked)} style={{ width: 16, height: 16 }} />
-          <label htmlFor="euNexusEdit" style={{ fontSize: 13, color: "#374151" }}>{t("euNexusActive")}</label>
+          <label htmlFor="euNexusEdit" style={{ fontSize: 13, color: "#0D1016" }}>{t("euNexusActive")}</label>
         </div>
         <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: 10 }}>
           <input type="checkbox" id="dualRole" checked={dualRoleFlag} onChange={e => setDualRoleFlag(e.target.checked)} style={{ width: 16, height: 16 }} />
-          <label htmlFor="dualRole" style={{ fontSize: 13, color: "#374151" }}>
+          <label htmlFor="dualRole" style={{ fontSize: 13, color: "#0D1016" }}>
             {t("dualRoleFull")}
           </label>
         </div>
@@ -646,7 +646,7 @@ function EditSystemModal({ system, onClose, onSave }: {
         </div>
       </div>
       <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 20, gap: 8 }}>
-        <button onClick={onClose} style={{ padding: "9px 16px", borderRadius: 8, fontSize: 13, border: "1px solid rgba(0,0,0,0.12)", background: "white", color: "#374151", cursor: "pointer" }}>{t("cancel")}</button>
+        <button onClick={onClose} style={{ padding: "9px 16px", borderRadius: 8, fontSize: 13, border: "1px solid rgba(0,0,0,0.08)", background: "white", color: "#0D1016", cursor: "pointer" }}>{t("cancel")}</button>
         <button onClick={handleSave} disabled={!name.trim()} style={{ padding: "9px 20px", borderRadius: 8, border: "none", background: name.trim() ? "#111" : "#e5e7eb", color: name.trim() ? "white" : "#9ca3af", fontSize: 13, fontWeight: 600, cursor: name.trim() ? "pointer" : "default" }}>
           {t("saveChanges")}
         </button>
@@ -737,28 +737,28 @@ function ClassifyModal({ system, onClose, onSave }: {
       background: "rgba(0,0,0,0.45)", padding: 16,
     }}>
       <div style={{
-        background: "white", borderRadius: 16, width: "min(95vw, 1060px)", maxHeight: "90vh",
+        background: "white", borderRadius: 8, width: "min(95vw, 1060px)", maxHeight: "90vh",
         display: "flex", flexDirection: "column", overflow: "hidden",
         boxShadow: "0 20px 60px rgba(0,0,0,0.18)",
       }}>
         {/* Header */}
         <div style={{ padding: "18px 24px 14px", borderBottom: "1px solid rgba(0,0,0,0.08)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexShrink: 0 }}>
           <div>
-            <h2 style={{ fontSize: 17, fontWeight: 700, color: "#0D1016", margin: 0 }}>{t("classify")} — {system.name}</h2>
-            <p style={{ fontSize: 12, color: "#6b7280", margin: "3px 0 0" }}>{t("classifySub")}</p>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: "#0D1016", margin: 0 }}>{t("classify")} — {system.name}</h2>
+            <p style={{ fontSize: 13, color: "#0D1016", margin: "3px 0 0" }}>{t("classifySub")}</p>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", padding: 4, marginTop: 2 }}>✕</button>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#0D1016", padding: 4, marginTop: 2 }}>✕</button>
         </div>
 
         {/* Body — split layout */}
         <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
 
           {/* ─── SINISTRA: form ─────────────────────────────────────── */}
-          <div style={{ flex: "0 0 56%", overflowY: "auto", padding: "18px 20px", borderRight: "1px solid rgba(0,0,0,0.06)" }}>
+          <div style={{ flex: "0 0 56%", overflowY: "auto", padding: "18px 20px", borderRight: "1px solid rgba(0,0,0,0.08)" }}>
 
             {/* Banner */}
             <div style={{ padding: "10px 14px", borderRadius: 8, marginBottom: 16, background: "rgba(13,16,22,0.04)", border: "1px solid rgba(13,16,22,0.10)" }}>
-              <p style={{ fontSize: 12, color: "#0D1016", margin: 0, lineHeight: 1.55 }}>
+              <p style={{ fontSize: 13, color: "#0D1016", margin: 0, lineHeight: 1.55 }}>
                 <span dangerouslySetInnerHTML={{ __html: t("classifyWarning") }} />
               </p>
             </div>
@@ -767,16 +767,16 @@ function ClassifyModal({ system, onClose, onSave }: {
             <div style={{ marginBottom: 10 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 7 }}>
                 <FieldLabel label={t("tierLabel")} showAi={false} />
-                <button onClick={() => setShowTierGuide(v => !v)} style={{ fontSize: 11, color: "#6b7280", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
+                <button onClick={() => setShowTierGuide(v => !v)} style={{ fontSize: 11, color: "#0D1016", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
                   {showTierGuide ? t("hideGuide") : t("showGuide")}
                 </button>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(115px, 1fr))", gap: 6 }}>
                 {(Object.entries(TIER_CONFIG) as [SystemTier, TierCfg][]).map(([key, cfg]) => (
                   <button key={key} onClick={() => { setTier(key); setShowTierGuide(true); }}
-                    style={{ padding: "8px 6px", borderRadius: 7, cursor: "pointer", textAlign: "center", border: `2px solid ${tier === key ? cfg.border : "rgba(0,0,0,0.08)"}`, background: tier === key ? cfg.bg : "white", transition: "all 0.1s" }}>
+                    style={{ padding: "8px 6px", borderRadius: 8, cursor: "pointer", textAlign: "center", border: `2px solid ${tier === key ? cfg.border : "rgba(0,0,0,0.08)"}`, background: tier === key ? cfg.bg : "white", transition: "all 0.1s" }}>
                     <div style={{ width: 7, height: 7, borderRadius: "50%", background: cfg.dot, margin: "0 auto 5px" }} />
-                    <p style={{ fontSize: 10, fontWeight: 700, color: tier === key ? cfg.text : "#6b7280", margin: 0 }}>{t(`tier_${key}_label`)}</p>
+                    <p style={{ fontSize: 11, fontWeight: 700, color: tier === key ? cfg.text : "#0D1016", margin: 0 }}>{t(`tier_${key}_label`)}</p>
                   </button>
                 ))}
               </div>
@@ -784,19 +784,19 @@ function ClassifyModal({ system, onClose, onSave }: {
 
             {/* Guida tier */}
             {showTierGuide && (
-              <div style={{ marginBottom: 14, padding: "12px 14px", borderRadius: 9, background: tierCfg.bg, border: `1px solid ${tierCfg.border}` }}>
+              <div style={{ marginBottom: 14, padding: "12px 14px", borderRadius: 8, background: tierCfg.bg, border: `1px solid ${tierCfg.border}` }}>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 7, marginBottom: 6 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: tierCfg.text }}>{t(`tier_${tier}_label`)}</span>
-                  <span style={{ fontSize: 9, color: "#9ca3af", fontFamily: "var(--font-mono)" }}>{tierCfg.article}</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: tierCfg.text }}>{t(`tier_${tier}_label`)}</span>
+                  <span style={{ fontSize: 11, color: "#0D1016", fontFamily: "var(--font-mono)" }}>{tierCfg.article}</span>
                 </div>
-                <p style={{ fontSize: 11.5, color: "#374151", margin: "0 0 8px", lineHeight: 1.5 }}>{t(`tier_${tier}_what`)}</p>
-                <p style={{ fontSize: 9.5, fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 4px" }}>{t("typicalExamples")}</p>
+                <p style={{ fontSize: 11, color: "#0D1016", margin: "0 0 8px", lineHeight: 1.5 }}>{t(`tier_${tier}_what`)}</p>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 4px" }}>{t("typicalExamples")}</p>
                 <ul style={{ margin: "0 0 8px", paddingLeft: 16, display: "flex", flexDirection: "column", gap: 2 }}>
-                  {tierCfg.examples.map((ex, i) => <li key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.4 }}>{t(`tier_${tier}_ex${i}`)}</li>)}
+                  {tierCfg.examples.map((ex, i) => <li key={i} style={{ fontSize: 11, color: "#0D1016", lineHeight: 1.4 }}>{t(`tier_${tier}_ex${i}`)}</li>)}
                 </ul>
-                <p style={{ fontSize: 9.5, fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 4px" }}>{t("mainObligations")}</p>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 4px" }}>{t("mainObligations")}</p>
                 <ul style={{ margin: 0, paddingLeft: 16, display: "flex", flexDirection: "column", gap: 2 }}>
-                  {tierCfg.obligations.map((ob, i) => <li key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.4 }}>{t(`tier_${tier}_ob${i}`)}</li>)}
+                  {tierCfg.obligations.map((ob, i) => <li key={i} style={{ fontSize: 11, color: "#0D1016", lineHeight: 1.4 }}>{t(`tier_${tier}_ob${i}`)}</li>)}
                 </ul>
               </div>
             )}
@@ -806,7 +806,7 @@ function ClassifyModal({ system, onClose, onSave }: {
               <div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <FieldLabel label={t("f_role")} showAi={false} />
-                  {role && <button onClick={() => setShowRoleGuide(v => !v)} style={{ fontSize: 10, color: "#6b7280", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", marginBottom: 6 }}>{showRoleGuide ? t("hide") : t("whatIsIt")}</button>}
+                  {role && <button onClick={() => setShowRoleGuide(v => !v)} style={{ fontSize: 11, color: "#0D1016", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", marginBottom: 6 }}>{showRoleGuide ? t("hide") : t("whatIsIt")}</button>}
                 </div>
                 <select value={role} onChange={e => { setRole(e.target.value); setShowRoleGuide(true); }} style={INPUT_STYLE}>
                   <option value="">{t("role_undefined")}</option>
@@ -818,18 +818,18 @@ function ClassifyModal({ system, onClose, onSave }: {
                   <option value="product_manufacturer">{t("role_product_manufacturer")}</option>
                 </select>
                 {showRoleGuide && roleGuide && (
-                  <div style={{ marginTop: 7, padding: "9px 11px", background: "rgba(0,0,0,0.03)", borderRadius: 7, border: "1px solid rgba(0,0,0,0.07)" }}>
-                    <p style={{ fontSize: 9.5, fontWeight: 700, color: "#6b7280", margin: "0 0 3px", textTransform: "uppercase", letterSpacing: "0.04em" }}>{roleGuide.article}</p>
-                    <p style={{ fontSize: 11.5, color: "#374151", margin: "0 0 4px", lineHeight: 1.45 }}>{t(`roleGuide_${role}_what`)}</p>
-                    <p style={{ fontSize: 11, color: "#6b7280", margin: 0, fontStyle: "italic", lineHeight: 1.35 }}>{t(`roleGuide_${role}_ex`)}</p>
+                  <div style={{ marginTop: 7, padding: "9px 11px", background: "#FAFAF9", borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)" }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", margin: "0 0 3px", textTransform: "uppercase", letterSpacing: "0.04em" }}>{roleGuide.article}</p>
+                    <p style={{ fontSize: 11, color: "#0D1016", margin: "0 0 4px", lineHeight: 1.45 }}>{t(`roleGuide_${role}_what`)}</p>
+                    <p style={{ fontSize: 11, color: "#0D1016", margin: 0, fontStyle: "italic", lineHeight: 1.35 }}>{t(`roleGuide_${role}_ex`)}</p>
                   </div>
                 )}
               </div>
               <div style={{ display: "flex", alignItems: "flex-start", gap: 9, paddingTop: 26 }}>
                 <input type="checkbox" id="dualRoleClassify" checked={dualRoleFlag} onChange={e => setDualRoleFlag(e.target.checked)} style={{ width: 15, height: 15, marginTop: 2, flexShrink: 0 }} />
                 <div>
-                  <label htmlFor="dualRoleClassify" style={{ fontSize: 12.5, color: "#374151", cursor: "pointer" }}>{t("dualRole25")}</label>
-                  <p style={{ fontSize: 10.5, color: "#9ca3af", margin: "2px 0 0", lineHeight: 1.4 }}>{t("dualRole25Desc")}</p>
+                  <label htmlFor="dualRoleClassify" style={{ fontSize: 13, color: "#0D1016", cursor: "pointer" }}>{t("dualRole25")}</label>
+                  <p style={{ fontSize: 11, color: "#0D1016", margin: "2px 0 0", lineHeight: 1.4 }}>{t("dualRole25Desc")}</p>
                 </div>
               </div>
             </div>
@@ -865,7 +865,7 @@ function ClassifyModal({ system, onClose, onSave }: {
                 />
                 {tier !== "unclassified" && !obligationsNote.trim() && (
                   <button onClick={() => setObligationsNote(tierCfg.obligations.join("\n"))}
-                    style={{ marginTop: 4, fontSize: 11, color: "#6b7280", background: "none", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 5, padding: "3px 10px", cursor: "pointer" }}>
+                    style={{ marginTop: 4, fontSize: 11, color: "#0D1016", background: "none", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 4, padding: "3px 10px", cursor: "pointer" }}>
                     {t("fillFromGuide")}
                   </button>
                 )}
@@ -874,7 +874,7 @@ function ClassifyModal({ system, onClose, onSave }: {
 
             {/* Footer */}
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 18, gap: 8 }}>
-              <button onClick={onClose} style={{ padding: "8px 14px", borderRadius: 8, fontSize: 13, border: "1px solid rgba(0,0,0,0.12)", background: "white", color: "#374151", cursor: "pointer" }}>{t("cancel")}</button>
+              <button onClick={onClose} style={{ padding: "8px 14px", borderRadius: 8, fontSize: 13, border: "1px solid rgba(0,0,0,0.08)", background: "white", color: "#0D1016", cursor: "pointer" }}>{t("cancel")}</button>
               <button onClick={handleSave} disabled={!canSave}
                 style={{ padding: "8px 18px", borderRadius: 8, border: "none", background: canSave ? "#111" : "#e5e7eb", color: canSave ? "white" : "#9ca3af", fontSize: 13, fontWeight: 600, cursor: canSave ? "pointer" : "default" }}>
                 {t("confirmClassification")}
@@ -885,12 +885,12 @@ function ClassifyModal({ system, onClose, onSave }: {
           {/* ─── DESTRA: chat AI ────────────────────────────────────── */}
           <div style={{ flex: "0 0 44%", display: "flex", flexDirection: "column", background: "#f9f9f8" }}>
             {/* Chat header */}
-            <div style={{ padding: "12px 16px 10px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "white", flexShrink: 0 }}>
+            <div style={{ padding: "12px 16px 10px", borderBottom: "1px solid rgba(0,0,0,0.08)", background: "white", flexShrink: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a" }} />
-                <span style={{ fontSize: 12, fontWeight: 700, color: "#0D1016" }}>{t("classifyAssistant")}</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "#0D1016" }}>{t("classifyAssistant")}</span>
               </div>
-              <p style={{ fontSize: 10.5, color: "#9ca3af", margin: "2px 0 0" }}>{t("guidedOn")}</p>
+              <p style={{ fontSize: 11, color: "#0D1016", margin: "2px 0 0" }}>{t("guidedOn")}</p>
             </div>
 
             {/* Messaggi */}
@@ -901,7 +901,7 @@ function ClassifyModal({ system, onClose, onSave }: {
                     maxWidth: "86%", padding: "9px 13px", borderRadius: msg.role === "user" ? "14px 14px 3px 14px" : "14px 14px 14px 3px",
                     background: msg.role === "user" ? "#0D1016" : "white",
                     border: msg.role === "assistant" ? "1px solid rgba(0,0,0,0.08)" : "none",
-                    fontSize: 12, color: msg.role === "user" ? "#fff" : "#374151", lineHeight: 1.55, whiteSpace: "pre-wrap",
+                    fontSize: 13, color: msg.role === "user" ? "#fff" : "#374151", lineHeight: 1.55, whiteSpace: "pre-wrap",
                   }}>
                     {msg.content}
                   </div>
@@ -910,7 +910,7 @@ function ClassifyModal({ system, onClose, onSave }: {
               {chatLoading && (
                 <div style={{ display: "flex" }}>
                   <div style={{ padding: "9px 13px", borderRadius: "14px 14px 14px 3px", background: "white", border: "1px solid rgba(0,0,0,0.08)" }}>
-                    <span style={{ fontSize: 18, letterSpacing: 2, color: "#9ca3af" }}>···</span>
+                    <span style={{ fontSize: 15, letterSpacing: 2, color: "#0D1016" }}>···</span>
                   </div>
                 </div>
               )}
@@ -918,7 +918,7 @@ function ClassifyModal({ system, onClose, onSave }: {
             </div>
 
             {/* Input chat */}
-            <div style={{ padding: "10px 14px", borderTop: "1px solid rgba(0,0,0,0.07)", background: "white", flexShrink: 0 }}>
+            <div style={{ padding: "10px 14px", borderTop: "1px solid rgba(0,0,0,0.08)", background: "white", flexShrink: 0 }}>
               {/* Suggerimento quick reply */}
               {chatMessages.length <= 1 && (
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
@@ -929,7 +929,7 @@ function ClassifyModal({ system, onClose, onSave }: {
                     t("qr_logistics"),
                   ].map(q => (
                     <button key={q} onClick={() => setChatInput(q)}
-                      style={{ fontSize: 10.5, padding: "4px 10px", borderRadius: 12, border: "1px solid rgba(0,0,0,0.1)", background: "rgba(0,0,0,0.03)", color: "#374151", cursor: "pointer" }}>
+                      style={{ fontSize: 11, padding: "4px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)", background: "#FAFAF9", color: "#0D1016", cursor: "pointer" }}>
                       {q}
                     </button>
                   ))}
@@ -942,16 +942,16 @@ function ClassifyModal({ system, onClose, onSave }: {
                   onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } }}
                   placeholder={t("chatPh")}
                   rows={2}
-                  style={{ flex: 1, resize: "none", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 9, padding: "8px 11px", fontSize: 12, color: "#0D1016", background: "#f9f9f8", outline: "none", lineHeight: 1.5, fontFamily: "inherit" }}
+                  style={{ flex: 1, resize: "none", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, padding: "8px 11px", fontSize: 13, color: "#0D1016", background: "#f9f9f8", outline: "none", lineHeight: 1.5, fontFamily: "inherit" }}
                 />
                 <button
                   onClick={sendChat}
                   disabled={!chatInput.trim() || chatLoading}
-                  style={{ width: 34, height: 34, borderRadius: 9, border: "none", background: chatInput.trim() && !chatLoading ? "#0D1016" : "rgba(0,0,0,0.08)", color: chatInput.trim() && !chatLoading ? "#fff" : "rgba(0,0,0,0.28)", cursor: chatInput.trim() && !chatLoading ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  style={{ width: 34, height: 34, borderRadius: 8, border: "none", background: chatInput.trim() && !chatLoading ? "#0D1016" : "rgba(0,0,0,0.08)", color: chatInput.trim() && !chatLoading ? "#fff" : "rgba(0,0,0,0.28)", cursor: chatInput.trim() && !chatLoading ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <Send size={13} />
                 </button>
               </div>
-              <p style={{ fontSize: 9.5, color: "#9ca3af", margin: "5px 0 0", lineHeight: 1.4 }}>
+              <p style={{ fontSize: 11, color: "#0D1016", margin: "5px 0 0", lineHeight: 1.4 }}>
                 {t("aiRepliesNote")}
               </p>
             </div>
@@ -1000,9 +1000,9 @@ Chatbot Supporto Clienti,Customer Care,Assistente virtuale basato su GPT-4 per i
   return (
     <ModalShell title={t("importCsv")} subtitle={t("importCsvSub")} onClose={onClose}>
       {/* Istruzioni formato */}
-      <div style={{ padding: "10px 14px", borderRadius: 8, marginBottom: 16, background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.08)" }}>
-        <p style={{ fontSize: 12, fontWeight: 600, color: "#374151", margin: "0 0 6px" }}>{t("csvFormat")}</p>
-        <p style={{ fontSize: 11, color: "#6b7280", margin: "0 0 4px" }}>
+      <div style={{ padding: "10px 14px", borderRadius: 8, marginBottom: 16, background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.08)" }}>
+        <p style={{ fontSize: 13, fontWeight: 600, color: "#0D1016", margin: "0 0 6px" }}>{t("csvFormat")}</p>
+        <p style={{ fontSize: 11, color: "#0D1016", margin: "0 0 4px" }}>
           <span dangerouslySetInnerHTML={{ __html: t("csvColumns") }} />
         </p>
         <button
@@ -1018,16 +1018,16 @@ Chatbot Supporto Clienti,Customer Care,Assistente virtuale basato su GPT-4 per i
         onChange={e => { setCsvText(e.target.value); setPreview([]); setError(null) }}
         placeholder={"name,owner,description,status\nWorkday ATS,HR,Sistema ATS per screening CV,in_production"}
         rows={6}
-        style={{ ...INPUT_STYLE, resize: "vertical", fontFamily: "var(--font-mono)", fontSize: 12, lineHeight: 1.5 }}
+        style={{ ...INPUT_STYLE, resize: "vertical", fontFamily: "var(--font-mono)", fontSize: 13, lineHeight: 1.5 }}
       />
-      {error && <p style={{ fontSize: 12, color: "#dc2626", margin: "6px 0 0" }}>{error}</p>}
+      {error && <p style={{ fontSize: 13, color: "#dc2626", margin: "6px 0 0" }}>{error}</p>}
 
       <button
         onClick={handleParse}
         disabled={csvText.trim().length < 5}
         style={{
           width: "100%", marginTop: 10, padding: "9px", borderRadius: 8, fontSize: 13,
-          border: "1px solid rgba(0,0,0,0.12)", background: "white", color: "#374151",
+          border: "1px solid rgba(0,0,0,0.08)", background: "white", color: "#0D1016",
           cursor: csvText.trim().length >= 5 ? "pointer" : "default", fontWeight: 500,
         }}
       >
@@ -1039,29 +1039,29 @@ Chatbot Supporto Clienti,Customer Care,Assistente virtuale basato su GPT-4 per i
         <div style={{ marginTop: 16 }}>
           {/* Banner guardrail import */}
           <div style={{ padding: "10px 14px", borderRadius: 8, marginBottom: 12, background: "rgba(217,119,6,0.05)", border: "1px solid rgba(217,119,6,0.2)" }}>
-            <p style={{ fontSize: 12, color: "#d97706", margin: 0 }}>
+            <p style={{ fontSize: 13, color: "#d97706", margin: 0 }}>
               <strong>{preview.length} {preview.length !== 1 ? t("systemsReady") : t("systemReady")}</strong> — {t("importBannerRest")}
             </p>
           </div>
 
           <div style={{ border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
-                <tr style={{ background: "#f9fafb" }}>
-                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#6b7280", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>{t("th_name")}</th>
-                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#6b7280", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>Owner</th>
-                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#6b7280", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>Status</th>
-                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#6b7280", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>Tier</th>
+                <tr style={{ background: "#FAFAF9" }}>
+                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#0D1016", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>{t("th_name")}</th>
+                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#0D1016", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>{t("th_owner")}</th>
+                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#0D1016", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>{t("th_status")}</th>
+                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#0D1016", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>{t("th_tier")}</th>
                 </tr>
               </thead>
               <tbody>
                 {preview.map((row, i) => (
                   <tr key={i} style={{ borderBottom: i < preview.length - 1 ? "1px solid rgba(0,0,0,0.05)" : "none" }}>
-                    <td style={{ padding: "8px 12px", color: "#111", fontWeight: 500 }}>{row.name}</td>
-                    <td style={{ padding: "8px 12px", color: "#6b7280" }}>{row.owner || "—"}</td>
-                    <td style={{ padding: "8px 12px", color: "#6b7280" }}>{t(`status_${row.status ?? ""}`) || row.status}</td>
+                    <td style={{ padding: "8px 12px", color: "#0D1016", fontWeight: 500 }}>{row.name}</td>
+                    <td style={{ padding: "8px 12px", color: "#0D1016" }}>{row.owner || "—"}</td>
+                    <td style={{ padding: "8px 12px", color: "#0D1016" }}>{t(`status_${row.status ?? ""}`) || row.status}</td>
                     <td style={{ padding: "8px 12px" }}>
-                      <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 4, background: "rgba(0,0,0,0.04)", color: "#6b7280", border: "1px solid rgba(0,0,0,0.1)" }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 7px", borderRadius: 4, background: "rgba(0,0,0,0.04)", color: "#0D1016", border: "1px solid rgba(0,0,0,0.08)" }}>
                         {t("unclassifiedUpper")}
                       </span>
                     </td>
@@ -1072,7 +1072,7 @@ Chatbot Supporto Clienti,Customer Care,Assistente virtuale basato su GPT-4 per i
           </div>
 
           {imported ? (
-            <div style={{ textAlign: "center", padding: "16px", color: "#16a34a", fontWeight: 600, fontSize: 14 }}>
+            <div style={{ textAlign: "center", padding: "16px", color: "#16a34a", fontWeight: 600, fontSize: 13 }}>
               ✓ {preview.length} {preview.length !== 1 ? t("systemsImported") : t("systemImported")}!
             </div>
           ) : (
@@ -1117,13 +1117,13 @@ export default function InventoryPage() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
           <div>
             <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{t("title")}</h1>
-            <p style={{ fontSize: 13, color: "#6b7280", margin: "4px 0 0" }}>
+            <p style={{ fontSize: 13, color: "#0D1016", margin: "4px 0 0" }}>
               {systems.length} {systems.length !== 1 ? t("systemsRegistered") : t("systemRegistered")} · {t("registerLabel")}
             </p>
           </div>
           <button
             onClick={() => setModal({ type: "import" })}
-            style={{ display: "flex", alignItems: "center", gap: 5, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.10)", background: "white", fontSize: 12, cursor: "pointer", color: "#6b7280", flexShrink: 0 }}
+            style={{ display: "flex", alignItems: "center", gap: 5, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)", background: "white", fontSize: 13, cursor: "pointer", color: "#0D1016", flexShrink: 0 }}
           >
             <FileDown size={12} /> CSV
           </button>
@@ -1141,8 +1141,8 @@ export default function InventoryPage() {
                 key={ch.step}
                 onClick={() => setModal({ type: "add", initialStep: ch.step })}
                 style={{
-                  flex: 1, textAlign: "left", padding: "12px 14px", borderRadius: 10, cursor: "pointer",
-                  border: ch.primary ? "1.5px solid #0D1016" : "1px solid rgba(0,0,0,0.10)",
+                  flex: 1, textAlign: "left", padding: "12px 14px", borderRadius: 8, cursor: "pointer",
+                  border: ch.primary ? "1.5px solid #0D1016" : "1px solid rgba(0,0,0,0.08)",
                   background: ch.primary ? "#0D1016" : "white",
                   transition: "opacity 0.15s",
                 }}
@@ -1151,7 +1151,7 @@ export default function InventoryPage() {
                   <Icon size={14} color={ch.primary ? "rgba(255,255,255,0.9)" : "#374151"} style={{ flexShrink: 0 }} />
                   <span style={{ fontSize: 13, fontWeight: 700, color: ch.primary ? "white" : "#0D1016" }}>{ch.label}</span>
                   <span style={{
-                    fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 4, flexShrink: 0,
+                    fontSize: 11, fontWeight: 700, padding: "1px 5px", borderRadius: 4, flexShrink: 0,
                     background: ch.primary ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.06)",
                     color: ch.primary ? "rgba(255,255,255,0.75)" : "rgba(0,0,0,0.40)",
                   }}>{ch.badge}</span>
@@ -1167,7 +1167,7 @@ export default function InventoryPage() {
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           <button
             onClick={() => setFilterTier("all")}
-            style={{ padding: "4px 12px", borderRadius: 20, fontSize: 12, fontWeight: 500, border: "1px solid rgba(0,0,0,0.12)", cursor: "pointer", background: filterTier === "all" ? "#111" : "white", color: filterTier === "all" ? "white" : "#374151" }}
+            style={{ padding: "4px 12px", borderRadius: 20, fontSize: 13, fontWeight: 500, border: "1px solid rgba(0,0,0,0.08)", cursor: "pointer", background: filterTier === "all" ? "#111" : "white", color: filterTier === "all" ? "white" : "#374151" }}
           >
             {t("allFilter")} ({systems.length})
           </button>
@@ -1178,11 +1178,11 @@ export default function InventoryPage() {
                 key={tier}
                 onClick={() => setFilterTier(filterTier === tier ? "all" : tier)}
                 style={{
-                  padding: "4px 12px", borderRadius: 20, fontSize: 12, fontWeight: 500,
+                  padding: "4px 12px", borderRadius: 20, fontSize: 13, fontWeight: 500,
                   border: `1px solid ${filterTier === tier ? cfg.border : "rgba(0,0,0,0.1)"}`,
                   cursor: "pointer",
                   background: filterTier === tier ? cfg.bg : "white",
-                  color: filterTier === tier ? cfg.text : "#6b7280",
+                  color: filterTier === tier ? cfg.text : "#0D1016",
                 }}
               >
                 {t(`tier_${tier}_label`)} ({counts[tier]})

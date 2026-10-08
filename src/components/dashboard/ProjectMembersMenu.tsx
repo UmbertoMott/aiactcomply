@@ -21,8 +21,8 @@ import { getPlanMeta, PLAN_EVENT_NAME, type PlanMeta } from "@/lib/billing/plan"
 
 const T = {
   text:   "#0D1016",
-  muted:  "rgba(0,0,0,0.40)",
-  faint:  "rgba(0,0,0,0.22)",
+  muted:  "#0D1016",
+  faint:  "#0D1016",
   border: "rgba(0,0,0,0.08)",
   green:  "#059669",
   amber:  "#b45309",
@@ -105,7 +105,7 @@ export function ProjectMembersMenu() {
         <Users className="h-3.5 w-3.5 flex-shrink-0" style={{ color: T.muted }} />
         <span>Membri</span>
         {used > 0 && (
-          <span style={{ fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 999, background: "rgba(0,0,0,0.06)", color: T.muted }}>
+          <span style={{ fontSize: 11, fontWeight: 700, padding: "1px 5px", borderRadius: 999, background: "rgba(0,0,0,0.06)", color: T.muted }}>
             {used}
           </span>
         )}
@@ -119,7 +119,7 @@ export function ProjectMembersMenu() {
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full rounded-2xl overflow-hidden"
+            className="w-full rounded-lg overflow-hidden"
             style={{ maxWidth: 480, background: "#fff", boxShadow: "0 20px 60px rgba(0,0,0,0.25)" }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -127,7 +127,7 @@ export function ProjectMembersMenu() {
             <div style={{ padding: "16px 20px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
               <div style={{ minWidth: 0 }}>
                 <h2 style={{ fontSize: 15, fontWeight: 600, color: T.text, letterSpacing: "-0.3px" }}>Membri del progetto</h2>
-                <p style={{ fontSize: 11.5, color: T.muted, marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <p style={{ fontSize: 11, color: T.muted, marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {project.name} · {used}/{limitLabel} membri · piano {plan.label}
                 </p>
               </div>
@@ -153,7 +153,7 @@ export function ProjectMembersMenu() {
                   <span style={{ fontSize: 13, color: T.text, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.email}</span>
                   <span
                     style={{
-                      display: "inline-flex", alignItems: "center", gap: 4, fontSize: 10, fontWeight: 600,
+                      display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 600,
                       padding: "2px 8px", borderRadius: 999,
                       background: m.status === "active" ? "rgba(5,150,105,0.08)" : "rgba(180,83,9,0.08)",
                       color: m.status === "active" ? T.green : T.amber,
@@ -198,7 +198,7 @@ export function ProjectMembersMenu() {
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
                     <button
                       onClick={handleCopyLink}
-                      style={{ fontSize: 12.5, fontWeight: 500, padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.text, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}
+                      style={{ fontSize: 13, fontWeight: 500, padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.text, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}
                     >
                       <Link2 size={13} /> {copied ? "Link copiato!" : "Copia link invito"}
                     </button>
@@ -206,21 +206,21 @@ export function ProjectMembersMenu() {
                       Ancora {limit - used} {limit - used === 1 ? "membro" : "membri"} disponibili
                     </span>
                   </div>
-                  {error && <p style={{ fontSize: 11.5, color: T.red, marginTop: 8 }}>{error}</p>}
+                  {error && <p style={{ fontSize: 11, color: T.red, marginTop: 8 }}>{error}</p>}
                 </div>
               ) : (
-                <div style={{ marginTop: 16, padding: "14px 16px", borderRadius: 8, background: "rgba(0,0,0,0.03)", border: `1px solid ${T.border}` }}>
+                <div style={{ marginTop: 16, padding: "14px 16px", borderRadius: 8, background: "#FAFAF9", border: `1px solid ${T.border}` }}>
                   <p style={{ fontSize: 13, fontWeight: 500, color: T.text, marginBottom: 4 }}>
                     {limit === 0 ? "Il piano Essenziale include un solo utente." : `Hai raggiunto il limite di ${limitLabel} membri del piano ${plan.label}.`}
                   </p>
-                  <p style={{ fontSize: 12, color: T.muted, marginBottom: 12, lineHeight: 1.5 }}>
+                  <p style={{ fontSize: 13, color: T.muted, marginBottom: 12, lineHeight: 1.5 }}>
                     {limit === 0
                       ? "Passa a Studio (fino a 3 membri) o Su misura (5 o più) per collaborare in team."
                       : "Passa a Su misura per aggiungere 5 o più membri."}
                   </p>
                   <Link
                     href="/pricing"
-                    style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12.5, fontWeight: 500, color: "#fff", background: T.text, padding: "8px 16px", borderRadius: 8, textDecoration: "none" }}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 500, color: "#fff", background: T.text, padding: "8px 16px", borderRadius: 8, textDecoration: "none" }}
                   >
                     Aggiorna piano <ArrowRight size={12} />
                   </Link>

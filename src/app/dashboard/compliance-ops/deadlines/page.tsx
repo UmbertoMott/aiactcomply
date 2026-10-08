@@ -22,14 +22,14 @@ const BG   = "#FAFAF9";
 const BG2  = "#ffffff";
 const BG3  = "#F3F4F6";
 const TEXT = "#0D1016";
-const MUTED= "rgba(0,0,0,0.45)";
+const MUTED= "#0D1016";
 const BORDER = "rgba(0,0,0,0.08)";
 const FONT: CSSProperties = { fontFamily: "inherit" };
 
 const SEV: Record<string, { color: string; bg: string; border: string }> = {
   critical:      { color: "#DC2626", bg: "rgba(220,38,38,0.06)", border: "rgba(220,38,38,0.2)" },
-  important:     { color: "rgba(0,0,0,0.65)", bg: "rgba(0,0,0,0.03)", border: "rgba(0,0,0,0.1)" },
-  informational: { color: "rgba(0,0,0,0.40)", bg: "transparent",      border: "transparent" },
+  important:     { color: "#0D1016", bg: "rgba(0,0,0,0.03)", border: "rgba(0,0,0,0.1)" },
+  informational: { color: "#0D1016", bg: "transparent",      border: "transparent" },
 };
 
 const TIMELINE_PREFS_KEY      = "aicomply_timeline_prefs";
@@ -86,7 +86,7 @@ function TimelineDot({ status }: { status: DeadlineStatus }) {
 function ArticleBadge({ article }: { article: string }) {
   const short = article.split(" ").slice(0, 2).join(" ");
   return (
-    <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded-full flex-shrink-0"
+    <span className="text-[11px] font-mono font-medium px-1.5 py-0.5 rounded-full flex-shrink-0"
       style={{ background: "rgba(0,0,0,0.04)", color: MUTED, border: `1px solid ${BORDER}` }}>
       {short}
     </span>
@@ -115,7 +115,7 @@ function DeadlineCard({ deadline, isLast, onRestore }: { deadline: AIActDeadline
       {/* Right: card */}
       <div className="flex-1 pb-5">
         <button
-          className="w-full text-left rounded-xl px-4 py-3 transition-all duration-150"
+          className="w-full text-left rounded-lg px-4 py-3 transition-all duration-150"
           style={{ background: expanded ? BG3 : "transparent", border: `1px solid ${expanded ? BORDER : "transparent"}`, cursor: "pointer" }}
           onClick={() => setExpanded(v => !v)}
         >
@@ -123,7 +123,7 @@ function DeadlineCard({ deadline, isLast, onRestore }: { deadline: AIActDeadline
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <ArticleBadge article={deadline.article} />
               <div className="min-w-0">
-                <p className="text-sm font-medium leading-snug" style={{ color: status === "passed" ? MUTED : TEXT }}>
+                <p className="text-[13px] font-medium leading-snug" style={{ color: status === "passed" ? MUTED : TEXT }}>
                   {deadline.label}
                 </p>
                 <div className="flex items-center gap-2 mt-0.5 flex-wrap">
@@ -133,13 +133,13 @@ function DeadlineCard({ deadline, isLast, onRestore }: { deadline: AIActDeadline
                       : `${days} giorni`}
                   </span>
                   {deadline.severity === "critical" && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded"
+                    <span className="text-[11px] px-1.5 py-0.5 rounded"
                       style={{ background: sev.bg, color: sev.color, border: `1px solid ${sev.border}` }}>
                       critica
                     </span>
                   )}
                   {deadline.isDynamic && (
-                    <span className="text-[10px]" style={{ color: MUTED }}>dinamica</span>
+                    <span className="text-[11px]" style={{ color: MUTED }}>dinamica</span>
                   )}
                 </div>
               </div>
@@ -168,7 +168,7 @@ function DeadlineCard({ deadline, isLast, onRestore }: { deadline: AIActDeadline
 
         {expanded && (
           <div className="mt-1 px-4 pb-3 rounded-b-xl" style={{ background: BG3, border: `1px solid ${BORDER}`, borderTop: "none", marginTop: -4 }}>
-            <p className="text-[12px] leading-relaxed pt-3 pb-2" style={{ color: MUTED }}>
+            <p className="text-[13px] leading-relaxed pt-3 pb-2" style={{ color: MUTED }}>
               {deadline.description}
             </p>
             {deadline.sourceSystemName && (
@@ -178,7 +178,7 @@ function DeadlineCard({ deadline, isLast, onRestore }: { deadline: AIActDeadline
             )}
             {actions.length > 0 && (
               <div className="mt-2">
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: MUTED }}>
+                <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: MUTED }}>
                   Azioni
                 </p>
                 <ul className="space-y-1.5">
@@ -187,8 +187,8 @@ function DeadlineCard({ deadline, isLast, onRestore }: { deadline: AIActDeadline
                       <div className="mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0"
                         style={{ background: "rgba(0,0,0,0.25)" }} />
                       {a.href
-                        ? <Link href={a.href} className="text-[12px] hover:underline" style={{ color: TEXT }}>{a.label}</Link>
-                        : <span className="text-[12px]" style={{ color: TEXT }}>{a.label}</span>
+                        ? <Link href={a.href} className="text-[13px] hover:underline" style={{ color: TEXT }}>{a.label}</Link>
+                        : <span className="text-[13px]" style={{ color: TEXT }}>{a.label}</span>
                       }
                     </li>
                   ))}
@@ -231,13 +231,13 @@ function SummaryCards({
           <button
             key={status}
             onClick={() => onFilter(isActive ? null : status)}
-            className="rounded-xl px-4 py-3 text-left transition-all duration-150"
+            className="rounded-lg px-4 py-3 text-left transition-all duration-150"
             style={{
               background: BG2,
               border: isActive ? `1px solid #0D1016` : `1px solid ${BORDER}`,
               opacity: activeFilter && !isActive ? 0.4 : 1,
               cursor: "pointer",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+              boxShadow: "none",
             }}>
             <p className="text-2xl font-semibold" style={{ color: status === "imminent" && counts[status] > 0 ? "#DC2626" : TEXT }}>{counts[status]}</p>
             <p className="text-[11px] mt-0.5" style={{ color: MUTED }}>{label}</p>
@@ -256,14 +256,14 @@ function NextDeadlineBanner({ deadline }: { deadline: AIActDeadline }) {
   const isImminent = status === "imminent";
 
   return (
-    <div className="rounded-xl px-5 py-4 mb-6 flex items-center gap-5"
+    <div className="rounded-lg px-5 py-4 mb-6 flex items-center gap-5"
       style={{
         background: BG2,
         border: isImminent ? `1px solid rgba(220,38,38,0.2)` : `1px solid ${BORDER}`,
-        boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+        boxShadow: "none",
       }}>
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-widest mb-1" style={{ color: MUTED }}>
+        <p className="text-[11px] font-semibold uppercase tracking-widest mb-1" style={{ color: MUTED }}>
           Prossima scadenza
         </p>
         <div className="flex items-baseline gap-2 mb-0.5">
@@ -279,7 +279,7 @@ function NextDeadlineBanner({ deadline }: { deadline: AIActDeadline }) {
       </div>
       {deadline.tool_href && (
         <Link href={deadline.tool_href}
-          className="flex-shrink-0 text-[12px] font-medium px-3 py-1.5 rounded-lg hover:opacity-80 transition-opacity"
+          className="flex-shrink-0 text-[13px] font-medium px-3 py-1.5 rounded-lg hover:opacity-80 transition-opacity"
           style={{ background: "#0D1016", color: "#fff", textDecoration: "none" }}>
           Vai →
         </Link>
@@ -321,15 +321,15 @@ function CopilotPanel({
   }
 
   return (
-    <div className="rounded-xl p-5 mb-6" style={{ background: BG2, border: `1px solid rgba(124,58,237,0.2)`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+    <div className="rounded-lg p-5 mb-6" style={{ background: BG2, border: `1px solid rgba(124,58,237,0.2)`, boxShadow: "none" }}>
       <div className="flex items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-2">
           <Sparkles size={16} style={{ color: "#a78bfa" }} />
-          <p className="text-sm font-semibold" style={{ color: TEXT }}>✦ AI — Prioritizzazione scadenze</p>
+          <p className="text-[13px] font-semibold" style={{ color: TEXT }}>✦ AI — Prioritizzazione scadenze</p>
         </div>
         {!groups && (
           <button onClick={run} disabled={loading}
-            className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-lg"
+            className="flex items-center gap-1.5 text-[13px] font-semibold px-3 py-1.5 rounded-lg"
             style={{ background: "#0D1016", color: "#fff", border: "none", cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1 }}>
             {loading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
             {loading ? "Analisi in corso..." : "Genera prioritizzazione AI"}
@@ -339,7 +339,7 @@ function CopilotPanel({
       <p className="text-[11px] mb-3" style={{ color: MUTED }}>
         ✦ AI — verifica e conferma: il copilot ordina e raggruppa le scadenze in base a severita normativa e sanzioni. Non inventa scadenze — quelle sono sempre derivate dall&apos;AI Act o dagli altri tool.
       </p>
-      {error && <p className="text-[12px]" style={{ color: "#ef4444" }}>{error}</p>}
+      {error && <p className="text-[13px]" style={{ color: "#ef4444" }}>{error}</p>}
       {groups && (
         <div className="space-y-4">
           {groups.map(group => (
@@ -351,7 +351,7 @@ function CopilotPanel({
                   return (
                     <li key={item.deadlineId} className="rounded-lg px-3 py-2"
                       style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.15)" }}>
-                      <p className="text-[12px] font-medium" style={{ color: TEXT }}>{d?.label ?? item.deadlineId}</p>
+                      <p className="text-[13px] font-medium" style={{ color: TEXT }}>{d?.label ?? item.deadlineId}</p>
                       <p className="text-[11px] mt-0.5" style={{ color: MUTED }}>{item.reasoning}</p>
                     </li>
                   );
@@ -362,11 +362,11 @@ function CopilotPanel({
           {!confirmed && (
             <label className="flex items-center gap-2 mt-3 cursor-pointer">
               <input type="checkbox" onChange={e => { if (e.target.checked) confirmPrioritization(); }} />
-              <span className="text-[12px]" style={{ color: MUTED }}>Confermo questa prioritizzazione (imposta aiConfirmed = true)</span>
+              <span className="text-[13px]" style={{ color: MUTED }}>Confermo questa prioritizzazione (imposta aiConfirmed = true)</span>
             </label>
           )}
           {confirmed && (
-            <div className="flex items-center gap-2 text-[12px]" style={{ color: "#4ade80" }}>
+            <div className="flex items-center gap-2 text-[13px]" style={{ color: "#4ade80" }}>
               <Check size={13} /> Prioritizzazione confermata
             </div>
           )}
@@ -505,7 +505,7 @@ export default function DeadlinesPage() {
               <CalendarClock size={20} style={{ color: MUTED }} />
               <h1 className="text-2xl font-semibold" style={{ color: TEXT }}>Scadenze AI Act</h1>
             </div>
-            <p className="text-sm" style={{ color: MUTED }}>
+            <p className="text-[13px]" style={{ color: MUTED }}>
               {systems.length > 0
                 ? `${activeDeadlines.length} scadenze attive${systemFilter === "all" ? ` per ${systems.length} sistema${systems.length !== 1 ? "i" : ""} nell'inventario` : ` — ${primarySystem?.name ?? ""}`}`
                 : "Dati statici — completa il Triage per scadenze personalizzate"}
@@ -522,7 +522,7 @@ export default function DeadlinesPage() {
                   setSystemFilter(e.target.value);
                   saveStoredSystemFilter(e.target.value);
                 }}
-                className="text-[12px] font-medium rounded-lg px-2.5 py-1.5 outline-none"
+                className="text-[13px] font-medium rounded-lg px-2.5 py-1.5 outline-none"
                 style={{ background: BG2, border: `1px solid ${BORDER}`, color: TEXT }}
               >
                 <option value="all">Tutti i sistemi</option>
@@ -538,7 +538,7 @@ export default function DeadlinesPage() {
                 setUserRole(next);
                 saveStoredRole(next);
               }}
-              className="text-[12px] font-medium rounded-lg px-2.5 py-1.5 outline-none"
+              className="text-[13px] font-medium rounded-lg px-2.5 py-1.5 outline-none"
               style={{ background: BG2, border: `1px solid ${BORDER}`, color: TEXT }}
             >
               {(Object.keys(ROLE_LABEL) as UserRole[]).map(r => (
@@ -580,34 +580,34 @@ export default function DeadlinesPage() {
 
         {/* Alert prioritario Annex III */}
         {showUrgentBanner && (
-          <div className="rounded-xl px-4 py-3 flex items-center justify-between gap-3 mb-6 flex-wrap"
+          <div className="rounded-lg px-4 py-3 flex items-center justify-between gap-3 mb-6 flex-wrap"
             style={{ background: "rgba(217,119,6,0.06)", border: "1px solid rgba(217,119,6,0.25)" }}>
             <div className="flex items-center gap-3">
               <AlertTriangle size={16} style={{ color: "#D97706", flexShrink: 0 }} />
               <div>
-                <p className="text-sm font-medium" style={{ color: "#92400e" }}>
+                <p className="text-[13px] font-medium" style={{ color: "#92400e" }}>
                   Scadenza Annex III — {daysToAnnexIII} giorni
                 </p>
-                <p className="text-[12px] mt-0.5" style={{ color: MUTED }}>
+                <p className="text-[13px] mt-0.5" style={{ color: MUTED }}>
                   Gli obblighi per i sistemi ad alto rischio dell&apos;Allegato III si applicano dal 2 dicembre 2027. Verifica dossier, EUDB e documentazione tecnica.
                 </p>
               </div>
             </div>
             <span className="font-mono text-[11px] px-2 py-1 rounded flex-shrink-0"
               style={{ background: "rgba(217,119,6,0.1)", color: "#92400e", border: "1px solid rgba(217,119,6,0.25)" }}>
-              Art. 6–51
+              Capo III, sez. 1-3 (Artt. 6-27)
             </span>
           </div>
         )}
 
         {/* Empty state — no inventory */}
         {systems.length === 0 && (
-          <div className="rounded-xl p-5 mb-6 flex items-start gap-3"
+          <div className="rounded-lg p-5 mb-6 flex items-start gap-3"
             style={{ background: BG2, border: `1px solid rgba(59,130,246,0.2)` }}>
             <Info size={14} style={{ color: MUTED, flexShrink: 0, marginTop: 2 }} />
             <div>
-              <p className="text-sm font-medium mb-1" style={{ color: TEXT }}>Scadenze personalizzate non disponibili</p>
-              <p className="text-[12px] leading-relaxed" style={{ color: MUTED }}>
+              <p className="text-[13px] font-medium mb-1" style={{ color: TEXT }}>Scadenze personalizzate non disponibili</p>
+              <p className="text-[13px] leading-relaxed" style={{ color: MUTED }}>
                 Stai visualizzando solo le scadenze che si applicano a tutti i sistemi di IA.
                 Completa il <Link href="/dashboard/triage" className="underline" style={{ color: "#0D1016" }}>Triage</Link> o
                 aggiungi sistemi all&apos;<Link href="/dashboard/tools/inventory" className="underline" style={{ color: "#0D1016" }}>Inventario</Link> per scadenze filtrate per il tuo tier normativo.
@@ -651,7 +651,7 @@ export default function DeadlinesPage() {
               {displayed.map((deadline, i) => (
                 <div key={deadline.id}>
                   {restoredIds.includes(deadline.id) && (
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4, marginLeft: 20, fontSize: 10, color: "#4f46e5" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4, marginLeft: 20, fontSize: 11, color: "#4f46e5" }}>
                       <RotateCcw size={10} /> Ripristinata dall&apos;archivio
                     </div>
                   )}
@@ -667,7 +667,7 @@ export default function DeadlinesPage() {
           <div className="mt-8 pt-6" style={{ borderTop: `1px solid ${BORDER}` }}>
             <button
               onClick={() => setShowArchived(v => !v)}
-              className="flex items-center gap-2 text-[12px] transition-colors"
+              className="flex items-center gap-2 text-[13px] transition-colors"
               style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}
             >
               <Archive size={13} />

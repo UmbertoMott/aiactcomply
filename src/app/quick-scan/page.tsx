@@ -12,10 +12,10 @@ export const metadata: Metadata = {
     description:
       "Quick Scan gratuito per individuare potenziali gap rispetto all'AI Act.",
     type: "website",
-    url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://aicomply-omega.vercel.app"}/quick-scan`,
+    url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com"}/quick-scan`,
   },
   alternates: {
-    canonical: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://aicomply-omega.vercel.app"}/quick-scan`,
+    canonical: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com"}/quick-scan`,
   },
 };
 

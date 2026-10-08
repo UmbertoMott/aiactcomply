@@ -249,16 +249,16 @@ export default function QMSPage() {
   return (
     <div className="w-full">
       {savedAt ? (
-        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[13px]"
           style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)", fontFamily: "inherit" }}>
           <CheckCircle size={13} strokeWidth={1.5} style={{ color: "#15803d" }} />
           <span style={{ color: "#15803d" }}>✓ {t("savedBanner")} {new Date(savedAt).toLocaleDateString("it-IT")}</span>
           <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>{t("seeDossier")}</Link>
         </div>
       ) : (
-        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[12px]"
-          style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", fontFamily: "inherit" }}>
-          <span style={{ color: "rgba(0,0,0,0.45)" }}>{t("saveHint")}</span>
+        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[13px]"
+          style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", fontFamily: "inherit" }}>
+          <span style={{ color: "#0D1016" }}>{t("saveHint")}</span>
           <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1 hover:opacity-80"
             style={{ background: "#0D1016", color: "#ffffff", border: "none", cursor: "pointer" }}>
             {t("saveBtn")}
@@ -272,11 +272,11 @@ export default function QMSPage() {
           value={systemName}
           onChange={(e) => setSystemName(e.target.value)}
           placeholder={t("systemName_placeholder")}
-          className="rounded-lg px-3 py-1.5 text-[12px] focus:outline-none"
-          style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)", color: "#0D1016", width: "200px" }}
+          className="rounded-lg px-3 py-1.5 text-[13px] focus:outline-none"
+          style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", width: "200px" }}
         />
       </div>
-      <p className="text-sm mb-8" style={{ color: "rgba(0,0,0,0.45)" }}>
+      <p className="text-[13px] mb-8" style={{ color: "#0D1016" }}>
         {t("subtitle")}
       </p>
 
@@ -286,14 +286,14 @@ export default function QMSPage() {
           { label: t("stat_completed"), value: completedCount, textColor: "#16a34a" },
           { label: t("stat_template"), value: templateSections.length, textColor: "#2563eb" },
         ].map((card) => (
-          <div key={card.label} className="rounded-xl p-4"
-            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+          <div key={card.label} className="rounded-lg p-4"
+            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "none" }}>
             <div className="text-[20px] font-semibold" style={{ color: card.textColor, letterSpacing: "-0.5px" }}>{card.value}</div>
-            <div className="mt-0.5 text-[11px]" style={{ color: "rgba(0,0,0,0.38)" }}>{card.label}</div>
+            <div className="mt-0.5 text-[11px]" style={{ color: "#0D1016" }}>{card.label}</div>
           </div>
         ))}
-        <div className="rounded-xl p-4"
-          style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+        <div className="rounded-lg p-4"
+          style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "none" }}>
           <button
             onClick={exportQMS}
             className="w-full flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-[11px] font-medium transition-opacity hover:opacity-80"
@@ -303,7 +303,7 @@ export default function QMSPage() {
         </div>
       </div>
 
-      <h2 className="text-sm font-semibold mb-4" style={{ color: "#0D1016" }}>
+      <h2 className="text-[13px] font-semibold mb-4" style={{ color: "#0D1016" }}>
         {t("add_heading")}
       </h2>
       <div className="grid md:grid-cols-2 gap-2 mb-8">
@@ -313,12 +313,12 @@ export default function QMSPage() {
             <button
               key={tpl.id}
               onClick={() => addSection(tpl)}
-              className="rounded-lg px-4 py-2.5 text-xs text-left transition-all flex items-center gap-1.5"
-              style={{ border: "1px solid rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.5)", background: "#ffffff" }}
+              className="rounded-lg px-4 py-2.5 text-[11px] text-left transition-all flex items-center gap-1.5"
+              style={{ border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", background: "#ffffff" }}
             >
-              <Plus className="h-3 w-3 shrink-0" style={{ color: "rgba(0,0,0,0.3)" }} />
+              <Plus className="h-3 w-3 shrink-0" style={{ color: "#0D1016" }} />
               {tpl.title}{" "}
-              <span style={{ color: "rgba(0,0,0,0.25)" }}>({tpl.art})</span>
+              <span style={{ color: "#0D1016" }}>({tpl.art})</span>
             </button>
           ))}
       </div>
@@ -332,24 +332,24 @@ export default function QMSPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.2 }}
-              className="rounded-xl p-5"
+              className="rounded-lg p-5"
               style={{
                 background: "#ffffff",
-                border: s.completed ? "1px solid rgba(22,163,74,0.25)" : "1px solid rgba(0,0,0,0.07)",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+                border: s.completed ? "1px solid rgba(22,163,74,0.25)" : "1px solid rgba(0,0,0,0.08)",
+                boxShadow: "none",
               }}
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4" style={{ color: "#2563eb" }} />
                   <div>
-                    <h3 className="text-sm font-semibold" style={{ color: "#0D1016" }}>{s.tplId ? t(`sec_${s.tplId}_title`) : s.title}</h3>
-                    <p className="text-xs" style={{ color: "rgba(0,0,0,0.45)" }}>{s.tplId ? t(`sec_${s.tplId}_desc`) : s.desc}</p>
+                    <h3 className="text-[13px] font-semibold" style={{ color: "#0D1016" }}>{s.tplId ? t(`sec_${s.tplId}_title`) : s.title}</h3>
+                    <p className="text-[11px]" style={{ color: "#0D1016" }}>{s.tplId ? t(`sec_${s.tplId}_desc`) : s.desc}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] rounded px-1.5 py-0.5"
-                    style={{ background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.4)" }}>
+                  <span className="text-[11px] rounded px-1.5 py-0.5"
+                    style={{ background: "rgba(0,0,0,0.04)", color: "#0D1016" }}>
                     {s.art}
                   </span>
                   {/* AI draft button */}
@@ -357,7 +357,7 @@ export default function QMSPage() {
                     <button
                       disabled={sectionDrafting[s.id]}
                       onClick={() => draftSection(s.id, s.art)}
-                      className="flex items-center gap-1 text-[10px] font-medium rounded-full px-2 py-0.5 transition-colors"
+                      className="flex items-center gap-1 text-[11px] font-medium rounded-full px-2 py-0.5 transition-colors"
                       style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.25)", color: "#92400e", cursor: sectionDrafting[s.id] ? "wait" : "pointer" }}
                       title={t("ai_title")}
                     >
@@ -367,17 +367,17 @@ export default function QMSPage() {
                   )}
                   <button
                     onClick={() => toggle(s.id)}
-                    className="text-[10px] font-medium rounded-full px-2 py-0.5 transition-colors"
+                    className="text-[11px] font-medium rounded-full px-2 py-0.5 transition-colors"
                     style={s.completed
                       ? { background: "rgba(22,163,74,0.1)", border: "1px solid rgba(22,163,74,0.3)", color: "#16a34a" }
-                      : { background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.45)" }}
+                      : { background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016" }}
                   >
                     {s.completed ? t("badge_ok") : t("badge_draft")}
                   </button>
                   <button
                     onClick={() => removeSection(s.id)}
                     className="transition-colors"
-                    style={{ color: "rgba(0,0,0,0.3)" }}
+                    style={{ color: "#0D1016" }}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
@@ -386,10 +386,10 @@ export default function QMSPage() {
               <textarea
                 value={s.content}
                 onChange={(e) => updateContent(s.id, e.target.value)}
-                className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none"
+                className="w-full rounded-lg px-3 py-2 text-[13px] focus:outline-none"
                 style={{
-                  border: "1px solid rgba(0,0,0,0.07)",
-                  background: "rgba(0,0,0,0.02)",
+                  border: "1px solid rgba(0,0,0,0.08)",
+                  background: "#FAFAF9",
                   color: "#0D1016",
                 }}
                 placeholder={t("content_placeholder")}
@@ -409,7 +409,7 @@ export default function QMSPage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
-            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg"
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-[13px] font-medium shadow-lg"
             style={{
               background: toast.type === "error" ? "rgba(220,38,38,0.95)" : "#0D1016",
               color: "#ffffff",

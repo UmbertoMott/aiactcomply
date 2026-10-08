@@ -16,26 +16,31 @@ export interface MandateDuty {
   confirmedAt?: string;
 }
 
+// Compiti del mandato: Art. 22(3), lettere a)-e), e cessazione del mandato (Art. 22(4)).
 export const MANDATORY_DUTIES: Omit<MandateDuty, "confirmed" | "confirmedAt">[] = [
   {
-    duty: "Conservazione documentazione tecnica per 10 anni dalla immissione sul mercato",
+    duty: "Verificare che la dichiarazione di conformità UE e la documentazione tecnica siano redatte e che sia stata eseguita la valutazione della conformità",
     artRef: "Art. 22(3)(a)",
   },
   {
-    duty: "Cooperazione con le autorità nazionali di vigilanza del mercato",
+    duty: "Tenere a disposizione delle autorità per 10 anni i dati di contatto del fornitore, la dichiarazione di conformità UE, la documentazione tecnica e l'eventuale certificato",
     artRef: "Art. 22(3)(b)",
   },
   {
-    duty: "Messa a disposizione della documentazione tecnica su richiesta delle autorità",
+    duty: "Fornire alle autorità, su richiesta motivata, le informazioni e la documentazione necessarie, compreso l'accesso ai log",
     artRef: "Art. 22(3)(c)",
   },
   {
-    duty: "Recesso immediato dal mandato in caso di violazione del regolamento da parte del provider",
-    artRef: "Art. 22(5)",
+    duty: "Cooperare con le autorità competenti in qualsiasi azione relativa al sistema",
+    artRef: "Art. 22(3)(d)",
   },
   {
-    duty: "Informazione alle autorità di vigilanza in caso di decesso o rischio grave",
-    artRef: "Art. 22(3)(d)",
+    duty: "Ove applicabile, adempiere agli obblighi di registrazione (Art. 49(1)) o verificarne la correttezza",
+    artRef: "Art. 22(3)(e)",
+  },
+  {
+    duty: "Porre fine al mandato se il fornitore agisce in modo contrario ai propri obblighi e informarne l'autorità",
+    artRef: "Art. 22(4)",
   },
 ];
 

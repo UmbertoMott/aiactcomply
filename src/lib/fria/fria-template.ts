@@ -283,7 +283,7 @@ export const FRIA_SUBPOINTS: FriaSubPoint[] = [
   {
     id: "f1c_ai_literacy", sectionKey: "fase1c",
     label: "AI literacy",
-    question: "Sono state adottate misure per garantire un livello sufficiente di alfabetizzazione AI per staff e operatori (Art. 4 AI Act)?",
+    question: "Sono state adottate misure per sostenere lo sviluppo dell'alfabetizzazione in materia di IA del personale e degli operatori (Art. 4 AI Act, come modificato dal Reg. (UE) 2026/1744)?",
     ref: "Art. 4 AI Act",
     fieldType: "select_ynp",
     required: true,
@@ -464,13 +464,13 @@ export const FRIA_SUBPOINTS: FriaSubPoint[] = [
   {
     id: "f3_notifica_autorita", sectionKey: "fase3",
     label: "Notifica all'autorità",
-    question: "È stata effettuata o pianificata la notifica all'autorità di vigilanza del mercato dell'esito della FRIA (Art. 27(2) AI Act)?",
-    ref: "Art. 27(2) AI Act",
+    question: "È stata effettuata o pianificata la notifica dei risultati della FRIA all'autorità di vigilanza del mercato, con il modello dell'Art. 27(5) (Art. 27(3) AI Act)?",
+    ref: "Art. 27(3) AI Act",
     fieldType: "select_ynp",
     required: false,
     examples: [
       "Sì — notifica formale della FRIA presentata all'Autorità di Vigilanza del Mercato (UIRM) e al Garante Privacy il 15/03/2025 tramite il sistema di notifica EU AI Database (Art. 71 AI Act); numero di protocollo: 2025-FRIA-IT-0089. L'Autorità ha confermato la ricevuta il 20/03/2025 e non ha sollevato obiezioni entro il termine di 30 giorni; il deployment è stato autorizzato a procedere. La FRIA sarà ri-notificata ad ogni aggiornamento sostanziale.",
-      "No — la notifica formale non è applicabile al nostro caso specifico per due ragioni: (1) il sistema opera in modalità esclusivamente interna senza produrre decisioni che hanno effetti giuridici o significativamente incidenti su terzi; (2) la sorveglianza umana al 100% esclude l'automaticità delle decisioni richiesta per l'obbligo di notifica Art. 27(2). Questa valutazione è stata validata dal nostro team legale (parere n. LEGAL-2025-012 del 01/02/2025).",
+      "No — la notifica non è ancora stata trasmessa: è un obbligo dell'Art. 27(3) che va adempiuto una volta effettuata la valutazione, salvo l'esenzione dell'Art. 46(1).",
       "Parzialmente — la procedura di notifica è stata avviata: istanza presentata tramite EU AI Database il 10/04/2025; attesa conferma formale dell'Autorità entro 45 giorni (scadenza stimata 25/05/2025). Nel frattempo il deployment procede in modalità pilota limitata (max 500 decisioni/mese) con sorveglianza umana rafforzata, come concordato con il Compliance Officer in attesa della notifica definitiva.",
     ],
   },
