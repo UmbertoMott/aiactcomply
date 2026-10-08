@@ -781,7 +781,7 @@ export default function QuestionnairePage() {
       <div className="mb-5 p-4 rounded-lg" style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.08)" }}>
         <div className="flex items-center justify-between mb-2">
           <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
-            {t("dossierWord")} <span style={{ color: barColor }}>{completedCount}/12</span> {t("sectionsCompleted")}
+            {t("dossierWord")} <span style={{ color: barColor }}>{completedCount}/{DOSSIER_KEYS.length}</span> {t("sectionsCompleted")}
           </p>
           <Link
             href="/dashboard/dossier"

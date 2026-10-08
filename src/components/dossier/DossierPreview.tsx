@@ -189,7 +189,7 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
       >
         {/* Top: logo */}
         <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.4px", fontFamily: "inherit" }}>
-          AI<span style={{ color: "rgba(255,255,255,0.3)", fontWeight: 300 }}>Comply</span>
+          Regulae<span style={{ color: "rgba(255,255,255,0.3)", fontWeight: 300 }}>OS</span>
         </div>
 
         {/* Bottom: document info */}
@@ -227,7 +227,7 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
           </div>
 
           <p style={{ fontSize: 10, color: "rgba(255,255,255,0.25)" }}>
-            Generato da {meta.generatedBy} · aicomply.eu
+            Generato da {meta.generatedBy} · regulaeos.com
           </p>
         </div>
       </div>

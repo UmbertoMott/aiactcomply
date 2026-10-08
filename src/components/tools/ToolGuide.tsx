@@ -9,6 +9,10 @@ import { useT } from "@/i18n/LocaleProvider";
 import ToolObligationCheck from "@/components/tools/ToolObligationCheck";
 
 const COLLAPSED_KEY = "aicomply_tool_guide_collapsed";
+// Pagine dove si classificano i sistemi: il rimando all'inventario porterebbe a sé stesse.
+const SELF_CLASSIFYING = new Set(["/dashboard/tools/inventory", "/dashboard/triage"]);
+// Obblighi che valgono a prescindere dalla classificazione (Art. 4).
+const ALWAYS_APPLIES = new Set(["/dashboard/tools/literacy"]);
 
 function readCollapsed(): boolean {
   try { return localStorage.getItem(COLLAPSED_KEY) === "true"; } catch { return false; }
@@ -29,6 +33,10 @@ export default function ToolGuide({ guide, needs }: { guide: ToolGuideEntry; nee
   let fit: ReactNode;
   if (guide.optional) {
     fit = t("optional");
+  } else if (ALWAYS_APPLIES.has(guide.href)) {
+    fit = t("always");
+  } else if (SELF_CLASSIFYING.has(guide.href)) {
+    fit = null;
   } else if (!needs || needs.assessed === 0) {
     fit = (
       <>
@@ -63,7 +71,7 @@ export default function ToolGuide({ guide, needs }: { guide: ToolGuideEntry; nee
       <div className="flex items-center gap-3 pb-2.5">
         <span className="text-[11px] font-semibold uppercase" style={{ color: "#0D1016", letterSpacing: "1px" }}>{t("title")}</span>
         <span className="text-[11px] flex-1 min-w-0 truncate" style={{ color: "#0D1016" }}>
-          {collapsed ? fit : null}
+          {collapsed ? (need ? fit : t(`${guide.id}_what`)) : null}
         </span>
         {collapsed && !guide.optional && <ToolObligationCheck href={guide.href} compact />}
         <button
@@ -85,9 +93,11 @@ export default function ToolGuide({ guide, needs }: { guide: ToolGuideEntry; nee
               </div>
             ))}
           </dl>
-          <p className="text-[11px] mt-3 pt-2.5" style={{ color: "#0D1016", borderTop: "1px solid rgba(0,0,0,0.08)", lineHeight: 1.5 }}>
-            {fit}
-          </p>
+          {fit && (
+            <p className="text-[11px] mt-3 pt-2.5" style={{ color: "#0D1016", borderTop: "1px solid rgba(0,0,0,0.08)", lineHeight: 1.5 }}>
+              {fit}
+            </p>
+          )}
           {!guide.optional && <ToolObligationCheck href={guide.href} />}
         </div>
       )}

@@ -282,11 +282,7 @@ export default function Art50KitPage() {
               </span>
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-medium" style={{ color: T.text }}>{obl.label}</p>
-                <p className="text-[11px]" style={{ color: T.faint }}>{obl.reference}</p>
               </div>
-              {obl.appliesToSelf && (
-                <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: T.violetBg, color: T.violet }}>RegulaeOS</span>
-              )}
             </div>
           ))}
         </div>
