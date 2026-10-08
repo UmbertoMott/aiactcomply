@@ -12,7 +12,7 @@ import ChiEroga from "@/components/sections/ChiEroga";
 import Footer from "@/components/sections/Footer";
 import BookDemoBanner from "@/components/BookDemoBanner";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aicomply-omega.vercel.app";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com";
 
 export const metadata: Metadata = {
   title: "RegulaeOS — Assistenza professionale alla conformità EU AI Act",

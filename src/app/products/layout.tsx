@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-const BASE_URL = "https://aicomply-omega.vercel.app";
+const BASE_URL = "https://www.regulaeos.com";
 
 export const metadata: Metadata = {
   title: "Prodotti RegulaeOS — Moduli per la Conformità EU AI Act",

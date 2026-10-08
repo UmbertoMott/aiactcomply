@@ -27,10 +27,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: post.metaDescription,
       type: "article",
       publishedTime: post.dateISO,
-      url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://aicomply-omega.vercel.app"}/risorse/${post.slug}`,
+      url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com"}/risorse/${post.slug}`,
     },
     alternates: {
-      canonical: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://aicomply-omega.vercel.app"}/risorse/${post.slug}`,
+      canonical: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com"}/risorse/${post.slug}`,
     },
   };
 }
@@ -54,9 +54,9 @@ export default async function BlogPost({ params }: Props) {
     publisher: {
       "@type": "Organization",
       name: "RegulaeOS",
-      url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://aicomply-omega.vercel.app",
+      url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com",
     },
-    mainEntityOfPage: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://aicomply-omega.vercel.app"}/risorse/${post.slug}`,
+    mainEntityOfPage: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com"}/risorse/${post.slug}`,
   };
 
   const faqSchema = {

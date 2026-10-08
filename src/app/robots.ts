@@ -1,6 +1,6 @@
 import { MetadataRoute } from "next";
 
-const BASE_URL = "https://aicomply-omega.vercel.app";
+const BASE_URL = "https://www.regulaeos.com";
 
 export default function robots(): MetadataRoute.Robots {
   return {
