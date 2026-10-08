@@ -22,7 +22,7 @@ export const OVERSIGHT_REQUIREMENTS = [
     description:
       "Il supervisore deve comprendere le capacità e i limiti del sistema di IA, inclusi i failure mode noti e gli indicatori di anomalia, così da riconoscere output inattesi o situazioni in cui il sistema non è affidabile.",
     linkedTool: "ai-literacy",
-    linkedToolLabel: "AI Literacy (Art. 4)",
+    linkedToolLabel: "Alfabetizzazione IA (Art. 4)",
     linkedToolPath: "/dashboard/tools/literacy",
     frictionGateRole: null,
   },
@@ -44,7 +44,7 @@ export const OVERSIGHT_REQUIREMENTS = [
     description:
       "Il supervisore deve saper interpretare correttamente l'output del sistema, compresi score di confidenza, feature importance e strumenti XAI disponibili.",
     linkedTool: "transparency",
-    linkedToolLabel: "Transparency (Art. 13)",
+    linkedToolLabel: "Trasparenza (Art. 13)",
     linkedToolPath: "/dashboard/tools/transparency",
     frictionGateRole: null,
   },
@@ -66,7 +66,7 @@ export const OVERSIGHT_REQUIREMENTS = [
     description:
       "Il supervisore deve poter intervenire sul sistema in qualsiasi momento e arrestarlo, portandolo in uno stato sicuro: le decisioni in sospeso vengono instradate a revisione manuale e il sistema non emette nuovi output fino alla riattivazione da parte di un supervisore autorizzato.",
     linkedTool: "risk-manager",
-    linkedToolLabel: "Risk Manager — step traceability",
+    linkedToolLabel: "Gestione dei rischi — tracciabilità",
     linkedToolPath: "/dashboard/tools/risk-manager",
     frictionGateRole: "tertiary" as const,
   },

@@ -79,6 +79,10 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
   };
 
   const progress = computeGuidedFriaProgress(doc, locale, tg);
+  // Documento vuoto: niente anteprima finché non c'è almeno una risposta (o la si chiede)
+  const [previewRequested, setPreviewRequested] = useState(false);
+  const hasAnswers = Object.values(doc.answers).some(a => a?.status === "done");
+  const previewVisible = hasAnswers || previewRequested;
 
   const saveDoc = useCallback((next: FriaGuidedDoc) => {
     writeToStorage("friaGuided", next);
@@ -107,6 +111,7 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
 
   const handleSectionClick = useCallback((sectionKey: string, anchor: string) => {
     setActiveSection(sectionKey);
+    setPreviewRequested(true);
     // Scorre solo il pannello del documento, non la pagina
     setTimeout(() => {
       const box = viewerRef.current;
@@ -166,14 +171,23 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {!previewVisible && (
+            <button
+              onClick={() => setPreviewRequested(true)}
+              style={{
+                background: "none", border: "none", padding: 0, cursor: "pointer",
+                fontSize: 11, color: T.text, textDecoration: "underline", textUnderlineOffset: 2,
+              }}
+            >
+              {t("gm_showPreview")}
+            </button>
+          )}
           {onExitGuidedMode && (
             <button
               onClick={onExitGuidedMode}
               style={{
-                display: "flex", alignItems: "center", gap: 6,
-                padding: "6px 12px", borderRadius: 8,
-                border: `1px solid ${T.text}`, background: T.text,
-                cursor: "pointer", fontSize: 11, fontWeight: 700, color: "#fff",
+                background: "none", border: "none", padding: 0, cursor: "pointer",
+                fontSize: 11, color: "rgba(13,16,22,0.65)", textDecoration: "underline", textUnderlineOffset: 2,
               }}
             >
               {t("gm_goToForm")}
@@ -215,8 +229,8 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
           />
         </div>
 
-        {/* CENTRO — Documento live */}
-        <>
+        {/* CENTRO — Documento live (nascosto finché il documento è vuoto) */}
+        {previewVisible && <>
           <div style={{
               flex: 1, minWidth: 0,
               display: "flex", flexDirection: "column",
@@ -233,7 +247,7 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
                     Art. 27 AI Act · {t("gm_documentWord")}
                   </p>
                   <p style={{ fontSize: 13, fontWeight: 700, color: T.text, margin: "1px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    FRIA — DIHR/ECNL 2025
+                    FRIA
                   </p>
                 </div>
 
@@ -321,7 +335,7 @@ export function FriaGuidedMode({ onExitGuidedMode }: FriaGuidedModeProps) {
               </div>
             </div>
 
-        </>
+        </>}
 
         {/* DESTRA — Chat guidata */}
         <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>

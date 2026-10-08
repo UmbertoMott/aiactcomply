@@ -4,6 +4,7 @@ import { Send, Check, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import { getFriaSubpoints } from "@/lib/fria/fria-template";
 import type { FriaGuidedDoc, FriaAnswer } from "@/lib/fria/fria-guided-types";
 import { useT, useLocale } from "@/i18n/LocaleProvider";
+import { plainRef } from "@/lib/ui/plain-label";
 import { nextFriaSubPointId } from "@/lib/fria/fria-guided-progress";
 
 const T = {
@@ -204,9 +205,11 @@ export function FriaGuidedChat({
             background: T.card, border: `1px solid ${T.border}`,
             borderRadius: "12px 12px 12px 3px", padding: "10px 14px", maxWidth: "90%",
           }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: T.green, marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.04em" }}>
-              {sp.ref}
-            </div>
+            {plainRef(sp.ref) && (
+              <div style={{ fontSize: 11, fontWeight: 500, color: "rgba(13,16,22,0.55)", marginBottom: 5 }}>
+                {plainRef(sp.ref)}
+              </div>
+            )}
             <p style={{ fontSize: 13, fontWeight: 500, color: T.text, margin: 0, lineHeight: 1.5 }}>
               {sp.question}
             </p>

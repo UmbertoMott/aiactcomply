@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import type { GuidedFriaProgress } from "@/lib/fria/fria-guided-progress";
 import { useT } from "@/i18n/LocaleProvider";
+import { plainLabel, plainRef } from "@/lib/ui/plain-label";
 
 const T = {
   text:     "#0D1016",
@@ -100,10 +101,10 @@ export function FriaProgressRail({
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: 11, fontWeight: 600, color: T.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {idx + 1}. {sec.label}
+                    {idx + 1}. {plainLabel(sec.label)}
                   </p>
                   <p style={{ fontSize: 11, color: T.muted, margin: 0, marginTop: 1 }}>
-                    {doneCount}/{totalCount} · {sec.legalRef}{sec.optional ? " · facoltativa" : ""}
+                    {doneCount}/{totalCount}{plainRef(sec.legalRef) ? ` · ${plainRef(sec.legalRef)}` : ""}{sec.optional ? " · facoltativa" : ""}
                   </p>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>

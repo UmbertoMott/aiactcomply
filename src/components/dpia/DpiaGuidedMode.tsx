@@ -54,7 +54,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
   const [stale, setStale]                       = useState(false);
   const [lastSaved, setLastSaved]               = useState<Date | null>(null);
 
-  // ── Documento: sempre visibile, come nella FRIA guidata (guida · documento · chat) ──
+  // ── Documento: visibile dalla prima risposta, come nella FRIA guidata (guida · documento · chat) ──
   // null = metà dello spazio disponibile; diventa un numero quando l'utente trascina il divisore
   const [docWidth, setDocWidth]     = useState<number | null>(null);
   const [isResizing, setIsResizing] = useState(false);
@@ -117,6 +117,10 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
   }, [docWidth]);
 
   const progress = computeGuidedDpiaProgress(doc, locale, tg);
+  // Documento vuoto: niente anteprima finché non c'è almeno una risposta (o la si chiede)
+  const [previewRequested, setPreviewRequested] = useState(false);
+  const hasAnswers = Object.values(doc.answers).some(a => a?.status === "done");
+  const previewVisible = hasAnswers || previewRequested;
 
   const saveDoc = useCallback((next: DpiaGuidedDoc) => {
     writeToStorage("dpiaGuided", next);
@@ -157,6 +161,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
 
   const handleSectionClick = useCallback((sectionKey: string, anchor: string) => {
     setActiveSection(sectionKey);
+    setPreviewRequested(true);
     // Scorre solo il pannello del documento, non la pagina
     setTimeout(() => {
       const box = viewerRef.current;
@@ -209,7 +214,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <p style={{ fontSize: 13, fontWeight: 700, color: T.text, margin: 0 }}>{t("gm_dpiaGuided")}</p>
           <span style={{ fontSize: 11, color: T.muted }}>
-            WP248 Allegato 2 · {progress.overallPercent}% {t("gm_completed")}
+            Art. 35 GDPR · {progress.overallPercent}% {t("gm_completed")}
           </span>
           {lastSaved && (
             <span style={{ fontSize: 11, color: T.green }}>✓ {t("gm_autoSaved")}</span>
@@ -225,14 +230,23 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {!previewVisible && (
+            <button
+              onClick={() => setPreviewRequested(true)}
+              style={{
+                background: "none", border: "none", padding: 0, cursor: "pointer",
+                fontSize: 11, color: T.text, textDecoration: "underline", textUnderlineOffset: 2,
+              }}
+            >
+              {t("gm_showPreview")}
+            </button>
+          )}
           {onExitGuidedMode && (
             <button
               onClick={onExitGuidedMode}
               style={{
-                display: "flex", alignItems: "center", gap: 6,
-                padding: "6px 12px", borderRadius: 8,
-                border: `1px solid ${T.text}`, background: T.text,
-                cursor: "pointer", fontSize: 11, fontWeight: 700, color: "#fff",
+                background: "none", border: "none", padding: 0, cursor: "pointer",
+                fontSize: 11, color: "rgba(13,16,22,0.65)", textDecoration: "underline", textUnderlineOffset: 2,
               }}
             >
               {t("gm_goToForm")}
@@ -277,8 +291,8 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
           />
         </div>
 
-        {/* CENTRO — Documento live */}
-        {(
+        {/* CENTRO — Documento live (nascosto finché il documento è vuoto) */}
+        {previewVisible && (
           <>
             <div ref={docPaneRef} style={{
               width: docWidth ?? `calc((100% - ${RAIL_W + SPLITTER}px) / 2)`, flexShrink: 0, minWidth: 260, maxWidth: "65%",
@@ -296,7 +310,7 @@ export function DpiaGuidedMode({ ghostClassifier, ghostDataAudit, onExitGuidedMo
                     Art. 35 GDPR · {t("gm_documentWord")}
                   </p>
                   <p style={{ fontSize: 13, fontWeight: 700, color: T.text, margin: "1px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    DPIA — WP248 rev.01
+                    DPIA
                   </p>
                 </div>
 

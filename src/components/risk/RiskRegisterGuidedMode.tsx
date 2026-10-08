@@ -44,7 +44,7 @@ function LivePreview({ doc }: { doc: RiskRegisterGuidedDoc }) {
     <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 13, color: T.text, lineHeight: 1.7 }}>
       <div style={{ background: T.card, borderRadius: 8, padding: "28px 32px", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "none" }}>
         <h1 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4, color: T.text, letterSpacing: "-0.5px" }}>
-          Risk Register — Art. 9 EU AI Act
+          Registro dei rischi — Art. 9 AI Act
         </h1>
         <p style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: T.muted, marginBottom: 24, textTransform: "uppercase", letterSpacing: "0.06em" }}>
           ISO/IEC 23894 · Reg. (UE) 2024/1689
@@ -97,7 +97,10 @@ export function RiskRegisterGuidedMode({ onExitGuidedMode }: RiskRegisterGuidedM
   const [forcedSubPointId, setForcedSubPointId] = useState<string | null>(null);
   const [lastSaved, setLastSaved]               = useState<Date | null>(null);
 
-  const [viewerOpen, setViewerOpen] = useState(false);
+  // L'anteprima del documento si apre da sola solo quando c'è almeno una risposta
+  const hasAnswers = RISK_REGISTER_SUBPOINTS.some(sp => doc.answers[sp.id]?.status === "done");
+  const [viewerOpen, setViewerOpen] = useState(hasAnswers);
+  const autoOpenedRef = useRef(hasAnswers);
   const [docWidth, setDocWidth]     = useState(380);
   const [isResizing, setIsResizing] = useState(false);
 
@@ -132,6 +135,11 @@ export function RiskRegisterGuidedMode({ onExitGuidedMode }: RiskRegisterGuidedM
       return next;
     });
     if (answer.status === "done") {
+      // Prima risposta: si apre l'anteprima del documento (una sola volta)
+      if (!autoOpenedRef.current) {
+        autoOpenedRef.current = true;
+        setViewerOpen(true);
+      }
       const allIds = RISK_REGISTER_SUBPOINTS.map(sp => sp.id);
       const idx = allIds.indexOf(subPointId);
       if (idx < allIds.length - 1) {
@@ -185,16 +193,18 @@ export function RiskRegisterGuidedMode({ onExitGuidedMode }: RiskRegisterGuidedM
     if (sp) setActiveSection(sp.sectionKey);
   }, []);
 
-  const handleExportJSON = () => {
+  // Nessun PDF in questa vista: si scaricano le risposte come file di dati
+  const handleDownloadData = () => {
     const data = JSON.stringify(doc, null, 2);
     const blob = new Blob([data], { type: "application/json" });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement("a");
     a.href     = url;
-    a.download = "risk-register-guidato.json";
+    a.download = "registro-rischi-guidato.json";
     a.click();
     URL.revokeObjectURL(url);
   };
+
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
@@ -215,33 +225,42 @@ export function RiskRegisterGuidedMode({ onExitGuidedMode }: RiskRegisterGuidedM
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {!viewerOpen && (
+            <button
+              onClick={openViewer}
+              style={{
+                background: "none", border: "none", padding: 0, cursor: "pointer",
+                fontSize: 11, color: T.text, textDecoration: "underline", textUnderlineOffset: 2,
+              }}
+            >
+              Mostra anteprima documento
+            </button>
+          )}
           {onExitGuidedMode && (
             <button
               onClick={onExitGuidedMode}
               style={{
-                display: "flex", alignItems: "center", gap: 6,
-                padding: "6px 12px", borderRadius: 8,
-                border: `1px solid ${T.text}`, background: T.text,
-                cursor: "pointer", fontSize: 11, fontWeight: 700, color: "#fff",
+                background: "none", border: "none", padding: 0, cursor: "pointer",
+                fontSize: 11, color: "rgba(13,16,22,0.65)", textDecoration: "underline", textUnderlineOffset: 2,
               }}
             >
-              Vai alla modalità completa →
+              Modifica tutte le risposte
             </button>
           )}
           <button
-            onClick={handleExportJSON}
-            disabled={progress.overallPercent < 5}
+            onClick={handleDownloadData}
+            disabled={!hasAnswers}
             style={{
               display: "flex", alignItems: "center", gap: 6,
               padding: "6px 12px", borderRadius: 8,
               border: `1px solid rgba(0,0,0,0.10)`, background: T.card,
-              cursor: progress.overallPercent < 5 ? "default" : "pointer",
+              cursor: hasAnswers ? "pointer" : "default",
               fontSize: 11, fontWeight: 600,
-              color: progress.overallPercent < 5 ? "rgba(0,0,0,0.28)" : T.text,
+              color: hasAnswers ? T.text : "rgba(0,0,0,0.28)",
             }}
           >
             <Download style={{ width: 13, height: 13 }} />
-            Esporta JSON
+            Scarica dati
           </button>
         </div>
       </div>
@@ -285,7 +304,7 @@ export function RiskRegisterGuidedMode({ onExitGuidedMode }: RiskRegisterGuidedM
                     Art. 9 AI Act · Documento
                   </p>
                   <p style={{ fontSize: 13, fontWeight: 700, color: T.text, margin: "1px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    Risk Register — ISO 23894
+                    Registro dei rischi
                   </p>
                 </div>
                 <button

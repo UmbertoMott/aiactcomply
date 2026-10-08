@@ -150,7 +150,7 @@ interface Art53Obligation {
 const ART53_OBLIGATIONS: Art53Obligation[] = [
   {
     id: "technical_doc",
-    label: "Documentazione tecnica del modello (Annex XI)",
+    label: "Documentazione tecnica del modello (Allegato XI)",
     article: "Art. 53(1)(a)",
     description: "Redigere e mantenere documentazione tecnica che copra: architettura, dati di addestramento, procedure di training, benchmark di valutazione, limitazioni note, misure di mitigazione rischi.",
     template_fields: [
@@ -164,7 +164,7 @@ const ART53_OBLIGATIONS: Art53Obligation[] = [
   },
   {
     id: "downstream_info",
-    label: "Informazioni ai downstream provider",
+    label: "Informazioni ai fornitori a valle",
     article: "Art. 53(1)(b)",
     description: "Fornire a chi integra il modello: documentazione tecnica, istruzioni per l’uso, limitazioni note, e informazioni per adempiere ai propri obblighi AI Act.",
     template_fields: [
@@ -176,7 +176,7 @@ const ART53_OBLIGATIONS: Art53Obligation[] = [
   },
   {
     id: "copyright_policy",
-    label: "Policy utilizzo dati di addestramento (copyright)",
+    label: "Politica di utilizzo dei dati di addestramento (diritto d'autore)",
     article: "Art. 53(1)(c)-(d)",
     description: "Pubblicare una sintesi sufficientemente dettagliata dei dati usati per l’addestramento, con riferimento alla compliance copyright (opt-out per text/data mining).",
     template_fields: [
@@ -208,7 +208,7 @@ interface Art55Obligation {
 const ART55_OBLIGATIONS: Art55Obligation[] = [
   {
     id: "model_evaluation",
-    label: "Valutazione del modello (adversarial testing)",
+    label: "Valutazione del modello (test contraddittori)",
     article: "Art. 55(1)(a)",
     description: "Eseguire valutazione del modello prima dell’immissione sul mercato e dopo aggiornamenti significativi, incluso adversarial testing (red-teaming) per identificare rischi sistemici.",
     fields: [
@@ -242,7 +242,7 @@ const ART55_OBLIGATIONS: Art55Obligation[] = [
   },
   {
     id: "cybersecurity",
-    label: "Protezione cybersecurity del modello",
+    label: "Protezione di cibersicurezza del modello",
     article: "Art. 55(1)(d)",
     description: "Garantire protezione adeguata contro cyberattacchi, data poisoning, e accesso non autorizzato ai pesi del modello.",
     fields: [
@@ -253,7 +253,7 @@ const ART55_OBLIGATIONS: Art55Obligation[] = [
   },
   {
     id: "code_of_practice",
-    label: "Adesione al GPAI Code of Practice",
+    label: "Adesione al Codice di buone pratiche GPAI",
     article: "Art. 56",
     description: "I provider con rischio sistemico possono dimostrare conformità ad Art. 55 facendo affidamento su codici di buone pratiche (Art. 56) fino alla pubblicazione di una norma armonizzata; in alternativa dimostrano la conformità con mezzi adeguati alternativi (Art. 55(2)).",
     status_options: ["Aderente", "Conformità equivalente documentata", "In valutazione", "Non aderente"],
@@ -1062,7 +1062,7 @@ export default function GPAIAssessmentPage() {
               {/* Quick links */}
               <div style={{ marginTop: 14, display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {[
-                  { href: "/dashboard/tools/risk-manager", label: "Risk Manager (Art. 9)" },
+                  { href: "/dashboard/tools/risk-manager", label: "Gestione dei rischi (Art. 9)" },
                   { href: "/dashboard/tools/docugen",      label: "Documentazione tecnica (Art. 11)" },
                   { href: "/dashboard/tools/fria",         label: "FRIA (Art. 27)" },
                 ].map(l => (

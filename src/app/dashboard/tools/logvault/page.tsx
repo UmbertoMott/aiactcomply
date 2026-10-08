@@ -15,7 +15,7 @@ import { suggestEventSeverity } from "@/app/actions/suggestEventSeverity";
 import { analyzeLogCoverage } from "@/app/actions/logvaultActions";
 import { analyzeLogSet, MAX_LOG_FILE_BYTES, MAX_ENTRIES } from "@/lib/logvault/log-analyzer";
 import {
-  CoverageFillRatePanel, LogQualityCard, IntegrityCard, RetentionPanel, exportLogConformityJSON,
+  CoverageFillRatePanel, LogQualityCard, IntegrityCard, RetentionPanel,
 } from "./LogVaultPanels";
 import { ToolPhaseBar, PhaseHeading, NextPhaseCta, useActivePhase, type ToolPhase, type PhaseStatus } from "@/components/compliance/ToolPhaseBar";
 import { SectionEmptyState } from "@/components/logvault/SectionEmptyState";
@@ -948,11 +948,6 @@ export default function LogVaultPage() {
             <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>{t("evidenceTitle")}</h2>
             <p className="text-[11px] mb-3" style={{ color: T.muted }}>{t("evidenceDesc")}</p>
             <div className="flex flex-wrap gap-2">
-              <button onClick={() => exportLogConformityJSON(record)}
-                className="text-[13px] font-medium px-3 py-1.5 rounded-lg"
-                style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
-                {t("exportJson")}
-              </button>
               <button onClick={() => window.print()}
                 className="text-[13px] font-medium px-3 py-1.5 rounded-lg"
                 style={{ background: "#fff", color: T.text, border: `1px solid ${T.border}`, cursor: "pointer" }}>

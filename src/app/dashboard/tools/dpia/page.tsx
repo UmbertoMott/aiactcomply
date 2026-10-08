@@ -1,8 +1,8 @@
 "use client";
-// DPIA (Art. 35 GDPR; Art. 26(9) AI Act). Un solo percorso in due viste dello stesso lavoro:
-// - modalità guidata: guida a sinistra, documento al centro, chat a destra (ingresso);
-// - modulo completo: il modello EDPB da compilare direttamente.
-import React, { useCallback, useState } from "react";
+// DPIA (Art. 35 GDPR; Art. 26(9) AI Act). Un solo percorso: la procedura guidata
+// (guida a sinistra, documento al centro, domande a destra). Il modello EDPB completo
+// resta raggiungibile solo da un link secondario ("Modifica tutte le risposte").
+import React, { useState } from "react";
 import Link from "next/link";
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import { DpiaGuidedMode } from "@/components/dpia/DpiaGuidedMode";
@@ -12,18 +12,12 @@ import { readFromStorage, type ClassifierResult, type DataAuditResult } from "@/
 import { useT } from "@/i18n/LocaleProvider";
 
 const T = { text: "#0D1016", muted: "#0D1016", border: "rgba(0,0,0,0.08)", bg: "#f8f8f7" } as const;
-const VIEW_KEY = "aicomply_dpia_view";
 
 export default function DPIAPage() {
   const tr = useT("toolDpia");
-  // Il layout della dashboard monta le pagine solo nel browser: localStorage è disponibile
-  const [guidedMode, setGuidedModeState] = useState(() => {
-    try { return localStorage.getItem(VIEW_KEY) !== "form"; } catch { return true; }
-  });
-  const setGuidedMode = useCallback((v: boolean) => {
-    setGuidedModeState(v);
-    try { localStorage.setItem(VIEW_KEY, v ? "guided" : "form"); } catch { /* storage non disponibile */ }
-  }, []);
+  // Si entra sempre nella procedura guidata; il modulo completo si apre solo su richiesta
+  // (la vecchia scelta salvata in localStorage non viene più ripristinata).
+  const [guidedMode, setGuidedMode] = useState(true);
 
   if (guidedMode) {
     return (
@@ -45,12 +39,12 @@ export default function DPIAPage() {
   return (
     <div style={{ minHeight: "100vh", background: T.bg, padding: "24px 32px" }}>
       <SystemSelector checkProhibited={true} />
-      <div style={{ marginBottom: 14, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+      <div style={{ marginBottom: 14, display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
         <button
           onClick={() => setGuidedMode(true)}
-          style={{ fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "none", background: T.text, color: "#fff", cursor: "pointer" }}
+          style={{ fontSize: 11, padding: 0, border: "none", background: "none", color: T.text, textDecoration: "underline", textUnderlineOffset: 2, cursor: "pointer" }}
         >
-          {tr("modeGuidedTitle")} — {tr("modeGuidedDescShort")}
+          ← {tr("gm_backToGuided")}
         </button>
         <Link href="/dashboard/tools/assessment-export" style={{ fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.text }}>
           {tr("exportWithFria")}

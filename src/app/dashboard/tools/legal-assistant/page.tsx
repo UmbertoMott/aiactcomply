@@ -182,6 +182,13 @@ const SUGGESTIONS: { label: string; query: string }[] = [
   },
 ];
 
+// Domande di esempio mostrate quando la chat è vuota
+const EXAMPLE_QUESTIONS: string[] = [
+  "Il mio sistema di selezione del personale è ad alto rischio?",
+  "Quali obblighi ho come deployer?",
+  "Quando devo fare la FRIA?",
+];
+
 // ─── EU AI Act navigation sections ───────────────────────────────
 
 const EU_ACT_SECTIONS: { label: string; ref: string; query: string }[] = [
@@ -460,6 +467,21 @@ export default function LegalAssistantPage() {
             <p className="text-[13px] text-[#0D1016] max-w-xs">
               Fai una domanda sul Regolamento UE 2024/1689 (EU AI Act) o sui documenti collegati.
             </p>
+            <div className="flex flex-col gap-1.5 w-full max-w-sm mt-1">
+              <p className="text-[11px] font-semibold text-[#0D1016]">Prova con una di queste domande:</p>
+              {EXAMPLE_QUESTIONS.map((q) => (
+                <button
+                  key={q}
+                  type="button"
+                  onClick={() => sendMessage(q)}
+                  disabled={loading}
+                  className="text-left text-[12px] text-[#0D1016] px-3 py-2 rounded-lg transition-colors hover:bg-black/[0.03] disabled:opacity-50"
+                  style={{ border: "1px solid rgba(0,0,0,0.08)", background: "#fff", cursor: "pointer" }}
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
@@ -781,7 +803,7 @@ export default function LegalAssistantPage() {
     <div className="w-full">
       <div className="mb-0 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Legal Assistant</h1>
+          <h1 className="text-2xl font-bold text-foreground">Assistente legale IA</h1>
           <p className="mt-1 text-[13px] text-[#0D1016]">
             Domande su EU AI Act, ISO 22989 e Guidelines — risposte citate con testo sorgente
           </p>

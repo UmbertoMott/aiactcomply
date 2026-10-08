@@ -705,7 +705,7 @@ export default function DocuGenPage() {
             {t("kicker")}
           </p>
           <h1 className="text-[24px] font-medium" style={{ color: "#0D1016", letterSpacing: "-0.8px" }}>
-            DocuGen AI — {classifierTier === "limited"
+            {classifierTier === "limited"
               ? t("titleArt50")
               : classifierTier === "minimal"
                 ? t("titleComplianceNote")
@@ -793,11 +793,11 @@ export default function DocuGenPage() {
               {t("exportWord")} {classifierTier === "limited" ? "Art. 50 PDF" : t("complianceNotePdf")}
             </button>
           ) : (
-            <button onClick={exportFullDocument}
+            <button onClick={exportPdf}
               className="flex items-center gap-1.5 text-[11px] px-3 py-2 rounded-lg transition-opacity hover:opacity-80"
               style={{ background: "#0D1016", color: "#fff", cursor: "pointer" }}>
               <Download className="h-3.5 w-3.5" />
-              {t("exportJson")}
+              {t("exportSignedPdf")}
             </button>
           )}
         </div>
@@ -864,7 +864,7 @@ export default function DocuGenPage() {
               </p>
             </div>
             {([
-              { label: "Classifier", art: "Art. 6", desc: t("src_classifier_desc"), href: "/dashboard/tools/inventory", present: !!ghost.systemName, preview: ghost.systemName ? `${t("systemWord")}: ${ghost.systemName} · Risk: ${ghost.riskLevel ?? "N/D"}` : null },
+              { label: "Triage", art: "Art. 6", desc: t("src_classifier_desc"), href: "/dashboard/tools/inventory", present: !!ghost.systemName, preview: ghost.systemName ? `${t("systemWord")}: ${ghost.systemName} · ${t("riskWordShort")}: ${ghost.riskLevel ?? "N/D"}` : null },
               { label: "Registro dei rischi", art: "Art. 9", desc: t("src_risk_desc"), href: "/dashboard/tools/risk-manager", present: !!ghost.risksSummary, preview: ghost.risksSummary },
               { label: "Qualità dei dati", art: "Art. 10", desc: t("src_data_desc"), href: "/dashboard/tools/data-audit", present: !!ghost.datasetsSummary, preview: ghost.datasetsSummary },
               { label: "DPIA", art: "Art. 35", desc: t("src_dpia_desc"), href: "/dashboard/tools/dpia", present: !!ghost.legalBasis, preview: ghost.legalBasis ? `${t("legalBasisWord")}: ${ghost.legalBasis?.slice(0, 80)}…` : null },

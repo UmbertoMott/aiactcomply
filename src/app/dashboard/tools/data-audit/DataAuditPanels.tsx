@@ -25,7 +25,7 @@ export function QualityScorecard({ datasets, t }: { datasets: DatasetProfile[]; 
   if (datasets.length === 0) return null;
   return (
     <section className="mb-6">
-      <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Data Quality Scorecard</h2>
+      <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>Punteggio di qualità dei dati</h2>
       <p className="text-[11px] mb-3" style={{ color: T.muted }}>{t("qs_subtitle")}</p>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {datasets.map(ds => {
@@ -329,7 +329,7 @@ export function RepresentativenessPanel({ datasets, rowsById, onCheck, t }: { da
                 </div>
               )}
               <table className="w-full text-[11px]" style={{ borderCollapse: "collapse" }}>
-                <thead><tr style={{ color: T.muted, textAlign: "left" }}><th className="py-1">{t("fp_group")}</th><th>{t("rp_observed")}</th>{check.verdict !== "no_reference" && <><th>{t("rp_expected")}</th><th>Gap</th></>}</tr></thead>
+                <thead><tr style={{ color: T.muted, textAlign: "left" }}><th className="py-1">{t("fp_group")}</th><th>{t("rp_observed")}</th>{check.verdict !== "no_reference" && <><th>{t("rp_expected")}</th><th>Scarto</th></>}</tr></thead>
                 <tbody>{check.observed.map(o => {
                   const ref = check.reference.find(r => r.group.toLowerCase() === o.group.toLowerCase());
                   const gap = check.perGroupGap.find(g => g.group.toLowerCase() === o.group.toLowerCase());
@@ -352,12 +352,12 @@ export function RepresentativenessPanel({ datasets, rowsById, onCheck, t }: { da
 // ═══ §10 Tabella mappatura ISO ══════════════════════════════════════════════
 const ISO_ROWS = [
   ["Completezza, unicità, consistenza, outlier", "Art. 10(3)", "ISO/IEC 5259 (data quality ML)"],
-  ["Provenance, origine, finalità raccolta", "Art. 10(2)(b)", "ISO/IEC 42001 Annex A.4.3"],
+  ["Provenienza, origine, finalità raccolta", "Art. 10(2)(b)", "ISO/IEC 42001 Annex A.4.3"],
   ["Preparazione (annotazione, pulizia…)", "Art. 10(2)(c)", "ISO/IEC 5259-3; ISO/IEC 8183"],
-  ["Esame bias / fairness metrics", "Art. 10(2)(f)", "ISO/IEC TR 24027 (bias in AI)"],
+  ["Esame dei bias / metriche di equità", "Art. 10(2)(f)", "ISO/IEC TR 24027 (bias in AI)"],
   ["Rappresentatività vs riferimento", "Art. 10(3)", "ISO/IEC TR 24027; ISO/IEC 5259"],
   ["Categorie particolari", "Art. 10(5)", "ISO/IEC 42001 A.4.3 + Art. 9 GDPR"],
-  ["Impact assessment collegato", "Art. 10(5)→27/35", "ISO/IEC 42001 §6.1.4 / §8.4"],
+  ["Valutazione d'impatto collegata", "Art. 10(5)→27/35", "ISO/IEC 42001 §6.1.4 / §8.4"],
 ];
 export function IsoMappingTable() {
   const t = useT("toolDataAudit");

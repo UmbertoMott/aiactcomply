@@ -24,7 +24,7 @@ export const TRACEABILITY_PURPOSES: readonly TraceabilityPurposeDefinition[] = [
     reference: "Art. 12(2)(a) [Reg. (UE) 2024/1689]",
     crossReference: "Art. 79(1) [Reg. (UE) 2024/1689]",
     linkedToolPath: "/dashboard/tools/risk-manager",
-    linkedToolLabel: "Risk Manager — step traceability",
+    linkedToolLabel: "Gestione dei rischi — tracciabilità",
   },
   {
     id: "post_market_monitoring",
@@ -32,7 +32,7 @@ export const TRACEABILITY_PURPOSES: readonly TraceabilityPurposeDefinition[] = [
     reference: "Art. 12(2)(b) [Reg. (UE) 2024/1689]",
     crossReference: "Art. 72 [Reg. (UE) 2024/1689]",
     linkedToolPath: "/dashboard/tools/post-market",
-    linkedToolLabel: "Post-Market (Art. 72-73)",
+    linkedToolLabel: "Monitoraggio dopo l'immissione sul mercato (Art. 72-73)",
   },
   {
     id: "deployer_monitoring",
@@ -40,7 +40,7 @@ export const TRACEABILITY_PURPOSES: readonly TraceabilityPurposeDefinition[] = [
     reference: "Art. 12(2)(c) [Reg. (UE) 2024/1689]",
     crossReference: "Art. 26(5) [Reg. (UE) 2024/1689]",
     linkedToolPath: "/dashboard/tools/deployer-dashboard",
-    linkedToolLabel: "Deployer Dashboard — monitoring_risk_reporting",
+    linkedToolLabel: "Cruscotto deployer — monitoraggio e segnalazione dei rischi",
   },
 ] as const satisfies readonly TraceabilityPurposeDefinition[];
 

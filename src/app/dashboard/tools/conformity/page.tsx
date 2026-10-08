@@ -166,7 +166,7 @@ export default function ConformityPage() {
       return saved ? (JSON.parse(saved) as { referenceNumber: string }).referenceNumber ?? "" : "";
     } catch { return ""; }
   });
-  const [manualRisk, setManualRisk] = useState("high");
+  const [manualRisk, setManualRisk] = useState("");
   const [manualAnnex, setManualAnnex] = useState("");
   const [toast, setToast] = useState<string>("");
 
@@ -300,9 +300,10 @@ export default function ConformityPage() {
                     borderRadius: 8, background: "#fff", color: C.text,
                   }}
                 >
-                  <option value="high">High</option>
-                  <option value="limited">Limited</option>
-                  <option value="minimal">Minimal</option>
+                  <option value="" disabled>{t("riskChoose")}</option>
+                  <option value="high">{t("riskHigh")}</option>
+                  <option value="limited">{t("riskLimited")}</option>
+                  <option value="minimal">{t("riskMinimal")}</option>
                 </select>
               </div>
               <div>
@@ -320,7 +321,8 @@ export default function ConformityPage() {
               </div>
             </div>
             <button
-              style={btnPrimary}
+              style={{ ...btnPrimary, opacity: manualRisk ? 1 : 0.5, cursor: manualRisk ? "pointer" : "not-allowed" }}
+              disabled={!manualRisk}
               onClick={() => {
                 const p = determineAssessmentPath(manualAnnex || null, manualRisk);
                 setPath(p);

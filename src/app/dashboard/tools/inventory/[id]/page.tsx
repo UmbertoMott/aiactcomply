@@ -30,7 +30,7 @@ const TIER_CFG: Record<string, { label: string; color: string; bg: string; bdr: 
   prohibited:    { label: "Vietato",          color: "#dc2626", bg: "rgba(220,38,38,0.08)",  bdr: "rgba(220,38,38,0.25)" },
   high_risk:     { label: "Alto rischio",     color: "#ea580c", bg: "rgba(234,88,12,0.08)",  bdr: "rgba(234,88,12,0.25)" },
   limited:       { label: "Rischio limitato", color: "#d97706", bg: "rgba(217,119,6,0.08)",  bdr: "rgba(217,119,6,0.25)" },
-  minimal:       { label: "Rischio minimale", color: "#16a34a", bg: "rgba(22,163,74,0.08)",  bdr: "rgba(22,163,74,0.25)" },
+  minimal:       { label: "Rischio minimo", color: "#16a34a", bg: "rgba(22,163,74,0.08)",  bdr: "rgba(22,163,74,0.25)" },
   gpai:          { label: "GPAI",             color: "#7c3aed", bg: "rgba(124,58,237,0.07)", bdr: "rgba(124,58,237,0.22)" },
   gpai_systemic: { label: "GPAI Sistemico",   color: "#6d28d9", bg: "rgba(109,40,217,0.08)", bdr: "rgba(109,40,217,0.25)" },
   unclassified:  { label: "Non classificato", color: "#0D1016", bg: "rgba(0,0,0,0.05)",      bdr: "rgba(0,0,0,0.12)" },
@@ -164,7 +164,7 @@ const OBLIGATIONS: Obligation[] = [
     icon: Users,
     storageKey: "aicomply_oversight_result",
     href: "/dashboard/tools/oversight",
-    toolLabel: "Supervisione",
+    toolLabel: "Sorveglianza umana",
     tiers: ["high_risk"],
     detect: raw => {
       const d = tryParse(raw);
@@ -194,11 +194,11 @@ const OBLIGATIONS: Obligation[] = [
     id: "qms",
     article: "Art. 17",
     label: "Sistema gestione qualità",
-    what: "Implementare un QMS per garantire la conformità continua ai requisiti dell'AI Act",
+    what: "Implementare un sistema di gestione della qualità per garantire la conformità continua ai requisiti dell'AI Act",
     icon: ClipboardCheck,
     storageKey: "aicomply_qms_result",
     href: "/dashboard/tools/qms",
-    toolLabel: "QMS",
+    toolLabel: "Sistema qualità",
     tiers: ["high_risk"],
     detect: raw => {
       const d = tryParse(raw);
@@ -279,12 +279,12 @@ const OBLIGATIONS: Obligation[] = [
   {
     id: "eudb",
     article: "Art. 49",
-    label: "Registrazione EUDB",
-    what: "Registrare il sistema nell'EU AI database prima dell'immissione sul mercato UE",
+    label: "Registrazione nella banca dati UE",
+    what: "Registrare il sistema nella banca dati UE prima dell'immissione sul mercato UE",
     icon: Globe,
     storageKey: "aicomply_eudb_result",
     href: "/dashboard/compliance-ops/eudb",
-    toolLabel: "EUDB",
+    toolLabel: "Banca dati UE",
     tiers: ["high_risk"],
     detect: raw => {
       const d = tryParse(raw);
@@ -315,7 +315,7 @@ const OBLIGATIONS: Obligation[] = [
     id: "gpai-transparency",
     article: "Art. 53",
     label: "Trasparenza GPAI",
-    what: "Pubblicare sommario dati di addestramento, policy copyright, istruzioni per l'integrazione",
+    what: "Pubblicare sommario dati di addestramento, politica sul diritto d'autore, istruzioni per l'integrazione",
     icon: Cpu,
     storageKey: "aicomply_gpai_result",
     href: "/dashboard/tools/gpai",
@@ -332,7 +332,7 @@ const OBLIGATIONS: Obligation[] = [
     id: "gpai-safety",
     article: "Art. 55",
     label: "Sicurezza modelli sistemici",
-    what: "Adversarial testing, red-teaming, piano di segnalazione incidenti e misure cybersecurity",
+    what: "Test contraddittori (red teaming), piano di segnalazione incidenti e misure di cibersicurezza",
     icon: Shield,
     storageKey: "aicomply_resilience_result",
     href: "/dashboard/tools/resilience",
@@ -348,12 +348,12 @@ const OBLIGATIONS: Obligation[] = [
   {
     id: "post-market",
     article: "Art. 72",
-    label: "Monitoraggio post-market",
-    what: "Piano di sorveglianza continua delle performance e segnalazione incidenti gravi",
+    label: "Monitoraggio dopo l'immissione sul mercato",
+    what: "Piano di sorveglianza continua delle prestazioni e segnalazione incidenti gravi",
     icon: Activity,
     storageKey: "aicomply_incident_result",
     href: "/dashboard/post-market",
-    toolLabel: "Post-Market",
+    toolLabel: "Monitoraggio dopo l'immissione sul mercato",
     tiers: ["high_risk"],
     detect: raw => {
       const d = tryParse(raw);
@@ -371,7 +371,7 @@ const OBLIGATIONS: Obligation[] = [
     icon: Bell,
     storageKey: "aicomply_incident_result",
     href: "/dashboard/post-market",
-    toolLabel: "Post-Market",
+    toolLabel: "Monitoraggio dopo l'immissione sul mercato",
     tiers: ["high_risk", "gpai_systemic"],
     detect: raw => {
       const d = tryParse(raw);
@@ -528,7 +528,7 @@ export default function SystemDetailPage() {
                   fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 100,
                   background: "rgba(234,88,12,0.08)", color: "#ea580c",
                   border: "1px solid rgba(234,88,12,0.20)",
-                }}>Dual-role</span>
+                }}>Doppio ruolo</span>
               )}
             </div>
             <h1 style={{ fontSize: 22, fontWeight: 700, color: T.text, margin: "0 0 4px", letterSpacing: "-0.5px" }}>

@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
   ChevronDown, ChevronRight, Plus, Trash2, CheckCircle,
-  AlertTriangle, Shield, Users, Activity, FileText, Download, RotateCcw,
+  AlertTriangle, Shield, Users, Activity, FileText, RotateCcw,
 } from "lucide-react";
 import SignOffPanel from "@/components/ui/SignOffPanel";
 import { useT } from "@/i18n/LocaleProvider";
@@ -289,14 +289,9 @@ export default function FRIAPage() {
   const [loadingAiSummary, setLoadingAiSummary] = useState(false);
   const [aiSummaryIsFromAI, setAiSummaryIsFromAI] = useState(false);
   const [stalenessWarning, setStalenessWarning] = useState(false);
-  // Modalità guidata (guida · documento · chat) come ingresso; la scelta viene ricordata
-  const [guidedMode, setGuidedModeState] = useState(() => {
-    try { return localStorage.getItem("aicomply_fria_view") !== "form"; } catch { return true; }
-  });
-  const setGuidedMode = (v: boolean) => {
-    setGuidedModeState(v);
-    try { localStorage.setItem("aicomply_fria_view", v ? "guided" : "form"); } catch { /* ignore */ }
-  };
+  // Si entra sempre nella procedura guidata (guida · documento · domande); il form completo
+  // si apre solo dal link "Modifica tutte le risposte" (la vecchia scelta salvata non conta più)
+  const [guidedMode, setGuidedMode] = useState(true);
 
   // Leggi dati correlati per il banner contestuale
   const riskData   = useMemo(() => readFromStorage<RiskManagerResult>("riskManager"), []);
@@ -593,13 +588,6 @@ export default function FRIAPage() {
     syncCorrelatedRisksFromFRIA();
     setDossierSavedAt(completedAt);
     showToast(t("toastSavedDossier"));
-  }
-  function exportReport() {
-    const blob = new Blob([JSON.stringify({ export_type: "FRIA Art. 27 EU AI Act", exported_at: new Date().toISOString(), document: doc }, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = `fria-${(doc.system_name || "doc").replace(/\s+/g, "-")}-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click(); URL.revokeObjectURL(url); showToast(t("toastExported"));
   }
 
   // ─── Derived ──────────────────────────────────────────────────────────────
@@ -1557,12 +1545,12 @@ export default function FRIAPage() {
 
       <SystemSelector checkProhibited={true} />
       {/* Una sola riga di azioni: torna alla modalità guidata, esporta, ricomincia */}
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 16 }}>
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", marginBottom: 16 }}>
         <button
           onClick={() => setGuidedMode(true)}
-          style={{ fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "none", background: "#0D1016", color: "#fff", cursor: "pointer" }}
+          style={{ fontSize: 11, padding: 0, border: "none", background: "none", color: "#0D1016", textDecoration: "underline", textUnderlineOffset: 2, cursor: "pointer" }}
         >
-          {t("modeGuidedTitle")} — {t("modeGuidedDesc")}
+          ← {t("gm_backToGuided")}
         </button>
         <Link href="/dashboard/tools/assessment-export" style={{ fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)", background: "#fff", color: "#0D1016" }}>
           {t("exportWithDpia")}
@@ -1840,9 +1828,6 @@ export default function FRIAPage() {
           <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
             <button onClick={saveToDossier} style={{ flex: 1, fontSize: 11, fontWeight: 500, padding: "6px 8px", borderRadius: 8, background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
               {t("saveDossierShort")}
-            </button>
-            <button onClick={exportReport} style={{ padding: "6px 9px", borderRadius: 8, background: T.bg, border: `1px solid ${T.border}`, cursor: "pointer", display: "flex", alignItems: "center" }}>
-              <Download style={{ width: 12, height: 12, color: T.muted }} />
             </button>
           </div>
           {/* Auto-save indicator */}

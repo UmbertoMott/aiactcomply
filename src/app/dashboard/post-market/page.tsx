@@ -732,7 +732,7 @@ function PostMarketPageInner() {
         <h1
           style={{ fontSize: "22px", fontWeight: 400, letterSpacing: "-0.5px", color: "#0D1016" }}
         >
-          Post-Market Monitoring
+          Monitoraggio dopo l&apos;immissione sul mercato
         </h1>
         <p className="text-[13px] mt-0.5" style={{ color: "#0D1016" }}>
           Sorveglianza continua post-immissione sul mercato.
@@ -889,7 +889,8 @@ function PostMarketPageInner() {
         >
           {/* Left: list + form */}
           <div className="space-y-4" style={showForm ? { flex: 1, minWidth: 0 } : {}}>
-            {/* Filters */}
+            {/* Filters (nascosti finché non ci sono incidenti) */}
+            {incidents.length > 0 && (
             <div className="flex flex-wrap gap-3">
               <div className="flex gap-1.5">
                 {(["all", "critical", "high", "medium", "low"] as const).map((s) => (
@@ -944,6 +945,7 @@ function PostMarketPageInner() {
                 ))}
               </div>
             </div>
+            )}
 
             {/* List card */}
             <div
@@ -1334,7 +1336,9 @@ function PostMarketPageInner() {
                     style={{ color: "rgba(0,0,0,0.15)" }}
                   />
                   <p className="text-[13px]" style={{ color: "#0D1016" }}>
-                    Nessun incidente corrisponde ai filtri selezionati.
+                    {incidents.length === 0
+                      ? "Nessun incidente registrato."
+                      : "Nessun incidente corrisponde ai filtri selezionati."}
                   </p>
                 </div>
               ) : (
@@ -2005,7 +2009,7 @@ function PostMarketPageInner() {
                           >
                             <FileText className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#15803d" }} />
                             <div style={{ flex: 1 }}>
-                              <p style={{ fontSize: 11, fontWeight: 500, color: "#15803d", margin: 0 }}>Monitoraggio Post-Market</p>
+                              <p style={{ fontSize: 11, fontWeight: 500, color: "#15803d", margin: 0 }}>Monitoraggio dopo l&apos;immissione sul mercato</p>
                               <p style={{ fontSize: 11, color: "#0D1016", margin: "1px 0 0" }}>Vedi report e piano PMM (Art. 72)</p>
                             </div>
                             <Link2 className="h-3 w-3 flex-shrink-0" style={{ color: "#0D1016" }} />
@@ -2034,7 +2038,7 @@ function PostMarketPageInner() {
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
-                  Piano di Sorveglianza Post-Market — Art. 72
+                  Piano di sorveglianza dopo l&apos;immissione sul mercato — Art. 72
                 </p>
                 <p className="text-[11px] mt-0.5" style={{ color: "#0D1016" }}>
                   Attività di monitoraggio obbligatorie per sistemi di IA ad alto rischio.
@@ -2380,7 +2384,7 @@ function PostMarketPageInner() {
             >
               <div>
                 <span className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
-                  Piano di Monitoraggio Post-Market
+                  Piano di monitoraggio dopo l&apos;immissione sul mercato
                 </span>
                 <p className="text-[11px] mt-0.5" style={{ color: "#0D1016" }}>
                   Art. 72(1) — sistema ad alto rischio

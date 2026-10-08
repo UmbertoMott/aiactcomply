@@ -135,7 +135,7 @@ export function generateDeadlineNotifications(today: Date = new Date()): AICompl
         createdAt: today.toISOString(),
         expiresAt: deadline.date,
         relatedArticle: deadline.article,
-        actionLabel: "Prepara compliance",
+        actionLabel: "Prepara la conformità",
         actionHref: deadline.mandatoryTools[0] || "/dashboard",
         icon: "Clock",
       });
@@ -179,12 +179,12 @@ export function generateProgressNotifications(
       if (missingTools.length > 0) {
         notifications.push({
           id: "missing-high-risk-tools",
-          title: `${missingTools.length} tool obbligatori da completare`,
-          body: `Il tuo sistema è ad alto rischio (Allegato III). Hai ${missingTools.length} tool di compliance ancora da completare prima del 2 dicembre 2027 (Allegato III).`,
+          title: `${missingTools.length} strumenti obbligatori da completare`,
+          body: `Il tuo sistema è ad alto rischio (Allegato III). Hai ${missingTools.length} strumenti di conformità ancora da completare prima del 2 dicembre 2027 (Allegato III).`,
           priority: missingTools.length > 5 ? "critical" : "high",
           category: "tool_incomplete",
           createdAt: today,
-          actionLabel: "Vedi tool mancanti",
+          actionLabel: "Vedi strumenti mancanti",
           actionHref: "/dashboard",
           icon: "ClipboardList",
           relatedArticle: "Art. 9-17",
@@ -194,8 +194,8 @@ export function generateProgressNotifications(
       if (completedTools.length > 0 && missingTools.length === 0) {
         notifications.push({
           id: "all-tools-complete",
-          title: "✅ Tutti i tool completati!",
-          body: "Ottimo lavoro. Tutti i tool di compliance per sistemi ad alto rischio sono stati completati. Genera il dossier finale.",
+          title: "✅ Tutti gli strumenti completati!",
+          body: "Ottimo lavoro. Tutti gli strumenti di conformità per sistemi ad alto rischio sono stati completati. Genera il dossier finale.",
           priority: "info",
           category: "achievement",
           createdAt: today,
@@ -210,12 +210,12 @@ export function generateProgressNotifications(
   if (completedTools.length === 0) {
     notifications.push({
       id: "no-tools-started",
-      title: "Inizia il tuo percorso di compliance",
-      body: "Non hai ancora completato nessun tool. Inizia dal Classifier per capire il livello di rischio del tuo sistema di IA.",
+      title: "Inizia il tuo percorso di conformità",
+      body: "Non hai ancora completato nessuno strumento. Aggiungi il primo sistema di IA all'inventario per capirne il livello di rischio.",
       priority: "medium",
       category: "tool_incomplete",
       createdAt: today,
-      actionLabel: "Inizia con Classifier",
+      actionLabel: "Aggiungi il primo sistema",
       actionHref: "/dashboard/tools/inventory",
       icon: "Play",
     });

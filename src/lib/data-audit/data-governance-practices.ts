@@ -61,7 +61,7 @@ export const DATA_GOVERNANCE_PRACTICES: readonly DataGovernancePracticeDefinitio
     source: "manual",
     linkedTool: "risk-manager",
     linkedToolPath: "/dashboard/tools/risk-manager",
-    linkedToolLabel: "Risk Manager (step mitigation) — Art. 9",
+    linkedToolLabel: "Gestione dei rischi (mitigazione) — Art. 9",
   },
   {
     id: "data_gaps",
@@ -87,7 +87,7 @@ export const DATA_GOVERNANCE_PRACTICES: readonly DataGovernancePracticeDefinitio
 
 export const SPECIAL_CATEGORIES_MODULE = {
   id: "special_categories",
-  label: "Trattamento di categorie particolari di dati personali per bias detection",
+  label: "Trattamento di categorie particolari di dati personali per rilevare distorsioni (bias)",
   primaryReference: "Art. 4 bis, par. 1 [Reg. (UE) 2024/1689, come modificato dal Reg. (UE) 2026/1744]",
   supportReference: "Art. 9 GDPR [Reg. (UE) 2016/679]",
   description:

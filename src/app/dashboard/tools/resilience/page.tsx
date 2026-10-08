@@ -135,16 +135,6 @@ export default function ResiliencePage() {
   }
 
   // ── Export ──────────────────────────────────────────────────────────────
-  async function exportJSON() {
-    const fingerprint = await computeResilienceFingerprint(record);
-    const withFp = { ...record, fingerprint };
-    persist(withFp);
-    const statement = { kind: "Resilience Statement (Art. 15 / Allegato IV)", generatedAt: new Date().toISOString(), record: withFp };
-    const blob = new Blob([JSON.stringify(statement, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = `resilience-statement-${new Date().toISOString().slice(0, 10)}.json`; a.click();
-    URL.revokeObjectURL(url);
-  }
   async function saveToDossier() {
     const fingerprint = await computeResilienceFingerprint(record);
     persist({ ...record, fingerprint });
@@ -336,7 +326,7 @@ export default function ResiliencePage() {
                 <div className="mt-3 rounded-lg p-2 flex items-center gap-2 flex-wrap" style={{ background: "rgba(220,38,38,0.06)" }}>
                   <AlertTriangle size={13} style={{ color: T.red }} />
                   <span className="text-[11px]" style={{ color: T.red }}>{t("tm_gapWarn")}</span>
-                  <Link href="/dashboard/tools/risk-manager" className="text-[11px] inline-flex items-center gap-1 ml-auto" style={{ color: T.text }}><ExternalLink size={11} /> Risk Manager (Art. 9)</Link>
+                  <Link href="/dashboard/tools/risk-manager" className="text-[11px] inline-flex items-center gap-1 ml-auto" style={{ color: T.text }}><ExternalLink size={11} /> Gestione dei rischi (Art. 9)</Link>
                 </div>
               </div>
 
@@ -375,7 +365,6 @@ export default function ResiliencePage() {
             </p>
             <div className="flex flex-wrap gap-2 items-center">
               <FinalExportGate>
-                <button onClick={exportJSON} className="flex items-center gap-1.5 text-[13px] font-medium px-3 py-1.5 rounded-lg" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}><FileText size={13} /> {t("ev_exportJson")}</button>
                 <button onClick={() => window.print()} className="flex items-center gap-1.5 text-[13px] font-medium px-3 py-1.5 rounded-lg" style={{ background: "#fff", color: T.text, border: `1px solid ${T.border}`, cursor: "pointer" }}><FileText size={13} /> {t("ev_printPdf")}</button>
               </FinalExportGate>
               <button onClick={saveToDossier} className="flex items-center gap-1.5 text-[13px] font-medium px-3 py-1.5 rounded-lg ml-auto" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}><CheckCircle2 size={13} /> {t("ev_saveDossier")}</button>

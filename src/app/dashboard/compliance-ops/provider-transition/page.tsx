@@ -77,7 +77,7 @@ function VerdictBanner({ verdict }: { verdict: Verdict }) {
       border: "rgba(239,68,68,0.18)",
       icon: <AlertTriangle size={18} className="text-red-700" />,
       title: "Obblighi del fornitore rilevati (Art. 25 · Art. 16)",
-      text: "Le risposte indicate suggeriscono che la tua organizzazione potrebbe aver assunto il ruolo di provider. Completa le obbligazioni nella sezione 3 e verifica con il team legale.",
+      text: "Le risposte indicate suggeriscono che la tua organizzazione potrebbe aver assunto il ruolo di fornitore. Completa le obbligazioni nella sezione 3 e verifica con il team legale.",
     },
     risk: {
       bg: "rgba(251,146,60,0.08)",
@@ -90,8 +90,8 @@ function VerdictBanner({ verdict }: { verdict: Verdict }) {
       bg: "rgba(22,163,74,0.06)",
       border: "rgba(22,163,74,0.15)",
       icon: <CheckCircle2 size={18} className="text-green-700" />,
-      title: "Nessun obbligo da provider rilevato",
-      text: "Le risposte indicano che rimani nel ruolo di deployer senza obblighi aggiuntivi da provider. Documenta comunque le modifiche apportate.",
+      title: "Nessun obbligo da fornitore rilevato",
+      text: "Le risposte indicano che rimani nel ruolo di deployer senza obblighi aggiuntivi da fornitore. Documenta comunque le modifiche apportate.",
     },
   } as const;
   const c = cfg[verdict];
@@ -182,7 +182,7 @@ export default function ProviderTransitionPage() {
               color: verdict === "provider" ? "#991b1b" : verdict === "risk" ? "#92400e" : "#15803d",
               borderRadius: 6, padding: "2px 10px", fontSize: 13, fontWeight: 600,
             }}>
-              {verdict === "provider" ? "PROVIDER" : verdict === "risk" ? "VERIFICA" : "DEPLOYER"}
+              {verdict === "provider" ? "FORNITORE" : verdict === "risk" ? "VERIFICA" : "DEPLOYER"}
             </span>
           )}
         </div>
@@ -190,7 +190,7 @@ export default function ProviderTransitionPage() {
           Cambio di ruolo — da deployer a fornitore
         </h1>
         <p style={{ color: MUTED, fontSize: 13, lineHeight: 1.5 }}>
-          Verifica se le modifiche apportate al sistema di IA configurano un trasferimento del ruolo da deployer a provider ai sensi dell&apos;Art. 25 del Reg. (UE) 2024/1689.
+          Verifica se le modifiche apportate al sistema di IA configurano un trasferimento del ruolo da deployer a fornitore ai sensi dell&apos;Art. 25 del Reg. (UE) 2024/1689.
         </p>
       </div>
 
@@ -200,7 +200,7 @@ export default function ProviderTransitionPage() {
           1. Checklist valutazione Art. 25
         </h2>
         <p style={{ color: MUTED, fontSize: 13, marginBottom: 20 }}>
-          Rispondi a tutte le domande per determinare il tuo ruolo. Le risposte &quot;Sì&quot; ai trigger configurano potenziali obblighi da provider.
+          Rispondi a tutte le domande per determinare il tuo ruolo. Le risposte &quot;Sì&quot; alle domande decisive configurano potenziali obblighi da fornitore.
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -264,7 +264,7 @@ export default function ProviderTransitionPage() {
               background: "rgba(129,140,248,0.08)", border: `1px solid rgba(129,140,248,0.2)`,
               borderRadius: 6, padding: "10px 14px", marginBottom: 16, fontSize: 13, color: MUTED,
             }}>
-              <strong style={{ color: INDIGO }}>✦ AI — verifica e conferma</strong> Le voci con sorgente &quot;LogVault Auto&quot; sono rilevate automaticamente dai log ma <strong>non</strong> impostano mai &quot;Sostanziale&quot; automaticamente — richiedono sempre valutazione manuale.
+              <strong style={{ color: INDIGO }}>✦ AI — verifica e conferma</strong> Le voci con sorgente &quot;Registro dei log&quot; sono rilevate automaticamente dai log ma <strong>non</strong> impostano mai &quot;Sostanziale&quot; automaticamente — richiedono sempre valutazione manuale.
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14 }}>
@@ -288,7 +288,7 @@ export default function ProviderTransitionPage() {
                       <span style={{ color: TEXT, fontSize: 13 }}>{mod.description || "(senza descrizione)"}</span>
                       {mod.source === "logvault_auto" && (
                         <span style={{ background: "rgba(129,140,248,0.15)", color: INDIGO, fontSize: 11, borderRadius: 4, padding: "1px 7px" }}>
-                          LogVault Auto
+                          Registro dei log
                         </span>
                       )}
                     </div>

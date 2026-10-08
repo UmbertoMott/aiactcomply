@@ -185,7 +185,7 @@ export function RetentionPanel({ record, onChange, t }: { record: LogVaultRecord
 
 // ═══ §10 Tabella mappatura ISO ══════════════════════════════════════════════
 const ISO_ROWS = [
-  ["Registrazione eventi / event logs", "Art. 12(1), Art. 19", "ISO/IEC 42001 A.6.2.8; 27001 A.8.15"],
+  ["Registrazione eventi", "Art. 12(1), Art. 19", "ISO/IEC 42001 A.6.2.8; 27001 A.8.15"],
   ["Copertura finalità di tracciabilità", "Art. 12(2)(a-c)", "ISO/IEC 42001 A.6.2.8; A.6.2.6"],
   ["Qualità/continuità (gap, duplicati)", "Art. 12", "ISO/IEC 27001 A.8.15; 5259"],
   ["Verifica integrità / hash-chain", "Art. 12(1)", "ISO/IEC 27037"],

@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
+import { plainRef } from "@/lib/ui/plain-label";
 import { Send, Check, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import { RISK_REGISTER_SUBPOINTS } from "@/lib/risk/risk-register-guided-types";
 import type { RiskRegisterGuidedDoc, RiskRegisterAnswer } from "@/lib/risk/risk-register-guided-types";
@@ -120,7 +121,7 @@ export function RiskRegisterGuidedChat({
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: T.green }} />
-            <span style={{ fontSize: 13, fontWeight: 700, color: T.text }}>Risk Register Guidato</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: T.text }}>Registro dei rischi guidato</span>
           </div>
           <span style={{ fontSize: 11, color: T.muted, fontFamily: "var(--font-mono)" }}>
             {currentIdx + 1} / {allIds.length}
@@ -190,9 +191,11 @@ export function RiskRegisterGuidedChat({
             background: T.card, border: `1px solid ${T.border}`,
             borderRadius: "12px 12px 12px 3px", padding: "10px 14px", maxWidth: "90%",
           }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: T.green, marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.04em" }}>
-              {sp.ref}
-            </div>
+            {plainRef(sp.ref) && (
+              <div style={{ fontSize: 11, fontWeight: 500, color: "rgba(13,16,22,0.55)", marginBottom: 5 }}>
+                {plainRef(sp.ref)}
+              </div>
+            )}
             <p style={{ fontSize: 13, fontWeight: 500, color: T.text, margin: 0, lineHeight: 1.5 }}>
               {sp.question}
             </p>

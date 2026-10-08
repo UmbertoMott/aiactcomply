@@ -53,9 +53,27 @@ function saveSettings(s: NotifSettings): void {
 
 type FilterType = "all" | "unread" | "critical" | "deadline" | "tool";
 
+// Nomi leggibili degli strumenti (al posto dello slug dell'URL)
+const TOOL_LABEL: Record<string, string> = {
+  triage: "Triage",
+  gpai: "Modelli GPAI",
+  "risk-manager": "Gestione dei rischi",
+  "data-audit": "Qualità dei dati",
+  docugen: "Documentazione tecnica",
+  logvault: "Registro dei log",
+  transparency: "Trasparenza",
+  oversight: "Sorveglianza umana",
+  resilience: "Robustezza e cibersicurezza",
+  qms: "Sistema qualità",
+};
+function toolLabel(path: string): string {
+  const slug = path.split("/").pop() ?? path;
+  return TOOL_LABEL[slug] ?? slug;
+}
+
 const categoryLabel: Record<NotificationCategory, string> = {
   deadline: "Scadenza",
-  tool_incomplete: "Tool",
+  tool_incomplete: "Strumenti",
   risk_alert: "Rischio",
   gpai: "GPAI",
   system: "Sistema",
@@ -228,7 +246,7 @@ function TimelineItem({
           <div className="mb-3">
             <div className="flex items-center justify-between mb-1">
               <span className="text-[11px]" style={{ color: "#0D1016" }}>
-                Tool completati: {completedCount}/{totalTools}
+                Strumenti completati: {completedCount}/{totalTools}
               </span>
               <span className="text-[11px] font-medium" style={{ color: pct === 100 ? "#15803d" : "rgba(0,0,0,0.4)" }}>
                 {pct}%
@@ -262,7 +280,7 @@ function TimelineItem({
                     textDecoration: "none",
                   }}
                 >
-                  {done ? "✓" : "○"} {tool.split("/").pop()}
+                  {done ? "✓" : "○"} {toolLabel(tool)}
                 </Link>
               );
             })}
@@ -279,7 +297,7 @@ function TimelineItem({
               color: "#ffffff",
             }}
           >
-            {isPast ? "Verifica retroattiva" : "Vai al tool"} <ArrowRight size={11} />
+            {isPast ? "Verifica retroattiva" : "Vai allo strumento"} <ArrowRight size={11} />
           </Link>
         )}
       </div>
@@ -551,7 +569,7 @@ export default function NotificationsPage() {
           Notifiche e Scadenze
         </h1>
         <p className="text-[13px]" style={{ color: "#0D1016" }}>
-          Rimani aggiornato sulle scadenze AI Act e completa i tool in tempo.
+          Rimani aggiornato sulle scadenze AI Act e completa gli strumenti in tempo.
         </p>
       </div>
 
@@ -622,7 +640,7 @@ export default function NotificationsPage() {
                       : { background: "rgba(0,0,0,0.06)", color: "#0D1016" }
                   }
                 >
-                  {{ all: "Tutte", unread: "Non lette", critical: "Critiche", deadline: "Scadenze", tool: "Tool" }[f]}
+                  {{ all: "Tutte", unread: "Non lette", critical: "Critiche", deadline: "Scadenze", tool: "Strumenti" }[f]}
                 </button>
               ))}
             </div>
@@ -711,25 +729,25 @@ export default function NotificationsPage() {
               {
                 key: "deadlines" as const,
                 label: "Notifiche scadenze normative",
-                desc: "Alert automatici per le scadenze AI Act",
+                desc: "Avvisi automatici per le scadenze AI Act",
                 disabled: false,
               },
               {
                 key: "toolIncomplete" as const,
-                label: "Notifiche tool incompleti",
-                desc: "Promemoria per i tool non ancora completati",
+                label: "Notifiche strumenti incompleti",
+                desc: "Promemoria per gli strumenti non ancora completati",
                 disabled: false,
               },
               {
                 key: "redTeam" as const,
                 label: "Notifiche sui test contraddittori",
-                desc: "Alert quando i test di red-team rilevano problemi",
+                desc: "Avvisi quando i test contraddittori (red team) rilevano problemi",
                 disabled: false,
               },
               {
                 key: "criticalAlert" as const,
-                label: "Alert rischio critico",
-                desc: "Obbligatorio per compliance — non disabilitabile",
+                label: "Avvisi di rischio critico",
+                desc: "Obbligatorio per la conformità — non disattivabile",
                 disabled: true,
               },
             ].map((row) => (

@@ -1049,9 +1049,9 @@ Chatbot Supporto Clienti,Customer Care,Assistente virtuale basato su GPT-4 per i
               <thead>
                 <tr style={{ background: "#FAFAF9" }}>
                   <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#0D1016", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>{t("th_name")}</th>
-                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#0D1016", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>Owner</th>
-                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#0D1016", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>Status</th>
-                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#0D1016", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>Tier</th>
+                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#0D1016", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>{t("th_owner")}</th>
+                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#0D1016", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>{t("th_status")}</th>
+                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#0D1016", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>{t("th_tier")}</th>
                 </tr>
               </thead>
               <tbody>

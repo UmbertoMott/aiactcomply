@@ -117,6 +117,7 @@ interface ReqCardProps {
 function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, index, t }: ReqCardProps) {
   const [open, setOpen] = useState(false);
   const status = record?.status ?? "not_started";
+  const badgeRef = `Art. 14(4)(${String.fromCharCode(96 + index)})`;
 
   return (
     <div className="rounded-lg border transition-shadow hover:shadow-sm" style={{ background: T.card, borderColor: status === "implemented" ? "#86efac" : T.border }}>
@@ -129,12 +130,14 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, index, t 
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[11px] font-mono font-bold" style={{ color: T.blue }}>Art. 14(4)({String.fromCharCode(96 + index)})</span>
+            <span className="text-[11px] font-mono font-bold" style={{ color: T.blue }}>{badgeRef}</span>
             <span className="text-[13px] font-semibold" style={{ color: T.text }}>{req.label}</span>
             <StatusPill status={status} t={t} />
             {pending && <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: T.violetBg, color: T.violet, border: `1px solid ${T.violetBdr}` }}>✦ AI</span>}
           </div>
-          <p className="text-[11px] mt-1" style={{ color: T.muted }}>{req.primaryReference}</p>
+          {req.primaryReference !== badgeRef && (
+            <p className="text-[11px] mt-1" style={{ color: T.muted }}>{req.primaryReference}</p>
+          )}
         </div>
         <span className="text-[11px] ml-2 flex-shrink-0" style={{ color: T.faint }}>{open ? "▲" : "▼"}</span>
       </button>

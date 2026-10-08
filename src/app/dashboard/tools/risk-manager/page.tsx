@@ -106,42 +106,42 @@ const PHASE_GUIDES: Partial<Record<RiskPhaseId, PhaseGuide>> = {
     starters: ["Quante persone sono impattate mensilmente?", "Quali usi impropri sono prevedibili?", "Il rischio rientra nel risk appetite aziendale?"],
   },
   testing: {
-    goal: "Definisci metriche di accuratezza/fairness, soglie accettabili e criteri di rilascio in produzione (Art. 9(8)).",
+    goal: "Indica come è stato verificato che il sistema funzioni bene e tratti tutti in modo equo, e quali risultati minimi servono prima di usarlo (Art. 9(8)).",
     examples: [
-      { label: "Metriche definite", text: "Accuratezza ≥90%, Disparate Impact ≥0.8, test su dataset validation set hold-out 20%." },
-      { label: "Soglia non rispettata", text: "Il DI score è 0.72 — sotto soglia. Il modello non può essere rilasciato senza debiasing." },
+      { label: "Verifiche superate", text: "Il fornitore ha testato il sistema su casi reali: risponde correttamente in almeno 9 casi su 10 e i risultati sono simili per uomini e donne." },
+      { label: "Risultato insufficiente", text: "Nei test il sistema scarta più spesso i candidati stranieri. Non lo usiamo finché il fornitore non corregge il problema." },
     ],
-    starters: ["Quali metriche di fairness sono state usate?", "Il modello ha superato il test su dataset di validazione?", "Qual è la soglia di accuratezza minima accettabile?"],
+    starters: ["Come è stato verificato che il sistema tratti tutti in modo equo?", "Il sistema ha superato i test prima dell'uso?", "Qual è il livello minimo di correttezza accettabile?"],
   },
   mitigation: {
     goal: "Scegli l'opzione di trattamento (Modifica/Evitamento/Condivisione/Ritenzione) e definisci le misure concrete seguendo la gerarchia Art. 9(5).",
     examples: [
-      { label: "Design-mitigation", text: "Eliminazione feature proxy (cap_residenza) dal dataset. Retraining con CTGAN debiasing. Testing fairness post-modifica." },
+      { label: "Modifica del sistema", text: "Il CAP di residenza non viene più usato per valutare i candidati, perché può portare a discriminazioni. Dopo la modifica il sistema è stato ricontrollato." },
       { label: "Controllo", text: "Revisione umana obbligatoria per i 20 candidati con score più vicino alla soglia di esclusione." },
     ],
     starters: ["Quale opzione di trattamento è stata scelta?", "Quali misure tecniche sono state adottate?", "Chi è il responsabile delle misure di mitigazione?"],
   },
   monitoring: {
-    goal: "Definisci frequenza monitoraggio, soglia PSI per drift detection e trigger di revisione del risk register.",
+    goal: "Indica ogni quanto si controlla che il sistema continui a funzionare bene e quali segnali fanno scattare una revisione del registro.",
     examples: [
-      { label: "PSI stabile", text: "PSI < 0.1 — modello stabile. Monitoraggio mensile automatico via pipeline Airflow." },
-      { label: "Trigger revisione", text: "PSI > 0.2 rilevato dopo aggiornamento dataset: revisione urgente avviata, modello sospeso temporaneamente." },
+      { label: "Controllo regolare", text: "Ogni mese il responsabile verifica a campione i risultati del sistema e segnala eventuali errori o reclami ricevuti." },
+      { label: "Revisione straordinaria", text: "Dopo un aggiornamento del fornitore i risultati sono peggiorati: abbiamo sospeso l'uso del sistema e avviato una revisione." },
     ],
-    starters: ["Qual è la frequenza di monitoraggio pianificata?", "È stato definito il PSI threshold?", "Cosa scatena una revisione straordinaria del risk register?"],
+    starters: ["Ogni quanto viene controllato il sistema?", "Quali segnali fanno scattare un controllo straordinario?", "Cosa provoca una revisione del registro dei rischi?"],
   },
   gap_check: {
-    goal: "Verifica che tutti i requisiti Art. 9(2)(a)-(d) + (6)-(9) siano coperti. Assegna un coverage score 0-100 e identifica le aree mancanti.",
+    goal: "Verifica che tutti i requisiti dell'Art. 9 siano coperti e indica cosa manca ancora.",
     examples: [
-      { label: "Copertura alta", text: "Coverage score: 85/100. Area mancante: Art. 9(9) impatto gruppi vulnerabili non ancora documentato." },
+      { label: "Quasi completo", text: "Quasi tutti i punti sono coperti. Manca ancora la valutazione dell'impatto su minori e persone vulnerabili (Art. 9(9))." },
       { label: "Gap critico", text: "Art. 9(2)(c) monitoraggio post-market non definito — gap obbligatorio da colmare prima del deployment." },
     ],
-    starters: ["Qual è il coverage score stimato?", "Quali requisiti Art. 9 non sono ancora coperti?", "Ci sono gap obbligatori da colmare prima del rilascio?"],
+    starters: ["Quanto è completo il registro, secondo te?", "Quali requisiti dell'Art. 9 non sono ancora coperti?", "Ci sono lacune da colmare prima dell'uso?"],
   },
   traceability: {
     goal: "Definisci la policy di versionamento del risk register, il periodo di conservazione dei log (Art. 19(1) / Art. 26(6)) e l'integrazione con il QMS aziendale (Art. 17).",
     examples: [
-      { label: "Versionamento attivo", text: "Versione v1.0 approvata. Log automatici via Git. Retention 5 anni. Integrato nel QMS ISO 9001." },
-      { label: "Nessun QMS", text: "Il sistema di gestione rischi è standalone — non integrato in un QMS formale. Raccomandato allineamento Art. 17." },
+      { label: "Versioni tracciate", text: "Versione 1.0 approvata il 10/03/2026. Ogni modifica viene registrata con data e autore. I registri si conservano per 5 anni nel sistema qualità aziendale." },
+      { label: "Nessun sistema qualità", text: "Il registro dei rischi è gestito a parte e non rientra in un sistema di gestione della qualità. Va collegato (Art. 17)." },
     ],
     starters: ["Il risk register è integrato nel QMS aziendale?", "Qual è la policy di retention dei log?", "Come vengono tracciate le versioni del registro?"],
   },
@@ -156,8 +156,8 @@ const PHASE_GUIDES: Partial<Record<RiskPhaseId, PhaseGuide>> = {
   signoff: {
     goal: "Raccogli i nominativi per il sign-off (risk owner, compliance/legale, rappresentante legale) e la valutazione complessiva del rischio.",
     examples: [
-      { label: "Approvazione completa", text: "Risk owner: Mario Rossi (CTO). Compliance: Avv. Anna Bianchi. Overall risk: MEDIO — accettabile con misure in vigore." },
-      { label: "Approvazione condizionata", text: "Approvazione condizionata: deployment autorizzato solo dopo completamento del debiasing (entro 30/09/2026)." },
+      { label: "Approvazione completa", text: "Responsabile del rischio: Mario Rossi (CTO). Compliance: Avv. Anna Bianchi. Rischio complessivo: medio, accettabile con le misure in vigore." },
+      { label: "Approvazione condizionata", text: "Uso autorizzato solo dopo che il fornitore avrà corretto le disparità di trattamento emerse nei test (entro il 30/09/2026)." },
     ],
     starters: ["Chi è il risk owner del sistema?", "Qual è la valutazione complessiva del rischio (overall risk)?", "C'è un'approvazione condizionata con azioni pendenti?"],
   },
@@ -797,14 +797,9 @@ export default function RiskManagerPage() {
   const [viewerAnchor, setViewerAnchor] = useState<string | null>(null);
   const [showPhaseGuide, setShowPhaseGuide] = useState(true);
   const [customPhrase, setCustomPhrase] = useState("");
-  // Modalità guidata come ingresso, come DPIA e FRIA; la scelta viene ricordata
-  const [guidedMode, setGuidedModeState] = useState(() => {
-    try { return localStorage.getItem("aicomply_risk_view") !== "form"; } catch { return true; }
-  });
-  const setGuidedMode = (v: boolean) => {
-    setGuidedModeState(v);
-    try { localStorage.setItem("aicomply_risk_view", v ? "guided" : "form"); } catch { /* storage non disponibile */ }
-  };
+  // Si entra sempre nella procedura guidata, come DPIA e FRIA; il modulo completo si apre
+  // solo dal link "Modifica tutte le risposte" (la vecchia scelta salvata non conta più)
+  const [guidedMode, setGuidedMode] = useState(true);
   const layoutRef = useRef<HTMLDivElement>(null);
 
   // Apre il documento e scrolla alla sezione richiesta
@@ -995,8 +990,7 @@ export default function RiskManagerPage() {
     setInput("");
   };
 
-  if (!hydrated) return null;
-
+  // La procedura guidata non dipende dallo stato della chat: si mostra subito
   if (guidedMode) {
     return (
       <div style={{ fontFamily: "inherit", background: "#ffffff", height: "calc(100vh - 4rem)", display: "flex", flexDirection: "column" }}>
@@ -1005,6 +999,16 @@ export default function RiskManagerPage() {
         <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
           <RiskRegisterGuidedMode onExitGuidedMode={() => setGuidedMode(false)} />
         </div>
+      </div>
+    );
+  }
+
+  // Modulo completo: finché lo stato salvato non è caricato mostra un segnaposto leggero
+  // (non una pagina vuota)
+  if (!hydrated) {
+    return (
+      <div style={{ fontFamily: "inherit", background: "#ffffff", height: "calc(100vh - 4rem)", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, color: "#0D1016", fontSize: 13 }}>
+        <Loader2 size={14} className="animate-spin" /> Caricamento del registro dei rischi…
       </div>
     );
   }
@@ -1042,31 +1046,17 @@ export default function RiskManagerPage() {
           </div>
         </div>
 
-        {/* Tab switcher: Form completo / Risk Register guidato */}
-        <div style={{ display: "flex", gap: 0, borderBottom: "1px solid rgba(0,0,0,0.08)", marginTop: 8 }}>
-          <button
-            onClick={() => setGuidedMode(false)}
-            style={{
-              padding: "8px 16px", fontSize: 13, fontWeight: !guidedMode ? 700 : 500,
-              color: !guidedMode ? "#0D1016" : "rgba(0,0,0,0.42)",
-              background: "none", border: "none", cursor: "pointer",
-              borderBottom: !guidedMode ? "2px solid #0D1016" : "2px solid transparent",
-              marginBottom: -1,
-            }}
-          >
-            {t("tabStructured")}
-          </button>
+        {/* Ritorno alla procedura guidata (unica modalità principale) */}
+        <div style={{ marginTop: 8 }}>
           <button
             onClick={() => setGuidedMode(true)}
             style={{
-              padding: "8px 16px", fontSize: 13, fontWeight: guidedMode ? 700 : 500,
-              color: guidedMode ? "#0D1016" : "rgba(0,0,0,0.42)",
+              padding: 0, fontSize: 11, color: "#0D1016",
               background: "none", border: "none", cursor: "pointer",
-              borderBottom: guidedMode ? "2px solid #0D1016" : "2px solid transparent",
-              marginBottom: -1,
+              textDecoration: "underline", textUnderlineOffset: 2,
             }}
           >
-            {t("tabGuided")}
+            ← {t("backToGuided")}
           </button>
         </div>
       </div>

@@ -85,7 +85,7 @@ const DEEPFAKE_REQUIREMENTS = [
 ];
 
 const ACCESSIBILITY_REQUIREMENTS = [
-  "Le spiegazioni fornite dal sistema sono comprensibili per un utente non tecnico (readability score target: ≤ licenza media)",
+  "Le spiegazioni fornite dal sistema sono comprensibili per un utente non tecnico (obiettivo di leggibilità: ≤ licenza media)",
   "L'interfaccia è accessibile (contrasto colori, screen reader, navigazione da tastiera)",
   "In caso di decisione automatizzata che impatta l'utente, è fornita una spiegazione in linguaggio non tecnico",
   "I messaggi di errore e le limitazioni del sistema sono comunicati chiaramente",

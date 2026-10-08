@@ -279,7 +279,7 @@ export default function EUDBCompliancePage() {
     markEUDBRegistrationComplete(registrationNumber);
     patch(d => ({ ...d, eudb_registration_number: registrationNumber }));
     handleSaveDossier();
-    showToast("✓ Registrazione completata — Deadline Timeline aggiornata");
+    showToast("✓ Registrazione completata — scadenzario aggiornato");
   }
 
   function copySection(section: "all" | "a" | "b" | "c") {
@@ -392,7 +392,7 @@ export default function EUDBCompliancePage() {
           <p style={{ fontSize: 11, color: DK.muted, margin: 0 }}>
             Consulta il{" "}
             <a href="/dashboard/tools/deployer-dashboard" style={{ color: DK.text, textDecoration: "none" }}>
-              Deployer Dashboard
+              Cruscotto deployer
             </a>{" "}
             per gli obblighi pertinenti.
           </p>
@@ -553,7 +553,7 @@ export default function EUDBCompliancePage() {
           </div>
         </SectionCard>
 
-        <SectionCard title="Status del sistema e Stati membri" article="Allegato VIII, sez. A, punti 7 e 10">
+        <SectionCard title="Stato del sistema e Stati membri" article="Allegato VIII, sez. A, punti 7 e 10">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <DkField label="Stato registrazione *">
               <select style={inputDk} value={s.registration_status} onChange={e => patchS("registration_status", e.target.value as "new"|"update"|"withdrawal")}>
@@ -755,7 +755,7 @@ export default function EUDBCompliancePage() {
         {validation.valid && (
           <div style={{ borderRadius: 8, border: `1px solid ${DK.greenBdr}`, background: DK.greenBg, padding: 12 }}>
             <p style={{ fontSize: 11, color: DK.green, margin: 0 }}>
-              ✓ Tutti i campi Allegato VIII compilati — pronto per l&apos;esportazione e upload al portale EC
+              ✓ Tutti i campi Allegato VIII compilati — pronto per l&apos;esportazione e il caricamento sul portale della Commissione UE
             </p>
           </div>
         )}
@@ -763,9 +763,9 @@ export default function EUDBCompliancePage() {
         {/* Export XML / JSON (PROMPT BF) */}
         <div style={{ ...cardDk, padding: 16, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           <div style={{ flex: 1, minWidth: 200 }}>
-            <p style={{ fontSize: 13, fontWeight: 600, color: DK.text, margin: 0 }}>Esporta per upload EUDB</p>
+            <p style={{ fontSize: 13, fontWeight: 600, color: DK.text, margin: 0 }}>Esporta per la banca dati UE</p>
             <p style={{ fontSize: 11, color: DK.muted, margin: "2px 0 0" }}>
-              XML / JSON machine-readable — struttura Allegato VIII · Art. 49
+              File per il portale UE — struttura Allegato VIII · Art. 49
             </p>
           </div>
           <button
@@ -776,7 +776,7 @@ export default function EUDBCompliancePage() {
               background: validation.valid ? "#0D1016" : "rgba(0,0,0,0.05)",
               color: validation.valid ? "#fff" : DK.faint,
               border: `1px solid ${validation.valid ? "#0D1016" : DK.border}` }}>
-            <Download size={12} /> {validation.valid ? "Esporta XML" : `Completa ${validation.errors.length} campi`}
+            <Download size={12} /> {validation.valid ? "Scarica file per il portale UE" : `Completa ${validation.errors.length} campi`}
           </button>
           <button
             disabled={!validation.valid}
@@ -785,7 +785,7 @@ export default function EUDBCompliancePage() {
               borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: validation.valid ? "pointer" : "not-allowed",
               background: "rgba(0,0,0,0.05)", color: validation.valid ? DK.text : DK.faint,
               border: `1px solid ${DK.border}` }}>
-            <Download size={12} /> Esporta JSON
+            <Download size={12} /> Scarica dati
           </button>
           {!validation.valid && (
             <p style={{ fontSize: 11, color: DK.faint, width: "100%", margin: 0 }}>
@@ -806,7 +806,7 @@ export default function EUDBCompliancePage() {
         </div>
 
         {/* Portal steps */}
-        <SectionCard title="Istruzioni — Portale EC" article="Art. 49">
+        <SectionCard title="Istruzioni — Portale della Commissione UE" article="Art. 49">
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {PORTAL_STEPS.map(ps => (
               <div key={ps.n} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
@@ -836,7 +836,7 @@ export default function EUDBCompliancePage() {
         {/* Registration number input */}
         <SectionCard title="Numero registrazione EUDB">
           <p style={{ fontSize: 11, color: DK.muted, margin: "0 0 12px" }}>
-            Inserisci il numero ricevuto dopo la registrazione sul portale EC. Il salvataggio aggiorna automaticamente la Deadline Timeline e il Deployer Dashboard.
+            Inserisci il numero ricevuto dopo la registrazione sul portale EC. Il salvataggio aggiorna automaticamente lo scadenzario e il cruscotto deployer.
           </p>
           <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
             <div style={{ flex: 1 }}>
@@ -869,7 +869,7 @@ export default function EUDBCompliancePage() {
           </button>
         </div>
 
-        <SignOffPanel toolKey="eudb" toolLabel="EUDB Registration — Art. 49" />
+        <SignOffPanel toolKey="eudb" toolLabel="Registrazione banca dati UE — Art. 49" />
       </div>
     );
   }
