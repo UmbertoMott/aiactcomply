@@ -29,6 +29,30 @@ function useInView(threshold = 0.1) {
 // fino ad allora si vede il primo fotogramma in JPEG.
 const posterFor = (src: string) => src.replace("/videos/", "/videos/posters/").replace(/\.mp4$/, ".jpg");
 
+// Su smartphone: ritaglio della zona utile di ogni video, alla risoluzione originale
+// (public/videos/mobile), così l'interfaccia si legge senza ingrandire i pixel.
+const MOBILE_ASPECT: Record<string, string> = {
+  "/videos/triage.mp4": "760/720",
+  "/videos/legal-assistant.mp4": "1080/888",
+  "/videos/fria.mp4": "800/720",
+  "/videos/eudb.mp4": "760/720",
+  "/videos/trust.mp4": "760/720",
+};
+const mobileSrc = (src: string) => src.replace("/videos/", "/videos/mobile/");
+const mobilePoster = (src: string) => src.replace("/videos/", "/videos/posters/mobile/").replace(/\.mp4$/, ".jpg");
+
+function useIsMobile() {
+  const [mobile, setMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const update = () => setMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  return mobile;
+}
+
 // ─── VIDEO ROW ────────────────────────────────────────────────────────────────
 
 interface RowProps {
@@ -43,16 +67,19 @@ interface RowProps {
   reverse?: boolean;
 }
 
-function VideoRow({ badge, title, desc, chips, videoSrc, zoom = 1, zoomX = 50, playbackRate = 1, reverse }: RowProps) {
+function VideoRow({ badge, title, desc, chips, videoSrc, zoom: zoomProp = 1, zoomX = 50, playbackRate = 1, reverse }: RowProps) {
   const { ref, visible } = useInView(0.1);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const mobile = useIsMobile();
+  const mobileCrop = mobile && !!MOBILE_ASPECT[videoSrc];
+  const zoom = mobileCrop ? 1 : zoomProp;
   useEffect(() => {
     if (!visible) return;
     const v = videoRef.current;
     if (!v) return;
     v.playbackRate = playbackRate;
     v.play().catch(() => {});
-  }, [visible, playbackRate]);
+  }, [visible, playbackRate, mobileCrop]);
 
   const fadeUp = { opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(24px)", transition: "opacity .6s ease, transform .6s ease" };
   const fadeUp2 = { opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(24px)", transition: "opacity .6s .1s ease, transform .6s .1s ease" };
@@ -89,8 +116,8 @@ function VideoRow({ badge, title, desc, chips, videoSrc, zoom = 1, zoomX = 50, p
             <span style={{ fontFamily: MONO, fontSize: 9, color: "rgba(0,0,0,0.25)" }}>regulaeos.com</span>
           </div>
         </div>
-        <div style={{ aspectRatio: "16/9", overflow: "hidden" }}>
-          <video ref={videoRef} src={videoSrc} poster={posterFor(videoSrc)} muted loop playsInline preload="none"
+        <div style={{ aspectRatio: mobileCrop ? MOBILE_ASPECT[videoSrc] : "16/9", overflow: "hidden" }}>
+          <video ref={videoRef} key={mobileCrop ? "m" : "d"} src={mobileCrop ? mobileSrc(videoSrc) : videoSrc} poster={mobileCrop ? mobilePoster(videoSrc) : posterFor(videoSrc)} muted loop playsInline preload="none"
             style={{ width: `${zoom*100}%`, height: `${zoom*100}%`, objectFit: "cover", display: "block", marginLeft: zoom>1 ? `-${(zoom-1)*(zoomX/100)*100}%` : "0", marginTop: zoom>1 ? `-${(zoom-1)*10}%` : "0" }}
           />
         </div>
@@ -448,6 +475,8 @@ function FlowTrio() {
 function LegalVideoRow({ badge, title, desc, chips, videoSrc, reverse }: Omit<RowProps, "zoom" | "zoomX" | "playbackRate">) {
   const { ref, visible } = useInView(0.1);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const mobile = useIsMobile();
+  const mobileCrop = mobile && !!MOBILE_ASPECT[videoSrc];
 
   useEffect(() => {
     if (!visible) return;
@@ -455,7 +484,7 @@ function LegalVideoRow({ badge, title, desc, chips, videoSrc, reverse }: Omit<Ro
     if (!v) return;
     v.playbackRate = 1;
     v.play().catch(() => {});
-  }, [visible]);
+  }, [visible, mobileCrop]);
 
   const fadeUp  = { opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(24px)", transition: "opacity .6s ease, transform .6s ease" };
   const fadeUp2 = { opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(24px)", transition: "opacity .6s .1s ease, transform .6s .1s ease" };
@@ -494,11 +523,12 @@ function LegalVideoRow({ badge, title, desc, chips, videoSrc, reverse }: Omit<Ro
           </div>
         </div>
         {/* Video con pan leggero sinistra→destra: scale 1.08 (impercettibile, testo nitido) */}
-        <div style={{ aspectRatio: "16/9", overflow: "hidden" }}>
+        <div style={{ aspectRatio: mobileCrop ? MOBILE_ASPECT[videoSrc] : "16/9", overflow: "hidden" }}>
           <video
             ref={videoRef}
-            src={videoSrc}
-            poster={posterFor(videoSrc)}
+            key={mobileCrop ? "m" : "d"}
+            src={mobileCrop ? mobileSrc(videoSrc) : videoSrc}
+            poster={mobileCrop ? mobilePoster(videoSrc) : posterFor(videoSrc)}
             muted
             loop
             playsInline
@@ -508,7 +538,8 @@ function LegalVideoRow({ badge, title, desc, chips, videoSrc, reverse }: Omit<Ro
               height: "100%",
               objectFit: "cover",
               display: "block",
-              animation: visible ? "legalZoomPan 13s ease-in-out infinite" : "none",
+              // Su smartphone il ritaglio è già ingrandito: niente pan
+              animation: visible && !mobileCrop ? "legalZoomPan 13s ease-in-out infinite" : "none",
             }}
           />
         </div>
@@ -588,11 +619,15 @@ function ProductHero() {
               transform: "translateZ(0px)",
             }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/screenshots/fria.png"
-                alt={t("imgAlt_fria")}
-                style={{ width: "100%", display: "block" }}
-              />
+              {/* Su smartphone: solo il documento FRIA, ritagliato dall'originale ad alta risoluzione */}
+              <picture>
+                <source media="(max-width: 768px)" srcSet="/screenshots/fria-mobile.png" />
+                <img
+                  src="/screenshots/fria.png"
+                  alt={t("imgAlt_fria")}
+                  style={{ width: "100%", display: "block" }}
+                />
+              </picture>
             </div>
 
             {/* Floating card: progress (top-right) — strato Z più alto */}
