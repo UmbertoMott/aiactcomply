@@ -98,7 +98,7 @@ function MobileGate() {
 
         {/* Icon */}
         <div
-          className="flex items-center justify-center w-16 h-16 rounded-2xl mb-6"
+          className="flex items-center justify-center w-16 h-16 rounded-lg mb-6"
           style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
         >
           <Monitor className="w-7 h-7" style={{ color: "rgba(255,255,255,0.7)" }} />
@@ -118,14 +118,14 @@ function MobileGate() {
         <div className="flex flex-col gap-3 w-full">
           <a
             href="/dashboard/billing"
-            className="w-full flex items-center justify-center rounded-xl text-sm font-medium transition-opacity hover:opacity-80"
+            className="w-full flex items-center justify-center rounded-lg text-[13px] font-medium transition-opacity hover:opacity-80"
             style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.75)", padding: "12px 0" }}
           >
             {t("mobile_billing")}
           </a>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center rounded-xl text-sm transition-opacity hover:opacity-80"
+            className="w-full flex items-center justify-center rounded-lg text-[13px] transition-opacity hover:opacity-80"
             style={{ color: "rgba(255,255,255,0.35)", padding: "10px 0" }}
           >
             {t("mobile_logout")}
@@ -368,7 +368,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </div>
                 {!collapsed && (
                   <span
-                    className="text-[9px] px-1.5 py-0.5 rounded font-semibold"
+                    className="text-[11px] px-1.5 py-0.5 rounded font-semibold"
                     style={{
                       background: "rgba(255,255,255,0.1)",
                       color: "rgba(255,255,255,0.65)",
@@ -384,7 +384,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {pillars.filter((p) => p.children ? p.children.some(isChildVisible) : isNeeded(p.href!)).map((pillar, idx, list) => {
               // Intestazione del blocco quando cambia sezione
               const header = !collapsed && pillar.section !== "start" && list[idx - 1]?.section !== pillar.section ? (
-                <p key={`h-${pillar.section}`} className="px-2 mt-4 mb-1 text-[9.5px] font-semibold uppercase" style={{ color: "rgba(255,255,255,0.35)", letterSpacing: "0.9px" }}>
+                <p key={`h-${pillar.section}`} className="px-2 mt-4 mb-1 text-[11px] font-semibold uppercase" style={{ color: "rgba(255,255,255,0.35)", letterSpacing: "0.9px" }}>
                   {t(`navSection_${pillar.section}`)}
                 </p>
               ) : null;
@@ -412,7 +412,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       {!collapsed && <span className="truncate">{sanitizeSidebarLabel(pillar.label)}</span>}
                     </div>
                     {!collapsed && pillar.art && (
-                      <span className="text-[9px] px-1.5 py-0.5 rounded"
+                      <span className="text-[10px] px-1.5 py-0.5 rounded whitespace-nowrap"
                         style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.55)" }}>
                         {pillar.badge === "urgent" ? "⚡" : sanitizeSidebarLabel(pillar.art)}
                       </span>
@@ -444,7 +444,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     {!collapsed && (
                       <div className="flex items-center gap-1">
                         {pillar.art && (
-                          <span className="text-[9px] px-1.5 py-0.5 rounded"
+                          <span className="text-[10px] px-1.5 py-0.5 rounded whitespace-nowrap"
                             style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.55)" }}>
                             {sanitizeSidebarLabel(pillar.art)}
                           </span>
@@ -479,7 +479,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             </div>
                             {!collapsed && (
                               child.art
-                                ? <span className="text-[9px] px-1 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}>{sanitizeSidebarLabel(child.art)}</span>
+                                ? <span className="text-[10px] px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}>{sanitizeSidebarLabel(child.art)}</span>
                                 : null
                             )}
                           </Link>
@@ -499,7 +499,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {hiddenCount > 0 && !collapsed && (
               <button
                 onClick={toggleShowAll}
-                className="w-full text-left mt-3 px-2 py-1.5 rounded-md text-[10.5px] transition-all"
+                className="w-full text-left mt-3 px-2 py-1.5 rounded-md text-[11px] transition-all"
                 style={{ color: "rgba(255,255,255,0.45)", background: "rgba(255,255,255,0.04)", cursor: "pointer" }}
               >
                 {showAll ? t("nav_showMine") : `${t("nav_showAll")} (${hiddenCount})`}
@@ -564,16 +564,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Topbar */}
         <header
           className="h-14 flex items-center px-6 flex-shrink-0"
-          style={{ background: "#ffffff", borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+          style={{ background: "#ffffff", borderBottom: "1px solid rgba(0,0,0,0.08)" }}
         >
           <button
             onClick={() => setSidebarOpen(true)}
             className="lg:hidden mr-4"
-            style={{ color: "rgba(0,0,0,0.4)" }}
+            style={{ color: "#0D1016" }}
           >
             <Menu className="h-5 w-5" />
           </button>
-          <div className="flex items-center gap-1.5 text-[12px]" style={{ color: "rgba(0,0,0,0.35)" }}>
+          <div className="flex items-center gap-1.5 text-[13px]" style={{ color: "#0D1016" }}>
             <Link href="/dashboard" className="hover:opacity-70 transition-opacity">{t("breadcrumbHome")}</Link>
             {currentItem && (
               <>
@@ -587,23 +587,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {needs.roles.map((r) => (
                 <span
                   key={r}
-                  className="text-[10px] px-2 py-0.5 rounded-full font-medium"
-                  style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.45)", border: "1px solid rgba(0,0,0,0.08)" }}
+                  className="text-[11px] px-2 py-0.5 rounded-full font-medium"
+                  style={{ background: "rgba(0,0,0,0.05)", color: "#0D1016", border: "1px solid rgba(0,0,0,0.08)" }}
                 >
                   {t(`role_${r}`)}
                 </span>
               ))}
-              <Link href="/dashboard/tools/inventory" className="text-[10px] transition-opacity hover:opacity-70" style={{ color: "rgba(0,0,0,0.3)" }}>
+              <Link href="/dashboard/tools/inventory" className="text-[11px] transition-opacity hover:opacity-70" style={{ color: "#0D1016" }}>
                 {t("rolesFromInventory")}
               </Link>
             </div>
           ) : role && (
             <div className="ml-4 hidden lg:flex items-center gap-1.5">
               <span
-                className="text-[10px] px-2 py-0.5 rounded-full font-medium"
+                className="text-[11px] px-2 py-0.5 rounded-full font-medium"
                 style={{
                   background: "rgba(0,0,0,0.05)",
-                  color: "rgba(0,0,0,0.45)",
+                  color: "#0D1016",
                   border: "1px solid rgba(0,0,0,0.08)",
                 }}
               >
@@ -611,8 +611,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </span>
               <Link
                 href="/dashboard/tools/inventory"
-                className="text-[10px] transition-opacity hover:opacity-70"
-                style={{ color: "rgba(0,0,0,0.3)" }}
+                className="text-[11px] transition-opacity hover:opacity-70"
+                style={{ color: "#0D1016" }}
               >
                 {t("rolesFromInventory")}
               </Link>

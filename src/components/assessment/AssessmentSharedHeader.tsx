@@ -22,7 +22,7 @@ export function AssessmentSharedHeader() {
     <div style={{
       background: "#ffffff",
       border: "1px solid rgba(0,0,0,0.08)",
-      borderRadius: 10,
+      borderRadius: 8,
       padding: "12px 16px",
       marginBottom: 16,
       display: "flex",
@@ -31,13 +31,13 @@ export function AssessmentSharedHeader() {
       alignItems: "flex-start",
     }}>
       <div style={{ flexShrink: 0 }}>
-        <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1px",
-          color: "rgba(0,0,0,0.3)", textTransform: "uppercase" as const,
+        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px",
+          color: "#0D1016", textTransform: "uppercase" as const,
           display: "block", marginBottom: 4 }}>
           {t("headerKicker")}
         </span>
-        <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 99,
-          background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.4)",
+        <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 99,
+          background: "rgba(0,0,0,0.05)", color: "#0D1016",
           fontStyle: "italic" }}>
           {t("readOnly")}
         </span>
@@ -80,8 +80,8 @@ export function AssessmentSharedHeader() {
 
 function Label({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.8px",
-      color: "rgba(0,0,0,0.3)", textTransform: "uppercase" as const,
+    <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.8px",
+      color: "#0D1016", textTransform: "uppercase" as const,
       marginBottom: 3 }}>
       {children}
     </div>
@@ -92,7 +92,7 @@ function Field({ label, value, maxWidth }: { label: string; value: string; maxWi
   return (
     <div style={{ maxWidth }}>
       <Label>{label}</Label>
-      <div style={{ fontSize: 12, color: "#0D1016", overflow: "hidden",
+      <div style={{ fontSize: 13, color: "#0D1016", overflow: "hidden",
         textOverflow: "ellipsis", whiteSpace: "nowrap" as const,
         maxWidth: maxWidth ?? 160 }}>
         {value}

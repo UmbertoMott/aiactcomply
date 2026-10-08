@@ -8,7 +8,7 @@ import { useT } from "@/i18n/LocaleProvider";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const T = {
-  text: "#0D1016", muted: "rgba(0,0,0,0.42)", faint: "rgba(0,0,0,0.28)",
+  text: "#0D1016", muted: "#0D1016", faint: "#0D1016",
   border: "rgba(0,0,0,0.08)", card: "#ffffff", bg: "#f8f8f7",
   red: "#dc2626", redBg: "rgba(220,38,38,0.06)", redBdr: "rgba(220,38,38,0.2)",
   amber: "#d97706", amberBg: "rgba(202,138,4,0.06)", amberBdr: "rgba(202,138,4,0.2)",
@@ -101,7 +101,7 @@ export function ContextCatalog({ onApply }: ContextCatalogProps) {
   const containerSt: CSSProperties = {
     marginBottom: 20,
     padding: "14px 16px",
-    borderRadius: 10,
+    borderRadius: 8,
     background: T.amberBg,
     border: `1px solid ${T.amberBdr}`,
   };
@@ -112,7 +112,7 @@ export function ContextCatalog({ onApply }: ContextCatalogProps) {
     gap: 10,
     padding: "8px 10px",
     marginBottom: 4,
-    borderRadius: 7,
+    borderRadius: 8,
     background: T.card,
     border: `1px solid ${T.border}`,
   };
@@ -121,11 +121,11 @@ export function ContextCatalog({ onApply }: ContextCatalogProps) {
     <div style={containerSt}>
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-        <span style={{ fontSize: 14 }}>✦</span>
-        <span style={{ fontSize: 12, fontWeight: 600, color: T.amber }}>
+        <span style={{ fontSize: 13 }}>✦</span>
+        <span style={{ fontSize: 13, fontWeight: 600, color: T.amber }}>
           {t("cc_header")}
         </span>
-        <span style={{ fontSize: 10, color: T.muted }}>
+        <span style={{ fontSize: 11, color: T.muted }}>
           ({suggestions.length} {suggestions.length === 1 ? t("cc_sugOne") : t("cc_sugMany")})
         </span>
       </div>
@@ -134,10 +134,10 @@ export function ContextCatalog({ onApply }: ContextCatalogProps) {
       {suggestions.slice(0, 6).map((sug, i) => (
         <div key={i} style={rowSt}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, marginBottom: 2 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: T.muted, marginBottom: 2 }}>
               {sug.label}
             </div>
-            <div style={{ fontSize: 12, color: T.text, lineHeight: 1.4 }}>
+            <div style={{ fontSize: 13, color: T.text, lineHeight: 1.4 }}>
               {sug.value}
             </div>
           </div>
@@ -159,7 +159,7 @@ export function ContextCatalog({ onApply }: ContextCatalogProps) {
           {sug.isNote && (
             <span style={{
               flexShrink: 0,
-              fontSize: 10, padding: "2px 8px", borderRadius: 9999,
+              fontSize: 11, padding: "2px 8px", borderRadius: 9999,
               background: "rgba(217,119,6,0.12)", border: `1px solid ${T.amberBdr}`,
               color: T.amber, fontWeight: 500,
             }}>

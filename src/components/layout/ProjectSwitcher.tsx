@@ -111,7 +111,7 @@ export function ProjectSwitcher() {
       {/* Dropdown */}
       {open && (
         <div
-          className="absolute right-0 top-full mt-1 w-64 rounded-xl shadow-xl border z-50 overflow-hidden"
+          className="absolute right-0 top-full mt-1 w-64 rounded-lg shadow-xl border z-50 overflow-hidden"
           style={{
             background: "#fff",
             borderColor: "rgba(0,0,0,0.08)",
@@ -120,15 +120,15 @@ export function ProjectSwitcher() {
         >
           {/* Header */}
           <div
-            className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wide"
-            style={{ color: "rgba(0,0,0,0.35)", borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+            className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide"
+            style={{ color: "#0D1016", borderBottom: "1px solid rgba(0,0,0,0.08)" }}
           >
             Progetti AI
           </div>
 
           {/* Nessun progetto */}
           {projects.length === 0 && !creating && (
-            <div className="px-3 py-4 text-center text-[11px]" style={{ color: "rgba(0,0,0,0.35)" }}>
+            <div className="px-3 py-4 text-center text-[11px]" style={{ color: "#0D1016" }}>
               Nessun progetto. Creane uno per separare i dati dei tuoi sistemi di IA.
             </div>
           )}
@@ -140,7 +140,7 @@ export function ProjectSwitcher() {
               <button
                 onClick={handleClearActive}
                 className="w-full flex items-center gap-2 px-3 py-2 text-[11px] text-left hover:bg-black/4 transition-colors"
-                style={{ color: "rgba(0,0,0,0.4)" }}
+                style={{ color: "#0D1016" }}
               >
                 <span className="w-3.5" />
                 <span className="italic">Nessun progetto (globale)</span>
@@ -203,7 +203,7 @@ export function ProjectSwitcher() {
           </div>
 
           {/* Crea nuovo */}
-          <div style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}>
+          <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
             {creating ? (
               <div className="px-3 py-2 flex items-center gap-1.5">
                 <input

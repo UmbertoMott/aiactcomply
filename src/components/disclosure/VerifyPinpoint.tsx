@@ -44,7 +44,7 @@ export default function VerifyPinpoint({ article, lang = "it", children }: Verif
         {/* Badge button */}
         <button
           onClick={() => setTooltipOpen((o) => !o)}
-          className="inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] font-medium transition-all hover:opacity-80 active:scale-95"
+          className="inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[11px] font-medium transition-all hover:opacity-80 active:scale-95"
           style={{
             background: "#FEF3C7",
             color: "#92400E",
@@ -62,7 +62,7 @@ export default function VerifyPinpoint({ article, lang = "it", children }: Verif
         {/* Tooltip */}
         {tooltipOpen && (
           <span
-            className="absolute bottom-full left-0 mb-1 z-50 rounded-xl px-3 py-2.5 text-[11px] whitespace-nowrap shadow-lg"
+            className="absolute bottom-full left-0 mb-1 z-50 rounded-lg px-3 py-2.5 text-[11px] whitespace-nowrap shadow-lg"
             style={{
               background: "#0D1016",
               color: "#ffffff",
@@ -78,7 +78,7 @@ export default function VerifyPinpoint({ article, lang = "it", children }: Verif
               href={eurLexUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-medium transition-opacity hover:opacity-75"
+              className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-medium transition-opacity hover:opacity-75"
               style={{ color: "#93c5fd" }}
               onClick={() => setTooltipOpen(false)}
             >

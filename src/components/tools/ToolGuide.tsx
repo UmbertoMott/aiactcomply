@@ -40,7 +40,7 @@ export default function ToolGuide({ guide, needs }: { guide: ToolGuideEntry; nee
     fit = (
       <>
         <strong style={{ color: "#0D1016" }}>{t("forYou")}:</strong> {t("neededFor")} {need.systems.join(", ")}
-        {need.articles.length > 0 && <span style={{ color: "rgba(0,0,0,0.4)" }}> · {need.articles.join("; ")}</span>}
+        {need.articles.length > 0 && <span style={{ color: "#0D1016" }}> · {need.articles.join("; ")}</span>}
       </>
     );
   } else {
@@ -57,35 +57,35 @@ export default function ToolGuide({ guide, needs }: { guide: ToolGuideEntry; nee
   return (
     <section
       aria-label={t("title")}
-      className="rounded-xl mb-6"
-      style={{ background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.08)" }}
+      className="mb-6"
+      style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}
     >
-      <div className="flex items-center gap-3 px-4 py-2.5">
-        <span className="text-[10px] font-semibold uppercase" style={{ color: "rgba(0,0,0,0.4)", letterSpacing: "1px" }}>{t("title")}</span>
-        <span className="text-[11px] flex-1 min-w-0 truncate" style={{ color: need ? "#15803d" : "rgba(0,0,0,0.5)" }}>
+      <div className="flex items-center gap-3 pb-2.5">
+        <span className="text-[11px] font-semibold uppercase" style={{ color: "#0D1016", letterSpacing: "1px" }}>{t("title")}</span>
+        <span className="text-[11px] flex-1 min-w-0 truncate" style={{ color: "#0D1016" }}>
           {collapsed ? fit : null}
         </span>
         {collapsed && !guide.optional && <ToolObligationCheck href={guide.href} compact />}
         <button
           onClick={toggle}
           className="flex items-center gap-1 text-[11px] flex-shrink-0"
-          style={{ color: "rgba(0,0,0,0.45)", background: "none", border: "none", cursor: "pointer" }}
+          style={{ color: "#0D1016", background: "none", border: "none", cursor: "pointer" }}
           aria-expanded={!collapsed}
         >
           {collapsed ? <>{t("show")} <ChevronDown size={12} /></> : <>{t("hide")} <ChevronUp size={12} /></>}
         </button>
       </div>
       {!collapsed && (
-        <div className="px-4 pb-4">
+        <div className="pb-5">
           <dl className="grid gap-x-6 gap-y-2.5" style={{ gridTemplateColumns: "minmax(110px, max-content) 1fr" }}>
             {rows.map(([label, value]) => (
               <div key={label} className="contents">
-                <dt className="text-[11px] font-semibold" style={{ color: "rgba(0,0,0,0.45)" }}>{label}</dt>
-                <dd className="text-[12px]" style={{ color: "#0D1016", lineHeight: 1.5, margin: 0 }}>{value}</dd>
+                <dt className="text-[11px] font-semibold" style={{ color: "#0D1016" }}>{label}</dt>
+                <dd className="text-[13px]" style={{ color: "#0D1016", lineHeight: 1.5, margin: 0 }}>{value}</dd>
               </div>
             ))}
           </dl>
-          <p className="text-[11px] mt-3 pt-2.5" style={{ color: "rgba(0,0,0,0.55)", borderTop: "1px solid rgba(0,0,0,0.06)", lineHeight: 1.5 }}>
+          <p className="text-[11px] mt-3 pt-2.5" style={{ color: "#0D1016", borderTop: "1px solid rgba(0,0,0,0.08)", lineHeight: 1.5 }}>
             {fit}
           </p>
           {!guide.optional && <ToolObligationCheck href={guide.href} />}

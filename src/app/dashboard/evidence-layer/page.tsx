@@ -146,27 +146,27 @@ export default function EvidenceLayerPage() {
               Registro delle evidenze
             </h1>
             <span
-              className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+              className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
               style={{ background: "rgba(13,16,22,0.06)", color: "rgba(13,16,22,0.5)" }}
             >
               Art. 12 · Art. 9 · Art. 72
             </span>
           </div>
-          <p style={{ fontSize: "12px", color: "rgba(0,0,0,0.42)", maxWidth: "520px" }}>
+          <p style={{ fontSize: 13, color: "#0D1016", maxWidth: "520px" }}>
             Registro delle prove con impronta (hash) a catena: ogni record è legato al precedente, così una modifica successiva si nota. È conservato nel browser: per l&apos;audit esportalo e archivialo.
           </p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={exportChain}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all"
-            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.1)", color: "rgba(0,0,0,0.6)" }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all"
+            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016" }}
           >
             <Download className="h-3.5 w-3.5" /> Pacchetto per l&apos;audit
           </button>
           <button
             onClick={() => openPanel()}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium"
             style={{ background: "#0D1016", color: "#ffffff" }}
           >
             <Plus className="h-3.5 w-3.5" /> Nuovo record
@@ -194,8 +194,8 @@ export default function EvidenceLayerPage() {
         ].map(card => (
           <div
             key={card.label}
-            className="rounded-xl p-4"
-            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+            className="rounded-lg p-4"
+            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "none" }}
           >
             <div
               className="font-semibold mb-0.5"
@@ -203,7 +203,7 @@ export default function EvidenceLayerPage() {
             >
               {card.value}
             </div>
-            <div style={{ fontSize: "11px", color: "rgba(0,0,0,0.38)" }}>{card.label}</div>
+            <div style={{ fontSize: "11px", color: "#0D1016" }}>{card.label}</div>
           </div>
         ))}
       </div>
@@ -211,11 +211,11 @@ export default function EvidenceLayerPage() {
       {/* ── Chain broken banner ── */}
       {!chainStatus.valid && (
         <div
-          className="rounded-xl p-3 mb-5 flex items-center gap-2"
+          className="rounded-lg p-3 mb-5 flex items-center gap-2"
           style={{ background: "rgba(220,38,38,0.05)", border: "1px solid rgba(220,38,38,0.25)" }}
         >
           <AlertTriangle className="h-4 w-4 flex-shrink-0" style={{ color: "#dc2626" }} />
-          <p style={{ fontSize: "12px", color: "#dc2626" }}>
+          <p style={{ fontSize: 13, color: "#dc2626" }}>
             <strong>Allarme integrità:</strong> la catena risulta manomessa a partire dal record #{chainStatus.brokenAt}.
             Esporta la chain e contatta il responsabile della conformità.
           </p>
@@ -231,7 +231,7 @@ export default function EvidenceLayerPage() {
             style={
               filterType === "all"
                 ? { background: "#0D1016", color: "#ffffff" }
-                : { background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.5)" }
+                : { background: "rgba(0,0,0,0.04)", color: "#0D1016" }
             }
           >
             Tutti <span style={{ opacity: 0.6 }}>{records.length}</span>
@@ -246,7 +246,7 @@ export default function EvidenceLayerPage() {
                 style={
                   filterType === tmpl.key
                     ? { background: tmpl.color, color: "#ffffff" }
-                    : { background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.5)" }
+                    : { background: "rgba(0,0,0,0.04)", color: "#0D1016" }
                 }
               >
                 {tmpl.label.split(" — ")[0]}{" "}
@@ -256,13 +256,13 @@ export default function EvidenceLayerPage() {
           })}
         </div>
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5" style={{ color: "rgba(0,0,0,0.3)" }} />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5" style={{ color: "#0D1016" }} />
           <input
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Cerca autore, tipo, contenuto…"
-            className="pl-8 pr-3 py-1.5 rounded-lg text-[12px] outline-none"
-            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.09)", color: "#0D1016", width: "220px" }}
+            className="pl-8 pr-3 py-1.5 rounded-lg text-[13px] outline-none"
+            style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", width: "220px" }}
           />
         </div>
       </div>
@@ -270,18 +270,18 @@ export default function EvidenceLayerPage() {
       {/* ── Record list ── */}
       {filtered.length === 0 ? (
         <div
-          className="rounded-xl p-12 text-center"
-          style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)" }}
+          className="rounded-lg p-12 text-center"
+          style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)" }}
         >
           <Database className="h-8 w-8 mx-auto mb-3" style={{ color: "rgba(0,0,0,0.15)" }} />
-          <p style={{ fontSize: "13px", color: "rgba(0,0,0,0.4)" }}>
+          <p style={{ fontSize: "13px", color: "#0D1016" }}>
             Nessun record{filterType !== "all"
               ? ` di tipo "${EVIDENCE_TEMPLATES.find(t => t.key === filterType)?.label}"`
               : ""}.
           </p>
           <button
             onClick={() => openPanel(filterType !== "all" ? filterType : undefined)}
-            className="mt-3 text-[12px] font-medium"
+            className="mt-3 text-[13px] font-medium"
             style={{ color: "#0D1016", textDecoration: "underline" }}
           >
             Aggiungi il primo record
@@ -303,8 +303,8 @@ export default function EvidenceLayerPage() {
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="rounded-xl overflow-hidden"
-                  style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.03)" }}
+                  className="rounded-lg overflow-hidden"
+                  style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "none" }}
                 >
                   {/* Card header */}
                   <button
@@ -313,7 +313,7 @@ export default function EvidenceLayerPage() {
                   >
                     <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: tmpl.color }} />
                     <span
-                      className="text-[10px] font-semibold rounded px-1.5 py-0.5 flex-shrink-0"
+                      className="text-[11px] font-semibold rounded px-1.5 py-0.5 flex-shrink-0"
                       style={{ background: tmpl.color + "18", color: tmpl.color }}
                     >
                       {tmpl.label.split(" — ")[0]}
@@ -321,15 +321,15 @@ export default function EvidenceLayerPage() {
                     <span className="flex-1 text-[13px] font-medium truncate" style={{ color: "#0D1016" }}>
                       {title || "—"}
                     </span>
-                    <span className="text-[11px] flex-shrink-0 hidden sm:block" style={{ color: "rgba(0,0,0,0.35)" }}>
+                    <span className="text-[11px] flex-shrink-0 hidden sm:block" style={{ color: "#0D1016" }}>
                       {record.author} · {formatDate(record.timestamp)}
                     </span>
-                    <span className="text-[10px] font-mono flex-shrink-0" style={{ color: "rgba(0,0,0,0.25)" }}>
+                    <span className="text-[11px] font-mono flex-shrink-0" style={{ color: "#0D1016" }}>
                       {record.hash.slice(0, 8)}…
                     </span>
                     {isExpanded
-                      ? <ChevronUp  className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "rgba(0,0,0,0.3)" }} />
-                      : <ChevronDown className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "rgba(0,0,0,0.3)" }} />}
+                      ? <ChevronUp  className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#0D1016" }} />
+                      : <ChevronDown className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#0D1016" }} />}
                   </button>
 
                   {/* Card expanded */}
@@ -350,12 +350,12 @@ export default function EvidenceLayerPage() {
                               return (
                                 <div key={f.key}>
                                   <div
-                                    className="text-[10px] font-semibold uppercase mb-0.5"
-                                    style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "0.5px" }}
+                                    className="text-[11px] font-semibold uppercase mb-0.5"
+                                    style={{ color: "#0D1016", letterSpacing: "0.5px" }}
                                   >
                                     {f.label}
                                   </div>
-                                  <div className="text-[12px]" style={{ color: "#0D1016" }}>{val}</div>
+                                  <div className="text-[13px]" style={{ color: "#0D1016" }}>{val}</div>
                                 </div>
                               );
                             })}
@@ -363,22 +363,22 @@ export default function EvidenceLayerPage() {
                           {/* Chain metadata */}
                           <div
                             className="rounded-lg p-3 space-y-1"
-                            style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.05)" }}
+                            style={{ background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.05)" }}
                           >
                             <div className="flex items-center gap-2">
                               <CheckCircle className="h-3 w-3 flex-shrink-0" style={{ color: "#16a34a" }} />
-                              <span className="text-[10px] font-semibold" style={{ color: "#16a34a" }}>Verificato ✓</span>
-                              <span className="text-[10px] font-mono ml-auto" style={{ color: "rgba(0,0,0,0.3)" }}>
+                              <span className="text-[11px] font-semibold" style={{ color: "#16a34a" }}>Verificato ✓</span>
+                              <span className="text-[11px] font-mono ml-auto" style={{ color: "#0D1016" }}>
                                 v{record.version}
                               </span>
                             </div>
-                            <div className="text-[10px] font-mono break-all" style={{ color: "rgba(0,0,0,0.4)" }}>
+                            <div className="text-[11px] font-mono break-all" style={{ color: "#0D1016" }}>
                               hash: {record.hash}
                             </div>
-                            <div className="text-[10px] font-mono break-all" style={{ color: "rgba(0,0,0,0.3)" }}>
+                            <div className="text-[11px] font-mono break-all" style={{ color: "#0D1016" }}>
                               prev: {record.previousHash}
                             </div>
-                            <div className="text-[10px] font-mono" style={{ color: "rgba(0,0,0,0.25)" }}>
+                            <div className="text-[11px] font-mono" style={{ color: "#0D1016" }}>
                               sig: {record.signature}
                             </div>
                           </div>
@@ -414,21 +414,21 @@ export default function EvidenceLayerPage() {
               {/* Panel header */}
               <div
                 className="flex items-center justify-between px-5 py-4"
-                style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}
+                style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}
               >
                 {step === 2 && selectedType ? (
                   <button
                     onClick={() => setStep(1)}
-                    className="flex items-center gap-1.5 text-[12px]"
-                    style={{ color: "rgba(0,0,0,0.5)" }}
+                    className="flex items-center gap-1.5 text-[13px]"
+                    style={{ color: "#0D1016" }}
                   >
                     ← {EVIDENCE_TEMPLATES.find(t => t.key === selectedType)?.label}
                   </button>
                 ) : (
-                  <span className="text-[14px] font-semibold" style={{ color: "#0D1016" }}>Nuovo record</span>
+                  <span className="text-[13px] font-semibold" style={{ color: "#0D1016" }}>Nuovo record</span>
                 )}
                 <button onClick={() => setPanelOpen(false)}>
-                  <X className="h-4 w-4" style={{ color: "rgba(0,0,0,0.4)" }} />
+                  <X className="h-4 w-4" style={{ color: "#0D1016" }} />
                 </button>
               </div>
 
@@ -438,7 +438,7 @@ export default function EvidenceLayerPage() {
                 {/* Step 1 — type picker */}
                 {step === 1 && (
                   <div>
-                    <p className="text-[12px] mb-4" style={{ color: "rgba(0,0,0,0.42)" }}>
+                    <p className="text-[13px] mb-4" style={{ color: "#0D1016" }}>
                       Scegli il tipo di record da aggiungere:
                     </p>
                     <div className="grid grid-cols-2 gap-2">
@@ -446,8 +446,8 @@ export default function EvidenceLayerPage() {
                         <button
                           key={tmpl.key}
                           onClick={() => { setSelectedType(tmpl.key); setStep(2); setFormValues({}); setFormErrors({}); }}
-                          className="text-left rounded-xl p-3 transition-all hover:shadow-sm"
-                          style={{ background: "#fafaf9", border: "1px solid rgba(0,0,0,0.08)" }}
+                          className="text-left rounded-lg p-3 transition-all hover:shadow-sm"
+                          style={{ background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.08)" }}
                         >
                           <div
                             className="w-6 h-6 rounded-md mb-2 flex items-center justify-center"
@@ -455,14 +455,14 @@ export default function EvidenceLayerPage() {
                           >
                             <div className="w-2 h-2 rounded-full" style={{ background: tmpl.color }} />
                           </div>
-                          <div className="text-[12px] font-semibold mb-0.5" style={{ color: "#0D1016" }}>
+                          <div className="text-[13px] font-semibold mb-0.5" style={{ color: "#0D1016" }}>
                             {tmpl.label.split(" — ")[0]}
                           </div>
-                          <div className="text-[10px] mb-1.5" style={{ color: "rgba(0,0,0,0.45)" }}>
+                          <div className="text-[11px] mb-1.5" style={{ color: "#0D1016" }}>
                             {tmpl.description}
                           </div>
                           <span
-                            className="text-[9px] font-semibold rounded px-1.5 py-0.5"
+                            className="text-[11px] font-semibold rounded px-1.5 py-0.5"
                             style={{ background: tmpl.color + "15", color: tmpl.color }}
                           >
                             {tmpl.article}
@@ -478,7 +478,7 @@ export default function EvidenceLayerPage() {
                   const tmpl = EVIDENCE_TEMPLATES.find(t => t.key === selectedType)!;
                   return (
                     <div className="space-y-4">
-                      <p className="text-[11px]" style={{ color: "rgba(0,0,0,0.4)" }}>{tmpl.description}</p>
+                      <p className="text-[11px]" style={{ color: "#0D1016" }}>{tmpl.description}</p>
                       {tmpl.fields.map(f => (
                         <div key={f.key}>
                           <label
@@ -495,9 +495,9 @@ export default function EvidenceLayerPage() {
                                 setFormValues(v => ({ ...v, [f.key]: e.target.value }));
                                 setFormErrors(v => ({ ...v, [f.key]: false }));
                               }}
-                              className="w-full rounded-lg px-3 py-2 text-[12px] outline-none"
+                              className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
                               style={{
-                                background: "#fafaf9",
+                                background: "#FAFAF9",
                                 border: `1px solid ${formErrors[f.key] ? "#dc2626" : "rgba(0,0,0,0.1)"}`,
                                 color: "#0D1016",
                               }}
@@ -514,9 +514,9 @@ export default function EvidenceLayerPage() {
                               }}
                               placeholder={f.placeholder}
                               rows={3}
-                              className="w-full rounded-lg px-3 py-2 text-[12px] outline-none resize-none"
+                              className="w-full rounded-lg px-3 py-2 text-[13px] outline-none resize-none"
                               style={{
-                                background: "#fafaf9",
+                                background: "#FAFAF9",
                                 border: `1px solid ${formErrors[f.key] ? "#dc2626" : "rgba(0,0,0,0.1)"}`,
                                 color: "#0D1016",
                               }}
@@ -529,16 +529,16 @@ export default function EvidenceLayerPage() {
                                 setFormErrors(v => ({ ...v, [f.key]: false }));
                               }}
                               placeholder={f.placeholder}
-                              className="w-full rounded-lg px-3 py-2 text-[12px] outline-none"
+                              className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
                               style={{
-                                background: "#fafaf9",
+                                background: "#FAFAF9",
                                 border: `1px solid ${formErrors[f.key] ? "#dc2626" : "rgba(0,0,0,0.1)"}`,
                                 color: "#0D1016",
                               }}
                             />
                           )}
                           {formErrors[f.key] && (
-                            <p className="text-[10px] mt-0.5" style={{ color: "#dc2626" }}>Campo obbligatorio</p>
+                            <p className="text-[11px] mt-0.5" style={{ color: "#dc2626" }}>Campo obbligatorio</p>
                           )}
                         </div>
                       ))}
@@ -555,15 +555,15 @@ export default function EvidenceLayerPage() {
                           value={author}
                           onChange={e => { setAuthor(e.target.value); setAuthorError(false); }}
                           placeholder="Il tuo nome o email aziendale"
-                          className="w-full rounded-lg px-3 py-2 text-[12px] outline-none"
+                          className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
                           style={{
-                            background: "#fafaf9",
+                            background: "#FAFAF9",
                             border: `1px solid ${authorError ? "#dc2626" : "rgba(0,0,0,0.1)"}`,
                             color: "#0D1016",
                           }}
                         />
                         {authorError && (
-                          <p className="text-[10px] mt-0.5" style={{ color: "#dc2626" }}>Campo obbligatorio</p>
+                          <p className="text-[11px] mt-0.5" style={{ color: "#dc2626" }}>Campo obbligatorio</p>
                         )}
                       </div>
                     </div>
@@ -573,7 +573,7 @@ export default function EvidenceLayerPage() {
 
               {/* Panel footer */}
               {step === 2 && (
-                <div className="px-5 py-4 space-y-2" style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}>
+                <div className="px-5 py-4 space-y-2" style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
                   <button
                     onClick={handleSave}
                     disabled={saving}
@@ -584,8 +584,8 @@ export default function EvidenceLayerPage() {
                   </button>
                   <button
                     onClick={() => setPanelOpen(false)}
-                    className="w-full py-2 text-[12px]"
-                    style={{ color: "rgba(0,0,0,0.4)" }}
+                    className="w-full py-2 text-[13px]"
+                    style={{ color: "#0D1016" }}
                   >
                     Annulla
                   </button>
@@ -603,11 +603,11 @@ export default function EvidenceLayerPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl"
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-lg"
             style={{ background: "#0D1016", color: "#ffffff", boxShadow: "0 4px 20px rgba(0,0,0,0.2)" }}
           >
             <CheckCircle className="h-4 w-4" style={{ color: "#86efac" }} />
-            <span className="text-[12px] font-medium">Record salvato ✓</span>
+            <span className="text-[13px] font-medium">Record salvato ✓</span>
             <span className="text-[11px] font-mono" style={{ color: "rgba(255,255,255,0.5)" }}>
               Hash: {toast.hash}
             </span>

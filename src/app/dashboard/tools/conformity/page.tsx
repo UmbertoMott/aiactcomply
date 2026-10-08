@@ -28,9 +28,9 @@ const C = {
   bg: "#FAFAF9",
   card: "#ffffff",
   text: "#0D1016",
-  textSecondary: "rgba(0,0,0,0.42)",
-  textTertiary: "rgba(0,0,0,0.3)",
-  border: "1px solid rgba(0,0,0,0.07)",
+  textSecondary: "#0D1016",
+  textTertiary: "#0D1016",
+  border: "1px solid rgba(0,0,0,0.08)",
   shadow: "0 1px 3px rgba(0,0,0,0.04)",
   green: "#15803d",
   greenBg: "rgba(22,163,74,0.04)",
@@ -47,7 +47,7 @@ const cardStyle: React.CSSProperties = {
   background: C.card,
   border: C.border,
   boxShadow: C.shadow,
-  borderRadius: 12,
+  borderRadius: 8,
   padding: 20,
 };
 
@@ -64,7 +64,7 @@ const btnPrimary: React.CSSProperties = {
   color: "#ffffff",
   borderRadius: 9999,
   padding: "8px 16px",
-  fontSize: 12,
+  fontSize: 13,
   fontWeight: 500,
   border: "none",
   cursor: "pointer",
@@ -75,12 +75,12 @@ const btnPrimary: React.CSSProperties = {
 
 const btnGhost: React.CSSProperties = {
   background: "transparent",
-  color: "rgba(0,0,0,0.5)",
+  color: "#0D1016",
   borderRadius: 9999,
   padding: "8px 16px",
-  fontSize: 12,
+  fontSize: 13,
   fontWeight: 500,
-  border: "1px solid rgba(0,0,0,0.12)",
+  border: "1px solid rgba(0,0,0,0.08)",
   cursor: "pointer",
   display: "inline-flex",
   alignItems: "center",
@@ -112,12 +112,12 @@ function Stepper({ step, t }: { step: number; t: TFn }) {
                 background: completed ? C.green : active ? C.text : "transparent",
                 border: future ? "1.5px solid rgba(0,0,0,0.15)" : "none",
                 color: completed || active ? "#fff" : C.textTertiary,
-                fontSize: 12, fontWeight: 600,
+                fontSize: 13, fontWeight: 600,
               }}>
                 {completed ? <CheckCircle size={14} color="#fff" /> : s.n}
               </div>
               <span style={{
-                fontSize: 10, fontWeight: 500,
+                fontSize: 11, fontWeight: 500,
                 color: completed ? C.green : active ? C.text : C.textTertiary,
                 whiteSpace: "nowrap",
               }}>
@@ -221,7 +221,7 @@ export default function ConformityPage() {
   function Step1() {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 500, color: C.text, margin: 0 }}>
+        <h2 style={{ fontSize: 15, fontWeight: 500, color: C.text, margin: 0 }}>
           {t("step1_title")}
         </h2>
 
@@ -262,12 +262,12 @@ export default function ConformityPage() {
 
               {path.path === "notified_body" && (
                 <>
-                  <p style={{ fontSize: 12, color: C.textSecondary, marginTop: 10 }}>
+                  <p style={{ fontSize: 13, color: C.textSecondary, marginTop: 10 }}>
                     {t("nbPrepNote")}
                   </p>
                   <div style={{ marginTop: 12 }}>
                     <p style={{ ...labelStyle, marginBottom: 8 }}>{t("accreditedNb")}</p>
-                    <p style={{ fontSize: 12, color: C.textSecondary, lineHeight: 1.5, margin: 0 }}>
+                    <p style={{ fontSize: 13, color: C.textSecondary, lineHeight: 1.5, margin: 0 }}>
                       {t("nbOfficialList")}{" "}
                       <a href="https://ec.europa.eu/growth/tools-databases/nando" target="_blank" rel="noopener noreferrer"
                         style={{ color: C.text, textDecoration: "underline", display: "inline-flex", alignItems: "center", gap: 4 }}>
@@ -337,10 +337,10 @@ export default function ConformityPage() {
                 background: path.path === "self" ? C.greenBg : C.amberBg,
                 border: `1px solid ${path.path === "self" ? C.greenBorder : C.amberBorder}`,
               }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: path.path === "self" ? C.green : C.amber }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: path.path === "self" ? C.green : C.amber }}>
                   {path.path === "self" ? t("selfAssessment") : t("notifiedBodyRequiredShort")}
                 </span>
-                <p style={{ fontSize: 12, color: C.textSecondary, margin: "4px 0 0" }}>{path.reason}</p>
+                <p style={{ fontSize: 13, color: C.textSecondary, margin: "4px 0 0" }}>{path.reason}</p>
               </div>
             )}
           </div>
@@ -354,7 +354,7 @@ export default function ConformityPage() {
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
             <Info size={14} color={C.textSecondary} />
-            <span style={{ fontSize: 12, fontWeight: 600, color: C.textSecondary }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: C.textSecondary }}>
               {t("whatIsSelfAssess")}
             </span>
           </div>
@@ -365,7 +365,7 @@ export default function ConformityPage() {
               t("selfStep3"),
               t("selfStep4"),
             ].map((item, i) => (
-              <li key={i} style={{ fontSize: 12, color: C.textSecondary }}>{item}</li>
+              <li key={i} style={{ fontSize: 13, color: C.textSecondary }}>{item}</li>
             ))}
           </ol>
         </div>
@@ -390,10 +390,10 @@ export default function ConformityPage() {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <h2 style={{ fontSize: 18, fontWeight: 500, color: C.text, margin: 0 }}>
+          <h2 style={{ fontSize: 15, fontWeight: 500, color: C.text, margin: 0 }}>
             {t("step2_title")}
           </h2>
-          <span style={{ fontSize: 12, color: C.textSecondary }}>
+          <span style={{ fontSize: 13, color: C.textSecondary }}>
             {verified} {t("ofWord")} {total} {t("reqsVerified")}
           </span>
         </div>
@@ -446,7 +446,7 @@ export default function ConformityPage() {
                         {found ? "✓" : "✗"} {req.article} — {req.title}
                       </span>
                       <span style={{
-                        fontSize: 10, padding: "1px 6px", borderRadius: 4,
+                        fontSize: 11, padding: "1px 6px", borderRadius: 4,
                         background: "rgba(0,0,0,0.06)", color: C.textSecondary,
                       }}>
                         {req.article}
@@ -464,8 +464,8 @@ export default function ConformityPage() {
                   <div style={{ padding: "0 16px 16px", borderTop: "1px solid rgba(0,0,0,0.05)" }}>
                     <p style={{ fontSize: 13, color: C.textSecondary, marginTop: 12 }}>{req.description}</p>
                     <div style={{
-                      fontStyle: "italic", fontSize: 12, color: C.textSecondary,
-                      background: "rgba(0,0,0,0.02)", borderRadius: 6, padding: "8px 12px", margin: "8px 0",
+                      fontStyle: "italic", fontSize: 13, color: C.textSecondary,
+                      background: "#FAFAF9", borderRadius: 6, padding: "8px 12px", margin: "8px 0",
                     }}>
                       {req.verificationQuestion}
                     </div>
@@ -476,7 +476,7 @@ export default function ConformityPage() {
                           <Link
                             href={req.linkedToolHref}
                             style={{
-                              fontSize: 12, color: C.text, fontWeight: 500,
+                              fontSize: 13, color: C.text, fontWeight: 500,
                               display: "inline-flex", alignItems: "center", gap: 4,
                             }}
                           >
@@ -504,12 +504,12 @@ export default function ConformityPage() {
                                 }))}
                                 style={{
                                   width: "100%", minHeight: 80, padding: "8px 10px",
-                                  fontSize: 12, border: C.border, borderRadius: 8,
+                                  fontSize: 13, border: C.border, borderRadius: 8,
                                   resize: "vertical", fontFamily: "inherit", color: C.text,
                                   boxSizing: "border-box",
                                 }}
                               />
-                              <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: C.textSecondary }}>
+                              <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: C.textSecondary }}>
                                 <input
                                   type="checkbox"
                                   onChange={(e) => {
@@ -543,7 +543,7 @@ export default function ConformityPage() {
             <span style={{ fontSize: 13, color: C.text, fontWeight: 500 }}>
               {passed}/{total} {t("reqsVerified")} ({score}%)
             </span>
-            <span style={{ fontSize: 12, color: C.textSecondary }}>{failed} {t("missingWord")}</span>
+            <span style={{ fontSize: 13, color: C.textSecondary }}>{failed} {t("missingWord")}</span>
           </div>
           <div style={{ height: 6, background: "rgba(0,0,0,0.06)", borderRadius: 9999, overflow: "hidden" }}>
             <div style={{
@@ -627,7 +627,7 @@ export default function ConformityPage() {
 
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 500, color: C.text, margin: 0 }}>
+        <h2 style={{ fontSize: 15, fontWeight: 500, color: C.text, margin: 0 }}>
           {t("step3_title")}
         </h2>
 
@@ -673,7 +673,7 @@ export default function ConformityPage() {
                 width: "100%", height: 500, padding: "12px 14px",
                 fontFamily: "'Courier New', monospace", whiteSpace: "pre",
                 fontSize: "11px", border: C.border, borderRadius: 8,
-                resize: "vertical", color: C.text, background: "#fafaf9",
+                resize: "vertical", color: C.text, background: "#FAFAF9",
                 boxSizing: "border-box",
               }}
             />
@@ -699,7 +699,7 @@ export default function ConformityPage() {
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
             <Info size={14} color={C.textSecondary} />
-            <span style={{ fontSize: 12, fontWeight: 600, color: C.textSecondary }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: C.textSecondary }}>
               {t("afterPrinting")}
             </span>
           </div>
@@ -710,7 +710,7 @@ export default function ConformityPage() {
               t("printStep3"),
               t("printStep4"),
             ].map((item, i) => (
-              <li key={i} style={{ fontSize: 12, color: C.textSecondary }}>{item}</li>
+              <li key={i} style={{ fontSize: 13, color: C.textSecondary }}>{item}</li>
             ))}
           </ol>
         </div>
@@ -807,7 +807,7 @@ export default function ConformityPage() {
 
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 500, color: C.text, margin: 0 }}>
+        <h2 style={{ fontSize: 15, fontWeight: 500, color: C.text, margin: 0 }}>
           {t("step4_title")}
         </h2>
 
@@ -840,7 +840,7 @@ export default function ConformityPage() {
                     key={key}
                     style={{
                       display: "flex", alignItems: "flex-start", gap: 8,
-                      fontSize: 12, cursor: "pointer",
+                      fontSize: 13, cursor: "pointer",
                       color: ceChecklist[key] ? C.green : C.textSecondary,
                     }}
                   >
@@ -862,12 +862,12 @@ export default function ConformityPage() {
               background: C.amberBg,
               border: `1px solid ${C.amberBorder}`,
             }}>
-              <p style={{ fontSize: 12, color: C.amber, margin: 0, fontWeight: 600 }}>
+              <p style={{ fontSize: 13, color: C.amber, margin: 0, fontWeight: 600 }}>
                 ⚠️ {t("ceCannotWithout")}
               </p>
               <ol style={{ margin: "8px 0 0", paddingLeft: 18 }}>
-                <li style={{ fontSize: 12, color: C.amber }}>{t("ceReq1")}</li>
-                <li style={{ fontSize: 12, color: C.amber }}>{t("ceReq2")}</li>
+                <li style={{ fontSize: 13, color: C.amber }}>{t("ceReq1")}</li>
+                <li style={{ fontSize: 13, color: C.amber }}>{t("ceReq2")}</li>
               </ol>
             </div>
           </div>
@@ -901,7 +901,7 @@ export default function ConformityPage() {
                     {done
                       ? <CheckCircle size={14} color={C.green} style={{ marginTop: 1, flexShrink: 0 }} />
                       : <div style={{ width: 14, height: 14, borderRadius: "50%", border: "1.5px solid rgba(0,0,0,0.15)", flexShrink: 0, marginTop: 1 }} />}
-                    <span style={{ fontSize: 12, color: done ? C.green : C.textSecondary }}>{label}</span>
+                    <span style={{ fontSize: 13, color: done ? C.green : C.textSecondary }}>{label}</span>
                   </div>
                 ))}
               </div>
@@ -913,7 +913,7 @@ export default function ConformityPage() {
                   background: C.greenBg, border: `1px solid ${C.greenBorder}`,
                   display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
                 }}>
-                  <p style={{ fontSize: 12, color: C.green, margin: 0, fontWeight: 600 }}>
+                  <p style={{ fontSize: 13, color: C.green, margin: 0, fontWeight: 600 }}>
                     ✓ {t("regRecorded")} {registrationRef}
                   </p>
                   <button onClick={handleEditRegistration}
@@ -923,7 +923,7 @@ export default function ConformityPage() {
                 </div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <p style={{ fontSize: 12, color: C.textSecondary, margin: 0, lineHeight: 1.5 }}>
+                  <p style={{ fontSize: 13, color: C.textSecondary, margin: 0, lineHeight: 1.5 }}>
                     {t("regHowTo")}
                   </p>
                   <div style={{ display: "flex", gap: 8 }}>
@@ -932,14 +932,14 @@ export default function ConformityPage() {
                       onChange={(e) => setRegistrationInput(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") handleSaveRegistration(); }}
                       placeholder={t("regPlaceholder")}
-                      style={{ flex: 1, fontSize: 12, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.12)", background: "#fff", color: C.text }}
+                      style={{ flex: 1, fontSize: 13, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)", background: "#fff", color: C.text }}
                     />
                     <button style={{ ...btnPrimary, opacity: registrationInput.trim() ? 1 : 0.5 }}
                       onClick={handleSaveRegistration} disabled={!registrationInput.trim()}>
                       <Shield size={13} /> {t("regSave")}
                     </button>
                   </div>
-                  <Link href="/dashboard/compliance-ops/eudb" style={{ fontSize: 12, color: C.text, textDecoration: "underline" }}>
+                  <Link href="/dashboard/compliance-ops/eudb" style={{ fontSize: 13, color: C.text, textDecoration: "underline" }}>
                     {t("regPrepareLink")}
                   </Link>
                 </div>
@@ -1004,8 +1004,8 @@ export default function ConformityPage() {
         {/* Score bar */}
         <div style={cardStyle}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: C.text }}>{t("conformityScore")}</span>
-            <span style={{ fontSize: 12, color: C.textSecondary }}>{score}%</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{t("conformityScore")}</span>
+            <span style={{ fontSize: 13, color: C.textSecondary }}>{score}%</span>
           </div>
           <div style={{ height: 8, background: "rgba(0,0,0,0.06)", borderRadius: 9999, overflow: "hidden" }}>
             <div style={{

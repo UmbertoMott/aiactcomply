@@ -6,10 +6,10 @@ import { useT } from "@/i18n/LocaleProvider";
 
 const T = {
   text:     "#0D1016",
-  muted:    "rgba(0,0,0,0.42)",
-  faint:    "rgba(0,0,0,0.22)",
+  muted:    "#0D1016",
+  faint:    "#0D1016",
   border:   "rgba(0,0,0,0.08)",
-  bg:       "#fafafa",
+  bg:       "#ffffff",
   green:    "#23403a",
   greenBg:  "rgba(35,64,58,0.06)",
   greenBdr: "rgba(35,64,58,0.20)",
@@ -52,7 +52,7 @@ export function FriaProgressRail({
       {/* Header — stile Risk Manager */}
       <div style={{ padding: "12px 12px 10px", borderBottom: `1px solid ${T.border}` }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-          <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>{t("pr_progress")}</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", textTransform: "uppercase", letterSpacing: "0.08em" }}>{t("pr_progress")}</span>
           <span style={{ fontSize: 11, fontWeight: 600, color: T.text, fontFamily: "var(--font-mono)" }}>{pct}%</span>
         </div>
         <div style={{ width: "100%", height: 4, background: "rgba(0,0,0,0.07)", borderRadius: 2, overflow: "hidden" }}>
@@ -71,15 +71,13 @@ export function FriaProgressRail({
 
           const borderColor = isActive
             ? T.greenBdr
-            : sec.percent === 100
-            ? "rgba(35,64,58,0.12)"
-            : "rgba(0,0,0,0.07)";
+            : "transparent";
           const bg = isActive ? T.greenBg : "transparent";
 
           return (
             <div key={sec.key} style={{
               border: `1px solid ${borderColor}`,
-              background: isActive ? T.greenBg : "#fff",
+              background: isActive ? T.greenBg : "transparent",
               borderRadius: 8,
               overflow: "hidden",
               marginBottom: 10,
@@ -104,12 +102,12 @@ export function FriaProgressRail({
                   <p style={{ fontSize: 11, fontWeight: 600, color: T.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {idx + 1}. {sec.label}
                   </p>
-                  <p style={{ fontSize: 9, color: T.muted, margin: 0, marginTop: 1 }}>
+                  <p style={{ fontSize: 11, color: T.muted, margin: 0, marginTop: 1 }}>
                     {doneCount}/{totalCount} · {sec.legalRef}{sec.optional ? " · facoltativa" : ""}
                   </p>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ fontSize: 9.5, fontWeight: 700, color: secColor, fontFamily: "var(--font-mono)" }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: secColor, fontFamily: "var(--font-mono)" }}>
                     {sec.percent}%
                   </span>
                   <ChevronRight
@@ -135,7 +133,7 @@ export function FriaProgressRail({
                         style={{
                           width: "100%", textAlign: "left", border: "none",
                           background: isCurrent ? T.greenBg : "transparent",
-                          borderRadius: 5, cursor: "pointer",
+                          borderRadius: 4, cursor: "pointer",
                           display: "flex", alignItems: "center", gap: 6,
                           padding: "4px 6px",
                           outline: isCurrent ? `1px solid ${T.greenBdr}` : "none",
@@ -150,7 +148,7 @@ export function FriaProgressRail({
                           }
                         </div>
                         <p style={{
-                          fontSize: 10, fontWeight: isCurrent ? 600 : 400,
+                          fontSize: 11, fontWeight: isCurrent ? 600 : 400,
                           color: sp.status === "done" ? T.muted : isCurrent ? T.green : T.text,
                           margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                           textDecoration: sp.status === "done" ? "line-through" : "none",

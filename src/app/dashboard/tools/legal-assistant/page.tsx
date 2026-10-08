@@ -220,7 +220,7 @@ function ToggleBtn({
       style={
         active
           ? { background: "#0D1016", color: "#fff" }
-          : { background: "transparent", color: "rgba(0,0,0,0.35)" }
+          : { background: "transparent", color: "#0D1016" }
       }
     >
       {children}
@@ -431,7 +431,7 @@ export default function LegalAssistantPage() {
     >
       <div
         className="flex items-center gap-2 px-4 py-3 flex-shrink-0"
-        style={{ background: "#FAFAF9", borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+        style={{ background: "#FAFAF9", borderBottom: "1px solid rgba(0,0,0,0.08)" }}
       >
         <div
           className="w-[26px] h-[26px] flex items-center justify-center rounded-md flex-shrink-0"
@@ -440,9 +440,9 @@ export default function LegalAssistantPage() {
           <Scale className="h-3.5 w-3.5 text-white" />
         </div>
         <div>
-          <div className="text-xs font-semibold text-foreground">Assistente AI Act</div>
+          <div className="text-[11px] font-semibold text-foreground">Assistente AI Act</div>
           {/* Art. 50(1): chi usa la chat deve sapere che interagisce con un sistema di IA */}
-          <div className="text-[9px] text-muted-foreground">
+          <div className="text-[11px] text-[#0D1016]">
             Stai parlando con un sistema di IA · le risposte non sono consulenza legale
           </div>
         </div>
@@ -452,12 +452,12 @@ export default function LegalAssistantPage() {
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full gap-3 text-center">
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              className="w-10 h-10 rounded-lg flex items-center justify-center"
               style={{ background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.08)" }}
             >
-              <BookOpen className="h-5 w-5 text-muted-foreground" />
+              <BookOpen className="h-5 w-5 text-[#0D1016]" />
             </div>
-            <p className="text-sm text-muted-foreground max-w-xs">
+            <p className="text-[13px] text-[#0D1016] max-w-xs">
               Fai una domanda sul Regolamento UE 2024/1689 (EU AI Act) o sui documenti collegati.
             </p>
           </div>
@@ -468,7 +468,7 @@ export default function LegalAssistantPage() {
             {msg.role === "user" ? (
               <div className="flex justify-end">
                 <div
-                  className="text-xs leading-relaxed px-3 py-2 max-w-[72%]"
+                  className="text-[11px] leading-relaxed px-3 py-2 max-w-[72%]"
                   style={{
                     background: "#0D1016",
                     color: "#fff",
@@ -482,12 +482,12 @@ export default function LegalAssistantPage() {
               <div className="flex gap-2 items-start">
                 <div
                   className="w-[22px] h-[22px] flex items-center justify-center rounded-md flex-shrink-0 mt-0.5"
-                  style={{ background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.1)" }}
+                  style={{ background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.08)" }}
                 >
-                  <BookOpen className="h-3 w-3 text-muted-foreground" />
+                  <BookOpen className="h-3 w-3 text-[#0D1016]" />
                 </div>
                 <div
-                  className="text-xs leading-relaxed px-3 py-2.5 max-w-[88%]"
+                  className="text-[11px] leading-relaxed px-3 py-2.5 max-w-[88%]"
                   style={{
                     background: "#FAFAF9",
                     border: "1px solid rgba(0,0,0,0.08)",
@@ -495,7 +495,7 @@ export default function LegalAssistantPage() {
                   }}
                 >
                   {msg.parsed?.intro && (
-                    <p className={`mb-2 text-[11px] ${msg.parsed.bullets?.length ? "text-muted-foreground" : "text-foreground"}`}>
+                    <p className={`mb-2 text-[11px] ${msg.parsed.bullets?.length ? "text-[#0D1016]" : "text-foreground"}`}>
                       {msg.parsed.intro}
                     </p>
                   )}
@@ -514,17 +514,17 @@ export default function LegalAssistantPage() {
                             style={{
                               cursor: b.artRef ? "pointer" : "default",
                               border: isActive
-                                ? "1px solid rgba(0,0,0,0.10)"
+                                ? "1px solid rgba(0,0,0,0.08)"
                                 : "1px solid transparent",
                               background: isActive ? "rgba(0,0,0,0.05)" : "transparent",
                             }}
                           >
-                            <span className="text-[10px] text-muted-foreground mt-0.5 flex-shrink-0">•</span>
+                            <span className="text-[11px] text-[#0D1016] mt-0.5 flex-shrink-0">•</span>
                             <span className="text-[11px] text-foreground flex-1">{b.text}</span>
                             {b.artRef && (
                               <span
-                                className="text-[9px] font-semibold rounded px-1.5 py-0.5 flex-shrink-0"
-                                style={{ background: "rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.55)" }}
+                                className="text-[11px] font-semibold rounded px-1.5 py-0.5 flex-shrink-0"
+                                style={{ background: "rgba(0,0,0,0.07)", color: "#0D1016" }}
                               >
                                 {b.artRef} ↗
                               </span>
@@ -543,21 +543,21 @@ export default function LegalAssistantPage() {
                   {msg.sources && msg.sources.length > 0 && (
                     <div
                       className="flex items-center gap-1.5 flex-wrap mt-2 pt-2"
-                      style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}
+                      style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}
                     >
-                      <span className="text-[9px] text-muted-foreground">Fonti:</span>
+                      <span className="text-[11px] text-[#0D1016]">Fonti:</span>
                       {Array.from(new Set(msg.sources.map((s) => s.sectionRef ?? s.documentTitle)))
                         .slice(0, 4)
                         .map((ref, i) => (
                           <span
                             key={i}
-                            className="text-[9px] font-medium rounded px-1.5 py-0.5"
-                            style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.55)" }}
+                            className="text-[11px] font-medium rounded px-1.5 py-0.5"
+                            style={{ background: "rgba(0,0,0,0.05)", color: "#0D1016" }}
                           >
                             {ref}
                           </span>
                         ))}
-                      <span className="ml-auto text-[9px] text-muted-foreground">
+                      <span className="ml-auto text-[11px] text-[#0D1016]">
                         {((msg.latencyMs ?? 0) / 1000).toFixed(1)}s · {msg.confidence}
                       </span>
                     </div>
@@ -572,9 +572,9 @@ export default function LegalAssistantPage() {
           <div className="flex gap-2 items-start">
             <div
               className="w-[22px] h-[22px] flex items-center justify-center rounded-md flex-shrink-0"
-              style={{ background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.1)" }}
+              style={{ background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.08)" }}
             >
-              <BookOpen className="h-3 w-3 text-muted-foreground" />
+              <BookOpen className="h-3 w-3 text-[#0D1016]" />
             </div>
             <div
               className="px-3 py-2.5"
@@ -595,7 +595,7 @@ export default function LegalAssistantPage() {
                     }}
                   />
                 ))}
-                <span className="text-[10px] text-muted-foreground ml-1">Ricerca in corso…</span>
+                <span className="text-[11px] text-[#0D1016] ml-1">Ricerca in corso…</span>
               </div>
             </div>
           </div>
@@ -606,11 +606,11 @@ export default function LegalAssistantPage() {
 
       <div
         className="px-4 py-3 flex-shrink-0"
-        style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}
+        style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}
       >
         <div
           className="flex items-center gap-2 px-3 py-2 rounded-lg"
-          style={{ background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.1)" }}
+          style={{ background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.08)" }}
         >
           <input
             ref={inputRef}
@@ -619,7 +619,7 @@ export default function LegalAssistantPage() {
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage(input)}
             disabled={loading}
             placeholder="Fai una domanda sull'AI Act, ISO 22989, Guidelines…"
-            className="flex-1 bg-transparent border-none outline-none text-xs text-foreground placeholder:text-muted-foreground disabled:opacity-50"
+            className="flex-1 bg-transparent border-none outline-none text-[11px] text-foreground placeholder:text-[#0D1016] disabled:opacity-50"
           />
           <button
             onClick={() => sendMessage(input)}
@@ -635,7 +635,7 @@ export default function LegalAssistantPage() {
             <button
               key={i}
               onClick={() => { sendMessage(s.query); }}
-              className="text-[9px] text-muted-foreground px-2 py-0.5 rounded transition-colors hover:text-foreground"
+              className="text-[11px] text-[#0D1016] px-2 py-0.5 rounded transition-colors hover:text-foreground"
               style={{ background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.08)" }}
             >
               {s.label}
@@ -657,7 +657,7 @@ export default function LegalAssistantPage() {
     >
       <div
         className="flex items-center justify-between px-4 py-3 flex-shrink-0"
-        style={{ background: "#fff", borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+        style={{ background: "#fff", borderBottom: "1px solid rgba(0,0,0,0.08)" }}
       >
         <div>
           <div className="text-[11px] font-semibold text-foreground">
@@ -665,7 +665,7 @@ export default function LegalAssistantPage() {
               ? `📄 ${activeSource.sectionRef ?? "Fonte"} — ${activeSource.documentTitle}`
               : "Pannello sorgente"}
           </div>
-          <div className="text-[9px] text-muted-foreground mt-0.5">
+          <div className="text-[11px] text-[#0D1016] mt-0.5">
             {activeSource
               ? "Regolamento (UE) 2024/1689 · EU AI Act"
               : "Clicca un badge per vedere il testo"}
@@ -673,8 +673,8 @@ export default function LegalAssistantPage() {
         </div>
         {activeSource && (
           <span
-            className="text-[9px] font-semibold rounded px-1.5 py-0.5 flex-shrink-0"
-            style={{ background: "rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.55)", fontFamily: "'DM Mono', monospace", letterSpacing: "0.02em" }}
+            className="text-[11px] font-semibold rounded px-1.5 py-0.5 flex-shrink-0"
+            style={{ background: "rgba(0,0,0,0.07)", color: "#0D1016", fontFamily: "'DM Mono', monospace", letterSpacing: "0.02em" }}
           >
             {activeSource.sectionRef}
           </span>
@@ -684,7 +684,7 @@ export default function LegalAssistantPage() {
       <div className="flex-1 overflow-y-auto px-4 py-3">
         {activeChunkIndex === -1 && activeMsg?.sources && activeMsg.sources.length > 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-2 text-center">
-            <p className="text-xs text-muted-foreground max-w-[220px]">
+            <p className="text-[11px] text-[#0D1016] max-w-[220px]">
               Fonte non disponibile nei chunk recuperati
             </p>
           </div>
@@ -694,9 +694,9 @@ export default function LegalAssistantPage() {
               className="w-8 h-8 rounded-lg flex items-center justify-center"
               style={{ background: "rgba(0,0,0,0.05)" }}
             >
-              <BookOpen className="h-4 w-4" style={{ color: "rgba(0,0,0,0.55)" }} />
+              <BookOpen className="h-4 w-4" style={{ color: "#0D1016" }} />
             </div>
-            <p className="text-xs text-muted-foreground max-w-[180px]">
+            <p className="text-[11px] text-[#0D1016] max-w-[180px]">
               Fai una domanda per vedere le fonti
             </p>
           </div>
@@ -711,14 +711,14 @@ export default function LegalAssistantPage() {
           >
             <div className="flex items-center justify-between mb-2">
               <span
-                className="text-[9px] font-semibold uppercase tracking-wider"
-                style={{ color: "rgba(0,0,0,0.55)", letterSpacing: "0.06em" }}
+                className="text-[11px] font-semibold uppercase tracking-wider"
+                style={{ color: "#0D1016", letterSpacing: "0.06em" }}
               >
                 Chunk selezionato
               </span>
               <span
-                className="text-[8px] font-semibold rounded px-1 py-0.5"
-                style={{ background: "rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.55)" }}
+                className="text-[11px] font-semibold rounded px-1 py-0.5"
+                style={{ background: "rgba(0,0,0,0.07)", color: "#0D1016" }}
               >
                 rilevanza {activeSource.similarity.toFixed(2)}
               </span>
@@ -734,11 +734,11 @@ export default function LegalAssistantPage() {
       {activeMsg?.sources && activeMsg.sources.length > 0 && (
         <div
           className="px-4 py-3 flex-shrink-0"
-          style={{ borderTop: "1px solid rgba(0,0,0,0.06)", background: "#ffffff" }}
+          style={{ borderTop: "1px solid rgba(0,0,0,0.08)", background: "#ffffff" }}
         >
           <p
-            className="text-[9px] font-semibold uppercase mb-2"
-            style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "0.07em" }}
+            className="text-[11px] font-semibold uppercase mb-2"
+            style={{ color: "#0D1016", letterSpacing: "0.07em" }}
           >
             Tutte le fonti trovate
           </p>
@@ -751,22 +751,22 @@ export default function LegalAssistantPage() {
                 style={{
                   border:
                     activeChunkIndex === i
-                      ? "1px solid rgba(0,0,0,0.10)"
+                      ? "1px solid rgba(0,0,0,0.08)"
                       : "1px solid transparent",
                   background:
                     activeChunkIndex === i ? "rgba(0,0,0,0.05)" : "transparent",
                 }}
               >
                 <span
-                  className="text-[9px] font-semibold rounded px-1.5 py-0.5 flex-shrink-0"
-                  style={{ background: "rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.55)", fontFamily: "'DM Mono', monospace", fontSize: 8 }}
+                  className="text-[11px] font-semibold rounded px-1.5 py-0.5 flex-shrink-0"
+                  style={{ background: "rgba(0,0,0,0.07)", color: "#0D1016", fontFamily: "'DM Mono', monospace", fontSize: 11 }}
                 >
                   {src.sectionRef ?? "—"}
                 </span>
-                <span className="text-[10px] text-muted-foreground flex-1 truncate">
+                <span className="text-[11px] text-[#0D1016] flex-1 truncate">
                   {src.documentTitle}
                 </span>
-                <span className="text-[9px] text-muted-foreground flex-shrink-0">
+                <span className="text-[11px] text-[#0D1016] flex-shrink-0">
                   {src.similarity.toFixed(2)}
                 </span>
               </div>
@@ -782,12 +782,12 @@ export default function LegalAssistantPage() {
       <div className="mb-0 flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Legal Assistant</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-[13px] text-[#0D1016]">
             Domande su EU AI Act, ISO 22989 e Guidelines — risposte citate con testo sorgente
           </p>
           <p
             className="mt-2 inline-flex items-start gap-1.5 text-[11px] rounded-md px-2.5 py-1.5"
-            style={{ background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.55)", maxWidth: 560, lineHeight: 1.5 }}
+            style={{ background: "rgba(0,0,0,0.04)", color: "#0D1016", maxWidth: 560, lineHeight: 1.5 }}
           >
             <Info size={12} style={{ flexShrink: 0, marginTop: 1 }} />
             {tDeon("legal_assistant_label")}
@@ -809,15 +809,15 @@ export default function LegalAssistantPage() {
         style={{ height: "calc(100vh - 200px)", minHeight: "500px" }}
       >
         {/* ── Left sidebar: EU AI Act sections / Chat history ── */}
-        <div style={{ width: 220, flexShrink: 0, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, overflow: "hidden", background: "#fafafa", display: "flex", flexDirection: "column" }}>
+        <div style={{ width: 220, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden", background: "#FAFAF9", display: "flex", flexDirection: "column" }}>
           {/* Header */}
-          <div style={{ padding: "10px 10px 8px", borderBottom: "1px solid rgba(0,0,0,0.07)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ padding: "10px 10px 8px", borderBottom: "1px solid rgba(0,0,0,0.08)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div>
-              <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>
                 {showChatList ? "Cronologia" : "Documento"}
               </span>
               {!showChatList && (
-                <p style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", margin: "2px 0 0", lineHeight: 1.3 }}>Reg. UE 2024/1689 · EU AI Act</p>
+                <p style={{ fontSize: 11, color: "#0D1016", margin: "2px 0 0", lineHeight: 1.3 }}>Reg. UE 2024/1689 · EU AI Act</p>
               )}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -825,7 +825,7 @@ export default function LegalAssistantPage() {
                 <button
                   onClick={startNewChat}
                   title="Nuova chat"
-                  style={{ width: 22, height: 22, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 5, color: "rgba(0,0,0,0.45)" }}
+                  style={{ width: 22, height: 22, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, color: "#0D1016" }}
                   onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.06)")}
                   onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                 ><Plus size={13} /></button>
@@ -833,7 +833,7 @@ export default function LegalAssistantPage() {
               <button
                 onClick={() => setShowChatList(p => !p)}
                 title={showChatList ? "Sezioni EU AI Act" : "Cronologia chat"}
-                style={{ width: 22, height: 22, border: "none", background: showChatList ? "rgba(0,0,0,0.08)" : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 5, color: "rgba(0,0,0,0.5)" }}
+                style={{ width: 22, height: 22, border: "none", background: showChatList ? "rgba(0,0,0,0.08)" : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, color: "#0D1016" }}
                 onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.06)")}
                 onMouseLeave={e => (e.currentTarget.style.background = showChatList ? "rgba(0,0,0,0.08)" : "transparent")}
               ><Menu size={13} /></button>
@@ -844,11 +844,11 @@ export default function LegalAssistantPage() {
           <div style={{ flex: 1, overflowY: "auto" as const, padding: "8px" }}>
             {showChatList ? (
               sessions.length === 0 ? (
-                <p style={{ fontSize: 10, color: "rgba(0,0,0,0.3)", padding: "12px 4px", margin: 0 }}>Nessuna chat salvata.</p>
+                <p style={{ fontSize: 11, color: "#0D1016", padding: "12px 4px", margin: 0 }}>Nessuna chat salvata.</p>
               ) : (
                 sessions.map(s => (
                   <div key={s.id} style={{
-                    borderRadius: 7, marginBottom: 3, overflow: "hidden",
+                    borderRadius: 8, marginBottom: 3, overflow: "hidden",
                     border: `1px solid ${s.id === currentSid ? "rgba(0,0,0,0.14)" : "rgba(0,0,0,0.06)"}`,
                     background: s.id === currentSid ? "rgba(0,0,0,0.03)" : "transparent",
                   }}>
@@ -870,20 +870,20 @@ export default function LegalAssistantPage() {
                           style={{ flex: 1, textAlign: "left" as const, background: "none", border: "none", padding: "7px 8px", cursor: "pointer", minWidth: 0 }}
                         >
                           <p style={{ fontSize: 11, fontWeight: s.id === currentSid ? 600 : 400, color: "#0D1016", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>{s.name}</p>
-                          <p style={{ fontSize: 9, color: "rgba(0,0,0,0.35)", margin: 0, marginTop: 1 }}>{relTime(s.updatedAt)}</p>
+                          <p style={{ fontSize: 11, color: "#0D1016", margin: 0, marginTop: 1 }}>{relTime(s.updatedAt)}</p>
                         </button>
                         <div style={{ display: "flex", gap: 1, paddingRight: 4, flexShrink: 0 }}>
                           <button
                             onClick={() => { setEditingId(s.id); setEditingName(s.name); }}
                             title="Rinomina"
-                            style={{ width: 20, height: 20, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, color: "rgba(0,0,0,0.35)" }}
+                            style={{ width: 20, height: 20, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, color: "#0D1016" }}
                             onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.06)")}
                             onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                           ><Pencil size={10} /></button>
                           <button
                             onClick={() => deleteSession(s.id)}
                             title="Elimina"
-                            style={{ width: 20, height: 20, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, color: "rgba(0,0,0,0.35)" }}
+                            style={{ width: 20, height: 20, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, color: "#0D1016" }}
                             onMouseEnter={e => { e.currentTarget.style.background = "rgba(220,38,38,0.08)"; e.currentTarget.style.color = "#dc2626"; }}
                             onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "rgba(0,0,0,0.35)"; }}
                           ><Trash2 size={10} /></button>
@@ -898,13 +898,13 @@ export default function LegalAssistantPage() {
                 <button
                   key={s.ref}
                   onClick={() => { sendMessage(s.query); setInput(""); }}
-                  style={{ width: "100%", textAlign: "left" as const, border: "1px solid rgba(0,0,0,0.07)", background: "transparent", padding: "9px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, borderRadius: 8, marginBottom: 4 }}
+                  style={{ width: "100%", textAlign: "left" as const, border: "1px solid rgba(0,0,0,0.08)", background: "transparent", padding: "9px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, borderRadius: 8, marginBottom: 4 }}
                   onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,0,0,0.03)"; e.currentTarget.style.borderColor = "rgba(0,0,0,0.12)"; }}
                   onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(0,0,0,0.07)"; }}
                 >
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>{s.label}</p>
-                    <p style={{ fontSize: 9, color: "rgba(0,0,0,0.42)", margin: 0, marginTop: 2, fontFamily: "var(--font-mono)" }}>{s.ref}</p>
+                    <p style={{ fontSize: 11, color: "#0D1016", margin: 0, marginTop: 2, fontFamily: "var(--font-mono)" }}>{s.ref}</p>
                   </div>
                 </button>
               ))
@@ -915,7 +915,7 @@ export default function LegalAssistantPage() {
         {/* ── Existing chat + source panels ── */}
         <div
           ref={containerRef}
-          className="rounded-xl overflow-hidden flex"
+          className="rounded-lg overflow-hidden flex"
           style={{
             border: "1px solid rgba(0,0,0,0.08)",
             flex: 1,

@@ -72,27 +72,27 @@ export function ComplianceRadarChart() {
 
   return (
     <div style={{
-      background: "#fff", borderRadius: 14, padding: "18px 20px",
-      border: "1px solid rgba(0,0,0,0.07)",
-      boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+      background: "#fff", borderRadius: 8, padding: "18px 20px",
+      border: "1px solid rgba(0,0,0,0.08)",
+      boxShadow: "none",
     }}>
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
         <div>
-          <p style={{ fontSize: 12, fontWeight: 700, color: "#1e293b", margin: 0 }}>Radar Conformità</p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: "#0D1016", margin: 0 }}>Radar Conformità</p>
           <p style={{ fontSize: 11, color: SLATE, margin: "2px 0 0" }}>EU AI Act · clicca per dettagli</p>
         </div>
         <div style={{ textAlign: "right" }}>
           <div style={{ fontSize: 26, fontWeight: 800, color: accent, lineHeight: 1, transition: "color 0.5s" }}>
             {total}%
           </div>
-          <p style={{ fontSize: 10, color: accent, margin: "2px 0 0", fontWeight: 600 }}>{label}</p>
+          <p style={{ fontSize: 11, color: accent, margin: "2px 0 0", fontWeight: 600 }}>{label}</p>
         </div>
       </div>
 
       {unlocked && (
         <div style={{ marginBottom: 10, padding: "8px 12px", borderRadius: 8, background: "rgba(5,150,105,0.08)", border: "1px solid rgba(5,150,105,0.2)", textAlign: "center" }}>
-          <p style={{ fontSize: 12, color: EMERALD, fontWeight: 700, margin: 0 }}>🏆 80% — dossier esportabile sbloccato!</p>
+          <p style={{ fontSize: 13, color: EMERALD, fontWeight: 700, margin: 0 }}>🏆 80% — dossier esportabile sbloccato!</p>
         </div>
       )}
 
@@ -178,7 +178,7 @@ export function ComplianceRadarChart() {
             }}>
               <p style={{ fontWeight: 700, margin: "0 0 4px", color: "#fff" }}>{ax.full}</p>
               <p style={{ margin: "0 0 4px", color: statusColor }}>{statusText}</p>
-              <p style={{ margin: 0, color: "rgba(255,255,255,0.4)", fontSize: 10 }}>
+              <p style={{ margin: 0, color: "rgba(255,255,255,0.4)", fontSize: 11 }}>
                 Clicca la legenda →
               </p>
             </div>
@@ -188,20 +188,20 @@ export function ComplianceRadarChart() {
 
       {/* Progress bar */}
       <div style={{ marginTop: 12 }}>
-        <div style={{ height: 5, borderRadius: 3, background: "#f1f5f9", overflow: "hidden", position: "relative" }}>
+        <div style={{ height: 5, borderRadius: 4, background: "#f1f5f9", overflow: "hidden", position: "relative" }}>
           <div style={{ position: "absolute", left: "50%", top: 0, width: 1, height: "100%", background: "rgba(217,119,6,0.3)", zIndex: 1 }} />
           <div style={{ position: "absolute", left: "80%", top: 0, width: 1, height: "100%", background: "rgba(5,150,105,0.3)", zIndex: 1 }} />
           <div style={{
-            height: "100%", borderRadius: 3,
+            height: "100%", borderRadius: 4,
             width: `${total}%`,
             background: `linear-gradient(90deg, ${INDIGO} 0%, ${accent} 100%)`,
             transition: "width 0.9s cubic-bezier(0.34, 1.56, 0.64, 1)",
           }} />
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
-          <span style={{ fontSize: 9, color: SLATE }}>0%</span>
-          <span style={{ fontSize: 9, color: AMBER }}>50% PDF</span>
-          <span style={{ fontSize: 9, color: EMERALD }}>80% Dossier</span>
+          <span style={{ fontSize: 11, color: SLATE }}>0%</span>
+          <span style={{ fontSize: 11, color: AMBER }}>50% PDF</span>
+          <span style={{ fontSize: 11, color: EMERALD }}>80% Dossier</span>
         </div>
       </div>
 
@@ -216,7 +216,7 @@ export function ComplianceRadarChart() {
               href={ax.href}
               style={{
                 display: "flex", alignItems: "center", gap: 4,
-                padding: "2px 7px", borderRadius: 5,
+                padding: "2px 7px", borderRadius: 4,
                 textDecoration: "none",
                 background: isH ? "rgba(79,70,229,0.07)" : "transparent",
                 border: isH ? "1px solid rgba(79,70,229,0.18)" : "1px solid transparent",
@@ -226,7 +226,7 @@ export function ComplianceRadarChart() {
               onMouseLeave={() => setHovered(null)}
             >
               <div style={{ width: 6, height: 6, borderRadius: "50%", background: dotCol, flexShrink: 0 }} />
-              <span style={{ fontSize: 10, color: isH ? INDIGO : SLATE, fontWeight: isH ? 600 : 400 }}>
+              <span style={{ fontSize: 11, color: isH ? INDIGO : SLATE, fontWeight: isH ? 600 : 400 }}>
                 {ax.label}
               </span>
             </Link>

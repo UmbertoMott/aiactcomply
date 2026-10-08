@@ -15,8 +15,8 @@ const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "7px 10px",
   borderRadius: "8px",
-  border: "1px solid rgba(0,0,0,0.12)",
-  fontSize: "12px",
+  border: "1px solid rgba(0,0,0,0.08)",
+  fontSize: 13,
   color: "#0D1016",
   background: "#fff",
   outline: "none",
@@ -154,12 +154,12 @@ export default function SignOffPanel({
         padding: "16px", marginTop: "24px",
       }}>
         <div className="flex items-center gap-2 mb-3">
-          <Shield className="h-3.5 w-3.5" style={{ color: "#23403a" }} />
-          <span className="text-[12px] font-medium" style={{ color: "#0D1016" }}>
+          <Shield className="h-3.5 w-3.5" style={{ color: "#0D1016" }} />
+          <span className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
             Firma del revisore
           </span>
-          <span className="text-[10px] px-1.5 py-0.5 rounded" style={{
-            background: "rgba(35,64,58,0.08)", color: "#23403a",
+          <span className="text-[11px] px-1.5 py-0.5 rounded" style={{
+            background: "rgba(35,64,58,0.08)", color: "#0D1016",
             border: "1px solid rgba(35,64,58,0.18)",
           }}>
             {record.signatureLevel.toUpperCase()}
@@ -174,28 +174,28 @@ export default function SignOffPanel({
           <div className="flex items-start gap-2">
             <CheckCircle2 className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#15803d" }} />
             <div className="flex-1 min-w-0">
-              <p className="text-[12px] font-medium" style={{ color: "#15803d" }}>
+              <p className="text-[13px] font-medium" style={{ color: "#15803d" }}>
                 Firmato da {record.signer.name} · {record.signer.role}
                 {record.signer.onBehalf && ` · per conto di ${record.signer.onBehalf}`}
               </p>
-              <div className="flex items-center gap-1.5 mt-1" style={{ color: "rgba(0,0,0,0.38)" }}>
+              <div className="flex items-center gap-1.5 mt-1" style={{ color: "#0D1016" }}>
                 <Clock className="h-3 w-3" />
-                <span className="text-[10px]">{formatDate(record.signedAt)}</span>
-                <span className="text-[10px]">·</span>
-                <span className="text-[10px]">conserva fino a {formatDate(record.retentionUntil)}</span>
+                <span className="text-[11px]">{formatDate(record.signedAt)}</span>
+                <span className="text-[11px]">·</span>
+                <span className="text-[11px]">conserva fino a {formatDate(record.retentionUntil)}</span>
               </div>
               <div className="flex items-center gap-1.5 mt-1">
-                <Hash className="h-3 w-3" style={{ color: "rgba(0,0,0,0.25)" }} />
-                <span className="text-[10px] font-mono" style={{ color: "rgba(0,0,0,0.35)" }}>
+                <Hash className="h-3 w-3" style={{ color: "#0D1016" }} />
+                <span className="text-[11px] font-mono" style={{ color: "#0D1016" }}>
                   {shortHash(record.contentHash)}
                 </span>
-                <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.25)" }}>·</span>
-                <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>
+                <span className="text-[11px]" style={{ color: "#0D1016" }}>·</span>
+                <span className="text-[11px]" style={{ color: "#0D1016" }}>
                   {record.legalRef}
                 </span>
               </div>
               {record.qualifiedTimestamp && (
-                <p className="text-[10px] mt-1" style={{ color: "#23403a" }}>
+                <p className="text-[11px] mt-1" style={{ color: "#0D1016" }}>
                   ✦ Marca temporale qualificata · TSA: {record.qualifiedTimestamp.tsa}
                 </p>
               )}
@@ -214,19 +214,19 @@ export default function SignOffPanel({
     }}>
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
-        <Shield className="h-3.5 w-3.5" style={{ color: "rgba(0,0,0,0.4)" }} />
-        <span className="text-[12px] font-medium" style={{ color: "#0D1016" }}>
+        <Shield className="h-3.5 w-3.5" style={{ color: "#0D1016" }} />
+        <span className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
           Firma del revisore
         </span>
-        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{
+        <span className="text-[11px] px-1.5 py-0.5 rounded" style={{
           background: "rgba(202,138,4,0.08)", color: "#92400e",
           border: "1px solid rgba(202,138,4,0.2)",
         }}>
           Richiesto per audit
         </span>
         {config?.qtspRecommended && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1" style={{
-            background: "rgba(35,64,58,0.06)", color: "#23403a",
+          <span className="text-[11px] px-1.5 py-0.5 rounded flex items-center gap-1" style={{
+            background: "rgba(35,64,58,0.06)", color: "#0D1016",
             border: "1px solid rgba(35,64,58,0.15)",
           }}>
             <Sparkles className="h-2.5 w-2.5" />
@@ -237,19 +237,19 @@ export default function SignOffPanel({
 
       {/* Hash documento */}
       <div className="mb-3 p-2.5 rounded-lg flex items-start gap-2" style={{
-        background: "rgba(0,0,0,0.025)", border: "1px solid rgba(0,0,0,0.07)",
+        background: "rgba(0,0,0,0.025)", border: "1px solid rgba(0,0,0,0.08)",
       }}>
-        <Hash className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" style={{ color: "rgba(0,0,0,0.3)" }} />
+        <Hash className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" style={{ color: "#0D1016" }} />
         <div>
-          <p className="text-[10px] font-medium mb-0.5" style={{ color: "rgba(0,0,0,0.45)" }}>
+          <p className="text-[11px] font-medium mb-0.5" style={{ color: "#0D1016" }}>
             Impronta del documento · {documentVersion}
           </p>
-          <p className="text-[11px] font-mono" style={{ color: "rgba(0,0,0,0.5)" }}>
+          <p className="text-[11px] font-mono" style={{ color: "#0D1016" }}>
             {contentHash ? shortHash(contentHash) : "…calcolo in corso"}
           </p>
           <div className="flex items-center gap-1 mt-1">
-            <Sparkles className="h-2.5 w-2.5" style={{ color: "rgba(0,0,0,0.25)" }} />
-            <span className="text-[9px]" style={{ color: "rgba(0,0,0,0.35)" }}>
+            <Sparkles className="h-2.5 w-2.5" style={{ color: "#0D1016" }} />
+            <span className="text-[11px]" style={{ color: "#0D1016" }}>
               ✦ AI — l'hash verifica che il documento non sia stato modificato dopo la firma
             </span>
           </div>
@@ -259,7 +259,7 @@ export default function SignOffPanel({
       <div className="space-y-3">
         {/* Nome */}
         <div>
-          <label className="block text-[11px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.55)" }}>
+          <label className="block text-[11px] font-medium mb-1" style={{ color: "#0D1016" }}>
             Nome e Cognome *
           </label>
           <input value={name} onChange={e => setName(e.target.value)}
@@ -268,7 +268,7 @@ export default function SignOffPanel({
 
         {/* Ruolo */}
         <div>
-          <label className="block text-[11px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.55)" }}>
+          <label className="block text-[11px] font-medium mb-1" style={{ color: "#0D1016" }}>
             Ruolo / Qualifica *
           </label>
           <input value={role} onChange={e => setRole(e.target.value)}
@@ -277,7 +277,7 @@ export default function SignOffPanel({
 
         {/* Email opzionale */}
         <div>
-          <label className="block text-[11px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.55)" }}>
+          <label className="block text-[11px] font-medium mb-1" style={{ color: "#0D1016" }}>
             Email <span style={{ fontWeight: 400, opacity: 0.6 }}>(opzionale)</span>
           </label>
           <input value={email} onChange={e => setEmail(e.target.value)} type="email"
@@ -287,9 +287,9 @@ export default function SignOffPanel({
         {/* Per conto di — All. V §8 (solo per declaration_art47 / authorized_rep) */}
         {(config?.requiresOnBehalf || toolKey === "declaration_art47" || toolKey === "authorized_rep_art22") && (
           <div>
-            <label className="block text-[11px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.55)" }}>
+            <label className="block text-[11px] font-medium mb-1" style={{ color: "#0D1016" }}>
               Per conto di {config?.requiresOnBehalf && <span style={{ color: "#dc2626" }}>*</span>}
-              <span style={{ fontWeight: 400, fontSize: 9, marginLeft: 4, opacity: 0.5 }}>
+              <span style={{ fontWeight: 400, fontSize: 11, marginLeft: 4, opacity: 0.5 }}>
                 (Allegato V §8 AI Act)
               </span>
             </label>
@@ -300,7 +300,7 @@ export default function SignOffPanel({
 
         {/* Note */}
         <div>
-          <label className="block text-[11px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.55)" }}>
+          <label className="block text-[11px] font-medium mb-1" style={{ color: "#0D1016" }}>
             Note di revisione <span style={{ fontWeight: 400, opacity: 0.6 }}>(opzionale)</span>
           </label>
           <textarea value={notes} onChange={e => setNotes(e.target.value)}
@@ -311,7 +311,7 @@ export default function SignOffPanel({
 
         {/* Riferimento normativo */}
         {config?.legalRef && (
-          <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.38)" }}>
+          <p className="text-[11px]" style={{ color: "#0D1016" }}>
             Rif. normativo: <strong>{config.legalRef}</strong>
             {" · "}Livello firma: SES
             {" · "}Conservazione: 10 anni (Art. 18)
@@ -328,7 +328,7 @@ export default function SignOffPanel({
         <button
           onClick={handleSignOff}
           disabled={isPending || !contentHash}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-medium transition-all disabled:opacity-50"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-medium transition-all disabled:opacity-50"
           style={{ background: "#0D1016", color: "#ffffff" }}
         >
           {isPending

@@ -43,8 +43,8 @@ export default function ToolObligationCheck({ href, compact }: { href: string; c
   }
 
   return (
-    <div className="mt-3 pt-2.5" style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}>
-      <p className="text-[11px] font-semibold mb-1.5" style={{ color: "rgba(0,0,0,0.45)" }}>
+    <div className="mt-3 pt-2.5" style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
+      <p className="text-[11px] font-semibold mb-1.5" style={{ color: "#0D1016" }}>
         {t("markDoneTitle")}{" "}
         <Link href={`/dashboard/tools/inventory/${data.systemId}`} className="underline" style={{ color: "#0D1016" }}>{data.systemName}</Link>
       </p>
@@ -59,8 +59,8 @@ export default function ToolObligationCheck({ href, compact }: { href: string; c
                 width: 15, height: 15, borderRadius: 4, border: `1.5px solid ${done ? "#15803d" : "rgba(0,0,0,0.25)"}`,
                 background: done ? "#15803d" : "#fff",
               }}>{done && <Check size={10} color="#fff" strokeWidth={3} />}</span>
-              <span className="text-[12px]" style={{ color: "#0D1016", lineHeight: 1.45 }}>
-                {o.title} <span style={{ color: "rgba(0,0,0,0.4)" }}>· {o.article} · {t("from")} {formatDate(o.appliesFrom)}</span>
+              <span className="text-[13px]" style={{ color: "#0D1016", lineHeight: 1.45 }}>
+                {o.title} <span style={{ color: "#0D1016" }}>· {o.article} · {t("from")} {formatDate(o.appliesFrom)}</span>
               </span>
             </button>
           );

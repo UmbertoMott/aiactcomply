@@ -24,7 +24,7 @@ type TFn = (key: string) => string;
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 const T = {
-  text: "#0D1016", muted: "rgba(0,0,0,0.42)", faint: "rgba(0,0,0,0.22)", border: "rgba(0,0,0,0.08)",
+  text: "#0D1016", muted: "#0D1016", faint: "#0D1016", border: "rgba(0,0,0,0.08)",
   card: "#fff", bg: "#f8f9fa",
   red: "#dc2626", redBg: "rgba(220,38,38,0.06)", redBdr: "rgba(220,38,38,0.18)",
   amber: "#d97706", amberBg: "rgba(202,138,4,0.07)", amberBdr: "rgba(202,138,4,0.22)",
@@ -33,8 +33,8 @@ const T = {
   violet: "#7c3aed", violetBg: "rgba(124,58,237,0.05)", violetBdr: "rgba(124,58,237,0.16)",
 } as const;
 const FONT: CSSProperties = { fontFamily: "inherit" };
-const card: CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
-const inp: CSSProperties = { width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, color: T.text, background: T.card, outline: "none" };
+const card: CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, boxShadow: "none" };
+const inp: CSSProperties = { width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, color: T.text, background: T.card, outline: "none" };
 const ta: CSSProperties = { ...inp, resize: "vertical" as const };
 
 // ─── Legacy types (scanner registry) ─────────────────────────────────────────
@@ -254,7 +254,7 @@ export default function Art50KitPage() {
     <div className="max-w-4xl mx-auto space-y-5" style={FONT}>
 
       {/* Deadline banner */}
-      <div className="flex items-center justify-between px-5 py-3 rounded-xl text-sm"
+      <div className="flex items-center justify-between px-5 py-3 rounded-lg text-[13px]"
         style={daysLeft <= 90 ? { background: "#fef2f2", border: "1px solid #fecaca" } : { background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
         <div className="flex items-center gap-3">
           <Clock size={16} style={{ color: daysLeft <= 90 ? T.red : T.blue }} />
@@ -263,29 +263,29 @@ export default function Art50KitPage() {
             {daysLeft <= 90 && ` · ${t("urgentAction")}`}
           </span>
         </div>
-        <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32024R1689" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs font-medium" style={{ color: daysLeft <= 90 ? T.red : T.blue }}>
+        <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32024R1689" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[11px] font-medium" style={{ color: daysLeft <= 90 ? T.red : T.blue }}>
           Art. 50 AI Act <ExternalLink size={12} />
         </a>
       </div>
 
       {/* ── Art. 50(1)-(5) reference table ─────────────────────────────────── */}
-      <div className="rounded-xl overflow-hidden" style={card}>
+      <div className="rounded-lg overflow-hidden" style={card}>
         <div className="px-4 py-3 border-b" style={{ borderColor: "#f3f4f6" }}>
-          <p className="text-[12px] font-semibold" style={{ color: T.text }}>{t("obligationsTitle")}</p>
-          <p className="text-[10px] mt-0.5" style={{ color: T.faint }}>{t("obligationsNote")}</p>
+          <p className="text-[13px] font-semibold" style={{ color: T.text }}>{t("obligationsTitle")}</p>
+          <p className="text-[11px] mt-0.5" style={{ color: T.faint }}>{t("obligationsNote")}</p>
         </div>
         <div className="divide-y" style={{ borderColor: "#f3f4f6" }}>
           {ART50_OBLIGATIONS.map(obl => (
             <div key={obl.id} className="flex items-start gap-3 px-4 py-3">
-              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded flex-shrink-0 mt-0.5" style={{ background: T.blueBg, color: T.blue }}>
+              <span className="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded flex-shrink-0 mt-0.5" style={{ background: T.blueBg, color: T.blue }}>
                 {obl.reference.split(" ").slice(0, 2).join(" ")}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-[12px] font-medium" style={{ color: T.text }}>{obl.label}</p>
-                <p className="text-[10px]" style={{ color: T.faint }}>{obl.reference}</p>
+                <p className="text-[13px] font-medium" style={{ color: T.text }}>{obl.label}</p>
+                <p className="text-[11px]" style={{ color: T.faint }}>{obl.reference}</p>
               </div>
               {obl.appliesToSelf && (
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: T.violetBg, color: T.violet }}>RegulaeOS</span>
+                <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: T.violetBg, color: T.violet }}>RegulaeOS</span>
               )}
             </div>
           ))}
@@ -301,15 +301,15 @@ export default function Art50KitPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-semibold" style={{ color: T.text }}>Avvisi e marcature IA — Art. 50</h1>
-              <p className="text-sm mt-0.5" style={{ color: T.muted }}>
+              <p className="text-[13px] mt-0.5" style={{ color: T.muted }}>
                 {t("clientSubtitle")} · {systems.length} {systems.length !== 1 ? t("systemsRegistered") : t("systemRegistered")}
               </p>
             </div>
             <div className="flex gap-2">
-              <Link href="/dashboard/tools/inventory" className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium" style={{ border: `1px solid ${T.border}`, color: T.muted, background: T.card }}>
+              <Link href="/dashboard/tools/inventory" className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-medium" style={{ border: `1px solid ${T.border}`, color: T.muted, background: T.card }}>
                 <Wand2 size={14} /> {t("guidedSetup")}
               </Link>
-              <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white" style={{ background: T.text }}>
+              <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium text-white" style={{ background: T.text }}>
                 <Plus size={16} /> {t("addSystem")}
               </button>
             </div>
@@ -317,11 +317,11 @@ export default function Art50KitPage() {
 
           {/* Add form */}
           {showForm && (
-            <div className="rounded-xl p-5" style={{ border: `1px solid ${T.blueBdr}`, background: T.blueBg }}>
-              <h3 className="text-sm font-semibold mb-4" style={{ color: T.text }}>{t("newSystem")}</h3>
+            <div className="rounded-lg p-5" style={{ border: `1px solid ${T.blueBdr}`, background: T.blueBg }}>
+              <h3 className="text-[13px] font-semibold mb-4" style={{ color: T.text }}>{t("newSystem")}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium mb-1.5" style={{ color: T.muted }}>{t("aiSystemLabel")} *</label>
+                  <label className="block text-[11px] font-medium mb-1.5" style={{ color: T.muted }}>{t("aiSystemLabel")} *</label>
                   <select
                     value={formInventoryId}
                     onChange={e => {
@@ -352,21 +352,21 @@ export default function Art50KitPage() {
                     />
                   )}
                   {inventorySystems.length === 0 && (
-                    <p className="text-[10px] mt-1" style={{ color: T.faint }}>
+                    <p className="text-[11px] mt-1" style={{ color: T.faint }}>
                       {t("noInventory")}{" "}
                       <a href="/dashboard/tools/inventory" className="underline" style={{ color: T.muted }}>{t("addToInventory")}</a> {t("firstWord")}.
                     </p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-medium mb-1.5" style={{ color: T.muted }}>{t("siteUrl")}</label>
+                  <label className="block text-[11px] font-medium mb-1.5" style={{ color: T.muted }}>{t("siteUrl")}</label>
                   <input type="url" placeholder="https://tuo-sito.it" value={formUrl} onChange={e => setFormUrl(e.target.value)} style={inp} />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-medium mb-2" style={{ color: T.muted }}>{t("systemType")} *</label>
+                  <label className="block text-[11px] font-medium mb-2" style={{ color: T.muted }}>{t("systemType")} *</label>
                   <div className="flex flex-wrap gap-2">
                     {([ { value: "chatbot" as const, label: t("type_chatbot") }, { value: "content" as const, label: t("type_content") }, { value: "recommendation" as const, label: t("type_recommendation") }, { value: "other" as const, label: t("type_other") } ]).map(opt => (
-                      <button key={opt.value} type="button" onClick={() => setFormType(opt.value)} className="px-3 py-1.5 rounded-lg border text-xs font-medium"
+                      <button key={opt.value} type="button" onClick={() => setFormType(opt.value)} className="px-3 py-1.5 rounded-lg border text-[11px] font-medium"
                         style={formType === opt.value ? { border: `1px solid ${T.blue}`, background: T.card, color: T.blue } : { border: `1px solid ${T.border}`, background: T.card, color: T.muted }}>
                         {opt.label}
                       </button>
@@ -385,11 +385,11 @@ export default function Art50KitPage() {
 
           {/* Empty state */}
           {systems.length === 0 && !showForm && (
-            <div className="rounded-xl py-16 text-center" style={{ border: "2px dashed rgba(0,0,0,0.14)", background: T.card }}>
+            <div className="rounded-lg py-16 text-center" style={{ border: "2px dashed rgba(0,0,0,0.14)", background: T.card }}>
               <Shield size={40} className="mx-auto mb-4" style={{ color: T.faint }} />
               <p className="font-medium" style={{ color: T.muted }}>{t("noSystems")}</p>
-              <p className="text-sm mt-1 max-w-xs mx-auto" style={{ color: T.faint }}>{t("noSystemsDesc")}</p>
-              <button onClick={() => setShowForm(true)} className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white" style={{ background: T.text }}>
+              <p className="text-[13px] mt-1 max-w-xs mx-auto" style={{ color: T.faint }}>{t("noSystemsDesc")}</p>
+              <button onClick={() => setShowForm(true)} className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13px] font-medium text-white" style={{ background: T.text }}>
                 <Plus size={16} /> {t("addFirstSystem")}
               </button>
             </div>
@@ -407,30 +407,30 @@ export default function Art50KitPage() {
                 const proposals = pendingProposals[system.id] ?? [];
 
                 return (
-                  <div key={system.id} className="rounded-xl p-5 transition-all" style={{ background: T.card, border: isExpanded ? `1px solid ${T.blueBdr}` : `1px solid ${T.border}`, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+                  <div key={system.id} className="rounded-lg p-5 transition-all" style={{ background: T.card, border: isExpanded ? `1px solid ${T.blueBdr}` : `1px solid ${T.border}`, boxShadow: "none" }}>
                     {/* System header row */}
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-start gap-4 flex-1 min-w-0">
-                        <div className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold border-2" style={{ borderColor: gColor, color: gColor }}>
+                        <div className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-[13px] font-bold border-2" style={{ borderColor: gColor, color: gColor }}>
                           {score !== null ? grade : "—"}
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-medium text-sm" style={{ color: T.text }}>{system.name}</span>
-                            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: T.bg, color: T.muted }}>{TYPE_LABELS[system.type]}</span>
-                            <span className="text-xs font-mono" style={{ color: T.faint }}>{system.registroId}</span>
+                            <span className="font-medium text-[13px]" style={{ color: T.text }}>{system.name}</span>
+                            <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: T.bg, color: T.muted }}>{TYPE_LABELS[system.type]}</span>
+                            <span className="text-[11px] font-mono" style={{ color: T.faint }}>{system.registroId}</span>
                           </div>
-                          {system.url && <a href={system.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 mt-1 text-xs hover:underline" style={{ color: T.blue }}>{system.url.replace(/^https?:\/\//, "")} <ExternalLink size={11} /></a>}
+                          {system.url && <a href={system.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 mt-1 text-[11px] hover:underline" style={{ color: T.blue }}>{system.url.replace(/^https?:\/\//, "")} <ExternalLink size={11} /></a>}
                           {system.signals.length > 0 && <div className="flex gap-1 mt-2">{system.signals.map(sig => <div key={sig.criterion} title={sig.criterion} className="h-1.5 w-8 rounded-full" style={{ background: sig.detected ? "#4ade80" : "#f87171" }} />)}</div>}
-                          {system.lastScannedAt ? <p className="text-xs mt-1.5" style={{ color: T.faint }}>{t("lastScan")} {new Date(system.lastScannedAt).toLocaleDateString(loc)} · {t("scoreWord")} {system.lastScore}/100</p> : <p className="flex items-center gap-1 text-xs mt-1.5" style={{ color: T.amber }}><AlertTriangle size={11} /> {t("scanNotDone")}</p>}
+                          {system.lastScannedAt ? <p className="text-[11px] mt-1.5" style={{ color: T.faint }}>{t("lastScan")} {new Date(system.lastScannedAt).toLocaleDateString(loc)} · {t("scoreWord")} {system.lastScore}/100</p> : <p className="flex items-center gap-1 text-[11px] mt-1.5" style={{ color: T.amber }}><AlertTriangle size={11} /> {t("scanNotDone")}</p>}
                         </div>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <button onClick={() => scanSystem(system)} disabled={scanning === system.id || !system.url} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs disabled:opacity-40" style={{ border: `1px solid ${T.border}`, color: T.muted, background: T.card, cursor: "pointer" }}>
+                        <button onClick={() => scanSystem(system)} disabled={scanning === system.id || !system.url} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] disabled:opacity-40" style={{ border: `1px solid ${T.border}`, color: T.muted, background: T.card, cursor: "pointer" }}>
                           <RefreshCw size={11} className={scanning === system.id ? "animate-spin" : ""} /> {scanning === system.id ? t("scanning") : t("rescan")}
                         </button>
-                        <button onClick={() => downloadRegistro(system)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs" style={{ border: `1px solid ${T.border}`, color: T.muted, background: T.card, cursor: "pointer" }}><Download size={11} /> {t("registerBtn")}</button>
-                        <button onClick={() => setActiveSystem(isExpanded ? null : system)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs"
+                        <button onClick={() => downloadRegistro(system)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px]" style={{ border: `1px solid ${T.border}`, color: T.muted, background: T.card, cursor: "pointer" }}><Download size={11} /> {t("registerBtn")}</button>
+                        <button onClick={() => setActiveSystem(isExpanded ? null : system)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px]"
                           style={isExpanded ? { border: `1px solid ${T.blueBdr}`, background: T.blueBg, color: T.blue } : { border: `1px solid ${T.border}`, background: "transparent", color: T.muted, cursor: "pointer" }}>
                           <FileText size={11} /> {t("details")}
                         </button>
@@ -445,10 +445,10 @@ export default function Art50KitPage() {
                         {/* Scan signals */}
                         {system.signals.length > 0 && (
                           <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: T.faint }}>{t("scannerAnalysis")}</p>
+                            <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: T.faint }}>{t("scannerAnalysis")}</p>
                             <div className="space-y-1.5">
                               {system.signals.map(sig => (
-                                <div key={sig.criterion} className="flex items-center justify-between text-xs">
+                                <div key={sig.criterion} className="flex items-center justify-between text-[11px]">
                                   <div className="flex items-center gap-2">
                                     {sig.detected ? <CheckCircle size={13} className="text-green-500" /> : <XCircle size={13} className="text-red-400" />}
                                     <span className="font-mono" style={{ color: T.text }}>{sig.criterion}</span>
@@ -462,10 +462,10 @@ export default function Art50KitPage() {
 
                         {/* ── Art. 50(1) — direct interaction checklist ── */}
                         {(system.type === "chatbot" || system.type === "recommendation") && (
-                          <div className="rounded-xl p-4" style={{ background: T.bg, border: `1px solid ${T.border}` }}>
+                          <div className="rounded-lg p-4" style={{ background: T.bg, border: `1px solid ${T.border}` }}>
                             <div className="flex items-center gap-2 mb-3">
-                              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>Art. 50(1)</span>
-                              <span className="text-[12px] font-semibold" style={{ color: T.text }}>{t("art50_1_title")}</span>
+                              <span className="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>Art. 50(1)</span>
+                              <span className="text-[13px] font-semibold" style={{ color: T.text }}>{t("art50_1_title")}</span>
                             </div>
                             <div className="space-y-3">
                               {[
@@ -520,11 +520,11 @@ export default function Art50KitPage() {
                         )}
 
                         {/* ── Art. 50(2) — synthetic content labelling ── */}
-                        <div className="rounded-xl p-4" style={{ background: T.bg, border: `1px solid ${T.border}` }}>
+                        <div className="rounded-lg p-4" style={{ background: T.bg, border: `1px solid ${T.border}` }}>
                           <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
                             <div className="flex items-center gap-2">
-                              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>Art. 50(2)</span>
-                              <span className="text-[12px] font-semibold" style={{ color: T.text }}>{t("art50_2_title")}</span>
+                              <span className="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>Art. 50(2)</span>
+                              <span className="text-[13px] font-semibold" style={{ color: T.text }}>{t("art50_2_title")}</span>
                             </div>
                             <button onClick={() => runProposeLabellingPlan(system)} disabled={proposing === system.id}
                               className="flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-lg"
@@ -597,7 +597,7 @@ export default function Art50KitPage() {
                                     <NonConformWarning method={method} exemptionClaimed={label?.exemptionClaimed} t={t} />
 
                                     {/* Capabilities display */}
-                                    <div className="flex gap-3 mt-1.5 text-[10px]">
+                                    <div className="flex gap-3 mt-1.5 text-[11px]">
                                       <span style={{ color: machineReadable ? T.green : T.red }}>
                                         {machineReadable ? "✓" : "✗"} Machine-readable
                                       </span>
@@ -609,7 +609,7 @@ export default function Art50KitPage() {
                                     {/* Exemption */}
                                     {!machineReadable && (
                                       <div className="mt-2">
-                                        <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("exemptionArt50_2")}</label>
+                                        <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("exemptionArt50_2")}</label>
                                         <select value={label?.exemptionClaimed ?? ""} onChange={e => {
                                           const syntheticContentLabels = rec.syntheticContentLabels.map(l => l.contentType === ct ? { ...l, exemptionClaimed: e.target.value || undefined } : l);
                                           patchSystemRec(system.id, { syntheticContentLabels });
@@ -634,10 +634,10 @@ export default function Art50KitPage() {
 
                         {/* ── Art. 50(4) — deepfake disclosure ── */}
                         {rec.selectedContentTypes.some(x => ["image", "audio", "video"].includes(x)) && (
-                          <div className="rounded-xl p-4" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
+                          <div className="rounded-lg p-4" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
                             <div className="flex items-center gap-2 mb-2">
-                              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded" style={{ background: T.amberBg, color: T.amber }}>Art. 50(4)</span>
-                              <span className="text-[12px] font-semibold" style={{ color: T.text }}>{t("art50_4_title")}</span>
+                              <span className="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded" style={{ background: T.amberBg, color: T.amber }}>Art. 50(4)</span>
+                              <span className="text-[13px] font-semibold" style={{ color: T.text }}>{t("art50_4_title")}</span>
                             </div>
                             <p className="text-[11px] mb-3 leading-relaxed" style={{ color: T.muted }}>
                               {t("art50_4_desc")}
@@ -662,13 +662,13 @@ export default function Art50KitPage() {
                             {rec.deepfakeDisclosure?.applicable === "yes" && (
                               <div className="space-y-3">
                                 <div>
-                                  <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("disclosureMechanism")}</label>
+                                  <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("disclosureMechanism")}</label>
                                   <textarea rows={2} value={rec.deepfakeDisclosure?.disclosureMechanism ?? ""}
                                     onChange={e => patchSystemRec(system.id, { deepfakeDisclosure: { ...rec.deepfakeDisclosure, systemId: system.id, disclosureMechanism: e.target.value } as typeof rec.deepfakeDisclosure })}
                                     placeholder={t("disclosureMechanismPh")} style={ta} />
                                 </div>
                                 <div>
-                                  <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("exemptionArt50_4")}</label>
+                                  <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("exemptionArt50_4")}</label>
                                   <select value={rec.deepfakeDisclosure?.exemptionClaimed ?? ""}
                                     onChange={e => patchSystemRec(system.id, { deepfakeDisclosure: { ...rec.deepfakeDisclosure, systemId: system.id, exemptionClaimed: e.target.value || undefined } as typeof rec.deepfakeDisclosure })}
                                     style={{ ...inp, width: "auto" }}>
@@ -688,10 +688,10 @@ export default function Art50KitPage() {
                         )}
 
                         {/* ── Art. 50(3) — emotion/biometric cross-link ── */}
-                        <div className="rounded-xl p-4" style={{ background: T.bg, border: `1px solid ${T.border}` }}>
+                        <div className="rounded-lg p-4" style={{ background: T.bg, border: `1px solid ${T.border}` }}>
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>Art. 50(3)</span>
-                            <span className="text-[12px] font-semibold" style={{ color: T.text }}>{t("art50_3_title")}</span>
+                            <span className="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>Art. 50(3)</span>
+                            <span className="text-[13px] font-semibold" style={{ color: T.text }}>{t("art50_3_title")}</span>
                           </div>
                           <p className="text-[11px] mb-3 leading-relaxed" style={{ color: T.muted }}>
                             {t("art50_3_desc")}
@@ -720,14 +720,14 @@ export default function Art50KitPage() {
           )}
 
           {/* Info footer */}
-          <div className="rounded-xl px-5 py-4 text-xs leading-relaxed" style={{ background: T.bg, border: `1px solid ${T.border}`, color: T.muted }}
+          <div className="rounded-lg px-5 py-4 text-[11px] leading-relaxed" style={{ background: T.bg, border: `1px solid ${T.border}`, color: T.muted }}
             dangerouslySetInnerHTML={{ __html: t("infoFooter") }} />
         </>
       )}
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg" style={{ background: T.text, color: "#fff" }}>
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-[13px] font-medium shadow-lg" style={{ background: T.text, color: "#fff" }}>
           ✓ {toast}
         </div>
       )}

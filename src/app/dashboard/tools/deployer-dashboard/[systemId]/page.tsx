@@ -40,10 +40,10 @@ import { loadOrgProfile } from "@/lib/dossier/org-profile";
 const FONT = { fontFamily: "inherit" };
 
 const STATUS_OPTIONS: { value: ObligationStatus; label: string; color: string; bg: string }[] = [
-  { value: "not_started", label: "Non avviato", color: "#6b7280", bg: "#f9fafb" },
+  { value: "not_started", label: "Non avviato", color: "#0D1016", bg: "#f9fafb" },
   { value: "in_progress", label: "In corso", color: "#d97706", bg: "#fffbeb" },
   { value: "done", label: "Completato", color: "#16a34a", bg: "#f0fdf4" },
-  { value: "na", label: "N/A", color: "#6b7280", bg: "#f3f4f6" },
+  { value: "na", label: "N/A", color: "#0D1016", bg: "#f3f4f6" },
 ];
 
 const FLAG_LABELS: Record<keyof DeployerApplicabilityFlags, string> = {
@@ -81,7 +81,7 @@ function ObligationCard({
 
   return (
     <div
-      className="rounded-xl border transition-all"
+      className="rounded-lg border transition-all"
       style={{
         background: "#fff",
         borderColor: status === "done" ? "#86efac" : status === "not_started" ? "#fca5a5" : "#e5e7eb",
@@ -98,7 +98,7 @@ function ObligationCard({
           ) : status === "in_progress" ? (
             <Clock size={16} style={{ color: "#d97706" }} />
           ) : status === "na" ? (
-            <Minus size={16} style={{ color: "#9ca3af" }} />
+            <Minus size={16} style={{ color: "#0D1016" }} />
           ) : (
             <AlertTriangle size={16} style={{ color: "#dc2626" }} />
           )}
@@ -108,21 +108,21 @@ function ObligationCard({
             <span className="text-[11px] font-mono font-bold" style={{ color: "#2563eb" }}>
               {def.id}
             </span>
-            <span className="text-sm font-semibold" style={{ color: "#0D1016" }}>
+            <span className="text-[13px] font-semibold" style={{ color: "#0D1016" }}>
               {def.label}
             </span>
             {!def.alwaysApplicable && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "#f0f9ff", color: "#0369a1" }}>
+              <span className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: "#f0f9ff", color: "#0369a1" }}>
                 condizionale
               </span>
             )}
             <StatusPill status={status} />
           </div>
-          <p className="text-xs mt-1 line-clamp-2" style={{ color: "#6b7280" }}>
+          <p className="text-[11px] mt-1 line-clamp-2" style={{ color: "#0D1016" }}>
             {def.description}
           </p>
         </div>
-        <span className="text-xs ml-2 mt-1" style={{ color: "#9ca3af" }}>
+        <span className="text-[11px] ml-2 mt-1" style={{ color: "#0D1016" }}>
           {open ? "▲" : "▼"}
         </span>
       </button>
@@ -133,12 +133,12 @@ function ObligationCard({
           <div className="pt-3 space-y-3">
             {/* Reference */}
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wide mb-1" style={{ color: "#9ca3af" }}>
+              <p className="text-[11px] font-semibold uppercase tracking-wide mb-1" style={{ color: "#0D1016" }}>
                 Riferimento normativo
               </p>
-              <p className="text-xs" style={{ color: "#374151" }}>{def.primaryReference}</p>
+              <p className="text-[11px]" style={{ color: "#0D1016" }}>{def.primaryReference}</p>
               {def.supportReferences.length > 0 && (
-                <p className="text-xs mt-0.5" style={{ color: "#9ca3af" }}>
+                <p className="text-[11px] mt-0.5" style={{ color: "#0D1016" }}>
                   {def.supportReferences.join(" · ")}
                 </p>
               )}
@@ -146,7 +146,7 @@ function ObligationCard({
 
             {/* Status selector */}
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wide mb-1" style={{ color: "#9ca3af" }}>
+              <p className="text-[11px] font-semibold uppercase tracking-wide mb-1" style={{ color: "#0D1016" }}>
                 Stato
               </p>
               <div className="flex flex-wrap gap-2">
@@ -154,7 +154,7 @@ function ObligationCard({
                   <button
                     key={opt.value}
                     onClick={() => onUpdate(def.id, { status: opt.value, lastUpdated: new Date().toISOString() })}
-                    className="text-xs px-2.5 py-1 rounded-lg border transition-all"
+                    className="text-[11px] px-2.5 py-1 rounded-lg border transition-all"
                     style={{
                       borderColor: status === opt.value ? opt.color : "#e5e7eb",
                       background: status === opt.value ? opt.bg : "#fff",
@@ -171,12 +171,12 @@ function ObligationCard({
             {/* Evidence / notes */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: "#9ca3af" }}>
+                <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: "#0D1016" }}>
                   Sommario evidenza
                 </label>
                 <textarea
                   rows={2}
-                  className="w-full text-xs px-2 py-1.5 rounded-lg border resize-none"
+                  className="w-full text-[11px] px-2 py-1.5 rounded-lg border resize-none"
                   style={{ borderColor: "#e5e7eb", color: "#0D1016" }}
                   placeholder="Documento, link, nota..."
                   value={record?.evidenceSummary ?? ""}
@@ -184,22 +184,22 @@ function ObligationCard({
                 />
               </div>
               <div>
-                <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: "#9ca3af" }}>
+                <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: "#0D1016" }}>
                   Responsabile
                 </label>
                 <input
-                  className="w-full text-xs px-2 py-1.5 rounded-lg border"
+                  className="w-full text-[11px] px-2 py-1.5 rounded-lg border"
                   style={{ borderColor: "#e5e7eb", color: "#0D1016" }}
                   placeholder="Nome / ruolo"
                   value={record?.assignee ?? ""}
                   onChange={(e) => onUpdate(def.id, { assignee: e.target.value })}
                 />
-                <label className="text-[11px] font-semibold uppercase tracking-wide block mt-2 mb-1" style={{ color: "#9ca3af" }}>
+                <label className="text-[11px] font-semibold uppercase tracking-wide block mt-2 mb-1" style={{ color: "#0D1016" }}>
                   Scadenza
                 </label>
                 <input
                   type="date"
-                  className="w-full text-xs px-2 py-1.5 rounded-lg border"
+                  className="w-full text-[11px] px-2 py-1.5 rounded-lg border"
                   style={{ borderColor: "#e5e7eb", color: "#0D1016" }}
                   value={record?.dueDate ?? ""}
                   onChange={(e) => onUpdate(def.id, { dueDate: e.target.value })}
@@ -211,7 +211,7 @@ function ObligationCard({
             {def.linkedTool && (
               <Link
                 href={def.linkedTool}
-                className="inline-flex items-center gap-1.5 text-xs font-medium"
+                className="inline-flex items-center gap-1.5 text-[11px] font-medium"
                 style={{ color: "#2563eb" }}
               >
                 <ExternalLink size={12} />
@@ -271,11 +271,11 @@ function WorkerNoticeModule({
   }
 
   return (
-    <div className="rounded-xl border p-4" style={{ background: "#fff", borderColor: "#e5e7eb" }}>
+    <div className="rounded-lg border p-4" style={{ background: "#fff", borderColor: "#e5e7eb" }}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Users size={16} style={{ color: "#7c3aed" }} />
-          <span className="font-semibold text-sm" style={{ color: "#0D1016" }}>
+          <span className="font-semibold text-[13px]" style={{ color: "#0D1016" }}>
             Informativa ai lavoratori
           </span>
           <span className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: "#f5f3ff", color: "#7c3aed" }}>
@@ -286,8 +286,8 @@ function WorkerNoticeModule({
           {notice?.noticeText && (
             <button
               onClick={copy}
-              className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg border"
-              style={{ borderColor: "#e5e7eb", color: "#374151" }}
+              className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg border"
+              style={{ borderColor: "#e5e7eb", color: "#0D1016" }}
             >
               {copied ? <Check size={12} /> : <Copy size={12} />}
               {copied ? "Copiato" : "Copia"}
@@ -296,7 +296,7 @@ function WorkerNoticeModule({
           <button
             onClick={generate}
             disabled={loading}
-            className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg"
+            className="flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-lg"
             style={{ background: "#0D1016", color: "#fff", opacity: loading ? 0.7 : 1 }}
           >
             {loading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
@@ -306,14 +306,14 @@ function WorkerNoticeModule({
       </div>
 
       {error && (
-        <p className="text-xs mb-2" style={{ color: "#dc2626" }}>{error}</p>
+        <p className="text-[11px] mb-2" style={{ color: "#dc2626" }}>{error}</p>
       )}
 
       {notice?.generated && notice.noticeText ? (
         <>
           <div
-            className="p-3 rounded-lg text-xs whitespace-pre-wrap mb-2"
-            style={{ background: "#fafaf9", border: "1px solid #e5e7eb", color: "#374151", maxHeight: 280, overflowY: "auto" }}
+            className="p-3 rounded-lg text-[11px] whitespace-pre-wrap mb-2"
+            style={{ background: "#FAFAF9", border: "1px solid #e5e7eb", color: "#0D1016", maxHeight: 280, overflowY: "auto" }}
           >
             {notice.noticeText}
           </div>
@@ -324,11 +324,11 @@ function WorkerNoticeModule({
           )}
           <div className="grid grid-cols-2 gap-3 mt-3">
             <div>
-              <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: "#9ca3af" }}>
+              <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: "#0D1016" }}>
                 Metodo di consegna
               </label>
               <input
-                className="w-full text-xs px-2 py-1.5 rounded-lg border"
+                className="w-full text-[11px] px-2 py-1.5 rounded-lg border"
                 style={{ borderColor: "#e5e7eb", color: "#0D1016" }}
                 placeholder="Email, affissione, sindacato..."
                 value={notice.deliveryMethod ?? ""}
@@ -338,12 +338,12 @@ function WorkerNoticeModule({
               />
             </div>
             <div>
-              <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: "#9ca3af" }}>
+              <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: "#0D1016" }}>
                 Data consegna
               </label>
               <input
                 type="date"
-                className="w-full text-xs px-2 py-1.5 rounded-lg border"
+                className="w-full text-[11px] px-2 py-1.5 rounded-lg border"
                 style={{ borderColor: "#e5e7eb", color: "#0D1016" }}
                 value={notice.deliveryDate ?? ""}
                 onChange={(e) =>
@@ -354,7 +354,7 @@ function WorkerNoticeModule({
           </div>
         </>
       ) : (
-        <p className="text-xs" style={{ color: "#6b7280" }}>
+        <p className="text-[11px]" style={{ color: "#0D1016" }}>
           Genera una bozza di informativa da inviare ai lavoratori e ai rappresentanti sindacali
           prima del deployment del sistema di IA.
         </p>
@@ -384,10 +384,10 @@ function RbiModule({
     : null;
 
   return (
-    <div className="rounded-xl border p-4" style={{ background: "#fff", borderColor: "#e5e7eb" }}>
+    <div className="rounded-lg border p-4" style={{ background: "#fff", borderColor: "#e5e7eb" }}>
       <div className="flex items-center gap-2 mb-3">
         <Database size={16} style={{ color: "#0891b2" }} />
-        <span className="font-semibold text-sm" style={{ color: "#0D1016" }}>
+        <span className="font-semibold text-[13px]" style={{ color: "#0D1016" }}>
           Autorizzazione identificazione biometrica a posteriori
         </span>
         <span className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: "#ecfeff", color: "#0891b2" }}>
@@ -413,12 +413,12 @@ function RbiModule({
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
-          <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: "#9ca3af" }}>
+          <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: "#0D1016" }}>
             Inizio deployment
           </label>
           <input
             type="date"
-            className="w-full text-xs px-2 py-1.5 rounded-lg border"
+            className="w-full text-[11px] px-2 py-1.5 rounded-lg border"
             style={{ borderColor: "#e5e7eb", color: "#0D1016" }}
             value={deployStart}
             onChange={(e) => {
@@ -431,23 +431,23 @@ function RbiModule({
           />
         </div>
         <div>
-          <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: "#9ca3af" }}>
+          <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: "#0D1016" }}>
             Scadenza (48h)
           </label>
           <input
             type="date"
-            className="w-full text-xs px-2 py-1.5 rounded-lg border"
+            className="w-full text-[11px] px-2 py-1.5 rounded-lg border"
             style={{ borderColor: "#e5e7eb", color: "#0D1016" }}
             value={deadline ?? ""}
             readOnly
           />
         </div>
         <div>
-          <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: "#9ca3af" }}>
+          <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: "#0D1016" }}>
             ID registrazione
           </label>
           <input
-            className="w-full text-xs px-2 py-1.5 rounded-lg border"
+            className="w-full text-[11px] px-2 py-1.5 rounded-lg border"
             style={{ borderColor: "#e5e7eb", color: "#0D1016" }}
             placeholder="RBI-XXXX-YYYY"
             value={rbi.registrationId ?? ""}
@@ -473,11 +473,11 @@ function RbiModule({
           }
           className="rounded"
         />
-        <label htmlFor="rbi-done" className="text-xs" style={{ color: "#374151" }}>
+        <label htmlFor="rbi-done" className="text-[11px]" style={{ color: "#0D1016" }}>
           Registrazione completata
         </label>
         {rbi.registrationDate && (
-          <span className="text-xs" style={{ color: "#9ca3af" }}>
+          <span className="text-[11px]" style={{ color: "#0D1016" }}>
             — {rbi.registrationDate}
           </span>
         )}
@@ -592,8 +592,8 @@ export default function DeployerSystemDetailPage() {
   if (!system || !record) {
     return (
       <div className="p-8 text-center" style={FONT}>
-        <Loader2 size={24} className="animate-spin mx-auto mb-2" style={{ color: "#9ca3af" }} />
-        <p className="text-sm" style={{ color: "#6b7280" }}>Caricamento sistema...</p>
+        <Loader2 size={24} className="animate-spin mx-auto mb-2" style={{ color: "#0D1016" }} />
+        <p className="text-[13px]" style={{ color: "#0D1016" }}>Caricamento sistema...</p>
       </div>
     );
   }
@@ -613,8 +613,8 @@ export default function DeployerSystemDetailPage() {
       <div className="flex items-start gap-3 mb-6">
         <Link
           href="/dashboard/tools/deployer-dashboard"
-          className="flex items-center gap-1 text-sm mt-0.5"
-          style={{ color: "#6b7280" }}
+          className="flex items-center gap-1 text-[13px] mt-0.5"
+          style={{ color: "#0D1016" }}
         >
           <ChevronLeft size={16} />
           Dashboard
@@ -622,8 +622,8 @@ export default function DeployerSystemDetailPage() {
         <div className="flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             <UserCheck size={18} style={{ color: "#2563eb" }} />
-            <h1 className="text-lg font-bold">{system.name}</h1>
-            <span className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: "#f3f4f6", color: "#6b7280" }}>
+            <h1 className="text-[15px] font-bold">{system.name}</h1>
+            <span className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: "#FAFAF9", color: "#0D1016" }}>
               {levelLabel(system.tier)}
             </span>
             {saved && (
@@ -632,7 +632,7 @@ export default function DeployerSystemDetailPage() {
               </span>
             )}
           </div>
-          <p className="text-xs mt-0.5" style={{ color: "#6b7280" }}>
+          <p className="text-[11px] mt-0.5" style={{ color: "#0D1016" }}>
             Art. 26 — Obblighi deployer
           </p>
         </div>
@@ -641,13 +641,13 @@ export default function DeployerSystemDetailPage() {
           <div className="text-2xl font-bold" style={{ color: pct === 100 ? "#16a34a" : "#0D1016" }}>
             {pct}%
           </div>
-          <div className="text-[11px]" style={{ color: "#6b7280" }}>{doneCount}/{totalCount} obblighi</div>
+          <div className="text-[11px]" style={{ color: "#0D1016" }}>{doneCount}/{totalCount} obblighi</div>
         </div>
       </div>
 
       {/* Sanctions note */}
       <div
-        className="flex items-start gap-2 p-3 rounded-lg mb-5 text-xs"
+        className="flex items-start gap-2 p-3 rounded-lg mb-5 text-[11px]"
         style={{ background: "#fef9c3", border: "1px solid #fde047", color: "#713f12" }}
       >
         <Info size={14} className="mt-0.5 flex-shrink-0" />
@@ -659,14 +659,14 @@ export default function DeployerSystemDetailPage() {
         <section className="mb-6">
           <button
             onClick={() => setDetailOpen(v => !v)}
-            className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-black/10 bg-white mb-1 hover:bg-black/[0.03] transition-colors"
+            className="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-black/10 bg-white mb-1 hover:bg-black/[0.03] transition-colors"
           >
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] text-black/50 bg-black/[0.05] px-1.5 py-0.5 rounded">Art. 26</span>
-              <span className="text-sm font-semibold text-[#0D1016]">Lista di controllo del deployer</span>
-              <span className="text-[10px] text-black/50">10 paragrafi</span>
+              <span className="font-mono text-[11px] text-[#0D1016] bg-black/[0.05] px-1.5 py-0.5 rounded">Art. 26</span>
+              <span className="text-[13px] font-semibold text-[#0D1016]">Lista di controllo del deployer</span>
+              <span className="text-[11px] text-[#0D1016]">10 paragrafi</span>
             </div>
-            {detailOpen ? <ChevronUp size={14} className="text-black/50" /> : <ChevronDown size={14} className="text-black/50" />}
+            {detailOpen ? <ChevronUp size={14} className="text-[#0D1016]" /> : <ChevronDown size={14} className="text-[#0D1016]" />}
           </button>
 
           {detailOpen && (
@@ -709,13 +709,13 @@ export default function DeployerSystemDetailPage() {
       {/* ── AI Applicability Assessment ── */}
       <section className="mb-6">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold text-sm" style={{ color: "#0D1016" }}>
+          <h2 className="font-semibold text-[13px]" style={{ color: "#0D1016" }}>
             Applicabilità obblighi
           </h2>
           <button
             onClick={runAiAssessment}
             disabled={aiLoading}
-            className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg"
+            className="flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-lg"
             style={{ background: "#0D1016", color: "#fff", opacity: aiLoading ? 0.7 : 1 }}
           >
             {aiLoading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
@@ -724,7 +724,7 @@ export default function DeployerSystemDetailPage() {
         </div>
 
         {aiError && (
-          <p className="text-xs mb-2" style={{ color: "#dc2626" }}>{aiError}</p>
+          <p className="text-[11px] mb-2" style={{ color: "#dc2626" }}>{aiError}</p>
         )}
         {record.flagsAiAssessed && (
           <p className="text-[11px] mb-2 font-semibold" style={{ color: "#d97706" }}>
@@ -732,7 +732,7 @@ export default function DeployerSystemDetailPage() {
           </p>
         )}
 
-        <div className="rounded-xl border p-4" style={{ background: "#fff", borderColor: "#e5e7eb" }}>
+        <div className="rounded-lg border p-4" style={{ background: "#fff", borderColor: "#e5e7eb" }}>
           <div className="space-y-2">
             {(Object.keys(FLAG_LABELS) as (keyof DeployerApplicabilityFlags)[]).map((key) => (
               <div key={key} className="flex items-start gap-3">
@@ -744,11 +744,11 @@ export default function DeployerSystemDetailPage() {
                   className="mt-0.5 rounded"
                 />
                 <div className="flex-1">
-                  <label htmlFor={`flag-${key}`} className="text-sm cursor-pointer" style={{ color: "#0D1016" }}>
+                  <label htmlFor={`flag-${key}`} className="text-[13px] cursor-pointer" style={{ color: "#0D1016" }}>
                     {FLAG_LABELS[key]}
                   </label>
                   {aiRationale?.[key] && (
-                    <p className="text-[11px] mt-0.5" style={{ color: "#6b7280" }}>
+                    <p className="text-[11px] mt-0.5" style={{ color: "#0D1016" }}>
                       {aiRationale[key]}
                     </p>
                   )}
@@ -761,7 +761,7 @@ export default function DeployerSystemDetailPage() {
 
       {/* ── Always-applicable obligations ── */}
       <section className="mb-6">
-        <h2 className="font-semibold text-sm mb-3" style={{ color: "#0D1016" }}>
+        <h2 className="font-semibold text-[13px] mb-3" style={{ color: "#0D1016" }}>
           Obblighi sempre applicabili ({alwaysAppl.length})
         </h2>
         <div className="space-y-2">
@@ -779,7 +779,7 @@ export default function DeployerSystemDetailPage() {
       {/* ── Conditional obligations ── */}
       {conditionalAppl.length > 0 && (
         <section className="mb-6">
-          <h2 className="font-semibold text-sm mb-3" style={{ color: "#0D1016" }}>
+          <h2 className="font-semibold text-[13px] mb-3" style={{ color: "#0D1016" }}>
             Obblighi condizionali attivi ({conditionalAppl.length})
           </h2>
           <div className="space-y-2">
@@ -812,22 +812,22 @@ export default function DeployerSystemDetailPage() {
       {/* ── EUDB fallback (D-10) ── */}
       {record.flags.eudbRequired && (
         <section className="mb-6">
-          <div className="rounded-xl border p-4" style={{ background: "#fff", borderColor: "#e5e7eb" }}>
+          <div className="rounded-lg border p-4" style={{ background: "#fff", borderColor: "#e5e7eb" }}>
             <div className="flex items-center gap-2 mb-2">
               <Database size={16} style={{ color: "#2563eb" }} />
-              <span className="font-semibold text-sm">Registrazione EUDB</span>
+              <span className="font-semibold text-[13px]">Registrazione EUDB</span>
               <span className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: "#eff6ff", color: "#2563eb" }}>
                 Art. 26(8), 49(3)
               </span>
             </div>
-            <p className="text-xs mb-3" style={{ color: "#6b7280" }}>
+            <p className="text-[11px] mb-3" style={{ color: "#0D1016" }}>
               Come autorità pubblica deployer di un sistema ad alto rischio dell&apos;Allegato III, prima dell&apos;uso
               ti registri nella banca dati UE, selezioni il sistema e ne registri l&apos;uso. Se il sistema non è registrato,
               non lo usi e informi il fornitore o il distributore (Art. 26(8), Art. 49(3)).
             </p>
             <textarea
               rows={3}
-              className="w-full text-xs px-2 py-1.5 rounded-lg border resize-none"
+              className="w-full text-[11px] px-2 py-1.5 rounded-lg border resize-none"
               style={{ borderColor: "#e5e7eb", color: "#0D1016" }}
               placeholder="Note registrazione EUDB: ID, data, link al record..."
               value={record.eudbNote ?? ""}
@@ -835,7 +835,7 @@ export default function DeployerSystemDetailPage() {
             />
             <Link
               href="/dashboard/compliance-ops/eudb"
-              className="inline-flex items-center gap-1.5 text-xs font-medium mt-2"
+              className="inline-flex items-center gap-1.5 text-[11px] font-medium mt-2"
               style={{ color: "#2563eb" }}
             >
               <ExternalLink size={12} />
@@ -851,8 +851,8 @@ export default function DeployerSystemDetailPage() {
 function LinkedBody({ status }: { status: LinkedStatus }) {
   return (
     <div className="flex items-center justify-between gap-3 flex-wrap">
-      <p className="text-xs text-black/60">{status.summary}</p>
-      <Link href={status.href} className="text-xs font-medium underline" style={{ color: "#2563eb" }}>
+      <p className="text-[11px] text-[#0D1016]">{status.summary}</p>
+      <Link href={status.href} className="text-[11px] font-medium underline" style={{ color: "#2563eb" }}>
         {status.linkLabel} →
       </Link>
     </div>

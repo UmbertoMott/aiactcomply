@@ -67,7 +67,7 @@ export function ComplianceAssistant({ currentTool }: Props) {
           position: "fixed", bottom: 80, right: 20, zIndex: 190,
           width: 46, height: 46, borderRadius: "50%",
           background: "#2563eb", color: "white", border: "none",
-          fontSize: 18, cursor: "pointer",
+          fontSize: 15, cursor: "pointer",
           boxShadow: "0 4px 16px rgba(37,99,235,0.35)",
           display: "flex", alignItems: "center", justifyContent: "center",
         }}
@@ -81,7 +81,7 @@ export function ComplianceAssistant({ currentTool }: Props) {
     <div style={{
       position: "fixed", bottom: 80, right: 20, zIndex: 190,
       width: 340, height: 460, background: "white",
-      border: "1px solid rgba(0,0,0,0.12)", borderRadius: 14,
+      border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8,
       boxShadow: "0 12px 40px rgba(0,0,0,0.12)",
       display: "flex", flexDirection: "column", overflow: "hidden",
     }}>
@@ -93,13 +93,13 @@ export function ComplianceAssistant({ currentTool }: Props) {
       }}>
         <div>
           <span style={{ fontSize: 13, fontWeight: 600 }}>✦ Assistente EU AI Act</span>
-          <div style={{ fontSize: 10, opacity: 0.75, marginTop: 1 }}>
+          <div style={{ fontSize: 11, opacity: 0.75, marginTop: 1 }}>
             Tool: {currentTool}
           </div>
         </div>
         <button
           onClick={() => setOpen(false)}
-          style={{ background: "none", border: "none", color: "white", cursor: "pointer", fontSize: 16, lineHeight: 1 }}
+          style={{ background: "none", border: "none", color: "white", cursor: "pointer", fontSize: 15, lineHeight: 1 }}
         >
           ✕
         </button>
@@ -108,7 +108,7 @@ export function ComplianceAssistant({ currentTool }: Props) {
       {/* Messages */}
       <div style={{ flex: 1, overflowY: "auto", padding: "12px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
         {messages.length === 0 && (
-          <p style={{ fontSize: 12, color: "#9ca3af", margin: 0 }}>
+          <p style={{ fontSize: 13, color: "#0D1016", margin: 0 }}>
             Chiedimi qualcosa su questo tool o sul tuo percorso di conformità EU AI Act.
           </p>
         )}
@@ -116,7 +116,7 @@ export function ComplianceAssistant({ currentTool }: Props) {
           <div
             key={i}
             style={{
-              maxWidth: "88%", padding: "8px 12px", borderRadius: 10, fontSize: 13,
+              maxWidth: "88%", padding: "8px 12px", borderRadius: 8, fontSize: 13,
               lineHeight: 1.45,
               alignSelf: m.role === "user" ? "flex-end" : "flex-start",
               background: m.role === "user" ? "#2563eb" : "#f3f4f6",
@@ -128,8 +128,8 @@ export function ComplianceAssistant({ currentTool }: Props) {
         ))}
         {loading && (
           <div style={{
-            alignSelf: "flex-start", padding: "8px 14px", borderRadius: 10,
-            background: "#f3f4f6", fontSize: 14, color: "#9ca3af",
+            alignSelf: "flex-start", padding: "8px 14px", borderRadius: 8,
+            background: "#FAFAF9", fontSize: 13, color: "#0D1016",
           }}>
             …
           </div>
@@ -146,7 +146,7 @@ export function ComplianceAssistant({ currentTool }: Props) {
           placeholder="Es. Cosa devo fare dopo?"
           style={{
             flex: 1, padding: "7px 10px", borderRadius: 8,
-            border: "1px solid rgba(0,0,0,0.15)", fontSize: 12, outline: "none",
+            border: "1px solid rgba(0,0,0,0.15)", fontSize: 13, outline: "none",
           }}
         />
         <button
@@ -156,7 +156,7 @@ export function ComplianceAssistant({ currentTool }: Props) {
             padding: "7px 14px", borderRadius: 8, border: "none",
             background: input.trim() && !loading ? "#2563eb" : "#e5e7eb",
             color: input.trim() && !loading ? "white" : "#9ca3af",
-            fontSize: 12, fontWeight: 600, cursor: input.trim() && !loading ? "pointer" : "default",
+            fontSize: 13, fontWeight: 600, cursor: input.trim() && !loading ? "pointer" : "default",
           }}
         >
           Invia

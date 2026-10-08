@@ -8,8 +8,8 @@ import { markDone, getActiveScopeId, type QueuedActivity } from "@/lib/queue/act
 
 const T = {
   text:     "#0D1016",
-  muted:    "rgba(0,0,0,0.42)",
-  faint:    "rgba(0,0,0,0.24)",
+  muted:    "#0D1016",
+  faint:    "#0D1016",
   border:   "rgba(0,0,0,0.07)",
   borderSt: "rgba(13,16,22,0.18)",
   card:     "#ffffff",
@@ -51,7 +51,7 @@ export function ActivityQueue() {
 
   const containerSt: CSSProperties = {
     marginBottom: 24,
-    borderRadius: 12,
+    borderRadius: 8,
     border: `1px solid ${isHighlighted ? T.borderSt : T.border}`,
     background: T.card,
     boxShadow: isHighlighted ? "0 0 0 3px rgba(13,16,22,0.04)" : "none",
@@ -97,7 +97,7 @@ export function ActivityQueue() {
             }}
           >
             {/* Tool icon */}
-            <span style={{ fontSize: 17, flexShrink: 0, marginTop: 2, lineHeight: 1 }}>
+            <span style={{ fontSize: 15, flexShrink: 0, marginTop: 2, lineHeight: 1 }}>
               {TOOL_ICON[activity.tool] ?? "📎"}
             </span>
 
@@ -116,7 +116,7 @@ export function ActivityQueue() {
               <a
                 href={activity.href}
                 style={{
-                  padding: "4px 14px", borderRadius: 7, fontSize: 12, fontWeight: 500,
+                  padding: "4px 14px", borderRadius: 8, fontSize: 13, fontWeight: 500,
                   background: T.text, color: "#fff", textDecoration: "none", cursor: "pointer",
                   display: "inline-block",
                 }}
@@ -126,7 +126,7 @@ export function ActivityQueue() {
               <button
                 onClick={() => handleMarkDone(activity.id)}
                 style={{
-                  padding: "4px 10px", borderRadius: 7, fontSize: 12,
+                  padding: "4px 10px", borderRadius: 8, fontSize: 13,
                   background: "none", color: T.muted,
                   border: `1px solid ${T.border}`, cursor: "pointer",
                   whiteSpace: "nowrap",

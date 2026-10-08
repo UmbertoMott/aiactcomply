@@ -22,8 +22,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const T = {
   text:   "#0D1016",
-  muted:  "rgba(0,0,0,0.45)",
-  faint:  "rgba(0,0,0,0.28)",
+  muted:  "#0D1016",
+  faint:  "#0D1016",
   border: "rgba(0,0,0,0.07)",
   card:   "#ffffff",
   bg:     "#fafaf9",
@@ -159,7 +159,7 @@ export default function NotificationBell() {
               borderRadius:"9999px",
               background:  T.text,
               color:       "#fff",
-              fontSize:    "9px",
+              fontSize:    11,
               fontWeight:  700,
               display:     "flex",
               alignItems:  "center",
@@ -210,7 +210,7 @@ export default function NotificationBell() {
             <span style={{ fontSize: "13px", fontWeight: 600, color: T.text, letterSpacing: "-0.2px" }}>
               Notifiche
               {unreadCount > 0 && (
-                <span style={{ ...MONO, fontSize: 10, fontWeight: 500, color: T.faint, marginLeft: 6 }}>
+                <span style={{ ...MONO, fontSize: 11, fontWeight: 500, color: T.faint, marginLeft: 6 }}>
                   {unreadCount} nuove
                 </span>
               )}
@@ -297,7 +297,7 @@ export default function NotificationBell() {
                     {/* Titolo senza emoji */}
                     <div
                       style={{
-                        fontSize:     "12px",
+                        fontSize:     13,
                         fontWeight:   isUnread ? 600 : 500,
                         color:        T.text,
                         lineHeight:   1.45,
@@ -334,7 +334,7 @@ export default function NotificationBell() {
                         <span
                           style={{
                             ...MONO,
-                            fontSize:     "9px",
+                            fontSize:     11,
                             fontWeight:   600,
                             color:        T.faint,
                             background:   "rgba(0,0,0,0.05)",
@@ -346,7 +346,7 @@ export default function NotificationBell() {
                           {n.relatedArticle}
                         </span>
                       )}
-                      <span style={{ ...MONO, fontSize: "9px", color: T.faint }}>
+                      <span style={{ ...MONO, fontSize: 11, color: T.faint }}>
                         {relativeTime(n.createdAt)}
                       </span>
 
@@ -356,7 +356,7 @@ export default function NotificationBell() {
                           onClick={() => setOpen(false)}
                           style={{
                             marginLeft:  "auto",
-                            fontSize:    "10px",
+                            fontSize:    11,
                             fontWeight:  600,
                             color:       T.text,
                             textDecoration: "none",
@@ -389,7 +389,7 @@ export default function NotificationBell() {
               onClick={() => setOpen(false)}
               style={{
                 ...MONO,
-                fontSize:    "10px",
+                fontSize:    11,
                 fontWeight:  500,
                 color:       T.muted,
                 textDecoration: "none",

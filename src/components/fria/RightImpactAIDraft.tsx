@@ -6,7 +6,7 @@ import type { FRIASeverityAssessment } from "@/lib/simulation/fria-engine";
 import { useT } from "@/i18n/LocaleProvider";
 
 const T = {
-  text: "#0D1016", muted: "rgba(0,0,0,0.42)", faint: "rgba(0,0,0,0.28)",
+  text: "#0D1016", muted: "#0D1016", faint: "#0D1016",
   border: "rgba(0,0,0,0.08)", card: "#ffffff", bg: "#f8f8f7",
   amber: "#d97706", amberBg: "rgba(202,138,4,0.06)", amberBdr: "rgba(202,138,4,0.2)",
   green: "#16a34a", greenBg: "rgba(22,163,74,0.06)", greenBdr: "rgba(22,163,74,0.2)",
@@ -74,15 +74,15 @@ export function RightImpactAIDraft({ ...props }: RightImpactAIDraftProps) {
       {draft && !confirmed && (
         <div style={{ padding: 12, background: T.amberBg, border: `1px solid ${T.amberBdr}`, borderRadius: 8, marginTop: 6 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-            <span style={{ fontSize: 10, fontWeight: 700, color: T.amber, background: "rgba(202,138,4,0.12)", padding: "2px 7px", borderRadius: 9999 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: T.amber, background: "rgba(202,138,4,0.12)", padding: "2px 7px", borderRadius: 9999 }}>
               ✦ {t("aiVerifyConfirm")}
             </span>
           </div>
-          <p style={{ fontSize: 12, color: T.text, marginBottom: 6, lineHeight: 1.5 }}>{draft.scenario_brief}</p>
+          <p style={{ fontSize: 13, color: T.text, marginBottom: 6, lineHeight: 1.5 }}>{draft.scenario_brief}</p>
           <p style={{ fontSize: 11, color: T.muted, marginBottom: 8, fontStyle: "italic" }}>{draft.severity_rationale}</p>
           {draft.mitigation_hints.length > 0 && (
             <div style={{ marginBottom: 10 }}>
-              <p style={{ fontSize: 10, fontWeight: 600, color: T.text, marginBottom: 4 }}>{t("riad_mitigationHints")}</p>
+              <p style={{ fontSize: 11, fontWeight: 600, color: T.text, marginBottom: 4 }}>{t("riad_mitigationHints")}</p>
               {draft.mitigation_hints.map((h, i) => (
                 <p key={i} style={{ fontSize: 11, color: T.muted, marginBottom: 2 }}>• {h}</p>
               ))}

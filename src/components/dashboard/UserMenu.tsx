@@ -89,14 +89,14 @@ export default function UserMenu() {
       >
         {/* Avatar */}
         <div
-          className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold flex-shrink-0"
+          className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-semibold flex-shrink-0"
           style={{ background: "#0D1016", color: "#ffffff" }}
         >
           {initials || "?"}
         </div>
         {/* Name (hidden on mobile) */}
         <span
-          className="hidden sm:block text-[12px] font-medium max-w-[120px] truncate"
+          className="hidden sm:block text-[13px] font-medium max-w-[120px] truncate"
           style={{ color: "#0D1016" }}
         >
           {(company || email?.split("@")[0] || "Account").replace(/^./, (c) => c.toUpperCase())}
@@ -104,7 +104,7 @@ export default function UserMenu() {
         <ChevronDown
           className="h-3 w-3 transition-transform"
           style={{
-            color: "rgba(0,0,0,0.4)",
+            color: "#0D1016",
             transform: open ? "rotate(180deg)" : "rotate(0deg)",
           }}
         />
@@ -113,23 +113,23 @@ export default function UserMenu() {
       {/* Dropdown */}
       {open && (
         <div
-          className="absolute right-0 top-full mt-1.5 min-w-[200px] rounded-xl overflow-hidden z-50 select-none"
+          className="absolute right-0 top-full mt-1.5 min-w-[200px] rounded-lg overflow-hidden z-50 select-none"
           style={{
             background: "#ffffff",
-            border: "1px solid rgba(0,0,0,0.1)",
+            border: "1px solid rgba(0,0,0,0.08)",
             boxShadow: "0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06)",
           }}
         >
           {/* User info header */}
           <div
             className="px-4 py-3"
-            style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}
+            style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}
           >
-            <p className="text-[12px] font-semibold truncate" style={{ color: "#0D1016" }}>
+            <p className="text-[13px] font-semibold truncate" style={{ color: "#0D1016" }}>
               {company || "Account"}
             </p>
             {email && (
-              <p className="text-[11px] truncate mt-0.5" style={{ color: "rgba(0,0,0,0.4)" }}>
+              <p className="text-[11px] truncate mt-0.5" style={{ color: "#0D1016" }}>
                 {email}
               </p>
             )}
@@ -147,7 +147,7 @@ export default function UserMenu() {
                   onMouseLeave={(e) => ((e.currentTarget as HTMLDivElement).style.background = "transparent")}
                   onClick={() => setOpen(false)}
                 >
-                  <item.icon className="h-[14px] w-[14px] flex-shrink-0" style={{ color: "rgba(0,0,0,0.45)" }} />
+                  <item.icon className="h-[14px] w-[14px] flex-shrink-0" style={{ color: "#0D1016" }} />
                   <span className="text-[13px]">{item.label}</span>
                 </div>
               );
@@ -155,7 +155,7 @@ export default function UserMenu() {
               return (
                 <div key={i}>
                   {item.separator && (
-                    <div className="my-1" style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }} />
+                    <div className="my-1" style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }} />
                   )}
                   {item.href ? (
                     isExternal ? (
@@ -174,7 +174,7 @@ export default function UserMenu() {
           </div>
 
           {/* Separator + Esci */}
-          <div style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }} className="py-1">
+          <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }} className="py-1">
             <div
               className="flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors"
               style={{ color: "#dc2626" }}

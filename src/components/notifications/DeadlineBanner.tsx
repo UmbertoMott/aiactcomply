@@ -47,7 +47,7 @@ export default function DeadlineBanner() {
     >
       <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" style={{ color }} />
       <p className="text-[11px] font-medium flex-1 min-w-0 truncate" style={{ color }}>
-        <span className="font-semibold uppercase tracking-wide" style={{ fontSize: "10px", opacity: 0.8 }}>
+        <span className="font-semibold uppercase tracking-wide" style={{ fontSize: 11, opacity: 0.8 }}>
           {deadline.article} ·{" "}
         </span>
         {days} giorni alla scadenza: {deadline.title}
@@ -62,7 +62,7 @@ export default function DeadlineBanner() {
       <button
         onClick={dismiss}
         className="flex-shrink-0 p-0.5 rounded hover:opacity-60 transition-opacity"
-        style={{ color: "rgba(0,0,0,0.3)" }}
+        style={{ color: "#0D1016" }}
         aria-label="Chiudi"
       >
         <X className="h-3.5 w-3.5" />

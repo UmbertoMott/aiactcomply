@@ -33,8 +33,8 @@ const DK = {
   card2:    "#f3f4f6",
   border:   "rgba(0,0,0,0.07)",
   text:     "#0D1016",
-  muted:    "rgba(0,0,0,0.40)",
-  faint:    "rgba(0,0,0,0.30)",
+  muted:    "#0D1016",
+  faint:    "#0D1016",
   indigo:   "#4f46e5",
   indigoBg: "rgba(99,102,241,0.08)",
   indigoBdr:"rgba(99,102,241,0.15)",
@@ -52,15 +52,15 @@ const DK = {
 
 const inputDk = {
   width: "100%", padding: "7px 10px", borderRadius: 8,
-  border: `1px solid rgba(0,0,0,0.10)`, fontSize: 12,
-  color: DK.text, background: "#f3f4f6", outline: "none",
+  border: `1px solid rgba(0,0,0,0.10)`, fontSize: 13,
+  color: DK.text, background: "#FAFAF9", outline: "none",
 };
 
 const taDk = { ...inputDk, resize: "vertical" as const };
 
 const cardDk = {
   background: DK.card, border: `1px solid ${DK.border}`,
-  borderRadius: 12,
+  borderRadius: 8,
 };
 
 // ── Sub-components ───────────────────────────────────────────────────────────
@@ -135,7 +135,7 @@ function MemberStatesSelectDark({ selected, onChange }: {
             return (
               <label key={sm} style={{
                 display: "flex", alignItems: "center", gap: 8, padding: "6px 12px",
-                cursor: "pointer", fontSize: 12, color: DK.text,
+                cursor: "pointer", fontSize: 13, color: DK.text,
                 background: checked ? "rgba(0,0,0,0.04)" : "transparent",
                 borderBottom: sm === "Tutti gli Stati Membri UE" ? `1px solid ${DK.border}` : undefined,
                 fontWeight: sm === "Tutti gli Stati Membri UE" ? 500 : 400,
@@ -152,7 +152,7 @@ function MemberStatesSelectDark({ selected, onChange }: {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 }}>
           {selected.map(sm => (
             <span key={sm} onClick={() => toggle(sm)} style={{
-              fontSize: 10, padding: "2px 8px", borderRadius: 10,
+              fontSize: 11, padding: "2px 8px", borderRadius: 8,
               background: "rgba(0,0,0,0.04)", color: DK.muted, border: `1px solid ${DK.border}`,
               cursor: "pointer",
             }}>
@@ -174,13 +174,13 @@ function DkField({ label, article, children, span2, aiBadge }: {
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
         <label style={{ fontSize: 11, color: DK.muted, fontWeight: 500 }}>{label}</label>
         {article && (
-          <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: DK.faint, borderRadius: 4,
+          <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: DK.faint, borderRadius: 4,
             padding: "1px 5px", border: `1px solid ${DK.border}`, background: "rgba(0,0,0,0.04)" }}>
             {article}
           </span>
         )}
         {aiBadge && (
-          <span style={{ fontSize: 9, fontWeight: 700, color: DK.muted,
+          <span style={{ fontSize: 11, fontWeight: 700, color: DK.muted,
             background: "rgba(0,0,0,0.04)", border: `1px solid ${DK.border}`,
             borderRadius: 4, padding: "1px 5px" }}>
             precompilato
@@ -201,7 +201,7 @@ function SectionCard({ title, article, aiBadge, children }: {
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <p style={{ fontSize: 13, fontWeight: 600, color: DK.text, margin: 0 }}>{title}</p>
           {article && (
-            <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: DK.faint,
+            <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: DK.faint,
               border: `1px solid ${DK.border}`, borderRadius: 4, padding: "1px 6px",
               background: "rgba(0,0,0,0.04)" }}>
               {article}
@@ -209,9 +209,9 @@ function SectionCard({ title, article, aiBadge, children }: {
           )}
         </div>
         {aiBadge && (
-          <span style={{ fontSize: 9, fontWeight: 700, color: DK.muted,
+          <span style={{ fontSize: 11, fontWeight: 700, color: DK.muted,
             background: "rgba(0,0,0,0.04)", border: `1px solid ${DK.border}`,
-            borderRadius: 5, padding: "2px 7px" }}>
+            borderRadius: 4, padding: "2px 7px" }}>
             precompilato — verifica
           </span>
         )}
@@ -349,7 +349,7 @@ export default function EUDBCompliancePage() {
           <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
             <Info size={13} style={{ color: DK.muted, flexShrink: 0, marginTop: 1 }} />
             <div>
-              <p style={{ fontSize: 12, color: DK.muted, fontWeight: 500, margin: 0 }}>
+              <p style={{ fontSize: 13, color: DK.muted, fontWeight: 500, margin: 0 }}>
                 Art. 49 AI Act — Chi deve registrarsi nel database UE?
               </p>
               <p style={{ fontSize: 11, color: DK.muted, opacity: 0.8, margin: "4px 0 0", lineHeight: 1.5 }}>
@@ -364,15 +364,15 @@ export default function EUDBCompliancePage() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                  <span style={{ fontSize: 10, color: DK.faint, fontWeight: 600 }}>Q{idx + 1}</span>
+                  <span style={{ fontSize: 11, color: DK.faint, fontWeight: 600 }}>Q{idx + 1}</span>
                   {q.prefillSource && (
-                    <span style={{ fontSize: 9, color: DK.muted, background: "rgba(0,0,0,0.04)",
+                    <span style={{ fontSize: 11, color: DK.muted, background: "rgba(0,0,0,0.04)",
                       border: `1px solid ${DK.border}`, borderRadius: 4, padding: "1px 5px", fontWeight: 600 }}>
                       {q.prefillSource}
                     </span>
                   )}
                 </div>
-                <p style={{ fontSize: 12, color: DK.text, fontWeight: 500, margin: 0 }}>{q.text}</p>
+                <p style={{ fontSize: 13, color: DK.text, fontWeight: 500, margin: 0 }}>{q.text}</p>
                 {q.note && <p style={{ fontSize: 11, color: DK.muted, margin: "5px 0 0", lineHeight: 1.5 }}>{q.note}</p>}
               </div>
               <RadioGroupDark value={doc.eligibility[q.key]} onChange={v => patchE(q.key, v)} name={q.key} />
@@ -381,11 +381,11 @@ export default function EUDBCompliancePage() {
         ))}
 
         {banner && (
-          <div style={{ padding: 14, borderRadius: 10, background: banner.bg,
+          <div style={{ padding: 14, borderRadius: 8, background: banner.bg,
             border: `1px solid ${banner.bdr}`, borderLeft: `4px solid ${banner.col}`,
             display: "flex", alignItems: "center", gap: 10 }}>
             <banner.Icon size={14} style={{ color: banner.col, flexShrink: 0 }} />
-            <p style={{ fontSize: 12, color: banner.col, fontWeight: 500, margin: 0 }}>{banner.text}</p>
+            <p style={{ fontSize: 13, color: banner.col, fontWeight: 500, margin: 0 }}>{banner.text}</p>
           </div>
         )}
         {eStatus === "not_required" && (
@@ -417,12 +417,12 @@ export default function EUDBCompliancePage() {
                   Precompilati {prefill.prefillCount} campi dall&apos;inventario e dal profilo azienda. Verifica prima di proseguire.
                 </p>
                 <button onClick={() => setShowPrefillDetail(v => !v)}
-                  style={{ fontSize: 10, color: DK.muted, background: "none", border: "none",
+                  style={{ fontSize: 11, color: DK.muted, background: "none", border: "none",
                     cursor: "pointer", padding: 0, marginTop: 4, textDecoration: "underline" }}>
                   {showPrefillDetail ? "Nascondi dettagli" : "Mostra fonti"}
                 </button>
                 {showPrefillDetail && (
-                  <ul style={{ fontSize: 10, color: DK.muted, margin: "6px 0 0", padding: "0 0 0 14px" }}>
+                  <ul style={{ fontSize: 11, color: DK.muted, margin: "6px 0 0", padding: "0 0 0 14px" }}>
                     <li>Provider: da AI Inventory</li>
                     {p.has_authorized_rep && <li>Rappresentante autorizzato: dal modulo Rappresentante autorizzato (Art. 22)</li>}
                   </ul>
@@ -470,7 +470,7 @@ export default function EUDBCompliancePage() {
 
         <SectionCard title="Rappresentante autorizzato (AR)" article="Allegato VIII, sez. A, punto 3" aiBadge={p.has_authorized_rep && !!p.ar_name}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: DK.muted, cursor: "pointer" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: DK.muted, cursor: "pointer" }}>
               <input type="checkbox" checked={p.has_authorized_rep}
                 onChange={e => patchP("has_authorized_rep", e.target.checked)}
                 style={{ accentColor: "#0D1016" }} />
@@ -479,7 +479,7 @@ export default function EUDBCompliancePage() {
           </div>
           {p.has_authorized_rep ? (
             <>
-              <div style={{ fontSize: 10, color: DK.amber, marginBottom: 10 }}>
+              <div style={{ fontSize: 11, color: DK.amber, marginBottom: 10 }}>
                 I dati AR sono sincronizzati con il modulo Rappresentante autorizzato (Art. 22) — le modifiche si propagano a entrambi.
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -490,13 +490,13 @@ export default function EUDBCompliancePage() {
               </div>
             </>
           ) : (
-            <p style={{ fontSize: 12, color: DK.faint, fontStyle: "italic" }}>Non applicabile — il provider è stabilito nell&apos;UE.</p>
+            <p style={{ fontSize: 13, color: DK.faint, fontStyle: "italic" }}>Non applicabile — il provider è stabilito nell&apos;UE.</p>
           )}
         </SectionCard>
 
         {!doc.aiConfirmed && prefill && prefill.prefillCount > 0 && (
           <button onClick={() => { patch(d => ({ ...d, aiConfirmed: true })); showToast("✓ Dati provider confermati"); }}
-            style={{ width: "100%", padding: "9px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+            style={{ width: "100%", padding: "9px", borderRadius: 8, fontSize: 13, fontWeight: 600,
               background: "rgba(0,0,0,0.04)", color: DK.muted, border: `1px solid ${DK.border}`, cursor: "pointer" }}>
             ✦ Conferma dati precompilati da AI
           </button>
@@ -526,10 +526,10 @@ export default function EUDBCompliancePage() {
             </div>
             {prefill.missingFields.length > 0 && (
               <div style={{ marginTop: 8, paddingLeft: 21 }}>
-                <p style={{ fontSize: 10, color: DK.amber, fontWeight: 500, margin: "0 0 4px" }}>
+                <p style={{ fontSize: 11, color: DK.amber, fontWeight: 500, margin: "0 0 4px" }}>
                   Campi da completare manualmente:
                 </p>
-                <ul style={{ fontSize: 10, color: DK.amber, margin: 0, padding: "0 0 0 14px" }}>
+                <ul style={{ fontSize: 11, color: DK.amber, margin: 0, padding: "0 0 0 14px" }}>
                   {prefill.missingFields.map((f, i) => <li key={i}>{f}</li>)}
                 </ul>
               </div>
@@ -653,11 +653,11 @@ export default function EUDBCompliancePage() {
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {/* Registered banner */}
         {isRegistered && (
-          <div style={{ padding: 14, borderRadius: 10, background: DK.greenBg,
+          <div style={{ padding: 14, borderRadius: 8, background: DK.greenBg,
             border: `1px solid ${DK.greenBdr}`, display: "flex", alignItems: "center", gap: 10 }}>
             <CheckCircle size={15} style={{ color: DK.emerald, flexShrink: 0 }} />
             <div>
-              <p style={{ fontSize: 12, color: DK.emerald, fontWeight: 600, margin: 0 }}>
+              <p style={{ fontSize: 13, color: DK.emerald, fontWeight: 600, margin: 0 }}>
                 Registrato — Art. 49 completato ✓
               </p>
               <p style={{ fontSize: 11, color: DK.emerald, opacity: 0.8, margin: "2px 0 0" }}>
@@ -672,7 +672,7 @@ export default function EUDBCompliancePage() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <span style={{ fontSize: 11, color: DK.muted }}>Dati identificativi del fornitore</span>
             <button onClick={() => copySection("a")} style={{ display: "flex", alignItems: "center", gap: 5,
-              padding: "4px 10px", borderRadius: 6, fontSize: 10, cursor: "pointer",
+              padding: "4px 10px", borderRadius: 6, fontSize: 11, cursor: "pointer",
               background: copiedSection === "a" ? DK.greenBg : "rgba(0,0,0,0.05)",
               color: copiedSection === "a" ? DK.green : DK.muted,
               border: `1px solid ${copiedSection === "a" ? DK.greenBdr : DK.border}` }}>
@@ -680,7 +680,7 @@ export default function EUDBCompliancePage() {
             </button>
           </div>
           <pre style={{ margin: 0, padding: 12, borderRadius: 8, background: DK.card2,
-            border: `1px solid ${DK.border}`, fontSize: 10, lineHeight: 1.7, color: DK.text,
+            border: `1px solid ${DK.border}`, fontSize: 11, lineHeight: 1.7, color: DK.text,
             overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-word",
             fontFamily: "var(--font-mono)" }}>
             {sectionA}
@@ -691,7 +691,7 @@ export default function EUDBCompliancePage() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <span style={{ fontSize: 11, color: DK.muted }}>Dati del sistema di IA</span>
             <button onClick={() => copySection("b")} style={{ display: "flex", alignItems: "center", gap: 5,
-              padding: "4px 10px", borderRadius: 6, fontSize: 10, cursor: "pointer",
+              padding: "4px 10px", borderRadius: 6, fontSize: 11, cursor: "pointer",
               background: copiedSection === "b" ? DK.greenBg : "rgba(0,0,0,0.05)",
               color: copiedSection === "b" ? DK.green : DK.muted,
               border: `1px solid ${copiedSection === "b" ? DK.greenBdr : DK.border}` }}>
@@ -699,7 +699,7 @@ export default function EUDBCompliancePage() {
             </button>
           </div>
           <pre style={{ margin: 0, padding: 12, borderRadius: 8, background: DK.card2,
-            border: `1px solid ${DK.border}`, fontSize: 10, lineHeight: 1.7, color: DK.text,
+            border: `1px solid ${DK.border}`, fontSize: 11, lineHeight: 1.7, color: DK.text,
             overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-word",
             fontFamily: "var(--font-mono)" }}>
             {sectionB}
@@ -710,7 +710,7 @@ export default function EUDBCompliancePage() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <span style={{ fontSize: 11, color: DK.muted }}>Documentazione di conformità</span>
             <button onClick={() => copySection("c")} style={{ display: "flex", alignItems: "center", gap: 5,
-              padding: "4px 10px", borderRadius: 6, fontSize: 10, cursor: "pointer",
+              padding: "4px 10px", borderRadius: 6, fontSize: 11, cursor: "pointer",
               background: copiedSection === "c" ? DK.greenBg : "rgba(0,0,0,0.05)",
               color: copiedSection === "c" ? DK.green : DK.muted,
               border: `1px solid ${copiedSection === "c" ? DK.greenBdr : DK.border}` }}>
@@ -718,7 +718,7 @@ export default function EUDBCompliancePage() {
             </button>
           </div>
           <pre style={{ margin: 0, padding: 12, borderRadius: 8, background: DK.card2,
-            border: `1px solid ${DK.border}`, fontSize: 10, lineHeight: 1.7, color: DK.text,
+            border: `1px solid ${DK.border}`, fontSize: 11, lineHeight: 1.7, color: DK.text,
             overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-word",
             fontFamily: "var(--font-mono)" }}>
             {sectionC}
@@ -727,9 +727,9 @@ export default function EUDBCompliancePage() {
 
         {/* Annex VIII Validation Banner (PROMPT BF) */}
         {!validation.valid && (
-          <div style={{ borderRadius: 10, border: "1px solid rgba(220,38,38,0.30)",
+          <div style={{ borderRadius: 8, border: "1px solid rgba(220,38,38,0.30)",
             background: "rgba(220,38,38,0.05)", padding: 16 }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: DK.red, margin: "0 0 10px" }}>
+            <p style={{ fontSize: 13, fontWeight: 600, color: DK.red, margin: "0 0 10px" }}>
               {validation.errors.length} campo{validation.errors.length > 1 ? "i" : ""} obbligatori mancanti — Allegato VIII
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
@@ -737,7 +737,7 @@ export default function EUDBCompliancePage() {
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11 }}>
                   <span style={{ color: DK.red, fontWeight: 700 }}>×</span>
                   <span style={{ color: DK.muted, flex: 1 }}>{err.message}</span>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: DK.faint }}>{err.artRef}</span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: DK.faint }}>{err.artRef}</span>
                 </div>
               ))}
             </div>
@@ -745,7 +745,7 @@ export default function EUDBCompliancePage() {
         )}
 
         {validation.valid && validation.warnings.length > 0 && (
-          <div style={{ borderRadius: 10, border: `1px solid ${DK.amberBdr}`, background: DK.amberBg, padding: 12 }}>
+          <div style={{ borderRadius: 8, border: `1px solid ${DK.amberBdr}`, background: DK.amberBg, padding: 12 }}>
             {validation.warnings.map((w, i) => (
               <p key={i} style={{ fontSize: 11, color: DK.amber, margin: 0 }}>⚠ {w.message}</p>
             ))}
@@ -753,7 +753,7 @@ export default function EUDBCompliancePage() {
         )}
 
         {validation.valid && (
-          <div style={{ borderRadius: 10, border: `1px solid ${DK.greenBdr}`, background: DK.greenBg, padding: 12 }}>
+          <div style={{ borderRadius: 8, border: `1px solid ${DK.greenBdr}`, background: DK.greenBg, padding: 12 }}>
             <p style={{ fontSize: 11, color: DK.green, margin: 0 }}>
               ✓ Tutti i campi Allegato VIII compilati — pronto per l&apos;esportazione e upload al portale EC
             </p>
@@ -763,7 +763,7 @@ export default function EUDBCompliancePage() {
         {/* Export XML / JSON (PROMPT BF) */}
         <div style={{ ...cardDk, padding: 16, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           <div style={{ flex: 1, minWidth: 200 }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: DK.text, margin: 0 }}>Esporta per upload EUDB</p>
+            <p style={{ fontSize: 13, fontWeight: 600, color: DK.text, margin: 0 }}>Esporta per upload EUDB</p>
             <p style={{ fontSize: 11, color: DK.muted, margin: "2px 0 0" }}>
               XML / JSON machine-readable — struttura Allegato VIII · Art. 49
             </p>
@@ -772,7 +772,7 @@ export default function EUDBCompliancePage() {
             disabled={!validation.valid}
             onClick={() => downloadEudbXml(eudbDraft)}
             style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 14px",
-              borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: validation.valid ? "pointer" : "not-allowed",
+              borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: validation.valid ? "pointer" : "not-allowed",
               background: validation.valid ? "#0D1016" : "rgba(0,0,0,0.05)",
               color: validation.valid ? "#fff" : DK.faint,
               border: `1px solid ${validation.valid ? "#0D1016" : DK.border}` }}>
@@ -782,13 +782,13 @@ export default function EUDBCompliancePage() {
             disabled={!validation.valid}
             onClick={() => downloadEudbJson(eudbDraft)}
             style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 14px",
-              borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: validation.valid ? "pointer" : "not-allowed",
+              borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: validation.valid ? "pointer" : "not-allowed",
               background: "rgba(0,0,0,0.05)", color: validation.valid ? DK.text : DK.faint,
               border: `1px solid ${DK.border}` }}>
             <Download size={12} /> Esporta JSON
           </button>
           {!validation.valid && (
-            <p style={{ fontSize: 10, color: DK.faint, width: "100%", margin: 0 }}>
+            <p style={{ fontSize: 11, color: DK.faint, width: "100%", margin: 0 }}>
               Fornitore: {sectionErrors.sectionA} · Sistema: {sectionErrors.sectionB} · Allegati: {sectionErrors.allegati}
             </p>
           )}
@@ -797,7 +797,7 @@ export default function EUDBCompliancePage() {
         {/* Copy all */}
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <button onClick={() => copySection("all")} style={{ display: "flex", alignItems: "center", gap: 6,
-            padding: "7px 16px", borderRadius: 8, fontSize: 12, cursor: "pointer",
+            padding: "7px 16px", borderRadius: 8, fontSize: 13, cursor: "pointer",
             background: copiedSection === "all" ? DK.greenBg : "rgba(0,0,0,0.05)",
             color: copiedSection === "all" ? DK.green : DK.muted,
             border: `1px solid ${copiedSection === "all" ? DK.greenBdr : DK.border}` }}>
@@ -812,11 +812,11 @@ export default function EUDBCompliancePage() {
               <div key={ps.n} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                 <div style={{ flexShrink: 0, width: 22, height: 22, borderRadius: "50%",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 10, fontWeight: 700, color: DK.muted,
+                  fontSize: 11, fontWeight: 700, color: DK.muted,
                   background: "rgba(0,0,0,0.04)", border: `1px solid ${DK.border}` }}>
                   {ps.n}
                 </div>
-                <p style={{ fontSize: 12, color: DK.text, margin: 0, lineHeight: 1.5, paddingTop: 3 }}>
+                <p style={{ fontSize: 13, color: DK.text, margin: 0, lineHeight: 1.5, paddingTop: 3 }}>
                   {ps.text}
                   {ps.href && (
                     <> —{" "}
@@ -824,7 +824,7 @@ export default function EUDBCompliancePage() {
                         style={{ color: DK.muted, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 3 }}>
                         ec.europa.eu/transparency/ai-register <ExternalLink size={10} />
                       </a>
-                      <span style={{ fontSize: 9, color: DK.faint }}></span>
+                      <span style={{ fontSize: 11, color: DK.faint }}></span>
                     </>
                   )}
                 </p>
@@ -846,7 +846,7 @@ export default function EUDBCompliancePage() {
             <button disabled={!registrationNumber.trim()}
               onClick={handleSaveRegistrationNumber}
               style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 16px",
-                borderRadius: 8, fontSize: 12, fontWeight: 600,
+                borderRadius: 8, fontSize: 13, fontWeight: 600,
                 background: registrationNumber.trim() ? DK.greenBg : "rgba(0,0,0,0.05)",
                 color: registrationNumber.trim() ? DK.green : DK.faint,
                 border: `1px solid ${registrationNumber.trim() ? DK.greenBdr : DK.border}`,
@@ -862,7 +862,7 @@ export default function EUDBCompliancePage() {
             <p style={{ fontSize: 11, color: DK.muted, margin: "3px 0 0" }}>Aggiorna il Dossier AI Act per la conformità Art. 49.</p>
           </div>
           <button onClick={handleSaveDossier} style={{ display: "flex", alignItems: "center", gap: 6,
-            padding: "8px 16px", borderRadius: 9999, fontSize: 12, fontWeight: 500,
+            padding: "8px 16px", borderRadius: 9999, fontSize: 13, fontWeight: 500,
             background: "#0D1016", color: "#fff",
             border: "1px solid #0D1016", cursor: "pointer" }}>
             <Save size={13} /> Salva nel dossier
@@ -887,12 +887,12 @@ export default function EUDBCompliancePage() {
           <h1 style={{ fontSize: 22, fontWeight: 400, letterSpacing: "-0.5px", color: DK.text, margin: 0 }}>
             Registrazione EUDB
           </h1>
-          <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 7px", borderRadius: 10,
+          <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", padding: "2px 7px", borderRadius: 8,
             background: "rgba(0,0,0,0.04)", color: DK.muted, border: `1px solid ${DK.border}` }}>
             Art. 49
           </span>
         </div>
-        <p style={{ fontSize: 12, color: DK.muted, margin: 0 }}>
+        <p style={{ fontSize: 13, color: DK.muted, margin: 0 }}>
           Wizard prefillato automaticamente dai dati degli altri moduli — verifica e conferma i campi proposti dall&apos;AI.
         </p>
       </div>
@@ -917,7 +917,7 @@ export default function EUDBCompliancePage() {
                 <div style={{ display: "flex", alignItems: "center", gap: 7, flexShrink: 0 }}>
                   <div style={{ width: 22, height: 22, borderRadius: "50%",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 10, fontWeight: 700,
+                    fontSize: 11, fontWeight: 700,
                     background: isDone ? DK.greenBg : isActive ? "rgba(0,0,0,0.06)" : "rgba(0,0,0,0.03)",
                     color: isDone ? DK.green : isActive ? DK.text : DK.faint,
                     border: `1px solid ${isDone ? DK.greenBdr : isActive ? DK.text : DK.border}` }}>
@@ -951,7 +951,7 @@ export default function EUDBCompliancePage() {
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20 }}>
         <button onClick={() => setStep(s => Math.max(1, s - 1) as 1 | 2 | 3 | 4)} disabled={step === 1}
           style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px",
-            borderRadius: 9999, fontSize: 12, cursor: step === 1 ? "not-allowed" : "pointer",
+            borderRadius: 9999, fontSize: 13, cursor: step === 1 ? "not-allowed" : "pointer",
             background: "rgba(0,0,0,0.05)", color: step === 1 ? DK.faint : DK.text,
             border: `1px solid ${DK.border}` }}>
           <ChevronLeft size={13} /> Indietro
@@ -960,7 +960,7 @@ export default function EUDBCompliancePage() {
           <button onClick={() => { if (step === 1 && !canProceed1) return; setStep(s => Math.min(4, s + 1) as 1 | 2 | 3 | 4); }}
             disabled={step === 1 && !canProceed1}
             style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px",
-              borderRadius: 9999, fontSize: 12, fontWeight: 500,
+              borderRadius: 9999, fontSize: 13, fontWeight: 500,
               background: step === 1 && !canProceed1 ? "rgba(0,0,0,0.04)" : "#0D1016",
               color: step === 1 && !canProceed1 ? DK.faint : "#fff",
               border: `1px solid ${step === 1 && !canProceed1 ? DK.border : "#0D1016"}`,
@@ -973,9 +973,9 @@ export default function EUDBCompliancePage() {
       {/* Toast */}
       {toast && (
         <div style={{ position: "fixed", bottom: 24, right: 24, zIndex: 9999,
-          padding: "10px 18px", borderRadius: 10, background: "#ffffff",
+          padding: "10px 18px", borderRadius: 8, background: "#ffffff",
           border: `1px solid ${DK.greenBdr}`, color: DK.green,
-          fontSize: 12, fontWeight: 500, boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
+          fontSize: 13, fontWeight: 500, boxShadow: "none" }}>
           {toast}
         </div>
       )}

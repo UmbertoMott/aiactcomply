@@ -11,7 +11,7 @@ import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { readFromStorage, type ClassifierResult, type DataAuditResult } from "@/lib/dossier/storage-schema";
 import { useT } from "@/i18n/LocaleProvider";
 
-const T = { text: "#0D1016", muted: "rgba(0,0,0,0.42)", border: "rgba(0,0,0,0.08)", bg: "#f8f8f7" } as const;
+const T = { text: "#0D1016", muted: "#0D1016", border: "rgba(0,0,0,0.08)", bg: "#f8f8f7" } as const;
 const VIEW_KEY = "aicomply_dpia_view";
 
 export default function DPIAPage() {

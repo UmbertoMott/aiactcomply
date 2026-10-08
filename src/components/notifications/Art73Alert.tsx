@@ -44,7 +44,7 @@ export default function Art73Alert() {
       className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg"
       style={{ background: bg, border: `1px solid ${border}` }}
     >
-      <p className="text-[11px] flex-1 min-w-0 truncate" style={{ color: "rgba(0,0,0,0.55)" }}>
+      <p className="text-[11px] flex-1 min-w-0 truncate" style={{ color: "#0D1016" }}>
         <span style={{ fontWeight: 600, color }}>Art. 73 — {minDays} giorni alla notifica.</span>
         {" "}{count} incidente/i non segnalato/i all&apos;autorità.
       </p>
@@ -58,7 +58,7 @@ export default function Art73Alert() {
       <button
         onClick={() => setDismissed(true)}
         className="flex-shrink-0 p-0.5 rounded hover:opacity-50 transition-opacity"
-        style={{ color: "rgba(0,0,0,0.25)" }}
+        style={{ color: "#0D1016" }}
         aria-label="Chiudi"
       >
         <X className="h-3 w-3" />

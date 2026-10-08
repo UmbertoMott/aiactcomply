@@ -7,9 +7,9 @@ import type { CorrelatedRisk } from "@/lib/assessment/assessment-schema";
 import { useT } from "@/i18n/LocaleProvider";
 
 const SEV_STYLE: Record<CorrelatedRisk["severity"], { bg: string; color: string; border: string }> = {
-  low:      { bg: "rgba(0,0,0,0.03)", color: "rgba(0,0,0,0.45)", border: "rgba(0,0,0,0.08)" },
-  medium:   { bg: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.60)", border: "rgba(0,0,0,0.14)" },
-  high:     { bg: "rgba(0,0,0,0.12)", color: "rgba(0,0,0,0.80)", border: "rgba(0,0,0,0.22)" },
+  low:      { bg: "rgba(0,0,0,0.03)", color: "#0D1016", border: "rgba(0,0,0,0.08)" },
+  medium:   { bg: "rgba(0,0,0,0.06)", color: "#0D1016", border: "rgba(0,0,0,0.14)" },
+  high:     { bg: "rgba(0,0,0,0.12)", color: "#0D1016", border: "rgba(0,0,0,0.22)" },
   critical: { bg: "#0D1016",          color: "#ffffff",           border: "#0D1016"           },
 };
 
@@ -34,9 +34,9 @@ export function CorrelatedRisksPanel() {
 
   if (risks.length === 0) {
     return (
-      <div style={{ padding: "12px 16px", borderRadius: 10,
-        border: "1px solid rgba(0,0,0,0.07)", background: "rgba(0,0,0,0.02)" }}>
-        <p style={{ fontSize: 12, color: "rgba(0,0,0,0.40)", margin: 0 }}>
+      <div style={{ padding: "12px 16px", borderRadius: 8,
+        border: "1px solid rgba(0,0,0,0.08)", background: "#FAFAF9" }}>
+        <p style={{ fontSize: 13, color: "#0D1016", margin: 0 }}>
           {t("noCorrelatedRisks")}
         </p>
       </div>
@@ -50,25 +50,25 @@ export function CorrelatedRisksPanel() {
         const applied = r.mitigation?.appliedToRegister ?? false;
         return (
           <div key={r.id} style={{
-            borderRadius: 10, border: "1px solid rgba(0,0,0,0.08)",
+            borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)",
             background: "#ffffff", padding: 14,
           }}>
             {/* Header */}
             <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 8 }}>
               <span style={{
-                fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 6,
+                fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 6,
                 background: sev.bg, color: sev.color, border: `1px solid ${sev.border}`,
                 flexShrink: 0, whiteSpace: "nowrap",
               }}>
                 {r.severity.toUpperCase()}
               </span>
-              <p style={{ fontSize: 12, color: "#0D1016", fontWeight: 500, margin: 0, flex: 1 }}>
+              <p style={{ fontSize: 13, color: "#0D1016", fontWeight: 500, margin: 0, flex: 1 }}>
                 {r.description}
               </p>
               <span style={{
-                fontSize: 9, padding: "2px 6px", borderRadius: 4,
-                background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.40)",
-                border: "1px solid rgba(0,0,0,0.07)", flexShrink: 0,
+                fontSize: 11, padding: "2px 6px", borderRadius: 4,
+                background: "rgba(0,0,0,0.04)", color: "#0D1016",
+                border: "1px solid rgba(0,0,0,0.08)", flexShrink: 0,
               }}>
                 {r.sourceView}
               </span>
@@ -79,9 +79,9 @@ export function CorrelatedRisksPanel() {
               <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 10 }}>
                 {r.refs.map((ref, i) => (
                   <span key={i} style={{
-                    fontSize: 9, padding: "1px 6px", borderRadius: 4, fontFamily: "var(--font-mono)",
-                    background: "rgba(0,0,0,0.03)", color: "rgba(0,0,0,0.50)",
-                    border: "1px solid rgba(0,0,0,0.07)",
+                    fontSize: 11, padding: "1px 6px", borderRadius: 4, fontFamily: "var(--font-mono)",
+                    background: "#FAFAF9", color: "#0D1016",
+                    border: "1px solid rgba(0,0,0,0.08)",
                   }}>
                     {ref.framework} · {ref.citation}
                   </span>
@@ -91,7 +91,7 @@ export function CorrelatedRisksPanel() {
 
             {/* Mitigation */}
             {applied ? (
-              <div style={{ fontSize: 11, color: "rgba(0,0,0,0.40)" }}>
+              <div style={{ fontSize: 11, color: "#0D1016" }}>
                 ✓ {t("appliedToRegister")} — ID: {r.mitigation?.registerRiskId}
               </div>
             ) : (
@@ -101,8 +101,8 @@ export function CorrelatedRisksPanel() {
                   onChange={e => setMitigationTexts(prev => ({ ...prev, [r.id]: e.target.value }))}
                   placeholder={t("ph_mitigation")}
                   style={{
-                    flex: 1, padding: "6px 10px", borderRadius: 7, fontSize: 11,
-                    border: "1px solid rgba(0,0,0,0.10)", color: "#0D1016",
+                    flex: 1, padding: "6px 10px", borderRadius: 8, fontSize: 11,
+                    border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016",
                     background: "#f9f9fb", outline: "none",
                   }}
                 />
@@ -110,11 +110,11 @@ export function CorrelatedRisksPanel() {
                   disabled={!mitigationTexts[r.id]?.trim() || applying === r.id}
                   onClick={() => handleApply(r.id)}
                   style={{
-                    padding: "6px 14px", borderRadius: 7, fontSize: 11, fontWeight: 600,
+                    padding: "6px 14px", borderRadius: 8, fontSize: 11, fontWeight: 600,
                     cursor: mitigationTexts[r.id]?.trim() ? "pointer" : "not-allowed",
                     background: mitigationTexts[r.id]?.trim() ? "#0D1016" : "rgba(0,0,0,0.05)",
                     color: mitigationTexts[r.id]?.trim() ? "#ffffff" : "rgba(0,0,0,0.30)",
-                    border: "1px solid rgba(0,0,0,0.10)",
+                    border: "1px solid rgba(0,0,0,0.08)",
                     whiteSpace: "nowrap",
                   }}>
                   {t("applyToRegister")}

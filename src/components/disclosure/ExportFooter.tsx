@@ -72,10 +72,10 @@ export default function ExportFooter({ outputId, companyName, systemName, genera
 
   return (
     <div
-      className="mt-8 pt-4 text-[9px] leading-relaxed font-mono"
+      className="mt-8 pt-4 text-[11px] leading-relaxed font-mono"
       style={{
         borderTop: "2px solid #0C447C",
-        color: "rgba(0,0,0,0.55)",
+        color: "#0D1016",
         whiteSpace: "pre-wrap",
         wordBreak: "break-word",
       }}

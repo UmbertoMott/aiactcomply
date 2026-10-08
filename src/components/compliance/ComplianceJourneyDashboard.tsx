@@ -13,8 +13,8 @@ import { loadOrgProfile } from "@/lib/dossier/org-profile";
 
 const T = {
   text:    "#0D1016",
-  muted:   "rgba(0,0,0,0.40)",
-  faint:   "rgba(0,0,0,0.18)",
+  muted:   "#0D1016",
+  faint:   "#0D1016",
   border:  "rgba(0,0,0,0.07)",
   card:    "#ffffff",
   red:     "#dc2626",   redBg:   "rgba(220,38,38,0.06)",   redBdr:  "rgba(220,38,38,0.18)",
@@ -26,7 +26,7 @@ const T = {
 const cardSt: CSSProperties = {
   background: T.card,
   border: `1px solid ${T.border}`,
-  borderRadius: 12,
+  borderRadius: 8,
   padding: 20,
 };
 
@@ -75,7 +75,7 @@ export default function ComplianceJourneyDashboard() {
         <div>
           <div className="flex items-center gap-2 mb-0.5">
             <Zap style={{ width: 15, height: 15, color: T.text }} />
-            <span style={{ fontSize: 14, fontWeight: 600, color: T.text }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>
               Percorso di Conformità
             </span>
             {/* Tier badge */}
@@ -86,7 +86,7 @@ export default function ComplianceJourneyDashboard() {
               {tierMeta.label}
             </span>
           </div>
-          <p style={{ fontSize: 12, color: T.muted, marginTop: 2 }}>
+          <p style={{ fontSize: 13, color: T.muted, marginTop: 2 }}>
             {pendingSteps.length === 0
               ? "Tutti i passi completati — ottimo lavoro! 🎉"
               : `${pendingSteps.length} ${pendingSteps.length === 1 ? "azione rimanente" : "azioni rimanenti"}`}
@@ -126,7 +126,7 @@ export default function ComplianceJourneyDashboard() {
           {!showAll && pendingSteps.length > 4 && (
             <button
               onClick={() => setShowAll(true)}
-              style={{ fontSize: 12, color: T.blue, background: "none", border: "none", cursor: "pointer", padding: "4px 0" }}
+              style={{ fontSize: 13, color: T.blue, background: "none", border: "none", cursor: "pointer", padding: "4px 0" }}
             >
               + {pendingSteps.length - 4} altri passi
             </button>
@@ -135,7 +135,7 @@ export default function ComplianceJourneyDashboard() {
           {/* Done steps (collapsed) */}
           {doneSteps.length > 0 && (
             <details className="mt-2">
-              <summary style={{ fontSize: 12, color: T.muted, cursor: "pointer", userSelect: "none", listStyle: "none" }}>
+              <summary style={{ fontSize: 13, color: T.muted, cursor: "pointer", userSelect: "none", listStyle: "none" }}>
                 <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   <CheckCircle2 style={{ width: 13, height: 13, color: T.green }} />
                   {doneSteps.length === 1 ? "1 passo completato" : `${doneSteps.length} passi completati`}
@@ -160,12 +160,12 @@ export default function ComplianceJourneyDashboard() {
         }}>
           <div className="flex items-center gap-2">
             <AlertCircle style={{ width: 14, height: 14, color: T.amber }} />
-            <span style={{ fontSize: 12, color: T.amber, fontWeight: 500 }}>
+            <span style={{ fontSize: 13, color: T.amber, fontWeight: 500 }}>
               Classifica il sistema per sbloccare il piano completo
             </span>
           </div>
           <Link href="/dashboard/triage" style={{
-            fontSize: 12, fontWeight: 600, color: T.amber,
+            fontSize: 13, fontWeight: 600, color: T.amber,
             display: "flex", alignItems: "center", gap: 4, textDecoration: "none",
           }}>
             Inizia <ChevronRight style={{ width: 13, height: 13 }} />

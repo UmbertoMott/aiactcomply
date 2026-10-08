@@ -2,8 +2,8 @@
 import Link from "next/link";
 import { ROLE_LABEL, formatDate, type Obligation, type Role } from "@/lib/obligations/engine";
 
-const T = { text: "#0D1016", muted: "rgba(0,0,0,0.45)", faint: "rgba(0,0,0,0.25)", border: "rgba(0,0,0,0.08)", amber: "#b45309" } as const;
-const card: React.CSSProperties = { background: "#ffffff", border: `1px solid ${T.border}`, borderRadius: 12, padding: "20px 22px", marginBottom: 12 };
+const T = { text: "#0D1016", muted: "#0D1016", faint: "#0D1016", border: "rgba(0,0,0,0.08)", amber: "#b45309" } as const;
+const card: React.CSSProperties = { background: "#ffffff", border: `1px solid ${T.border}`, borderRadius: 8, padding: "20px 22px", marginBottom: 12 };
 
 // ─── Riepilogo obblighi ───────────────────────────────────────────────────────
 
@@ -28,7 +28,7 @@ export default function ObligationsSummary({ roles, obligations, notes, riskTitl
       </div>
       {notes.map((n, i) => (
         <div key={i} style={{ ...card, padding: "12px 16px", background: "rgba(180,83,9,0.04)", borderColor: "rgba(180,83,9,0.2)" }}>
-          <p style={{ fontSize: 12.5, color: T.text, margin: 0, lineHeight: 1.5 }}>{n}</p>
+          <p style={{ fontSize: 13, color: T.text, margin: 0, lineHeight: 1.5 }}>{n}</p>
         </div>
       ))}
       {GROUP_ORDER.map(g => {
@@ -40,11 +40,11 @@ export default function ObligationsSummary({ roles, obligations, notes, riskTitl
             {items.map((o, i) => (
               <div key={o.id} style={{ padding: "12px 18px", borderTop: i ? `1px solid ${T.border}` : "none" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline" }}>
-                  <p style={{ fontSize: 13.5, fontWeight: 600, color: T.text, margin: 0 }}>{o.title}</p>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: 0 }}>{o.title}</p>
                   <span style={{ fontSize: 11, color: T.muted, whiteSpace: "nowrap" }}>{o.article}</span>
                 </div>
-                <p style={{ fontSize: 12.5, color: T.muted, margin: "4px 0 6px", lineHeight: 1.5 }}>{o.what}</p>
-                {o.note && <p style={{ fontSize: 12, color: T.amber, margin: "0 0 6px" }}>{o.note}</p>}
+                <p style={{ fontSize: 13, color: T.muted, margin: "4px 0 6px", lineHeight: 1.5 }}>{o.what}</p>
+                {o.note && <p style={{ fontSize: 13, color: T.amber, margin: "0 0 6px" }}>{o.note}</p>}
                 <div style={{ display: "flex", gap: 12, flexWrap: "wrap", fontSize: 11, color: T.muted }}>
                   <span>Si applica dal {formatDate(o.appliesFrom)}</span>
                   {o.iso.length > 0 && <span>ISO/IEC 42001: {o.iso.join(", ")}</span>}

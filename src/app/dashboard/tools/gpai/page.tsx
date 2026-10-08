@@ -17,8 +17,8 @@ type TFn = (key: string) => string;
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const T = {
   text:     "#0D1016",
-  muted:    "rgba(0,0,0,0.45)",
-  faint:    "rgba(0,0,0,0.28)",
+  muted:    "#0D1016",
+  faint:    "#0D1016",
   border:   "rgba(0,0,0,0.08)",
   card:     "#ffffff",
   bg:       "#F8FAFC",
@@ -32,8 +32,8 @@ const T = {
 const cardSt: CSSProperties = {
   background: T.card,
   border: `1px solid ${T.border}`,
-  boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-  borderRadius: 12,
+  boxShadow: "none",
+  borderRadius: 8,
   padding: 20,
 };
 
@@ -389,7 +389,7 @@ function AnswerBtn({ value, selected, onClick, t }: {
       style={{
         padding: "5px 12px",
         borderRadius: 20,
-        fontSize: 12,
+        fontSize: 13,
         fontWeight: 600,
         cursor: "pointer",
         border: `1.5px solid ${selected ? c.border : T.border}`,
@@ -557,7 +557,7 @@ export default function GPAIAssessmentPage() {
   };
 
   const inputSt: CSSProperties = {
-    width: "100%", padding: "7px 10px", borderRadius: 7,
+    width: "100%", padding: "7px 10px", borderRadius: 8,
     border: `1px solid ${T.border}`, fontSize: 13, color: T.text,
     background: T.card, outline: "none", boxSizing: "border-box",
   };
@@ -572,7 +572,7 @@ export default function GPAIAssessmentPage() {
 
       {/* Dossier saved */}
       {savedAt ? (
-        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]"
+        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[13px]"
           style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}>
           <CheckCircle2 size={13} style={{ color: T.green }} />
           <span style={{ color: T.green }}>{t("savedDossier")} · {new Date(savedAt).toLocaleDateString(loc)}</span>
@@ -604,7 +604,7 @@ export default function GPAIAssessmentPage() {
           <h2 style={{ fontSize: 15, fontWeight: 700, color: T.text, margin: 0 }}>
             {t("sec1_title")}
           </h2>
-          <p style={{ fontSize: 12, color: T.muted, marginTop: 4 }}>
+          <p style={{ fontSize: 13, color: T.muted, marginTop: 4 }}>
             {t("sec1_sub")}
           </p>
         </div>
@@ -615,7 +615,7 @@ export default function GPAIAssessmentPage() {
             const expanded = expandedChecks.has(check.id);
             return (
               <div key={check.id} style={{
-                border: `1px solid ${T.border}`, borderRadius: 10, padding: "12px 14px",
+                border: `1px solid ${T.border}`, borderRadius: 8, padding: "12px 14px",
                 background: ans !== null ? T.bg : T.card,
               }}>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
@@ -646,7 +646,7 @@ export default function GPAIAssessmentPage() {
                       <div style={{
                         marginTop: 10, padding: "10px 12px", borderRadius: 8,
                         background: T.blueBg, border: `1px solid ${T.blueBdr}`,
-                        fontSize: 12, color: T.blue, lineHeight: 1.6,
+                        fontSize: 13, color: T.blue, lineHeight: 1.6,
                       }}>
                         {t(`e_${check.id}`)}
                       </div>
@@ -661,7 +661,7 @@ export default function GPAIAssessmentPage() {
         {/* Role result banner */}
         {role !== "incomplete" && (
           <div style={{
-            marginTop: 16, padding: "12px 16px", borderRadius: 10,
+            marginTop: 16, padding: "12px 16px", borderRadius: 8,
             background: roleBannerConfig[role].bg,
             border: `1px solid ${roleBannerConfig[role].bdr}`,
             display: "flex", alignItems: "flex-start", gap: 10,
@@ -673,7 +673,7 @@ export default function GPAIAssessmentPage() {
               <div style={{ fontWeight: 700, fontSize: 13, color: roleBannerConfig[role].col }}>
                 {roleBannerConfig[role].title}
               </div>
-              <div style={{ fontSize: 12, color: roleBannerConfig[role].col, marginTop: 2, opacity: 0.9 }}>
+              <div style={{ fontSize: 13, color: roleBannerConfig[role].col, marginTop: 2, opacity: 0.9 }}>
                 {roleBannerConfig[role].desc}
               </div>
             </div>
@@ -682,9 +682,9 @@ export default function GPAIAssessmentPage() {
 
         {role === "incomplete" && (
           <div style={{
-            marginTop: 16, padding: "10px 14px", borderRadius: 10,
+            marginTop: 16, padding: "10px 14px", borderRadius: 8,
             background: T.bg, border: `1px solid ${T.border}`,
-            fontSize: 12, color: T.muted, display: "flex", alignItems: "center", gap: 8,
+            fontSize: 13, color: T.muted, display: "flex", alignItems: "center", gap: 8,
           }}>
             <Info size={14} />
             {t("completeAllQuestions")}
@@ -703,7 +703,7 @@ export default function GPAIAssessmentPage() {
                 <div style={{ fontSize: 13, fontWeight: 600, color: T.blue, marginBottom: 4 }}>
                   {t("osException")}
                 </div>
-                <div style={{ fontSize: 12, color: T.blue, lineHeight: 1.6, marginBottom: 10 }}>
+                <div style={{ fontSize: 13, color: T.blue, lineHeight: 1.6, marginBottom: 10 }}>
                   {t("osExceptionDesc")}
                 </div>
                 <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
@@ -713,7 +713,7 @@ export default function GPAIAssessmentPage() {
                     onChange={e => setDraft(p => ({ ...p, isOpenSource: e.target.checked }))}
                     style={{ width: 14, height: 14 }}
                   />
-                  <span style={{ fontSize: 12, color: T.blue, fontWeight: 600 }}>
+                  <span style={{ fontSize: 13, color: T.blue, fontWeight: 600 }}>
                     {t("osCheckbox")}
                   </span>
                 </label>
@@ -742,7 +742,7 @@ export default function GPAIAssessmentPage() {
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
                 <div style={{ flex: 1 }}><ProgressBar value={art53Score} /></div>
-                <span style={{ fontSize: 12, fontWeight: 700, color: T.blue, minWidth: 36 }}>{art53Score}%</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: T.blue, minWidth: 36 }}>{art53Score}%</span>
               </div>
             </div>
 
@@ -753,7 +753,7 @@ export default function GPAIAssessmentPage() {
                 const isExempt = draft.isOpenSource && (obl.id === "downstream_info" || obl.id === "copyright_policy") && role !== "gpai_provider_systemic";
                 return (
                   <div key={obl.id} style={{
-                    border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden",
+                    border: `1px solid ${T.border}`, borderRadius: 8, overflow: "hidden",
                     opacity: isExempt ? 0.55 : 1,
                   }}>
                     <div
@@ -764,8 +764,8 @@ export default function GPAIAssessmentPage() {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                           <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{t(`a53_${obl.id}_label`)}</span>
-                          <span style={{ fontSize: 10, color: T.muted, fontStyle: "italic" }}>{obl.article}</span>
-                          {isExempt && <span style={{ fontSize: 10, fontWeight: 600, color: T.green, background: T.greenBg, borderRadius: 4, padding: "1px 6px" }}>{t("exemptOs")}</span>}
+                          <span style={{ fontSize: 11, color: T.muted, fontStyle: "italic" }}>{obl.article}</span>
+                          {isExempt && <span style={{ fontSize: 11, fontWeight: 600, color: T.green, background: T.greenBg, borderRadius: 4, padding: "1px 6px" }}>{t("exemptOs")}</span>}
                         </div>
                       </div>
                       <div onClick={e => e.stopPropagation()}>
@@ -775,19 +775,19 @@ export default function GPAIAssessmentPage() {
 
                     {expanded && (
                       <div style={{ padding: "12px 14px 14px", borderTop: `1px solid ${T.border}`, background: T.bg }}>
-                        <p style={{ fontSize: 12, color: T.muted, marginBottom: 10, lineHeight: 1.6 }}>{t(`a53_${obl.id}_desc`)}</p>
+                        <p style={{ fontSize: 13, color: T.muted, marginBottom: 10, lineHeight: 1.6 }}>{t(`a53_${obl.id}_desc`)}</p>
 
                         {obl.template_fields && (
                           <div style={{ marginBottom: 10 }}>
                             <div style={{ fontSize: 11, fontWeight: 600, color: T.muted, marginBottom: 6 }}>{t("fieldsToDocument")}</div>
-                            <ul style={{ margin: 0, paddingLeft: 16, fontSize: 12, color: T.text, lineHeight: 1.8 }}>
+                            <ul style={{ margin: 0, paddingLeft: 16, fontSize: 13, color: T.text, lineHeight: 1.8 }}>
                               {obl.template_fields.map((f, i) => <li key={i}>{t(`a53_${obl.id}_f${i}`)}</li>)}
                             </ul>
                           </div>
                         )}
 
                         {obl.href && (
-                          <Link href={obl.href} style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, color: T.blue, fontWeight: 600 }}>
+                          <Link href={obl.href} style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 13, color: T.blue, fontWeight: 600 }}>
                             <ExternalLink size={12} /> {obl.note ? t(`a53_${obl.id}_note`) : t("goToTool")}
                           </Link>
                         )}
@@ -823,10 +823,10 @@ export default function GPAIAssessmentPage() {
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
                   <div style={{ flex: 1 }}><ProgressBar value={art55Score} color={T.red} /></div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: T.red, minWidth: 36 }}>{art55Score}%</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: T.red, minWidth: 36 }}>{art55Score}%</span>
                 </div>
                 {/* AI Office unsure warning */}
-                <div style={{ marginTop: 10, padding: "8px 12px", borderRadius: 8, background: T.amberBg, border: `1px solid ${T.amberBdr}`, fontSize: 12, color: T.amber }}>
+                <div style={{ marginTop: 10, padding: "8px 12px", borderRadius: 8, background: T.amberBg, border: `1px solid ${T.amberBdr}`, fontSize: 13, color: T.amber }}>
                   <span dangerouslySetInnerHTML={{ __html: t("flopsNote") }} />
                 </div>
               </div>
@@ -836,7 +836,7 @@ export default function GPAIAssessmentPage() {
                   const state = draft.art55.find(o => o.id === obl.id)!;
                   const expanded = expandedObl.has(`55-${obl.id}`);
                   return (
-                    <div key={obl.id} style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden" }}>
+                    <div key={obl.id} style={{ border: `1px solid ${T.border}`, borderRadius: 8, overflow: "hidden" }}>
                       <div
                         style={{ padding: "12px 14px", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, background: T.card }}
                         onClick={() => toggleObl(`55-${obl.id}`)}
@@ -845,7 +845,7 @@ export default function GPAIAssessmentPage() {
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                             <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{t(`a55_${obl.id}_label`)}</span>
-                            <span style={{ fontSize: 10, color: T.muted, fontStyle: "italic" }}>{obl.article}</span>
+                            <span style={{ fontSize: 11, color: T.muted, fontStyle: "italic" }}>{obl.article}</span>
                           </div>
                         </div>
                         <div onClick={e => e.stopPropagation()}>
@@ -855,7 +855,7 @@ export default function GPAIAssessmentPage() {
 
                       {expanded && (
                         <div style={{ padding: "12px 14px 14px", borderTop: `1px solid ${T.border}`, background: T.bg }}>
-                          <p style={{ fontSize: 12, color: T.muted, marginBottom: 10, lineHeight: 1.6 }}>{t(`a55_${obl.id}_desc`)}</p>
+                          <p style={{ fontSize: 13, color: T.muted, marginBottom: 10, lineHeight: 1.6 }}>{t(`a55_${obl.id}_desc`)}</p>
 
                           {obl.status_options && (
                             <div style={{ marginBottom: 10 }}>
@@ -863,7 +863,7 @@ export default function GPAIAssessmentPage() {
                               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                                 {obl.status_options.map(opt => (
                                   <button key={opt} onClick={() => updateArt55Field(obl.id, "cop_status", opt)} style={{
-                                    padding: "5px 12px", borderRadius: 20, fontSize: 12, fontWeight: 500, cursor: "pointer",
+                                    padding: "5px 12px", borderRadius: 20, fontSize: 13, fontWeight: 500, cursor: "pointer",
                                     background: state.fields["cop_status"] === opt ? T.blueBg : T.card,
                                     color: state.fields["cop_status"] === opt ? T.blue : T.muted,
                                     border: `1px solid ${state.fields["cop_status"] === opt ? T.blueBdr : T.border}`,
@@ -910,7 +910,7 @@ export default function GPAIAssessmentPage() {
                   {t("sec2b1_title")}
                 </h2>
               </div>
-              <p style={{ fontSize: 12, color: T.muted, marginTop: 4 }}>
+              <p style={{ fontSize: 13, color: T.muted, marginTop: 4 }}>
                 {t("sec2b1_sub")}
               </p>
             </div>
@@ -926,7 +926,7 @@ export default function GPAIAssessmentPage() {
               const allChecked = prov.has_technical_doc && prov.has_usage_policy && prov.has_copyright_policy && prov.has_limitations_doc;
               const missingCount = [prov.has_technical_doc, prov.has_usage_policy, prov.has_copyright_policy, prov.has_limitations_doc].filter(v => !v).length;
               return (
-                <div key={prov.id} style={{ border: `1px solid ${allChecked ? T.greenBdr : T.border}`, borderRadius: 10, overflow: "hidden", marginBottom: 8 }}>
+                <div key={prov.id} style={{ border: `1px solid ${allChecked ? T.greenBdr : T.border}`, borderRadius: 8, overflow: "hidden", marginBottom: 8 }}>
                   <div
                     style={{ padding: "10px 14px", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, background: allChecked ? T.greenBg : T.card }}
                     onClick={() => { const n = new Set(expandedProv); n.has(prov.id) ? n.delete(prov.id) : n.add(prov.id); setExpandedProv(n); }}
@@ -980,13 +980,13 @@ export default function GPAIAssessmentPage() {
                               onChange={e => updateProvider(prov.id, { [item.key]: e.target.checked })}
                               style={{ width: 13, height: 13 }}
                             />
-                            <span style={{ fontSize: 12, color: T.text }}>{item.label}</span>
+                            <span style={{ fontSize: 13, color: T.text }}>{item.label}</span>
                           </label>
                         ))}
                       </div>
 
                       {missingCount > 0 && (
-                        <div style={{ padding: "8px 12px", borderRadius: 8, background: T.amberBg, border: `1px solid ${T.amberBdr}`, fontSize: 12, color: T.amber, marginBottom: 10 }}>
+                        <div style={{ padding: "8px 12px", borderRadius: 8, background: T.amberBg, border: `1px solid ${T.amberBdr}`, fontSize: 13, color: T.amber, marginBottom: 10 }}>
                           <strong>{t("docMissingTitle")}</strong> — {t("contactPre")} {prov.provider_name || t("theProvider")} {t("docMissingPost")}
                         </div>
                       )}
@@ -1009,7 +1009,7 @@ export default function GPAIAssessmentPage() {
               onClick={addProvider}
               style={{
                 display: "flex", alignItems: "center", gap: 6, marginTop: 8,
-                padding: "8px 14px", borderRadius: 9999, fontSize: 12, fontWeight: 600,
+                padding: "8px 14px", borderRadius: 9999, fontSize: 13, fontWeight: 600,
                 background: T.card, border: `1px dashed ${T.border}`, color: T.muted, cursor: "pointer", width: "100%",
                 justifyContent: "center",
               }}
@@ -1028,7 +1028,7 @@ export default function GPAIAssessmentPage() {
               </div>
 
               {/* Visual chain */}
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: T.muted, background: T.bg, border: `1px solid ${T.border}`, borderRadius: 8, padding: "12px 16px", marginBottom: 14, lineHeight: 1.9 }}>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: T.muted, background: T.bg, border: `1px solid ${T.border}`, borderRadius: 8, padding: "12px 16px", marginBottom: 14, lineHeight: 1.9 }}>
                 <div style={{ color: T.blue, fontWeight: 700 }}>{t("chain_gpaiProvider")}</div>
                 <div>&nbsp; ├── {t("chain_gpai_resp1")}</div>
                 <div>&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {t("chain_gpai_resp2")}</div>
@@ -1068,7 +1068,7 @@ export default function GPAIAssessmentPage() {
                 ].map(l => (
                   <Link key={l.href} href={l.href} style={{
                     display: "inline-flex", alignItems: "center", gap: 4, padding: "5px 12px",
-                    borderRadius: 8, fontSize: 12, fontWeight: 600, color: T.blue,
+                    borderRadius: 8, fontSize: 13, fontWeight: 600, color: T.blue,
                     background: T.blueBg, border: `1px solid ${T.blueBdr}`, textDecoration: "none",
                   }}>
                     <Link2 size={11} /> {l.label}
@@ -1089,23 +1089,23 @@ export default function GPAIAssessmentPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ marginBottom: 16 }}>
             {(role === "gpai_provider_standard" || role === "gpai_provider_systemic") && (
-              <div style={{ padding: 14, borderRadius: 10, border: `1px solid ${T.border}`, background: T.bg }}>
-                <div style={{ fontSize: 12, color: T.muted, marginBottom: 6 }}>Art. 53 Compliance</div>
+              <div style={{ padding: 14, borderRadius: 8, border: `1px solid ${T.border}`, background: T.bg }}>
+                <div style={{ fontSize: 13, color: T.muted, marginBottom: 6 }}>Art. 53 Compliance</div>
                 <ProgressBar value={art53Score} />
-                <div style={{ fontSize: 18, fontWeight: 700, color: T.blue, marginTop: 6 }}>{art53Score}%</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: T.blue, marginTop: 6 }}>{art53Score}%</div>
               </div>
             )}
             {role === "gpai_provider_systemic" && (
-              <div style={{ padding: 14, borderRadius: 10, border: `1px solid ${T.redBdr}`, background: T.redBg }}>
-                <div style={{ fontSize: 12, color: T.red, marginBottom: 6 }}>{t("art55Compliance")}</div>
+              <div style={{ padding: 14, borderRadius: 8, border: `1px solid ${T.redBdr}`, background: T.redBg }}>
+                <div style={{ fontSize: 13, color: T.red, marginBottom: 6 }}>{t("art55Compliance")}</div>
                 <ProgressBar value={art55Score} color={T.red} />
-                <div style={{ fontSize: 18, fontWeight: 700, color: T.red, marginTop: 6 }}>{art55Score}%</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: T.red, marginTop: 6 }}>{art55Score}%</div>
               </div>
             )}
             {(role === "downstream_high_risk" || role === "downstream_standard") && (
-              <div style={{ padding: 14, borderRadius: 10, border: `1px solid ${T.border}`, background: T.bg }}>
-                <div style={{ fontSize: 12, color: T.muted, marginBottom: 6 }}>{t("upstreamCovered")}</div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: T.text }}>{draft.providers.length}</div>
+              <div style={{ padding: 14, borderRadius: 8, border: `1px solid ${T.border}`, background: T.bg }}>
+                <div style={{ fontSize: 13, color: T.muted, marginBottom: 6 }}>{t("upstreamCovered")}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: T.text }}>{draft.providers.length}</div>
                 <div style={{ fontSize: 11, color: T.muted, marginTop: 2 }}>
                   {draft.providers.filter(p => p.has_technical_doc && p.has_usage_policy && p.has_copyright_policy && p.has_limitations_doc).length} {t("fullyDocumented")}
                 </div>
@@ -1116,22 +1116,22 @@ export default function GPAIAssessmentPage() {
           {/* Open issues */}
           {(role === "gpai_provider_standard" || role === "gpai_provider_systemic") && (
             <div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: T.muted, marginBottom: 8 }}>{t("openObligations")}</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: T.muted, marginBottom: 8 }}>{t("openObligations")}</div>
               {[
                 ...draft.art53.filter(o => o.status !== "compliant").map(o => ({ id: o.id, label: ART53_OBLIGATIONS.find(a => a.id === o.id)?.label ?? o.id, art: "Art. 53" })),
                 ...(role === "gpai_provider_systemic" ? draft.art55.filter(o => o.status !== "compliant").map(o => ({ id: o.id, label: ART55_OBLIGATIONS.find(a => a.id === o.id)?.label ?? o.id, art: "Art. 55" })) : []),
               ].length === 0 ? (
-                <div style={{ fontSize: 12, color: T.green }}>✓ {t("allCompliant")}</div>
+                <div style={{ fontSize: 13, color: T.green }}>✓ {t("allCompliant")}</div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                   {[
                     ...draft.art53.filter(o => o.status !== "compliant").map(o => ({ id: o.id, label: ART53_OBLIGATIONS.find(a => a.id === o.id)?.label ?? o.id, art: "Art. 53", status: o.status })),
                     ...(role === "gpai_provider_systemic" ? draft.art55.filter(o => o.status !== "compliant").map(o => ({ id: o.id, label: ART55_OBLIGATIONS.find(a => a.id === o.id)?.label ?? o.id, art: "Art. 55", status: o.status })) : []),
                   ].map(item => (
-                    <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: T.text }}>
+                    <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: T.text }}>
                       <XCircle size={12} style={{ color: item.status === "in_progress" ? T.amber : T.red, flexShrink: 0 }} />
                       <span>{item.label}</span>
-                      <span style={{ fontSize: 10, color: T.muted, marginLeft: "auto" }}>{item.art}</span>
+                      <span style={{ fontSize: 11, color: T.muted, marginLeft: "auto" }}>{item.art}</span>
                     </div>
                   ))}
                 </div>
@@ -1147,7 +1147,7 @@ export default function GPAIAssessmentPage() {
           onClick={saveToDoasier}
           style={{
             display: "flex", alignItems: "center", gap: 8, padding: "10px 20px",
-            borderRadius: 10, fontSize: 13, fontWeight: 700,
+            borderRadius: 8, fontSize: 13, fontWeight: 700,
             background: T.text, color: "#ffffff", border: "none", cursor: "pointer",
           }}
         >
@@ -1162,7 +1162,7 @@ export default function GPAIAssessmentPage() {
         <div style={{
           position: "fixed", bottom: 24, right: 24,
           background: T.text, color: "#fff", padding: "10px 18px",
-          borderRadius: 10, fontSize: 13, fontWeight: 600,
+          borderRadius: 8, fontSize: 13, fontWeight: 600,
           boxShadow: "0 4px 16px rgba(0,0,0,0.2)", zIndex: 9999,
         }}>{toast}</div>
       )}

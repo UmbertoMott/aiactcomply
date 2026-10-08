@@ -15,7 +15,7 @@ interface DocumentUploadPanelProps {
 
 const T = {
   border: "rgba(0,0,0,0.08)",
-  muted: "rgba(0,0,0,0.42)",
+  muted: "#0D1016",
   blue: "#1d4ed8",
   blueBg: "rgba(29,78,216,0.05)",
   blueBdr: "rgba(29,78,216,0.16)",
@@ -125,7 +125,7 @@ export function DocumentUploadPanel({ toolId, onFactConfirmed }: DocumentUploadP
           onClick={() => fileInputRef.current?.click()}
           style={{
             border: `2px dashed ${dragging ? T.blue : T.border}`,
-            borderRadius: 10,
+            borderRadius: 8,
             padding: "18px 20px",
             display: "flex",
             flexDirection: "column",
@@ -137,10 +137,10 @@ export function DocumentUploadPanel({ toolId, onFactConfirmed }: DocumentUploadP
           }}
         >
           <Upload size={20} style={{ color: T.muted }} />
-          <p style={{ fontSize: 12, fontWeight: 500, color: T.muted, textAlign: "center" }}>
+          <p style={{ fontSize: 13, fontWeight: 500, color: T.muted, textAlign: "center" }}>
             Trascina un documento o clicca per caricare
           </p>
-          <p style={{ fontSize: 10, color: "rgba(0,0,0,0.3)" }}>
+          <p style={{ fontSize: 11, color: "#0D1016" }}>
             PDF, TXT, MD, DOCX — max 10 MB
           </p>
           <input
@@ -155,21 +155,21 @@ export function DocumentUploadPanel({ toolId, onFactConfirmed }: DocumentUploadP
 
       {/* Uploading */}
       {status === "uploading" && (
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", borderRadius: 10, background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", borderRadius: 8, background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
           <Loader2 size={14} style={{ color: T.blue, animation: "spin 1s linear infinite" }} />
-          <span style={{ fontSize: 12, color: T.blue }}>Caricamento <strong>{filename}</strong>…</span>
+          <span style={{ fontSize: 13, color: T.blue }}>Caricamento <strong>{filename}</strong>…</span>
         </div>
       )}
 
       {/* Processing */}
       {status === "processing" && (
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", borderRadius: 10, background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", borderRadius: 8, background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
           <Loader2 size={14} style={{ color: T.amber, animation: "spin 1s linear infinite" }} />
           <div>
-            <span style={{ fontSize: 12, fontWeight: 500, color: T.amber }}>
+            <span style={{ fontSize: 13, fontWeight: 500, color: T.amber }}>
               ✦ AI — Estrazione fatti in corso…
             </span>
-            <p style={{ fontSize: 10, color: "rgba(0,0,0,0.45)", margin: "2px 0 0" }}>
+            <p style={{ fontSize: 11, color: "#0D1016", margin: "2px 0 0" }}>
               {filename} — L&apos;AI sta leggendo il documento per estrarre campi di compliance
             </p>
           </div>
@@ -179,19 +179,19 @@ export function DocumentUploadPanel({ toolId, onFactConfirmed }: DocumentUploadP
       {/* Done */}
       {status === "done" && (
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 10, background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.18)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 8, background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.18)" }}>
             <CheckCircle2 size={14} style={{ color: T.green, flexShrink: 0 }} />
             <div style={{ flex: 1 }}>
-              <span style={{ fontSize: 12, fontWeight: 500, color: T.green }}>
+              <span style={{ fontSize: 13, fontWeight: 500, color: T.green }}>
                 {duplicate ? "Documento già presente" : "Documento caricato"}
               </span>
               {factsCount > 0 && (
-                <span style={{ fontSize: 11, color: "rgba(0,0,0,0.5)", marginLeft: 8 }}>
+                <span style={{ fontSize: 11, color: "#0D1016", marginLeft: 8 }}>
                   — {factsCount} {factsCount === 1 ? "fatto estratto" : "fatti estratti"} ✦ AI
                 </span>
               )}
               {factsCount === 0 && (
-                <span style={{ fontSize: 11, color: "rgba(0,0,0,0.4)", marginLeft: 8 }}>
+                <span style={{ fontSize: 11, color: "#0D1016", marginLeft: 8 }}>
                   — Nessun campo rilevante trovato nel documento
                 </span>
               )}
@@ -207,7 +207,7 @@ export function DocumentUploadPanel({ toolId, onFactConfirmed }: DocumentUploadP
               )}
               <button
                 onClick={reset}
-                style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(0,0,0,0.3)", padding: 2 }}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "#0D1016", padding: 2 }}
               >
                 <X size={13} />
               </button>
@@ -227,13 +227,13 @@ export function DocumentUploadPanel({ toolId, onFactConfirmed }: DocumentUploadP
 
       {/* Error */}
       {status === "error" && (
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 10, background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.18)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 8, background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.18)" }}>
           <AlertTriangle size={14} style={{ color: T.red, flexShrink: 0 }} />
           <div style={{ flex: 1 }}>
-            <span style={{ fontSize: 12, fontWeight: 500, color: T.red }}>Errore caricamento</span>
-            {error && <p style={{ fontSize: 11, color: "rgba(0,0,0,0.5)", margin: "2px 0 0" }}>{error}</p>}
+            <span style={{ fontSize: 13, fontWeight: 500, color: T.red }}>Errore caricamento</span>
+            {error && <p style={{ fontSize: 11, color: "#0D1016", margin: "2px 0 0" }}>{error}</p>}
           </div>
-          <button onClick={reset} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(0,0,0,0.3)", padding: 2 }}>
+          <button onClick={reset} style={{ background: "none", border: "none", cursor: "pointer", color: "#0D1016", padding: 2 }}>
             <X size={13} />
           </button>
         </div>

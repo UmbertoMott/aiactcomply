@@ -43,7 +43,7 @@ import {
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const T = {
-  text: "#0D1016", muted: "rgba(0,0,0,0.42)", faint: "rgba(0,0,0,0.28)",
+  text: "#0D1016", muted: "#0D1016", faint: "#0D1016",
   border: "rgba(0,0,0,0.08)", card: "#ffffff", bg: "#f8f8f7",
   red: "#dc2626", redBg: "rgba(220,38,38,0.06)", redBdr: "rgba(220,38,38,0.2)",
   amber: "#d97706", amberBg: "rgba(202,138,4,0.06)", amberBdr: "rgba(202,138,4,0.2)",
@@ -53,12 +53,12 @@ const T = {
 
 const cardSt: CSSProperties = {
   background: T.card, border: `1px solid ${T.border}`,
-  borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+  borderRadius: 8, boxShadow: "none",
 };
 
 const inputSt: CSSProperties = {
   width: "100%", padding: "7px 10px", borderRadius: 8,
-  border: `1px solid ${T.border}`, fontSize: 12, color: T.text,
+  border: `1px solid ${T.border}`, fontSize: 13, color: T.text,
   background: T.card, outline: "none",
 };
 
@@ -81,7 +81,7 @@ function Badge({ label, color = "gray" }: { label: string; color?: RiskColor }) 
   };
   const c = map[color];
   return (
-    <span style={{ fontSize: 10, fontWeight: 500, padding: "2px 7px", borderRadius: 9999,
+    <span style={{ fontSize: 11, fontWeight: 500, padding: "2px 7px", borderRadius: 9999,
       background: c.bg, border: `1px solid ${c.bdr}`, color: c.text }}>
       {label}
     </span>
@@ -100,7 +100,7 @@ function Sel({ label, value, options, onChange, note }: {
         <option value="">{t("selectPlaceholder")}</option>
         {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
-      {note && <p style={{ fontSize: 10, color: T.faint, marginTop: 3 }}>{note}</p>}
+      {note && <p style={{ fontSize: 11, color: T.faint, marginTop: 3 }}>{note}</p>}
     </div>
   );
 }
@@ -626,7 +626,7 @@ export default function FRIAPage() {
     return (
       <div>
         <div style={{ marginBottom: 24 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>{t("p1_title")}</h2>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: T.text, margin: 0 }}>{t("p1_title")}</h2>
           <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>{t("p1_sub")}</p>
         </div>
         <ContextCatalog onApply={(patch) => upCtx(patch)} />
@@ -732,7 +732,7 @@ export default function FRIAPage() {
     return (
       <div>
         <div style={{ marginBottom: 20 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>{t("p2_title")}</h2>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: T.text, margin: 0 }}>{t("p2_title")}</h2>
           <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>{t("p2_sub")}</p>
         </div>
 
@@ -742,7 +742,7 @@ export default function FRIAPage() {
             padding: "10px 14px", borderRadius: 8, marginBottom: 16,
             background: "rgba(217,119,6,0.06)", border: "1px solid rgba(217,119,6,0.2)",
           }}>
-            <p style={{ fontSize: 12, color: "#d97706", margin: "0 0 8px", fontWeight: 500 }}>
+            <p style={{ fontSize: 13, color: "#d97706", margin: "0 0 8px", fontWeight: 500 }}>
               <strong>{rmScenarios.length} {t("rmRisksWord")}</strong> {t("rmPreloaded")}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -753,7 +753,7 @@ export default function FRIAPage() {
                     `Rischio importato dal Risk Manager — likelihood: ${r.likelihood}, impact: ${r.impact}${r.mitigation ? `. Mitigazione proposta: ${r.mitigation}` : ""}`
                   )}
                   style={{
-                    textAlign: "left", fontSize: 12, padding: "4px 10px",
+                    textAlign: "left", fontSize: 13, padding: "4px 10px",
                     borderRadius: 6, border: "1px solid rgba(217,119,6,0.3)",
                     background: "white", cursor: "pointer", color: T.amber,
                   }}>
@@ -771,19 +771,19 @@ export default function FRIAPage() {
           <div style={{ width: 196, flexShrink: 0 }}>
             <div style={{ ...cardSt, overflow: "hidden" }}>
               <div style={{ padding: "10px 12px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{t("scenariWord")}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{t("scenariWord")}</span>
                 <button onClick={addScenario} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, background: T.text, color: "#fff", border: "none", borderRadius: 6, padding: "4px 8px", cursor: "pointer" }}>
                   <Plus style={{ width: 11, height: 11 }} /> {t("newWord")}
                 </button>
               </div>
               {doc.scenarios.length === 0 ? (
-                <div style={{ padding: "24px 12px", textAlign: "center", fontSize: 12, color: T.muted }}>{t("noScenario")}</div>
+                <div style={{ padding: "24px 12px", textAlign: "center", fontSize: 13, color: T.muted }}>{t("noScenario")}</div>
               ) : (
                 doc.scenarios.map((s) => (
                   <button key={s.id} onClick={() => { setActiveScenarioId(s.id); setP2Tab("rights"); }}
                     style={{ width: "100%", padding: "10px 12px", textAlign: "left", background: activeScenarioId === s.id ? T.bg : "none", border: "none", borderBottom: `1px solid ${T.border}`, cursor: "pointer" }}>
-                    <div style={{ fontSize: 12, fontWeight: 500, color: T.text, marginBottom: 2 }}>{s.title || t("untitled")}</div>
-                    <div style={{ fontSize: 10, color: T.muted }}>{s.right_impacts.length} {t("rightsAbbrev")} · {s.type || "—"}</div>
+                    <div style={{ fontSize: 13, fontWeight: 500, color: T.text, marginBottom: 2 }}>{s.title || t("untitled")}</div>
+                    <div style={{ fontSize: 11, color: T.muted }}>{s.right_impacts.length} {t("rightsAbbrev")} · {s.type || "—"}</div>
                   </button>
                 ))
               )}
@@ -829,7 +829,7 @@ export default function FRIAPage() {
                 <div style={{ display: "flex", padding: "0 20px", borderBottom: `1px solid ${T.border}` }}>
                   {([{ id: "rights", label: t("tabRights") }, { id: "matrix", label: t("tabMatrix") }] as const).map((tab) => (
                     <button key={tab.id} onClick={() => setP2Tab(tab.id)}
-                      style={{ padding: "10px 16px", fontSize: 12, fontWeight: p2Tab === tab.id ? 600 : 400, color: p2Tab === tab.id ? T.text : T.muted, background: "none", border: "none", borderBottom: p2Tab === tab.id ? `2px solid ${T.text}` : "2px solid transparent", cursor: "pointer" }}>
+                      style={{ padding: "10px 16px", fontSize: 13, fontWeight: p2Tab === tab.id ? 600 : 400, color: p2Tab === tab.id ? T.text : T.muted, background: "none", border: "none", borderBottom: p2Tab === tab.id ? `2px solid ${T.text}` : "2px solid transparent", cursor: "pointer" }}>
                       {tab.label}
                     </button>
                   ))}
@@ -861,7 +861,7 @@ export default function FRIAPage() {
                       const sevColors: Record<string, string> = { critical: "#dc2626", high: "#d97706", medium: "#d97706", low: "#16a34a" };
                       return (
                         <div style={{ marginBottom: 16, padding: "10px 12px", background: T.bg, borderRadius: 8, border: `1px solid ${T.border}` }}>
-                          <p style={{ fontSize: 10, fontWeight: 700, color: T.text, textTransform: "uppercase" as const, letterSpacing: "0.5px", marginBottom: 8 }}>
+                          <p style={{ fontSize: 11, fontWeight: 700, color: T.text, textTransform: "uppercase" as const, letterSpacing: "0.5px", marginBottom: 8 }}>
                             {t("prioritization")}
                           </p>
                           {sorted.map((ri, idx) => {
@@ -869,9 +869,9 @@ export default function FRIAPage() {
                             const priority = ri.likelihood.computed_priority;
                             return (
                               <div key={ri.right_id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 0", borderBottom: idx < sorted.length - 1 ? `1px solid ${T.border}` : "none" }}>
-                                <span style={{ fontSize: 10, fontWeight: 700, color: T.faint, minWidth: 18 }}>#{idx + 1}</span>
+                                <span style={{ fontSize: 11, fontWeight: 700, color: T.faint, minWidth: 18 }}>#{idx + 1}</span>
                                 <span style={{ fontSize: 11, color: T.text, flex: 1 }}>{r?.name ?? ri.right_id}</span>
-                                <span style={{ fontSize: 10, fontWeight: 600, color: sevColors[priority] ?? T.muted, background: "rgba(0,0,0,0.04)", padding: "1px 6px", borderRadius: 9999 }}>
+                                <span style={{ fontSize: 11, fontWeight: 600, color: sevColors[priority] ?? T.muted, background: "rgba(0,0,0,0.04)", padding: "1px 6px", borderRadius: 9999 }}>
                                   {levelLabel(priority).toUpperCase()}
                                 </span>
                               </div>
@@ -885,11 +885,11 @@ export default function FRIAPage() {
                       const openGrp = openRightGroups.has(grp.id);
                       const selCount = rights.filter((r) => activeScenario.right_impacts.some((ri) => ri.right_id === r.id)).length;
                       return (
-                        <div key={grp.id} style={{ marginBottom: 8, border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden" }}>
+                        <div key={grp.id} style={{ marginBottom: 8, border: `1px solid ${T.border}`, borderRadius: 8, overflow: "hidden" }}>
                           <button onClick={() => setOpenRightGroups((prev) => { const n = new Set(prev); n.has(grp.id) ? n.delete(grp.id) : n.add(grp.id); return n; })}
                             style={{ width: "100%", padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", background: openGrp ? T.bg : T.card, border: "none", cursor: "pointer" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                              <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{grp.label}</span>
+                              <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{grp.label}</span>
                               {selCount > 0 && <Badge label={`${selCount} sel.`} color="gray" />}
                             </div>
                             {openGrp ? <ChevronDown style={{ width: 13, height: 13, color: T.muted }} /> : <ChevronRight style={{ width: 13, height: 13, color: T.muted }} />}
@@ -904,12 +904,12 @@ export default function FRIAPage() {
                                   <div key={right.id} style={{ marginBottom: checked ? 8 : 0 }}>
                                     <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 0" }}>
                                       <input type="checkbox" checked={checked} onChange={() => toggleRightImpact(activeScenario.id, right.id)} style={{ cursor: "pointer", flexShrink: 0 }} />
-                                      <span style={{ fontSize: 12, color: checked ? T.text : T.muted, fontWeight: checked ? 500 : 400, flex: 1 }}>{right.name}</span>
-                                      <span style={{ fontSize: 10, color: T.faint }}>{right.charter_art}</span>
+                                      <span style={{ fontSize: 13, color: checked ? T.text : T.muted, fontWeight: checked ? 500 : 400, flex: 1 }}>{right.name}</span>
+                                      <span style={{ fontSize: 11, color: T.faint }}>{right.charter_art}</span>
                                       {right.is_absolute && <Badge label="assoluto" color="red" />}
                                       {checked && (
                                         <button onClick={() => setOpenRights((prev) => { const n = new Set(prev); n.has(right.id) ? n.delete(right.id) : n.add(right.id); return n; })}
-                                          style={{ fontSize: 10, color: T.text, background: "none", border: "none", cursor: "pointer", padding: "2px 4px" }}>
+                                          style={{ fontSize: 11, color: T.text, background: "none", border: "none", cursor: "pointer", padding: "2px 4px" }}>
                                           {openAssess ? t("collapseUp") : t("assessDown")}
                                         </button>
                                       )}
@@ -926,14 +926,14 @@ export default function FRIAPage() {
                                             law_enforcement: t("sec_law"), migration: t("sec_migration"), justice: t("sec_justice"),
                                           };
                                           return (
-                                            <div style={{ marginBottom: 14, padding: "10px 12px", borderRadius: 7, background: "rgba(0,0,0,0.04)", border: `1px solid ${T.border}` }}>
-                                              <div style={{ fontSize: 10, fontWeight: 600, color: T.text, textTransform: "uppercase" as const, letterSpacing: "0.5px", marginBottom: 7 }}>
+                                            <div style={{ marginBottom: 14, padding: "10px 12px", borderRadius: 8, background: "rgba(0,0,0,0.04)", border: `1px solid ${T.border}` }}>
+                                              <div style={{ fontSize: 11, fontWeight: 600, color: T.text, textTransform: "uppercase" as const, letterSpacing: "0.5px", marginBottom: 7 }}>
                                                 {t("ecnlSectorRisks")}
                                               </div>
                                               <div style={{ display: "flex", flexDirection: "column" as const, gap: 4 }}>
                                                 {sectorHints.map(([sector, desc]) => (
                                                   <div key={sector} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                                                    <span style={{ fontSize: 10, fontWeight: 600, color: T.text, minWidth: 120, flexShrink: 0 }}>{sectorLabel[sector] ?? sector}</span>
+                                                    <span style={{ fontSize: 11, fontWeight: 600, color: T.text, minWidth: 120, flexShrink: 0 }}>{sectorLabel[sector] ?? sector}</span>
                                                     <span style={{ fontSize: 11, color: T.text, lineHeight: 1.4 }}>{desc}</span>
                                                   </div>
                                                 ))}
@@ -1002,7 +1002,7 @@ export default function FRIAPage() {
                                             <div style={{ padding: "7px 0" }}>
                                               {impact.severity.computed_severity
                                                 ? <Badge label={levelLabel(impact.severity.computed_severity).toUpperCase()} color={riskColorFor(impact.severity.computed_severity)} />
-                                                : <span style={{ fontSize: 12, color: T.faint }}>{t("notComputed")}</span>}
+                                                : <span style={{ fontSize: 13, color: T.faint }}>{t("notComputed")}</span>}
                                             </div>
                                           </div>
                                           <Sel label={t("sev_likelihood")} value={impact.likelihood.likelihood}
@@ -1018,7 +1018,7 @@ export default function FRIAPage() {
                                             <div style={{ padding: "7px 0" }}>
                                               {impact.likelihood.computed_priority
                                                 ? <Badge label={levelLabel(impact.likelihood.computed_priority).toUpperCase()} color={riskColorFor(impact.likelihood.computed_priority)} />
-                                                : <span style={{ fontSize: 12, color: T.faint }}>— non calcolata —</span>}
+                                                : <span style={{ fontSize: 13, color: T.faint }}>— non calcolata —</span>}
                                             </div>
                                           </div>
                                           <Sel label={t("sev_residual")} value={impact.residual_risk}
@@ -1064,7 +1064,7 @@ export default function FRIAPage() {
                                         {/* What-If residual panel */}
                                         {impact.severity.computed_severity && (
                                           <div style={{ marginTop: 8, padding: "8px 10px", background: T.bg, borderRadius: 6, border: `1px solid ${T.border}` }}>
-                                            <p style={{ fontSize: 10, fontWeight: 600, color: T.text, marginBottom: 4 }}>
+                                            <p style={{ fontSize: 11, fontWeight: 600, color: T.text, marginBottom: 4 }}>
                                               {t("whatIfResidual")}
                                             </p>
                                             {(() => {
@@ -1083,10 +1083,10 @@ export default function FRIAPage() {
                                                   {improved && <>
                                                     <span style={{ color: T.faint }}>→</span>
                                                     <span style={{ color: sevColors[residual] ?? T.muted, fontWeight: 600 }}>{levelLabel(residual).toUpperCase()}</span>
-                                                    <span style={{ color: T.green, fontSize: 10 }}>({implemented} {t("activeMitigations")})</span>
+                                                    <span style={{ color: T.green, fontSize: 11 }}>({implemented} {t("activeMitigations")})</span>
                                                   </>}
                                                   {!improved && (
-                                                    <span style={{ color: T.faint, fontSize: 10 }}>{t("noActiveMitigation")}</span>
+                                                    <span style={{ color: T.faint, fontSize: 11 }}>{t("noActiveMitigation")}</span>
                                                   )}
                                                 </div>
                                               );
@@ -1112,9 +1112,9 @@ export default function FRIAPage() {
                       <p style={{ fontSize: 13, color: T.muted, textAlign: "center", padding: 32 }}>{t("noRightAssessed")}</p>
                     ) : (
                       <div>
-                        <p style={{ fontSize: 12, color: T.muted, marginBottom: 16 }}>{t("matrixLabel")}: <strong>{activeScenario.title}</strong></p>
+                        <p style={{ fontSize: 13, color: T.muted, marginBottom: 16 }}>{t("matrixLabel")}: <strong>{activeScenario.title}</strong></p>
                         <div style={{ display: "grid", gridTemplateColumns: "80px 1fr 1fr 1fr", gap: 3 }}>
-                          <div style={{ fontSize: 10, color: T.faint, textAlign: "center" }} />
+                          <div style={{ fontSize: 11, color: T.faint, textAlign: "center" }} />
                           {[t("colHighSev"), t("colMedSev"), t("colLowSev")].map((h) => (
                             <div key={h} style={{ padding: "6px 8px", fontSize: 11, fontWeight: 600, color: T.muted, textAlign: "center", background: T.bg, borderRadius: 6 }}>{h}</div>
                           ))}
@@ -1134,9 +1134,9 @@ export default function FRIAPage() {
                                   <div key={`${lik}-${sev}`} style={{ padding: 8, minHeight: 64, background: cellItems.length > 0 ? cellStyle.bg : T.bg, border: `1px solid ${cellItems.length > 0 ? cellStyle.bdr : T.border}`, borderRadius: 6 }}>
                                     {cellItems.map((ri) => {
                                       const r = FUNDAMENTAL_RIGHTS.find((f) => f.id === ri.right_id);
-                                      return <div key={ri.right_id} style={{ fontSize: 10, color: T.text, marginBottom: 2, lineHeight: 1.3 }}>{r?.name ?? ri.right_id}</div>;
+                                      return <div key={ri.right_id} style={{ fontSize: 11, color: T.text, marginBottom: 2, lineHeight: 1.3 }}>{r?.name ?? ri.right_id}</div>;
                                     })}
-                                    {cellItems.length === 0 && <span style={{ fontSize: 10, color: T.faint }}>—</span>}
+                                    {cellItems.length === 0 && <span style={{ fontSize: 11, color: T.faint }}>—</span>}
                                   </div>
                                 );
                               }),
@@ -1161,7 +1161,7 @@ export default function FRIAPage() {
     return (
       <div>
         <div style={{ marginBottom: 20 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>{t("p3_title")}</h2>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: T.text, margin: 0 }}>{t("p3_title")}</h2>
           <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>{t("p3_sub")}</p>
         </div>
         <FriaGapCheck
@@ -1184,10 +1184,10 @@ export default function FRIAPage() {
             <div style={{ marginBottom: 16, padding: "12px 16px", borderRadius: 8, background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.25)", display: "flex", gap: 10, alignItems: "flex-start" }}>
               <AlertTriangle style={{ width: 16, height: 16, color: T.red, flexShrink: 0, marginTop: 1 }} />
               <div>
-                <div style={{ fontSize: 12, fontWeight: 600, color: T.red, marginBottom: 4 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: T.red, marginBottom: 4 }}>
                   {t("absoluteRightsTitle")}
                 </div>
-                <div style={{ fontSize: 12, color: "#7f1d1d", lineHeight: 1.5 }}>
+                <div style={{ fontSize: 13, color: "#7f1d1d", lineHeight: 1.5 }}>
                   {names.join(", ")} {t("absoluteRightsBody1")}
                   {t("absoluteRightsBody2")} <strong>{t("absoluteRightsBodyBold")}</strong> {t("absoluteRightsBody3")}
                 </div>
@@ -1215,7 +1215,7 @@ export default function FRIAPage() {
             ].map((opt) => (
               <button key={opt.value} onClick={() => upDeploy({ recommendation: opt.value })}
                 style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", marginBottom: 8, borderRadius: 8, border: `1px solid ${d.recommendation === opt.value ? opt.bdr : T.border}`, background: d.recommendation === opt.value ? opt.bg : T.card, cursor: "pointer", textAlign: "left" }}>
-                <span style={{ fontSize: 12, fontWeight: d.recommendation === opt.value ? 600 : 400, color: d.recommendation === opt.value ? opt.color : T.muted }}>{opt.label}</span>
+                <span style={{ fontSize: 13, fontWeight: d.recommendation === opt.value ? 600 : 400, color: d.recommendation === opt.value ? opt.color : T.muted }}>{opt.label}</span>
               </button>
             ))}
             {d.recommendation === "deploy_with_conditions" && (
@@ -1241,7 +1241,7 @@ export default function FRIAPage() {
             <div>
               <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 2px" }}>{t("publicSummaryTitle")}</h3>
               {aiSummaryIsFromAI && (
-                <span style={{ fontSize: 10, fontWeight: 700, color: T.amber, background: T.amberBg, padding: "1px 7px", borderRadius: 9999 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: T.amber, background: T.amberBg, padding: "1px 7px", borderRadius: 9999 }}>
                   ✦ {t("aiVerifyConfirm")}
                 </span>
               )}
@@ -1249,14 +1249,14 @@ export default function FRIAPage() {
             <div style={{ display: "flex", gap: 8 }}>
               <button
                 onClick={() => { const s = generatePublicSummary(doc); upDeploy({ public_summary: s }); setAiSummaryIsFromAI(false); showToast(t("toastSummaryGenerated")); }}
-                style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, background: T.bg, color: T.text, border: `1px solid ${T.border}`, borderRadius: 8, padding: "7px 14px", cursor: "pointer" }}
+                style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, background: T.bg, color: T.text, border: `1px solid ${T.border}`, borderRadius: 8, padding: "7px 14px", cursor: "pointer" }}
               >
                 <FileText style={{ width: 13, height: 13 }} /> {t("generateSummary")}
               </button>
               <button
                 onClick={handleAiPublicSummary}
                 disabled={loadingAiSummary}
-                style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, background: loadingAiSummary ? T.bg : T.text, color: loadingAiSummary ? T.muted : "#fff", border: "none", borderRadius: 8, padding: "7px 14px", cursor: loadingAiSummary ? "default" : "pointer" }}
+                style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, background: loadingAiSummary ? T.bg : T.text, color: loadingAiSummary ? T.muted : "#fff", border: "none", borderRadius: 8, padding: "7px 14px", cursor: loadingAiSummary ? "default" : "pointer" }}
               >
                 {loadingAiSummary ? t("aiGenerating") : t("aiDraft")}
               </button>
@@ -1270,12 +1270,12 @@ export default function FRIAPage() {
         {/* Art. 27(3) — Notifica dei risultati all'autorità di vigilanza: sempre dovuta (salvo Art. 46(1)) */}
         {(
           <div style={{ marginBottom: 16, padding: "12px 16px", borderRadius: 8, background: T.amberBg, border: `1px solid ${T.amberBdr}`, display: "flex", gap: 10, alignItems: "flex-start" }}>
-            <span style={{ fontSize: 16, flexShrink: 0 }}>⚠</span>
+            <span style={{ fontSize: 15, flexShrink: 0 }}>⚠</span>
             <div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: T.amber, marginBottom: 4 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: T.amber, marginBottom: 4 }}>
                 {t("art27Reminder")}
               </div>
-              <div style={{ fontSize: 12, color: T.text, lineHeight: 1.5 }}>
+              <div style={{ fontSize: 13, color: T.text, lineHeight: 1.5 }}>
                 {t("art27ReminderBody")}
               </div>
             </div>
@@ -1283,11 +1283,11 @@ export default function FRIAPage() {
         )}
 
         {/* Rischi correlati DPIA ⇄ FRIA */}
-        <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)", padding: 20, marginBottom: 16 }}>
+        <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, boxShadow: "none", padding: 20, marginBottom: 16 }}>
           <p style={{ fontSize: 13, fontWeight: 600, color: "#0D1016", margin: "0 0 6px" }}>
             {t("correlatedRisksTitle")}
           </p>
-          <p style={{ fontSize: 11, color: "rgba(0,0,0,0.40)", margin: "0 0 14px" }}>
+          <p style={{ fontSize: 11, color: "#0D1016", margin: "0 0 14px" }}>
             {t("correlatedRisksSub")}
           </p>
           <CorrelatedRisksPanel />
@@ -1305,19 +1305,19 @@ export default function FRIAPage() {
     return (
       <div>
         <div style={{ marginBottom: 20 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>{t("p4_title")}</h2>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: T.text, margin: 0 }}>{t("p4_title")}</h2>
           <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>{t("p4_sub")}</p>
         </div>
 
         {/* Staleness warning */}
         {stalenessWarning && (
           <div style={{ marginBottom: 16, padding: "12px 16px", borderRadius: 8, background: T.amberBg, border: `1px solid ${T.amberBdr}`, display: "flex", alignItems: "flex-start", gap: 10 }}>
-            <span style={{ fontSize: 16, flexShrink: 0 }}>⚠</span>
+            <span style={{ fontSize: 15, flexShrink: 0 }}>⚠</span>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: T.amber, marginBottom: 4 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: T.amber, marginBottom: 4 }}>
                 {t("staleTitle")}
               </div>
-              <div style={{ fontSize: 12, color: T.text, lineHeight: 1.5, marginBottom: 8 }}>
+              <div style={{ fontSize: 13, color: T.text, lineHeight: 1.5, marginBottom: 8 }}>
                 {t("staleBody")}
               </div>
               <button
@@ -1344,7 +1344,7 @@ export default function FRIAPage() {
             </button>
           </div>
           {mon.items.length === 0 ? (
-            <p style={{ fontSize: 12, color: T.muted, padding: "8px 0" }}>{t("noMonItems")}</p>
+            <p style={{ fontSize: 13, color: T.muted, padding: "8px 0" }}>{t("noMonItems")}</p>
           ) : (
             <div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 140px 160px 32px", gap: 8, marginBottom: 6 }}>
@@ -1371,9 +1371,9 @@ export default function FRIAPage() {
           <h3 style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 14px" }}>{t("triggersTitle")}</h3>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
             {DEFAULT_TRIGGERS.map((trg) => (
-              <label key={trg} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", borderRadius: 7, cursor: "pointer", background: mon.update_triggers.includes(trg) ? "rgba(0,0,0,0.04)" : "none" }}>
+              <label key={trg} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", borderRadius: 8, cursor: "pointer", background: mon.update_triggers.includes(trg) ? "rgba(0,0,0,0.04)" : "none" }}>
                 <input type="checkbox" checked={mon.update_triggers.includes(trg)} onChange={() => toggleTrigger(trg)} style={{ cursor: "pointer" }} />
-                <span style={{ fontSize: 12, color: T.text }}>{trg}</span>
+                <span style={{ fontSize: 13, color: T.text }}>{trg}</span>
               </label>
             ))}
           </div>
@@ -1388,7 +1388,7 @@ export default function FRIAPage() {
             </button>
           </div>
           {mon.update_history.length === 0 ? (
-            <p style={{ fontSize: 12, color: T.muted }}>{t("noRevision")}</p>
+            <p style={{ fontSize: 13, color: T.muted }}>{t("noRevision")}</p>
           ) : (
             mon.update_history.map((rec) => (
               <div key={rec.id} style={{ marginBottom: 10, padding: 14, background: T.bg, borderRadius: 8, border: `1px solid ${T.border}` }}>
@@ -1412,7 +1412,7 @@ export default function FRIAPage() {
     return (
       <div>
         <div style={{ marginBottom: 20 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: T.text, margin: 0 }}>{t("p5_title")}</h2>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: T.text, margin: 0 }}>{t("p5_title")}</h2>
           <p style={{ marginTop: 4, fontSize: 13, color: T.muted }}>{t("p5_sub")}</p>
         </div>
 
@@ -1426,15 +1426,15 @@ export default function FRIAPage() {
           if (highImpacts.length === 0) return null;
           const hasEngagement = doc.engagement_log.some(e => e.findings?.trim());
           return (
-            <div style={{ marginBottom: 16, padding: "14px 16px", borderRadius: 10, background: T.card, border: `1px solid ${T.border}`, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+            <div style={{ marginBottom: 16, padding: "14px 16px", borderRadius: 8, background: T.card, border: `1px solid ${T.border}`, boxShadow: "none" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                 <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{t("highRiskValidation")}</span>
                 {hasEngagement
-                  ? <span style={{ fontSize: 10, fontWeight: 700, color: T.green, background: T.greenBg, padding: "2px 8px", borderRadius: 9999 }}>✓ {t("engagementDocumented")}</span>
-                  : <span style={{ fontSize: 10, fontWeight: 700, color: T.amber, background: T.amberBg, padding: "2px 8px", borderRadius: 9999 }}>{t("consultationRecommended")}</span>
+                  ? <span style={{ fontSize: 11, fontWeight: 700, color: T.green, background: T.greenBg, padding: "2px 8px", borderRadius: 9999 }}>✓ {t("engagementDocumented")}</span>
+                  : <span style={{ fontSize: 11, fontWeight: 700, color: T.amber, background: T.amberBg, padding: "2px 8px", borderRadius: 9999 }}>{t("consultationRecommended")}</span>
                 }
               </div>
-              <p style={{ fontSize: 12, color: T.muted, margin: "0 0 10px", lineHeight: 1.4 }}>
+              <p style={{ fontSize: 13, color: T.muted, margin: "0 0 10px", lineHeight: 1.4 }}>
                 {highImpacts.length} {t("highSevIdentified")}
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -1445,7 +1445,7 @@ export default function FRIAPage() {
                       <span style={{ fontSize: 11, fontWeight: 700, color: imp.severity === "critical" ? T.red : T.amber, minWidth: 60 }}>
                         {imp.severity === "critical" ? t("criticalWord") : t("highWord")}
                       </span>
-                      <span style={{ fontSize: 12, color: T.text }}>{rightName}</span>
+                      <span style={{ fontSize: 13, color: T.text }}>{rightName}</span>
                       <span style={{ fontSize: 11, color: T.muted }}>— {imp.scenarioTitle || t("scenarioWord")}</span>
                     </div>
                   );
@@ -1467,7 +1467,7 @@ export default function FRIAPage() {
             </button>
           </div>
           {doc.stakeholders.length === 0 ? (
-            <p style={{ fontSize: 12, color: T.muted, padding: "8px 0" }}>{t("noStakeholder")}</p>
+            <p style={{ fontSize: 13, color: T.muted, padding: "8px 0" }}>{t("noStakeholder")}</p>
           ) : (
             doc.stakeholders.map((s) => (
               <div key={s.id} style={{ marginBottom: 10, padding: 14, background: T.bg, borderRadius: 8, border: `1px solid ${T.border}` }}>
@@ -1507,7 +1507,7 @@ export default function FRIAPage() {
             </button>
           </div>
           {doc.engagement_log.length === 0 ? (
-            <p style={{ fontSize: 12, color: T.muted }}>{t("noEngagement")}</p>
+            <p style={{ fontSize: 13, color: T.muted }}>{t("noEngagement")}</p>
           ) : (
             doc.engagement_log.map((e) => (
               <div key={e.id} style={{ marginBottom: 10, padding: 14, background: T.bg, borderRadius: 8, border: `1px solid ${T.border}` }}>
@@ -1564,7 +1564,7 @@ export default function FRIAPage() {
         >
           {t("modeGuidedTitle")} — {t("modeGuidedDesc")}
         </button>
-        <Link href="/dashboard/tools/assessment-export" style={{ fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.10)", background: "#fff", color: "#0D1016" }}>
+        <Link href="/dashboard/tools/assessment-export" style={{ fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)", background: "#fff", color: "#0D1016" }}>
           {t("exportWithDpia")}
         </Link>
         <button
@@ -1621,12 +1621,12 @@ export default function FRIAPage() {
 
         return (
           <div style={{
-            borderRadius: 10, marginBottom: 16, overflow: "hidden",
-            border: "1px solid rgba(0,0,0,0.09)",
+            borderRadius: 8, marginBottom: 16, overflow: "hidden",
+            border: "1px solid rgba(0,0,0,0.08)",
           }}>
             {/* Header */}
-            <div style={{ padding: "12px 16px", background: "rgba(0,0,0,0.025)", borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
-              <p style={{ fontSize: 12, fontWeight: 700, color: "#0D1016", margin: 0, letterSpacing: "0.03em" }}>
+            <div style={{ padding: "12px 16px", background: "rgba(0,0,0,0.025)", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+              <p style={{ fontSize: 13, fontWeight: 700, color: "#0D1016", margin: 0, letterSpacing: "0.03em" }}>
                 {t("aiDraftSources")}
               </p>
             </div>
@@ -1637,7 +1637,7 @@ export default function FRIAPage() {
                 <div key={s.key} style={{
                   display: "flex", alignItems: "center", gap: 12,
                   padding: "11px 16px",
-                  borderBottom: i < steps.length - 1 ? "1px solid rgba(0,0,0,0.06)" : "none",
+                  borderBottom: i < steps.length - 1 ? "1px solid rgba(0,0,0,0.08)" : "none",
                 }}>
                   {/* Status dot */}
                   <div style={{
@@ -1647,41 +1647,41 @@ export default function FRIAPage() {
                     border: `1.5px solid ${s.done ? "rgba(22,163,74,0.30)" : s.required ? "rgba(220,38,38,0.25)" : "rgba(0,0,0,0.12)"}`,
                   }}>
                     {s.done
-                      ? <span style={{ fontSize: 10, color: "#16a34a" }}>✓</span>
-                      : <span style={{ fontSize: 9, color: s.required ? "#dc2626" : "rgba(0,0,0,0.30)" }}>○</span>
+                      ? <span style={{ fontSize: 11, color: "#16a34a" }}>✓</span>
+                      : <span style={{ fontSize: 11, color: s.required ? "#dc2626" : "rgba(0,0,0,0.30)" }}>○</span>
                     }
                   </div>
 
                   {/* Info */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: "#0D1016" }}>{s.label}</span>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: "#0D1016" }}>{s.label}</span>
                       <span style={{
-                        fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
-                        background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.40)",
+                        fontSize: 11, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
+                        background: "rgba(0,0,0,0.04)", color: "#0D1016",
                       }}>{s.art}</span>
                       {s.required && !s.done && (
                         <span style={{
-                          fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
+                          fontSize: 11, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
                           background: "rgba(220,38,38,0.08)", color: "#dc2626",
                         }}>{t("requiredBadge")}</span>
                       )}
                     </div>
-                    <p style={{ fontSize: 11, color: "rgba(0,0,0,0.40)", margin: "1px 0 0", lineHeight: 1.3 }}>{s.why}</p>
+                    <p style={{ fontSize: 11, color: "#0D1016", margin: "1px 0 0", lineHeight: 1.3 }}>{s.why}</p>
                   </div>
 
                   {/* Action */}
                   {s.done ? (
                     <Link href={s.href} style={{
-                      fontSize: 11, fontWeight: 500, color: "rgba(0,0,0,0.40)",
+                      fontSize: 11, fontWeight: 500, color: "#0D1016",
                       textDecoration: "none", whiteSpace: "nowrap",
                     }}>
                       {t("editArrow")}
                     </Link>
                   ) : (
                     <Link href={s.href} style={{
-                      fontSize: 11, fontWeight: 600, padding: "5px 11px", borderRadius: 7,
-                      border: s.required ? "1px solid rgba(220,38,38,0.25)" : "1px solid rgba(0,0,0,0.12)",
+                      fontSize: 11, fontWeight: 600, padding: "5px 11px", borderRadius: 8,
+                      border: s.required ? "1px solid rgba(220,38,38,0.25)" : "1px solid rgba(0,0,0,0.08)",
                       background: s.required ? "rgba(220,38,38,0.06)" : "rgba(0,0,0,0.02)",
                       color: s.required ? "#dc2626" : "#374151",
                       textDecoration: "none", whiteSpace: "nowrap",
@@ -1694,12 +1694,12 @@ export default function FRIAPage() {
             </div>
 
             {/* Draft button footer */}
-            <div style={{ padding: "11px 16px", background: "rgba(0,0,0,0.015)", borderTop: "1px solid rgba(0,0,0,0.07)", display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ padding: "11px 16px", background: "rgba(0,0,0,0.015)", borderTop: "1px solid rgba(0,0,0,0.08)", display: "flex", alignItems: "center", gap: 10 }}>
               <button
                 onClick={handleDraftFria}
                 disabled={loadingDraft || !hasClassifier}
                 style={{
-                  padding: "7px 16px", borderRadius: 7, border: "none",
+                  padding: "7px 16px", borderRadius: 8, border: "none",
                   background: (!hasClassifier || loadingDraft) ? "#e5e7eb" : "#0D1016",
                   color: (!hasClassifier || loadingDraft) ? "#9ca3af" : "white",
                   fontSize: 13, fontWeight: 500,
@@ -1729,11 +1729,11 @@ export default function FRIAPage() {
       <div style={{ display: "flex", gap: 12, minHeight: 0 }}>
 
       {/* ── Left sidebar ── */}
-      <div style={{ width: 232, flexShrink: 0, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, overflow: "hidden", background: "#fafafa", display: "flex", flexDirection: "column", minHeight: "100%" }}>
+      <div style={{ width: 232, flexShrink: 0, border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden", background: "#FAFAF9", display: "flex", flexDirection: "column", minHeight: "100%" }}>
         {/* DOCUMENTO header */}
         <div style={{ padding: "12px 12px 10px", borderBottom: `1px solid ${T.border}` }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-            <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>{t("documentWord")}</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>{t("documentWord")}</span>
             <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", fontFamily: "var(--font-mono)" }}>{completeness}%</span>
           </div>
           <div style={{ width: "100%", height: 4, background: "rgba(0,0,0,0.07)", borderRadius: 2, overflow: "hidden" }}>
@@ -1742,21 +1742,21 @@ export default function FRIAPage() {
         </div>
         {/* System name + org */}
         <div style={{ padding: "12px 14px 12px", borderBottom: `1px solid ${T.border}` }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", marginBottom: 8 }}>{t("aiSystemWord")}</div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", marginBottom: 8 }}>{t("aiSystemWord")}</div>
           <input value={doc.system_name} onChange={(e) => upDoc({ system_name: e.target.value })} placeholder={t("ph_systemName")}
             style={{ ...inputSt, marginBottom: 6, fontSize: 13, fontWeight: 500 }} />
           <input value={doc.organization} onChange={(e) => upDoc({ organization: e.target.value })} placeholder={t("organizationWord")}
             style={{ ...inputSt, marginBottom: 6 }} />
           <input value={doc.responsible_team} onChange={(e) => upDoc({ responsible_team: e.target.value })} placeholder={t("ph_responsibleTeam")} style={{ ...inputSt, marginBottom: 6 }} />
           <div>
-            <label style={{ display: "block", fontSize: 10, fontWeight: 500, color: T.faint, marginBottom: 3 }}>{t("friaStartDate")}</label>
+            <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.faint, marginBottom: 3 }}>{t("friaStartDate")}</label>
             <input type="date" value={doc.fria_start_date} onChange={(e) => upDoc({ fria_start_date: e.target.value })} style={inputSt} />
           </div>
         </div>
 
         {/* Phase nav — FriaProgressRail style */}
         <div style={{ padding: "8px 8px", flex: 1, overflowY: "auto" as const }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", padding: "0 6px", marginBottom: 6 }}>{t("friaPhases")}</div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", padding: "0 6px", marginBottom: 6 }}>{t("friaPhases")}</div>
           {phaseProgress.map((p) => {
             const isActive   = phase === p.id;
             const isExpanded = expandedPhases.has(p.id);
@@ -1782,12 +1782,12 @@ export default function FRIAPage() {
                     <p style={{ fontSize: 11, fontWeight: 600, color: T.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
                       {p.id}. {p.label}
                     </p>
-                    <p style={{ fontSize: 9, color: T.muted, margin: 0, marginTop: 1 }}>
+                    <p style={{ fontSize: 11, color: T.muted, margin: 0, marginTop: 1 }}>
                       {p.done}/{p.total} · {p.legalRef}
                     </p>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <span style={{ fontSize: 9.5, fontWeight: 700, color: pctColor, fontFamily: "var(--font-mono)" }}>{p.percent}%</span>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: pctColor, fontFamily: "var(--font-mono)" }}>{p.percent}%</span>
                     <ChevronRight size={10} style={{ color: T.faint, transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                   </div>
                 </button>
@@ -1797,11 +1797,11 @@ export default function FRIAPage() {
                 {isExpanded && (
                   <div style={{ borderTop: "1px solid rgba(0,0,0,0.05)", padding: "4px 6px 6px" }}>
                     {p.subPoints.map(sp => (
-                      <div key={sp.label} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 4px", borderRadius: 5 }}>
+                      <div key={sp.label} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 4px", borderRadius: 4 }}>
                         <div style={{ flexShrink: 0 }}>
                           <div style={{ width: 10, height: 10, borderRadius: "50%", border: `1.5px solid ${sp.done ? "#23403a" : "#dc2626"}` }} />
                         </div>
-                        <p style={{ fontSize: 10, color: sp.done ? T.muted : T.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const, textDecoration: sp.done ? "line-through" : "none", opacity: sp.done ? 0.55 : 1 }}>
+                        <p style={{ fontSize: 11, color: sp.done ? T.muted : T.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const, textDecoration: sp.done ? "line-through" : "none", opacity: sp.done ? 0.55 : 1 }}>
                           {sp.label}
                         </p>
                       </div>
@@ -1815,11 +1815,11 @@ export default function FRIAPage() {
 
         {/* Summary stats */}
         <div style={{ padding: "12px 14px", borderTop: `1px solid ${T.border}` }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", marginBottom: 10 }}>{t("friaSummary")}</div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: T.muted, textTransform: "uppercase" as const, letterSpacing: "0.6px", marginBottom: 10 }}>{t("friaSummary")}</div>
           <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ fontSize: 11, color: T.muted }}>{t("completenessWord")}</span>
-              <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{completeness}%</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{completeness}%</span>
             </div>
             <div style={{ height: 4, background: T.bg, borderRadius: 9999, overflow: "hidden" }}>
               <div style={{ height: "100%", width: `${completeness}%`, background: completeness > 75 ? T.green : completeness > 40 ? T.amber : T.red, borderRadius: 9999, transition: "width 0.3s" }} />
@@ -1838,16 +1838,16 @@ export default function FRIAPage() {
             </div>
           </div>
           <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
-            <button onClick={saveToDossier} style={{ flex: 1, fontSize: 11, fontWeight: 500, padding: "6px 8px", borderRadius: 7, background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
+            <button onClick={saveToDossier} style={{ flex: 1, fontSize: 11, fontWeight: 500, padding: "6px 8px", borderRadius: 8, background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
               {t("saveDossierShort")}
             </button>
-            <button onClick={exportReport} style={{ padding: "6px 9px", borderRadius: 7, background: T.bg, border: `1px solid ${T.border}`, cursor: "pointer", display: "flex", alignItems: "center" }}>
+            <button onClick={exportReport} style={{ padding: "6px 9px", borderRadius: 8, background: T.bg, border: `1px solid ${T.border}`, cursor: "pointer", display: "flex", alignItems: "center" }}>
               <Download style={{ width: 12, height: 12, color: T.muted }} />
             </button>
           </div>
           {/* Auto-save indicator */}
           {friaSaved && (
-            <div style={{ marginTop: 8, fontSize: 10, color: "#16a34a", textAlign: "center" as const }}>
+            <div style={{ marginTop: 8, fontSize: 11, color: "#16a34a", textAlign: "center" as const }}>
               ✓ {t("autoSaved")}
             </div>
           )}
@@ -1862,10 +1862,10 @@ export default function FRIAPage() {
       </div>
 
       {/* ── Main content ── */}
-      <div ref={contentRef} style={{ flex: 1, minWidth: 0, padding: "0 4px 40px 28px", overflowY: "auto" as const, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, background: "#fafafa" }}>
+      <div ref={contentRef} style={{ flex: 1, minWidth: 0, padding: "0 4px 40px 28px", overflowY: "auto" as const, border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, background: "#FAFAF9" }}>
         {/* Dossier save banner */}
         {dossierSavedAt ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 8, padding: "10px 14px", marginBottom: 20, background: T.greenBg, border: `1px solid ${T.greenBdr}`, fontSize: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 8, padding: "10px 14px", marginBottom: 20, background: T.greenBg, border: `1px solid ${T.greenBdr}`, fontSize: 13 }}>
             <CheckCircle style={{ width: 13, height: 13, color: T.green, flexShrink: 0 }} />
             <span style={{ color: "#15803d" }}>{t("friaSavedBanner")} · {new Date(dossierSavedAt).toLocaleDateString("it-IT")}</span>
             <Link href="/dashboard/dossier" style={{ marginLeft: "auto", fontSize: 11, fontWeight: 500, color: T.green }}>{t("viewDossier")}</Link>
@@ -1884,7 +1884,7 @@ export default function FRIAPage() {
       <AnimatePresence>
         {toast && (
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }}
-            style={{ position: "fixed", bottom: 24, right: 24, zIndex: 50, display: "flex", alignItems: "center", gap: 8, padding: "10px 16px", borderRadius: 10, fontSize: 12, fontWeight: 500, boxShadow: "0 4px 16px rgba(0,0,0,0.12)", background: toast.type === "error" ? "rgba(220,38,38,0.95)" : T.text, color: "#fff" }}>
+            style={{ position: "fixed", bottom: 24, right: 24, zIndex: 50, display: "flex", alignItems: "center", gap: 8, padding: "10px 16px", borderRadius: 8, fontSize: 13, fontWeight: 500, boxShadow: "0 4px 16px rgba(0,0,0,0.12)", background: toast.type === "error" ? "rgba(220,38,38,0.95)" : T.text, color: "#fff" }}>
             {toast.type === "error" ? "⚠" : "✓"} {toast.msg}
           </motion.div>
         )}

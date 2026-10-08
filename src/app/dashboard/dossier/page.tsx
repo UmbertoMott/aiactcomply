@@ -21,8 +21,8 @@ const DossierPreview = dynamic(
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const card = {
   background: "#ffffff",
-  border: "1px solid rgba(0,0,0,0.07)",
-  boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+  border: "1px solid rgba(0,0,0,0.08)",
+  boxShadow: "none",
 };
 const font = { fontFamily: "inherit" };
 
@@ -60,7 +60,7 @@ function ProgressRing({ pct }: { pct: number }) {
         style={{ transition: "stroke-dashoffset 0.6s ease" }}
       />
       <text x={44} y={44} textAnchor="middle" dominantBaseline="central"
-        style={{ fontSize: 18, fontWeight: 700, fill: "#0D1016", fontFamily: "inherit" }}>
+        style={{ fontSize: 15, fontWeight: 700, fill: "#0D1016", fontFamily: "inherit" }}>
         {pct}%
       </text>
     </svg>
@@ -209,16 +209,16 @@ export default function DossierPage() {
           <div className="min-h-full flex flex-col items-center py-8 px-4">
             {/* Modal header */}
             <div
-              className="w-full max-w-3xl flex items-center justify-between mb-4 rounded-xl px-4 py-2.5 flex-shrink-0"
+              className="w-full max-w-3xl flex items-center justify-between mb-4 rounded-lg px-4 py-2.5 flex-shrink-0"
               style={{ background: "rgba(255,255,255,0.07)" }}
             >
-              <span className="text-[12px] font-medium" style={{ color: "rgba(255,255,255,0.7)" }}>
+              <span className="text-[13px] font-medium" style={{ color: "rgba(255,255,255,0.7)" }}>
                 Anteprima Dossier — {data.meta.systemName}
               </span>
               <div className="flex items-center gap-2">
                 <button
                   onClick={handlePrint}
-                  className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[12px] font-medium transition-opacity hover:opacity-85"
+                  className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-medium transition-opacity hover:opacity-85"
                   style={{ background: "#3b82f6", color: "#ffffff", border: "none", cursor: "pointer" }}
                 >
                   <Printer size={12} /> Stampa
@@ -234,7 +234,7 @@ export default function DossierPage() {
             </div>
             {/* Document */}
             <div
-              className="w-full max-w-3xl rounded-xl overflow-hidden"
+              className="w-full max-w-3xl rounded-lg overflow-hidden"
               style={{ background: "#ffffff", boxShadow: "0 32px 64px rgba(0,0,0,0.5)" }}
             >
               <DossierPreview data={data} />
@@ -247,7 +247,7 @@ export default function DossierPage() {
       <div className="w-full" style={font}>
         {/* Toast */}
         {toast && (
-          <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg"
+          <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-lg text-[13px] font-medium shadow-lg"
             style={{ background: "#0D1016", color: "#ffffff" }}>
             {toast}
           </div>
@@ -266,21 +266,21 @@ export default function DossierPage() {
               <button
                 onClick={() => { loadDossier(); showToast("Dossier aggiornato"); }}
                 className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium hover:opacity-75 transition-opacity"
-                style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)", color: "rgba(0,0,0,0.55)", cursor: "pointer" }}
+                style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", cursor: "pointer" }}
               >
                 <RefreshCw size={11} /> Aggiorna
               </button>
               <button
                 onClick={handleExportJSON}
                 className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium hover:opacity-75 transition-opacity"
-                style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)", color: "rgba(0,0,0,0.55)", cursor: "pointer" }}
+                style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", cursor: "pointer" }}
               >
                 <Download size={11} /> Pacchetto per l&apos;audit
               </button>
               <button
                 onClick={handleExportPdf}
                 className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium hover:opacity-75 transition-opacity"
-                style={{ background: "#0D1016", border: "1px solid rgba(0,0,0,0.12)", color: "#fff", cursor: "pointer" }}
+                style={{ background: "#0D1016", border: "1px solid rgba(0,0,0,0.08)", color: "#fff", cursor: "pointer" }}
               >
                 <Download size={11} /> Export PDF
               </button>
@@ -294,29 +294,29 @@ export default function DossierPage() {
                 value={metaCompany}
                 onChange={(e) => setMetaCompany(e.target.value)}
                 placeholder="Nome azienda"
-                className="rounded-lg px-2.5 py-1.5 text-[12px] focus:outline-none"
-                style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.1)", color: "#0D1016", width: "180px" }}
+                className="rounded-lg px-2.5 py-1.5 text-[13px] focus:outline-none"
+                style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", width: "180px" }}
               />
               <input
                 value={metaSystem}
                 onChange={(e) => setMetaSystem(e.target.value)}
                 placeholder="Nome sistema di IA"
-                className="rounded-lg px-2.5 py-1.5 text-[12px] focus:outline-none"
-                style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.1)", color: "#0D1016", width: "200px" }}
+                className="rounded-lg px-2.5 py-1.5 text-[13px] focus:outline-none"
+                style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", width: "200px" }}
               />
               <button onClick={handleSaveMeta} className="text-[11px] font-medium rounded-full px-3 py-1"
                 style={{ background: "#0D1016", color: "#ffffff", cursor: "pointer" }}>Salva</button>
               <button onClick={() => setEditingMeta(false)} className="text-[11px]"
-                style={{ color: "rgba(0,0,0,0.4)", cursor: "pointer", background: "none", border: "none" }}>Annulla</button>
+                style={{ color: "#0D1016", cursor: "pointer", background: "none", border: "none" }}>Annulla</button>
             </div>
           ) : (
             <div className="flex items-center gap-2 mt-1">
-              <p className="text-[13px]" style={{ color: "rgba(0,0,0,0.42)" }}>
+              <p className="text-[13px]" style={{ color: "#0D1016" }}>
                 {data?.meta.companyName ?? "—"} · {data?.meta.systemName ?? "—"} · Regolamento UE 2024/1689
               </p>
               <button onClick={() => setEditingMeta(true)} title="Modifica"
                 style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex" }}>
-                <Edit2 size={11} style={{ color: "rgba(0,0,0,0.3)" }} />
+                <Edit2 size={11} style={{ color: "#0D1016" }} />
               </button>
             </div>
           )}
@@ -328,12 +328,12 @@ export default function DossierPage() {
           <div className="lg:col-span-1 flex flex-col gap-4">
 
             {/* Progress ring card */}
-            <div className="rounded-xl p-5" style={card}>
+            <div className="rounded-lg p-5" style={card}>
               <div className="flex items-center gap-4 mb-3">
                 <ProgressRing pct={pct} />
                 <div>
                   <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>Completamento</p>
-                  <p className="text-[12px]" style={{ color: "rgba(0,0,0,0.4)" }}>
+                  <p className="text-[13px]" style={{ color: "#0D1016" }}>
                     {done} di {sections.length} sezioni complete
                   </p>
                 </div>
@@ -347,9 +347,9 @@ export default function DossierPage() {
             </div>
 
             {/* Section list */}
-            <div className="rounded-xl overflow-hidden" style={card}>
-              <div className="px-4 py-3" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
-                <p className="text-[10px] font-semibold uppercase" style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "1px" }}>
+            <div className="rounded-lg overflow-hidden" style={card}>
+              <div className="px-4 py-3" style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+                <p className="text-[11px] font-semibold uppercase" style={{ color: "#0D1016", letterSpacing: "1px" }}>
                   Sezioni
                 </p>
               </div>
@@ -359,26 +359,26 @@ export default function DossierPage() {
                     <StatusIcon status={s.status} />
                     <div className="flex-1 min-w-0" style={{ opacity: s.status === "not_applicable" ? 0.4 : 1 }}>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-semibold" style={{ color: "rgba(0,0,0,0.3)" }}>{s.article}</span>
+                        <span className="text-[11px] font-semibold" style={{ color: "#0D1016" }}>{s.article}</span>
                         <span className="text-[11px] font-medium truncate" style={{ color: s.status === "not_applicable" ? "rgba(0,0,0,0.4)" : "#0D1016" }}>{s.title}</span>
                         {s.status === "not_applicable" && (
-                          <span className="text-[9px] px-1 rounded" style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.3)", border: "1px solid rgba(0,0,0,0.07)", whiteSpace: "nowrap" }}>
+                          <span className="text-[11px] px-1 rounded" style={{ background: "rgba(0,0,0,0.05)", color: "#0D1016", border: "1px solid rgba(0,0,0,0.08)", whiteSpace: "nowrap" }}>
                             N/A
                           </span>
                         )}
                       </div>
                       {s.status === "complete" && s.completedAt ? (
-                        <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.3)" }}>
+                        <p className="text-[11px]" style={{ color: "#0D1016" }}>
                           {new Date(s.completedAt).toLocaleDateString("it-IT")}
                         </p>
                       ) : s.status === "not_applicable" ? (
-                        <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.3)", fontStyle: "italic" }}>
+                        <p className="text-[11px]" style={{ color: "#0D1016", fontStyle: "italic" }}>
                           {s.notApplicableReason ?? "Non applicabile per questo sistema"}
                         </p>
                       ) : s.status !== "complete" ? (
                         <Link
                           href={s.href}
-                          className="text-[10px] font-medium transition-opacity hover:opacity-70"
+                          className="text-[11px] font-medium transition-opacity hover:opacity-70"
                           style={{ color: "#3b82f6" }}
                         >
                           Completa ora →
@@ -392,32 +392,32 @@ export default function DossierPage() {
 
             {/* Info box */}
             <div
-              className="rounded-xl p-4 text-[11px] leading-relaxed"
-              style={{ background: "#f8fafc", border: "1px solid rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.5)" }}
+              className="rounded-lg p-4 text-[11px] leading-relaxed"
+              style={{ background: "#f8fafc", border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016" }}
             >
-              <p className="font-semibold mb-1" style={{ color: "rgba(0,0,0,0.6)" }}>Sezioni obbligatorie per sistemi ad alto rischio:</p>
+              <p className="font-semibold mb-1" style={{ color: "#0D1016" }}>Sezioni obbligatorie per sistemi ad alto rischio:</p>
               <p className="mb-2">Art. 9, 10, 11, 12, 13, 14, 15, 17</p>
-              <p className="font-semibold mb-1" style={{ color: "rgba(0,0,0,0.6)" }}>Consigliate per tutti i sistemi:</p>
+              <p className="font-semibold mb-1" style={{ color: "#0D1016" }}>Consigliate per tutti i sistemi:</p>
               <p>Art. 5, 6</p>
             </div>
 
             {/* CTA buttons */}
             <button
               onClick={handlePrint}
-              className="flex items-center justify-center gap-2 w-full rounded-xl py-3 text-[13px] font-medium transition-all hover:opacity-90"
+              className="flex items-center justify-center gap-2 w-full rounded-lg py-3 text-[13px] font-medium transition-all hover:opacity-90"
               style={{ background: "#0D1016", color: "#ffffff", border: "none", cursor: "pointer" }}
             >
               <Printer size={14} />
               Genera e Stampa Dossier PDF
             </button>
-            <p className="text-[10px] text-center" style={{ color: "rgba(0,0,0,0.3)", marginTop: -8 }}>
+            <p className="text-[11px] text-center" style={{ color: "#0D1016", marginTop: -8 }}>
               Il browser aprirà la finestra di stampa. Seleziona &quot;Salva come PDF&quot; per salvare.
             </p>
 
             <button
               onClick={() => setModalOpen(true)}
-              className="flex items-center justify-center gap-2 w-full rounded-xl py-2.5 text-[12px] font-medium transition-all hover:opacity-80"
-              style={{ background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.6)", border: "1px solid rgba(0,0,0,0.08)", cursor: "pointer" }}
+              className="flex items-center justify-center gap-2 w-full rounded-lg py-2.5 text-[13px] font-medium transition-all hover:opacity-80"
+              style={{ background: "rgba(0,0,0,0.04)", color: "#0D1016", border: "1px solid rgba(0,0,0,0.08)", cursor: "pointer" }}
             >
               <Eye size={13} />
               Anteprima dossier
@@ -427,19 +427,19 @@ export default function DossierPage() {
           {/* ── Right column: scaled preview ── */}
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] font-semibold uppercase" style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "1px" }}>
+              <p className="text-[11px] font-semibold uppercase" style={{ color: "#0D1016", letterSpacing: "1px" }}>
                 Anteprima — A4
               </p>
               <button
                 onClick={() => setModalOpen(true)}
-                className="flex items-center gap-1 text-[10px] transition-opacity hover:opacity-70"
-                style={{ color: "rgba(0,0,0,0.35)", background: "none", border: "none", cursor: "pointer" }}
+                className="flex items-center gap-1 text-[11px] transition-opacity hover:opacity-70"
+                style={{ color: "#0D1016", background: "none", border: "none", cursor: "pointer" }}
               >
                 Espandi <ChevronRight size={10} />
               </button>
             </div>
             <div
-              className="rounded-xl overflow-hidden"
+              className="rounded-lg overflow-hidden"
               style={{ background: "#e5e7eb", padding: 16 }}
             >
               {/* Scaled document — zoom affects layout so no grey overflow */}

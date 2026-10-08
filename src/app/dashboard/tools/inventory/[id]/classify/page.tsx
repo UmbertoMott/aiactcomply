@@ -8,7 +8,7 @@ import ClassifyWizard from "@/components/obligations/ClassifyWizard";
 import { loadInventory, type AISystem } from "@/lib/inventory/ai-system";
 import { saveAssessment } from "@/lib/inventory/classifier-bridge";
 
-const T = { text: "#0D1016", muted: "rgba(0,0,0,0.45)", bg: "#FAFAF9" } as const;
+const T = { text: "#0D1016", muted: "#0D1016", bg: "#FAFAF9" } as const;
 
 export default function ClassifyPage() {
   const params = useParams();
@@ -26,7 +26,7 @@ export default function ClassifyPage() {
 
   if (notFound) return (
     <div style={{ padding: 48 }}>
-      <p style={{ color: T.muted, fontSize: 14 }}>Sistema non trovato. <Link href="/dashboard/tools/inventory" style={{ color: T.text, fontWeight: 600 }}>Torna all&apos;inventario</Link></p>
+      <p style={{ color: T.muted, fontSize: 13 }}>Sistema non trovato. <Link href="/dashboard/tools/inventory" style={{ color: T.text, fontWeight: 600 }}>Torna all&apos;inventario</Link></p>
     </div>
   );
   if (!system) return null;
@@ -34,7 +34,7 @@ export default function ClassifyPage() {
   return (
     <div style={{ background: T.bg, minHeight: "100vh", padding: "24px 28px" }}>
       <div style={{ maxWidth: 820, margin: "0 auto" }}>
-        <Link href={`/dashboard/tools/inventory/${system.id}`} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: T.muted, textDecoration: "none", marginBottom: 16 }}>
+        <Link href={`/dashboard/tools/inventory/${system.id}`} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: T.muted, textDecoration: "none", marginBottom: 16 }}>
           <ArrowLeft size={13} /> {system.name}
         </Link>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: T.text, margin: "0 0 4px", letterSpacing: "-0.4px" }}>Classifica il sistema</h1>

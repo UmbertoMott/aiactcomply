@@ -15,16 +15,16 @@ import {
 
 const T = {
   bg: "#fafafa", card: "#ffffff", border: "rgba(0,0,0,0.10)",
-  text: "#0D1016", muted: "rgba(0,0,0,0.5)", accent: "#23403a",
+  text: "#0D1016", muted: "#0D1016", accent: "#23403a",
   red: "#dc2626", redBg: "rgba(220,38,38,0.06)", redBdr: "rgba(220,38,38,0.2)",
-  green: "#16a34a", amber: "#d97706", faint: "rgba(0,0,0,0.35)",
+  green: "#16a34a", amber: "#d97706", faint: "#0D1016",
 };
 
 const inputSt: React.CSSProperties = {
   width: "100%", padding: "9px 11px", fontSize: 13, color: T.text,
   background: "#fff", border: `1px solid ${T.border}`, borderRadius: 8, outline: "none",
 };
-const labelSt: React.CSSProperties = { display: "block", fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 5 };
+const labelSt: React.CSSProperties = { display: "block", fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 5 };
 const hintSt: React.CSSProperties = { fontSize: 11, color: T.muted, marginBottom: 7, lineHeight: 1.5 };
 
 // ─── Campi riutilizzabili ─────────────────────────────────────────────────────
@@ -57,9 +57,9 @@ function Inp({ label, hint, value, onChange, type = "text" }: { label: string; h
 
 function SectionCard({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, padding: "20px 22px", marginBottom: 16 }}>
-      <h3 style={{ fontSize: 14, fontWeight: 700, color: T.text, marginBottom: subtitle ? 3 : 14 }}>{title}</h3>
-      {subtitle && <p style={{ fontSize: 12, color: T.muted, marginBottom: 16, lineHeight: 1.5 }}>{subtitle}</p>}
+    <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: "20px 22px", marginBottom: 16 }}>
+      <h3 style={{ fontSize: 13, fontWeight: 700, color: T.text, marginBottom: subtitle ? 3 : 14 }}>{title}</h3>
+      {subtitle && <p style={{ fontSize: 13, color: T.muted, marginBottom: 16, lineHeight: 1.5 }}>{subtitle}</p>}
       {children}
     </div>
   );
@@ -192,15 +192,15 @@ export default function DpiaEdpbForm() {
       {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 14 }}>
         <div>
-          <h2 style={{ fontSize: 17, fontWeight: 700, color: T.text, marginBottom: 3 }}>{t("title")}</h2>
-          <p style={{ fontSize: 12, color: T.muted }}>{t("subtitle")}</p>
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: T.text, marginBottom: 3 }}>{t("title")}</h2>
+          <p style={{ fontSize: 13, color: T.muted }}>{t("subtitle")}</p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
           <span style={{ fontSize: 11, color: saved ? "#16a34a" : T.muted, display: "flex", alignItems: "center", gap: 4 }}>
             {saved && <Check className="h-3 w-3" />}{saved ? t("saved") : t("saving")}
           </span>
           <button onClick={() => setAiOpen((v) => !v)} title={t("aiPrefill")}
-            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(35,64,58,0.25)", background: aiOpen ? "rgba(35,64,58,0.12)" : "rgba(35,64,58,0.06)", color: "#23403a", cursor: "pointer" }}>
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(35,64,58,0.25)", background: aiOpen ? "rgba(35,64,58,0.12)" : "rgba(35,64,58,0.06)", color: "#0D1016", cursor: "pointer" }}>
             <Sparkles className="h-3.5 w-3.5" /><span>{t("aiPrefill")}</span>
           </button>
           <button onClick={handleReset} title={t("resetBtn")}
@@ -212,20 +212,20 @@ export default function DpiaEdpbForm() {
 
       {/* AI pre-fill panel (sorgenti dati per la bozza AI) */}
       {aiOpen && (
-        <div style={{ border: `1px solid rgba(35,64,58,0.25)`, background: "rgba(35,64,58,0.04)", borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: "#23403a", marginBottom: 3, display: "flex", alignItems: "center", gap: 6 }}>
+        <div style={{ border: `1px solid rgba(35,64,58,0.25)`, background: "rgba(35,64,58,0.04)", borderRadius: 8, padding: "16px 18px", marginBottom: 16 }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: "#0D1016", marginBottom: 3, display: "flex", alignItems: "center", gap: 6 }}>
             <Sparkles className="h-4 w-4" />{t("aiPanelTitle")}
           </p>
-          <p style={{ fontSize: 11.5, color: T.muted, marginBottom: 12, lineHeight: 1.5 }}>{t("aiPanelHint")}</p>
+          <p style={{ fontSize: 11, color: T.muted, marginBottom: 12, lineHeight: 1.5 }}>{t("aiPanelHint")}</p>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             <Field label={t("aiSystemName")}><input value={aiName} onChange={(e) => setAiName(e.target.value)} style={inputSt} /></Field>
             <Field label={t("aiDataCategories")}><input value={aiCats} onChange={(e) => setAiCats(e.target.value)} style={inputSt} /></Field>
           </div>
           <Txt label={t("aiDescription")} value={aiDesc} onChange={setAiDesc} rows={3} />
-          {aiError && <p style={{ fontSize: 12, color: T.red, marginBottom: 8 }}>{aiError}</p>}
+          {aiError && <p style={{ fontSize: 13, color: T.red, marginBottom: 8 }}>{aiError}</p>}
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <button onClick={handleAiPrefill} disabled={aiLoading || !aiName.trim() || !aiDesc.trim()}
-              style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, padding: "8px 16px", borderRadius: 8, border: "none", background: "#0D1016", color: "#fff", cursor: (aiLoading || !aiName.trim() || !aiDesc.trim()) ? "not-allowed" : "pointer", opacity: (aiLoading || !aiName.trim() || !aiDesc.trim()) ? 0.55 : 1 }}>
+              style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, padding: "8px 16px", borderRadius: 8, border: "none", background: "#0D1016", color: "#fff", cursor: (aiLoading || !aiName.trim() || !aiDesc.trim()) ? "not-allowed" : "pointer", opacity: (aiLoading || !aiName.trim() || !aiDesc.trim()) ? 0.55 : 1 }}>
               <Sparkles className="h-4 w-4" />{aiLoading ? t("aiGenerating") : t("aiGenerate")}
             </button>
             <span style={{ fontSize: 11, color: T.muted }}>{t("aiFillsEmptyNote")}</span>
@@ -237,11 +237,11 @@ export default function DpiaEdpbForm() {
       <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
 
         {/* Left rail */}
-        <div style={{ width: 240, flexShrink: 0, border: `1px solid ${T.border}`, borderRadius: 10, background: "#fafafa", display: "flex", flexDirection: "column", position: "sticky", top: 12, maxHeight: "calc(100vh - 32px)", overflowY: "auto" }}>
+        <div style={{ width: 240, flexShrink: 0, border: `1px solid ${T.border}`, borderRadius: 8, background: "#FAFAF9", display: "flex", flexDirection: "column", position: "sticky", top: 12, maxHeight: "calc(100vh - 32px)", overflowY: "auto" }}>
           {/* DOCUMENTO header + progress */}
           <div style={{ padding: "12px 12px 10px", borderBottom: `1px solid ${T.border}` }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-              <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>{t("docWord")}</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", textTransform: "uppercase", letterSpacing: "0.08em" }}>{t("docWord")}</span>
               <span style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", fontFamily: "var(--font-mono)" }}>{completeness.overallPercent}%</span>
             </div>
             <div style={{ width: "100%", height: 4, background: "rgba(0,0,0,0.07)", borderRadius: 2, overflow: "hidden" }}>
@@ -251,14 +251,14 @@ export default function DpiaEdpbForm() {
 
           {/* Processing name */}
           <div style={{ padding: "12px 14px", borderBottom: `1px solid ${T.border}` }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: 6 }}>{t("processingName")}</div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: 6 }}>{t("processingName")}</div>
             <input value={doc.processingName} onChange={(e) => set("processingName", e.target.value)} placeholder={t("processingNameHint")}
               style={{ ...inputSt, fontSize: 13, fontWeight: 500 }} />
           </div>
 
           {/* Section nav (progress rail) */}
           <div style={{ padding: "8px", flex: 1 }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.6px", padding: "0 6px", marginBottom: 6 }}>{t("sectionsWord")}</div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.6px", padding: "0 6px", marginBottom: 6 }}>{t("sectionsWord")}</div>
             {completeness.sections.map((s) => {
               const isActive = section === s.section;
               const isExp = expanded.has(s.section);
@@ -275,10 +275,10 @@ export default function DpiaEdpbForm() {
                     <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${circleColor}`, flexShrink: 0 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontSize: 11, fontWeight: 600, color: T.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.section}. {t(`${EDPB_SECTIONS[s.section].key}Tab`)}</p>
-                      <p style={{ fontSize: 9, color: T.muted, margin: "1px 0 0" }}>{s.done}/{s.total}</p>
+                      <p style={{ fontSize: 11, color: T.muted, margin: "1px 0 0" }}>{s.done}/{s.total}</p>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                      <span style={{ fontSize: 9.5, fontWeight: 700, color: pctColor, fontFamily: "var(--font-mono)" }}>{pct}%</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: pctColor, fontFamily: "var(--font-mono)" }}>{pct}%</span>
                       <ChevronRight size={10} style={{ color: T.faint, transform: isExp ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                     </div>
                   </button>
@@ -290,7 +290,7 @@ export default function DpiaEdpbForm() {
                       {subs.map((sp, i) => (
                         <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px" }}>
                           <div style={{ width: 10, height: 10, borderRadius: "50%", border: `1.5px solid ${sp.filled ? "#23403a" : "#dc2626"}`, flexShrink: 0 }} />
-                          <p style={{ fontSize: 10, color: sp.filled ? T.muted : T.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: sp.filled ? "line-through" : "none", opacity: sp.filled ? 0.55 : 1 }}>{t(sp.labelKey)}</p>
+                          <p style={{ fontSize: 11, color: sp.filled ? T.muted : T.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: sp.filled ? "line-through" : "none", opacity: sp.filled ? 0.55 : 1 }}>{t(sp.labelKey)}</p>
                         </div>
                       ))}
                     </div>
@@ -302,7 +302,7 @@ export default function DpiaEdpbForm() {
 
           {/* Summary + actions */}
           <div style={{ padding: "12px 14px", borderTop: `1px solid ${T.border}` }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: 10 }}>{t("summaryWord")}</div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: T.muted, textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: 10 }}>{t("summaryWord")}</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontSize: 11, color: T.muted }}>{t("purposesTitle")}</span>
@@ -318,19 +318,19 @@ export default function DpiaEdpbForm() {
               </div>
             </div>
             <button onClick={goToNextGap} disabled={completeness.firstIncompleteSection === null}
-              style={{ width: "100%", marginTop: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "7px 10px", borderRadius: 7, border: "none", background: completeness.firstIncompleteSection === null ? "rgba(22,163,74,0.9)" : T.accent, color: "#fff", cursor: completeness.firstIncompleteSection === null ? "default" : "pointer" }}>
+              style={{ width: "100%", marginTop: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 11, fontWeight: 600, padding: "7px 10px", borderRadius: 8, border: "none", background: completeness.firstIncompleteSection === null ? "rgba(22,163,74,0.9)" : T.accent, color: "#fff", cursor: completeness.firstIncompleteSection === null ? "default" : "pointer" }}>
               {completeness.firstIncompleteSection === null ? <><Check className="h-3.5 w-3.5" />{t("guidedComplete")}</> : <>{t("guidedNext")}<ChevronRight className="h-3.5 w-3.5" /></>}
             </button>
             <button onClick={handleExport} disabled={exporting}
-              style={{ width: "100%", marginTop: 6, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 11, fontWeight: 500, padding: "7px 10px", borderRadius: 7, border: `1px solid ${T.border}`, background: "#fff", color: T.text, cursor: exporting ? "wait" : "pointer", opacity: exporting ? 0.6 : 1 }}>
+              style={{ width: "100%", marginTop: 6, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 11, fontWeight: 500, padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.text, cursor: exporting ? "wait" : "pointer", opacity: exporting ? 0.6 : 1 }}>
               <Download className="h-3.5 w-3.5" />{exporting ? t("exporting") : t("exportPdf")}
             </button>
-            {saved && <div style={{ marginTop: 8, fontSize: 10, color: "#16a34a", textAlign: "center" }}>✓ {t("saved")}</div>}
+            {saved && <div style={{ marginTop: 8, fontSize: 11, color: "#16a34a", textAlign: "center" }}>✓ {t("saved")}</div>}
           </div>
         </div>
 
         {/* Main content: all sections stacked */}
-        <div ref={contentRef} style={{ flex: 1, minWidth: 0, maxHeight: "calc(100vh - 32px)", overflowY: "auto", border: `1px solid ${T.border}`, borderRadius: 10, background: "#fafafa", padding: "16px 20px 48px", scrollBehavior: "smooth" }}>
+        <div ref={contentRef} style={{ flex: 1, minWidth: 0, maxHeight: "calc(100vh - 32px)", overflowY: "auto", border: `1px solid ${T.border}`, borderRadius: 8, background: "#FAFAF9", padding: "16px 20px 48px", scrollBehavior: "smooth" }}>
           {SECTIONS.map(({ n, Comp }) => (
             <div key={n} id={`edpb-sec-${n}`} style={{ marginTop: n === 0 ? 0 : 20, scrollMarginTop: 12 }}>
               <Comp doc={doc} set={set} t={t} />
@@ -351,11 +351,11 @@ function PartyList({ items, onChange, t, addLabel }: { items: EdpbParty[]; onCha
   return (
     <div>
       {items.map((p, i) => (
-        <div key={p.id} style={{ border: `1px solid ${T.border}`, borderRadius: 10, padding: 14, marginBottom: 10 }}>
+        <div key={p.id} style={{ border: `1px solid ${T.border}`, borderRadius: 8, padding: 14, marginBottom: 10 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
             <span style={{ fontSize: 11, fontWeight: 700, color: T.muted }}>#{i + 1}</span>
             <button onClick={() => onChange(items.filter((x) => x.id !== p.id))}
-              style={{ padding: "5px 7px", borderRadius: 7, border: `1px solid ${T.redBdr}`, background: T.redBg, color: T.red, cursor: "pointer" }}>
+              style={{ padding: "5px 7px", borderRadius: 8, border: `1px solid ${T.redBdr}`, background: T.redBg, color: T.red, cursor: "pointer" }}>
               <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -368,7 +368,7 @@ function PartyList({ items, onChange, t, addLabel }: { items: EdpbParty[]; onCha
         </div>
       ))}
       <button onClick={() => onChange([...items, emptyParty()])}
-        style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.accent, cursor: "pointer" }}>
+        style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 600, padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.accent, cursor: "pointer" }}>
         <Plus className="h-4 w-4" />{addLabel}
       </button>
     </div>
@@ -416,7 +416,7 @@ function Section0({ doc, set, t }: { doc: DpiaEdpbDoc; set: SetFn; t: TFn }) {
               <button onClick={() => set("team", doc.team.filter((x) => x.id !== m.id))} style={{ padding: "7px 9px", borderRadius: 8, border: `1px solid ${T.redBdr}`, background: T.redBg, color: T.red, cursor: "pointer" }}><Trash2 className="h-3.5 w-3.5" /></button>
             </div>
           ))}
-          <button onClick={() => set("team", [...doc.team, emptyTeamMember()])} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "6px 10px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.accent, cursor: "pointer" }}><Plus className="h-4 w-4" />{t("addTeamMember")}</button>
+          <button onClick={() => set("team", [...doc.team, emptyTeamMember()])} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 600, padding: "6px 10px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.accent, cursor: "pointer" }}><Plus className="h-4 w-4" />{t("addTeamMember")}</button>
         </Field>
 
         <Txt label={t("references")} hint={t("referencesHint")} value={doc.references} onChange={(v) => set("references", v)} rows={2} />
@@ -429,7 +429,7 @@ function Section0({ doc, set, t }: { doc: DpiaEdpbDoc; set: SetFn; t: TFn }) {
             ["art35_3c", t("reasonArt35c")],
             ["beneficial", t("reasonBeneficial")],
           ] as const).map(([k, label]) => (
-            <label key={k} style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 6, cursor: "pointer", fontSize: 12, color: T.text }}>
+            <label key={k} style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 6, cursor: "pointer", fontSize: 13, color: T.text }}>
               <input type="checkbox" checked={doc.reasons[k]} onChange={(e) => set("reasons", { ...doc.reasons, [k]: e.target.checked })} style={{ marginTop: 2 }} />
               <span>{label}</span>
             </label>
@@ -457,16 +457,16 @@ function Section1({ doc, set, t }: { doc: DpiaEdpbDoc; set: SetFn; t: TFn }) {
 
       <SectionCard title={`1.1.2 · ${t("purposesTitle")}`} subtitle={t("purposesHint")}>
         {doc.purposes.map((p, i) => (
-          <div key={p.id} style={{ border: `1px solid ${T.border}`, borderRadius: 10, padding: 12, marginBottom: 10 }}>
+          <div key={p.id} style={{ border: `1px solid ${T.border}`, borderRadius: 8, padding: 12, marginBottom: 10 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
               <span style={{ fontSize: 11, fontWeight: 700, color: T.muted }}>#{i + 1}</span>
-              <button onClick={() => set("purposes", doc.purposes.filter((x) => x.id !== p.id))} style={{ padding: "5px 7px", borderRadius: 7, border: `1px solid ${T.redBdr}`, background: T.redBg, color: T.red, cursor: "pointer" }}><Trash2 className="h-3.5 w-3.5" /></button>
+              <button onClick={() => set("purposes", doc.purposes.filter((x) => x.id !== p.id))} style={{ padding: "5px 7px", borderRadius: 8, border: `1px solid ${T.redBdr}`, background: T.redBg, color: T.red, cursor: "pointer" }}><Trash2 className="h-3.5 w-3.5" /></button>
             </div>
             <Txt label={t("purposeField")} value={p.purpose} onChange={(v) => set("purposes", doc.purposes.map((x) => x.id === p.id ? { ...x, purpose: v } : x))} rows={2} />
             <Inp label={t("purposeLegalBasis")} hint={t("purposeLegalBasisHint")} value={p.legalBasis} onChange={(v) => set("purposes", doc.purposes.map((x) => x.id === p.id ? { ...x, legalBasis: v } : x))} />
           </div>
         ))}
-        <button onClick={() => set("purposes", [...doc.purposes, emptyPurpose()])} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.accent, cursor: "pointer" }}><Plus className="h-4 w-4" />{t("addPurpose")}</button>
+        <button onClick={() => set("purposes", [...doc.purposes, emptyPurpose()])} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 600, padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.accent, cursor: "pointer" }}><Plus className="h-4 w-4" />{t("addPurpose")}</button>
       </SectionCard>
 
       <SectionCard title={`1.1.3 · ${t("secondaryUsesTitle")}`}>
@@ -492,10 +492,10 @@ function Section1({ doc, set, t }: { doc: DpiaEdpbDoc; set: SetFn; t: TFn }) {
 
       <SectionCard title={`1.3 · ${t("assetsTitle")}`} subtitle={t("assetsHint")}>
         {doc.assets.map((a, i) => (
-          <div key={a.id} style={{ border: `1px solid ${T.border}`, borderRadius: 10, padding: 12, marginBottom: 10 }}>
+          <div key={a.id} style={{ border: `1px solid ${T.border}`, borderRadius: 8, padding: 12, marginBottom: 10 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
               <span style={{ fontSize: 11, fontWeight: 700, color: T.muted }}>#{i + 1}</span>
-              <button onClick={() => set("assets", doc.assets.filter((x) => x.id !== a.id))} style={{ padding: "5px 7px", borderRadius: 7, border: `1px solid ${T.redBdr}`, background: T.redBg, color: T.red, cursor: "pointer" }}><Trash2 className="h-3.5 w-3.5" /></button>
+              <button onClick={() => set("assets", doc.assets.filter((x) => x.id !== a.id))} style={{ padding: "5px 7px", borderRadius: 8, border: `1px solid ${T.redBdr}`, background: T.redBg, color: T.red, cursor: "pointer" }}><Trash2 className="h-3.5 w-3.5" /></button>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
               <input placeholder={t("assetName")} value={a.name} onChange={(e) => set("assets", doc.assets.map((x) => x.id === a.id ? { ...x, name: e.target.value } : x))} style={inputSt} />
@@ -505,7 +505,7 @@ function Section1({ doc, set, t }: { doc: DpiaEdpbDoc; set: SetFn; t: TFn }) {
             <textarea placeholder={t("assetDescription")} value={a.description} onChange={(e) => set("assets", doc.assets.map((x) => x.id === a.id ? { ...x, description: e.target.value } : x))} rows={2} style={{ ...inputSt, marginTop: 8, resize: "vertical" }} />
           </div>
         ))}
-        <button onClick={() => set("assets", [...doc.assets, emptyAsset()])} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.accent, cursor: "pointer" }}><Plus className="h-4 w-4" />{t("addAsset")}</button>
+        <button onClick={() => set("assets", [...doc.assets, emptyAsset()])} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 600, padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.accent, cursor: "pointer" }}><Plus className="h-4 w-4" />{t("addAsset")}</button>
         <div style={{ marginTop: 14 }}>
           <Txt label={t("architecture")} hint={t("architectureHint")} value={doc.architecture} onChange={(v) => set("architecture", v)} rows={2} />
         </div>
@@ -524,10 +524,10 @@ function MeasureList({ items, onChange, t, addLabel }: { items: EdpbMeasure[]; o
   return (
     <div>
       {items.map((m, i) => (
-        <div key={m.id} style={{ border: `1px solid ${T.border}`, borderRadius: 10, padding: 12, marginBottom: 10 }}>
+        <div key={m.id} style={{ border: `1px solid ${T.border}`, borderRadius: 8, padding: 12, marginBottom: 10 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
             <span style={{ fontSize: 11, fontWeight: 700, color: T.muted }}>#{i + 1}</span>
-            <button onClick={() => onChange(items.filter((x) => x.id !== m.id))} style={{ padding: "5px 7px", borderRadius: 7, border: `1px solid ${T.redBdr}`, background: T.redBg, color: T.red, cursor: "pointer" }}><Trash2 className="h-3.5 w-3.5" /></button>
+            <button onClick={() => onChange(items.filter((x) => x.id !== m.id))} style={{ padding: "5px 7px", borderRadius: 8, border: `1px solid ${T.redBdr}`, background: T.redBg, color: T.red, cursor: "pointer" }}><Trash2 className="h-3.5 w-3.5" /></button>
           </div>
           <textarea placeholder={t("measureDescription")} value={m.description} onChange={(e) => onChange(items.map((x) => x.id === m.id ? { ...x, description: e.target.value } : x))} rows={2} style={{ ...inputSt, resize: "vertical", marginBottom: 8 }} />
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -538,7 +538,7 @@ function MeasureList({ items, onChange, t, addLabel }: { items: EdpbMeasure[]; o
           </div>
         </div>
       ))}
-      <button onClick={() => onChange([...items, emptyMeasure()])} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.accent, cursor: "pointer" }}><Plus className="h-4 w-4" />{addLabel}</button>
+      <button onClick={() => onChange([...items, emptyMeasure()])} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 600, padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.accent, cursor: "pointer" }}><Plus className="h-4 w-4" />{addLabel}</button>
     </div>
   );
 }
@@ -611,10 +611,10 @@ function RiskList({ items, onChange, t }: { items: EdpbRisk[]; onChange: (items:
   return (
     <div>
       {items.map((r, i) => (
-        <div key={r.id} style={{ border: `1px solid ${T.border}`, borderRadius: 10, padding: 14, marginBottom: 12 }}>
+        <div key={r.id} style={{ border: `1px solid ${T.border}`, borderRadius: 8, padding: 14, marginBottom: 12 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
             <span style={{ fontSize: 11, fontWeight: 700, color: T.muted }}>{t("riskLabel")} #{i + 1}</span>
-            <button onClick={() => onChange(items.filter((x) => x.id !== r.id))} style={{ padding: "5px 7px", borderRadius: 7, border: `1px solid ${T.redBdr}`, background: T.redBg, color: T.red, cursor: "pointer" }}><Trash2 className="h-3.5 w-3.5" /></button>
+            <button onClick={() => onChange(items.filter((x) => x.id !== r.id))} style={{ padding: "5px 7px", borderRadius: 8, border: `1px solid ${T.redBdr}`, background: T.redBg, color: T.red, cursor: "pointer" }}><Trash2 className="h-3.5 w-3.5" /></button>
           </div>
           <Txt label={t("riskScenario")} hint={t("riskScenarioHint")} value={r.scenario} onChange={(v) => patch(r.id, { scenario: v })} rows={2} />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -627,13 +627,13 @@ function RiskList({ items, onChange, t }: { items: EdpbRisk[]; onChange: (items:
             <LevelSelect label={t("riskSeverity")} value={r.severity} onChange={(v) => patch(r.id, { severity: v })} t={t} />
           </div>
           <Txt label={t("riskModulating")} hint={t("riskModulatingHint")} value={r.modulating} onChange={(v) => patch(r.id, { modulating: v })} rows={2} />
-          <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: T.text, cursor: "pointer" }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: T.text, cursor: "pointer" }}>
             <input type="checkbox" checked={r.acceptable} onChange={(e) => patch(r.id, { acceptable: e.target.checked })} />
             <span>{t("riskAcceptable")}</span>
           </label>
         </div>
       ))}
-      <button onClick={() => onChange([...items, emptyRisk()])} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.accent, cursor: "pointer" }}><Plus className="h-4 w-4" />{t("addRisk")}</button>
+      <button onClick={() => onChange([...items, emptyRisk()])} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 600, padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.accent, cursor: "pointer" }}><Plus className="h-4 w-4" />{t("addRisk")}</button>
     </div>
   );
 }
@@ -645,10 +645,10 @@ function MitigationList({ items, onChange, t }: { items: EdpbMitigation[]; onCha
   return (
     <div>
       {items.map((m, i) => (
-        <div key={m.id} style={{ border: `1px solid ${T.border}`, borderRadius: 10, padding: 12, marginBottom: 10 }}>
+        <div key={m.id} style={{ border: `1px solid ${T.border}`, borderRadius: 8, padding: 12, marginBottom: 10 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
             <span style={{ fontSize: 11, fontWeight: 700, color: T.muted }}>#{i + 1}</span>
-            <button onClick={() => onChange(items.filter((x) => x.id !== m.id))} style={{ padding: "5px 7px", borderRadius: 7, border: `1px solid ${T.redBdr}`, background: T.redBg, color: T.red, cursor: "pointer" }}><Trash2 className="h-3.5 w-3.5" /></button>
+            <button onClick={() => onChange(items.filter((x) => x.id !== m.id))} style={{ padding: "5px 7px", borderRadius: 8, border: `1px solid ${T.redBdr}`, background: T.redBg, color: T.red, cursor: "pointer" }}><Trash2 className="h-3.5 w-3.5" /></button>
           </div>
           <textarea placeholder={t("mitDescription")} value={m.description} onChange={(e) => patch(m.id, { description: e.target.value })} rows={2} style={{ ...inputSt, resize: "vertical", marginBottom: 8 }} />
           <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8, alignItems: "center" }}>
@@ -659,7 +659,7 @@ function MitigationList({ items, onChange, t }: { items: EdpbMitigation[]; onCha
           </div>
         </div>
       ))}
-      <button onClick={() => onChange([...items, emptyMitigation()])} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.accent, cursor: "pointer" }}><Plus className="h-4 w-4" />{t("addMitigation")}</button>
+      <button onClick={() => onChange([...items, emptyMitigation()])} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 600, padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.accent, cursor: "pointer" }}><Plus className="h-4 w-4" />{t("addMitigation")}</button>
     </div>
   );
 }

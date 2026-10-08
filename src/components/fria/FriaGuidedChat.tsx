@@ -8,11 +8,11 @@ import { nextFriaSubPointId } from "@/lib/fria/fria-guided-progress";
 
 const T = {
   text:     "#0D1016",
-  muted:    "rgba(0,0,0,0.42)",
-  faint:    "rgba(0,0,0,0.22)",
+  muted:    "#0D1016",
+  faint:    "#0D1016",
   border:   "rgba(0,0,0,0.08)",
   card:     "#ffffff",
-  bg:       "#f5f5f4",
+  bg:       "#ffffff",
   green:    "#23403a",
   greenBg:  "rgba(35,64,58,0.08)",
   greenBdr: "rgba(35,64,58,0.20)",
@@ -117,7 +117,7 @@ export function FriaGuidedChat({
   if (!sp) {
     return (
       <div style={{ padding: 24, textAlign: "center", color: T.muted }}>
-        <p style={{ fontSize: 12 }}>{t("gc_completed")}</p>
+        <p style={{ fontSize: 13 }}>{t("gc_completed")}</p>
         <p style={{ fontSize: 11, color: T.muted, marginTop: 6 }}>{t("gc_closePanel")}</p>
       </div>
     );
@@ -134,9 +134,9 @@ export function FriaGuidedChat({
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: T.green }} />
-            <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{t("gc_friaGuided")}</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: T.text }}>{t("gc_friaGuided")}</span>
           </div>
-          <span style={{ fontSize: 10, color: T.muted, fontFamily: "var(--font-mono)" }}>
+          <span style={{ fontSize: 11, color: T.muted, fontFamily: "var(--font-mono)" }}>
             {currentIdx + 1} / {allIds.length}
           </span>
         </div>
@@ -178,7 +178,7 @@ export function FriaGuidedChat({
                     title={t("gc_editAnswer")}
                     style={{
                       display: "flex", alignItems: "center", gap: 4,
-                      fontSize: 9, fontWeight: 600, padding: "3px 8px", borderRadius: 6,
+                      fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 6,
                       border: `1px solid ${T.border}`, background: T.card,
                       color: T.muted, cursor: "pointer",
                     }}
@@ -204,7 +204,7 @@ export function FriaGuidedChat({
             background: T.card, border: `1px solid ${T.border}`,
             borderRadius: "12px 12px 12px 3px", padding: "10px 14px", maxWidth: "90%",
           }}>
-            <div style={{ fontSize: 9, fontWeight: 700, color: T.green, marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: T.green, marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.04em" }}>
               {sp.ref}
             </div>
             <p style={{ fontSize: 13, fontWeight: 500, color: T.text, margin: 0, lineHeight: 1.5 }}>
@@ -219,10 +219,10 @@ export function FriaGuidedChat({
                 <div style={{
                   marginTop: 10, padding: "9px 11px",
                   background: "rgba(0,0,0,0.025)", borderRadius: 8,
-                  border: "1px solid rgba(0,0,0,0.06)",
+                  border: "1px solid rgba(0,0,0,0.08)",
                   display: "flex", flexDirection: "column", gap: 5,
                 }}>
-                  <span style={{ fontSize: 9, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                     Esempi
                   </span>
                   {qr.map(opt => {
@@ -230,10 +230,10 @@ export function FriaGuidedChat({
                     if (!ex) return null;
                     return (
                       <div key={opt} style={{ display: "flex", gap: 7, alignItems: "flex-start" }}>
-                        <span style={{ fontSize: 9.5, fontWeight: 700, color: T.text, flexShrink: 0, minWidth: 70, paddingTop: 1 }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: T.text, flexShrink: 0, minWidth: 70, paddingTop: 1 }}>
                           {opt}:
                         </span>
-                        <span style={{ fontSize: 10.5, color: T.muted, lineHeight: 1.45, fontStyle: "italic" }}>
+                        <span style={{ fontSize: 11, color: T.muted, lineHeight: 1.45, fontStyle: "italic" }}>
                           {ex.length > 110 ? ex.slice(0, 107) + "…" : ex}
                         </span>
                       </div>
@@ -276,15 +276,15 @@ export function FriaGuidedChat({
             {/* Esempi come chip per testo libero */}
             {!isDone && qr.length === 0 && sp.examples.length > 0 && (
               <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 5 }}>
-                <span style={{ fontSize: 9, color: T.muted, textTransform: "uppercase", letterSpacing: "0.04em" }}>{t("gc_examples")}</span>
+                <span style={{ fontSize: 11, color: T.muted, textTransform: "uppercase", letterSpacing: "0.04em" }}>{t("gc_examples")}</span>
                 {sp.examples.slice(0, 2).map((ex, i) => (
                   <button
                     key={i} onClick={() => setInput(ex)}
                     style={{
                       textAlign: "left", border: `1px solid ${T.border}`,
-                      borderRadius: 7, padding: "6px 9px",
-                      background: "rgba(0,0,0,0.02)", color: T.text,
-                      fontSize: 10.5, lineHeight: 1.4, cursor: "pointer",
+                      borderRadius: 8, padding: "6px 9px",
+                      background: "#FAFAF9", color: T.text,
+                      fontSize: 11, lineHeight: 1.4, cursor: "pointer",
                     }}
                   >
                     {ex.length > 110 ? ex.slice(0, 107) + "…" : ex}
@@ -301,12 +301,12 @@ export function FriaGuidedChat({
             <div style={{
               maxWidth: "85%", background: T.text,
               borderRadius: "12px 12px 3px 12px",
-              padding: "10px 14px", fontSize: 12, color: "#ffffff", lineHeight: 1.5, whiteSpace: "pre-wrap",
+              padding: "10px 14px", fontSize: 13, color: "#ffffff", lineHeight: 1.5, whiteSpace: "pre-wrap",
             }}>
               {existing!.value}
               <div style={{ marginTop: 5, display: "flex", alignItems: "center", gap: 4 }}>
                 <Check size={10} style={{ color: "rgba(255,255,255,0.55)" }} />
-                <span style={{ fontSize: 9, color: "rgba(255,255,255,0.55)" }}>{t("gc_confirmed")}</span>
+                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)" }}>{t("gc_confirmed")}</span>
               </div>
             </div>
           </div>
@@ -325,8 +325,8 @@ export function FriaGuidedChat({
             placeholder={isDone ? t("gc_ph_rewrite") : t("gc_ph_write")}
             rows={2}
             style={{
-              flex: 1, resize: "none", border: `1px solid ${T.border}`, borderRadius: 10,
-              padding: "8px 12px", fontSize: 12, color: T.text, background: T.bg,
+              flex: 1, resize: "none", border: `1px solid ${T.border}`, borderRadius: 8,
+              padding: "8px 12px", fontSize: 13, color: T.text, background: T.bg,
               outline: "none", lineHeight: 1.5, fontFamily: "inherit",
             }}
           />
@@ -334,7 +334,7 @@ export function FriaGuidedChat({
             onClick={() => handleSend()}
             disabled={!input.trim()}
             style={{
-              width: 36, height: 36, borderRadius: 10, border: "none",
+              width: 36, height: 36, borderRadius: 8, border: "none",
               background: input.trim() ? T.text : "rgba(0,0,0,0.08)",
               color: input.trim() ? "#fff" : "rgba(0,0,0,0.28)",
               cursor: input.trim() ? "pointer" : "default",
@@ -353,14 +353,14 @@ export function FriaGuidedChat({
             disabled={currentIdx === 0}
             style={{
               display: "flex", alignItems: "center", gap: 4,
-              fontSize: 10, color: currentIdx === 0 ? T.faint : T.muted,
+              fontSize: 11, color: currentIdx === 0 ? T.faint : T.muted,
               background: "none", border: "none", cursor: currentIdx === 0 ? "default" : "pointer",
-              padding: "3px 6px", borderRadius: 5,
+              padding: "3px 6px", borderRadius: 4,
             }}
           >
             <ChevronLeft size={12} /> {t("gc_prev")}
           </button>
-          <span style={{ fontSize: 9, color: T.faint }}>
+          <span style={{ fontSize: 11, color: T.faint }}>
             {!sp.required && <span style={{ color: T.muted }}>{t("gc_optional")} · </span>}
             {sp.label}
           </span>
@@ -369,9 +369,9 @@ export function FriaGuidedChat({
             disabled={currentIdx === allIds.length - 1}
             style={{
               display: "flex", alignItems: "center", gap: 4,
-              fontSize: 10, color: currentIdx === allIds.length - 1 ? T.faint : T.muted,
+              fontSize: 11, color: currentIdx === allIds.length - 1 ? T.faint : T.muted,
               background: "none", border: "none", cursor: currentIdx === allIds.length - 1 ? "default" : "pointer",
-              padding: "3px 6px", borderRadius: 5,
+              padding: "3px 6px", borderRadius: 4,
             }}
           >
             {t("gc_next")} <ChevronRight size={12} />

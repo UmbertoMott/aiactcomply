@@ -9,12 +9,12 @@ import { useT } from "@/i18n/LocaleProvider";
 type TFn = (key: string) => string;
 
 const T = {
-  text: "#0D1016", muted: "rgba(0,0,0,0.42)", faint: "rgba(0,0,0,0.22)", border: "rgba(0,0,0,0.08)",
+  text: "#0D1016", muted: "#0D1016", faint: "#0D1016", border: "rgba(0,0,0,0.08)",
   card: "#fff", bg: "#f9f9fb", red: "#dc2626", amber: "#d97706", green: "#15803d", dark: "#0D1016",
 } as const;
-const card: CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, padding: 16 };
-const inp: CSSProperties = { padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, color: T.text, background: T.card, outline: "none" };
-const label: CSSProperties = { fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: T.muted, marginBottom: 5, display: "block" };
+const card: CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: 16 };
+const inp: CSSProperties = { padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, color: T.text, background: T.card, outline: "none" };
+const label: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: T.muted, marginBottom: 5, display: "block" };
 const scoreColor = (v: number) => v >= 90 ? T.green : v >= 60 ? T.amber : T.red;
 
 // ═══ §4 Qualità & continuità ════════════════════════════════════════════════
@@ -38,7 +38,7 @@ export function LogQualityCard({ logSets, t }: { logSets: ImportedLogSet[]; t: T
                 <Stat k={t("q_duplicates")} v={String(q.duplicateCount)} c={q.duplicateCount > 0 ? T.amber : T.green} />
               </div>
               {q.chronologicalGaps.length > 0 ? (
-                <div className="text-[10px]" style={{ color: T.red }}>
+                <div className="text-[11px]" style={{ color: T.red }}>
                   <b>{q.chronologicalGaps.length} {t("q_chronoGaps")}</b> {t("q_possibleLoss")}
                   <ul className="mt-1" style={{ listStyle: "disc", paddingLeft: 16, color: T.muted }}>
                     {q.chronologicalGaps.slice(0, 3).map((g, i) => (
@@ -47,7 +47,7 @@ export function LogQualityCard({ logSets, t }: { logSets: ImportedLogSet[]; t: T
                     {q.chronologicalGaps.length > 3 && <li>+{q.chronologicalGaps.length - 3} {t("q_others")}</li>}
                   </ul>
                 </div>
-              ) : <p className="text-[10px]" style={{ color: T.green }}>{t("q_noGaps")}</p>}
+              ) : <p className="text-[11px]" style={{ color: T.green }}>{t("q_noGaps")}</p>}
             </div>
           );
         })}
@@ -56,7 +56,7 @@ export function LogQualityCard({ logSets, t }: { logSets: ImportedLogSet[]; t: T
   );
 }
 function Stat({ k, v, c }: { k: string; v: string; c: string }) {
-  return <div><div className="text-[16px] font-bold" style={{ color: c }}>{v}</div><div className="text-[9px]" style={{ color: T.muted }}>{k}</div></div>;
+  return <div><div className="text-[15px] font-bold" style={{ color: c }}>{v}</div><div className="text-[11px]" style={{ color: T.muted }}>{k}</div></div>;
 }
 
 // ═══ §6 Integrità & tamper-evidence ═════════════════════════════════════════
@@ -79,17 +79,17 @@ export function IntegrityCard({ logSets, t }: { logSets: ImportedLogSet[]; t: TF
             <div key={ls.id} style={card}>
               <p className="text-[11px] font-semibold mb-2 truncate" style={{ color: T.text }}>{ls.fileName}</p>
               {st && (
-                <p className="text-[12px] font-semibold mb-1" style={{ color: st.c }}>
+                <p className="text-[13px] font-semibold mb-1" style={{ color: st.c }}>
                   {st.label}{s?.status === "broken" && s.brokenAtEntry ? ` ${t("i_atEntry")} #${s.brokenAtEntry}` : ""}
                 </p>
               )}
               {s?.status !== "no_integrity_fields" && s?.checkedCount ? (
-                <p className="text-[10px]" style={{ color: T.muted }}>{s.checkedCount} {t("i_linksVerified")}</p>
+                <p className="text-[11px]" style={{ color: T.muted }}>{s.checkedCount} {t("i_linksVerified")}</p>
               ) : s?.status === "no_integrity_fields" ? (
-                <p className="text-[10px]" style={{ color: T.muted }}>{t("i_noHashFields")}</p>
+                <p className="text-[11px]" style={{ color: T.muted }}>{t("i_noHashFields")}</p>
               ) : null}
               {ls.fingerprint && (
-                <p className="text-[10px] mt-2" style={{ color: T.faint, fontFamily: "var(--font-mono)" }}>
+                <p className="text-[11px] mt-2" style={{ color: T.faint, fontFamily: "var(--font-mono)" }}>
                   fingerprint {ls.fingerprint.slice(0, 8)}… · {ls.analyzedAt?.slice(0, 10)}
                 </p>
               )}
@@ -128,12 +128,12 @@ export function CoverageFillRatePanel({ record, t }: { record: LogVaultRecord; t
           return (
             <div key={p.id} className="flex items-start justify-between gap-3 py-2" style={{ borderTop: `1px solid ${T.border}` }}>
               <div className="flex-1">
-                <p className="text-[12px] font-medium" style={{ color: T.text }}>{p.label}</p>
-                <p className="text-[10px]" style={{ color: T.muted }}>{p.reference} · {t("cf_fields")} {fields.length ? fields.join(", ") : t("cf_noFieldMapped")}</p>
+                <p className="text-[13px] font-medium" style={{ color: T.text }}>{p.label}</p>
+                <p className="text-[11px]" style={{ color: T.muted }}>{p.reference} · {t("cf_fields")} {fields.length ? fields.join(", ") : t("cf_noFieldMapped")}</p>
               </div>
               <div className="text-right flex-shrink-0">
-                <div className="text-[12px] font-bold" style={{ color: col }}>{stLabel}</div>
-                {fields.length > 0 && <div className="text-[10px]" style={{ color: T.muted }}>{Math.round(best * 100)}% {t("cf_filled")}</div>}
+                <div className="text-[13px] font-bold" style={{ color: col }}>{stLabel}</div>
+                {fields.length > 0 && <div className="text-[11px]" style={{ color: T.muted }}>{Math.round(best * 100)}% {t("cf_filled")}</div>}
               </div>
             </div>
           );
@@ -173,10 +173,10 @@ export function RetentionPanel({ record, onChange, t }: { record: LogVaultRecord
             <input type="number" min={0} style={{ ...inp, width: 120 }} value={r.retentionPolicyMonths ?? ""}
               onChange={e => recompute(r.role, e.target.value === "" ? undefined : Math.max(0, Number(e.target.value)))} /></div>
         </div>
-        <div className="flex flex-wrap gap-5 text-[12px]">
-          <div><span style={{ color: T.muted, fontSize: 10 }}>{t("r_spanCovered")}</span><div style={{ fontWeight: 700 }}>{r.retentionSpanMonths !== undefined ? `${r.retentionSpanMonths} ${t("r_months")}` : "—"}</div></div>
-          <div><span style={{ color: T.muted, fontSize: 10 }}>{t("r_policyDeclared")}</span><div style={{ fontWeight: 700 }}>{r.retentionPolicyMonths !== undefined ? `${r.retentionPolicyMonths} ${t("r_months")}` : "—"}</div></div>
-          <div><span style={{ color: T.muted, fontSize: 10 }}>{t("r_verdict")}</span><div style={{ fontWeight: 700, color: vi.c }}>{vi.label}</div></div>
+        <div className="flex flex-wrap gap-5 text-[13px]">
+          <div><span style={{ color: T.muted, fontSize: 11 }}>{t("r_spanCovered")}</span><div style={{ fontWeight: 700 }}>{r.retentionSpanMonths !== undefined ? `${r.retentionSpanMonths} ${t("r_months")}` : "—"}</div></div>
+          <div><span style={{ color: T.muted, fontSize: 11 }}>{t("r_policyDeclared")}</span><div style={{ fontWeight: 700 }}>{r.retentionPolicyMonths !== undefined ? `${r.retentionPolicyMonths} ${t("r_months")}` : "—"}</div></div>
+          <div><span style={{ color: T.muted, fontSize: 11 }}>{t("r_verdict")}</span><div style={{ fontWeight: 700, color: vi.c }}>{vi.label}</div></div>
         </div>
       </div>
     </section>

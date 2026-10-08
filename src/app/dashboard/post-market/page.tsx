@@ -272,8 +272,8 @@ function savePlan(plan: MonitoringCheck[]) {
 const SEV_STYLE: Record<Severity, { bg: string; color: string; border: string }> = {
   critical: { bg: "rgba(220,38,38,0.08)", color: "#b91c1c", border: "rgba(220,38,38,0.25)" },
   high: { bg: "rgba(245,158,11,0.08)", color: "#92400e", border: "rgba(245,158,11,0.25)" },
-  medium: { bg: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.55)", border: "rgba(0,0,0,0.18)" },
-  low: { bg: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.45)", border: "rgba(0,0,0,0.12)" },
+  medium: { bg: "rgba(0,0,0,0.05)", color: "#0D1016", border: "rgba(0,0,0,0.18)" },
+  low: { bg: "rgba(0,0,0,0.05)", color: "#0D1016", border: "rgba(0,0,0,0.12)" },
 };
 
 const STATUS_COLOR: Record<IncidentStatus, string> = {
@@ -300,8 +300,8 @@ const INPUT_STYLE: React.CSSProperties = {
   width: "100%",
   padding: "7px 10px",
   borderRadius: "8px",
-  border: "1px solid rgba(0,0,0,0.12)",
-  fontSize: "12px",
+  border: "1px solid rgba(0,0,0,0.08)",
+  fontSize: 13,
   color: "#0D1016",
   background: "#fff",
   outline: "none",
@@ -734,7 +734,7 @@ function PostMarketPageInner() {
         >
           Post-Market Monitoring
         </h1>
-        <p className="text-[12px] mt-0.5" style={{ color: "rgba(0,0,0,0.42)" }}>
+        <p className="text-[13px] mt-0.5" style={{ color: "#0D1016" }}>
           Sorveglianza continua post-immissione sul mercato.
         </p>
       </div>
@@ -763,7 +763,7 @@ function PostMarketPageInner() {
             onClick={() => setUrgentBannerDismissed(true)}
             title="Chiudi"
             style={{
-              flexShrink: 0, width: 18, height: 18, borderRadius: 9,
+              flexShrink: 0, width: 18, height: 18, borderRadius: 8,
               background: "rgba(220,38,38,0.12)", border: "none", cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
               color: "#dc2626", fontSize: 11, lineHeight: 1,
@@ -811,11 +811,11 @@ function PostMarketPageInner() {
         ].map((card) => (
           <div
             key={card.label}
-            className="rounded-xl p-4"
+            className="rounded-lg p-4"
             style={{
               background: "#fff",
-              border: "1px solid rgba(0,0,0,0.07)",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+              border: "1px solid rgba(0,0,0,0.08)",
+              boxShadow: "none",
             }}
           >
             <div
@@ -826,13 +826,13 @@ function PostMarketPageInner() {
               {card.sub && (
                 <span
                   className="text-[13px] font-normal"
-                  style={{ color: "rgba(0,0,0,0.3)" }}
+                  style={{ color: "#0D1016" }}
                 >
                   {card.sub}
                 </span>
               )}
             </div>
-            <div className="mt-0.5 text-[11px]" style={{ color: "rgba(0,0,0,0.38)" }}>
+            <div className="mt-0.5 text-[11px]" style={{ color: "#0D1016" }}>
               {card.label}
             </div>
           </div>
@@ -842,7 +842,7 @@ function PostMarketPageInner() {
       {/* Tab nav */}
       <div
         className="flex gap-5 mb-5"
-        style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}
+        style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}
       >
         {[
           {
@@ -861,14 +861,14 @@ function PostMarketPageInner() {
             style={
               tab === id
                 ? { borderColor: "#0D1016", color: "#0D1016" }
-                : { borderColor: "transparent", color: "rgba(0,0,0,0.42)" }
+                : { borderColor: "transparent", color: "#0D1016" }
             }
           >
             <Icon className="h-3.5 w-3.5" />
             {label}
             {badge > 0 && (
               <span
-                className="text-[10px] font-semibold rounded-full px-1.5 py-0.5"
+                className="text-[11px] font-semibold rounded-full px-1.5 py-0.5"
                 style={{ background: "rgba(220,38,38,0.1)", color: "#dc2626" }}
               >
                 {badge}
@@ -899,13 +899,13 @@ function PostMarketPageInner() {
                     style={{
                       padding: "3px 10px",
                       borderRadius: "999px",
-                      fontSize: "10px",
+                      fontSize: 11,
                       fontWeight: 500,
                       cursor: "pointer",
                       border:
                         filterSeverity === s
                           ? "1px solid #0D1016"
-                          : "1px solid rgba(0,0,0,0.12)",
+                          : "1px solid rgba(0,0,0,0.08)",
                       background: filterSeverity === s ? "#0D1016" : "#fff",
                       color: filterSeverity === s ? "#fff" : "rgba(0,0,0,0.5)",
                       transition: "all 0.12s",
@@ -923,13 +923,13 @@ function PostMarketPageInner() {
                     style={{
                       padding: "3px 10px",
                       borderRadius: "999px",
-                      fontSize: "10px",
+                      fontSize: 11,
                       fontWeight: 500,
                       cursor: "pointer",
                       border:
                         filterStatus === s
                           ? "1px solid #0D1016"
-                          : "1px solid rgba(0,0,0,0.12)",
+                          : "1px solid rgba(0,0,0,0.08)",
                       background: filterStatus === s ? "#0D1016" : "#fff",
                       color: filterStatus === s ? "#fff" : "rgba(0,0,0,0.5)",
                       transition: "all 0.12s",
@@ -947,12 +947,12 @@ function PostMarketPageInner() {
 
             {/* List card */}
             <div
-              className="rounded-xl overflow-hidden"
-              style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#fff" }}
+              className="rounded-lg overflow-hidden"
+              style={{ border: "1px solid rgba(0,0,0,0.08)", background: "#fff" }}
             >
               <div
                 className="flex items-center justify-between px-5 py-3.5"
-                style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+                style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}
               >
                 <span className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
                   Registro Incidenti
@@ -982,14 +982,14 @@ function PostMarketPageInner() {
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.14 }}
                     className="px-5 py-4 space-y-3"
-                    style={{ borderBottom: "1px solid rgba(0,0,0,0.06)", background: "rgba(0,0,0,0.01)" }}
+                    style={{ borderBottom: "1px solid rgba(0,0,0,0.08)", background: "rgba(0,0,0,0.01)" }}
                   >
-                    <p className="text-[12px] font-semibold" style={{ color: "#0D1016" }}>
+                    <p className="text-[13px] font-semibold" style={{ color: "#0D1016" }}>
                       Nuova segnalazione incidente grave (Art. 73)
                     </p>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
+                        <label className="block text-[11px] font-medium mb-1" style={{ color: "#0D1016" }}>
                           Titolo <span style={{ color: "#dc2626" }}>*</span>
                         </label>
                         <input
@@ -1000,7 +1000,7 @@ function PostMarketPageInner() {
                         />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
+                        <label className="block text-[11px] font-medium mb-1" style={{ color: "#0D1016" }}>
                           Sistema coinvolto <span style={{ color: "#dc2626" }}>*</span>
                         </label>
                         <select
@@ -1045,7 +1045,7 @@ function PostMarketPageInner() {
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
+                        <label className="block text-[11px] font-medium mb-1" style={{ color: "#0D1016" }}>
                           Data rilevamento
                         </label>
                         <input
@@ -1056,7 +1056,7 @@ function PostMarketPageInner() {
                         />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
+                        <label className="block text-[11px] font-medium mb-1" style={{ color: "#0D1016" }}>
                           Autorità competente
                         </label>
                         <select
@@ -1085,13 +1085,13 @@ function PostMarketPageInner() {
 
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <label className="block text-[10px] font-medium" style={{ color: "rgba(0,0,0,0.45)" }}>
+                        <label className="block text-[11px] font-medium" style={{ color: "#0D1016" }}>
                           Gravità
                         </label>
                         <button
                           type="button"
                           onClick={() => setShowSeverityGuide(v => !v)}
-                          style={{ fontSize: 9, color: "rgba(0,0,0,0.4)", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}
+                          style={{ fontSize: 11, color: "#0D1016", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}
                         >
                           {showSeverityGuide ? "Nascondi guida" : "Come scelgo?"}
                         </button>
@@ -1108,10 +1108,10 @@ function PostMarketPageInner() {
                               style={{
                                 padding: "3px 10px",
                                 borderRadius: "999px",
-                                fontSize: "10px",
+                                fontSize: 11,
                                 fontWeight: 600,
                                 cursor: "pointer",
-                                border: active ? `1px solid ${st.border}` : "1px solid rgba(0,0,0,0.1)",
+                                border: active ? `1px solid ${st.border}` : "1px solid rgba(0,0,0,0.08)",
                                 background: active ? st.bg : "#fff",
                                 color: active ? st.color : "rgba(0,0,0,0.45)",
                                 transition: "all 0.12s",
@@ -1123,13 +1123,13 @@ function PostMarketPageInner() {
                         })}
                       </div>
                       {showSeverityGuide && (
-                        <div style={{ marginTop: 10, borderRadius: 10, border: "1px solid rgba(0,0,0,0.08)", overflow: "hidden" }}>
+                        <div style={{ marginTop: 10, borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)", overflow: "hidden" }}>
                           {/* Header */}
-                          <div style={{ padding: "8px 14px", background: "rgba(0,0,0,0.03)", borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
-                            <p style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>
+                          <div style={{ padding: "8px 14px", background: "#FAFAF9", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+                            <p style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>
                               Guida classificazione — Art. 73 + Art. 3(49) Reg. UE 2024/1689
                             </p>
-                            <p style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", margin: "3px 0 0" }}>
+                            <p style={{ fontSize: 11, color: "#0D1016", margin: "3px 0 0" }}>
                               Solo gli incidenti <strong>Critical</strong> e <strong>High</strong> sono "incidenti gravi" ai sensi dell&apos;Art. 3(49) e richiedono notifica formale all&apos;autorità.
                             </p>
                           </div>
@@ -1213,39 +1213,39 @@ function PostMarketPageInner() {
                               action: "Registrazione nel log eventi + revisione al prossimo ciclo PMM",
                             },
                           ].map((row, idx) => (
-                            <div key={row.sev} style={{ borderBottom: idx < 3 ? "1px solid rgba(0,0,0,0.06)" : "none", padding: "12px 14px" }}>
+                            <div key={row.sev} style={{ borderBottom: idx < 3 ? "1px solid rgba(0,0,0,0.08)" : "none", padding: "12px 14px" }}>
                               {/* Severity badge + deadline */}
                               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
                                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                  <span style={{ fontSize: 10, fontWeight: 700, color: row.color, background: row.bg, border: `1px solid ${row.border}`, padding: "2px 10px", borderRadius: 20 }}>{row.sev}</span>
-                                  <span style={{ fontSize: 9, color: "rgba(0,0,0,0.35)" }}>{row.ref}</span>
+                                  <span style={{ fontSize: 11, fontWeight: 700, color: row.color, background: row.bg, border: `1px solid ${row.border}`, padding: "2px 10px", borderRadius: 20 }}>{row.sev}</span>
+                                  <span style={{ fontSize: 11, color: "#0D1016" }}>{row.ref}</span>
                                 </div>
                                 <div style={{ textAlign: "right" }}>
-                                  <span style={{ fontSize: 10, fontWeight: 700, color: row.deadlineColor }}>{row.deadline}</span>
-                                  <p style={{ fontSize: 9, color: "rgba(0,0,0,0.35)", margin: "2px 0 0", maxWidth: 200 }}>{row.deadlineSub}</p>
+                                  <span style={{ fontSize: 11, fontWeight: 700, color: row.deadlineColor }}>{row.deadline}</span>
+                                  <p style={{ fontSize: 11, color: "#0D1016", margin: "2px 0 0", maxWidth: 200 }}>{row.deadlineSub}</p>
                                 </div>
                               </div>
 
                               {/* Criteria list */}
                               <ul style={{ margin: "0 0 6px", padding: "0 0 0 14px", listStyleType: "disc" }}>
                                 {row.criteria.map((c, i) => (
-                                  <li key={i} style={{ fontSize: 10, color: "rgba(0,0,0,0.6)", lineHeight: 1.5, marginBottom: 2 }}>{c}</li>
+                                  <li key={i} style={{ fontSize: 11, color: "#0D1016", lineHeight: 1.5, marginBottom: 2 }}>{c}</li>
                                 ))}
                               </ul>
 
                               {/* Example */}
-                              <p style={{ fontSize: 10, color: "rgba(0,0,0,0.42)", lineHeight: 1.45, margin: "4px 0 5px", fontStyle: "italic" }}>{row.examples}</p>
+                              <p style={{ fontSize: 11, color: "#0D1016", lineHeight: 1.45, margin: "4px 0 5px", fontStyle: "italic" }}>{row.examples}</p>
 
                               {/* Action */}
                               <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 20, background: row.bg, border: `1px solid ${row.border}` }}>
-                                <span style={{ fontSize: 9, fontWeight: 600, color: row.color }}>→ {row.action}</span>
+                                <span style={{ fontSize: 11, fontWeight: 600, color: row.color }}>→ {row.action}</span>
                               </div>
                             </div>
                           ))}
 
                           {/* Footer note */}
-                          <div style={{ padding: "8px 14px", background: "rgba(0,0,0,0.02)", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
-                            <p style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", margin: 0, lineHeight: 1.5 }}>
+                          <div style={{ padding: "8px 14px", background: "#FAFAF9", borderTop: "1px solid rgba(0,0,0,0.08)" }}>
+                            <p style={{ fontSize: 11, color: "#0D1016", margin: 0, lineHeight: 1.5 }}>
                               ⚠ In caso di dubbio tra Critical e High, classificare sempre come Critical e notificare entro 2 gg. La riclassificazione può avvenire dopo la notifica iniziale (Art. 73(5)).
                             </p>
                           </div>
@@ -1254,7 +1254,7 @@ function PostMarketPageInner() {
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
+                      <label className="block text-[11px] font-medium mb-1" style={{ color: "#0D1016" }}>
                         Utenti impattati (stima)
                       </label>
                       <input
@@ -1266,7 +1266,7 @@ function PostMarketPageInner() {
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
+                      <label className="block text-[11px] font-medium mb-1" style={{ color: "#0D1016" }}>
                         Descrizione dettagliata <span style={{ color: "#dc2626" }}>*</span>
                       </label>
                       <textarea
@@ -1279,7 +1279,7 @@ function PostMarketPageInner() {
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
+                      <label className="block text-[11px] font-medium mb-1" style={{ color: "#0D1016" }}>
                         Azioni già intraprese
                       </label>
                       <textarea
@@ -1298,7 +1298,7 @@ function PostMarketPageInner() {
                         width: "100%",
                         padding: "9px",
                         borderRadius: "8px",
-                        fontSize: "12px",
+                        fontSize: 13,
                         fontWeight: 600,
                         background:
                           form.title.trim() && form.system.trim() && form.description.trim()
@@ -1333,7 +1333,7 @@ function PostMarketPageInner() {
                     className="h-7 w-7 mx-auto mb-2"
                     style={{ color: "rgba(0,0,0,0.15)" }}
                   />
-                  <p className="text-[12px]" style={{ color: "rgba(0,0,0,0.38)" }}>
+                  <p className="text-[13px]" style={{ color: "#0D1016" }}>
                     Nessun incidente corrisponde ai filtri selezionati.
                   </p>
                 </div>
@@ -1355,13 +1355,13 @@ function PostMarketPageInner() {
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-2">
                             <span
-                              className="text-[10px] font-mono flex-shrink-0"
-                              style={{ color: "rgba(0,0,0,0.35)" }}
+                              className="text-[11px] font-mono flex-shrink-0"
+                              style={{ color: "#0D1016" }}
                             >
                               {inc.id}
                             </span>
                             <span
-                              className="text-[12px] font-medium truncate"
+                              className="text-[13px] font-medium truncate"
                               style={{ color: "#0D1016" }}
                             >
                               {inc.title}
@@ -1370,7 +1370,7 @@ function PostMarketPageInner() {
                           <div className="flex items-center gap-1.5 flex-shrink-0">
                             {inc.source === "logvault_auto" && (
                               <span
-                                className="flex items-center gap-0.5 text-[9px] font-semibold rounded-full px-1.5 py-0.5"
+                                className="flex items-center gap-0.5 text-[11px] font-semibold rounded-full px-1.5 py-0.5"
                                 style={{ background: "rgba(124,58,237,0.08)", color: "#7c3aed", border: "1px solid rgba(124,58,237,0.2)" }}
                               >
                                 <Sparkles className="h-2.5 w-2.5" /> Auto
@@ -1378,14 +1378,14 @@ function PostMarketPageInner() {
                             )}
                             {inc.severityClassification === "serious_incident" && (
                               <span
-                                className="text-[9px] font-semibold rounded-full px-1.5 py-0.5"
+                                className="text-[11px] font-semibold rounded-full px-1.5 py-0.5"
                                 style={{ background: "rgba(220,38,38,0.08)", color: "#b91c1c", border: "1px solid rgba(220,38,38,0.2)" }}
                               >
                                 Incidente grave
                               </span>
                             )}
                             <span
-                              className="text-[10px] font-semibold rounded-full px-2 py-0.5"
+                              className="text-[11px] font-semibold rounded-full px-2 py-0.5"
                               style={{
                                 background: sev.bg,
                                 color: sev.color,
@@ -1395,21 +1395,21 @@ function PostMarketPageInner() {
                               {inc.severity}
                             </span>
                             <span
-                              className="text-[10px] font-medium"
+                              className="text-[11px] font-medium"
                               style={{ color: STATUS_COLOR[inc.status] }}
                             >
                               {STATUS_LABEL[inc.status]}
                             </span>
                           </div>
                         </div>
-                        <p className="text-[11px] mb-1.5" style={{ color: "rgba(0,0,0,0.4)" }}>
+                        <p className="text-[11px] mb-1.5" style={{ color: "#0D1016" }}>
                           {inc.system} · {inc.date}
                         </p>
                         {!inc.notified && (
                           <div className="mt-1.5">
                             {days === 0 ? (
                               <p
-                                className="text-[10px] font-semibold"
+                                className="text-[11px] font-semibold"
                                 style={{ color: "#dc2626" }}
                               >
                                 ⚠ SCADUTO — notifica urgente
@@ -1422,7 +1422,7 @@ function PostMarketPageInner() {
                                     style={{ color: "#dc2626" }}
                                   />
                                   <span
-                                    className="text-[10px] font-medium"
+                                    className="text-[11px] font-medium"
                                     style={{ color: "#dc2626" }}
                                   >
                                     Notifica entro {days} giorn{days === 1 ? "o" : "i"} (Art. 73)
@@ -1446,7 +1446,7 @@ function PostMarketPageInner() {
                         )}
                         {inc.notified && (
                           <p
-                            className="text-[10px] font-medium flex items-center gap-1"
+                            className="text-[11px] font-medium flex items-center gap-1"
                             style={{ color: "#15803d" }}
                           >
                             <CheckCircle className="h-3 w-3" /> Notificato
@@ -1491,14 +1491,14 @@ function PostMarketPageInner() {
             {showForm ? (
               /* ── Incident form AI chat ── */
               <div
-                className="rounded-xl overflow-hidden flex flex-col"
-                style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#fff", height: "calc(100vh - 140px)" }}
+                className="rounded-lg overflow-hidden flex flex-col"
+                style={{ border: "1px solid rgba(0,0,0,0.08)", background: "#fff", height: "calc(100vh - 140px)" }}
               >
                 {/* Header */}
-                <div style={{ padding: "10px 16px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "#fafafa", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                <div style={{ padding: "10px 16px", borderBottom: "1px solid rgba(0,0,0,0.08)", background: "#FAFAF9", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
                   <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#0D1016" }} />
                   <span style={{ fontSize: 11, fontWeight: 700, color: "#0D1016" }}>Assistente Art. 73</span>
-                  <span style={{ fontSize: 10, color: "rgba(0,0,0,0.35)", marginLeft: 2 }}>— guida normativa AI Act</span>
+                  <span style={{ fontSize: 11, color: "#0D1016", marginLeft: 2 }}>— guida normativa AI Act</span>
                 </div>
 
                 {/* Messages */}
@@ -1511,15 +1511,15 @@ function PostMarketPageInner() {
                           maxWidth: "90%",
                           borderRadius: isUser ? "14px 14px 4px 14px" : "14px 14px 14px 4px",
                           padding: "9px 13px",
-                          fontSize: 12, lineHeight: 1.55,
+                          fontSize: 13, lineHeight: 1.55,
                           background: isUser ? "#0D1016" : "#f5f5f4",
                           color: isUser ? "#fff" : "#0D1016",
-                          border: isUser ? "none" : "1px solid rgba(0,0,0,0.07)",
+                          border: isUser ? "none" : "1px solid rgba(0,0,0,0.08)",
                           whiteSpace: "pre-wrap",
                         }}>
                           {!isUser && (
                             <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 5 }}>
-                              <span style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.35)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Art. 73 AI</span>
+                              <span style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", textTransform: "uppercase", letterSpacing: "0.08em" }}>Art. 73 AI</span>
                             </div>
                           )}
                           {msg.content}
@@ -1531,11 +1531,11 @@ function PostMarketPageInner() {
                   {/* Pending field suggestion chip */}
                   {pendingSuggestion && !incidentChatLoading && (
                     <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10 }}>
-                      <div style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.10)", borderRadius: 12, padding: "10px 14px", maxWidth: "90%" }}>
-                        <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.45)", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.07em" }}>
+                      <div style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, padding: "10px 14px", maxWidth: "90%" }}>
+                        <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.07em" }}>
                           Proposta per: {pendingSuggestion.label}
                         </p>
-                        <p style={{ fontSize: 12, color: "#0D1016", margin: "0 0 10px", lineHeight: 1.5, fontStyle: "italic" }}>
+                        <p style={{ fontSize: 13, color: "#0D1016", margin: "0 0 10px", lineHeight: 1.5, fontStyle: "italic" }}>
                           &ldquo;{pendingSuggestion.value}&rdquo;
                         </p>
                         <div style={{ display: "flex", gap: 6 }}>
@@ -1547,7 +1547,7 @@ function PostMarketPageInner() {
                           </button>
                           <button
                             onClick={() => setPendingSuggestion(null)}
-                            style={{ fontSize: 11, padding: "5px 12px", borderRadius: 20, background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.5)", border: "1px solid rgba(0,0,0,0.08)", cursor: "pointer" }}
+                            style={{ fontSize: 11, padding: "5px 12px", borderRadius: 20, background: "rgba(0,0,0,0.05)", color: "#0D1016", border: "1px solid rgba(0,0,0,0.08)", cursor: "pointer" }}
                           >
                             Ignora
                           </button>
@@ -1558,16 +1558,16 @@ function PostMarketPageInner() {
 
                   {incidentChatLoading && (
                     <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10 }}>
-                      <div style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.07)", borderRadius: "14px 14px 14px 4px", padding: "9px 13px", display: "flex", alignItems: "center", gap: 7 }}>
+                      <div style={{ background: "#f5f5f4", border: "1px solid rgba(0,0,0,0.08)", borderRadius: "14px 14px 14px 4px", padding: "9px 13px", display: "flex", alignItems: "center", gap: 7 }}>
                         <Loader2 size={12} style={{ color: "#0D1016", animation: "spin 1s linear infinite" }} />
-                        <span style={{ fontSize: 11, color: "rgba(0,0,0,0.4)" }}>Analisi in corso…</span>
+                        <span style={{ fontSize: 11, color: "#0D1016" }}>Analisi in corso…</span>
                       </div>
                     </div>
                   )}
                 </div>
 
                 {/* Input */}
-                <div style={{ padding: "10px 14px", borderTop: "1px solid rgba(0,0,0,0.07)", flexShrink: 0 }}>
+                <div style={{ padding: "10px 14px", borderTop: "1px solid rgba(0,0,0,0.08)", flexShrink: 0 }}>
                   <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
                     <textarea
                       value={incidentChatInput}
@@ -1597,7 +1597,7 @@ function PostMarketPageInner() {
                       placeholder="Descrivi cosa è successo…"
                       rows={2}
                       disabled={incidentChatLoading}
-                      style={{ flex: 1, fontSize: 12, padding: "8px 12px", borderRadius: 10, border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", resize: "none", outline: "none", fontFamily: "inherit", background: "#fff", lineHeight: 1.5, opacity: incidentChatLoading ? 0.5 : 1 }}
+                      style={{ flex: 1, fontSize: 13, padding: "8px 12px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", resize: "none", outline: "none", fontFamily: "inherit", background: "#fff", lineHeight: 1.5, opacity: incidentChatLoading ? 0.5 : 1 }}
                     />
                     <button
                       disabled={!incidentChatInput.trim() || incidentChatLoading}
@@ -1620,24 +1620,24 @@ function PostMarketPageInner() {
                         if (suggestion) setPendingSuggestion(suggestion);
                         setIncidentChatLoading(false);
                       }}
-                      style={{ flexShrink: 0, width: 36, height: 36, background: (!incidentChatInput.trim() || incidentChatLoading) ? "rgba(0,0,0,0.06)" : "#0D1016", color: (!incidentChatInput.trim() || incidentChatLoading) ? "rgba(0,0,0,0.25)" : "#fff", border: "none", borderRadius: 9, cursor: (!incidentChatInput.trim() || incidentChatLoading) ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                      style={{ flexShrink: 0, width: 36, height: 36, background: (!incidentChatInput.trim() || incidentChatLoading) ? "rgba(0,0,0,0.06)" : "#0D1016", color: (!incidentChatInput.trim() || incidentChatLoading) ? "rgba(0,0,0,0.25)" : "#fff", border: "none", borderRadius: 8, cursor: (!incidentChatInput.trim() || incidentChatLoading) ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
                     >
                       <Send size={13} />
                     </button>
                   </div>
-                  <p style={{ fontSize: 9, color: "rgba(0,0,0,0.25)", marginTop: 5 }}>Enter per inviare · Shift+Enter per andare a capo</p>
+                  <p style={{ fontSize: 11, color: "#0D1016", marginTop: 5 }}>Enter per inviare · Shift+Enter per andare a capo</p>
                 </div>
               </div>
             ) : !selected ? (
               <div
-                className="rounded-xl p-6 text-center"
-                style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#fff" }}
+                className="rounded-lg p-6 text-center"
+                style={{ border: "1px solid rgba(0,0,0,0.08)", background: "#fff" }}
               >
                 <AlertTriangle
                   className="h-7 w-7 mx-auto mb-2"
                   style={{ color: "rgba(0,0,0,0.15)" }}
                 />
-                <p className="text-[12px]" style={{ color: "rgba(0,0,0,0.4)" }}>
+                <p className="text-[13px]" style={{ color: "#0D1016" }}>
                   Seleziona un incidente per i dettagli e le azioni.
                 </p>
               </div>
@@ -1645,23 +1645,23 @@ function PostMarketPageInner() {
               <>
                 {/* 5-step linear stepper */}
                 <div
-                  className="rounded-xl overflow-hidden"
-                  style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#fff" }}
+                  className="rounded-lg overflow-hidden"
+                  style={{ border: "1px solid rgba(0,0,0,0.08)", background: "#fff" }}
                 >
                   {/* Header: title + status */}
-                  <div style={{ padding: "12px 16px", borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+                  <div style={{ padding: "12px 16px", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
                     <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 8 }}>
                       <div>
-                        <span style={{ fontSize: 10, fontFamily: "var(--font-dm-mono, monospace)", color: "rgba(0,0,0,0.35)" }}>
+                        <span style={{ fontSize: 11, fontFamily: "var(--font-dm-mono, monospace)", color: "#0D1016" }}>
                           {selected.id}
                         </span>
-                        <p style={{ fontSize: 12, fontWeight: 600, color: "#0D1016", margin: "1px 0 0" }}>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: "#0D1016", margin: "1px 0 0" }}>
                           {selected.title}
                         </p>
                       </div>
                       <button
                         onClick={() => setSelected(null)}
-                        style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(0,0,0,0.3)", padding: "2px", flexShrink: 0 }}
+                        style={{ background: "none", border: "none", cursor: "pointer", color: "#0D1016", padding: "2px", flexShrink: 0 }}
                       >
                         <X className="h-3.5 w-3.5" />
                       </button>
@@ -1674,7 +1674,7 @@ function PostMarketPageInner() {
                             key={s}
                             onClick={() => updateStatus(selected.id, s)}
                             style={{
-                              padding: "2px 8px", borderRadius: 6, fontSize: 9, fontWeight: 500, cursor: "pointer",
+                              padding: "2px 8px", borderRadius: 6, fontSize: 11, fontWeight: 500, cursor: "pointer",
                               background: active ? `${STATUS_COLOR[s]}18` : "rgba(0,0,0,0.04)",
                               color: active ? STATUS_COLOR[s] : "rgba(0,0,0,0.38)",
                               border: active ? `1px solid ${STATUS_COLOR[s]}40` : "1px solid transparent",
@@ -1689,7 +1689,7 @@ function PostMarketPageInner() {
                   </div>
 
                   {/* Step nav */}
-                  <div style={{ display: "flex", alignItems: "center", padding: "8px 16px", borderBottom: "1px solid rgba(0,0,0,0.07)", background: "rgba(0,0,0,0.01)" }}>
+                  <div style={{ display: "flex", alignItems: "center", padding: "8px 16px", borderBottom: "1px solid rgba(0,0,0,0.08)", background: "rgba(0,0,0,0.01)" }}>
                     {[
                       { n: 1, label: "Dati" },
                       { n: 2, label: "Classifica" },
@@ -1707,11 +1707,11 @@ function PostMarketPageInner() {
                             background: stepperStep === n ? "#0D1016" : stepperStep > n ? "rgba(0,0,0,0.12)" : "rgba(0,0,0,0.06)",
                             color: stepperStep === n ? "#fff" : "rgba(0,0,0,0.4)",
                             display: "flex", alignItems: "center", justifyContent: "center",
-                            fontSize: 9, fontWeight: 700, transition: "all 0.15s",
+                            fontSize: 11, fontWeight: 700, transition: "all 0.15s",
                           }}>
                             {n}
                           </div>
-                          <span style={{ fontSize: 8, color: stepperStep === n ? "#0D1016" : "rgba(0,0,0,0.35)", fontWeight: stepperStep === n ? 600 : 400, whiteSpace: "nowrap" }}>
+                          <span style={{ fontSize: 11, color: stepperStep === n ? "#0D1016" : "rgba(0,0,0,0.35)", fontWeight: stepperStep === n ? 600 : 400, whiteSpace: "nowrap" }}>
                             {label}
                           </span>
                         </button>
@@ -1735,36 +1735,36 @@ function PostMarketPageInner() {
                           { label: "Utenti impattati", value: selected.affectedUsers || "—" },
                         ].map(row => (
                           <div key={row.label}>
-                            <span style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: "0.08em", color: "rgba(0,0,0,0.35)", display: "block" }}>{row.label}</span>
+                            <span style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: "0.08em", color: "#0D1016", display: "block" }}>{row.label}</span>
                             <p style={{ fontSize: 11, color: "#0D1016", margin: "1px 0 0" }}>{row.value}</p>
                           </div>
                         ))}
                         <div>
-                          <span style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: "0.08em", color: "rgba(0,0,0,0.35)", display: "block" }}>Descrizione</span>
-                          <p style={{ fontSize: 11, color: "rgba(0,0,0,0.55)", lineHeight: 1.5, margin: "1px 0 0" }}>{selected.description}</p>
+                          <span style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: "0.08em", color: "#0D1016", display: "block" }}>Descrizione</span>
+                          <p style={{ fontSize: 11, color: "#0D1016", lineHeight: 1.5, margin: "1px 0 0" }}>{selected.description}</p>
                         </div>
                         {selected.actions && (
                           <div>
-                            <span style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: "0.08em", color: "rgba(0,0,0,0.35)", display: "block" }}>Azioni intraprese</span>
-                            <p style={{ fontSize: 11, color: "rgba(0,0,0,0.55)", lineHeight: 1.5, margin: "1px 0 0" }}>{selected.actions}</p>
+                            <span style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: "0.08em", color: "#0D1016", display: "block" }}>Azioni intraprese</span>
+                            <p style={{ fontSize: 11, color: "#0D1016", lineHeight: 1.5, margin: "1px 0 0" }}>{selected.actions}</p>
                           </div>
                         )}
                         {selected.source === "logvault_auto" && (
                           <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "8px 12px", borderRadius: 8, background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.18)" }}>
                             <Sparkles className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" style={{ color: "#7c3aed" }} />
-                            <p style={{ fontSize: 10, color: "#7c3aed", margin: 0 }}>Bozza generata automaticamente da LogVault. Verifica i dati prima di procedere.</p>
+                            <p style={{ fontSize: 11, color: "#7c3aed", margin: 0 }}>Bozza generata automaticamente da LogVault. Verifica i dati prima di procedere.</p>
                           </div>
                         )}
                         <div style={{ display: "flex", gap: 8, paddingTop: 4 }}>
                           <button
                             onClick={() => exportIncidentTxt(selected)}
-                            style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10, color: "rgba(0,0,0,0.5)", background: "none", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 6, padding: "4px 10px", cursor: "pointer" }}
+                            style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "#0D1016", background: "none", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 6, padding: "4px 10px", cursor: "pointer" }}
                           >
                             <Download className="h-3 w-3" /> Esporta scheda
                           </button>
                           <button
                             onClick={() => setStepperStep(2)}
-                            style={{ flex: 1, fontSize: 10, fontWeight: 600, background: "#0D1016", color: "#fff", border: "none", borderRadius: 6, padding: "4px 10px", cursor: "pointer" }}
+                            style={{ flex: 1, fontSize: 11, fontWeight: 600, background: "#0D1016", color: "#fff", border: "none", borderRadius: 6, padding: "4px 10px", cursor: "pointer" }}
                           >
                             Avanti — Classifica →
                           </button>
@@ -1775,7 +1775,7 @@ function PostMarketPageInner() {
                     {/* Step 2: Classifica */}
                     {stepperStep === 2 && (
                       <div className="space-y-3">
-                        <p style={{ fontSize: 10, color: "rgba(0,0,0,0.45)", lineHeight: 1.5, margin: 0 }}>
+                        <p style={{ fontSize: 11, color: "#0D1016", lineHeight: 1.5, margin: 0 }}>
                           Incidente grave ai sensi dell&apos;Art. 3(49) Reg. (UE) 2024/1689 se coinvolge almeno una delle categorie seguenti.
                         </p>
                         {INCIDENT_CATEGORIES.map(cat => (
@@ -1792,7 +1792,7 @@ function PostMarketPageInner() {
                             />
                             <div>
                               <p style={{ fontSize: 11, color: "#0D1016", margin: 0 }}>{cat.label}</p>
-                              <p style={{ fontSize: 9, color: "rgba(0,0,0,0.35)", margin: "1px 0 0" }}>
+                              <p style={{ fontSize: 11, color: "#0D1016", margin: "1px 0 0" }}>
                                 {cat.articleRef} · {cat.deadlineDays} gg — {cat.deadlineArtRef}
                               </p>
                             </div>
@@ -1807,10 +1807,10 @@ function PostMarketPageInner() {
                               background: dl.days <= 2 ? "rgba(220,38,38,0.06)" : "rgba(0,0,0,0.04)",
                               border: `1px solid ${dl.days <= 2 ? "rgba(220,38,38,0.2)" : "rgba(0,0,0,0.1)"}`,
                             }}>
-                              <p style={{ fontSize: 10, fontWeight: 600, color: dl.days <= 2 ? "#dc2626" : "#0D1016", margin: 0 }}>
+                              <p style={{ fontSize: 11, fontWeight: 600, color: dl.days <= 2 ? "#dc2626" : "#0D1016", margin: 0 }}>
                                 Termine reattivo: {dl.days} giorni ({dl.artRef})
                               </p>
-                              <p style={{ fontSize: 9, color: "rgba(0,0,0,0.4)", margin: "2px 0 0" }}>
+                              <p style={{ fontSize: 11, color: "#0D1016", margin: "2px 0 0" }}>
                                 Scadenza: {addDays(selected.date, dl.days)}
                               </p>
                             </div>
@@ -1822,12 +1822,12 @@ function PostMarketPageInner() {
                             applyNewClassification(selected.id, stepperCategories, selected.date);
                             setStepperStep(stepperCategories.length > 0 ? 3 : 5);
                           }}
-                          style={{ width: "100%", fontSize: 10, fontWeight: 600, background: "#0D1016", color: "#fff", border: "none", borderRadius: 6, padding: "7px", cursor: "pointer" }}
+                          style={{ width: "100%", fontSize: 11, fontWeight: 600, background: "#0D1016", color: "#fff", border: "none", borderRadius: 6, padding: "7px", cursor: "pointer" }}
                         >
                           Applica classificazione
                         </button>
                         {stepperCategories.length === 0 && (
-                          <p style={{ fontSize: 9, color: "rgba(0,0,0,0.35)", textAlign: "center", margin: 0 }}>
+                          <p style={{ fontSize: 11, color: "#0D1016", textAlign: "center", margin: 0 }}>
                             Nessuna categoria → nessun obbligo di notifica esterna (Art. 72)
                           </p>
                         )}
@@ -1844,31 +1844,31 @@ function PostMarketPageInner() {
                       return (
                         <div className="space-y-3">
                           <div style={{
-                            padding: "12px 14px", borderRadius: 10,
+                            padding: "12px 14px", borderRadius: 8,
                             background: isAlert ? "rgba(220,38,38,0.06)" : "rgba(0,0,0,0.03)",
                             border: `1px solid ${isAlert ? "rgba(220,38,38,0.25)" : "rgba(0,0,0,0.1)"}`,
                           }}>
-                            <p style={{ fontSize: 18, fontWeight: 700, color: isAlert ? "#dc2626" : "#0D1016", margin: 0 }}>
+                            <p style={{ fontSize: 15, fontWeight: 700, color: isAlert ? "#dc2626" : "#0D1016", margin: 0 }}>
                               {selected.notified ? "✓ Notificato" : days === 0 ? "SCADUTO" : `${days} giorni rimanenti`}
                             </p>
                             {!selected.notified && (
-                              <p style={{ fontSize: 10, color: "rgba(0,0,0,0.45)", margin: "4px 0 0" }}>
+                              <p style={{ fontSize: 11, color: "#0D1016", margin: "4px 0 0" }}>
                                 termine di {dl} giorni ({dlRef}){deadline ? ` — scadenza ${deadline}` : ""}
                               </p>
                             )}
                             {isAlert && !selected.notified && days > 0 && (
-                              <p style={{ fontSize: 10, fontWeight: 600, color: "#dc2626", margin: "6px 0 0" }}>
+                              <p style={{ fontSize: 11, fontWeight: 600, color: "#dc2626", margin: "6px 0 0" }}>
                                 ⚠ Notifica urgente — contatta l&apos;autorità immediatamente
                               </p>
                             )}
                           </div>
                           {selected.severityClassification && (
-                            <div style={{ padding: "8px 12px", borderRadius: 8, background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.08)" }}>
-                              <p style={{ fontSize: 10, fontWeight: 600, color: "#0D1016", margin: 0 }}>
+                            <div style={{ padding: "8px 12px", borderRadius: 8, background: "#FAFAF9", border: "1px solid rgba(0,0,0,0.08)" }}>
+                              <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", margin: 0 }}>
                                 {SEVERITY_CLASS_LABEL[selected.severityClassification]}
                               </p>
                               {selected.notificationDeadlineType && selected.notificationDeadlineType !== "none" && (
-                                <p style={{ fontSize: 9, color: "rgba(0,0,0,0.45)", margin: "2px 0 0" }}>
+                                <p style={{ fontSize: 11, color: "#0D1016", margin: "2px 0 0" }}>
                                   {DEADLINE_TYPE_LABEL[selected.notificationDeadlineType]}
                                 </p>
                               )}
@@ -1876,7 +1876,7 @@ function PostMarketPageInner() {
                           )}
                           <button
                             onClick={() => setStepperStep(4)}
-                            style={{ width: "100%", fontSize: 10, fontWeight: 600, background: "#0D1016", color: "#fff", border: "none", borderRadius: 6, padding: "7px", cursor: "pointer" }}
+                            style={{ width: "100%", fontSize: 11, fontWeight: 600, background: "#0D1016", color: "#fff", border: "none", borderRadius: 6, padding: "7px", cursor: "pointer" }}
                           >
                             Avanti — Genera notifica →
                           </button>
@@ -1895,7 +1895,7 @@ function PostMarketPageInner() {
                             </p>
                           </div>
                         ) : selected.severityClassification !== "serious_incident" ? (
-                          <p style={{ fontSize: 11, color: "rgba(0,0,0,0.4)", margin: 0 }}>
+                          <p style={{ fontSize: 11, color: "#0D1016", margin: 0 }}>
                             Nessuna notifica obbligatoria — registra nel log interno (Art. 72).
                           </p>
                         ) : (
@@ -1914,14 +1914,14 @@ function PostMarketPageInner() {
                                 <CheckCircle className="h-3.5 w-3.5" /> Segna come notificato
                               </button>
                             </div>
-                            <p style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", lineHeight: 1.5, margin: 0 }}>
+                            <p style={{ fontSize: 11, color: "#0D1016", lineHeight: 1.5, margin: 0 }}>
                               Reg. (UE) 2024/1689 Art. 73. La notifica preliminare deve essere seguita da rapporto completo (Art. 73(5)) compilabile nello step 5.
                             </p>
                           </>
                         )}
                         <button
                           onClick={() => setStepperStep(5)}
-                          style={{ width: "100%", fontSize: 10, fontWeight: 600, background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.6)", border: "none", borderRadius: 6, padding: "6px", cursor: "pointer" }}
+                          style={{ width: "100%", fontSize: 11, fontWeight: 600, background: "rgba(0,0,0,0.06)", color: "#0D1016", border: "none", borderRadius: 6, padding: "6px", cursor: "pointer" }}
                         >
                           Avanti — Follow-up →
                         </button>
@@ -1932,7 +1932,7 @@ function PostMarketPageInner() {
                     {stepperStep === 5 && (
                       <div className="space-y-3">
                         <div>
-                          <label style={{ display: "block", fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.5)", marginBottom: 4 }}>
+                          <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#0D1016", marginBottom: 4 }}>
                             Causa radice — Sez. 4 <span style={{ color: "#dc2626" }}>*</span>
                           </label>
                           <textarea
@@ -1940,11 +1940,11 @@ function PostMarketPageInner() {
                             onChange={e => updateIncidentField(selected.id, "rootCause", e.target.value)}
                             rows={3}
                             placeholder="Causa radice: errore sistema, gap training data, failure deployment…"
-                            style={{ width: "100%", fontSize: 11, padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", resize: "vertical", outline: "none", background: "#fff", boxSizing: "border-box" }}
+                            style={{ width: "100%", fontSize: 11, padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", resize: "vertical", outline: "none", background: "#fff", boxSizing: "border-box" }}
                           />
                         </div>
                         <div>
-                          <label style={{ display: "block", fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.5)", marginBottom: 4 }}>
+                          <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#0D1016", marginBottom: 4 }}>
                             Misure definitive — Sez. 6 <span style={{ color: "#dc2626" }}>*</span>
                           </label>
                           <textarea
@@ -1952,7 +1952,7 @@ function PostMarketPageInner() {
                             onChange={e => updateIncidentField(selected.id, "finalMeasures", e.target.value)}
                             rows={3}
                             placeholder="Misure permanenti: patch, retraining, modifica processo…"
-                            style={{ width: "100%", fontSize: 11, padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", resize: "vertical", outline: "none", background: "#fff", boxSizing: "border-box" }}
+                            style={{ width: "100%", fontSize: 11, padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", resize: "vertical", outline: "none", background: "#fff", boxSizing: "border-box" }}
                           />
                         </div>
                         {(() => {
@@ -1974,7 +1974,7 @@ function PostMarketPageInner() {
                               }}
                               style={{
                                 width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                                padding: "8px", borderRadius: 8, fontSize: 10, fontWeight: 600,
+                                padding: "8px", borderRadius: 8, fontSize: 11, fontWeight: 600,
                                 background: canGenerate ? "#0D1016" : "rgba(0,0,0,0.06)",
                                 color: canGenerate ? "#fff" : "rgba(0,0,0,0.3)",
                                 border: "none", cursor: canGenerate ? "pointer" : "not-allowed",
@@ -1993,10 +1993,10 @@ function PostMarketPageInner() {
                             >
                               <Clock className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#dc2626" }} />
                               <div style={{ flex: 1 }}>
-                                <p style={{ fontSize: 10, fontWeight: 500, color: "#dc2626", margin: 0 }}>Deadline Timeline</p>
-                                <p style={{ fontSize: 9, color: "rgba(0,0,0,0.45)", margin: "1px 0 0" }}>Scadenza: {selected.notificationDeadlineDate}</p>
+                                <p style={{ fontSize: 11, fontWeight: 500, color: "#dc2626", margin: 0 }}>Deadline Timeline</p>
+                                <p style={{ fontSize: 11, color: "#0D1016", margin: "1px 0 0" }}>Scadenza: {selected.notificationDeadlineDate}</p>
                               </div>
-                              <Link2 className="h-3 w-3 flex-shrink-0" style={{ color: "rgba(0,0,0,0.3)" }} />
+                              <Link2 className="h-3 w-3 flex-shrink-0" style={{ color: "#0D1016" }} />
                             </a>
                           )}
                           <button
@@ -2005,10 +2005,10 @@ function PostMarketPageInner() {
                           >
                             <FileText className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#15803d" }} />
                             <div style={{ flex: 1 }}>
-                              <p style={{ fontSize: 10, fontWeight: 500, color: "#15803d", margin: 0 }}>Monitoraggio Post-Market</p>
-                              <p style={{ fontSize: 9, color: "rgba(0,0,0,0.45)", margin: "1px 0 0" }}>Vedi report e piano PMM (Art. 72)</p>
+                              <p style={{ fontSize: 11, fontWeight: 500, color: "#15803d", margin: 0 }}>Monitoraggio Post-Market</p>
+                              <p style={{ fontSize: 11, color: "#0D1016", margin: "1px 0 0" }}>Vedi report e piano PMM (Art. 72)</p>
                             </div>
-                            <Link2 className="h-3 w-3 flex-shrink-0" style={{ color: "rgba(0,0,0,0.3)" }} />
+                            <Link2 className="h-3 w-3 flex-shrink-0" style={{ color: "#0D1016" }} />
                           </button>
                         </div>
                       </div>
@@ -2028,22 +2028,22 @@ function PostMarketPageInner() {
         <div className="space-y-5">
           {/* Header + progress */}
           <div
-            className="rounded-xl p-5"
-            style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#fff" }}
+            className="rounded-lg p-5"
+            style={{ border: "1px solid rgba(0,0,0,0.08)", background: "#fff" }}
           >
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
                   Piano di Sorveglianza Post-Market — Art. 72
                 </p>
-                <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.42)" }}>
+                <p className="text-[11px] mt-0.5" style={{ color: "#0D1016" }}>
                   Attività di monitoraggio obbligatorie per sistemi di IA ad alto rischio.
                 </p>
               </div>
               <button
                 onClick={exportPlanCSV}
                 className="flex items-center gap-1 text-[11px] font-medium rounded-lg px-3 py-1.5 hover:opacity-80 transition-opacity"
-                style={{ border: "1px solid rgba(0,0,0,0.1)", color: "rgba(0,0,0,0.6)" }}
+                style={{ border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016" }}
               >
                 <Download className="h-3 w-3" /> Esporta piano
               </button>
@@ -2051,7 +2051,7 @@ function PostMarketPageInner() {
             <div className="flex items-center gap-3">
               <span
                 className="text-[11px] font-medium flex-shrink-0"
-                style={{ color: "rgba(0,0,0,0.4)" }}
+                style={{ color: "#0D1016" }}
               >
                 {planDone}/{planTotal} attività completate
               </span>
@@ -2083,8 +2083,8 @@ function PostMarketPageInner() {
 
           {/* Checks list */}
           <div
-            className="rounded-xl overflow-hidden"
-            style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#fff" }}
+            className="rounded-lg overflow-hidden"
+            style={{ border: "1px solid rgba(0,0,0,0.08)", background: "#fff" }}
           >
             <div className="divide-y" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
               {plan.map((check) => {
@@ -2128,7 +2128,7 @@ function PostMarketPageInner() {
                         >
                           <div>
                             <span
-                              className="text-[12px] font-medium"
+                              className="text-[13px] font-medium"
                               style={{
                                 color: check.done ? "rgba(0,0,0,0.35)" : "#0D1016",
                                 textDecoration: check.done ? "line-through" : "none",
@@ -2138,7 +2138,7 @@ function PostMarketPageInner() {
                             </span>
                             <div className="flex items-center gap-2 mt-0.5">
                               <span
-                                className="text-[10px] font-semibold rounded px-1.5 py-0.5"
+                                className="text-[11px] font-semibold rounded px-1.5 py-0.5"
                                 style={{
                                   background: "rgba(59,130,246,0.08)",
                                   color: "#1d4ed8",
@@ -2147,17 +2147,17 @@ function PostMarketPageInner() {
                                 {check.article}
                               </span>
                               <span
-                                className="text-[10px] rounded px-1.5 py-0.5"
+                                className="text-[11px] rounded px-1.5 py-0.5"
                                 style={{
                                   background: "rgba(0,0,0,0.05)",
-                                  color: "rgba(0,0,0,0.45)",
+                                  color: "#0D1016",
                                 }}
                               >
                                 {check.frequency}
                               </span>
                               {check.done && check.lastDone && (
                                 <span
-                                  className="text-[10px]"
+                                  className="text-[11px]"
                                   style={{ color: "#15803d" }}
                                 >
                                   ✓ {check.lastDone}
@@ -2168,12 +2168,12 @@ function PostMarketPageInner() {
                           {expanded ? (
                             <ChevronUp
                               className="h-3.5 w-3.5 flex-shrink-0"
-                              style={{ color: "rgba(0,0,0,0.25)" }}
+                              style={{ color: "#0D1016" }}
                             />
                           ) : (
                             <ChevronDown
                               className="h-3.5 w-3.5 flex-shrink-0"
-                              style={{ color: "rgba(0,0,0,0.25)" }}
+                              style={{ color: "#0D1016" }}
                             />
                           )}
                         </button>
@@ -2190,8 +2190,8 @@ function PostMarketPageInner() {
                             >
                               <div className="mt-2">
                                 <label
-                                  className="block text-[10px] font-medium mb-1"
-                                  style={{ color: "rgba(0,0,0,0.4)" }}
+                                  className="block text-[11px] font-medium mb-1"
+                                  style={{ color: "#0D1016" }}
                                 >
                                   Note
                                 </label>
@@ -2221,13 +2221,13 @@ function PostMarketPageInner() {
 
           {/* Art. 72 info banner */}
           <div
-            className="rounded-xl p-4"
+            className="rounded-lg p-4"
             style={{
               background: "rgba(59,130,246,0.04)",
               border: "1px solid rgba(59,130,246,0.15)",
             }}
           >
-            <p className="text-[11px] leading-relaxed" style={{ color: "rgba(0,0,0,0.55)" }}>
+            <p className="text-[11px] leading-relaxed" style={{ color: "#0D1016" }}>
               <span className="font-semibold" style={{ color: "#1d4ed8" }}>Art. 72(1) —</span>{" "}
               Il fornitore istituisce e documenta un sistema di monitoraggio successivo all&apos;immissione sul mercato,
               proporzionato alla natura del sistema e ai suoi rischi.{" "}
@@ -2255,18 +2255,18 @@ function PostMarketPageInner() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.96, opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="w-full max-w-2xl rounded-2xl overflow-hidden"
+              className="w-full max-w-2xl rounded-lg overflow-hidden"
               style={{ background: "#fff", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}
             >
               <div
                 className="flex items-center justify-between px-6 py-4"
-                style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}
+                style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}
               >
                 <div>
-                  <p className="text-[14px] font-semibold" style={{ color: "#0D1016" }}>
+                  <p className="text-[13px] font-semibold" style={{ color: "#0D1016" }}>
                     Notifica preliminare — Art. 73 Reg. UE 2024/1689
                   </p>
-                  <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.45)" }}>
+                  <p className="text-[11px] mt-0.5" style={{ color: "#0D1016" }}>
                     Testo da inviare a: {selected.authority}
                   </p>
                 </div>
@@ -2276,7 +2276,7 @@ function PostMarketPageInner() {
                     background: "none",
                     border: "none",
                     cursor: "pointer",
-                    color: "rgba(0,0,0,0.35)",
+                    color: "#0D1016",
                   }}
                 >
                   <X className="h-4 w-4" />
@@ -2290,8 +2290,8 @@ function PostMarketPageInner() {
                   rows={14}
                   className="w-full rounded-lg text-[11px] font-mono p-3 focus:outline-none resize-none"
                   style={{
-                    background: "rgba(0,0,0,0.02)",
-                    border: "1px solid rgba(0,0,0,0.1)",
+                    background: "#FAFAF9",
+                    border: "1px solid rgba(0,0,0,0.08)",
                     color: "#0D1016",
                     lineHeight: 1.6,
                   }}
@@ -2300,7 +2300,7 @@ function PostMarketPageInner() {
 
               <div
                 className="px-6 py-4 flex items-center gap-2"
-                style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}
+                style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}
               >
                 <button
                   onClick={() => {
@@ -2308,7 +2308,7 @@ function PostMarketPageInner() {
                     showToastMsg("Testo copiato");
                   }}
                   className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-[11px] font-medium hover:opacity-80 transition-opacity"
-                  style={{ border: "1px solid rgba(0,0,0,0.1)", color: "rgba(0,0,0,0.6)" }}
+                  style={{ border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016" }}
                 >
                   <Copy className="h-3 w-3" /> Copia testo
                 </button>
@@ -2325,17 +2325,17 @@ function PostMarketPageInner() {
                     showToastMsg("File .txt scaricato");
                   }}
                   className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-[11px] font-medium hover:opacity-80 transition-opacity"
-                  style={{ border: "1px solid rgba(0,0,0,0.1)", color: "rgba(0,0,0,0.6)" }}
+                  style={{ border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016" }}
                 >
                   <Download className="h-3 w-3" /> Scarica .txt
                 </button>
                 <div className="flex-1" />
                 <button
                   onClick={() => setShowNotifyModal(false)}
-                  className="rounded-lg px-4 py-2 text-[12px] font-medium hover:opacity-80 transition-opacity"
+                  className="rounded-lg px-4 py-2 text-[13px] font-medium hover:opacity-80 transition-opacity"
                   style={{
-                    border: "1px solid rgba(0,0,0,0.12)",
-                    color: "rgba(0,0,0,0.55)",
+                    border: "1px solid rgba(0,0,0,0.08)",
+                    color: "#0D1016",
                     background: "none",
                     cursor: "pointer",
                   }}
@@ -2344,7 +2344,7 @@ function PostMarketPageInner() {
                 </button>
                 <button
                   onClick={() => markNotified(selected.id)}
-                  className="flex items-center gap-1.5 rounded-lg px-4 py-2 text-[12px] font-semibold text-white hover:opacity-90 transition-opacity"
+                  className="flex items-center gap-1.5 rounded-lg px-4 py-2 text-[13px] font-semibold text-white hover:opacity-90 transition-opacity"
                   style={{ background: "#15803d", border: "none", cursor: "pointer" }}
                 >
                   <CheckCircle className="h-3.5 w-3.5" /> Conferma notifica inviata
@@ -2363,7 +2363,7 @@ function PostMarketPageInner() {
             className="flex items-start gap-2 rounded-lg px-3 py-2"
             style={{ background: "rgba(245,158,11,0.07)", border: "1px solid rgba(245,158,11,0.2)" }}
           >
-            <span className="text-[10px] font-semibold mt-0.5" style={{ color: "#92400e" }}>✦ AI</span>
+            <span className="text-[11px] font-semibold mt-0.5" style={{ color: "#92400e" }}>✦ AI</span>
             <p className="text-[11px]" style={{ color: "#92400e" }}>
               Le proposte AI sono bozze da verificare. Obblighi Art. 72 ricostruiti dalla memoria del modello — verificare contro testo consolidato Reg. (UE) 2024/1689.
             </p>
@@ -2371,18 +2371,18 @@ function PostMarketPageInner() {
 
           {/* PMM Plan editor */}
           <div
-            className="rounded-xl overflow-hidden"
-            style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#fff" }}
+            className="rounded-lg overflow-hidden"
+            style={{ border: "1px solid rgba(0,0,0,0.08)", background: "#fff" }}
           >
             <div
               className="flex items-center justify-between px-5 py-3.5"
-              style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+              style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}
             >
               <div>
                 <span className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
                   Piano di Monitoraggio Post-Market
                 </span>
-                <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.4)" }}>
+                <p className="text-[11px] mt-0.5" style={{ color: "#0D1016" }}>
                   Art. 72(1) — sistema ad alto rischio
                 </p>
               </div>
@@ -2414,7 +2414,7 @@ function PostMarketPageInner() {
                       setPmmAiLoading(false);
                     }
                   }}
-                  className="flex items-center gap-1 text-[10px] font-semibold rounded-lg px-3 py-1.5"
+                  className="flex items-center gap-1 text-[11px] font-semibold rounded-lg px-3 py-1.5"
                   style={{
                     background: pmmAiLoading ? "rgba(0,0,0,0.05)" : "rgba(245,158,11,0.1)",
                     color: "#92400e",
@@ -2429,7 +2429,7 @@ function PostMarketPageInner() {
                     savePMMPlan(pmmPlan);
                     showToastMsg("✓ Piano salvato");
                   }}
-                  className="flex items-center gap-1 text-[10px] font-semibold rounded-lg px-3 py-1.5"
+                  className="flex items-center gap-1 text-[11px] font-semibold rounded-lg px-3 py-1.5"
                   style={{ background: "#0D1016", color: "#fff", border: "none", cursor: "pointer" }}
                 >
                   Salva piano
@@ -2458,7 +2458,7 @@ function PostMarketPageInner() {
                       savePMMPlan(confirmed);
                       showToastMsg("✓ Piano confermato");
                     }}
-                    className="text-[10px] font-semibold rounded px-2 py-1"
+                    className="text-[11px] font-semibold rounded px-2 py-1"
                     style={{ background: "#92400e", color: "#fff", border: "none", cursor: "pointer" }}
                   >
                     Conferma piano
@@ -2468,25 +2468,25 @@ function PostMarketPageInner() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
+                  <label className="block text-[11px] font-medium mb-1" style={{ color: "#0D1016" }}>
                     Descrizione sistema (PMM)
                   </label>
                   <textarea
                     rows={3}
-                    className="w-full rounded-lg text-[12px] p-2 resize-none focus:outline-none"
-                    style={{ border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", background: "#fff" }}
+                    className="w-full rounded-lg text-[13px] p-2 resize-none focus:outline-none"
+                    style={{ border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", background: "#fff" }}
                     value={pmmPlan.pmmSystemDescription}
                     onChange={(e) => setPmmPlan((p) => ({ ...p, pmmSystemDescription: e.target.value, aiConfirmed: false }))}
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
+                  <label className="block text-[11px] font-medium mb-1" style={{ color: "#0D1016" }}>
                     Metodologia di monitoraggio
                   </label>
                   <textarea
                     rows={3}
-                    className="w-full rounded-lg text-[12px] p-2 resize-none focus:outline-none"
-                    style={{ border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", background: "#fff" }}
+                    className="w-full rounded-lg text-[13px] p-2 resize-none focus:outline-none"
+                    style={{ border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", background: "#fff" }}
                     value={pmmPlan.monitoringMethodology}
                     onChange={(e) => setPmmPlan((p) => ({ ...p, monitoringMethodology: e.target.value, aiConfirmed: false }))}
                   />
@@ -2495,12 +2495,12 @@ function PostMarketPageInner() {
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
+                  <label className="block text-[11px] font-medium mb-1" style={{ color: "#0D1016" }}>
                     Frequenza raccolta dati
                   </label>
                   <select
-                    className="w-full rounded-lg text-[12px] p-2 focus:outline-none"
-                    style={{ border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", background: "#fff", cursor: "pointer" }}
+                    className="w-full rounded-lg text-[13px] p-2 focus:outline-none"
+                    style={{ border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", background: "#fff", cursor: "pointer" }}
                     value={pmmPlan.dataCollectionFrequency}
                     onChange={(e) => {
                       const freq = e.target.value as PostMarketMonitoringPlan["dataCollectionFrequency"];
@@ -2515,13 +2515,13 @@ function PostMarketPageInner() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
+                  <label className="block text-[11px] font-medium mb-1" style={{ color: "#0D1016" }}>
                     Data messa in servizio
                   </label>
                   <input
                     type="date"
-                    className="w-full rounded-lg text-[12px] p-2 focus:outline-none"
-                    style={{ border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", background: "#fff" }}
+                    className="w-full rounded-lg text-[13px] p-2 focus:outline-none"
+                    style={{ border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", background: "#fff" }}
                     value={pmmPlan.inServiceDate ?? ""}
                     onChange={(e) => {
                       const d = e.target.value;
@@ -2531,14 +2531,14 @@ function PostMarketPageInner() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
+                  <label className="block text-[11px] font-medium mb-1" style={{ color: "#0D1016" }}>
                     Prossimo report previsto
                   </label>
                   <input
                     type="date"
                     readOnly
-                    className="w-full rounded-lg text-[12px] p-2 focus:outline-none"
-                    style={{ border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", background: "rgba(0,0,0,0.02)" }}
+                    className="w-full rounded-lg text-[13px] p-2 focus:outline-none"
+                    style={{ border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", background: "#FAFAF9" }}
                     value={pmmPlan.nextReportDueDate ?? ""}
                   />
                 </div>
@@ -2547,7 +2547,7 @@ function PostMarketPageInner() {
               {/* Annex III checklist (law enforcement) */}
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <label className="text-[10px] font-medium" style={{ color: "rgba(0,0,0,0.45)" }}>
+                  <label className="text-[11px] font-medium" style={{ color: "#0D1016" }}>
                     Sistema Annex III (law enforcement / migrazione)?
                   </label>
                   <input
@@ -2569,7 +2569,7 @@ function PostMarketPageInner() {
                 </div>
                 {pmmPlan.isAnnex3LawEnforcement && pmmPlan.annex3LawEnforcementChecklist && (
                   <div className="space-y-2 rounded-lg p-3" style={{ background: "rgba(220,38,38,0.04)", border: "1px solid rgba(220,38,38,0.12)" }}>
-                    <p className="text-[10px] font-semibold mb-2" style={{ color: "#b91c1c" }}>
+                    <p className="text-[11px] font-semibold mb-2" style={{ color: "#b91c1c" }}>
                       Checklist aggiuntiva — Annex III law enforcement
                     </p>
                     {pmmPlan.annex3LawEnforcementChecklist.map((item) => (
@@ -2587,7 +2587,7 @@ function PostMarketPageInner() {
                         />
                         <div>
                           <p className="text-[11px]" style={{ color: "#0D1016" }}>{item.label}</p>
-                          <p className="text-[9px]" style={{ color: "rgba(0,0,0,0.35)" }}>{item.reference}</p>
+                          <p className="text-[11px]" style={{ color: "#0D1016" }}>{item.reference}</p>
                         </div>
                       </label>
                     ))}
@@ -2597,13 +2597,13 @@ function PostMarketPageInner() {
 
               {/* Deployer feedback */}
               <div>
-                <label className="block text-[10px] font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
+                <label className="block text-[11px] font-medium mb-1" style={{ color: "#0D1016" }}>
                   Sintesi feedback deployer (opzionale)
                 </label>
                 <textarea
                   rows={2}
-                  className="w-full rounded-lg text-[12px] p-2 resize-none focus:outline-none"
-                  style={{ border: "1px solid rgba(0,0,0,0.12)", color: "#0D1016", background: "#fff" }}
+                  className="w-full rounded-lg text-[13px] p-2 resize-none focus:outline-none"
+                  style={{ border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", background: "#fff" }}
                   placeholder="Segnalazioni, reclami, feedback dagli utenti del sistema..."
                   value={pmmPlan.deployerFeedbackSummary ?? ""}
                   onChange={(e) => setPmmPlan((p) => ({ ...p, deployerFeedbackSummary: e.target.value, aiConfirmed: false }))}
@@ -2614,18 +2614,18 @@ function PostMarketPageInner() {
 
           {/* Draft Report */}
           <div
-            className="rounded-xl overflow-hidden"
-            style={{ border: "1px solid rgba(0,0,0,0.07)", background: "#fff" }}
+            className="rounded-lg overflow-hidden"
+            style={{ border: "1px solid rgba(0,0,0,0.08)", background: "#fff" }}
           >
             <div
               className="flex items-center justify-between px-5 py-3.5"
-              style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+              style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}
             >
               <div>
                 <span className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
                   Report di monitoraggio
                 </span>
-                <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.4)" }}>
+                <p className="text-[11px] mt-0.5" style={{ color: "#0D1016" }}>
                   Art. 72(2) — bozza AI da rivedere e confermare
                 </p>
               </div>
@@ -2686,7 +2686,7 @@ function PostMarketPageInner() {
             {pmmReports.length === 0 ? (
               <div className="px-5 py-8 text-center">
                 <FileText className="h-8 w-8 mx-auto mb-2" style={{ color: "rgba(0,0,0,0.15)" }} />
-                <p className="text-[12px]" style={{ color: "rgba(0,0,0,0.35)" }}>
+                <p className="text-[13px]" style={{ color: "#0D1016" }}>
                   Nessun report salvato. Genera la prima bozza con il copilot AI.
                 </p>
               </div>
@@ -2700,8 +2700,8 @@ function PostMarketPageInner() {
                     />
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-[12px] font-medium" style={{ color: "#0D1016" }}>{rpt.id}</span>
-                        <span className="text-[9px] rounded-full px-2 py-0.5 font-medium" style={{
+                        <span className="text-[13px] font-medium" style={{ color: "#0D1016" }}>{rpt.id}</span>
+                        <span className="text-[11px] rounded-full px-2 py-0.5 font-medium" style={{
                           background: rpt.aiConfirmed ? "rgba(21,128,61,0.08)" : "rgba(245,158,11,0.08)",
                           color: rpt.aiConfirmed ? "#15803d" : "#92400e",
                           border: `1px solid ${rpt.aiConfirmed ? "rgba(21,128,61,0.2)" : "rgba(245,158,11,0.2)"}`,
@@ -2709,16 +2709,16 @@ function PostMarketPageInner() {
                           {rpt.aiConfirmed ? "Confermato" : "✦ AI — in attesa"}
                         </span>
                       </div>
-                      <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.4)" }}>
+                      <p className="text-[11px] mt-0.5" style={{ color: "#0D1016" }}>
                         {rpt.periodStart} → {rpt.periodEnd} · {rpt.flaggedAnomalies.length} anomali{rpt.flaggedAnomalies.length === 1 ? "a" : "e"}
                       </p>
-                      <p className="text-[11px] mt-1 line-clamp-2" style={{ color: "rgba(0,0,0,0.6)" }}>
+                      <p className="text-[11px] mt-1 line-clamp-2" style={{ color: "#0D1016" }}>
                         {rpt.narrative}
                       </p>
                       {rpt.flaggedAnomalies.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-1.5">
                           {rpt.flaggedAnomalies.map((a, i) => (
-                            <span key={i} className="text-[9px] rounded px-1.5 py-0.5" style={{
+                            <span key={i} className="text-[11px] rounded px-1.5 py-0.5" style={{
                               background: a.severity === "high" ? "rgba(220,38,38,0.07)" : "rgba(245,158,11,0.07)",
                               color: a.severity === "high" ? "#b91c1c" : "#92400e",
                               border: `1px solid ${a.severity === "high" ? "rgba(220,38,38,0.15)" : "rgba(245,158,11,0.15)"}`,
@@ -2744,7 +2744,7 @@ function PostMarketPageInner() {
                           );
                           showToastMsg("✓ Report confermato e registrato nell'Evidence Layer");
                         }}
-                        className="text-[10px] font-semibold rounded px-2 py-1 flex-shrink-0"
+                        className="text-[11px] font-semibold rounded px-2 py-1 flex-shrink-0"
                         style={{ background: "#15803d", color: "#fff", border: "none", cursor: "pointer" }}
                       >
                         Conferma
@@ -2773,33 +2773,33 @@ function PostMarketPageInner() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.96, y: 10 }}
               transition={{ duration: 0.14 }}
-              className="rounded-2xl w-full max-w-xl mx-4"
-              style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", maxHeight: "80vh", overflowY: "auto" }}
+              className="rounded-lg w-full max-w-xl mx-4"
+              style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.08)", maxHeight: "80vh", overflowY: "auto" }}
             >
               <div
                 className="flex items-start justify-between px-6 py-4"
-                style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}
+                style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}
               >
                 <div>
                   <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
                     Bozza report: {draftReport.id}
                   </p>
-                  <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.4)" }}>
+                  <p className="text-[11px] mt-0.5" style={{ color: "#0D1016" }}>
                     ✦ AI — verifica e conferma finché aiConfirmed !== true
                   </p>
                 </div>
-                <button onClick={() => setShowDraftModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(0,0,0,0.35)" }}>
+                <button onClick={() => setShowDraftModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#0D1016" }}>
                   <X className="h-4 w-4" />
                 </button>
               </div>
               <div className="px-6 py-4 space-y-4">
                 <div>
-                  <p className="text-[10px] font-semibold mb-1.5" style={{ color: "rgba(0,0,0,0.45)" }}>NARRATIVA</p>
-                  <p className="text-[12px] leading-relaxed" style={{ color: "#0D1016" }}>{draftReport.narrative}</p>
+                  <p className="text-[11px] font-semibold mb-1.5" style={{ color: "#0D1016" }}>NARRATIVA</p>
+                  <p className="text-[13px] leading-relaxed" style={{ color: "#0D1016" }}>{draftReport.narrative}</p>
                 </div>
                 {draftReport.flaggedAnomalies.length > 0 && (
                   <div>
-                    <p className="text-[10px] font-semibold mb-1.5" style={{ color: "rgba(0,0,0,0.45)" }}>ANOMALIE SEGNALATE</p>
+                    <p className="text-[11px] font-semibold mb-1.5" style={{ color: "#0D1016" }}>ANOMALIE SEGNALATE</p>
                     <div className="space-y-2">
                       {draftReport.flaggedAnomalies.map((a, i) => (
                         <div key={i} className="rounded-lg px-3 py-2" style={{
@@ -2807,9 +2807,9 @@ function PostMarketPageInner() {
                           border: `1px solid ${a.severity === "high" ? "rgba(220,38,38,0.15)" : "rgba(245,158,11,0.15)"}`,
                         }}>
                           <p className="text-[11px] font-medium" style={{ color: a.severity === "high" ? "#b91c1c" : "#92400e" }}>{a.metric}</p>
-                          <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.6)" }}>{a.description}</p>
+                          <p className="text-[11px] mt-0.5" style={{ color: "#0D1016" }}>{a.description}</p>
                           {a.riskRegisterRef && (
-                            <p className="text-[9px] mt-0.5" style={{ color: "rgba(0,0,0,0.4)" }}>Risk Register: {a.riskRegisterRef}</p>
+                            <p className="text-[11px] mt-0.5" style={{ color: "#0D1016" }}>Risk Register: {a.riskRegisterRef}</p>
                           )}
                         </div>
                       ))}
@@ -2819,12 +2819,12 @@ function PostMarketPageInner() {
               </div>
               <div
                 className="px-6 py-4 flex gap-2 justify-end"
-                style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}
+                style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}
               >
                 <button
                   onClick={() => setShowDraftModal(false)}
                   className="text-[11px] font-medium rounded-lg px-3 py-2"
-                  style={{ border: "1px solid rgba(0,0,0,0.12)", color: "rgba(0,0,0,0.55)", background: "none", cursor: "pointer" }}
+                  style={{ border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", background: "none", cursor: "pointer" }}
                 >
                   Annulla
                 </button>
@@ -2870,7 +2870,7 @@ function PostMarketPageInner() {
       {/* Toast */}
       {toast && (
         <div
-          className="fixed bottom-6 right-6 z-50 rounded-xl px-4 py-3 text-sm font-medium shadow-lg"
+          className="fixed bottom-6 right-6 z-50 rounded-lg px-4 py-3 text-[13px] font-medium shadow-lg"
           style={{ background: "#0D1016", color: "#fff" }}
         >
           {toast}

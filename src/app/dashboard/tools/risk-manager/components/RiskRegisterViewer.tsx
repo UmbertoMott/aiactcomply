@@ -33,7 +33,7 @@ function SectionTitle({ sectionId, num, title, article }: {
     }}>
       <span style={{ fontSize: 13, fontWeight: 700, fontFamily: SANS }}>{num}. {title}</span>
       {article && (
-        <span style={{ fontSize: 9.5, opacity: 0.5, letterSpacing: "0.05em", fontFamily: SANS, whiteSpace: "nowrap", marginLeft: 12 }}>
+        <span style={{ fontSize: 11, opacity: 0.5, letterSpacing: "0.05em", fontFamily: SANS, whiteSpace: "nowrap", marginLeft: 12 }}>
           {article}
         </span>
       )}
@@ -43,7 +43,7 @@ function SectionTitle({ sectionId, num, title, article }: {
 
 function Placeholder({ text = "Da compilare — rispondere in chat per popolare questa sezione." }: { text?: string }) {
   return (
-    <p style={{ fontSize: 11, color: "rgba(0,0,0,0.30)", fontStyle: "italic", padding: "8px 0", fontFamily: SANS, margin: 0 }}>
+    <p style={{ fontSize: 11, color: "#0D1016", fontStyle: "italic", padding: "8px 0", fontFamily: SANS, margin: 0 }}>
       {text}
     </p>
   );
@@ -52,7 +52,7 @@ function Placeholder({ text = "Da compilare — rispondere in chat per popolare 
 function AiBadge() {
   return (
     <span style={{
-      fontSize: 8.5, fontWeight: 600, padding: "1px 6px", borderRadius: 4,
+      fontSize: 11, fontWeight: 600, padding: "1px 6px", borderRadius: 4,
       background: "rgba(217,119,6,0.08)", color: "#b45309",
       border: "1px solid rgba(217,119,6,0.25)", whiteSpace: "nowrap",
       fontFamily: SANS, verticalAlign: "middle", marginLeft: 4,
@@ -66,12 +66,12 @@ function KVTable({ rows }: { rows: Array<[string, string | undefined]> }) {
   const filled = rows.filter(([, v]) => v);
   if (filled.length === 0) return <Placeholder />;
   return (
-    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
+    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
       <tbody>
         {filled.map(([label, v]) => (
-          <tr key={label} style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+          <tr key={label} style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
             <td data-noedit="true" style={{ padding: "5px 8px 5px 0", fontWeight: 700, color: "#0D1016", width: "42%", verticalAlign: "top" }}>{label}</td>
-            <td style={{ padding: "5px 0", color: "#1a1a1a", lineHeight: 1.5 }}>{v}</td>
+            <td style={{ padding: "5px 0", color: "#0D1016", lineHeight: 1.5 }}>{v}</td>
           </tr>
         ))}
       </tbody>
@@ -83,7 +83,7 @@ function BulletList({ items, emptyText }: { items: string[]; emptyText?: string 
   const filled = items.filter(Boolean);
   if (filled.length === 0) return <Placeholder text={emptyText} />;
   return (
-    <ul style={{ margin: "4px 0 0", paddingLeft: 18, fontSize: 12.5, color: "#1a1a1a", lineHeight: 1.6 }}>
+    <ul style={{ margin: "4px 0 0", paddingLeft: 18, fontSize: 13, color: "#0D1016", lineHeight: 1.6 }}>
       {filled.map((it, i) => <li key={i}>{it}</li>)}
     </ul>
   );
@@ -117,7 +117,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
     return (
       <div style={{ textAlign: "center", padding: "40px 0", fontFamily: SANS }}>
         <Clock size={24} style={{ color: "rgba(0,0,0,0.15)", margin: "0 auto 10px" }} />
-        <p style={{ fontSize: 13, color: "rgba(0,0,0,0.4)", margin: 0 }}>
+        <p style={{ fontSize: 13, color: "#0D1016", margin: 0 }}>
           Il registro si compila progressivamente con le risposte in chat.
         </p>
       </div>
@@ -230,7 +230,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
                   const colors = BAND_COLORS[band];
                   const scale = { low: 1, medium: 2, high: 3 } as const;
                   return (
-                    <tr key={r.id} style={{ borderBottom: "1px solid rgba(0,0,0,0.07)", verticalAlign: "top" }}>
+                    <tr key={r.id} style={{ borderBottom: "1px solid rgba(0,0,0,0.08)", verticalAlign: "top" }}>
                       <td style={{ padding: "5px 6px", fontWeight: 700, whiteSpace: "nowrap" }}>
                         {r.id}
                         {!r.aiConfirmed && r.source !== "manual" && <AiBadge />}
@@ -238,12 +238,12 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
                       <td style={{ padding: "5px 6px", minWidth: 140 }}>
                         {r.category && <strong>{r.category}</strong>}{r.category && r.description ? " — " : ""}{r.description}
                       </td>
-                      <td style={{ padding: "5px 6px", fontSize: 9.5, color: "rgba(0,0,0,0.55)", minWidth: 110 }}>{r.art9Reference}</td>
+                      <td style={{ padding: "5px 6px", fontSize: 11, color: "#0D1016", minWidth: 110 }}>{r.art9Reference}</td>
                       <td style={{ padding: "5px 6px" }}>{r.likelihood ? scale[r.likelihood] : "—"}</td>
                       <td style={{ padding: "5px 6px" }}>{r.impact ? scale[r.impact] : "—"}</td>
                       <td style={{ padding: "5px 6px", fontWeight: 700 }}>{score ?? "—"}</td>
                       <td style={{ padding: "5px 6px" }}>
-                        <span style={{ fontSize: 9.5, fontWeight: 700, padding: "1px 7px", borderRadius: 4, background: colors.bg, color: colors.fg, textTransform: "capitalize" }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, padding: "1px 7px", borderRadius: 4, background: colors.bg, color: colors.fg, textTransform: "capitalize" }}>
                           {band}
                         </span>
                       </td>
@@ -259,11 +259,11 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
           </div>
           {incomplete.length > 0 && (
             <div style={{ marginTop: 10 }}>
-              <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.45)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>
                 Voci incomplete
               </p>
               {incomplete.map(r => (
-                <p key={r.id} style={{ fontSize: 10.5, color: "#92400e", margin: "2px 0" }}>
+                <p key={r.id} style={{ fontSize: 11, color: "#92400e", margin: "2px 0" }}>
                   {r.id} — manca: {missingFields(r).join(", ")}
                 </p>
               ))}
@@ -280,13 +280,13 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
         <>
           {doc.estimation.intendedUseCases.length > 0 && (
             <div style={{ marginBottom: 10 }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(0,0,0,0.5)", margin: "0 0 4px" }}>Usi previsti</p>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", margin: "0 0 4px" }}>Usi previsti</p>
               <BulletList items={doc.estimation.intendedUseCases} />
             </div>
           )}
           {doc.estimation.foreseenMisuse.length > 0 && (
             <div style={{ marginBottom: 10 }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(0,0,0,0.5)", margin: "0 0 4px" }}>Usi impropri ragionevolmente prevedibili</p>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", margin: "0 0 4px" }}>Usi impropri ragionevolmente prevedibili</p>
               <BulletList items={doc.estimation.foreseenMisuse} />
             </div>
           )}
@@ -326,21 +326,21 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
               {alerts.map((a, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 0", fontSize: 11 }}>
                   <span style={{
-                    fontSize: 9, fontWeight: 700, padding: "1px 7px", borderRadius: 4, flexShrink: 0,
+                    fontSize: 11, fontWeight: 700, padding: "1px 7px", borderRadius: 4, flexShrink: 0,
                     background: a.status === "overdue" ? "#FEE2E2" : a.status === "due_soon" ? "#FEF3C7" : "#f3f4f6",
                     color: a.status === "overdue" ? "#991b1b" : a.status === "due_soon" ? "#92400e" : "#6b7280",
                   }}>
                     {a.status === "overdue" ? "SCADUTA" : a.status === "due_soon" ? "ENTRO 30GG" : "PIANIFICATA"}
                   </span>
-                  <span style={{ color: "#1a1a1a" }}>{a.label}</span>
-                  <span style={{ color: "rgba(0,0,0,0.4)", marginLeft: "auto", whiteSpace: "nowrap" }}>{a.dueDate}</span>
+                  <span style={{ color: "#0D1016" }}>{a.label}</span>
+                  <span style={{ color: "#0D1016", marginLeft: "auto", whiteSpace: "nowrap" }}>{a.dueDate}</span>
                 </div>
               ))}
             </div>
           )}
           {doc.reviewLog.length > 0 && (
             <div style={{ marginTop: 12 }}>
-              <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.45)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px" }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px" }}>
                 Cadenza di riesame per rischio — log revisioni
               </p>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, fontFamily: SANS }}>
@@ -353,7 +353,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
                 </thead>
                 <tbody>
                   {doc.reviewLog.map((e, i) => (
-                    <tr key={i} style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+                    <tr key={i} style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
                       <td style={{ padding: "5px 6px", whiteSpace: "nowrap" }}>{e.date}</td>
                       <td style={{ padding: "5px 6px" }}>{e.trigger}</td>
                       <td style={{ padding: "5px 6px" }}>{e.outcome ?? "—"}</td>
@@ -378,11 +378,11 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
             <p style={{ fontSize: 13, margin: "0 0 6px" }}>
               <strong>Punteggio di copertura:</strong>{" "}
               <span style={{ fontSize: 19, fontWeight: 700 }}>{doc.gapCheck.coverageScore}</span>
-              <span style={{ color: "rgba(0,0,0,0.4)" }}>/100</span>
+              <span style={{ color: "#0D1016" }}>/100</span>
             </p>
           )}
           {doc.gapCheck.assessment && (
-            <p style={{ fontSize: 12.5, lineHeight: 1.65, margin: "0 0 10px", textAlign: "justify" }}>{doc.gapCheck.assessment}</p>
+            <p style={{ fontSize: 13, lineHeight: 1.65, margin: "0 0 10px", textAlign: "justify" }}>{doc.gapCheck.assessment}</p>
           )}
           {doc.gapCheck.missingAreas.length > 0 && (
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, fontFamily: SANS }}>
@@ -395,15 +395,15 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
               </thead>
               <tbody>
                 {doc.gapCheck.missingAreas.map((a, i) => (
-                  <tr key={i} style={{ borderBottom: "1px solid rgba(0,0,0,0.07)", verticalAlign: "top" }}>
+                  <tr key={i} style={{ borderBottom: "1px solid rgba(0,0,0,0.08)", verticalAlign: "top" }}>
                     <td style={{ padding: "5px 6px" }}>{a.area}</td>
-                    <td style={{ padding: "5px 6px", fontSize: 9.5, color: "rgba(0,0,0,0.55)" }}>{a.art9Requirement}</td>
+                    <td style={{ padding: "5px 6px", fontSize: 11, color: "#0D1016" }}>{a.art9Requirement}</td>
                     <td style={{ padding: "5px 6px" }}>
                       <span style={{
-                        fontSize: 9.5, fontWeight: 700, padding: "1px 7px", borderRadius: 4,
+                        fontSize: 11, fontWeight: 700, padding: "1px 7px", borderRadius: 4,
                         background: a.priority === "obbligatorio" ? "#F3F3F3" : "#F8F8F8",
                         color: a.priority === "obbligatorio" ? "#0D1016" : "rgba(0,0,0,0.5)",
-                        border: "1px solid rgba(0,0,0,0.1)",
+                        border: "1px solid rgba(0,0,0,0.08)",
                         textTransform: "capitalize",
                       }}>
                         {a.priority}
@@ -442,10 +442,10 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
         <>
           {doc.signOff.otherRegimesIntegration && (
             <div style={{ marginBottom: 12 }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(0,0,0,0.5)", margin: "0 0 4px" }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", margin: "0 0 4px" }}>
                 Integrazione con altri regimi — Art. 9(10)
               </p>
-              <p style={{ fontSize: 12.5, color: "#1a1a1a", margin: 0 }}>{doc.signOff.otherRegimesIntegration}</p>
+              <p style={{ fontSize: 13, color: "#0D1016", margin: 0 }}>{doc.signOff.otherRegimesIntegration}</p>
             </div>
           )}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20, marginBottom: 16 }}>
@@ -455,18 +455,18 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
               ["Rappresentante legale", doc.signOff.legalRepresentative],
             ] as const).map(([role, s]) => (
               <div key={role}>
-                <p style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.50)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px", fontFamily: SANS }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px", fontFamily: SANS }}>
                   {role}
                 </p>
-                {s.name && <p style={{ fontSize: 11, color: "#1a1a1a", margin: "0 0 10px" }}>{s.name}</p>}
+                {s.name && <p style={{ fontSize: 11, color: "#0D1016", margin: "0 0 10px" }}>{s.name}</p>}
                 {!s.name && <div style={{ height: 10 }} />}
-                <div style={{ borderBottom: "1px solid rgba(0,0,0,0.10)", height: 24, marginBottom: 4 }} />
-                {s.date && <p style={{ fontSize: 9, color: "rgba(0,0,0,0.40)", margin: "4px 0 0", fontFamily: SANS }}>{s.date}</p>}
+                <div style={{ borderBottom: "1px solid rgba(0,0,0,0.08)", height: 24, marginBottom: 4 }} />
+                {s.date && <p style={{ fontSize: 11, color: "#0D1016", margin: "4px 0 0", fontFamily: SANS }}>{s.date}</p>}
               </div>
             ))}
           </div>
           {doc.signOff.documentHash && (
-            <p style={{ fontSize: 9.5, color: "rgba(0,0,0,0.35)", fontFamily: "'DM Mono', monospace", margin: "8px 0 0" }}>
+            <p style={{ fontSize: 11, color: "#0D1016", fontFamily: "'DM Mono', monospace", margin: "8px 0 0" }}>
               Hash di versione: {doc.signOff.documentHash}
             </p>
           )}
@@ -476,10 +476,10 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20, marginBottom: 16 }}>
             {["Risk owner", "Responsabile compliance/legale", "Rappresentante legale"].map(label => (
               <div key={label}>
-                <p style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.50)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 16px", fontFamily: SANS }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 16px", fontFamily: SANS }}>
                   {label}
                 </p>
-                <div style={{ borderBottom: "1px solid rgba(0,0,0,0.10)", height: 24 }} />
+                <div style={{ borderBottom: "1px solid rgba(0,0,0,0.08)", height: 24 }} />
               </div>
             ))}
           </div>
@@ -504,8 +504,8 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
             const label = k.replace(/([A-Z])/g, " $1").replace(/_/g, " ").replace(/^./, c => c.toUpperCase());
             return (
               <div key={k} style={{ marginBottom: 10 }}>
-                <p style={{ fontSize: 11.5, fontWeight: 700, color: "#0D1016", margin: "0 0 2px" }}>{label}</p>
-                <p style={{ fontSize: 12.5, color: "#1a1a1a", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>{displayVal}</p>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#0D1016", margin: "0 0 2px" }}>{label}</p>
+                <p style={{ fontSize: 13, color: "#0D1016", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>{displayVal}</p>
               </div>
             );
           })}
@@ -513,7 +513,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
       ))}
 
       {/* Nota di verifica — sempre in coda */}
-      <p style={{ fontSize: 10, color: "rgba(0,0,0,0.45)", fontStyle: "italic", marginTop: 22 }}>
+      <p style={{ fontSize: 11, color: "#0D1016", fontStyle: "italic", marginTop: 22 }}>
         I riferimenti normativi contrassegnati con {VERIFY_NOTE_IT} richiedono conferma puntuale
         sul testo consolidato prima dell&apos;uso in un contesto di conformità formale.
         La compilazione del registro non sostituisce la valutazione legale qualificata.

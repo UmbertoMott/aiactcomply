@@ -11,7 +11,7 @@ import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { useActiveSystem } from "@/lib/hooks/useActiveSystem";
 import { useT, useLocale } from "@/i18n/LocaleProvider";
 
-const card = { background: "#ffffff", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
+const card = { background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "none" };
 
 // Contenuto minimo delle istruzioni per l'uso — Art. 13(3) Reg. (UE) 2024/1689.
 // "optional" = la norma dice "se del caso": va compilato solo se pertinente.
@@ -140,15 +140,15 @@ export default function TransparencyPage() {
 
       {/* Header */}
       <div className="mb-5">
-        <p className="text-[11px] font-semibold uppercase mb-1" style={{ color: "rgba(0,0,0,0.3)", letterSpacing: "1.2px" }}>
+        <p className="text-[11px] font-semibold uppercase mb-1" style={{ color: "#0D1016", letterSpacing: "1.2px" }}>
           {t("headerKicker")}
         </p>
         <h1 className="text-[24px] font-medium" style={{ color: "#0D1016", letterSpacing: "-0.8px" }}>{t("h1")}</h1>
-        <p className="text-[13px] mt-2 max-w-3xl" style={{ color: "rgba(0,0,0,0.55)", lineHeight: 1.55 }}>{t("intro")}</p>
+        <p className="text-[13px] mt-2 max-w-3xl" style={{ color: "#0D1016", lineHeight: 1.55 }}>{t("intro")}</p>
       </div>
 
       {/* Chi lo deve fare */}
-      <div className="rounded-xl p-4 mb-5 text-[12px] space-y-1.5" style={{ ...card, color: "rgba(0,0,0,0.6)", lineHeight: 1.5 }}>
+      <div className="rounded-lg p-4 mb-5 text-[13px] space-y-1.5" style={{ ...card, color: "#0D1016", lineHeight: 1.5 }}>
         <p><strong style={{ color: "#0D1016" }}>{t("whoProviderLabel")}</strong> {t("whoProvider")}</p>
         <p><strong style={{ color: "#0D1016" }}>{t("whoDeployerLabel")}</strong> {t("whoDeployer")}</p>
         <p>
@@ -158,18 +158,18 @@ export default function TransparencyPage() {
       </div>
 
       {active && !isHighRisk && (
-        <div className="rounded-lg px-4 py-2.5 mb-5 text-[12px]" style={{ background: "rgba(202,138,4,0.06)", border: "1px solid rgba(202,138,4,0.2)", color: "#92400e" }}>
+        <div className="rounded-lg px-4 py-2.5 mb-5 text-[13px]" style={{ background: "rgba(202,138,4,0.06)", border: "1px solid rgba(202,138,4,0.2)", color: "#92400e" }}>
           {t("notHighRiskNote")}
         </div>
       )}
 
       {/* Stato + azioni */}
-      <div className="flex flex-wrap items-center gap-3 rounded-lg px-4 py-2.5 mb-5 text-[12px]" style={card}>
+      <div className="flex flex-wrap items-center gap-3 rounded-lg px-4 py-2.5 mb-5 text-[13px]" style={card}>
         <span style={{ color: complete ? "#15803d" : "rgba(0,0,0,0.55)" }}>
           {complete ? "✓ " : ""}{t("progress").replace("{done}", String(requiredDone)).replace("{total}", String(required.length))}
         </span>
         {savedAt && (
-          <span style={{ color: "rgba(0,0,0,0.4)" }}>· {t("savedOn")} {new Date(savedAt).toLocaleDateString(loc)}</span>
+          <span style={{ color: "#0D1016" }}>· {t("savedOn")} {new Date(savedAt).toLocaleDateString(loc)}</span>
         )}
         <div className="ml-auto flex gap-2">
           <button onClick={exportDoc} className="flex items-center gap-1 text-[11px] font-medium rounded-full px-3 py-1"
@@ -186,31 +186,31 @@ export default function TransparencyPage() {
       {/* Modulo Art. 13(3) */}
       <div className="space-y-3">
         {FIELDS.map(f => (
-          <div key={f.id} className="rounded-xl p-4" style={card}>
+          <div key={f.id} className="rounded-lg p-4" style={card}>
             <div className="flex flex-wrap items-baseline gap-2 mb-1">
-              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.55)" }}>{f.ref}</span>
+              <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded" style={{ background: "rgba(0,0,0,0.05)", color: "#0D1016" }}>{f.ref}</span>
               <label htmlFor={`f-${f.id}`} className="text-[13px] font-medium" style={{ color: "#0D1016" }}>{t(`f_${f.id}_label`)}</label>
-              {f.optional && <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.4)" }}>{t("ifApplicable")}</span>}
+              {f.optional && <span className="text-[11px]" style={{ color: "#0D1016" }}>{t("ifApplicable")}</span>}
               {filled(fields[f.id]) && <span className="text-[11px] ml-auto" style={{ color: "#15803d" }}>✓</span>}
             </div>
-            <p className="text-[11px] mb-2" style={{ color: "rgba(0,0,0,0.45)", lineHeight: 1.5 }}>{t(`f_${f.id}_help`)}</p>
+            <p className="text-[11px] mb-2" style={{ color: "#0D1016", lineHeight: 1.5 }}>{t(`f_${f.id}_help`)}</p>
             <textarea
               id={`f-${f.id}`}
               value={fields[f.id] ?? ""}
               onChange={e => setFields(prev => ({ ...prev, [f.id]: e.target.value }))}
               rows={3}
-              className="w-full text-[12px] rounded-lg px-3 py-2"
-              style={{ border: "1px solid rgba(0,0,0,0.1)", resize: "vertical", fontFamily: "inherit", background: "#fff" }}
+              className="w-full text-[13px] rounded-lg px-3 py-2"
+              style={{ border: "1px solid rgba(0,0,0,0.08)", resize: "vertical", fontFamily: "inherit", background: "#fff" }}
             />
           </div>
         ))}
       </div>
 
       {/* Revisione AI opzionale */}
-      <div className="mt-6 rounded-xl p-4" style={card}>
+      <div className="mt-6 rounded-lg p-4" style={card}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <FileSearch size={15} style={{ color: "rgba(0,0,0,0.4)" }} />
+            <FileSearch size={15} style={{ color: "#0D1016" }} />
             <span className="text-[13px] font-medium" style={{ color: "#0D1016" }}>{t("noticeAnalyzerTitle")}</span>
           </div>
           <button disabled={noticeLoading || requiredDone < 2} onClick={analyze}
@@ -223,27 +223,27 @@ export default function TransparencyPage() {
             {noticeLoading ? t("analyzing") : t("analyzeNotice")}
           </button>
         </div>
-        <p className="text-[11px] mt-1" style={{ color: "rgba(0,0,0,0.45)" }}>{t("noticeAnalyzerDesc")}</p>
+        <p className="text-[11px] mt-1" style={{ color: "#0D1016" }}>{t("noticeAnalyzerDesc")}</p>
         {noticeError && <p className="text-[11px] mt-2" style={{ color: "#dc2626" }}>{t("analysisError")}</p>}
         {noticeResult && (
           <div className="mt-3 space-y-2">
-            <p className="text-[12px]" style={{ color: "#0D1016" }}>{noticeResult.overallAssessment}</p>
+            <p className="text-[13px]" style={{ color: "#0D1016" }}>{noticeResult.overallAssessment}</p>
             {noticeResult.missingFields.map((m, i) => (
               <div key={i} className="rounded-lg px-3 py-2 text-[11px]" style={{ background: "rgba(202,138,4,0.05)", border: "1px solid rgba(202,138,4,0.18)" }}>
                 <strong style={{ color: "#0D1016" }}>{m.article} — {m.field}</strong>
-                <span style={{ color: "rgba(0,0,0,0.5)" }}> · {m.reason}</span>
+                <span style={{ color: "#0D1016" }}> · {m.reason}</span>
               </div>
             ))}
             {noticeResult.suggestedImprovements.map((s, i) => (
-              <p key={i} className="text-[11px]" style={{ color: "rgba(0,0,0,0.55)" }}>• {s}</p>
+              <p key={i} className="text-[11px]" style={{ color: "#0D1016" }}>• {s}</p>
             ))}
-            <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>{t("aiVerify")}</p>
+            <p className="text-[11px]" style={{ color: "#0D1016" }}>{t("aiVerify")}</p>
           </div>
         )}
       </div>
 
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg" style={{ background: "#0D1016", color: "#fff" }}>
+        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-lg text-[13px] font-medium shadow-lg" style={{ background: "#0D1016", color: "#fff" }}>
           ✓ {toast}
         </div>
       )}

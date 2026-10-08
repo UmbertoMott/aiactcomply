@@ -58,8 +58,8 @@ export default function JourneySteps() {
   const current = steps.findIndex((s) => !s.done);
 
   return (
-    <section className="fu-1" style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 10, padding: "14px 16px", marginBottom: 14 }}>
-      <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "rgba(0,0,0,0.4)", marginBottom: 10 }}>
+    <section className="fu-1" style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, padding: "14px 16px", marginBottom: 14 }}>
+      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "#0D1016", marginBottom: 10 }}>
         {t("js_title")}
       </p>
       <ol style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 8, listStyle: "none", margin: 0, padding: 0 }}>
@@ -72,10 +72,10 @@ export default function JourneySteps() {
                 border: active ? "1.5px solid #0D1016" : "1px solid rgba(0,0,0,0.08)",
                 background: s.done ? "rgba(22,163,74,0.04)" : "#FAFAF9",
               }}>
-                <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, color: "#0D1016" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#0D1016" }}>
                   <span style={{
                     width: 18, height: 18, borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 10, flexShrink: 0,
+                    fontSize: 11, flexShrink: 0,
                     background: s.done ? "#15803d" : active ? "#0D1016" : "rgba(0,0,0,0.08)",
                     color: s.done || active ? "#fff" : "rgba(0,0,0,0.5)",
                   }}>
@@ -83,7 +83,7 @@ export default function JourneySteps() {
                   </span>
                   {s.label}
                 </span>
-                <span style={{ display: "block", fontSize: 11, color: "rgba(0,0,0,0.5)", marginTop: 4 }}>{s.status}</span>
+                <span style={{ display: "block", fontSize: 11, color: "#0D1016", marginTop: 4 }}>{s.status}</span>
                 {active && (
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 500, color: "#0D1016", marginTop: 6 }}>
                     {t("js_continue")} <ArrowRight size={11} />

@@ -14,11 +14,11 @@ import { RiskRegisterGuidedChat } from "./RiskRegisterGuidedChat";
 
 const T = {
   border: "rgba(0,0,0,0.08)",
-  bg:     "#f8f8f7",
+  bg:     "#ffffff",
   card:   "#ffffff",
   text:   "#0D1016",
-  muted:  "rgba(0,0,0,0.42)",
-  faint:  "rgba(0,0,0,0.22)",
+  muted:  "#0D1016",
+  faint:  "#0D1016",
   green:  "#23403a",
 } as const;
 
@@ -35,18 +35,18 @@ function LivePreview({ doc }: { doc: RiskRegisterGuidedDoc }) {
   if (bySection.length === 0) {
     return (
       <div style={{ padding: "32px 24px", textAlign: "center", color: T.muted }}>
-        <p style={{ fontSize: 12 }}>Le risposte appariranno qui man mano che completi la chat guidata.</p>
+        <p style={{ fontSize: 13 }}>Le risposte appariranno qui man mano che completi la chat guidata.</p>
       </div>
     );
   }
 
   return (
     <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 13, color: T.text, lineHeight: 1.7 }}>
-      <div style={{ background: T.card, borderRadius: 8, padding: "28px 32px", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-        <h1 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, color: T.text, letterSpacing: "-0.5px" }}>
+      <div style={{ background: T.card, borderRadius: 8, padding: "28px 32px", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "none" }}>
+        <h1 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4, color: T.text, letterSpacing: "-0.5px" }}>
           Risk Register — Art. 9 EU AI Act
         </h1>
-        <p style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: T.muted, marginBottom: 24, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+        <p style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: T.muted, marginBottom: 24, textTransform: "uppercase", letterSpacing: "0.06em" }}>
           ISO/IEC 23894 · Reg. (UE) 2024/1689
         </p>
 
@@ -55,15 +55,15 @@ function LivePreview({ doc }: { doc: RiskRegisterGuidedDoc }) {
             <h2 style={{ fontSize: 13, fontWeight: 700, color: T.text, borderBottom: "1.5px solid rgba(0,0,0,0.10)", paddingBottom: 6, marginBottom: 12, letterSpacing: "-0.2px" }}>
               {sec.label}
             </h2>
-            <p style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: T.muted, marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            <p style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: T.muted, marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.06em" }}>
               {sec.legalRef}
             </p>
             {items.map(sp => (
               <div key={sp.id} style={{ marginBottom: 14 }}>
-                <p style={{ fontSize: 10, fontFamily: "var(--font-mono)", fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 3 }}>
+                <p style={{ fontSize: 11, fontFamily: "var(--font-mono)", fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 3 }}>
                   {sp.label}
                 </p>
-                <p style={{ fontSize: 12.5, color: T.text, lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>
+                <p style={{ fontSize: 13, color: T.text, lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>
                   {doc.answers[sp.id]?.value}
                 </p>
               </div>
@@ -206,12 +206,12 @@ export function RiskRegisterGuidedMode({ onExitGuidedMode }: RiskRegisterGuidedM
         flexShrink: 0,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <p style={{ fontSize: 12, fontWeight: 700, color: T.text, margin: 0 }}>Registro dei rischi guidato</p>
-          <span style={{ fontSize: 10, color: T.muted }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: T.text, margin: 0 }}>Registro dei rischi guidato</p>
+          <span style={{ fontSize: 11, color: T.muted }}>
             Art. 9 AI Act · {progress.overallPercent}% completato
           </span>
           {lastSaved && (
-            <span style={{ fontSize: 9, color: T.green }}>✓ Salvato automaticamente</span>
+            <span style={{ fontSize: 11, color: T.green }}>✓ Salvato automaticamente</span>
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -220,7 +220,7 @@ export function RiskRegisterGuidedMode({ onExitGuidedMode }: RiskRegisterGuidedM
               onClick={onExitGuidedMode}
               style={{
                 display: "flex", alignItems: "center", gap: 6,
-                padding: "6px 12px", borderRadius: 7,
+                padding: "6px 12px", borderRadius: 8,
                 border: `1px solid ${T.text}`, background: T.text,
                 cursor: "pointer", fontSize: 11, fontWeight: 700, color: "#fff",
               }}
@@ -233,7 +233,7 @@ export function RiskRegisterGuidedMode({ onExitGuidedMode }: RiskRegisterGuidedM
             disabled={progress.overallPercent < 5}
             style={{
               display: "flex", alignItems: "center", gap: 6,
-              padding: "6px 12px", borderRadius: 7,
+              padding: "6px 12px", borderRadius: 8,
               border: `1px solid rgba(0,0,0,0.10)`, background: T.card,
               cursor: progress.overallPercent < 5 ? "default" : "pointer",
               fontSize: 11, fontWeight: 600,
@@ -254,10 +254,9 @@ export function RiskRegisterGuidedMode({ onExitGuidedMode }: RiskRegisterGuidedM
         {/* SINISTRA — Rail avanzamento */}
         <div style={{
           width: RAIL_W, flexShrink: 0,
-          border: `1px solid rgba(0,0,0,0.07)`,
-          borderRadius: 10,
+          borderRight: `1px solid rgba(0,0,0,0.08)`,
           overflow: "hidden", display: "flex", flexDirection: "column",
-          background: "#fafafa",
+          background: "#ffffff",
         }}>
           <RiskRegisterProgressRail
             progress={progress}
@@ -279,13 +278,13 @@ export function RiskRegisterGuidedMode({ onExitGuidedMode }: RiskRegisterGuidedM
               {/* Header documento */}
               <div style={{
                 padding: "8px 12px", borderBottom: `1px solid rgba(0,0,0,0.07)`,
-                background: "#fafafa", display: "flex", alignItems: "center", gap: 6, flexShrink: 0,
+                background: "#ffffff", display: "flex", alignItems: "center", gap: 6, flexShrink: 0,
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 9, fontWeight: 600, color: "rgba(0,0,0,0.35)", letterSpacing: "0.8px", textTransform: "uppercase", margin: 0 }}>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", letterSpacing: "0.8px", textTransform: "uppercase", margin: 0 }}>
                     Art. 9 AI Act · Documento
                   </p>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: T.text, margin: "1px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: T.text, margin: "1px 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     Risk Register — ISO 23894
                   </p>
                 </div>
@@ -293,10 +292,10 @@ export function RiskRegisterGuidedMode({ onExitGuidedMode }: RiskRegisterGuidedM
                   onClick={() => setViewerOpen(false)}
                   title="Chiudi documento"
                   style={{
-                    flexShrink: 0, width: 24, height: 24, borderRadius: 12,
+                    flexShrink: 0, width: 24, height: 24, borderRadius: 8,
                     background: "rgba(0,0,0,0.05)", border: "none", cursor: "pointer",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    color: "rgba(0,0,0,0.45)",
+                    color: "#0D1016",
                   }}
                   onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.10)")}
                   onMouseLeave={e => (e.currentTarget.style.background = "rgba(0,0,0,0.05)")}
@@ -306,7 +305,7 @@ export function RiskRegisterGuidedMode({ onExitGuidedMode }: RiskRegisterGuidedM
               </div>
 
               {/* Contenuto scrollabile */}
-              <div ref={viewerRef} style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#FAFAFA" }}>
+              <div ref={viewerRef} style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#FAFAF9" }}>
                 <LivePreview doc={doc} />
               </div>
             </div>

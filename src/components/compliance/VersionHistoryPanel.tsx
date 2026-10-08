@@ -117,21 +117,21 @@ function VersionRow({
                 style={{ fontSize: 11, fontWeight: 700, color: isFirst ? "#0D1016" : "rgba(0,0,0,0.6)" }}
                 onDoubleClick={e => { e.stopPropagation(); setEditingTag(true); setTimeout(() => tagRef.current?.focus(), 50); }}>
                 {v.tag ?? `v?`}
-                <span style={{ fontSize: 9, color: "rgba(0,0,0,0.3)", marginLeft: 3, fontWeight: 400 }}>
+                <span style={{ fontSize: 11, color: "#0D1016", marginLeft: 3, fontWeight: 400 }}>
                   (doppio clic per rinominare)
                 </span>
               </span>
             )}
 
             {/* Status badge */}
-            <span style={{ fontSize: 9, fontWeight: 600, padding: "1px 6px", borderRadius: 4,
+            <span style={{ fontSize: 11, fontWeight: 600, padding: "1px 6px", borderRadius: 4,
               background: statusCfg.bg, color: statusCfg.color, border: `1px solid ${statusCfg.border}` }}>
               {statusCfg.label}
             </span>
 
             {/* Substantial modification badge */}
             {v.isSubstantialModification && (
-              <span style={{ fontSize: 9, fontWeight: 600, padding: "1px 6px", borderRadius: 4,
+              <span style={{ fontSize: 11, fontWeight: 600, padding: "1px 6px", borderRadius: 4,
                 background: "rgba(220,38,38,0.07)", color: "#dc2626", border: "1px solid rgba(220,38,38,0.2)",
                 display: "flex", alignItems: "center", gap: 3 }}>
                 <AlertTriangle size={9} /> Modifica sostanziale
@@ -140,15 +140,15 @@ function VersionRow({
 
             {/* Sections changed badge */}
             {v.sectionsChanged && v.sectionsChanged.length > 0 && (
-              <span style={{ fontSize: 9, color: "rgba(0,0,0,0.4)", padding: "1px 6px", borderRadius: 4,
+              <span style={{ fontSize: 11, color: "#0D1016", padding: "1px 6px", borderRadius: 4,
                 background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)" }}>
                 {v.sectionsChanged.length} sezioni modificate
               </span>
             )}
 
             {isFirst && (
-              <span style={{ fontSize: 9, fontWeight: 600, padding: "1px 6px", borderRadius: 4,
-                background: "rgba(13,16,22,0.06)", color: "rgba(0,0,0,0.5)" }}>
+              <span style={{ fontSize: 11, fontWeight: 600, padding: "1px 6px", borderRadius: 4,
+                background: "rgba(13,16,22,0.06)", color: "#0D1016" }}>
                 Corrente
               </span>
             )}
@@ -156,17 +156,17 @@ function VersionRow({
 
           <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
             <Clock size={10} color="rgba(0,0,0,0.3)" />
-            <span style={{ fontSize: 10, color: "rgba(0,0,0,0.35)" }} title={formatFull(v.savedAt)}>
+            <span style={{ fontSize: 11, color: "#0D1016" }} title={formatFull(v.savedAt)}>
               {formatDate(v.savedAt)}
             </span>
             {v.systemName && (
-              <span style={{ fontSize: 10, color: "rgba(0,0,0,0.3)" }}>· {v.systemName}</span>
+              <span style={{ fontSize: 11, color: "#0D1016" }}>· {v.systemName}</span>
             )}
           </div>
 
           {/* Note preview */}
           {v.note && !editingNote && (
-            <p style={{ fontSize: 10, color: "rgba(0,0,0,0.45)", marginTop: 3, fontStyle: "italic" }}>
+            <p style={{ fontSize: 11, color: "#0D1016", marginTop: 3, fontStyle: "italic" }}>
               &quot;{v.note}&quot;
             </p>
           )}
@@ -183,7 +183,7 @@ function VersionRow({
             onMouseLeave={e => (e.currentTarget.style.color = "rgba(0,0,0,0.2)")}>
             <Trash2 size={12} />
           </button>
-          <div style={{ color: "rgba(0,0,0,0.25)" }}>
+          <div style={{ color: "#0D1016" }}>
             {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
           </div>
         </div>
@@ -195,20 +195,20 @@ function VersionRow({
 
           {/* Substantial modification detail */}
           {v.isSubstantialModification && v.substModificationBasis && (
-            <div style={{ marginBottom: 8, padding: "6px 10px", borderRadius: 7,
+            <div style={{ marginBottom: 8, padding: "6px 10px", borderRadius: 8,
               background: "rgba(220,38,38,0.05)", border: "1px solid rgba(220,38,38,0.15)" }}>
-              <p style={{ fontSize: 10, fontWeight: 600, color: "#dc2626", marginBottom: 2 }}>⚠ Modifica sostanziale — Art. 6(3) AI Act</p>
-              <p style={{ fontSize: 10, color: "rgba(0,0,0,0.5)", lineHeight: 1.5 }}>{v.substModificationBasis}</p>
+              <p style={{ fontSize: 11, fontWeight: 600, color: "#dc2626", marginBottom: 2 }}>⚠ Modifica sostanziale — Art. 6(3) AI Act</p>
+              <p style={{ fontSize: 11, color: "#0D1016", lineHeight: 1.5 }}>{v.substModificationBasis}</p>
             </div>
           )}
 
           {/* Sections changed diff */}
           {v.sectionsChanged && v.sectionsChanged.length > 0 && (
             <div style={{ marginBottom: 8 }}>
-              <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.4)", marginBottom: 4 }}>Sezioni modificate rispetto alla versione precedente:</p>
+              <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", marginBottom: 4 }}>Sezioni modificate rispetto alla versione precedente:</p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                 {v.sectionsChanged.map(s => (
-                  <span key={s} style={{ fontSize: 10, padding: "2px 7px", borderRadius: 4,
+                  <span key={s} style={{ fontSize: 11, padding: "2px 7px", borderRadius: 4,
                     background: "rgba(37,99,235,0.07)", color: "#2563eb", border: "1px solid rgba(37,99,235,0.15)" }}>
                     {sectionLabels?.[s] ?? s}
                   </span>
@@ -219,7 +219,7 @@ function VersionRow({
 
           {/* Note editing */}
           <div style={{ marginBottom: 8 }}>
-            <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.4)", marginBottom: 3 }}>Nota:</p>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", marginBottom: 3 }}>Nota:</p>
             {editingNote ? (
               <div onClick={e => e.stopPropagation()} style={{ display: "flex", gap: 6 }}>
                 <textarea ref={noteRef} value={noteVal} onChange={e => setNoteVal(e.target.value)}
@@ -227,14 +227,14 @@ function VersionRow({
                   style={{ flex: 1, fontSize: 11, padding: "5px 8px", borderRadius: 6,
                     border: "1px solid rgba(0,0,0,0.15)", resize: "none", fontFamily: "inherit" }} />
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  <button onClick={saveNote} style={{ padding: "4px 8px", borderRadius: 5, background: "#0D1016", color: "#fff", border: "none", fontSize: 10, cursor: "pointer" }}>Salva</button>
-                  <button onClick={() => setEditingNote(false)} style={{ padding: "4px 8px", borderRadius: 5, background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.5)", border: "none", fontSize: 10, cursor: "pointer" }}>Annulla</button>
+                  <button onClick={saveNote} style={{ padding: "4px 8px", borderRadius: 4, background: "#0D1016", color: "#fff", border: "none", fontSize: 11, cursor: "pointer" }}>Salva</button>
+                  <button onClick={() => setEditingNote(false)} style={{ padding: "4px 8px", borderRadius: 4, background: "rgba(0,0,0,0.06)", color: "#0D1016", border: "none", fontSize: 11, cursor: "pointer" }}>Annulla</button>
                 </div>
               </div>
             ) : (
               <button onClick={e => { e.stopPropagation(); setEditingNote(true); setTimeout(() => noteRef.current?.focus(), 50); }}
-                style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10, color: "rgba(0,0,0,0.4)",
-                  background: "none", border: "1px dashed rgba(0,0,0,0.15)", borderRadius: 5, padding: "3px 8px", cursor: "pointer" }}>
+                style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "#0D1016",
+                  background: "none", border: "1px dashed rgba(0,0,0,0.15)", borderRadius: 4, padding: "3px 8px", cursor: "pointer" }}>
                 <Edit3 size={10} /> {v.note ? "Modifica nota" : "Aggiungi nota"}
               </button>
             )}
@@ -242,16 +242,16 @@ function VersionRow({
 
           {/* Delete confirm */}
           {confirmDelete && (
-            <div style={{ marginBottom: 8, padding: "8px 10px", borderRadius: 7, display: "flex", alignItems: "center", gap: 8,
+            <div style={{ marginBottom: 8, padding: "8px 10px", borderRadius: 8, display: "flex", alignItems: "center", gap: 8,
               background: "rgba(220,38,38,0.05)", border: "1px solid rgba(220,38,38,0.2)" }}>
               <Trash2 size={11} color="#dc2626" />
-              <span style={{ fontSize: 10, color: "#dc2626", flex: 1 }}>Eliminare la versione <strong>{v.tag}</strong>? Non è reversibile.</span>
+              <span style={{ fontSize: 11, color: "#dc2626", flex: 1 }}>Eliminare la versione <strong>{v.tag}</strong>? Non è reversibile.</span>
               <button onClick={() => { deleteVersion(toolId, v.id); onDeleted(); }}
-                style={{ fontSize: 10, fontWeight: 600, padding: "3px 10px", borderRadius: 5, background: "#dc2626", color: "#fff", border: "none", cursor: "pointer" }}>
+                style={{ fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 4, background: "#dc2626", color: "#fff", border: "none", cursor: "pointer" }}>
                 Elimina
               </button>
               <button onClick={() => setConfirmDelete(false)}
-                style={{ fontSize: 10, padding: "3px 8px", borderRadius: 5, background: "rgba(0,0,0,0.06)", border: "none", cursor: "pointer" }}>
+                style={{ fontSize: 11, padding: "3px 8px", borderRadius: 4, background: "rgba(0,0,0,0.06)", border: "none", cursor: "pointer" }}>
                 Annulla
               </button>
             </div>
@@ -262,21 +262,21 @@ function VersionRow({
             {!isFirst && (
               confirmRestore ? (
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ fontSize: 10, color: "#dc2626" }}>Sovrascrive la versione corrente — confermi?</span>
+                  <span style={{ fontSize: 11, color: "#dc2626" }}>Sovrascrive la versione corrente — confermi?</span>
                   <button onClick={() => { onRestore(v.data); setConfirmRestore(false); }}
-                    style={{ fontSize: 10, fontWeight: 600, padding: "3px 10px", borderRadius: 5, background: "#dc2626", color: "#fff", border: "none", cursor: "pointer" }}>
+                    style={{ fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 4, background: "#dc2626", color: "#fff", border: "none", cursor: "pointer" }}>
                     Sì, ripristina
                   </button>
                   <button onClick={() => setConfirmRestore(false)}
-                    style={{ fontSize: 10, padding: "3px 8px", borderRadius: 5, background: "rgba(0,0,0,0.06)", border: "none", cursor: "pointer" }}>
+                    style={{ fontSize: 11, padding: "3px 8px", borderRadius: 4, background: "rgba(0,0,0,0.06)", border: "none", cursor: "pointer" }}>
                     Annulla
                   </button>
                 </div>
               ) : (
                 <button onClick={e => { e.stopPropagation(); setConfirmRestore(true); }}
-                  style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10, fontWeight: 600,
+                  style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 600,
                     padding: "4px 10px", borderRadius: 6, background: "rgba(0,0,0,0.05)",
-                    border: "1px solid rgba(0,0,0,0.1)", color: "rgba(0,0,0,0.55)", cursor: "pointer" }}>
+                    border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", cursor: "pointer" }}>
                   <RotateCcw size={10} /> Ripristina questa versione
                 </button>
               )
@@ -306,31 +306,31 @@ export function VersionHistoryPanel({ toolId, onRestore, sectionLabels }: Versio
   const substantialCount = versions.filter(v => v.isSubstantialModification).length;
 
   return (
-    <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(0,0,0,0.07)", background: "#fff" }}>
+    <div className="rounded-lg border overflow-hidden" style={{ borderColor: "rgba(0,0,0,0.07)", background: "#fff" }}>
       {/* Header */}
       <button
         onClick={() => { setExpanded(v => !v); if (!expanded) refresh(); }}
         className="w-full flex items-center gap-2 px-4 py-3 text-left transition-colors"
-        style={{ background: expanded ? "rgba(0,0,0,0.015)" : "#fff", borderBottom: expanded ? "1px solid rgba(0,0,0,0.06)" : "none" }}>
-        <History className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "rgba(0,0,0,0.4)" }} />
-        <span className="text-[11px] font-medium" style={{ color: "rgba(0,0,0,0.55)" }}>
+        style={{ background: expanded ? "rgba(0,0,0,0.015)" : "#fff", borderBottom: expanded ? "1px solid rgba(0,0,0,0.08)" : "none" }}>
+        <History className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#0D1016" }} />
+        <span className="text-[11px] font-medium" style={{ color: "#0D1016" }}>
           Cronologia versioni
         </span>
         {versions.length > 0 && (
           <div style={{ display: "flex", gap: 4, marginLeft: 4 }}>
-            <span style={{ fontSize: 10, padding: "1px 6px", borderRadius: 4,
-              background: "rgba(13,16,22,0.06)", color: "rgba(0,0,0,0.5)", fontWeight: 600 }}>
+            <span style={{ fontSize: 11, padding: "1px 6px", borderRadius: 4,
+              background: "rgba(13,16,22,0.06)", color: "#0D1016", fontWeight: 600 }}>
               {versions.length} snapshot
             </span>
             {finalizedCount > 0 && (
-              <span style={{ fontSize: 10, padding: "1px 6px", borderRadius: 4,
+              <span style={{ fontSize: 11, padding: "1px 6px", borderRadius: 4,
                 background: "rgba(21,128,61,0.08)", color: "#15803d", border: "1px solid rgba(21,128,61,0.2)", fontWeight: 600 }}>
                 <FileCheck size={9} style={{ display: "inline", marginRight: 3 }} />
                 {finalizedCount} finalizzate
               </span>
             )}
             {substantialCount > 0 && (
-              <span style={{ fontSize: 10, padding: "1px 6px", borderRadius: 4,
+              <span style={{ fontSize: 11, padding: "1px 6px", borderRadius: 4,
                 background: "rgba(220,38,38,0.07)", color: "#dc2626", border: "1px solid rgba(220,38,38,0.15)", fontWeight: 600 }}>
                 <AlertTriangle size={9} style={{ display: "inline", marginRight: 3 }} />
                 {substantialCount} sostanziali
@@ -338,7 +338,7 @@ export function VersionHistoryPanel({ toolId, onRestore, sectionLabels }: Versio
             )}
           </div>
         )}
-        <span className="ml-auto" style={{ color: "rgba(0,0,0,0.3)" }}>
+        <span className="ml-auto" style={{ color: "#0D1016" }}>
           {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
         </span>
       </button>
@@ -347,9 +347,9 @@ export function VersionHistoryPanel({ toolId, onRestore, sectionLabels }: Versio
       {expanded && (
         <div>
           {versions.length === 0 ? (
-            <div className="px-4 py-6 text-center" style={{ color: "rgba(0,0,0,0.3)" }}>
+            <div className="px-4 py-6 text-center" style={{ color: "#0D1016" }}>
               <History size={20} style={{ margin: "0 auto 8px", opacity: 0.3 }} />
-              <p style={{ fontSize: 12, marginBottom: 4 }}>Nessuna versione salvata</p>
+              <p style={{ fontSize: 13, marginBottom: 4 }}>Nessuna versione salvata</p>
               <p style={{ fontSize: 11 }}>Ogni salvataggio crea uno snapshot ripristinabile.</p>
             </div>
           ) : (
@@ -371,19 +371,19 @@ export function VersionHistoryPanel({ toolId, onRestore, sectionLabels }: Versio
               <div style={{ padding: "10px 16px", borderTop: "1px solid rgba(0,0,0,0.05)", display: "flex", justifyContent: "flex-end" }}>
                 {confirmClear ? (
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 10, color: "#dc2626" }}>Eliminare tutte le {versions.length} versioni?</span>
+                    <span style={{ fontSize: 11, color: "#dc2626" }}>Eliminare tutte le {versions.length} versioni?</span>
                     <button onClick={() => { clearVersions(toolId); refresh(); setConfirmClear(false); }}
-                      style={{ fontSize: 10, fontWeight: 600, padding: "3px 10px", borderRadius: 5, background: "#dc2626", color: "#fff", border: "none", cursor: "pointer" }}>
+                      style={{ fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 4, background: "#dc2626", color: "#fff", border: "none", cursor: "pointer" }}>
                       Elimina tutto
                     </button>
                     <button onClick={() => setConfirmClear(false)}
-                      style={{ fontSize: 10, padding: "3px 8px", borderRadius: 5, background: "rgba(0,0,0,0.06)", border: "none", cursor: "pointer" }}>
+                      style={{ fontSize: 11, padding: "3px 8px", borderRadius: 4, background: "rgba(0,0,0,0.06)", border: "none", cursor: "pointer" }}>
                       Annulla
                     </button>
                   </div>
                 ) : (
                   <button onClick={() => setConfirmClear(true)}
-                    style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10, color: "rgba(0,0,0,0.35)",
+                    style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "#0D1016",
                       background: "none", border: "none", cursor: "pointer" }}>
                     <Trash2 size={10} /> Cancella storico
                   </button>

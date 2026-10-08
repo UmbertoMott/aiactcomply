@@ -34,8 +34,8 @@ type TFn = (key: string) => string;
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const T = {
   text:    "#0D1016",
-  muted:   "rgba(0,0,0,0.42)",
-  faint:   "rgba(0,0,0,0.22)",
+  muted:   "#0D1016",
+  faint:   "#0D1016",
   border:  "rgba(0,0,0,0.08)",
   card:    "#ffffff",
   bg:      "#f9f9fb",
@@ -47,8 +47,8 @@ const T = {
 } as const;
 
 const FONT: CSSProperties = { fontFamily: "inherit" };
-const card: CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
-const inp: CSSProperties = { width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, color: T.text, background: T.card, outline: "none" };
+const card: CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, boxShadow: "none" };
+const inp: CSSProperties = { width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, color: T.text, background: T.card, outline: "none" };
 const ta: CSSProperties = { ...inp, resize: "vertical" as const };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -119,7 +119,7 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, index, t 
   const status = record?.status ?? "not_started";
 
   return (
-    <div className="rounded-xl border transition-shadow hover:shadow-sm" style={{ background: T.card, borderColor: status === "implemented" ? "#86efac" : T.border }}>
+    <div className="rounded-lg border transition-shadow hover:shadow-sm" style={{ background: T.card, borderColor: status === "implemented" ? "#86efac" : T.border }}>
       {/* Header */}
       <button className="w-full flex items-start gap-3 p-4 text-left" onClick={() => setOpen(v => !v)}>
         <div className="mt-0.5 flex-shrink-0">
@@ -130,18 +130,18 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, index, t 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[11px] font-mono font-bold" style={{ color: T.blue }}>Art. 14(4)({String.fromCharCode(96 + index)})</span>
-            <span className="text-sm font-semibold" style={{ color: T.text }}>{req.label}</span>
+            <span className="text-[13px] font-semibold" style={{ color: T.text }}>{req.label}</span>
             <StatusPill status={status} t={t} />
             {pending && <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: T.violetBg, color: T.violet, border: `1px solid ${T.violetBdr}` }}>✦ AI</span>}
           </div>
           <p className="text-[11px] mt-1" style={{ color: T.muted }}>{req.primaryReference}</p>
         </div>
-        <span className="text-xs ml-2 flex-shrink-0" style={{ color: T.faint }}>{open ? "▲" : "▼"}</span>
+        <span className="text-[11px] ml-2 flex-shrink-0" style={{ color: T.faint }}>{open ? "▲" : "▼"}</span>
       </button>
 
       {open && (
         <div className="px-4 pb-4 border-t" style={{ borderColor: "#f3f4f6" }}>
-          <p className="text-[12px] mt-3 mb-4 leading-relaxed" style={{ color: T.muted }}>{req.description}</p>
+          <p className="text-[13px] mt-3 mb-4 leading-relaxed" style={{ color: T.muted }}>{req.description}</p>
 
           {/* AI pending suggestion */}
           {pending && (
@@ -153,7 +153,7 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, index, t 
                 </p>
               )}
               {pending.measureDescription && (
-                <p className="text-[12px] whitespace-pre-wrap" style={{ color: T.text }}>{pending.measureDescription}</p>
+                <p className="text-[13px] whitespace-pre-wrap" style={{ color: T.text }}>{pending.measureDescription}</p>
               )}
               <button onClick={() => onAcceptAi(req.id)}
                 className="mt-2 flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded"
@@ -202,7 +202,7 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, index, t 
                 return (
                   <button key={s}
                     onClick={() => onUpdate(req.id, { status: s, lastUpdated: new Date().toISOString() })}
-                    className="text-[12px] px-3 py-1 rounded-lg border transition-all"
+                    className="text-[13px] px-3 py-1 rounded-lg border transition-all"
                     style={{ borderColor: active ? colors[s] : T.border, background: active ? `${colors[s]}10` : "transparent", color: active ? colors[s] : T.muted, fontWeight: active ? 600 : 400 }}>
                     {labels[s]}
                   </button>
@@ -213,7 +213,7 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, index, t 
 
           {/* Linked tool */}
           {req.linkedToolPath && (
-            <Link href={req.linkedToolPath} className="inline-flex items-center gap-1.5 text-[12px] font-medium"
+            <Link href={req.linkedToolPath} className="inline-flex items-center gap-1.5 text-[13px] font-medium"
               style={{ color: T.blue }}>
               <ExternalLink size={12} />
               {req.linkedToolLabel}
@@ -248,19 +248,19 @@ function FourEyesModule({
   const [rolesInput, setRolesInput] = useState(record.verifierRoles ?? []);
 
   return (
-    <div className="rounded-xl border-2 p-4" style={{ background: T.card, borderColor: T.violet }}>
+    <div className="rounded-lg border-2 p-4" style={{ background: T.card, borderColor: T.violet }}>
       <div className="flex items-center gap-2 mb-1">
         <Shield size={16} style={{ color: T.violet }} />
-        <span className="font-semibold text-sm" style={{ color: T.text }}>{FOUR_EYES_MODULE.label}</span>
+        <span className="font-semibold text-[13px]" style={{ color: T.text }}>{FOUR_EYES_MODULE.label}</span>
         <span className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: T.violetBg, color: T.violet }}>
           {FOUR_EYES_MODULE.primaryReference}
         </span>
       </div>
-      <p className="text-[12px] mb-4 leading-relaxed" style={{ color: T.muted }}>{FOUR_EYES_MODULE.description}</p>
+      <p className="text-[13px] mb-4 leading-relaxed" style={{ color: T.muted }}>{FOUR_EYES_MODULE.description}</p>
 
       {record.applicable === "unspecified" && (
         <div className="rounded-lg p-3 mb-4" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-          <p className="text-[12px] font-semibold mb-2" style={{ color: T.amber }}>
+          <p className="text-[13px] font-semibold mb-2" style={{ color: T.amber }}>
             {t("fe_applicabilityToVerify")} — {FOUR_EYES_MODULE.supportReference}
           </p>
           <p className="text-[11px] mb-3" style={{ color: "#78350f" }}>
@@ -268,12 +268,12 @@ function FourEyesModule({
           </p>
           <div className="flex gap-2 flex-wrap mb-2">
             <button onClick={() => onUpdate({ applicable: "yes" })}
-              className="text-[12px] px-3 py-1 rounded-lg border"
+              className="text-[13px] px-3 py-1 rounded-lg border"
               style={{ background: T.greenBg, borderColor: T.green, color: T.green, fontWeight: 600 }}>
               {t("fe_yesBiometric")}
             </button>
             <button onClick={() => onUpdate({ applicable: "no" })}
-              className="text-[12px] px-3 py-1 rounded-lg border"
+              className="text-[13px] px-3 py-1 rounded-lg border"
               style={{ background: T.redBg, borderColor: T.red, color: T.red }}>
               {t("fe_noBiometric")}
             </button>
@@ -318,7 +318,7 @@ function FourEyesModule({
                 const active = record.status === s;
                 return (
                   <button key={s} onClick={() => onUpdate({ status: s })}
-                    className="text-[12px] px-3 py-1 rounded-lg border"
+                    className="text-[13px] px-3 py-1 rounded-lg border"
                     style={{ borderColor: active ? colors[s] : T.border, background: active ? `${colors[s]}10` : "transparent", color: active ? colors[s] : T.muted, fontWeight: active ? 600 : 400 }}>
                     {labels[s]}
                   </button>
@@ -331,7 +331,7 @@ function FourEyesModule({
 
       {record.applicable === "no" && (
         <div className="rounded-lg p-3" style={{ background: T.bg, border: `1px solid ${T.border}` }}>
-          <p className="text-[12px]" style={{ color: T.muted }}>
+          <p className="text-[13px]" style={{ color: T.muted }}>
             {t("fe_notApplicable")}
             <button onClick={() => onUpdate({ applicable: "unspecified" })} className="ml-2 underline" style={{ background: "none", border: "none", cursor: "pointer", color: T.muted, fontSize: 11 }}>
               {t("fe_edit")}
@@ -498,12 +498,12 @@ export default function OversightPage() {
 
       {/* Dossier banner */}
       {savedAt ? (
-        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[12px]" style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}>
+        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[13px]" style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}>
           <span style={{ color: T.green }}>✓ {t("dossierSaved")} · {new Date(savedAt).toLocaleDateString(loc)}</span>
           <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium" style={{ color: T.green }}>{t("seeDossier")}</Link>
         </div>
       ) : (
-        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[12px]" style={{ background: T.card, border: `1px solid ${T.border}` }}>
+        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-5 text-[13px]" style={{ background: T.card, border: `1px solid ${T.border}` }}>
           <span style={{ color: T.muted }}>{t("saveHint")}</span>
           <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
             {t("saveToDossier")}
@@ -518,19 +518,19 @@ export default function OversightPage() {
           <h1 className="text-xl font-bold" style={{ color: T.text }}>{t("title")}</h1>
           <span className="text-[11px] font-medium px-2 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>Art. 14</span>
         </div>
-        <p className="text-[12px]" style={{ color: T.muted }}>
+        <p className="text-[13px]" style={{ color: T.muted }}>
           {t("subtitle")}
         </p>
       </div>
 
       {/* Context box — Art. 14(1)-(2) non-interactive */}
-      <div className="rounded-xl p-4 mb-5 flex items-start gap-3" style={{ background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
+      <div className="rounded-lg p-4 mb-5 flex items-start gap-3" style={{ background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
         <Info size={16} className="mt-0.5 flex-shrink-0" style={{ color: T.blue }} />
         <div>
-          <p className="text-[12px] font-semibold mb-1" style={{ color: T.blue }}>
+          <p className="text-[13px] font-semibold mb-1" style={{ color: T.blue }}>
             {t("ctx_title")}
           </p>
-          <p className="text-[12px] leading-relaxed" style={{ color: "#1e3a8a" }}>
+          <p className="text-[13px] leading-relaxed" style={{ color: "#1e3a8a" }}>
             {t("ctx_body")}
           </p>
         </div>
@@ -557,7 +557,7 @@ export default function OversightPage() {
         <div className="flex items-center gap-2">
           {aiError && <span className="text-[11px]" style={{ color: T.red }}>{aiError}</span>}
           <button onClick={runAiSuggest} disabled={aiLoading}
-            className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg"
+            className="flex items-center gap-1.5 text-[13px] font-medium px-3 py-1.5 rounded-lg"
             style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer", opacity: aiLoading ? 0.7 : 1 }}>
             {aiLoading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
             {Object.keys(pendingSuggestions).length > 0 ? t("aiRegen") : t("aiDraftAll")}
@@ -604,7 +604,7 @@ export default function OversightPage() {
       )}
 
       {/* Sanctions note */}
-      <div className="flex items-start gap-2 p-3 rounded-lg mt-6 text-xs" style={{ background: "#fef9c3", border: "1px solid #fde047", color: "#713f12" }}>
+      <div className="flex items-start gap-2 p-3 rounded-lg mt-6 text-[11px]" style={{ background: "#fef9c3", border: "1px solid #fde047", color: "#713f12" }}>
         <Info size={14} className="mt-0.5 flex-shrink-0" />
         <span dangerouslySetInnerHTML={{ __html: t("sanctions") }} />
       </div>
@@ -612,7 +612,7 @@ export default function OversightPage() {
       {/* Save */}
       <div className="flex justify-end mt-4">
         <button onClick={saveToDossier}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[12px] font-medium"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13px] font-medium"
           style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
           <CheckCircle2 className="h-3.5 w-3.5" />
           {t("saveToDossier")}
@@ -621,7 +621,7 @@ export default function OversightPage() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg"
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-[13px] font-medium shadow-lg"
           style={{ background: toast.kind === "err" ? "rgba(220,38,38,0.95)" : T.text, color: "#fff" }}>
           {toast.kind === "err" ? "⛔" : "✓"} {toast.msg}
         </div>

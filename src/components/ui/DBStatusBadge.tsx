@@ -30,7 +30,7 @@ export function DBStatusBadge({ source, className = "" }: Props) {
     empty: {
       icon: <WifiOff className="w-3 h-3" />,
       label: "Offline",
-      style: "bg-slate-500/10 text-slate-500 border border-slate-500/20",
+      style: "bg-slate-500/10 text-[#0D1016] border border-slate-500/20",
     },
   };
 

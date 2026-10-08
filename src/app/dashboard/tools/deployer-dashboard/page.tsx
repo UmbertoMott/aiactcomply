@@ -31,12 +31,12 @@ function statusBadge(status: DeployerDashboardRecord["overallStatus"], t: T) {
     compliant:   { label: t("st_compliant"),  color: "#16a34a", bg: "rgba(22,163,74,0.07)"  },
     in_progress: { label: t("st_inProgress"), color: "#b45309", bg: "rgba(180,83,9,0.07)"   },
     attention:   { label: t("st_attention"),  color: "#dc2626", bg: "rgba(220,38,38,0.07)"  },
-    pending:     { label: t("st_pending"),    color: "rgba(0,0,0,0.4)", bg: "rgba(0,0,0,0.04)" },
+    pending:     { label: t("st_pending"),    color: "#0D1016", bg: "rgba(0,0,0,0.04)" },
   };
   const s = map[status];
   return (
     <span style={{
-      fontSize: 10, fontWeight: 600, padding: "1px 8px", borderRadius: 10,
+      fontSize: 11, fontWeight: 600, padding: "1px 8px", borderRadius: 8,
       color: s.color, background: s.bg, border: `1px solid ${s.color}33`,
       fontFamily: FONT,
     }}>
@@ -56,7 +56,7 @@ function progressBar(done: number, total: number) {
           transition: "width 0.4s",
         }} />
       </div>
-      <span style={{ fontSize: 10, color: "rgba(0,0,0,0.4)", fontFamily: "var(--font-mono)" }}>
+      <span style={{ fontSize: 11, color: "#0D1016", fontFamily: "var(--font-mono)" }}>
         {done}/{total}
       </span>
     </div>
@@ -99,7 +99,7 @@ export default function DeployerDashboardPage() {
       {/* Header — stile identico a Risk Manager */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 20 }}>
         <div>
-          <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.3)", letterSpacing: "1.2px", textTransform: "uppercase", marginBottom: 4 }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: "#0D1016", letterSpacing: "1.2px", textTransform: "uppercase", marginBottom: 4 }}>
             Art. 26 · Reg. UE 2024/1689
           </p>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
@@ -108,7 +108,7 @@ export default function DeployerDashboardPage() {
               {t("h1")}
             </h1>
           </div>
-          <p style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", margin: 0 }}>
+          <p style={{ fontSize: 13, color: "#0D1016", margin: 0 }}>
             {t("subtitle")}
           </p>
         </div>
@@ -117,8 +117,8 @@ export default function DeployerDashboardPage() {
           style={{
             display: "flex", alignItems: "center", gap: 6,
             fontSize: 11, padding: "6px 12px", borderRadius: 20,
-            background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.4)",
-            border: "1px solid rgba(0,0,0,0.07)", cursor: "pointer",
+            background: "rgba(0,0,0,0.04)", color: "#0D1016",
+            border: "1px solid rgba(0,0,0,0.08)", cursor: "pointer",
             flexShrink: 0,
           }}
         >
@@ -159,11 +159,11 @@ export default function DeployerDashboardPage() {
           { label: t("kpi_compliant"),  value: compliant,    color: "#16a34a"  },
           { label: t("kpi_attention"),  value: attention,    color: "#dc2626"  },
         ].map((k) => (
-          <div key={k.label} style={{ borderRadius: 10, padding: "14px 16px", background: "#fff", border: "1px solid rgba(0,0,0,0.07)" }}>
+          <div key={k.label} style={{ borderRadius: 8, padding: "14px 16px", background: "#fff", border: "1px solid rgba(0,0,0,0.08)" }}>
             <div style={{ fontSize: 22, fontWeight: 700, color: k.color, lineHeight: 1 }}>
               {k.value}
             </div>
-            <div style={{ fontSize: 11, marginTop: 4, color: "rgba(0,0,0,0.45)" }}>
+            <div style={{ fontSize: 11, marginTop: 4, color: "#0D1016" }}>
               {k.label}
             </div>
           </div>
@@ -173,21 +173,21 @@ export default function DeployerDashboardPage() {
       {/* System cards / empty state */}
       {items.length === 0 ? (
         <div style={{
-          textAlign: "center", padding: "56px 24px", borderRadius: 10,
+          textAlign: "center", padding: "56px 24px", borderRadius: 8,
           background: "#fff", border: "1px dashed rgba(0,0,0,0.12)",
         }}>
           <UserCheck size={24} style={{ color: "rgba(0,0,0,0.18)", margin: "0 auto 12px" }} />
           <p style={{ fontSize: 13, fontWeight: 500, color: "#0D1016", margin: "0 0 4px" }}>
             {t("empty_title")}
           </p>
-          <p style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", margin: "0 0 20px" }}>
+          <p style={{ fontSize: 13, color: "#0D1016", margin: "0 0 20px" }}>
             {t("empty_body")}
           </p>
           <Link
             href="/dashboard/tools/inventory"
             style={{
               display: "inline-flex", alignItems: "center", gap: 6,
-              fontSize: 12, fontWeight: 600, padding: "8px 16px", borderRadius: 8,
+              fontSize: 13, fontWeight: 600, padding: "8px 16px", borderRadius: 8,
               background: "#0D1016", color: "#fff", textDecoration: "none",
             }}
           >
@@ -211,8 +211,8 @@ export default function DeployerDashboardPage() {
                 key={system.id}
                 href={`/dashboard/tools/deployer-dashboard/${system.id}`}
                 style={{
-                  display: "block", borderRadius: 10, padding: "14px 16px",
-                  background: "#fff", border: "1px solid rgba(0,0,0,0.07)",
+                  display: "block", borderRadius: 8, padding: "14px 16px",
+                  background: "#fff", border: "1px solid rgba(0,0,0,0.08)",
                   textDecoration: "none", transition: "box-shadow 0.15s",
                 }}
                 onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 2px 10px rgba(0,0,0,0.07)")}
@@ -221,47 +221,47 @@ export default function DeployerDashboardPage() {
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 3 }}>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: "#0D1016" }}>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: "#0D1016" }}>
                         {system.name}
                       </span>
                       {statusBadge(status, t)}
                       <span style={{
-                        fontSize: 10, padding: "1px 6px", borderRadius: 4,
-                        background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.45)",
+                        fontSize: 11, padding: "1px 6px", borderRadius: 4,
+                        background: "rgba(0,0,0,0.04)", color: "#0D1016",
                       }}>
                         {tier}
                       </span>
                       {system.dualRoleFlag && (
                         <span style={{
-                          fontSize: 10, padding: "1px 6px", borderRadius: 4,
+                          fontSize: 11, padding: "1px 6px", borderRadius: 4,
                           background: "rgba(180,83,9,0.08)", color: "#b45309",
                         }}>
                           dual role
                         </span>
                       )}
                     </div>
-                    <p style={{ fontSize: 11, color: "rgba(0,0,0,0.4)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <p style={{ fontSize: 11, color: "#0D1016", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {system.description || t("no_description")}
                     </p>
                     {progressBar(doneCount, totalCount)}
                   </div>
-                  <ChevronRight size={14} style={{ marginLeft: 12, marginTop: 2, flexShrink: 0, color: "rgba(0,0,0,0.25)" }} />
+                  <ChevronRight size={14} style={{ marginLeft: 12, marginTop: 2, flexShrink: 0, color: "#0D1016" }} />
                 </div>
 
                 {status === "attention" && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 8, fontSize: 10, color: "#dc2626" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 8, fontSize: 11, color: "#dc2626" }}>
                     <AlertTriangle size={11} />
                     {t("hint_attention")}
                   </div>
                 )}
                 {status === "compliant" && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 8, fontSize: 10, color: "#16a34a" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 8, fontSize: 11, color: "#16a34a" }}>
                     <CheckCircle2 size={11} />
                     {t("hint_compliant")}
                   </div>
                 )}
                 {status === "in_progress" && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 8, fontSize: 10, color: "#b45309" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 8, fontSize: 11, color: "#b45309" }}>
                     <Clock size={11} />
                     {t("hint_inProgress")}
                   </div>

@@ -15,8 +15,8 @@ type TFn = (key: string) => string;
 
 const T = {
   text:     "#0D1016",
-  muted:    "rgba(0,0,0,0.45)",
-  faint:    "rgba(0,0,0,0.28)",
+  muted:    "#0D1016",
+  faint:    "#0D1016",
   border:   "rgba(0,0,0,0.07)",
   card:     "#ffffff",
   red:      "#0D1016", redBg:   "rgba(13,16,22,0.04)",   redBdr:   "rgba(13,16,22,0.12)",
@@ -25,7 +25,7 @@ const T = {
   green:    "#0D1016", greenBg: "rgba(13,16,22,0.04)",   greenBdr: "rgba(13,16,22,0.12)",
 };
 
-const card = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 12 };
+const card = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 8 };
 
 type IconType = React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
 
@@ -210,17 +210,17 @@ function AuthorityCard({ auth, t }: { auth: Authority; t: TFn }) {
         className="w-full text-left px-5 py-4 flex items-start gap-4 hover:bg-black/[0.01] transition-colors"
       >
         <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+          className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
           style={{ background: auth.colorBg, border: `1px solid ${auth.colorBdr}` }}
         >
           <Icon className="w-5 h-5" style={{ color: auth.color }} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-sm" style={{ color: T.text }}>{auth.name}</span>
-            <span className="text-xs" style={{ color: T.muted }}>{auth.fullName}</span>
+            <span className="font-semibold text-[13px]" style={{ color: T.text }}>{auth.name}</span>
+            <span className="text-[11px]" style={{ color: T.muted }}>{auth.fullName}</span>
           </div>
-          <p className="text-xs mt-0.5 leading-relaxed" style={{ color: T.muted }}>{auth.role}</p>
+          <p className="text-[11px] mt-0.5 leading-relaxed" style={{ color: T.muted }}>{auth.role}</p>
         </div>
         {open
           ? <ChevronUp  className="w-4 h-4 flex-shrink-0 mt-1" style={{ color: T.faint }} />
@@ -241,27 +241,27 @@ function AuthorityCard({ auth, t }: { auth: Authority; t: TFn }) {
 
               {/* Contatti */}
               <div className="pt-4">
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: T.faint }}>{t("lbl_contacts")}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: T.faint }}>{t("lbl_contacts")}</p>
                 <div className="space-y-1.5">
                   <a href={auth.website} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-xs hover:underline" style={{ color: auth.color }}>
+                    className="flex items-center gap-2 text-[11px] hover:underline" style={{ color: auth.color }}>
                     <ExternalLink className="w-3 h-3" /> {auth.website}
                   </a>
                   {auth.phone && (
-                    <div className="flex items-center gap-2 text-xs" style={{ color: T.muted }}>
+                    <div className="flex items-center gap-2 text-[11px]" style={{ color: T.muted }}>
                       <Phone className="w-3 h-3" /> {auth.phone}
                     </div>
                   )}
-                  <div className="text-xs font-mono" style={{ color: T.muted }}>{auth.contact}</div>
+                  <div className="text-[11px] font-mono" style={{ color: T.muted }}>{auth.contact}</div>
                 </div>
               </div>
 
               {/* Poteri */}
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: T.faint }}>{t("lbl_powers")}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: T.faint }}>{t("lbl_powers")}</p>
                 <ul className="space-y-1.5">
                   {auth.powers.map((p, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs" style={{ color: T.muted }}>
+                    <li key={i} className="flex items-start gap-2 text-[11px]" style={{ color: T.muted }}>
                       <CheckCircle2 className="w-3 h-3 mt-0.5 flex-shrink-0" style={{ color: auth.color }} />
                       {p}
                     </li>
@@ -271,12 +271,12 @@ function AuthorityCard({ auth, t }: { auth: Authority; t: TFn }) {
 
               {/* Quando notificare */}
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: T.faint }}>{t("lbl_whenNotify")}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: T.faint }}>{t("lbl_whenNotify")}</p>
                 <div className="space-y-2">
                   {auth.when_to_notify.map((n, i) => (
                     <div key={i} className="rounded-lg px-3 py-2.5" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-                      <div className="text-xs font-medium mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>{n.trigger}</div>
-                      <div className="flex items-center gap-3 text-[11px]" style={{ color: "rgba(0,0,0,0.45)" }}>
+                      <div className="text-[11px] font-medium mb-1" style={{ color: "#0D1016" }}>{n.trigger}</div>
+                      <div className="flex items-center gap-3 text-[11px]" style={{ color: "#0D1016" }}>
                         <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {n.deadline}</span>
                         <span style={{ color: T.blue }}>{n.article}</span>
                       </div>
@@ -288,15 +288,15 @@ function AuthorityCard({ auth, t }: { auth: Authority; t: TFn }) {
               {/* Sandbox — solo AGID */}
               {auth.sandbox && (
                 <div className="rounded-lg px-4 py-3" style={{ background: T.blueBg, border: `1px solid ${T.blueBdr}` }}>
-                  <p className="text-xs font-semibold mb-1" style={{ color: T.blue }}>
+                  <p className="text-[11px] font-semibold mb-1" style={{ color: T.blue }}>
                     {t("sandbox_title")}
                   </p>
-                  <p className="text-xs leading-relaxed mb-2" style={{ color: T.muted }}>{auth.sandbox.description}</p>
-                  <p className="text-xs leading-relaxed" style={{ color: T.muted }}>
+                  <p className="text-[11px] leading-relaxed mb-2" style={{ color: T.muted }}>{auth.sandbox.description}</p>
+                  <p className="text-[11px] leading-relaxed" style={{ color: T.muted }}>
                     <strong>{t("sandbox_howto")}</strong> {auth.sandbox.how_to_apply}
                   </p>
                   <a href={auth.sandbox.url} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs mt-2 hover:underline" style={{ color: T.blue }}>
+                    className="inline-flex items-center gap-1 text-[11px] mt-2 hover:underline" style={{ color: T.blue }}>
                     {t("sandbox_portal")} <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
@@ -321,13 +321,13 @@ function CriminalRiskCard({ risk, t }: { risk: CriminalRisk; t: TFn }) {
         <AlertOctagon className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: T.red }} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-sm" style={{ color: T.text }}>{risk.title}</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full font-medium"
+            <span className="font-semibold text-[13px]" style={{ color: T.text }}>{risk.title}</span>
+            <span className="text-[11px] px-2 py-0.5 rounded-full font-medium"
               style={{ background: T.redBg, color: T.red, border: `1px solid ${T.redBdr}` }}>
               {risk.penalty}
             </span>
           </div>
-          <p className="text-xs mt-0.5" style={{ color: T.muted }}>{risk.article}</p>
+          <p className="text-[11px] mt-0.5" style={{ color: T.muted }}>{risk.article}</p>
         </div>
         {open
           ? <ChevronUp  className="w-4 h-4 flex-shrink-0 mt-1" style={{ color: T.faint }} />
@@ -345,21 +345,21 @@ function CriminalRiskCard({ risk, t }: { risk: CriminalRisk; t: TFn }) {
             className="overflow-hidden"
           >
             <div className="px-5 pb-5 space-y-3" style={{ borderTop: `1px solid ${T.border}` }}>
-              <p className="text-xs leading-relaxed pt-4" style={{ color: T.muted }}>{risk.description}</p>
+              <p className="text-[11px] leading-relaxed pt-4" style={{ color: T.muted }}>{risk.description}</p>
               <div className="rounded-lg px-3 py-2.5" style={{ background: T.redBg, border: `1px solid ${T.redBdr}` }}>
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: T.red }}>{t("lbl_aggravating")}</p>
-                <p className="text-xs" style={{ color: "rgba(0,0,0,0.55)" }}>{risk.aggravated}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: T.red }}>{t("lbl_aggravating")}</p>
+                <p className="text-[11px]" style={{ color: "#0D1016" }}>{risk.aggravated}</p>
               </div>
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: T.faint }}>{t("lbl_whoRisk")}</p>
-                <p className="text-xs" style={{ color: T.muted }}>{risk.who_is_at_risk}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: T.faint }}>{t("lbl_whoRisk")}</p>
+                <p className="text-[11px]" style={{ color: T.muted }}>{risk.who_is_at_risk}</p>
               </div>
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: T.faint }}>{t("lbl_howMitigate")}</p>
-                <p className="text-xs" style={{ color: T.muted }}>{risk.mitigation}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: T.faint }}>{t("lbl_howMitigate")}</p>
+                <p className="text-[11px]" style={{ color: T.muted }}>{risk.mitigation}</p>
               </div>
               <a href={risk.href}
-                className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg transition-colors hover:opacity-90"
+                className="inline-flex items-center gap-1 text-[11px] px-3 py-1.5 rounded-lg transition-colors hover:opacity-90"
                 style={{ background: T.redBg, color: T.red, border: `1px solid ${T.redBdr}` }}>
                 {t("goMitigation")} <ExternalLink className="w-3 h-3" />
               </a>
@@ -404,23 +404,23 @@ export default function AgidAcnPage() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <Building2 className="w-4 h-4" style={{ color: T.blue }} />
-          <span className="text-xs font-medium" style={{ color: T.muted }}>{t("headerKicker")}</span>
+          <span className="text-[11px] font-medium" style={{ color: T.muted }}>{t("headerKicker")}</span>
         </div>
         <h1 className="text-xl font-bold mb-1" style={{ color: T.text }}>AGID / ACN / Garante Privacy</h1>
-        <p className="text-sm" style={{ color: T.muted }}>
+        <p className="text-[13px]" style={{ color: T.muted }}>
           {t("subtitle")}
         </p>
       </div>
 
       {/* Alert L.132 */}
-      <div className="rounded-xl px-4 py-3.5" style={{ background: T.redBg, border: `1px solid ${T.redBdr}` }}>
+      <div className="rounded-lg px-4 py-3.5" style={{ background: T.redBg, border: `1px solid ${T.redBdr}` }}>
         <div className="flex items-start gap-3">
           <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: T.red }} />
           <div>
-            <p className="text-sm font-semibold mb-0.5" style={{ color: T.red }}>
+            <p className="text-[13px] font-semibold mb-0.5" style={{ color: T.red }}>
               {t("l132AlertTitle")}
             </p>
-            <p className="text-xs leading-relaxed" style={{ color: "rgba(0,0,0,0.55)" }}>
+            <p className="text-[11px] leading-relaxed" style={{ color: "#0D1016" }}>
               {t("l132AlertBody")}
             </p>
           </div>
@@ -428,12 +428,12 @@ export default function AgidAcnPage() {
       </div>
 
       {/* Tab switcher */}
-      <div className="flex gap-1 p-1 rounded-xl" style={{ background: "rgba(0,0,0,0.04)" }}>
+      <div className="flex gap-1 p-1 rounded-lg" style={{ background: "rgba(0,0,0,0.04)" }}>
         {TABS.map(tb => (
           <button
             key={tb.id}
             onClick={() => setTab(tb.id)}
-            className="flex-1 py-2 rounded-lg text-xs font-medium transition-all"
+            className="flex-1 py-2 rounded-lg text-[11px] font-medium transition-all"
             style={{
               background: tab === tb.id ? T.card : "transparent",
               color: tab === tb.id ? T.text : T.muted,
@@ -457,8 +457,8 @@ export default function AgidAcnPage() {
       {/* Tab: Rischi penali */}
       {tab === "criminal" && (
         <div className="space-y-3">
-          <div className="rounded-xl px-4 py-3" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-            <p className="text-xs leading-relaxed" style={{ color: "rgba(0,0,0,0.45)" }}
+          <div className="rounded-lg px-4 py-3" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
+            <p className="text-[11px] leading-relaxed" style={{ color: "#0D1016" }}
               dangerouslySetInnerHTML={{ __html: t("criminal_note") }} />
           </div>
           {CRIMINAL_RISKS.map((risk, i) => (
@@ -470,7 +470,7 @@ export default function AgidAcnPage() {
       {/* Tab: Sanzioni amministrative */}
       {tab === "sanctions" && (
         <div className="space-y-3">
-          <p className="text-sm" style={{ color: T.muted }}>
+          <p className="text-[13px]" style={{ color: T.muted }}>
             {t("sanctions_intro")}
           </p>
           {ADMIN_SANCTIONS.map((s, i) => {
@@ -479,7 +479,7 @@ export default function AgidAcnPage() {
 
             if (isCritical) {
               return (
-                <div key={i} className="rounded-xl overflow-hidden" style={{ border: `1px solid ${colors.bdr}` }}>
+                <div key={i} className="rounded-lg overflow-hidden" style={{ border: `1px solid ${colors.bdr}` }}>
                   <button
                     onClick={() => setArt5Open((v) => !v)}
                     aria-expanded={art5Open}
@@ -488,15 +488,15 @@ export default function AgidAcnPage() {
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold mb-1" style={{ color: colors.txt }}>{s.max_amount}</p>
-                        <p className="text-xs" style={{ color: "rgba(0,0,0,0.55)" }}>{s.violation}</p>
-                        <p className="text-[10px] mt-1.5 font-medium" style={{ color: "rgba(0,0,0,0.35)" }}>
+                        <p className="text-[13px] font-semibold mb-1" style={{ color: colors.txt }}>{s.max_amount}</p>
+                        <p className="text-[11px]" style={{ color: "#0D1016" }}>{s.violation}</p>
+                        <p className="text-[11px] mt-1.5 font-medium" style={{ color: "#0D1016" }}>
                           {art5Open ? t("art5_hide") : t("art5_show")}
                         </p>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <p className="text-xs font-medium" style={{ color: colors.txt }}>{t("or_word")}</p>
-                        <p className="text-sm font-semibold" style={{ color: colors.txt }}>{s.max_pct}</p>
+                        <p className="text-[11px] font-medium" style={{ color: colors.txt }}>{t("or_word")}</p>
+                        <p className="text-[13px] font-semibold" style={{ color: colors.txt }}>{s.max_pct}</p>
                       </div>
                     </div>
                   </button>
@@ -521,22 +521,22 @@ export default function AgidAcnPage() {
             }
 
             return (
-              <div key={i} className="rounded-xl p-4" style={{ background: colors.bg, border: `1px solid ${colors.bdr}` }}>
+              <div key={i} className="rounded-lg p-4" style={{ background: colors.bg, border: `1px solid ${colors.bdr}` }}>
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-sm font-semibold mb-1" style={{ color: colors.txt }}>{s.max_amount}</p>
-                    <p className="text-xs" style={{ color: "rgba(0,0,0,0.55)" }}>{s.violation}</p>
+                    <p className="text-[13px] font-semibold mb-1" style={{ color: colors.txt }}>{s.max_amount}</p>
+                    <p className="text-[11px]" style={{ color: "#0D1016" }}>{s.violation}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-xs font-medium" style={{ color: colors.txt }}>{t("or_word")}</p>
-                    <p className="text-sm font-semibold" style={{ color: colors.txt }}>{s.max_pct}</p>
+                    <p className="text-[11px] font-medium" style={{ color: colors.txt }}>{t("or_word")}</p>
+                    <p className="text-[13px] font-semibold" style={{ color: colors.txt }}>{s.max_pct}</p>
                   </div>
                 </div>
               </div>
             );
           })}
-          <div className="rounded-xl px-4 py-3" style={{ background: "rgba(0,0,0,0.02)", border: `1px solid ${T.border}` }}>
-            <p className="text-xs leading-relaxed" style={{ color: T.muted }}
+          <div className="rounded-lg px-4 py-3" style={{ background: "#FAFAF9", border: `1px solid ${T.border}` }}>
+            <p className="text-[11px] leading-relaxed" style={{ color: T.muted }}
               dangerouslySetInnerHTML={{ __html: t("sanctions_footer") }} />
           </div>
         </div>

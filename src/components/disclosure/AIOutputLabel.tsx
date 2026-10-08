@@ -28,15 +28,15 @@ export default function AIOutputLabel({
     >
       <div className="flex items-center gap-2 flex-wrap">
         <span
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold"
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold"
           style={{ background: "#0C447C", color: "#ffffff" }}
         >
           <Bot size={9} strokeWidth={2} />
           {t("ai_generated")}
         </span>
         <span
-          className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold"
-          style={{ background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.6)" }}
+          className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold"
+          style={{ background: "rgba(0,0,0,0.06)", color: "#0D1016" }}
         >
           {t("internal_draft")}
         </span>
@@ -44,7 +44,7 @@ export default function AIOutputLabel({
           {documentType}
         </span>
       </div>
-      <p className="text-[10px] mt-1.5" style={{ color: "rgba(0,0,0,0.5)", lineHeight: 1.5 }}>
+      <p className="text-[11px] mt-1.5" style={{ color: "#0D1016", lineHeight: 1.5 }}>
         {t("deliverable_note")}
       </p>
     </div>

@@ -9,7 +9,7 @@ import { Upload } from "lucide-react";
 export function SectionEmptyState({ message, hint }: { message: string; hint?: string }) {
   return (
     <div style={{
-      borderRadius: 12, border: "1.5px dashed rgba(0,0,0,0.14)",
+      borderRadius: 8, border: "1.5px dashed rgba(0,0,0,0.14)",
       background: "rgba(0,0,0,0.015)", padding: "28px 24px",
       textAlign: "center",
     }}>
@@ -18,10 +18,10 @@ export function SectionEmptyState({ message, hint }: { message: string; hint?: s
         display: "flex", alignItems: "center", justifyContent: "center",
         background: "rgba(0,0,0,0.05)",
       }}>
-        <Upload size={15} style={{ color: "rgba(0,0,0,0.35)" }} />
+        <Upload size={15} style={{ color: "#0D1016" }} />
       </div>
-      <p style={{ fontSize: 12.5, fontWeight: 500, color: "rgba(0,0,0,0.55)", margin: 0 }}>{message}</p>
-      <p style={{ fontSize: 11, color: "rgba(0,0,0,0.35)", margin: "4px 0 0" }}>
+      <p style={{ fontSize: 13, fontWeight: 500, color: "#0D1016", margin: 0 }}>{message}</p>
+      <p style={{ fontSize: 11, color: "#0D1016", margin: "4px 0 0" }}>
         {hint ?? "Le metriche vengono calcolate localmente nel browser — nessun dato grezzo viene salvato."}
       </p>
     </div>

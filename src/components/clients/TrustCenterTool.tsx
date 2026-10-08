@@ -27,7 +27,7 @@ const BG     = "#FAFAF9";
 const CARD   = "#ffffff";
 const BORDER = "rgba(0,0,0,0.07)";
 const TEXT   = "#0D1016";
-const MUTED  = "rgba(0,0,0,0.40)";
+const MUTED  = "#0D1016";
 const INDIGO = "#4f46e5";
 const EMERAL = "#15803d";
 
@@ -57,7 +57,7 @@ function IosSwitch({ on, onChange, disabled }: { on: boolean; onChange: (v: bool
       role="switch"
       disabled={disabled}
       style={{
-        width: 42, height: 24, borderRadius: 12, border: "none", cursor: disabled ? "not-allowed" : "pointer",
+        width: 42, height: 24, borderRadius: 8, border: "none", cursor: disabled ? "not-allowed" : "pointer",
         background: on ? "#0D1016" : "#d1d5db",
         position: "relative", transition: "background 0.2s",
         opacity: disabled ? 0.45 : 1,
@@ -104,14 +104,14 @@ function EmailTagInput({
   return (
     <div style={{
       display: "flex", flexWrap: "wrap", gap: 6, padding: "8px 10px",
-      background: "rgba(0,0,0,0.03)", border: `1px solid ${BORDER}`, borderRadius: 8,
+      background: "#FAFAF9", border: `1px solid ${BORDER}`, borderRadius: 8,
       minHeight: 40, alignItems: "center",
     }}>
       {values.map(v => (
         <span key={v} style={{
           display: "flex", alignItems: "center", gap: 4,
-          background: "rgba(0,0,0,0.07)", borderRadius: 5, padding: "2px 8px",
-          fontSize: 12, color: TEXT,
+          background: "rgba(0,0,0,0.07)", borderRadius: 4, padding: "2px 8px",
+          fontSize: 13, color: TEXT,
         }}>
           {v}
           <button
@@ -131,7 +131,7 @@ function EmailTagInput({
         placeholder={values.length === 0 ? placeholder : ""}
         style={{
           border: "none", outline: "none", background: "transparent",
-          fontSize: 12, color: TEXT, minWidth: 160, flex: 1,
+          fontSize: 13, color: TEXT, minWidth: 160, flex: 1,
         }}
       />
     </div>
@@ -150,7 +150,7 @@ function PublicPreview({
   const publicSections = ALL_SECTION_IDS.filter(id => page.sections[id].is_public);
 
   return (
-    <div style={{ background: "#f3f4f6", border: `1px solid ${BORDER}`, borderRadius: 12, overflow: "hidden" }}>
+    <div style={{ background: "#FAFAF9", border: `1px solid ${BORDER}`, borderRadius: 8, overflow: "hidden" }}>
       {/* Browser chrome */}
       <div style={{ background: "#e5e7eb", padding: "8px 14px", display: "flex", alignItems: "center", gap: 8, borderBottom: `1px solid ${BORDER}` }}>
         <div style={{ display: "flex", gap: 5 }}>
@@ -169,7 +169,7 @@ function PublicPreview({
           <div style={{ textAlign: "center", padding: "40px 0" }}>
             <Globe size={28} style={{ color: MUTED, margin: "0 auto 12px" }} />
             <p style={{ color: MUTED, fontSize: 13 }}>Nessuna sezione pubblica attivata</p>
-            <p style={{ color: MUTED, fontSize: 12, marginTop: 4 }}>Attiva almeno una sezione nell&apos;editor</p>
+            <p style={{ color: MUTED, fontSize: 13, marginTop: 4 }}>Attiva almeno una sezione nell&apos;editor</p>
           </div>
         ) : (
           <>
@@ -177,7 +177,7 @@ function PublicPreview({
             <div style={{ marginBottom: 24, paddingBottom: 16, borderBottom: `1px solid ${BORDER}` }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                 <ShieldCheck size={18} style={{ color: EMERAL }} />
-                <span style={{ color: EMERAL, fontWeight: 700, fontSize: 14 }}>RegulaeOS Trust Center</span>
+                <span style={{ color: EMERAL, fontWeight: 700, fontSize: 13 }}>RegulaeOS Trust Center</span>
               </div>
               <h1 className="doc-title" style={{ color: TEXT, fontSize: 20, fontWeight: 700, margin: "0 0 4px" }}>
                 {systemName || "Sistema di IA"}
@@ -195,7 +195,7 @@ function PublicPreview({
                 <div key={id} style={{ marginBottom: 20, paddingBottom: 20, borderBottom: `1px solid ${BORDER}` }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
                     <h2 style={{ color: TEXT, fontSize: 15, fontWeight: 600, margin: 0 }}>{meta.label}</h2>
-                    <span style={{ color: MUTED, fontSize: 10, fontFamily: "var(--font-mono)", background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "2px 6px", flexShrink: 0, marginLeft: 8 }}>
+                    <span style={{ color: MUTED, fontSize: 11, fontFamily: "var(--font-mono)", background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "2px 6px", flexShrink: 0, marginLeft: 8 }}>
                       {meta.article}
                     </span>
                   </div>
@@ -204,7 +204,7 @@ function PublicPreview({
                       {section.summary.text}
                     </p>
                   ) : (
-                    <p style={{ color: "rgba(0,0,0,0.40)", fontSize: 13, fontStyle: "italic" }}>Testo non ancora compilato.</p>
+                    <p style={{ color: "#0D1016", fontSize: 13, fontStyle: "italic" }}>Testo non ancora compilato.</p>
                   )}
                 </div>
               );
@@ -212,7 +212,7 @@ function PublicPreview({
 
             {/* Footer */}
             <div style={{ paddingTop: 8 }}>
-              <p style={{ color: "rgba(0,0,0,0.40)", fontSize: 11 }}>
+              <p style={{ color: "#0D1016", fontSize: 11 }}>
                 Pagina generata da RegulaeOS · Ultimo aggiornamento: {new Date(latestPublicSectionDate(page)).toLocaleDateString("it-IT")}
                 {page.noindex && " · Questa pagina non è indicizzata dai motori di ricerca."}
               </p>
@@ -251,14 +251,14 @@ function SectionCard({
     <div style={{
       background: CARD,
       border: `1px ${hasSource ? "solid" : "dashed"} ${BORDER}`,
-      borderRadius: 10, padding: 16,
+      borderRadius: 8, padding: 16,
       opacity: hasSource ? 1 : 0.65,
     }}>
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
         <div>
-          <p style={{ color: TEXT, fontWeight: 600, fontSize: 14, margin: "0 0 2px" }}>{meta.label}</p>
-          <span style={{ color: MUTED, fontSize: 10, fontFamily: "var(--font-mono)", background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "1px 6px" }}>
+          <p style={{ color: TEXT, fontWeight: 600, fontSize: 13, margin: "0 0 2px" }}>{meta.label}</p>
+          <span style={{ color: MUTED, fontSize: 11, fontFamily: "var(--font-mono)", background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "1px 6px" }}>
             {meta.article}
           </span>
         </div>
@@ -270,14 +270,14 @@ function SectionCard({
       </div>
 
       {/* Source preview */}
-      <div style={{ background: "rgba(0,0,0,0.02)", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "8px 10px", marginBottom: 10 }}>
+      <div style={{ background: "#FAFAF9", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "8px 10px", marginBottom: 10 }}>
         <p style={{ color: MUTED, fontSize: 11, marginBottom: 4 }}>
           Fonte: <em>{meta.sourceModule}</em>
         </p>
         {hasSource ? (
           <SourceSummary id={id} sourceData={sourceData} />
         ) : (
-          <p style={{ color: "#92400e", fontSize: 12 }}>
+          <p style={{ color: "#92400e", fontSize: 13 }}>
             Nessun dato disponibile — completa{" "}
             <Link href={sourceModuleHref(id)} style={{ color: INDIGO, textDecoration: "underline" }}>
               {meta.sourceModule}
@@ -308,7 +308,7 @@ function SectionCard({
           placeholder="Testo della sezione pubblica… (clicca 'Genera con AI' per una proposta)"
           rows={3}
           style={{
-            width: "100%", background: "#f3f4f6", border: `1px solid ${aiConfirmed ? "rgba(52,211,153,0.3)" : INDIGO + "40"}`,
+            width: "100%", background: "#FAFAF9", border: `1px solid ${aiConfirmed ? "rgba(52,211,153,0.3)" : INDIGO + "40"}`,
             borderRadius: 6, padding: 8, color: TEXT, fontSize: 13, resize: "vertical",
             boxSizing: "border-box",
           }}
@@ -321,7 +321,7 @@ function SectionCard({
               display: "flex", alignItems: "center", gap: 5,
               background: "rgba(129,140,248,0.12)", color: INDIGO,
               border: `1px solid rgba(129,140,248,0.3)`, borderRadius: 6,
-              padding: "5px 12px", fontSize: 12, cursor: hasSource && !isGenerating ? "pointer" : "not-allowed",
+              padding: "5px 12px", fontSize: 13, cursor: hasSource && !isGenerating ? "pointer" : "not-allowed",
               opacity: hasSource && !isGenerating ? 1 : 0.5,
             }}
           >
@@ -335,7 +335,7 @@ function SectionCard({
                 display: "flex", alignItems: "center", gap: 5,
                 background: "rgba(52,211,153,0.12)", color: EMERAL,
                 border: `1px solid rgba(52,211,153,0.3)`, borderRadius: 6,
-                padding: "5px 12px", fontSize: 12, cursor: "pointer",
+                padding: "5px 12px", fontSize: 13, cursor: "pointer",
               }}
             >
               <CheckCircle2 size={12} /> Conferma
@@ -350,21 +350,21 @@ function SectionCard({
 function SourceSummary({ id, sourceData }: { id: TrustCenterSectionId; sourceData: TrustCenterSourceData }) {
   switch (id) {
     case "risk_tier":
-      return <span style={{ color: TEXT, fontSize: 12 }}>{levelLabel(sourceData.risk_tier.riskTier)} · {sourceData.risk_tier.systemName ?? "—"}</span>;
+      return <span style={{ color: TEXT, fontSize: 13 }}>{levelLabel(sourceData.risk_tier.riskTier)} · {sourceData.risk_tier.systemName ?? "—"}</span>;
     case "intended_use":
-      return <span style={{ color: TEXT, fontSize: 12 }}>{(sourceData.intended_use.finalityDescription ?? "").slice(0, 100)}{sourceData.intended_use.finalityDescription && sourceData.intended_use.finalityDescription.length > 100 ? "…" : ""}</span>;
+      return <span style={{ color: TEXT, fontSize: 13 }}>{(sourceData.intended_use.finalityDescription ?? "").slice(0, 100)}{sourceData.intended_use.finalityDescription && sourceData.intended_use.finalityDescription.length > 100 ? "…" : ""}</span>;
     case "oversight":
-      return <span style={{ color: TEXT, fontSize: 12 }}>{sourceData.oversight.implementedMeasures.length} misura/e implementata/e</span>;
+      return <span style={{ color: TEXT, fontSize: 13 }}>{sourceData.oversight.implementedMeasures.length} misura/e implementata/e</span>;
     case "transparency":
-      return <span style={{ color: TEXT, fontSize: 12 }}>{sourceData.transparency.activeDisclosures.length} disclosure attiva/e</span>;
+      return <span style={{ color: TEXT, fontSize: 13 }}>{sourceData.transparency.activeDisclosures.length} disclosure attiva/e</span>;
     case "conformity":
-      return <span style={{ color: TEXT, fontSize: 12 }}>Dichiarazione: {sourceData.conformity.declarationDrafted ? "redatta" : "non redatta"} · CE: {sourceData.conformity.ceMark ? "sì" : "no"}</span>;
+      return <span style={{ color: TEXT, fontSize: 13 }}>Dichiarazione: {sourceData.conformity.declarationDrafted ? "redatta" : "non redatta"} · CE: {sourceData.conformity.ceMark ? "sì" : "no"}</span>;
     case "eudb":
-      return <span style={{ color: TEXT, fontSize: 12 }}>Numero EUDB: {sourceData.eudb.registrationNumber ?? "—"}</span>;
+      return <span style={{ color: TEXT, fontSize: 13 }}>Numero EUDB: {sourceData.eudb.registrationNumber ?? "—"}</span>;
     case "post_market":
-      return <span style={{ color: TEXT, fontSize: 12 }}>{sourceData.post_market.methodology?.slice(0, 80) ?? "—"}</span>;
+      return <span style={{ color: TEXT, fontSize: 13 }}>{sourceData.post_market.methodology?.slice(0, 80) ?? "—"}</span>;
     case "contact":
-      return <span style={{ color: TEXT, fontSize: 12 }}>{sourceData.contact.arName ?? sourceData.contact.providerName ?? "—"}</span>;
+      return <span style={{ color: TEXT, fontSize: 13 }}>{sourceData.contact.arName ?? sourceData.contact.providerName ?? "—"}</span>;
     default:
       return null;
   }
@@ -556,7 +556,7 @@ export default function TrustCenterEditorPage() {
     {
       key: "email",
       label: "Email",
-      color: "#374151",
+      color: "#0D1016",
       icon: <Mail size={16} />,
       url: (u: string) => `mailto:?subject=${encodeURIComponent("Pagina di trasparenza AI — " + systemName)}&body=${encodeURIComponent(shareText + "\n\n" + u)}`,
     },
@@ -574,12 +574,12 @@ export default function TrustCenterEditorPage() {
             <ShieldCheck size={20} style={{ color: EMERAL }} />
             <h1 style={{ color: TEXT, fontSize: 22, fontWeight: 700, margin: 0 }}>Pagina pubblica di conformità</h1>
             {page.isPublished && (
-              <span style={{ background: "rgba(52,211,153,0.12)", color: EMERAL, border: "1px solid rgba(52,211,153,0.3)", borderRadius: 6, padding: "2px 10px", fontSize: 12, fontWeight: 600 }}>
+              <span style={{ background: "rgba(52,211,153,0.12)", color: EMERAL, border: "1px solid rgba(52,211,153,0.3)", borderRadius: 6, padding: "2px 10px", fontSize: 13, fontWeight: 600 }}>
                 Pubblicato
               </span>
             )}
           </div>
-          <p style={{ color: MUTED, fontSize: 14 }}>
+          <p style={{ color: MUTED, fontSize: 13 }}>
             Pagina pubblica di trasparenza per il sistema di IA — {publicSectionCount}/8 sezioni attive
           </p>
         </div>
@@ -589,12 +589,12 @@ export default function TrustCenterEditorPage() {
           <div style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)", borderRadius: 8, padding: "10px 16px", marginBottom: 16, display: "flex", alignItems: "center", gap: 12 }}>
             <CheckCircle2 size={15} style={{ color: EMERAL }} />
             <span style={{ color: EMERAL, fontSize: 13, fontWeight: 600 }}>Pagina pubblica attiva</span>
-            <Link href={localUrl} target="_blank" style={{ color: INDIGO, fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+            <Link href={localUrl} target="_blank" style={{ color: INDIGO, fontSize: 13, display: "flex", alignItems: "center", gap: 4 }}>
               {publicUrl} <ExternalLink size={11} />
             </Link>
             <button
               onClick={handleCopy}
-              style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 5, background: "none", border: `1px solid rgba(52,211,153,0.3)`, borderRadius: 6, padding: "4px 12px", cursor: "pointer", color: EMERAL, fontSize: 12 }}
+              style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 5, background: "none", border: `1px solid rgba(52,211,153,0.3)`, borderRadius: 6, padding: "4px 12px", cursor: "pointer", color: EMERAL, fontSize: 13 }}
             >
               {copied ? <Check size={12} /> : <Copy size={12} />}
               {copied ? "Copiato" : "Copia link"}
@@ -608,7 +608,7 @@ export default function TrustCenterEditorPage() {
             <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
               <AlertTriangle size={16} style={{ color: "#92400e", flexShrink: 0, marginTop: 2 }} />
               <div>
-                <p style={{ color: "#92400e", fontWeight: 600, fontSize: 14, marginBottom: 4 }}>Conferma pubblicazione</p>
+                <p style={{ color: "#92400e", fontWeight: 600, fontSize: 13, marginBottom: 4 }}>Conferma pubblicazione</p>
                 <p style={{ color: "#92400e", fontSize: 13, lineHeight: 1.5 }}>
                   Pubblicando questa pagina, le {publicSectionCount} sezioni attive saranno visibili a chiunque abbia il link.
                   Verifica che tutti i testi siano confermati (✦ AI risolto) prima di procedere.
@@ -633,7 +633,7 @@ export default function TrustCenterEditorPage() {
         )}
 
         {/* ── Master controls ────────────────────────────────────────── */}
-        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 16, marginBottom: 24, display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center" }}>
+        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 8, padding: 16, marginBottom: 24, display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <IosSwitch on={page.isPublished} onChange={handlePublishToggle} />
             <div>
@@ -655,7 +655,7 @@ export default function TrustCenterEditorPage() {
           </div>
           <div style={{ marginLeft: "auto", display: "flex", gap: 10 }}>
             {!page.isPublished && (
-              <div style={{ display: "flex", alignItems: "center", gap: 5, color: MUTED, fontSize: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 5, color: MUTED, fontSize: 13 }}>
                 <Info size={12} />
                 Funzione &quot;pagina riservata/invitati&quot; non disponibile — il link è l&apos;unico controllo di accesso
               </div>
@@ -671,7 +671,7 @@ export default function TrustCenterEditorPage() {
         </div>
 
         {/* ── Share panel ────────────────────────────────────────────── */}
-        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 16, marginBottom: 24 }}>
+        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 8, padding: 16, marginBottom: 24 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: shareOpen ? 14 : 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <Share2 size={14} style={{ color: MUTED }} />
@@ -684,7 +684,7 @@ export default function TrustCenterEditorPage() {
             </div>
             <button
               onClick={() => setShareOpen(v => !v)}
-              style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "4px 12px", cursor: "pointer", color: MUTED, fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}
+              style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "4px 12px", cursor: "pointer", color: MUTED, fontSize: 13, display: "flex", alignItems: "center", gap: 5 }}
             >
               {shareOpen ? "Chiudi" : "Mostra link e opzioni"}
             </button>
@@ -694,13 +694,13 @@ export default function TrustCenterEditorPage() {
             <div>
               {/* URL row */}
               <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 14 }}>
-                <div style={{ flex: 1, background: "rgba(0,0,0,0.03)", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", fontSize: 12, color: page.isPublished ? TEXT : MUTED, fontFamily: "var(--font-mono)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div style={{ flex: 1, background: "#FAFAF9", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", fontSize: 13, color: page.isPublished ? TEXT : MUTED, fontFamily: "var(--font-mono)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {publicUrl}
                 </div>
                 <button
                   onClick={handleCopy}
                   disabled={!page.isPublished}
-                  style={{ display: "flex", alignItems: "center", gap: 5, background: page.isPublished ? "#0D1016" : "rgba(0,0,0,0.06)", color: page.isPublished ? "#fff" : MUTED, border: "none", borderRadius: 8, padding: "8px 14px", cursor: page.isPublished ? "pointer" : "not-allowed", fontSize: 12, fontWeight: 600, flexShrink: 0 }}
+                  style={{ display: "flex", alignItems: "center", gap: 5, background: page.isPublished ? "#0D1016" : "rgba(0,0,0,0.06)", color: page.isPublished ? "#fff" : MUTED, border: "none", borderRadius: 8, padding: "8px 14px", cursor: page.isPublished ? "pointer" : "not-allowed", fontSize: 13, fontWeight: 600, flexShrink: 0 }}
                 >
                   {copied ? <Check size={12} /> : <Copy size={12} />}
                   {copied ? "Copiato!" : "Copia link"}
@@ -709,7 +709,7 @@ export default function TrustCenterEditorPage() {
                   <Link
                     href={localUrl}
                     target="_blank"
-                    style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(0,0,0,0.04)", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", color: MUTED, fontSize: 12, textDecoration: "none", flexShrink: 0 }}
+                    style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(0,0,0,0.04)", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", color: MUTED, fontSize: 13, textDecoration: "none", flexShrink: 0 }}
                   >
                     <ExternalLink size={12} /> Apri
                   </Link>
@@ -730,7 +730,7 @@ export default function TrustCenterEditorPage() {
                       background: page.isPublished ? ch.color : "rgba(0,0,0,0.04)",
                       color: page.isPublished ? "#fff" : MUTED,
                       border: page.isPublished ? "none" : `1px solid ${BORDER}`,
-                      borderRadius: 8, padding: "7px 14px", fontSize: 12, fontWeight: 500,
+                      borderRadius: 8, padding: "7px 14px", fontSize: 13, fontWeight: 500,
                       textDecoration: "none", cursor: page.isPublished ? "pointer" : "not-allowed",
                       opacity: page.isPublished ? 1 : 0.6,
                       transition: "opacity 150ms",
@@ -746,11 +746,11 @@ export default function TrustCenterEditorPage() {
         </div>
 
         {/* ── Visibility / Access Control ────────────────────────────── */}
-        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 16, marginBottom: 24 }}>
+        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 8, padding: 16, marginBottom: 24 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
             <Lock size={14} style={{ color: MUTED }} />
             <span style={{ color: TEXT, fontWeight: 600, fontSize: 13 }}>Visibilità pubblica</span>
-            <span style={{ color: MUTED, fontFamily: "var(--font-mono)", fontSize: 10, background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "1px 6px" }}>Art. 13</span>
+            <span style={{ color: MUTED, fontFamily: "var(--font-mono)", fontSize: 11, background: "rgba(0,0,0,0.04)", borderRadius: 4, padding: "1px 6px" }}>Art. 13</span>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: page.accessConfig.visibility !== "public" ? 14 : 0 }}>
             {(["public", "restricted", "invite_only"] as TrustCenterVisibility[]).map(v => (
@@ -763,7 +763,7 @@ export default function TrustCenterEditorPage() {
                   background: page.accessConfig.visibility === v ? "rgba(79,70,229,0.06)" : "rgba(0,0,0,0.02)",
                 }}
               >
-                <div style={{ fontWeight: 600, fontSize: 12, color: page.accessConfig.visibility === v ? INDIGO : TEXT, marginBottom: 2 }}>
+                <div style={{ fontWeight: 600, fontSize: 13, color: page.accessConfig.visibility === v ? INDIGO : TEXT, marginBottom: 2 }}>
                   {v === "public" && "Pubblico"}
                   {v === "restricted" && "Dominio aziendale"}
                   {v === "invite_only" && "Solo invitati"}
@@ -800,7 +800,7 @@ export default function TrustCenterEditorPage() {
         </div>
 
         {/* ── Export pacchetto conformità ─────────────────────────────── */}
-        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 16, marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 8, padding: 16, marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
           <div>
             <p style={{ color: TEXT, fontWeight: 600, fontSize: 13, margin: 0 }}>Pacchetto di conformità</p>
             <p style={{ color: MUTED, fontSize: 11, margin: "2px 0 0" }}>
@@ -825,7 +825,7 @@ export default function TrustCenterEditorPage() {
 
           {/* Left: editor */}
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <p style={{ color: MUTED, fontSize: 12, marginBottom: 4 }}>
+            <p style={{ color: MUTED, fontSize: 13, marginBottom: 4 }}>
               Per ogni sezione: attiva il toggle per renderla pubblica, genera il testo con AI e confermalo prima di salvare.
             </p>
             {ALL_SECTION_IDS.map(id => (
@@ -845,7 +845,7 @@ export default function TrustCenterEditorPage() {
 
           {/* Right: live preview */}
           <div style={{ position: "sticky", top: 24 }}>
-            <p style={{ color: MUTED, fontSize: 12, marginBottom: 8 }}>Anteprima live — vista esterna</p>
+            <p style={{ color: MUTED, fontSize: 13, marginBottom: 8 }}>Anteprima live — vista esterna</p>
             <PublicPreview
               page={page}
               sourceData={sourceData}

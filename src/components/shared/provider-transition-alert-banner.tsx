@@ -53,7 +53,7 @@ export default function ProviderTransitionAlertBanner() {
             ? "Cambio di ruolo — obblighi del fornitore rilevati (Art. 25)"
             : "Cambio di ruolo — verifica necessaria (Art. 25)"}
         </p>
-        <p style={{ color: "#94A3B8", fontSize: 12, lineHeight: 1.5 }}>
+        <p style={{ color: "#0D1016", fontSize: 13, lineHeight: 1.5 }}>
           {isProvider
             ? `Le modifiche apportate al sistema di IA potrebbero configurare obblighi del fornitore ai sensi dell'Art. 25 Reg. (UE) 2024/1689.${earliest ? ` Prima modifica sostanziale: ${earliest}.` : ""}`
             : "Una o più risposte 'Incerto' richiedono valutazione legale prima di escludere obblighi del fornitore (Art. 25)."
@@ -62,13 +62,13 @@ export default function ProviderTransitionAlertBanner() {
       </div>
       <Link
         href="/dashboard/compliance-ops/provider-transition"
-        style={{ color: "#818cf8", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap", marginTop: 2 }}
+        style={{ color: "#818cf8", fontSize: 13, fontWeight: 600, whiteSpace: "nowrap", marginTop: 2 }}
       >
         Valuta →
       </Link>
       <button
         onClick={() => { sessionStorage.setItem(DISMISSED_KEY, "1"); setDismissed(true); }}
-        style={{ background: "none", border: "none", cursor: "pointer", color: "#94A3B8", padding: 2, marginTop: 1 }}
+        style={{ background: "none", border: "none", cursor: "pointer", color: "#0D1016", padding: 2, marginTop: 1 }}
         aria-label="Chiudi"
       >
         <X size={14} />

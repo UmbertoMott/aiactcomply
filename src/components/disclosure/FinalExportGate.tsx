@@ -24,7 +24,7 @@ export default function FinalExportGate({ children }: { children: React.ReactNod
   return (
     <div
       className="flex items-start gap-2 rounded-lg px-3 py-2.5 text-[11px]"
-      style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.1)", color: "rgba(0,0,0,0.6)", lineHeight: 1.5 }}
+      style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)", color: "#0D1016", lineHeight: 1.5 }}
     >
       <Lock size={13} style={{ flexShrink: 0, marginTop: 1 }} />
       <span>{t("export_gated")}</span>

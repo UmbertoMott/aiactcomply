@@ -9,8 +9,8 @@ import { useT } from "@/i18n/LocaleProvider";
 // ─── Design tokens (aligned with FRIA) ───────────────────────────────────────
 const T = {
   text:     "#0D1016",
-  muted:    "rgba(0,0,0,0.42)",
-  faint:    "rgba(0,0,0,0.28)",
+  muted:    "#0D1016",
+  faint:    "#0D1016",
   border:   "rgba(0,0,0,0.08)",
   card:     "#ffffff",
   bg:       "#f8f8f7",
@@ -242,7 +242,7 @@ export function NextStepGuide({ dpia, gapCheck, onNavigateToStep }: NextStepGuid
     return (
       <div style={{
         background: T.greenBg, border: `1px solid ${T.greenBdr}`,
-        borderRadius: 10, padding: "14px 20px", marginTop: 16,
+        borderRadius: 8, padding: "14px 20px", marginTop: 16,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: 13, fontWeight: 600, color: T.green }}>✓ {t("dnsg_completeTitle")}</span>
@@ -267,8 +267,8 @@ export function NextStepGuide({ dpia, gapCheck, onNavigateToStep }: NextStepGuid
     <div style={{
       background: T.card,
       border: `1px solid ${T.border}`,
-      borderRadius: 10,
-      boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+      borderRadius: 8,
+      boxShadow: "none",
       padding: "16px 20px",
       marginTop: 16,
     }}>
@@ -278,7 +278,7 @@ export function NextStepGuide({ dpia, gapCheck, onNavigateToStep }: NextStepGuid
           {t("dnsg_nextStep")}
         </span>
         <span style={{
-          fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 9999,
+          fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 9999,
           background: T.amberBg, border: `1px solid ${T.amberBdr}`, color: T.amber,
         }}>
           {t("dnsg_stepWord")} {step.targetStep + 1}
@@ -289,7 +289,7 @@ export function NextStepGuide({ dpia, gapCheck, onNavigateToStep }: NextStepGuid
       <p style={{ fontSize: 13, fontWeight: 600, color: T.text, margin: "0 0 4px" }}>
         {t(`dnsg_${stepKey}_title`)}
       </p>
-      <p style={{ fontSize: 12, color: T.muted, margin: "0 0 14px", lineHeight: 1.5 }}>
+      <p style={{ fontSize: 13, color: T.muted, margin: "0 0 14px", lineHeight: 1.5 }}>
         {t(`dnsg_${stepKey}_desc`)}
       </p>
 
@@ -319,11 +319,11 @@ export function NextStepGuide({ dpia, gapCheck, onNavigateToStep }: NextStepGuid
       {rationale && (
         <div style={{ marginBottom: 14, padding: "10px 12px", background: T.amberBg, border: `1px solid ${T.amberBdr}`, borderRadius: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-            <span style={{ fontSize: 10, fontWeight: 700, color: T.amber, background: "rgba(202,138,4,0.10)", padding: "2px 7px", borderRadius: 9999 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: T.amber, background: "rgba(202,138,4,0.10)", padding: "2px 7px", borderRadius: 9999 }}>
               ✦ {t("aiVerifyConfirm")}
             </span>
           </div>
-          <p style={{ fontSize: 12, color: T.text, margin: 0, lineHeight: 1.6 }}>
+          <p style={{ fontSize: 13, color: T.text, margin: 0, lineHeight: 1.6 }}>
             {rationale}
           </p>
         </div>
@@ -334,7 +334,7 @@ export function NextStepGuide({ dpia, gapCheck, onNavigateToStep }: NextStepGuid
         <button
           onClick={() => onNavigateToStep?.(step.targetStep)}
           style={{
-            fontSize: 12, fontWeight: 600, padding: "7px 16px", borderRadius: 8,
+            fontSize: 13, fontWeight: 600, padding: "7px 16px", borderRadius: 8,
             border: "none", background: T.text, color: "#fff",
             cursor: "pointer",
           }}

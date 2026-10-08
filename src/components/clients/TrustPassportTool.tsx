@@ -15,8 +15,8 @@ import { useT } from "@/i18n/LocaleProvider";
 
 const T = {
   text:   "#0D1016",
-  muted:  "rgba(0,0,0,0.45)",
-  faint:  "rgba(0,0,0,0.28)",
+  muted:  "#0D1016",
+  faint:  "#0D1016",
   border: "rgba(0,0,0,0.07)",
   card:   "#ffffff",
   green:  "#15803d", greenBg: "rgba(22,163,74,0.06)",  greenBdr: "rgba(22,163,74,0.2)",
@@ -51,18 +51,18 @@ function PillarCard({
   color: { txt: string; bg: string; bdr: string };
 }) {
   return (
-    <div className="rounded-xl p-4" style={{ background: T.card, border: `1px solid ${T.border}` }}>
+    <div className="rounded-lg p-4" style={{ background: T.card, border: `1px solid ${T.border}` }}>
       <div className="flex items-start justify-between mb-2">
-        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: T.faint }}>{label}</span>
+        <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: T.faint }}>{label}</span>
         <span
-          className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+          className="text-[11px] font-bold px-2 py-0.5 rounded-full"
           style={{ background: color.bg, color: color.txt, border: `1px solid ${color.bdr}` }}
         >
           {status}
         </span>
       </div>
       <div className="text-2xl font-bold mb-1" style={{ color: color.txt }}>
-        {score}<span className="text-sm" style={{ color: T.faint }}>/100</span>
+        {score}<span className="text-[13px]" style={{ color: T.faint }}>/100</span>
       </div>
       <div className="h-1.5 rounded-full w-full mb-2" style={{ background: "rgba(0,0,0,0.07)" }}>
         <div
@@ -86,7 +86,7 @@ function StatementRow({ ok, title, subtitle }: { ok: boolean; title: string; sub
         : <Circle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: T.faint }} />
       }
       <div>
-        <p className="text-xs font-medium" style={{ color: ok ? T.text : T.muted }}>{title}</p>
+        <p className="text-[11px] font-medium" style={{ color: ok ? T.text : T.muted }}>{title}</p>
         <p className="text-[11px]" style={{ color: T.muted }}>{subtitle}</p>
       </div>
     </div>
@@ -191,16 +191,16 @@ export default function TrustPassportPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <ShieldCheck className="w-4 h-4" style={{ color: T.purple }} />
-            <span className="text-xs font-medium" style={{ color: T.muted }}>Kit per la vendita</span>
+            <span className="text-[11px] font-medium" style={{ color: T.muted }}>Kit per la vendita</span>
           </div>
           <h1 className="text-xl font-bold">Dichiarazione di affidabilità IA</h1>
-          <p className="text-sm mt-0.5" style={{ color: T.muted }}>
+          <p className="text-[13px] mt-0.5" style={{ color: T.muted }}>
             {t("subtitle")}
           </p>
         </div>
         <button
           onClick={generate}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px]"
           style={{ background: T.card, border: `1px solid ${T.border}`, color: T.muted }}
         >
           <RefreshCw className="w-3 h-3" /> {t("regen")}
@@ -209,12 +209,12 @@ export default function TrustPassportPage() {
 
       {/* Error / empty */}
       {error && (
-        <div className="rounded-xl px-4 py-3 flex items-start gap-2"
+        <div className="rounded-lg px-4 py-3 flex items-start gap-2"
           style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
           <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: T.amber }} />
           <div>
-            <p className="text-xs font-semibold" style={{ color: T.amber }}>{error}</p>
-            <Link href="/dashboard/tools/inventory" className="text-xs underline mt-1 inline-block" style={{ color: T.amber }}>
+            <p className="text-[11px] font-semibold" style={{ color: T.amber }}>{error}</p>
+            <Link href="/dashboard/tools/inventory" className="text-[11px] underline mt-1 inline-block" style={{ color: T.amber }}>
               {t("goClassifier")}
             </Link>
           </div>
@@ -224,8 +224,8 @@ export default function TrustPassportPage() {
       {passport && (
         <>
           {/* Azienda input */}
-          <div className="rounded-xl p-4" style={{ background: T.card, border: `1px solid ${T.border}` }}>
-            <label className="block text-xs font-medium mb-1.5" style={{ color: T.muted }}>
+          <div className="rounded-lg p-4" style={{ background: T.card, border: `1px solid ${T.border}` }}>
+            <label className="block text-[11px] font-medium mb-1.5" style={{ color: T.muted }}>
               {t("company_label")}
             </label>
             <input
@@ -233,26 +233,26 @@ export default function TrustPassportPage() {
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
               onBlur={generate}
-              className="w-full px-3 py-1.5 rounded-lg text-sm"
+              className="w-full px-3 py-1.5 rounded-lg text-[13px]"
               style={{ border: `1px solid ${T.border}`, color: T.text }}
             />
           </div>
 
           {/* Hero — score globale */}
-          <div className="rounded-2xl p-6 flex items-center gap-6"
+          <div className="rounded-lg p-6 flex items-center gap-6"
             style={{ background: T.purpleBg, border: `1px solid ${T.purpleBdr}` }}>
             <div className="flex-shrink-0">
               <Award className="w-12 h-12" style={{ color: T.purple }} />
             </div>
             <div className="flex-1">
-              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: T.purple }}>
+              <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: T.purple }}>
                 {t("score_label")}
               </p>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="text-4xl font-bold" style={{ color: T.text }}>{passport.overallTrustScore}</span>
-                <span className="text-sm" style={{ color: T.muted }}>/ 100</span>
+                <span className="text-[13px]" style={{ color: T.muted }}>/ 100</span>
               </div>
-              <p className="text-xs mt-1" style={{ color: T.muted }}>
+              <p className="text-[11px] mt-1" style={{ color: T.muted }}>
                 {t("system_word")} <strong>{passport.systemName}</strong> · {t("tier_word")} {passport.riskTier}
                 {" · "}{t("validUntil")} {new Date(passport.validUntil).toLocaleDateString("it-IT")}
               </p>
@@ -260,9 +260,9 @@ export default function TrustPassportPage() {
             <div className="flex-shrink-0 text-center">
               {qrDataUrl
                 ? <img src={qrDataUrl} alt={t("qr_alt")} className="w-24 h-24 rounded-lg bg-white p-1" />
-                : <div className="w-24 h-24 rounded-lg bg-white/10 flex items-center justify-center text-[10px]" style={{ color: T.faint }}>{t("qr_generating")}</div>
+                : <div className="w-24 h-24 rounded-lg bg-white/10 flex items-center justify-center text-[11px]" style={{ color: T.faint }}>{t("qr_generating")}</div>
               }
-              <p className="text-[9px] mt-1" style={{ color: T.faint }}>{t("qr_scan")}</p>
+              <p className="text-[11px] mt-1" style={{ color: T.faint }}>{t("qr_scan")}</p>
             </div>
           </div>
 
@@ -275,8 +275,8 @@ export default function TrustPassportPage() {
           </div>
 
           {/* Statements */}
-          <div className="rounded-xl p-5" style={{ background: T.card, border: `1px solid ${T.border}` }}>
-            <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: T.faint }}>
+          <div className="rounded-lg p-5" style={{ background: T.card, border: `1px solid ${T.border}` }}>
+            <p className="text-[11px] font-semibold uppercase tracking-wider mb-3" style={{ color: T.faint }}>
               {t("statements_heading")}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -290,8 +290,8 @@ export default function TrustPassportPage() {
           </div>
 
           {/* Cosa NON include */}
-          <div className="rounded-xl p-5" style={{ background: "rgba(0,0,0,0.02)", border: `1px solid ${T.border}` }}>
-            <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: T.faint }}>
+          <div className="rounded-lg p-5" style={{ background: "#FAFAF9", border: `1px solid ${T.border}` }}>
+            <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: T.faint }}>
               {t("notExpose_heading")}
             </p>
             <div className="flex flex-wrap gap-1.5">
@@ -308,21 +308,21 @@ export default function TrustPassportPage() {
           </div>
 
           {/* Verifica */}
-          <div className="rounded-xl p-5" style={{ background: T.card, border: `1px solid ${T.border}` }}>
-            <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: T.faint }}>
+          <div className="rounded-lg p-5" style={{ background: T.card, border: `1px solid ${T.border}` }}>
+            <p className="text-[11px] font-semibold uppercase tracking-wider mb-3" style={{ color: T.faint }}>
               {t("verif_heading")}
             </p>
             <div className="space-y-2">
               <div>
-                <p className="text-[10px]" style={{ color: T.faint }}>{t("verif_hash")}</p>
-                <code className="text-xs" style={{ color: T.text }}>{passport.verificationHash}</code>
+                <p className="text-[11px]" style={{ color: T.faint }}>{t("verif_hash")}</p>
+                <code className="text-[11px]" style={{ color: T.text }}>{passport.verificationHash}</code>
               </div>
               <div>
-                <p className="text-[10px]" style={{ color: T.faint }}>{t("verif_url")}</p>
+                <p className="text-[11px]" style={{ color: T.faint }}>{t("verif_url")}</p>
                 <div className="flex items-center gap-2">
-                  <code className="text-xs flex-1 truncate" style={{ color: T.blue }}>{passport.publicRegistryUrl}</code>
+                  <code className="text-[11px] flex-1 truncate" style={{ color: T.blue }}>{passport.publicRegistryUrl}</code>
                   <button onClick={copyVerificationUrl}
-                    className="text-[10px] px-2 py-1 rounded flex items-center gap-1"
+                    className="text-[11px] px-2 py-1 rounded flex items-center gap-1"
                     style={{ background: T.blueBg, color: T.blue, border: `1px solid ${T.blueBdr}` }}>
                     <Copy className="w-3 h-3" /> {copied ? t("copied") : t("copy")}
                   </button>
@@ -334,25 +334,25 @@ export default function TrustPassportPage() {
           {/* Actions */}
           <div className="flex flex-wrap gap-3">
             <button onClick={downloadPdfA3} disabled={pdfLoading}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium text-white disabled:opacity-50"
               style={{ background: T.purple }}>
               <FileDown className="w-4 h-4" />
               {pdfLoading ? t("pdf_loading") : t("pdf_btn")}
             </button>
             <button onClick={downloadMarkdown}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-[13px]"
               style={{ background: T.card, color: T.text, border: `1px solid ${T.border}` }}>
               <Download className="w-4 h-4" />
               {t("md_btn")}
             </button>
             <Link href="/dashboard/dossier"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-[13px]"
               style={{ background: T.card, color: T.text, border: `1px solid ${T.border}` }}>
               <FileText className="w-4 h-4" />
               {t("dossier_btn")}
             </Link>
             <a href={passport.publicRegistryUrl} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-[13px]"
               style={{ background: T.card, color: T.text, border: `1px solid ${T.border}` }}>
               <ExternalLink className="w-4 h-4" />
               {t("openRegistry")}
@@ -360,7 +360,7 @@ export default function TrustPassportPage() {
           </div>
 
           {/* Disclaimer legale */}
-          <div className="rounded-xl px-4 py-3" style={{ background: "rgba(0,0,0,0.02)", border: `1px solid ${T.border}` }}>
+          <div className="rounded-lg px-4 py-3" style={{ background: "#FAFAF9", border: `1px solid ${T.border}` }}>
             <p className="text-[11px] leading-relaxed" style={{ color: T.muted }}
               dangerouslySetInnerHTML={{ __html: t("disclaimer") }}
             />

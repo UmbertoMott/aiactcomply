@@ -15,8 +15,8 @@ type TFn = (key: string) => string;
 
 const T = {
   text:   "#0D1016",
-  muted:  "rgba(0,0,0,0.45)",
-  faint:  "rgba(0,0,0,0.28)",
+  muted:  "#0D1016",
+  faint:  "#0D1016",
   border: "rgba(0,0,0,0.07)",
   card:   "#ffffff",
   red:    "#dc2626", redBg:   "rgba(220,38,38,0.06)",   redBdr:   "rgba(220,38,38,0.18)",
@@ -76,7 +76,7 @@ function AlertCard({ alert, t }: { alert: DriftAlert; t: TFn }) {
     <motion.div
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-xl p-4"
+      className="rounded-lg p-4"
       style={{
         background: isCritical ? T.redBg : T.amberBg,
         border: `1px solid ${isCritical ? T.redBdr : T.amberBdr}`,
@@ -85,9 +85,9 @@ function AlertCard({ alert, t }: { alert: DriftAlert; t: TFn }) {
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex items-center gap-2">
           <span style={{ color: isCritical ? T.red : T.amber }}>{icon}</span>
-          <span className="text-sm font-semibold" style={{ color: T.text }}>{label}</span>
+          <span className="text-[13px] font-semibold" style={{ color: T.text }}>{label}</span>
           <span
-            className="text-[10px] font-bold px-1.5 py-0.5 rounded uppercase"
+            className="text-[11px] font-bold px-1.5 py-0.5 rounded uppercase"
             style={{
               background: isCritical ? T.redBg : T.amberBg,
               color: isCritical ? T.red : T.amber,
@@ -98,16 +98,16 @@ function AlertCard({ alert, t }: { alert: DriftAlert; t: TFn }) {
           </span>
         </div>
         <div className="text-right flex-shrink-0">
-          <div className="text-lg font-bold" style={{ color: isCritical ? T.red : T.amber }}>
+          <div className="text-[15px] font-bold" style={{ color: isCritical ? T.red : T.amber }}>
             {alert.current}{unit}
           </div>
-          <div className="text-[10px]" style={{ color: T.muted }}>
+          <div className="text-[11px]" style={{ color: T.muted }}>
             +{alert.deviation_pct}% {t("vsThreshold")} {alert.baseline}{unit}
           </div>
         </div>
       </div>
 
-      <p className="text-xs leading-relaxed mb-2" style={{ color: "rgba(0,0,0,0.55)" }}>
+      <p className="text-[11px] leading-relaxed mb-2" style={{ color: "#0D1016" }}>
         {alert.description}
       </p>
 
@@ -122,7 +122,7 @@ function AlertCard({ alert, t }: { alert: DriftAlert; t: TFn }) {
         />
       </div>
 
-      <div className="text-[10px]" style={{ color: T.muted }}>
+      <div className="text-[11px]" style={{ color: T.muted }}>
         📋 {alert.art_reference}
       </div>
     </motion.div>
@@ -137,11 +137,11 @@ function StatusBadge({ report, t }: { report: DriftReport | null; t: TFn }) {
   if (!report.is_drifting) {
     return (
       <div
-        className="flex items-center gap-2 px-3 py-2 rounded-xl"
+        className="flex items-center gap-2 px-3 py-2 rounded-lg"
         style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}
       >
         <CheckCircle2 className="w-4 h-4" style={{ color: T.green }} />
-        <span className="text-xs font-medium" style={{ color: T.green }}>
+        <span className="text-[11px] font-medium" style={{ color: T.green }}>
           {t("noDrift")} — {report.events_analyzed} {t("eventsAnalyzed")}
         </span>
       </div>
@@ -151,14 +151,14 @@ function StatusBadge({ report, t }: { report: DriftReport | null; t: TFn }) {
   const criticalCount = report.alerts.filter(a => a.severity === "critical").length;
   return (
     <div
-      className="flex items-center gap-2 px-3 py-2 rounded-xl"
+      className="flex items-center gap-2 px-3 py-2 rounded-lg"
       style={{
         background: criticalCount > 0 ? T.redBg : T.amberBg,
         border: `1px solid ${criticalCount > 0 ? T.redBdr : T.amberBdr}`,
       }}
     >
       <AlertTriangle className="w-4 h-4" style={{ color: criticalCount > 0 ? T.red : T.amber }} />
-      <span className="text-xs font-medium" style={{ color: criticalCount > 0 ? T.red : T.amber }}>
+      <span className="text-[11px] font-medium" style={{ color: criticalCount > 0 ? T.red : T.amber }}>
         {report.alerts.length} {t("alerts_word")}
         {criticalCount > 0 ? ` (${criticalCount} ${t("critical_word")})` : ` — ${t("warning_word")}`}
         {" · "}{report.events_analyzed} {t("events_word")}
@@ -174,7 +174,7 @@ function HistoryTimeline({ history, t, loc }: { history: HistoryEntry[]; t: TFn;
 
   return (
     <div>
-      <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: T.faint }}>
+      <p className="text-[11px] font-semibold uppercase tracking-wider mb-3" style={{ color: T.faint }}>
         {t("history_pre")} {history.length} {t("history_post")}
       </p>
       <div className="flex items-end gap-1 h-12">
@@ -196,7 +196,7 @@ function HistoryTimeline({ history, t, loc }: { history: HistoryEntry[]; t: TFn;
           );
         })}
       </div>
-      <div className="flex justify-between text-[10px] mt-1" style={{ color: T.faint }}>
+      <div className="flex justify-between text-[11px] mt-1" style={{ color: T.faint }}>
         <span>{new Date(history[history.length - 1]?.fetchedAt).toLocaleTimeString(loc)}</span>
         <span>{t("now_word")}</span>
       </div>
@@ -314,12 +314,12 @@ export default function DriftMonitorPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Activity className="w-4 h-4" style={{ color: T.blue }} />
-            <span className="text-xs font-medium" style={{ color: T.muted }}>
+            <span className="text-[11px] font-medium" style={{ color: T.muted }}>
               {t("kicker")}
             </span>
           </div>
           <h1 className="text-xl font-bold">{t("title")}</h1>
-          <p className="text-sm mt-0.5" style={{ color: T.muted }}>
+          <p className="text-[13px] mt-0.5" style={{ color: T.muted }}>
             {t("subtitle")}
           </p>
         </div>
@@ -332,7 +332,7 @@ export default function DriftMonitorPage() {
               <button
                 key={opt.value}
                 onClick={() => setWindowHours(opt.value)}
-                className="px-2.5 py-1.5 text-xs transition-colors"
+                className="px-2.5 py-1.5 text-[11px] transition-colors"
                 style={{
                   background: windowHours === opt.value ? T.text : T.card,
                   color: windowHours === opt.value ? "#fff" : T.muted,
@@ -349,7 +349,7 @@ export default function DriftMonitorPage() {
               <button
                 key={opt.value}
                 onClick={() => setRefreshSec(opt.value)}
-                className="px-2.5 py-1.5 text-xs transition-colors"
+                className="px-2.5 py-1.5 text-[11px] transition-colors"
                 style={{
                   background: refreshSec === opt.value ? T.text : T.card,
                   color: refreshSec === opt.value ? "#fff" : T.muted,
@@ -363,7 +363,7 @@ export default function DriftMonitorPage() {
           {/* Pausa / Riprendi */}
           <button
             onClick={() => setPaused(p => !p)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px] transition-colors"
             style={{ background: T.card, border: `1px solid ${T.border}`, color: T.muted }}
           >
             {paused
@@ -376,7 +376,7 @@ export default function DriftMonitorPage() {
           <button
             onClick={fetchDrift}
             disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px] transition-colors"
             style={{ background: T.card, border: `1px solid ${T.border}`, color: T.muted }}
           >
             <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />
@@ -386,7 +386,7 @@ export default function DriftMonitorPage() {
       </div>
 
       {/* Countdown + ultimo aggiornamento */}
-      <div className="flex items-center gap-3 text-xs" style={{ color: T.faint }}>
+      <div className="flex items-center gap-3 text-[11px]" style={{ color: T.faint }}>
         {lastFetch && (
           <span>{t("lastUpdate")} {lastFetch.toLocaleTimeString(loc)}</span>
         )}
@@ -399,10 +399,10 @@ export default function DriftMonitorPage() {
       {/* Errore */}
       {error && (
         <div
-          className="rounded-xl px-4 py-3"
+          className="rounded-lg px-4 py-3"
           style={{ background: T.redBg, border: `1px solid ${T.redBdr}` }}
         >
-          <p className="text-xs" style={{ color: T.red }}>
+          <p className="text-[11px]" style={{ color: T.red }}>
             {error.includes("SESSION_EXPIRED") || error.includes("401")
               ? <>{t("err_sessionExpired_pre")} <Link href="/login" className="underline">{t("err_loginAgain")}</Link></>
               : error.includes("tabella") || error.includes("relation")
@@ -421,17 +421,17 @@ export default function DriftMonitorPage() {
       {/* Nessun log nella finestra */}
       {report?.message && !report.is_drifting && report.events_analyzed === 0 && (
         <div
-          className="rounded-xl px-4 py-8 text-center"
+          className="rounded-lg px-4 py-8 text-center"
           style={{ background: T.card, border: `1px solid ${T.border}` }}
         >
           <Activity className="w-8 h-8 mx-auto mb-2" style={{ color: "rgba(0,0,0,0.15)" }} />
-          <p className="text-sm font-medium mb-1" style={{ color: T.muted }}>
+          <p className="text-[13px] font-medium mb-1" style={{ color: T.muted }}>
             {t("noLog_pre")} {windowHours}h {t("noLog_post")}
           </p>
-          <p className="text-xs" style={{ color: T.faint }}>
+          <p className="text-[11px]" style={{ color: T.faint }}>
             {t("noLog_hint")}{" "}
             <code
-              className="text-xs px-1 py-0.5 rounded"
+              className="text-[11px] px-1 py-0.5 rounded"
               style={{ background: "rgba(0,0,0,0.04)" }}
             >
               /api/logvault/ingest
@@ -439,7 +439,7 @@ export default function DriftMonitorPage() {
           </p>
           <Link
             href="/dashboard/tools/logvault"
-            className="inline-flex items-center gap-1 mt-3 text-xs px-3 py-1.5 rounded-lg"
+            className="inline-flex items-center gap-1 mt-3 text-[11px] px-3 py-1.5 rounded-lg"
             style={{ background: T.blueBg, color: T.blue, border: `1px solid ${T.blueBdr}` }}
           >
             {t("goLogVault")}
@@ -456,7 +456,7 @@ export default function DriftMonitorPage() {
             animate={{ opacity: 1 }}
             className="space-y-2"
           >
-            <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: T.red }}>
+            <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: T.red }}>
               {t("criticalAlerts_pre")} ({criticalAlerts.length})
             </p>
             {criticalAlerts.map((alert, i) => (
@@ -475,7 +475,7 @@ export default function DriftMonitorPage() {
             animate={{ opacity: 1 }}
             className="space-y-2"
           >
-            <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: T.amber }}>
+            <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: T.amber }}>
               {t("warnings_pre")} ({warningAlerts.length})
             </p>
             {warningAlerts.map((alert, i) => (
@@ -488,7 +488,7 @@ export default function DriftMonitorPage() {
       {/* Storico visivo */}
       {history.length > 1 && (
         <div
-          className="rounded-xl p-4"
+          className="rounded-lg p-4"
           style={{ background: T.card, border: `1px solid ${T.border}` }}
         >
           <HistoryTimeline history={[...history].reverse()} t={t} loc={loc} />
@@ -497,10 +497,10 @@ export default function DriftMonitorPage() {
 
       {/* Footer legale */}
       <div
-        className="rounded-xl px-4 py-3"
-        style={{ background: "rgba(0,0,0,0.02)", border: `1px solid ${T.border}` }}
+        className="rounded-lg px-4 py-3"
+        style={{ background: "#FAFAF9", border: `1px solid ${T.border}` }}
       >
-        <p className="text-xs leading-relaxed" style={{ color: T.muted }}
+        <p className="text-[11px] leading-relaxed" style={{ color: T.muted }}
           dangerouslySetInnerHTML={{ __html: t("footer") }} />
       </div>
 

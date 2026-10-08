@@ -12,8 +12,8 @@ import type { OrgProfile } from "@/lib/dossier/storage-schema";
 
 const T = {
   text:    "#0D1016",
-  muted:   "rgba(0,0,0,0.42)",
-  faint:   "rgba(0,0,0,0.22)",
+  muted:   "#0D1016",
+  faint:   "#0D1016",
   border:  "rgba(0,0,0,0.08)",
   card:    "#ffffff",
   bg:      "#FAFAF9",
@@ -25,7 +25,7 @@ const T = {
 const cardSt: CSSProperties = {
   background: T.card,
   border: `1px solid ${T.border}`,
-  borderRadius: 12,
+  borderRadius: 8,
   padding: 20,
 };
 
@@ -52,12 +52,12 @@ function ToggleRow({
           <span style={{ fontSize: 13, fontWeight: 500, color: T.text }}>{label}</span>
           {badge && (
             <span style={{
-              fontSize: 10, fontWeight: 600, padding: "1px 6px", borderRadius: 10,
+              fontSize: 11, fontWeight: 600, padding: "1px 6px", borderRadius: 8,
               color: T.blue, background: T.blueBg, border: `1px solid ${T.blueBdr}`,
             }}>{badge}</span>
           )}
         </div>
-        <p style={{ fontSize: 12, color: T.muted, marginTop: 2, lineHeight: 1.5 }}>{sublabel}</p>
+        <p style={{ fontSize: 13, color: T.muted, marginTop: 2, lineHeight: 1.5 }}>{sublabel}</p>
       </div>
       <button
         role="switch"
@@ -150,7 +150,7 @@ export default function OrgProfilePage() {
 
         {/* Org name */}
         <div className="mb-4">
-          <label style={{ fontSize: 12, fontWeight: 500, color: T.muted, display: "block", marginBottom: 6 }}>
+          <label style={{ fontSize: 13, fontWeight: 500, color: T.muted, display: "block", marginBottom: 6 }}>
             Nome organizzazione
           </label>
           <input
@@ -168,7 +168,7 @@ export default function OrgProfilePage() {
 
         {/* Country */}
         <div>
-          <label style={{ fontSize: 12, fontWeight: 500, color: T.muted, display: "block", marginBottom: 6 }}>
+          <label style={{ fontSize: 13, fontWeight: 500, color: T.muted, display: "block", marginBottom: 6 }}>
             Paese sede legale
           </label>
           <select
@@ -185,7 +185,7 @@ export default function OrgProfilePage() {
             ))}
           </select>
           {isNonEU && (
-            <p style={{ marginTop: 6, fontSize: 12, color: T.amber }}>
+            <p style={{ marginTop: 6, fontSize: 13, color: T.amber }}>
               ⚠️ Paese non UE — potresti avere l&apos;obbligo di designare un Rappresentante Autorizzato (Art. 22).
             </p>
           )}
@@ -198,7 +198,7 @@ export default function OrgProfilePage() {
           <Globe style={{ width: 15, height: 15, color: T.muted }} />
           <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Flag normativi</span>
         </div>
-        <p style={{ fontSize: 12, color: T.muted, marginBottom: 12, lineHeight: 1.5 }}>
+        <p style={{ fontSize: 13, color: T.muted, marginBottom: 12, lineHeight: 1.5 }}>
           Attiva le opzioni rilevanti per la tua organizzazione. Influenzano il piano di conformità.
         </p>
 
@@ -222,11 +222,11 @@ export default function OrgProfilePage() {
           }}>
             <div className="flex items-center gap-2">
               <Zap style={{ width: 13, height: 13, color: T.blue }} />
-              <span style={{ fontSize: 12, fontWeight: 500, color: T.blue }}>
+              <span style={{ fontSize: 13, fontWeight: 500, color: T.blue }}>
                 GPAI rilevato — obblighi Art. 53–55 attivi
               </span>
             </div>
-            <p style={{ fontSize: 12, color: T.muted, marginTop: 4 }}>
+            <p style={{ fontSize: 13, color: T.muted, marginTop: 4 }}>
               Il flag GPAI è stato impostato automaticamente dal Triage. Va al GPAI Assessment per completare la valutazione.
             </p>
           </div>
@@ -247,7 +247,7 @@ export default function OrgProfilePage() {
           {saved ? "Salvato!" : "Salva impostazioni"}
         </button>
         {saved && (
-          <span style={{ fontSize: 12, color: T.green }}>
+          <span style={{ fontSize: 13, color: T.green }}>
             ✓ Le impostazioni sono state salvate
           </span>
         )}

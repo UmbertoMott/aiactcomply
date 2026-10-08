@@ -21,8 +21,8 @@ export default function AiaArchitectUI() {
         style={{ width: "140px", borderRight: "1px solid #f0f0f0", background: "#fff" }}
       >
         <div
-          className="flex items-center gap-1.5 text-[12px] font-bold mb-4"
-          style={{ color: "#1a1a1a" }}
+          className="flex items-center gap-1.5 text-[13px] font-bold mb-4"
+          style={{ color: "#0D1016" }}
         >
           <div
             className="w-4 h-4 rounded"
@@ -31,8 +31,8 @@ export default function AiaArchitectUI() {
           RegulaeOS
         </div>
         <div
-          className="text-[9px] font-semibold uppercase mb-1.5"
-          style={{ color: "#999", letterSpacing: "0.8px" }}
+          className="text-[11px] font-semibold uppercase mb-1.5"
+          style={{ color: "#0D1016", letterSpacing: "0.8px" }}
         >
           Moduli
         </div>
@@ -44,16 +44,16 @@ export default function AiaArchitectUI() {
         ].map(({ label, tag, active }) => (
           <div
             key={label}
-            className="flex items-center justify-between text-[10px] px-2 py-1.5 rounded mb-0.5"
+            className="flex items-center justify-between text-[11px] px-2 py-1.5 rounded mb-0.5"
             style={
               active
                 ? { background: "#eff6ff", color: "#1d4ed8", fontWeight: 500 }
-                : { color: "#555" }
+                : { color: "#0D1016" }
             }
           >
             <span>{label}</span>
             <span
-              className="text-[8px] px-1.5 py-0.5 rounded"
+              className="text-[11px] px-1.5 py-0.5 rounded"
               style={{ background: "#e0e7ff", color: "#4338ca" }}
             >
               {tag}
@@ -63,20 +63,20 @@ export default function AiaArchitectUI() {
       </div>
 
       {/* Main */}
-      <div className="flex-1 p-3.5" style={{ background: "#fafafa" }}>
+      <div className="flex-1 p-3.5" style={{ background: "#FAFAF9" }}>
         <div className="text-[13px] font-bold mb-0.5">AIA-Architect</div>
-        <div className="text-[10px] mb-3" style={{ color: "#777" }}>
+        <div className="text-[11px] mb-3" style={{ color: "#777" }}>
           Motore AST Parser: analisi semantica → Art. 10 → Dossier Vivente Annex IV
         </div>
         <div className="flex gap-1 mb-3">
           {["Editor Codice", "AST Scan", "Annex IV JSON"].map((tab, i) => (
             <div
               key={tab}
-              className="text-[10px] px-2.5 py-1 rounded-md"
+              className="text-[11px] px-2.5 py-1 rounded-md"
               style={
                 i === 1
                   ? { background: "#4f46e5", color: "#fff" }
-                  : { border: "1px solid #e5e7eb", color: "#666" }
+                  : { border: "1px solid #e5e7eb", color: "#0D1016" }
               }
             >
               {tab}
@@ -86,12 +86,12 @@ export default function AiaArchitectUI() {
         <div className="text-[11px] font-semibold mb-2">Data Lineage Column-Level — Art. 10</div>
         <div className="rounded-lg overflow-hidden" style={{ border: "1px solid #e5e7eb" }}>
           <div
-            className="grid text-[9px] font-semibold uppercase px-2.5 py-1.5"
+            className="grid text-[11px] font-semibold uppercase px-2.5 py-1.5"
             style={{
               gridTemplateColumns: "80px 85px 80px 1fr 44px",
-              background: "#f9fafb",
+              background: "#FAFAF9",
               borderBottom: "1px solid #e5e7eb",
-              color: "#6b7280",
+              color: "#0D1016",
               letterSpacing: "0.5px",
             }}
           >
@@ -104,11 +104,11 @@ export default function AiaArchitectUI() {
           {rows.map(({ fonte, col, feature, trasf, bias, level }) => (
             <div
               key={feature}
-              className="grid text-[10px] px-2.5 py-1.5 items-center"
+              className="grid text-[11px] px-2.5 py-1.5 items-center"
               style={{
                 gridTemplateColumns: "80px 85px 80px 1fr 44px",
                 borderBottom: "1px solid #f3f4f6",
-                color: "#374151",
+                color: "#0D1016",
               }}
             >
               <span className="truncate pr-1">{fonte}</span>
@@ -116,7 +116,7 @@ export default function AiaArchitectUI() {
               <span className="truncate pr-1" style={{ color: "#2563eb" }}>{feature}</span>
               <span className="truncate pr-1">{trasf}</span>
               <span
-                className="text-[9px] font-bold text-center px-1.5 py-0.5 rounded"
+                className="text-[11px] font-bold text-center px-1.5 py-0.5 rounded"
                 style={biasStyle[level]}
               >
                 {bias}

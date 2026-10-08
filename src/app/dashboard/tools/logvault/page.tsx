@@ -34,7 +34,7 @@ type TFn = (key: string) => string;
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 const T = {
-  text: "#0D1016", muted: "rgba(0,0,0,0.42)", faint: "rgba(0,0,0,0.22)", border: "rgba(0,0,0,0.08)",
+  text: "#0D1016", muted: "#0D1016", faint: "#0D1016", border: "rgba(0,0,0,0.08)",
   card: "#fff", bg: "#f9f9fb",
   red: "#dc2626", redBg: "rgba(220,38,38,0.06)", redBdr: "rgba(220,38,38,0.18)",
   amber: "#d97706", amberBg: "rgba(202,138,4,0.07)", amberBdr: "rgba(202,138,4,0.22)",
@@ -43,8 +43,8 @@ const T = {
   violet: "#7c3aed", violetBg: "rgba(124,58,237,0.05)", violetBdr: "rgba(124,58,237,0.16)",
 } as const;
 const FONT: CSSProperties = { fontFamily: "inherit" };
-const card: CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" };
-const inp: CSSProperties = { width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, color: T.text, background: T.card, outline: "none" };
+const card: CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, boxShadow: "none" };
+const inp: CSSProperties = { width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, color: T.text, background: T.card, outline: "none" };
 const ta: CSSProperties = { ...inp, resize: "vertical" as const };
 
 // ─── Coverage badge ───────────────────────────────────────────────────────────
@@ -57,7 +57,7 @@ function CoverageBadge({ covered, t }: { covered: CoverageStatus; t: TFn }) {
   };
   const s = map[covered];
   return (
-    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ color: s.color, background: s.bg }}>{s.label}</span>
+    <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-full" style={{ color: s.color, background: s.bg }}>{s.label}</span>
   );
 }
 
@@ -80,7 +80,7 @@ function PurposeCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDetec
   const matchedFields = allDetectedFields.filter(f => hints.some(h => f.toLowerCase().includes(h)));
 
   return (
-    <div className="rounded-xl border" style={{ background: T.card, borderColor: covered === "yes" ? "#86efac" : covered === "partial" ? "#fcd34d" : T.border }}>
+    <div className="rounded-lg border" style={{ background: T.card, borderColor: covered === "yes" ? "#86efac" : covered === "partial" ? "#fcd34d" : T.border }}>
       <button className="w-full flex items-start gap-3 p-4 text-left" onClick={() => setOpen(v => !v)}>
         <div className="mt-0.5">
           {covered === "yes" ? <CheckCircle size={15} style={{ color: T.green }} /> :
@@ -90,21 +90,21 @@ function PurposeCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDetec
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>
+            <span className="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded" style={{ background: T.blueBg, color: T.blue }}>
               {def.reference.split(" ").slice(0, 2).join(" ")}
             </span>
-            <span className="text-[12px] font-semibold" style={{ color: T.text }}>{def.label}</span>
+            <span className="text-[13px] font-semibold" style={{ color: T.text }}>{def.label}</span>
             <CoverageBadge covered={covered} t={t} />
-            {pendingProposal && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: T.violetBg, color: T.violet }}>✦ AI</span>}
+            {pendingProposal && <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: T.violetBg, color: T.violet }}>✦ AI</span>}
           </div>
-          <p className="text-[10px] mt-0.5" style={{ color: T.faint }}>{def.crossReference}</p>
+          <p className="text-[11px] mt-0.5" style={{ color: T.faint }}>{def.crossReference}</p>
           {matchedFields.length > 0 && covered === "unspecified" && (
             <p className="text-[11px] mt-1" style={{ color: T.amber }}>
               ⚠ {t("pc_relevantFieldsDetected")} {matchedFields.join(", ")}
             </p>
           )}
         </div>
-        <span className="text-[10px] flex-shrink-0" style={{ color: T.faint }}>{open ? "▲" : "▼"}</span>
+        <span className="text-[11px] flex-shrink-0" style={{ color: T.faint }}>{open ? "▲" : "▼"}</span>
       </button>
 
       {open && (
@@ -113,7 +113,7 @@ function PurposeCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDetec
           {pendingProposal && (
             <div className="mt-3 rounded-lg p-3 mb-3" style={{ background: T.violetBg, border: `1px solid ${T.violetBdr}` }}>
               <p className="text-[11px] font-semibold mb-1" style={{ color: T.violet }}>✦ {t("aiVerify")}</p>
-              <p className="text-[12px] mb-1" style={{ color: T.text }}>{pendingProposal.rationale}</p>
+              <p className="text-[13px] mb-1" style={{ color: T.text }}>{pendingProposal.rationale}</p>
               {pendingProposal.evidenceFields.length > 0 && (
                 <p className="text-[11px]" style={{ color: T.muted }}>
                   {t("fieldsWord")} {pendingProposal.evidenceFields.join(", ")}
@@ -153,7 +153,7 @@ function PurposeCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDetec
 
           {/* Coverage selector */}
           <div className="mt-3 mb-2">
-            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1.5" style={{ color: T.muted }}>{t("coverage")}</label>
+            <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1.5" style={{ color: T.muted }}>{t("coverage")}</label>
             <div className="flex gap-2 flex-wrap">
               {(["yes", "partial", "no", "unspecified"] as CoverageStatus[]).map(s => {
                 const labels: Record<CoverageStatus, string> = { yes: t("cov_yes"), partial: t("cov_partial"), no: t("cov_no"), unspecified: t("cov_unspecified") };
@@ -171,7 +171,7 @@ function PurposeCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDetec
 
           {/* Evidence fields */}
           <div className="mb-3">
-            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("evidenceFieldsComma")}</label>
+            <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("evidenceFieldsComma")}</label>
             <input type="text" value={rec?.evidenceFields?.join(", ") ?? ""}
               onChange={e => onUpdate(def.id, { evidenceFields: e.target.value.split(",").map(s => s.trim()).filter(Boolean) })}
               placeholder={t("pc_evFieldsPh")}
@@ -179,7 +179,7 @@ function PurposeCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDetec
           </div>
 
           <div className="mb-3">
-            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("notesWord")}</label>
+            <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("notesWord")}</label>
             <textarea rows={2} value={rec?.notes ?? ""}
               onChange={e => onUpdate(def.id, { notes: e.target.value })}
               placeholder={t("pc_notesPh")}
@@ -214,7 +214,7 @@ function BiometricCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDet
   const matched = allDetectedFields.filter(f => hints.some(h => f.toLowerCase().includes(h)));
 
   return (
-    <div className="rounded-xl border" style={{ background: T.card, borderColor: covered === "yes" ? "#86efac" : covered === "partial" ? "#fcd34d" : T.border }}>
+    <div className="rounded-lg border" style={{ background: T.card, borderColor: covered === "yes" ? "#86efac" : covered === "partial" ? "#fcd34d" : T.border }}>
       <button className="w-full flex items-start gap-3 p-3 text-left" onClick={() => setOpen(v => !v)}>
         <div className="mt-0.5">
           {covered === "yes" ? <CheckCircle size={13} style={{ color: T.green }} /> :
@@ -224,13 +224,13 @@ function BiometricCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDet
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] font-mono px-1 py-0.5 rounded" style={{ background: T.bg, color: T.muted }}>{def.reference.split(" ").slice(0, 2).join(" ")}</span>
+            <span className="text-[11px] font-mono px-1 py-0.5 rounded" style={{ background: T.bg, color: T.muted }}>{def.reference.split(" ").slice(0, 2).join(" ")}</span>
             <span className="text-[11px] font-medium" style={{ color: T.text }}>{def.label}</span>
             <CoverageBadge covered={covered} t={t} />
-            {pendingProposal && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: T.violetBg, color: T.violet }}>✦ AI</span>}
+            {pendingProposal && <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: T.violetBg, color: T.violet }}>✦ AI</span>}
           </div>
         </div>
-        <span style={{ color: T.faint, fontSize: 10 }}>{open ? "▲" : "▼"}</span>
+        <span style={{ color: T.faint, fontSize: 11 }}>{open ? "▲" : "▼"}</span>
       </button>
 
       {open && (
@@ -270,9 +270,9 @@ function BiometricCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDet
               <p className="text-[11px] font-semibold" style={{ color: T.amber }}>{t("bc_fieldDetected")} {matched.join(", ")}</p>
               <div className="flex gap-1 mt-1">
                 <button onClick={() => onUpdate(def.id, { covered: "partial", evidenceField: matched[0] })}
-                  className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: T.amberBg, color: T.amber, border: `1px solid ${T.amberBdr}`, cursor: "pointer" }}>{t("cov_partial")}</button>
+                  className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: T.amberBg, color: T.amber, border: `1px solid ${T.amberBdr}`, cursor: "pointer" }}>{t("cov_partial")}</button>
                 <button onClick={() => onUpdate(def.id, { covered: "yes", evidenceField: matched[0] })}
-                  className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: T.greenBg, color: T.green, border: `1px solid ${T.greenBdr}`, cursor: "pointer" }}>{t("bc_confirm")}</button>
+                  className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: T.greenBg, color: T.green, border: `1px solid ${T.greenBdr}`, cursor: "pointer" }}>{t("bc_confirm")}</button>
               </div>
             </div>
           )}
@@ -292,7 +292,7 @@ function BiometricCard({ def, rec, pendingProposal, onUpdate, onAcceptAi, allDet
           </div>
 
           <div>
-            <label className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("bc_evidenceField")}</label>
+            <label className="text-[11px] font-semibold uppercase tracking-wide block mb-1" style={{ color: T.muted }}>{t("bc_evidenceField")}</label>
             <input type="text" value={rec?.evidenceField ?? ""}
               onChange={e => onUpdate(def.id, { evidenceField: e.target.value })}
               placeholder={t("bc_evFieldPh")}
@@ -313,9 +313,9 @@ function LogSetCard({ logSet, onRemove, t, loc }: { logSet: ImportedLogSet; onRe
           <div className="flex items-center gap-1.5 mb-0.5">
             <FileText size={12} style={{ color: T.green }} />
             <span className="text-[11px] font-semibold truncate" style={{ color: T.green }}>{logSet.fileName}</span>
-            <span className="text-[10px] px-1 rounded" style={{ background: T.bg, color: T.muted }}>{logSet.format.toUpperCase()}</span>
+            <span className="text-[11px] px-1 rounded" style={{ background: T.bg, color: T.muted }}>{logSet.format.toUpperCase()}</span>
           </div>
-          <div className="flex flex-wrap gap-3 text-[10px]" style={{ color: T.muted }}>
+          <div className="flex flex-wrap gap-3 text-[11px]" style={{ color: T.muted }}>
             <span>{logSet.entryCount.toLocaleString()} {t("entriesWord")}</span>
             <span>{logSet.detectedFields.length} {t("fieldsCountWord")}</span>
             {logSet.dateRangeStart && (
@@ -325,7 +325,7 @@ function LogSetCard({ logSet, onRemove, t, loc }: { logSet: ImportedLogSet; onRe
             )}
           </div>
           {logSet.detectedFields.length > 0 && (
-            <p className="text-[10px] mt-1 truncate" style={{ color: T.faint }}>
+            <p className="text-[11px] mt-1 truncate" style={{ color: T.faint }}>
               {t("fieldsWord")} {logSet.detectedFields.slice(0, 8).join(", ")}{logSet.detectedFields.length > 8 ? `... +${logSet.detectedFields.length - 8}` : ""}
             </p>
           )}
@@ -601,12 +601,12 @@ export default function LogVaultPage() {
 
       {/* Dossier banner */}
       {savedAt ? (
-        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-4 text-[12px]" style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}>
+        <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-4 text-[13px]" style={{ background: T.greenBg, border: `1px solid ${T.greenBdr}` }}>
           <span style={{ color: T.green }}>✓ {t("savedDossier")} · {new Date(savedAt).toLocaleDateString(loc)}</span>
           <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium" style={{ color: T.green }}>{t("seeDossier")}</Link>
         </div>
       ) : (
-        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-4 text-[12px]" style={{ background: T.card, border: `1px solid ${T.border}` }}>
+        <div className="flex items-center justify-between rounded-lg px-4 py-2.5 mb-4 text-[13px]" style={{ background: T.card, border: `1px solid ${T.border}` }}>
           <span style={{ color: T.muted }}>{t("saveHint")}</span>
           <button onClick={saveToDossier} className="text-[11px] font-medium rounded-full px-3 py-1" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>{t("save")}</button>
         </div>
@@ -646,7 +646,7 @@ export default function LogVaultPage() {
       <AnimatePresence>
         {showConfig && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden mb-4">
-            <div className="rounded-xl p-4" style={card}>
+            <div className="rounded-lg p-4" style={card}>
               <div className="flex items-start gap-2.5 mb-3">
                 <AlertTriangle size={15} style={{ color: T.red, flexShrink: 0, marginTop: 1 }} />
                 <div>
@@ -661,7 +661,7 @@ export default function LogVaultPage() {
               {loadingSeverity && <p className="text-[11px] mt-1" style={{ color: T.muted }}>{t("classifyingAi")}</p>}
               {severitySuggestion && (
                 <div className="mt-2 rounded-lg p-2.5" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-                  <p className="text-[12px] font-semibold" style={{ color: T.amber }}>{t("severityDetected")} <strong>{severitySuggestion.severity.toUpperCase()}</strong></p>
+                  <p className="text-[13px] font-semibold" style={{ color: T.amber }}>{t("severityDetected")} <strong>{severitySuggestion.severity.toUpperCase()}</strong></p>
                   <p className="text-[11px] mt-0.5" style={{ color: T.muted }}>{severitySuggestion.rationale}</p>
                   {severitySuggestion.regulatoryFlag && <p className="text-[11px] mt-0.5" style={{ color: T.red }}>⚠ {severitySuggestion.regulatoryFlag}</p>}
                 </div>
@@ -675,10 +675,10 @@ export default function LogVaultPage() {
       <div className="flex gap-4 mb-6 flex-wrap">
 
         {/* Art. 12(1) triage */}
-        <div className="flex-1 min-w-0 rounded-xl p-4" style={card}>
+        <div className="flex-1 min-w-0 rounded-lg p-4" style={card}>
           <div className="flex items-center gap-2 mb-2">
             <Info size={14} style={{ color: T.blue }} />
-            <span className="text-[12px] font-semibold" style={{ color: T.text }}>{t("triageTitle")}</span>
+            <span className="text-[13px] font-semibold" style={{ color: T.text }}>{t("triageTitle")}</span>
           </div>
           <p className="text-[11px] mb-3 leading-relaxed" style={{ color: T.muted }}>
             {t("triageQuestion")}
@@ -689,7 +689,7 @@ export default function LogVaultPage() {
               { v: "no" as const, l: t("triage_no") },
             ]).map(opt => (
               <button key={opt.v} onClick={() => patchRecord({ loggingCapabilityConfirmed: opt.v })}
-                className="text-[12px] px-3 py-2 rounded-lg border"
+                className="text-[13px] px-3 py-2 rounded-lg border"
                 style={{
                   borderColor: record.loggingCapabilityConfirmed === opt.v ? T.blue : T.border,
                   background: record.loggingCapabilityConfirmed === opt.v ? T.blueBg : "transparent",
@@ -706,8 +706,8 @@ export default function LogVaultPage() {
 
       {/* "No logging" guide */}
       {record.loggingCapabilityConfirmed === "no" && (
-        <div className="rounded-xl p-4 mb-6" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
-          <p className="text-[12px] font-semibold mb-2" style={{ color: T.amber }}>
+        <div className="rounded-lg p-4 mb-6" style={{ background: T.amberBg, border: `1px solid ${T.amberBdr}` }}>
+          <p className="text-[13px] font-semibold mb-2" style={{ color: T.amber }}>
             ⚠ {t("noLogTitle")}
           </p>
           <p className="text-[11px] leading-relaxed" style={{ color: T.text }}>
@@ -767,10 +767,10 @@ export default function LogVaultPage() {
               onClick={() => fileInputRef.current?.click()}
               onDragOver={e => e.preventDefault()}
               onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFileImport(f); }}
-              className="rounded-xl border-2 border-dashed flex flex-col items-center justify-center p-6 cursor-pointer"
+              className="rounded-lg border-2 border-dashed flex flex-col items-center justify-center p-6 cursor-pointer"
               style={{ borderColor: T.border, background: T.bg }}>
               {uploading ? <Loader2 size={20} className="animate-spin mb-2" style={{ color: T.blue }} /> : <Upload size={20} className="mb-2" style={{ color: T.muted }} />}
-              <p className="text-[12px] font-medium" style={{ color: T.text }}>{uploading ? t("analyzing") : t("dropHint")}</p>
+              <p className="text-[13px] font-medium" style={{ color: T.text }}>{uploading ? t("analyzing") : t("dropHint")}</p>
               <p className="text-[11px]" style={{ color: T.muted }}>{t("formats")}</p>
               <p className="text-[11px] mt-1" style={{ color: T.faint }}>{t("rawNotSaved")}</p>
               <input ref={fileInputRef} type="file" accept=".json,.ndjson,.jsonl,.csv,.tsv" className="hidden"
@@ -786,8 +786,8 @@ export default function LogVaultPage() {
                   { label: t("stat_fieldsDetected"), value: allDetectedFields.length },
                 ].map(s => (
                   <div key={s.label} className="rounded-lg p-3" style={card}>
-                    <div className="text-lg font-semibold" style={{ color: T.text }}>{s.value}</div>
-                    <div className="text-[10px]" style={{ color: T.muted }}>{s.label}</div>
+                    <div className="text-[15px] font-semibold" style={{ color: T.text }}>{s.value}</div>
+                    <div className="text-[11px]" style={{ color: T.muted }}>{s.label}</div>
                   </div>
                 ))}
               </div>
@@ -835,7 +835,7 @@ export default function LogVaultPage() {
               <div className="mt-3 rounded-lg p-3" style={{ background: T.violetBg, border: `1px solid ${T.violetBdr}` }}>
                 <p className="text-[11px] font-semibold mb-1" style={{ color: T.violet }}>✦ {t("aiVerifySafeState")}</p>
                 <p className="text-[11px] leading-relaxed" style={{ color: T.text }}>{aiSafeStateSuggestion}</p>
-                <button onClick={() => setAiSafeStateSuggestion(null)} className="text-[10px] mt-1" style={{ color: T.muted, background: "none", border: "none", cursor: "pointer" }}>{t("close")}</button>
+                <button onClick={() => setAiSafeStateSuggestion(null)} className="text-[11px] mt-1" style={{ color: T.muted, background: "none", border: "none", cursor: "pointer" }}>{t("close")}</button>
               </div>
             )}
           </section>
@@ -876,8 +876,8 @@ export default function LogVaultPage() {
           </div>
 
           {/* ── Retention notes ────────────────────────────────────────────── */}
-          <section className="mb-6 rounded-xl p-4" style={card}>
-            <h2 className="text-[12px] font-semibold mb-1" style={{ color: T.text }}>
+          <section className="mb-6 rounded-lg p-4" style={card}>
+            <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>
               {t("retentionNotesTitle")}
             </h2>
             <p className="text-[11px] mb-3" style={{ color: T.muted }}>
@@ -903,14 +903,14 @@ export default function LogVaultPage() {
                 <div className="flex-1 h-px" style={{ background: T.border }} />
               </div>
               {logsImported ? (
-                <div className="rounded-xl border-2 p-4" style={{ background: T.card, borderColor: T.violet }}>
+                <div className="rounded-lg border-2 p-4" style={{ background: T.card, borderColor: T.violet }}>
                   <div className="flex items-center gap-2 mb-3">
                     <Shield size={15} style={{ color: T.violet }} />
-                    <span className="font-semibold text-sm" style={{ color: T.text }}>{t("bioMinReqTitle")}</span>
+                    <span className="font-semibold text-[13px]" style={{ color: T.text }}>{t("bioMinReqTitle")}</span>
                   </div>
                   {totalBiometricUncovered > 0 && (
                     <div className="rounded-lg p-3 mb-3" style={{ background: T.redBg, border: `1px solid ${T.redBdr}` }}>
-                      <p className="text-[12px] font-semibold" style={{ color: T.red }}>
+                      <p className="text-[13px] font-semibold" style={{ color: T.red }}>
                         {t("bioUncoveredPre")} {totalBiometricUncovered}/4 {t("bioUncoveredPost")}
                       </p>
                       <p className="text-[11px] mt-1" style={{ color: T.muted }}>{t("bioUncoveredHint")}</p>
@@ -944,17 +944,17 @@ export default function LogVaultPage() {
           </div>
 
           {/* ── §9 Export Log Conformity Statement ── */}
-          <section className="mb-6 rounded-xl p-4" style={card}>
-            <h2 className="text-[12px] font-semibold mb-1" style={{ color: T.text }}>{t("evidenceTitle")}</h2>
+          <section className="mb-6 rounded-lg p-4" style={card}>
+            <h2 className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>{t("evidenceTitle")}</h2>
             <p className="text-[11px] mb-3" style={{ color: T.muted }}>{t("evidenceDesc")}</p>
             <div className="flex flex-wrap gap-2">
               <button onClick={() => exportLogConformityJSON(record)}
-                className="text-[12px] font-medium px-3 py-1.5 rounded-lg"
+                className="text-[13px] font-medium px-3 py-1.5 rounded-lg"
                 style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
                 {t("exportJson")}
               </button>
               <button onClick={() => window.print()}
-                className="text-[12px] font-medium px-3 py-1.5 rounded-lg"
+                className="text-[13px] font-medium px-3 py-1.5 rounded-lg"
                 style={{ background: "#fff", color: T.text, border: `1px solid ${T.border}`, cursor: "pointer" }}>
                 {t("printPdf")}
               </button>
@@ -963,7 +963,7 @@ export default function LogVaultPage() {
 
           {/* Save */}
           <div className="flex justify-end">
-            <button onClick={saveToDossier} className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[12px] font-medium"
+            <button onClick={saveToDossier} className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13px] font-medium"
               style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}>
               <CheckCircle size={14} /> {t("saveToDossier")}
             </button>
@@ -976,7 +976,7 @@ export default function LogVaultPage() {
       <AnimatePresence>
         {toast && (
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }}
-            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg"
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-[13px] font-medium shadow-lg"
             style={{ background: toast.type === "error" ? "rgba(220,38,38,0.95)" : T.text, color: "#fff" }}>
             {toast.type === "error" ? "⚠" : "✓"} {toast.msg}
           </motion.div>

@@ -10,7 +10,7 @@ import { saveAssessment } from "@/lib/inventory/classifier-bridge";
 import { writeToStorage, type ProhibitedCheckResult } from "@/lib/dossier/storage-schema";
 import { ART5_PRACTICES } from "@/lib/obligations/engine";
 
-const T = { text: "#0D1016", muted: "rgba(0,0,0,0.45)", border: "rgba(0,0,0,0.08)", bg: "#FAFAF9" } as const;
+const T = { text: "#0D1016", muted: "#0D1016", border: "rgba(0,0,0,0.08)", bg: "#FAFAF9" } as const;
 
 /** Esito della verifica Art. 5, letto da dossier e valutazione di conformità */
 function saveArt5Check({ rk, risk }: ClassifyState) {
@@ -57,7 +57,7 @@ export default function TriagePage() {
           finishLabel="Salva nell'inventario"
           finishDisabled={name.trim().length === 0}
           finishExtra={
-            <div style={{ background: "white", border: `1px solid ${T.border}`, borderRadius: 12, padding: "16px 18px", marginTop: 12 }}>
+            <div style={{ background: "white", border: `1px solid ${T.border}`, borderRadius: 8, padding: "16px 18px", marginTop: 12 }}>
               <label htmlFor="triage-name" style={{ fontSize: 13, fontWeight: 600, color: T.text, display: "block", marginBottom: 6 }}>
                 Nome del sistema
               </label>
@@ -65,7 +65,7 @@ export default function TriagePage() {
                 id="triage-name" value={name} onChange={e => setName(e.target.value)} placeholder="Es. Software di selezione dei CV"
                 style={{ width: "100%", padding: "9px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13 }}
               />
-              <p style={{ fontSize: 11.5, color: T.muted, margin: "6px 0 0" }}>
+              <p style={{ fontSize: 11, color: T.muted, margin: "6px 0 0" }}>
                 Salvandolo, il sistema entra nell&apos;inventario con questa classificazione e diventa quello di riferimento per gli altri tool.
               </p>
             </div>

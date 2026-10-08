@@ -23,12 +23,12 @@ import { useT } from "@/i18n/LocaleProvider";
 import FinalExportGate from "@/components/disclosure/FinalExportGate";
 
 const T = {
-  text: "#0D1016", muted: "rgba(0,0,0,0.42)", faint: "rgba(0,0,0,0.22)", border: "rgba(0,0,0,0.08)",
+  text: "#0D1016", muted: "#0D1016", faint: "#0D1016", border: "rgba(0,0,0,0.08)",
   card: "#fff", bg: "#f9f9fb", red: "#dc2626", amber: "#d97706", green: "#15803d", violet: "#7c3aed",
 } as const;
-const card: CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, padding: 16 };
-const inp: CSSProperties = { padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, color: T.text, background: T.card, outline: "none" };
-const lbl: CSSProperties = { fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: T.muted, marginBottom: 5, display: "block" };
+const card: CSSProperties = { background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: 16 };
+const inp: CSSProperties = { padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, color: T.text, background: T.card, outline: "none" };
+const lbl: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: T.muted, marginBottom: 5, display: "block" };
 
 export default function ResiliencePage() {
   const t = useT("toolResilience");
@@ -171,7 +171,7 @@ export default function ResiliencePage() {
         </div>
 
         {/* Privacy */}
-        <div className="rounded-xl p-3 mb-4 flex items-start gap-2" style={{ background: "rgba(0,0,0,0.03)", border: `1px solid ${T.border}` }}>
+        <div className="rounded-lg p-3 mb-4 flex items-start gap-2" style={{ background: "#FAFAF9", border: `1px solid ${T.border}` }}>
           <Shield size={14} className="mt-0.5 flex-shrink-0" style={{ color: T.text }} />
           <p className="text-[11px]" style={{ color: T.muted }}>
             Resilience <strong style={{ color: T.text }}>{t("privacy_strong")}</strong>{t("privacy_text")}
@@ -202,9 +202,9 @@ export default function ResiliencePage() {
           </div>
           <div onClick={() => fileRef.current?.click()}
             onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleImport(f); }}
-            className="rounded-xl border-2 border-dashed flex flex-col items-center justify-center p-6 cursor-pointer" style={{ borderColor: T.border, background: T.bg }}>
+            className="rounded-lg border-2 border-dashed flex flex-col items-center justify-center p-6 cursor-pointer" style={{ borderColor: T.border, background: T.bg }}>
             {uploading ? <Loader2 size={20} className="animate-spin mb-2" style={{ color: T.text }} /> : <Upload size={20} className="mb-2" style={{ color: T.muted }} />}
-            <p className="text-[12px] font-medium" style={{ color: T.text }}>{uploading ? t("up_analyzing") : `${t("up_import_pre")} ${KIND_LABEL[uploadKind]}`}</p>
+            <p className="text-[13px] font-medium" style={{ color: T.text }}>{uploading ? t("up_analyzing") : `${t("up_import_pre")} ${KIND_LABEL[uploadKind]}`}</p>
             <p className="text-[11px]" style={{ color: T.muted }}>{t("up_hint")}</p>
             <input ref={fileRef} type="file" accept=".json,.csv,.tsv" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleImport(f); e.currentTarget.value = ""; }} />
           </div>
@@ -229,7 +229,7 @@ export default function ResiliencePage() {
           ) : (
             <>
               <div style={card} className="mb-3">
-                <p className="text-[12px] font-semibold mb-1" style={{ color: T.text }}>{t("acc_q")}</p>
+                <p className="text-[13px] font-semibold mb-1" style={{ color: T.text }}>{t("acc_q")}</p>
                 <p className="text-[11px] mb-2" style={{ color: T.muted }}>{t("acc_note")}</p>
                 <div className="flex gap-2 items-center flex-wrap">
                   {(["yes", "no"] as const).map(v => {
@@ -247,8 +247,8 @@ export default function ResiliencePage() {
               </div>
 
               <div style={card}>
-                <p className="text-[12px] font-semibold mb-2" style={{ color: T.text }}>{t("sp_title")}</p>
-                {auditGroups.length > 0 && <p className="text-[10px] mb-2" style={{ color: T.muted }}>{t("sp_auditGroups")} {auditGroups.join(", ")}</p>}
+                <p className="text-[13px] font-semibold mb-2" style={{ color: T.text }}>{t("sp_title")}</p>
+                {auditGroups.length > 0 && <p className="text-[11px] mb-2" style={{ color: T.muted }}>{t("sp_auditGroups")} {auditGroups.join(", ")}</p>}
                 <div className="flex gap-2 flex-wrap items-end mb-3">
                   <div><label style={lbl}>{t("sp_setLabel")}</label>
                     <select style={inp} value={spDsId} onChange={e => setSpDsId(e.target.value)}>
@@ -257,18 +257,18 @@ export default function ResiliencePage() {
                     </select></div>
                   <div><label style={lbl}>{t("sp_metricLabel")}</label>
                     <input style={inp} value={spMetric} onChange={e => setSpMetric(e.target.value)} placeholder={t("sp_metricPlaceholder")} /></div>
-                  <button onClick={computeSP} disabled={!spDsId} className="text-[12px] font-medium px-3 py-1.5 rounded-lg" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer", opacity: spDsId ? 1 : 0.5 }}>{t("sp_compute")}</button>
+                  <button onClick={computeSP} disabled={!spDsId} className="text-[13px] font-medium px-3 py-1.5 rounded-lg" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer", opacity: spDsId ? 1 : 0.5 }}>{t("sp_compute")}</button>
                 </div>
                 {spSetsWithRows.length === 0 && <p className="text-[11px]" style={{ color: T.amber }}>{t("sp_reloadHint")}</p>}
                 {record.subPopulation.map((sp: SubPopulationMetric) => (
                   <div key={sp.metric + sp.dimension} className="mt-3 pt-3" style={{ borderTop: `1px solid ${T.border}` }}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[12px] font-semibold" style={{ color: T.text }}>{sp.metric} — {t("sp_overall")} {(sp.overall * 100).toFixed(1)}%</span>
+                      <span className="text-[13px] font-semibold" style={{ color: T.text }}>{sp.metric} — {t("sp_overall")} {(sp.overall * 100).toFixed(1)}%</span>
                       <span className="text-[11px] font-bold" style={{ color: verdictColor[sp.verdict] }}>{t("sp_gap")} {(sp.maxGap * 100).toFixed(1)}% · {sp.verdict}</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {sp.byGroup.map(g => (
-                        <span key={g.group} className="text-[10px] px-2 py-1 rounded" style={{ background: T.bg, color: (g.sampleSize ?? 0) < 30 ? T.faint : T.text }}>
+                        <span key={g.group} className="text-[11px] px-2 py-1 rounded" style={{ background: T.bg, color: (g.sampleSize ?? 0) < 30 ? T.faint : T.text }}>
                           {g.group}: {(g.value * 100).toFixed(1)}%{(g.sampleSize ?? 0) < 30 ? t("sp_sampleInsuff") : ""}
                         </span>
                       ))}
@@ -290,7 +290,7 @@ export default function ResiliencePage() {
           ) : (
             <>
               <div style={card} className="mb-3">
-                <p className="text-[12px] font-semibold mb-2" style={{ color: T.text }}>{t("tm_title")}</p>
+                <p className="text-[13px] font-semibold mb-2" style={{ color: T.text }}>{t("tm_title")}</p>
                 <div className="space-y-2">
                   {PREN18282_THREATS.map(threat => {
                     const rec = record.threats.find(t => t.threatId === threat.id);
@@ -300,12 +300,12 @@ export default function ResiliencePage() {
                       <div key={threat.id} className="rounded-lg p-3" style={{ border: `1px solid ${T.border}` }}>
                         <div className="flex items-start justify-between gap-2 mb-2">
                           <div>
-                            <p className="text-[12px] font-medium" style={{ color: T.text }}>{threat.label}
-                              {threat.generativeOnly && !isGenerative && <span className="text-[10px] ml-1" style={{ color: T.amber }}>{t("tm_checkApplic")}</span>}
+                            <p className="text-[13px] font-medium" style={{ color: T.text }}>{threat.label}
+                              {threat.generativeOnly && !isGenerative && <span className="text-[11px] ml-1" style={{ color: T.amber }}>{t("tm_checkApplic")}</span>}
                             </p>
-                            <p className="text-[10px]" style={{ color: T.muted }}>{threat.reference}</p>
+                            <p className="text-[11px]" style={{ color: T.muted }}>{threat.reference}</p>
                           </div>
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0" style={{ color: statusColor, background: T.bg }}>
+                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0" style={{ color: statusColor, background: T.bg }}>
                             {status === "tested_mitigated" ? t("st_testedMitigated") : status === "tested_gap" ? t("st_testedGap") : t("st_notAssessed")}
                           </span>
                         </div>
@@ -341,13 +341,13 @@ export default function ResiliencePage() {
               </div>
 
               <div style={card}>
-                <p className="text-[12px] font-semibold mb-2" style={{ color: T.text }}>{t("rob_title")}</p>
+                <p className="text-[13px] font-semibold mb-2" style={{ color: T.text }}>{t("rob_title")}</p>
                 <div className="space-y-2">
                   {ROBUSTNESS_ITEMS.map(item => {
                     const rec = record.robustness.find(r => r.itemId === item.id);
                     return (
                       <div key={item.id} className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[12px] flex-1" style={{ color: T.text, minWidth: 200 }}>{item.label}</span>
+                        <span className="text-[13px] flex-1" style={{ color: T.text, minWidth: 200 }}>{item.label}</span>
                         <select style={{ ...inp, fontSize: 11 }} value={rec?.status ?? "unspecified"} onChange={e => updateRobustness(item.id, { status: e.target.value as "documented" | "gap" | "unspecified" })}>
                           <option value="unspecified">{t("rob_toAssess")}</option>
                           <option value="documented">{t("rob_documented")}</option>
@@ -375,23 +375,23 @@ export default function ResiliencePage() {
             </p>
             <div className="flex flex-wrap gap-2 items-center">
               <FinalExportGate>
-                <button onClick={exportJSON} className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}><FileText size={13} /> {t("ev_exportJson")}</button>
-                <button onClick={() => window.print()} className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg" style={{ background: "#fff", color: T.text, border: `1px solid ${T.border}`, cursor: "pointer" }}><FileText size={13} /> {t("ev_printPdf")}</button>
+                <button onClick={exportJSON} className="flex items-center gap-1.5 text-[13px] font-medium px-3 py-1.5 rounded-lg" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}><FileText size={13} /> {t("ev_exportJson")}</button>
+                <button onClick={() => window.print()} className="flex items-center gap-1.5 text-[13px] font-medium px-3 py-1.5 rounded-lg" style={{ background: "#fff", color: T.text, border: `1px solid ${T.border}`, cursor: "pointer" }}><FileText size={13} /> {t("ev_printPdf")}</button>
               </FinalExportGate>
-              <button onClick={saveToDossier} className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-lg ml-auto" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}><CheckCircle2 size={13} /> {t("ev_saveDossier")}</button>
+              <button onClick={saveToDossier} className="flex items-center gap-1.5 text-[13px] font-medium px-3 py-1.5 rounded-lg ml-auto" style={{ background: T.text, color: "#fff", border: "none", cursor: "pointer" }}><CheckCircle2 size={13} /> {t("ev_saveDossier")}</button>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3">
             {RESILIENCE_PILLARS.map(p => (
               <Link key={p.id} href={p.linkedPath} className="rounded-lg p-3 block" style={{ background: T.card, border: `1px solid ${T.border}`, textDecoration: "none" }}>
                 <p className="text-[11px] font-semibold" style={{ color: T.text }}>{p.label}</p>
-                <p className="text-[10px]" style={{ color: T.muted }}>{p.reference}</p>
+                <p className="text-[11px]" style={{ color: T.muted }}>{p.reference}</p>
               </Link>
             ))}
           </div>
         </section>
 
-        {toast && <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl text-[12px] font-medium shadow-lg" style={{ background: T.text, color: "#fff" }}>✓ {toast}</div>}
+        {toast && <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-lg text-[13px] font-medium shadow-lg" style={{ background: T.text, color: "#fff" }}>✓ {toast}</div>}
       </div>
     </div>
   );

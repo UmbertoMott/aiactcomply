@@ -76,7 +76,7 @@ export default function DisclosureModal({ lang = "it" }: DisclosureModalProps) {
       // Intentionally NOT closing on backdrop click — modal is blocking
     >
       <div
-        className="relative w-full max-w-lg mx-4 rounded-2xl overflow-hidden"
+        className="relative w-full max-w-lg mx-4 rounded-lg overflow-hidden"
         style={{
           background: "#ffffff",
           boxShadow: "0 32px 80px rgba(0,0,0,0.35)",
@@ -89,13 +89,13 @@ export default function DisclosureModal({ lang = "it" }: DisclosureModalProps) {
           {/* Icon + badge */}
           <div className="flex items-center justify-between mb-5">
             <div
-              className="flex items-center justify-center rounded-xl"
+              className="flex items-center justify-center rounded-lg"
               style={{ width: 44, height: 44, background: "#E6F1FB" }}
             >
               <Shield size={22} style={{ color: "#0C447C" }} strokeWidth={1.5} />
             </div>
             <span
-              className="text-[10px] font-semibold px-2.5 py-1 rounded-full"
+              className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
               style={{ background: "#E6F1FB", color: "#0C447C", letterSpacing: "0.5px" }}
             >
               {t.badge}
@@ -105,23 +105,23 @@ export default function DisclosureModal({ lang = "it" }: DisclosureModalProps) {
           {/* Title */}
           <h2
             className="mb-4"
-            style={{ fontSize: "17px", fontWeight: 600, color: "#0D1016", letterSpacing: "-0.4px", lineHeight: 1.3 }}
+            style={{ fontSize: 15, fontWeight: 600, color: "#0D1016", letterSpacing: "-0.4px", lineHeight: 1.3 }}
           >
             {t.title}
           </h2>
 
           {/* Body */}
-          <p className="text-[13px] mb-3" style={{ color: "rgba(0,0,0,0.55)", lineHeight: 1.6 }}>
+          <p className="text-[13px] mb-3" style={{ color: "#0D1016", lineHeight: 1.6 }}>
             {t.body[0]}
           </p>
-          <p className="text-[12px] font-semibold mb-2" style={{ color: "#0D1016" }}>
+          <p className="text-[13px] font-semibold mb-2" style={{ color: "#0D1016" }}>
             {t.body[1]}
           </p>
 
           {/* Bullets */}
           <ul className="mb-6 space-y-2">
             {t.bullets.map((b, i) => (
-              <li key={i} className="flex items-start gap-2 text-[12px]" style={{ color: "rgba(0,0,0,0.6)", lineHeight: 1.5 }}>
+              <li key={i} className="flex items-start gap-2 text-[13px]" style={{ color: "#0D1016", lineHeight: 1.5 }}>
                 <span className="mt-1 flex-shrink-0 rounded-full" style={{ width: 5, height: 5, background: "#3b82f6", marginTop: 6 }} />
                 {b}
               </li>
@@ -131,7 +131,7 @@ export default function DisclosureModal({ lang = "it" }: DisclosureModalProps) {
           {/* CTA */}
           <button
             onClick={handleAcknowledge}
-            className="w-full py-3 rounded-xl text-[13px] font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+            className="w-full py-3 rounded-lg text-[13px] font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
             style={{ background: "#0D1016", color: "#ffffff", border: "none", cursor: "pointer" }}
           >
             {t.cta}

@@ -511,8 +511,8 @@ function buildQPaExtra(t: TFn): QQuestion[] {
 
 const card: React.CSSProperties = {
   background: "#ffffff",
-  border: "1px solid rgba(0,0,0,0.07)",
-  boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+  border: "1px solid rgba(0,0,0,0.08)",
+  boxShadow: "none",
   borderRadius: "12px",
 };
 
@@ -745,31 +745,31 @@ export default function QuestionnairePage() {
       <div className="mb-6">
         <div className="flex items-start gap-3">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+            className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
             style={{ background: "rgba(59,130,246,0.07)" }}
           >
             <FileText className="h-5 w-5" style={{ color: "#2563eb" }} />
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-[18px] font-semibold" style={{ color: "#0D1016" }}>
+              <h1 className="text-[15px] font-semibold" style={{ color: "#0D1016" }}>
                 {t("title")}
               </h1>
               <span
-                className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                className="flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full"
                 style={{ background: "rgba(22,163,74,0.09)", color: "#15803d", border: "1px solid rgba(22,163,74,0.2)" }}
               >
                 <Zap className="h-3 w-3" /> {t("autoFillBadge")}
               </span>
             </div>
-            <p className="text-[12px] mt-0.5" style={{ color: "rgba(0,0,0,0.45)" }}>
+            <p className="text-[13px] mt-0.5" style={{ color: "#0D1016" }}>
               {t("subtitle")}
             </p>
           </div>
           <button
             onClick={refreshSnapshot}
             className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg transition-all flex-shrink-0"
-            style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.55)" }}
+            style={{ background: "rgba(0,0,0,0.05)", color: "#0D1016" }}
             title={t("reloadDossier")}
           >
             <RefreshCw className="h-3.5 w-3.5" /> {t("reloadDossier")}
@@ -778,9 +778,9 @@ export default function QuestionnairePage() {
       </div>
 
       {/* ── Dossier status banner ───────────────────────────────────────────── */}
-      <div className="mb-5 p-4 rounded-xl" style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)" }}>
+      <div className="mb-5 p-4 rounded-lg" style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.08)" }}>
         <div className="flex items-center justify-between mb-2">
-          <p className="text-[12px] font-medium" style={{ color: "#0D1016" }}>
+          <p className="text-[13px] font-medium" style={{ color: "#0D1016" }}>
             {t("dossierWord")} <span style={{ color: barColor }}>{completedCount}/12</span> {t("sectionsCompleted")}
           </p>
           <Link
@@ -797,14 +797,14 @@ export default function QuestionnairePage() {
             style={{ width: `${completedPct}%`, background: barColor }}
           />
         </div>
-        <p className="text-[11px] mt-1.5" style={{ color: "rgba(0,0,0,0.4)" }}>
+        <p className="text-[11px] mt-1.5" style={{ color: "#0D1016" }}>
           {t("autoFillAvailPre")} ~{completedPct}% {t("autoFillAvailPost")}
         </p>
       </div>
 
       {/* ── Template selection ──────────────────────────────────────────────── */}
       <div className="mb-5">
-        <p className="text-[12px] font-semibold mb-3" style={{ color: "#0D1016" }}>
+        <p className="text-[13px] font-semibold mb-3" style={{ color: "#0D1016" }}>
           {t("selectType")}
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -815,7 +815,7 @@ export default function QuestionnairePage() {
               <button
                 key={tpl.id}
                 onClick={() => { setSelectedTemplate(tpl); setGenerated(false); }}
-                className="text-left p-4 rounded-xl transition-all"
+                className="text-left p-4 rounded-lg transition-all"
                 style={{
                   background: isSelected ? "rgba(59,130,246,0.05)" : "#fff",
                   border: isSelected
@@ -831,20 +831,20 @@ export default function QuestionnairePage() {
                   >
                     <Icon className="h-3.5 w-3.5" style={{ color: isSelected ? "#2563eb" : "#0D1016" }} />
                   </div>
-                  <p className="text-[12px] font-semibold" style={{ color: "#0D1016" }}>
+                  <p className="text-[13px] font-semibold" style={{ color: "#0D1016" }}>
                     {tpl.label}
                   </p>
                 </div>
-                <p className="text-[11px] mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
+                <p className="text-[11px] mb-1.5" style={{ color: "#0D1016" }}>
                   {tpl.description}
                 </p>
                 <div className="flex items-center justify-between">
-                  <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>
+                  <p className="text-[11px]" style={{ color: "#0D1016" }}>
                     {tpl.useCase}
                   </p>
                   <span
-                    className="text-[10px] px-1.5 py-0.5 rounded font-medium"
-                    style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.45)" }}
+                    className="text-[11px] px-1.5 py-0.5 rounded font-medium"
+                    style={{ background: "rgba(0,0,0,0.05)", color: "#0D1016" }}
                   >
                     {tpl.questions.length} {t("questionsWord")}
                   </span>
@@ -859,7 +859,7 @@ export default function QuestionnairePage() {
       <button
         onClick={handleGenerate}
         disabled={!selectedTemplate}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[13px] font-semibold mb-6 transition-all disabled:opacity-40"
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-lg text-[13px] font-semibold mb-6 transition-all disabled:opacity-40"
         style={{ background: "#0D1016", color: "#fff" }}
       >
         <Zap className="h-4 w-4" />
@@ -888,12 +888,12 @@ export default function QuestionnairePage() {
                     {idx + 1}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-medium leading-snug" style={{ color: "#0D1016" }}>
+                    <p className="text-[13px] font-medium leading-snug" style={{ color: "#0D1016" }}>
                       {q.text}
                     </p>
                     <span
-                      className="inline-block mt-1 text-[10px] px-1.5 py-0.5 rounded"
-                      style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.45)" }}
+                      className="inline-block mt-1 text-[11px] px-1.5 py-0.5 rounded"
+                      style={{ background: "rgba(0,0,0,0.05)", color: "#0D1016" }}
                     >
                       {q.category}
                     </span>
@@ -910,8 +910,8 @@ export default function QuestionnairePage() {
                       width: "100%",
                       padding: "8px 10px",
                       borderRadius: "8px",
-                      border: "1px solid rgba(0,0,0,0.1)",
-                      fontSize: "12px",
+                      border: "1px solid rgba(0,0,0,0.08)",
+                      fontSize: 13,
                       color: "#0D1016",
                       background: answer.status === "manual" ? "rgba(220,38,38,0.02)" : "#fafaf9",
                       resize: "vertical",
@@ -923,12 +923,12 @@ export default function QuestionnairePage() {
                 {/* Footer */}
                 <div className="flex items-center gap-2 px-4 pb-3">
                   <span
-                    className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                    className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
                     style={{ background: sm.bg, color: sm.color, border: `1px solid ${sm.border}` }}
                   >
                     {t(sm.labelKey)}
                   </span>
-                  <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>
+                  <p className="text-[11px]" style={{ color: "#0D1016" }}>
                     {answer.source}
                   </p>
                 </div>
@@ -947,7 +947,7 @@ export default function QuestionnairePage() {
           style={{
             background: "rgba(255,255,255,0.95)",
             backdropFilter: "blur(12px)",
-            borderTop: "1px solid rgba(0,0,0,0.07)",
+            borderTop: "1px solid rgba(0,0,0,0.08)",
             boxShadow: "0 -4px 16px rgba(0,0,0,0.06)",
           }}
         >
@@ -997,15 +997,15 @@ export default function QuestionnairePage() {
       {/* Info callout (only before generation) */}
       {!generated && (
         <div
-          className="rounded-xl p-4 flex items-start gap-3"
+          className="rounded-lg p-4 flex items-start gap-3"
           style={{ background: "rgba(59,130,246,0.05)", border: "1px solid rgba(59,130,246,0.15)" }}
         >
           <Info className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: "#2563eb" }} />
           <div>
-            <p className="text-[12px] font-medium mb-0.5" style={{ color: "#1e40af" }}>
+            <p className="text-[13px] font-medium mb-0.5" style={{ color: "#1e40af" }}>
               {t("howItWorksTitle")}
             </p>
-            <p className="text-[11px] leading-relaxed" style={{ color: "rgba(0,0,0,0.55)" }}
+            <p className="text-[11px] leading-relaxed" style={{ color: "#0D1016" }}
               dangerouslySetInnerHTML={{ __html: t("howItWorksBody") }} />
           </div>
         </div>
@@ -1014,7 +1014,7 @@ export default function QuestionnairePage() {
       {/* Toast */}
       {toast && (
         <div
-          className="fixed bottom-16 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-lg text-[12px] font-medium shadow-lg z-50"
+          className="fixed bottom-16 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-lg text-[13px] font-medium shadow-lg z-50"
           style={{ background: "#0D1016", color: "#fff", whiteSpace: "nowrap" }}
         >
           {toast}
