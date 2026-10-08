@@ -221,10 +221,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   useEffect(() => {
     setLayoutMounted(true);
-    const check = () => setIsMobile(window.innerWidth < 1024);
+    // Schermata "Apri dal computer" solo sui telefoni: schermo piccolo E touch.
+    // Una finestra del computer ristretta (mouse) o un tablet usano l'app normale.
+    const mq = window.matchMedia("(max-width: 767px) and (pointer: coarse)");
+    const check = () => setIsMobile(mq.matches);
     check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
+    mq.addEventListener("change", check);
+    return () => mq.removeEventListener("change", check);
   }, []);
   const { role } = useUserRole();
   const { profile: orgProfile } = useOrgProfile();
@@ -318,7 +321,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Sidebar */}
       <aside
-        className={`relative fixed inset-y-0 left-0 z-50 flex flex-col transform transition-all duration-200 lg:translate-x-0 lg:static lg:z-auto select-none ${sidebarW} ${
+        className={`fixed inset-y-0 left-0 z-50 flex flex-col transform transition-all duration-200 lg:translate-x-0 lg:relative lg:z-auto select-none ${sidebarW} ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         style={{ background: "#0D1016", cursor: "default" }}
