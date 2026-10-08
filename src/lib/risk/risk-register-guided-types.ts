@@ -49,15 +49,15 @@ export interface RiskRegisterGuidedDoc {
 // ─── Sezioni ──────────────────────────────────────────────────────────────────
 
 export const RISK_REGISTER_SECTIONS: RiskRegisterGuidedSection[] = [
-  { key: "sec0", label: "§0 — Scoping",                  legalRef: "Art. 9(1)",        anchor: "rr-sec0"  },
+  { key: "sec0", label: "§0 — Ambito e criteri",         legalRef: "Art. 9(1)",        anchor: "rr-sec0"  },
   { key: "sec1", label: "§1 — Identificazione Rischi",   legalRef: "Art. 9(2)(a)",     anchor: "rr-sec1"  },
   { key: "sec2", label: "§2 — Stima e Valutazione",      legalRef: "Art. 9(2)(b)",     anchor: "rr-sec2"  },
   { key: "sec3", label: "§3 — Test e Validazione",       legalRef: "Art. 9(6)-(8)",    anchor: "rr-sec3"  },
   { key: "sec4", label: "§4 — Trattamento Rischio",      legalRef: "Art. 9(4)-(5)",    anchor: "rr-sec4"  },
-  { key: "sec5", label: "§5 — Monitoraggio Post-Market", legalRef: "Art. 9(2)(c)",     anchor: "rr-sec5"  },
+  { key: "sec5", label: "§5 — Monitoraggio sul mercato", legalRef: "Art. 9(2)(c)",     anchor: "rr-sec5"  },
   { key: "sec7", label: "§7 — Tracciabilità",            legalRef: "Art. 12, 17",      anchor: "rr-sec7"  },
   { key: "sec8", label: "§8 — Dismissione",              legalRef: "ISO 23894 Ann. C", anchor: "rr-sec8"  },
-  { key: "sec9", label: "§9 — Sign-off",                 legalRef: "Art. 9(1)",        anchor: "rr-sec9"  },
+  { key: "sec9", label: "§9 — Approvazione",             legalRef: "Art. 9(1)",        anchor: "rr-sec9"  },
   { key: "comm", label: "Comunicazione",                 legalRef: "ISO 23894 §6.2",   anchor: "rr-comm"  },
 ] as const;
 
