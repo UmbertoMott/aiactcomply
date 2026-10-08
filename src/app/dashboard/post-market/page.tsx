@@ -320,6 +320,16 @@ const EMPTY_FORM = {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
+// Etichette leggibili del livello di rischio (nel selettore del sistema)
+const TIER_LABEL_IT: Record<string, string> = {
+  prohibited: "Vietato",
+  high_risk: "Alto rischio",
+  limited: "Rischio limitato",
+  minimal: "Rischio minimo",
+  gpai: "GPAI",
+  gpai_systemic: "GPAI con rischio sistemico",
+};
+
 function PostMarketPageInner() {
   const searchParams = useSearchParams();
   const rawTab = searchParams.get("tab");
@@ -1026,7 +1036,7 @@ function PostMarketPageInner() {
                           {inventorySystems.map(sys => (
                             <option key={sys.id} value={sys.id}>
                               {sys.name}
-                              {sys.tier !== "unclassified" ? ` · ${sys.tier.replace("_", " ")}` : ""}
+                              {sys.tier !== "unclassified" ? ` · ${TIER_LABEL_IT[sys.tier] ?? sys.tier}` : ""}
                             </option>
                           ))}
                           <option value="__altro__">Altro (non in inventario)</option>
@@ -1200,7 +1210,7 @@ function PostMarketPageInner() {
                               color: "#16a34a",
                               bg: "rgba(22,163,74,0.04)",
                               border: "rgba(22,163,74,0.12)",
-                              ref: "Art. 72 — sorveglianza post-market",
+                              ref: "Art. 72 — sorveglianza dopo l'immissione sul mercato",
                               criteria: [
                                 "Near-miss: malfunzionamento rilevato prima di causare danno",
                                 "Anomalia tecnica minore senza impatto su utenti finali",

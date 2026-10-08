@@ -294,7 +294,7 @@ export default function SignOffPanel({
               </span>
             </label>
             <input value={onBehalf} onChange={e => setOnBehalf(e.target.value)}
-              placeholder="es. Acme S.r.l., nome del produttore/provider" style={inputStyle} />
+              placeholder="es. Acme S.r.l., nome del produttore/fornitore" style={inputStyle} />
           </div>
         )}
 

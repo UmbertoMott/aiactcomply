@@ -93,7 +93,7 @@ export async function GET(req: Request) {
         deviation_pct: Math.round(((p99 - THRESHOLDS.latency_p99_ms) / THRESHOLDS.latency_p99_ms) * 100),
         severity: p99 > THRESHOLDS.latency_p99_ms * 2 ? "critical" : "warning",
         description: `Latenza p99 = ${p99}ms (soglia: ${THRESHOLDS.latency_p99_ms}ms). Media: ${Math.round(avgLatency)}ms`,
-        art_reference: "Art. 9 — Gestione dei rischi: performance degradation",
+        art_reference: "Art. 9 — Gestione dei rischi: calo delle prestazioni",
       });
     }
   }
@@ -110,7 +110,7 @@ export async function GET(req: Request) {
       deviation_pct: Math.round(((errorRate - THRESHOLDS.error_rate_pct) / THRESHOLDS.error_rate_pct) * 100),
       severity: errorRate > THRESHOLDS.error_rate_pct * 3 ? "critical" : "warning",
       description: `${errorEvents} errori su ${logs.length} eventi (${errorRate.toFixed(1)}%)`,
-      art_reference: "Art. 12 — Logging: error pattern anomaly",
+      art_reference: "Art. 12 — Registrazione eventi: errori anomali ricorrenti",
     });
   }
 
@@ -126,7 +126,7 @@ export async function GET(req: Request) {
       deviation_pct: Math.round(((flaggedRate - THRESHOLDS.flagged_rate_pct) / THRESHOLDS.flagged_rate_pct) * 100),
       severity: flaggedRate > 10 ? "critical" : "warning",
       description: `${flaggedEvents} eventi flaggati (${flaggedRate.toFixed(1)}%). Soglia: ${THRESHOLDS.flagged_rate_pct}%`,
-      art_reference: "Art. 9 — Gestione rischi: compliance flag rate anomaly",
+      art_reference: "Art. 9 — Gestione dei rischi: frequenza anomala di segnalazioni di conformità",
     });
   }
 
@@ -142,7 +142,7 @@ export async function GET(req: Request) {
       deviation_pct: Math.round(((breachRate - THRESHOLDS.guardrail_breach_pct) / THRESHOLDS.guardrail_breach_pct) * 100),
       severity: "critical",
       description: `${guardrailBreaches} violazioni guardrail (${breachRate.toFixed(1)}%). Richiede revisione immediata.`,
-      art_reference: "Art. 14 — Sorveglianza umana: guardrail breach requires human review",
+      art_reference: "Art. 14 — Sorveglianza umana: violazione dei filtri di sicurezza, serve una verifica umana",
     });
   }
 
