@@ -18,7 +18,7 @@ import { FIELD_NAME_HINTS } from "@/lib/logvault/traceability-purposes";
 import { SystemSelector } from "@/components/compliance/SystemSelector";
 import { useActiveSystem } from "@/lib/hooks/useActiveSystem";
 import { useScopedStorage } from "@/lib/hooks/useScopedStorage";
-import { useLocale } from "@/i18n/LocaleProvider";
+import { useLocale, useT } from "@/i18n/LocaleProvider";
 
 // ─── Modello dati (solo risposte e riepilogo della prova, mai log grezzi) ─────
 
@@ -56,129 +56,12 @@ const EMPTY: LogRecord = {
 const PURPOSES = ["risk_identification", "post_market_monitoring", "deployer_monitoring"] as const;
 const BIOMETRIC = ["usage_period", "reference_database", "matched_input_data", "verifier_identity"] as const;
 
-// ─── Testi ────────────────────────────────────────────────────────────────────
-
-const TXT = {
-  it: {
-    title: "Registro dei log",
-    sub: "Dimostra che il sistema registra gli eventi in automatico e che i log sono conservati.",
-    privacy: "RegulaeOS non riceve né conserva i log del sistema: la conservazione resta a carico del fornitore o del deployer (Artt. 19 e 26(6)).",
-    role_q: "Per questo sistema sei",
-    provider: "Fornitore", deployer: "Deployer",
-    provider_hint: "Hai sviluppato il sistema o lo metti sul mercato con il tuo nome.",
-    deployer_hint: "Usi il sistema sotto la tua autorità.",
-    q1: "Il sistema registra gli eventi in automatico mentre funziona?",
-    q1_ref: "Art. 12(1)",
-    yes: "Sì", no: "No", unknown: "Non so",
-    q1_no_provider: "È un requisito dei sistemi ad alto rischio: il sistema deve consentire la registrazione automatica degli eventi per tutta la sua durata.",
-    q1_no_deployer: "Chiedilo al fornitore: le istruzioni per l'uso devono spiegare come raccogliere, conservare e interpretare i log (Art. 13(3)(f)).",
-    q2: "Quali eventi registra?",
-    q2_ref: "Art. 12(2)",
-    q2_hint_deployer: "Rispondi in base alle istruzioni per l'uso del fornitore.",
-    ev_risk_identification: "Errori, anomalie e situazioni che possono creare un rischio o una modifica sostanziale",
-    ev_post_market_monitoring: "Dati utili a controllare il funzionamento nel tempo (monitoraggio dopo l'immissione sul mercato)",
-    ev_deployer_monitoring: "Dati utili a chi usa il sistema per sorvegliarne il funzionamento",
-    q_bio: "È un sistema di identificazione biometrica a distanza?",
-    q_bio_ref: "Allegato III, punto 1(a)",
-    q_bio_list: "In questo caso i log devono contenere almeno:",
-    ev_usage_period: "Data e ora di inizio e fine di ogni utilizzo",
-    ev_reference_database: "La banca dati usata per il confronto",
-    ev_matched_input_data: "I dati di input che hanno dato una corrispondenza",
-    ev_verifier_identity: "Chi ha verificato i risultati (Art. 14(5))",
-    q3: "Dove sono conservati i log e chi li custodisce?",
-    keeper_q: "Chi conserva i log",
-    keeper_us: "Noi", keeper_provider: "Il fornitore", keeper_other: "Un altro soggetto per nostro conto",
-    location: "Dove (es. server aziendale, servizio cloud, gestionale del fornitore)",
-    responsible: "Persona o funzione responsabile",
-    q4: "Per quanto tempo li conservi?",
-    q4_ref_provider: "Art. 19(1)", q4_ref_deployer: "Art. 26(6)",
-    months: "mesi",
-    q4_short: "Il minimo è 6 mesi, salvo norme diverse, in particolare sulla protezione dei dati personali.",
-    q4_keeper_provider: "Se i log non sono sotto il tuo controllo l'obbligo di conservazione è del fornitore. Indica comunque per quanto li conserva, se lo sai.",
-    q5: "Prova",
-    q5_opt: "facoltativa",
-    q5_doc: "Documento di riferimento (es. istruzioni per l'uso, cap. 5; procedura interna di conservazione)",
-    q5_file: "Carica un estratto di log",
-    q5_file_hint: "Il file viene letto solo sul tuo computer e non è inviato a RegulaeOS. Usa un estratto senza dati personali. Formati: .json, .ndjson, .csv, .tsv.",
-    sample_entries: "voci", sample_period: "periodo", sample_fields: "campi",
-    sample_match: "Campi trovati per gli eventi indicati",
-    sample_nomatch: "nessun campo riconosciuto: controlla a mano",
-    remove: "Rimuovi",
-    err_size: "File troppo grande", err_type: "Formato non supportato", err_empty: "Nessuna voce leggibile nel file", err_read: "Impossibile leggere il file",
-    status: "Esito",
-    complete: "Completo: puoi salvare nel dossier.",
-    missing: "Da completare",
-    m_role: "indica il tuo ruolo", m_auto: "conferma che il sistema registra gli eventi", m_events: "indica quali eventi registra",
-    m_bio: "rispondi sulla biometria", m_bio_ev: "conferma i dati biometrici richiesti", m_keeper: "indica chi conserva i log",
-    m_loc: "indica dove sono conservati", m_months: "indica per quanto tempo", m_min: "porta la conservazione ad almeno 6 mesi",
-    save: "Salva nel dossier", saved: "Salvato nel dossier",
-    noSystem: "Scegli o aggiungi un sistema per iniziare.",
-  },
-  en: {
-    title: "Log register",
-    sub: "Show that the system records events automatically and that logs are kept.",
-    privacy: "RegulaeOS does not receive or store the system's logs: keeping them remains the provider's or deployer's duty (Arts. 19 and 26(6)).",
-    role_q: "For this system you are the",
-    provider: "Provider", deployer: "Deployer",
-    provider_hint: "You developed the system or place it on the market under your name.",
-    deployer_hint: "You use the system under your authority.",
-    q1: "Does the system record events automatically while it runs?",
-    q1_ref: "Art. 12(1)",
-    yes: "Yes", no: "No", unknown: "Don't know",
-    q1_no_provider: "This is a requirement for high-risk systems: the system must allow automatic recording of events over its lifetime.",
-    q1_no_deployer: "Ask the provider: the instructions for use must explain how to collect, store and interpret logs (Art. 13(3)(f)).",
-    q2: "Which events does it record?",
-    q2_ref: "Art. 12(2)",
-    q2_hint_deployer: "Answer based on the provider's instructions for use.",
-    ev_risk_identification: "Errors, anomalies and situations that may create a risk or a substantial modification",
-    ev_post_market_monitoring: "Data to check operation over time (post-market monitoring)",
-    ev_deployer_monitoring: "Data that lets the user monitor the system's operation",
-    q_bio: "Is it a remote biometric identification system?",
-    q_bio_ref: "Annex III, point 1(a)",
-    q_bio_list: "In that case logs must contain at least:",
-    ev_usage_period: "Start and end date and time of each use",
-    ev_reference_database: "The reference database used for matching",
-    ev_matched_input_data: "The input data that led to a match",
-    ev_verifier_identity: "Who verified the results (Art. 14(5))",
-    q3: "Where are logs kept and who keeps them?",
-    keeper_q: "Who keeps the logs",
-    keeper_us: "Us", keeper_provider: "The provider", keeper_other: "Another party on our behalf",
-    location: "Where (e.g. company server, cloud service, provider's platform)",
-    responsible: "Responsible person or function",
-    q4: "How long do you keep them?",
-    q4_ref_provider: "Art. 19(1)", q4_ref_deployer: "Art. 26(6)",
-    months: "months",
-    q4_short: "The minimum is 6 months, unless other law provides otherwise, in particular data protection law.",
-    q4_keeper_provider: "If logs are not under your control the retention duty lies with the provider. Still state how long they keep them, if you know.",
-    q5: "Evidence",
-    q5_opt: "optional",
-    q5_doc: "Reference document (e.g. instructions for use, ch. 5; internal retention procedure)",
-    q5_file: "Upload a log excerpt",
-    q5_file_hint: "The file is read only on your computer and is not sent to RegulaeOS. Use an excerpt without personal data. Formats: .json, .ndjson, .csv, .tsv.",
-    sample_entries: "entries", sample_period: "period", sample_fields: "fields",
-    sample_match: "Fields found for the selected events",
-    sample_nomatch: "no recognised field: check manually",
-    remove: "Remove",
-    err_size: "File too large", err_type: "Unsupported format", err_empty: "No readable entries in the file", err_read: "Could not read the file",
-    status: "Result",
-    complete: "Complete: you can save it to the dossier.",
-    missing: "Still to do",
-    m_role: "state your role", m_auto: "confirm the system records events", m_events: "state which events it records",
-    m_bio: "answer the biometric question", m_bio_ev: "confirm the required biometric data", m_keeper: "state who keeps the logs",
-    m_loc: "state where they are kept", m_months: "state how long", m_min: "raise retention to at least 6 months",
-    save: "Save to dossier", saved: "Saved to dossier",
-    noSystem: "Choose or add a system to start.",
-  },
-} as const;
-
-type Key = keyof typeof TXT.it;
-
 // ─── Pagina ───────────────────────────────────────────────────────────────────
 
 export default function LogRegisterPage() {
   const locale = useLocale();
-  const tx = TXT[locale === "en" ? "en" : "it"];
-  const t = (k: Key) => tx[k];
+  // Testi in src/i18n/tools/deployer_ops.ts (namespace "deployer_ops_logvault")
+  const t = useT("deployer_ops_logvault");
 
   const { active } = useActiveSystem();
   const [rec, setRec] = useScopedStorage<LogRecord>("logregister", EMPTY);
@@ -261,7 +144,7 @@ export default function LogRegisterPage() {
 
   async function save() {
     const now = new Date().toISOString();
-    const events = rec.events.map((id) => tx[`ev_${id}` as Key] ?? id);
+    const events = rec.events.map((id) => { const k = `ev_${id}`; const v = t(k); return v === k ? id : v; });
     writeToStorage("logvault", {
       loggingEnabled: rec.automatic === "yes",
       retentionDays: monthsSet ? Math.round(monthsNum * 30) : 0,
@@ -323,7 +206,7 @@ export default function LogRegisterPage() {
           <Step n={3} title={t("q2")} refText={t("q2_ref")} done={stepDone.events}>
             {!isProvider && rec.role && <Note>{t("q2_hint_deployer")}</Note>}
             {PURPOSES.map((id) => (
-              <Check key={id} checked={rec.events.includes(id)} onChange={() => toggleEvent(id)} label={t(`ev_${id}` as Key)} />
+              <Check key={id} checked={rec.events.includes(id)} onChange={() => toggleEvent(id)} label={t(`ev_${id}`)} />
             ))}
             <div style={{ marginTop: 6 }}>
               <p style={{ fontSize: 13, margin: "0 0 8px" }}>
@@ -339,7 +222,7 @@ export default function LogRegisterPage() {
               <>
                 <Note>{t("q_bio_list")} <span style={{ fontSize: 11 }}>Art. 12(3)</span></Note>
                 {BIOMETRIC.map((id) => (
-                  <Check key={id} checked={rec.events.includes(id)} onChange={() => toggleEvent(id)} label={t(`ev_${id}` as Key)} />
+                  <Check key={id} checked={rec.events.includes(id)} onChange={() => toggleEvent(id)} label={t(`ev_${id}`)} />
                 ))}
               </>
             )}
@@ -391,14 +274,14 @@ export default function LogRegisterPage() {
                   </button>
                 </div>
                 <div>
-                  {rec.sample.entryCount.toLocaleString()} {t("sample_entries")} · {t("sample_period")} {fmtDate(rec.sample.from)} – {fmtDate(rec.sample.to)} · {rec.sample.fields.length} {t("sample_fields")}
+                  {rec.sample.entryCount.toLocaleString(locale === "en" ? "en-GB" : "it-IT")} {t("sample_entries")} · {t("sample_period")} {fmtDate(rec.sample.from)} – {fmtDate(rec.sample.to)} · {rec.sample.fields.length} {t("sample_fields")}
                 </div>
                 {matches.length > 0 && (
                   <div style={{ marginTop: 6 }}>
                     <div style={{ fontSize: 12.5, fontWeight: 600 }}>{t("sample_match")}</div>
                     {matches.map((m) => (
                       <div key={m.id} style={{ fontSize: 12.5 }}>
-                        {t(`ev_${m.id}` as Key)}: {m.found.length ? m.found.join(", ") : t("sample_nomatch")}
+                        {t(`ev_${m.id}`)}: {m.found.length ? m.found.join(", ") : t("sample_nomatch")}
                       </div>
                     ))}
                   </div>

@@ -94,6 +94,7 @@ function NonConformWarning({ method, exemptionClaimed, t }: { method: LabellingM
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function Art50KitPage() {
   const t = useT("toolArt50");
+  const tk = useT("deployer_ops_art50");
   const locale = useLocale();
   const loc = locale === "it" ? "it-IT" : "en-GB";
   const TYPE_LABELS = buildTypeLabels(t);
@@ -188,27 +189,27 @@ export default function Art50KitPage() {
   function registroMeasures(systemId: string): string[] {
     const rec = getSystemRecord(art50Record, systemId);
     const out: string[] = [];
-    if (rec.directInteraction) out.push(`  - Informativa di interazione con l'IA (Art. 50(1)): ${rec.directInteraction.status ?? "stato non indicato"}`);
+    if (rec.directInteraction) out.push(`  - ${tk("reg_m_interaction")} (Art. 50(1)): ${rec.directInteraction.status ?? tk("reg_m_noStatus")}`);
     for (const l of rec.syntheticContentLabels) {
-      out.push(`  - Marcatura ${l.contentType} (Art. 50(2)): ${l.labellingMethod}${l.machineReadable ? ", leggibile da dispositivi" : ""}${l.exemptionClaimed ? ` — esenzione: ${l.exemptionClaimed}` : ""}`);
+      out.push(`  - ${tk("reg_m_marking")} ${l.contentType} (Art. 50(2)): ${l.labellingMethod}${l.machineReadable ? `, ${tk("reg_m_machineReadable")}` : ""}${l.exemptionClaimed ? ` — ${tk("reg_m_exemption")}: ${l.exemptionClaimed}` : ""}`);
     }
-    if (rec.deepfakeDisclosure?.applicable === "yes") out.push(`  - Deep fake (Art. 50(4)): ${rec.deepfakeDisclosure.disclosureMechanism || "modalità non indicata"}`);
-    return out.length > 0 ? out : ["  Nessuna misura ancora registrata"];
+    if (rec.deepfakeDisclosure?.applicable === "yes") out.push(`  - Deep fake (Art. 50(4)): ${rec.deepfakeDisclosure.disclosureMechanism || tk("reg_m_noMechanism")}`);
+    return out.length > 0 ? out : [`  ${tk("reg_m_none")}`];
   }
 
   function downloadRegistro(system: Art50System) {
     const lines = [
-      "REGISTRO DI IMPLEMENTAZIONE ART. 50 — AI ACT (UE) 2024/1689", "=".repeat(60), "",
-      `ID Registro:          ${system.registroId}`, `Sistema di IA:           ${system.name}`,
-      `Tipologia:            ${TYPE_LABELS[system.type]}`, `URL:                  ${system.url || "non specificato"}`,
-      `Data registrazione:   ${new Date(system.createdAt).toLocaleDateString("it-IT", { day: "2-digit", month: "long", year: "numeric" })}`,
-      `Ultimo scan:          ${system.lastScannedAt ? new Date(system.lastScannedAt).toLocaleDateString("it-IT", { day: "2-digit", month: "long", year: "numeric" }) : "non eseguito"}`,
-      `Punteggio Art. 50:    ${system.lastScore !== null ? system.lastScore + "/100" : "n/d"}`, "",
-      "MISURE REGISTRATE (dichiarate dall'utente in questo kit):",
+      tk("reg_title"), "=".repeat(60), "",
+      `${tk("reg_id").padEnd(22)}${system.registroId}`, `${tk("reg_system").padEnd(22)}${system.name}`,
+      `${tk("reg_type").padEnd(22)}${TYPE_LABELS[system.type]}`, `${"URL:".padEnd(22)}${system.url || tk("reg_notSpecified")}`,
+      `${tk("reg_date").padEnd(22)}${new Date(system.createdAt).toLocaleDateString(loc, { day: "2-digit", month: "long", year: "numeric" })}`,
+      `${tk("reg_lastScan").padEnd(22)}${system.lastScannedAt ? new Date(system.lastScannedAt).toLocaleDateString(loc, { day: "2-digit", month: "long", year: "numeric" }) : tk("reg_notRun")}`,
+      `${tk("reg_score").padEnd(22)}${system.lastScore !== null ? system.lastScore + "/100" : tk("reg_na")}`, "",
+      tk("reg_measures"),
       ...registroMeasures(system.id), "",
-      "RIFERIMENTO NORMATIVO:", "  Art. 50(1)-(5) Regolamento (UE) 2024/1689 (AI Act)", "  In vigore dal 2 agosto 2026; Art. 50(2) per i sistemi già sul mercato entro il 2 dicembre 2026 (Art. 111(4))", "",
-      "NOTA LEGALE:", "  RegulaeOS non rilascia attestazioni di conformità legale.", "  Questo documento costituisce esclusivamente un registro interno.", "=".repeat(60),
-      `Generato da RegulaeOS — ${new Date().toISOString()}`,
+      tk("reg_legalRef"), `  ${tk("reg_legalRef1")}`, `  ${tk("reg_legalRef2")}`, "",
+      tk("reg_legalNote"), `  ${tk("reg_legalNote1")}`, `  ${tk("reg_legalNote2")}`, "=".repeat(60),
+      `${tk("reg_generated")} — ${new Date().toISOString()}`,
     ];
     const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `${system.registroId}.txt`; a.click(); URL.revokeObjectURL(url);
@@ -263,7 +264,7 @@ export default function Art50KitPage() {
             {daysLeft <= 90 && ` · ${t("urgentAction")}`}
           </span>
         </div>
-        <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32024R1689" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[11px] font-medium" style={{ color: daysLeft <= 90 ? T.red : T.blue }}>
+        <a href={`https://eur-lex.europa.eu/legal-content/${locale === "en" ? "EN" : "IT"}/TXT/?uri=CELEX:32024R1689`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[11px] font-medium" style={{ color: daysLeft <= 90 ? T.red : T.blue }}>
           Art. 50 AI Act <ExternalLink size={12} />
         </a>
       </div>
@@ -281,7 +282,7 @@ export default function Art50KitPage() {
                 {obl.reference.split(" ").slice(0, 2).join(" ")}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-medium" style={{ color: T.text }}>{obl.label}</p>
+                <p className="text-[13px] font-medium" style={{ color: T.text }}>{tk(`obl_${obl.id}`)}</p>
               </div>
             </div>
           ))}
@@ -296,7 +297,7 @@ export default function Art50KitPage() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-semibold" style={{ color: T.text }}>Avvisi e marcature IA — Art. 50</h1>
+              <h1 className="text-xl font-semibold" style={{ color: T.text }}>{tk("h1")}</h1>
               <p className="text-[13px] mt-0.5" style={{ color: T.muted }}>
                 {t("clientSubtitle")} · {systems.length} {systems.length !== 1 ? t("systemsRegistered") : t("systemRegistered")}
               </p>
@@ -356,7 +357,7 @@ export default function Art50KitPage() {
                 </div>
                 <div>
                   <label className="block text-[11px] font-medium mb-1.5" style={{ color: T.muted }}>{t("siteUrl")}</label>
-                  <input type="url" placeholder="https://tuo-sito.it" value={formUrl} onChange={e => setFormUrl(e.target.value)} style={inp} />
+                  <input type="url" placeholder={tk("urlPh")} value={formUrl} onChange={e => setFormUrl(e.target.value)} style={inp} />
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-[11px] font-medium mb-2" style={{ color: T.muted }}>{t("systemType")} *</label>
@@ -567,8 +568,8 @@ export default function Art50KitPage() {
                                       <div className="rounded-lg p-2.5 mb-2" style={{ background: T.violetBg, border: `1px solid ${T.violetBdr}` }}>
                                         <p className="text-[11px] font-semibold mb-0.5" style={{ color: T.violet }}>✦ {t("aiVerify")}</p>
                                         <p className="text-[11px] mb-1" style={{ color: T.text }}>{proposal.rationale}</p>
-                                        <p className="text-[11px]" style={{ color: T.muted }}>{t("methodProposed")} <strong>{LabellingMethodLabels[proposal.suggestedMethod]}</strong></p>
-                                        {proposal.exemptionId && <p className="text-[11px] mt-0.5" style={{ color: T.muted }}>{t("exemptionLabel")} {SYNTHETIC_CONTENT_EXEMPTIONS.find(e => e.id === proposal.exemptionId)?.label}</p>}
+                                        <p className="text-[11px]" style={{ color: T.muted }}>{t("methodProposed")} <strong>{tk(`method_${proposal.suggestedMethod}`)}</strong></p>
+                                        {proposal.exemptionId && <p className="text-[11px] mt-0.5" style={{ color: T.muted }}>{t("exemptionLabel")} {SYNTHETIC_CONTENT_EXEMPTIONS.some(e => e.id === proposal.exemptionId) ? tk(`ex_${proposal.exemptionId}`) : proposal.exemptionId}</p>}
                                         <button onClick={() => acceptProposal(system.id, ct)}
                                           className="mt-1.5 flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded"
                                           style={{ background: T.violet, color: "#fff", border: "none", cursor: "pointer" }}>
@@ -587,7 +588,7 @@ export default function Art50KitPage() {
                                         : [...rec.syntheticContentLabels, existing];
                                       patchSystemRec(system.id, { syntheticContentLabels });
                                     }} style={{ ...inp, width: "auto", marginBottom: 4 }}>
-                                      {Object.entries(LabellingMethodLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                                      {Object.keys(LabellingMethodLabels).map((k) => <option key={k} value={k}>{tk(`method_${k}`)}</option>)}
                                     </select>
 
                                     <NonConformWarning method={method} exemptionClaimed={label?.exemptionClaimed} t={t} />
@@ -595,10 +596,10 @@ export default function Art50KitPage() {
                                     {/* Capabilities display */}
                                     <div className="flex gap-3 mt-1.5 text-[11px]">
                                       <span style={{ color: machineReadable ? T.green : T.red }}>
-                                        {machineReadable ? "✓" : "✗"} Machine-readable
+                                        {machineReadable ? "✓" : "✗"} {tk("machineReadable")}
                                       </span>
                                       <span style={{ color: humanReadable ? T.green : T.muted }}>
-                                        {humanReadable ? "✓" : "✗"} Human-readable
+                                        {humanReadable ? "✓" : "✗"} {tk("humanReadable")}
                                       </span>
                                     </div>
 
@@ -611,7 +612,7 @@ export default function Art50KitPage() {
                                           patchSystemRec(system.id, { syntheticContentLabels });
                                         }} style={{ ...inp, width: "auto" }}>
                                           <option value="">{t("noExemption")}</option>
-                                          {SYNTHETIC_CONTENT_EXEMPTIONS.map(e => <option key={e.id} value={e.id}>{e.label.slice(0, 60)}...</option>)}
+                                          {SYNTHETIC_CONTENT_EXEMPTIONS.map(e => <option key={e.id} value={e.id}>{tk(`ex_${e.id}`).slice(0, 60)}...</option>)}
                                         </select>
                                         {label?.exemptionClaimed && (
                                           <textarea rows={2} value={label.exemptionJustification ?? ""}
@@ -669,7 +670,7 @@ export default function Art50KitPage() {
                                     onChange={e => patchSystemRec(system.id, { deepfakeDisclosure: { ...rec.deepfakeDisclosure, systemId: system.id, exemptionClaimed: e.target.value || undefined } as typeof rec.deepfakeDisclosure })}
                                     style={{ ...inp, width: "auto" }}>
                                     <option value="">{t("noExemption")}</option>
-                                    {DEEPFAKE_EXEMPTIONS.map(e => <option key={e.id} value={e.id}>{e.label.slice(0, 65)}...</option>)}
+                                    {DEEPFAKE_EXEMPTIONS.map(e => <option key={e.id} value={e.id}>{tk(`ex_${e.id}`).slice(0, 65)}...</option>)}
                                   </select>
                                   {rec.deepfakeDisclosure?.exemptionClaimed && (
                                     <textarea rows={2} value={rec.deepfakeDisclosure?.exemptionJustification ?? ""}
