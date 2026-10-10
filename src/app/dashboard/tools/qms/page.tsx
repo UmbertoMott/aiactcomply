@@ -11,7 +11,7 @@ import Link from "next/link";
 import { writeToStorage, readFromStorage } from "@/lib/dossier/storage-schema";
 import type { QMSResult, ClassifierResult, RiskManagerResult, DataAuditResult } from "@/lib/dossier/storage-schema";
 import { appendEvidence } from "@/lib/evidence/evidence-layer";
-import { useT } from "@/i18n/LocaleProvider";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
 
 const STORAGE_KEY = "qms_sections";
 const SYSNAME_KEY = "qms_system_name";
@@ -48,6 +48,7 @@ type QMSSection = {
 
 export default function QMSPage() {
   const t = useT("toolQms");
+  const locale = useLocale();
   const templateSections = buildTemplateSections(t);
   const [sections, setSections] = useState<QMSSection[]>(() => {
     if (typeof window === "undefined") return [];
@@ -143,11 +144,11 @@ export default function QMSPage() {
       setSections(prev => {
         const riskSection = prev.find(s => s.tplId === "risk" || s.title === "Sistema gestione rischi");
         if (!riskSection || riskSection.content) return prev;
-        const summary = `Livello di rischio complessivo: ${riskManager.overallRiskLevel}. ` +
-          `${riskManager.risks.length} rischi identificati. ` +
+        const summary = `${t("pre_riskLevel")} ${riskManager.overallRiskLevel}. ` +
+          `${riskManager.risks.length} ${t("pre_risksIdentified")} ` +
           riskManager.risks
             .slice(0, 3)
-            .map(r => `${r.title} (probabilità: ${r.likelihood}, impatto: ${r.impact}, mitigazione: ${r.mitigation})`)
+            .map(r => `${r.title} (${t("pre_likelihood")} ${r.likelihood}, ${t("pre_impact")} ${r.impact}, ${t("pre_mitigation")} ${r.mitigation})`)
             .join("; ") +
           (riskManager.risks.length > 3 ? "; ..." : ".");
         const next = prev.map(s =>
@@ -164,9 +165,9 @@ export default function QMSPage() {
         const dataSection = prev.find(s => s.tplId === "data_mgmt" || s.title === "Gestione dati");
         if (!dataSection || dataSection.content) return prev;
         const personalCount = dataAudit.datasets.filter(d => d.personalData).length;
-        const summary = `Qualità complessiva: ${dataAudit.overallQuality}. ` +
-          `${dataAudit.datasets.length} dataset analizzati, di cui ${personalCount} con dati personali. ` +
-          `Dataset: ${dataAudit.datasets.map(d => d.name).join(", ")}.`;
+        const summary = `${t("pre_overallQuality")} ${dataAudit.overallQuality}. ` +
+          `${dataAudit.datasets.length} ${t("pre_datasetsAnalysed")} ${personalCount} ${t("pre_withPersonalData")} ` +
+          `${t("pre_datasets")} ${dataAudit.datasets.map(d => d.name).join(", ")}.`;
         const next = prev.map(s =>
           (s.tplId === "data_mgmt" || s.title === "Gestione dati") ? { ...s, content: summary } : s
         );
@@ -252,7 +253,7 @@ export default function QMSPage() {
         <div className="flex items-center gap-2 rounded-lg px-4 py-2.5 mb-5 text-[13px]"
           style={{ background: "rgba(22,163,74,0.06)", border: "1px solid rgba(22,163,74,0.15)", fontFamily: "inherit" }}>
           <CheckCircle size={13} strokeWidth={1.5} style={{ color: "#15803d" }} />
-          <span style={{ color: "#15803d" }}>✓ {t("savedBanner")} {new Date(savedAt).toLocaleDateString("it-IT")}</span>
+          <span style={{ color: "#15803d" }}>✓ {t("savedBanner")} {new Date(savedAt).toLocaleDateString(locale === "en" ? "en-GB" : "it-IT")}</span>
           <Link href="/dashboard/dossier" className="ml-auto text-[11px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#15803d" }}>{t("seeDossier")}</Link>
         </div>
       ) : (

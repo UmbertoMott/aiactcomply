@@ -37,6 +37,7 @@ const filled = (v?: string) => (v ?? "").trim().length > 0;
 
 export default function TransparencyPage() {
   const t = useT("toolTransparency");
+  const td = useT("deployer_ops_transparency");
   const locale = useLocale();
   const loc = locale === "it" ? "it-IT" : "en-GB";
   const { active } = useActiveSystem();
@@ -117,7 +118,7 @@ export default function TransparencyPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `istruzioni-uso-art13-${(active?.name ?? "sistema").replace(/\s+/g, "_").toLowerCase()}-${new Date().toISOString().slice(0, 10)}.md`;
+    a.download = `${td("fileBase")}-${(active?.name ?? td("fileSystem")).replace(/\s+/g, "_").toLowerCase()}-${new Date().toISOString().slice(0, 10)}.md`;
     a.click();
     URL.revokeObjectURL(url);
     showToast(t("toastExported"));
