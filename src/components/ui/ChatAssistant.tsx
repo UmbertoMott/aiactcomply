@@ -52,14 +52,17 @@ Il Regolamento UE 2024/1689 (AI Act) è il primo quadro normativo completo sull'
 **Timeline applicativa:**
 - Febbraio 2025 → divieti pratiche vietate (Art. 5)
 - Agosto 2025 → obblighi GPAI e governance
-- Agosto 2026 → obblighi sistemi alto rischio (Allegato III)
-- Agosto 2027 → sistemi alto rischio già sul mercato
+- 2 agosto 2026 → obblighi di trasparenza (Art. 50)
+- 2 dicembre 2026 → nuovi divieti dell'Art. 5(1)(b bis)-(b ter)
+- 2 dicembre 2027 → obblighi sistemi alto rischio (Allegato III)
+- 2 agosto 2028 → sistemi alto rischio dell'Allegato I; i sistemi già sul mercato sono soggetti solo se subiscono modifiche significative (Art. 111(2)), quelli destinati alle autorità pubbliche entro il 2 agosto 2030
+(date dell'Art. 113 come modificato dal Reg. (UE) 2026/1744)
 
 **Struttura a livelli di rischio:**
 - 🚫 **Inaccettabile** — proibiti
-- 🔴 **Alto rischio** — obblighi estesi (Allegati II e III)
+- 🔴 **Alto rischio** — obblighi estesi (Allegati I e III)
 - 🟡 **Rischio limitato** — obblighi trasparenza
-- 🟢 **Rischio minimale** — liberi
+- 🟢 **Rischio minimale** — nessun requisito specifico, resta l'Art. 4 (alfabetizzazione)
 
 RegulaeOS copre tutti gli obblighi attraverso i suoi tool.`,
   },
@@ -516,8 +519,9 @@ Provider che mettono a disposizione modelli GPAI nell'UE, incluse API commercial
 **A cosa serve:** Completa la valutazione di conformità dell'AI Act e genera la Dichiarazione di Conformità UE. È il passo finale per immettere un sistema di IA ad alto rischio sul mercato.
 
 **2 Percorsi:**
-- **Self-assessment:** Per sistemi Allegato III (eccetto biometria/infrastrutture critiche). Il provider attesta autonomamente la conformità.
-- **Third-party (Organismo Notificato):** Obbligatorio per sistemi Allegato II (sicurezza prodotti) e casi specifici Allegato III.
+- **Controllo interno (Allegato VI):** per i sistemi dell'Allegato III, punti 2-8 (Art. 43(2)). Il fornitore attesta autonomamente la conformità.
+- **Organismo notificato (Allegato VII):** per la biometria (Allegato III, punto 1) se non si applicano integralmente norme armonizzate o specifiche comuni (Art. 43(1)).
+- **Procedura settoriale:** per i prodotti dell'Allegato I, sezione A, si segue la procedura della normativa di settore (Art. 43(3), come modificato dal Reg. (UE) 2026/1744).
 
 **Prerequisiti (completare prima):**
 Risk Manager ✓ → Data Audit ✓ → DocuGen ✓ → LogVault ✓ → Transparency ✓ → Oversight ✓ → Resilience ✓ → QMS ✓

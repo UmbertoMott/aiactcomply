@@ -29,16 +29,16 @@ const TIER_CONFIG: Record<SystemTier, TierCfg> = {
   prohibited: {
     label: "Vietato", bg: "rgba(220,38,38,0.07)", border: "rgba(220,38,38,0.25)", text: "#dc2626", dot: "#dc2626",
     article: "Art. 5 AI Act",
-    what: "Il sistema utilizza tecniche proibite: manipolazione subliminale, sfruttamento delle vulnerabilità, social scoring governativo, identificazione biometrica in tempo reale in spazi pubblici (con eccezioni limitate), sistemi di inferenza delle emozioni sul lavoro/scuola.",
+    what: "Il sistema rientra in una pratica vietata dall'Art. 5: manipolazione subliminale o ingannevole, sfruttamento delle vulnerabilità, punteggio sociale (anche da parte di privati), identificazione biometrica remota in tempo reale in spazi pubblici a fini di contrasto (con eccezioni limitate), inferenza delle emozioni sul luogo di lavoro o negli istituti di istruzione, generazione o manipolazione di immagini intime non consensuali e di materiale pedopornografico (Art. 5(1)(b bis)-(b ter), dal 2 dicembre 2026).",
     examples: ["Sistema di scoring della fiducia cittadina per la PA", "Riconoscimento facciale live in piazze o strade", "AI che deduce lo stato emotivo degli studenti durante gli esami", "Chatbot che manipola l'utente sfruttandone la solitudine"],
     obligations: ["Non puoi deploiarlo — punto.", "Verifica se il tuo sistema rientra nelle eccezioni molto limitate (es. ricerca di persone scomparse)", "In caso di dubbio, consulta immediatamente un legale specializzato in AI Act"],
   },
   high_risk: {
     label: "Alto rischio", bg: "rgba(234,88,12,0.07)", border: "rgba(234,88,12,0.25)", text: "#ea580c", dot: "#ea580c",
-    article: "Art. 6 + Allegato III AI Act",
-    what: "Il sistema prende o influenza decisioni che impattano significativamente persone fisiche in settori sensibili elencati nell'Allegato III (occupazione, istruzione, servizi essenziali, forze dell'ordine, migrazione, giustizia, infrastrutture critiche).",
+    article: "Art. 6 + Allegati I e III AI Act",
+    what: "Il sistema prende o influenza decisioni che impattano significativamente persone fisiche in settori sensibili elencati nell'Allegato III (occupazione, istruzione, servizi essenziali, forze dell'ordine, migrazione, giustizia, infrastrutture critiche), oppure è un prodotto o componente di sicurezza di un prodotto disciplinato dall'Allegato I (Art. 6(1)).",
     examples: ["AI per la pre-selezione dei CV", "Sistema di scoring del credito bancario", "AI per l'assegnazione di sussidi di disoccupazione", "Diagnosi medica assistita da AI", "AI per la valutazione del rischio di recidiva penale"],
-    obligations: ["Documentazione tecnica completa (Art. 11 + Allegato IV)", "FRIA — Valutazione impatto diritti fondamentali (Art. 27)", "Risk Register Art. 9", "Sorveglianza umana obbligatoria (Art. 14)", "Registrazione nel database EU (Art. 49)", "Conformità assessment prima del deployment"],
+    obligations: ["Documentazione tecnica completa (Art. 11 + Allegato IV)", "FRIA — Valutazione d'impatto sui diritti fondamentali (Art. 27), per i deployer indicati all'Art. 27(1)", "Risk Register Art. 9", "Sorveglianza umana obbligatoria (Art. 14)", "Registrazione nel database EU (Art. 49)", "Conformità assessment prima del deployment"],
   },
   limited: {
     label: "Limitato", bg: "rgba(217,119,6,0.07)", border: "rgba(217,119,6,0.25)", text: "#d97706", dot: "#d97706",
@@ -49,10 +49,10 @@ const TIER_CONFIG: Record<SystemTier, TierCfg> = {
   },
   minimal: {
     label: "Minimale", bg: "rgba(22,163,74,0.07)", border: "rgba(22,163,74,0.25)", text: "#16a34a", dot: "#16a34a",
-    article: "Art. 69 AI Act",
-    what: "Il sistema non rientra nelle categorie proibite, ad alto rischio o a rischio limitato. Nessun obbligo legale obbligatorio — si applica solo un regime volontario di buone pratiche.",
+    article: "Art. 4, Art. 95 AI Act",
+    what: "Il sistema non rientra nelle categorie proibite, ad alto rischio o a rischio limitato. Resta l'obbligo dell'Art. 4 (misure a sostegno dell'alfabetizzazione in materia di IA, come modificato dal Reg. (UE) 2026/1744); il resto è buona prassi volontaria.",
     examples: ["Filtro antispam nella posta elettronica", "Algoritmo di raccomandazione prodotti in e-commerce", "AI per il riconoscimento di immagini in un'app fotografica", "Assistente per la scrittura di email interne", "Ottimizzazione logistica aziendale"],
-    obligations: ["Nessun obbligo obbligatorio per legge", "Volontario: adesione a codici di condotta (Art. 69)", "Raccomandato: documentazione interna minima e governance AI di base"],
+    obligations: ["Alfabetizzazione in materia di IA (Art. 4)", "Volontario: adesione a codici di condotta (Art. 95)", "Raccomandato: documentazione interna minima e governance AI di base"],
   },
   gpai: {
     label: "GPAI", bg: "rgba(99,102,241,0.07)", border: "rgba(99,102,241,0.25)", text: "#6366f1", dot: "#6366f1",

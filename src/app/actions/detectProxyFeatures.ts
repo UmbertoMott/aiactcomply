@@ -30,7 +30,7 @@ Analizza il dataset descritto per identificare "proxy features": variabili che n
 un attributo protetto ma lo correlano indirettamente (zip code → etnia, nome → genere, ecc.).
 
 Art. 10(2)(f) richiede di esaminare eventuali bias nei dati che potrebbero portare a discriminazioni.
-Art. 10(5) consente l'uso di categorie speciali SOLO per individuare e correggere bias nei dati.
+Art. 4 bis, par. 1 (Reg. (UE) 2024/1689 come modificato dal Reg. (UE) 2026/1744) consente eccezionalmente il trattamento di categorie particolari di dati SOLO se strettamente necessario per rilevare e correggere distorsioni, alle condizioni delle lettere a)-f).
 
 REGOLE:
 - Rispondi SOLO con JSON valido, nessun testo fuori dal JSON

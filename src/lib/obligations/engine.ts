@@ -470,6 +470,8 @@ const T = {
   gpai: { href: "/dashboard/tools/gpai", label: "GPAI" },
   transition: { href: "/dashboard/compliance-ops/provider-transition", label: "Cambio di ruolo" },
   prohibited: { href: "/dashboard/triage", label: "Triage — Art. 5" },
+  supplyChain: { href: "/dashboard/tools/supply-chain", label: "Importatori e distributori" },
+  aims: { href: "/dashboard/tools/aims", label: "Sistema di gestione IA" },
 } as const;
 
 export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleResult, risk: RiskResult, riskAnswers: RiskAnswers): ObligationsResult {
@@ -584,8 +586,8 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
       article: "Artt. 20, 73", iso: ["10.2", "A.8.4"], tool: T.postMarket });
     p({ id: "art16l", title: "Requisiti di accessibilità", what: "Garantire la conformità ai requisiti di accessibilità delle direttive (UE) 2016/2102 e 2019/882.",
       article: "Art. 16(l)", iso: [] });
-    p({ id: "art25-4", title: "Accordi scritti con i fornitori di componenti", what: "Con i terzi che forniscono sistemi, strumenti, servizi o componenti integrati, precisare per iscritto informazioni, capacità, accesso tecnico e assistenza necessari per adempiere al regolamento.",
-      article: "Art. 25(4)", iso: ["A.10.2", "A.10.3"] });
+    p({ id: "art25-4", title: "Accordi scritti con i fornitori di componenti", what: "Con i terzi che forniscono sistemi o modelli di IA, strumenti, servizi, componenti o processi usati o integrati nel sistema, precisare per iscritto informazioni, capacità, accesso tecnico e assistenza necessari, sulla base dello stato dell'arte generalmente riconosciuto. Non serve con chi rende accessibili al pubblico, con licenza libera e open source, strumenti, servizi, processi o componenti diversi dai modelli di IA per finalità generali.",
+      article: "Art. 25(4) (testo modificato dal Reg. (UE) 2026/1744)", iso: ["A.10.2", "A.10.3"], tool: T.aims });
     if (roleAnswers.establishedOutsideEU) {
       p({ id: "art22", title: "Nominare un rappresentante autorizzato nell'UE", what: "Prima di mettere il sistema a disposizione nell'Unione, nominare con mandato scritto un rappresentante autorizzato stabilito nell'UE, con i compiti dell'Art. 22(3).",
         article: "Art. 22", iso: [], tool: T.authRep });
@@ -648,13 +650,13 @@ export function computeObligations(roleAnswers: RoleAnswers, roleResult: RoleRes
   // ── Importatore / distributore ──
   if (highRisk && roles.has("importer") && !annexISectionB) {
     add({ id: "art23", group: "importer", role: "importer", appliesFrom: hrFrom, title: "Verifiche prima dell'immissione sul mercato",
-      what: "Verificare valutazione della conformità, documentazione tecnica, marcatura CE, dichiarazione UE, istruzioni e rappresentante autorizzato; indicare il proprio nome; conservare i documenti per 10 anni.",
-      article: "Art. 23", iso: ["A.10.3"] });
+      what: "Verificare valutazione della conformità, documentazione tecnica, marcatura CE, dichiarazione UE, istruzioni e rappresentante autorizzato; non immettere sistemi che si ha motivo di ritenere non conformi o falsificati; indicare il proprio nome e indirizzo; curare stoccaggio e trasporto; conservare certificato, istruzioni e dichiarazione UE per 10 anni; cooperare con le autorità.",
+      article: "Art. 23", iso: ["A.10.3"], tool: T.supplyChain, storageKey: "aicomply_supplychain_result" });
   }
   if (highRisk && roles.has("distributor") && !annexISectionB) {
     add({ id: "art24", group: "distributor", role: "distributor", appliesFrom: hrFrom, title: "Verifiche prima della messa a disposizione",
-      what: "Verificare marcatura CE, dichiarazione UE e istruzioni per l'uso; non mettere a disposizione sistemi non conformi; cooperare con le autorità.",
-      article: "Art. 24", iso: ["A.10.3"] });
+      what: "Verificare marcatura CE, copia della dichiarazione UE, istruzioni per l'uso e indicazioni di fornitore e importatore; non mettere a disposizione sistemi che si ha motivo di ritenere non conformi; curare stoccaggio e trasporto; adottare o far adottare misure correttive e informare in caso di rischio; cooperare con le autorità.",
+      article: "Art. 24", iso: ["A.10.3"], tool: T.supplyChain, storageKey: "aicomply_supplychain_result" });
   }
 
   // ── Art. 50 ──

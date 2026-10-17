@@ -96,7 +96,7 @@ function WaitlistForm() {
             className="mb-8 text-[13px]"
             style={{ color: "rgba(255,255,255,0.45)", lineHeight: 1.7, maxWidth: 340 }}
           >
-            L&apos;AI Act scade ad agosto 2025. Le aziende che iniziano oggi
+            Gli obblighi per i sistemi ad alto rischio si applicano dal 2 dicembre 2027. Le aziende che iniziano oggi
             arrivano conformi in tempo.
           </p>
 

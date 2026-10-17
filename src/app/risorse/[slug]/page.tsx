@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = getPostBySlug(slug, locale);
   if (!post) return {};
   return {
-    title: post.metaTitle,
+    title: { absolute: post.metaTitle },
     description: post.metaDescription,
     openGraph: {
       title: post.metaTitle,

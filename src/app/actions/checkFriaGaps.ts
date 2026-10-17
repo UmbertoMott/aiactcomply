@@ -49,7 +49,7 @@ function summarizeFria(doc: FRIADocument): string {
     // 27(1)(f) — misure se rischio si materializza
     mitigatedRightsCount: mitigatedCount,
     complaint_mechanisms: ctx.complaint_mechanisms,
-    // 27(2) — notifica autorità
+    // 27(3) — notifica autorità
     recommendation: doc.deployment.recommendation,
     conditions: doc.deployment.conditions,
     // 27(4) — coerenza con DPIA
@@ -78,8 +78,8 @@ Verifica TUTTI gli elementi obbligatori:
 4. Art. 27(1)(d) — Rischi specifici di danno per i diritti e le libertà fondamentali, considerando anche i minori e le persone vulnerabili
 5. Art. 27(1)(e) — Misure di sorveglianza umana pianificate per l'implementazione
 6. Art. 27(1)(f) — Misure da adottare se i rischi si materializzano, inclusi meccanismi di reclamo e rimedi
-7. Art. 27(2) — Notifica all'autorità di vigilanza del mercato (obbligo se raccomandazione non è "deploy" incondizionato)
-8. Art. 27(4) — Coordinamento con DPIA GDPR (la DPIA non sostituisce la FRIA ma deve essere coerente)
+7. Art. 27(3) — Notifica dei risultati all'autorità di vigilanza del mercato (obbligo se raccomandazione non è "deploy" incondizionato)
+8. Art. 27(4) (come sostituito dal Reg. (UE) 2026/1744) — se alcuni obblighi sono già rispettati con la DPIA, la FRIA può rinviare alle sezioni pertinenti della DPIA o includerne parti
 
 Per ogni elemento, valuta status: "ok" (presente e sufficiente), "incomplete" (presente ma lacunoso), "missing" (assente).
 

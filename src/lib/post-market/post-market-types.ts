@@ -107,30 +107,30 @@ export function savePMMReports(reports: PostMarketReport[]): void {
 }
 
 // Annex III law enforcement checklist items
-// ✦ AI — verifica e conferma: numerazione punti Annex III da verificare sul testo consolidato
+// Numerazione dei punti dell'Allegato III verificata sul testo ufficiale (punto 1 biometria, 6 contrasto, 7 migrazione)
 export const ANNEX3_LAW_ENFORCEMENT_CHECKLIST: AnnexIIILawEnforcementItem[] = [
   {
     id: "le_1",
     label: "Valutazione impatto specifico su diritti fondamentali delle persone sottoposte a misure di polizia",
-    reference: "Annex III pt. 1(a)",
+    reference: "Allegato III, punto 6; Art. 27",
     completed: false,
   },
   {
     id: "le_2",
     label: "Documentazione delle salvaguardie procedurali specifiche per sistemi biometrici in contesti di law enforcement",
-    reference: "Annex III pt. 6",
+    reference: "Allegato III, punto 1; Art. 26(10)",
     completed: false,
   },
   {
     id: "le_3",
     label: "Revisione periodica dell'impatto su gruppi vulnerabili (minori, rifugiati) per sistemi migrazione/asilo",
-    reference: "Annex III pt. 7",
+    reference: "Allegato III, punto 7",
     completed: false,
   },
   {
     id: "le_4",
-    label: "Notifica all'autorità di sorveglianza del mercato competente per casi di rischio sistemico",
-    reference: "Art. 72(3) + Annex III",
+    label: "Informare il fornitore e l'autorità di vigilanza del mercato se il sistema presenta un rischio ai sensi dell'Art. 79(1), e segnalare gli incidenti gravi",
+    reference: "Art. 26(5); Art. 73",
     completed: false,
   },
 ];

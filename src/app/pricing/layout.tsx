@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 const BASE_URL = "https://www.regulaeos.com";
 
 export const metadata: Metadata = {
-  title: "Assistenza EU AI Act — Piani Essenziale, Studio, Su misura | RegulaeOS",
+  title: { absolute: "Assistenza EU AI Act — Piani Essenziale, Studio, Su misura | RegulaeOS" },
   description:
     "Assistenza professionale in abbonamento per la conformità EU AI Act. Tre piani: Essenziale €49/mese, Studio €149/mese, Su misura. Ogni valutazione validata da un avvocato.",
   openGraph: {

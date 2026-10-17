@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import LegalLayout from "@/components/legal/LegalLayout";
 
 export const metadata: Metadata = {
-  title: "Cookie Policy — RegulaeOS",
+  alternates: { canonical: "/cookie-policy" },
+  title: { absolute: "Cookie Policy — RegulaeOS" },
   description: "Informativa estesa sull'uso dei cookie e tecnologie di tracciamento su regulaeos.com, ai sensi del Provvedimento Garante 8 maggio 2014 e delle Linee Guida 2021.",
   robots: { index: true, follow: true },
 };

@@ -40,14 +40,14 @@ interface Practice {
 }
 
 function buildPractices(t: TFn): Practice[] {
-  return (["a", "b", "c", "d", "e", "f", "g", "h"] as const).map(l => ({
-    letter: l,
+  return (["a", "b", "ba", "bb", "c", "d", "e", "f", "g", "h"] as const).map(l => ({
+    letter: l === "ba" ? "b bis" : l === "bb" ? "b ter" : l,
     title: t(`p_${l}_title`),
     summary: t(`p_${l}_summary`),
     description: t(`p_${l}_desc`),
     example: t(`p_${l}_example`),
     who_is_at_risk: t(`p_${l}_who`),
-    reference: `Art. 5(1)(${l}) EU AI Act`,
+    reference: `Art. 5(1)(${l === "ba" ? "b bis" : l === "bb" ? "b ter" : l}) AI Act`,
   }));
 }
 

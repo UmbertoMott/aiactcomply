@@ -36,6 +36,8 @@ export const TOOL_GUIDES: ToolGuideEntry[] = [
   { id: "agid", href: "/dashboard/tools/agid-acn", optional: true },
   { id: "nist", href: "/dashboard/tools/nist-ai-rmf", optional: true },
   { id: "art50", href: "/dashboard/tools/art50-kit", optional: false },
+  { id: "supply", href: "/dashboard/tools/supply-chain", optional: false },
+  { id: "aims", href: "/dashboard/tools/aims", optional: true },
   { id: "dossier", href: "/dashboard/dossier", optional: true },
 ];
 

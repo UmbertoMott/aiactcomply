@@ -22,6 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description:
         "Pagina di trasparenza AI conforme al Reg. (UE) 2024/1689 (AI Act) — generata con RegulaeOS.",
       robots: page.noindex ? "noindex, nofollow" : "index, follow",
+      alternates: { canonical: `/trust/${slug}` },
       openGraph: {
         title: `${systemName ?? "Sistema di IA"} — Trust Center`,
         url: `https://aicomply.io/trust/${slug}`,

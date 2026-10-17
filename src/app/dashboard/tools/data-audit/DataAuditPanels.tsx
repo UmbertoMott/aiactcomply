@@ -352,12 +352,12 @@ export function RepresentativenessPanel({ datasets, rowsById, onCheck, t }: { da
 // ═══ §10 Tabella mappatura ISO ══════════════════════════════════════════════
 const ISO_ROWS = [
   ["Completezza, unicità, consistenza, outlier", "Art. 10(3)", "ISO/IEC 5259 (data quality ML)"],
-  ["Provenienza, origine, finalità raccolta", "Art. 10(2)(b)", "ISO/IEC 42001 Annex A.4.3"],
+  ["Provenienza, origine, finalità raccolta", "Art. 10(2)(b)", "ISO/IEC 42001 A.7.5"],
   ["Preparazione (annotazione, pulizia…)", "Art. 10(2)(c)", "ISO/IEC 5259-3; ISO/IEC 8183"],
   ["Esame dei bias / metriche di equità", "Art. 10(2)(f)", "ISO/IEC TR 24027 (bias in AI)"],
   ["Rappresentatività vs riferimento", "Art. 10(3)", "ISO/IEC TR 24027; ISO/IEC 5259"],
-  ["Categorie particolari", "Art. 10(5)", "ISO/IEC 42001 A.4.3 + Art. 9 GDPR"],
-  ["Valutazione d'impatto collegata", "Art. 10(5)→27/35", "ISO/IEC 42001 §6.1.4 / §8.4"],
+  ["Categorie particolari", "Art. 4 bis(1)", "ISO/IEC 42001 A.7.4 + Art. 9 GDPR"],
+  ["Valutazione d'impatto collegata", "Art. 4 bis(1)(f) → Art. 27(4) / Art. 35 GDPR", "ISO/IEC 42001 §6.1.4 / §8.4"],
 ];
 export function IsoMappingTable() {
   const t = useT("toolDataAudit");

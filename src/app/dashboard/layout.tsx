@@ -9,6 +9,7 @@ import {
   Landmark, Zap, Menu, X, ChevronRight, ChevronLeft, ChevronDown,
   LogOut, Settings, LayoutGrid, Siren, Home, CalendarClock, ShieldCheck, Bot,
   Monitor, Eye, Megaphone, ClipboardCheck, BadgeCheck, Boxes, GraduationCap,
+  PackageCheck, Network,
 } from "lucide-react";
 import { getDossierSections, getCompletionPercentage, aggregateDossier } from "@/lib/dossier/dossier-engine";
 import { useUserRole, ROLE_LABELS } from "@/lib/hooks/useUserRole";
@@ -23,6 +24,7 @@ import UserMenu from "@/components/dashboard/UserMenu";
 import ChatAssistant from "@/components/ui/ChatAssistant";
 import SessionWarning from "@/components/auth/SessionWarning";
 import { ProjectSwitcher } from "@/components/layout/ProjectSwitcher";
+import LanguageToggle from "@/components/LanguageToggle";
 import { ProjectMembersMenu } from "@/components/dashboard/ProjectMembersMenu";
 import { sanitizeSidebarLabel } from "@/lib/sidebar/sidebar-utils";
 import { useT, useLocale } from "@/i18n/LocaleProvider";
@@ -47,6 +49,8 @@ const ALWAYS_VISIBLE = new Set([
   // Strumenti facoltativi: sempre disponibili, non derivano da un obbligo
   "/dashboard/tools/clients",
   "/dashboard/tools/nist-ai-rmf",
+  // Sistema di gestione ISO/IEC 42001: riguarda l'intera organizzazione
+  "/dashboard/tools/aims",
 ]);
 const SHOW_ALL_KEY = "aicomply_sidebar_show_all";
 
@@ -63,7 +67,7 @@ type NavChild = {
   tooltip?: string;
 };
 
-type NavSection = "start" | "obligations" | "after" | "optional";
+type NavSection = "start" | "obligations" | "after" | "management" | "optional";
 
 type NavPillar = {
   id: string;
@@ -176,6 +180,7 @@ function buildPillars(t: T): NavPillar[] {
   { id: "qms", section: "obligations", icon: ClipboardCheck, label: t("nav_qms"), href: "/dashboard/tools/qms", art: "Art. 17", tooltip: t("tt_qms") },
   { id: "authRep", section: "obligations", icon: UserCheck, label: t("nav_authRep"), href: "/dashboard/compliance-ops/authorized-rep", art: "Art. 22" },
   { id: "transition", section: "obligations", icon: ArrowRightLeft, label: t("nav_providerTransition"), href: "/dashboard/compliance-ops/provider-transition", art: "Art. 25", tooltip: t("tt_providerTransition") },
+  { id: "supply-chain", section: "obligations", icon: PackageCheck, label: t("nav_supplyChain"), href: "/dashboard/tools/supply-chain", art: "Artt. 23-24", tooltip: t("tt_supplyChain") },
   { id: "deployer", section: "obligations", icon: UserCheck, label: t("nav_deployer"), href: "/dashboard/tools/deployer-dashboard", art: "Art. 26" },
   { id: "dpia", section: "obligations", icon: ShieldAlert, label: "DPIA", href: "/dashboard/tools/dpia", art: "Art. 26(9) · GDPR 35" },
   { id: "fria", section: "obligations", icon: BookMarked, label: "FRIA", href: "/dashboard/tools/fria", art: "Art. 27" },
@@ -183,19 +188,21 @@ function buildPillars(t: T): NavPillar[] {
   { id: "eudb", section: "obligations", icon: Database, label: t("nav_eudb"), href: "/dashboard/compliance-ops/eudb", art: "Art. 49" },
   { id: "art50", section: "obligations", icon: Megaphone, label: t("nav_art50"), href: "/dashboard/tools/art50-kit", art: "Art. 50", tooltip: t("tt_art50") },
   { id: "gpai", section: "obligations", icon: Boxes, label: t("nav_gpai"), href: "/dashboard/tools/gpai", art: "Art. 51-55", tooltip: t("tt_gpai") },
+  // ── Dopo l'immissione sul mercato ──
+  { id: "post-market", section: "after", icon: TrendingUp, label: t("nav_postMarket"), href: "/dashboard/post-market", art: "Art. 72-73", tooltip: t("tt_postMarket") },
+  // ── Sistema di gestione (ISO/IEC 42001, volontaria) ──
+  { id: "aims", section: "management", icon: Network, label: t("nav_aims"), href: "/dashboard/tools/aims", art: "ISO/IEC 42001", tooltip: t("tt_aims") },
+  // ── Altre norme e buone prassi (fuori dal perimetro AI Act / ISO 42001) ──
+  { id: "legal-assistant", section: "optional", icon: Bot, label: t("nav_legalAssistant"), href: "/dashboard/tools/legal-assistant", tooltip: t("tt_legalAssistant") },
+  { id: "customers", section: "optional", icon: ShieldCheck, label: t("nav_customersGroup"), href: "/dashboard/tools/clients", art: t("optionalBadge"), tooltip: t("tt_customers") },
+  { id: "nist", section: "optional", icon: Map, label: "NIST AI RMF", href: "/dashboard/tools/nist-ai-rmf", art: t("goodPracticeBadge"), tooltip: t("tt_nist") },
   {
-    id: "italy", section: "obligations", icon: Landmark, label: t("nav_italyGroup"), art: "L. 132/2025",
+    id: "italy", section: "optional", icon: Landmark, label: t("nav_italyGroup"), art: t("lawItalyBadge"),
     children: [
       { icon: Scale,    label: "L.132/2025", href: "/dashboard/tools/l132",     art: "Italia", flag: "paItaly" },
       { icon: Landmark, label: "AGID/ACN",   href: "/dashboard/tools/agid-acn", art: "Italia", flag: "paItaly" },
     ],
   },
-  // ── Dopo l'immissione sul mercato ──
-  { id: "post-market", section: "after", icon: TrendingUp, label: t("nav_postMarket"), href: "/dashboard/post-market", art: "Art. 72-73", tooltip: t("tt_postMarket") },
-  // ── Strumenti facoltativi ──
-  { id: "legal-assistant", section: "optional", icon: Bot, label: t("nav_legalAssistant"), href: "/dashboard/tools/legal-assistant", tooltip: t("tt_legalAssistant") },
-  { id: "customers", section: "optional", icon: ShieldCheck, label: t("nav_customersGroup"), href: "/dashboard/tools/clients", art: t("optionalBadge"), tooltip: t("tt_customers") },
-  { id: "nist", section: "optional", icon: Map, label: "NIST AI RMF", href: "/dashboard/tools/nist-ai-rmf", art: "NIST" },
   ];
 }
 
@@ -621,6 +628,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           )}
           <div className="ml-auto flex items-center gap-2">
+            <LanguageToggle compact />
             <ProjectMembersMenu />
             <ProjectSwitcher />
             <NotificationBell />

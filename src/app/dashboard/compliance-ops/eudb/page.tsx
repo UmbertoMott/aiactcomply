@@ -562,7 +562,7 @@ export default function EUDBCompliancePage() {
                 <option value="withdrawal">Ritiro dal mercato</option>
               </select>
             </DkField>
-            <DkField label="Stati membri in cui è immesso *" span2>
+            <DkField label={s.risk_classification.includes("6(3)") ? "Stati membri (non richiesti per la registrazione dell'Art. 49(2))" : "Stati membri in cui è immesso *"} span2>
               <MemberStatesSelectDark selected={s.member_states} onChange={v => patchS("member_states", v)} />
             </DkField>
           </div>

@@ -293,7 +293,7 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
 
       {/* ── ART. 5 — PRATICHE VIETATE ── */}
       <Section id="sec-prohibited" article="Art. 5" title="Verifica Pratiche Vietate"
-        subtitle="Verifica condotta ai sensi dell'Art. 5 Reg. UE 2024/1689. In vigore dal 2 febbraio 2025."
+        subtitle="Verifica condotta ai sensi dell'Art. 5 Reg. UE 2024/1689, come modificato dal Reg. (UE) 2026/1744. In vigore dal 2 febbraio 2025; lettere b bis) e b ter) dal 2 dicembre 2026."
         completedAt={data.prohibited?.completedAt}>
         {data.prohibited ? (() => {
           const vs = verdictStyle(data.prohibited.verdict);
@@ -347,7 +347,7 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
               <InfoRow label="Allegato III" value={data.classifier.annexIII ? "⚠️ Sì — obblighi specifici applicabili" : "No"} />
               {data.classifier.annexIII && (
                 <div style={{ padding: "10px 14px", background: T.orangeBg, borderRadius: 4, marginTop: 12, marginBottom: 12, fontSize: 11 }}>
-                  ⚠️ Il sistema ricade nell&apos;Allegato III — sono obbligatorie la valutazione di conformità (Art. 43) e la registrazione nella banca dati EU (Art. 51).
+                  ⚠️ Il sistema ricade nell&apos;Allegato III — salvo la deroga dell&apos;Art. 6(3), sono obbligatorie la valutazione della conformità (Art. 43) e la registrazione nella banca dati UE (Art. 49).
                 </div>
               )}
               {data.classifier.applicableArticles.length > 0 && (
@@ -645,8 +645,10 @@ export default function DossierPreview({ data }: DossierPreviewProps) {
           rows={[
             ["2 Feb 2025", "Pratiche vietate Art. 5 — divieti assoluti in vigore", <Badge key="a" color={T.green} bg={T.greenBg}>✓ In vigore</Badge>],
             ["2 Ago 2025", "GPAI Art. 53–55 — modelli AI per uso generale", <Badge key="b" color={T.green} bg={T.greenBg}>✓ In vigore</Badge>],
-            ["2 Ago 2026", "Alto rischio Allegato III — obblighi di conformità", <Badge key="c" color={T.orange} bg={T.orangeBg}>⏳ Prossima scadenza</Badge>],
-            ["2 Ago 2027", "Alto rischio Allegato III punti 6–8 (prodotti esistenti)", <Badge key="d" color={T.yellow} bg={T.yellowBg}>⏳ Futura</Badge>],
+            ["2 Ago 2026", "Trasparenza Art. 50", <Badge key="t" color={T.green} bg={T.greenBg}>✓ In vigore</Badge>],
+            ["2 Dic 2026", "Nuovi divieti Art. 5(1)(b bis)-(b ter); marcatura Art. 50(2) per i sistemi già sul mercato (Art. 111(4))", <Badge key="p" color={T.orange} bg={T.orangeBg}>⏳ Prossima scadenza</Badge>],
+            ["2 Dic 2027", "Alto rischio Allegato III — obblighi di conformità", <Badge key="c" color={T.yellow} bg={T.yellowBg}>⏳ Futura</Badge>],
+            ["2 Ago 2028", "Alto rischio Allegato I — componenti di sicurezza di prodotti", <Badge key="d" color={T.yellow} bg={T.yellowBg}>⏳ Futura</Badge>],
           ]}
         />
       </div>

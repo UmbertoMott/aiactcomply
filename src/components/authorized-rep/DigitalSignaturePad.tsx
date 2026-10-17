@@ -5,6 +5,7 @@
 
 import React, { useRef, useState } from "react";
 import type { DigitalSignature } from "@/types/authorized-rep";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
 
 const DK = {
   text: "#0D1016",
@@ -43,6 +44,7 @@ export function DigitalSignaturePad({ mandateId, onSign, disabled }: Props) {
   const [signerName, setSignerName] = useState("");
   const [hasDrawn, setHasDrawn] = useState(false);
   const [signing, setSigning] = useState(false);
+  const t = useT("market_ops_sig");
 
   function getCtx() {
     return canvasRef.current?.getContext("2d") ?? null;
@@ -101,7 +103,7 @@ export function DigitalSignaturePad({ mandateId, onSign, disabled }: Props) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
         <div>
           <label style={{ display: "block", fontSize: 11, color: DK.muted, marginBottom: 5 }}>
-            Nome e cognome *
+            {t("name_label")}
           </label>
           <input
             type="text"
@@ -114,7 +116,7 @@ export function DigitalSignaturePad({ mandateId, onSign, disabled }: Props) {
         </div>
         <div>
           <label style={{ display: "block", fontSize: 11, color: DK.muted, marginBottom: 5 }}>
-            Email professionale *
+            {t("email_label")}
           </label>
           <input
             type="email"
@@ -130,12 +132,12 @@ export function DigitalSignaturePad({ mandateId, onSign, disabled }: Props) {
       {/* Signature canvas */}
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-          <label style={{ fontSize: 11, color: DK.muted }}>Firma grafica (opzionale)</label>
+          <label style={{ fontSize: 11, color: DK.muted }}>{t("drawn_label")}</label>
           <button
             onClick={clearCanvas}
             type="button"
             style={{ fontSize: 11, color: DK.faint, background: "none", border: "none", cursor: "pointer" }}>
-            Cancella
+            {t("clear")}
           </button>
         </div>
         <canvas
@@ -154,17 +156,14 @@ export function DigitalSignaturePad({ mandateId, onSign, disabled }: Props) {
         />
         {!hasDrawn && (
           <p style={{ fontSize: 11, color: DK.faint, textAlign: "center", marginTop: 4 }}>
-            Firma nell&apos;area sopra (opzionale)
+            {t("draw_hint")}
           </p>
         )}
       </div>
 
       {/* Legal disclaimer */}
       <p style={{ fontSize: 11, color: DK.faint, lineHeight: 1.5, margin: 0 }}>
-        ⚠ Questa firma digitale NON ha valore legale equiparabile a una firma qualificata eIDAS.
-        Firmando, il Rappresentante Autorizzato conferma di aver letto e accettato tutti gli obblighi
-        previsti dall&apos;Art. 22 EU AI Act. La firma è accompagnata da timestamp e hash di integrità
-        SHA-256 per finalità di audit.
+        {t("disclaimer")}
       </p>
 
       <button
@@ -178,7 +177,7 @@ export function DigitalSignaturePad({ mandateId, onSign, disabled }: Props) {
           border: `1px solid ${canSign ? "#0D1016" : DK.border}`,
           transition: "all 0.12s",
         }}>
-        {signing ? "Calcolo hash…" : "Apponi firma e conferma mandato"}
+        {signing ? t("hashing") : t("sign_confirm")}
       </button>
     </div>
   );
@@ -190,26 +189,28 @@ interface ConfirmationProps {
 }
 
 export function SignatureConfirmation({ signature, onRevoke }: ConfirmationProps) {
+  const t = useT("market_ops_sig");
+  const locale = useLocale();
   return (
     <div style={{ borderRadius: 8, border: `1px solid ${DK.greenBdr}`, background: DK.greenBg, padding: 14 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
         <p style={{ fontSize: 13, fontWeight: 600, color: DK.green, margin: 0 }}>
-          ✓ Mandato firmato digitalmente
+          {t("signed_title")}
         </p>
         {onRevoke && (
           <button
             onClick={onRevoke}
             style={{ fontSize: 11, color: DK.red, background: "none", border: "none", cursor: "pointer" }}>
-            Revoca firma
+            {t("revoke")}
           </button>
         )}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
         <p style={{ fontSize: 11, color: DK.muted, margin: 0 }}>
-          Firmatario: <strong style={{ color: DK.text }}>{signature.signerName}</strong> — {signature.signerEmail}
+          {t("signer")} <strong style={{ color: DK.text }}>{signature.signerName}</strong> — {signature.signerEmail}
         </p>
         <p style={{ fontSize: 11, color: DK.muted, margin: 0 }}>
-          Data: {new Date(signature.signedAt).toLocaleString("it-IT")}
+          {t("date")} {new Date(signature.signedAt).toLocaleString(locale === "en" ? "en-GB" : "it-IT")}
         </p>
         <p style={{ fontSize: 11, color: DK.faint, fontFamily: "var(--font-mono)", margin: "4px 0 0",
           wordBreak: "break-all" }}>
@@ -218,7 +219,7 @@ export function SignatureConfirmation({ signature, onRevoke }: ConfirmationProps
       </div>
       {signature.canvasDataUrl && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={signature.canvasDataUrl} alt="firma" style={{ maxHeight: 60, marginTop: 8, borderRadius: 4,
+        <img src={signature.canvasDataUrl} alt={t("img_alt")} style={{ maxHeight: 60, marginTop: 8, borderRadius: 4,
           border: `1px solid ${DK.border}`, background: "#fff" }} />
       )}
     </div>

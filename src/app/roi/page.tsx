@@ -6,7 +6,8 @@ import RoiCalculator from "@/components/RoiCalculator";
 import { getT } from "@/i18n/server";
 
 export const metadata: Metadata = {
-  title: "Calcolatore ROI — Prevenzione sanzioni AI Act | RegulaeOS",
+  alternates: { canonical: "/roi" },
+  title: { absolute: "Calcolatore ROI — Prevenzione sanzioni AI Act | RegulaeOS" },
   description:
     "Stima la tua esposizione alle sanzioni dell'EU AI Act (Art. 99) e il ritorno sull'investimento della prevenzione. Fino a €35M o 7% del fatturato.",
 };

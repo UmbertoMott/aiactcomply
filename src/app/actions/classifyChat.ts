@@ -35,16 +35,16 @@ Determina se l'organizzazione è:
 - Importatore (Art. 3(6)): mette sul mercato UE un sistema sviluppato fuori UE
 - Distributore (Art. 3(7)): rende disponibile il sistema senza modificarlo
 - Rappresentante autorizzato (Art. 3(5)): agisce per conto di provider extra-UE
-- Produttore prodotto (Art. 25(1)(b)): integra AI in un prodotto fisico che vende
+- Fabbricante del prodotto (Art. 25(3)): immette sul mercato con il proprio nome un prodotto dell'Allegato I, sezione A, che integra un sistema ad alto rischio
 
-FASE 3 — CLASSIFICAZIONE TIER (Art. 5, 6, 50, 51-55, 69 + Allegato III)
+FASE 3 — CLASSIFICAZIONE TIER (Artt. 5, 6, 50, 51-55, 95 + Allegati I e III; Reg. (UE) 2024/1689 come modificato dal Reg. (UE) 2026/1744)
 Determina il tier corretto:
-- VIETATO (Art. 5): manipolazione subliminale, social scoring, biometria real-time in luoghi pubblici, inferenza emozioni in contesto lavorativo/scolastico
-- ALTO RISCHIO (Art. 6 + Allegato III): sistemi in ambito occupazione, istruzione, servizi essenziali, credito, forze dell'ordine, migrazione, giustizia, infrastrutture critiche
+- VIETATO (Art. 5): manipolazione subliminale, social scoring, biometria real-time in luoghi pubblici a fini di contrasto, inferenza emozioni in contesto lavorativo/scolastico, immagini intime non consensuali e materiale pedopornografico generati dall'IA (Art. 5(1)(b bis)-(b ter), dal 2.12.2026)
+- ALTO RISCHIO (Art. 6(1) + Allegato I: componenti di sicurezza di prodotti regolati; Art. 6(2) + Allegato III): sistemi in ambito occupazione, istruzione, servizi essenziali, credito, forze dell'ordine, migrazione, giustizia, infrastrutture critiche
 - LIMITATO (Art. 50): sistemi che interagiscono con persone o generano contenuti (chatbot, deepfake, sintesi vocale)
 - GPAI (Art. 51-55): modelli fondazionali a uso generale (GPT, Claude, Gemini, Llama) — provider o deployer
 - GPAI SISTEMICO (Art. 55): modelli GPAI con >10²⁵ FLOP di training
-- MINIMALE (Art. 69): tutto il resto — nessun obbligo obbligatorio
+- MINIMALE: tutto il resto — resta l'Art. 4 (alfabetizzazione); codici di condotta volontari (Art. 95)
 
 ISTRUZIONI:
 - Rispondi in italiano, massimo 4-5 frasi per turno

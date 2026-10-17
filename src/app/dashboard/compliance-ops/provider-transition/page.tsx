@@ -190,7 +190,7 @@ export default function ProviderTransitionPage() {
           Cambio di ruolo — da deployer a fornitore
         </h1>
         <p style={{ color: MUTED, fontSize: 13, lineHeight: 1.5 }}>
-          Verifica se le modifiche apportate al sistema di IA configurano un trasferimento del ruolo da deployer a fornitore ai sensi dell&apos;Art. 25 del Reg. (UE) 2024/1689.
+          Verifica se le modifiche apportate al sistema di IA configurano un trasferimento del ruolo da deployer a fornitore ai sensi dell&apos;Art. 25 del Reg. (UE) 2024/1689, come modificato dal Reg. (UE) 2026/1744.
         </p>
       </div>
 
@@ -473,6 +473,11 @@ export default function ProviderTransitionPage() {
           <p style={{ color: MUTED, fontSize: 13, marginBottom: 16 }}>
             Completa le seguenti obbligazioni. Le voci con sorgente &quot;derivata&quot; si aggiornano automaticamente dagli altri moduli RegulaeOS.
           </p>
+          <div style={{ fontSize: 13, color: TEXT, lineHeight: 1.6, padding: "12px 0", marginBottom: 16, borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}` }}>
+            <strong style={{ fontWeight: 600 }}>Cosa puoi chiedere al fornitore iniziale (Art. 25(2), come sostituito dal Reg. (UE) 2026/1744).</strong>{" "}
+            Il fornitore iniziale non è più considerato fornitore del sistema, ma deve cooperare con te e, ove pertinente: a) metterti a disposizione documentazione tecnica sufficiente a valutare la conformità all&apos;Art. 16; b) comunicarti le limitazioni note e le modalità di guasto; c) concederti un accesso tecnico mirato, anche per sperimentazione e convalida.
+            L&apos;obbligo non si applica se il fornitore iniziale ha specificato chiaramente che il sistema non deve essere trasformato in un sistema ad alto rischio. La violazione dell&apos;Art. 25(2) e (4) è sanzionabile (Art. 99(4)(d bis)).
+          </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {PROVIDER_OBLIGATIONS.map(obl => {
               const done = isObligDone(obl.id);

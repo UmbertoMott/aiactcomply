@@ -56,9 +56,9 @@ export const RISK_REGISTER_SECTIONS: RiskRegisterGuidedSection[] = [
   { key: "sec4", label: "§4 — Trattamento Rischio",      legalRef: "Art. 9(4)-(5)",    anchor: "rr-sec4"  },
   { key: "sec5", label: "§5 — Monitoraggio sul mercato", legalRef: "Art. 9(2)(c)",     anchor: "rr-sec5"  },
   { key: "sec7", label: "§7 — Tracciabilità",            legalRef: "Art. 12, 17",      anchor: "rr-sec7"  },
-  { key: "sec8", label: "§8 — Dismissione",              legalRef: "ISO 23894 Ann. C", anchor: "rr-sec8"  },
+  { key: "sec8", label: "§8 — Dismissione",              legalRef: "Buona prassi · ISO/IEC 23894 Ann. C", anchor: "rr-sec8"  },
   { key: "sec9", label: "§9 — Approvazione",             legalRef: "Art. 9(1)",        anchor: "rr-sec9"  },
-  { key: "comm", label: "Comunicazione",                 legalRef: "ISO 23894 §6.2",   anchor: "rr-comm"  },
+  { key: "comm", label: "Comunicazione",                 legalRef: "Buona prassi · ISO/IEC 23894 §6.2",   anchor: "rr-comm"  },
 ] as const;
 
 // ─── Sotto-punti (36 domande) ─────────────────────────────────────────────────
@@ -450,7 +450,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     sectionKey: "sec8",
     label: "Rischi di fine vita identificati",
     question: "Sono stati identificati rischi specifici della fase di fine vita del sistema (dismissione/ritiro)?",
-    ref: "ISO 23894 Annex C",
+    ref: "Buona prassi · ISO/IEC 23894 Ann. C",
     fieldType: "select_ynp",
     examples: [
       "Sì — rischi identificati: dipendenze downstream di 3 sistemi, dataset da anonimizzare, comunicazione ai deployer.",
@@ -477,7 +477,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     sectionKey: "sec8",
     label: "Dipendenze downstream",
     question: "Sono stati mappati i sistemi o processi downstream che dipendono dagli output del sistema di IA?",
-    ref: "ISO 23894 Annex C",
+    ref: "Buona prassi · ISO/IEC 23894 Ann. C",
     fieldType: "select_ynp",
     examples: [
       "Sì — 3 sistemi downstream identificati (CRM, HR portal, reportistica); piano di migrazione definito.",
@@ -535,7 +535,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     sectionKey: "comm",
     label: "Stakeholder interni coinvolti",
     question: "Quali stakeholder interni sono stati coinvolti nel processo di risk management per questo sistema di IA?",
-    ref: "ISO 23894 §6.2",
+    ref: "Buona prassi · ISO/IEC 23894 §6.2",
     fieldType: "multiline",
     examples: [
       "DPO (parere GDPR e AI Act), Legal (conformità normativa), Engineering (technical risk), HR (impatto sui lavoratori), CTO (approvazione deployment).",
@@ -561,7 +561,7 @@ export const RISK_REGISTER_SUBPOINTS: RiskRegisterSubPoint[] = [
     sectionKey: "comm",
     label: "Consultazioni esterne",
     question: "Sono state effettuate consultazioni con stakeholder esterni (deployer, autorità di vigilanza, associazioni di categoria)?",
-    ref: "ISO 23894 §6.2",
+    ref: "Buona prassi · ISO/IEC 23894 §6.2",
     fieldType: "select_ynp",
     examples: [
       "Sì — consultazione con deployer (aziende clienti) e parere dell'AGID ricevuto in data 20/01/2025.",

@@ -19,7 +19,8 @@ FORMATO OBBLIGATORIO — rispetta SEMPRE queste regole:
 5. Se le informazioni sono parziali, cita quello che trovi come bullet e segnala i limiti.
 6. Se l'informazione è completamente assente, scrivi un solo bullet:
    * Informazione non disponibile nei documenti indicizzati. [Fonte: nessun documento pertinente]
-Non inventare riferimenti normativi.`;
+Non inventare riferimenti normativi.
+Il Regolamento (UE) 2024/1689 è stato modificato dal Regolamento (UE) 2026/1744 (Omnibus digitale sull'IA, in vigore dal 27 luglio 2026): tra l'altro Art. 4, Art. 4 bis (che sostituisce l'Art. 10(5)), Art. 5(1)(b bis)-(b ter), Art. 25(2) e (4), Art. 27(4), Art. 99(6 bis), Artt. 111 e 113 (nuove date). Se un documento del contesto riporta il testo originale di una di queste disposizioni, segnala che è stato modificato.`;
 
 const SYSTEM_PROMPT_EN = `You are an expert on the EU AI Act (Regulation EU 2024/1689) and AI regulation.
 Answer EXCLUSIVELY based on the documents provided in the context.
@@ -33,7 +34,8 @@ MANDATORY FORMAT — always follow these rules:
 5. If information is partial, cite what you find as bullets and note the limits.
 6. If information is completely absent, write a single bullet:
    * Information not available in the indexed documents. [Source: no relevant document]
-Do not invent regulatory references.`;
+Do not invent regulatory references.
+Regulation (EU) 2024/1689 has been amended by Regulation (EU) 2026/1744 (Digital Omnibus on AI, in force since 27 July 2026), including Art. 4, Art. 4a (replacing Art. 10(5)), Art. 5(1)(ba)-(bb), Art. 25(2) and (4), Art. 27(4), Art. 99(6a), Arts. 111 and 113 (new dates). If a context document shows the original text of one of these provisions, point out that it has been amended.`;
 
 function buildPrompt(
   query: string,

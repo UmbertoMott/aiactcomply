@@ -8,7 +8,7 @@ export interface EudbDraft {
   providerAddress: string;
   providerContact: string;
   providerRole: string;
-  // Allegato VIII — Sezione B: Sistema AI
+  // Allegato VIII — Sezione A, punti 4-5 (o sezione B per la deroga dell'Art. 6(3)): sistema di IA
   systemName: string;
   systemVersion: string;
   intendedPurpose: string;

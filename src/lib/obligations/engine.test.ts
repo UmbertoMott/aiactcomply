@@ -184,3 +184,22 @@ test("Allegato I, sezione B: al deployer non si applicano gli Artt. 26-27 (Art. 
   assert.equal(r.risk.category, "high_risk_annex_i");
   assert.ok(!r.ids.some(id => id.startsWith("art26") || id === "art27"));
 });
+
+test("Importatore e distributore di un sistema ad alto rischio: Artt. 23-24 con il tool dedicato", () => {
+  const imp = run({ developer: "third_party", thirdPartyUse: ["import"], publicStatus: "none" }, { aiDefinition: "infers", annexIII: ["4a"] });
+  const art23 = imp.obl.obligations.find(o => o.id === "art23");
+  assert.ok(art23, "art23");
+  assert.equal(art23.tool?.href, "/dashboard/tools/supply-chain");
+  const dis = run({ developer: "third_party", thirdPartyUse: ["distribute"], publicStatus: "none" }, { aiDefinition: "infers", annexIII: ["4a"] });
+  assert.equal(dis.obl.obligations.find(o => o.id === "art24")?.tool?.href, "/dashboard/tools/supply-chain");
+  const tn = toolNeeds([{ name: "S", roleAnswers: { developer: "third_party", thirdPartyUse: ["import"], publicStatus: "none" }, riskAnswers: { aiDefinition: "infers", annexIII: ["4a"] } }]);
+  assert.ok(tn.tools["/dashboard/tools/supply-chain"]);
+});
+
+test("Art. 25(4) nel testo modificato dal Reg. 2026/1744: stato dell'arte ed esclusione open source", () => {
+  const r = run({ developer: "us", ownUse: ["market"], publicStatus: "none" }, { aiDefinition: "infers", annexIII: ["4a"] });
+  const o = r.obl.obligations.find(x => x.id === "art25-4");
+  assert.ok(o);
+  assert.match(o.what, /stato dell'arte/);
+  assert.match(o.what, /open source/);
+});
