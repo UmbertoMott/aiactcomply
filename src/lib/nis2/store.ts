@@ -1,7 +1,7 @@
 "use client";
 
-// Stato dei requisiti NIS 2: stato, annotazioni ed elenco dei documenti in localStorage;
-// il contenuto dei file in IndexedDB. Tutto resta nel browser di questo dispositivo.
+// Stato dei requisiti NIS 2: stato, annotazioni ed elenco dei documenti in localStorage.
+// Il contenuto dei file è cifrato nel browser (crypto.ts) e salvato tramite file-storage.ts.
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Nis2Profile } from "./requirements";
@@ -14,6 +14,12 @@ export interface Nis2DocMeta {
   size: number;
   type: string;
   addedAt: string;
+  /** Vettore di inizializzazione AES-GCM (base64); assente nei file salvati prima della cifratura */
+  iv?: string;
+  /** Impronta della chiave usata per cifrare il file */
+  keyId?: string;
+  /** Dove è conservato il file cifrato */
+  storage?: "local" | "cloud";
 }
 
 export interface Nis2Entry {
@@ -93,30 +99,3 @@ export function useNis2Entry(profile: Nis2Profile, id: string): [Nis2Entry, (pat
   }, [profile, id]);
   return [entry, update];
 }
-
-// ─── File in IndexedDB ───────────────────────────────────────────────────────
-
-const DB = "aicomply_nis2";
-const STORE = "files";
-
-function openDb(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB, 1);
-    req.onupgradeneeded = () => req.result.createObjectStore(STORE);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function tx<T>(mode: IDBTransactionMode, run: (s: IDBObjectStore) => IDBRequest<T>): Promise<T> {
-  const db = await openDb();
-  return new Promise<T>((resolve, reject) => {
-    const req = run(db.transaction(STORE, mode).objectStore(STORE));
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-export const putFile = (id: string, file: Blob) => tx("readwrite", (s) => s.put(file, id));
-export const getFile = (id: string) => tx<Blob | undefined>("readonly", (s) => s.get(id) as IDBRequest<Blob | undefined>);
-export const deleteFile = (id: string) => tx("readwrite", (s) => s.delete(id));

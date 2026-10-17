@@ -5,10 +5,12 @@
 import React, { useRef, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ChevronLeft, ChevronRight, FileText, Upload, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, Lock, Upload, X } from "lucide-react";
 import { INK, LINE, fieldStyle, Choice, Note, SecondaryButton } from "@/components/tools/ToolUi";
 import { NIS2_SETS, findNis2Item, type Nis2Profile } from "@/lib/nis2/requirements";
-import { MAX_FILE_BYTES, deleteFile, getFile, putFile, useNis2Entry, useNis2Profile, type Nis2Status } from "@/lib/nis2/store";
+import { MAX_FILE_BYTES, useNis2Entry, useNis2Profile, type Nis2DocMeta, type Nis2Status } from "@/lib/nis2/store";
+import { readDocument, removeDocument, saveDocument } from "@/lib/nis2/documents";
+import { fileStorage } from "@/lib/nis2/file-storage";
 import { Nis2ProfileChooser } from "@/components/nis2/Nis2Overview";
 import { useLocale, useT } from "@/i18n/LocaleProvider";
 
@@ -36,6 +38,7 @@ function RequirementView({ profile, id }: { profile: Nis2Profile; id: string }) 
   const found = findNis2Item(profile, id);
   const [entry, update] = useNis2Entry(profile, id);
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   if (!found) {
@@ -57,24 +60,30 @@ function RequirementView({ profile, id }: { profile: Nis2Profile; id: string }) 
 
   async function addFiles(files: FileList) {
     setError(null);
-    const added = [];
+    const added: Nis2DocMeta[] = [];
+    setBusy(true);
     for (const f of Array.from(files)) {
       if (f.size > MAX_FILE_BYTES) { setError(`${f.name}: ${t("too_big")}`); continue; }
-      const docId = crypto.randomUUID();
       try {
-        await putFile(docId, f);
-        added.push({ id: docId, name: f.name, size: f.size, type: f.type, addedAt: new Date().toISOString() });
+        added.push(await saveDocument(f));
       } catch {
         setError(t("file_error"));
       }
     }
+    setBusy(false);
     if (added.length) update({ docs: [...entry.docs, ...added], status: entry.status === "todo" ? "progress" : entry.status });
     if (fileRef.current) fileRef.current.value = "";
   }
 
-  async function openDoc(docId: string, name: string) {
-    const blob = await getFile(docId).catch(() => undefined);
-    if (!blob) { setError(t("file_error")); return; }
+  async function openDoc(doc: Nis2DocMeta) {
+    const name = doc.name;
+    let blob: Blob;
+    try {
+      blob = await readDocument(doc);
+    } catch (e) {
+      setError(t((e as Error).message === "missing_key" ? "key_missing" : "open_error"));
+      return;
+    }
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -85,9 +94,9 @@ function RequirementView({ profile, id }: { profile: Nis2Profile; id: string }) 
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
   }
 
-  async function removeDoc(docId: string) {
-    await deleteFile(docId).catch(() => undefined);
-    update({ docs: entry.docs.filter((d) => d.id !== docId) });
+  async function removeDoc(doc: Nis2DocMeta) {
+    await removeDocument(doc).catch(() => undefined);
+    update({ docs: entry.docs.filter((d) => d.id !== doc.id) });
   }
 
   const fmtSize = (n: number) => (n < 1024 * 1024 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`);
@@ -130,18 +139,22 @@ function RequirementView({ profile, id }: { profile: Nis2Profile; id: string }) 
       <section style={{ padding: "18px 0", borderTop: `1px solid ${LINE}`, display: "flex", flexDirection: "column", gap: 10 }}>
         <h2 style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>{t("documents")}</h2>
         <Note>{t("documents_hint")}</Note>
+        <p style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 12.5, lineHeight: 1.5, margin: 0 }}>
+          <Lock size={14} style={{ flexShrink: 0, marginTop: 2 }} />
+          <span>{t(fileStorage.kind === "cloud" ? "enc_note_cloud" : "enc_note_local")} <Link href="/dashboard/nis2/sicurezza" style={{ color: INK }}>{t("security")}</Link></span>
+        </p>
         {entry.docs.length === 0 ? (
           <p style={{ fontSize: 12.5, margin: 0 }}>{t("no_docs")}</p>
         ) : (
           entry.docs.map((d) => (
             <div key={d.id} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, paddingBottom: 6, borderBottom: `1px solid ${LINE}` }}>
-              <FileText size={14} style={{ flexShrink: 0 }} />
-              <button type="button" onClick={() => void openDoc(d.id, d.name)} title={t("open")}
+              {d.iv ? <span title={t("encrypted")} style={{ display: "inline-flex" }}><Lock size={13} style={{ flexShrink: 0 }} /></span> : <FileText size={14} style={{ flexShrink: 0 }} />}
+              <button type="button" onClick={() => void openDoc(d)} title={t("open")}
                 style={{ background: "none", border: "none", padding: 0, color: INK, cursor: "pointer", textDecoration: "underline", fontSize: 13, fontFamily: "inherit", textAlign: "left", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {d.name}
               </button>
               <span style={{ fontSize: 12, whiteSpace: "nowrap" }}>{fmtSize(d.size)} · {fmtDate(d.addedAt)}</span>
-              <button type="button" onClick={() => void removeDoc(d.id)} aria-label={t("remove")} title={t("remove")}
+              <button type="button" onClick={() => void removeDoc(d)} aria-label={t("remove")} title={t("remove")}
                 style={{ background: "none", border: "none", cursor: "pointer", color: INK, padding: 2, display: "inline-flex" }}>
                 <X size={14} />
               </button>
@@ -149,7 +162,7 @@ function RequirementView({ profile, id }: { profile: Nis2Profile; id: string }) 
           ))
         )}
         <div>
-          <SecondaryButton onClick={() => fileRef.current?.click()}><Upload size={14} /> {t("add_file")}</SecondaryButton>
+          <SecondaryButton onClick={() => fileRef.current?.click()} disabled={busy}><Upload size={14} /> {busy ? t("encrypting") : t("add_file")}</SecondaryButton>
           <input ref={fileRef} type="file" multiple hidden onChange={(e) => { if (e.target.files?.length) void addFiles(e.target.files); }} />
         </div>
         {error && <Note warn>{error}</Note>}

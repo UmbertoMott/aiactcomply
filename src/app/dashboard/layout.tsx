@@ -174,6 +174,7 @@ function buildNis2Pillars(t: T, set: Nis2Set | null): NavPillar[] {
       href: `/dashboard/nis2/f/${f}`, art: n(f),
     })),
     { id: "nis2-incidents", section: "start", icon: Siren, label: t("incidents_short"), href: "/dashboard/nis2/incidenti", art: "IS" },
+    { id: "nis2-security", section: "start", icon: ShieldAlert, label: t("security"), href: "/dashboard/nis2/sicurezza" },
   ];
 }
 
