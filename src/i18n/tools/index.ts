@@ -8,9 +8,10 @@ import qualityDocs from "./quality_docs";
 import marketOps from "./market_ops";
 import support from "./support";
 import governance from "./governance";
+import nis2 from "./nis2";
 
 // Unisce i dizionari dei tool (un file per gruppo, così ogni gruppo si modifica senza conflitti).
-const GROUPS: ToolDictionaries[] = [shell, inventory, fria, dpiaRisk, deployerOps, qualityDocs, marketOps, support, governance];
+const GROUPS: ToolDictionaries[] = [shell, inventory, fria, dpiaRisk, deployerOps, qualityDocs, marketOps, support, governance, nis2];
 
 function merge(locale: "it" | "en"): Record<string, ToolNamespace> {
   const out: Record<string, ToolNamespace> = {};

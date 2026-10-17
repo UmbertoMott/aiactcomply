@@ -74,7 +74,7 @@ export async function updateSession(request: NextRequest) {
     const otpVerified = request.cookies.get("login_otp_verified")?.value;
     if (otpVerified) {
       const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = "/dashboard";
+      redirectUrl.pathname = "/dashboard/start";
       return NextResponse.redirect(redirectUrl);
     }
     // Sessione attiva ma OTP non verificato → mostra login normalmente

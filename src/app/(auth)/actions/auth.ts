@@ -162,7 +162,7 @@ export async function loginEmail(formData: FormData) {
 export async function verifyOTP(formData: FormData) {
   const code       = formData.get("code")       as string;
   const email      = formData.get("email")      as string | null;
-  const redirectTo = (formData.get("redirectTo") as string) || "/dashboard";
+  const redirectTo = (formData.get("redirectTo") as string) || "/dashboard/start";
 
   if (!email) {
     return { error: "Email mancante. Riprova dalla pagina di registrazione." };
