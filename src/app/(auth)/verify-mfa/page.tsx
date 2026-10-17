@@ -76,7 +76,7 @@ export default function VerifyMFAPage() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push("/dashboard/start");
   }
 
   return (

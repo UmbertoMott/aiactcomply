@@ -33,10 +33,11 @@ import { loadInventory } from "@/lib/inventory/ai-system";
 import { migrateLegacyClassifier, syncClassifierFromInventory } from "@/lib/inventory/classifier-bridge";
 import { guideForPath } from "@/lib/tools/tool-guide";
 import ToolGuide from "@/components/tools/ToolGuide";
+import { NIS2_FUNCTIONS, NIS2_REQUIREMENTS } from "@/lib/nis2/requirements";
 
 /** La home "/dashboard" è attiva solo su se stessa; le altre voci anche sulle sottopagine */
 function isOnPath(pathname: string, href: string): boolean {
-  return href === "/dashboard" ? pathname === href : pathname === href || pathname.startsWith(href + "/");
+  return href === "/dashboard" || href === "/dashboard/nis2" ? pathname === href : pathname === href || pathname.startsWith(href + "/");
 }
 
 /** Voci sempre visibili nel menu, anche quando è filtrato sugli obblighi */
@@ -161,6 +162,19 @@ function SidebarTooltip({ text, children }: { text: string; children: React.Reac
   );
 }
 
+/** Menu dell'area NIS 2: panoramica, le sei funzioni del Framework nazionale, incidenti */
+function buildNis2Pillars(t: T): NavPillar[] {
+  const fnIcons = { GV: Landmark, ID: Crosshair, PR: ShieldCheck, DE: Eye, RS: Siren, RC: TrendingUp } as const;
+  return [
+    { id: "nis2-overview", section: "start", icon: LayoutGrid, label: t("overview"), href: "/dashboard/nis2", art: String(NIS2_REQUIREMENTS.length) },
+    ...NIS2_FUNCTIONS.map((f) => ({
+      id: `nis2-${f}`, section: "start" as NavSection, icon: fnIcons[f], label: `${f} — ${t(`fn_${f}`)}`,
+      href: `/dashboard/nis2/f/${f}`, art: String(NIS2_REQUIREMENTS.filter((r) => r.fn === f).length),
+    })),
+    { id: "nis2-incidents", section: "start", icon: Siren, label: t("incidents_short"), href: "/dashboard/nis2/incidenti", art: "IS" },
+  ];
+}
+
 function buildPillars(t: T): NavPillar[] {
   return [
   // ── Inizio: inventario, verifica rapida, scadenze ──
@@ -209,8 +223,12 @@ function buildPillars(t: T): NavPillar[] {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const t = useT("dash");
+  const tn = useT("nis2");
   const locale = useLocale();
-  const pillars = buildPillars(t);
+  // Due aree: AI Act (predefinita) e NIS 2; /dashboard/start è la scelta iniziale senza menu
+  const area: "aiact" | "nis2" = pathname.startsWith("/dashboard/nis2") ? "nis2" : "aiact";
+  const isStart = pathname === "/dashboard/start";
+  const pillars = area === "nis2" ? buildNis2Pillars(tn) : buildPillars(t);
   const [isMobile, setIsMobile] = useState(false);
   const [layoutMounted, setLayoutMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -258,7 +276,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   // Menu filtrato sugli obblighi dei sistemi classificati (lib/obligations/engine.ts → toolNeeds)
-  const filtering = !!needs && needs.assessed > 0 && !showAll;
+  const filtering = area === "aiact" && !!needs && needs.assessed > 0 && !showAll;
 
   function isNeeded(href: string): boolean {
     return !filtering || ALWAYS_VISIBLE.has(href) || !!needs?.tools[href];
@@ -269,7 +287,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return isNeeded(child.href);
   }
 
-  const hiddenCount = needs && needs.assessed > 0
+  const hiddenCount = area === "aiact" && needs && needs.assessed > 0
     ? pillars.flatMap((p) => p.children ?? [{ href: p.href! } as NavChild])
         .filter((c) => !c.flag && !ALWAYS_VISIBLE.has(c.href) && !needs.tools[c.href]).length
     : 0;
@@ -304,7 +322,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     .sort((a, b) => b.href.length - a.href.length)[0];
 
   const sidebarW = collapsed ? "w-[52px]" : "w-56";
-  const currentGuide = guideForPath(pathname);
+  const currentGuide = area === "aiact" ? guideForPath(pathname) : null;
+  const homeHref = area === "nis2" ? "/dashboard/nis2" : "/dashboard";
+
+  if (isStart) {
+    return (
+      <div className="flex flex-col h-screen w-full overflow-hidden" style={{ background: "#FFFFFF" }}>
+        <DisclosureModal lang={locale} />
+        <DisclosureBanner lang={locale} />
+        <header className="h-14 flex items-center px-6 flex-shrink-0" style={{ background: "#0D1016" }}>
+          <Link href="/" style={{ display: "flex", alignItems: "center" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.svg" alt="RegulaeOS" style={{ height: 22, width: "auto", filter: "invert(1)" }} />
+          </Link>
+          <div className="ml-auto flex items-center gap-2" style={{ background: "#ffffff", borderRadius: 999, padding: "2px 6px" }}>
+            <LanguageToggle compact />
+            <UserMenu />
+          </div>
+        </header>
+        <main className="dash-main flex-1 overflow-y-auto p-6 w-full" style={{ background: "#FFFFFF" }}>{children}</main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen w-full overflow-hidden" style={{ background: "#FFFFFF" }}>
@@ -358,8 +397,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex-1 min-h-0 overflow-y-auto py-4" style={{ scrollbarWidth: "none" }}>
           <nav className={collapsed ? "px-1.5" : "px-3"}>
 
+            {/* Area: AI Act / NIS 2 */}
+            {!collapsed && (
+              <div className="mb-3 flex rounded-md p-0.5" style={{ background: "rgba(255,255,255,0.06)" }}>
+                {([["aiact", "/dashboard", tn("switch_aiact")], ["nis2", "/dashboard/nis2", tn("switch_nis2")]] as const).map(([a, href, label]) => (
+                  <Link key={a} href={href} onClick={() => setSidebarOpen(false)}
+                    className="flex-1 text-center rounded py-1 text-[11px] font-medium transition-all"
+                    style={area === a ? { background: "rgba(255,255,255,0.14)", color: "#ffffff" } : { color: "rgba(255,255,255,0.55)" }}>
+                    {label}
+                  </Link>
+                ))}
+              </div>
+            )}
+
             {/* Dossier */}
-            <div className="mb-4 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+            {area === "aiact" && <div className="mb-4 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
               <Link
                 href="/dashboard/dossier"
                 onClick={() => setSidebarOpen(false)}
@@ -387,7 +439,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </span>
                 )}
               </Link>
-            </div>
+            </div>}
 
             {/* 5 Pilastri */}
             {pillars.filter((p) => p.children ? p.children.some(isChildVisible) : isNeeded(p.href!)).map((pillar, idx, list) => {
@@ -583,7 +635,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Menu className="h-5 w-5" />
           </button>
           <div className="flex items-center gap-1.5 text-[13px]" style={{ color: "#0D1016" }}>
-            <Link href="/dashboard" className="hover:opacity-70 transition-opacity">{t("breadcrumbHome")}</Link>
+            <Link href={homeHref} className="hover:opacity-70 transition-opacity">{area === "nis2" ? "NIS 2" : t("breadcrumbHome")}</Link>
             {currentItem && (
               <>
                 <ChevronRight className="h-3 w-3" />
@@ -591,7 +643,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </>
             )}
           </div>
-          {needs && needs.assessed > 0 && needs.roles.length > 0 ? (
+          {area === "nis2" ? null : needs && needs.assessed > 0 && needs.roles.length > 0 ? (
             <div className="ml-4 hidden lg:flex items-center gap-1.5">
               {needs.roles.map((r) => (
                 <span

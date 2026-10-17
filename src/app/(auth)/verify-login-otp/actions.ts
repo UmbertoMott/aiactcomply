@@ -50,7 +50,7 @@ export async function verifyLoginOTPAction(formData: FormData) {
     redirect("/verify-mfa");
   }
 
-  redirect("/dashboard");
+  redirect("/dashboard/start");
 }
 
 // ── Rinvia codice ──────────────────────────────────────────────────────────
