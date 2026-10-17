@@ -4,7 +4,8 @@ import Image from "next/image";
 import DemoForm from "@/components/DemoForm";
 
 export const metadata: Metadata = {
-  title: "Prenota una demo — RegulaeOS",
+  alternates: { canonical: "/prenota-demo" },
+  title: { absolute: "Prenota una demo — RegulaeOS" },
   description:
     "Prenota una demo di RegulaeOS: vedi come l'avvocato, assistito dallo strumento, predispone il tuo assessment di conformità EU AI Act. Chiamata di 30 minuti.",
 };

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import LegalLayout from "@/components/legal/LegalLayout";
 
 export const metadata: Metadata = {
-  title: "Termini e Condizioni — RegulaeOS",
+  alternates: { canonical: "/termini" },
+  title: { absolute: "Termini e Condizioni — RegulaeOS" },
   description: "Termini e condizioni di utilizzo della piattaforma RegulaeOS per la conformità EU AI Act.",
   robots: { index: true, follow: true },
 };

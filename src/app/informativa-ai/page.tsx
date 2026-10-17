@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import LegalLayout from "@/components/legal/LegalLayout";
 
 export const metadata: Metadata = {
-  title: "Informativa sull'uso dell'AI — RegulaeOS",
+  alternates: { canonical: "/informativa-ai" },
+  title: { absolute: "Informativa sull'uso dell'AI — RegulaeOS" },
   description: "Informativa trasparenza sull'utilizzo di sistemi di intelligenza artificiale nella piattaforma RegulaeOS, ai sensi dell'art. 50 EU AI Act.",
   robots: { index: true, follow: true },
 };

@@ -15,7 +15,7 @@ import BookDemoBanner from "@/components/BookDemoBanner";
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com";
 
 export const metadata: Metadata = {
-  title: "RegulaeOS — Assistenza professionale alla conformità EU AI Act",
+  title: { absolute: "RegulaeOS — Assistenza professionale alla conformità EU AI Act" },
   description:
     "RegulaeOS eroga assistenza professionale alla conformità al Regolamento EU AI Act (2024/1689), erogata da un avvocato iscritto all'albo. Risk assessment, FRIA, DPIA e documentazione tecnica: ogni valutazione è assistita dallo strumento e validata dall'avvocato.",
   keywords: [

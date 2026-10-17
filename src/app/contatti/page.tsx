@@ -3,7 +3,8 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/sections/Footer";
 
 export const metadata: Metadata = {
-  title: "Contatti — RegulaeOS",
+  alternates: { canonical: "/contatti" },
+  title: { absolute: "Contatti — RegulaeOS" },
   description: "Contatta l'Avvocato per attivare l'assistenza professionale alla conformità EU AI Act.",
 };
 

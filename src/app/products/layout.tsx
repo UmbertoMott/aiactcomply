@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 const BASE_URL = "https://www.regulaeos.com";
 
 export const metadata: Metadata = {
-  title: "Prodotti RegulaeOS — Moduli per la Conformità EU AI Act",
+  title: { absolute: "Prodotti RegulaeOS — Moduli per la Conformità EU AI Act" },
   description:
     "Triage, Legal Assistant, Risk Manager, EUDB, Trust Center e molto altro. RegulaeOS copre ogni obbligo dell'EU AI Act con strumenti specializzati per team prodotto, legal e compliance.",
   openGraph: {

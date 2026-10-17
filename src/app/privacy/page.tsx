@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import LegalLayout from "@/components/legal/LegalLayout";
 
 export const metadata: Metadata = {
-  title: "Informativa sulla Privacy — RegulaeOS",
+  alternates: { canonical: "/privacy" },
+  title: { absolute: "Informativa sulla Privacy — RegulaeOS" },
   description: "Informativa sul trattamento dei dati personali ai sensi del Regolamento UE 2016/679 (GDPR) da parte di RegulaeOS S.r.l.",
   robots: { index: true, follow: true },
 };
