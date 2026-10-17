@@ -7,11 +7,11 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ChevronLeft, ChevronRight, FileText, Upload, X } from "lucide-react";
 import { INK, LINE, fieldStyle, Choice, Note, SecondaryButton } from "@/components/tools/ToolUi";
-import { NIS2_INCIDENTS, NIS2_REQUIREMENTS, findNis2Item } from "@/lib/nis2/requirements";
-import { MAX_FILE_BYTES, deleteFile, getFile, putFile, useNis2Entry, type Nis2Status } from "@/lib/nis2/store";
+import { NIS2_SETS, findNis2Item, type Nis2Profile } from "@/lib/nis2/requirements";
+import { MAX_FILE_BYTES, deleteFile, getFile, putFile, useNis2Entry, useNis2Profile, type Nis2Status } from "@/lib/nis2/store";
+import { Nis2ProfileChooser } from "@/components/nis2/Nis2Overview";
 import { useLocale, useT } from "@/i18n/LocaleProvider";
 
-const ORDER = [...NIS2_REQUIREMENTS.map((r) => r.id), ...NIS2_INCIDENTS.map((i) => i.id)];
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -25,10 +25,16 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 export default function Nis2RequirementPage() {
   const params = useParams<{ id: string }>();
   const id = decodeURIComponent(params.id);
+  const [profile, setProfile] = useNis2Profile();
+  if (!profile) return <Nis2ProfileChooser onChoose={setProfile} />;
+  return <RequirementView key={`${profile}:${id}`} profile={profile} id={id} />;
+}
+
+function RequirementView({ profile, id }: { profile: Nis2Profile; id: string }) {
   const t = useT("nis2");
   const locale = useLocale();
-  const found = findNis2Item(id);
-  const [entry, update] = useNis2Entry(id);
+  const found = findNis2Item(profile, id);
+  const [entry, update] = useNis2Entry(profile, id);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -41,6 +47,8 @@ export default function Nis2RequirementPage() {
     );
   }
 
+  const set = NIS2_SETS[profile];
+  const ORDER = [...set.requirements.map((r) => r.id), ...set.incidents.map((i) => i.id)];
   const idx = ORDER.indexOf(id);
   const prev = idx > 0 ? ORDER[idx - 1] : null;
   const next = idx < ORDER.length - 1 ? ORDER[idx + 1] : null;
@@ -97,7 +105,8 @@ export default function Nis2RequirementPage() {
         </span>
       </div>
 
-      <h1 style={{ margin: "0 0 14px" }}>{title}</h1>
+      <h1 style={{ margin: "0 0 4px" }}>{title}</h1>
+      <p style={{ fontSize: 12.5, margin: "0 0 14px" }}>{t(`profile_${profile}`)}</p>
 
       {isReq ? (
         <>

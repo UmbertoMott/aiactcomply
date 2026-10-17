@@ -6,8 +6,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Network, ShieldCheck } from "lucide-react";
 import { INK, LINE, OK } from "@/components/tools/ToolUi";
-import { NIS2_REQUIREMENTS } from "@/lib/nis2/requirements";
-import { useNis2All } from "@/lib/nis2/store";
+import { NIS2_SETS } from "@/lib/nis2/requirements";
+import { useNis2All, useNis2Profile } from "@/lib/nis2/store";
 import { loadInventory } from "@/lib/inventory/ai-system";
 import { useT } from "@/i18n/LocaleProvider";
 
@@ -35,9 +35,11 @@ function AreaCard({ href, icon, name, law, desc, stat, enter }: {
 
 export default function StartPage() {
   const t = useT("nis2");
-  const nis2 = useNis2All();
+  const [profile] = useNis2Profile();
+  const nis2 = useNis2All(profile);
+  const reqs = profile ? NIS2_SETS[profile].requirements : [];
   const [systems] = useState<number>(() => (typeof window === "undefined" ? 0 : loadInventory().length));
-  const done = NIS2_REQUIREMENTS.filter((r) => nis2[r.id]?.status === "done").length;
+  const done = reqs.filter((r) => nis2[r.id]?.status === "done").length;
 
   return (
     <div style={{ maxWidth: 900, margin: "40px auto 0", color: INK }}>
@@ -47,7 +49,7 @@ export default function StartPage() {
         <AreaCard href="/dashboard" icon={<ShieldCheck size={22} />} name={t("aiact_name")} law={t("aiact_law")} desc={t("aiact_desc")}
           stat={systems ? `${systems} ${t(systems === 1 ? "system_one" : "system_many")}` : undefined} enter={t("enter")} />
         <AreaCard href="/dashboard/nis2" icon={<Network size={22} />} name={t("nis2_name")} law={t("nis2_law")} desc={t("nis2_desc")}
-          stat={done > 0 ? `${done}/${NIS2_REQUIREMENTS.length} ${t("done_of")}` : undefined} enter={t("enter")} />
+          stat={profile ? `${t(`profile_${profile}`)} · ${done}/${reqs.length} ${t("done_of")}` : undefined} enter={t("enter")} />
       </div>
     </div>
   );

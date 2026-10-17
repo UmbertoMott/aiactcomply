@@ -33,7 +33,8 @@ import { loadInventory } from "@/lib/inventory/ai-system";
 import { migrateLegacyClassifier, syncClassifierFromInventory } from "@/lib/inventory/classifier-bridge";
 import { guideForPath } from "@/lib/tools/tool-guide";
 import ToolGuide from "@/components/tools/ToolGuide";
-import { NIS2_FUNCTIONS, NIS2_REQUIREMENTS } from "@/lib/nis2/requirements";
+import { NIS2_FUNCTIONS, NIS2_SETS, type Nis2Set } from "@/lib/nis2/requirements";
+import { useNis2Profile } from "@/lib/nis2/store";
 
 /** La home "/dashboard" è attiva solo su se stessa; le altre voci anche sulle sottopagine */
 function isOnPath(pathname: string, href: string): boolean {
@@ -163,13 +164,14 @@ function SidebarTooltip({ text, children }: { text: string; children: React.Reac
 }
 
 /** Menu dell'area NIS 2: panoramica, le sei funzioni del Framework nazionale, incidenti */
-function buildNis2Pillars(t: T): NavPillar[] {
+function buildNis2Pillars(t: T, set: Nis2Set | null): NavPillar[] {
+  const n = (f?: string) => (set ? String(f ? set.requirements.filter((r) => r.fn === f).length : set.requirements.length) : undefined);
   const fnIcons = { GV: Landmark, ID: Crosshair, PR: ShieldCheck, DE: Eye, RS: Siren, RC: TrendingUp } as const;
   return [
-    { id: "nis2-overview", section: "start", icon: LayoutGrid, label: t("overview"), href: "/dashboard/nis2", art: String(NIS2_REQUIREMENTS.length) },
+    { id: "nis2-overview", section: "start", icon: LayoutGrid, label: t("overview"), href: "/dashboard/nis2", art: n() },
     ...NIS2_FUNCTIONS.map((f) => ({
       id: `nis2-${f}`, section: "start" as NavSection, icon: fnIcons[f], label: `${f} — ${t(`fn_${f}`)}`,
-      href: `/dashboard/nis2/f/${f}`, art: String(NIS2_REQUIREMENTS.filter((r) => r.fn === f).length),
+      href: `/dashboard/nis2/f/${f}`, art: n(f),
     })),
     { id: "nis2-incidents", section: "start", icon: Siren, label: t("incidents_short"), href: "/dashboard/nis2/incidenti", art: "IS" },
   ];
@@ -228,7 +230,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // Due aree: AI Act (predefinita) e NIS 2; /dashboard/start è la scelta iniziale senza menu
   const area: "aiact" | "nis2" = pathname.startsWith("/dashboard/nis2") ? "nis2" : "aiact";
   const isStart = pathname === "/dashboard/start";
-  const pillars = area === "nis2" ? buildNis2Pillars(tn) : buildPillars(t);
+  const [nis2Profile] = useNis2Profile();
+  const pillars = area === "nis2" ? buildNis2Pillars(tn, nis2Profile ? NIS2_SETS[nis2Profile] : null) : buildPillars(t);
   const [isMobile, setIsMobile] = useState(false);
   const [layoutMounted, setLayoutMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
