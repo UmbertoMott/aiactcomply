@@ -429,7 +429,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
       )}
 
       {/* ── §8 — Dismissione / ritiro ───────────────────────────────────────── */}
-      <SectionTitle sectionId="sec-dismissal" num="§8" title="Dismissione / ritiro" article="ISO 23894 Annex C · Art. 9" />
+      <SectionTitle sectionId="sec-dismissal" num="§8" title="Dismissione / ritiro" article="Art. 9 · buona prassi ISO/IEC 23894 Ann. C" />
       {doc.dismissal ? (
         <KVTable rows={disRows} />
       ) : (
@@ -488,7 +488,7 @@ export function RiskRegisterViewer({ doc, annexes }: { doc: RiskRegisterDocument
       )}
 
       {/* ── Trasversale — Comunicazione e consultazione ─────────────────────── */}
-      <SectionTitle sectionId="sec-communication" num="⊕" title="Comunicazione e consultazione" article="ISO 23894 §6.2 — trasversale" />
+      <SectionTitle sectionId="sec-communication" num="⊕" title="Comunicazione e consultazione" article="Buona prassi ISO/IEC 23894 §6.2 — trasversale" />
       {doc.communication ? (
         <KVTable rows={commRows} />
       ) : (

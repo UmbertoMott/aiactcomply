@@ -842,7 +842,7 @@ export default function DataAuditPage() {
         </div>
       </section>
 
-      {/* ── Art. 10(5) special categories (conditional) ── */}
+      {/* ── Art. 4 bis(1) categorie particolari (condizionale) ── */}
       {showSpecialCategories && (
         <>
           <div className="flex items-center gap-3 my-5">

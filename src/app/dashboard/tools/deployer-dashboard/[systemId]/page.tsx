@@ -651,7 +651,7 @@ export default function DeployerSystemDetailPage() {
         style={{ background: "#fef9c3", border: "1px solid #fde047", color: "#713f12" }}
       >
         <Info size={14} className="mt-0.5 flex-shrink-0" />
-        Sanzioni Art. 99(4)(e): fino a 15 milioni € o 3% del fatturato mondiale annuo per gli obblighi del deployer (per PMI e start-up l'importo più basso, Art. 99(6)).
+        Sanzioni Art. 99(4)(e): fino a 15 milioni € o 3% del fatturato mondiale annuo per gli obblighi del deployer (per PMI e start-up l'importo più basso, Art. 99(6); per le piccole imprese a media capitalizzazione, Art. 99(6 bis)).
       </div>
 
       {/* ── Art. 26 Dettaglio Operativo (PROMPT BD) ── */}

@@ -32,7 +32,6 @@ const lbl: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: "uppe
 
 export default function ResiliencePage() {
   const t = useT("toolResilience");
-  const tr = useT("quality_docs_resilience");
   const KIND_LABEL: Record<EvalKind, string> = { accuracy: t("kind_accuracy"), robustness: t("kind_robustness"), redteam: t("kind_redteam") };
   const [record, setRecord] = useState<ResilienceRecord>(() => loadResilienceRecord());
   const [rowsById, setRowsById] = useState<Record<string, EvalRow[]>>({});
@@ -112,7 +111,7 @@ export default function ResiliencePage() {
     const g = guessFields(es.detectedFields);
     if (!g.group || !g.value) { showToast(t("toast_needGroupValue")); return; }
     const sp = computeSubPopulation(rows, {
-      metric: spMetric || t("sp_metricDefault"),
+      metric: spMetric || "metrica",
       groupCol: g.group, valueCol: g.value, sampleCol: g.sample, metricCol: g.metric, threshold: record.gapThreshold,
     });
     const others = record.subPopulation.filter(s => !(s.metric === sp.metric && s.dimension === sp.dimension));
@@ -165,7 +164,7 @@ export default function ResiliencePage() {
         <div className="rounded-lg p-3 mb-4 flex items-start gap-2" style={{ background: "#FAFAF9", border: `1px solid ${T.border}` }}>
           <Shield size={14} className="mt-0.5 flex-shrink-0" style={{ color: T.text }} />
           <p className="text-[11px]" style={{ color: T.muted }}>
-            {t("privacy_tool")} <strong style={{ color: T.text }}>{t("privacy_strong")}</strong>{t("privacy_text")}
+            Resilience <strong style={{ color: T.text }}>{t("privacy_strong")}</strong>{t("privacy_text")}
           </p>
         </div>
 
@@ -233,7 +232,7 @@ export default function ResiliencePage() {
                     );
                   })}
                   {record.accuracy[0]?.declaredInInstructions === "no" && <span className="text-[11px]" style={{ color: T.red }}>{t("acc_gap")}</span>}
-                  <Link href="/dashboard/tools/transparency" className="text-[11px] inline-flex items-center gap-1 ml-auto" style={{ color: T.text }}><ExternalLink size={11} /> {t("link_transparency")}</Link>
+                  <Link href="/dashboard/tools/transparency" className="text-[11px] inline-flex items-center gap-1 ml-auto" style={{ color: T.text }}><ExternalLink size={11} /> Transparency Kit</Link>
                 </div>
               </div>
 
@@ -255,7 +254,7 @@ export default function ResiliencePage() {
                   <div key={sp.metric + sp.dimension} className="mt-3 pt-3" style={{ borderTop: `1px solid ${T.border}` }}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[13px] font-semibold" style={{ color: T.text }}>{sp.metric} — {t("sp_overall")} {(sp.overall * 100).toFixed(1)}%</span>
-                      <span className="text-[11px] font-bold" style={{ color: verdictColor[sp.verdict] }}>{t("sp_gap")} {(sp.maxGap * 100).toFixed(1)}% · {t(`verdict_${sp.verdict}`)}</span>
+                      <span className="text-[11px] font-bold" style={{ color: verdictColor[sp.verdict] }}>{t("sp_gap")} {(sp.maxGap * 100).toFixed(1)}% · {sp.verdict}</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {sp.byGroup.map(g => (
@@ -291,7 +290,7 @@ export default function ResiliencePage() {
                       <div key={threat.id} className="rounded-lg p-3" style={{ border: `1px solid ${T.border}` }}>
                         <div className="flex items-start justify-between gap-2 mb-2">
                           <div>
-                            <p className="text-[13px] font-medium" style={{ color: T.text }}>{tr(`threat_${threat.id}`)}
+                            <p className="text-[13px] font-medium" style={{ color: T.text }}>{threat.label}
                               {threat.generativeOnly && !isGenerative && <span className="text-[11px] ml-1" style={{ color: T.amber }}>{t("tm_checkApplic")}</span>}
                             </p>
                             <p className="text-[11px]" style={{ color: T.muted }}>{threat.reference}</p>
@@ -327,7 +326,7 @@ export default function ResiliencePage() {
                 <div className="mt-3 rounded-lg p-2 flex items-center gap-2 flex-wrap" style={{ background: "rgba(220,38,38,0.06)" }}>
                   <AlertTriangle size={13} style={{ color: T.red }} />
                   <span className="text-[11px]" style={{ color: T.red }}>{t("tm_gapWarn")}</span>
-                  <Link href="/dashboard/tools/risk-manager" className="text-[11px] inline-flex items-center gap-1 ml-auto" style={{ color: T.text }}><ExternalLink size={11} /> {t("link_riskManager")}</Link>
+                  <Link href="/dashboard/tools/risk-manager" className="text-[11px] inline-flex items-center gap-1 ml-auto" style={{ color: T.text }}><ExternalLink size={11} /> Gestione dei rischi (Art. 9)</Link>
                 </div>
               </div>
 
@@ -338,7 +337,7 @@ export default function ResiliencePage() {
                     const rec = record.robustness.find(r => r.itemId === item.id);
                     return (
                       <div key={item.id} className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[13px] flex-1" style={{ color: T.text, minWidth: 200 }}>{tr(`rob_${item.id}`)}</span>
+                        <span className="text-[13px] flex-1" style={{ color: T.text, minWidth: 200 }}>{item.label}</span>
                         <select style={{ ...inp, fontSize: 11 }} value={rec?.status ?? "unspecified"} onChange={e => updateRobustness(item.id, { status: e.target.value as "documented" | "gap" | "unspecified" })}>
                           <option value="unspecified">{t("rob_toAssess")}</option>
                           <option value="documented">{t("rob_documented")}</option>
@@ -374,7 +373,7 @@ export default function ResiliencePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3">
             {RESILIENCE_PILLARS.map(p => (
               <Link key={p.id} href={p.linkedPath} className="rounded-lg p-3 block" style={{ background: T.card, border: `1px solid ${T.border}`, textDecoration: "none" }}>
-                <p className="text-[11px] font-semibold" style={{ color: T.text }}>{tr(`pillar_${p.id}`)}</p>
+                <p className="text-[11px] font-semibold" style={{ color: T.text }}>{p.label}</p>
                 <p className="text-[11px]" style={{ color: T.muted }}>{p.reference}</p>
               </Link>
             ))}

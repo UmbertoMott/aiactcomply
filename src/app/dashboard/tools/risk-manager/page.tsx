@@ -58,7 +58,7 @@ const PHASES: Phase[] = [
   { id: "traceability",   label: "8. Tracciabilità",             subtitle: "§7 versionamento e QMS",         article: "Art. 9(1)-(2)",           supportRef: "Art. 12, 17",            docSection: "§7" },
   { id: "dismissal",      label: "9. Dismissione / Ritiro",      subtitle: "§8 rischi di fine vita",         article: "Art. 9",                  supportRef: "ISO 23894 Annex C",                                           docSection: "§8" },
   { id: "signoff",        label: "10. Approvazione e Firme",     subtitle: "§9 sign-off finale",             article: "Art. 9(1)",               docSection: "§9" },
-  { id: "communication",  label: "11. Comunicazione",            subtitle: "Trasversale — ISO 23894 §6.2",  article: "ISO 23894 §6.2",                                               docSection: "Trasversale" },
+  { id: "communication",  label: "11. Comunicazione",            subtitle: "Trasversale — ISO 23894 §6.2",  article: "Buona prassi · ISO/IEC 23894",                                               docSection: "Trasversale" },
 ];
 
 // Modulo condizionale separato (non numerato, non in PHASES)

@@ -112,7 +112,6 @@ interface ReqCardProps {
 }
 
 function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, index, t }: ReqCardProps) {
-  const to = useT("deployer_ops_oversight");
   const [open, setOpen] = useState(false);
   const status = record?.status ?? "not_started";
   const badgeRef = `Art. 14(4)(${String.fromCharCode(96 + index)})`;
@@ -126,7 +125,7 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, index, t 
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2 flex-wrap">
-            <span style={{ fontSize: 15, fontWeight: 600 }}>{index}. {to(`req_${req.id}_label`)}</span>
+            <span style={{ fontSize: 15, fontWeight: 600 }}>{index}. {req.label}</span>
             <span className="text-[11px]">{badgeRef}</span>
             <StatusPill status={status} t={t} />
             {pending && <span className="text-[11px]">✦ AI</span>}
@@ -140,7 +139,7 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, index, t 
 
       {open && (
         <div style={{ padding: "0 0 20px 32px" }}>
-          <p className="text-[13px] mb-4 leading-relaxed" style={{ color: T.muted }}>{to(`req_${req.id}_desc`)}</p>
+          <p className="text-[13px] mb-4 leading-relaxed" style={{ color: T.muted }}>{req.description}</p>
 
           {/* AI pending suggestion */}
           {pending && (
@@ -148,7 +147,7 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, index, t 
               <p className="text-[11px] font-semibold mb-1.5" style={{ color: T.violet }}>✦ {t("aiVerify")}</p>
               {pending.implementationType && (
                 <p className="text-[11px] mb-1" style={{ color: T.text }}>
-                  <strong>{t("proposedType")}</strong> {pending.implementationType in MEASURE_IMPLEMENTATION_TYPE_LABELS ? to(`impl_${pending.implementationType}`) : pending.implementationType}
+                  <strong>{t("proposedType")}</strong> {MEASURE_IMPLEMENTATION_TYPE_LABELS[pending.implementationType] ?? pending.implementationType}
                 </p>
               )}
               {pending.measureDescription && (
@@ -171,8 +170,8 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, index, t 
               value={record?.implementationType ?? "not_specified"}
               onChange={e => onUpdate(req.id, { implementationType: e.target.value as OversightRequirementRecord["implementationType"], lastUpdated: new Date().toISOString() })}
               style={inp}>
-              {Object.keys(MEASURE_IMPLEMENTATION_TYPE_LABELS).map((v) => (
-                <option key={v} value={v}>{to(`impl_${v}`)}</option>
+              {Object.entries(MEASURE_IMPLEMENTATION_TYPE_LABELS).map(([v, l]) => (
+                <option key={v} value={v}>{l}</option>
               ))}
             </select>
           </div>
@@ -209,7 +208,7 @@ function RequirementCard({ req, record, pending, onUpdate, onAcceptAi, index, t 
           {/* Linked tool */}
           {req.linkedToolPath && (
             <Link href={req.linkedToolPath} className="text-[13px] underline" style={{ color: INK }}>
-              {to(`req_${req.id}_linked`)} →
+              {req.linkedToolLabel} →
             </Link>
           )}
 
@@ -238,21 +237,20 @@ function FourEyesModule({
   aiAssessing: boolean;
   t: TFn;
 }) {
-  const to = useT("deployer_ops_oversight");
   const [rolesInput, setRolesInput] = useState(record.verifierRoles ?? []);
 
   return (
     <div style={{ borderTop: `1px solid ${LINE}`, padding: "18px 0 18px 32px", color: INK }}>
       <div className="flex items-baseline gap-2 mb-1 flex-wrap">
-        <span style={{ fontSize: 15, fontWeight: 600 }}>{to("fe_label")}</span>
+        <span style={{ fontSize: 15, fontWeight: 600 }}>{FOUR_EYES_MODULE.label}</span>
         <span className="text-[11px]">{FOUR_EYES_MODULE.primaryReference}</span>
       </div>
-      <p className="text-[13px] mb-4 leading-relaxed" style={{ color: T.muted }}>{to("fe_desc")}</p>
+      <p className="text-[13px] mb-4 leading-relaxed" style={{ color: T.muted }}>{FOUR_EYES_MODULE.description}</p>
 
       {record.applicable === "unspecified" && (
         <div className="mb-4">
           <p className="text-[13px] font-semibold mb-2" style={{ color: INK }}>
-            {t("fe_applicabilityToVerify")} — {to("fe_support")}
+            {t("fe_applicabilityToVerify")} — {FOUR_EYES_MODULE.supportReference}
           </p>
           <p className="text-[13px] mb-3" style={{ color: INK }}>
             {t("fe_triageDesc")}
@@ -324,7 +322,6 @@ function FourEyesModule({
 
 export default function OversightPage() {
   const t = useT("toolOversight");
-  const to = useT("deployer_ops_oversight");
   const locale = useLocale();
   const loc = locale === "it" ? "it-IT" : "en-GB";
   const [record, setRecord] = useState<OversightRecord>(() => loadOversightRecord());
@@ -411,7 +408,7 @@ export default function OversightPage() {
     try {
       const cls = readFromStorage<ClassifierResult>("classifier");
       const result = await suggestOversightMeasures({
-        systemName: cls?.systemName ?? to("defaultSystemName"),
+        systemName: cls?.systemName ?? "Sistema di IA",
         systemDescription: cls?.systemDescription ?? "",
         riskTier: cls?.riskLevel ?? "high",
       });
@@ -433,7 +430,7 @@ export default function OversightPage() {
     try {
       const cls = readFromStorage<ClassifierResult>("classifier");
       const result = await assessFourEyesApplicability({
-        systemName: cls?.systemName ?? to("defaultSystemName"),
+        systemName: cls?.systemName ?? "Sistema di IA",
         systemDescription: cls?.systemDescription ?? "",
         riskTier: cls?.riskLevel,
       });
@@ -467,7 +464,7 @@ export default function OversightPage() {
   const implementedCount = countImplemented(record);
   const fourEyesDone = record.fourEyes.applicable === "yes" && record.fourEyes.status === "implemented";
   const cls = typeof window !== "undefined" ? readFromStorage<ClassifierResult>("classifier") : null;
-  const systemName = cls?.systemName ?? to("defaultSystemName");
+  const systemName = cls?.systemName ?? "Sistema di IA";
   const systemDescription = cls?.systemDescription ?? "";
 
   return (

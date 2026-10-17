@@ -30,8 +30,7 @@ export async function assessChangeImpact(
   const prompt = `Sei un esperto di EU AI Act — modifiche ai sistemi di IA ad alto rischio.
 Valuta quale impatto ha una modifica descritta sulla documentazione Annex IV e sulla conformità.
 
-Art. 6(3): Se il sistema subisce una modifica sostanziale, deve essere considerato un nuovo sistema
-ai fini della conformità.
+Art. 3(23) e Art. 43(4): se il sistema ad alto rischio subisce una modifica sostanziale, va sottoposto a una nuova valutazione della conformità (e, se la modifica è fatta da un terzo, questo diventa fornitore: Art. 25(1)(b)).
 Art. 11: La documentazione tecnica deve essere aggiornata per riflettere ogni modifica.
 
 Indicatori di modifica sostanziale:

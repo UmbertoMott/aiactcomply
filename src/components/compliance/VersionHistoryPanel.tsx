@@ -197,7 +197,7 @@ function VersionRow({
           {v.isSubstantialModification && v.substModificationBasis && (
             <div style={{ marginBottom: 8, padding: "6px 10px", borderRadius: 8,
               background: "rgba(220,38,38,0.05)", border: "1px solid rgba(220,38,38,0.15)" }}>
-              <p style={{ fontSize: 11, fontWeight: 600, color: "#dc2626", marginBottom: 2 }}>⚠ Modifica sostanziale — Art. 6(3) AI Act</p>
+              <p style={{ fontSize: 11, fontWeight: 600, color: "#dc2626", marginBottom: 2 }}>⚠ Modifica sostanziale — Artt. 3(23), 43(4) AI Act</p>
               <p style={{ fontSize: 11, color: "#0D1016", lineHeight: 1.5 }}>{v.substModificationBasis}</p>
             </div>
           )}

@@ -47,7 +47,7 @@ function LivePreview({ doc }: { doc: RiskRegisterGuidedDoc }) {
           Registro dei rischi — Art. 9 AI Act
         </h1>
         <p style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: T.muted, marginBottom: 24, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-          ISO/IEC 23894 · Reg. (UE) 2024/1689
+          Reg. (UE) 2024/1689, Art. 9 · metodo ISO/IEC 23894 (facoltativo)
         </p>
 
         {bySection.map(({ sec, items }) => (

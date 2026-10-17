@@ -213,7 +213,7 @@ export async function sendRoiReport(
       <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
       <p style="color:#94a3b8;font-size:11px;line-height:1.6;">
         Stima indicativa basata sull'Art. 99 del Regolamento (UE) 2024/1689. Gli importi rappresentano il
-        massimale teorico; per le PMI si applica il minore tra i due importi. Non costituisce consulenza
+        massimale teorico; per PMI e start-up si applica il minore tra i due importi (Art. 99(6)), per le piccole imprese a media capitalizzazione solo per le sanzioni dell'Art. 99(4)-(5) (Art. 99(6 bis)). Non costituisce consulenza
         legale personalizzata. Ricevi questa email perché hai richiesto il report su regulaeos.com.
       </p>
     </div>`;

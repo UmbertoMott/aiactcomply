@@ -59,7 +59,11 @@ export function validateEudbDraft(draft: EudbDraft): ValidationResult {
     }
   }
 
-  for (const { field, label, artRef } of REQUIRED_ALLEGATI) {
+  // Deroga Art. 6(3): si registrano solo le informazioni dell'Allegato VIII, sezione B
+  // (punti 7 e 9 soppressi dal Reg. (UE) 2026/1744). Dichiarazione UE, istruzioni e
+  // documentazione dell'Allegato IV non sono richieste per questa registrazione.
+  const art63 = draft.riskCategory.includes("6(3)");
+  for (const { field, label, artRef } of art63 ? [] : REQUIRED_ALLEGATI) {
     if (!draft[field]) {
       errors.push({
         field,

@@ -160,3 +160,27 @@ Criterio di semplificazione: ogni tool fa una sola cosa, quella che chiede un ar
 3. **Un solo pacchetto di prove.** Dossier e registro delle evidenze esportano lo stesso "Pacchetto per l'audit". Il pacchetto contiene il dossier, le firme di DPIA e FRIA, il registro delle evidenze con verifica completa della catena e l'impronta SHA-256 dell'intero pacchetto. La verifica ricalcola l'impronta di ogni record, quindi rileva anche un record modificato e non solo una catena spezzata.
 4. **Tre tool clienti in uno.** Questionari, passaporto di affidabilità e pagina pubblica sono schede di un'unica pagina, "Per i clienti" (`/dashboard/tools/clients`). I vecchi indirizzi reindirizzano lì.
 5. **Registro dei rischi precompilato.** Fatto: vedi "Registro dei rischi".
+
+## Perimetro: AI Act (come modificato dal Reg. (UE) 2026/1744) e ISO/IEC 42001
+
+Verifica del terzo intervento, sul testo ufficiale IT del Reg. (UE) 2024/1689 e del Reg. (UE) 2026/1744.
+
+**Lacune chiuse**
+- **Importatori e distributori** (`/dashboard/tools/supply-chain`): verifiche dell'Art. 23(1)-(7) e dell'Art. 24(1)-(6), marcatura CE (Art. 48), comunicazioni e misure correttive (Artt. 20(1), 23(2), 24(4)), cambio di ruolo (Art. 25(1)). Non si applica all'Allegato I, sezione B (Art. 2(2) sostituito). Il motore degli obblighi collega Artt. 23-24 al tool.
+- **Sistema di gestione dell'IA** (`/dashboard/tools/aims`, volontario): clausole 4.1-4.4, 5.2, 5.3, 6.2, 9.2, 9.3, 10.1-10.2; controlli A.3.3 e A.8.3 con il canale di segnalazione (Art. 87, direttiva (UE) 2019/1937; in Italia D.Lgs. 24/2023), A.5.5 (impatti sulla società), A.10.2-A.10.3 (fornitori, Art. 25(4) modificato, sanzionabile ex Art. 99(4)(d bis)). Genera la Dichiarazione di Applicabilità (6.1.3) con i 38 controlli dell'Allegato A collegati agli articoli e ai tool, esportabile in CSV. Il testo della norma non è riprodotto.
+- **Art. 25(2)** sostituito: obblighi di cooperazione del fornitore iniziale (lettere a-c) ed esclusione, mostrati nel tool Cambio di ruolo.
+
+**Allineamento al Reg. (UE) 2026/1744**
+- Art. 10(5) soppresso → Art. 4 bis(1) (Data Audit, prompt di rilevamento delle variabili proxy).
+- Nuovo Art. 4 anche nei testi EN della FRIA; rischio minimo: resta l'Art. 4 (non "nessun obbligo"); codici di condotta Art. 95 (non 69).
+- Date dell'Art. 113: Allegato III dal 2.12.2027, Allegato I dal 2.8.2028, Art. 5(1)(b bis)-(b ter) dal 2.12.2026 (assistente, dossier, chip del sito).
+- Nuovi divieti b bis) e b ter) nel tool delle pratiche vietate, nell'inventario e nel prompt di classificazione; punteggio sociale esteso ai privati.
+- Art. 27(4) sostituito (rinvio alla DPIA); la sintesi della FRIA in banca dati è Art. 49(3) e Allegato VIII, sez. C, punto 4.
+- Allegato VIII, sez. B, punti 7 e 9 soppressi: la registrazione dell'Art. 49(2) non richiede più Stati membri né i documenti della sezione A.
+- Art. 11(1) e Art. 99(6 bis): piccole imprese a media capitalizzazione.
+- Art. 25(4) sostituito: stato dell'arte ed esclusione per i componenti open source diversi dai modelli GPAI.
+
+**Fuori perimetro, ora etichettati**
+- Menu "Altre norme e buone prassi": NIST AI RMF (buona prassi), legge italiana L. 132/2025 e AgID/ACN (legge nazionale), strumenti per i clienti (facoltativi), assistente legale.
+- Metodi tecnici citati nei tool, indicati come riferimenti facoltativi: ISO/IEC 23894 (registro dei rischi), ISO/IEC 5259 e regola dei 4/5 (qualità dei dati), prEN 18282 (robustezza), guida DIHR/ECNL (FRIA). Obbligatori restano solo gli articoli dell'AI Act.
+- DPIA (GDPR, Art. 35) resta tra gli obblighi solo perché richiamata dall'Art. 26(9).
