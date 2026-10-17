@@ -638,9 +638,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           >
             <Menu className="h-5 w-5" />
           </button>
+          {/* Torna alla scelta delle aree (AI Act / NIS 2) */}
+          <Link
+            href="/dashboard/start"
+            title={tn("areas_title")}
+            className="flex items-center gap-1.5 text-[12px] font-medium rounded-md px-2.5 py-1 mr-4 transition-opacity hover:opacity-70"
+            style={{ color: "#0D1016", border: "1px solid rgba(0,0,0,0.12)" }}
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+            <LayoutGrid className="h-3.5 w-3.5" />
+            {tn("areas")}
+          </Link>
           <div className="flex items-center gap-1.5 text-[13px]" style={{ color: "#0D1016" }}>
-            <Link href={homeHref} className="hover:opacity-70 transition-opacity">{area === "nis2" ? "NIS 2" : t("breadcrumbHome")}</Link>
-            {currentItem && (
+            <Link href={homeHref} className="hover:opacity-70 transition-opacity">{area === "nis2" ? "NIS 2" : "AI Act"}</Link>
+            {currentItem && currentItem.href !== homeHref && (
               <>
                 <ChevronRight className="h-3 w-3" />
                 <span style={{ color: "#0D1016" }}>{currentItem.label}</span>
