@@ -52,6 +52,8 @@ function OAuthButton({
 function LoginForm() {
   const searchParams = useSearchParams();
   const sessionExpired = searchParams.get("reason") === "session_expired";
+  const fromCheckout = searchParams.get("from") === "checkout";
+  const prefillEmail = searchParams.get("email") ?? "";
 
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => {
@@ -75,6 +77,14 @@ function LoginForm() {
         </Link>
       </p>
 
+      {fromCheckout && (
+        <div
+          className="mb-6 rounded-lg px-4 py-2.5 text-[12px]"
+          style={{ background: "#ecfdf5", border: "1px solid #a7f3d0", color: "#065f46" }}
+        >
+          Pagamento ricevuto. Accedi con la stessa email usata per il pagamento per entrare nella tua area.
+        </div>
+      )}
       {sessionExpired && (
         <div
           className="mb-6 rounded-lg px-4 py-2.5 text-[12px]"
@@ -98,6 +108,7 @@ function LoginForm() {
             name="email"
             type="email"
             required
+            defaultValue={prefillEmail}
             autoComplete="email"
             placeholder="nome@azienda.it"
             className="w-full rounded-lg px-4 py-2.5 text-[13px] outline-none transition-all"

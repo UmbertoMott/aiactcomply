@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createOTPCookie } from "@/lib/auth/otp-cookie";
 import { sendLoginOTPEmail } from "@/lib/auth/email";
+import { hasActivePurchase } from "@/lib/billing/purchases";
 
 function getClientIP(): string {
   return "unknown"; // In Next.js 16 server actions, use headers() if forwarded IP is needed
@@ -31,8 +32,12 @@ const ALLOWED_EMAILS = new Set(
   (process.env.AUTH_ALLOWED_EMAILS ?? "dridrop@gmail.com")
     .split(",").map((e) => e.trim().toLowerCase()).filter(Boolean)
 );
-function isAllowedEmail(email: string | null | undefined): boolean {
-  return ALLOWED_EMAILS.has((email ?? "").trim().toLowerCase());
+// Oltre all'allowlist, entra chi ha un acquisto attivo (offerta pagata con Stripe).
+async function isAllowedEmail(email: string | null | undefined): Promise<boolean> {
+  const e = (email ?? "").trim().toLowerCase();
+  if (!e) return false;
+  if (ALLOWED_EMAILS.has(e)) return true;
+  return hasActivePurchase(e);
 }
 
 export async function signup(formData: FormData) {
@@ -49,8 +54,8 @@ export async function signup(formData: FormData) {
   }
 
   // Accesso riservato in pre-lancio
-  if (!isAllowedEmail(rawData.email)) {
-    return { error: "Le registrazioni sono al momento riservate. Contatta connect@regulaeos.com." };
+  if (!(await isAllowedEmail(rawData.email))) {
+    return { error: "Le registrazioni sono al momento riservate. Usa la stessa email con cui hai effettuato il pagamento, oppure contatta connect@regulaeos.com." };
   }
 
   // ── Duplicate checks (using service-role admin client) ───────────────
@@ -114,8 +119,8 @@ export async function loginEmail(formData: FormData) {
   }
 
   // Accesso riservato in pre-lancio: solo email in allowlist
-  if (!isAllowedEmail(rawData.email)) {
-    return { error: "Accesso non abilitato per questo indirizzo email." };
+  if (!(await isAllowedEmail(rawData.email))) {
+    return { error: "Accesso non abilitato per questo indirizzo email. Usa la stessa email con cui hai effettuato il pagamento." };
   }
 
   // Rate limiting

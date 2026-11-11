@@ -15,6 +15,8 @@ function RegisterForm() {
   const searchParams = useSearchParams();
 
   const fromScanner = searchParams.get("from") === "scanner";
+  const fromCheckout = searchParams.get("from") === "checkout";
+  const prefillEmail = searchParams.get("email") ?? "";
   const scanUrl     = searchParams.get("url")      || "";
   const scanScore   = searchParams.get("score")    || "";
   const scanCritical = searchParams.get("critical") || "";
@@ -54,6 +56,15 @@ function RegisterForm() {
 
   return (
     <div>
+      {fromCheckout && (
+        <div
+          className="mb-6 rounded-lg px-4 py-2.5 text-[12px]"
+          style={{ background: "#ecfdf5", border: "1px solid #a7f3d0", color: "#065f46" }}
+        >
+          Pagamento ricevuto. Crea il tuo account con la stessa email usata per il pagamento per entrare nella tua area.
+        </div>
+      )}
+
       {fromScanner && (
         <div
           className="mb-6 rounded-xl px-4 py-3.5 flex items-start gap-3"
@@ -115,6 +126,7 @@ function RegisterForm() {
             name="email"
             type="email"
             required
+            defaultValue={prefillEmail}
             className="w-full rounded-lg border border-border bg-muted px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
             placeholder="nome@azienda.it"
           />
