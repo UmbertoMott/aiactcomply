@@ -180,7 +180,7 @@ export default function RoiCalculator() {
             <p style={{ fontSize: 13.5, color: "rgba(0,0,0,0.6)", lineHeight: 1.5, maxWidth: 420 }}>
               {t("validatePre")}<strong style={{ color: "#0D1016" }}>{t("validateStrong")}</strong>{t("validatePost")}
             </p>
-            <Link href="/prenota-demo"
+            <Link href="/inizia"
               className="inline-flex text-[13px] font-medium rounded-full px-6 py-3 transition-opacity hover:opacity-85"
               style={{ background: "#0D1016", color: "#fff", letterSpacing: "-0.2px", textDecoration: "none", flexShrink: 0 }}>
               {t("bookDemo")}

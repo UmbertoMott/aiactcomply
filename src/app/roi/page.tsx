@@ -95,7 +95,7 @@ export default async function RoiPage() {
               {t("ctaBody")}
             </p>
             <Link
-              href="/prenota-demo"
+              href="/inizia"
               className="inline-flex text-[14px] font-medium rounded-full px-8 py-3.5 transition-opacity hover:opacity-85"
               style={{ background: "#ffffff", color: "#0D1016", letterSpacing: "-0.2px", textDecoration: "none" }}
             >

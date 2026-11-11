@@ -108,7 +108,7 @@ export default function Nav() {
             {t("login")}
           </Link>
           <Link
-            href="/prenota-demo"
+            href="/inizia"
             className="hidden md:inline-flex items-center whitespace-nowrap text-[13px] font-medium rounded-full px-5 py-2 transition-opacity hover:opacity-80"
             style={{ background: "#0D1016", color: "#ffffff", letterSpacing: "-0.2px" }}
           >
@@ -147,8 +147,8 @@ export default function Nav() {
               {l.label}
             </Link>
           ))}
-          {/* Su smartphone "Prenota demo" sta qui, non nella barra */}
-          <Link href="/prenota-demo" onClick={() => setMobileOpen(false)}
+          {/* Su smartphone "Inizia" sta qui, non nella barra */}
+          <Link href="/inizia" onClick={() => setMobileOpen(false)}
             style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 48, marginTop: 14, borderRadius: 999, background: "#0D1016", color: "#ffffff", fontSize: 15, fontWeight: 500, textDecoration: "none" }}>
             {t("bookDemo")}
           </Link>

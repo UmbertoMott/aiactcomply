@@ -205,9 +205,9 @@ export async function sendRoiReport(
         <p style="font-size:32px;font-weight:700;margin:0;color:#0D1016;">${escapeHtml(fig.roi)}×</p>
       </div>
 
-      <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com"}/prenota-demo"
+      <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com"}/inizia"
          style="display:inline-block;background:#0D1016;color:#fff;padding:13px 28px;border-radius:999px;text-decoration:none;font-weight:600;margin:12px 0;">
-        Prenota una demo con l'avvocato
+        Inizia ora
       </a>
 
       <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
@@ -361,5 +361,65 @@ export async function sendWaitlistNotification(entry: {
         <p style="color:#64748b;font-size:12px;">RegulaeOS Waitlist · ${new Date().toLocaleString("it-IT")}</p>
       </div>
     `,
+  });
+}
+
+// ── Recesso (art. 52 ss. Codice del Consumo) ───────────────────────────────
+
+export async function sendWithdrawalEmails(info: {
+  email: string;
+  name: string | null;
+  product: string;
+  amount: string;
+  purchasedAt: string;
+  requestedAt: string;
+  sessionId: string;
+}): Promise<void> {
+  const resend = getResend();
+  const notifyEmail = process.env.BILLING_NOTIFY_EMAIL ?? process.env.WAITLIST_NOTIFY_EMAIL ?? "dridrop@gmail.com";
+
+  if (!resend) {
+    console.log(`[RECESSO] ${info.email} — ${info.product} (${info.amount}) acquistato il ${info.purchasedAt}, richiesta del ${info.requestedAt}`);
+    return;
+  }
+
+  const rows = `
+    <tr><td style="padding:6px 0;color:#64748b;width:45%;">Servizio</td><td style="padding:6px 0;">${escapeHtml(info.product)}</td></tr>
+    <tr><td style="padding:6px 0;color:#64748b;">Importo</td><td style="padding:6px 0;">${escapeHtml(info.amount)}</td></tr>
+    <tr><td style="padding:6px 0;color:#64748b;">Data acquisto</td><td style="padding:6px 0;">${escapeHtml(info.purchasedAt)}</td></tr>
+    <tr><td style="padding:6px 0;color:#64748b;">Data richiesta di recesso</td><td style="padding:6px 0;">${escapeHtml(info.requestedAt)}</td></tr>`;
+
+  // Conferma al cliente su supporto durevole
+  await resend.emails.send({
+    from: FROM,
+    to: info.email,
+    subject: "Conferma di ricezione del recesso — RegulaeOS",
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;color:#1e293b;">
+        <h2 style="color:#0D1016;margin:0 0 16px;">Abbiamo ricevuto il tuo recesso</h2>
+        <p>${info.name ? `Gentile ${escapeHtml(info.name)},` : "Gentile cliente,"}</p>
+        <p>confermiamo di aver ricevuto la tua comunicazione di recesso dal contratto indicato sotto
+        (artt. 52 e seguenti del D.Lgs. 206/2005, Codice del Consumo). L'abbonamento è stato annullato
+        e non riceverai ulteriori addebiti.</p>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0;">${rows}</table>
+        <p>Ti rimborseremo entro 14 giorni da oggi, con lo stesso mezzo di pagamento che hai usato,
+        senza costi a tuo carico (art. 56 Codice del Consumo).</p>
+        <p style="color:#64748b;font-size:13px;">Per qualsiasi domanda scrivi a connect@regulaeos.com.</p>
+      </div>`,
+  });
+
+  // Notifica interna: rimborso da eseguire
+  await resend.emails.send({
+    from: FROM,
+    to: notifyEmail,
+    subject: `Recesso da rimborsare — ${info.email} (${info.amount})`,
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;">
+        <h2 style="color:#0D1016;">Richiesta di recesso ricevuta</h2>
+        <p>Cliente: <a href="mailto:${escapeHtml(info.email)}">${escapeHtml(info.email)}</a>${info.name ? ` (${escapeHtml(info.name)})` : ""}</p>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">${rows}</table>
+        <p>Abbonamento già annullato su Stripe. <strong>Esegui il rimborso dal pannello Stripe entro 14 giorni.</strong></p>
+        <p style="color:#64748b;font-size:12px;">Checkout Session: ${escapeHtml(info.sessionId)}</p>
+      </div>`,
   });
 }
