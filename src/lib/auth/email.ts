@@ -205,9 +205,9 @@ export async function sendRoiReport(
         <p style="font-size:32px;font-weight:700;margin:0;color:#0D1016;">${escapeHtml(fig.roi)}×</p>
       </div>
 
-      <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com"}/prenota-demo"
+      <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com"}/inizia"
          style="display:inline-block;background:#0D1016;color:#fff;padding:13px 28px;border-radius:999px;text-decoration:none;font-weight:600;margin:12px 0;">
-        Prenota una demo con l'avvocato
+        Inizia ora
       </a>
 
       <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />

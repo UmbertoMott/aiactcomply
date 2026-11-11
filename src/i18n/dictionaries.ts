@@ -148,7 +148,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       disclaimer: "Stima indicativa basata sull'Art. 99 del Regolamento (UE) 2024/1689. Gli importi rappresentano il massimale teorico; l'entità effettiva dipende dalla natura della violazione e dalle circostanze. Per PMI e start-up si applica il minore tra i due importi; per le piccole imprese a media capitalizzazione il minore solo per le sanzioni dell'Art. 99(4)-(5) (Art. 99(6 bis), Reg. (UE) 2026/1744). Non costituisce consulenza legale personalizzata.",
       ctaTitle: "Trasforma il rischio in conformità.",
       ctaBody: "In 30 minuti l'avvocato, assistito dallo strumento, imposta il tuo primo assessment e ti mostra come azzerare l'esposizione.",
-      bookDemo: "Prenota una demo",
+      bookDemo: "Inizia",
       calcOrg: "La tua organizzazione",
       calcTurnover: "Fatturato annuo mondiale",
       calcViolation: "Tipo di violazione potenziale",
@@ -511,7 +511,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       scanner: "Scanner Art. 50",
       resources: "Risorse",
       login: "Accedi",
-      bookDemo: "Prenota demo",
+      bookDemo: "Inizia",
       openMenu: "Apri il menu",
       closeMenu: "Chiudi il menu",
       contents: "Contenuti",
@@ -722,7 +722,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       ctaSecondary: "Parla con l'avvocato",
     },
     banner: {
-      cta: "Prenota una demo",
+      cta: "Inizia",
     },
     footer: {
       tagline: "Assistenza professionale alla conformità AI Act, erogata da un avvocato iscritto all'albo. Il software è lo strumento con cui il servizio è reso.",
@@ -3925,7 +3925,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       disclaimer: "Indicative estimate based on Art. 99 of Regulation (EU) 2024/1689. The amounts represent the theoretical maximum; the actual figure depends on the nature of the infringement and the circumstances. For SMEs and start-ups the lower of the two amounts applies; for small mid-caps the lower one applies only to fines under Art. 99(4)-(5) (Art. 99(6a), Regulation (EU) 2026/1744). This does not constitute personalised legal advice.",
       ctaTitle: "Turn risk into compliance.",
       ctaBody: "In 30 minutes the lawyer, assisted by the tool, sets up your first assessment and shows you how to eliminate your exposure.",
-      bookDemo: "Book a demo",
+      bookDemo: "Get started",
       calcOrg: "Your organisation",
       calcTurnover: "Annual worldwide turnover",
       calcViolation: "Type of potential infringement",
@@ -4288,7 +4288,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       scanner: "Art. 50 Scanner",
       resources: "Resources",
       login: "Log in",
-      bookDemo: "Book a demo",
+      bookDemo: "Get started",
       openMenu: "Open menu",
       closeMenu: "Close menu",
       contents: "Contents",
@@ -4499,7 +4499,7 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
       ctaSecondary: "Talk to the lawyer",
     },
     banner: {
-      cta: "Book a demo",
+      cta: "Get started",
     },
     footer: {
       tagline: "Professional AI Act compliance assistance, delivered by a lawyer admitted to the Bar. The software is the tool through which the service is delivered.",
