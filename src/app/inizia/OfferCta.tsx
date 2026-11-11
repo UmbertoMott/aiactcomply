@@ -36,10 +36,10 @@ export default function OfferCta() {
     return (
       <div>
         <p style={{ fontSize: 15, color: "rgba(255,255,255,0.75)", lineHeight: 1.6, marginBottom: 20 }}>
-          L&rsquo;offerta si è conclusa il {OFFER.deadlineLabel}. Puoi comunque
-          attivare uno dei piani di assistenza ordinari.
+          L&rsquo;offerta si è conclusa il {OFFER.deadlineLabel}. Scrivici per
+          conoscere le condizioni attuali.
         </p>
-        <Link href="/pricing" style={btn(true)}>Vedi i piani</Link>
+        <Link href="/contatti" style={btn(true)}>Contattaci</Link>
       </div>
     );
   }

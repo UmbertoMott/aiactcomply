@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import Nav from "@/components/Nav";
-import BookDemoBanner from "@/components/BookDemoBanner";
 import { useT } from "@/i18n/LocaleProvider";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
@@ -294,7 +293,7 @@ interface ConversionData {
   fine?: string;
 }
 
-function ConversionBlock({ data }: { data: ConversionData }) {
+function ConversionBlock({ data, showCta }: { data: ConversionData; showCta: boolean }) {
   const t = useT("products");
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
@@ -394,9 +393,10 @@ function ConversionBlock({ data }: { data: ConversionData }) {
                 </span>
               ))}
             </div>
-            {/* Primary CTA */}
+            {/* CTA "Inizia" solo ogni due fasce scure */}
+            {showCta && (<>
             <Link
-              href={data.ctaHref ?? "/register"}
+              href="/inizia"
               onMouseEnter={() => setHovered(true)}
               onMouseLeave={() => setHovered(false)}
               style={{
@@ -410,12 +410,10 @@ function ConversionBlock({ data }: { data: ConversionData }) {
                 transition: "background 0.18s ease, color 0.18s ease",
               }}
             >
-              {data.ctaLabel}
+              {t("startCta")}
               <span style={{ fontSize: 16, lineHeight: 1 }}>→</span>
             </Link>
-            <p style={{ fontFamily: MONO, fontSize: 10, color: "rgba(255,255,255,0.20)", textAlign: "right" }}>
-              {t("noCardSetup")}
-            </p>
+            </>)}
           </div>
         </div>
       </motion.div>
@@ -603,14 +601,6 @@ function ComingSoon() {
               </motion.span>
             ))}
           </div>
-          <Link href="/pricing" style={{
-            fontFamily: MONO, fontSize: 12, fontWeight: 500,
-            color: "#0D1016", textDecoration: "none",
-            borderBottom: "1px solid rgba(0,0,0,0.25)",
-            paddingBottom: 2,
-          }}>
-            {t("seePlans")}
-          </Link>
         </motion.div>
       </div>
     </section>
@@ -728,13 +718,11 @@ export default function ProductsPage() {
       </section>
 
       {/* ── Module sections + conversion blocks ── */}
-      {/* Banner CTA ogni 3 sezioncine: dopo Mod2 (3ª) e dopo Mod5 (6ª) */}
+      {/* CTA "Inizia" solo in una fascia scura ogni due; nessun CTA sulle bianche */}
       {MODULES.map((mod, i) => (
         <div key={mod.id}>
           <ModuleSection {...mod} />
-          <ConversionBlock data={CONVERSION[mod.id]} />
-          {i === 1 && <BookDemoBanner />}
-          {i === 4 && <BookDemoBanner />}
+          <ConversionBlock data={CONVERSION[mod.id]} showCta={i % 2 === 1} />
         </div>
       ))}
 
@@ -761,19 +749,10 @@ export default function ProductsPage() {
           {t("readySub")}
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-          <Link href="/register" style={{
+          <Link href="/inizia" style={{
             display: "inline-block", fontFamily: MONO, fontSize: 12, fontWeight: 500,
             color: "#ffffff", background: "#0D1016",
             borderRadius: 8, padding: "13px 32px",
-            textDecoration: "none",
-          }}>
-            {t("startFree")}
-          </Link>
-          <Link href="/pricing" style={{
-            display: "inline-block", fontFamily: MONO, fontSize: 12, fontWeight: 500,
-            color: "#0D1016", background: "transparent",
-            border: "1px solid rgba(0,0,0,0.14)",
-            borderRadius: 8, padding: "13px 28px",
             textDecoration: "none",
           }}>
             {t("seePlansPlain")}

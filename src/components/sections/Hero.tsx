@@ -367,17 +367,11 @@ export default function Hero() {
 
           {/* CTAs */}
           <motion.div variants={wordVariant} className="flex gap-3">
-            <Link href="/contatti"
+            <Link href="/inizia"
               className="text-[13px] font-medium rounded-full px-6 py-3 transition-opacity hover:opacity-85"
               style={{ background: "#ffffff", color: "#0D1016", letterSpacing: "-0.2px" }}
             >
               {t("ctaPrimary")}
-            </Link>
-            <Link href="/pricing"
-              className="text-[13px] rounded-full px-6 py-3 transition-colors hover:bg-white/10"
-              style={{ border: "1px solid rgba(255,255,255,0.30)", color: "rgba(255,255,255,0.80)", background: "transparent" }}
-            >
-              {t("ctaSecondary")}
             </Link>
           </motion.div>
         </motion.div>
