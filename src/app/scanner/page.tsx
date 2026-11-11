@@ -409,7 +409,7 @@ function ScanResults({ result, onReset }: { result: Art50ScanResult; onReset: ()
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <a
-            href="/pricing"
+            href="/inizia"
             className="inline-flex items-center justify-center rounded-full text-[13px] font-medium transition-all duration-200 px-7 py-2.5"
             style={{ background: "#0D1016", color: "#ffffff" }}
             onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}

@@ -40,10 +40,9 @@ export default function CtaFinal() {
           {t("subtitle")}
         </p>
         <div className="flex gap-3 justify-center">
-          <Button href="/contatti" variant="primary">
+          <Button href="/inizia" variant="primary">
             {t("ctaPrimary")}
           </Button>
-          <Button href="/contatti" variant="ghost">{t("ctaSecondary")}</Button>
         </div>
       </motion.div>
     </section>

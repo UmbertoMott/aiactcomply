@@ -219,7 +219,7 @@ export function ProjectMembersMenu() {
                       : "Passa a Su misura per aggiungere 5 o più membri."}
                   </p>
                   <Link
-                    href="/pricing"
+                    href="/inizia"
                     style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 500, color: "#fff", background: T.text, padding: "8px 16px", borderRadius: 8, textDecoration: "none" }}
                   >
                     Aggiorna piano <ArrowRight size={12} />

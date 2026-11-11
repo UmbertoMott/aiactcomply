@@ -80,7 +80,6 @@ export default function Nav() {
 
         <div className="hidden md:flex items-center gap-8 text-[13px]" style={{ color: "rgba(0,0,0,0.42)" }}>
           <Link href="/products" className="hover:text-[#0D1016] transition-colors">{t("product")}</Link>
-          <Link href="/pricing" className="hover:text-[#0D1016] transition-colors">{t("pricing")}</Link>
           <Link href="/scanner" className="hover:text-[#0D1016] transition-colors">{t("scanner")}</Link>
 
           {/* Risorse — trigger mega-menu */}
@@ -136,7 +135,6 @@ export default function Nav() {
         <div className="md:hidden" style={{ borderTop: "1px solid rgba(0,0,0,0.07)", marginTop: 14, paddingTop: 6 }}>
           {[
             { href: "/products", label: t("product") },
-            { href: "/pricing", label: t("pricing") },
             { href: "/scanner", label: t("scanner") },
             { href: "/risorse", label: t("resources") },
             { href: "/roi", label: t("roiToolLabel") },

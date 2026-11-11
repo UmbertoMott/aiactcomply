@@ -583,7 +583,7 @@ export default function QuickScanClient() {
                   principali gap, priorità operative e prossimi documenti da preparare.
                 </p>
                 <Link
-                  href="/pricing"
+                  href="/inizia"
                   style={{
                     display: "inline-flex",
                     alignItems: "center",

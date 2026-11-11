@@ -13,7 +13,6 @@ export default function Footer() {
 
   const PRODUCT_LINKS = [
     { label: t("link_service"),  href: "/products" },
-    { label: t("link_pricing"),  href: "/pricing" },
     { label: t("link_scanner"),  href: "/scanner" },
     { label: t("link_resources"), href: "/risorse" },
     { label: t("link_provider"), href: "/#chi-eroga" },
