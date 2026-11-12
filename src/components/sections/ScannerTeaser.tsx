@@ -342,7 +342,7 @@ export default function ScannerTeaser() {
                 Analizza gratis →
               </Link>
               <Link
-                href="/register"
+                href="/inizia"
                 className="inline-flex items-center justify-center rounded-full text-[13px] font-medium transition-all duration-200 px-7 py-2.5"
                 style={{
                   background: "rgba(255,255,255,0.07)",

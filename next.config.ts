@@ -33,11 +33,16 @@ const nextConfig: NextConfig = {
     ];
   },
   async headers() {
+    // Pagine di servizio (accesso, verifica, area riservata): non devono finire
+    // nell'indice di Google. Il noindex va nell'header perché sono client component.
+    const noindex = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
     return [
       {
         source: "/(.*)",
         headers: securityHeaders,
       },
+      ...["/login", "/register", "/verify", "/verify-login-otp", "/verify-mfa", "/benvenuto", "/auth/:path*", "/dashboard", "/dashboard/:path*"]
+        .map((source) => ({ source, headers: noindex })),
     ];
   },
 };
