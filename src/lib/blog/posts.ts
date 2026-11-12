@@ -38,6 +38,304 @@ export interface BlogPost {
 
 export const POSTS: BlogPost[] = [
   {
+    slug: "nis-nis2-differenze",
+    title: "NIS e NIS2, differenze e cosa cambia per le aziende",
+    excerpt:
+      "La NIS2 ha sostituito la prima direttiva NIS e, in Italia, il D.Lgs. 138/2024 ha abrogato il D.Lgs. 65/2018. Settori, criteri di individuazione, obblighi, responsabilità degli amministratori e sanzioni a confronto, con il rinvio puntuale agli articoli.",
+    date: "12 novembre 2026",
+    dateISO: "2026-11-12",
+    author: { name: "Umberto Mottola", jobTitle: "Avvocato, CIPP/E" },
+    dateModifiedISO: "2026-11-12",
+    readTime: "9 min",
+    category: "Normativa",
+    tags: ["NIS2", "NIS", "NIS e NIS2", "NIS II", "differenze NIS NIS2", "D.Lgs. 65/2018", "D.Lgs. 138/2024", "direttiva 2016/1148"],
+    metaTitle: "NIS e NIS2, differenze e cosa cambia per le aziende",
+    metaDescription:
+      "NIS e NIS2 a confronto. Settori, soggetti, obblighi, notifica degli incidenti, responsabilità del vertice e sanzioni, con i rinvii a direttive e decreti.",
+    faqSchema: [
+      {
+        q: "La direttiva NIS è ancora in vigore?",
+        a: "No. L'art. 44 della direttiva (UE) 2022/2555 ha abrogato la direttiva (UE) 2016/1148 a decorrere dal 18 ottobre 2024. In Italia l'art. 41 del D.Lgs. 138/2024 ha abrogato dalla stessa data il D.Lgs. 65/2018, salvo due commi abrogati dal 1° gennaio 2025.",
+      },
+      {
+        q: "Qual è la differenza principale tra NIS e NIS2?",
+        a: "Con la NIS erano gli Stati membri a individuare gli operatori di servizi essenziali; con la NIS2 rientra nell'ambito, di regola, ogni media o grande impresa che opera in uno dei 18 settori elencati negli allegati I e II della direttiva. Ne conseguono un ambito molto più ampio, obblighi più dettagliati e sanzioni fissate dalla legge.",
+      },
+      {
+        q: "Chi era operatore di servizi essenziali rientra automaticamente nella NIS2?",
+        a: "L'art. 3, comma 9, lettera a), del D.Lgs. 138/2024 consente di includere gli ex operatori di servizi essenziali a prescindere dalle dimensioni, ma tramite individuazione da parte dell'ACN su proposta delle Autorità di settore (comma 13). Se l'impresa supera le soglie dimensionali e opera in un settore elencato, rientra comunque nell'ambito in base alla regola generale.",
+      },
+      {
+        q: "NIS II, NIS 2 e NIS2 sono la stessa cosa?",
+        a: "Sì. Sono tre modi di indicare la direttiva (UE) 2022/2555, che in Italia è stata recepita con il D.Lgs. 4 settembre 2024, n. 138, chiamato decreto NIS.",
+      },
+      {
+        q: "Le sanzioni della NIS2 sono più alte di quelle della NIS?",
+        a: "La prima direttiva NIS si limitava a chiedere sanzioni effettive, proporzionate e dissuasive, lasciando gli importi agli Stati. La NIS2 fissa invece i massimi; in Italia l'art. 38 del decreto NIS prevede fino a 10 milioni di euro o il 2% del fatturato mondiale per i soggetti essenziali e fino a 7 milioni o l'1,4% per i soggetti importanti.",
+      },
+    ],
+    content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · aggiornato al 12 nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In sintesi.</strong> La NIS2, ossia la direttiva (UE) 2022/2555, ha sostituito dal 18 ottobre 2024 la prima direttiva NIS del 2016; in Italia il D.Lgs. 138/2024 ha abrogato il D.Lgs. 65/2018. Le differenze principali sono quattro; i settori passano da 7 a 18, i soggetti si individuano con una regola dimensionale, obblighi e responsabilità degli amministratori diventano espliciti e le sanzioni massime sono fissate dalla legge.
+</p>
+
+<p>Chi cerca le differenze tra NIS e NIS2 vuole di solito capire una cosa precisa, ossia se le regole che la propria azienda conosceva, o ignorava, sotto la vecchia disciplina valgono ancora. La risposta è negativa; la prima direttiva NIS è stata abrogata e la NIS2 non si limita ad aggiornarla, ma ne cambia l'impostazione.</p>
+<p>Questo articolo mette a confronto i due regimi, punto per punto, con il rinvio agli articoli delle direttive e dei decreti di recepimento. Per una panoramica completa degli obblighi si rinvia alla <a href="/risorse/nis2">guida alla NIS2</a>; per le scadenze aggiornate, alla pagina sullo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>.</p>
+
+<h2>Che cos'era la prima direttiva NIS?</h2>
+<p>La prima direttiva NIS è la <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32016L1148" target="_blank" rel="noopener">direttiva (UE) 2016/1148</a>, recepita in Italia con il D.Lgs. 18 maggio 2018, n. 65. Imponeva misure di sicurezza e la notifica degli incidenti a due sole categorie, gli operatori di servizi essenziali (OSE), individuati da ciascuno Stato membro, e i fornitori di servizi digitali (FSD).</p>
+<p>Il meccanismo degli OSE era affidato agli Stati. L'art. 5 della direttiva, che disciplinava l'identificazione degli operatori, chiedeva a ogni Stato di individuarli entro il 9 novembre 2018 sulla base di tre criteri; il servizio doveva essere essenziale per attività sociali o economiche fondamentali, doveva dipendere dalla rete e dai sistemi informativi, e un incidente doveva poter avere effetti negativi rilevanti sulla sua fornitura.</p>
+<p>I settori degli OSE, elencati nell'allegato II, erano sette.</p>
+<ol>
+  <li>Energia;</li>
+  <li>trasporti;</li>
+  <li>settore bancario;</li>
+  <li>infrastrutture dei mercati finanziari;</li>
+  <li>settore sanitario;</li>
+  <li>fornitura e distribuzione di acqua potabile;</li>
+  <li>infrastrutture digitali.</li>
+</ol>
+<p>I fornitori di servizi digitali, invece, erano individuati dall'allegato III in tre tipologie, ossia mercati online, motori di ricerca online e servizi cloud. Per entrambe le categorie gli artt. 14 e 16 della direttiva, che fissavano gli obblighi di sicurezza e di notifica, chiedevano di notificare gli incidenti con impatto rilevante senza indebito ritardo, ma senza termini orari precisi.</p>
+
+<h2>Quali sono le differenze tra NIS e NIS2?</h2>
+<p>Le differenze riguardano tutti gli elementi della disciplina; l'ambito, il modo in cui si individuano i soggetti, il contenuto delle misure, i tempi di notifica, il ruolo degli amministratori e le sanzioni. La NIS2 stessa spiega, al considerando 6, che la distinzione tra OSE e FSD si era rivelata obsoleta.</p>
+<p>La tabella mette a confronto i due regimi.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Aspetto</th><th>NIS (direttiva 2016/1148)</th><th>NIS2 (direttiva 2022/2555)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Recepimento in Italia</td><td>D.Lgs. 65/2018</td><td>D.Lgs. 138/2024 (decreto NIS)</td></tr>
+      <tr><td>Settori</td><td>7 settori per gli OSE (allegato II) e 3 tipi di servizi digitali (allegato III)</td><td>18 settori, di cui 11 ad alta criticità (allegato I) e 7 critici (allegato II)</td></tr>
+      <tr><td>Individuazione dei soggetti</td><td>Designazione degli OSE da parte di ciascuno Stato (art. 5)</td><td>Regola dimensionale uniforme, con eccezioni a prescindere dalle dimensioni (art. 2)</td></tr>
+      <tr><td>Categorie</td><td>Operatori di servizi essenziali e fornitori di servizi digitali</td><td>Soggetti essenziali e soggetti importanti (art. 3)</td></tr>
+      <tr><td>Misure di sicurezza</td><td>Misure tecniche e organizzative adeguate e proporzionate</td><td>Approccio multirischio con almeno dieci elementi obbligatori (art. 21, par. 2)</td></tr>
+      <tr><td>Notifica degli incidenti</td><td>Senza indebito ritardo, senza termini orari</td><td>Preallarme entro 24 ore, notifica entro 72 ore, relazione finale entro un mese (art. 23)</td></tr>
+      <tr><td>Organi di amministrazione</td><td>Nessun articolo dedicato</td><td>Approvano le misure, ne sovrintendono l'attuazione, ne rispondono e seguono una formazione (art. 20)</td></tr>
+      <tr><td>Sanzioni</td><td>Effettive, proporzionate e dissuasive, con importi lasciati agli Stati (art. 21)</td><td>Massimi di almeno 10 milioni di euro o 2% del fatturato, e 7 milioni o 1,4% (art. 34)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>I dati della colonna NIS2 sono tratti dal <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">testo della direttiva (UE) 2022/2555 su EUR-Lex</a>; quelli della colonna NIS dal testo della direttiva 2016/1148. Le sezioni che seguono spiegano le differenze che pesano di più nella pratica.</p>
+
+<h2>Chi rientra nella NIS2 rispetto alla vecchia NIS?</h2>
+<p>Con la NIS2 rientra di regola ogni impresa, pubblica o privata, che opera in uno dei settori degli allegati I e II e che è almeno una media impresa, ossia supera i massimali della piccola impresa fissati dalla raccomandazione 2003/361/CE. Non serve più una designazione dello Stato, come accadeva per gli OSE.</p>
+<p>Il cambio di criterio è spiegato dal considerando 7 della direttiva; poiché sotto la NIS gli Stati individuavano gli operatori in modo molto diverso tra loro, il legislatore europeo ha scelto una regola della soglia di dimensione, uguale per tutti. In Italia la regola è ripresa dall'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art3" target="_blank" rel="noopener">art. 3 del decreto NIS</a>, che ne definisce l'ambito di applicazione e, al comma 2, lo estende ai soggetti degli allegati I e II che superano i massimali per le piccole imprese.</p>
+<p>Restano alcune eccezioni, nel senso che determinati soggetti rientrano a prescindere dalle dimensioni. L'art. 2 della direttiva cita, tra gli altri, i fornitori di reti e servizi di comunicazione elettronica accessibili al pubblico, i prestatori di servizi fiduciari e i registri dei nomi di dominio di primo livello; l'art. 3, comma 9, del decreto NIS aggiunge i soggetti che l'ACN individua, su proposta delle Autorità di settore, perché ad esempio unici fornitori nazionali di un servizio essenziale o elementi sistemici della catena di approvvigionamento.</p>
+<p>Due ulteriori novità meritano attenzione. La prima riguarda gli ex fornitori di servizi digitali, poiché mercati online e motori di ricerca figurano ora nell'allegato II tra i fornitori di servizi digitali, insieme alle piattaforme di social network; la seconda riguarda i gruppi, poiché l'art. 3, comma 10, del decreto NIS applica la disciplina anche all'impresa collegata a un soggetto NIS, indipendentemente dalle dimensioni, se ad esempio ne gestisce i sistemi informativi o ne decide le misure di sicurezza.</p>
+
+<h2>Obblighi più dettagliati e responsabilità del vertice</h2>
+<p>Sotto la NIS gli obblighi di sicurezza erano formulati in termini generali. La NIS2, invece, indica un contenuto minimo; l'art. 21, par. 2, della direttiva, che disciplina le misure di gestione dei rischi, elenca dieci elementi che ogni soggetto deve coprire.</p>
+<ol>
+  <li>Politiche di analisi dei rischi e di sicurezza dei sistemi informatici;</li>
+  <li>gestione degli incidenti;</li>
+  <li>continuità operativa, compresi backup, ripristino in caso di disastro e gestione delle crisi;</li>
+  <li>sicurezza della catena di approvvigionamento, compresi i rapporti con i diretti fornitori;</li>
+  <li>sicurezza dell'acquisizione, dello sviluppo e della manutenzione dei sistemi, compresa la gestione delle vulnerabilità;</li>
+  <li>procedure per valutare l'efficacia delle misure;</li>
+  <li>igiene informatica di base e formazione;</li>
+  <li>uso della crittografia e, se del caso, della cifratura;</li>
+  <li>sicurezza delle risorse umane, controllo degli accessi e gestione degli attivi;</li>
+  <li>autenticazione a più fattori e comunicazioni protette, se del caso.</li>
+</ol>
+<p>La novità più rilevante sul piano della governance, tuttavia, è un'altra. L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art23" target="_blank" rel="noopener">art. 23 del decreto NIS</a>, che recepisce l'art. 20 della direttiva, stabilisce che gli organi di amministrazione e direttivi approvano le modalità di attuazione delle misure, sovrintendono agli obblighi, sono responsabili delle violazioni e devono seguire una formazione in materia di sicurezza informatica. La sicurezza, dunque, cessa di essere un tema solo tecnico e diventa una responsabilità del vertice.</p>
+<p>Cambia infine la notifica degli incidenti. L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">art. 25 del decreto NIS</a>, che disciplina la notifica al CSIRT Italia, prevede una pre-notifica entro 24 ore da quando si viene a conoscenza dell'incidente significativo, una notifica entro 72 ore e una relazione finale entro un mese dalla notifica; se l'incidente è ancora in corso, si inviano relazioni mensili sui progressi e la relazione finale entro un mese dalla conclusione della gestione. Al posto del generico "senza indebito ritardo" della NIS, quindi, vi sono termini precisi e contenuti predefiniti.</p>
+
+<h2>Cosa succede a chi era già operatore di servizi essenziali?</h2>
+<p>Il vecchio regime non sopravvive. L'art. 41 del decreto NIS ha abrogato il D.Lgs. 65/2018 dal 18 ottobre 2024, salvo due commi abrogati dal 1° gennaio 2025; gli ex OSE, perciò, sono soggetti alle sole regole della NIS2, e possono esservi inclusi anche a prescindere dalle dimensioni.</p>
+<p>L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art41" target="_blank" rel="noopener">art. 41 del decreto</a>, intitolato al regime transitorio e alle abrogazioni, dispone inoltre che il nuovo decreto si applica dal 18 ottobre 2024; i due commi abrogati più tardi sono l'art. 7, comma 8, e l'art. 8, comma 10, del D.Lgs. 65/2018. Quanto all'inclusione, l'art. 3, comma 9, lettera a), del decreto NIS prevede che possano rientrare, indipendentemente dalle dimensioni, i soggetti identificati come OSE prima della sua entrata in vigore; l'individuazione spetta all'ACN, su proposta delle Autorità di settore, secondo il comma 13 dello stesso articolo.</p>
+<p>Ne consegue che l'ex OSE non può limitarsi a mantenere le misure adottate in passato. Deve verificare la propria posizione nel nuovo elenco e adeguarsi ai nuovi requisiti nei termini previsti; per la fase di prima applicazione, l'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art42" target="_blank" rel="noopener">art. 42 del decreto</a> fissava, fino al 31 dicembre 2025, nove mesi per gli obblighi di notifica e diciotto mesi per gli obblighi degli artt. 23, 24 e 29, decorrenti dalla comunicazione di inserimento nell'elenco. Le scadenze successive sono riportate nella pagina sullo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>.</p>
+
+<h2>Sanzioni, dalla clausola generale agli importi fissati dalla legge</h2>
+<p>La direttiva del 2016 si limitava a chiedere, all'art. 21, sanzioni effettive, proporzionate e dissuasive, lasciando agli Stati la scelta degli importi. La NIS2, al contrario, fissa all'art. 34 i massimi che ogni Stato deve prevedere come minimo, e il decreto italiano li ha recepiti.</p>
+<p>L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">art. 38 del decreto NIS</a>, che disciplina le sanzioni amministrative, distingue due fasce.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Violazione</th><th>Soggetti essenziali</th><th>Soggetti importanti</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Obblighi degli organi di amministrazione, misure di sicurezza e notifica degli incidenti (artt. 23, 24 e 25)</td><td>Fino a 10 milioni di euro o al 2% del fatturato mondiale annuo, se superiore; minimo pari a un ventesimo del massimo</td><td>Fino a 7 milioni di euro o all'1,4% del fatturato mondiale annuo, se superiore; minimo pari a un trentesimo del massimo</td></tr>
+      <tr><td>Registrazione, categorizzazione delle attività, collaborazione con ACN e CSIRT Italia</td><td>Fino allo 0,1% del fatturato mondiale annuo</td><td>Fino allo 0,07% del fatturato mondiale annuo</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Per le pubbliche amministrazioni essenziali la sanzione per le violazioni più gravi va da 25.000 a 125.000 euro, ridotta di un terzo per quelle importanti. Due previsioni, inoltre, non hanno equivalenti nella vecchia disciplina; in caso di mancata o tardiva registrazione si contestano tutte le violazioni e si applica la sanzione più grave aumentata fino al triplo (comma 13), e, se il soggetto non ottempera a una diffida, l'ACN può disporre nei confronti degli amministratori la sanzione accessoria dell'incapacità a svolgere funzioni dirigenziali nel medesimo soggetto (comma 6).</p>
+
+<h2>Conclusioni</h2>
+<p>La NIS2 non è una semplice revisione della NIS. Sostituisce la designazione caso per caso con una regola dimensionale, estende l'ambito da 7 a 18 settori, fissa un contenuto minimo delle misure, scandisce la notifica degli incidenti in termini orari e pone la responsabilità in capo agli amministratori, con sanzioni fissate dalla legge. Chi era già OSE deve quindi rileggere la propria posizione alla luce del D.Lgs. 138/2024, mentre molte imprese che la vecchia NIS non toccava si trovano oggi pienamente nell'ambito.</p>
+<p>Per gli obblighi nel dettaglio si rinvia alla <a href="/risorse/nis2">guida completa alla NIS2</a>.</p>
+
+<p><strong>Per verificare a che punto è la tua organizzazione</strong>, <a href="/inizia">la gap analysis NIS2 di RegulaeOS</a> permette di confrontare le misure adottate con i requisiti della determinazione ACN e di raccogliere in un unico posto le prove documentali.</p>
+
+<h2>Fonti</h2>
+<ul>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32016L1148" target="_blank" rel="noopener">Direttiva (UE) 2016/1148 (NIS), EUR-Lex</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Direttiva (UE) 2022/2555 (NIS2), EUR-Lex</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art3" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 3 (ambito di applicazione), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art23" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 23 (organi di amministrazione e direttivi), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 25 (notifica degli incidenti), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 38 (sanzioni amministrative), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art41" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 41 (regime transitorio e abrogazioni), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art42" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 42 (fase di prima applicazione), Normattiva</a></li>
+</ul>
+`,
+    en: {
+      title: "NIS and NIS2: differences and what changes for companies",
+      excerpt:
+        "NIS2 replaced the first NIS Directive and, in Italy, Legislative Decree 138/2024 repealed Legislative Decree 65/2018. Sectors, identification criteria, obligations, directors' liability and penalties compared, with precise references to the articles.",
+      date: "12 November 2026",
+      readTime: "9 min",
+      category: "Regulation",
+      tags: ["NIS2", "NIS", "NIS and NIS2", "NIS II", "NIS vs NIS2", "Legislative Decree 65/2018", "Legislative Decree 138/2024", "Directive 2016/1148"],
+      metaTitle: "NIS vs NIS2: differences and what changes for companies",
+      metaDescription:
+        "NIS and NIS2 compared. Sectors, entities, obligations, incident notification, management liability and penalties, with references to directives and decrees.",
+      faqSchema: [
+        {
+          q: "Is the NIS Directive still in force?",
+          a: "No. Article 44 of Directive (EU) 2022/2555 repealed Directive (EU) 2016/1148 with effect from 18 October 2024. In Italy, Article 41 of Legislative Decree 138/2024 repealed Legislative Decree 65/2018 from the same date, except for two paragraphs repealed from 1 January 2025.",
+        },
+        {
+          q: "What is the main difference between NIS and NIS2?",
+          a: "Under NIS, Member States identified operators of essential services; under NIS2, as a rule, every medium-sized or large enterprise operating in one of the 18 sectors listed in Annexes I and II of the directive is in scope. The result is a much wider scope, more detailed obligations and penalties set by law.",
+        },
+        {
+          q: "Are former operators of essential services automatically covered by NIS2?",
+          a: "Article 3(9)(a) of Legislative Decree 138/2024 allows former operators of essential services to be included regardless of size, but through identification by ACN on a proposal from the sector authorities (paragraph 13). If the enterprise exceeds the size thresholds and operates in a listed sector, it is in scope anyway under the general rule.",
+        },
+        {
+          q: "Are NIS II, NIS 2 and NIS2 the same thing?",
+          a: "Yes. They are three ways of referring to Directive (EU) 2022/2555, which Italy transposed by Legislative Decree no. 138 of 4 September 2024, known as the NIS decree.",
+        },
+        {
+          q: "Are NIS2 penalties higher than NIS penalties?",
+          a: "The first NIS Directive merely required effective, proportionate and dissuasive penalties, leaving the amounts to Member States. NIS2 instead sets the maximums; in Italy, Article 38 of the NIS decree provides for up to EUR 10 million or 2% of worldwide turnover for essential entities and up to EUR 7 million or 1.4% for important entities.",
+        },
+      ],
+      content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · updated 12 Nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In short.</strong> NIS2, i.e. Directive (EU) 2022/2555, replaced the first NIS Directive of 2016 from 18 October 2024; in Italy, Legislative Decree 138/2024 repealed Legislative Decree 65/2018. There are four main differences; sectors grow from 7 to 18, entities are identified through a size rule, obligations and directors' liability become explicit, and maximum penalties are set by law.
+</p>
+
+<p>Anyone looking for the differences between NIS and NIS2 usually wants to know one specific thing, namely whether the rules their company knew, or ignored, under the old framework still apply. The answer is no; the first NIS Directive has been repealed, and NIS2 does not merely update it but changes its whole approach.</p>
+<p>This article compares the two regimes point by point, with references to the articles of the directives and of the transposing decrees. For a full overview of the obligations, see the <a href="/risorse/nis2">NIS2 guide</a>; for up-to-date deadlines, see the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">NIS2 implementation status</a>.</p>
+
+<h2>What was the first NIS Directive?</h2>
+<p>The first NIS Directive is <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32016L1148" target="_blank" rel="noopener">Directive (EU) 2016/1148</a>, transposed in Italy by Legislative Decree no. 65 of 18 May 2018. It imposed security measures and incident notification on only two categories, operators of essential services (OES), identified by each Member State, and digital service providers (DSP).</p>
+<p>The OES mechanism was left to the Member States. Article 5 of the directive, which governed the identification of operators, required each State to identify them by 9 November 2018 on the basis of three criteria; the service had to be essential for critical societal or economic activities, it had to depend on network and information systems, and an incident had to be capable of having significant disruptive effects on its provision.</p>
+<p>The OES sectors, listed in Annex II, were seven.</p>
+<ol>
+  <li>Energy;</li>
+  <li>transport;</li>
+  <li>banking;</li>
+  <li>financial market infrastructures;</li>
+  <li>health sector;</li>
+  <li>drinking water supply and distribution;</li>
+  <li>digital infrastructure.</li>
+</ol>
+<p>Digital service providers, by contrast, were identified in Annex III in three types, namely online marketplaces, online search engines and cloud computing services. For both categories, Articles 14 and 16 of the directive, which set out the security and notification obligations, required incidents with a significant impact to be notified without undue delay, but without precise hourly deadlines.</p>
+
+<h2>What are the differences between NIS and NIS2?</h2>
+<p>The differences concern every element of the framework; the scope, the way entities are identified, the content of the measures, the notification deadlines, the role of directors and the penalties. NIS2 itself explains, in recital 6, that the distinction between OES and DSP had proved obsolete.</p>
+<p>The table compares the two regimes.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Aspect</th><th>NIS (Directive 2016/1148)</th><th>NIS2 (Directive 2022/2555)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Transposition in Italy</td><td>Legislative Decree 65/2018</td><td>Legislative Decree 138/2024 (NIS decree)</td></tr>
+      <tr><td>Sectors</td><td>7 sectors for OES (Annex II) and 3 types of digital services (Annex III)</td><td>18 sectors, 11 of high criticality (Annex I) and 7 critical (Annex II)</td></tr>
+      <tr><td>Identification of entities</td><td>Designation of OES by each Member State (Art. 5)</td><td>Uniform size-cap rule, with exceptions regardless of size (Art. 2)</td></tr>
+      <tr><td>Categories</td><td>Operators of essential services and digital service providers</td><td>Essential entities and important entities (Art. 3)</td></tr>
+      <tr><td>Security measures</td><td>Appropriate and proportionate technical and organisational measures</td><td>All-hazards approach with at least ten mandatory elements (Art. 21(2))</td></tr>
+      <tr><td>Incident notification</td><td>Without undue delay, no hourly deadlines</td><td>Early warning within 24 hours, notification within 72 hours, final report within one month (Art. 23)</td></tr>
+      <tr><td>Management bodies</td><td>No dedicated article</td><td>Approve the measures, oversee implementation, are liable and must undergo training (Art. 20)</td></tr>
+      <tr><td>Penalties</td><td>Effective, proportionate and dissuasive, amounts left to Member States (Art. 21)</td><td>Maximums of at least EUR 10 million or 2% of turnover, and EUR 7 million or 1.4% (Art. 34)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The NIS2 column is based on the <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">text of Directive (EU) 2022/2555 on EUR-Lex</a>; the NIS column on the text of Directive 2016/1148. The following sections explain the differences that matter most in practice.</p>
+
+<h2>Who is covered by NIS2 compared with the old NIS?</h2>
+<p>Under NIS2, as a rule, every public or private enterprise operating in one of the sectors of Annexes I and II that is at least a medium-sized enterprise, i.e. exceeds the small enterprise ceilings of Recommendation 2003/361/EC, is in scope. A State designation, as was required for OES, is no longer needed.</p>
+<p>The change of criterion is explained in recital 7 of the directive; since under NIS Member States identified operators in very different ways, the EU legislator opted for a size-cap rule that is the same for everyone. In Italy the rule is set out in <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art3" target="_blank" rel="noopener">Article 3 of the NIS decree</a>, which defines its scope and, in paragraph 2, extends it to entities of the types in Annexes I and II that exceed the ceilings for small enterprises.</p>
+<p>Some exceptions remain, in the sense that certain entities are in scope regardless of size. Article 2 of the directive mentions, among others, providers of public electronic communications networks and services, trust service providers and top-level domain name registries; Article 3(9) of the NIS decree adds entities that ACN identifies, on a proposal from the sector authorities, because they are, for example, the sole national provider of an essential service or systemic elements of the supply chain.</p>
+<p>Two further novelties deserve attention. The first concerns former digital service providers, since online marketplaces and search engines now appear in Annex II among digital providers, together with social networking platforms; the second concerns groups, since Article 3(10) of the NIS decree also applies the rules to an enterprise linked to a NIS entity, regardless of size, if for example it manages its information systems or decides its security measures.</p>
+
+<h2>More detailed obligations and management liability</h2>
+<p>Under NIS, security obligations were framed in general terms. NIS2, by contrast, sets a minimum content; Article 21(2) of the directive, which governs cybersecurity risk-management measures, lists ten elements that every entity must cover.</p>
+<ol>
+  <li>Policies on risk analysis and information system security;</li>
+  <li>incident handling;</li>
+  <li>business continuity, including backup management, disaster recovery and crisis management;</li>
+  <li>supply chain security, including relationships with direct suppliers;</li>
+  <li>security in the acquisition, development and maintenance of systems, including vulnerability handling;</li>
+  <li>procedures to assess the effectiveness of the measures;</li>
+  <li>basic cyber hygiene and training;</li>
+  <li>use of cryptography and, where appropriate, encryption;</li>
+  <li>human resources security, access control and asset management;</li>
+  <li>multi-factor authentication and secured communications, where appropriate.</li>
+</ol>
+<p>The most significant governance novelty, however, is another. <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art23" target="_blank" rel="noopener">Article 23 of the NIS decree</a>, which transposes Article 20 of the directive, provides that management and governing bodies approve the implementation arrangements for the measures, oversee the obligations, are liable for infringements and must undergo cybersecurity training. Security therefore ceases to be a purely technical matter and becomes a responsibility of top management.</p>
+<p>Finally, incident notification changes. <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">Article 25 of the NIS decree</a>, which governs notification to CSIRT Italia, provides for an early warning within 24 hours of becoming aware of the significant incident, a notification within 72 hours and a final report within one month of the notification; if the incident is still ongoing, monthly progress reports are sent and the final report is due within one month of the end of its handling. Instead of the generic "without undue delay" of NIS, there are precise deadlines and predefined content.</p>
+
+<h2>What happens to former operators of essential services?</h2>
+<p>The old regime does not survive. Article 41 of the NIS decree repealed Legislative Decree 65/2018 from 18 October 2024, except for two paragraphs repealed from 1 January 2025; former OES are therefore subject only to the NIS2 rules, and may be included even regardless of size.</p>
+<p><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art41" target="_blank" rel="noopener">Article 41 of the decree</a>, headed transitional regime and repeals, also provides that the new decree applies from 18 October 2024; the two paragraphs repealed later are Article 7(8) and Article 8(10) of Legislative Decree 65/2018. As for inclusion, Article 3(9)(a) of the NIS decree provides that entities identified as OES before its entry into force may be covered regardless of size; identification is up to ACN, on a proposal from the sector authorities, under paragraph 13 of the same article.</p>
+<p>It follows that a former OES cannot simply keep the measures it adopted in the past. It must check its position in the new list and comply with the new requirements within the set deadlines; for the initial implementation phase, <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art42" target="_blank" rel="noopener">Article 42 of the decree</a> set, until 31 December 2025, nine months for the notification obligations and eighteen months for the obligations under Articles 23, 24 and 29, running from the notice of inclusion in the list. Later deadlines are reported on the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">NIS2 implementation status</a>.</p>
+
+<h2>Penalties, from a general clause to amounts set by law</h2>
+<p>The 2016 directive merely required, in Article 21, effective, proportionate and dissuasive penalties, leaving the choice of amounts to Member States. NIS2, by contrast, sets in Article 34 the maximums that each State must provide for at least, and the Italian decree has transposed them.</p>
+<p><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">Article 38 of the NIS decree</a>, which governs administrative penalties, distinguishes two bands.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Infringement</th><th>Essential entities</th><th>Important entities</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Obligations of management bodies, security measures and incident notification (Arts. 23, 24 and 25)</td><td>Up to EUR 10 million or 2% of worldwide annual turnover, whichever is higher; minimum of one twentieth of the maximum</td><td>Up to EUR 7 million or 1.4% of worldwide annual turnover, whichever is higher; minimum of one thirtieth of the maximum</td></tr>
+      <tr><td>Registration, categorisation of activities, cooperation with ACN and CSIRT Italia</td><td>Up to 0.1% of worldwide annual turnover</td><td>Up to 0.07% of worldwide annual turnover</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>For essential public administrations, the penalty for the most serious infringements ranges from EUR 25,000 to EUR 125,000, reduced by one third for important ones. Two provisions, moreover, have no equivalent in the old framework; in the event of failure to register or late registration, all infringements are charged and the most serious penalty applies, increased up to threefold (paragraph 13), and, if the entity fails to comply with a formal warning, ACN may impose on directors the ancillary penalty of incapacity to perform managerial functions within the same entity (paragraph 6).</p>
+
+<h2>Conclusions</h2>
+<p>NIS2 is not a mere revision of NIS. It replaces case-by-case designation with a size rule, extends the scope from 7 to 18 sectors, sets a minimum content for the measures, sets hourly deadlines for incident notification and places responsibility on directors, with penalties set by law. Former OES must therefore reassess their position in light of Legislative Decree 138/2024, while many enterprises that the old NIS did not touch are now fully in scope.</p>
+<p>For the obligations in detail, see the <a href="/risorse/nis2">complete NIS2 guide</a>.</p>
+
+<p><strong>Want to understand where your organisation stands?</strong> <a href="/inizia">The RegulaeOS NIS2 gap analysis</a> lets you compare the measures you have adopted with the requirements of the ACN determination and collect the documentary evidence in one place.</p>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32016L1148" target="_blank" rel="noopener">Directive (EU) 2016/1148 (NIS), EUR-Lex</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Directive (EU) 2022/2555 (NIS2), EUR-Lex</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art3" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 3 (scope), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art23" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 23 (management bodies), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 25 (incident notification), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 38 (administrative penalties), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art41" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 41 (transitional regime and repeals), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art42" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 42 (initial implementation phase), Normattiva</a></li>
+</ul>
+`,
+    },
+  },
+  {
     slug: "nis2",
     title: "NIS2, guida completa per le aziende italiane",
     excerpt:
