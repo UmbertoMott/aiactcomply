@@ -153,6 +153,123 @@ export const POSTS: BlogPost[] = [
 
 <p><strong>Vuoi sapere a che punto è la tua organizzazione?</strong> <a href="/inizia">La gap analysis NIS2 di RegulaeOS</a> permette di confrontare le misure adottate con i requisiti degli allegati della determinazione ACN e di raccogliere le prove documentali per ciascuno.</p>
 `,
+    en: {
+      title: "NIS2: implementation status in Italy and Europe (updated November 2026)",
+      excerpt:
+        "Italy transposed NIS2 through Legislative Decree 138/2024 and has entered the enforcement phase: past and upcoming deadlines, penalties and the transposition status in the other Member States.",
+      date: "12 November 2026",
+      readTime: "9 min",
+      category: "Regulation",
+      tags: ["NIS2", "Legislative Decree 138/2024", "ACN", "cybersecurity", "deadlines", "CSIRT Italia"],
+      metaTitle: "NIS2: implementation status in Italy and Europe (November 2026) | RegulaeOS",
+      metaDescription:
+        "NIS2 implementation status as of November 2026: Legislative Decree 138/2024, ACN determinations, 2026-2027 deadlines, penalties and the Member States referred to the Court of Justice.",
+      faqSchema: [
+        {
+          q: "Is NIS2 already in force in Italy?",
+          a: "Yes. NIS2 was transposed by Legislative Decree 138/2024, in force since 16 October 2024; the detailed obligations are set by the ACN determinations, in particular no. 379907/2025, applicable from 15 January 2026.",
+        },
+        {
+          q: "What was the October 2026 NIS2 deadline?",
+          a: "It was the deadline, 18 months after the notice of inclusion in the NIS list, by which entities included in 2025 had to adopt the baseline security measures set out in Annexes 1 and 2 of ACN determination no. 379907/2025.",
+        },
+        {
+          q: "What deadlines apply to NIS entities identified in 2026?",
+          a: "Under ACN determination no. 127434/2026, they must appoint a CSIRT contact person by the end of 2026, notify significant incidents from 1 January 2027 and adopt the baseline security measures by 31 July 2027.",
+        },
+        {
+          q: "When is the 2027 NIS registration?",
+          a: "From 1 January to 28 February 2027 all NIS entities must register or update their registration on the ACN services portal, as every year.",
+        },
+        {
+          q: "Which Member States have not yet transposed NIS2?",
+          a: "On 8 July 2026 the Commission referred Ireland, Spain, France and the Netherlands to the Court of Justice. The Netherlands then adopted a law in force since 15 August 2026, while in France the bill is before the National Assembly and in Spain and Ireland transposition does not yet appear to be complete.",
+        },
+      ],
+      content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · updated 12 Nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In short.</strong> Italy transposed the NIS2 Directive through Legislative Decree 138/2024, in force since 16 October 2024, and has now entered the enforcement phase: for entities added to the NIS list in 2025, the deadline to adopt the baseline security measures expired in October 2026, while those added in 2026 have until 31 July 2027. In Europe, Ireland, Spain, France and the Netherlands have been referred to the Court of Justice for late transposition.
+</p>
+
+<p>NIS2, i.e. Directive (EU) 2022/2555 on the security of network and information systems, had to be transposed by all Member States by 17 October 2024. Two years on, the picture is two-speed: some countries, including Italy, are already in the practical implementation phase, while others still have no national law.</p>
+<p>Anyone looking up the NIS2 implementation status usually wants to know three things: whether the rules already apply, which deadlines have passed and which are coming, and what those who are late are exposed to. This page answers each question based solely on official acts (the decree, the determinations of the National Cybersecurity Agency, European Commission press releases) and is updated every month.</p>
+
+<h2>What is the NIS2 implementation status in Italy?</h2>
+<p>In Italy NIS2 has been fully in force since 16 October 2024, when Legislative Decree 138/2024, which transposed it on time, entered into force. The competent authority is the National Cybersecurity Agency (ACN), which has already identified more than 20,000 NIS entities and is now checking their compliance.</p>
+<p>The decree leaves it to ACN measures, called determinations, to turn the general obligations into verifiable requirements. The reference currently in force is ACN determination no. 379907 of 19 December 2025, which sets the so-called baseline specifications, i.e. the minimum security measures and the rules for notifying incidents; it applies from 15 January 2026 and replaces the previous determination no. 164179 of 14 April 2025.</p>
+<p>The measures differ depending on the entity's category. Important entities must comply with Annex 1 of the determination, which according to ICT Security Magazine contains 37 measures and 87 requirements; essential entities must comply with Annex 2, which contains 43 and 116. Annexes 3 and 4, in turn, set out when an incident becomes significant and must therefore be notified to CSIRT Italia, the ACN unit that receives reports.</p>
+<p>According to ACN, by December 2025 the NIS list exceeded 20,000 names, partly as a result of hundreds of late registrations and more than two thousand review procedures.</p>
+
+<h2>Which NIS2 deadlines have passed and which are coming?</h2>
+<p>The deadlines depend on the year in which the entity received the notice of inclusion in the NIS list, since the time limits run from that date. For entities listed since 2025 the deadline for the baseline measures expired in October 2026; for those added in 2026 it expires on 31 July 2027.</p>
+<p>The table summarises the calendar drawn from the ACN page on the baseline specifications, from ACN determination no. 127434/2026, which governs the deadlines for new entities, and from the ACN NIS Vademecum.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>When</th><th>Who it concerns</th><th>What must be done</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>January 2026</td><td>Entities listed since 2025</td><td>Notify baseline significant incidents to CSIRT Italia (9 months after the notice of inclusion)</td><td class="ac-passed">Ongoing</td></tr>
+      <tr><td>May and June 2026</td><td>All NIS entities</td><td>List and categorise activities and services (Art. 30 of the decree, which provides for a simplified impact analysis)</td><td class="ac-passed">Completed</td></tr>
+      <tr><td>October 2026</td><td>Entities listed since 2025</td><td>Adopt all baseline security measures (18 months after the notice of inclusion)</td><td class="ac-passed">Expired</td></tr>
+      <tr><td>By end of 2026</td><td>Entities added in 2026</td><td>Appoint the CSIRT contact person, i.e. the person who will liaise with CSIRT Italia</td><td class="ac-soon">Upcoming</td></tr>
+      <tr><td>1 January 2027</td><td>Entities added in 2026</td><td>The obligation to notify significant incidents begins</td><td class="ac-soon">Upcoming</td></tr>
+      <tr><td>1 January - 28 February 2027</td><td>All NIS entities</td><td>Annual registration or update on the ACN services portal</td><td class="ac-soon">Upcoming</td></tr>
+      <tr><td>31 July 2027</td><td>Entities added in 2026</td><td>Adopt all baseline security measures</td><td class="ac-omnibus">To prepare</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>It should be noted that the October 2026 deadline is calculated as 18 months from receipt of the notice of inclusion; the exact date must therefore be checked, for each entity, against the notice received from ACN.</p>
+
+<h2>What happens after the October 2026 deadline?</h2>
+<p>Now that the deadline for the baseline measures has passed, ACN can check whether the 2025 entities have actually adopted them. For essential entities supervision may also be proactive; for important entities, by contrast, checks start only where there is evidence suggesting an infringement.</p>
+<p>The distinction, which derives from the directive, was confirmed by ACN in its answers to operators' questions, as reported by Diritto Bancario. In practice, an essential entity may be inspected even if no incident has occurred, so it must be able to demonstrate at any time which measures it has adopted and with what documentary evidence.</p>
+<p>The maximum penalties under the decree, according to ICT Security Magazine, reach EUR 10 million or 2% of total worldwide annual turnover for essential entities, and EUR 7 million or 1.4% for important entities, whichever is higher. The decree also makes the management and governing bodies responsible for approving and overseeing the measures; security therefore cannot be delegated entirely to the IT function.</p>
+
+<h2>Where does NIS2 transposition stand in the other Member States?</h2>
+<p>Most Member States have now transposed NIS2, but four countries were referred to the Court of Justice of the European Union on 8 July 2026 for failing to notify full transposition: Ireland, Spain, France and the Netherlands.</p>
+<p>The infringement procedure took place in three stages. The Commission sent letters of formal notice to 23 Member States on 28 November 2024; it then sent reasoned opinions to 19 Member States on 7 May 2025; finally it referred four Member States to the Court, seeking, according to Corriere Comunicazioni, a lump sum and daily penalty payments until full transposition.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Country</th><th>Known situation</th><th>Source</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Netherlands</td><td>Transposition law (Cyberbeveiligingswet) in force since 15 August 2026, adopted after the referral</td><td>NIS2 Tracker</td></tr>
+      <tr><td>France</td><td>The bill, already passed by the Senate, has been before the National Assembly since 9 November 2026</td><td>LCP</td></tr>
+      <tr><td>Spain</td><td>The bill stalled when elections were called; the transposition of the old NIS Directive (Royal Decree-law 12/2018) still applies</td><td>Cuatrecasas</td></tr>
+      <tr><td>Ireland</td><td>The Government expects to notify transposition by the end of 2026</td><td>The Record</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>For an Italian company with offices or suppliers in these countries, the delay has a practical effect: foreign subsidiaries remain subject to the previous national rules, while Italian customers that are NIS entities will still ask for assurances on supply chain security.</p>
+
+<h2>The NIS2 amendments proposed by the Commission in 2026</h2>
+<p>On 20 January 2026 the European Commission proposed, as part of a new cybersecurity package, targeted amendments to NIS2. According to the Commission's press release, the amendments simplify the rules on jurisdiction, streamline the collection of data on ransomware attacks, introduce the new category of small mid-cap enterprises and should ease the compliance burden for around 28,700 companies, 6,200 of them micro and small enterprises.</p>
+<p>This is, however, only a proposal. It will have to be approved by the European Parliament and the Council, and Member States will then have one year to transpose it; until then Legislative Decree 138/2024 and the ACN determinations continue to apply, so waiting for the amendments is not a valid reason to postpone compliance.</p>
+
+<h2>What to do now, depending on your position</h2>
+<p>The obligations for the coming months vary depending on the organisation's situation.</p>
+<ol>
+  <li><strong>Entities listed since 2025</strong>: the deadline for the baseline measures has passed, so you need to check that every requirement of the applicable annex is covered and, above all, that there is documentary evidence for each one (approved policies, registers, minutes of the management body), in view of possible inspections;</li>
+  <li><strong>entities added in 2026</strong>: appoint the CSIRT contact person by the end of 2026 and put the incident notification procedure in place before 1 January 2027, while planning the baseline measures for 31 July 2027;</li>
+  <li><strong>organisations that do not know whether NIS2 applies to them</strong>: it is advisable to check before the registration window, which opens on 1 January 2027 and closes on 28 February 2027, also considering the role of supplier to a NIS entity;</li>
+  <li><strong>all NIS entities</strong>: prepare the annual update of the information on the ACN portal, which takes place in the same window.</li>
+</ol>
+
+<h2>Conclusions</h2>
+<p>In Italy NIS2 is no longer a rule to be studied but an obligation to be demonstrated. With the October 2026 deadline, the first application phase for the 2025 entities has closed, and what will make the difference is the ability to prove, requirement by requirement, what has been adopted; for the 2026 entities, by contrast, the calendar is still manageable, provided they start now.</p>
+<p>In Europe the picture remains fragmented, but the referral to the Court of Justice makes it likely that the remaining Member States will transpose the directive shortly. This page will be updated with every new ACN determination and every development in the infringement procedure.</p>
+
+<p><strong>Want to know where your organisation stands?</strong> <a href="/inizia">The RegulaeOS NIS2 gap analysis</a> lets you compare the measures you have adopted with the requirements of the annexes to the ACN determination and collect the documentary evidence for each one.</p>
+`,
+    },
   },
   {
     slug: "ai-act-quick-scan-10-domande-gap-compliance",
