@@ -279,7 +279,7 @@ export async function sendQuickScanReport(
         non sostituisce un assessment completo o una validazione professionale.
       </p>
 
-      <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com"}/pricing"
+      <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com"}/inizia"
          style="display:inline-block;background:#0D1016;color:#fff;padding:13px 28px;border-radius:999px;text-decoration:none;font-weight:600;margin:12px 0;">
         Run Full AI Act Assessment
       </a>

@@ -115,6 +115,8 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
     },
     risorse: {
       kicker: "Risorse",
+      latestTitle: "Ultimi articoli",
+      latestAll: "Tutte le risorse →",
       h1: "Guide e aggiornamenti sull'EU AI Act",
       subtitle: "Analisi normativa, scadenze, obblighi pratici. Senza paroloni.",
       empty: "Nessun articolo pubblicato.",
@@ -3893,6 +3895,8 @@ export const DICTIONARIES: Record<Locale, Dictionary> = {
     },
     risorse: {
       kicker: "Resources",
+      latestTitle: "Latest articles",
+      latestAll: "All resources →",
       h1: "Guides and updates on the EU AI Act",
       subtitle: "Regulatory analysis, deadlines, practical obligations. No jargon.",
       empty: "No articles published yet.",

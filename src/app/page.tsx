@@ -11,6 +11,7 @@ import CtaFinal from "@/components/sections/CtaFinal";
 import ChiEroga from "@/components/sections/ChiEroga";
 import Footer from "@/components/sections/Footer";
 import BookDemoBanner from "@/components/BookDemoBanner";
+import LatestPosts from "@/components/sections/LatestPosts";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com";
 
@@ -167,6 +168,7 @@ export default function Home() {
         <BookDemoBanner />
         <Quote />
         <ChiEroga />
+        <LatestPosts />
         <CtaFinal />
       </main>
       <Footer />
