@@ -30,6 +30,7 @@ const nextConfig: NextConfig = {
     return [
       { source: "/pricing", destination: "/inizia", permanent: true },
       { source: "/prenota-demo", destination: "/inizia", permanent: true },
+      { source: "/nis2", destination: "/risorse/nis2", permanent: true },
     ];
   },
   async headers() {

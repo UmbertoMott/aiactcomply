@@ -27,6 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: post.metaDescription,
       type: "article",
       publishedTime: post.dateISO,
+      modifiedTime: post.dateModifiedISO ?? post.dateISO,
       url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com"}/risorse/${post.slug}`,
     },
     alternates: {
@@ -49,8 +50,10 @@ export default async function BlogPost({ params }: Props) {
     headline: post.title,
     description: post.metaDescription,
     datePublished: post.dateISO,
-    dateModified: post.dateISO,
-    author: { "@type": "Organization", name: "RegulaeOS" },
+    dateModified: post.dateModifiedISO ?? post.dateISO,
+    author: post.author
+      ? { "@type": "Person", name: post.author.name, ...(post.author.jobTitle ? { jobTitle: post.author.jobTitle } : {}) }
+      : { "@type": "Organization", name: "RegulaeOS" },
     publisher: {
       "@type": "Organization",
       name: "RegulaeOS",
@@ -125,6 +128,13 @@ export default async function BlogPost({ params }: Props) {
               color: #0D1016;
               margin: 48px 0 16px;
               line-height: 1.25;
+            }
+            .ac-post h3 {
+              font-size: 16px;
+              font-weight: 600;
+              color: #0D1016;
+              margin: 32px 0 8px;
+              line-height: 1.35;
             }
             .ac-post p {
               font-size: 16px;
