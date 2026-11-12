@@ -36,6 +36,125 @@ export interface BlogPost {
 
 export const POSTS: BlogPost[] = [
   {
+    slug: "nis2-stato-attuazione-italia-europa",
+    title: "NIS2, stato di attuazione in Italia e in Europa (aggiornato a novembre 2026)",
+    excerpt:
+      "L'Italia ha recepito la NIS2 con il D.Lgs. 138/2024 ed è entrata nella fase dei controlli: scadenze passate e in arrivo, sanzioni e stato del recepimento negli altri Stati membri.",
+    date: "12 novembre 2026",
+    dateISO: "2026-11-12",
+    readTime: "9 min",
+    category: "Normativa",
+    tags: ["NIS2", "D.Lgs. 138/2024", "ACN", "cybersicurezza", "scadenze", "CSIRT Italia"],
+    metaTitle: "NIS2: stato di attuazione in Italia e in Europa (novembre 2026) | RegulaeOS",
+    metaDescription:
+      "Stato di attuazione della NIS2 a novembre 2026: D.Lgs. 138/2024, determinazioni ACN, scadenze 2026-2027, sanzioni e Stati deferiti alla Corte di giustizia.",
+    faqSchema: [
+      {
+        q: "La NIS2 è già in vigore in Italia?",
+        a: "Sì. La NIS2 è stata recepita con il D.Lgs. 138/2024, in vigore dal 16 ottobre 2024; gli obblighi di dettaglio sono fissati dalle determinazioni dell'ACN, in particolare dalla n. 379907/2025, applicabile dal 15 gennaio 2026.",
+      },
+      {
+        q: "Qual era la scadenza NIS2 di ottobre 2026?",
+        a: "Era il termine, pari a 18 mesi dalla comunicazione di inserimento nell'elenco NIS, entro cui i soggetti inseriti nel 2025 dovevano adottare le misure di sicurezza di base previste dagli allegati 1 e 2 della determinazione ACN n. 379907/2025.",
+      },
+      {
+        q: "Che scadenze hanno i soggetti NIS identificati nel 2026?",
+        a: "Secondo la determinazione ACN n. 127434/2026, devono designare il referente CSIRT entro la fine del 2026, notificare gli incidenti significativi dal 1 gennaio 2027 e adottare le misure di sicurezza di base entro il 31 luglio 2027.",
+      },
+      {
+        q: "Quando si fa la registrazione NIS per il 2027?",
+        a: "Dal 1 gennaio al 28 febbraio 2027 tutti i soggetti NIS devono effettuare o aggiornare la registrazione sul portale dei servizi dell'ACN, come ogni anno.",
+      },
+      {
+        q: "Quali Stati non hanno ancora recepito la NIS2?",
+        a: "L'8 luglio 2026 la Commissione ha deferito alla Corte di giustizia Irlanda, Spagna, Francia e Paesi Bassi. I Paesi Bassi hanno poi adottato una legge in vigore dal 15 agosto 2026, mentre in Francia il disegno di legge è all'esame dell'Assemblea nazionale e in Spagna e Irlanda il recepimento non risulta ancora completato.",
+      },
+    ],
+    content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · aggiornato al 12 nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In sintesi.</strong> L'Italia ha recepito la direttiva NIS2 con il D.Lgs. 138/2024, in vigore dal 16 ottobre 2024, ed è ormai entrata nella fase dei controlli; per i soggetti inseriti nell'elenco NIS nel 2025, infatti, il termine per adottare le misure di sicurezza di base è scaduto a ottobre 2026, mentre chi è entrato nell'elenco nel 2026 ha tempo fino al 31 luglio 2027. In Europa, invece, Irlanda, Spagna, Francia e Paesi Bassi sono stati deferiti alla Corte di giustizia per il ritardo nel recepimento.
+</p>
+
+<p>La NIS2, ossia la direttiva (UE) 2022/2555 sulla sicurezza delle reti e dei sistemi informativi, doveva essere recepita da tutti gli Stati membri entro il 17 ottobre 2024. A due anni da quella data il quadro è a due velocità; alcuni Paesi, tra cui l'Italia, sono già nella fase di attuazione concreta, altri non hanno ancora una legge nazionale.</p>
+<p>Chi cerca lo stato di attuazione della NIS2 vuole sapere, in genere, tre cose; se la norma è già applicabile, quali scadenze sono passate e quali arrivano, e cosa rischia chi è in ritardo. Questa pagina risponde a ciascuna domanda sulla base dei soli atti ufficiali (decreto, determinazioni dell'Agenzia per la Cybersicurezza Nazionale, comunicati della Commissione europea) e viene aggiornata ogni mese.</p>
+
+<h2>Qual è lo stato di attuazione della NIS2 in Italia?</h2>
+<p>In Italia la NIS2 è pienamente in vigore dal 16 ottobre 2024, data di entrata in vigore del D.Lgs. 138/2024, che l'ha recepita nei termini. L'autorità competente è l'Agenzia per la Cybersicurezza Nazionale (ACN), che ha già identificato oltre 20.000 soggetti NIS e ne verifica ora gli adempimenti.</p>
+<p>Il decreto rinvia a provvedimenti dell'ACN, chiamati determinazioni, il compito di tradurre gli obblighi generali in requisiti verificabili. Il riferimento oggi vigente è la determinazione ACN n. 379907 del 19 dicembre 2025, che fissa le cosiddette specifiche di base, ossia le misure minime di sicurezza e le regole per notificare gli incidenti; essa si applica dal 15 gennaio 2026 e sostituisce la precedente determinazione n. 164179 del 14 aprile 2025.</p>
+<p>Le misure cambiano a seconda della categoria del soggetto. I soggetti importanti devono rispettare l'allegato 1 della determinazione, che secondo ICT Security Magazine conta 37 misure e 87 requisiti; i soggetti essenziali devono rispettare l'allegato 2, che ne conta 43 e 116. Gli allegati 3 e 4, del pari, stabiliscono quando un incidente diventa significativo e va quindi notificato al CSIRT Italia, la struttura dell'ACN che riceve le segnalazioni.</p>
+<p>Secondo l'ACN, a dicembre 2025 l'elenco dei soggetti NIS superava i 20.000 nominativi, anche per effetto di centinaia di registrazioni tardive e di oltre duemila istruttorie di revisione.</p>
+
+<h2>Quali scadenze NIS2 sono passate e quali arrivano?</h2>
+<p>Le scadenze dipendono dall'anno in cui il soggetto ha ricevuto la comunicazione di inserimento nell'elenco NIS, poiché i termini decorrono da quella data. Per chi è in elenco dal 2025 il termine delle misure di base è scaduto a ottobre 2026; per chi vi è entrato nel 2026, invece, scade il 31 luglio 2027.</p>
+<p>La tabella riassume il calendario ricavato dalla pagina ACN sulle specifiche di base, dalla determinazione ACN n. 127434/2026, che regola i termini per i nuovi soggetti, e dal Vademecum NIS dell'ACN.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Quando</th><th>Chi riguarda</th><th>Cosa va fatto</th><th>Stato</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Gennaio 2026</td><td>Soggetti in elenco dal 2025</td><td>Notificare al CSIRT Italia gli incidenti significativi di base (9 mesi dalla comunicazione di inserimento)</td><td class="ac-passed">In corso</td></tr>
+      <tr><td>Maggio e giugno 2026</td><td>Tutti i soggetti NIS</td><td>Elencare e categorizzare attività e servizi (art. 30 del decreto, che prevede un'analisi d'impatto semplificata)</td><td class="ac-passed">Concluso</td></tr>
+      <tr><td>Ottobre 2026</td><td>Soggetti in elenco dal 2025</td><td>Adottare tutte le misure di sicurezza di base (18 mesi dalla comunicazione di inserimento)</td><td class="ac-passed">Scaduto</td></tr>
+      <tr><td>Entro fine 2026</td><td>Soggetti entrati in elenco nel 2026</td><td>Designare il referente CSIRT, ossia la persona che terrà i contatti con il CSIRT Italia</td><td class="ac-soon">Imminente</td></tr>
+      <tr><td>1 gennaio 2027</td><td>Soggetti entrati in elenco nel 2026</td><td>Inizia l'obbligo di notifica degli incidenti significativi</td><td class="ac-soon">Imminente</td></tr>
+      <tr><td>1 gennaio - 28 febbraio 2027</td><td>Tutti i soggetti NIS</td><td>Registrazione o aggiornamento annuale sul portale dei servizi ACN</td><td class="ac-soon">Imminente</td></tr>
+      <tr><td>31 luglio 2027</td><td>Soggetti entrati in elenco nel 2026</td><td>Adottare tutte le misure di sicurezza di base</td><td class="ac-omnibus">Da preparare</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Va precisato che il termine di ottobre 2026 si calcola sui 18 mesi dalla ricezione della comunicazione di inserimento; ne consegue che la data esatta va verificata, per ciascun soggetto, sulla comunicazione ricevuta dall'ACN.</p>
+
+<h2>Cosa succede dopo la scadenza di ottobre 2026?</h2>
+<p>Scaduto il termine per le misure di base, l'ACN può verificare se i soggetti del 2025 le abbiano effettivamente adottate. Sui soggetti essenziali la vigilanza può essere anche preventiva; sui soggetti importanti, invece, i controlli partono solo in presenza di elementi che facciano presumere una violazione.</p>
+<p>La distinzione, che deriva dalla direttiva, è stata confermata dall'ACN in risposta ai quesiti degli operatori, come riporta Diritto Bancario. In pratica un soggetto essenziale può ricevere un'ispezione anche senza che sia accaduto alcun incidente, sicché deve essere in grado di dimostrare in ogni momento quali misure ha adottato e con quali prove documentali.</p>
+<p>Le sanzioni massime previste dal decreto, secondo ICT Security Magazine, arrivano a 10 milioni di euro o al 2% del fatturato mondiale annuo per i soggetti essenziali, e a 7 milioni di euro o all'1,4% per i soggetti importanti, applicandosi l'importo più alto. Il decreto, inoltre, attribuisce agli organi di amministrazione e direttivi la responsabilità dell'approvazione e della supervisione delle misure; la sicurezza, dunque, non può essere delegata per intero alla funzione IT.</p>
+
+<h2>A che punto è il recepimento della NIS2 negli altri Stati membri?</h2>
+<p>La maggior parte degli Stati membri ha ormai recepito la NIS2, ma quattro Paesi sono stati deferiti alla Corte di giustizia dell'Unione europea l'8 luglio 2026 per non aver notificato il recepimento completo; si tratta di Irlanda, Spagna, Francia e Paesi Bassi.</p>
+<p>La procedura d'infrazione si è svolta in tre fasi. La Commissione ha inviato le lettere di costituzione in mora a 23 Stati il 28 novembre 2024; ha poi inviato i pareri motivati a 19 Stati il 7 maggio 2025; ha infine deferito quattro Stati alla Corte, chiedendo, secondo il Corriere Comunicazioni, una somma forfettaria e penalità giornaliere fino al completo recepimento.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Stato</th><th>Situazione nota</th><th>Fonte</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Paesi Bassi</td><td>Legge di recepimento (Cyberbeveiligingswet) in vigore dal 15 agosto 2026, approvata dopo il deferimento</td><td>Tracker NIS2</td></tr>
+      <tr><td>Francia</td><td>Il disegno di legge, già approvato dal Senato, è all'esame dell'Assemblea nazionale dal 9 novembre 2026</td><td>LCP</td></tr>
+      <tr><td>Spagna</td><td>L'iter del progetto di legge si è fermato con la convocazione delle elezioni; resta applicabile il recepimento della vecchia NIS (Real Decreto-ley 12/2018)</td><td>Cuatrecasas</td></tr>
+      <tr><td>Irlanda</td><td>Il Governo prevede di notificare il recepimento entro la fine del 2026</td><td>The Record</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Per un'azienda italiana con sedi o fornitori in questi Paesi il ritardo ha un effetto pratico; le controllate estere, infatti, restano soggette alle regole nazionali previgenti, mentre i clienti italiani soggetti NIS chiederanno comunque garanzie sulla sicurezza della catena di fornitura.</p>
+
+<h2>Le modifiche alla NIS2 proposte dalla Commissione nel 2026</h2>
+<p>Il 20 gennaio 2026 la Commissione europea ha proposto, nell'ambito di un nuovo pacchetto sulla cibersicurezza, alcune modifiche mirate alla NIS2. Secondo il comunicato della Commissione, le modifiche semplificano le regole sulla giurisdizione, rendono più snella la raccolta di dati sugli attacchi ransomware, introducono la nuova categoria delle piccole imprese a media capitalizzazione e dovrebbero alleggerire gli adempimenti per circa 28.700 imprese, di cui 6.200 micro e piccole.</p>
+<p>Si tratta, tuttavia, di una proposta. Essa dovrà essere approvata dal Parlamento europeo e dal Consiglio, e gli Stati membri avranno poi un anno per recepirla; fino ad allora restano applicabili il D.Lgs. 138/2024 e le determinazioni dell'ACN, sicché attendere le modifiche non è una ragione valida per rinviare l'adeguamento.</p>
+
+<h2>Cosa fare adesso, in base alla propria posizione</h2>
+<p>Gli adempimenti dei prossimi mesi variano a seconda della situazione dell'organizzazione.</p>
+<ol>
+  <li><strong>Soggetti in elenco dal 2025</strong>; il termine per le misure di base è scaduto, sicché occorre verificare che ogni requisito dell'allegato applicabile sia coperto e, soprattutto, che esista una prova documentale per ciascuno (policy approvate, registri, verbali dell'organo di amministrazione), in vista di eventuali controlli;</li>
+  <li><strong>soggetti entrati in elenco nel 2026</strong>; vanno designati il referente CSIRT entro la fine del 2026 e predisposta la procedura di notifica degli incidenti prima del 1 gennaio 2027, pianificando le misure di base entro il 31 luglio 2027;</li>
+  <li><strong>organizzazioni che non sanno se rientrano nella NIS2</strong>; conviene verificarlo prima della finestra di registrazione che si apre il 1 gennaio 2027 e si chiude il 28 febbraio 2027, considerando anche il ruolo di fornitore di un soggetto NIS;</li>
+  <li><strong>tutti i soggetti NIS</strong>; va preparato l'aggiornamento annuale delle informazioni sul portale ACN, che si effettua nella stessa finestra.</li>
+</ol>
+
+<h2>Conclusioni</h2>
+<p>In Italia la NIS2 non è più una norma da studiare ma un obbligo da dimostrare. Con la scadenza di ottobre 2026 si è chiusa la fase di prima applicazione per i soggetti del 2025, e la differenza la farà la capacità di provare, requisito per requisito, ciò che si è adottato; per i soggetti del 2026, invece, il calendario è ancora gestibile, a condizione di partire subito.</p>
+<p>In Europa il quadro resta frammentato, ma il deferimento alla Corte di giustizia rende probabile che anche gli ultimi Stati recepiscano la direttiva a breve. Questa pagina sarà aggiornata a ogni nuova determinazione dell'ACN e a ogni sviluppo della procedura d'infrazione.</p>
+
+<p><strong>Vuoi sapere a che punto è la tua organizzazione?</strong> <a href="/inizia">La gap analysis NIS2 di RegulaeOS</a> permette di confrontare le misure adottate con i requisiti degli allegati della determinazione ACN e di raccogliere le prove documentali per ciascuno.</p>
+`,
+  },
+  {
     slug: "ai-act-quick-scan-10-domande-gap-compliance",
     title: "AI Act Quick Scan: 10 domande per capire se hai gap di compliance",
     excerpt:
@@ -116,7 +235,7 @@ export const POSTS: BlogPost[] = [
 <h2>Perché funziona per RegulaeOS</h2>
 <p>RegulaeOS non vende solo software. Vende un percorso assistito verso la conformità: triage, assessment, documentazione tecnica, DPIA, FRIA, risk register e validazione professionale.</p>
 <p>Il quick scan è il primo gradino giusto perché promette poco e consegna qualcosa di concreto. Non chiede all'utente di capire il regolamento prima di iniziare. Gli chiede di descrivere il suo sistema, poi traduce quelle risposte in un rischio leggibile.</p>
-<p>Da lì, la CTA è naturale: <a href="/scanner">provare lo scanner Art. 50</a>, <a href="/pricing">vedere i piani</a> oppure <a href="/contatti">parlare con un professionista</a>.</p>
+<p>Da lì, la CTA è naturale: <a href="/scanner">provare lo scanner Art. 50</a>, <a href="/inizia">usare RegulaeOS</a> oppure <a href="/contatti">parlare con un professionista</a>.</p>
 
 <h2>La versione MVP</h2>
 <p>Per partire basta una pagina responsive con progress bar, 8-10 domande, scoring interno, schermata teaser, lead form e schermata finale.</p>
@@ -202,7 +321,7 @@ export const POSTS: BlogPost[] = [
 <h2>Why it works for RegulaeOS</h2>
 <p>RegulaeOS doesn't just sell software. It sells an assisted path towards compliance: triage, assessment, technical documentation, DPIA, FRIA, risk register and professional validation.</p>
 <p>The quick scan is the right first step because it promises little and delivers something concrete. It doesn't ask the user to understand the regulation before starting. It asks them to describe their system, then translates those answers into readable risk.</p>
-<p>From there, the CTA is natural: <a href="/scanner">try the Art. 50 scanner</a>, <a href="/pricing">see the plans</a> or <a href="/contatti">talk to a professional</a>.</p>
+<p>From there, the CTA is natural: <a href="/scanner">try the Art. 50 scanner</a>, <a href="/inizia">use RegulaeOS</a> or <a href="/contatti">talk to a professional</a>.</p>
 
 <h2>The MVP version</h2>
 <p>To get started, all you need is a responsive page with a progress bar, 8-10 questions, internal scoring, a teaser screen, a lead form and a final screen.</p>
@@ -503,7 +622,7 @@ export const POSTS: BlogPost[] = [
 <p>La risposta dipende da due variabili: quanto è complesso il tuo sistema AI e quanto sei organizzato nella raccolta della documentazione.</p>
 <p>Un percorso di conformità completo per un sistema Annex III fatto in modo tradizionale richiede consulenze legali, audit tecnici, redazione di documentazione, gap analysis, assessment DPIA e FRIA. Il mercato parla di 6-18 mesi, con costi che variano dai 30.000 ai 150.000 euro per un sistema di media complessità.</p>
 <p>RegulaeOS è costruito per comprimere quel percorso. Il primo assessment è pronto in meno di 48 ore. I tool guidano ogni articolo del regolamento, dai check Art. 5 alla dichiarazione di conformità. Il dossier finale è esportabile e pronto per un notified body o per le autorità di vigilanza.</p>
-<p>Puoi vedere i <a href="/pricing">piani disponibili</a> o iniziare subito con lo scanner gratuito.</p>
+<p>Puoi <a href="/inizia">usare RegulaeOS</a> o iniziare subito con lo scanner gratuito.</p>
 `,
     en: {
       title: "Updated AI Act deadlines: the 2025–2028 calendar after the Omnibus delay",
@@ -601,7 +720,7 @@ export const POSTS: BlogPost[] = [
 <p>The answer depends on two variables: how complex your AI system is and how organised you are in collecting the documentation.</p>
 <p>A full compliance path for an Annex III system done the traditional way requires legal advice, technical audits, drafting of documentation, gap analysis, DPIA and FRIA assessments. The market talks about 6-18 months, with costs ranging from 30,000 to 150,000 euros for a system of medium complexity.</p>
 <p>RegulaeOS is built to compress that path. The first assessment is ready in less than 48 hours. The tools guide every article of the regulation, from the Art. 5 checks to the declaration of conformity. The final dossier is exportable and ready for a notified body or for market surveillance authorities.</p>
-<p>You can see the <a href="/pricing">available plans</a> or start now with the free scanner.</p>
+<p>You can <a href="/inizia">use RegulaeOS</a> or start now with the free scanner.</p>
 `,
     },
   },
