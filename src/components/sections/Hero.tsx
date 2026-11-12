@@ -22,6 +22,13 @@ const wordVariant = {
   },
 };
 
+// Variante per le parole del titolo: niente opacity 0, così il titolo
+// è visibile già nell'HTML servito ai motori di ricerca.
+const h1WordVariant = {
+  hidden: { y: 22 },
+  show: { y: 0, transition: { duration: 0.52, ease: [0.25, 0.46, 0.45, 0.94] as const } },
+};
+
 const DELETE_SPEED = 48;
 const TYPE_SPEED = 60;
 const IDLE_MS = 2400;
@@ -333,16 +340,16 @@ export default function Hero() {
             }}
           >
             {LINE1.map((word) => (
-              <motion.span key={word} variants={wordVariant}
+              <motion.span key={word} variants={h1WordVariant}
                 style={{ display: "inline-block", marginRight: "0.22em" }}>
                 {word}
               </motion.span>
             ))}
             <br />
-            <motion.span variants={wordVariant} style={{ display: "inline-block", marginRight: "0.22em" }}>
+            <motion.span variants={h1WordVariant} style={{ display: "inline-block", marginRight: "0.22em" }}>
               {t("without")}
             </motion.span>
-            <motion.span variants={wordVariant} style={{ display: "inline-block" }}>
+            <motion.span variants={h1WordVariant} style={{ display: "inline-block" }}>
               <TypewriterWord wordsCsv={t("cyclingWords")} />
             </motion.span>
           </motion.h1>

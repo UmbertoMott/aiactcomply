@@ -3,61 +3,63 @@ import { getAllPosts } from "@/lib/blog/posts";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com";
 
+// Date di ultima modifica STABILI: se cambiano a ogni richiesta Google smette
+// di fidarsi del campo lastmod. Aggiornare PAGES_UPDATED quando cambiano le pagine.
+const PAGES_UPDATED = new Date("2026-11-12");
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const posts = getAllPosts();
+  const latestPost = posts.reduce(
+    (max, p) => (new Date(p.dateISO) > max ? new Date(p.dateISO) : max),
+    PAGES_UPDATED,
+  );
 
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: BASE_URL,
-      lastModified: new Date(),
+      lastModified: latestPost,
       changeFrequency: "weekly",
       priority: 1,
     },
     {
-      url: `${BASE_URL}/waitlist`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
       url: `${BASE_URL}/scanner`,
-      lastModified: new Date(),
+      lastModified: PAGES_UPDATED,
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${BASE_URL}/products`,
-      lastModified: new Date(),
+      lastModified: PAGES_UPDATED,
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${BASE_URL}/quick-scan`,
-      lastModified: new Date(),
+      lastModified: PAGES_UPDATED,
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${BASE_URL}/roi`,
-      lastModified: new Date(),
+      lastModified: PAGES_UPDATED,
       changeFrequency: "monthly",
       priority: 0.6,
     },
     {
       url: `${BASE_URL}/inizia`,
-      lastModified: new Date(),
+      lastModified: PAGES_UPDATED,
       changeFrequency: "monthly",
       priority: 0.6,
     },
     {
       url: `${BASE_URL}/contatti`,
-      lastModified: new Date(),
+      lastModified: PAGES_UPDATED,
       changeFrequency: "monthly",
       priority: 0.5,
     },
     {
       url: `${BASE_URL}/risorse`,
-      lastModified: new Date(),
+      lastModified: latestPost,
       changeFrequency: "weekly",
       priority: 0.9,
     },

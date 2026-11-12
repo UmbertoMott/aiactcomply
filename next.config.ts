@@ -27,7 +27,10 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["@aws-sdk/client-s3"],
   // I piani di assistenza sono stati sostituiti dall'offerta su /inizia
   async redirects() {
-    return [{ source: "/pricing", destination: "/inizia", permanent: false }];
+    return [
+      { source: "/pricing", destination: "/inizia", permanent: true },
+      { source: "/prenota-demo", destination: "/inizia", permanent: true },
+    ];
   },
   async headers() {
     return [
