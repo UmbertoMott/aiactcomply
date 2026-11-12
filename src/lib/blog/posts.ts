@@ -32,9 +32,359 @@ export interface BlogPost {
   content: string;        // HTML puro — usato in dangerouslySetInnerHTML
   faqSchema: { q: string; a: string }[];
   en?: BlogPostL10n;      // traduzione inglese (fallback: italiano)
+  author?: { name: string; jobTitle?: string }; // autore persona (schema.org); default: RegulaeOS
+  dateModifiedISO?: string; // ultima revisione (schema.org dateModified); default: dateISO
 }
 
 export const POSTS: BlogPost[] = [
+  {
+    slug: "nis2",
+    title: "NIS2, guida completa per le aziende italiane",
+    excerpt:
+      "Chi deve adeguarsi alla NIS2, che differenza c'è tra soggetti essenziali e importanti, quali obblighi scattano, come si notificano gli incidenti e quali sanzioni si rischiano: la guida passo per passo.",
+    date: "12 novembre 2026",
+    dateISO: "2026-11-12",
+    author: { name: "Umberto Mottola", jobTitle: "Avvocato, CIPP/E" },
+    dateModifiedISO: "2026-11-12",
+    readTime: "12 min",
+    category: "Guide",
+    tags: ["NIS2", "NIS 2", "direttiva NIS2", "NIS2 obblighi", "NIS2 chi deve adeguarsi", "D.Lgs. 138/2024", "ACN"],
+    metaTitle: "NIS2, guida completa per le aziende italiane (2026)",
+    metaDescription:
+      "Chi deve adeguarsi alla NIS2, differenze tra soggetti essenziali e importanti, obblighi, notifica incidenti e sanzioni. Guida aggiornata di un avvocato CIPP/E.",
+    faqSchema: [
+      {
+        q: "La NIS2 si applica alle piccole imprese?",
+        a: "Di regola no. Le micro e piccole imprese, ossia con meno di 50 dipendenti e fatturato o bilancio inferiore a 10 milioni di euro, restano fuori, salvo alcune categorie indicate dal decreto (come i fornitori di comunicazioni elettroniche e i prestatori di servizi fiduciari) e salvo individuazione da parte dell'ACN.",
+      },
+      {
+        q: "Come faccio a sapere se la mia azienda è soggetta alla NIS2?",
+        a: "Occorre verificare due elementi; se l'azienda svolge, anche in modo residuale, un'attività elencata negli allegati I, II, III o IV del D.Lgs. 138/2024, e se supera le soglie della piccola impresa. Il codice ATECO da solo non basta.",
+      },
+      {
+        q: "Che differenza c'è tra soggetto essenziale e importante?",
+        a: "I soggetti essenziali sono in genere le grandi imprese dei settori altamente critici e devono adottare più misure (allegato 2 della determinazione ACN n. 379907/2025); possono essere controllati anche in via preventiva e rischiano sanzioni più alte. I soggetti importanti adottano le misure dell'allegato 1 e sono controllati di regola dopo un evento o una segnalazione.",
+      },
+      {
+        q: "Entro quanto tempo va notificato un incidente NIS2?",
+        a: "La pre-notifica al CSIRT Italia va inviata entro 24 ore da quando si viene a conoscenza dell'incidente significativo, la notifica entro 72 ore e la relazione finale entro un mese dalla notifica.",
+      },
+      {
+        q: "Un fornitore di un soggetto NIS deve adeguarsi alla NIS2?",
+        a: "Non automaticamente. Secondo l'ACN il fornitore rientra nell'ambito solo se soddisfa a sua volta i criteri del decreto; in pratica, tuttavia, riceverà dal cliente requisiti di sicurezza contrattuali e potrà essere indicato come fornitore rilevante.",
+      },
+    ],
+    content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · aggiornato al 12 nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In sintesi.</strong> La NIS2 è la direttiva europea che impone a medie e grandi organizzazioni di 18 settori di gestire il rischio informatico, adottare misure di sicurezza e notificare gli incidenti gravi; in Italia è stata recepita con il D.Lgs. 138/2024 e si applica dal 16 ottobre 2024. Chi rientra nell'ambito deve registrarsi sul portale dell'ACN, far approvare le misure dagli amministratori e rispettare i requisiti fissati dall'Agenzia, pena sanzioni fino a 10 milioni di euro o al 2% del fatturato.
+</p>
+
+<p>Molte aziende scoprono di essere soggette alla NIS2 per caso, magari dalla richiesta di un cliente che chiede garanzie sulla sicurezza della fornitura. Il motivo è semplice da spiegare; la direttiva non riguarda più soltanto i grandi operatori di energia, trasporti e sanità, ma si estende a interi comparti produttivi, come la gestione dei rifiuti, l'alimentare, la chimica e la manifattura.</p>
+<p>Questa guida spiega, in termini semplici e con il rinvio puntuale agli atti ufficiali, chi deve adeguarsi, che differenza c'è tra soggetti essenziali e importanti, quali obblighi scattano e quali passaggi seguire. Per le scadenze aggiornate mese per mese si rinvia alla pagina dedicata allo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>.</p>
+
+<h2>Cos'è la NIS2 e quale norma la recepisce in Italia?</h2>
+<p>La NIS2 è la direttiva (UE) 2022/2555, che fissa un livello comune elevato di sicurezza informatica nell'Unione e sostituisce la prima direttiva NIS del 2016. In Italia è stata recepita con il D.Lgs. 4 settembre 2024, n. 138, chiamato decreto NIS, in vigore dal 16 ottobre 2024.</p>
+<p>Rispetto alla vecchia NIS cambiano soprattutto due cose. La prima riguarda l'ampiezza dell'ambito, che secondo l'ACN passa a 18 settori, di cui 11 altamente critici e 7 critici, per oltre 80 tipologie di soggetti; la seconda riguarda il criterio di individuazione, poiché non è più lo Stato a scegliere caso per caso gli operatori, ma sono le stesse organizzazioni a doversi riconoscere nell'ambito in base a settore e dimensione.</p>
+<p>L'autorità competente è l'Agenzia per la Cybersicurezza Nazionale (ACN), che riceve le registrazioni, redige l'elenco dei soggetti NIS, fissa i requisiti di dettaglio con proprie determinazioni e svolge i controlli. Il CSIRT Italia, ossia la struttura tecnica dell'ACN che gestisce gli incidenti, riceve le notifiche.</p>
+
+<h2>Chi deve adeguarsi alla NIS2?</h2>
+<p>Devono adeguarsi le organizzazioni pubbliche e private che svolgono attività elencate negli allegati del decreto NIS e che sono almeno medie imprese, ossia con almeno 50 dipendenti oppure con fatturato o bilancio annuo di almeno 10 milioni di euro. Alcune categorie vi rientrano a prescindere dalle dimensioni.</p>
+<p>L'articolo 3 del decreto, che ne definisce l'ambito di applicazione, rinvia a quattro allegati; l'allegato I elenca i settori altamente critici, l'allegato II gli altri settori critici, l'allegato III le pubbliche amministrazioni e l'allegato IV ulteriori soggetti che rientrano solo se individuati dall'Autorità. Le soglie dimensionali sono quelle della raccomandazione europea 2003/361/CE sulle PMI, applicate tenendo conto, per i gruppi, dei dati delle imprese collegate.</p>
+<p>La tabella riassume, per i principali settori, come l'ACN classifica le imprese in base alla dimensione.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Settore</th><th>Allegato</th><th>Grandi imprese</th><th>Medie imprese</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Energia, trasporti, sanità, acqua potabile, acque reflue, spazio</td><td>I</td><td>Essenziali</td><td>Importanti</td></tr>
+      <tr><td>Settore bancario e infrastrutture dei mercati finanziari</td><td>I</td><td>Essenziali (con prevalenza del regolamento DORA)</td><td>Importanti</td></tr>
+      <tr><td>Gestione dei servizi ICT per le imprese</td><td>I</td><td>Essenziali</td><td>Importanti</td></tr>
+      <tr><td>Infrastrutture digitali</td><td>I</td><td>Essenziali</td><td>Essenziali o importanti, a seconda della tipologia</td></tr>
+      <tr><td>Rifiuti, alimentare, chimica, manifattura, servizi postali, ricerca</td><td>II</td><td>Importanti</td><td>Importanti</td></tr>
+      <tr><td>Pubblica amministrazione centrale</td><td>III</td><td colspan="2">Essenziali, a prescindere dalla dimensione</td></tr>
+      <tr><td>Pubblica amministrazione regionale e locale</td><td>III</td><td colspan="2">Importanti, a prescindere dalla dimensione</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Restano in linea di massima fuori dall'ambito le micro e piccole imprese, ossia con meno di 50 dipendenti e fatturato o bilancio inferiore a 10 milioni di euro. Vi sono, tuttavia, eccezioni rilevanti; secondo le FAQ dell'ACN, rientrano indipendentemente dalle dimensioni, tra gli altri, i fornitori di reti e servizi di comunicazione elettronica accessibili al pubblico, i prestatori di servizi fiduciari e i gestori di registri e servizi dei nomi di dominio, e l'ACN può comunque individuare come soggetti NIS anche micro e piccole imprese dei settori interessati.</p>
+<p>Tre chiarimenti dell'ACN evitano gli errori più frequenti.</p>
+<ol>
+  <li>Non esiste un criterio di prevalenza; un'organizzazione rientra nell'ambito anche se svolge solo in forma residuale un'attività elencata negli allegati;</li>
+  <li>i codici ATECO non bastano a stabilire se si è soggetti alla NIS2, salvo per alcune tipologie, sicché la verifica va fatta sulle attività concretamente svolte;</li>
+  <li>essere fornitore di un soggetto NIS non fa rientrare automaticamente nell'ambito; il fornitore, tuttavia, riceverà dal cliente richieste contrattuali di sicurezza e potrà essere indicato come fornitore rilevante.</li>
+</ol>
+<p>In caso di dubbio conviene fare l'autovalutazione prevista dall'ACN prima della finestra annuale di registrazione, che si apre il 1 gennaio e si chiude il 28 febbraio.</p>
+
+<h2>Che differenza c'è tra soggetti essenziali e importanti?</h2>
+<p>Sono essenziali, in linea generale, le grandi imprese dei settori altamente critici dell'allegato I, oltre ad alcune categorie individuate dal decreto a prescindere dalla dimensione; sono importanti tutti gli altri soggetti NIS. La categoria decide quante misure adottare, come si viene controllati e quanto può essere alta la sanzione.</p>
+<p>Le differenze pratiche sono tre e si possono confrontare nella tabella.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Aspetto</th><th>Soggetti essenziali</th><th>Soggetti importanti</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Misure di sicurezza di base</td><td>Allegato 2 della determinazione ACN 379907/2025, con 43 misure e 116 requisiti</td><td>Allegato 1 della stessa determinazione, con 37 misure e 87 requisiti</td></tr>
+      <tr><td>Controlli</td><td>Anche preventivi, senza che sia accaduto nulla</td><td>Solo in presenza di elementi che facciano presumere una violazione</td></tr>
+      <tr><td>Sanzione massima</td><td>10 milioni di euro o 2% del fatturato mondiale annuo</td><td>7 milioni di euro o 1,4% del fatturato mondiale annuo</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Il numero di misure e requisiti è riportato da ICT Security Magazine sulla base degli allegati della determinazione ACN n. 379907/2025; la diversa intensità dei controlli è stata confermata dall'ACN in risposta ai quesiti degli operatori, come riporta Diritto Bancario.</p>
+<p>Ne consegue che un soggetto essenziale deve poter dimostrare in ogni momento le misure adottate, poiché l'ispezione può arrivare anche in assenza di incidenti; un soggetto importante, invece, è controllato di regola dopo un evento o una segnalazione, ma resta comunque obbligato ad adottare tutte le misure del proprio allegato. La categoria assegnata compare nella comunicazione di inserimento nell'elenco inviata dall'ACN.</p>
+
+<h2>Quali sono gli obblighi della NIS2?</h2>
+<p>Gli obblighi principali sono cinque; registrarsi sul portale ACN, coinvolgere gli organi di amministrazione, adottare le misure di sicurezza, notificare gli incidenti significativi e gestire la sicurezza dei fornitori. I requisiti di dettaglio sono fissati dalla determinazione ACN n. 379907/2025.</p>
+
+<h3>Registrazione e aggiornamento annuale</h3>
+<p>Le organizzazioni che si riconoscono nell'ambito devono registrarsi sul portale dei servizi dell'ACN (art. 7 del decreto, che disciplina l'identificazione dei soggetti); come ogni anno, secondo il Vademecum NIS dell'ACN, la finestra per registrarsi o aggiornare la registrazione va dal 1 gennaio al 28 febbraio. Ricevuta la comunicazione di inserimento nell'elenco, il soggetto deve inoltre elencare e categorizzare le proprie attività e i propri servizi (art. 30 del decreto), svolgendo un'analisi d'impatto semplificata secondo il modello dell'ACN.</p>
+
+<h3>Responsabilità degli organi di amministrazione</h3>
+<p>L'art. 23 del decreto pone la sicurezza informatica in capo al vertice; gli organi di amministrazione e direttivi approvano le modalità di gestione dei rischi, ne sovrintendono l'attuazione, seguono una formazione specifica e rispondono delle violazioni. La sicurezza, dunque, non può essere delegata per intero alla funzione IT, e serve una traccia documentale delle decisioni assunte (delibere, verbali, report periodici).</p>
+
+<h3>Misure di sicurezza</h3>
+<p>L'art. 24 del decreto impone misure tecniche, operative e organizzative proporzionate al rischio; secondo la guida dell'ACN alle specifiche di base, le misure si applicano ai sistemi informativi e di rete usati nelle attività o nell'erogazione dei servizi, e coprono tutti gli elementi elencati dal secondo comma dell'articolo, tra cui la gestione degli incidenti, la continuità operativa, la sicurezza della catena di approvvigionamento e il controllo degli accessi. Il termine è di 18 mesi dalla comunicazione di inserimento nell'elenco; per chi è entrato nel 2026, invece, la determinazione ACN n. 127434/2026 lo fissa al 31 luglio 2027.</p>
+
+<h3>Notifica degli incidenti significativi</h3>
+<p>L'art. 25 del decreto scandisce la notifica al CSIRT Italia in più passaggi.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Fase</th><th>Termine</th><th>Contenuto</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Pre-notifica</td><td>Entro 24 ore da quando si viene a conoscenza dell'incidente</td><td>Prima segnalazione, con l'indicazione dell'eventuale origine malevola e dell'impatto transfrontaliero</td></tr>
+      <tr><td>Notifica</td><td>Entro 72 ore</td><td>Aggiornamento e prima valutazione di gravità e impatto, con gli indicatori di compromissione se disponibili</td></tr>
+      <tr><td>Relazione intermedia</td><td>Su richiesta del CSIRT Italia</td><td>Aggiornamenti sulla situazione</td></tr>
+      <tr><td>Relazione finale</td><td>Entro un mese dalla notifica</td><td>Descrizione dettagliata, causa probabile, misure adottate, impatto transfrontaliero</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Il calendario, riportato tra gli altri da Agenda Digitale, prevede inoltre che, se la gestione dell'incidente è ancora in corso allo scadere del mese, si inviino relazioni mensili sui progressi e la relazione finale entro un mese dalla chiusura. Quali incidenti siano significativi lo stabiliscono gli allegati 3 e 4 della determinazione ACN n. 379907/2025. Se l'incidente coinvolge dati personali, va valutata in parallelo la notifica al Garante privacy entro 72 ore ai sensi dell'art. 33 GDPR, che riguarda le violazioni di dati personali.</p>
+
+<h3>Sicurezza della catena di fornitura</h3>
+<p>Le misure dell'art. 24 includono la sicurezza dei fornitori; il soggetto NIS deve quindi valutare i rischi legati a chi gli fornisce prodotti e servizi, inserire clausole di sicurezza nei contratti e, secondo la determinazione ACN sul portale, indicare i fornitori rilevanti, ossia quelli che forniscono servizi ICT o la cui interruzione avrebbe un impatto significativo sulla sua attività.</p>
+
+<h2>Quali sanzioni prevede la NIS2?</h2>
+<p>Le sanzioni massime arrivano a 10 milioni di euro o al 2% del fatturato mondiale annuo per i soggetti essenziali, e a 7 milioni di euro o all'1,4% per i soggetti importanti, applicandosi l'importo più alto tra i due. Per le pubbliche amministrazioni sono previsti importi diversi e più contenuti.</p>
+<p>Gli importi, riportati da ICT Security Magazine, sono massimi edittali, ossia il tetto oltre il quale la sanzione non può andare; l'importo concreto dipende dalla gravità della violazione e dalle circostanze del caso. Per le pubbliche amministrazioni, secondo LentePubblica, le sanzioni vanno da 25.000 a 125.000 euro.</p>
+<p>Accanto alle sanzioni economiche pesa la responsabilità del vertice. Poiché l'art. 23 del decreto affida agli organi di amministrazione l'approvazione e la supervisione delle misure, una carenza nella sicurezza diventa anche una questione di governance; un consiglio di amministrazione che non ha mai deliberato sul tema, o che non ha ricevuto alcuna formazione, si trova esposto in caso di controllo o di incidente.</p>
+
+<h2>Come adeguarsi alla NIS2, passo per passo</h2>
+<p>L'adeguamento segue un ordine preciso, poiché ogni passaggio dipende dal precedente; non si possono scegliere le misure senza sapere quale allegato si applica, né dimostrarle senza averle prima documentate.</p>
+<ol>
+  <li><strong>Verificare se si rientra nell'ambito</strong>; si confrontano le attività effettivamente svolte con gli allegati del decreto e i dati dimensionali con le soglie europee sulle PMI, considerando anche le imprese collegate;</li>
+  <li><strong>registrarsi sul portale ACN</strong> nella finestra dal 1 gennaio al 28 febbraio, oppure aggiornare la registrazione se già effettuata;</li>
+  <li><strong>coinvolgere gli organi di amministrazione</strong>; servono una delibera che approvi l'impostazione della gestione del rischio, un piano di formazione e un flusso periodico di report al vertice;</li>
+  <li><strong>fare una gap analysis</strong>, ossia confrontare le misure già in essere con i requisiti dell'allegato applicabile della determinazione ACN n. 379907/2025, requisito per requisito;</li>
+  <li><strong>adottare le misure mancanti</strong> entro il termine di 18 mesi, o entro il 31 luglio 2027 per chi è entrato nell'elenco nel 2026, dando priorità a quelle con maggiore impatto sul rischio;</li>
+  <li><strong>predisporre la procedura di notifica degli incidenti</strong>, con ruoli, contatti e moduli pronti per rispettare i termini di 24 ore, 72 ore e un mese, e designare il referente CSIRT;</li>
+  <li><strong>mappare i fornitori</strong>, individuare quelli rilevanti e aggiornare i contratti con clausole di sicurezza;</li>
+  <li><strong>raccogliere le prove documentali</strong> di ogni misura (policy approvate, registri, verbali, esiti dei test), perché in caso di controllo conta ciò che si può dimostrare.</li>
+</ol>
+<p>I primi due passaggi hanno natura giuridica, gli altri richiedono il lavoro congiunto di funzione legale, IT e vertice aziendale; per questa ragione conviene affidare il coordinamento a una figura che parli entrambi i linguaggi e tenere un unico registro delle misure e delle relative prove.</p>
+
+<h2>Conclusioni</h2>
+<p>La NIS2 non riguarda più soltanto le infrastrutture critiche in senso stretto, ma gran parte delle medie e grandi imprese di 18 settori; chi vi rientra deve registrarsi, coinvolgere il vertice, adottare le misure dell'allegato applicabile e saper notificare un incidente nei tempi previsti. Il punto decisivo, tuttavia, è la prova, poiché in sede di controllo l'ACN valuta ciò che l'organizzazione è in grado di documentare, requisito per requisito.</p>
+<p>Per le scadenze aggiornate si rinvia alla pagina sullo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>, rivista ogni mese.</p>
+
+<p><strong>Vuoi capire a che punto è la tua organizzazione?</strong> <a href="/inizia">La gap analysis NIS2 di RegulaeOS</a> permette di confrontare le misure adottate con i requisiti della determinazione ACN e di raccogliere in un unico posto le prove documentali.</p>
+
+<h2>Fonti</h2>
+<ul>
+  <li><a href="https://eur-lex.europa.eu/eli/dir/2022/2555/oj" target="_blank" rel="noopener">Direttiva (UE) 2022/2555 (NIS2), EUR-Lex</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138" target="_blank" rel="noopener">D.Lgs. 4 settembre 2024, n. 138, Normattiva</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/registrazione" target="_blank" rel="noopener">ACN, ambito e registrazione</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/ambito" target="_blank" rel="noopener">ACN, FAQ sull'ambito di applicazione</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">ACN, determinazione n. 379907/2025 sulle specifiche di base</a></li>
+  <li>ACN, determinazione n. 127434/2026 sui termini per i nuovi soggetti</li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/guida-alla-lettura-specifiche-di-base" target="_blank" rel="noopener">ACN, guida alla lettura delle specifiche di base</a></li>
+  <li>ACN, determinazione sul portale e sui fornitori rilevanti</li>
+  <li><a href="https://www.acn.gov.it/portale/documents/20119/600993/VademecumNIS_2026_v1.pdf/9631c10d-9157-ae43-43b3-a353aa962d09?t=1789134752314" target="_blank" rel="noopener">ACN, Vademecum NIS</a></li>
+</ul>
+`,
+    en: {
+      title: "NIS2: the complete guide for Italian companies",
+      excerpt:
+        "Who must comply with NIS2, the difference between essential and important entities, the obligations, how incidents are notified and what penalties apply: a step-by-step guide.",
+      date: "12 November 2026",
+      readTime: "12 min",
+      category: "Guide",
+      tags: ["NIS2", "NIS 2", "NIS2 directive", "NIS2 obligations", "NIS2 scope", "Legislative Decree 138/2024", "ACN"],
+      metaTitle: "NIS2: the complete guide for Italian companies (2026)",
+      metaDescription:
+        "Who must comply with NIS2, essential vs important entities, obligations, incident notification and penalties. Updated guide by a CIPP/E lawyer.",
+      faqSchema: [
+        {
+          q: "Does NIS2 apply to small businesses?",
+          a: "As a rule, no. Micro and small enterprises, i.e. with fewer than 50 employees and turnover or balance sheet below EUR 10 million, are out of scope, except for certain categories specified by the decree (such as electronic communications providers and trust service providers) and unless identified by ACN.",
+        },
+        {
+          q: "How do I know whether my company is subject to NIS2?",
+          a: "Two elements must be checked: whether the company carries out, even marginally, an activity listed in Annexes I, II, III or IV of Legislative Decree 138/2024, and whether it exceeds the small enterprise thresholds. The ATECO code alone is not enough.",
+        },
+        {
+          q: "What is the difference between an essential and an important entity?",
+          a: "Essential entities are generally large enterprises in highly critical sectors and must adopt more measures (Annex 2 of ACN determination no. 379907/2025); they can also be supervised proactively and face higher penalties. Important entities adopt the measures in Annex 1 and are normally inspected after an event or a report.",
+        },
+        {
+          q: "How quickly must a NIS2 incident be notified?",
+          a: "The early warning to CSIRT Italia must be sent within 24 hours of becoming aware of the significant incident, the notification within 72 hours and the final report within one month of the notification.",
+        },
+        {
+          q: "Does a supplier to a NIS entity have to comply with NIS2?",
+          a: "Not automatically. According to ACN, a supplier is in scope only if it meets the criteria of the decree itself; in practice, however, it will receive contractual security requirements from the customer and may be designated as a relevant supplier.",
+        },
+      ],
+      content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · updated 12 Nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In short.</strong> NIS2 is the EU directive requiring medium-sized and large organisations in 18 sectors to manage cyber risk, adopt security measures and notify serious incidents; in Italy it was transposed by Legislative Decree 138/2024 and has applied since 16 October 2024. Organisations in scope must register on the ACN portal, have the measures approved by their directors and meet the requirements set by the Agency, or face penalties of up to EUR 10 million or 2% of turnover.
+</p>
+
+<p>Many companies find out by chance that NIS2 applies to them, often when a customer asks for assurances on supply security. The reason is easy to explain: the directive no longer concerns only large energy, transport and healthcare operators, but extends to entire industries such as waste management, food, chemicals and manufacturing.</p>
+<p>This guide explains, in plain terms and with precise references to the official acts, who must comply, what the difference is between essential and important entities, which obligations apply and which steps to follow. For deadlines updated month by month, see the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">NIS2 implementation status</a>.</p>
+
+<h2>What is NIS2 and which law transposes it in Italy?</h2>
+<p>NIS2 is Directive (EU) 2022/2555, which sets a high common level of cybersecurity across the Union and replaces the first NIS Directive of 2016. In Italy it was transposed by Legislative Decree no. 138 of 4 September 2024, known as the NIS decree, in force since 16 October 2024.</p>
+<p>Compared with the old NIS, two things change above all. The first is the breadth of the scope, which according to ACN grows to 18 sectors, 11 highly critical and 7 critical, covering more than 80 types of entity; the second is the identification criterion, since it is no longer the State that selects operators case by case: organisations themselves must recognise that they are in scope based on sector and size.</p>
+<p>The competent authority is the National Cybersecurity Agency (ACN), which receives registrations, draws up the list of NIS entities, sets the detailed requirements through its determinations and carries out inspections. CSIRT Italia, the ACN technical unit that handles incidents, receives the notifications.</p>
+
+<h2>Who must comply with NIS2?</h2>
+<p>Public and private organisations that carry out activities listed in the annexes to the NIS decree and that are at least medium-sized enterprises, i.e. with at least 50 employees or annual turnover or balance sheet of at least EUR 10 million, must comply. Some categories are in scope regardless of size.</p>
+<p>Article 3 of the decree, which defines its scope, refers to four annexes: Annex I lists the highly critical sectors, Annex II the other critical sectors, Annex III public administrations and Annex IV further entities that are in scope only if identified by the Authority. The size thresholds are those of European Recommendation 2003/361/EC on SMEs, applied taking into account, for groups, the data of linked enterprises.</p>
+<p>The table summarises, for the main sectors, how ACN classifies enterprises by size.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Sector</th><th>Annex</th><th>Large enterprises</th><th>Medium enterprises</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Energy, transport, health, drinking water, waste water, space</td><td>I</td><td>Essential</td><td>Important</td></tr>
+      <tr><td>Banking and financial market infrastructures</td><td>I</td><td>Essential (DORA prevails)</td><td>Important</td></tr>
+      <tr><td>ICT service management (B2B)</td><td>I</td><td>Essential</td><td>Important</td></tr>
+      <tr><td>Digital infrastructure</td><td>I</td><td>Essential</td><td>Essential or important, depending on the type</td></tr>
+      <tr><td>Waste, food, chemicals, manufacturing, postal services, research</td><td>II</td><td>Important</td><td>Important</td></tr>
+      <tr><td>Central public administration</td><td>III</td><td colspan="2">Essential, regardless of size</td></tr>
+      <tr><td>Regional and local public administration</td><td>III</td><td colspan="2">Important, regardless of size</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Micro and small enterprises, i.e. with fewer than 50 employees and turnover or balance sheet below EUR 10 million, generally remain out of scope. There are, however, significant exceptions: according to the ACN FAQs, providers of public electronic communications networks and services, trust service providers and top-level domain name registries and domain name service providers, among others, are in scope regardless of size, and ACN may in any case identify micro and small enterprises in the relevant sectors as NIS entities.</p>
+<p>Three ACN clarifications help avoid the most common mistakes.</p>
+<ol>
+  <li>There is no prevalence criterion: an organisation is in scope even if it carries out an activity listed in the annexes only marginally;</li>
+  <li>ATECO codes are not enough to establish whether NIS2 applies, except for certain types, so the assessment must be based on the activities actually carried out;</li>
+  <li>being a supplier to a NIS entity does not automatically bring you into scope; the supplier will, however, receive contractual security requirements from the customer and may be designated as a relevant supplier.</li>
+</ol>
+<p>If in doubt, it is advisable to carry out the self-assessment provided for by ACN before the annual registration window, which opens on 1 January and closes on 28 February.</p>
+
+<h2>What is the difference between essential and important entities?</h2>
+<p>As a general rule, essential entities are large enterprises in the highly critical sectors of Annex I, plus certain categories identified by the decree regardless of size; all other NIS entities are important. The category determines how many measures must be adopted, how the entity is supervised and how high the penalty can be.</p>
+<p>The practical differences are three and can be compared in the table.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Aspect</th><th>Essential entities</th><th>Important entities</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Baseline security measures</td><td>Annex 2 of ACN determination 379907/2025, with 43 measures and 116 requirements</td><td>Annex 1 of the same determination, with 37 measures and 87 requirements</td></tr>
+      <tr><td>Supervision</td><td>Also proactive, even when nothing has happened</td><td>Only where there is evidence suggesting an infringement</td></tr>
+      <tr><td>Maximum penalty</td><td>EUR 10 million or 2% of total worldwide annual turnover</td><td>EUR 7 million or 1.4% of total worldwide annual turnover</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The number of measures and requirements is reported by ICT Security Magazine based on the annexes to ACN determination no. 379907/2025; the different intensity of supervision was confirmed by ACN in its answers to operators' questions, as reported by Diritto Bancario.</p>
+<p>It follows that an essential entity must be able to demonstrate its measures at any time, since an inspection may come even without any incident; an important entity, by contrast, is normally inspected after an event or a report, but is still required to adopt all the measures in its annex. The assigned category appears in the notice of inclusion in the list sent by ACN.</p>
+
+<h2>What are the NIS2 obligations?</h2>
+<p>There are five main obligations: registering on the ACN portal, involving the management bodies, adopting security measures, notifying significant incidents and managing supplier security. The detailed requirements are set by ACN determination no. 379907/2025.</p>
+
+<h3>Registration and annual update</h3>
+<p>Organisations that recognise they are in scope must register on the ACN services portal (Art. 7 of the decree, which governs the identification of entities); as every year, according to the ACN NIS Vademecum, the window to register or update the registration runs from 1 January to 28 February. Once it has received the notice of inclusion in the list, the entity must also list and categorise its activities and services (Art. 30 of the decree), carrying out a simplified impact analysis according to the ACN template.</p>
+
+<h3>Responsibility of the management bodies</h3>
+<p>Art. 23 of the decree places cybersecurity with top management: the management and governing bodies approve the risk management arrangements, oversee their implementation, undergo specific training and are liable for infringements. Security therefore cannot be delegated entirely to the IT function, and a documentary record of the decisions taken is needed (resolutions, minutes, periodic reports).</p>
+
+<h3>Security measures</h3>
+<p>Art. 24 of the decree requires technical, operational and organisational measures proportionate to the risk; according to the ACN guide to the baseline specifications, the measures apply to the network and information systems used in the entity's activities or in the provision of its services, and cover all the elements listed in the second paragraph of the article, including incident handling, business continuity, supply chain security and access control. The deadline is 18 months from the notice of inclusion in the list; for entities added in 2026, ACN determination no. 127434/2026 sets it at 31 July 2027.</p>
+
+<h3>Notification of significant incidents</h3>
+<p>Art. 25 of the decree sets out notification to CSIRT Italia in several stages.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Stage</th><th>Deadline</th><th>Content</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Early warning</td><td>Within 24 hours of becoming aware of the incident</td><td>First report, indicating any suspected malicious origin and cross-border impact</td></tr>
+      <tr><td>Notification</td><td>Within 72 hours</td><td>Update and initial assessment of severity and impact, with indicators of compromise where available</td></tr>
+      <tr><td>Intermediate report</td><td>At the request of CSIRT Italia</td><td>Status updates</td></tr>
+      <tr><td>Final report</td><td>Within one month of the notification</td><td>Detailed description, likely cause, measures taken, cross-border impact</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The timeline, reported among others by Agenda Digitale, also provides that if the incident is still being handled when the month expires, monthly progress reports must be sent and the final report submitted within one month of closure. Which incidents are significant is established by Annexes 3 and 4 of ACN determination no. 379907/2025. If the incident involves personal data, notification to the Italian Data Protection Authority within 72 hours under Art. 33 GDPR, which concerns personal data breaches, must be assessed in parallel.</p>
+
+<h3>Supply chain security</h3>
+<p>The Art. 24 measures include supplier security; the NIS entity must therefore assess the risks linked to those who supply it with products and services, include security clauses in contracts and, according to the ACN determination on the portal, designate relevant suppliers, i.e. those that provide ICT services or whose disruption would have a significant impact on its activity.</p>
+
+<h2>What penalties does NIS2 provide for?</h2>
+<p>Maximum penalties reach EUR 10 million or 2% of total worldwide annual turnover for essential entities, and EUR 7 million or 1.4% for important entities, whichever is higher. Different and lower amounts apply to public administrations.</p>
+<p>The amounts, reported by ICT Security Magazine, are statutory maximums, i.e. the ceiling the penalty cannot exceed; the actual amount depends on the seriousness of the infringement and the circumstances of the case. For public administrations, according to LentePubblica, penalties range from EUR 25,000 to EUR 125,000.</p>
+<p>Alongside financial penalties, the liability of top management weighs heavily. Since Art. 23 of the decree entrusts the management bodies with approving and overseeing the measures, a security shortcoming also becomes a governance issue; a board of directors that has never resolved on the matter, or has received no training, is exposed in the event of an inspection or an incident.</p>
+
+<h2>How to comply with NIS2, step by step</h2>
+<p>Compliance follows a precise order, since each step depends on the previous one: you cannot choose the measures without knowing which annex applies, nor demonstrate them without first documenting them.</p>
+<ol>
+  <li><strong>Check whether you are in scope</strong>: compare the activities actually carried out with the annexes to the decree, and the size data with the European SME thresholds, also considering linked enterprises;</li>
+  <li><strong>register on the ACN portal</strong> in the window from 1 January to 28 February, or update the registration if already made;</li>
+  <li><strong>involve the management bodies</strong>: a resolution approving the risk management approach, a training plan and a periodic reporting flow to top management are needed;</li>
+  <li><strong>carry out a gap analysis</strong>, i.e. compare the measures already in place with the requirements of the applicable annex of ACN determination no. 379907/2025, requirement by requirement;</li>
+  <li><strong>adopt the missing measures</strong> within the 18-month deadline, or by 31 July 2027 for entities added to the list in 2026, prioritising those with the greatest impact on risk;</li>
+  <li><strong>set up the incident notification procedure</strong>, with roles, contacts and forms ready to meet the 24-hour, 72-hour and one-month deadlines, and appoint the CSIRT contact person;</li>
+  <li><strong>map your suppliers</strong>, identify the relevant ones and update contracts with security clauses;</li>
+  <li><strong>collect documentary evidence</strong> for each measure (approved policies, registers, minutes, test results), because in an inspection what counts is what you can demonstrate.</li>
+</ol>
+<p>The first two steps are legal in nature, while the others require joint work by the legal function, IT and top management; for this reason it is advisable to entrust coordination to someone who speaks both languages and to keep a single register of the measures and the related evidence.</p>
+
+<h2>Conclusions</h2>
+<p>NIS2 no longer concerns only critical infrastructure in the strict sense, but most medium-sized and large enterprises in 18 sectors; those in scope must register, involve top management, adopt the measures of the applicable annex and be able to notify an incident within the required timeframes. The decisive point, however, is evidence, since in an inspection ACN assesses what the organisation is able to document, requirement by requirement.</p>
+<p>For up-to-date deadlines, see the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">NIS2 implementation status</a>, reviewed every month.</p>
+
+<p><strong>Want to understand where your organisation stands?</strong> <a href="/inizia">The RegulaeOS NIS2 gap analysis</a> lets you compare the measures you have adopted with the requirements of the ACN determination and collect the documentary evidence in one place.</p>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://eur-lex.europa.eu/eli/dir/2022/2555/oj" target="_blank" rel="noopener">Directive (EU) 2022/2555 (NIS2), EUR-Lex</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138" target="_blank" rel="noopener">Legislative Decree no. 138 of 4 September 2024, Normattiva</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/registrazione" target="_blank" rel="noopener">ACN, scope and registration</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/ambito" target="_blank" rel="noopener">ACN, FAQs on scope</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">ACN, determination no. 379907/2025 on the baseline specifications</a></li>
+  <li>ACN, determination no. 127434/2026 on deadlines for new entities</li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/guida-alla-lettura-specifiche-di-base" target="_blank" rel="noopener">ACN, reading guide to the baseline specifications</a></li>
+  <li>ACN, determination on the portal and relevant suppliers</li>
+  <li><a href="https://www.acn.gov.it/portale/documents/20119/600993/VademecumNIS_2026_v1.pdf/9631c10d-9157-ae43-43b3-a353aa962d09?t=1789134752314" target="_blank" rel="noopener">ACN, NIS Vademecum</a></li>
+</ul>
+`,
+    },
+  },
   {
     slug: "nis2-stato-attuazione-italia-europa",
     title: "NIS2, stato di attuazione in Italia e in Europa (aggiornato a novembre 2026)",
@@ -42,6 +392,8 @@ export const POSTS: BlogPost[] = [
       "L'Italia ha recepito la NIS2 con il D.Lgs. 138/2024 ed è entrata nella fase dei controlli: scadenze passate e in arrivo, sanzioni e stato del recepimento negli altri Stati membri.",
     date: "12 novembre 2026",
     dateISO: "2026-11-12",
+    author: { name: "Umberto Mottola", jobTitle: "Avvocato, CIPP/E" },
+    dateModifiedISO: "2026-11-12",
     readTime: "9 min",
     category: "Normativa",
     tags: ["NIS2", "D.Lgs. 138/2024", "ACN", "cybersicurezza", "scadenze", "CSIRT Italia"],
@@ -77,7 +429,7 @@ export const POSTS: BlogPost[] = [
   <strong>In sintesi.</strong> L'Italia ha recepito la direttiva NIS2 con il D.Lgs. 138/2024, in vigore dal 16 ottobre 2024, ed è ormai entrata nella fase dei controlli; per i soggetti inseriti nell'elenco NIS nel 2025, infatti, il termine per adottare le misure di sicurezza di base è scaduto a ottobre 2026, mentre chi è entrato nell'elenco nel 2026 ha tempo fino al 31 luglio 2027. In Europa, invece, Irlanda, Spagna, Francia e Paesi Bassi sono stati deferiti alla Corte di giustizia per il ritardo nel recepimento.
 </p>
 
-<p>La NIS2, ossia la direttiva (UE) 2022/2555 sulla sicurezza delle reti e dei sistemi informativi, doveva essere recepita da tutti gli Stati membri entro il 17 ottobre 2024. A due anni da quella data il quadro è a due velocità; alcuni Paesi, tra cui l'Italia, sono già nella fase di attuazione concreta, altri non hanno ancora una legge nazionale.</p>
+<p>La <a href="/risorse/nis2">NIS2</a>, ossia la direttiva (UE) 2022/2555 sulla sicurezza delle reti e dei sistemi informativi, doveva essere recepita da tutti gli Stati membri entro il 17 ottobre 2024. A due anni da quella data il quadro è a due velocità; alcuni Paesi, tra cui l'Italia, sono già nella fase di attuazione concreta, altri non hanno ancora una legge nazionale.</p>
 <p>Chi cerca lo stato di attuazione della NIS2 vuole sapere, in genere, tre cose; se la norma è già applicabile, quali scadenze sono passate e quali arrivano, e cosa rischia chi è in ritardo. Questa pagina risponde a ciascuna domanda sulla base dei soli atti ufficiali (decreto, determinazioni dell'Agenzia per la Cybersicurezza Nazionale, comunicati della Commissione europea) e viene aggiornata ogni mese.</p>
 
 <h2>Qual è lo stato di attuazione della NIS2 in Italia?</h2>
@@ -193,7 +545,7 @@ export const POSTS: BlogPost[] = [
   <strong>In short.</strong> Italy transposed the NIS2 Directive through Legislative Decree 138/2024, in force since 16 October 2024, and has now entered the enforcement phase: for entities added to the NIS list in 2025, the deadline to adopt the baseline security measures expired in October 2026, while those added in 2026 have until 31 July 2027. In Europe, Ireland, Spain, France and the Netherlands have been referred to the Court of Justice for late transposition.
 </p>
 
-<p>NIS2, i.e. Directive (EU) 2022/2555 on the security of network and information systems, had to be transposed by all Member States by 17 October 2024. Two years on, the picture is two-speed: some countries, including Italy, are already in the practical implementation phase, while others still have no national law.</p>
+<p><a href="/risorse/nis2">NIS2</a>, i.e. Directive (EU) 2022/2555 on the security of network and information systems, had to be transposed by all Member States by 17 October 2024. Two years on, the picture is two-speed: some countries, including Italy, are already in the practical implementation phase, while others still have no national law.</p>
 <p>Anyone looking up the NIS2 implementation status usually wants to know three things: whether the rules already apply, which deadlines have passed and which are coming, and what those who are late are exposed to. This page answers each question based solely on official acts (the decree, the determinations of the National Cybersecurity Agency, European Commission press releases) and is updated every month.</p>
 
 <h2>What is the NIS2 implementation status in Italy?</h2>
