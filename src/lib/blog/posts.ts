@@ -38,6 +38,328 @@ export interface BlogPost {
 
 export const POSTS: BlogPost[] = [
   {
+    slug: "notifica-incidenti-nis2-csirt-italia",
+    title: "Notifica degli incidenti NIS2 al CSIRT Italia, la procedura passo per passo",
+    excerpt:
+      "Quali incidenti vanno notificati, da quando decorrono le 24 e le 72 ore, chi invia la notifica e da quale portale, cosa scrivere nella relazione finale e come coordinarsi con il data breach GDPR. La procedura dell'art. 25 del decreto NIS e dei provvedimenti ACN, passo per passo.",
+    date: "13 novembre 2026",
+    dateISO: "2026-11-13",
+    author: { name: "Umberto Mottola", jobTitle: "Avvocato, CIPP/E" },
+    dateModifiedISO: "2026-11-13",
+    readTime: "9 min",
+    category: "Guide",
+    tags: ["NIS2", "notifica incidenti NIS2", "CSIRT Italia", "incidente significativo", "referente CSIRT", "art. 25 decreto NIS", "determinazione ACN 379907/2025", "D.Lgs. 138/2024"],
+    metaTitle: "Notifica incidenti NIS2 al CSIRT Italia, passo per passo",
+    metaDescription:
+      "Notifica degli incidenti NIS2 al CSIRT Italia. Incidenti significativi, termini di 24 e 72 ore, referente CSIRT, relazione finale e rapporto con il GDPR.",
+    faqSchema: [
+      {
+        q: "Entro quanto tempo va notificato un incidente NIS2?",
+        a: "L'art. 25 del D.Lgs. 138/2024 prevede una pre-notifica al CSIRT Italia entro 24 ore da quando il soggetto è venuto a conoscenza dell'incidente significativo, una notifica entro 72 ore e una relazione finale entro un mese dalla notifica. I termini decorrono dal momento in cui il soggetto ha evidenza dell'incidente e sono preceduti dalla formula senza ingiustificato ritardo.",
+      },
+      {
+        q: "Quali incidenti sono significativi ai fini della NIS2?",
+        a: "Sono quelli descritti negli allegati 3 e 4 della determinazione ACN 379907/2025. Per tutti i soggetti NIS rilevano la perdita di riservatezza verso l'esterno dei dati digitali (IS-1), la perdita di integrità con impatto verso l'esterno (IS-2) e la violazione dei livelli di servizio attesi (IS-3); per i soli soggetti essenziali anche l'accesso non autorizzato o con abuso di privilegi (IS-4).",
+      },
+      {
+        q: "Chi deve inviare la notifica al CSIRT Italia?",
+        a: "Di regola il referente CSIRT o un suo sostituto, designati dal punto di contatto sul Portale dei Servizi ACN. Secondo le FAQ dell'ACN può notificare anche il punto di contatto o il suo sostituto. La designazione è una delega operativa, sicché la responsabilità resta in capo agli organi di amministrazione ai sensi dell'art. 23 del decreto NIS.",
+      },
+      {
+        q: "Da quando si applica l'obbligo di notifica degli incidenti?",
+        a: "Per i soggetti inseriti nell'elenco NIS nel 2025 l'obbligo si applica decorsi nove mesi dalla comunicazione di inserimento. Per i soggetti inseriti per la prima volta nel 2026 decorre dal 1° gennaio 2027, ai sensi della determinazione ACN 127434/2026; il referente CSIRT va quindi designato entro la fine del 2026.",
+      },
+      {
+        q: "La notifica al CSIRT Italia sostituisce la notifica al Garante privacy?",
+        a: "No. Se l'incidente comporta una violazione di dati personali, il titolare deve valutare anche la notifica al Garante ai sensi dell'art. 33 GDPR, senza ingiustificato ritardo e, ove possibile, entro 72 ore. I due obblighi hanno presupposti, destinatari e contenuti diversi e vanno gestiti in parallelo.",
+      },
+    ],
+    content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · aggiornato al 13 nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In sintesi.</strong> La notifica degli incidenti NIS2 è disciplinata dall'art. 25 del D.Lgs. 138/2024; il soggetto essenziale o importante che ha evidenza di un incidente significativo invia al CSIRT Italia una pre-notifica entro 24 ore, una notifica entro 72 ore e una relazione finale entro un mese. Quali incidenti siano significativi lo stabiliscono gli allegati 3 e 4 della determinazione ACN 379907/2025; la notifica passa dal Portale dei Servizi ACN, di regola tramite il referente CSIRT.
+</p>
+
+<p>La notifica degli incidenti NIS2 è l'obbligo che mette più alla prova l'organizzazione interna di un soggetto NIS, poiché si gioca in poche ore e lascia una traccia scritta presso l'autorità. Chi la prepara solo quando l'incidente è già in corso rischia di sbagliare la qualificazione dell'evento, di mancare i termini o di non sapere chi deve materialmente inviarla.</p>
+<p>Questo articolo ricostruisce la procedura passo per passo, dalla qualificazione dell'incidente fino alla relazione finale, sulla base del decreto NIS e dei provvedimenti dell'ACN. Per il quadro generale degli obblighi si rinvia alla <a href="/risorse/nis2">guida alla NIS2</a>; per le scadenze dell'attuazione, alla pagina sullo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>.</p>
+
+<h2>Quali incidenti vanno notificati al CSIRT Italia?</h2>
+<p>Vanno notificati gli incidenti significativi, ossia quelli che causano o possono causare una grave perturbazione dei servizi o perdite finanziarie, oppure perdite considerevoli ad altre persone. Per rendere la valutazione oggettiva, l'ACN li ha tradotti in quattro fattispecie, tre valide per tutti i soggetti NIS e una ulteriore per i soli soggetti essenziali.</p>
+<p>La regola generale è nell'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">art. 25 del decreto NIS</a>, che disciplina gli obblighi di notifica di incidente. Il comma 1 impone ai soggetti essenziali e importanti di notificare al CSIRT Italia, senza ingiustificato ritardo, ogni incidente con impatto significativo sulla fornitura dei loro servizi; il comma 4 considera significativo l'incidente che ha causato o può causare una grave perturbazione operativa o perdite finanziarie per il soggetto, oppure perdite materiali o immateriali considerevoli per altre persone fisiche o giuridiche.</p>
+<p>La definizione, tuttavia, è troppo generica per essere applicata in poche ore. Per questo la <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">determinazione ACN n. 379907 del 19 dicembre 2025</a>, che fissa le specifiche di base per gli obblighi degli artt. 23, 24, 25, 29 e 32 del decreto e si applica dal 15 gennaio 2026, descrive gli incidenti significativi di base nell'allegato 3, per i soggetti importanti, e nell'<a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-4-v2" target="_blank" rel="noopener">allegato 4</a>, per i soggetti essenziali.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Codice</th><th>Cosa descrive</th><th>Soggetti importanti</th><th>Soggetti essenziali</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>IS-1</td><td>Perdita di riservatezza, verso l'esterno, di dati digitali di proprietà del soggetto o sotto il suo controllo, anche parziale</td><td>Sì</td><td>Sì</td></tr>
+      <tr><td>IS-2</td><td>Perdita di integrità, con impatto verso l'esterno, degli stessi dati digitali</td><td>Sì</td><td>Sì</td></tr>
+      <tr><td>IS-3</td><td>Violazione dei livelli di servizio attesi dei servizi o delle attività, definiti dal soggetto con la misura DE.CM-01</td><td>Sì</td><td>Sì</td></tr>
+      <tr><td>IS-4</td><td>Accesso non autorizzato, o con abuso dei privilegi concessi, ai dati digitali del soggetto</td><td>No</td><td>Sì</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>La causa dell'incidente non conta. Le <a href="https://www.acn.gov.it/portale/faq/nis/misure-di-sicurezza-e-notifica-di-incidenti" target="_blank" rel="noopener">FAQ dell'ACN su misure di sicurezza e notifica di incidenti</a> chiariscono che rientrano nell'obbligo anche gli incidenti dovuti a eventi naturali, come un'alluvione, a malfunzionamenti o a errori umani, in coerenza con l'approccio multirischio della NIS2.</p>
+<p>Un punto merita attenzione. La fattispecie IS-3 si misura sui livelli di servizio attesi che il soggetto stesso definisce con la misura DE.CM-01; ne consegue che, senza quella definizione, l'organizzazione non dispone di un parametro per capire quando un disservizio diventa un incidente da notificare.</p>
+
+<h2>Quando decorrono le 24 e le 72 ore?</h2>
+<p>I termini decorrono dal momento in cui il soggetto ha evidenza dell'incidente, ossia dispone, a valle di un'analisi anche sommaria, di elementi oggettivi dai quali risulta che si è verificata una delle fattispecie degli allegati 3 o 4. Non rileva, quindi, il momento in cui l'incidente è materialmente avvenuto.</p>
+<p>L'art. 25, comma 5, del decreto fa decorrere i termini da quando il soggetto è venuto a conoscenza dell'incidente significativo. Le <a href="https://www.acn.gov.it/portale/documents/d/guest/definizione-del-processo-di-gestione-degli-incidenti-di-sicurezza-informatica" target="_blank" rel="noopener">linee guida dell'ACN sul processo di gestione degli incidenti</a> precisano che l'acquisizione dell'evidenza è di regola successiva al verificarsi dell'incidente e segna il momento da cui decorrono la pre-notifica e la notifica.</p>
+<p>Secondo le FAQ dell'ACN, l'evidenza nasce di solito da tre fonti.</p>
+<ul>
+  <li>Segnalazioni di attori esterni, come quelle dello stesso CSIRT Italia;</li>
+  <li>segnalazioni interne, come quella di un utente che riporta un malfunzionamento all'help desk;</li>
+  <li>eventi di sicurezza o malfunzionamenti rilevati dai sistemi di monitoraggio.</li>
+</ul>
+<p>Il decreto, tuttavia, premette a ogni scadenza la formula senza ingiustificato ritardo; le 24 e le 72 ore sono perciò limiti massimi, non termini da attendere. Ne consegue che la procedura interna deve portare la segnalazione dell'help desk o l'allarme del monitoraggio a chi decide sulla notifica in tempi compatibili con queste scadenze.</p>
+<p>Quanto alla decorrenza dell'obbligo in sé, le FAQ dell'ACN distinguono due situazioni. Per i soggetti inseriti nell'elenco NIS nel 2025 l'obbligo si applica decorsi nove mesi dalla comunicazione di inserimento; per quelli inseriti per la prima volta nel 2026, invece, decorre dal 1° gennaio 2027, come ha comunicato l'ACN nel <a href="https://www.acn.gov.it/portale/w/nis-online-le-determine-sugli-adempimenti-per-i-nuovi-soggetti-e-sulle-modalita-di-accesso-alla-piattaforma-acn" target="_blank" rel="noopener">comunicato del 13 aprile 2026 sulla determinazione 127434/2026</a>, sicché il referente CSIRT va designato entro la fine del 2026.</p>
+
+<h2>La notifica passo per passo</h2>
+<p>L'art. 25, comma 5, del decreto scandisce la procedura in cinque atti, con termini e contenuti diversi. La tabella li riassume nell'ordine in cui vanno compiuti.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Passo</th><th>Termine</th><th>Contenuto minimo</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1. Pre-notifica</td><td>Senza ingiustificato ritardo e comunque entro 24 ore dalla conoscenza dell'incidente</td><td>Ove possibile, se l'incidente può derivare da atti illegittimi o malevoli e se può avere un impatto transfrontaliero</td></tr>
+      <tr><td>2. Notifica</td><td>Senza ingiustificato ritardo e comunque entro 72 ore dalla conoscenza dell'incidente</td><td>Aggiornamento della pre-notifica, valutazione iniziale di gravità e impatto e, se disponibili, indicatori di compromissione</td></tr>
+      <tr><td>3. Relazione intermedia</td><td>Su richiesta del CSIRT Italia</td><td>Aggiornamenti pertinenti sulla situazione</td></tr>
+      <tr><td>4. Relazione finale</td><td>Entro un mese dalla trasmissione della notifica</td><td>Descrizione dettagliata, con gravità e impatto; tipo di minaccia o causa originale (root cause); misure di attenuazione adottate e in corso; impatto transfrontaliero, se noto</td></tr>
+      <tr><td>5. Relazioni mensili</td><td>Se l'incidente è ancora in corso alla scadenza della relazione finale</td><td>Relazione mensile sui progressi e relazione finale entro un mese dalla conclusione della gestione</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Nella pratica, le linee guida dell'ACN indicano di inviare la pre-notifica con le informazioni effettivamente disponibili, di svolgere poi le attività di investigazione e di tornare alla fase di segnalazione per trasmettere la notifica entro 72 ore. I prestatori di servizi fiduciari seguono una regola più stringente; per gli incidenti che incidono sui servizi fiduciari, infatti, anche la notifica va inviata entro 24 ore (comma 6).</p>
+<p>Dopo la pre-notifica il CSIRT Italia risponde, ove possibile entro 24 ore, con un riscontro iniziale e, su richiesta, con orientamenti sulle misure di mitigazione (comma 7). Se si sospetta un reato, fornisce anche indicazioni per la segnalazione all'organo centrale del Ministero dell'interno per la sicurezza e la regolarità dei servizi di telecomunicazione (comma 8); la notifica, del resto, non equivale a una denuncia, come precisa la stessa <a href="https://segnalazioni.acn.gov.it/" target="_blank" rel="noopener">pagina di notifica incidente del Portale Segnalazioni ACN</a>.</p>
+<p>Due previsioni completano il quadro. Il comma 3 stabilisce che la notifica non espone chi la effettua a una responsabilità maggiore di quella derivante dall'incidente; i commi 9 e 10 prevedono che, sentito il CSIRT Italia e se opportuno, il soggetto comunichi ai destinatari dei propri servizi gli incidenti significativi che possono ripercuotersi sulla fornitura e le misure che possono adottare contro una minaccia significativa.</p>
+<p>Il rispetto della procedura, infine, non è un adempimento formale. L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">art. 38 del decreto NIS</a>, che disciplina le sanzioni amministrative, punisce la mancata osservanza degli obblighi di notifica dell'art. 25 con sanzioni fino a 10 milioni di euro o al 2% del fatturato mondiale annuo, se superiore, per i soggetti essenziali, e fino a 7 milioni di euro o all'1,4% per i soggetti importanti; per le pubbliche amministrazioni sono previsti importi diversi.</p>
+
+<h2>Chi deve inviare la notifica e da quale portale?</h2>
+<p>La notifica è inviata di regola dal referente CSIRT, o da un suo sostituto, attraverso il Portale dei Servizi ACN, compilando la maschera dedicata. Secondo le FAQ dell'ACN può notificare anche il punto di contatto o il suo sostituto; la responsabilità, tuttavia, resta in capo agli organi di amministrazione.</p>
+<p>Il referente CSIRT è la persona fisica che interloquisce con il CSIRT Italia ed effettua le notifiche obbligatorie e volontarie per conto del soggetto. Secondo le <a href="https://www.acn.gov.it/portale/faq/nis/ruoli-e-procedure" target="_blank" rel="noopener">FAQ dell'ACN su ruoli e procedure</a>, lo designa il punto di contatto con la funzione Aggiornamento dati dei Servizi NIS del Portale dei Servizi ACN, indicandone codice fiscale e indirizzo email; il referente completa poi il censimento della propria utenza, senza caricare documenti.</p>
+<p>Le stesse FAQ, che richiamano l'art. 7 della determinazione ACN sulla piattaforma digitale, chiedono almeno competenze di base in sicurezza informatica e gestione degli incidenti e una conoscenza approfondita dei sistemi del soggetto. Il referente può essere esterno, ad esempio il responsabile di un SOC esternalizzato; nelle organizzazioni di dimensioni contenute può coincidere con il punto di contatto, che in tal caso deve essere interno.</p>
+<p>La designazione, precisa l'ACN, è una delega operativa e non una delega di responsabilità, poiché l'art. 23 del decreto, che disciplina gli obblighi degli organi di amministrazione e direttivi, pone la responsabilità in capo al vertice. Ne consegue che il consiglio di amministrazione deve conoscere la procedura e, nei casi più gravi, essere coinvolto nelle decisioni.</p>
+<p>Quanto al canale, la pagina di notifica incidente del Portale Segnalazioni ACN rinvia, per le notifiche relative al decreto NIS, al Portale dei Servizi ACN, dove va compilata la maschera dedicata. Le misure di sicurezza di base chiedono inoltre un piano per la gestione degli incidenti e la notifica al CSIRT Italia (misura RS.MA-01); secondo le linee guida dell'ACN, il piano indica almeno le fasi e le procedure con ruoli e responsabilità, le modalità per predisporre le relazioni, i contatti per la segnalazione, la comunicazione interna ed esterna, anche verso gli organi di amministrazione, e la reportistica da usare per documentare l'incidente.</p>
+
+<h2>Incidenti presso i fornitori e notifiche volontarie</h2>
+<p>Quando l'incidente coinvolge un fornitore che è a sua volta soggetto NIS, l'obbligo dipende da dove si verifica e da chi ne subisce l'impatto. Le FAQ dell'ACN distinguono tre casi.</p>
+<ul>
+  <li>Incidente sui sistemi del cliente, gestiti da un fornitore, ad esempio un SOC o la manutenzione di un impianto di climatizzazione; notifica il cliente, che può poi coinvolgere il fornitore nella gestione;</li>
+  <li>incidente sui sistemi del fornitore; notifica il fornitore e, se l'incidente è significativo anche per i servizi del cliente, notifica pure quest'ultimo;</li>
+  <li>incidente legato a un servizio cloud; notificano entrambi, salvo che il servizio sia di tipo IaaS o di hosting dell'infrastruttura del cliente, nel qual caso notifica il solo cliente.</li>
+</ul>
+<p>In tutti i casi il cliente deve assicurarsi, nei requisiti di sicurezza sulle forniture previsti dalla misura GV.SC-01, che il fornitore segnali tempestivamente gli eventi di sicurezza che incidono sui suoi servizi. Senza questa clausola, infatti, il cliente rischia di acquisire l'evidenza dell'incidente quando i termini sono già compromessi.</p>
+<p>Accanto all'obbligo esiste una facoltà. L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art26" target="_blank" rel="noopener">art. 26 del decreto</a>, che disciplina la notifica volontaria di informazioni pertinenti, consente ai soggetti NIS di segnalare incidenti non significativi, minacce informatiche e quasi-incidenti, e ai soggetti fuori dall'ambito di segnalare anche gli incidenti con impatto significativo. Il CSIRT Italia tratta queste notifiche dopo quelle obbligatorie; la notifica volontaria, inoltre, non può imporre al soggetto obblighi che altrimenti non avrebbe.</p>
+
+<h2>Che rapporto c'è tra notifica NIS2 e data breach GDPR?</h2>
+<p>Sono due obblighi distinti, che possono scattare per lo stesso evento. Se l'incidente comporta una violazione di dati personali, il titolare deve valutare anche la notifica al Garante privacy ai sensi dell'art. 33 GDPR, che ha presupposti, destinatari e termini propri.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Aspetto</th><th>Notifica NIS2</th><th>Notifica GDPR</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Norma</td><td>Art. 25 del D.Lgs. 138/2024</td><td>Art. 33 del regolamento (UE) 2016/679</td></tr>
+      <tr><td>Destinatario</td><td>CSIRT Italia</td><td>Garante per la protezione dei dati personali</td></tr>
+      <tr><td>Presupposto</td><td>Incidente significativo, secondo gli allegati 3 e 4 della determinazione ACN</td><td>Violazione di dati personali, salvo che sia improbabile un rischio per i diritti e le libertà delle persone</td></tr>
+      <tr><td>Termini</td><td>24 ore, 72 ore e un mese</td><td>Senza ingiustificato ritardo e, ove possibile, entro 72 ore, motivando l'eventuale ritardo</td></tr>
+      <tr><td>Chi notifica</td><td>Il soggetto NIS, tramite referente CSIRT o punto di contatto</td><td>Il titolare del trattamento</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Il testo dell'<a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32016R0679" target="_blank" rel="noopener">art. 33 del GDPR su EUR-Lex</a> conferma che la notifica al Garante segue una logica propria, centrata sul rischio per gli interessati. Ne consegue che la procedura interna dovrebbe valutare i due profili in parallelo fin dalle prime ore; una pre-notifica al CSIRT Italia non sostituisce la notifica al Garante, e viceversa.</p>
+
+<h2>Conclusioni</h2>
+<p>La notifica degli incidenti NIS2 si regge su tre elementi che vanno preparati prima dell'incidente. Occorre saper riconoscere le fattispecie degli allegati 3 e 4, il che presuppone livelli di servizio definiti; occorre sapere quando si acquisisce l'evidenza, poiché da lì decorrono le 24 e le 72 ore; occorre, infine, un referente CSIRT designato e un piano che dica chi fa cosa, compreso il coordinamento con il Garante privacy quando sono coinvolti dati personali.</p>
+<p>Per gli altri obblighi del decreto si rinvia alla <a href="/risorse/nis2">guida completa alla NIS2</a>.</p>
+
+<p><strong>Per verificare se la tua procedura di notifica è pronta</strong>, <a href="/inizia">la gap analysis NIS2 di RegulaeOS</a> permette di confrontare le misure adottate con i requisiti della determinazione ACN, compresi il piano di gestione degli incidenti e la misura RS.MA-01, e di raccogliere in un unico posto le prove documentali.</p>
+
+<h2>Fonti</h2>
+<ul>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 25 (obblighi in materia di notifica di incidente), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art26" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 26 (notifica volontaria di informazioni pertinenti), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 38 (sanzioni amministrative), Normattiva</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">Determinazione ACN n. 379907 del 19 dicembre 2025 (specifiche di base), ACN</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-4-v2" target="_blank" rel="noopener">Allegato 4, incidenti significativi di base per i soggetti essenziali, ACN</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/misure-di-sicurezza-e-notifica-di-incidenti" target="_blank" rel="noopener">FAQ NIS, misure di sicurezza e notifica di incidenti, ACN</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/ruoli-e-procedure" target="_blank" rel="noopener">FAQ NIS, ruoli e procedure, ACN</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/definizione-del-processo-di-gestione-degli-incidenti-di-sicurezza-informatica" target="_blank" rel="noopener">Linee guida NIS, definizione del processo di gestione degli incidenti di sicurezza informatica, ACN</a></li>
+  <li><a href="https://www.acn.gov.it/portale/w/nis-online-le-determine-sugli-adempimenti-per-i-nuovi-soggetti-e-sulle-modalita-di-accesso-alla-piattaforma-acn" target="_blank" rel="noopener">Comunicato ACN del 13 aprile 2026 sulle determine per i nuovi soggetti NIS</a></li>
+  <li><a href="https://segnalazioni.acn.gov.it/" target="_blank" rel="noopener">Portale Segnalazioni ACN, notifica incidente</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32016R0679" target="_blank" rel="noopener">Regolamento (UE) 2016/679 (GDPR), art. 33, EUR-Lex</a></li>
+</ul>
+`,
+    en: {
+      title: "NIS2 incident notification to CSIRT Italia: the step-by-step procedure",
+      excerpt:
+        "Which incidents must be notified, when the 24 and 72 hours start running, who sends the notification and through which portal, what goes in the final report and how to coordinate with a GDPR data breach notification. The procedure under Article 25 of the Italian NIS Decree and ACN measures, step by step.",
+      date: "13 November 2026",
+      readTime: "9 min",
+      category: "Guide",
+      tags: ["NIS2", "NIS2 incident notification", "CSIRT Italia", "significant incident", "CSIRT contact person", "Article 25 NIS Decree", "ACN Determination 379907/2025", "Legislative Decree 138/2024"],
+      metaTitle: "NIS2 incident notification to CSIRT Italia, step by step",
+      metaDescription:
+        "NIS2 incident notification to CSIRT Italia. Significant incidents, 24 and 72 hour deadlines, CSIRT contact person, final report and the link with the GDPR.",
+      faqSchema: [
+        {
+          q: "How quickly must a NIS2 incident be notified?",
+          a: "Article 25 of Legislative Decree 138/2024 requires an early warning to CSIRT Italia within 24 hours of becoming aware of the significant incident, an incident notification within 72 hours and a final report within one month of the notification. The deadlines run from the moment the entity has evidence of the incident and are preceded by the words without undue delay.",
+        },
+        {
+          q: "Which incidents are significant for NIS2 purposes?",
+          a: "Those described in Annexes 3 and 4 of ACN Determination 379907/2025. For all NIS entities they are the loss of confidentiality of digital data towards the outside (IS-1), the loss of integrity with external impact (IS-2) and the breach of expected service levels (IS-3); for essential entities only, also unauthorised access or access abusing granted privileges (IS-4).",
+        },
+        {
+          q: "Who must send the notification to CSIRT Italia?",
+          a: "As a rule, the CSIRT contact person or a deputy, designated by the point of contact on the ACN Services Portal. According to the ACN FAQs, the point of contact or its deputy may also notify. The designation is an operational delegation, so liability remains with the management bodies under Article 23 of the NIS Decree.",
+        },
+        {
+          q: "From when does the incident notification obligation apply?",
+          a: "For entities added to the NIS list in 2025, the obligation applies nine months after the notice of inclusion. For entities added for the first time in 2026, it applies from 1 January 2027 under ACN Determination 127434/2026; the CSIRT contact person must therefore be designated by the end of 2026.",
+        },
+        {
+          q: "Does notifying CSIRT Italia replace notifying the Italian data protection authority?",
+          a: "No. If the incident involves a personal data breach, the controller must also assess notification to the Garante under Article 33 GDPR, without undue delay and, where feasible, within 72 hours. The two obligations have different triggers, recipients and contents and must be handled in parallel.",
+        },
+      ],
+      content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · updated 13 Nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In short.</strong> NIS2 incident notification is governed by Article 25 of Legislative Decree 138/2024; an essential or important entity that has evidence of a significant incident sends CSIRT Italia an early warning within 24 hours, an incident notification within 72 hours and a final report within one month. Which incidents are significant is set out in Annexes 3 and 4 of ACN Determination 379907/2025; notifications go through the ACN Services Portal, normally via the CSIRT contact person.
+</p>
+
+<p>NIS2 incident notification is the obligation that tests a NIS entity's internal organisation more than any other, because it plays out within a few hours and leaves a written record with the authority. An organisation that prepares only once the incident is under way risks misclassifying the event, missing the deadlines or not knowing who is supposed to send the notification.</p>
+<p>This article walks through the procedure step by step, from classifying the incident to the final report, based on the Italian NIS Decree and ACN measures. For an overview of all obligations, see the <a href="/risorse/nis2">NIS2 guide</a>; for implementation deadlines, see the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">status of NIS2 implementation</a>.</p>
+
+<h2>Which incidents must be notified to CSIRT Italia?</h2>
+<p>Significant incidents must be notified, meaning those that cause or can cause severe disruption of services or financial losses, or considerable losses to other persons. To make the assessment objective, ACN has translated them into four incident types, three applying to all NIS entities and one more applying to essential entities only.</p>
+<p>The general rule is in <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">Article 25 of the NIS Decree</a>, which governs incident notification obligations. Paragraph 1 requires essential and important entities to notify CSIRT Italia, without undue delay, of any incident having a significant impact on the provision of their services; paragraph 4 treats an incident as significant if it has caused or is capable of causing severe operational disruption or financial loss for the entity, or considerable material or non-material damage to other natural or legal persons.</p>
+<p>That definition, however, is too general to apply within a few hours. This is why <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">ACN Determination No. 379907 of 19 December 2025</a>, which sets the basic specifications for the obligations under Articles 23, 24, 25, 29 and 32 of the Decree and applies from 15 January 2026, describes the basic significant incidents in Annex 3, for important entities, and in <a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-4-v2" target="_blank" rel="noopener">Annex 4</a>, for essential entities.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Code</th><th>What it describes</th><th>Important entities</th><th>Essential entities</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>IS-1</td><td>Loss of confidentiality, towards the outside, of digital data owned or controlled, even partially, by the entity</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>IS-2</td><td>Loss of integrity, with external impact, of the same digital data</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>IS-3</td><td>Breach of the expected service levels of services or activities, as defined by the entity under measure DE.CM-01</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>IS-4</td><td>Unauthorised access, or access abusing granted privileges, to the entity's digital data</td><td>No</td><td>Yes</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The cause of the incident is irrelevant. The <a href="https://www.acn.gov.it/portale/faq/nis/misure-di-sicurezza-e-notifica-di-incidenti" target="_blank" rel="noopener">ACN FAQs on security measures and incident notification</a> clarify that incidents caused by natural events, such as a flood, by malfunctions or by human error are also covered, in line with the all-hazards approach of NIS2.</p>
+<p>One point deserves attention. Type IS-3 is measured against the expected service levels that the entity itself defines under measure DE.CM-01; without that definition, therefore, the organisation has no benchmark for telling when an outage becomes a notifiable incident.</p>
+
+<h2>When do the 24 and 72 hours start running?</h2>
+<p>The deadlines run from the moment the entity has evidence of the incident, meaning that, after even a summary analysis, it holds objective elements showing that one of the incident types in Annexes 3 or 4 has occurred. The moment at which the incident actually took place is therefore not decisive.</p>
+<p>Article 25(5) of the Decree makes the deadlines run from when the entity became aware of the significant incident. The <a href="https://www.acn.gov.it/portale/documents/d/guest/definizione-del-processo-di-gestione-degli-incidenti-di-sicurezza-informatica" target="_blank" rel="noopener">ACN guidelines on the incident management process</a> explain that evidence is normally acquired after the incident occurs and marks the moment from which the early warning and notification deadlines run.</p>
+<p>According to the ACN FAQs, evidence usually comes from three sources.</p>
+<ul>
+  <li>Reports from external parties, such as CSIRT Italia itself;</li>
+  <li>internal reports, such as a user reporting a malfunction to the help desk;</li>
+  <li>security events or malfunctions detected by monitoring systems.</li>
+</ul>
+<p>The Decree, however, places the words without undue delay before every deadline; the 24 and 72 hours are therefore maximum limits, not periods to wait out. The internal procedure must consequently bring a help desk report or a monitoring alert to whoever decides on notification within a time frame compatible with those deadlines.</p>
+<p>As to when the obligation itself applies, the ACN FAQs distinguish two situations. For entities added to the NIS list in 2025, the obligation applies nine months after the notice of inclusion; for entities added for the first time in 2026, it applies from 1 January 2027, as ACN announced in its <a href="https://www.acn.gov.it/portale/w/nis-online-le-determine-sugli-adempimenti-per-i-nuovi-soggetti-e-sulle-modalita-di-accesso-alla-piattaforma-acn" target="_blank" rel="noopener">13 April 2026 notice on Determination 127434/2026</a>, so the CSIRT contact person must be designated by the end of 2026.</p>
+
+<h2>The notification, step by step</h2>
+<p>Article 25(5) of the Decree breaks the procedure down into five steps with different deadlines and contents. The table summarises them in the order in which they must be taken.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Step</th><th>Deadline</th><th>Minimum content</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1. Early warning</td><td>Without undue delay and in any case within 24 hours of becoming aware of the incident</td><td>Where possible, whether the incident may result from unlawful or malicious acts and whether it may have a cross-border impact</td></tr>
+      <tr><td>2. Incident notification</td><td>Without undue delay and in any case within 72 hours of becoming aware of the incident</td><td>Update of the early warning, initial assessment of severity and impact and, where available, indicators of compromise</td></tr>
+      <tr><td>3. Intermediate report</td><td>At the request of CSIRT Italia</td><td>Relevant status updates</td></tr>
+      <tr><td>4. Final report</td><td>Within one month of submitting the incident notification</td><td>Detailed description, including severity and impact; type of threat or root cause; mitigation measures applied and ongoing; cross-border impact, if known</td></tr>
+      <tr><td>5. Monthly reports</td><td>If the incident is still ongoing when the final report is due</td><td>Monthly progress report and final report within one month of the end of incident handling</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>In practice, the ACN guidelines recommend sending the early warning with the information actually available, then carrying out the investigation and returning to the reporting phase to submit the notification within 72 hours. Trust service providers follow a stricter rule; for incidents affecting their trust services, the incident notification itself must also be sent within 24 hours (paragraph 6).</p>
+<p>After the early warning, CSIRT Italia replies, where possible within 24 hours, with initial feedback and, on request, guidance on mitigation measures (paragraph 7). Where a criminal offence is suspected, it also provides guidance on reporting to the central body of the Ministry of the Interior for the security and regularity of telecommunication services (paragraph 8); the notification, moreover, is not a criminal complaint, as the <a href="https://segnalazioni.acn.gov.it/" target="_blank" rel="noopener">incident notification page of the ACN Reporting Portal</a> itself states.</p>
+<p>Two further provisions complete the picture. Paragraph 3 provides that notification does not expose the notifying entity to greater liability than that arising from the incident; paragraphs 9 and 10 provide that, after consulting CSIRT Italia and where appropriate, the entity informs the recipients of its services of significant incidents likely to affect the provision of those services and of the measures they can take against a significant threat.</p>
+<p>Finally, compliance with the procedure is not a formality. <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">Article 38 of the NIS Decree</a>, which governs administrative penalties, punishes failure to comply with the notification obligations of Article 25 with fines of up to EUR 10 million or 2% of total worldwide annual turnover, whichever is higher, for essential entities, and up to EUR 7 million or 1.4% for important entities; different amounts apply to public administrations.</p>
+
+<h2>Who must send the notification and through which portal?</h2>
+<p>The notification is normally sent by the CSIRT contact person, or a deputy, through the ACN Services Portal by filling in the dedicated form. According to the ACN FAQs, the point of contact or its deputy may also notify; liability, however, remains with the management bodies.</p>
+<p>The CSIRT contact person is the natural person who deals with CSIRT Italia and makes mandatory and voluntary notifications on behalf of the entity. According to the <a href="https://www.acn.gov.it/portale/faq/nis/ruoli-e-procedure" target="_blank" rel="noopener">ACN FAQs on roles and procedures</a>, the point of contact designates that person through the Data update function of the NIS Services on the ACN Services Portal, entering their tax code and email address; the contact person then completes the registration of their own user account, without uploading any documents.</p>
+<p>The same FAQs, which refer to Article 7 of the ACN determination on the digital platform, require at least basic skills in information security and incident handling and in-depth knowledge of the entity's systems. The contact person may be external, for example the head of an outsourced SOC; in smaller organisations the role may coincide with the point of contact, who in that case must be internal.</p>
+<p>The designation, ACN points out, is an operational delegation, not a delegation of liability, because Article 23 of the Decree, which governs the obligations of management and governing bodies, places liability on senior management. The board of directors must therefore know the procedure and, in the most serious cases, be involved in the decisions.</p>
+<p>As to the channel, the incident notification page of the ACN Reporting Portal refers notifications under the NIS Decree to the ACN Services Portal, where the dedicated form must be completed. The basic security measures also require a plan for incident handling and notification to CSIRT Italia (measure RS.MA-01); according to the ACN guidelines, the plan sets out at least the phases and procedures with roles and responsibilities, how reports are prepared, reporting contacts, internal and external communication, including towards the management bodies, and the reporting templates used to document the incident.</p>
+
+<h2>Incidents at suppliers and voluntary notifications</h2>
+<p>When an incident involves a supplier that is itself a NIS entity, the obligation depends on where the incident occurs and who suffers its impact. The ACN FAQs distinguish three cases.</p>
+<ul>
+  <li>Incident on the customer's systems managed by a supplier, for example a SOC or the maintenance of an air-conditioning system; the customer notifies and may then involve the supplier in handling the incident;</li>
+  <li>incident on the supplier's systems; the supplier notifies and, if the incident is also significant for the customer's services, the customer notifies as well;</li>
+  <li>incident linked to a cloud service; both notify, unless the service is IaaS or hosting of the customer's infrastructure, in which case only the customer notifies.</li>
+</ul>
+<p>In all cases the customer must ensure, through the supply security requirements under measure GV.SC-01, that the supplier promptly reports security events affecting its services. Without such a clause, the customer risks acquiring evidence of the incident when the deadlines are already compromised.</p>
+<p>Alongside the obligation there is an option. <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art26" target="_blank" rel="noopener">Article 26 of the Decree</a>, which governs voluntary notification of relevant information, allows NIS entities to report non-significant incidents, cyber threats and near misses, and allows entities outside the scope to report incidents with a significant impact as well. CSIRT Italia handles these notifications after mandatory ones; voluntary notification, moreover, cannot impose on the notifying entity any obligation it would not otherwise have had.</p>
+
+<h2>How does NIS2 notification relate to a GDPR data breach?</h2>
+<p>They are two separate obligations that can be triggered by the same event. If the incident involves a personal data breach, the controller must also assess notification to the Italian data protection authority under Article 33 GDPR, which has its own triggers, recipients and deadlines.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Aspect</th><th>NIS2 notification</th><th>GDPR notification</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Legal basis</td><td>Article 25 of Legislative Decree 138/2024</td><td>Article 33 of Regulation (EU) 2016/679</td></tr>
+      <tr><td>Recipient</td><td>CSIRT Italia</td><td>Garante per la protezione dei dati personali</td></tr>
+      <tr><td>Trigger</td><td>Significant incident, according to Annexes 3 and 4 of the ACN determination</td><td>Personal data breach, unless it is unlikely to result in a risk to the rights and freedoms of individuals</td></tr>
+      <tr><td>Deadlines</td><td>24 hours, 72 hours and one month</td><td>Without undue delay and, where feasible, within 72 hours, giving reasons for any delay</td></tr>
+      <tr><td>Who notifies</td><td>The NIS entity, via the CSIRT contact person or point of contact</td><td>The controller</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The text of <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32016R0679" target="_blank" rel="noopener">Article 33 GDPR on EUR-Lex</a> confirms that notification to the Garante follows its own logic, centred on the risk to data subjects. The internal procedure should therefore assess both aspects in parallel from the first hours; an early warning to CSIRT Italia does not replace notification to the Garante, and vice versa.</p>
+
+<h2>Conclusions</h2>
+<p>NIS2 incident notification rests on three elements that must be prepared before any incident occurs. The organisation must be able to recognise the incident types in Annexes 3 and 4, which presupposes defined service levels; it must know when evidence is acquired, because the 24 and 72 hours run from that moment; and it needs a designated CSIRT contact person and a plan stating who does what, including coordination with the data protection authority when personal data are involved.</p>
+<p>For the other obligations under the Decree, see the <a href="/risorse/nis2">complete NIS2 guide</a>.</p>
+
+<p><strong>To check whether your notification procedure is ready</strong>, <a href="/inizia">RegulaeOS's NIS2 gap analysis</a> lets you compare the measures in place with the requirements of the ACN determination, including the incident management plan and measure RS.MA-01, and keep all supporting evidence in one place.</p>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">Legislative Decree 138/2024, Article 25 (incident notification obligations), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art26" target="_blank" rel="noopener">Legislative Decree 138/2024, Article 26 (voluntary notification of relevant information), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">Legislative Decree 138/2024, Article 38 (administrative penalties), Normattiva</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">ACN Determination No. 379907 of 19 December 2025 (basic specifications), ACN</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-4-v2" target="_blank" rel="noopener">Annex 4, basic significant incidents for essential entities, ACN</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/misure-di-sicurezza-e-notifica-di-incidenti" target="_blank" rel="noopener">NIS FAQs, security measures and incident notification, ACN</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/ruoli-e-procedure" target="_blank" rel="noopener">NIS FAQs, roles and procedures, ACN</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/definizione-del-processo-di-gestione-degli-incidenti-di-sicurezza-informatica" target="_blank" rel="noopener">NIS guidelines, definition of the information security incident management process, ACN</a></li>
+  <li><a href="https://www.acn.gov.it/portale/w/nis-online-le-determine-sugli-adempimenti-per-i-nuovi-soggetti-e-sulle-modalita-di-accesso-alla-piattaforma-acn" target="_blank" rel="noopener">ACN notice of 13 April 2026 on the determinations for new NIS entities</a></li>
+  <li><a href="https://segnalazioni.acn.gov.it/" target="_blank" rel="noopener">ACN Reporting Portal, incident notification</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32016R0679" target="_blank" rel="noopener">Regulation (EU) 2016/679 (GDPR), Article 33, EUR-Lex</a></li>
+</ul>
+`,
+    },
+  },
+  {
     slug: "nis-nis2-differenze",
     title: "NIS e NIS2, differenze e cosa cambia per le aziende",
     excerpt:
