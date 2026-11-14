@@ -38,6 +38,390 @@ export interface BlogPost {
 
 export const POSTS: BlogPost[] = [
   {
+    slug: "misure-sicurezza-base-nis2-acn",
+    title: "Misure di sicurezza di base NIS2, la determinazione ACN spiegata in modo semplice",
+    excerpt:
+      "Le misure di sicurezza di base fissate dall'ACN con la determinazione n. 379907/2025. Quante sono, come si leggono i codici, cosa cambia tra soggetti importanti ed essenziali, quali documenti servono, cosa approva il vertice e quali scadenze valgono.",
+    date: "14 novembre 2026",
+    dateISO: "2026-11-14",
+    author: { name: "Umberto Mottola", jobTitle: "Avvocato, CIPP/E" },
+    dateModifiedISO: "2026-11-14",
+    readTime: "10 min",
+    category: "Guide",
+    tags: ["NIS2", "misure di sicurezza di base", "misure di sicurezza NIS2", "determinazione ACN 379907/2025", "specifiche di base", "ACN", "soggetti essenziali", "soggetti importanti", "D.Lgs. 138/2024"],
+    metaTitle: "Misure di sicurezza di base NIS2, la guida semplice",
+    metaDescription:
+      "Le misure di sicurezza di base NIS2 della determinazione ACN 379907/2025. Quante sono, differenze tra importanti ed essenziali, documenti e scadenze.",
+    faqSchema: [
+      {
+        q: "Quante sono le misure di sicurezza di base NIS2?",
+        a: "Sono 37 misure con 87 requisiti per i soggetti importanti, contenute nell'allegato 1 della determinazione ACN n. 379907/2025, e 43 misure con 116 requisiti per i soggetti essenziali, contenute nell'allegato 2. Le misure sono organizzate nelle sei funzioni del Framework nazionale per la cybersecurity e la data protection.",
+      },
+      {
+        q: "Entro quando vanno adottate le misure di sicurezza di base?",
+        a: "Entro diciotto mesi dalla ricezione della comunicazione di inserimento nell'elenco dei soggetti NIS; per i soggetti inseriti nel 2025 l'ACN indica il mese di ottobre 2026. Per i soggetti inseriti per la prima volta nel 2026 il termine scade invece il 31 luglio 2027, in base alla determinazione ACN n. 127434/2026.",
+      },
+      {
+        q: "Le misure vanno applicate a tutti i sistemi aziendali?",
+        a: "In linea di principio sì. Tuttavia, quando un requisito contiene la formula «per almeno i sistemi informativi e di rete rilevanti», il soggetto può limitarlo ai sistemi la cui compromissione avrebbe un impatto significativo sulle attività e sui servizi per cui rientra nella NIS2, come chiarisce la FAQ MSB.7 dell'ACN.",
+      },
+      {
+        q: "Quali documenti deve approvare il consiglio di amministrazione?",
+        a: "Secondo l'appendice C della guida alla lettura dell'ACN, gli organi di amministrazione e direttivi approvano undici documenti, tra cui l'organizzazione per la sicurezza informatica, le politiche, la valutazione del rischio, il piano di trattamento del rischio, i piani di continuità, di ripristino e di gestione delle crisi, il piano di formazione e il piano di gestione degli incidenti.",
+      },
+      {
+        q: "Bisogna modificare i contratti già in essere con i fornitori?",
+        a: "No. Secondo la FAQ MSB.12 dell'ACN, i requisiti di sicurezza previsti dalla misura GV.SC-05 vanno inseriti nei contratti stipulati, rinnovati o prorogati a partire dal termine per l'adozione delle misure, e soltanto per le forniture con potenziali impatti sulla sicurezza dei sistemi informativi e di rete.",
+      },
+    ],
+    content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · aggiornato al 14 nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In sintesi.</strong> Le misure di sicurezza di base NIS2 sono i requisiti minimi fissati dall'ACN con la determinazione n. 379907 del 19 dicembre 2025, applicabile dal 15 gennaio 2026. I soggetti importanti adottano 37 misure con 87 requisiti (allegato 1); i soggetti essenziali 43 misure con 116 requisiti (allegato 2). Il termine è di diciotto mesi dalla comunicazione di inserimento nell'elenco NIS; per chi vi è entrato per la prima volta nel 2026 scade il 31 luglio 2027.
+</p>
+
+<p>Le misure di sicurezza di base NIS2 sono la parte più concreta della disciplina, perché dicono che cosa un'organizzazione deve fare, documento per documento e controllo per controllo. Il decreto NIS fissa gli obblighi in termini generali; la determinazione dell'Agenzia per la cybersicurezza nazionale (ACN) li traduce in requisiti verificabili.</p>
+<p>Questo articolo spiega in modo semplice come sono costruite le misure, che cosa cambia tra soggetti importanti ed essenziali, quali documenti servono e quali scadenze valgono. Per il quadro generale degli obblighi si rinvia alla <a href="/risorse/nis2">guida alla NIS2</a>; per il calendario completo, alla pagina sullo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>.</p>
+
+<h2>Che cosa sono le misure di sicurezza di base NIS2?</h2>
+<p>Sono le specifiche minime con cui l'ACN, quale Autorità nazionale competente NIS, ha dato contenuto agli obblighi degli artt. 23 e 24 del decreto NIS, ossia agli obblighi degli organi di amministrazione e alle misure di gestione dei rischi informatici. Le stabiliscono gli allegati 1 e 2 della <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">determinazione ACN n. 379907/2025</a>.</p>
+<p>La base normativa è duplice. L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">art. 24 del decreto NIS</a>, che disciplina le misure di gestione dei rischi, chiede misure tecniche, operative e organizzative adeguate e proporzionate e, al comma 2, elenca dieci elementi minimi, dalla gestione degli incidenti alla sicurezza della catena di approvvigionamento. L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art31" target="_blank" rel="noopener">art. 31 del decreto</a>, intitolato alla proporzionalità e gradualità degli obblighi, affida poi all'ACN il compito di fissare obblighi proporzionati, nonché termini, modalità e specifiche di attuazione.</p>
+<p>La determinazione si applica dal 15 gennaio 2026 e, come dispone il suo art. 9, sostituisce la precedente determinazione n. 164179 del 14 aprile 2025. Si compone di quattro allegati; gli allegati 1 e 2 contengono le misure di sicurezza, mentre gli allegati 3 e 4 descrivono gli incidenti significativi da notificare al CSIRT Italia.</p>
+<p>Anche l'aggettivo «di base» ha un significato preciso. Secondo la <a href="https://www.acn.gov.it/portale/faq/nis/misure-di-sicurezza-e-notifica-di-incidenti" target="_blank" rel="noopener">FAQ MSB.4 dell'ACN</a>, indica le misure adottate in fase di prima applicazione del decreto, ai sensi dell'art. 42, che disciplina appunto la prima applicazione.</p>
+
+<h2>Quante sono le misure e come sono organizzate?</h2>
+<p>I soggetti importanti devono adottare 37 misure, articolate in 87 requisiti; i soggetti essenziali 43 misure, con 116 requisiti. Ogni misura ha un codice, una descrizione e uno o più requisiti, e segue la struttura del Framework nazionale per la cybersecurity e la data protection, edizione 2025.</p>
+<p>I numeri sono riportati dalla <a href="https://www.acn.gov.it/portale/documents/d/guest/guida-alla-lettura-specifiche-di-base" target="_blank" rel="noopener">guida alla lettura delle specifiche di base</a> pubblicata dall'ACN, al paragrafo 2.1. Il codice ha la forma XX.YY-NN, dove la prima sigla indica la funzione, la seconda la categoria e il numero la sottocategoria del Framework. Ad esempio, PR.DS-11 appartiene alla funzione Protezione e alla categoria Sicurezza dei dati, e riguarda i backup.</p>
+<p>I requisiti, invece, dicono che cosa occorre fare in concreto. L'ACN chiarisce, nella FAQ MSB.6, che adottare le misure significa attuare tutti i requisiti previsti; non basta, quindi, coprire la misura in termini generici.</p>
+<p>Le funzioni sono sei. La tabella riporta il numero di misure per ciascuna, contato sugli <a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-1-v2" target="_blank" rel="noopener">allegato 1</a> e <a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-2-v2" target="_blank" rel="noopener">allegato 2</a>.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Funzione</th><th>Che cosa copre, in sintesi</th><th>Soggetti importanti</th><th>Soggetti essenziali</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Governo (GV)</td><td>Sistemi rilevanti, gestione del rischio, ruoli, politiche, fornitori</td><td>11</td><td>11</td></tr>
+      <tr><td>Identificazione (ID)</td><td>Inventari, valutazione e trattamento del rischio, vulnerabilità, piani di adeguamento e di continuità</td><td>9</td><td>10</td></tr>
+      <tr><td>Protezione (PR)</td><td>Utenze e accessi, formazione, cifratura e backup, aggiornamenti, log, reti</td><td>12</td><td>16</td></tr>
+      <tr><td>Rilevamento (DE)</td><td>Monitoraggio delle reti e protezione degli endpoint</td><td>2</td><td>2</td></tr>
+      <tr><td>Risposta (RS)</td><td>Piano di gestione degli incidenti e comunicazioni</td><td>2</td><td>2</td></tr>
+      <tr><td>Ripristino (RC)</td><td>Ripristino dopo un incidente</td><td>1</td><td>2</td></tr>
+      <tr><td><strong>Totale</strong></td><td></td><td><strong>37</strong></td><td><strong>43</strong></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Il peso, come si vede, è sulla governance. La guida alla lettura osserva infatti, al paragrafo 2.4, che i requisiti sono per la maggior parte di tipo organizzativo, ossia riguardano politiche, ruoli, piani e procedure; gli strumenti tecnologici dovrebbero essere a supporto dei processi definiti dall'organizzazione.</p>
+
+<h2>Le sei misure in più per i soggetti essenziali</h2>
+<p>Le misure aggiuntive per i soggetti essenziali discendono dall'art. 31 del decreto, che chiede obblighi proporzionati all'esposizione al rischio, alle dimensioni del soggetto e all'impatto sociale ed economico degli incidenti. Secondo la guida alla lettura, 27 misure hanno requisiti identici per le due categorie, 10 hanno requisiti aggiuntivi per gli essenziali e 6 valgono soltanto per questi ultimi.</p>
+<p>Le sei misure esclusive dell'allegato 2 sono le seguenti.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Misura</th><th>Che cosa chiede</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>ID.AM-03</td><td>Un inventario aggiornato dei flussi di rete tra i sistemi del soggetto e l'esterno</td></tr>
+      <tr><td>PR.AT-02</td><td>Una formazione dedicata al personale con ruoli specializzati, compresi gli amministratori di sistema</td></tr>
+      <tr><td>PR.PS-01</td><td>Configurazioni di riferimento sicure (hardened) dei sistemi rilevanti, documentate in un elenco aggiornato</td></tr>
+      <tr><td>PR.PS-03</td><td>Procedure per il trasferimento fisico e la dismissione sicura dei dispositivi che memorizzano dati, e registri delle manutenzioni sull'hardware</td></tr>
+      <tr><td>PR.IR-03</td><td>Sistemi di comunicazione di emergenza protetti, secondo gli esiti della valutazione del rischio</td></tr>
+      <tr><td>RC.CO-03</td><td>Procedure per comunicare alle articolazioni interne le attività di ripristino dopo un incidente</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Tra i requisiti aggiuntivi delle misure comuni, alcuni hanno un peso pratico rilevante. Per i sistemi rilevanti l'allegato 2 richiede vulnerability assessment o penetration test periodici, e comunque prima della messa in esercizio (ID.RA-01); chiede inoltre la protezione fisica o la cifratura dei backup e test di ripristino periodici (PR.DS-11), nonché strumenti di analisi e filtraggio del traffico in ingresso, compresa la posta elettronica (DE.CM-01).</p>
+
+<h2>Le clausole che rendono le misure proporzionate al rischio</h2>
+<p>Non tutti i requisiti vanno applicati allo stesso modo a ogni sistema. La guida alla lettura, al paragrafo 2.3, individua quattro clausole che modulano gli obblighi in base al rischio.</p>
+<ul>
+  <li><strong>«Per almeno i sistemi informativi e di rete rilevanti»</strong>, che consente di limitare il requisito ai sistemi la cui compromissione avrebbe un impatto significativo sulle attività e sui servizi per cui il soggetto rientra nella NIS2;</li>
+  <li><strong>«in accordo agli esiti della valutazione del rischio di cui alla misura ID.RA-05»</strong>, che rimette alla valutazione del rischio la scelta di come e dove applicare il requisito;</li>
+  <li><strong>«fatte salve motivate e documentate ragioni normative o tecniche»</strong>, che ammette una deroga, purché motivata, documentata e accompagnata, ove applicabile, da misure compensative descritte nel piano di trattamento del rischio (ID.RA-06);</li>
+  <li><strong>«forniture con potenziali impatti sulla sicurezza dei sistemi informativi e di rete»</strong>, che limita alcuni obblighi verso i fornitori alle sole forniture rilevanti.</li>
+</ul>
+<p>Ne consegue che il primo passo è redigere l'elenco aggiornato dei sistemi rilevanti, richiesto dalla misura GV.OC-04. La guida suggerisce un metodo in tre passaggi; si individuano le attività e i servizi per cui il soggetto rientra nella NIS2, si valuta l'impatto che una compromissione dei sistemi avrebbe su di essi e si qualificano come rilevanti i sistemi con impatto significativo. Non è richiesta una metodologia specifica.</p>
+<p>Un esempio chiarisce il meccanismo. Il requisito sull'autenticazione multifattore (PR.AA-03, punto 2) si applica almeno ai sistemi rilevanti e secondo la valutazione del rischio; la guida ammette perciò che, per un sistema isolato e già protetto da controlli di accesso fisico, il rischio possa risultare accettabile anche senza autenticazione multifattore.</p>
+<p>Lo stesso criterio vale per i fornitori. Secondo la FAQ MSB.12 dell'ACN, non occorre adeguare i contratti già in essere; i requisiti di sicurezza vanno inseriti nei contratti stipulati, rinnovati o prorogati a partire dal termine per l'adozione delle misure.</p>
+
+<h2>Quali documenti servono e quali deve approvare il vertice?</h2>
+<p>Servono elenchi, inventari, piani, politiche, procedure e registri, che l'organizzazione può raccogliere in uno o più documenti. Undici di questi documenti, dalle politiche di sicurezza al piano di gestione degli incidenti, devono essere approvati dagli organi di amministrazione e direttivi, in attuazione dell'art. 23 del decreto NIS.</p>
+<p>La FAQ MSB.11 dell'ACN elenca le principali evidenze documentali.</p>
+<ul>
+  <li><strong>Elenchi</strong>, ossia il personale dell'organizzazione di sicurezza informatica, i sistemi accessibili da remoto e, per i soli essenziali, le configurazioni di riferimento;</li>
+  <li><strong>inventari</strong> di apparati fisici, di servizi e software, dei servizi erogati dai fornitori e dei fornitori, oltre ai flussi di rete per i soli essenziali;</li>
+  <li><strong>piani</strong>, tra cui gestione e trattamento del rischio, continuità operativa e ripristino in caso di disastro, gestione delle vulnerabilità, adeguamento, formazione e risposta agli incidenti;</li>
+  <li><strong>politiche</strong> di sicurezza informatica, per i sedici ambiti elencati dalla misura GV.PO-01 e almeno per i requisiti indicati nella tabella 1 in appendice agli allegati;</li>
+  <li><strong>procedure</strong>, per i requisiti che le richiedono espressamente;</li>
+  <li><strong>registri</strong>, come quello della formazione dei dipendenti e, per i soli essenziali, quelli degli esiti del riesame delle politiche e delle manutenzioni sull'hardware.</li>
+</ul>
+<p>Le politiche vanno riesaminate almeno una volta l'anno, come prevede la misura GV.PO-02; la valutazione del rischio e i piani di continuità vanno rivisti almeno ogni due anni e, in ogni caso, dopo un incidente significativo o un mutamento dell'esposizione alle minacce. La FAQ MSB.11 precisa che i documenti devono riprodurre la situazione corrente e possono essere tenuti in formato cartaceo o digitale.</p>
+<p>La guida alla lettura, in appendice C, elenca i documenti che gli organi di amministrazione e direttivi devono approvare.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Documento da approvare</th><th>Misura di riferimento</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Organizzazione per la sicurezza informatica</td><td>GV.RR-02, punto 1</td></tr>
+      <tr><td>Politiche di sicurezza informatica</td><td>GV.PO-01, punto 3</td></tr>
+      <tr><td>Valutazione del rischio</td><td>ID.RA-05, punto 3</td></tr>
+      <tr><td>Piano di trattamento del rischio, compresa l'accettazione dei rischi residui</td><td>ID.RA-06, punto 3</td></tr>
+      <tr><td>Piano di gestione delle vulnerabilità</td><td>ID.RA-08, punto 4</td></tr>
+      <tr><td>Piano di adeguamento</td><td>ID.IM-01, punto 1</td></tr>
+      <tr><td>Piani di continuità operativa, di ripristino in caso di disastro e di gestione delle crisi</td><td>ID.IM-04, punto 4</td></tr>
+      <tr><td>Piano di formazione</td><td>PR.AT-01, punto 2</td></tr>
+      <tr><td>Piano per la gestione degli incidenti</td><td>RS.MA-01, punto 2</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Il coinvolgimento del vertice non si esaurisce nell'approvazione. Il piano di formazione deve comprendere anche gli organi di amministrazione e direttivi (PR.AT-01), e questi vanno informati con relazioni periodiche sugli esiti del piano di adeguamento (ID.IM-01).</p>
+
+<h2>Entro quando vanno adottate le misure di sicurezza di base?</h2>
+<p>Il termine è di diciotto mesi dalla ricezione della comunicazione di inserimento nell'elenco dei soggetti NIS, come stabilisce l'art. 3 della determinazione n. 379907/2025. Per chi è stato inserito per la prima volta nel 2026, invece, la determinazione ACN n. 127434/2026 fissa una data unica, il 31 luglio 2027.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Soggetti</th><th>Misure di sicurezza (allegati 1 e 2)</th><th>Notifica degli incidenti (allegati 3 e 4)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Inseriti nell'elenco nel 2025</td><td>Diciotto mesi dalla comunicazione; l'ACN indica ottobre 2026</td><td>Nove mesi dalla comunicazione; l'ACN indica gennaio 2026</td></tr>
+      <tr><td>Inseriti per la prima volta nel 2026</td><td>Entro il 31 luglio 2027</td><td>Dal 1° gennaio 2027</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Le indicazioni di ottobre 2026 e gennaio 2026 sono tratte dalla <a href="https://www.acn.gov.it/portale/nis/modalita-specifiche-base" target="_blank" rel="noopener">pagina dell'ACN sulle specifiche di base</a>; le date per i soggetti del 2026 sono fissate dall'art. 1 della <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_misuresicurezza-v4_post" target="_blank" rel="noopener">determinazione ACN n. 127434/2026</a>, applicabile dal 30 aprile 2026. La stessa determinazione, al comma 3 dell'art. 1, conferma che per i soggetti inseriti nel 2025 e rimasti nell'elenco del 2026 restano fermi i termini originari.</p>
+<p>L'ACN ha comunicato i primi inserimenti a partire dal 12 aprile 2025, come riporta la guida alla lettura; per questi soggetti, dunque, il termine per le misure è già decorso. Chi non avesse completato l'adeguamento deve tenere presente l'art. 24, comma 4, del decreto NIS, secondo cui il soggetto che rileva di non essere conforme adotta senza indebito ritardo le misure correttive necessarie.</p>
+<p>Due regimi particolari completano il quadro. Gli ex operatori di servizi essenziali e gli operatori di telecomunicazioni individuati dalla determinazione mantengono, sui sistemi interessati, le misure già adottate secondo la disciplina previgente, come prevedono gli artt. 5 e 6 della determinazione n. 379907/2025, fermi restando i nuovi obblighi e i relativi termini.</p>
+
+<h2>Conclusioni</h2>
+<p>Le misure di sicurezza di base trasformano gli obblighi generali della NIS2 in un elenco preciso di requisiti. Sono più numerose per i soggetti essenziali, ma in entrambi i casi poggiano soprattutto su governance, documentazione e approvazione del vertice; le clausole basate sul rischio, tuttavia, consentono di concentrare gli sforzi sui sistemi davvero rilevanti.</p>
+<p>In pratica conviene procedere in quest'ordine:</p>
+<ol>
+  <li>redigere l'elenco dei sistemi informativi e di rete rilevanti (GV.OC-04);</li>
+  <li>eseguire e documentare la valutazione del rischio, compreso il rischio legato ai fornitori (ID.RA-05 e GV.SC-07);</li>
+  <li>definire il piano di trattamento del rischio, con le eventuali deroghe motivate e le misure compensative (ID.RA-06);</li>
+  <li>adottare politiche e piani e sottoporli all'approvazione degli organi di amministrazione e direttivi;</li>
+  <li>attuare e documentare i controlli tecnici, requisito per requisito.</li>
+</ol>
+<p>Per gli altri obblighi, dalla registrazione alla notifica degli incidenti, si rinvia alla <a href="/risorse/nis2">guida completa alla NIS2</a>.</p>
+
+<p><strong>Per verificare a che punto è la tua organizzazione</strong>, <a href="/inizia">la gap analysis NIS2 di RegulaeOS</a> permette di confrontare le misure adottate con i requisiti dell'allegato applicabile della determinazione ACN e di raccogliere in un unico posto le prove documentali.</p>
+
+<h2>Fonti</h2>
+<ul>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">ACN, determinazione n. 379907 del 19 dicembre 2025 (specifiche di base)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-1-v2" target="_blank" rel="noopener">ACN, allegato 1, misure di sicurezza di base per i soggetti importanti</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-2-v2" target="_blank" rel="noopener">ACN, allegato 2, misure di sicurezza di base per i soggetti essenziali</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/guida-alla-lettura-specifiche-di-base" target="_blank" rel="noopener">ACN, Linee guida NIS, specifiche di base, guida alla lettura (versione 2.1, aprile 2026)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_misuresicurezza-v4_post" target="_blank" rel="noopener">ACN, determinazione n. 127434/2026 (termini per i soggetti inseriti nel 2026)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/nis/modalita-specifiche-base" target="_blank" rel="noopener">ACN, pagina «Modalità e specifiche di base»</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/misure-di-sicurezza-e-notifica-di-incidenti" target="_blank" rel="noopener">ACN, FAQ NIS, misure di sicurezza e notifica di incidenti</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 24 (misure di gestione dei rischi), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art31" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 31 (proporzionalità e gradualità degli obblighi), Normattiva</a></li>
+</ul>
+`,
+    en: {
+      title: "NIS2 baseline security measures: the ACN determination explained simply",
+      excerpt:
+        "The baseline security measures set by ACN in determination no. 379907/2025. How many there are, how to read the codes, what changes between important and essential entities, which documents are needed, what the board must approve and which deadlines apply.",
+      date: "14 November 2026",
+      readTime: "10 min",
+      category: "Guide",
+      tags: ["NIS2", "baseline security measures", "NIS2 security measures", "ACN determination 379907/2025", "baseline specifications", "ACN", "essential entities", "important entities", "Legislative Decree 138/2024"],
+      metaTitle: "NIS2 baseline security measures, explained simply",
+      metaDescription:
+        "NIS2 baseline security measures under ACN determination 379907/2025. How many, important vs essential entities, required documents and deadlines.",
+      faqSchema: [
+        {
+          q: "How many NIS2 baseline security measures are there?",
+          a: "There are 37 measures with 87 requirements for important entities, set out in Annex 1 of ACN determination no. 379907/2025, and 43 measures with 116 requirements for essential entities, set out in Annex 2. The measures are organised into the six functions of the Italian National Framework for Cybersecurity and Data Protection.",
+        },
+        {
+          q: "By when must the baseline security measures be adopted?",
+          a: "Within eighteen months of receiving the notice of inclusion in the list of NIS entities; for entities included in 2025, ACN indicates October 2026. For entities included for the first time in 2026, the deadline is 31 July 2027, under ACN determination no. 127434/2026.",
+        },
+        {
+          q: "Do the measures apply to all company systems?",
+          a: "In principle, yes. However, where a requirement contains the wording 'for at least the relevant network and information systems', the entity may limit it to systems whose compromise would have a significant impact on the activities and services for which it falls within NIS2, as clarified by ACN FAQ MSB.7.",
+        },
+        {
+          q: "Which documents must the board of directors approve?",
+          a: "According to Appendix C of ACN's reading guide, the management bodies approve eleven documents, including the cybersecurity organisation, the policies, the risk assessment, the risk treatment plan, the business continuity, disaster recovery and crisis management plans, the training plan and the incident management plan.",
+        },
+        {
+          q: "Do existing supplier contracts have to be amended?",
+          a: "No. According to ACN FAQ MSB.12, the security requirements under measure GV.SC-05 must be included in contracts signed, renewed or extended from the deadline for adopting the measures, and only for supplies with potential impacts on the security of network and information systems.",
+        },
+      ],
+      content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · updated 14 Nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In short.</strong> NIS2 baseline security measures are the minimum requirements set by the Italian National Cybersecurity Agency (ACN) in determination no. 379907 of 19 December 2025, applicable from 15 January 2026. Important entities adopt 37 measures with 87 requirements (Annex 1); essential entities adopt 43 measures with 116 requirements (Annex 2). The deadline is eighteen months from the notice of inclusion in the NIS list; for entities first included in 2026, it is 31 July 2027.
+</p>
+
+<p>NIS2 baseline security measures are the most concrete part of the framework, because they say what an organisation must do, document by document and control by control. The Italian NIS decree sets the obligations in general terms; the ACN determination turns them into verifiable requirements.</p>
+<p>This article explains in plain terms how the measures are built, what changes between important and essential entities, which documents are needed and which deadlines apply. For a general overview of the obligations, see the <a href="/risorse/nis2">NIS2 guide</a>; for the full timeline, see the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">NIS2 implementation status</a>.</p>
+
+<h2>What are the NIS2 baseline security measures?</h2>
+<p>They are the minimum specifications through which ACN, as the national NIS competent authority, gave substance to the obligations in Articles 23 and 24 of the NIS decree, namely the obligations of management bodies and the cybersecurity risk-management measures. They are set out in Annexes 1 and 2 of <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">ACN determination no. 379907/2025</a>.</p>
+<p>The legal basis is twofold. <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">Article 24 of the NIS decree</a>, which governs risk-management measures, requires appropriate and proportionate technical, operational and organisational measures and, in paragraph 2, lists ten minimum elements, from incident handling to supply chain security. <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art31" target="_blank" rel="noopener">Article 31 of the decree</a>, on the proportionality and gradual implementation of obligations, then tasks ACN with setting proportionate obligations, together with deadlines, procedures and implementation specifications.</p>
+<p>The determination applies from 15 January 2026 and, under its Article 9, replaces the previous determination no. 164179 of 14 April 2025. It has four annexes; Annexes 1 and 2 contain the security measures, while Annexes 3 and 4 describe the significant incidents to be notified to CSIRT Italia.</p>
+<p>The word "baseline" also has a precise meaning. According to <a href="https://www.acn.gov.it/portale/faq/nis/misure-di-sicurezza-e-notifica-di-incidenti" target="_blank" rel="noopener">ACN FAQ MSB.4</a>, it refers to the measures adopted during the first application phase of the decree under Article 42, which governs that phase.</p>
+
+<h2>How many measures are there and how are they organised?</h2>
+<p>Important entities must adopt 37 measures, broken down into 87 requirements; essential entities must adopt 43 measures, with 116 requirements. Each measure has a code, a description and one or more requirements, and follows the structure of the Italian National Framework for Cybersecurity and Data Protection, 2025 edition.</p>
+<p>The figures are given in section 2.1 of the <a href="https://www.acn.gov.it/portale/documents/d/guest/guida-alla-lettura-specifiche-di-base" target="_blank" rel="noopener">reading guide to the baseline specifications</a> published by ACN. The code takes the form XX.YY-NN, where the first pair of letters indicates the function, the second the category and the number the subcategory of the Framework. For example, PR.DS-11 belongs to the Protect function and the Data Security category, and concerns backups.</p>
+<p>The requirements, in turn, say what must be done in practice. ACN clarifies in FAQ MSB.6 that adopting the measures means implementing all the requirements; covering a measure in general terms is therefore not enough.</p>
+<p>There are six functions. The table shows the number of measures in each, counted on <a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-1-v2" target="_blank" rel="noopener">Annex 1</a> and <a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-2-v2" target="_blank" rel="noopener">Annex 2</a>.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Function</th><th>What it covers, in brief</th><th>Important entities</th><th>Essential entities</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Govern (GV)</td><td>Relevant systems, risk management, roles, policies, suppliers</td><td>11</td><td>11</td></tr>
+      <tr><td>Identify (ID)</td><td>Inventories, risk assessment and treatment, vulnerabilities, improvement and continuity plans</td><td>9</td><td>10</td></tr>
+      <tr><td>Protect (PR)</td><td>Accounts and access, training, encryption and backups, updates, logs, networks</td><td>12</td><td>16</td></tr>
+      <tr><td>Detect (DE)</td><td>Network monitoring and endpoint protection</td><td>2</td><td>2</td></tr>
+      <tr><td>Respond (RS)</td><td>Incident management plan and communications</td><td>2</td><td>2</td></tr>
+      <tr><td>Recover (RC)</td><td>Recovery after an incident</td><td>1</td><td>2</td></tr>
+      <tr><td><strong>Total</strong></td><td></td><td><strong>37</strong></td><td><strong>43</strong></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>As the table shows, the weight lies on governance. The reading guide notes in section 2.4 that most requirements are organisational, i.e. they concern policies, roles, plans and procedures; technology tools should support the processes defined by the organisation.</p>
+
+<h2>The six additional measures for essential entities</h2>
+<p>The additional measures for essential entities stem from Article 31 of the decree, which calls for obligations proportionate to risk exposure, the size of the entity and the social and economic impact of incidents. According to the reading guide, 27 measures have identical requirements for both categories, 10 have additional requirements for essential entities and 6 apply to essential entities only.</p>
+<p>The six measures found only in Annex 2 are the following.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Measure</th><th>What it requires</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>ID.AM-03</td><td>An up-to-date inventory of network flows between the entity's systems and the outside</td></tr>
+      <tr><td>PR.AT-02</td><td>Dedicated training for staff in specialised roles, including system administrators</td></tr>
+      <tr><td>PR.PS-01</td><td>Secure (hardened) baseline configurations for relevant systems, documented in an up-to-date list</td></tr>
+      <tr><td>PR.PS-03</td><td>Procedures for the physical transfer and secure disposal of devices that store data, and records of hardware maintenance</td></tr>
+      <tr><td>PR.IR-03</td><td>Secured emergency communication systems, based on the outcome of the risk assessment</td></tr>
+      <tr><td>RC.CO-03</td><td>Procedures for informing internal units about recovery activities after an incident</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Among the additional requirements attached to shared measures, some carry real practical weight. For relevant systems, Annex 2 requires periodic vulnerability assessments or penetration tests, and in any case before systems go live (ID.RA-01); it also requires physical protection or encryption of backups and periodic restore tests (PR.DS-11), as well as tools to analyse and filter inbound traffic, including email (DE.CM-01).</p>
+
+<h2>The clauses that make the measures risk-proportionate</h2>
+<p>Not every requirement applies in the same way to every system. Section 2.3 of the reading guide identifies four clauses that scale the obligations according to risk.</p>
+<ul>
+  <li><strong>"For at least the relevant network and information systems"</strong>, which allows the requirement to be limited to systems whose compromise would have a significant impact on the activities and services for which the entity falls within NIS2;</li>
+  <li><strong>"in accordance with the outcome of the risk assessment under measure ID.RA-05"</strong>, which leaves it to the risk assessment to decide how and where the requirement applies;</li>
+  <li><strong>"save for justified and documented regulatory or technical reasons"</strong>, which allows a derogation, provided it is justified, documented and, where applicable, accompanied by compensating measures described in the risk treatment plan (ID.RA-06);</li>
+  <li><strong>"supplies with potential impacts on the security of network and information systems"</strong>, which limits certain supplier obligations to relevant supplies only.</li>
+</ul>
+<p>It follows that the first step is to draw up the up-to-date list of relevant systems required by measure GV.OC-04. The guide suggests a three-step method; identify the activities and services for which the entity falls within NIS2, assess the impact a compromise of the systems would have on them, and classify as relevant the systems with a significant impact. No specific methodology is required.</p>
+<p>An example shows how this works. The multi-factor authentication requirement (PR.AA-03, point 2) applies at least to relevant systems and in line with the risk assessment; the guide therefore accepts that, for an isolated system already protected by physical access controls, the risk may be acceptable even without multi-factor authentication.</p>
+<p>The same approach applies to suppliers. According to ACN FAQ MSB.12, existing contracts do not need to be amended; security requirements must be included in contracts signed, renewed or extended from the deadline for adopting the measures.</p>
+
+<h2>Which documents are needed and which must the board approve?</h2>
+<p>Lists, inventories, plans, policies, procedures and records are needed, which the organisation may gather in one or more documents. Eleven of these documents, from the security policies to the incident management plan, must be approved by the management bodies, in implementation of Article 23 of the NIS decree.</p>
+<p>ACN FAQ MSB.11 lists the main documentary evidence.</p>
+<ul>
+  <li><strong>Lists</strong>, namely the staff of the cybersecurity organisation, the systems accessible remotely and, for essential entities only, the baseline configurations;</li>
+  <li><strong>inventories</strong> of physical devices, of services and software, of services provided by suppliers and of suppliers, plus network flows for essential entities only;</li>
+  <li><strong>plans</strong>, including risk management and treatment, business continuity and disaster recovery, vulnerability management, improvement, training and incident response;</li>
+  <li><strong>cybersecurity policies</strong>, for the sixteen areas listed in measure GV.PO-01 and at least for the requirements shown in Table 1 in the appendix to the annexes;</li>
+  <li><strong>procedures</strong>, for the requirements that expressly call for them;</li>
+  <li><strong>records</strong>, such as the staff training record and, for essential entities only, records of policy review outcomes and hardware maintenance.</li>
+</ul>
+<p>Policies must be reviewed at least once a year, under measure GV.PO-02; the risk assessment and continuity plans must be reviewed at least every two years and, in any case, after a significant incident or a change in threat exposure. FAQ MSB.11 states that documents must reflect the current situation and may be kept on paper or in digital form.</p>
+<p>Appendix C of the reading guide lists the documents that the management bodies must approve.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Document to be approved</th><th>Reference measure</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Cybersecurity organisation</td><td>GV.RR-02, point 1</td></tr>
+      <tr><td>Cybersecurity policies</td><td>GV.PO-01, point 3</td></tr>
+      <tr><td>Risk assessment</td><td>ID.RA-05, point 3</td></tr>
+      <tr><td>Risk treatment plan, including acceptance of residual risks</td><td>ID.RA-06, point 3</td></tr>
+      <tr><td>Vulnerability management plan</td><td>ID.RA-08, point 4</td></tr>
+      <tr><td>Improvement plan</td><td>ID.IM-01, point 1</td></tr>
+      <tr><td>Business continuity, disaster recovery and crisis management plans</td><td>ID.IM-04, point 4</td></tr>
+      <tr><td>Training plan</td><td>PR.AT-01, point 2</td></tr>
+      <tr><td>Incident management plan</td><td>RS.MA-01, point 2</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The board's involvement does not end with approval. The training plan must also cover the management bodies (PR.AT-01), and they must be kept informed through periodic reports on the outcome of the improvement plan (ID.IM-01).</p>
+
+<h2>By when must the baseline security measures be adopted?</h2>
+<p>The deadline is eighteen months from receipt of the notice of inclusion in the list of NIS entities, as set by Article 3 of determination no. 379907/2025. For entities included for the first time in 2026, however, ACN determination no. 127434/2026 sets a single date, 31 July 2027.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Entities</th><th>Security measures (Annexes 1 and 2)</th><th>Incident notification (Annexes 3 and 4)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Included in the list in 2025</td><td>Eighteen months from the notice; ACN indicates October 2026</td><td>Nine months from the notice; ACN indicates January 2026</td></tr>
+      <tr><td>Included for the first time in 2026</td><td>By 31 July 2027</td><td>From 1 January 2027</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The October 2026 and January 2026 indications come from the <a href="https://www.acn.gov.it/portale/nis/modalita-specifiche-base" target="_blank" rel="noopener">ACN page on the baseline specifications</a>; the dates for 2026 entities are set by Article 1 of <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_misuresicurezza-v4_post" target="_blank" rel="noopener">ACN determination no. 127434/2026</a>, applicable from 30 April 2026. Article 1(3) of the same determination confirms that, for entities included in 2025 and still on the 2026 list, the original deadlines remain unchanged.</p>
+<p>ACN sent the first inclusion notices from 12 April 2025, as stated in the reading guide; for those entities, therefore, the deadline for the measures has already passed. Anyone who has not completed the work should bear in mind Article 24(4) of the NIS decree, under which an entity that finds it is not compliant must take the necessary corrective measures without undue delay.</p>
+<p>Two special regimes complete the picture. Former operators of essential services and the telecom operators identified in the determination maintain, on the systems concerned, the measures already adopted under the previous rules, as provided by Articles 5 and 6 of determination no. 379907/2025, without prejudice to the new obligations and their deadlines.</p>
+
+<h2>Conclusions</h2>
+<p>Baseline security measures turn the general NIS2 obligations into a precise list of requirements. They are more numerous for essential entities, but in both cases they rest mainly on governance, documentation and board approval; the risk-based clauses, however, make it possible to focus effort on the systems that really matter.</p>
+<p>In practice, it makes sense to proceed in this order:</p>
+<ol>
+  <li>draw up the list of relevant network and information systems (GV.OC-04);</li>
+  <li>carry out and document the risk assessment, including supplier risk (ID.RA-05 and GV.SC-07);</li>
+  <li>define the risk treatment plan, with any justified derogations and compensating measures (ID.RA-06);</li>
+  <li>adopt policies and plans and submit them to the management bodies for approval;</li>
+  <li>implement and document the technical controls, requirement by requirement.</li>
+</ol>
+<p>For the other obligations, from registration to incident notification, see the <a href="/risorse/nis2">complete NIS2 guide</a>.</p>
+
+<p><strong>To check where your organisation stands</strong>, <a href="/inizia">RegulaeOS's NIS2 gap analysis</a> lets you compare the measures in place with the requirements of the applicable annex of the ACN determination and gather the documentary evidence in one place.</p>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">ACN, determination no. 379907 of 19 December 2025 (baseline specifications)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-1-v2" target="_blank" rel="noopener">ACN, Annex 1, baseline security measures for important entities</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-2-v2" target="_blank" rel="noopener">ACN, Annex 2, baseline security measures for essential entities</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/guida-alla-lettura-specifiche-di-base" target="_blank" rel="noopener">ACN, NIS guidelines, baseline specifications, reading guide (version 2.1, April 2026)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_misuresicurezza-v4_post" target="_blank" rel="noopener">ACN, determination no. 127434/2026 (deadlines for entities included in 2026)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/nis/modalita-specifiche-base" target="_blank" rel="noopener">ACN, "Modalità e specifiche di base" page</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/misure-di-sicurezza-e-notifica-di-incidenti" target="_blank" rel="noopener">ACN, NIS FAQ, security measures and incident notification</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 24 (risk-management measures), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art31" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 31 (proportionality and gradual implementation), Normattiva</a></li>
+</ul>
+`,
+    },
+  },
+  {
     slug: "nis-nis2-differenze",
     title: "NIS e NIS2, differenze e cosa cambia per le aziende",
     excerpt:
