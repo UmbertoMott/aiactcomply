@@ -1,5 +1,5 @@
 import { MetadataRoute } from "next";
-import { getAllPosts } from "@/lib/blog/posts";
+import { getAllPosts, getTotalPages } from "@/lib/blog/posts";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com";
 
@@ -72,5 +72,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...blogPages];
+  // Pagine 2..N della lista Risorse
+  const listPages: MetadataRoute.Sitemap = Array.from({ length: getTotalPages() - 1 }, (_, i) => ({
+    url: `${BASE_URL}/risorse/pagina/${i + 2}`,
+    lastModified: latestPost,
+    changeFrequency: "weekly" as const,
+    priority: 0.5,
+  }));
+
+  return [...staticPages, ...listPages, ...blogPages];
 }
