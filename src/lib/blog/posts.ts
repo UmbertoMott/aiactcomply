@@ -1892,6 +1892,19 @@ export function getPostBySlug(slug: string, locale: Locale = "it"): BlogPost | u
   return post ? localize(post, locale) : undefined;
 }
 
+// ─── Paginazione della pagina Risorse: massimo 10 articoli per pagina ─────────
+export const POSTS_PER_PAGE = 10;
+
+export function getTotalPages(): number {
+  return Math.max(1, Math.ceil(POSTS.length / POSTS_PER_PAGE));
+}
+
+/** Articoli della pagina `page` (1-based) della lista Risorse. */
+export function getPostsPage(page: number, locale: Locale = "it"): BlogPost[] {
+  const start = (page - 1) * POSTS_PER_PAGE;
+  return getAllPosts(locale).slice(start, start + POSTS_PER_PAGE);
+}
+
 export function getAllPosts(locale: Locale = "it"): BlogPost[] {
   return POSTS.map((p) => localize(p, locale));
 }
