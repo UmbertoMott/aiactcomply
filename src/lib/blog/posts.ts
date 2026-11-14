@@ -38,6 +38,300 @@ export interface BlogPost {
 
 export const POSTS: BlogPost[] = [
   {
+    slug: "registrazione-nis2-portale-acn",
+    title: "Registrazione NIS2 sul portale ACN, guida passo per passo e aggiornamento annuale 2027",
+    excerpt:
+      "Come funziona la registrazione NIS2 sul portale dell'ACN secondo la determinazione n. 314287/2026. Chi deve registrarsi, chi può non ripetere la dichiarazione, come si designa il punto di contatto, che cosa si aggiorna dal 15 aprile al 31 maggio, il calendario 2027 e le sanzioni.",
+    date: "14 novembre 2026",
+    dateISO: "2026-11-14",
+    author: { name: "Umberto Mottola", jobTitle: "Avvocato, CIPP/E" },
+    dateModifiedISO: "2026-11-14",
+    readTime: "10 min",
+    category: "Guide",
+    tags: ["NIS2", "registrazione NIS2", "portale ACN", "aggiornamento annuale NIS2", "punto di contatto NIS", "fornitori rilevanti", "determinazione ACN 314287/2026", "ACN", "D.Lgs. 138/2024"],
+    metaTitle: "Registrazione NIS2 sul portale ACN, la guida 2027",
+    metaDescription:
+      "Registrazione NIS2 sul portale ACN. Chi deve farla, punto di contatto, dichiarazione, aggiornamento annuale dal 15 aprile al 31 maggio, scadenze e sanzioni.",
+    faqSchema: [
+      {
+        q: "Quando si fa la registrazione NIS2 sul portale ACN?",
+        a: "Dal 1° gennaio al 28 febbraio di ogni anno, come prevedono l'art. 7, comma 1, del decreto NIS e l'art. 11 della determinazione ACN n. 314287/2026. La finestra per il 2027 si apre quindi il 1° gennaio 2027 e si chiude il 28 febbraio 2027.",
+      },
+      {
+        q: "Chi è già nell'elenco dei soggetti NIS deve registrarsi di nuovo ogni anno?",
+        a: "No, purché non siano cambiate le informazioni dichiarate nell'anno precedente. In tal caso, secondo l'art. 11, commi 1 e 11, della determinazione ACN n. 314287/2026, il soggetto non presenta una nuova dichiarazione e resta nell'elenco con lo stesso status. Se invece le informazioni sono cambiate, la dichiarazione va ripresentata nella finestra di gennaio e febbraio.",
+      },
+      {
+        q: "Chi può essere punto di contatto NIS?",
+        a: "Il rappresentante legale, un procuratore generale iscritto nel registro delle imprese oppure un dipendente delegato dal rappresentante legale, come prevede l'art. 4 della determinazione ACN n. 314287/2026. Nei gruppi di imprese può essere delegato anche il dipendente di un'altra società del gruppo che rientra nella NIS2.",
+      },
+      {
+        q: "Che differenza c'è tra registrazione e aggiornamento annuale?",
+        a: "La registrazione, tra il 1° gennaio e il 28 febbraio, serve all'ACN per decidere chi entra nell'elenco dei soggetti NIS. L'aggiornamento annuale, tra il 15 aprile e il 31 maggio, riguarda solo i soggetti inseriti o confermati nell'elenco, che comunicano tra l'altro indirizzi IP, nomi di dominio, componenti degli organi di amministrazione, referente CSIRT e fornitori rilevanti.",
+      },
+      {
+        q: "Quali sanzioni si rischiano per la mancata registrazione NIS2?",
+        a: "L'art. 38, comma 11, del decreto NIS prevede sanzioni fino allo 0,1% del fatturato annuo mondiale per i soggetti essenziali e fino allo 0,07% per i soggetti importanti. Inoltre, in caso di mancata o tardiva registrazione, il comma 13 impone di contestare tutte le altre violazioni e di applicare la sanzione più grave aumentata fino al triplo.",
+      },
+    ],
+    content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · aggiornato al 14 nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In sintesi.</strong> La registrazione NIS2 si effettua sul portale dell'ACN dal 1° gennaio al 28 febbraio di ogni anno; per il 2027 valgono le regole della determinazione ACN n. 314287/2026, applicabile dal 25 ottobre 2026. Chi è già nell'elenco dei soggetti NIS e non ha variazioni non ripresenta la dichiarazione. Dal 15 aprile al 31 maggio i soggetti inseriti completano l'aggiornamento annuale, che comprende anche l'elenco dei fornitori rilevanti.
+</p>
+
+<p>La registrazione NIS2 sul portale dell'Agenzia per la cybersicurezza nazionale (ACN) è il primo adempimento della disciplina, perché è da qui che l'Agenzia costruisce ogni anno l'elenco dei soggetti essenziali e importanti. Non è, tuttavia, un adempimento unico; al contrario, si inserisce in un ciclo annuale che comprende anche l'aggiornamento delle informazioni e la categorizzazione delle attività.</p>
+<p>Questo articolo spiega, passo per passo, chi deve registrarsi, come si compila la dichiarazione, che cosa si aggiorna in primavera e quali termini valgono per il 2027. Per il quadro generale degli obblighi si rinvia alla <a href="/risorse/nis2">guida alla NIS2</a>; per il calendario complessivo, alla pagina sullo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>.</p>
+
+<h2>Che cos'è la registrazione NIS2 sul portale ACN?</h2>
+<p>È la dichiarazione con cui un'organizzazione comunica all'ACN di rientrare, o di poter rientrare, nell'ambito della NIS2. È disciplinata dall'art. 7 del decreto NIS, che regola l'identificazione e l'elencazione dei soggetti essenziali e importanti; si presenta tramite il servizio NIS/Dichiarazione del portale, dal 1° gennaio al 28 febbraio di ogni anno.</p>
+<p>L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art7" target="_blank" rel="noopener">art. 7 del D.Lgs. 138/2024</a> fissa il contenuto minimo, ossia ragione sociale, indirizzo e recapiti, designazione di un punto di contatto e settori, sottosettori e tipologie di soggetto degli allegati I, II, III e IV. Il comma 6 dello stesso articolo affida poi all'ACN il compito di stabilire termini, modalità e procedimenti di accesso alla piattaforma.</p>
+<p>Per il 2027 queste regole sono contenute nella <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_piattaforma_314287-2026_signeddg" target="_blank" rel="noopener">determinazione ACN n. 314287/2026</a>, che, come dispone il suo art. 24, sostituisce la precedente determinazione n. 127437 del 13 aprile 2026 e si applica dal 25 ottobre 2026.</p>
+<p>La registrazione non attribuisce, di per sé, la qualifica di soggetto NIS. Come chiarisce la <a href="https://www.acn.gov.it/portale/faq/nis/registrazione" target="_blank" rel="noopener">FAQ REG.3 dell'ACN</a>, chi rientra nell'ambito del decreto è soggetto NIS a prescindere dalla registrazione; quest'ultima serve all'Agenzia per redigere, entro il 31 marzo, l'elenco dei soggetti essenziali e importanti.</p>
+
+<h2>Chi deve registrarsi e chi può non ripetere la registrazione?</h2>
+<p>Devono registrarsi le organizzazioni pubbliche e private che si riconoscono in una tipologia di soggetto degli allegati I e II del decreto NIS e che, ove richiesto, superano le soglie della media impresa. Chi è già nell'elenco dei soggetti NIS, invece, non ripresenta la dichiarazione se le informazioni dell'anno precedente non sono cambiate.</p>
+<p>Prima di registrarsi occorre un'autovalutazione. La FAQ REG.1 dell'ACN la articola in tre passaggi.</p>
+<ol>
+  <li><strong>giurisdizione</strong>, ossia verificare che all'organizzazione si applichi la legge italiana, di regola perché è stabilita in Italia;</li>
+  <li><strong>dimensione</strong>, ossia verificare di non essere una micro o piccola impresa ai sensi della raccomandazione 2003/361/CE, salvo le tipologie che rientrano a prescindere dalla dimensione, come i prestatori di servizi fiduciari;</li>
+  <li><strong>tipologia di soggetto</strong>, ossia verificare se almeno una delle definizioni degli allegati I e II corrisponde alle attività svolte, anche in forma residuale; in caso di dubbio l'ACN ritiene comunque opportuno registrarsi.</li>
+</ol>
+<p>L'obbligo riguarda la singola persona giuridica, non il gruppo. La FAQ REG.8 precisa infatti che ogni società del gruppo che rientra nella NIS2 deve registrarsi distintamente. Le organizzazioni che ricadono solo nell'allegato IV, invece, si registrano dopo aver ricevuto la notifica di individuazione dell'ACN; in tal caso l'art. 13 della determinazione assegna trenta giorni dalla notifica, salvo che questa arrivi dopo il 31 luglio, poiché allora si attende la finestra dell'anno seguente.</p>
+<p>La novità più rilevante riguarda i soggetti già inseriti. Secondo l'art. 11, comma 1, della determinazione n. 314287/2026, questi non presentano una nuova dichiarazione soltanto se non sono intervenute modifiche rispetto a quanto dichiarato nell'anno precedente; in tal caso, per il comma 11, restano nell'elenco con lo stesso status. Se invece qualcosa è cambiato, per esempio i codici ATECO, la dimensione o le tipologie di soggetto, la dichiarazione va ripresentata, descrivendo le modifiche e motivando l'eventuale rimozione di tipologie.</p>
+
+<h2>Come si fa la registrazione, passo per passo</h2>
+<p>La registrazione si compone di tre fasi, ossia il censimento del punto di contatto, la sua associazione al soggetto e la compilazione della dichiarazione, come riassume la FAQ REG.5 dell'ACN. Ciascuna fase è disciplinata da un articolo della determinazione.</p>
+<p><strong>1. Designare il punto di contatto.</strong> È la persona fisica che cura l'attuazione del decreto NIS per conto del soggetto e dialoga con l'ACN. Secondo l'art. 4 della determinazione può essere il rappresentante legale, un procuratore generale iscritto nel registro delle imprese oppure un dipendente delegato dal rappresentante legale; nei gruppi può essere delegato anche il dipendente di un'altra società del gruppo che rientra nella NIS2. Il punto di contatto riferisce direttamente al vertice e agli organi di amministrazione.</p>
+<p><strong>2. Censimento sul portale.</strong> Il punto di contatto accede al portale con CIE, SPID personale, CNS o eIDAS e completa la propria anagrafica, come prevede l'art. 8.</p>
+<p><strong>3. Associazione al soggetto.</strong> Il punto di contatto inserisce il codice fiscale del soggetto, o il codice IPA per le pubbliche amministrazioni, verifica i dati della sede legale e indica a che titolo opera. Se è un delegato, carica la delega; l'ACN mette a disposizione un modello, ma è sufficiente anche una delega più ampia già esistente, come chiarisce la FAQ REG.4. L'associazione è poi convalidata dal soggetto con la procedura inviata al suo domicilio digitale, in base all'art. 9.</p>
+<p><strong>4. Compilazione della dichiarazione.</strong> L'art. 11, comma 2, elenca le informazioni richieste.</p>
+<ul>
+  <li>i codici ATECO che descrivono l'attività del soggetto;</li>
+  <li>le normative settoriali europee richiamate negli allegati I e II del decreto, quando si applicano al soggetto;</li>
+  <li>la classe dimensionale ai sensi della raccomandazione 2003/361/CE e, se il portale rileva incongruenze, dipendenti, fatturato e bilancio;</li>
+  <li>le tipologie di soggetto degli allegati I, II, III e IV a cui il soggetto è riconducibile;</li>
+  <li>per le imprese non autonome, la capogruppo e le imprese collegate che soddisfano i criteri dell'art. 3, comma 10, del decreto NIS.</li>
+</ul>
+<p><strong>5. Conferma e invio.</strong> Al termine il portale restituisce una valutazione preliminare automatica dello status, ossia essenziale, importante o fuori ambito; il punto di contatto la conferma oppure indica e motiva una valutazione diversa. Poi conferma le informazioni ai sensi del d.P.R. 445/2000 e le trasmette; copia della dichiarazione arriva, per ricevuta, al domicilio digitale del soggetto.</p>
+<p>Due dettagli pratici meritano attenzione. Decorsi dieci giorni solari dall'invio, la dichiarazione diventa definitiva e non è più modificabile, come prevede l'art. 11, comma 9. Inoltre, l'art. 3, comma 5, richiama la responsabilità penale dell'art. 76 del d.P.R. 445/2000 per le dichiarazioni mendaci; ne consegue che la dichiarazione va preparata con la stessa cura di un atto formale.</p>
+
+<h2>Che cosa si aggiorna tra il 15 aprile e il 31 maggio?</h2>
+<p>Dal 15 aprile al 31 maggio i soggetti inseriti o confermati nell'elenco completano l'aggiornamento annuale delle informazioni. Comunicano, tra l'altro, indirizzi IP pubblici e nomi di dominio, componenti degli organi di amministrazione, referente CSIRT, accordi di condivisione delle informazioni e fornitori rilevanti, come prevede l'art. 16 della determinazione.</p>
+<p>La base è l'art. 7, comma 4, del decreto NIS, che già indica spazio di indirizzamento IP e domini, Stati membri in cui si forniscono servizi, responsabili ai sensi dell'art. 38, comma 5, e sostituto del punto di contatto. L'art. 16, comma 3, della determinazione aggiunge le altre voci.</p>
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Informazione</th><th>Che cosa significa in pratica</th><th>Riferimento</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Dati anagrafici del soggetto</td><td>Sede legale, rappresentante legale, procuratori generali, domicilio digitale, telefono e posta elettronica</td><td>Art. 16, c. 3, lett. a)</td></tr>
+      <tr><td>Organi di amministrazione e direttivi</td><td>Codici fiscali e PEC dei componenti, che accettano l'indicazione accedendo al portale</td><td>Art. 16, c. 3, lett. b), e art. 17</td></tr>
+      <tr><td>Indirizzi IP e domini</td><td>Indirizzi IP pubblici statici e nomi di dominio in uso o nella disponibilità del soggetto</td><td>Art. 16, c. 3, lett. d)</td></tr>
+      <tr><td>Accordi di condivisione</td><td>Accordi di condivisione delle informazioni sulla sicurezza informatica dell'art. 17 del decreto NIS</td><td>Art. 16, c. 3, lett. e)</td></tr>
+      <tr><td>Referente CSIRT</td><td>Chi notifica gli incidenti al CSIRT Italia ed eventuali sostituti</td><td>Art. 16, c. 3, lett. f), e art. 7</td></tr>
+      <tr><td>Fornitori rilevanti NIS</td><td>Denominazione, codice fiscale, Paese, codici CPV delle forniture e criterio di rilevanza</td><td>Art. 16, c. 3, lett. g), e art. 18</td></tr>
+    </tbody>
+  </table>
+</div>
+<p>I fornitori rilevanti meritano una spiegazione. L'art. 1, comma 1, lett. nn), della determinazione li definisce secondo due criteri alternativi; è rilevante la fornitura ICT, riconducibile ai punti 8 e 9 dell'allegato I del decreto, oppure la fornitura non fungibile, la cui interruzione avrebbe un impatto significativo sulle attività NIS anche per la mancanza di alternative. Secondo le premesse della determinazione, queste informazioni servono all'ACN per individuare gli elementi sistemici della catena di approvvigionamento.</p>
+<p>Altri due termini si collegano all'inserimento nell'elenco. Il sostituto del punto di contatto va designato entro il 31 maggio dell'anno di inserimento (art. 5, comma 3), salvo che il punto di contatto sia l'unica persona che opera nell'organizzazione; il referente CSIRT va designato entro il 31 dicembre dello stesso anno (art. 7). Le entità finanziarie soggette al regolamento DORA sono esentate dall'elenco degli organi di amministrazione, dal referente CSIRT e dalla categorizzazione, salvo adesione volontaria.</p>
+<p>Fuori dalle finestre annuali vale l'aggiornamento continuo. L'art. 7, comma 7, del decreto impone di comunicare ogni modifica delle informazioni tempestivamente e, in ogni caso, entro quattordici giorni; per esempio, un nuovo amministratore o un nuovo fornitore rilevante.</p>
+
+<h2>Il calendario della registrazione NIS2 per il 2027</h2>
+<p>La tabella riassume i termini del ciclo annuale, come risultano dal decreto NIS e dalla determinazione n. 314287/2026.</p>
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Quando</th><th>Che cosa</th><th>Chi</th><th>Riferimento</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Fino al 30 novembre 2026</td><td>Designazione del rappresentante NIS in Italia</td><td>Fornitori digitali senza stabilimento nell'UE</td><td>Det., art. 6</td></tr>
+      <tr><td>1° gennaio - 28 febbraio 2027</td><td>Registrazione o nuova dichiarazione</td><td>Nuovi soggetti e soggetti inseriti con variazioni</td><td>D.Lgs. 138/2024, art. 7, c. 1; det., art. 11</td></tr>
+      <tr><td>Entro il 31 marzo 2027</td><td>Redazione dell'elenco dei soggetti NIS e successive comunicazioni</td><td>ACN</td><td>D.Lgs. 138/2024, art. 7, c. 2 e 3; det., art. 15</td></tr>
+      <tr><td>15 aprile - 31 maggio 2027</td><td>Aggiornamento annuale delle informazioni</td><td>Soggetti inseriti o confermati</td><td>D.Lgs. 138/2024, art. 7, c. 4; det., art. 16</td></tr>
+      <tr><td>1° maggio - 30 giugno 2027</td><td>Elencazione e categorizzazione delle attività e dei servizi</td><td>Soggetti NIS</td><td>Det., art. 20</td></tr>
+      <tr><td>Entro il 1° settembre 2027</td><td>Ultimo termine utile per le dichiarazioni tardive trattate nell'anno</td><td>Soggetti in ritardo</td><td>Det., art. 11, c. 8</td></tr>
+      <tr><td>Entro quattordici giorni da ogni modifica</td><td>Aggiornamento continuo</td><td>Soggetti inseriti o confermati</td><td>D.Lgs. 138/2024, art. 7, c. 7; det., art. 19</td></tr>
+    </tbody>
+  </table>
+</div>
+<p>Dopo la comunicazione dell'ACN il soggetto può presentare istanza di revisione entro sessanta giorni, a pena di decadenza, come prevede l'art. 15, comma 6, della determinazione. Ai soggetti già inseriti, infine, il portale propone una dichiarazione precompilata con le informazioni dell'anno precedente (art. 11, comma 10); conviene comunque verificarla voce per voce prima dell'invio.</p>
+
+<h2>Cosa succede se non ci si registra o ci si registra in ritardo?</h2>
+<p>La dichiarazione inviata dopo il 28 febbraio è tardiva, salvo criticità tecniche documentate non imputabili al soggetto; se arriva entro il 1° settembre è comunque trattata nell'anno. Restano però applicabili le sanzioni dell'art. 38 del decreto NIS, aggravate in modo significativo per chi omette o ritarda la registrazione.</p>
+<p>L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">art. 38 del decreto NIS</a>, che disciplina le sanzioni amministrative, punisce al comma 10, lett. a), la mancata registrazione, comunicazione o aggiornamento delle informazioni dell'art. 7. Per il comma 11 la sanzione arriva fino allo 0,1% del fatturato annuo mondiale per i soggetti essenziali e fino allo 0,07% per i soggetti importanti; per le pubbliche amministrazioni essenziali va da 10.000 a 50.000 euro.</p>
+<p>Il punto più delicato è il comma 13. In caso di mancata o tardiva registrazione sono contestate tutte le violazioni dei commi 8 e 10, comprese quelle sulle misure di sicurezza e sulla notifica degli incidenti, e si applica la sanzione prevista per la violazione più grave aumentata fino al triplo. Ne consegue che il ritardo nella registrazione non resta un'irregolarità formale, poiché espone il soggetto all'intero quadro sanzionatorio.</p>
+<p>Anche la responsabilità del vertice è esplicita. L'art. 2, comma 3, della determinazione ricorda che, ai sensi dell'art. 23 del decreto NIS, gli organi di amministrazione e direttivi sovrintendono alla registrazione e all'aggiornamento delle informazioni e sono responsabili delle eventuali violazioni. Per chi registra in ritardo, infine, il termine per completare l'aggiornamento annuale è di trenta giorni dalla comunicazione di inserimento nell'elenco (art. 16, comma 11).</p>
+
+<h2>Conclusioni</h2>
+<p>La registrazione NIS2 non si esaurisce in un modulo da compilare a gennaio. È l'avvio di un ciclo annuale che prosegue con l'aggiornamento di primavera, la categorizzazione e l'aggiornamento continuo, e che coinvolge direttamente gli organi di amministrazione; la determinazione n. 314287/2026 semplifica la posizione di chi non ha variazioni, tuttavia chiede a tutti di tenere le informazioni allineate alla realtà.</p>
+<p>In vista della finestra che si apre il 1° gennaio 2027, conviene procedere in questo ordine.</p>
+<ol>
+  <li>ripetere l'autovalutazione e verificare se ATECO, dimensione o tipologie di soggetto sono cambiati rispetto all'ultima dichiarazione;</li>
+  <li>controllare che il punto di contatto sia ancora in carica e che la delega sia valida, designando anche il sostituto;</li>
+  <li>preparare per tempo indirizzi IP, domini, elenco degli amministratori con le loro PEC ed elenco dei fornitori rilevanti, che serviranno ad aprile;</li>
+  <li>predisporre una procedura interna per comunicare ogni modifica entro quattordici giorni.</li>
+</ol>
+<p>Per gli adempimenti successivi alla registrazione si rinvia alla <a href="/risorse/nis2">guida completa alla NIS2</a> e all'articolo sulle <a href="/risorse/misure-sicurezza-base-nis2-acn">misure di sicurezza di base</a>.</p>
+<p><strong>Per arrivare pronti alla registrazione 2027</strong>, <a href="/inizia">la gap analysis NIS2 di RegulaeOS</a> permette di verificare l'ambito di applicazione, raccogliere le informazioni richieste dal portale ACN e tenere traccia delle scadenze del ciclo annuale.</p>
+
+<h2>Fonti</h2>
+<ul>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_piattaforma_314287-2026_signeddg" target="_blank" rel="noopener">ACN, determinazione n. 314287/2026 sulla piattaforma digitale NIS (registrazione 2027)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/registrazione" target="_blank" rel="noopener">ACN, FAQ NIS, registrazione</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art7" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 7 (identificazione ed elencazione dei soggetti), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 38 (sanzioni amministrative), Normattiva</a></li>
+</ul>
+`,
+    en: {
+      title: "NIS2 registration on the ACN portal: step-by-step guide and 2027 annual update",
+      excerpt:
+        "How NIS2 registration on the ACN portal works under determination no. 314287/2026. Who must register, who need not repeat the declaration, how to appoint the point of contact, what must be updated from 15 April to 31 May, the 2027 calendar and the penalties.",
+      date: "14 November 2026",
+      readTime: "10 min",
+      category: "Guide",
+      tags: ["NIS2", "NIS2 registration", "ACN portal", "NIS2 annual update", "NIS point of contact", "relevant suppliers", "ACN determination 314287/2026", "ACN", "Legislative Decree 138/2024"],
+      metaTitle: "NIS2 registration on the ACN portal, 2027 guide",
+      metaDescription:
+        "NIS2 registration on the Italian ACN portal. Who must register, point of contact, declaration, annual update from 15 April to 31 May, deadlines and penalties.",
+      faqSchema: [
+        {
+          q: "When does NIS2 registration on the ACN portal take place?",
+          a: "From 1 January to 28 February each year, as provided by Article 7(1) of the Italian NIS decree and Article 11 of ACN determination no. 314287/2026. The 2027 window therefore opens on 1 January 2027 and closes on 28 February 2027.",
+        },
+        {
+          q: "Must entities already on the list of NIS entities register again every year?",
+          a: "No, provided the information declared in the previous year has not changed. In that case, under Article 11(1) and (11) of ACN determination no. 314287/2026, the entity does not file a new declaration and remains on the list with the same status. If the information has changed, the declaration must be filed again in the January and February window.",
+        },
+        {
+          q: "Who can act as NIS point of contact?",
+          a: "The legal representative, a general attorney recorded in the companies register or an employee delegated by the legal representative, as provided by Article 4 of ACN determination no. 314287/2026. Within groups, an employee of another group company that falls within NIS2 may also be delegated.",
+        },
+        {
+          q: "What is the difference between registration and the annual update?",
+          a: "Registration, between 1 January and 28 February, enables ACN to decide who is included in the list of NIS entities. The annual update, between 15 April and 31 May, concerns only entities included or confirmed on the list, which report, among other things, IP addresses, domain names, members of the management bodies, the CSIRT contact person and relevant suppliers.",
+        },
+        {
+          q: "What penalties apply for failing to register under NIS2?",
+          a: "Article 38(11) of the Italian NIS decree provides for fines of up to 0.1% of worldwide annual turnover for essential entities and up to 0.07% for important entities. Moreover, in the event of failure to register or late registration, paragraph 13 requires all other infringements to be charged and the penalty for the most serious one to be increased up to threefold.",
+        },
+      ],
+      content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · updated 14 Nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In short.</strong> NIS2 registration takes place on the portal of the Italian National Cybersecurity Agency (ACN) from 1 January to 28 February each year; for 2027 the rules of ACN determination no. 314287/2026, applicable from 25 October 2026, apply. Entities already on the list of NIS entities with no changes do not file the declaration again. From 15 April to 31 May, listed entities complete the annual update, which also includes the list of relevant suppliers.
+</p>
+
+<p>NIS2 registration on the ACN portal is the first obligation under the framework, because it is the basis on which the Agency draws up each year the list of essential and important entities. It is not, however, a one-off task; on the contrary, it is part of an annual cycle that also includes updating information and categorising activities.</p>
+<p>This article explains, step by step, who must register, how to complete the declaration, what must be updated in spring and which deadlines apply for 2027. For the general overview of obligations, see the <a href="/risorse/nis2">NIS2 guide</a>; for the overall calendar, see the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">state of NIS2 implementation</a>.</p>
+
+<h2>What is NIS2 registration on the ACN portal?</h2>
+<p>It is the declaration by which an organisation informs ACN that it falls, or may fall, within the scope of NIS2. It is governed by Article 7 of the Italian NIS decree, which regulates the identification and listing of essential and important entities; it is filed through the portal's NIS/Declaration service, from 1 January to 28 February each year.</p>
+<p><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art7" target="_blank" rel="noopener">Article 7 of Legislative Decree 138/2024</a> sets the minimum content, namely company name, address and contact details, appointment of a point of contact, and the sectors, subsectors and types of entity in Annexes I, II, III and IV. Paragraph 6 of the same article tasks ACN with setting the deadlines, arrangements and procedures for accessing the platform.</p>
+<p>For 2027 these rules are set out in <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_piattaforma_314287-2026_signeddg" target="_blank" rel="noopener">ACN determination no. 314287/2026</a>, which, under its Article 24, replaces the previous determination no. 127437 of 13 April 2026 and applies from 25 October 2026.</p>
+<p>Registration does not in itself confer the status of NIS entity. As <a href="https://www.acn.gov.it/portale/faq/nis/registrazione" target="_blank" rel="noopener">ACN FAQ REG.3</a> clarifies, an organisation within the scope of the decree is a NIS entity regardless of registration; registration enables the Agency to draw up, by 31 March, the list of essential and important entities.</p>
+
+<h2>Who must register, and who need not repeat registration?</h2>
+<p>Public and private organisations must register if they recognise themselves in a type of entity listed in Annexes I and II of the NIS decree and, where required, exceed the medium-sized enterprise thresholds. Entities already on the list of NIS entities, however, do not file the declaration again if the previous year's information has not changed.</p>
+<p>A self-assessment is needed before registering. ACN FAQ REG.1 sets it out in three steps.</p>
+<ol>
+  <li><strong>jurisdiction</strong>, namely checking that Italian law applies to the organisation, as a rule because it is established in Italy;</li>
+  <li><strong>size</strong>, namely checking that it is not a micro or small enterprise under Recommendation 2003/361/EC, except for the types that fall within scope regardless of size, such as trust service providers;</li>
+  <li><strong>type of entity</strong>, namely checking whether at least one of the definitions in Annexes I and II matches the activities carried out, even on a residual basis; in case of doubt ACN considers it advisable to register in any event.</li>
+</ol>
+<p>The obligation applies to each legal entity, not to the group. FAQ REG.8 states that each group company falling within NIS2 must register separately. Organisations falling only within Annex IV register after receiving ACN's identification notice; in that case Article 13 of the determination allows thirty days from the notice, unless it arrives after 31 July, in which case the following year's window applies.</p>
+<p>The most significant change concerns entities already listed. Under Article 11(1) of determination no. 314287/2026, they do not file a new declaration only if nothing has changed compared with the previous year's declaration; in that case, under paragraph 11, they remain on the list with the same status. If something has changed, for example ATECO codes, size or types of entity, the declaration must be filed again, describing the changes and giving reasons for any removal of types.</p>
+
+<h2>How to register, step by step</h2>
+<p>Registration consists of three phases, namely enrolment of the point of contact, association with the entity and completion of the declaration, as summarised by ACN FAQ REG.5. Each phase is governed by an article of the determination.</p>
+<p><strong>1. Appoint the point of contact.</strong> This is the natural person who handles implementation of the NIS decree on behalf of the entity and liaises with ACN. Under Article 4 of the determination it may be the legal representative, a general attorney recorded in the companies register or an employee delegated by the legal representative; within groups, an employee of another group company falling within NIS2 may also be delegated. The point of contact reports directly to senior management and to the management bodies.</p>
+<p><strong>2. Enrolment on the portal.</strong> The point of contact logs in to the portal with CIE, personal SPID, CNS or eIDAS and completes their personal details, as provided by Article 8.</p>
+<p><strong>3. Association with the entity.</strong> The point of contact enters the entity's tax code, or the IPA code for public administrations, checks the registered office details and states in what capacity they act. A delegate uploads the delegation; ACN provides a template, but a broader pre-existing delegation is also sufficient, as FAQ REG.4 clarifies. The association is then validated by the entity through the procedure sent to its certified digital address, under Article 9.</p>
+<p><strong>4. Completion of the declaration.</strong> Article 11(2) lists the information required.</p>
+<ul>
+  <li>the ATECO codes describing the entity's activity;</li>
+  <li>the EU sectoral legislation referred to in Annexes I and II of the decree, where it applies to the entity;</li>
+  <li>the size class under Recommendation 2003/361/EC and, if the portal detects inconsistencies, headcount, turnover and balance sheet;</li>
+  <li>the types of entity in Annexes I, II, III and IV to which the entity belongs;</li>
+  <li>for non-autonomous enterprises, the parent company and the linked enterprises meeting the criteria of Article 3(10) of the NIS decree.</li>
+</ul>
+<p><strong>5. Confirmation and submission.</strong> At the end, the portal returns an automatic preliminary assessment of status, namely essential, important or out of scope; the point of contact confirms it or states and justifies a different assessment. They then confirm the information under Presidential Decree 445/2000 and submit it; a copy of the declaration is sent, as a receipt, to the entity's certified digital address.</p>
+<p>Two practical details deserve attention. Ten calendar days after submission, the declaration becomes final and can no longer be amended, under Article 11(9). Moreover, Article 3(5) recalls criminal liability under Article 76 of Presidential Decree 445/2000 for false declarations; the declaration should therefore be prepared with the same care as a formal deed.</p>
+
+<h2>What must be updated between 15 April and 31 May?</h2>
+<p>From 15 April to 31 May, entities included or confirmed on the list complete the annual information update. They report, among other things, public IP addresses and domain names, members of the management bodies, the CSIRT contact person, information-sharing arrangements and relevant suppliers, as provided by Article 16 of the determination.</p>
+<p>The basis is Article 7(4) of the NIS decree, which already lists IP address space and domains, Member States in which services are provided, the persons responsible under Article 38(5), and the deputy point of contact. Article 16(3) of the determination adds the other items.</p>
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Information</th><th>What it means in practice</th><th>Reference</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Entity details</td><td>Registered office, legal representative, general attorneys, certified digital address, telephone and email</td><td>Art. 16(3)(a)</td></tr>
+      <tr><td>Management bodies</td><td>Tax codes and certified email addresses of members, who accept the listing by logging in to the portal</td><td>Art. 16(3)(b) and Art. 17</td></tr>
+      <tr><td>IP addresses and domains</td><td>Static public IP addresses and domain names used by or available to the entity</td><td>Art. 16(3)(d)</td></tr>
+      <tr><td>Sharing arrangements</td><td>Cybersecurity information-sharing arrangements under Article 17 of the NIS decree</td><td>Art. 16(3)(e)</td></tr>
+      <tr><td>CSIRT contact person</td><td>Who notifies incidents to CSIRT Italia, and any deputies</td><td>Art. 16(3)(f) and Art. 7</td></tr>
+      <tr><td>Relevant NIS suppliers</td><td>Name, tax code, country, CPV codes of the supplies and relevance criterion</td><td>Art. 16(3)(g) and Art. 18</td></tr>
+    </tbody>
+  </table>
+</div>
+<p>Relevant suppliers deserve an explanation. Article 1(1)(nn) of the determination defines them by two alternative criteria; a supply is relevant if it is an ICT supply, falling under points 8 and 9 of Annex I of the decree, or a non-substitutable supply, whose disruption would have a significant impact on NIS activities, also because no alternatives are available. According to the recitals of the determination, this information enables ACN to identify systemic elements of the supply chain.</p>
+<p>Two further deadlines are linked to inclusion on the list. The deputy point of contact must be appointed by 31 May of the year of inclusion (Article 5(3)), unless the point of contact is the only person working in the organisation; the CSIRT contact person must be appointed by 31 December of the same year (Article 7). Financial entities subject to the DORA Regulation are exempt from listing the management bodies, from the CSIRT contact person and from categorisation, unless they opt in voluntarily.</p>
+<p>Outside the annual windows, continuous updating applies. Article 7(7) of the decree requires any change in the information to be reported promptly and in any case within fourteen days; for example, a new director or a new relevant supplier.</p>
+
+<h2>The 2027 NIS2 registration calendar</h2>
+<p>The table summarises the deadlines of the annual cycle, as set out in the NIS decree and determination no. 314287/2026.</p>
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>When</th><th>What</th><th>Who</th><th>Reference</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>By 30 November 2026</td><td>Appointment of the NIS representative in Italy</td><td>Digital providers with no establishment in the EU</td><td>Det., Art. 6</td></tr>
+      <tr><td>1 January - 28 February 2027</td><td>Registration or new declaration</td><td>New entities and listed entities with changes</td><td>Leg. Decree 138/2024, Art. 7(1); det., Art. 11</td></tr>
+      <tr><td>By 31 March 2027</td><td>Drawing up the list of NIS entities and subsequent notices</td><td>ACN</td><td>Leg. Decree 138/2024, Art. 7(2) and (3); det., Art. 15</td></tr>
+      <tr><td>15 April - 31 May 2027</td><td>Annual information update</td><td>Included or confirmed entities</td><td>Leg. Decree 138/2024, Art. 7(4); det., Art. 16</td></tr>
+      <tr><td>1 May - 30 June 2027</td><td>Listing and categorisation of activities and services</td><td>NIS entities</td><td>Det., Art. 20</td></tr>
+      <tr><td>By 1 September 2027</td><td>Last date for late declarations to be processed within the year</td><td>Late entities</td><td>Det., Art. 11(8)</td></tr>
+      <tr><td>Within fourteen days of any change</td><td>Continuous update</td><td>Included or confirmed entities</td><td>Leg. Decree 138/2024, Art. 7(7); det., Art. 19</td></tr>
+    </tbody>
+  </table>
+</div>
+<p>After ACN's notice, the entity may file a request for review within sixty days, on pain of forfeiture, under Article 15(6) of the determination. Finally, entities already listed are offered a pre-filled declaration based on the previous year's information (Article 11(10)); it is nonetheless advisable to check it item by item before submission.</p>
+
+<h2>What happens if you do not register, or register late?</h2>
+<p>A declaration submitted after 28 February is late, unless there are documented technical problems not attributable to the entity; if it arrives by 1 September it is still processed within the year. However, the penalties of Article 38 of the NIS decree remain applicable, and they are significantly heavier for those who fail to register or register late.</p>
+<p><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">Article 38 of the NIS decree</a>, which governs administrative penalties, punishes in paragraph 10(a) failure to register, report or update the information under Article 7. Under paragraph 11, the fine is up to 0.1% of worldwide annual turnover for essential entities and up to 0.07% for important entities; for essential public administrations it ranges from EUR 10,000 to EUR 50,000.</p>
+<p>The most sensitive point is paragraph 13. In the event of failure to register or late registration, all the infringements under paragraphs 8 and 10 are charged, including those on security measures and incident notification, and the penalty for the most serious infringement is increased up to threefold. Late registration is therefore not a mere formal irregularity, since it exposes the entity to the full penalty framework.</p>
+<p>The responsibility of senior management is also explicit. Article 2(3) of the determination recalls that, under Article 23 of the NIS decree, the management bodies oversee registration and the updating of information and are liable for any infringements. Finally, for late registrants, the deadline to complete the annual update is thirty days from the notice of inclusion on the list (Article 16(11)).</p>
+
+<h2>Conclusions</h2>
+<p>NIS2 registration is not just a form to be filled in in January. It starts an annual cycle that continues with the spring update, categorisation and continuous updating, and that directly involves the management bodies; determination no. 314287/2026 simplifies the position of entities with no changes, but requires everyone to keep their information aligned with reality.</p>
+<p>Ahead of the window opening on 1 January 2027, it makes sense to proceed in this order:</p>
+<ol>
+  <li>repeat the self-assessment and check whether ATECO codes, size or types of entity have changed since the last declaration;</li>
+  <li>check that the point of contact is still in office and that the delegation is valid, also appointing the deputy;</li>
+  <li>prepare in good time IP addresses, domains, the list of directors with their certified email addresses and the list of relevant suppliers, which will be needed in April;</li>
+  <li>set up an internal procedure to report any change within fourteen days.</li>
+</ol>
+<p>For the obligations following registration, see the <a href="/risorse/nis2">complete NIS2 guide</a> and the article on <a href="/risorse/misure-sicurezza-base-nis2-acn">baseline security measures</a>.</p>
+<p><strong>To be ready for the 2027 registration</strong>, <a href="/inizia">RegulaeOS's NIS2 gap analysis</a> lets you check the scope of application, gather the information required by the ACN portal and keep track of the deadlines of the annual cycle.</p>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_piattaforma_314287-2026_signeddg" target="_blank" rel="noopener">ACN, determination no. 314287/2026 on the NIS digital platform (2027 registration)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/registrazione" target="_blank" rel="noopener">ACN, NIS FAQ, registration</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art7" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 7 (identification and listing of entities), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 38 (administrative penalties), Normattiva</a></li>
+</ul>
+`,
+    },
+  },
+  {
     slug: "misure-sicurezza-base-nis2-acn",
     title: "Misure di sicurezza di base NIS2, la determinazione ACN spiegata in modo semplice",
     excerpt:
