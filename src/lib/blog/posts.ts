@@ -38,6 +38,330 @@ export interface BlogPost {
 
 export const POSTS: BlogPost[] = [
   {
+    slug: "nis2-organi-di-amministrazione-obblighi-cda",
+    title: "NIS2 e organi di amministrazione, obblighi, formazione e responsabilità del CdA (art. 23 decreto NIS)",
+    excerpt:
+      "Che cosa chiede l'art. 23 del decreto NIS al consiglio di amministrazione. Chi rientra tra gli organi di amministrazione e direttivi, quali documenti vanno approvati, che cosa si può delegare secondo le FAQ ACN, come impostare la formazione e quali responsabilità e sanzioni gravano sugli amministratori.",
+    date: "15 novembre 2026",
+    dateISO: "2026-11-15",
+    author: { name: "Umberto Mottola", jobTitle: "Avvocato, CIPP/E" },
+    dateModifiedISO: "2026-11-15",
+    readTime: "9 min",
+    category: "Guide",
+    tags: ["NIS2", "organi di amministrazione NIS2", "CdA NIS2", "art. 23 decreto NIS", "formazione NIS2", "responsabilità amministratori", "governance cybersecurity", "ACN", "D.Lgs. 138/2024"],
+    metaTitle: "NIS2 e organi di amministrazione, obblighi del CdA",
+    metaDescription:
+      "Gli obblighi NIS2 degli organi di amministrazione (art. 23 decreto NIS). Chi è coinvolto, documenti da approvare, deleghe, formazione e sanzioni.",
+    faqSchema: [
+      {
+        q: "Chi sono gli organi di amministrazione e direttivi ai fini della NIS2?",
+        a: "Sono gli organi che detengono il potere di direzione dell'organizzazione, compreso il consiglio di amministrazione, come chiarisce la FAQ ODA.1 dell'ACN. I dirigenti che non fanno parte del consiglio, il punto di contatto e il CISO non vi rientrano, salvo che siano anche componenti del consiglio; il rappresentante legale vi rientra in ogni caso.",
+      },
+      {
+        q: "Quali documenti NIS2 deve approvare il consiglio di amministrazione?",
+        a: "Secondo la FAQ ODA.10 dell'ACN sono undici, tra cui l'organizzazione per la sicurezza informatica, le politiche, la valutazione del rischio, il piano di trattamento del rischio, i piani di continuità operativa, di ripristino e di gestione delle crisi, il piano di formazione e il piano di gestione degli incidenti.",
+      },
+      {
+        q: "Il consiglio di amministrazione può delegare gli obblighi NIS2?",
+        a: "Può delegare le attività operative necessarie ad attuarli, ma non l'approvazione dei documenti previsti dall'art. 23 del decreto NIS. Secondo le FAQ ODA.8 e ODA.9 dell'ACN quest'ultima resta in capo all'organo nella sua collegialità, o all'organo monocratico, e la delega non esclude la responsabilità degli amministratori.",
+      },
+      {
+        q: "La formazione NIS2 è obbligatoria per gli amministratori?",
+        a: "Sì. L'art. 23, comma 2, del decreto NIS impone agli organi di amministrazione e direttivi di seguire una formazione in materia di sicurezza informatica e di promuoverne una coerente per i dipendenti. La misura PR.AT-01 delle specifiche ACN richiede inoltre un piano di formazione che includa gli stessi organi e che questi approvino.",
+      },
+      {
+        q: "Quali sanzioni rischiano gli amministratori per la NIS2?",
+        a: "La violazione degli obblighi dell'art. 23 è punita, ai sensi dell'art. 38 del decreto NIS, con sanzioni a carico del soggetto fino a 10 milioni di euro o al 2% del fatturato mondiale per gli essenziali e fino a 7 milioni o all'1,4% per gli importanti. Se il soggetto non rispetta una diffida, l'ACN può inoltre disporre verso gli amministratori l'incapacità temporanea a svolgere funzioni dirigenziali.",
+      },
+    ],
+    content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · aggiornato al 15 nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In sintesi.</strong> Con la NIS2 la sicurezza informatica diventa una responsabilità del consiglio di amministrazione. L'art. 23 del decreto NIS impone agli organi di amministrazione e direttivi di approvare le misure di gestione del rischio, di sovrintenderne l'attuazione, di seguire una formazione e di promuoverla per i dipendenti; gli stessi organi rispondono delle violazioni. Secondo le FAQ ACN l'approvazione degli undici documenti strategici non è delegabile.
+</p>
+
+<p>Gli obblighi NIS2 degli organi di amministrazione sono il punto in cui la disciplina sulla sicurezza informatica incontra il diritto societario. Il decreto legislativo n. 138 del 2024, ossia il decreto NIS che ha recepito in Italia la direttiva (UE) 2022/2555, non si limita a chiedere misure tecniche; pretende che il vertice le approvi, le controlli e ne risponda.</p>
+<p>Questo articolo spiega in modo semplice chi sono gli organi coinvolti, che cosa devono approvare, che cosa possono delegare, come impostare la formazione e quali sanzioni sono previste. Per il quadro generale degli obblighi si rinvia alla <a href="/risorse/nis2">guida alla NIS2</a>; per il calendario degli adempimenti, alla pagina sullo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>.</p>
+
+<h2>Che cosa prevede l'art. 23 del decreto NIS?</h2>
+<p>L'art. 23 assegna agli organi di amministrazione e direttivi dei soggetti essenziali e importanti cinque compiti; approvare le modalità di attuazione delle misure di sicurezza, sovrintendere agli obblighi, seguire una formazione, promuoverla per i dipendenti ed essere informati sugli incidenti. Gli stessi organi sono responsabili delle violazioni del decreto.</p>
+<p>Il testo dell'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art23" target="_blank" rel="noopener">art. 23 del decreto NIS</a>, intitolato agli organi di amministrazione e direttivi, si articola in tre commi.</p>
+<ul>
+  <li><strong>Comma 1</strong>, secondo cui gli organi approvano le modalità di implementazione delle misure di gestione dei rischi adottate ai sensi dell'art. 24, che disciplina appunto tali misure; sovrintendono all'attuazione degli obblighi del capo IV, dedicato alla gestione del rischio e alla notifica degli incidenti, e dell'art. 7, che regola la registrazione e l'aggiornamento delle informazioni; sono responsabili delle violazioni del decreto;</li>
+  <li><strong>comma 2</strong>, secondo cui gli organi seguono una formazione in materia di sicurezza informatica e promuovono l'offerta periodica di una formazione coerente ai dipendenti;</li>
+  <li><strong>comma 3</strong>, secondo cui gli organi sono informati periodicamente o, se opportuno, tempestivamente degli incidenti e delle notifiche previste dagli artt. 25 e 26, che disciplinano rispettivamente la notifica obbligatoria e quella volontaria.</li>
+</ul>
+<p>La norma recepisce l'art. 20 della <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/PDF/?uri=CELEX:32022L2555" target="_blank" rel="noopener">direttiva (UE) 2022/2555</a>, dedicato alla governance, che chiede agli Stati membri di rendere gli organi di gestione responsabili dell'approvazione e della supervisione delle misure e di obbligarne i membri a seguire una formazione. La conseguenza pratica è chiara; la sicurezza informatica non può più essere lasciata per intero alla funzione IT.</p>
+
+<h2>Chi sono gli organi di amministrazione e direttivi?</h2>
+<p>Sono gli organi che detengono il potere di direzione dell'organizzazione, compreso il consiglio di amministrazione. Non vi rientrano i dirigenti esterni al consiglio, il punto di contatto, il CISO o il responsabile della sicurezza, salvo che siano anche consiglieri; il rappresentante legale vi rientra comunque.</p>
+<p>La definizione si ricava dalle <a href="https://www.acn.gov.it/portale/faq/nis/ruoli-e-procedure" target="_blank" rel="noopener">FAQ dell'ACN su ruoli e procedure</a>. La FAQ ODA.1 rinvia al potere di direzione; le FAQ ODA.3 e ODA.6 escludono i dirigenti e le figure tecniche sotto ordinate al consiglio; la FAQ ODA.5 chiarisce che, se manca un consiglio o se questo non svolge funzioni di direzione, occorre individuare, anche attraverso lo statuto, l'organo che svolge funzioni analoghe.</p>
+<p>La tabella riassume i casi più frequenti, secondo la FAQ ODA.4.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Modello di governance</th><th>Chi è componente degli organi di amministrazione e direttivi</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Consiglio di amministrazione collegiale</td><td>Tutti i consiglieri</td></tr>
+      <tr><td>Amministratore unico</td><td>La persona fisica che ricopre il ruolo</td></tr>
+      <tr><td>Nessun consiglio di amministrazione</td><td>I membri dell'organo che svolge funzioni analoghe, individuato anche in base alla legge istitutiva e allo statuto</td></tr>
+      <tr><td>Qualsiasi modello</td><td>Il rappresentante legale, in ogni caso (FAQ ODA.5)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>L'individuazione ha anche un effetto pratico immediato. Nell'aggiornamento annuale delle informazioni, che l'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art7" target="_blank" rel="noopener">art. 7, comma 4, del decreto NIS</a> colloca tra il 15 aprile e il 31 maggio di ogni anno, il soggetto deve elencare i componenti di questi organi, come precisano le FAQ ODA.2 e ODA.7. Secondo la FAQ ODA.13 non è necessaria la PEC personale di ciascuno; basta un indirizzo PEC funzionale dell'organizzazione.</p>
+
+<h2>Quali documenti deve approvare il consiglio di amministrazione?</h2>
+<p>Il consiglio deve approvare undici documenti di indirizzo, indicati dalla FAQ ODA.10 dell'ACN e dall'appendice C della guida alla lettura delle specifiche di base. Ciascuno corrisponde a un requisito delle misure di sicurezza fissate dalla determinazione ACN n. 379907/2025.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Documento da approvare</th><th>Requisito di riferimento</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Organizzazione per la sicurezza informatica</td><td>GV.RR-02, punto 1</td></tr>
+      <tr><td>Politiche di sicurezza informatica</td><td>GV.PO-01, punto 3</td></tr>
+      <tr><td>Valutazione del rischio per i sistemi informativi e di rete</td><td>ID.RA-05, punto 3</td></tr>
+      <tr><td>Piano di trattamento del rischio</td><td>ID.RA-06, punto 3</td></tr>
+      <tr><td>Piano di gestione delle vulnerabilità</td><td>ID.RA-08, punto 4</td></tr>
+      <tr><td>Piano di adeguamento</td><td>ID.IM-01, punto 1</td></tr>
+      <tr><td>Piano di continuità operativa</td><td>ID.IM-04, punto 4</td></tr>
+      <tr><td>Piano di ripristino in caso di disastro</td><td>ID.IM-04, punto 4</td></tr>
+      <tr><td>Piano di gestione delle crisi</td><td>ID.IM-04, punto 4</td></tr>
+      <tr><td>Piano di formazione</td><td>PR.AT-01, punto 2</td></tr>
+      <tr><td>Piano per la gestione degli incidenti di sicurezza informatica</td><td>RS.MA-01, punto 2</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Il livello di dettaglio richiesto è quello proprio di un organo di vertice. La FAQ ODA.10 chiede che i documenti declinino i requisiti almeno sul piano dell'indirizzo e della pianificazione strategica, in modo che il consiglio decida in modo consapevole; il dettaglio tecnico può invece stare in procedure, istruzioni operative e manuali curati dalle strutture competenti.</p>
+<p>Ne consegue una semplificazione importante. Secondo le FAQ ODA.11 e ODA.12, il consiglio non deve approvare le procedure richiamate nei documenti strategici, e il loro aggiornamento non obbliga a una nuova delibera. Il piano di gestione degli incidenti, ad esempio, può limitarsi a elencare le procedure con il rinvio ai relativi documenti.</p>
+<p>Il coinvolgimento, tuttavia, non si esaurisce nell'approvazione. Il requisito ID.IM-01, punto 2, dell'<a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-1-v2" target="_blank" rel="noopener">allegato 1 alla determinazione ACN</a> prevede che gli organi siano informati con relazioni periodiche sugli esiti del piano di adeguamento. Per il contenuto delle misure si rinvia all'articolo sulle <a href="/risorse/misure-sicurezza-base-nis2-acn">misure di sicurezza di base NIS2</a>.</p>
+
+<h2>Si possono delegare gli obblighi dell'art. 23?</h2>
+<p>Si possono delegare le attività operative necessarie ad attuare gli obblighi, ma non l'approvazione dei documenti previsti dall'art. 23. Questa resta all'organo nella sua collegialità, o all'organo monocratico, e non può essere trasferita a singoli consiglieri né ad altri organi o funzioni, qualunque sia il modello di governance.</p>
+<p>Il principio è fissato dalle FAQ ODA.8 e ODA.9, aggiornate dall'ACN il <a href="https://www.acn.gov.it/portale/w/aggiornate-le-faq-acn-sugli-obblighi-degli-organi-di-amministrazione-e-direttivi-dei-soggetti-nis" target="_blank" rel="noopener">14 luglio 2026</a>. L'ACN qualifica gli obblighi dell'art. 23 come obblighi di indirizzo e pianificazione strategica, e perciò non delegabili; la delega delle attività esecutive, invece, è ammessa e non esclude la responsabilità del consiglio.</p>
+<p>Per le società, la FAQ ODA.9 richiama gli artt. 2381 e 2392 del codice civile, ossia le norme sulla delega di attribuzioni all'interno del consiglio e sulla responsabilità degli amministratori verso la società. L'ACN precisa però che il rinvio non consente di trasferire a singoli membri l'adempimento degli obblighi dell'art. 23.</p>
+<p>Lo stesso vale per le figure operative previste dalla disciplina NIS. Secondo la FAQ PDC.3 il punto di contatto cura l'attuazione degli adempimenti ma non ne ha la responsabilità; secondo la FAQ RCS.2 la designazione del referente CSIRT, che notifica gli incidenti al CSIRT Italia, è una delega operativa e non una delega di responsabilità.</p>
+
+<h2>La formazione degli organi di amministrazione e dei dipendenti</h2>
+<p>La formazione opera su due livelli. L'art. 23, comma 2, lettera a), obbliga i componenti degli organi a seguire una formazione in materia di sicurezza informatica; la lettera b) chiede loro di promuovere una formazione periodica coerente per i dipendenti, affinché acquisiscano competenze sufficienti a individuare i rischi e a valutarne l'impatto sulle attività e sui servizi del soggetto.</p>
+<p>Il decreto non fissa un numero di ore né un programma. Le specifiche dell'ACN, tuttavia, danno all'obbligo una forma verificabile. La misura PR.AT-01, punto 1, dell'allegato 1 richiede un piano di formazione del personale, «ivi inclusi gli organi di amministrazione e direttivi», che comprenda almeno la pianificazione delle attività con i relativi contenuti e le eventuali modalità di verifica dell'apprendimento.</p>
+<p>Lo stesso piano va approvato dal consiglio (PR.AT-01, punto 2), e va tenuto un registro aggiornato dei dipendenti formati, dei contenuti e delle verifiche svolte (punto 3). In pratica conviene documentare anche la formazione dei consiglieri, con date, argomenti e partecipanti, poiché in caso di verifica è la prova più semplice dell'adempimento.</p>
+
+<h2>Responsabilità e sanzioni per gli amministratori</h2>
+<p>L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">art. 38 del decreto NIS</a>, che disciplina le sanzioni, colpisce la violazione degli obblighi dell'art. 23 su due piani. Il primo riguarda il soggetto, con sanzioni pecuniarie; il secondo riguarda le persone fisiche, con una sanzione accessoria.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Destinatario</th><th>Sanzione per la violazione dell'art. 23</th><th>Base normativa</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Soggetti essenziali privati</td><td>Fino a 10 milioni di euro o al 2% del fatturato annuo mondiale, se superiore; minimo pari a un ventesimo del massimo</td><td>Art. 38, commi 8, lett. a), e 9, lett. a)</td></tr>
+      <tr><td>Soggetti importanti privati</td><td>Fino a 7 milioni di euro o all'1,4% del fatturato annuo mondiale, se superiore; minimo pari a un trentesimo del massimo</td><td>Art. 38, commi 8, lett. a), e 9, lett. b)</td></tr>
+      <tr><td>Pubbliche amministrazioni essenziali</td><td>Da 25.000 a 125.000 euro, ridotti di un terzo per quelle importanti</td><td>Art. 38, comma 9, lett. c) e d)</td></tr>
+      <tr><td>Amministratori e rappresentanti legali</td><td>Incapacità temporanea a svolgere funzioni dirigenziali nel medesimo soggetto, se questo non rispetta una diffida dell'ACN</td><td>Art. 38, comma 6</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>La sanzione accessoria merita attenzione. Il comma 6 consente all'ACN, quando il soggetto non adempie entro i termini di una diffida emessa ai sensi dell'art. 37, che regola i poteri di esecuzione, di disporre l'incapacità a svolgere funzioni dirigenziali nei confronti degli organi di amministrazione e direttivi, dell'amministratore delegato o del rappresentante legale; la misura dura finché il soggetto non pone rimedio alle carenze.</p>
+<p>Il comma 5 aggiunge che le persone fisiche responsabili di un soggetto essenziale, o che lo rappresentano legalmente, assicurano il rispetto del decreto e possono essere ritenute responsabili dell'inadempimento. Per i dipendenti pubblici, infine, il comma 7 richiama le norme sulla responsabilità dirigenziale, disciplinare e amministrativo-contabile.</p>
+
+<h2>Conclusioni</h2>
+<p>L'art. 23 del decreto NIS trasforma la sicurezza informatica in una materia di competenza del consiglio di amministrazione. Il vertice approva i documenti strategici, vigila sull'attuazione, si forma e risponde delle violazioni; la delega, ammessa per le attività operative, non lo libera dalla responsabilità.</p>
+<p>In pratica conviene procedere in quest'ordine:</p>
+<ol>
+  <li>individuare con precisione i componenti degli organi di amministrazione e direttivi e verificarne l'elencazione sul portale ACN;</li>
+  <li>sottoporre al consiglio gli undici documenti strategici, redatti a livello di indirizzo, e verbalizzarne l'approvazione;</li>
+  <li>definire le deleghe operative, chiarendo che l'approvazione resta collegiale;</li>
+  <li>approvare un piano di formazione che includa i consiglieri e tenere il registro delle attività svolte;</li>
+  <li>stabilire un flusso periodico di relazioni al consiglio sugli incidenti, sulle notifiche e sul piano di adeguamento.</li>
+</ol>
+<p>Per gli altri obblighi, dalla registrazione alla notifica degli incidenti, si rinvia alla <a href="/risorse/nis2">guida completa alla NIS2</a>.</p>
+
+<p><strong>Per verificare a che punto è la tua organizzazione</strong>, <a href="/inizia">la gap analysis NIS2 di RegulaeOS</a> permette di controllare quali documenti richiedono l'approvazione del consiglio, di raccogliere delibere e verbali in un unico posto e di tenere traccia della formazione degli organi di amministrazione.</p>
+
+<h2>Fonti</h2>
+<ul>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art23" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 23 (organi di amministrazione e direttivi), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 38 (sanzioni amministrative), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art7" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 7 (identificazione ed elencazione dei soggetti), Normattiva</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/PDF/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Direttiva (UE) 2022/2555 (NIS2), art. 20, EUR-Lex</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/ruoli-e-procedure" target="_blank" rel="noopener">ACN, FAQ NIS, ruoli e procedure (FAQ ODA, PDC, RCS)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/w/aggiornate-le-faq-acn-sugli-obblighi-degli-organi-di-amministrazione-e-direttivi-dei-soggetti-nis" target="_blank" rel="noopener">ACN, «Aggiornate le FAQ ACN sugli obblighi degli organi di amministrazione e direttivi dei soggetti NIS», 14 luglio 2026</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-1-v2" target="_blank" rel="noopener">ACN, allegato 1 alla determinazione n. 379907/2025, misure di sicurezza di base per i soggetti importanti</a></li>
+  <li><a href="https://www.acn.gov.it/portale/nis/obblighi" target="_blank" rel="noopener">ACN, pagina «Obblighi» della sezione NIS</a></li>
+</ul>
+`,
+    en: {
+      title: "NIS2 and management bodies: board obligations, training and liability (Art. 23 of the Italian NIS decree)",
+      excerpt:
+        "What Article 23 of the Italian NIS decree requires of the board of directors. Who counts as a management body, which documents must be approved, what can be delegated according to the ACN FAQs, how to organise training and which liabilities and penalties apply to directors.",
+      date: "15 November 2026",
+      readTime: "9 min",
+      category: "Guide",
+      tags: ["NIS2", "NIS2 management bodies", "NIS2 board of directors", "Article 23 NIS decree", "NIS2 training", "directors' liability", "cybersecurity governance", "ACN", "Legislative Decree 138/2024"],
+      metaTitle: "NIS2 and management bodies: board obligations",
+      metaDescription:
+        "NIS2 obligations of management bodies under Art. 23 of the Italian NIS decree. Who is involved, documents to approve, delegation, training and penalties.",
+      faqSchema: [
+        {
+          q: "Who are the management bodies for NIS2 purposes?",
+          a: "They are the bodies holding the power to direct the organisation, including the board of directors, as clarified by ACN FAQ ODA.1. Managers who are not board members, the point of contact and the CISO are not included unless they also sit on the board; the legal representative is always included.",
+        },
+        {
+          q: "Which NIS2 documents must the board of directors approve?",
+          a: "According to ACN FAQ ODA.10 there are eleven, including the cybersecurity organisation, the policies, the risk assessment, the risk treatment plan, the business continuity, disaster recovery and crisis management plans, the training plan and the incident management plan.",
+        },
+        {
+          q: "Can the board of directors delegate NIS2 obligations?",
+          a: "It can delegate the operational activities needed to implement them, but not the approval of the documents required by Article 23 of the NIS decree. Under ACN FAQs ODA.8 and ODA.9, approval remains with the body acting collectively, or with the sole director, and delegation does not exclude the directors' liability.",
+        },
+        {
+          q: "Is NIS2 training mandatory for directors?",
+          a: "Yes. Article 23(2) of the NIS decree requires management bodies to undergo cybersecurity training and to promote consistent training for employees. Measure PR.AT-01 of the ACN specifications also requires a training plan that includes those bodies and that they approve.",
+        },
+        {
+          q: "What penalties do directors face under NIS2?",
+          a: "Breach of the Article 23 obligations is punished under Article 38 of the NIS decree with fines on the entity of up to EUR 10 million or 2% of worldwide turnover for essential entities, and up to EUR 7 million or 1.4% for important entities. If the entity fails to comply with a formal warning, ACN may also impose on directors a temporary ban from exercising managerial functions.",
+        },
+      ],
+      content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · updated 15 Nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In short.</strong> Under NIS2, cybersecurity becomes a responsibility of the board of directors. Article 23 of the Italian NIS decree requires management bodies to approve risk-management measures, oversee their implementation, undergo training and promote it for employees; the same bodies are liable for infringements. According to the ACN FAQs, approval of the eleven strategic documents cannot be delegated.
+</p>
+
+<p>The NIS2 obligations of management bodies are where cybersecurity rules meet company law. Legislative Decree no. 138 of 2024, the NIS decree that transposed Directive (EU) 2022/2555 into Italian law, does not merely require technical measures; it requires top management to approve them, oversee them and answer for them.</p>
+<p>This article explains in plain terms who the bodies concerned are, what they must approve, what they can delegate, how to organise training and which penalties apply. For a general overview of the obligations, see the <a href="/risorse/nis2">NIS2 guide</a>; for the timeline of obligations, see the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">NIS2 implementation status</a>.</p>
+
+<h2>What does Article 23 of the NIS decree provide?</h2>
+<p>Article 23 gives the management bodies of essential and important entities five tasks; approving how security measures are implemented, overseeing compliance, undergoing training, promoting training for employees and being informed of incidents. The same bodies are liable for infringements of the decree.</p>
+<p>The text of <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art23" target="_blank" rel="noopener">Article 23 of the NIS decree</a>, headed "management and governing bodies", has three paragraphs.</p>
+<ul>
+  <li><strong>Paragraph 1</strong>, under which the bodies approve the implementation arrangements for the risk-management measures adopted under Article 24, which governs those measures; oversee compliance with the obligations in Chapter IV, on risk management and incident notification, and in Article 7, on registration and updating of information; and are liable for infringements of the decree;</li>
+  <li><strong>paragraph 2</strong>, under which the bodies undergo cybersecurity training and promote regular, consistent training for employees;</li>
+  <li><strong>paragraph 3</strong>, under which the bodies are informed periodically or, where appropriate, promptly of incidents and of the notifications under Articles 25 and 26, which govern mandatory and voluntary notification respectively.</li>
+</ul>
+<p>The provision transposes Article 20 of <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/PDF/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Directive (EU) 2022/2555</a>, on governance, which requires Member States to make management bodies responsible for approving and overseeing the measures and to require their members to undergo training. The practical consequence is clear; cybersecurity can no longer be left entirely to the IT function.</p>
+
+<h2>Who are the management bodies?</h2>
+<p>They are the bodies holding the power to direct the organisation, including the board of directors. Managers outside the board, the point of contact, the CISO and the security manager are not included unless they are also directors; the legal representative is always included.</p>
+<p>The definition comes from the <a href="https://www.acn.gov.it/portale/faq/nis/ruoli-e-procedure" target="_blank" rel="noopener">ACN FAQs on roles and procedures</a>. FAQ ODA.1 refers to the power of direction; FAQs ODA.3 and ODA.6 exclude managers and technical roles reporting to the board; FAQ ODA.5 clarifies that, where there is no board or the board does not direct the organisation, the body performing similar functions must be identified, including by reference to the articles of association.</p>
+<p>The table summarises the most common cases, based on FAQ ODA.4.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Governance model</th><th>Who is a member of the management bodies</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Collegial board of directors</td><td>All directors</td></tr>
+      <tr><td>Sole director</td><td>The natural person holding the role</td></tr>
+      <tr><td>No board of directors</td><td>The members of the body performing similar functions, identified also on the basis of the founding law and the articles of association</td></tr>
+      <tr><td>Any model</td><td>The legal representative, in all cases (FAQ ODA.5)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Identifying them also has an immediate practical effect. In the annual update of information, which <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art7" target="_blank" rel="noopener">Article 7(4) of the NIS decree</a> places between 15 April and 31 May each year, the entity must list the members of these bodies, as FAQs ODA.2 and ODA.7 specify. According to FAQ ODA.13, each member's personal certified email (PEC) is not required; an organisational PEC address is enough.</p>
+
+<h2>Which documents must the board of directors approve?</h2>
+<p>The board must approve eleven strategic documents, listed in ACN FAQ ODA.10 and in Appendix C of the reading guide to the baseline specifications. Each corresponds to a requirement of the security measures set by ACN determination no. 379907/2025.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Document to approve</th><th>Reference requirement</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Cybersecurity organisation</td><td>GV.RR-02, point 1</td></tr>
+      <tr><td>Cybersecurity policies</td><td>GV.PO-01, point 3</td></tr>
+      <tr><td>Risk assessment for network and information systems</td><td>ID.RA-05, point 3</td></tr>
+      <tr><td>Risk treatment plan</td><td>ID.RA-06, point 3</td></tr>
+      <tr><td>Vulnerability management plan</td><td>ID.RA-08, point 4</td></tr>
+      <tr><td>Improvement plan</td><td>ID.IM-01, point 1</td></tr>
+      <tr><td>Business continuity plan</td><td>ID.IM-04, point 4</td></tr>
+      <tr><td>Disaster recovery plan</td><td>ID.IM-04, point 4</td></tr>
+      <tr><td>Crisis management plan</td><td>ID.IM-04, point 4</td></tr>
+      <tr><td>Training plan</td><td>PR.AT-01, point 2</td></tr>
+      <tr><td>Cybersecurity incident management plan</td><td>RS.MA-01, point 2</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The level of detail required is that of a top-level body. FAQ ODA.10 asks that the documents reflect the requirements at least at the level of direction and strategic planning, so that the board can decide in an informed way; technical detail can instead sit in procedures, operating instructions and manuals maintained by the relevant departments.</p>
+<p>This brings an important simplification. Under FAQs ODA.11 and ODA.12, the board does not have to approve the procedures referred to in the strategic documents, and updating them does not require a new resolution. The incident management plan, for example, may simply list the procedures with references to the relevant documents.</p>
+<p>Involvement does not end with approval, however. Requirement ID.IM-01, point 2, of <a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-1-v2" target="_blank" rel="noopener">Annex 1 to the ACN determination</a> provides that the bodies are informed through periodic reports on the results of the improvement plan. For the content of the measures, see the article on <a href="/risorse/misure-sicurezza-base-nis2-acn">NIS2 baseline security measures</a>.</p>
+
+<h2>Can the Article 23 obligations be delegated?</h2>
+<p>The operational activities needed to implement the obligations can be delegated, but not the approval of the documents required by Article 23. Approval remains with the body acting collectively, or with the sole director, and cannot be transferred to individual directors or to other bodies or functions, whatever the governance model.</p>
+<p>The principle is set out in FAQs ODA.8 and ODA.9, updated by ACN on <a href="https://www.acn.gov.it/portale/w/aggiornate-le-faq-acn-sugli-obblighi-degli-organi-di-amministrazione-e-direttivi-dei-soggetti-nis" target="_blank" rel="noopener">14 July 2026</a>. ACN describes the Article 23 obligations as obligations of direction and strategic planning, and therefore non-delegable; delegating executive activities, by contrast, is allowed and does not exclude the board's liability.</p>
+<p>For companies, FAQ ODA.9 refers to Articles 2381 and 2392 of the Italian Civil Code, namely the rules on delegation of powers within the board and on directors' liability towards the company. ACN specifies, however, that this reference does not allow the Article 23 obligations to be transferred to individual members.</p>
+<p>The same applies to the operational roles under the NIS framework. According to FAQ PDC.3, the point of contact handles compliance but is not responsible for it; according to FAQ RCS.2, appointing the CSIRT contact, who notifies incidents to CSIRT Italia, is an operational delegation and not a delegation of responsibility.</p>
+
+<h2>Training for management bodies and employees</h2>
+<p>Training works on two levels. Article 23(2)(a) requires members of the bodies to undergo cybersecurity training; point (b) asks them to promote regular, consistent training for employees, so that they acquire sufficient skills to identify risks and assess their impact on the entity's activities and services.</p>
+<p>The decree does not set a number of hours or a syllabus. The ACN specifications, however, give the obligation a verifiable form. Measure PR.AT-01, point 1, of Annex 1 requires a staff training plan, "including the management and governing bodies", covering at least the planning of activities with their content and any methods for checking what has been learned.</p>
+<p>The same plan must be approved by the board (PR.AT-01, point 2), and an up-to-date register must be kept of the employees trained, the content and the checks carried out (point 3). In practice it is advisable to document directors' training too, with dates, topics and attendees, since in an inspection it is the simplest evidence of compliance.</p>
+
+<h2>Liability and penalties for directors</h2>
+<p><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">Article 38 of the NIS decree</a>, which governs penalties, addresses breaches of the Article 23 obligations on two levels. The first concerns the entity, with administrative fines; the second concerns natural persons, with an ancillary penalty.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Addressee</th><th>Penalty for breach of Article 23</th><th>Legal basis</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Private essential entities</td><td>Up to EUR 10 million or 2% of worldwide annual turnover, whichever is higher; minimum of one twentieth of the maximum</td><td>Art. 38(8)(a) and (9)(a)</td></tr>
+      <tr><td>Private important entities</td><td>Up to EUR 7 million or 1.4% of worldwide annual turnover, whichever is higher; minimum of one thirtieth of the maximum</td><td>Art. 38(8)(a) and (9)(b)</td></tr>
+      <tr><td>Essential public administrations</td><td>From EUR 25,000 to EUR 125,000, reduced by one third for important ones</td><td>Art. 38(9)(c) and (d)</td></tr>
+      <tr><td>Directors and legal representatives</td><td>Temporary ban from exercising managerial functions within the same entity, if it fails to comply with an ACN formal warning</td><td>Art. 38(6)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The ancillary penalty deserves attention. Paragraph 6 allows ACN, where the entity fails to comply within the deadline of a formal warning issued under Article 37, which governs enforcement powers, to ban the management bodies, the chief executive or the legal representative from exercising managerial functions; the measure lasts until the entity remedies the shortcomings.</p>
+<p>Paragraph 5 adds that natural persons responsible for an essential entity, or acting as its legal representative, ensure compliance with the decree and may be held liable for non-compliance. Finally, for public employees, paragraph 7 refers to the rules on managerial, disciplinary and administrative-accounting liability.</p>
+
+<h2>Conclusions</h2>
+<p>Article 23 of the NIS decree turns cybersecurity into a matter for the board of directors. Top management approves the strategic documents, oversees implementation, undergoes training and is liable for infringements; delegation, allowed for operational activities, does not release it from liability.</p>
+<p>In practice, it is advisable to proceed in this order:</p>
+<ol>
+  <li>identify precisely the members of the management bodies and check that they are listed on the ACN portal;</li>
+  <li>submit the eleven strategic documents, drafted at the level of direction, to the board and minute their approval;</li>
+  <li>define operational delegations, making clear that approval remains collective;</li>
+  <li>approve a training plan that includes directors and keep a register of the activities carried out;</li>
+  <li>set up a periodic flow of reports to the board on incidents, notifications and the improvement plan.</li>
+</ol>
+<p>For the other obligations, from registration to incident notification, see the <a href="/risorse/nis2">complete NIS2 guide</a>.</p>
+
+<p><strong>To check where your organisation stands</strong>, <a href="/inizia">RegulaeOS's NIS2 gap analysis</a> lets you check which documents require board approval, gather resolutions and minutes in one place and keep track of the training of management bodies.</p>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art23" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 23 (management bodies), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 38 (administrative penalties), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art7" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 7 (identification and listing of entities), Normattiva</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/PDF/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Directive (EU) 2022/2555 (NIS2), Art. 20, EUR-Lex</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/ruoli-e-procedure" target="_blank" rel="noopener">ACN, NIS FAQ, roles and procedures (FAQs ODA, PDC, RCS)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/w/aggiornate-le-faq-acn-sugli-obblighi-degli-organi-di-amministrazione-e-direttivi-dei-soggetti-nis" target="_blank" rel="noopener">ACN, news on the update of the FAQs on management bodies, 14 July 2026</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-1-v2" target="_blank" rel="noopener">ACN, Annex 1 to determination no. 379907/2025, baseline security measures for important entities</a></li>
+  <li><a href="https://www.acn.gov.it/portale/nis/obblighi" target="_blank" rel="noopener">ACN, NIS "Obblighi" page</a></li>
+</ul>
+`,
+    },
+  },
+  {
     slug: "misure-sicurezza-base-nis2-acn",
     title: "Misure di sicurezza di base NIS2, la determinazione ACN spiegata in modo semplice",
     excerpt:
