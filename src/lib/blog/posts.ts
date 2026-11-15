@@ -38,6 +38,386 @@ export interface BlogPost {
 
 export const POSTS: BlogPost[] = [
   {
+    slug: "fornitori-rilevanti-nis2-catena-di-fornitura",
+    title: "Fornitori rilevanti NIS2 e sicurezza della catena di fornitura, obblighi, elenco ACN e contratti",
+    excerpt:
+      "Che cosa chiede la NIS2 sui fornitori. Chi sono i fornitori rilevanti NIS secondo la determinazione ACN n. 314287/2026, come si elencano nell'aggiornamento annuale, quali misure GV.SC applicare alla catena di fornitura, quando vanno adeguati i contratti e chi notifica gli incidenti che coinvolgono un fornitore.",
+    date: "15 novembre 2026",
+    dateISO: "2026-11-15",
+    author: { name: "Umberto Mottola", jobTitle: "Avvocato, CIPP/E" },
+    dateModifiedISO: "2026-11-15",
+    readTime: "9 min",
+    category: "Guide",
+    tags: ["NIS2", "fornitori rilevanti NIS", "supply chain NIS2", "catena di approvvigionamento", "GV.SC", "contratti fornitori NIS2", "art. 24 decreto NIS", "ACN", "D.Lgs. 138/2024"],
+    metaTitle: "Fornitori rilevanti NIS2 e supply chain, guida pratica",
+    metaDescription:
+      "Fornitori rilevanti NIS2 e sicurezza della catena di fornitura. Chi elencare all'ACN, misure GV.SC, contratti da adeguare e notifica degli incidenti.",
+    faqSchema: [
+      {
+        q: "Chi sono i fornitori rilevanti NIS?",
+        a: "Sono i soggetti che forniscono servizi o prodotti a un soggetto NIS e soddisfano almeno uno di due criteri fissati dalla determinazione ACN n. 314287/2026; la fornitura rientra tra le attività dei punti 8 e 9 dell'allegato I del decreto NIS, ossia è una fornitura ICT, oppure la sua interruzione avrebbe un impatto significativo sui servizi NIS, anche per la mancanza di alternative.",
+      },
+      {
+        q: "Quando si comunicano all'ACN i fornitori rilevanti?",
+        a: "Nell'aggiornamento annuale delle informazioni, tra il 15 aprile e il 31 maggio, come prevedono l'art. 16, comma 3, lettera g), e l'art. 18 della determinazione ACN n. 314287/2026. Per ciascun fornitore si indicano denominazione, codice fiscale, Paese della sede legale, codici CPV della fornitura e criterio di rilevanza.",
+      },
+      {
+        q: "Essere fornitore rilevante significa rientrare nella NIS2?",
+        a: "No, non automaticamente. Secondo la FAQ FRN.1 dell'ACN gli elenchi servono a individuare, d'intesa con le Autorità di settore, gli elementi sistemici della catena di approvvigionamento, che l'art. 3, comma 9, lettera f), del decreto NIS consente di includere tra i soggetti NIS indipendentemente dalle dimensioni.",
+      },
+      {
+        q: "Bisogna modificare tutti i contratti con i fornitori?",
+        a: "No. Secondo la FAQ MSB.12 dell'ACN i requisiti di sicurezza della misura GV.SC-05 vanno inseriti nei contratti stipulati, rinnovati o prorogati dal termine per l'adozione delle misure, e solo per le forniture con potenziali impatti sulla sicurezza. Le FAQ MSB.15 e MSB.16 aggiungono che non servono tutti i requisiti né la loro riproduzione testuale.",
+      },
+      {
+        q: "Chi notifica al CSIRT Italia un incidente che coinvolge un fornitore?",
+        a: "Dipende da dove si verifica l'incidente. Secondo le FAQ ISB.F dell'ACN, se colpisce i sistemi del cliente notifica il cliente; se colpisce i sistemi di un fornitore che è a sua volta soggetto NIS notifica il fornitore e, se l'incidente è significativo anche per il cliente, notifica anche quest'ultimo.",
+      },
+    ],
+    content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · aggiornato al 15 nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In sintesi.</strong> La NIS2 chiede ai soggetti essenziali e importanti di gestire il rischio che deriva dai fornitori. In pratica gli obblighi sono due; elencare all'ACN i fornitori rilevanti nell'aggiornamento annuale e applicare alla catena di fornitura le misure GV.SC, ossia valutare il rischio, definire requisiti di sicurezza, inserirli nei contratti nuovi o rinnovati e verificarli nel tempo. I contratti in essere non vanno riscritti.
+</p>
+
+<p>I fornitori rilevanti NIS2 e la sicurezza della catena di fornitura sono il punto in cui la disciplina esce dal perimetro della singola organizzazione. Il decreto legislativo n. 138 del 2024, ossia il decreto NIS che ha recepito in Italia la direttiva (UE) 2022/2555, parte da un'osservazione semplice; molti incidenti entrano attraverso un fornitore, sicché la sicurezza di un soggetto dipende anche da chi gli fornisce servizi e prodotti.</p>
+<p>Questo articolo spiega chi sono i fornitori rilevanti, come si comunicano all'ACN, quali misure applicare alla catena di fornitura, che cosa cambia nei contratti e chi notifica gli incidenti che coinvolgono un fornitore. Per il quadro generale degli obblighi si rinvia alla <a href="/risorse/nis2">guida alla NIS2</a>; per il calendario degli adempimenti, alla pagina sullo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>.</p>
+
+<h2>Che cosa chiede la NIS2 sui fornitori?</h2>
+<p>La NIS2 inserisce la sicurezza della catena di approvvigionamento tra le misure minime di gestione del rischio. Ogni soggetto essenziale o importante deve quindi presidiare i rapporti con i propri diretti fornitori, tenendo conto delle loro vulnerabilità, della qualità dei loro prodotti e delle loro pratiche di sicurezza.</p>
+<p>La base è l'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">art. 24 del decreto NIS</a>, che disciplina le misure di gestione dei rischi per la sicurezza informatica. Il comma 2, lettera d), vi include la «sicurezza della catena di approvvigionamento, ivi compresi gli aspetti relativi alla sicurezza riguardanti i rapporti tra ciascun soggetto e i suoi diretti fornitori o fornitori di servizi».</p>
+<p>Il comma 3 precisa come scegliere le misure adeguate. Il soggetto tiene conto delle vulnerabilità specifiche di ogni diretto fornitore, della qualità complessiva dei prodotti e delle pratiche di sicurezza dei fornitori, comprese le procedure di sviluppo sicuro, nonché dei risultati delle valutazioni coordinate dei rischi sulle catene di approvvigionamento critiche svolte dal Gruppo di cooperazione NIS. La norma riprende l'art. 21, paragrafi 2, lettera d), e 3, della <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/PDF/?uri=CELEX:32022L2555" target="_blank" rel="noopener">direttiva (UE) 2022/2555</a>, che fissa le stesse misure a livello europeo.</p>
+<p>In Italia l'obbligo si sviluppa su due binari distinti, che conviene tenere separati.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Binario</th><th>Che cosa si fa</th><th>Fonte</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Elencazione dei fornitori rilevanti</td><td>Si comunicano all'ACN i fornitori ICT o non fungibili</td><td>Determinazione ACN n. 314287/2026, artt. 16 e 18</td></tr>
+      <tr><td>Misure di sicurezza sulla catena di fornitura</td><td>Si valuta il rischio, si fissano requisiti, si inseriscono nei contratti e si verificano</td><td>Determinazione ACN n. 379907/2025, misure GV.SC</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2>Chi sono i fornitori rilevanti NIS?</h2>
+<p>È fornitore rilevante NIS chi fornisce servizi o prodotti a un soggetto NIS e soddisfa almeno uno di due criteri; la fornitura è ICT, perché riconducibile ai punti 8 e 9 dell'allegato I del decreto NIS, oppure è non fungibile, perché la sua interruzione avrebbe un impatto significativo sulle attività NIS.</p>
+<p>La definizione si trova nell'art. 1, comma 1, lettera nn), della <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_piattaforma_314287-2026_signeddg" target="_blank" rel="noopener">determinazione ACN n. 314287/2026</a>, che disciplina la piattaforma digitale NIS e le informazioni da fornire all'ACN; la determinazione sostituisce la precedente n. 127437 del 13 aprile 2026 e si applica dal 25 ottobre 2026. I punti 8 e 9 dell'allegato I del decreto riguardano, rispettivamente, le infrastrutture digitali e la gestione dei servizi TIC tra imprese.</p>
+<p>Il secondo criterio è il più delicato. La fornitura è non fungibile quando la sua interruzione o compromissione incide in modo significativo sulla capacità del soggetto di erogare le attività o i servizi NIS, «anche per effetto della indisponibilità di fornitori alternativi». Secondo la FAQ FRN.2, i due criteri possono ricorrere da soli o insieme, sicché una fornitura può essere ICT, non fungibile oppure ICT non fungibile.</p>
+<p>La tabella riporta gli esempi indicati dalla FAQ FRN.4 nelle <a href="https://www.acn.gov.it/portale/faq/nis/aggiornamento-delle-informazioni" target="_blank" rel="noopener">FAQ ACN sull'aggiornamento delle informazioni</a>.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Tipo di fornitura</th><th>Esempi indicati dall'ACN</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>ICT</td><td>Cloud computing, data center, servizi DNS, reti di distribuzione dei contenuti, servizi fiduciari, reti e servizi di comunicazione elettronica, servizi gestiti e servizi gestiti di sicurezza</td></tr>
+      <tr><td>ICT non fungibile</td><td>Connettività dati e voce, fissa e mobile, se non ridondata</td></tr>
+      <tr><td>Non fungibile</td><td>Erogazione di energia elettrica</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>La stessa FAQ riassume il principio; rientrano tutte le dipendenze digitali del soggetto NIS e anche le dipendenze non digitali che non possono essere sostituite senza un impatto significativo sui servizi NIS.</p>
+<p>Occorre infine chiarire lo scopo dell'elenco. Secondo la FAQ FRN.1, le informazioni servono all'ACN per individuare, d'intesa con le Autorità di settore, gli elementi sistemici della catena di approvvigionamento; l'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art3" target="_blank" rel="noopener">art. 3, comma 9, lettera f), del decreto NIS</a>, che individua i casi di applicazione indipendente dalle dimensioni, consente infatti di includere tra i soggetti NIS chi sia considerato critico «quale elemento sistemico della catena di approvvigionamento, anche digitale». Ne consegue che essere indicati come fornitori rilevanti non comporta, di per sé, l'applicazione della NIS2.</p>
+
+<h2>Come si comunicano i fornitori rilevanti all'ACN?</h2>
+<p>I fornitori rilevanti si elencano nel servizio di aggiornamento annuale del portale ACN, tra il 15 aprile e il 31 maggio. Per ciascuno si indicano denominazione, codice fiscale, Paese della sede legale, codici CPV della fornitura e criterio di rilevanza utilizzato; le modifiche successive si comunicano entro quattordici giorni.</p>
+<p>L'elenco fa parte dell'aggiornamento annuale disciplinato dall'art. 16 della determinazione n. 314287/2026, il cui comma 3, lettera g), richiama appunto i fornitori rilevanti ai fini dell'art. 3, comma 9, lettera f), del decreto. L'art. 18 della determinazione, intitolato all'elencazione dei fornitori rilevanti NIS, indica le cinque informazioni da comunicare.</p>
+<ul>
+  <li>la denominazione;</li>
+  <li>il codice fiscale;</li>
+  <li>il Paese in cui il fornitore ha la sede legale;</li>
+  <li>i codici CPV, ossia i codici del vocabolario comune per gli appalti pubblici previsto dal regolamento (CE) n. 2195/2002, relativi alle forniture di cui il soggetto fruisce;</li>
+  <li>il criterio di rilevanza utilizzato.</li>
+</ul>
+<p>Le FAQ da FRN.5 a FRN.10 risolvono i casi pratici più frequenti, che la tabella riassume.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Caso</th><th>Indicazione dell'ACN</th><th>FAQ</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Fornitori esteri, anche extra UE</td><td>Vanno elencati</td><td>FRN.5</td></tr>
+      <tr><td>Fornitori delle sedi estere di un soggetto italiano</td><td>Vanno elencati</td><td>FRN.6</td></tr>
+      <tr><td>Fornitore A che si avvale del subfornitore B</td><td>Si indica A; B solo se il suo contributo è palese</td><td>FRN.7</td></tr>
+      <tr><td>Fornitura contrattualizzata con A ma erogata da B</td><td>Si indica B; A solo se non è un mero intermediario ma è funzionale all'erogazione</td><td>FRN.8</td></tr>
+      <tr><td>Fornitore dello stesso gruppo</td><td>Va valutato come gli altri</td><td>FRN.9</td></tr>
+      <tr><td>Più codici CPV per lo stesso fornitore</td><td>Una riga del file per ogni codice</td><td>FRN.10</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>L'esempio della FAQ FRN.8 aiuta a capire il criterio. Se l'organizzazione usa un servizio SaaS del fornitore B la cui gestione applicativa è affidata al fornitore A, entrambi sono rilevanti; se invece da A acquista soltanto le licenze e non ha altre interazioni con lui, A non appare rilevante.</p>
+<p>L'elenco va poi tenuto aggiornato. Secondo la FAQ AGA.1, ai sensi dell'art. 7, comma 7, del decreto NIS ogni modifica delle informazioni trasmesse va comunicata tempestivamente e comunque entro quattordici giorni; un nuovo fornitore cloud, per esempio, non attende l'aggiornamento dell'anno successivo. Per la procedura sul portale si rinvia alla <a href="/risorse/nis2">guida alla NIS2</a>.</p>
+
+<h2>Le misure di sicurezza sulla catena di fornitura, in quattro fasi</h2>
+<p>Il secondo binario riguarda le misure di sicurezza di base, fissate dalla determinazione ACN n. 379907/2025 negli allegati 1, per i soggetti importanti, e 2, per i soggetti essenziali. Per la catena di fornitura i requisiti sono gli stessi nei due allegati e si trovano nella categoria GV.SC, dedicata alla gestione del rischio della catena di approvvigionamento.</p>
+<p>La FAQ MSB.13 delle <a href="https://www.acn.gov.it/portale/faq/nis/misure-di-sicurezza-e-notifica-di-incidenti" target="_blank" rel="noopener">FAQ ACN su misure di sicurezza e notifica di incidenti</a> ordina questi requisiti in quattro fasi, che la tabella riassume.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Fase</th><th>Che cosa si fa</th><th>Misura</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1. Valutazione del rischio</td><td>Si valuta e documenta il rischio associato alle forniture</td><td>GV.SC-07, punto 1</td></tr>
+      <tr><td>2. Requisiti di sicurezza</td><td>Si definiscono requisiti coerenti con l'esito della valutazione e con le misure applicate ai propri sistemi</td><td>GV.SC-01, punto 1</td></tr>
+      <tr><td>3. Inserimento nei documenti</td><td>I requisiti entrano in richieste di offerta, bandi, contratti, accordi e convenzioni</td><td>GV.SC-05, punto 1</td></tr>
+      <tr><td>4. Verifica</td><td>Si verifica periodicamente, e si documenta, la conformità delle forniture ai requisiti</td><td>GV.SC-07, punto 2</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>La valutazione del rischio ha un contenuto minimo. Secondo la misura GV.SC-07 dell'<a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-1-v2" target="_blank" rel="noopener">allegato 1</a>, richiamata dalla FAQ MSB.14, vanno considerati almeno il livello di accesso del fornitore ai sistemi, il suo accesso alla proprietà intellettuale e ai dati, l'impatto di una grave interruzione della fornitura, i tempi e i costi di ripristino e i ruoli del fornitore nel governo dei sistemi.</p>
+<p>Altri tre requisiti completano il quadro. La misura GV.SC-01 chiede di coinvolgere l'organizzazione per la sicurezza informatica nei processi di acquisto fin dalla progettazione della fornitura; la misura GV.SC-04 impone un inventario aggiornato dei fornitori delle forniture con potenziali impatti sulla sicurezza, con almeno il referente e la tipologia di fornitura; la misura GV.SC-02 chiede di definire e comunicare gli eventuali ruoli di sicurezza assegnati al personale dei fornitori. A questi si aggiunge la misura ID.AM-04, che richiede l'inventario dei servizi informatici erogati dai fornitori, compresi i servizi cloud.</p>
+<p>Per il contenuto delle altre misure si rinvia all'articolo sulle <a href="/risorse/misure-sicurezza-base-nis2-acn">misure di sicurezza di base NIS2</a>.</p>
+
+<h2>Bisogna modificare i contratti con i fornitori?</h2>
+<p>Non tutti e non subito. I requisiti di sicurezza vanno inseriti nei contratti stipulati, rinnovati o prorogati dal termine per l'adozione delle misure, e solo per le forniture con potenziali impatti sulla sicurezza dei sistemi. Non occorre inserire tutti i requisiti delle misure di base, né riprodurne il testo.</p>
+<p>La regola sul tempo è fissata dalla FAQ MSB.12. I contratti già in essere non vanno adeguati; per quelli stipulati, rinnovati o prorogati dopo il termine per l'adozione delle misure, invece, l'inserimento dei requisiti è obbligatorio, salvo motivate e documentate ragioni normative o tecniche. Per i soggetti inseriti nell'elenco entro il 31 dicembre 2025, precisa la stessa FAQ, quel termine è di diciotto mesi dalla ricezione della comunicazione di inserimento.</p>
+<p>La regola sul perimetro è fissata dalla FAQ MSB.15. I requisiti servono soltanto per le forniture la cui compromissione può incidere sulla disponibilità, l'autenticità, l'integrità o la riservatezza dei dati e dei servizi dei sistemi informativi e di rete; non per ogni acquisto.</p>
+<p>La regola sul contenuto è fissata dalla FAQ MSB.16. Non è necessario riportare tutti i requisiti delle misure di base né copiarne il testo; basta che le clausole ne recepiscano il contenuto sostanziale, in coerenza con la valutazione del rischio della singola fornitura. Le FAQ MSB.17 e MSB.19, pensate per le amministrazioni, confermano lo stesso criterio di proporzionalità; per servizi non ICT, come la pulizia o la vigilanza senza strumenti digitali, i requisiti devono restare coerenti con l'oggetto della prestazione e con il rischio concreto.</p>
+<p>Due clausole meritano comunque attenzione. Secondo la FAQ ISB.F.1, nel definire i requisiti il soggetto deve assicurarsi che il fornitore gli segnali tempestivamente gli eventi di sicurezza che incidono sui suoi servizi; secondo la FAQ ACI.2, conviene valutare clausole sulla protezione delle informazioni scambiate con il fornitore, come gli accordi di riservatezza.</p>
+
+<h2>Incidenti che coinvolgono un fornitore, chi notifica al CSIRT Italia</h2>
+<p>Quando un incidente coinvolge un fornitore, l'obbligo di notifica previsto dall'art. 25 del decreto NIS, che disciplina la notifica degli incidenti significativi, segue un criterio semplice; conta su quali sistemi si verifica l'incidente e se il fornitore è a sua volta soggetto NIS. Le FAQ ISB.F distinguono tre ipotesi.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Situazione</th><th>Chi notifica</th><th>FAQ</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Incidente sui sistemi del cliente, anche se gestiti da un fornitore NIS, per esempio un SOC</td><td>Il cliente</td><td>ISB.F.1</td></tr>
+      <tr><td>Incidente sui sistemi di un fornitore NIS che eroga servizi al cliente</td><td>Il fornitore; anche il cliente, se l'incidente è significativo per i suoi servizi</td><td>ISB.F.2</td></tr>
+      <tr><td>Incidente su un servizio cloud erogato da un fornitore NIS</td><td>Cliente e fornitore; il solo cliente se il servizio è IaaS o di hosting della sua infrastruttura</td><td>ISB.F.3</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>La conseguenza pratica è che il contratto deve rendere possibile la notifica nei termini. Il cliente, infatti, può notificare solo ciò che conosce; per questo la clausola di segnalazione tempestiva degli eventi di sicurezza, ricordata dalla FAQ ISB.F.1, è uno strumento di adempimento e non una semplice cautela.</p>
+
+<h2>Conclusioni</h2>
+<p>La NIS2 trasforma la scelta e la gestione dei fornitori in un tema di conformità. Il soggetto NIS deve sapere da chi dipende, comunicarlo all'ACN quando la fornitura è ICT o non fungibile, valutare il rischio di ogni fornitura con impatti sulla sicurezza e tradurlo in clausole contrattuali proporzionate e verificabili.</p>
+<p>In pratica conviene procedere in questo ordine:</p>
+<ol>
+  <li>censire i fornitori e i servizi che erogano, compresi cloud e servizi gestiti, e individuare quelli rilevanti secondo i due criteri dell'ACN;</li>
+  <li>preparare per l'aggiornamento annuale l'elenco con codice fiscale, Paese, codici CPV e criterio di rilevanza, prevedendo una procedura per le modifiche entro quattordici giorni;</li>
+  <li>valutare e documentare il rischio di ogni fornitura con potenziali impatti sulla sicurezza, secondo i criteri della misura GV.SC-07;</li>
+  <li>predisporre clausole di sicurezza modulari da inserire nei contratti nuovi, rinnovati o prorogati, comprese la segnalazione tempestiva degli eventi e la riservatezza;</li>
+  <li>pianificare verifiche periodiche sui fornitori e conservarne gli esiti.</li>
+</ol>
+<p>Per gli altri obblighi, dalla registrazione alla notifica degli incidenti, si rinvia alla <a href="/risorse/nis2">guida completa alla NIS2</a>.</p>
+
+<p><strong>Per verificare a che punto è la tua organizzazione</strong>, <a href="/inizia">la gap analysis NIS2 di RegulaeOS</a> permette di censire i fornitori, individuare quelli rilevanti da comunicare all'ACN e controllare quali contratti richiedono requisiti di sicurezza.</p>
+
+<h2>Fonti</h2>
+<ul>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 24 (misure di gestione dei rischi per la sicurezza informatica), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art3" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 3 (ambito di applicazione), Normattiva</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/PDF/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Direttiva (UE) 2022/2555 (NIS2), art. 21, EUR-Lex</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_piattaforma_314287-2026_signeddg" target="_blank" rel="noopener">ACN, determinazione n. 314287/2026 sulla piattaforma digitale NIS (artt. 1, 16 e 18)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/aggiornamento-delle-informazioni" target="_blank" rel="noopener">ACN, FAQ NIS, aggiornamento delle informazioni (FAQ AGA, ACI, FRN)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/misure-di-sicurezza-e-notifica-di-incidenti" target="_blank" rel="noopener">ACN, FAQ NIS, misure di sicurezza e notifica di incidenti (FAQ MSB, ISB.F)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-1-v2" target="_blank" rel="noopener">ACN, allegato 1 alla determinazione n. 379907/2025, misure di sicurezza di base per i soggetti importanti</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-2-v2" target="_blank" rel="noopener">ACN, allegato 2 alla determinazione n. 379907/2025, misure di sicurezza di base per i soggetti essenziali</a></li>
+</ul>
+`,
+    en: {
+      title: "NIS2 relevant suppliers and supply chain security: obligations, ACN list and contracts",
+      excerpt:
+        "What NIS2 requires regarding suppliers. Who the NIS relevant suppliers are under ACN determination no. 314287/2026, how to list them in the annual update, which GV.SC measures apply to the supply chain, when contracts must be updated and who notifies incidents involving a supplier.",
+      date: "15 November 2026",
+      readTime: "9 min",
+      category: "Guide",
+      tags: ["NIS2", "NIS relevant suppliers", "NIS2 supply chain", "supply chain security", "GV.SC", "NIS2 supplier contracts", "Article 24 NIS decree", "ACN", "Legislative Decree 138/2024"],
+      metaTitle: "NIS2 relevant suppliers and supply chain: a practical guide",
+      metaDescription:
+        "NIS2 relevant suppliers and supply chain security in Italy. Who to list with ACN, GV.SC measures, which contracts to update and incident notification.",
+      faqSchema: [
+        {
+          q: "Who are NIS relevant suppliers?",
+          a: "They are entities that supply services or products to a NIS entity and meet at least one of two criteria set by ACN determination no. 314287/2026; the supply falls within points 8 and 9 of Annex I to the NIS decree, i.e. it is an ICT supply, or its disruption would have a significant impact on NIS services, including because no alternatives are available.",
+        },
+        {
+          q: "When are relevant suppliers reported to ACN?",
+          a: "In the annual update of information, between 15 April and 31 May, as provided by Article 16(3)(g) and Article 18 of ACN determination no. 314287/2026. For each supplier the entity states its name, tax code, country of registered office, the CPV codes of the supply and the relevance criterion.",
+        },
+        {
+          q: "Does being a relevant supplier bring a company within NIS2?",
+          a: "Not automatically. According to ACN FAQ FRN.1, the lists are used to identify, in agreement with the sector authorities, systemic elements of the supply chain, which Article 3(9)(f) of the NIS decree allows to be included among NIS entities regardless of size.",
+        },
+        {
+          q: "Must all supplier contracts be amended?",
+          a: "No. According to ACN FAQ MSB.12, the security requirements of measure GV.SC-05 must be included in contracts signed, renewed or extended from the deadline for adopting the measures, and only for supplies with potential security impacts. FAQs MSB.15 and MSB.16 add that neither all requirements nor their literal wording are needed.",
+        },
+        {
+          q: "Who notifies CSIRT Italia of an incident involving a supplier?",
+          a: "It depends on where the incident occurs. According to ACN FAQs ISB.F, if it affects the customer's systems the customer notifies; if it affects the systems of a supplier that is itself a NIS entity, the supplier notifies and, if the incident is also significant for the customer, the customer notifies as well.",
+        },
+      ],
+      content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · updated 15 Nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In short.</strong> NIS2 requires essential and important entities to manage the risk arising from their suppliers. In practice there are two obligations; listing relevant suppliers with ACN in the annual update, and applying the GV.SC measures to the supply chain, namely assessing risk, defining security requirements, including them in new or renewed contracts and checking them over time. Existing contracts do not need to be rewritten.
+</p>
+
+<p>NIS2 relevant suppliers and supply chain security are where the rules reach beyond the boundaries of a single organisation. Legislative Decree no. 138 of 2024, the NIS decree that transposed Directive (EU) 2022/2555 into Italian law, starts from a simple observation; many incidents come in through a supplier, so an entity's security also depends on those who provide it with services and products.</p>
+<p>This article explains who relevant suppliers are, how they are reported to ACN, which measures apply to the supply chain, what changes in contracts and who notifies incidents involving a supplier. For a general overview of the obligations, see the <a href="/risorse/nis2">NIS2 guide</a>; for the timeline of obligations, see the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">NIS2 implementation status</a>.</p>
+
+<h2>What does NIS2 require regarding suppliers?</h2>
+<p>NIS2 includes supply chain security among the minimum risk-management measures. Every essential or important entity must therefore manage its relationships with its direct suppliers, taking into account their vulnerabilities, the quality of their products and their security practices.</p>
+<p>The legal basis is <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">Article 24 of the NIS decree</a>, which governs cybersecurity risk-management measures. Paragraph 2(d) includes "supply chain security, including security-related aspects concerning the relationships between each entity and its direct suppliers or service providers".</p>
+<p>Paragraph 3 explains how to choose appropriate measures. The entity takes into account the specific vulnerabilities of each direct supplier, the overall quality of suppliers' products and cybersecurity practices, including their secure development procedures, and the results of the coordinated risk assessments of critical supply chains carried out by the NIS Cooperation Group. The provision mirrors Article 21(2)(d) and (3) of <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/PDF/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Directive (EU) 2022/2555</a>, which sets the same measures at EU level.</p>
+<p>In Italy the obligation runs on two separate tracks, which are best kept apart.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Track</th><th>What is done</th><th>Source</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Listing relevant suppliers</td><td>ICT or non-substitutable suppliers are reported to ACN</td><td>ACN determination no. 314287/2026, Articles 16 and 18</td></tr>
+      <tr><td>Supply chain security measures</td><td>Risk is assessed, requirements are set, included in contracts and checked</td><td>ACN determination no. 379907/2025, GV.SC measures</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2>Who are NIS relevant suppliers?</h2>
+<p>A NIS relevant supplier is anyone who supplies services or products to a NIS entity and meets at least one of two criteria; the supply is ICT, because it falls within points 8 and 9 of Annex I to the NIS decree, or it is non-substitutable, because its disruption would have a significant impact on NIS activities.</p>
+<p>The definition is in Article 1(1)(nn) of <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_piattaforma_314287-2026_signeddg" target="_blank" rel="noopener">ACN determination no. 314287/2026</a>, which governs the NIS digital platform and the information to be provided to ACN; the determination replaces the previous no. 127437 of 13 April 2026 and applies from 25 October 2026. Points 8 and 9 of Annex I to the decree cover digital infrastructure and business-to-business ICT service management respectively.</p>
+<p>The second criterion is the more delicate one. A supply is non-substitutable when its disruption or compromise significantly affects the entity's ability to provide its NIS activities or services, "including as a result of the unavailability of alternative suppliers". According to FAQ FRN.2, the two criteria may apply alone or together, so a supply may be ICT, non-substitutable, or ICT and non-substitutable.</p>
+<p>The table shows the examples given in FAQ FRN.4 of the <a href="https://www.acn.gov.it/portale/faq/nis/aggiornamento-delle-informazioni" target="_blank" rel="noopener">ACN FAQs on updating information</a>.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Type of supply</th><th>Examples given by ACN</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>ICT</td><td>Cloud computing, data centres, DNS services, content delivery networks, trust services, electronic communications networks and services, managed services and managed security services</td></tr>
+      <tr><td>ICT and non-substitutable</td><td>Data and voice connectivity, fixed and mobile, where not redundant</td></tr>
+      <tr><td>Non-substitutable</td><td>Electricity supply</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The same FAQ sums up the principle; all of the NIS entity's digital dependencies are included, as well as non-digital dependencies that cannot be replaced without a significant impact on NIS services.</p>
+<p>Finally, the purpose of the list should be clear. According to FAQ FRN.1, the information enables ACN to identify, in agreement with the sector authorities, systemic elements of the supply chain; <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art3" target="_blank" rel="noopener">Article 3(9)(f) of the NIS decree</a>, which lists the cases where the decree applies regardless of size, allows an entity to be included among NIS entities if it is considered critical "as a systemic element of the supply chain, including the digital supply chain". It follows that being listed as a relevant supplier does not, in itself, bring a company within NIS2.</p>
+
+<h2>How are relevant suppliers reported to ACN?</h2>
+<p>Relevant suppliers are listed in the annual update service of the ACN portal, between 15 April and 31 May. For each one the entity states its name, tax code, country of registered office, the CPV codes of the supply and the relevance criterion used; later changes are reported within fourteen days.</p>
+<p>The list is part of the annual update governed by Article 16 of determination no. 314287/2026, whose paragraph 3(g) refers to relevant suppliers for the purposes of Article 3(9)(f) of the decree. Article 18 of the determination, on the listing of NIS relevant suppliers, sets out the five items of information to be reported.</p>
+<ul>
+  <li>the name;</li>
+  <li>the tax code;</li>
+  <li>the country of the supplier's registered office;</li>
+  <li>the CPV codes, namely the Common Procurement Vocabulary codes under Regulation (EC) no. 2195/2002, for the supplies the entity uses;</li>
+  <li>the relevance criterion used.</li>
+</ul>
+<p>FAQs FRN.5 to FRN.10 resolve the most common practical cases, summarised in the table.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Case</th><th>ACN guidance</th><th>FAQ</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Foreign suppliers, including non-EU</td><td>Must be listed</td><td>FRN.5</td></tr>
+      <tr><td>Suppliers of foreign branches of an Italian entity</td><td>Must be listed</td><td>FRN.6</td></tr>
+      <tr><td>Supplier A using subcontractor B</td><td>List A; B only where its contribution is evident</td><td>FRN.7</td></tr>
+      <tr><td>Supply contracted with A but delivered by B</td><td>List B; A only if it is not a mere intermediary but is needed to deliver the supply</td><td>FRN.8</td></tr>
+      <tr><td>Supplier in the same group</td><td>Must be assessed like any other</td><td>FRN.9</td></tr>
+      <tr><td>Several CPV codes for the same supplier</td><td>One row in the file for each code</td><td>FRN.10</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The example in FAQ FRN.8 helps explain the criterion. If the organisation uses a SaaS service from supplier B whose application management is entrusted to supplier A, both are relevant; if instead it only buys licences from A and has no further dealings with it, A does not appear relevant.</p>
+<p>The list must then be kept up to date. According to FAQ AGA.1, under Article 7(7) of the NIS decree any change to the information submitted must be reported promptly and in any case within fourteen days; a new cloud provider, for example, does not wait for the following year's update. For the portal procedure, see the <a href="/risorse/nis2">NIS2 guide</a>.</p>
+
+<h2>Supply chain security measures in four phases</h2>
+<p>The second track concerns the baseline security measures set by ACN determination no. 379907/2025 in Annex 1, for important entities, and Annex 2, for essential entities. For the supply chain the requirements are the same in both annexes and sit in the GV.SC category, on supply chain risk management.</p>
+<p>FAQ MSB.13 of the <a href="https://www.acn.gov.it/portale/faq/nis/misure-di-sicurezza-e-notifica-di-incidenti" target="_blank" rel="noopener">ACN FAQs on security measures and incident notification</a> arranges these requirements in four phases, summarised in the table.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Phase</th><th>What is done</th><th>Measure</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1. Risk assessment</td><td>The risk associated with supplies is assessed and documented</td><td>GV.SC-07, point 1</td></tr>
+      <tr><td>2. Security requirements</td><td>Requirements are defined in line with the assessment and with the measures applied to the entity's own systems</td><td>GV.SC-01, point 1</td></tr>
+      <tr><td>3. Inclusion in documents</td><td>Requirements are included in requests for proposals, tenders, contracts, agreements and conventions</td><td>GV.SC-05, point 1</td></tr>
+      <tr><td>4. Verification</td><td>Compliance of supplies with the requirements is checked periodically and documented</td><td>GV.SC-07, point 2</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The risk assessment has a minimum content. Under measure GV.SC-07 of <a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-1-v2" target="_blank" rel="noopener">Annex 1</a>, referred to in FAQ MSB.14, it must consider at least the supplier's level of access to the systems, its access to intellectual property and data, the impact of a serious disruption of the supply, recovery times and costs, and the supplier's roles in governing the systems.</p>
+<p>Three further requirements complete the picture. Measure GV.SC-01 requires the cybersecurity organisation to be involved in procurement from the design of the supply; measure GV.SC-04 requires an up-to-date inventory of suppliers of supplies with potential security impacts, including at least the contact person and the type of supply; measure GV.SC-02 requires any security roles assigned to supplier staff to be defined and communicated. Measure ID.AM-04 adds an inventory of IT services provided by suppliers, including cloud services.</p>
+<p>For the content of the other measures, see the article on <a href="/risorse/misure-sicurezza-base-nis2-acn">NIS2 baseline security measures</a>.</p>
+
+<h2>Must supplier contracts be amended?</h2>
+<p>Not all of them and not immediately. Security requirements must be included in contracts signed, renewed or extended from the deadline for adopting the measures, and only for supplies with potential impacts on system security. It is not necessary to include all the baseline requirements or to reproduce their wording.</p>
+<p>The timing rule is set by FAQ MSB.12. Existing contracts do not need to be updated; for those signed, renewed or extended after the deadline for adopting the measures, however, including the requirements is mandatory, unless there are justified and documented legal or technical reasons. For entities included in the list by 31 December 2025, the same FAQ specifies that the deadline is eighteen months from receipt of the notice of inclusion.</p>
+<p>The scope rule is set by FAQ MSB.15. Requirements are needed only for supplies whose compromise may affect the availability, authenticity, integrity or confidentiality of the data and services of network and information systems; not for every purchase.</p>
+<p>The content rule is set by FAQ MSB.16. It is not necessary to include all the baseline requirements or to copy their text; it is enough for the clauses to reflect their substance, in line with the risk assessment of the individual supply. FAQs MSB.17 and MSB.19, written for public administrations, confirm the same proportionality criterion; for non-ICT services, such as cleaning or security guarding without digital tools, requirements must remain consistent with the subject matter of the contract and with the actual risk.</p>
+<p>Two clauses nonetheless deserve attention. According to FAQ ISB.F.1, when defining requirements the entity must ensure that the supplier promptly reports security events affecting its services; according to FAQ ACI.2, it is advisable to consider clauses protecting the information exchanged with the supplier, such as confidentiality agreements.</p>
+
+<h2>Incidents involving a supplier: who notifies CSIRT Italia</h2>
+<p>When an incident involves a supplier, the notification obligation under Article 25 of the NIS decree, which governs notification of significant incidents, follows a simple criterion; what matters is on whose systems the incident occurs and whether the supplier is itself a NIS entity. FAQs ISB.F distinguish three cases.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Situation</th><th>Who notifies</th><th>FAQ</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Incident on the customer's systems, even if managed by a NIS supplier, for example a SOC</td><td>The customer</td><td>ISB.F.1</td></tr>
+      <tr><td>Incident on the systems of a NIS supplier serving the customer</td><td>The supplier; also the customer, if the incident is significant for its services</td><td>ISB.F.2</td></tr>
+      <tr><td>Incident on a cloud service provided by a NIS supplier</td><td>Customer and supplier; only the customer if the service is IaaS or hosting of its infrastructure</td><td>ISB.F.3</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The practical consequence is that the contract must make timely notification possible. The customer can only notify what it knows; this is why the clause on prompt reporting of security events, mentioned in FAQ ISB.F.1, is a compliance tool and not a mere precaution.</p>
+
+<h2>Conclusions</h2>
+<p>NIS2 turns the selection and management of suppliers into a compliance matter. A NIS entity must know whom it depends on, report this to ACN where the supply is ICT or non-substitutable, assess the risk of every supply with security impacts and translate it into proportionate, verifiable contractual clauses.</p>
+<p>In practice, it is advisable to proceed in this order:</p>
+<ol>
+  <li>map suppliers and the services they provide, including cloud and managed services, and identify the relevant ones under ACN's two criteria;</li>
+  <li>prepare for the annual update the list with tax code, country, CPV codes and relevance criterion, with a procedure for reporting changes within fourteen days;</li>
+  <li>assess and document the risk of every supply with potential security impacts, using the criteria of measure GV.SC-07;</li>
+  <li>prepare modular security clauses for new, renewed or extended contracts, including prompt reporting of events and confidentiality;</li>
+  <li>plan periodic checks on suppliers and keep the results.</li>
+</ol>
+<p>For the other obligations, from registration to incident notification, see the <a href="/risorse/nis2">complete NIS2 guide</a>.</p>
+
+<p><strong>To check where your organisation stands</strong>, <a href="/inizia">RegulaeOS's NIS2 gap analysis</a> lets you map your suppliers, identify the relevant ones to report to ACN and check which contracts require security requirements.</p>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 24 (cybersecurity risk-management measures), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art3" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 3 (scope), Normattiva</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/PDF/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Directive (EU) 2022/2555 (NIS2), Art. 21, EUR-Lex</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_piattaforma_314287-2026_signeddg" target="_blank" rel="noopener">ACN, determination no. 314287/2026 on the NIS digital platform (Articles 1, 16 and 18)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/aggiornamento-delle-informazioni" target="_blank" rel="noopener">ACN, NIS FAQ, updating information (FAQs AGA, ACI, FRN)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/misure-di-sicurezza-e-notifica-di-incidenti" target="_blank" rel="noopener">ACN, NIS FAQ, security measures and incident notification (FAQs MSB, ISB.F)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-1-v2" target="_blank" rel="noopener">ACN, Annex 1 to determination no. 379907/2025, baseline security measures for important entities</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/allegato-2-v2" target="_blank" rel="noopener">ACN, Annex 2 to determination no. 379907/2025, baseline security measures for essential entities</a></li>
+</ul>
+`,
+    },
+  },
+  {
     slug: "nis2-organi-di-amministrazione-obblighi-cda",
     title: "NIS2 e organi di amministrazione, obblighi, formazione e responsabilità del CdA (art. 23 decreto NIS)",
     excerpt:
