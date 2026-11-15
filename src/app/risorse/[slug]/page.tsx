@@ -232,7 +232,7 @@ export default async function BlogPost({ params }: Props) {
           <p style={{ fontSize: 14, color: "rgba(0,0,0,0.42)", marginBottom: 28 }}>
             {t("postCtaBody")}
           </p>
-          <Link href="/scanner" style={{
+          <Link href={localizedHref("/scanner", locale)} style={{
             display: "inline-block", fontFamily: "'DM Mono', monospace",
             fontSize: 13, fontWeight: 500, color: "#ffffff",
             background: "#0D1016", borderRadius: 8,

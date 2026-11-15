@@ -12,52 +12,70 @@ import ChiEroga from "@/components/sections/ChiEroga";
 import Footer from "@/components/sections/Footer";
 import BookDemoBanner from "@/components/BookDemoBanner";
 import LatestPosts from "@/components/sections/LatestPosts";
+import { getLocale } from "@/i18n/server";
+import { absoluteLocalizedUrl, localeAlternates, ogLocale } from "@/i18n/seo";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com";
 
-export const metadata: Metadata = {
-  title: { absolute: "RegulaeOS — Assistenza professionale alla conformità EU AI Act" },
-  description:
-    "RegulaeOS eroga assistenza professionale alla conformità al Regolamento EU AI Act (2024/1689), erogata da un avvocato iscritto all'albo. Risk assessment, FRIA, DPIA e documentazione tecnica: ogni valutazione è assistita dallo strumento e validata dall'avvocato.",
-  keywords: [
-    "EU AI Act compliance",
-    "conformità AI Act",
-    "software EU AI Act",
-    "classificazione sistema di IA",
-    "documentazione tecnica AI",
-    "AI Act obblighi",
-    "AI governance platform",
-    "AI Act Italia",
-    "RegulaeOS",
-  ],
-  openGraph: {
-    title: "RegulaeOS — Conformità EU AI Act",
+const HOME_META = {
+  it: {
+    title: "RegulaeOS — Assistenza professionale alla conformità EU AI Act",
     description:
+      "RegulaeOS eroga assistenza professionale alla conformità al Regolamento EU AI Act (2024/1689), erogata da un avvocato iscritto all'albo. Risk assessment, FRIA, DPIA e documentazione tecnica: ogni valutazione è assistita dallo strumento e validata dall'avvocato.",
+    ogTitle: "RegulaeOS — Conformità EU AI Act",
+    ogDescription:
       "Classifica il rischio del tuo sistema di IA, genera documentazione tecnica e gestisci gli obblighi EU AI Act. Alto rischio dal 2 dicembre 2027.",
-    url: BASE_URL,
-    siteName: "RegulaeOS",
-    images: [
-      {
-        url: `${BASE_URL}/og-image.png`,
-        width: 1200,
-        height: 630,
-        alt: "RegulaeOS — Conformità EU AI Act",
-      },
-    ],
-    locale: "it_IT",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "RegulaeOS — Conformità EU AI Act",
-    description:
+    twDescription:
       "Classifica il rischio del tuo sistema di IA e gestisci gli obblighi EU AI Act. Alto rischio dal 2 dicembre 2027.",
-    images: [`${BASE_URL}/og-image.png`],
   },
-  alternates: {
-    canonical: BASE_URL,
+  en: {
+    title: "RegulaeOS — Professional EU AI Act compliance assistance",
+    description:
+      "RegulaeOS provides professional assistance with compliance with the EU AI Act (Regulation 2024/1689), delivered by a registered lawyer. Risk assessment, FRIA, DPIA and technical documentation: every assessment is tool-assisted and validated by the lawyer.",
+    ogTitle: "RegulaeOS — EU AI Act compliance",
+    ogDescription:
+      "Classify the risk of your AI system, generate technical documentation and manage EU AI Act obligations. High-risk rules apply from 2 December 2027.",
+    twDescription:
+      "Classify the risk of your AI system and manage EU AI Act obligations. High-risk rules apply from 2 December 2027.",
   },
-};
+} as const;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const m = HOME_META[locale];
+  const url = absoluteLocalizedUrl("/", locale);
+  return {
+    title: { absolute: m.title },
+    description: m.description,
+    keywords: [
+      "EU AI Act compliance",
+      "conformità AI Act",
+      "software EU AI Act",
+      "classificazione sistema di IA",
+      "documentazione tecnica AI",
+      "AI Act obblighi",
+      "AI governance platform",
+      "AI Act Italia",
+      "RegulaeOS",
+    ],
+    openGraph: {
+      title: m.ogTitle,
+      description: m.ogDescription,
+      url,
+      siteName: "RegulaeOS",
+      images: [{ url: `${BASE_URL}/og-image.png`, width: 1200, height: 630, alt: m.ogTitle }],
+      locale: ogLocale(locale),
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: m.ogTitle,
+      description: m.twDescription,
+      images: [`${BASE_URL}/og-image.png`],
+    },
+    alternates: localeAlternates("/", locale),
+  };
+}
 
 const jsonLd = {
   "@context": "https://schema.org",

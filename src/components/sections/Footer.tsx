@@ -3,21 +3,20 @@
 import Link from "next/link";
 import Image from "next/image";
 import { openCookieSettings } from "@/components/CookieBanner";
-import { useT, useLocale } from "@/i18n/LocaleProvider";
-import { localizedHref } from "@/i18n/config";
+import { useT, useLocalizedHref } from "@/i18n/LocaleProvider";
 
 const MONO = "'DM Mono', monospace";
 const DARK = "#0D1016";
 
 export default function Footer() {
   const t = useT("footer");
-  const locale = useLocale();
+  const href = useLocalizedHref();
 
   const PRODUCT_LINKS = [
-    { label: t("link_service"),  href: "/products" },
-    { label: t("link_scanner"),  href: "/scanner" },
-    { label: t("link_resources"), href: localizedHref("/risorse", locale) },
-    { label: t("link_provider"), href: "/#chi-eroga" },
+    { label: t("link_service"),  href: href("/products") },
+    { label: t("link_scanner"),  href: href("/scanner") },
+    { label: t("link_resources"), href: href("/risorse") },
+    { label: t("link_provider"), href: href("/#chi-eroga") },
   ];
 
   const LEGAL_LINKS = [
@@ -46,7 +45,7 @@ export default function Footer() {
         }}>
           {/* Brand */}
           <div style={{ flex: "1 1 180px", minWidth: 160 }}>
-            <Link href="/" style={{ display: "inline-block", marginBottom: 14 }}>
+            <Link href={href("/")} style={{ display: "inline-block", marginBottom: 14 }}>
               <Image
                 src="/logo.svg"
                 alt="RegulaeOS"

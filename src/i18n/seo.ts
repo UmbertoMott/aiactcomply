@@ -5,7 +5,9 @@ export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulae
 
 /** URL assoluta di un percorso nella lingua indicata (/en solo per le sezioni localizzate). */
 export function absoluteLocalizedUrl(basePath: string, locale: Locale): string {
-  return `${SITE_URL}${localizedHref(basePath, locale)}`;
+  const path = localizedHref(basePath, locale);
+  // Home italiana senza slash finale (https://www.regulaeos.com), come il canonical storico.
+  return path === "/" ? SITE_URL : `${SITE_URL}${path}`;
 }
 
 /**

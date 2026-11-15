@@ -42,36 +42,32 @@ export default function sitemap(): MetadataRoute.Sitemap {
   );
 
   const staticPages: MetadataRoute.Sitemap = [
-    {
-      url: BASE_URL,
+    ...localizedEntries("/", ["it", "en"], {
       lastModified: latestPost,
       changeFrequency: "weekly",
       priority: 1,
-    },
-    {
-      url: `${BASE_URL}/scanner`,
+    }),
+    ...localizedEntries("/scanner", ["it", "en"], {
       lastModified: PAGES_UPDATED,
       changeFrequency: "monthly",
       priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/products`,
+    }),
+    ...localizedEntries("/products", ["it", "en"], {
       lastModified: PAGES_UPDATED,
       changeFrequency: "monthly",
       priority: 0.8,
-    },
+    }),
     {
       url: `${BASE_URL}/quick-scan`,
       lastModified: PAGES_UPDATED,
       changeFrequency: "monthly",
       priority: 0.8,
     },
-    {
-      url: `${BASE_URL}/roi`,
+    ...localizedEntries("/roi", ["it", "en"], {
       lastModified: PAGES_UPDATED,
       changeFrequency: "monthly",
       priority: 0.6,
-    },
+    }),
     {
       url: `${BASE_URL}/inizia`,
       lastModified: PAGES_UPDATED,

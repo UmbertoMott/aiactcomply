@@ -66,7 +66,7 @@ export default async function RisorseListing({ page }: { page: number }) {
         <p style={{ fontSize: 15, color: "rgba(0,0,0,0.42)", marginBottom: 20 }}>
           {t("ctaQuestion")}
         </p>
-        <Link href="/scanner" style={{
+        <Link href={localizedHref("/scanner", locale)} style={{
           display: "inline-block", fontFamily: MONO, fontSize: 13, fontWeight: 500,
           color: "#ffffff", background: "#0D1016", borderRadius: 8,
           padding: "12px 28px", textDecoration: "none", letterSpacing: "0.02em",

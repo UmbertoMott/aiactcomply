@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import Nav from "@/components/Nav";
-import { useT } from "@/i18n/LocaleProvider";
+import { useT, useLocalizedHref } from "@/i18n/LocaleProvider";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
 const MONO  = "'DM Mono', monospace";
@@ -491,6 +491,7 @@ function buildConversion(t: (k: string) => string): Record<string, ConversionDat
 // ─── Scanner banner ───────────────────────────────────────────────────────────
 function ScannerBanner() {
   const t = useT("products");
+  const href = useLocalizedHref();
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -538,7 +539,7 @@ function ScannerBanner() {
               {t("scannerDesc")}
             </p>
           </div>
-          <Link href="/scanner" style={{
+          <Link href={href("/scanner")} style={{
             display: "inline-flex", alignItems: "center", gap: 10,
             fontFamily: MONO, fontSize: 12, fontWeight: 500,
             color: "#0D1016", background: "#ffffff",

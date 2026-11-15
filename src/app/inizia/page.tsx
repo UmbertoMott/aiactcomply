@@ -3,6 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 import OfferCta from "./OfferCta";
 import { OFFER } from "@/lib/offer";
+import { getLocale } from "@/i18n/server";
+import { localizedHref } from "@/i18n/config";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/inizia" },
@@ -49,7 +51,8 @@ const TERMS: { t: string; d: string }[] = [
   },
 ];
 
-export default function IniziaPage() {
+export default async function IniziaPage() {
+  const homeHref = localizedHref("/", await getLocale());
   return (
     <main style={{ display: "flex", minHeight: "100vh", flexWrap: "wrap" }}>
       {/* ── Pannello sinistro — cosa include + condizioni ── */}
@@ -64,7 +67,7 @@ export default function IniziaPage() {
           gap: 40,
         }}
       >
-        <Link href="/" style={{ display: "inline-flex", alignItems: "center", textDecoration: "none" }}>
+        <Link href={homeHref} style={{ display: "inline-flex", alignItems: "center", textDecoration: "none" }}>
           <Image src="/logo.svg" alt="RegulaeOS" width={140} height={36} priority />
         </Link>
 
@@ -110,7 +113,7 @@ export default function IniziaPage() {
             Comunicazione informativa ai sensi dell&rsquo;art. 35 del Codice Deontologico Forense.
             Per tutto quanto non indicato valgono le <Link href="/termini" style={{ color: "inherit" }}>Condizioni generali</Link>.
           </p>
-          <Link href="/" style={{ display: "inline-block", marginTop: 24, fontFamily: MONO, fontSize: 12, color: "rgba(0,0,0,0.42)", textDecoration: "none" }}>
+          <Link href={homeHref} style={{ display: "inline-block", marginTop: 24, fontFamily: MONO, fontSize: 12, color: "rgba(0,0,0,0.42)", textDecoration: "none" }}>
             ← Torna al sito
           </Link>
         </div>

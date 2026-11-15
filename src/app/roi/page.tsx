@@ -3,14 +3,32 @@ import Link from "next/link";
 import Nav from "@/components/Nav";
 import Footer from "@/components/sections/Footer";
 import RoiCalculator from "@/components/RoiCalculator";
-import { getT } from "@/i18n/server";
+import { getT, getLocale } from "@/i18n/server";
+import { localeAlternates, ogLocale } from "@/i18n/seo";
 
-export const metadata: Metadata = {
-  alternates: { canonical: "/roi" },
-  title: { absolute: "Calcolatore ROI — Prevenzione sanzioni AI Act | RegulaeOS" },
-  description:
-    "Stima la tua esposizione alle sanzioni dell'EU AI Act (Art. 99) e il ritorno sull'investimento della prevenzione. Fino a €35M o 7% del fatturato.",
-};
+const ROI_META = {
+  it: {
+    title: "Calcolatore ROI — Prevenzione sanzioni AI Act | RegulaeOS",
+    description:
+      "Stima la tua esposizione alle sanzioni dell'EU AI Act (Art. 99) e il ritorno sull'investimento della prevenzione. Fino a €35M o 7% del fatturato.",
+  },
+  en: {
+    title: "ROI Calculator — AI Act penalty prevention | RegulaeOS",
+    description:
+      "Estimate your exposure to EU AI Act penalties (Art. 99) and the return on investment of prevention. Up to €35M or 7% of turnover.",
+  },
+} as const;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const m = ROI_META[locale];
+  return {
+    alternates: localeAlternates("/roi", locale),
+    title: { absolute: m.title },
+    description: m.description,
+    openGraph: { title: m.title, description: m.description, locale: ogLocale(locale) },
+  };
+}
 
 const SERIF = "Georgia, 'Times New Roman', serif";
 const MONO  = "'DM Mono', monospace";

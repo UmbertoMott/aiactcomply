@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Nav from "@/components/Nav";
 import Footer from "@/components/sections/Footer";
+import { getLocale } from "@/i18n/server";
+import { localizedHref } from "@/i18n/config";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
 const MONO  = "'DM Mono', monospace";
@@ -12,7 +14,8 @@ interface Props {
   children: React.ReactNode;
 }
 
-export default function LegalLayout({ title, lastUpdated, children }: Props) {
+export default async function LegalLayout({ title, lastUpdated, children }: Props) {
+  const homeHref = localizedHref("/", await getLocale());
   return (
     <>
       <Nav />
@@ -25,7 +28,7 @@ export default function LegalLayout({ title, lastUpdated, children }: Props) {
           borderBottom: "1px solid rgba(0,0,0,0.08)",
         }}>
           <Link
-            href="/"
+            href={homeHref}
             style={{
               fontFamily: MONO,
               fontSize: 11,

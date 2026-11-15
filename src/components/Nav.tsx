@@ -3,8 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useT, useLocale } from "@/i18n/LocaleProvider";
-import { localizedHref } from "@/i18n/config";
+import { useT, useLocalizedHref } from "@/i18n/LocaleProvider";
 import LanguageToggle from "@/components/LanguageToggle";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
@@ -32,8 +31,8 @@ function MenuItem({ label, href, desc, onNav }: { label: string; href: string; d
 
 export default function Nav() {
   const t = useT("nav");
-  const locale = useLocale();
-  const risorseHref = localizedHref("/risorse", locale);
+  const href = useLocalizedHref();
+  const risorseHref = href("/risorse");
   const [scrolled, setScrolled] = useState(false);
   const [resOpen, setResOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -44,8 +43,8 @@ export default function Nav() {
     { label: t("blogLabel"), href: risorseHref, desc: t("blogDesc") },
   ];
   const RES_STRUMENTI = [
-    { label: t("roiToolLabel"), href: "/roi", desc: t("roiToolDesc") },
-    { label: t("productToolLabel"), href: "/products", desc: t("productToolDesc") },
+    { label: t("roiToolLabel"), href: href("/roi"), desc: t("roiToolDesc") },
+    { label: t("productToolLabel"), href: href("/products"), desc: t("productToolDesc") },
   ];
 
   useEffect(() => {
@@ -77,13 +76,13 @@ export default function Nav() {
       }}
     >
       <div className="flex items-center justify-between">
-        <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
+        <Link href={href("/")} style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
           <Image src="/logo.svg" alt="RegulaeOS" width={140} height={36} priority />
         </Link>
 
         <div className="hidden md:flex items-center gap-8 text-[13px]" style={{ color: "rgba(0,0,0,0.42)" }}>
-          <Link href="/products" className="hover:text-[#0D1016] transition-colors">{t("product")}</Link>
-          <Link href="/scanner" className="hover:text-[#0D1016] transition-colors">{t("scanner")}</Link>
+          <Link href={href("/products")} className="hover:text-[#0D1016] transition-colors">{t("product")}</Link>
+          <Link href={href("/scanner")} className="hover:text-[#0D1016] transition-colors">{t("scanner")}</Link>
 
           {/* Risorse — trigger mega-menu */}
           <div onMouseEnter={openMenu} onMouseLeave={scheduleClose} style={{ position: "relative" }}>
@@ -137,10 +136,10 @@ export default function Nav() {
       {mobileOpen && (
         <div className="md:hidden" style={{ borderTop: "1px solid rgba(0,0,0,0.07)", marginTop: 14, paddingTop: 6 }}>
           {[
-            { href: "/products", label: t("product") },
-            { href: "/scanner", label: t("scanner") },
+            { href: href("/products"), label: t("product") },
+            { href: href("/scanner"), label: t("scanner") },
             { href: risorseHref, label: t("resources") },
-            { href: "/roi", label: t("roiToolLabel") },
+            { href: href("/roi"), label: t("roiToolLabel") },
             { href: "/login", label: t("login") },
           ].map((l) => (
             <Link key={l.href} href={l.href} onClick={() => setMobileOpen(false)}
@@ -203,7 +202,7 @@ export default function Nav() {
 
             {/* Colonna 3 — Card in evidenza: Calcolatore ROI */}
             <div>
-              <Link href="/roi" onClick={closeNow} style={{ textDecoration: "none", display: "block" }}>
+              <Link href={href("/roi")} onClick={closeNow} style={{ textDecoration: "none", display: "block" }}>
                 <div style={{
                   background: "#0D1016",
                   borderRadius: 14,

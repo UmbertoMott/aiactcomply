@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import { DEFAULT_LOCALE, LOCALE_COOKIE, type Locale } from "./config";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, localizedHref, type Locale } from "./config";
 import { translate } from "./dictionaries";
 
 // Contesto lingua per i Client Component. Il valore arriva dal Server (root layout
@@ -27,6 +27,13 @@ export function useLocale(): Locale {
 export function useT(ns: string): (key: string) => string {
   const locale = useContext(LocaleContext);
   return (key: string) => translate(locale, ns, key);
+}
+
+// Link nella lingua corrente: const href = useLocalizedHref(); href("/scanner")
+// → "/en/scanner" in inglese, "/scanner" in italiano (pagine non localizzate invariate).
+export function useLocalizedHref(): (path: string) => string {
+  const locale = useContext(LocaleContext);
+  return (path: string) => localizedHref(path, locale);
 }
 
 // Imposta il cookie di lingua (client). Chi chiama fa poi router.refresh().
