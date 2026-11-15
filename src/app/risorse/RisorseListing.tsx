@@ -4,13 +4,14 @@ import BookDemoBanner from "@/components/BookDemoBanner";
 import PostCard from "./PostCard";
 import { getPostsPage, getTotalPages } from "@/lib/blog/posts";
 import { getT, getLocale } from "@/i18n/server";
+import { localizedHref, type Locale } from "@/i18n/config";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
 const MONO  = "'DM Mono', monospace";
 
-/** URL della pagina N della lista Risorse (la 1 è /risorse). */
-export function risorsePageHref(page: number): string {
-  return page <= 1 ? "/risorse" : `/risorse/pagina/${page}`;
+/** URL della pagina N della lista Risorse (la 1 è /risorse; in inglese /en/risorse). */
+export function risorsePageHref(page: number, locale: Locale = "it"): string {
+  return localizedHref(page <= 1 ? "/risorse" : `/risorse/pagina/${page}`, locale);
 }
 
 /** Lista Risorse paginata: massimo POSTS_PER_PAGE (10) articoli per pagina. */
@@ -57,7 +58,7 @@ export default async function RisorseListing({ page }: { page: number }) {
           </div>
         )}
 
-        {totalPages > 1 && <Pagination page={page} totalPages={totalPages} t={t} />}
+        {totalPages > 1 && <Pagination page={page} totalPages={totalPages} locale={locale} t={t} />}
       </section>
 
       {/* CTA */}
@@ -79,7 +80,7 @@ export default async function RisorseListing({ page }: { page: number }) {
   );
 }
 
-function Pagination({ page, totalPages, t }: { page: number; totalPages: number; t: (k: string) => string }) {
+function Pagination({ page, totalPages, locale, t }: { page: number; totalPages: number; locale: Locale; t: (k: string) => string }) {
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
   const base: React.CSSProperties = {
     fontFamily: MONO, fontSize: 13, minWidth: 40, height: 40, padding: "0 12px",
@@ -92,17 +93,17 @@ function Pagination({ page, totalPages, t }: { page: number; totalPages: number;
   return (
     <nav aria-label={t("pagination")} style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginTop: 40 }}>
       {page > 1 && (
-        <Link href={risorsePageHref(page - 1)} rel="prev" style={idle}>{t("prevPage")}</Link>
+        <Link href={risorsePageHref(page - 1, locale)} rel="prev" style={idle}>{t("prevPage")}</Link>
       )}
       {pages.map((n) =>
         n === page ? (
           <span key={n} aria-current="page" style={current}>{n}</span>
         ) : (
-          <Link key={n} href={risorsePageHref(n)} aria-label={`${t("pageLabel")} ${n}`} style={idle}>{n}</Link>
+          <Link key={n} href={risorsePageHref(n, locale)} aria-label={`${t("pageLabel")} ${n}`} style={idle}>{n}</Link>
         ),
       )}
       {page < totalPages && (
-        <Link href={risorsePageHref(page + 1)} rel="next" style={idle}>{t("nextPage")}</Link>
+        <Link href={risorsePageHref(page + 1, locale)} rel="next" style={idle}>{t("nextPage")}</Link>
       )}
     </nav>
   );

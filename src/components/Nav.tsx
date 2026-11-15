@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useT } from "@/i18n/LocaleProvider";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
+import { localizedHref } from "@/i18n/config";
 import LanguageToggle from "@/components/LanguageToggle";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
@@ -31,6 +32,8 @@ function MenuItem({ label, href, desc, onNav }: { label: string; href: string; d
 
 export default function Nav() {
   const t = useT("nav");
+  const locale = useLocale();
+  const risorseHref = localizedHref("/risorse", locale);
   const [scrolled, setScrolled] = useState(false);
   const [resOpen, setResOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -38,7 +41,7 @@ export default function Nav() {
 
   // Contenuti del mega-menu Risorse (etichette tradotte, href reali).
   const RES_CONTENUTI = [
-    { label: t("blogLabel"), href: "/risorse", desc: t("blogDesc") },
+    { label: t("blogLabel"), href: risorseHref, desc: t("blogDesc") },
   ];
   const RES_STRUMENTI = [
     { label: t("roiToolLabel"), href: "/roi", desc: t("roiToolDesc") },
@@ -85,7 +88,7 @@ export default function Nav() {
           {/* Risorse — trigger mega-menu */}
           <div onMouseEnter={openMenu} onMouseLeave={scheduleClose} style={{ position: "relative" }}>
             <Link
-              href="/risorse"
+              href={risorseHref}
               className="inline-flex items-center gap-1.5 transition-colors"
               style={{ color: resOpen ? "#0D1016" : "rgba(0,0,0,0.42)" }}
             >
@@ -136,7 +139,7 @@ export default function Nav() {
           {[
             { href: "/products", label: t("product") },
             { href: "/scanner", label: t("scanner") },
-            { href: "/risorse", label: t("resources") },
+            { href: risorseHref, label: t("resources") },
             { href: "/roi", label: t("roiToolLabel") },
             { href: "/login", label: t("login") },
           ].map((l) => (

@@ -3,18 +3,20 @@
 import Link from "next/link";
 import Image from "next/image";
 import { openCookieSettings } from "@/components/CookieBanner";
-import { useT } from "@/i18n/LocaleProvider";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
+import { localizedHref } from "@/i18n/config";
 
 const MONO = "'DM Mono', monospace";
 const DARK = "#0D1016";
 
 export default function Footer() {
   const t = useT("footer");
+  const locale = useLocale();
 
   const PRODUCT_LINKS = [
     { label: t("link_service"),  href: "/products" },
     { label: t("link_scanner"),  href: "/scanner" },
-    { label: t("link_resources"), href: "/risorse" },
+    { label: t("link_resources"), href: localizedHref("/risorse", locale) },
     { label: t("link_provider"), href: "/#chi-eroga" },
   ];
 

@@ -1,8 +1,10 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import Nav from "@/components/Nav";
 import { getPostBySlug, getAllPosts } from "@/lib/blog/posts";
 import { getT, getLocale } from "@/i18n/server";
+import { localizedHref } from "@/i18n/config";
+import { SITE_URL, absoluteLocalizedUrl, localeAlternates, ogLocale } from "@/i18n/seo";
 import type { Metadata } from "next";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
@@ -18,7 +20,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const locale = await getLocale();
   const post = getPostBySlug(slug, locale);
-  if (!post) return {};
+  if (!post || !post.locales?.includes(locale)) return {};
+  const basePath = `/risorse/${post.slug}`;
   return {
     title: { absolute: post.metaTitle },
     description: post.metaDescription,
@@ -28,11 +31,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "article",
       publishedTime: post.dateISO,
       modifiedTime: post.dateModifiedISO ?? post.dateISO,
-      url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com"}/risorse/${post.slug}`,
+      url: absoluteLocalizedUrl(basePath, locale),
+      locale: ogLocale(locale),
     },
-    alternates: {
-      canonical: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com"}/risorse/${post.slug}`,
-    },
+    alternates: localeAlternates(basePath, locale, post.locales),
   };
 }
 
@@ -41,13 +43,18 @@ export default async function BlogPost({ params }: Props) {
   const locale = await getLocale();
   const post = getPostBySlug(slug, locale);
   if (!post) notFound();
+  // /en/risorse/<slug> senza traduzione inglese: si rimanda all'italiano
+  // (redirect temporaneo, così quando arriva la traduzione la URL inglese vale).
+  if (!post.locales?.includes(locale)) redirect(`/risorse/${post.slug}`);
 
   const t = await getT("risorse");
+  const pageUrl = absoluteLocalizedUrl(`/risorse/${post.slug}`, locale);
 
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: post.title,
+    inLanguage: locale,
     description: post.metaDescription,
     datePublished: post.dateISO,
     dateModified: post.dateModifiedISO ?? post.dateISO,
@@ -57,9 +64,9 @@ export default async function BlogPost({ params }: Props) {
     publisher: {
       "@type": "Organization",
       name: "RegulaeOS",
-      url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com",
+      url: SITE_URL,
     },
-    mainEntityOfPage: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com"}/risorse/${post.slug}`,
+    mainEntityOfPage: pageUrl,
   };
 
   const faqSchema = {
@@ -82,7 +89,7 @@ export default async function BlogPost({ params }: Props) {
 
         {/* Back */}
         <div style={{ maxWidth: 720, margin: "0 auto", padding: "32px 24px 0" }}>
-          <Link href="/risorse" style={{
+          <Link href={localizedHref("/risorse", locale)} style={{
             fontFamily: MONO, fontSize: 12, color: "rgba(0,0,0,0.35)",
             textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6,
           }}>

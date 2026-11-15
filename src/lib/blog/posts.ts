@@ -34,6 +34,8 @@ export interface BlogPost {
   en?: BlogPostL10n;      // traduzione inglese (fallback: italiano)
   author?: { name: string; jobTitle?: string }; // autore persona (schema.org); default: RegulaeOS
   dateModifiedISO?: string; // ultima revisione (schema.org dateModified); default: dateISO
+  /** Calcolato da localize(): lingue in cui il post esiste (URL /risorse e /en/risorse). */
+  locales?: Locale[];
 }
 
 export const POSTS: BlogPost[] = [
@@ -1877,19 +1879,45 @@ export const POSTS: BlogPost[] = [
   },
 ];
 
+/** Lingue disponibili per un post: l'italiano sempre, l'inglese se c'è `en`. */
+function postLocales(post: BlogPost): Locale[] {
+  return post.en ? ["it", "en"] : ["it"];
+}
+
+// Nella versione inglese i link interni agli altri articoli puntano alla loro
+// URL inglese (/en/risorse/...), se tradotti; altrimenti restano all'italiano.
+function localizeInternalLinks(html: string): string {
+  return html.replace(/href="\/risorse\/([a-z0-9-]+)"/g, (match, slug: string) => {
+    const target = POSTS.find((p) => p.slug === slug);
+    return target?.en ? `href="/en/risorse/${slug}"` : match;
+  });
+}
+
 // Applica la traduzione richiesta sovrascrivendo i campi tradotti; slug,
 // dateISO ed eventuali campi non tradotti restano invariati.
 function localize(post: BlogPost, locale: Locale): BlogPost {
+  const locales = postLocales(post);
   if (locale === "en" && post.en) {
     const { en, ...base } = post;
-    return { ...base, ...en, tags: en.tags ?? base.tags };
+    return {
+      ...base, ...en,
+      tags: en.tags ?? base.tags,
+      content: localizeInternalLinks(en.content),
+      locales,
+    };
   }
-  return post;
+  return { ...post, locales };
 }
 
 export function getPostBySlug(slug: string, locale: Locale = "it"): BlogPost | undefined {
   const post = POSTS.find((p) => p.slug === slug);
   return post ? localize(post, locale) : undefined;
+}
+
+/** true se il post esiste nella lingua indicata (l'italiano esiste sempre). */
+export function hasLocale(slug: string, locale: Locale): boolean {
+  const post = POSTS.find((p) => p.slug === slug);
+  return !!post && postLocales(post).includes(locale);
 }
 
 // ─── Paginazione della pagina Risorse: massimo 10 articoli per pagina ─────────

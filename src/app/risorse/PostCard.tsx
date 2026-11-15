@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useT } from "@/i18n/LocaleProvider";
+import { useT, useLocale } from "@/i18n/LocaleProvider";
+import { localizedHref } from "@/i18n/config";
 import type { BlogPost } from "@/lib/blog/posts";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
@@ -9,8 +10,11 @@ const MONO  = "'DM Mono', monospace";
 
 export default function PostCard({ post, isNew }: { post: BlogPost; isNew: boolean }) {
   const t = useT("risorse");
+  const locale = useLocale();
+  // Link alla versione nella lingua corrente, se l'articolo è tradotto.
+  const href = localizedHref(`/risorse/${post.slug}`, post.locales?.includes(locale) ? locale : "it");
   return (
-    <Link href={`/risorse/${post.slug}`} style={{ textDecoration: "none" }}>
+    <Link href={href} style={{ textDecoration: "none" }}>
       <article
         style={{
           background: "#ffffff",

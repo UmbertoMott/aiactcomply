@@ -1,19 +1,25 @@
 import RisorseListing from "./RisorseListing";
 import type { Metadata } from "next";
+import { getLocale } from "@/i18n/server";
+import { absoluteLocalizedUrl, localeAlternates, ogLocale } from "@/i18n/seo";
+import { RISORSE_META } from "./meta";
 
-export const metadata: Metadata = {
-  alternates: { canonical: "/risorse" },
-  title: { absolute: "Risorse AI Act — Guide, Normativa e Aggiornamenti | RegulaeOS" },
-  description:
-    "Guide pratiche sull'EU AI Act, aggiornamenti normativi e risorse per la compliance AI in Italia. Scadenze, obblighi, Annex III, GPAI e molto altro.",
-  openGraph: {
-    title: "Risorse AI Act | RegulaeOS",
-    description:
-      "Guide pratiche sull'EU AI Act, aggiornamenti normativi e risorse per la compliance AI in Italia.",
-    type: "website",
-    url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.regulaeos.com"}/risorse`,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const m = RISORSE_META[locale];
+  return {
+    alternates: localeAlternates("/risorse", locale),
+    title: { absolute: m.title },
+    description: m.description,
+    openGraph: {
+      title: m.ogTitle,
+      description: m.ogDescription,
+      type: "website",
+      url: absoluteLocalizedUrl("/risorse", locale),
+      locale: ogLocale(locale),
+    },
+  };
+}
 
 // Pagina 1 della lista Risorse (massimo 10 articoli; le successive sono /risorse/pagina/N)
 export default function RisorseIndex() {

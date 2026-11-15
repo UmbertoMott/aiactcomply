@@ -1,11 +1,31 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { LOCALE_HEADER, type Locale } from "@/i18n/config";
 
-export async function updateSession(request: NextRequest) {
+export interface UpdateSessionOptions {
+  /** Lingua dell'URL da passare alle pagine (header LOCALE_HEADER). */
+  locale?: Locale;
+  /** Se presente, la richiesta viene riscritta internamente su questo URL. */
+  rewriteTo?: URL;
+}
+
+export async function updateSession(request: NextRequest, opts: UpdateSessionOptions = {}) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
   const key  = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
-  let supabaseResponse = NextResponse.next({ request });
+  // Risposta "prosegui": inoltra gli header della richiesta (inclusi i cookie
+  // eventualmente aggiornati da Supabase) e imposta la lingua dell'URL. L'header
+  // di lingua arrivato dal client viene sempre scartato: lo decide solo il proxy.
+  const passThrough = () => {
+    const headers = new Headers(request.headers);
+    headers.delete(LOCALE_HEADER);
+    if (opts.locale) headers.set(LOCALE_HEADER, opts.locale);
+    return opts.rewriteTo
+      ? NextResponse.rewrite(opts.rewriteTo, { request: { headers } })
+      : NextResponse.next({ request: { headers } });
+  };
+
+  let supabaseResponse = passThrough();
 
   if (!url.startsWith("http")) {
     return supabaseResponse;
@@ -18,7 +38,7 @@ export async function updateSession(request: NextRequest) {
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        supabaseResponse = NextResponse.next({ request });
+        supabaseResponse = passThrough();
         cookiesToSet.forEach(({ name, value, options }) =>
           supabaseResponse.cookies.set(name, value, options)
         );

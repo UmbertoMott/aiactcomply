@@ -1,5 +1,6 @@
 import { updateSession } from "@/lib/supabase/middleware";
 import { type NextRequest, NextResponse } from "next/server";
+import { LOCALE_COOKIE, parseLocalizedPath } from "@/i18n/config";
 
 // Art. 50 EU AI Act — machine-readable HTTP disclosure headers
 // Injected on all /api/* routes that return AI-generated content.
@@ -28,7 +29,25 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  const response = await updateSession(request);
+  // Lingua nell'URL (sezione Risorse): /risorse/... = italiano, /en/risorse/...
+  // = inglese. Le URL /en vengono riscritte internamente sulla stessa pagina;
+  // la lingua arriva alle pagine via header e vince sul cookie.
+  const localized = parseLocalizedPath(request.nextUrl.pathname);
+  let rewriteTo: URL | undefined;
+  if (localized?.locale === "en") {
+    rewriteTo = request.nextUrl.clone();
+    rewriteTo.pathname = localized.basePath;
+  }
+
+  const response = await updateSession(request, { locale: localized?.locale, rewriteTo });
+
+  // La lingua dell'URL diventa anche la preferenza dell'utente: chi arriva su un
+  // articolo inglese continua a navigare il resto del sito in inglese.
+  if (localized && request.cookies.get(LOCALE_COOKIE)?.value !== localized.locale) {
+    response.cookies.set(LOCALE_COOKIE, localized.locale, {
+      path: "/", maxAge: 31536000, sameSite: "lax",
+    });
+  }
 
   // Add AI disclosure headers to all /api/ responses
   if (request.nextUrl.pathname.startsWith("/api/")) {

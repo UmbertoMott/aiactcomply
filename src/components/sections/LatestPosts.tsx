@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getAllPosts } from "@/lib/blog/posts";
 import { getLocale, getT } from "@/i18n/server";
+import { localizedHref } from "@/i18n/config";
 import PostCard from "@/app/risorse/PostCard";
 
 const SERIF = "Georgia, 'Times New Roman', serif";
@@ -20,7 +21,7 @@ export default async function LatestPosts() {
           <h2 style={{ fontFamily: SERIF, fontSize: "clamp(26px, 3vw, 38px)", fontWeight: 400, letterSpacing: "-1.2px", color: "#0D1016", margin: 0 }}>
             {t("latestTitle")}
           </h2>
-          <Link href="/risorse" style={{ fontFamily: MONO, fontSize: 12, color: "#0D1016", textDecoration: "none", borderBottom: "1px solid rgba(0,0,0,0.25)", paddingBottom: 2 }}>
+          <Link href={localizedHref("/risorse", locale)} style={{ fontFamily: MONO, fontSize: 12, color: "#0D1016", textDecoration: "none", borderBottom: "1px solid rgba(0,0,0,0.25)", paddingBottom: 2 }}>
             {t("latestAll")}
           </Link>
         </div>

@@ -1,22 +1,31 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTransition } from "react";
-import { LOCALES, type Locale } from "@/i18n/config";
+import { LOCALES, localizedHref, parseLocalizedPath, type Locale } from "@/i18n/config";
 import { useLocale, setLocaleCookie } from "@/i18n/LocaleProvider";
 
-// Levetta lingua IT / EN. Salva il cookie e fa refresh: il Server ri-renderizza
-// nella lingua scelta (client e <html lang> si aggiornano) senza reload completo.
+// Levetta lingua IT / EN. Salva il cookie; sulle pagine con lingua nell'URL
+// (Risorse: /risorse ↔ /en/risorse) porta alla URL dell'altra lingua, altrove
+// fa refresh e il Server ri-renderizza nella lingua scelta.
 
 export default function LanguageToggle({ compact = false }: { compact?: boolean }) {
   const locale = useLocale();
   const router = useRouter();
+  const pathname = usePathname();
   const [pending, startTransition] = useTransition();
 
   const switchTo = (l: Locale) => {
     if (l === locale) return;
     setLocaleCookie(l);
-    startTransition(() => router.refresh());
+    const localized = parseLocalizedPath(pathname);
+    if (localized) {
+      // Navigazione completa: il root layout (<html lang>, contesto lingua) non
+      // viene ri-renderizzato nelle navigazioni client, quindi serve un reload.
+      window.location.assign(localizedHref(localized.basePath, l) + window.location.search);
+    } else {
+      startTransition(() => router.refresh());
+    }
   };
 
   return (
