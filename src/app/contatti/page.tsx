@@ -64,7 +64,7 @@ export default function ContattiPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 64 }}>
 
             {/* Email */}
-            <a href="mailto:info@aicomply.eu" className="contatti-card">
+            <a href="mailto:connect@regulaeos.com" className="contatti-card">
               <div style={{
                 width: 44, height: 44, borderRadius: 10,
                 background: "#0D1016",
@@ -81,7 +81,7 @@ export default function ContattiPage() {
                   Email
                 </p>
                 <p style={{ fontSize: 15, fontWeight: 500, color: "#0D1016", letterSpacing: "-0.2px" }}>
-                  info@aicomply.eu
+                  connect@regulaeos.com
                 </p>
               </div>
             </a>
