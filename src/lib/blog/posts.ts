@@ -38,6 +38,332 @@ export interface BlogPost {
 
 export const POSTS: BlogPost[] = [
   {
+    slug: "categorizzazione-nis2-attivita-servizi-art-30",
+    title: "Categorizzazione NIS2 di attività e servizi, guida all'art. 30 del decreto NIS e al modello ACN",
+    excerpt:
+      "Come funziona la categorizzazione NIS2 prevista dall'art. 30 del decreto NIS. Chi deve comunicare l'elenco categorizzato, entro quando, come usare le dieci macro-aree e le quattro categorie di rilevanza della determinazione ACN 155238/2026 e perché la categorizzazione condiziona le future misure di sicurezza.",
+    date: "16 novembre 2026",
+    dateISO: "2026-11-16",
+    author: { name: "Umberto Mottola", jobTitle: "Avvocato, CIPP/E" },
+    dateModifiedISO: "2026-11-16",
+    readTime: "9 min",
+    category: "Guide",
+    tags: ["NIS2", "categorizzazione NIS2", "art. 30 decreto NIS", "categorie di rilevanza", "macro-aree ACN", "determinazione ACN 155238/2026", "elenco categorizzato", "ACN", "D.Lgs. 138/2024"],
+    metaTitle: "Categorizzazione NIS2, art. 30 e modello ACN",
+    metaDescription:
+      "Categorizzazione NIS2 di attività e servizi (art. 30 decreto NIS). Scadenze, dieci macro-aree, quattro categorie di rilevanza e come compilare l'elenco.",
+    faqSchema: [
+      {
+        q: "Che cos'è la categorizzazione NIS2?",
+        a: "È l'obbligo, previsto dall'art. 30 del decreto NIS, di comunicare ogni anno all'ACN, tramite la piattaforma digitale, l'elenco delle proprie attività e dei propri servizi con l'attribuzione a ciascuno di una categoria di rilevanza. La categoria misura l'impatto che una compromissione dell'attività avrebbe sulla capacità del soggetto di svolgere le attività per cui rientra nella NIS2.",
+      },
+      {
+        q: "Entro quando va comunicato l'elenco categorizzato delle attività e dei servizi?",
+        a: "Dal 1° maggio al 30 giugno di ogni anno, a partire dalla ricezione della prima comunicazione di inserimento nell'elenco dei soggetti NIS. L'obbligo si applica dall'anno solare 2026, sicché la prossima finestra utile va dal 1° maggio al 30 giugno 2027.",
+      },
+      {
+        q: "Quali sono le categorie di rilevanza del modello ACN?",
+        a: "La determinazione ACN 155238/2026 ne prevede quattro, con impatto crescente, ossia impatto minimo, impatto basso, impatto medio e impatto alto. Ciascuna delle dieci macro-aree del modello ha una categoria pre-assegnata; ad esempio Monitoraggio e controllo è a impatto alto e Produzione di beni e servizi a impatto medio.",
+      },
+      {
+        q: "Si può attribuire una categoria di rilevanza diversa da quella pre-assegnata?",
+        a: "Sì. L'art. 3, comma 3, della determinazione ACN 155238/2026 consente al soggetto di indicare una categoria diversa sulla base di una propria valutazione dell'impatto di una possibile compromissione; in tal caso, tuttavia, deve conservare la documentazione che contiene tale valutazione.",
+      },
+      {
+        q: "Che cosa succede dopo la comunicazione dell'elenco all'ACN?",
+        a: "Ai sensi dell'art. 30, comma 3, del decreto NIS l'ACN fornisce riscontro sulla conformità entro novanta giorni, prorogabili una sola volta fino a ulteriori sessanta. Se il riscontro non arriva nei termini, il comma 4 stabilisce che la conformità si intende convalidata.",
+      },
+    ],
+    content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · aggiornato al 16 nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In sintesi.</strong> La categorizzazione NIS2 è l'obbligo, fissato dall'art. 30 del decreto NIS, di comunicare all'ACN ogni anno, dal 1° maggio al 30 giugno, l'elenco delle proprie attività e dei propri servizi con una categoria di rilevanza. Il modello ACN, adottato con la determinazione 155238/2026, prevede dieci macro-aree e quattro categorie, da impatto minimo a impatto alto. Da questa classificazione dipenderanno le misure di sicurezza a lungo termine.
+</p>
+
+<p>La categorizzazione NIS2 delle attività e dei servizi è uno degli adempimenti meno conosciuti del decreto legislativo n. 138 del 2024, ossia il decreto NIS che ha recepito in Italia la direttiva (UE) 2022/2555. Si tratta, in sostanza, di una analisi di impatto semplificata; il soggetto elenca ciò che fa e indica, per ogni voce, quanto sarebbe grave una sua compromissione.</p>
+<p>Questo articolo spiega chi è tenuto all'adempimento, entro quando, come funziona il modello predisposto dall'Agenzia per la cybersicurezza nazionale (ACN) e perché conviene curarlo con attenzione. Per il quadro generale degli obblighi si rinvia alla <a href="/risorse/nis2">guida alla NIS2</a>; per il calendario degli adempimenti, alla pagina sullo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>.</p>
+
+<h2>Che cos'è la categorizzazione NIS2 prevista dall'art. 30?</h2>
+<p>È l'obbligo per i soggetti essenziali e importanti di comunicare e aggiornare, tramite la piattaforma digitale dell'ACN, un elenco delle proprie attività e dei propri servizi con l'attribuzione di una categoria di rilevanza. La categoria misura l'impatto che una compromissione avrebbe sulla capacità di svolgere le attività per cui il soggetto rientra nella NIS2.</p>
+<p>L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art30" target="_blank" rel="noopener">art. 30 del decreto NIS</a>, intitolato all'elencazione, caratterizzazione e categorizzazione delle attività e dei servizi, si articola in cinque commi.</p>
+<ul>
+  <li><strong>Comma 1</strong>, che fissa l'obbligo e la finestra annuale di comunicazione, collegandolo all'art. 24, comma 1, che disciplina le misure di gestione dei rischi per la sicurezza informatica;</li>
+  <li><strong>comma 2</strong>, che affida all'ACN, in qualità di Autorità nazionale competente NIS, il compito di stabilire le categorie di rilevanza nonché il processo, le modalità e i criteri della categorizzazione;</li>
+  <li><strong>comma 3</strong>, secondo cui l'ACN fornisce riscontro sulla conformità di quanto comunicato entro novanta giorni, prorogabili una sola volta fino a ulteriori sessanta giorni; se chiede integrazioni, il termine è interrotto e il soggetto deve rispondere entro trenta giorni;</li>
+  <li><strong>comma 4</strong>, secondo cui, in assenza di riscontro nei termini, la conformità si intende convalidata;</li>
+  <li><strong>comma 5</strong>, che consente all'ACN di avvalersi dei tavoli settoriali previsti dall'art. 11, comma 4, lettera f).</li>
+</ul>
+<p>Il termine «categoria di rilevanza» ha un significato preciso. Secondo l'art. 1 della <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_categorizzazione_260409-v8_signed" target="_blank" rel="noopener">determinazione ACN 155238/2026</a>, che disciplina il modello di categorizzazione, essa misura l'impatto di una possibile compromissione dell'attività o del servizio sulla capacità del soggetto di svolgere correttamente le «attività e servizi NIS», ossia quelli per i quali il soggetto rientra nell'ambito di applicazione del decreto.</p>
+
+<h2>Chi deve fare la categorizzazione ed entro quando?</h2>
+<p>Devono farla tutti i soggetti essenziali e importanti. La comunicazione va effettuata dal 1° maggio al 30 giugno di ogni anno, a partire dalla ricezione della prima comunicazione di inserimento nell'elenco dei soggetti NIS; l'obbligo si applica dall'anno solare 2026, sicché la prossima finestra va dal 1° maggio al 30 giugno 2027.</p>
+<p>L'applicazione dal 2026 discende dall'art. 42, comma 2, del decreto NIS, richiamato nelle premesse della determinazione 155238/2026, la quale si applica a sua volta dal 1° maggio 2026 (art. 8). La <a href="https://www.acn.gov.it/portale/faq/nis/categorizzazione" target="_blank" rel="noopener">FAQ CAT.1 dell'ACN</a> conferma la finestra annuale e il collegamento con la prima comunicazione prevista dall'art. 7, comma 3, lettera a), che regola la notifica dell'inserimento nell'elenco.</p>
+<p>La comunicazione avviene sulla piattaforma digitale dell'ACN. Secondo la <a href="https://www.acn.gov.it/portale/w/nis-pubblicate-le-modalita-per-l-elencazione-e-la-categorizzazione-delle-attivita-e-dei-servizi" target="_blank" rel="noopener">notizia ACN del 24 aprile 2026</a>, la procedura è stabilita dagli artt. 20 e 21 della determinazione ACN 127437/2026, che disciplina l'utilizzo della piattaforma e le informazioni da fornire all'Autorità.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Fase</th><th>Termine</th><th>Base normativa</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Comunicazione o aggiornamento dell'elenco categorizzato</td><td>Dal 1° maggio al 30 giugno di ogni anno</td><td>Art. 30, comma 1, decreto NIS</td></tr>
+      <tr><td>Riscontro dell'ACN sulla conformità</td><td>Entro 90 giorni, prorogabili una volta fino a 60</td><td>Art. 30, comma 3, decreto NIS</td></tr>
+      <tr><td>Risposta del soggetto a una richiesta di integrazioni</td><td>Entro 30 giorni dalla richiesta</td><td>Art. 30, comma 3, decreto NIS</td></tr>
+      <tr><td>Silenzio dell'ACN oltre i termini</td><td>Conformità convalidata</td><td>Art. 30, comma 4, decreto NIS</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2>Il modello ACN, dieci macro-aree e quattro categorie di rilevanza</h2>
+<p>La determinazione 155238/2026 adotta un modello unico, contenuto in due allegati quasi identici. L'art. 2 prevede dieci macro-aree, ciascuna con una denominazione, una descrizione e una categoria di rilevanza pre-assegnata, e quattro categorie con impatto crescente, ossia impatto minimo, basso, medio e alto.</p>
+<p>Ogni macro-area, come spiega la <a href="https://www.acn.gov.it/portale/nis/categorizzazione" target="_blank" rel="noopener">pagina ACN sulla categorizzazione</a>, rappresenta un insieme di attività accomunate da elementi quali utenti, finalità o tipo di prestazione. La tabella riporta le macro-aree e le categorie pre-assegnate dagli <a href="https://www.acn.gov.it/portale/documents/d/guest/allegato_1_modello260409-v1" target="_blank" rel="noopener">allegati 1</a> e <a href="https://www.acn.gov.it/portale/documents/d/guest/allegato_2_modello260409-v1" target="_blank" rel="noopener">2</a>.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Macro-area</th><th>Che cosa comprende, in sintesi</th><th>Categoria pre-assegnata</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Monitoraggio e controllo</td><td>Supporto ai vertici, coordinamento della sicurezza informatica e fisica, continuità operativa, controllo di qualità e di conformità, anche sui fornitori</td><td>Impatto alto</td></tr>
+      <tr><td>Produzione di beni e servizi</td><td>Pianificazione operativa, processi operativi, erogazione dei servizi ai clienti, manutenzione degli impianti</td><td>Impatto medio</td></tr>
+      <tr><td>Ricerca, sviluppo e progettazione</td><td>Nuove tecnologie, prototipi, progetti, proprietà intellettuale e brevetti</td><td>Impatto medio</td></tr>
+      <tr><td>Gestione finanziaria</td><td>Flussi di cassa, fatturazione e pagamenti, contabilità, bilancio, tesoreria</td><td>Impatto basso</td></tr>
+      <tr><td>Gestione dei clienti</td><td>Onboarding, anagrafica e CRM, help desk, richieste commerciali</td><td>Impatto basso</td></tr>
+      <tr><td>Gestione delle risorse umane</td><td>Selezione, retribuzione, valutazione, formazione</td><td>Impatto basso</td></tr>
+      <tr><td>Logistica</td><td>Flussi logistici, magazzino, spedizioni, distribuzione e consegna</td><td>Impatto basso (allegato 1) o impatto minimo (allegato 2)</td></tr>
+      <tr><td>Comunicazione e marketing</td><td>Canali digitali e social, ufficio stampa, brand, eventi e campagne</td><td>Impatto minimo</td></tr>
+      <tr><td>Gestione amministrativa</td><td>Immobili, contratti, gestione amministrativa dei fornitori, adempimenti fiscali e autorizzativi</td><td>Impatto minimo</td></tr>
+      <tr><td>Altri servizi e attività</td><td>Tutto ciò che non rientra nelle altre macro-aree</td><td>Impatto minimo</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>L'unica differenza tra i due allegati riguarda la logistica. L'allegato 1 si applica alle tipologie di soggetto indicate dall'art. 2, comma 2, della determinazione, che rinvia a specifici numeri degli allegati I, II e IV del decreto NIS; per questi soggetti la logistica è a impatto basso, poiché, secondo la <a href="https://www.acn.gov.it/portale/documents/d/guest/modello-di-categorizzazione-nis-guida-alla-lettura" target="_blank" rel="noopener">guida alla lettura dell'ACN</a>, è strettamente legata al loro core business. Per tutti gli altri soggetti si applica l'allegato 2, che la colloca a impatto minimo.</p>
+
+<h2>Come si compila l'elenco categorizzato?</h2>
+<p>Per ogni attività o servizio il soggetto indica la macro-area, la denominazione e la descrizione e la categoria di rilevanza, come prevede l'art. 3, comma 2, della determinazione. Vanno considerate tutte le attività svolte e i servizi erogati, sia all'interno sia all'esterno dell'organizzazione.</p>
+<p>La FAQ CAT.7 e la guida alla lettura suggeriscono un percorso in tre fasi, che resta comunque facoltativo.</p>
+<ol>
+  <li><strong>Identificazione delle attività e dei servizi</strong>; si individuano quelli supportati, svolti o erogati da sistemi informativi e di rete, senza una metodologia obbligatoria. La guida descrive un approccio top-down, che parte dall'organigramma e dai processi, e uno bottom-up, che parte dall'inventario dei sistemi; si possono usare anche analisi già svolte, come la business impact analysis o la valutazione del rischio.</li>
+  <li><strong>Mappatura nelle macro-aree</strong>; ogni attività va associata a una sola macro-area, sicché quella che ne tocca più di una va scomposta.</li>
+  <li><strong>Attribuzione della categoria di rilevanza</strong>; ogni attività riceve, per impostazione predefinita, la categoria della propria macro-area, salvo diversa valutazione documentata.</li>
+</ol>
+<p>Il livello di dettaglio è lasciato al soggetto. La guida consiglia, tuttavia, di evitare una frammentazione eccessiva e precisa che per ogni macro-area basta indicare, al più, tante attività quante sono le categorie di rilevanza, ossia quattro. Le macro-aree in cui il soggetto non svolge alcuna attività possono restare vuote (art. 3, comma 4).</p>
+
+<h2>Si può cambiare la categoria pre-assegnata?</h2>
+<p>Sì. Il soggetto può attribuire a un'attività una categoria diversa da quella della macro-area, più alta o più bassa, sulla base di una propria valutazione dell'impatto di una possibile compromissione; in tal caso, tuttavia, deve conservare la documentazione che contiene tale valutazione, come impone l'art. 3, comma 3, della determinazione.</p>
+<p>Ne consegue che una stessa macro-area può contenere attività con categorie diverse. La guida alla lettura qualifica la valutazione come una business impact analysis semplificata, che considera riservatezza, integrità e disponibilità, e non impone una metodologia.</p>
+<p>Per orientare la scelta, l'appendice B della guida indica i criteri seguiti dall'ACN per pre-assegnare le categorie.</p>
+<ul>
+  <li>il grado di coordinamento delle attività e dei servizi NIS;</li>
+  <li>l'incidenza sulle funzioni di sicurezza;</li>
+  <li>l'interdipendenza con le attività e i servizi NIS e i possibili effetti a catena;</li>
+  <li>la natura e il volume dei dati trattati, ad esempio la presenza di dati personali;</li>
+  <li>l'influenza sulla continuità operativa delle attività e dei servizi NIS.</li>
+</ul>
+<p>In pratica, chi abbassa una categoria si espone a un controllo più attento. Conviene quindi motivare per iscritto ogni scostamento, con riferimento a questi criteri, e conservare il documento insieme all'elenco comunicato.</p>
+
+<h2>Pubbliche amministrazioni e perimetro di sicurezza nazionale cibernetica</h2>
+<p>La determinazione prevede due regole di coordinamento. La prima, contenuta nell'art. 4, riguarda i soggetti che hanno già classificato dati e servizi ai sensi dell'art. 3 del decreto direttoriale ACN n. 21007/24, il cosiddetto Regolamento Cloud per la pubblica amministrazione; questi applicano il modello del Regolamento Cloud in luogo di quello NIS.</p>
+<p>Per tali soggetti, come precisa la FAQ CAT.8, l'elenco coincide con quello dei dati e dei servizi classificati come ordinari, critici o strategici sulla piattaforma PA digitale 2026, che il soggetto può confermare o aggiornare; ogni modifica deve però restare coerente con quella classificazione.</p>
+<p>La seconda regola, contenuta nell'art. 5, riguarda le attività e i servizi soggetti alla disciplina del perimetro di sicurezza nazionale cibernetica, istituito dal decreto-legge n. 105 del 2019. A essi è attribuita d'ufficio la categoria impatto alto, sicché, secondo la FAQ CAT.9, non vanno indicati nell'elenco categorizzato.</p>
+
+<h2>Perché la categorizzazione condiziona le misure di sicurezza</h2>
+<p>La categorizzazione non è un adempimento fine a sé stesso. L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art31" target="_blank" rel="noopener">art. 31 del decreto NIS</a>, che disciplina la proporzionalità e la gradualità degli obblighi, consente all'ACN di differenziare termini, modalità e specifiche degli obblighi anche in base alle categorie di rilevanza delle attività che i sistemi informativi e di rete supportano (comma 2, lettera a).</p>
+<p>Oggi i soggetti applicano le misure di sicurezza di base stabilite dalla determinazione ACN 379907/2025, illustrate nell'articolo sulle <a href="/risorse/misure-sicurezza-base-nis2-acn">misure di sicurezza di base NIS2</a>. Secondo la FAQ CAT.3, queste saranno integrate da misure aggiuntive di livello avanzato, che confluiranno nelle misure di sicurezza a lungo termine; l'ACN ha indicato che le stabilirà con successive determinazioni entro la fine del 2026.</p>
+<p>Le misure a lungo termine saranno differenziate proprio in base alle categorie di rilevanza. Ne consegue che un'attività classificata a impatto alto richiederà, con ogni probabilità, requisiti più stringenti; una categorizzazione accurata permette dunque, come osserva la guida ACN, di garantire livelli adeguati di sicurezza limitando l'investimento al necessario.</p>
+
+<h2>Conclusioni</h2>
+<p>La categorizzazione NIS2 è un esercizio annuale, ma i suoi effetti si estendono al lungo periodo. L'elenco comunicato all'ACN orienterà le misure di sicurezza che ogni soggetto dovrà adottare nelle fasi successive alla prima applicazione; per questo merita la stessa cura riservata alla valutazione del rischio.</p>
+<p>In vista della finestra del 2027 conviene procedere in quest'ordine:</p>
+<ol>
+  <li>verificare che cosa è stato comunicato nel 2026 e se l'ACN ha formulato rilievi o richieste di integrazione;</li>
+  <li>aggiornare l'inventario delle attività e dei servizi, partendo dai processi e dai sistemi informativi;</li>
+  <li>mappare ogni attività in una sola macro-area, scomponendo quelle trasversali;</li>
+  <li>confermare o modificare le categorie pre-assegnate, documentando per iscritto ogni scostamento;</li>
+  <li>allineare l'elenco con la valutazione del rischio e con il piano di adeguamento alle misure di base.</li>
+</ol>
+<p>Per gli altri obblighi, dalla registrazione alla notifica degli incidenti, si rinvia alla <a href="/risorse/nis2">guida completa alla NIS2</a>.</p>
+
+<p><strong>Per preparare l'elenco categorizzato senza partire da zero</strong>, <a href="/inizia">la gap analysis NIS2 di RegulaeOS</a> aiuta a censire attività e servizi, ad associarli alle macro-aree del modello ACN e a conservare la documentazione delle valutazioni che giustificano una categoria diversa da quella pre-assegnata.</p>
+
+<h2>Fonti</h2>
+<ul>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art30" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 30 (elencazione, caratterizzazione e categorizzazione delle attività e dei servizi), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art31" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 31 (proporzionalità e gradualità degli obblighi), Normattiva</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_categorizzazione_260409-v8_signed" target="_blank" rel="noopener">ACN, determinazione n. 155238/2026 sul modello di categorizzazione</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/allegato_1_modello260409-v1" target="_blank" rel="noopener">ACN, allegato 1 alla determinazione n. 155238/2026</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/allegato_2_modello260409-v1" target="_blank" rel="noopener">ACN, allegato 2 alla determinazione n. 155238/2026</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/modello-di-categorizzazione-nis-guida-alla-lettura" target="_blank" rel="noopener">ACN, Linee guida NIS, Modello di categorizzazione, guida alla lettura (aprile 2026)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/categorizzazione" target="_blank" rel="noopener">ACN, FAQ NIS sulla categorizzazione (CAT.1-CAT.9)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/nis/categorizzazione" target="_blank" rel="noopener">ACN, pagina «Categorizzazione» della sezione NIS</a></li>
+  <li><a href="https://www.acn.gov.it/portale/w/nis-pubblicate-le-modalita-per-l-elencazione-e-la-categorizzazione-delle-attivita-e-dei-servizi" target="_blank" rel="noopener">ACN, «NIS, pubblicate le modalità per l'elencazione e la categorizzazione delle attività e dei servizi», 24 aprile 2026</a></li>
+</ul>
+`,
+    en: {
+      title: "NIS2 categorisation of activities and services: a guide to Article 30 of the Italian NIS decree and the ACN model",
+      excerpt:
+        "How NIS2 categorisation under Article 30 of the Italian NIS decree works. Who must submit the categorised list, by when, how to use the ten macro-areas and four relevance categories of ACN determination 155238/2026, and why categorisation will shape future security measures.",
+      date: "16 November 2026",
+      readTime: "9 min",
+      category: "Guide",
+      tags: ["NIS2", "NIS2 categorisation", "Article 30 NIS decree", "relevance categories", "ACN macro-areas", "ACN determination 155238/2026", "categorised list", "ACN", "Legislative Decree 138/2024"],
+      metaTitle: "NIS2 categorisation: Article 30 and the ACN model",
+      metaDescription:
+        "NIS2 categorisation of activities and services (Art. 30 Italian NIS decree). Deadlines, ten macro-areas, four relevance categories and how to fill in the list.",
+      faqSchema: [
+        {
+          q: "What is NIS2 categorisation?",
+          a: "It is the obligation, under Article 30 of the Italian NIS decree, to submit every year to ACN, through its digital platform, a list of the entity's activities and services, assigning each a relevance category. The category measures the impact that a compromise of the activity would have on the entity's ability to perform the activities for which it falls within NIS2.",
+        },
+        {
+          q: "By when must the categorised list of activities and services be submitted?",
+          a: "Between 1 May and 30 June each year, starting from receipt of the first notice of inclusion in the list of NIS entities. The obligation applies from calendar year 2026, so the next window runs from 1 May to 30 June 2027.",
+        },
+        {
+          q: "What are the relevance categories in the ACN model?",
+          a: "ACN determination 155238/2026 sets four, in increasing order of impact: minimal, low, medium and high impact. Each of the model's ten macro-areas has a pre-assigned category; for example, Monitoring and control is high impact and Production of goods and services is medium impact.",
+        },
+        {
+          q: "Can a relevance category other than the pre-assigned one be used?",
+          a: "Yes. Article 3(3) of ACN determination 155238/2026 allows the entity to assign a different category on the basis of its own assessment of the impact of a possible compromise; in that case, however, it must keep the documentation containing that assessment.",
+        },
+        {
+          q: "What happens after the list is submitted to ACN?",
+          a: "Under Article 30(3) of the NIS decree, ACN gives feedback on compliance within ninety days, which can be extended once by up to sixty more. If no feedback is given within those time limits, paragraph 4 provides that compliance is deemed validated.",
+        },
+      ],
+      content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · updated 16 Nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In short.</strong> NIS2 categorisation is the obligation, set by Article 30 of the Italian NIS decree, to submit to ACN every year, between 1 May and 30 June, a list of the entity's activities and services with a relevance category for each. The ACN model, adopted by determination 155238/2026, provides ten macro-areas and four categories, from minimal to high impact. The long-term security measures will depend on this classification.
+</p>
+
+<p>NIS2 categorisation of activities and services is one of the least known obligations under Legislative Decree no. 138 of 2024, the NIS decree that transposed Directive (EU) 2022/2555 into Italian law. In essence it is a simplified impact analysis; the entity lists what it does and states, for each item, how serious a compromise would be.</p>
+<p>This article explains who must comply, by when, how the model prepared by the National Cybersecurity Agency (ACN) works and why it deserves care. For a general overview of the obligations, see the <a href="/risorse/nis2">NIS2 guide</a>; for the timeline of obligations, see the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">NIS2 implementation status</a>.</p>
+
+<h2>What is NIS2 categorisation under Article 30?</h2>
+<p>It is the obligation for essential and important entities to submit and update, through the ACN digital platform, a list of their activities and services with a relevance category assigned to each. The category measures the impact a compromise would have on the ability to perform the activities for which the entity falls within NIS2.</p>
+<p><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art30" target="_blank" rel="noopener">Article 30 of the NIS decree</a>, headed "listing, characterisation and categorisation of activities and services", has five paragraphs.</p>
+<ul>
+  <li><strong>Paragraph 1</strong>, which sets the obligation and the annual submission window, linking it to Article 24(1), which governs cybersecurity risk-management measures;</li>
+  <li><strong>paragraph 2</strong>, which tasks ACN, as the national competent NIS authority, with setting the relevance categories and the process, arrangements and criteria for categorisation;</li>
+  <li><strong>paragraph 3</strong>, under which ACN gives feedback on the compliance of the submission within ninety days, extendable once by up to sixty days; if it requests additional information, the time limit is interrupted and the entity must reply within thirty days;</li>
+  <li><strong>paragraph 4</strong>, under which, if no feedback is given in time, compliance is deemed validated;</li>
+  <li><strong>paragraph 5</strong>, which allows ACN to rely on the sector tables provided for in Article 11(4)(f).</li>
+</ul>
+<p>The term "relevance category" has a precise meaning. Under Article 1 of <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_categorizzazione_260409-v8_signed" target="_blank" rel="noopener">ACN determination 155238/2026</a>, which governs the categorisation model, it measures the impact of a possible compromise of the activity or service on the entity's ability to properly perform its "NIS activities and services", meaning those for which the entity falls within the scope of the decree.</p>
+
+<h2>Who must carry out categorisation, and by when?</h2>
+<p>All essential and important entities must do so. The submission is made between 1 May and 30 June each year, starting from receipt of the first notice of inclusion in the list of NIS entities; the obligation applies from calendar year 2026, so the next window runs from 1 May to 30 June 2027.</p>
+<p>Application from 2026 follows from Article 42(2) of the NIS decree, referred to in the recitals of determination 155238/2026, which itself applies from 1 May 2026 (Article 8). <a href="https://www.acn.gov.it/portale/faq/nis/categorizzazione" target="_blank" rel="noopener">ACN FAQ CAT.1</a> confirms the annual window and the link with the first notice under Article 7(3)(a), which governs notification of inclusion in the list.</p>
+<p>The submission is made on the ACN digital platform. According to the <a href="https://www.acn.gov.it/portale/w/nis-pubblicate-le-modalita-per-l-elencazione-e-la-categorizzazione-delle-attivita-e-dei-servizi" target="_blank" rel="noopener">ACN news item of 24 April 2026</a>, the procedure is set out in Articles 20 and 21 of ACN determination 127437/2026, which governs use of the platform and the information to be provided to the Authority.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Step</th><th>Time limit</th><th>Legal basis</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Submission or update of the categorised list</td><td>1 May to 30 June each year</td><td>Art. 30(1) NIS decree</td></tr>
+      <tr><td>ACN feedback on compliance</td><td>Within 90 days, extendable once by up to 60</td><td>Art. 30(3) NIS decree</td></tr>
+      <tr><td>Entity's reply to a request for additional information</td><td>Within 30 days of the request</td><td>Art. 30(3) NIS decree</td></tr>
+      <tr><td>No ACN feedback within the time limits</td><td>Compliance deemed validated</td><td>Art. 30(4) NIS decree</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2>The ACN model: ten macro-areas and four relevance categories</h2>
+<p>Determination 155238/2026 adopts a single model, set out in two almost identical annexes. Article 2 provides ten macro-areas, each with a name, a description and a pre-assigned relevance category, and four categories of increasing impact, namely minimal, low, medium and high impact.</p>
+<p>Each macro-area, as the <a href="https://www.acn.gov.it/portale/nis/categorizzazione" target="_blank" rel="noopener">ACN categorisation page</a> explains, groups activities sharing features such as users, purpose or type of service. The table shows the macro-areas and the categories pre-assigned by <a href="https://www.acn.gov.it/portale/documents/d/guest/allegato_1_modello260409-v1" target="_blank" rel="noopener">Annex 1</a> and <a href="https://www.acn.gov.it/portale/documents/d/guest/allegato_2_modello260409-v1" target="_blank" rel="noopener">Annex 2</a>.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Macro-area</th><th>What it covers, in brief</th><th>Pre-assigned category</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Monitoring and control</td><td>Support to top management, coordination of cyber and physical security, business continuity, quality and compliance control, including over suppliers</td><td>High impact</td></tr>
+      <tr><td>Production of goods and services</td><td>Operational planning, operating processes, delivery of services to customers, plant maintenance</td><td>Medium impact</td></tr>
+      <tr><td>Research, development and design</td><td>New technologies, prototypes, projects, intellectual property and patents</td><td>Medium impact</td></tr>
+      <tr><td>Financial management</td><td>Cash flows, invoicing and payments, accounting, financial statements, treasury</td><td>Low impact</td></tr>
+      <tr><td>Customer management</td><td>Onboarding, customer records and CRM, help desk, sales requests</td><td>Low impact</td></tr>
+      <tr><td>Human resources management</td><td>Recruitment, payroll, performance appraisal, training</td><td>Low impact</td></tr>
+      <tr><td>Logistics</td><td>Logistics flows, warehousing, shipping, distribution and delivery</td><td>Low impact (Annex 1) or minimal impact (Annex 2)</td></tr>
+      <tr><td>Communication and marketing</td><td>Digital and social channels, press office, brand, events and campaigns</td><td>Minimal impact</td></tr>
+      <tr><td>Administrative management</td><td>Real estate, contracts, administrative supplier management, tax and permit matters</td><td>Minimal impact</td></tr>
+      <tr><td>Other services and activities</td><td>Anything not covered by the other macro-areas</td><td>Minimal impact</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The only difference between the two annexes concerns logistics. Annex 1 applies to the types of entity listed in Article 2(2) of the determination, which refers to specific items of Annexes I, II and IV of the NIS decree; for these entities logistics is low impact because, according to the <a href="https://www.acn.gov.it/portale/documents/d/guest/modello-di-categorizzazione-nis-guida-alla-lettura" target="_blank" rel="noopener">ACN reading guide</a>, it is closely linked to their core business. All other entities apply Annex 2, which places it at minimal impact.</p>
+
+<h2>How is the categorised list compiled?</h2>
+<p>For each activity or service the entity states the macro-area, the name and description and the relevance category, as required by Article 3(2) of the determination. All activities performed and services provided must be considered, both inside and outside the organisation.</p>
+<p>FAQ CAT.7 and the reading guide suggest a three-step process, which remains optional.</p>
+<ol>
+  <li><strong>Identifying activities and services</strong>; the entity identifies those supported, performed or delivered by network and information systems, with no mandatory methodology. The guide describes a top-down approach, starting from the organisation chart and processes, and a bottom-up approach, starting from the system inventory; existing analyses such as a business impact analysis or risk assessment can also be used.</li>
+  <li><strong>Mapping into macro-areas</strong>; each activity is assigned to a single macro-area, so one that spans several must be broken down.</li>
+  <li><strong>Assigning the relevance category</strong>; each activity takes, by default, the category of its macro-area, unless a different documented assessment is made.</li>
+</ol>
+<p>The level of detail is left to the entity. The guide nonetheless recommends avoiding excessive fragmentation and states that, for each macro-area, it is enough to list at most as many activities as there are relevance categories, namely four. Macro-areas in which the entity performs no activity may be left empty (Article 3(4)).</p>
+
+<h2>Can the pre-assigned category be changed?</h2>
+<p>Yes. The entity may assign an activity a category different from that of its macro-area, higher or lower, on the basis of its own assessment of the impact of a possible compromise; in that case, however, it must keep the documentation containing that assessment, as required by Article 3(3) of the determination.</p>
+<p>It follows that a single macro-area may contain activities with different categories. The reading guide describes the assessment as a simplified business impact analysis covering confidentiality, integrity and availability, and does not impose a methodology.</p>
+<p>To guide the choice, Appendix B of the guide sets out the criteria ACN used to pre-assign the categories.</p>
+<ul>
+  <li>the degree of coordination of NIS activities and services;</li>
+  <li>the effect on security functions;</li>
+  <li>interdependence with NIS activities and services and possible knock-on effects;</li>
+  <li>the nature and volume of the data processed, for example the presence of personal data;</li>
+  <li>the influence on the continuity of NIS activities and services.</li>
+</ul>
+<p>In practice, lowering a category invites closer scrutiny. It is therefore advisable to give written reasons for every departure, by reference to these criteria, and to keep that document together with the submitted list.</p>
+
+<h2>Public administrations and the national cybersecurity perimeter</h2>
+<p>The determination contains two coordination rules. The first, in Article 4, concerns entities that have already classified data and services under Article 3 of ACN Directorial Decree no. 21007/24, the so-called Cloud Regulation for public administration; they apply the Cloud Regulation model instead of the NIS model.</p>
+<p>For these entities, as FAQ CAT.8 explains, the list coincides with the data and services classified as ordinary, critical or strategic on the PA digitale 2026 platform, which the entity may confirm or update; any change must, however, remain consistent with that classification.</p>
+<p>The second rule, in Article 5, concerns activities and services subject to the national cybersecurity perimeter rules established by Decree-Law no. 105 of 2019. They are automatically assigned the high impact category and, according to FAQ CAT.9, are not to be included in the categorised list.</p>
+
+<h2>Why categorisation shapes security measures</h2>
+<p>Categorisation is not an end in itself. <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art31" target="_blank" rel="noopener">Article 31 of the NIS decree</a>, on proportionality and gradual implementation of obligations, allows ACN to differentiate the time limits, arrangements and specifications of obligations according, among other things, to the relevance categories of the activities that network and information systems support (paragraph 2(a)).</p>
+<p>Today entities apply the baseline security measures set by ACN determination 379907/2025, discussed in the article on <a href="/risorse/misure-sicurezza-base-nis2-acn">NIS2 baseline security measures</a>. According to FAQ CAT.3, these will be supplemented by additional advanced measures, which will become part of the long-term security measures; ACN has stated that it will set them through further determinations by the end of 2026.</p>
+<p>The long-term measures will be differentiated precisely by relevance category. It follows that an activity classified as high impact will most likely require stricter requirements; accurate categorisation therefore makes it possible, as the ACN guide notes, to ensure adequate security while limiting investment to what is necessary.</p>
+
+<h2>Conclusions</h2>
+<p>NIS2 categorisation is an annual exercise, but its effects are long-term. The list submitted to ACN will shape the security measures each entity must adopt in the phases following initial application; for this reason it deserves the same care as the risk assessment.</p>
+<p>Ahead of the 2027 window, it is advisable to proceed in this order:</p>
+<ol>
+  <li>check what was submitted in 2026 and whether ACN raised any findings or requests for additional information;</li>
+  <li>update the inventory of activities and services, starting from processes and information systems;</li>
+  <li>map each activity to a single macro-area, breaking down cross-cutting ones;</li>
+  <li>confirm or change the pre-assigned categories, documenting every departure in writing;</li>
+  <li>align the list with the risk assessment and with the plan for implementing the baseline measures.</li>
+</ol>
+<p>For the other obligations, from registration to incident notification, see the <a href="/risorse/nis2">complete NIS2 guide</a>.</p>
+
+<p><strong>To prepare the categorised list without starting from scratch</strong>, <a href="/inizia">the RegulaeOS NIS2 gap analysis</a> helps you map activities and services, assign them to the macro-areas of the ACN model and keep the documentation of assessments that justify a category different from the pre-assigned one.</p>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art30" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 30 (listing, characterisation and categorisation of activities and services), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art31" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 31 (proportionality and gradual implementation of obligations), Normattiva</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_categorizzazione_260409-v8_signed" target="_blank" rel="noopener">ACN, determination no. 155238/2026 on the categorisation model</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/allegato_1_modello260409-v1" target="_blank" rel="noopener">ACN, Annex 1 to determination no. 155238/2026</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/allegato_2_modello260409-v1" target="_blank" rel="noopener">ACN, Annex 2 to determination no. 155238/2026</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/modello-di-categorizzazione-nis-guida-alla-lettura" target="_blank" rel="noopener">ACN, NIS Guidelines, Categorisation model, reading guide (April 2026)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/categorizzazione" target="_blank" rel="noopener">ACN, NIS FAQs on categorisation (CAT.1-CAT.9)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/nis/categorizzazione" target="_blank" rel="noopener">ACN, "Categorizzazione" page of the NIS section</a></li>
+  <li><a href="https://www.acn.gov.it/portale/w/nis-pubblicate-le-modalita-per-l-elencazione-e-la-categorizzazione-delle-attivita-e-dei-servizi" target="_blank" rel="noopener">ACN, news item on the publication of the listing and categorisation arrangements, 24 April 2026</a></li>
+</ul>
+`,
+    },
+  },
+  {
     slug: "nis2-organi-di-amministrazione-obblighi-cda",
     title: "NIS2 e organi di amministrazione, obblighi, formazione e responsabilità del CdA (art. 23 decreto NIS)",
     excerpt:
