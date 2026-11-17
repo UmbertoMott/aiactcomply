@@ -38,6 +38,372 @@ export interface BlogPost {
 
 export const POSTS: BlogPost[] = [
   {
+    slug: "nis2-adempimenti-scadenze",
+    title: "NIS2, adempimenti e scadenze 2027, il calendario completo per soggetti essenziali e importanti",
+    excerpt:
+      "Tutti gli adempimenti NIS2 e le relative scadenze in un unico calendario. Registrazione, aggiornamento annuale, categorizzazione, referente CSIRT, misure di sicurezza di base e notifica degli incidenti, con i termini per chi è entrato nell'elenco nel 2025 e nel 2026 e le novità della determinazione ACN 314287/2026.",
+    date: "17 novembre 2026",
+    dateISO: "2026-11-17",
+    author: { name: "Umberto Mottola", jobTitle: "Avvocato, CIPP/E" },
+    dateModifiedISO: "2026-11-17",
+    readTime: "9 min",
+    category: "Guide",
+    tags: ["NIS2", "adempimenti NIS2", "scadenze NIS2", "calendario NIS2", "registrazione NIS2", "referente CSIRT", "misure di sicurezza di base", "determinazione ACN 314287/2026", "D.Lgs. 138/2024"],
+    metaTitle: "NIS2, adempimenti e scadenze 2027, il calendario",
+    metaDescription:
+      "Adempimenti e scadenze NIS2 per il 2027. Registrazione, aggiornamento annuale, categorizzazione, referente CSIRT, misure di base, notifiche e sanzioni.",
+    faqSchema: [
+      {
+        q: "Quali sono le principali scadenze NIS2 del 2027?",
+        a: "Le finestre annuali sono tre; la registrazione sul portale ACN dal 1° gennaio al 28 febbraio, l'aggiornamento annuale delle informazioni dal 15 aprile al 31 maggio e la categorizzazione di attività e servizi dal 1° maggio al 30 giugno. Per i soggetti entrati nell'elenco nel 2026, inoltre, l'obbligo di notifica degli incidenti decorre dal 1° gennaio 2027 e le misure di sicurezza di base vanno adottate entro il 31 luglio 2027.",
+      },
+      {
+        q: "Chi è già nell'elenco NIS deve registrarsi di nuovo nel 2027?",
+        a: "Non necessariamente. L'art. 11, comma 1, della determinazione ACN 314287/2026 esonera dalla registrazione i soggetti già presenti nell'elenco se non sono intervenute modifiche rispetto alla dichiarazione dell'anno precedente; in tal caso essi restano nell'elenco con lo status già attribuito. Se le informazioni sono cambiate, invece, la dichiarazione va presentata dal 1° gennaio al 28 febbraio.",
+      },
+      {
+        q: "Entro quando va designato il referente CSIRT?",
+        a: "Entro il 31 dicembre dell'anno in cui il soggetto è stato inserito nell'elenco NIS, come prevede la determinazione ACN 314287/2026. Per i soggetti inseriti nel 2026 la scadenza è quindi il 31 dicembre 2026; il referente è la persona che tiene i contatti con il CSIRT Italia ed effettua le notifiche degli incidenti.",
+      },
+      {
+        q: "Entro quanto tempo va notificato un incidente significativo?",
+        a: "L'art. 25, comma 5, del decreto NIS prevede una pre-notifica al CSIRT Italia entro 24 ore da quando si è venuti a conoscenza dell'incidente, una notifica entro 72 ore con una prima valutazione e una relazione finale entro un mese dalla notifica. Su richiesta del CSIRT Italia va trasmessa anche una relazione intermedia.",
+      },
+      {
+        q: "Quali sanzioni sono previste per chi non rispetta gli adempimenti NIS2?",
+        a: "Per la violazione degli obblighi sulle misure di sicurezza, sulla notifica degli incidenti e sugli organi di amministrazione l'art. 38 del decreto NIS prevede sanzioni fino a 10 milioni di euro o al 2% del fatturato mondiale per i soggetti essenziali e fino a 7 milioni o all'1,4% per gli importanti. Per la mancata registrazione, il mancato aggiornamento o la mancata categorizzazione il massimo è lo 0,1% del fatturato per gli essenziali e lo 0,07% per gli importanti.",
+      },
+    ],
+    content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · aggiornato al 17 nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In sintesi.</strong> Gli adempimenti NIS2 seguono un calendario fisso; registrazione dal 1° gennaio al 28 febbraio, aggiornamento annuale dal 15 aprile al 31 maggio, categorizzazione dal 1° maggio al 30 giugno. A queste finestre si sommano termini legati all'anno di ingresso nell'elenco; chi vi è entrato nel 2026 deve designare il referente CSIRT entro il 31 dicembre 2026, notificare gli incidenti dal 1° gennaio 2027 e adottare le misure di base entro il 31 luglio 2027.
+</p>
+
+<p>Gli adempimenti NIS2 e le relative scadenze sono il primo problema pratico per chi rientra nel decreto legislativo n. 138 del 2024, ossia il decreto NIS che ha recepito in Italia la direttiva (UE) 2022/2555. Le regole sono distribuite tra il decreto e diverse determinazioni dell'Agenzia per la cybersicurezza nazionale (ACN), sicché è facile perdere una data.</p>
+<p>Questo articolo raccoglie in un unico calendario gli adempimenti ricorrenti, i termini che dipendono dall'anno di ingresso nell'elenco e le novità introdotte dalla determinazione ACN 314287/2026. Per il quadro generale della disciplina si rinvia alla <a href="/risorse/nis2">guida alla NIS2</a>; per lo stato di recepimento negli altri Stati membri, alla pagina sullo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>.</p>
+
+<h2>Quali sono gli adempimenti NIS2?</h2>
+<p>Gli adempimenti principali sono sei; registrarsi sul portale ACN, aggiornare ogni anno le informazioni, categorizzare attività e servizi, designare punto di contatto e referente CSIRT, adottare le misure di sicurezza di base e notificare gli incidenti significativi. Su tutti vigilano gli organi di amministrazione, che ne rispondono.</p>
+<p>La tabella indica, per ciascun adempimento, la norma di riferimento e il suo contenuto.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Adempimento</th><th>In che cosa consiste</th><th>Base normativa</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Registrazione</td><td>Dichiarazione sul portale ACN dei dati del soggetto, del settore e del punto di contatto</td><td>Art. 7, comma 1, decreto NIS; art. 11 determinazione ACN 314287/2026</td></tr>
+      <tr><td>Aggiornamento annuale</td><td>Indirizzi IP e domini, componenti degli organi di amministrazione, referente CSIRT, fornitori rilevanti</td><td>Art. 7, comma 4, decreto NIS; art. 16 determinazione ACN 314287/2026</td></tr>
+      <tr><td>Categorizzazione</td><td>Elenco delle attività e dei servizi con la relativa categoria di rilevanza</td><td>Art. 30 decreto NIS; determinazione ACN 155238/2026</td></tr>
+      <tr><td>Figure di riferimento</td><td>Punto di contatto, sostituto e referente CSIRT, che notifica gli incidenti</td><td>Determinazione ACN 314287/2026</td></tr>
+      <tr><td>Misure di sicurezza di base</td><td>Requisiti tecnici e organizzativi degli allegati 1 (importanti) e 2 (essenziali)</td><td>Artt. 23 e 24 decreto NIS; determinazione ACN 379907/2025</td></tr>
+      <tr><td>Notifica degli incidenti</td><td>Pre-notifica, notifica e relazione finale al CSIRT Italia</td><td>Art. 25 decreto NIS; allegati 3 e 4 determinazione ACN 379907/2025</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art23" target="_blank" rel="noopener">art. 23 del decreto NIS</a>, che disciplina gli obblighi degli organi di amministrazione e direttivi, affida a questi ultimi la supervisione della registrazione e delle misure di sicurezza. Il tema è approfondito nell'articolo su <a href="/risorse/nis2-organi-di-amministrazione-obblighi-cda">NIS2 e organi di amministrazione</a>.</p>
+
+<h2>Qual è il calendario annuale degli adempimenti NIS2?</h2>
+<p>Ogni anno si ripetono tre finestre; registrazione dal 1° gennaio al 28 febbraio, aggiornamento annuale dal 15 aprile al 31 maggio e categorizzazione dal 1° maggio al 30 giugno. Entro il 31 marzo, invece, l'ACN redige l'elenco dei soggetti essenziali e importanti e comunica a ciascuno l'inserimento, la permanenza o l'espunzione.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Periodo (2027)</th><th>Adempimento</th><th>Chi riguarda</th><th>Base normativa</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1 gennaio - 28 febbraio</td><td>Registrazione o aggiornamento della dichiarazione</td><td>Nuovi soggetti e soggetti in elenco le cui informazioni sono cambiate</td><td>Art. 7, comma 1, decreto NIS; art. 11 det. 314287/2026</td></tr>
+      <tr><td>Entro 31 marzo</td><td>Redazione dell'elenco NIS e comunicazioni ai soggetti</td><td>ACN</td><td>Art. 7, commi 2 e 3, decreto NIS</td></tr>
+      <tr><td>Fino al 14 aprile</td><td>Aggiornamento continuo delle informazioni dell'anno precedente</td><td>Soggetti in elenco</td><td>Art. 19 det. 314287/2026</td></tr>
+      <tr><td>15 aprile - 31 maggio</td><td>Aggiornamento annuale delle informazioni</td><td>Soggetti inseriti o confermati nell'elenco</td><td>Art. 7, comma 4, decreto NIS; art. 16 det. 314287/2026</td></tr>
+      <tr><td>Entro 31 maggio dell'anno di inserimento</td><td>Designazione del sostituto del punto di contatto</td><td>Soggetti inseriti nel 2027</td><td>Art. 5 det. 314287/2026</td></tr>
+      <tr><td>1 maggio - 30 giugno</td><td>Elencazione e categorizzazione di attività e servizi</td><td>Soggetti in elenco, salvo le entità finanziarie soggette al DORA</td><td>Art. 30 decreto NIS; art. 20 det. 314287/2026</td></tr>
+      <tr><td>1 settembre - 30 novembre</td><td>Designazione o aggiornamento del rappresentante NIS in Italia</td><td>Soggetti non stabiliti nell'Unione europea</td><td>Art. 6 det. 314287/2026</td></tr>
+      <tr><td>Entro 31 dicembre dell'anno di inserimento</td><td>Designazione del referente CSIRT</td><td>Soggetti inseriti nell'anno</td><td>Det. 314287/2026</td></tr>
+      <tr><td>In ogni momento</td><td>Comunicazione di ogni modifica delle informazioni, entro 14 giorni</td><td>Soggetti in elenco</td><td>Art. 7, comma 7, decreto NIS</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Le date delle tre finestre principali sono fissate direttamente dall'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art7" target="_blank" rel="noopener">art. 7 del decreto NIS</a>, che disciplina l'identificazione e l'elencazione dei soggetti, e dall'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art30" target="_blank" rel="noopener">art. 30</a>, dedicato alla categorizzazione. Come funziona quest'ultima è spiegato nell'articolo sulla <a href="/risorse/categorizzazione-nis2-attivita-servizi-art-30">categorizzazione NIS2 di attività e servizi</a>.</p>
+
+<h2>Quali scadenze valgono per chi è entrato nell'elenco nel 2025 o nel 2026?</h2>
+<p>I termini per le misure di sicurezza e per la notifica degli incidenti dipendono dall'anno di ingresso nell'elenco. Per i soggetti del 2025 decorrono dalla comunicazione di inserimento, con 9 mesi per le notifiche e 18 mesi per le misure; per quelli del 2026 le date sono fisse, ossia il 1° gennaio 2027 per le notifiche e il 31 luglio 2027 per le misure.</p>
+<p>La regola per i soggetti del 2025 è contenuta nell'art. 3 della <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">determinazione ACN 379907/2025</a>, che stabilisce le specifiche di base per gli obblighi degli artt. 23, 24, 25, 29 e 32 del decreto. Quella per i soggetti del 2026 è contenuta nell'art. 1 della <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_misuresicurezza-v4_post" target="_blank" rel="noopener">determinazione ACN 127434/2026</a>, che fissa i termini per i soggetti inseriti per la prima volta nell'elenco nel 2026 e conferma, al comma 3, i termini già previsti per chi vi era entrato nel 2025.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Adempimento</th><th>Soggetti inseriti nel 2025</th><th>Soggetti inseriti nel 2026</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Notifica degli incidenti significativi</td><td>9 mesi dalla comunicazione di inserimento</td><td>Dal 1° gennaio 2027</td></tr>
+      <tr><td>Misure di sicurezza di base</td><td>18 mesi dalla comunicazione di inserimento</td><td>Entro il 31 luglio 2027</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Poiché per i soggetti del 2025 il termine si calcola dalla data di ricezione della comunicazione, la scadenza esatta va verificata sulla comunicazione ricevuta dall'ACN. Per chi l'ha ricevuta ad aprile 2025, ad esempio, i 18 mesi sono scaduti a ottobre 2026; ne consegue che le misure di base devono essere già operative e documentate. Il loro contenuto è illustrato nell'articolo sulle <a href="/risorse/misure-sicurezza-base-nis2-acn">misure di sicurezza di base NIS2</a>.</p>
+
+<h2>Le novità della determinazione ACN 314287/2026 per la registrazione 2027</h2>
+<p>Dal 25 ottobre 2026 si applica la <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_piattaforma_314287-2026_signeddg" target="_blank" rel="noopener">determinazione ACN 314287/2026</a>, che disciplina l'uso della piattaforma digitale e le informazioni da fornire all'ACN. Essa sostituisce la determinazione 127437 del 13 aprile 2026 ed è stata adottata, come si legge nelle premesse, in vista della registrazione 2027.</p>
+<p>Le novità di maggior rilievo pratico sono tre.</p>
+<ul>
+  <li><strong>Esonero dalla registrazione</strong>; secondo l'art. 11, comma 1, i soggetti già presenti nell'elenco non devono ripresentare la dichiarazione se non sono intervenute modifiche rispetto a quella dell'anno precedente, e, ai sensi del comma 11, restano in elenco con lo status già attribuito;</li>
+  <li><strong>dichiarazioni tardive</strong>; secondo l'art. 11, comma 8, le dichiarazioni presentate dopo il 28 febbraio ma entro il 1° settembre sono comunque trattate ai fini della registrazione nell'anno di riferimento, ferma la loro qualificazione come tardive;</li>
+  <li><strong>riscontro sulla categorizzazione</strong>; secondo l'art. 21, comma 2, fino al 31 dicembre 2027 l'ACN fornisce riscontro sugli elenchi categorizzati entro centocinquanta giorni dalla trasmissione, in luogo dei novanta giorni previsti in via ordinaria dall'art. 30, comma 3, del decreto NIS.</li>
+</ul>
+<p>L'esonero, tuttavia, va maneggiato con cautela. Esso opera solo se nessuna informazione della dichiarazione è cambiata; una variazione del fatturato, dei dipendenti, dei codici ATECO o della struttura del gruppo impone invece di presentare una nuova dichiarazione nella finestra ordinaria.</p>
+
+<h2>Notifica degli incidenti, i termini da rispettare</h2>
+<p>Quando si verifica un incidente significativo, i termini si contano in ore. L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">art. 25, comma 5, del decreto NIS</a>, che disciplina gli obblighi di notifica, prevede una sequenza di comunicazioni al CSIRT Italia, la struttura dell'ACN che riceve le segnalazioni.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Comunicazione</th><th>Termine</th><th>Contenuto essenziale</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Pre-notifica</td><td>Entro 24 ore dalla conoscenza dell'incidente</td><td>Se possibile, indicazione di un'eventuale origine illecita o malevola e dell'impatto transfrontaliero</td></tr>
+      <tr><td>Notifica</td><td>Entro 72 ore dalla conoscenza dell'incidente</td><td>Valutazione iniziale della gravità e dell'impatto e, se disponibili, indicatori di compromissione</td></tr>
+      <tr><td>Relazione intermedia</td><td>Su richiesta del CSIRT Italia</td><td>Aggiornamenti sulla situazione</td></tr>
+      <tr><td>Relazione finale</td><td>Entro un mese dalla notifica</td><td>Descrizione dettagliata, causa originale, misure di attenuazione, eventuale impatto transfrontaliero</td></tr>
+      <tr><td>Relazione mensile</td><td>Se l'incidente è ancora in corso</td><td>Progressi, con relazione finale entro un mese dalla conclusione</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Quali incidenti siano significativi lo stabiliscono gli allegati 3 e 4 della determinazione 379907/2025, rispettivamente per i soggetti importanti e per quelli essenziali. Le notifiche sono effettuate dal referente CSIRT o dai suoi sostituti; in caso di loro indisponibilità, secondo la determinazione 314287/2026, può provvedere in via eccezionale il punto di contatto.</p>
+
+<h2>Cosa rischia chi non rispetta gli adempimenti NIS2?</h2>
+<p>L'art. 38 del decreto NIS prevede due livelli di sanzioni. Il livello più alto colpisce le violazioni sulle misure di sicurezza, sulla notifica degli incidenti e sugli obblighi degli organi di amministrazione; il livello più basso riguarda gli adempimenti informativi, ossia registrazione, aggiornamento e categorizzazione.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Violazione</th><th>Soggetti essenziali privati</th><th>Soggetti importanti privati</th><th>Base normativa</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Obblighi degli artt. 23, 24 e 25 (organi di amministrazione, misure di sicurezza, notifica)</td><td>Fino a 10 milioni di euro o al 2% del fatturato annuo mondiale, se superiore</td><td>Fino a 7 milioni di euro o all'1,4% del fatturato annuo mondiale, se superiore</td><td>Art. 38, commi 8 e 9</td></tr>
+      <tr><td>Mancata registrazione, aggiornamento o categorizzazione; mancata collaborazione con l'ACN o con il CSIRT Italia</td><td>Fino allo 0,1% del fatturato annuo mondiale</td><td>Fino allo 0,07% del fatturato annuo mondiale</td><td>Art. 38, commi 10 e 11</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Per le pubbliche amministrazioni il <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">medesimo art. 38</a> prevede importi fissi, da 25.000 a 125.000 euro per le violazioni più gravi e da 10.000 a 50.000 euro per quelle informative, ridotti di un terzo per i soggetti importanti. Per le violazioni informative, inoltre, il comma 11 tiene fermi i minimi edittali del comma 9, ossia un ventesimo del massimo per gli essenziali e un trentesimo per gli importanti.</p>
+
+<h2>Conclusioni</h2>
+<p>Gli adempimenti NIS2 non si esauriscono in una scadenza unica; si tratta di un ciclo annuale, a cui si sommano termini legati all'anno di ingresso nell'elenco. Chi conosce il proprio calendario può distribuire il lavoro durante l'anno, evitando di concentrare tutto a ridosso delle finestre.</p>
+<p>Nei prossimi mesi conviene procedere in quest'ordine:</p>
+<ol>
+  <li>per i soggetti inseriti nel 2026, designare il referente CSIRT entro il 31 dicembre 2026 e predisporre la procedura di notifica prima del 1° gennaio 2027;</li>
+  <li>verificare se le informazioni della dichiarazione sono cambiate e, in caso affermativo, presentarla tra il 1° gennaio e il 28 febbraio 2027;</li>
+  <li>preparare per tempo l'aggiornamento annuale, con l'elenco degli organi di amministrazione e dei fornitori rilevanti;</li>
+  <li>rivedere l'elenco categorizzato in vista della finestra di maggio e giugno 2027;</li>
+  <li>pianificare l'adozione delle misure di base entro il 31 luglio 2027, oppure, per i soggetti del 2025, verificarne la piena attuazione e la documentazione.</li>
+</ol>
+
+<p><strong>Per non perdere nessuna scadenza</strong>, <a href="/inizia">la gap analysis NIS2 di RegulaeOS</a> ricostruisce il calendario degli adempimenti in base all'anno di ingresso nell'elenco e alla categoria del soggetto, e tiene traccia di registrazione, aggiornamenti, categorizzazione e misure di sicurezza in un unico posto.</p>
+
+<h2>Fonti</h2>
+<ul>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art7" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 7 (identificazione ed elencazione dei soggetti), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art23" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 23 (organi di amministrazione e direttivi), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 25 (obblighi di notifica degli incidenti), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art30" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 30 (elencazione, caratterizzazione e categorizzazione delle attività e dei servizi), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 38 (sanzioni amministrative), Normattiva</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_piattaforma_314287-2026_signeddg" target="_blank" rel="noopener">ACN, determinazione n. 314287/2026 sulla piattaforma digitale e sulle informazioni da fornire</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">ACN, determinazione n. 379907/2025, specifiche di base per gli obblighi degli artt. 23, 24, 25, 29 e 32</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_misuresicurezza-v4_post" target="_blank" rel="noopener">ACN, determinazione n. 127434/2026, termini per i soggetti inseriti nell'elenco nel 2026</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_categorizzazione_260409-v8_signed" target="_blank" rel="noopener">ACN, determinazione n. 155238/2026 sul modello di categorizzazione</a></li>
+</ul>
+`,
+    en: {
+      title: "NIS2 obligations and deadlines for 2027: the complete calendar for essential and important entities",
+      excerpt:
+        "All NIS2 obligations and their deadlines in a single calendar. Registration, annual update, categorisation, CSIRT contact person, baseline security measures and incident notification, with the deadlines for entities added to the list in 2025 and 2026 and the changes introduced by ACN determination 314287/2026.",
+      date: "17 November 2026",
+      readTime: "9 min",
+      category: "Guide",
+      tags: ["NIS2", "NIS2 obligations", "NIS2 deadlines", "NIS2 calendar", "NIS2 registration", "CSIRT contact person", "baseline security measures", "ACN determination 314287/2026", "Legislative Decree 138/2024"],
+      metaTitle: "NIS2 obligations and deadlines for 2027: the calendar",
+      metaDescription:
+        "NIS2 obligations and deadlines for 2027. Registration, annual update, categorisation, CSIRT contact, baseline measures, incident notification and penalties.",
+      faqSchema: [
+        {
+          q: "What are the main NIS2 deadlines in 2027?",
+          a: "There are three annual windows: registration on the ACN portal from 1 January to 28 February, the annual update of information from 15 April to 31 May, and categorisation of activities and services from 1 May to 30 June. For entities added to the list in 2026, the incident notification obligation also applies from 1 January 2027 and the baseline security measures must be adopted by 31 July 2027.",
+        },
+        {
+          q: "Do entities already on the NIS list have to register again in 2027?",
+          a: "Not necessarily. Article 11(1) of ACN determination 314287/2026 exempts entities already on the list from registration if nothing has changed since the previous year's declaration; in that case they remain on the list with the status already assigned. If the information has changed, however, the declaration must be submitted between 1 January and 28 February.",
+        },
+        {
+          q: "By when must the CSIRT contact person be appointed?",
+          a: "By 31 December of the year in which the entity was added to the NIS list, as provided by ACN determination 314287/2026. For entities added in 2026 the deadline is therefore 31 December 2026; the contact person liaises with CSIRT Italia and submits incident notifications.",
+        },
+        {
+          q: "How quickly must a significant incident be notified?",
+          a: "Article 25(5) of the NIS decree requires an early warning to CSIRT Italia within 24 hours of becoming aware of the incident, a notification within 72 hours with an initial assessment, and a final report within one month of the notification. An intermediate report must also be sent at the request of CSIRT Italia.",
+        },
+        {
+          q: "What penalties apply for failing to meet NIS2 obligations?",
+          a: "For breaches of the obligations on security measures, incident notification and management bodies, Article 38 of the NIS decree provides fines of up to EUR 10 million or 2% of worldwide turnover for essential entities and up to EUR 7 million or 1.4% for important entities. For failure to register, update or categorise, the maximum is 0.1% of turnover for essential entities and 0.07% for important entities.",
+        },
+      ],
+      content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · updated 17 Nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In short.</strong> NIS2 obligations follow a fixed calendar: registration from 1 January to 28 February, annual update from 15 April to 31 May, categorisation from 1 May to 30 June. On top of these windows come deadlines linked to the year of inclusion in the list; entities added in 2026 must appoint the CSIRT contact person by 31 December 2026, notify incidents from 1 January 2027 and adopt the baseline measures by 31 July 2027.
+</p>
+
+<p>NIS2 obligations and their deadlines are the first practical problem for anyone within the scope of Legislative Decree no. 138 of 2024, the NIS decree that transposed Directive (EU) 2022/2555 into Italian law. The rules are spread across the decree and several determinations of the National Cybersecurity Agency (ACN), so it is easy to miss a date.</p>
+<p>This article brings together in a single calendar the recurring obligations, the deadlines that depend on the year of inclusion in the list and the changes introduced by ACN determination 314287/2026. For a general overview of the rules, see the <a href="/risorse/nis2">NIS2 guide</a>; for the state of transposition in other Member States, see the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">NIS2 implementation status</a>.</p>
+
+<h2>What are the NIS2 obligations?</h2>
+<p>There are six main obligations: registering on the ACN portal, updating information every year, categorising activities and services, appointing the point of contact and the CSIRT contact person, adopting the baseline security measures and notifying significant incidents. Management bodies oversee all of them and are liable for them.</p>
+<p>The table shows, for each obligation, the legal basis and what it involves.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Obligation</th><th>What it involves</th><th>Legal basis</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Registration</td><td>Declaration on the ACN portal of the entity's details, sector and point of contact</td><td>Art. 7(1) NIS decree; Art. 11 ACN determination 314287/2026</td></tr>
+      <tr><td>Annual update</td><td>IP addresses and domains, members of management bodies, CSIRT contact person, relevant suppliers</td><td>Art. 7(4) NIS decree; Art. 16 ACN determination 314287/2026</td></tr>
+      <tr><td>Categorisation</td><td>List of activities and services with their relevance category</td><td>Art. 30 NIS decree; ACN determination 155238/2026</td></tr>
+      <tr><td>Key roles</td><td>Point of contact, deputy and CSIRT contact person, who notifies incidents</td><td>ACN determination 314287/2026</td></tr>
+      <tr><td>Baseline security measures</td><td>Technical and organisational requirements in Annexes 1 (important) and 2 (essential)</td><td>Arts. 23 and 24 NIS decree; ACN determination 379907/2025</td></tr>
+      <tr><td>Incident notification</td><td>Early warning, notification and final report to CSIRT Italia</td><td>Art. 25 NIS decree; Annexes 3 and 4 ACN determination 379907/2025</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art23" target="_blank" rel="noopener">Article 23 of the NIS decree</a>, which governs the obligations of management bodies, makes them responsible for overseeing registration and security measures. The topic is covered in the article on <a href="/risorse/nis2-organi-di-amministrazione-obblighi-cda">NIS2 and management bodies</a>.</p>
+
+<h2>What is the annual calendar of NIS2 obligations?</h2>
+<p>Three windows recur every year: registration from 1 January to 28 February, annual update from 15 April to 31 May and categorisation from 1 May to 30 June. By 31 March, ACN draws up the list of essential and important entities and notifies each entity of its inclusion, continued inclusion or removal.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Period (2027)</th><th>Obligation</th><th>Who it concerns</th><th>Legal basis</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1 January - 28 February</td><td>Registration or update of the declaration</td><td>New entities and listed entities whose information has changed</td><td>Art. 7(1) NIS decree; Art. 11 det. 314287/2026</td></tr>
+      <tr><td>By 31 March</td><td>Drawing up of the NIS list and notices to entities</td><td>ACN</td><td>Art. 7(2) and (3) NIS decree</td></tr>
+      <tr><td>Until 14 April</td><td>Ongoing update of the previous year's information</td><td>Listed entities</td><td>Art. 19 det. 314287/2026</td></tr>
+      <tr><td>15 April - 31 May</td><td>Annual update of information</td><td>Entities added to or confirmed on the list</td><td>Art. 7(4) NIS decree; Art. 16 det. 314287/2026</td></tr>
+      <tr><td>By 31 May of the year of inclusion</td><td>Appointment of the deputy point of contact</td><td>Entities added in 2027</td><td>Art. 5 det. 314287/2026</td></tr>
+      <tr><td>1 May - 30 June</td><td>Listing and categorisation of activities and services</td><td>Listed entities, except financial entities subject to DORA</td><td>Art. 30 NIS decree; Art. 20 det. 314287/2026</td></tr>
+      <tr><td>1 September - 30 November</td><td>Appointment or update of the NIS representative in Italy</td><td>Entities not established in the European Union</td><td>Art. 6 det. 314287/2026</td></tr>
+      <tr><td>By 31 December of the year of inclusion</td><td>Appointment of the CSIRT contact person</td><td>Entities added in that year</td><td>Det. 314287/2026</td></tr>
+      <tr><td>At any time</td><td>Notification of any change in information, within 14 days</td><td>Listed entities</td><td>Art. 7(7) NIS decree</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The dates of the three main windows are set directly by <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art7" target="_blank" rel="noopener">Article 7 of the NIS decree</a>, which governs identification and listing of entities, and by <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art30" target="_blank" rel="noopener">Article 30</a>, on categorisation. How categorisation works is explained in the article on <a href="/risorse/categorizzazione-nis2-attivita-servizi-art-30">NIS2 categorisation of activities and services</a>.</p>
+
+<h2>Which deadlines apply to entities added to the list in 2025 or 2026?</h2>
+<p>The deadlines for security measures and incident notification depend on the year of inclusion in the list. For 2025 entities they run from the notice of inclusion, with 9 months for notifications and 18 months for the measures; for 2026 entities the dates are fixed, namely 1 January 2027 for notifications and 31 July 2027 for the measures.</p>
+<p>The rule for 2025 entities is in Article 3 of <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">ACN determination 379907/2025</a>, which sets the baseline specifications for the obligations under Articles 23, 24, 25, 29 and 32 of the decree. The rule for 2026 entities is in Article 1 of <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_misuresicurezza-v4_post" target="_blank" rel="noopener">ACN determination 127434/2026</a>, which sets the deadlines for entities added to the list for the first time in 2026 and confirms, in paragraph 3, the deadlines already applicable to those added in 2025.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Obligation</th><th>Entities added in 2025</th><th>Entities added in 2026</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Notification of significant incidents</td><td>9 months after the notice of inclusion</td><td>From 1 January 2027</td></tr>
+      <tr><td>Baseline security measures</td><td>18 months after the notice of inclusion</td><td>By 31 July 2027</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Since for 2025 entities the time limit runs from receipt of the notice, the exact deadline must be checked against the notice received from ACN. For an entity that received it in April 2025, for example, the 18 months expired in October 2026; it follows that the baseline measures must already be in place and documented. Their content is described in the article on <a href="/risorse/misure-sicurezza-base-nis2-acn">NIS2 baseline security measures</a>.</p>
+
+<h2>What ACN determination 314287/2026 changes for 2027 registration</h2>
+<p>Since 25 October 2026, <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_piattaforma_314287-2026_signeddg" target="_blank" rel="noopener">ACN determination 314287/2026</a> has applied; it governs the use of the digital platform and the information to be provided to ACN. It replaces determination 127437 of 13 April 2026 and was adopted, as its recitals state, with a view to the 2027 registration.</p>
+<p>The three changes of greatest practical importance are the following.</p>
+<ul>
+  <li><strong>Registration exemption</strong>; under Article 11(1), entities already on the list need not resubmit the declaration if nothing has changed since the previous year's, and, under paragraph 11, they remain on the list with the status already assigned;</li>
+  <li><strong>late declarations</strong>; under Article 11(8), declarations submitted after 28 February but by 1 September are still processed for registration in the reference year, although they remain late;</li>
+  <li><strong>feedback on categorisation</strong>; under Article 21(2), until 31 December 2027 ACN gives feedback on categorised lists within one hundred and fifty days of submission, instead of the ninety days ordinarily provided by Article 30(3) of the NIS decree.</li>
+</ul>
+<p>The exemption should, however, be handled with care. It applies only if none of the information in the declaration has changed; a change in turnover, headcount, ATECO codes or group structure requires a new declaration in the ordinary window.</p>
+
+<h2>Incident notification: the time limits</h2>
+<p>When a significant incident occurs, time limits are counted in hours. <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">Article 25(5) of the NIS decree</a>, which governs notification obligations, provides for a sequence of communications to CSIRT Italia, the ACN unit that receives reports.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Communication</th><th>Time limit</th><th>Essential content</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Early warning</td><td>Within 24 hours of becoming aware of the incident</td><td>Where possible, whether it may be caused by unlawful or malicious acts and whether it may have a cross-border impact</td></tr>
+      <tr><td>Notification</td><td>Within 72 hours of becoming aware of the incident</td><td>Initial assessment of severity and impact and, where available, indicators of compromise</td></tr>
+      <tr><td>Intermediate report</td><td>At the request of CSIRT Italia</td><td>Relevant status updates</td></tr>
+      <tr><td>Final report</td><td>Within one month of the notification</td><td>Detailed description, root cause, mitigation measures, any cross-border impact</td></tr>
+      <tr><td>Monthly report</td><td>If the incident is still ongoing</td><td>Progress, with a final report within one month of the end of incident handling</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Which incidents are significant is set out in Annexes 3 and 4 of determination 379907/2025, for important and essential entities respectively. Notifications are submitted by the CSIRT contact person or their deputies; if they are unavailable, under determination 314287/2026, the point of contact may exceptionally do so.</p>
+
+<h2>What are the consequences of failing to meet NIS2 obligations?</h2>
+<p>Article 38 of the NIS decree provides two tiers of penalties. The higher tier covers breaches relating to security measures, incident notification and the obligations of management bodies; the lower tier covers information obligations, namely registration, updating and categorisation.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Breach</th><th>Private essential entities</th><th>Private important entities</th><th>Legal basis</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Obligations under Arts. 23, 24 and 25 (management bodies, security measures, notification)</td><td>Up to EUR 10 million or 2% of worldwide annual turnover, whichever is higher</td><td>Up to EUR 7 million or 1.4% of worldwide annual turnover, whichever is higher</td><td>Art. 38(8) and (9)</td></tr>
+      <tr><td>Failure to register, update or categorise; failure to cooperate with ACN or CSIRT Italia</td><td>Up to 0.1% of worldwide annual turnover</td><td>Up to 0.07% of worldwide annual turnover</td><td>Art. 38(10) and (11)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>For public administrations, <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">the same Article 38</a> provides fixed amounts, from EUR 25,000 to EUR 125,000 for the most serious breaches and from EUR 10,000 to EUR 50,000 for information breaches, reduced by one third for important entities. For information breaches, paragraph 11 also keeps the minimum amounts set by paragraph 9, namely one twentieth of the maximum for essential entities and one thirtieth for important entities.</p>
+
+<h2>Conclusions</h2>
+<p>NIS2 obligations are not a single deadline; they form an annual cycle, on top of which come deadlines linked to the year of inclusion in the list. Knowing your calendar lets you spread the work across the year instead of concentrating everything just before the windows open.</p>
+<p>Over the coming months, it is advisable to proceed in this order:</p>
+<ol>
+  <li>for entities added in 2026, appoint the CSIRT contact person by 31 December 2026 and set up the notification procedure before 1 January 2027;</li>
+  <li>check whether the information in the declaration has changed and, if so, submit it between 1 January and 28 February 2027;</li>
+  <li>prepare the annual update in good time, including the list of management body members and relevant suppliers;</li>
+  <li>review the categorised list ahead of the May and June 2027 window;</li>
+  <li>plan adoption of the baseline measures by 31 July 2027 or, for 2025 entities, check that they are fully implemented and documented.</li>
+</ol>
+
+<p><strong>To make sure no deadline is missed</strong>, <a href="/inizia">the RegulaeOS NIS2 gap analysis</a> builds the calendar of obligations based on the year of inclusion in the list and the entity's category, and tracks registration, updates, categorisation and security measures in one place.</p>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art7" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 7 (identification and listing of entities), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art23" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 23 (management bodies), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 25 (incident notification obligations), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art30" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 30 (listing, characterisation and categorisation of activities and services), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 38 (administrative penalties), Normattiva</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_piattaforma_314287-2026_signeddg" target="_blank" rel="noopener">ACN, determination no. 314287/2026 on the digital platform and information to be provided</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">ACN, determination no. 379907/2025, baseline specifications for the obligations under Arts. 23, 24, 25, 29 and 32</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_misuresicurezza-v4_post" target="_blank" rel="noopener">ACN, determination no. 127434/2026, deadlines for entities added to the list in 2026</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_categorizzazione_260409-v8_signed" target="_blank" rel="noopener">ACN, determination no. 155238/2026 on the categorisation model</a></li>
+</ul>
+`,
+    },
+  },
+  {
     slug: "categorizzazione-nis2-attivita-servizi-art-30",
     title: "Categorizzazione NIS2 di attività e servizi, guida all'art. 30 del decreto NIS e al modello ACN",
     excerpt:
