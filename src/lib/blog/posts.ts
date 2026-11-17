@@ -38,6 +38,284 @@ export interface BlogPost {
 
 export const POSTS: BlogPost[] = [
   {
+    slug: "nis2-gdpr",
+    title: "NIS2 e GDPR, differenze, data breach e doppia notifica",
+    excerpt:
+      "NIS2 e GDPR si applicano insieme. Cosa tutelano, chi obbligano, quando un incidente è anche un data breach, come gestire la doppia notifica al CSIRT Italia e al Garante e perché non si pagano due sanzioni per lo stesso comportamento.",
+    date: "17 novembre 2026",
+    dateISO: "2026-11-17",
+    author: { name: "Umberto Mottola", jobTitle: "Avvocato, CIPP/E" },
+    dateModifiedISO: "2026-11-17",
+    readTime: "9 min",
+    category: "Normativa",
+    tags: ["NIS2", "GDPR", "NIS2 e GDPR", "data breach", "notifica incidenti", "CSIRT Italia", "Garante privacy", "D.Lgs. 138/2024", "regolamento 2016/679"],
+    metaTitle: "NIS2 e GDPR, differenze e doppia notifica degli incidenti",
+    metaDescription:
+      "NIS2 e GDPR a confronto. Oggetto, destinatari, autorità, data breach e incidente significativo, notifica al CSIRT Italia e al Garante, sanzioni.",
+    faqSchema: [
+      {
+        q: "La NIS2 sostituisce il GDPR?",
+        a: "No. Il considerando 14 della direttiva (UE) 2022/2555 precisa che la direttiva non pregiudica il regolamento (UE) 2016/679, e l'art. 8 del D.Lgs. 138/2024 impone a ACN, Autorità di settore e soggetti NIS di trattare i dati personali in conformità al GDPR e al Codice privacy. Le due discipline si applicano in parallelo.",
+      },
+      {
+        q: "Un data breach va notificato anche al CSIRT Italia?",
+        a: "Solo se è anche un incidente significativo ai sensi dell'art. 25, comma 4, del decreto NIS, ossia se ha causato o può causare una grave perturbazione operativa dei servizi o perdite finanziarie, oppure perdite considerevoli per altre persone. Altrimenti resta solo la notifica al Garante prevista dall'art. 33 del GDPR, se ne ricorrono i presupposti.",
+      },
+      {
+        q: "Entro quando vanno fatte le notifiche NIS2 e GDPR?",
+        a: "Per la NIS2 l'art. 25, comma 5, del decreto NIS prevede una pre-notifica al CSIRT Italia entro 24 ore, una notifica entro 72 ore e una relazione finale entro un mese. Per il GDPR l'art. 33 chiede di notificare al Garante senza ingiustificato ritardo e, ove possibile, entro 72 ore, motivando l'eventuale ritardo.",
+      },
+      {
+        q: "Si possono ricevere due sanzioni per lo stesso incidente?",
+        a: "Non due sanzioni pecuniarie per il medesimo comportamento. L'art. 35, par. 2, della NIS2 stabilisce che, se l'autorità di controllo privacy ha inflitto una sanzione pecuniaria ai sensi del GDPR, l'autorità NIS non impone una sanzione pecuniaria per la violazione imputabile allo stesso comportamento; restano possibili le misure di esecuzione.",
+      },
+      {
+        q: "Chi è conforme al GDPR è anche conforme alla NIS2?",
+        a: "No. Le misure dell'art. 32 del GDPR proteggono i dati personali, mentre l'art. 21 della NIS2 chiede di proteggere sistemi e servizi con almeno dieci elementi, tra cui sicurezza della catena di approvvigionamento e continuità operativa. Il lavoro fatto per il GDPR è un buon punto di partenza, ma va integrato.",
+      },
+    ],
+    content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · aggiornato al 17 nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In sintesi.</strong> NIS2 e GDPR si applicano insieme e nessuna delle due norme assorbe l'altra. Il GDPR tutela i dati personali e riguarda chiunque li tratti; la NIS2 tutela la sicurezza dei sistemi e la continuità dei servizi e riguarda i soggetti essenziali e importanti. Ne consegue che lo stesso attacco informatico può richiedere due notifiche distinte, al CSIRT Italia entro 24 e 72 ore e al Garante entro 72 ore, con soglie, contenuti e sanzioni diversi.
+</p>
+
+<p>Il rapporto tra NIS2 e GDPR è una delle prime questioni che affronta chi gestisce la sicurezza in un'azienda soggetta al decreto NIS. Molte imprese hanno già un modello privacy, con registro dei trattamenti, procedura di data breach e, spesso, un DPO; si chiedono quindi se quel lavoro basti anche per la NIS2. La risposta è negativa, ma il lavoro già fatto è un punto di partenza utile.</p>
+<p>Questo articolo spiega come le due discipline si coordinano, con il rinvio puntuale agli articoli. Per il quadro generale degli obblighi si rinvia alla <a href="/risorse/nis2">guida alla NIS2</a>; per le scadenze aggiornate, alla pagina sullo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>.</p>
+
+<h2>Che rapporto c'è tra NIS2 e GDPR?</h2>
+<p>NIS2 e GDPR sono due discipline autonome che si applicano in parallelo. La direttiva NIS2 chiarisce, al considerando 14, che a ogni trattamento di dati personali svolto in base alla direttiva si applica il diritto dell'Unione sulla protezione dei dati e che la direttiva non pregiudica il regolamento (UE) 2016/679.</p>
+<p>Il testo è consultabile sul <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">testo della direttiva (UE) 2022/2555 su EUR-Lex</a>. In Italia lo stesso principio è ripreso dall'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art8" target="_blank" rel="noopener">art. 8 del decreto NIS</a>, che disciplina la protezione dei dati personali; l'Agenzia per la cybersicurezza nazionale (ACN), le Autorità di settore e i soggetti NIS trattano i dati personali nella misura necessaria ai fini del decreto e in conformità al Codice privacy e al GDPR.</p>
+<p>Le due norme, tuttavia, tutelano beni diversi. Il <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32016R0679" target="_blank" rel="noopener">GDPR</a> protegge le persone fisiche rispetto al trattamento dei loro dati; la NIS2 protegge i sistemi informativi e di rete e la continuità dei servizi che su di essi si reggono. Ne consegue che un soggetto NIS resta, per i dati che tratta, titolare o responsabile del trattamento, con tutti gli obblighi che il GDPR gli impone.</p>
+
+<h2>Quali sono le differenze tra NIS2 e GDPR?</h2>
+<p>Le differenze principali riguardano l'oggetto tutelato, i destinatari, l'autorità di riferimento, l'evento che fa scattare la notifica e i tempi. Il GDPR si rivolge a chiunque tratti dati personali, a prescindere da settore e dimensioni; la NIS2 si rivolge solo ai soggetti essenziali e importanti dei settori elencati negli allegati della direttiva e del decreto.</p>
+<p>La tabella mette a confronto i due regimi.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Aspetto</th><th>GDPR (regolamento 2016/679)</th><th>NIS2 (direttiva 2022/2555 e D.Lgs. 138/2024)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Cosa tutela</td><td>I dati personali e i diritti delle persone fisiche</td><td>La sicurezza dei sistemi informativi e di rete e la continuità dei servizi</td></tr>
+      <tr><td>Chi è obbligato</td><td>Titolari e responsabili del trattamento</td><td>Soggetti essenziali e soggetti importanti</td></tr>
+      <tr><td>Autorità</td><td>Garante per la protezione dei dati personali</td><td>ACN, quale Autorità nazionale competente NIS e CSIRT Italia</td></tr>
+      <tr><td>Evento da notificare</td><td>Violazione dei dati personali (art. 4, punto 12)</td><td>Incidente significativo (art. 25, comma 4, decreto NIS)</td></tr>
+      <tr><td>Termini</td><td>Senza ingiustificato ritardo e, ove possibile, entro 72 ore (art. 33)</td><td>Pre-notifica entro 24 ore, notifica entro 72 ore, relazione finale entro un mese (art. 25, comma 5)</td></tr>
+      <tr><td>Comunicazione a terzi</td><td>Agli interessati, se il rischio per i loro diritti è elevato (art. 34)</td><td>Ai destinatari dei servizi, se opportuno e sentito il CSIRT Italia (art. 25, comma 9)</td></tr>
+      <tr><td>Sanzioni massime su sicurezza e notifica</td><td>Fino a 10 milioni di euro o al 2% del fatturato mondiale, se superiore (art. 83, par. 4)</td><td>Fino a 10 milioni o al 2% per i soggetti essenziali, fino a 7 milioni o all'1,4% per quelli importanti (art. 38, comma 9)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>I dati della colonna GDPR sono tratti dagli artt. 4, 33, 34 e 83 del regolamento; quelli della colonna NIS2 dall'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">art. 25 del decreto NIS</a>, che disciplina la notifica degli incidenti, e dall'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">art. 38 del decreto NIS</a>, che disciplina le sanzioni amministrative. Per le pubbliche amministrazioni il decreto NIS prevede importi diversi, fissati dallo stesso art. 38.</p>
+
+<h2>Incidente significativo e violazione dei dati personali, quando coincidono</h2>
+<p>Le due nozioni si sovrappongono solo in parte. L'art. 6, punto 6, della NIS2 definisce incidente un evento che compromette la disponibilità, l'autenticità, l'integrità o la riservatezza di dati o di servizi offerti dai sistemi informatici e di rete; l'art. 4, punto 12, del GDPR definisce violazione dei dati personali la violazione di sicurezza che comporta, accidentalmente o in modo illecito, la distruzione, la perdita, la modifica, la divulgazione non autorizzata o l'accesso ai dati personali.</p>
+<p>Ai fini della notifica NIS, inoltre, non basta un incidente qualsiasi. L'art. 25, comma 4, del decreto NIS considera significativo l'incidente che ha causato o può causare una grave perturbazione operativa dei servizi o perdite finanziarie per il soggetto, oppure che ha avuto o può avere ripercussioni su altre persone fisiche o giuridiche con perdite materiali o immateriali considerevoli. Il GDPR, invece, chiede di notificare ogni violazione dei dati personali, salvo che sia improbabile che presenti un rischio per i diritti e le libertà delle persone.</p>
+<p>Ne derivano, in linea di massima, tre ipotesi.</p>
+<ol>
+  <li>Un ransomware blocca i sistemi gestionali e sottrae i dati di dipendenti e clienti; l'evento è, di regola, sia un incidente significativo sia una violazione dei dati personali;</li>
+  <li>un'email con i dati di pochi clienti viene inviata per errore al destinatario sbagliato; l'evento è una violazione dei dati personali, ma normalmente non perturba i servizi e non raggiunge la soglia dell'incidente significativo;</li>
+  <li>un attacco ferma una linea di produzione senza coinvolgere dati personali; l'evento può essere un incidente significativo NIS, ma non è un data breach.</li>
+</ol>
+<p>Gli esempi hanno valore orientativo, poiché la qualificazione dipende sempre dalle circostanze concrete. Per questa ragione conviene che la stessa persona, o lo stesso gruppo, valuti ogni evento alla luce di entrambe le soglie.</p>
+
+<h2>Come si gestisce la doppia notifica al CSIRT Italia e al Garante?</h2>
+<p>Le due notifiche sono distinte e vanno effettuate entrambe, quando ne ricorrono i presupposti. La notifica al CSIRT Italia, prevista dall'art. 25 del decreto NIS, non sostituisce quella al Garante prevista dall'art. 33 del GDPR, né il contrario; cambiano destinatario, canale, soglia e contenuto.</p>
+<p>Sul piano dei tempi, entrambi i termini decorrono dal momento in cui il soggetto viene a conoscenza dell'evento. Per la NIS2 il comma 5 dell'art. 25 prevede una pre-notifica entro 24 ore, una notifica entro 72 ore con una valutazione iniziale dell'incidente e una relazione finale entro un mese dalla notifica; per il GDPR l'art. 33 chiede di notificare senza ingiustificato ritardo e, ove possibile, entro 72 ore, motivando l'eventuale ritardo, e consente di fornire le informazioni in fasi successive.</p>
+<p>Anche il canale è diverso. Secondo la <a href="https://www.garanteprivacy.it/data-breach" target="_blank" rel="noopener">pagina del Garante sui data breach</a>, dal 1° luglio 2021 la notifica di una violazione di dati personali va inviata tramite un'apposita procedura telematica; la notifica NIS, invece, segue le modalità stabilite dall'ACN. Il contenuto, infine, risponde a finalità diverse, poiché il Garante valuta il rischio per le persone, mentre il CSIRT Italia valuta l'impatto sui servizi e l'eventuale portata transfrontaliera.</p>
+<p>Nella pratica conviene una procedura unica di gestione degli incidenti, con un solo punto di decisione e due esiti possibili. Tre accorgimenti sono utili.</p>
+<ul>
+  <li>Registrare ogni violazione dei dati personali, anche se non notificata, come impone l'art. 33, par. 5, del GDPR;</li>
+  <li>prevedere nei contratti con i fornitori l'obbligo di informare subito l'azienda, poiché l'art. 33, par. 2, del GDPR impone al responsabile del trattamento di avvisare il titolare senza ingiustificato ritardo;</li>
+  <li>non ritardare la notifica NIS per timore delle conseguenze, poiché il comma 3 dell'art. 25 del decreto NIS stabilisce che la notifica non espone il soggetto a una maggiore responsabilità rispetto a quella derivante dall'incidente.</li>
+</ul>
+<p>Le due discipline prevedono, inoltre, comunicazioni verso l'esterno con presupposti diversi. L'art. 34 del GDPR impone di comunicare la violazione agli interessati quando il rischio per i loro diritti è elevato; il comma 9 dell'art. 25 del decreto NIS prevede invece che i soggetti, sentito il CSIRT Italia e se opportuno, informino i destinatari dei servizi degli incidenti significativi che possono ripercuotersi sulla fornitura.</p>
+
+<h2>Si rischiano due sanzioni per lo stesso incidente?</h2>
+<p>Non due sanzioni pecuniarie per il medesimo comportamento. L'art. 35 della NIS2 stabilisce che, se l'autorità di controllo privacy ha già inflitto una sanzione pecuniaria ai sensi del GDPR, l'autorità competente NIS non impone una sanzione pecuniaria per la violazione imputabile allo stesso comportamento; restano tuttavia possibili le misure di esecuzione.</p>
+<p>La norma, intitolata alle violazioni che comportano una violazione dei dati personali, si articola in due passaggi. Il paragrafo 1 impone all'autorità NIS che, in sede di vigilanza, scopra una violazione degli artt. 21 o 23 della direttiva, ossia delle misure di sicurezza o degli obblighi di notifica, idonea a comportare un data breach da notificare ai sensi dell'art. 33 del GDPR, di informarne senza indebito ritardo l'autorità di controllo privacy; il paragrafo 2 esclude la seconda sanzione pecuniaria, ma consente all'autorità NIS di adottare le misure di esecuzione previste dagli artt. 32 e 33 della direttiva.</p>
+<p>Il divieto, quindi, ha confini precisi. Riguarda solo la sanzione pecuniaria e solo il medesimo comportamento; non impedisce all'ACN di esercitare i poteri di esecuzione, che in Italia sono disciplinati dall'art. 37 del decreto NIS, né incide sulla sanzione accessoria che l'art. 38, comma 6, consente di disporre nei confronti degli amministratori quando il soggetto non ottempera a una diffida.</p>
+
+<h2>Come coordinare le misure di sicurezza NIS2 e GDPR</h2>
+<p>L'art. 32 del GDPR, che disciplina la sicurezza del trattamento, chiede misure tecniche e organizzative adeguate al rischio per i diritti delle persone. L'art. 21 della NIS2, che disciplina le misure di gestione dei rischi, chiede invece un approccio multirischio con almeno dieci elementi, tra cui sicurezza della catena di approvvigionamento, gestione degli incidenti e autenticazione a più fattori. Alcuni elementi coincidono, sicché lo stesso presidio può servire a entrambe le discipline.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Presidio</th><th>GDPR, art. 32, par. 1</th><th>NIS2, art. 21, par. 2</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Cifratura</td><td>Pseudonimizzazione e cifratura dei dati personali (lett. a)</td><td>Politiche sull'uso della crittografia e, se del caso, della cifratura (lett. h)</td></tr>
+      <tr><td>Continuità e ripristino</td><td>Capacità di ripristinare tempestivamente disponibilità e accesso ai dati (lett. c)</td><td>Continuità operativa, gestione del backup, ripristino in caso di disastro e gestione delle crisi (lett. c)</td></tr>
+      <tr><td>Verifica dell'efficacia</td><td>Procedura per testare e valutare regolarmente le misure (lett. d)</td><td>Strategie e procedure per valutare l'efficacia delle misure (lett. f)</td></tr>
+      <tr><td>Elementi propri della NIS2</td><td>Non espressamente elencati nell'art. 32</td><td>Catena di approvvigionamento (lett. d), igiene informatica e formazione (lett. g), autenticazione a più fattori (lett. j)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>In Italia le misure NIS sono disciplinate dall'art. 24 del decreto NIS e sono state specificate dall'ACN; il loro contenuto è illustrato nell'articolo sulle <a href="/risorse/misure-sicurezza-base-nis2-acn">misure di sicurezza di base NIS2</a>. Sul piano organizzativo conviene un registro dei rischi unico, che consideri sia l'impatto sulle persone sia l'impatto sui servizi, e un raccordo stabile tra il DPO, ove nominato, e chi gestisce la sicurezza informatica.</p>
+<p>Resta ferma, infine, la responsabilità del vertice. L'art. 23 del decreto NIS, che disciplina gli obblighi degli organi di amministrazione e direttivi, li rende responsabili dell'attuazione delle misure; il tema è approfondito nell'articolo su <a href="/risorse/nis2-organi-di-amministrazione-obblighi-cda">NIS2 e organi di amministrazione</a>.</p>
+
+<h2>Conclusioni</h2>
+<p>NIS2 e GDPR non si escludono, ma si sommano. Il soggetto NIS resta titolare del trattamento ai fini privacy e deve, quindi, valutare ogni evento due volte; una per i dati personali, davanti al Garante, e una per i servizi, davanti al CSIRT Italia. Il divieto di doppia sanzione pecuniaria previsto dall'art. 35 della NIS2 attenua il rischio economico, ma non elimina il doppio binario degli obblighi.</p>
+<p>Chi ha già un modello privacy solido parte avvantaggiato, poiché procedure di data breach, registro delle violazioni e misure dell'art. 32 possono essere estese ai requisiti NIS invece di essere duplicati. Per gli obblighi nel dettaglio si rinvia alla <a href="/risorse/nis2">guida completa alla NIS2</a>.</p>
+
+<p><strong>Per verificare a che punto è la tua organizzazione</strong>, <a href="/inizia">la gap analysis NIS2 di RegulaeOS</a> permette di confrontare le misure adottate con i requisiti della determinazione ACN e di raccogliere in un unico posto le prove documentali.</p>
+
+<h2>Fonti</h2>
+<ul>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Direttiva (UE) 2022/2555 (NIS2), EUR-Lex</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32016R0679" target="_blank" rel="noopener">Regolamento (UE) 2016/679 (GDPR), EUR-Lex</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art8" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 8 (protezione dei dati personali), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 25 (notifica di incidente), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art37" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 37 (misure di esecuzione), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 38 (sanzioni amministrative), Normattiva</a></li>
+  <li><a href="https://www.garanteprivacy.it/data-breach" target="_blank" rel="noopener">Garante per la protezione dei dati personali, Data breach</a></li>
+</ul>
+`,
+    en: {
+      title: "NIS2 and GDPR: differences, data breaches and dual notification",
+      excerpt:
+        "NIS2 and GDPR apply together. What each protects, who is bound, when an incident is also a data breach, how to handle dual notification to CSIRT Italia and the Garante, and why the same conduct does not lead to two fines.",
+      date: "17 November 2026",
+      readTime: "9 min",
+      category: "Regulation",
+      tags: ["NIS2", "GDPR", "NIS2 and GDPR", "data breach", "incident notification", "CSIRT Italia", "Italian DPA", "Legislative Decree 138/2024", "Regulation 2016/679"],
+      metaTitle: "NIS2 and GDPR: differences and dual incident notification",
+      metaDescription:
+        "NIS2 and GDPR compared. Scope, obliged entities, authorities, data breach vs significant incident, notification to CSIRT Italia and the Garante, fines.",
+      faqSchema: [
+        {
+          q: "Does NIS2 replace the GDPR?",
+          a: "No. Recital 14 of Directive (EU) 2022/2555 states that the directive is without prejudice to Regulation (EU) 2016/679, and Article 8 of Legislative Decree 138/2024 requires ACN, sector authorities and NIS entities to process personal data in accordance with the GDPR and the Italian Privacy Code. The two regimes apply in parallel.",
+        },
+        {
+          q: "Must a data breach also be notified to CSIRT Italia?",
+          a: "Only if it is also a significant incident under Article 25(4) of the NIS decree, meaning it has caused or can cause severe operational disruption of services or financial losses, or considerable losses for other persons. Otherwise only the notification to the Garante under Article 33 GDPR applies, where its conditions are met.",
+        },
+        {
+          q: "What are the deadlines for NIS2 and GDPR notifications?",
+          a: "For NIS2, Article 25(5) of the NIS decree requires an early warning to CSIRT Italia within 24 hours, an incident notification within 72 hours and a final report within one month. For the GDPR, Article 33 requires notification to the Garante without undue delay and, where feasible, within 72 hours, with reasons for any delay.",
+        },
+        {
+          q: "Can the same incident lead to two fines?",
+          a: "Not two administrative fines for the same conduct. Article 35(2) of NIS2 provides that, where the data protection supervisory authority has imposed a fine under the GDPR, the NIS authority does not impose a fine for an infringement arising from the same conduct; enforcement measures remain available.",
+        },
+        {
+          q: "Does GDPR compliance mean NIS2 compliance?",
+          a: "No. Article 32 GDPR measures protect personal data, whereas Article 21 NIS2 requires the protection of systems and services through at least ten elements, including supply chain security and business continuity. GDPR work is a good starting point, but it must be supplemented.",
+        },
+      ],
+      content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · updated 17 Nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In short.</strong> NIS2 and GDPR apply together and neither absorbs the other. The GDPR protects personal data and applies to anyone who processes it; NIS2 protects the security of systems and the continuity of services and applies to essential and important entities. As a result, the same cyberattack may require two separate notifications, to CSIRT Italia within 24 and 72 hours and to the Garante within 72 hours, with different thresholds, contents and penalties.
+</p>
+
+<p>The relationship between NIS2 and GDPR is one of the first issues faced by anyone managing security in a company subject to the Italian NIS decree. Many companies already have a privacy framework, with a record of processing, a data breach procedure and, often, a DPO; they therefore ask whether that work is enough for NIS2 as well. It is not, but the work already done is a useful starting point.</p>
+<p>This article explains how the two regimes fit together, with precise references to the articles. For an overview of the obligations, see the <a href="/risorse/nis2">NIS2 guide</a>; for up-to-date deadlines, see the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">implementation status of NIS2</a>.</p>
+
+<h2>How do NIS2 and GDPR relate to each other?</h2>
+<p>NIS2 and GDPR are two independent regimes that apply in parallel. Recital 14 of the NIS2 Directive states that EU data protection law applies to any processing of personal data under the directive and that the directive is without prejudice to Regulation (EU) 2016/679.</p>
+<p>The text is available in the <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">text of Directive (EU) 2022/2555 on EUR-Lex</a>. In Italy the same principle is set out in <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art8" target="_blank" rel="noopener">Article 8 of the NIS decree</a>, which governs the protection of personal data; the National Cybersecurity Agency (ACN), the sector authorities and NIS entities process personal data to the extent necessary for the purposes of the decree and in accordance with the Italian Privacy Code and the GDPR.</p>
+<p>The two laws, however, protect different interests. The <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32016R0679" target="_blank" rel="noopener">GDPR</a> protects natural persons with regard to the processing of their data; NIS2 protects network and information systems and the continuity of the services that rely on them. It follows that a NIS entity remains, for the data it processes, a controller or processor, with all the obligations the GDPR imposes.</p>
+
+<h2>What are the differences between NIS2 and GDPR?</h2>
+<p>The main differences concern the protected interest, the obliged parties, the competent authority, the event that triggers notification and the deadlines. The GDPR applies to anyone processing personal data, regardless of sector and size; NIS2 applies only to essential and important entities in the sectors listed in the annexes to the directive and the decree.</p>
+<p>The table compares the two regimes.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Aspect</th><th>GDPR (Regulation 2016/679)</th><th>NIS2 (Directive 2022/2555 and Legislative Decree 138/2024)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>What it protects</td><td>Personal data and the rights of natural persons</td><td>The security of network and information systems and the continuity of services</td></tr>
+      <tr><td>Who is bound</td><td>Controllers and processors</td><td>Essential and important entities</td></tr>
+      <tr><td>Authority</td><td>Garante per la protezione dei dati personali (Italian DPA)</td><td>ACN, as national competent NIS authority and CSIRT Italia</td></tr>
+      <tr><td>Event to notify</td><td>Personal data breach (Article 4(12))</td><td>Significant incident (Article 25(4) of the NIS decree)</td></tr>
+      <tr><td>Deadlines</td><td>Without undue delay and, where feasible, within 72 hours (Article 33)</td><td>Early warning within 24 hours, notification within 72 hours, final report within one month (Article 25(5))</td></tr>
+      <tr><td>Communication to third parties</td><td>To data subjects, where the risk to their rights is high (Article 34)</td><td>To service recipients, where appropriate and after consulting CSIRT Italia (Article 25(9))</td></tr>
+      <tr><td>Maximum fines for security and notification</td><td>Up to EUR 10 million or 2% of worldwide turnover, if higher (Article 83(4))</td><td>Up to EUR 10 million or 2% for essential entities, up to EUR 7 million or 1.4% for important entities (Article 38(9))</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The GDPR column is based on Articles 4, 33, 34 and 83 of the regulation; the NIS2 column on <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">Article 25 of the NIS decree</a>, which governs incident notification, and <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">Article 38 of the NIS decree</a>, which governs administrative penalties. For public administrations the NIS decree sets different amounts, laid down in the same Article 38.</p>
+
+<h2>Significant incident and personal data breach: when they overlap</h2>
+<p>The two concepts overlap only in part. Article 6(6) of NIS2 defines an incident as an event compromising the availability, authenticity, integrity or confidentiality of data or of the services offered by network and information systems; Article 4(12) GDPR defines a personal data breach as a breach of security leading to the accidental or unlawful destruction, loss, alteration, unauthorised disclosure of, or access to, personal data.</p>
+<p>For NIS notification purposes, moreover, not every incident counts. Article 25(4) of the NIS decree considers an incident significant if it has caused or can cause severe operational disruption of services or financial losses for the entity, or if it has affected or can affect other natural or legal persons by causing considerable material or non-material losses. The GDPR, by contrast, requires notification of every personal data breach, unless it is unlikely to result in a risk to the rights and freedoms of individuals.</p>
+<p>Broadly speaking, three scenarios follow.</p>
+<ol>
+  <li>Ransomware locks the management systems and exfiltrates employee and customer data; the event is, as a rule, both a significant incident and a personal data breach;</li>
+  <li>an email containing the data of a few customers is sent to the wrong recipient by mistake; the event is a personal data breach, but it normally does not disrupt services and does not reach the significant incident threshold;</li>
+  <li>an attack halts a production line without involving personal data; the event may be a significant NIS incident, but it is not a data breach.</li>
+</ol>
+<p>These examples are indicative only, since the classification always depends on the specific circumstances. For this reason it is advisable for the same person, or the same team, to assess every event against both thresholds.</p>
+
+<h2>How should dual notification to CSIRT Italia and the Garante be handled?</h2>
+<p>The two notifications are separate and both must be made when their conditions are met. Notification to CSIRT Italia under Article 25 of the NIS decree does not replace notification to the Garante under Article 33 GDPR, or vice versa; recipient, channel, threshold and content all differ.</p>
+<p>As to timing, both deadlines run from the moment the entity becomes aware of the event. For NIS2, Article 25(5) requires an early warning within 24 hours, a notification within 72 hours with an initial assessment of the incident and a final report within one month of the notification; for the GDPR, Article 33 requires notification without undue delay and, where feasible, within 72 hours, with reasons for any delay, and allows information to be provided in phases.</p>
+<p>The channel also differs. According to the <a href="https://www.garanteprivacy.it/data-breach" target="_blank" rel="noopener">Garante's data breach page</a>, since 1 July 2021 notifications of personal data breaches must be submitted through a dedicated online procedure; NIS notifications, instead, follow the arrangements set by ACN. Finally, the content serves different purposes, since the Garante assesses the risk to individuals, whereas CSIRT Italia assesses the impact on services and any cross-border effect.</p>
+<p>In practice, a single incident management procedure works best, with one decision point and two possible outcomes. Three precautions are useful.</p>
+<ul>
+  <li>Record every personal data breach, even if not notified, as required by Article 33(5) GDPR;</li>
+  <li>include in supplier contracts an obligation to inform the company immediately, since Article 33(2) GDPR requires the processor to notify the controller without undue delay;</li>
+  <li>do not delay the NIS notification for fear of the consequences, since Article 25(3) of the NIS decree provides that notification does not expose the entity to increased liability compared with that arising from the incident.</li>
+</ul>
+<p>The two regimes also provide for external communications on different conditions. Article 34 GDPR requires the breach to be communicated to data subjects where the risk to their rights is high; Article 25(9) of the NIS decree provides instead that entities, after consulting CSIRT Italia and where appropriate, inform service recipients of significant incidents likely to affect the provision of services.</p>
+
+<h2>Can the same incident lead to two fines?</h2>
+<p>Not two administrative fines for the same conduct. Article 35 of NIS2 provides that, where the data protection supervisory authority has already imposed a fine under the GDPR, the competent NIS authority does not impose a fine for an infringement arising from the same conduct; enforcement measures nevertheless remain available.</p>
+<p>The provision, headed infringements entailing a personal data breach, works in two steps. Paragraph 1 requires a NIS authority that, in the course of supervision, discovers an infringement of Articles 21 or 23 of the directive, meaning the security measures or reporting obligations, that may entail a data breach to be notified under Article 33 GDPR, to inform the data protection supervisory authority without undue delay; paragraph 2 rules out the second fine, but allows the NIS authority to adopt the enforcement measures provided for in Articles 32 and 33 of the directive.</p>
+<p>The bar therefore has precise limits. It covers only fines and only the same conduct; it does not prevent ACN from exercising its enforcement powers, which in Italy are governed by Article 37 of the NIS decree, nor does it affect the ancillary sanction that Article 38(6) allows against directors where the entity fails to comply with a formal warning.</p>
+
+<h2>How to align NIS2 and GDPR security measures</h2>
+<p>Article 32 GDPR, which governs security of processing, requires technical and organisational measures appropriate to the risk to individuals' rights. Article 21 NIS2, which governs cybersecurity risk-management measures, requires an all-hazards approach with at least ten elements, including supply chain security, incident handling and multi-factor authentication. Some elements coincide, so the same safeguard can serve both regimes.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Safeguard</th><th>GDPR, Article 32(1)</th><th>NIS2, Article 21(2)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Encryption</td><td>Pseudonymisation and encryption of personal data (point a)</td><td>Policies on the use of cryptography and, where appropriate, encryption (point h)</td></tr>
+      <tr><td>Continuity and recovery</td><td>Ability to restore availability of and access to data in a timely manner (point c)</td><td>Business continuity, backup management, disaster recovery and crisis management (point c)</td></tr>
+      <tr><td>Testing effectiveness</td><td>Process for regularly testing and evaluating the measures (point d)</td><td>Policies and procedures to assess the effectiveness of the measures (point f)</td></tr>
+      <tr><td>NIS2-specific elements</td><td>Not expressly listed in Article 32</td><td>Supply chain (point d), cyber hygiene and training (point g), multi-factor authentication (point j)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>In Italy NIS measures are governed by Article 24 of the NIS decree and have been specified by ACN; their content is explained in the article on <a href="/risorse/misure-sicurezza-base-nis2-acn">NIS2 baseline security measures</a>. Organisationally, a single risk register that considers both the impact on individuals and the impact on services is advisable, together with a stable link between the DPO, where appointed, and those responsible for IT security.</p>
+<p>Finally, senior management remains accountable. Article 23 of the NIS decree, which governs the obligations of management bodies, makes them responsible for implementing the measures; the topic is covered in the article on <a href="/risorse/nis2-organi-di-amministrazione-obblighi-cda">NIS2 and management bodies</a>.</p>
+
+<h2>Conclusions</h2>
+<p>NIS2 and GDPR do not exclude each other; they add up. A NIS entity remains a controller for privacy purposes and must therefore assess every event twice, once for personal data, before the Garante, and once for services, before CSIRT Italia. The bar on double fines in Article 35 NIS2 reduces the financial risk, but it does not remove the dual track of obligations.</p>
+<p>Companies with a solid privacy framework start ahead, since data breach procedures, breach registers and Article 32 measures can be extended to NIS requirements instead of being duplicated. For the obligations in detail, see the <a href="/risorse/nis2">complete NIS2 guide</a>.</p>
+
+<p><strong>To check where your organisation stands</strong>, <a href="/inizia">the RegulaeOS NIS2 gap analysis</a> lets you compare the measures in place with the requirements of the ACN determination and collect the supporting evidence in one place.</p>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Directive (EU) 2022/2555 (NIS2), EUR-Lex</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32016R0679" target="_blank" rel="noopener">Regulation (EU) 2016/679 (GDPR), EUR-Lex</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art8" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 8 (protection of personal data), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 25 (incident notification), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art37" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 37 (enforcement measures), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 38 (administrative penalties), Normattiva</a></li>
+  <li><a href="https://www.garanteprivacy.it/data-breach" target="_blank" rel="noopener">Garante per la protezione dei dati personali, Data breach</a></li>
+</ul>
+`,
+    },
+  },
+  {
     slug: "nis2-adempimenti-scadenze",
     title: "NIS2, adempimenti e scadenze 2027, il calendario completo per soggetti essenziali e importanti",
     excerpt:
