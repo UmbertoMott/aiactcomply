@@ -38,6 +38,310 @@ export interface BlogPost {
 
 export const POSTS: BlogPost[] = [
   {
+    slug: "nis2-dora",
+    title: "NIS2 e DORA, differenze e rapporti per banche ed entità finanziarie",
+    excerpt:
+      "Come si coordinano la direttiva NIS2 e il regolamento DORA. Perché il DORA è lex specialis, quali obblighi del decreto NIS restano in capo a banche e infrastrutture dei mercati finanziari, a chi si notificano gli incidenti e cosa cambia per i fornitori ICT e i gruppi misti.",
+    date: "18 novembre 2026",
+    dateISO: "2026-11-18",
+    author: { name: "Umberto Mottola", jobTitle: "Avvocato, CIPP/E" },
+    dateModifiedISO: "2026-11-18",
+    readTime: "9 min",
+    category: "Normativa",
+    tags: ["NIS2", "DORA", "NIS2 e DORA", "regolamento (UE) 2022/2554", "lex specialis", "entità finanziarie", "CSIRT Italia", "D.Lgs. 138/2024", "D.Lgs. 23/2025"],
+    metaTitle: "NIS2 e DORA, differenze e regole per banche e finanza",
+    metaDescription:
+      "NIS2 e DORA a confronto. Perché il DORA prevale, quali obblighi del decreto NIS restano alle banche, chi riceve le notifiche e cosa vale per i fornitori ICT.",
+    faqSchema: [
+      {
+        q: "Una banca soggetta al DORA deve rispettare anche la NIS2?",
+        a: "Solo in parte. L'art. 3, comma 14, del decreto NIS esclude per i soggetti dei settori bancario e delle infrastrutture dei mercati finanziari l'applicazione dell'art. 17 e dei capi IV e V, ossia misure di sicurezza, notifica degli incidenti, vigilanza e sanzioni, che sono disciplinati dal DORA. Restano invece applicabili le disposizioni generali del capo I, tra cui la registrazione sul portale ACN prevista dall'art. 7.",
+      },
+      {
+        q: "Perché il DORA è considerato lex specialis rispetto alla NIS2?",
+        a: "Perché il considerando 16 del regolamento (UE) 2022/2554 lo qualifica espressamente come lex specialis e l'art. 1, paragrafo 2, lo considera atto giuridico settoriale ai sensi dell'art. 4 della direttiva NIS2. Ne consegue che, per le entità finanziarie, le regole del DORA su gestione dei rischi TIC e segnalazione degli incidenti prendono il posto di quelle corrispondenti della NIS2.",
+      },
+      {
+        q: "A chi notifica un incidente grave una banca soggetta al DORA?",
+        a: "All'autorità competente DORA, che per le banche è la Banca d'Italia secondo l'art. 4, comma 1, del D.Lgs. 23/2025. Il comma 3 dello stesso articolo stabilisce che le entità finanziarie dei settori bancario e delle infrastrutture dei mercati finanziari trasmettono la notifica iniziale e le relazioni anche al CSIRT Italia, con gli stessi modelli e negli stessi termini.",
+      },
+      {
+        q: "Le entità finanziarie soggette al DORA devono categorizzare attività e servizi sul portale ACN?",
+        a: "No. L'art. 20, comma 6, della determinazione ACN 314287/2026 esenta le entità finanziarie soggette al DORA che rientrano nel decreto NIS dall'elencazione e categorizzazione delle attività e dei servizi; esse possono comunque aderirvi su base volontaria. La stessa determinazione prevede esenzioni analoghe per la designazione del referente CSIRT e per l'elenco degli organi di amministrazione.",
+      },
+      {
+        q: "Un fornitore ICT di banche è soggetto al DORA o alla NIS2?",
+        a: "Il DORA si applica anche ai fornitori terzi di servizi TIC, come prevede l'art. 2, paragrafo 1, lettera u), ma la deroga dell'art. 4 della NIS2 riguarda solo i soggetti contemplati dall'atto settoriale. Un fornitore che rientra in proprio nella NIS2 resta quindi soggetto al decreto NIS; l'art. 47 del DORA prevede infatti forme di cooperazione per i soggetti NIS designati anche come fornitori critici.",
+      },
+    ],
+    content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · aggiornato al 18 nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In sintesi.</strong> Per le banche e le infrastrutture dei mercati finanziari il DORA prevale sulla NIS2, poiché è lex specialis. Il decreto NIS esclude per questi soggetti misure di sicurezza, notifica degli incidenti, vigilanza e sanzioni, che restano regolati dal DORA e affidati a Banca d'Italia, Consob, IVASS e COVIP. Restano invece le disposizioni generali, tra cui la registrazione sul portale ACN; gli incidenti gravi vanno notificati anche al CSIRT Italia.
+</p>
+
+<p>Il rapporto tra NIS2 e DORA è una delle questioni più frequenti per banche, intermediari e fornitori ICT del settore finanziario. Entrambe le norme riguardano la sicurezza informatica; tuttavia la direttiva (UE) 2022/2555, ossia la NIS2, ha portata generale, mentre il regolamento (UE) 2022/2554, ossia il DORA, è dedicato alla resilienza operativa digitale del solo settore finanziario.</p>
+<p>Questo articolo spiega quale delle due norme prevale, quali obblighi del decreto legislativo n. 138 del 2024, il decreto NIS, restano applicabili alle entità finanziarie e a chi vanno notificati gli incidenti. Per il quadro generale della disciplina si rinvia alla <a href="/risorse/nis2">guida alla NIS2</a>; per lo stato di recepimento negli altri Stati membri, alla pagina sullo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>.</p>
+
+<h2>Che rapporto c'è tra NIS2 e DORA?</h2>
+<p>Il DORA è lex specialis rispetto alla NIS2. Per le entità finanziarie che sarebbero soggetti essenziali o importanti, le regole del DORA su gestione dei rischi TIC, segnalazione degli incidenti, test di resilienza e rischi di terze parti prendono il posto delle disposizioni corrispondenti della NIS2, comprese vigilanza ed esecuzione.</p>
+<p>Il meccanismo poggia su due norme che si richiamano a vicenda. L'<a href="https://eur-lex.europa.eu/eli/dir/2022/2555/oj/ita" target="_blank" rel="noopener">art. 4 della direttiva NIS2</a>, che disciplina gli atti giuridici settoriali dell'Unione, stabilisce che, quando un atto settoriale impone misure di gestione dei rischi o notifiche di incidenti di effetto almeno equivalente, le disposizioni pertinenti della direttiva non si applicano ai soggetti interessati. L'<a href="https://eur-lex.europa.eu/eli/reg/2022/2554/oj/ita" target="_blank" rel="noopener">art. 1, paragrafo 2, del DORA</a>, a sua volta, dichiara che il regolamento è atto giuridico settoriale ai sensi di quell'art. 4 per le entità finanziarie identificate come soggetti essenziali o importanti.</p>
+<p>I considerando confermano la scelta. Il considerando 16 del DORA lo qualifica espressamente come lex specialis rispetto alla NIS2; il considerando 28 della NIS2 precisa che gli Stati membri non dovrebbero applicare ai soggetti finanziari coperti dal DORA le disposizioni su gestione dei rischi, segnalazione, vigilanza ed esecuzione. Entrambi, tuttavia, chiedono di mantenere un saldo collegamento tra il settore finanziario e il quadro generale di cibersicurezza, sicché la NIS2 non scompare del tutto.</p>
+
+<h2>Quali entità finanziarie rientrano nella NIS2?</h2>
+<p>La NIS2 comprende solo due settori finanziari, elencati nell'allegato I. Il settore 3, bancario, riguarda gli enti creditizi; il settore 4, infrastrutture dei mercati finanziari, riguarda i gestori delle sedi di negoziazione e le controparti centrali. Il DORA, invece, si applica a un elenco molto più ampio di entità finanziarie.</p>
+<p>L'<a href="https://eur-lex.europa.eu/eli/reg/2022/2554/oj/ita" target="_blank" rel="noopener">art. 2, paragrafo 1, del DORA</a>, che ne definisce l'ambito di applicazione, comprende tra gli altri istituti di pagamento e di moneta elettronica, imprese di investimento, imprese di assicurazione e intermediari assicurativi, gestori di fondi, fondi pensione, prestatori di servizi per le cripto-attività e, alla lettera u), i fornitori terzi di servizi TIC. Ne consegue che molte entità finanziarie sono soggette al DORA senza essere mai state soggetti NIS.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Tipo di soggetto</th><th>NIS2 (allegato I)</th><th>DORA (art. 2, par. 1)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Enti creditizi (banche)</td><td>Sì, settore 3</td><td>Sì, lettera a)</td></tr>
+      <tr><td>Sedi di negoziazione</td><td>Sì, settore 4</td><td>Sì, lettera i)</td></tr>
+      <tr><td>Controparti centrali</td><td>Sì, settore 4</td><td>Sì, lettera h)</td></tr>
+      <tr><td>Istituti di pagamento e di moneta elettronica</td><td>No</td><td>Sì, lettere b) e d)</td></tr>
+      <tr><td>Imprese di assicurazione e riassicurazione</td><td>No</td><td>Sì, lettera n)</td></tr>
+      <tr><td>Fornitori terzi di servizi TIC</td><td>Solo se rientrano in un settore NIS</td><td>Sì, lettera u)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Per le entità del secondo gruppo, quindi, il problema del coordinamento non si pone; esse applicano il DORA e basta. La questione riguarda soprattutto banche, sedi di negoziazione e controparti centrali, che rientrano in entrambe le discipline.</p>
+
+<h2>Quali obblighi del decreto NIS restano per banche e infrastrutture dei mercati finanziari?</h2>
+<p>Restano le disposizioni generali del capo I del decreto NIS, tra cui la registrazione sul portale ACN. Non si applicano, invece, l'art. 17 e i capi IV e V, ossia misure di sicurezza, notifica degli incidenti, vigilanza e sanzioni, che per questi soggetti sono disciplinati dal DORA.</p>
+<p>La regola è scritta nell'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art3" target="_blank" rel="noopener">art. 3, comma 14, del decreto NIS</a>, che delimita l'ambito di applicazione. Esso esclude per i soggetti essenziali o importanti dei settori 3 e 4 dell'allegato I l'art. 17, che disciplina gli accordi di condivisione delle informazioni, il capo IV, dedicato agli obblighi di gestione del rischio e di notifica degli incidenti (artt. 23-33), e il capo V, dedicato a monitoraggio, vigilanza ed esecuzione (artt. 34-39). Il comma 15 dello stesso articolo, inoltre, esclude del tutto dal decreto i soggetti esentati dall'ambito di applicazione del DORA.</p>
+<p>L'art. 7 del decreto NIS, che disciplina l'identificazione e la registrazione dei soggetti, si trova invece nel capo I e non è richiamato dalla deroga. La <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_piattaforma_314287-2026_signeddg" target="_blank" rel="noopener">determinazione ACN 314287/2026</a>, che disciplina la piattaforma digitale e le informazioni da fornire all'ACN, prevede poi alcune esenzioni specifiche per le entità finanziarie soggette al DORA.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Adempimento NIS</th><th>Si applica alle entità DORA dei settori 3 e 4</th><th>Base normativa</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Registrazione sul portale ACN</td><td>Sì</td><td>Art. 7 decreto NIS (capo I)</td></tr>
+      <tr><td>Designazione del referente CSIRT</td><td>No, salvo adesione volontaria</td><td>Art. 7, comma 6, det. ACN 314287/2026</td></tr>
+      <tr><td>Elenco degli organi di amministrazione nell'aggiornamento annuale</td><td>No, salvo adesione volontaria</td><td>Art. 16, comma 13, det. ACN 314287/2026</td></tr>
+      <tr><td>Elencazione e categorizzazione di attività e servizi</td><td>No, salvo adesione volontaria</td><td>Art. 20, comma 6, det. ACN 314287/2026</td></tr>
+      <tr><td>Misure di sicurezza e notifica degli incidenti</td><td>No, si applica il DORA</td><td>Art. 3, comma 14, decreto NIS</td></tr>
+      <tr><td>Vigilanza e sanzioni dell'ACN</td><td>No, si applica il DORA</td><td>Art. 3, comma 14, decreto NIS</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>In pratica, dunque, una banca che rientra nel decreto NIS deve comunque presentare la dichiarazione sul portale ACN e aggiornarla; non deve invece adottare le misure di base dell'ACN né categorizzare attività e servizi. Come funzionano questi adempimenti per gli altri soggetti è spiegato negli articoli sulle <a href="/risorse/nis2-adempimenti-scadenze">scadenze NIS2</a> e sulla <a href="/risorse/categorizzazione-nis2-attivita-servizi-art-30">categorizzazione di attività e servizi</a>.</p>
+
+<h2>A chi si notificano gli incidenti, all'autorità DORA o al CSIRT Italia?</h2>
+<p>La notifica va fatta all'autorità competente DORA, ossia Banca d'Italia, Consob, IVASS o COVIP secondo il tipo di entità. Le banche e le infrastrutture dei mercati finanziari, tuttavia, devono trasmettere la notifica iniziale e ogni relazione anche al CSIRT Italia, con gli stessi modelli e negli stessi termini.</p>
+<p>L'<a href="https://eur-lex.europa.eu/eli/reg/2022/2554/oj/ita" target="_blank" rel="noopener">art. 19 del DORA</a>, che disciplina la segnalazione dei gravi incidenti TIC, prevede tre comunicazioni all'autorità competente, ossia una notifica iniziale, una relazione intermedia e una relazione finale; i termini sono fissati dagli atti di attuazione previsti dall'art. 20. Il paragrafo 1, sesto comma, consente inoltre agli Stati membri di richiedere che le stesse comunicazioni siano trasmesse anche ai CSIRT designati ai sensi della NIS2.</p>
+<p>L'Italia ha esercitato questa facoltà con il <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2025-03-10;23~art4" target="_blank" rel="noopener">D.Lgs. 10 marzo 2025, n. 23</a>, che adegua l'ordinamento nazionale al DORA. L'art. 4 individua le autorità che ricevono le segnalazioni, ossia la Banca d'Italia per banche, istituti di pagamento, imprese di investimento e altri intermediari, la Consob per depositari centrali e sedi di negoziazione, l'IVASS per assicurazioni e intermediari assicurativi e la COVIP per i fondi pensione. Il comma 3 dello stesso articolo impone alle entità dei settori bancario e delle infrastrutture dei mercati finanziari di inviare le comunicazioni anche al CSIRT Italia; le informazioni così trasmesse sono coperte dal segreto d'ufficio.</p>
+<p>La sequenza non coincide con quella del decreto NIS. L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">art. 25 del decreto NIS</a>, che disciplina la notifica degli incidenti significativi, prevede infatti una pre-notifica entro 24 ore, una notifica entro 72 ore e una relazione finale entro un mese; per le entità finanziarie in esame, invece, valgono i modelli e i termini del DORA.</p>
+
+<h2>NIS2 e DORA a confronto, le differenze principali</h2>
+<p>Le due discipline condividono l'obiettivo, ossia ridurre il rischio informatico; tuttavia differiscono per natura giuridica, ambito, autorità e strumenti. La tabella riassume le differenze più rilevanti per chi opera nel settore finanziario.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Aspetto</th><th>NIS2 e decreto NIS</th><th>DORA</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Natura dell'atto</td><td>Direttiva, recepita con il D.Lgs. 138/2024</td><td>Regolamento direttamente applicabile dal 17 gennaio 2025 (art. 64), integrato dal D.Lgs. 23/2025</td></tr>
+      <tr><td>Ambito</td><td>Settori degli allegati I e II, di cui due finanziari (settori 3 e 4 dell'allegato I)</td><td>Solo settore finanziario, ventuno categorie di soggetti (art. 2, par. 1)</td></tr>
+      <tr><td>Autorità</td><td>ACN e CSIRT Italia</td><td>Banca d'Italia, Consob, IVASS e COVIP (art. 3 D.Lgs. 23/2025)</td></tr>
+      <tr><td>Responsabilità degli organi</td><td>Approvazione e supervisione delle misure, formazione (art. 23 decreto NIS)</td><td>Responsabilità finale per la gestione dei rischi informatici (art. 5, par. 2)</td></tr>
+      <tr><td>Incidenti</td><td>Incidenti significativi, pre-notifica 24 ore, notifica 72 ore, relazione finale entro un mese</td><td>Gravi incidenti TIC, notifica iniziale, relazione intermedia e finale nei termini degli atti di attuazione (artt. 19 e 20)</td></tr>
+      <tr><td>Test</td><td>Nessun obbligo di test di penetrazione guidati dalla minaccia</td><td>Test di resilienza operativa digitale e test di penetrazione guidati dalla minaccia, TLPT (artt. 24 e 26)</td></tr>
+      <tr><td>Terze parti</td><td>Sicurezza della catena di approvvigionamento e fornitori rilevanti</td><td>Gestione dei rischi informatici derivanti da terzi e sorveglianza dei fornitori critici (art. 28 e ss.)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Sugli obblighi degli organi di amministrazione nel decreto NIS si veda l'articolo su <a href="/risorse/nis2-organi-di-amministrazione-obblighi-cda">NIS2 e organi di amministrazione</a>; sulle misure richieste agli altri soggetti, quello sulle <a href="/risorse/misure-sicurezza-base-nis2-acn">misure di sicurezza di base</a>.</p>
+
+<h2>Cosa cambia per i fornitori ICT e per i gruppi misti?</h2>
+<p>La deroga a favore del DORA opera solo per i soggetti che il DORA effettivamente disciplina. Un fornitore ICT che rientra in proprio nella NIS2 resta soggetto al decreto NIS, anche se lavora per banche; lo stesso vale per le società non finanziarie di un gruppo che comprende entità finanziarie.</p>
+<p>L'art. 4, paragrafo 1, secondo periodo, della NIS2 stabilisce infatti che, quando l'atto settoriale non contempla tutti i soggetti di un settore, le disposizioni della direttiva continuano ad applicarsi ai soggetti non contemplati. Il fatto che il DORA imponga obblighi alle entità finanziarie nei rapporti con i propri fornitori, quindi, non sottrae il fornitore agli obblighi NIS, ove ne ricorrano i presupposti.</p>
+<p>Il legislatore europeo ha previsto il caso della sovrapposizione. L'<a href="https://eur-lex.europa.eu/eli/reg/2022/2554/oj/ita" target="_blank" rel="noopener">art. 47 del DORA</a>, che disciplina la cooperazione con le strutture della NIS2, consente alle autorità DORA di partecipare ai lavori del gruppo di cooperazione per i soggetti essenziali o importanti designati anche come fornitori terzi critici, di consultare i CSIRT e di stipulare accordi di cooperazione con le autorità NIS. Per i gruppi, ne consegue che la mappatura va fatta società per società, verificando per ciascuna se si applica il DORA, il decreto NIS o entrambi per profili diversi.</p>
+
+<h2>Conclusioni</h2>
+<p>Il rapporto tra NIS2 e DORA si riassume in una regola di specialità con alcune eccezioni. Per banche, sedi di negoziazione e controparti centrali il DORA sostituisce la NIS2 su misure di sicurezza, notifiche, vigilanza e sanzioni; tuttavia il decreto NIS continua a chiedere la registrazione sul portale ACN, e il D.Lgs. 23/2025 porta le notifiche degli incidenti anche al CSIRT Italia.</p>
+<p>In concreto, conviene procedere così:</p>
+<ol>
+  <li>verificare se l'entità rientra nei settori 3 o 4 dell'allegato I del decreto NIS oppure soltanto nel DORA;</li>
+  <li>per le entità soggette a entrambe le discipline, curare la registrazione e l'aggiornamento sul portale ACN, tenendo conto delle esenzioni della determinazione 314287/2026;</li>
+  <li>adeguare la procedura di gestione degli incidenti affinché le comunicazioni previste dall'art. 19 del DORA raggiungano anche il CSIRT Italia, ove richiesto;</li>
+  <li>nei gruppi misti e per i fornitori ICT, accertare per ciascuna società quale disciplina si applica e documentare la valutazione.</li>
+</ol>
+
+<p><strong>Per capire quali obblighi NIS2 restano in capo alla propria organizzazione</strong>, <a href="/inizia">la gap analysis NIS2 di RegulaeOS</a> verifica settore, dimensione e rapporti con altre discipline settoriali, e indica gli adempimenti che restano da presidiare sul portale ACN.</p>
+
+<h2>Fonti</h2>
+<ul>
+  <li><a href="https://eur-lex.europa.eu/eli/dir/2022/2555/oj/ita" target="_blank" rel="noopener">Direttiva (UE) 2022/2555 (NIS2), art. 4, considerando 28 e allegato I, EUR-Lex</a></li>
+  <li><a href="https://eur-lex.europa.eu/eli/reg/2022/2554/oj/ita" target="_blank" rel="noopener">Regolamento (UE) 2022/2554 (DORA), artt. 1, 2, 5, 19, 24, 26, 28, 47 e 64, considerando 16, EUR-Lex</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art3" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 3 (ambito di applicazione), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 25 (obblighi di notifica degli incidenti), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2025-03-10;23~art3" target="_blank" rel="noopener">D.Lgs. 23/2025, art. 3 (autorità competenti DORA), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2025-03-10;23~art4" target="_blank" rel="noopener">D.Lgs. 23/2025, art. 4 (segnalazione dei gravi incidenti TIC), Normattiva</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_piattaforma_314287-2026_signeddg" target="_blank" rel="noopener">ACN, determinazione n. 314287/2026 sulla piattaforma digitale e sulle informazioni da fornire</a></li>
+</ul>
+`,
+    en: {
+      title: "NIS2 and DORA: differences and interplay for banks and financial entities",
+      excerpt:
+        "How the NIS2 Directive and the DORA Regulation fit together. Why DORA is lex specialis, which obligations under the Italian NIS decree still apply to banks and financial market infrastructures, who receives incident reports and what changes for ICT providers and mixed groups.",
+      date: "18 November 2026",
+      readTime: "9 min",
+      category: "Regulation",
+      tags: ["NIS2", "DORA", "NIS2 and DORA", "Regulation (EU) 2022/2554", "lex specialis", "financial entities", "CSIRT Italia", "Legislative Decree 138/2024", "Legislative Decree 23/2025"],
+      metaTitle: "NIS2 and DORA: differences and rules for financial entities",
+      metaDescription:
+        "NIS2 and DORA compared. Why DORA prevails, which NIS decree obligations remain for banks, who receives incident reports and what applies to ICT providers.",
+      faqSchema: [
+        {
+          q: "Does a bank subject to DORA also have to comply with NIS2?",
+          a: "Only in part. Article 3(14) of the Italian NIS decree disapplies Article 17 and Chapters IV and V, namely security measures, incident notification, supervision and penalties, for entities in the banking and financial market infrastructure sectors, as these matters are governed by DORA. The general provisions of Chapter I, including registration on the ACN portal under Article 7, still apply.",
+        },
+        {
+          q: "Why is DORA considered lex specialis with respect to NIS2?",
+          a: "Because recital 16 of Regulation (EU) 2022/2554 expressly describes it as lex specialis and Article 1(2) treats it as a sector-specific Union legal act for the purposes of Article 4 of the NIS2 Directive. As a result, for financial entities, DORA's rules on ICT risk management and incident reporting replace the corresponding NIS2 provisions.",
+        },
+        {
+          q: "Who does a bank subject to DORA report a major incident to?",
+          a: "To the DORA competent authority, which for banks is the Bank of Italy under Article 4(1) of Legislative Decree 23/2025. Paragraph 3 of the same article requires financial entities in the banking and financial market infrastructure sectors to also send the initial notification and the reports to CSIRT Italia, using the same templates and within the same time limits.",
+        },
+        {
+          q: "Do financial entities subject to DORA have to categorise activities and services on the ACN portal?",
+          a: "No. Article 20(6) of ACN determination 314287/2026 exempts financial entities subject to DORA that fall within the NIS decree from listing and categorising their activities and services; they may still do so on a voluntary basis. The same determination provides similar exemptions for appointing the CSIRT contact person and for listing the members of management bodies.",
+        },
+        {
+          q: "Is an ICT provider serving banks subject to DORA or NIS2?",
+          a: "DORA also applies to ICT third-party service providers under Article 2(1)(u), but the NIS2 Article 4 carve-out only covers entities that the sector-specific act actually governs. A provider that falls within NIS2 in its own right therefore remains subject to the NIS decree; Article 47 of DORA indeed provides for cooperation in respect of NIS entities also designated as critical providers.",
+        },
+      ],
+      content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · updated 18 Nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In short.</strong> For banks and financial market infrastructures DORA prevails over NIS2, as it is lex specialis. The Italian NIS decree disapplies security measures, incident notification, supervision and penalties for these entities, which remain governed by DORA and supervised by the Bank of Italy, Consob, IVASS and COVIP. The general provisions still apply, including registration on the ACN portal; major incidents must also be reported to CSIRT Italia.
+</p>
+
+<p>The relationship between NIS2 and DORA is one of the most frequent questions for banks, intermediaries and ICT providers in the financial sector. Both deal with cybersecurity; however, Directive (EU) 2022/2555, namely NIS2, has general scope, while Regulation (EU) 2022/2554, namely DORA, is dedicated to the digital operational resilience of the financial sector only.</p>
+<p>This article explains which of the two prevails, which obligations under Legislative Decree no. 138 of 2024, the Italian NIS decree, still apply to financial entities and who incidents must be reported to. For a general overview, see the <a href="/risorse/nis2">NIS2 guide</a>; for the state of transposition in other Member States, see the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">NIS2 implementation status</a>.</p>
+
+<h2>How do NIS2 and DORA relate to each other?</h2>
+<p>DORA is lex specialis with respect to NIS2. For financial entities that would be essential or important entities, DORA's rules on ICT risk management, incident reporting, resilience testing and third-party risk replace the corresponding NIS2 provisions, including supervision and enforcement.</p>
+<p>The mechanism rests on two provisions that refer to each other. <a href="https://eur-lex.europa.eu/eli/dir/2022/2555/oj/eng" target="_blank" rel="noopener">Article 4 of the NIS2 Directive</a>, on sector-specific Union legal acts, provides that where a sector-specific act requires risk-management measures or incident notifications of at least equivalent effect, the relevant provisions of the Directive do not apply to the entities concerned. <a href="https://eur-lex.europa.eu/eli/reg/2022/2554/oj/eng" target="_blank" rel="noopener">Article 1(2) of DORA</a>, in turn, states that the Regulation is a sector-specific Union legal act for the purposes of that Article 4 in relation to financial entities identified as essential or important entities.</p>
+<p>The recitals confirm this choice. Recital 16 of DORA expressly describes it as lex specialis with respect to NIS2; recital 28 of NIS2 states that Member States should not apply to financial entities covered by DORA the provisions on risk management, reporting, supervision and enforcement. Both, however, call for a strong link between the financial sector and the horizontal cybersecurity framework, so NIS2 does not disappear entirely.</p>
+
+<h2>Which financial entities fall within NIS2?</h2>
+<p>NIS2 covers only two financial sectors, listed in Annex I. Sector 3, banking, covers credit institutions; sector 4, financial market infrastructures, covers operators of trading venues and central counterparties. DORA, by contrast, applies to a much broader list of financial entities.</p>
+<p><a href="https://eur-lex.europa.eu/eli/reg/2022/2554/oj/eng" target="_blank" rel="noopener">Article 2(1) of DORA</a>, which defines its scope, includes among others payment and electronic money institutions, investment firms, insurance undertakings and intermediaries, fund managers, pension funds, crypto-asset service providers and, under point (u), ICT third-party service providers. It follows that many financial entities are subject to DORA without ever having been NIS entities.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Type of entity</th><th>NIS2 (Annex I)</th><th>DORA (Art. 2(1))</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Credit institutions (banks)</td><td>Yes, sector 3</td><td>Yes, point (a)</td></tr>
+      <tr><td>Trading venues</td><td>Yes, sector 4</td><td>Yes, point (i)</td></tr>
+      <tr><td>Central counterparties</td><td>Yes, sector 4</td><td>Yes, point (h)</td></tr>
+      <tr><td>Payment and electronic money institutions</td><td>No</td><td>Yes, points (b) and (d)</td></tr>
+      <tr><td>Insurance and reinsurance undertakings</td><td>No</td><td>Yes, point (n)</td></tr>
+      <tr><td>ICT third-party service providers</td><td>Only if they fall within a NIS sector</td><td>Yes, point (u)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>For the second group, therefore, there is no coordination issue; they simply apply DORA. The question mainly concerns banks, trading venues and central counterparties, which fall within both regimes.</p>
+
+<h2>Which NIS decree obligations remain for banks and financial market infrastructures?</h2>
+<p>The general provisions of Chapter I of the NIS decree remain, including registration on the ACN portal. Article 17 and Chapters IV and V, namely security measures, incident notification, supervision and penalties, do not apply, as for these entities they are governed by DORA.</p>
+<p>The rule is set out in <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art3" target="_blank" rel="noopener">Article 3(14) of the NIS decree</a>, which defines its scope. For essential or important entities in sectors 3 and 4 of Annex I, it disapplies Article 17, on cybersecurity information-sharing arrangements, Chapter IV, on risk-management and incident-notification obligations (Arts. 23-33), and Chapter V, on monitoring, supervision and enforcement (Arts. 34-39). Paragraph 15 of the same article also excludes from the decree altogether the entities exempted from the scope of DORA.</p>
+<p>Article 7 of the NIS decree, on identification and registration of entities, is in Chapter I and is not covered by the carve-out. <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_piattaforma_314287-2026_signeddg" target="_blank" rel="noopener">ACN determination 314287/2026</a>, which governs the digital platform and the information to be provided to ACN, then provides some specific exemptions for financial entities subject to DORA.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>NIS obligation</th><th>Applies to DORA entities in sectors 3 and 4</th><th>Legal basis</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Registration on the ACN portal</td><td>Yes</td><td>Art. 7 NIS decree (Chapter I)</td></tr>
+      <tr><td>Appointment of the CSIRT contact person</td><td>No, unless on a voluntary basis</td><td>Art. 7(6) ACN det. 314287/2026</td></tr>
+      <tr><td>List of management body members in the annual update</td><td>No, unless on a voluntary basis</td><td>Art. 16(13) ACN det. 314287/2026</td></tr>
+      <tr><td>Listing and categorisation of activities and services</td><td>No, unless on a voluntary basis</td><td>Art. 20(6) ACN det. 314287/2026</td></tr>
+      <tr><td>Security measures and incident notification</td><td>No, DORA applies</td><td>Art. 3(14) NIS decree</td></tr>
+      <tr><td>ACN supervision and penalties</td><td>No, DORA applies</td><td>Art. 3(14) NIS decree</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>In practice, then, a bank within the NIS decree must still submit and update its declaration on the ACN portal; it does not, however, have to adopt the ACN baseline measures or categorise its activities and services. How these obligations work for other entities is explained in the articles on <a href="/risorse/nis2-adempimenti-scadenze">NIS2 deadlines</a> and on <a href="/risorse/categorizzazione-nis2-attivita-servizi-art-30">categorisation of activities and services</a>.</p>
+
+<h2>Who receives incident reports, the DORA authority or CSIRT Italia?</h2>
+<p>Reports go to the DORA competent authority, namely the Bank of Italy, Consob, IVASS or COVIP depending on the type of entity. Banks and financial market infrastructures, however, must also send the initial notification and each report to CSIRT Italia, using the same templates and within the same time limits.</p>
+<p><a href="https://eur-lex.europa.eu/eli/reg/2022/2554/oj/eng" target="_blank" rel="noopener">Article 19 of DORA</a>, on reporting of major ICT-related incidents, provides for three communications to the competent authority, namely an initial notification, an intermediate report and a final report; the time limits are set by the implementing acts provided for in Article 20. The sixth subparagraph of paragraph 1 also allows Member States to require the same communications to be sent to the CSIRTs designated under NIS2.</p>
+<p>Italy has used this option through <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2025-03-10;23~art4" target="_blank" rel="noopener">Legislative Decree no. 23 of 10 March 2025</a>, which adapts national law to DORA. Article 4 identifies the authorities receiving reports, namely the Bank of Italy for banks, payment institutions, investment firms and other intermediaries, Consob for central securities depositories and trading venues, IVASS for insurers and insurance intermediaries and COVIP for pension funds. Paragraph 3 of the same article requires entities in the banking and financial market infrastructure sectors to also send the communications to CSIRT Italia; the information so transmitted is covered by official secrecy.</p>
+<p>The sequence does not match the one in the NIS decree. <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">Article 25 of the NIS decree</a>, on notification of significant incidents, provides for an early warning within 24 hours, a notification within 72 hours and a final report within one month; for the financial entities discussed here, DORA's templates and time limits apply instead.</p>
+
+<h2>NIS2 and DORA compared: the main differences</h2>
+<p>The two regimes share the same goal, namely reducing cyber risk; however, they differ in legal nature, scope, authorities and tools. The table summarises the differences most relevant to the financial sector.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Aspect</th><th>NIS2 and NIS decree</th><th>DORA</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Nature of the act</td><td>Directive, transposed by Legislative Decree 138/2024</td><td>Regulation directly applicable from 17 January 2025 (Art. 64), supplemented by Legislative Decree 23/2025</td></tr>
+      <tr><td>Scope</td><td>Sectors in Annexes I and II, two of them financial (sectors 3 and 4 of Annex I)</td><td>Financial sector only, twenty-one categories of entities (Art. 2(1))</td></tr>
+      <tr><td>Authorities</td><td>ACN and CSIRT Italia</td><td>Bank of Italy, Consob, IVASS and COVIP (Art. 3 Legislative Decree 23/2025)</td></tr>
+      <tr><td>Management body responsibility</td><td>Approval and oversight of measures, training (Art. 23 NIS decree)</td><td>Ultimate responsibility for managing ICT risk (Art. 5(2))</td></tr>
+      <tr><td>Incidents</td><td>Significant incidents, 24-hour early warning, 72-hour notification, final report within one month</td><td>Major ICT-related incidents, initial notification, intermediate and final report within the time limits of the implementing acts (Arts. 19 and 20)</td></tr>
+      <tr><td>Testing</td><td>No threat-led penetration testing obligation</td><td>Digital operational resilience testing and threat-led penetration testing, TLPT (Arts. 24 and 26)</td></tr>
+      <tr><td>Third parties</td><td>Supply chain security and relevant suppliers</td><td>Management of ICT third-party risk and oversight of critical providers (Art. 28 et seq.)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>On the obligations of management bodies under the NIS decree, see the article on <a href="/risorse/nis2-organi-di-amministrazione-obblighi-cda">NIS2 and management bodies</a>; on the measures required of other entities, see the one on <a href="/risorse/misure-sicurezza-base-nis2-acn">baseline security measures</a>.</p>
+
+<h2>What changes for ICT providers and mixed groups?</h2>
+<p>The carve-out in favour of DORA only covers entities that DORA actually governs. An ICT provider that falls within NIS2 in its own right remains subject to the NIS decree, even if it serves banks; the same applies to non-financial companies in a group that includes financial entities.</p>
+<p>The second sentence of Article 4(1) of NIS2 provides that, where a sector-specific act does not cover all entities in a sector, the provisions of the Directive continue to apply to the entities not covered. The fact that DORA imposes obligations on financial entities in their dealings with providers does not, therefore, remove the provider from NIS obligations where the relevant conditions are met.</p>
+<p>The EU legislator anticipated the overlap. <a href="https://eur-lex.europa.eu/eli/reg/2022/2554/oj/eng" target="_blank" rel="noopener">Article 47 of DORA</a>, on cooperation with NIS2 structures, allows DORA authorities to take part in the Cooperation Group's work on essential or important entities also designated as critical ICT third-party providers, to consult CSIRTs and to enter into cooperation arrangements with NIS authorities. For groups, it follows that the mapping must be carried out company by company, checking for each one whether DORA, the NIS decree or both apply for different aspects.</p>
+
+<h2>Conclusions</h2>
+<p>The relationship between NIS2 and DORA boils down to a speciality rule with some exceptions. For banks, trading venues and central counterparties, DORA replaces NIS2 on security measures, notifications, supervision and penalties; however, the NIS decree still requires registration on the ACN portal, and Legislative Decree 23/2025 extends incident reports to CSIRT Italia as well.</p>
+<p>In practice, it is advisable to proceed as follows:</p>
+<ol>
+  <li>check whether the entity falls within sectors 3 or 4 of Annex I to the NIS decree or only within DORA;</li>
+  <li>for entities subject to both regimes, handle registration and updates on the ACN portal, taking into account the exemptions in determination 314287/2026;</li>
+  <li>adapt the incident-management procedure so that the communications required by Article 19 of DORA also reach CSIRT Italia, where required;</li>
+  <li>in mixed groups and for ICT providers, establish for each company which regime applies and document the assessment.</li>
+</ol>
+
+<p><strong>To understand which NIS2 obligations remain for your organisation</strong>, <a href="/inizia">the RegulaeOS NIS2 gap analysis</a> checks sector, size and interplay with other sector-specific rules, and shows the obligations still to be managed on the ACN portal.</p>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://eur-lex.europa.eu/eli/dir/2022/2555/oj/eng" target="_blank" rel="noopener">Directive (EU) 2022/2555 (NIS2), Art. 4, recital 28 and Annex I, EUR-Lex</a></li>
+  <li><a href="https://eur-lex.europa.eu/eli/reg/2022/2554/oj/eng" target="_blank" rel="noopener">Regulation (EU) 2022/2554 (DORA), Arts. 1, 2, 5, 19, 24, 26, 28, 47 and 64, recital 16, EUR-Lex</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art3" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 3 (scope), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 25 (incident notification obligations), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2025-03-10;23~art3" target="_blank" rel="noopener">Legislative Decree 23/2025, Art. 3 (DORA competent authorities), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2025-03-10;23~art4" target="_blank" rel="noopener">Legislative Decree 23/2025, Art. 4 (reporting of major ICT-related incidents), Normattiva</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_piattaforma_314287-2026_signeddg" target="_blank" rel="noopener">ACN, determination no. 314287/2026 on the digital platform and information to be provided</a></li>
+</ul>
+`,
+    },
+  },
+  {
     slug: "nis2-adempimenti-scadenze",
     title: "NIS2, adempimenti e scadenze 2027, il calendario completo per soggetti essenziali e importanti",
     excerpt:
