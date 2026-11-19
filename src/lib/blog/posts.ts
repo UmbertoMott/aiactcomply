@@ -38,6 +38,292 @@ export interface BlogPost {
 
 export const POSTS: BlogPost[] = [
   {
+    slug: "nis2-iso-27001",
+    title: "NIS2 e ISO 27001, differenze, sovrapposizioni e perché la certificazione non basta",
+    excerpt:
+      "La certificazione ISO/IEC 27001 aiuta molto ad adeguarsi alla NIS2, ma non equivale alla conformità. Che cosa dicono il decreto NIS, la determinazione ACN 379907/2025 e il regolamento di esecuzione (UE) 2024/2690, dove le due discipline si sovrappongono e quali obblighi restano scoperti.",
+    date: "19 novembre 2026",
+    dateISO: "2026-11-19",
+    author: { name: "Umberto Mottola", jobTitle: "Avvocato, CIPP/E" },
+    dateModifiedISO: "2026-11-19",
+    readTime: "8 min",
+    category: "Normativa",
+    tags: ["NIS2", "ISO 27001", "NIS2 e ISO 27001", "ISO/IEC 27001", "SGSI", "misure di sicurezza di base", "determinazione ACN 379907/2025", "regolamento 2024/2690", "D.Lgs. 138/2024"],
+    metaTitle: "NIS2 e ISO 27001, differenze e perché non basta",
+    metaDescription:
+      "NIS2 e ISO 27001 a confronto. Cosa dicono decreto NIS, misure ACN e regolamento 2024/2690, dove si sovrappongono e quali obblighi restano scoperti.",
+    faqSchema: [
+      {
+        q: "La certificazione ISO 27001 rende conformi alla NIS2?",
+        a: "No. Il decreto NIS non attribuisce alla certificazione ISO/IEC 27001 alcuna presunzione di conformità e l'ACN, nella FAQ MSB.6, chiarisce che adottare le misure di sicurezza di base significa attuare tutti i loro requisiti. La certificazione è quindi un ottimo punto di partenza, ma va verificata requisito per requisito rispetto all'allegato applicabile della determinazione ACN 379907/2025.",
+      },
+      {
+        q: "La NIS2 obbliga a certificarsi ISO 27001?",
+        a: "No. Né il decreto NIS né la determinazione ACN 379907/2025 impongono la certificazione ISO/IEC 27001. L'art. 27 del decreto consente all'ACN di imporre l'uso di prodotti, servizi e processi TIC certificati nell'ambito dei sistemi europei di certificazione della cybersicurezza, che sono un istituto diverso dalla certificazione di un sistema di gestione.",
+      },
+      {
+        q: "Che cosa chiede la NIS2 in più rispetto alla ISO 27001?",
+        a: "Chiede adempimenti che uno standard volontario non può prevedere; la registrazione annuale sul portale ACN (art. 7), la notifica degli incidenti significativi al CSIRT Italia entro 24 ore, 72 ore e un mese (art. 25), gli obblighi di approvazione e formazione degli organi di amministrazione (art. 23) e l'attuazione di requisiti puntuali fissati dall'ACN, il tutto sotto un regime di sanzioni amministrative (art. 38).",
+      },
+      {
+        q: "Posso usare la valutazione del rischio fatta per la ISO 27001?",
+        a: "Sì. Secondo la FAQ MSB.9 dell'ACN, la misura ID.RA-05 non impone un particolare standard per la valutazione del rischio, sicché il soggetto può usare il modello già in uso. Occorre tuttavia che la valutazione copra i sistemi informativi e di rete rilevanti per la NIS2 e che sia approvata dagli organi di amministrazione e direttivi.",
+      },
+      {
+        q: "Per i fornitori di servizi digitali la ISO 27001 conta di più?",
+        a: "Per alcune categorie sì, almeno come riferimento tecnico. Il considerando 3 del regolamento di esecuzione (UE) 2024/2690, che si applica tra gli altri a cloud, data center e servizi gestiti, dichiara che i requisiti si basano su norme come ISO/IEC 27001 e 27002. L'ENISA, tuttavia, avverte che la propria mappatura con questi standard non indica un'equivalenza.",
+      },
+    ],
+    content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · aggiornato al 19 nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In sintesi.</strong> NIS2 e ISO 27001 perseguono lo stesso obiettivo con strumenti diversi; la prima è una legge, la seconda uno standard volontario. Un sistema di gestione certificato ISO/IEC 27001 copre buona parte delle misure di sicurezza richieste dall'ACN, ma non garantisce la conformità; restano da verificare tutti i requisiti della determinazione ACN 379907/2025 e restano scoperti registrazione, notifica degli incidenti al CSIRT Italia e obblighi degli organi di amministrazione.
+</p>
+
+<p>Il rapporto tra NIS2 e ISO 27001 è una delle domande più frequenti tra le imprese che rientrano nel decreto legislativo n. 138 del 2024, ossia il decreto NIS che ha recepito in Italia la direttiva (UE) 2022/2555. Molte di esse hanno già un sistema di gestione per la sicurezza delle informazioni (SGSI) conforme alla norma ISO/IEC 27001, spesso certificato, e si chiedono quanto lavoro resti da fare.</p>
+<p>Questo articolo spiega che cosa dicono le fonti ufficiali sul punto, dove le due discipline si sovrappongono e quali obblighi la certificazione non copre. Per il quadro generale si rinvia alla <a href="/risorse/nis2">guida alla NIS2</a>; per lo stato di recepimento in Italia e in Europa, alla pagina sullo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>.</p>
+
+<h2>Che rapporto c'è tra NIS2 e ISO 27001?</h2>
+<p>La NIS2 è una disciplina di legge, vincolante e sanzionata, che impone ai soggetti essenziali e importanti misure di gestione del rischio informatico. La ISO/IEC 27001 è invece uno standard internazionale volontario, che fissa i requisiti di un sistema di gestione per la sicurezza delle informazioni. Il decreto NIS richiama le norme internazionali come parametro, senza però renderle obbligatorie.</p>
+<p>Secondo la <a href="https://www.iso.org/standard/27001" target="_blank" rel="noopener">scheda ufficiale dell'ISO</a>, la norma, giunta alla terza edizione del 2022, definisce i requisiti che un SGSI deve soddisfare; l'organizzazione che la applica decide se sottoporsi o meno alla certificazione. Si tratta, quindi, di una scelta volontaria.</p>
+<p>Il decreto NIS, dal canto suo, considera gli standard in due punti. L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">art. 24, comma 1, lettera a)</a>, che disciplina le misure di gestione dei rischi, chiede un livello di sicurezza adeguato ai rischi tenuto conto dello stato dell'arte e, ove applicabile, delle pertinenti norme nazionali, europee e internazionali. L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art28" target="_blank" rel="noopener">art. 28</a>, dedicato alle specifiche tecniche, affida poi all'ACN il compito di promuovere l'uso di specifiche tecniche europee e internazionali, senza imporre né favorire un particolare tipo di tecnologia.</p>
+<p>La stessa impostazione si ritrova nella direttiva. L'<a href="https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32022L2555" target="_blank" rel="noopener">art. 25 della direttiva (UE) 2022/2555</a>, intitolato alla normazione, chiede agli Stati membri di incoraggiare l'uso di norme e specifiche tecniche europee e internazionali; promuovere, tuttavia, non significa rendere obbligatorio.</p>
+
+<h2>La certificazione ISO 27001 basta per essere conformi alla NIS2?</h2>
+<p>No. Nessuna disposizione del decreto NIS né della determinazione ACN 379907/2025 attribuisce alla certificazione ISO/IEC 27001 una presunzione di conformità. L'ACN chiarisce che adottare le misure di sicurezza di base significa attuarne tutti i requisiti; la certificazione è quindi un buon punto di partenza, ma non sostituisce la verifica puntuale.</p>
+<p>Il primo argomento è testuale. Gli obblighi di sicurezza sono specificati dagli allegati 1 e 2 della <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">determinazione ACN n. 379907/2025</a>, che fissano rispettivamente le misure per i soggetti importanti e per quelli essenziali. Secondo la <a href="https://www.acn.gov.it/portale/faq/nis/misure-di-sicurezza-e-notifica-di-incidenti" target="_blank" rel="noopener">FAQ MSB.6 dell'ACN</a>, adottare le misure significa implementare tutti i requisiti previsti; ne consegue che ciò che conta è il singolo requisito, non il possesso di un certificato.</p>
+<p>Il secondo argomento riguarda la certificazione prevista dalla legge. L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art27" target="_blank" rel="noopener">art. 27 del decreto NIS</a>, che disciplina l'uso di schemi di certificazione della cybersicurezza, consente all'ACN di imporre l'uso di prodotti, servizi e processi TIC certificati nell'ambito dei sistemi europei previsti dall'art. 49 del regolamento (UE) 2019/881 o, nelle more, di schemi riconosciuti a livello nazionale o europeo. La norma riguarda dunque la certificazione di prodotti, servizi e processi, ossia un istituto diverso dalla certificazione volontaria di un sistema di gestione.</p>
+<p>Infine, l'ACN ha costruito le misure su un proprio modello. La <a href="https://www.acn.gov.it/portale/documents/d/guest/guida-alla-lettura-specifiche-di-base" target="_blank" rel="noopener">guida alla lettura delle specifiche di base</a> precisa che le misure sono sviluppate in accordo al Framework nazionale per la cybersecurity e la data protection, edizione 2025, e sono organizzate in funzioni, categorie, sottocategorie e requisiti. La struttura, quindi, non coincide con quella della ISO/IEC 27001, sicché serve una mappatura.</p>
+
+<h2>Dove la ISO 27001 aiuta davvero</h2>
+<p>Le sovrapposizioni sono ampie. L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">art. 24, comma 2, del decreto NIS</a> elenca gli elementi minimi delle misure di sicurezza, dalla politica di analisi dei rischi alla crittografia; si tratta di ambiti che un SGSI maturo affronta già. La tabella collega i principali elementi alle misure ACN corrispondenti e indica che cosa verificare se l'organizzazione dispone già di un SGSI.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Elemento dell'art. 24, comma 2</th><th>Misure ACN di riferimento</th><th>Che cosa verificare nel SGSI esistente</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>a) Analisi dei rischi e politiche di sicurezza</td><td>GV.PO-01, ID.RA-05, ID.RA-06</td><td>Che le politiche coprano gli ambiti richiesti e che valutazione e trattamento del rischio siano approvati dal vertice</td></tr>
+      <tr><td>b) Gestione degli incidenti</td><td>RS.MA-01</td><td>Che il piano preveda le notifiche al CSIRT Italia e i relativi termini</td></tr>
+      <tr><td>c) Continuità operativa e backup</td><td>ID.IM-04, PR.DS-11</td><td>Che piani di continuità e ripristino esistano e siano riesaminati con la periodicità richiesta</td></tr>
+      <tr><td>d) Sicurezza della catena di approvvigionamento</td><td>GV.SC-01, GV.SC-05, GV.SC-07</td><td>Che il rischio delle forniture sia valutato e che i requisiti di sicurezza entrino nei contratti nuovi o rinnovati</td></tr>
+      <tr><td>e) Gestione delle vulnerabilità</td><td>ID.RA-08</td><td>Che esista un piano di gestione delle vulnerabilità approvato dal vertice</td></tr>
+      <tr><td>g) Igiene di base e formazione</td><td>PR.AT-01</td><td>Che il piano di formazione includa gli organi di amministrazione e direttivi</td></tr>
+      <tr><td>l) Autenticazione a più fattori</td><td>PR.AA-03</td><td>Che l'autenticazione multifattore sia applicata almeno ai sistemi rilevanti, secondo la valutazione del rischio</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Due chiarimenti dell'ACN rendono il riuso più agevole. La FAQ MSB.9 precisa che la misura ID.RA-05 non impone un particolare standard per la valutazione del rischio, sicché il soggetto può usare il modello già in uso; la FAQ MSB.11 consente di organizzare la documentazione in uno o più documenti, purché riproduca la situazione corrente. Ne consegue che la documentazione del SGSI può essere integrata, senza riscriverla da capo.</p>
+<p>Per l'elenco completo delle misure e dei documenti si rinvia all'articolo sulle <a href="/risorse/misure-sicurezza-base-nis2-acn">misure di sicurezza di base NIS2</a>.</p>
+
+<h2>Che cosa chiede la NIS2 in più rispetto alla ISO 27001?</h2>
+<p>La NIS2 aggiunge obblighi che nessuno standard volontario può prevedere, perché nascono da un rapporto con l'autorità pubblica; registrazione sul portale ACN, notifica degli incidenti al CSIRT Italia, responsabilità personale degli organi di amministrazione. A questi si sommano requisiti puntuali fissati dall'ACN e un regime di sanzioni amministrative.</p>
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Profilo</th><th>ISO/IEC 27001</th><th>NIS2 (decreto NIS e determinazioni ACN)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Natura</td><td>Standard volontario; la certificazione è una scelta</td><td>Obbligo di legge per i soggetti essenziali e importanti</td></tr>
+      <tr><td>Registrazione</td><td>Non prevista</td><td>Registrazione o aggiornamento dal 1° gennaio al 28 febbraio di ogni anno (art. 7, comma 1)</td></tr>
+      <tr><td>Notifica degli incidenti</td><td>Non prevede notifiche a un'autorità</td><td>Pre-notifica entro 24 ore, notifica entro 72 ore e relazione finale entro un mese al CSIRT Italia (art. 25, comma 5)</td></tr>
+      <tr><td>Vertice aziendale</td><td>Impegno della direzione nel sistema di gestione</td><td>Approvazione delle misure, formazione obbligatoria e responsabilità per le violazioni (art. 23)</td></tr>
+      <tr><td>Contenuto delle misure</td><td>Definito dall'organizzazione in base al rischio</td><td>Requisiti puntuali degli allegati 1 e 2 della determinazione ACN 379907/2025</td></tr>
+      <tr><td>Controllo</td><td>Audit dell'organismo di certificazione</td><td>Vigilanza dell'ACN e sanzioni amministrative (art. 38)</td></tr>
+    </tbody>
+  </table>
+</div>
+<p>Il profilo più delicato è quello degli organi di amministrazione. L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art23" target="_blank" rel="noopener">art. 23 del decreto NIS</a>, che disciplina gli organi di amministrazione e direttivi, stabilisce che essi approvano le modalità di implementazione delle misure, sovrintendono agli obblighi, sono responsabili delle violazioni e devono seguire una formazione in materia di sicurezza informatica. Il tema è approfondito nell'articolo su <a href="/risorse/nis2-organi-di-amministrazione-obblighi-cda">NIS2 e organi di amministrazione</a>.</p>
+<p>Anche la notifica degli incidenti ha regole proprie. L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">art. 25 del decreto NIS</a>, che disciplina la notifica degli incidenti, fissa termini stringenti; gli allegati 3 e 4 della determinazione ACN 379907/2025 individuano poi le fattispecie di incidente significativo da notificare. Una procedura di gestione degli incidenti conforme alla ISO/IEC 27001 va quindi integrata con questi termini e queste fattispecie.</p>
+<p>Le conseguenze del mancato adeguamento, infine, sono rilevanti. Per la violazione degli artt. 23, 24 e 25, l'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">art. 38 del decreto NIS</a>, che disciplina le sanzioni amministrative, prevede fino a 10 milioni di euro o al 2% del fatturato annuo mondiale per i soggetti essenziali e fino a 7 milioni o all'1,4% per gli importanti, se l'importo percentuale è superiore. Per le scadenze di tutti gli adempimenti si rinvia al <a href="/risorse/nis2-adempimenti-scadenze">calendario degli adempimenti NIS2</a>.</p>
+
+<h2>Il caso dei fornitori di servizi digitali</h2>
+<p>Per alcune categorie del settore digitale il legame con la ISO/IEC 27001 è più stretto. Il regolamento di esecuzione (UE) 2024/2690, che fissa i requisiti tecnici delle misure per cloud, data center, servizi gestiti e altri fornitori digitali, dichiara di basarsi su norme come ISO/IEC 27001 e 27002. Anche qui, però, non vi è equivalenza automatica.</p>
+<p>Il <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32024R2690" target="_blank" rel="noopener">regolamento di esecuzione (UE) 2024/2690 del 17 ottobre 2024</a> si applica, tra gli altri, ai fornitori di servizi DNS, ai registri dei nomi di dominio di primo livello, ai fornitori di cloud computing e di data center, ai fornitori di servizi gestiti e di servizi di sicurezza gestiti, ai mercati online, ai motori di ricerca, ai social network e ai prestatori di servizi fiduciari. Il considerando 3 afferma che i requisiti tecnici e metodologici del suo allegato si basano su norme europee e internazionali, quali ISO/IEC 27001, ISO/IEC 27002 ed ETSI EN 319401, e su specifiche tecniche come la CEN/TS 18026 del 2024.</p>
+<p>A supporto del regolamento l'ENISA ha pubblicato, il 26 giugno 2025, una <a href="https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance" target="_blank" rel="noopener">guida tecnica di attuazione</a> che collega ciascun requisito, tra l'altro, alle norme ISO/IEC 27001 e 27002 nell'edizione 2022 e al NIST Cybersecurity Framework 2.0. La guida avverte, tuttavia, che la mappatura non va interpretata come misura di equivalenza tra standard o framework diversi; il certificato resta dunque un indizio utile, non una prova di conformità.</p>
+
+<h2>Come usare il SGSI ISO 27001 per adeguarsi alla NIS2?</h2>
+<p>Il metodo più efficace è una gap analysis requisito per requisito. Si confrontano i controlli già attuati nel SGSI con i requisiti dell'allegato applicabile della determinazione ACN, si colmano le lacune e si integrano gli adempimenti che la ISO/IEC 27001 non prevede, come registrazione, notifica e coinvolgimento formale del vertice.</p>
+<p>In concreto conviene procedere in quest'ordine:</p>
+<ol>
+  <li>verificare che il perimetro del SGSI comprenda i sistemi informativi e di rete rilevanti per le attività e i servizi per cui il soggetto rientra nella NIS2, redigendone l'elenco richiesto dalla misura GV.OC-04;</li>
+  <li>mappare i controlli esistenti sui requisiti dell'allegato 1, per i soggetti importanti, o dell'allegato 2, per gli essenziali, documentando per ciascuno il grado di copertura;</li>
+  <li>riusare la valutazione e il trattamento del rischio del SGSI, aggiornandoli dove necessario, come consente la FAQ MSB.9;</li>
+  <li>integrare il piano di gestione degli incidenti con i termini dell'art. 25 e con le fattispecie degli allegati 3 e 4 della determinazione;</li>
+  <li>sottoporre agli organi di amministrazione e direttivi i documenti che la guida alla lettura ACN chiede di approvare e pianificarne la formazione;</li>
+  <li>tenere distinte le evidenze per l'audit di certificazione e quelle per l'ACN, in modo da poter dimostrare la conformità ai requisiti nazionali.</li>
+</ol>
+
+<h2>Conclusioni</h2>
+<p>NIS2 e ISO 27001 non sono alternative, ma complementari. Chi ha già un SGSI conforme alla ISO/IEC 27001 parte avvantaggiato, poiché molte misure ACN trovano riscontro in processi esistenti; tuttavia il decreto NIS non riconosce al certificato alcun valore di presunzione, sicché la conformità va dimostrata requisito per requisito.</p>
+<p>Restano poi obblighi che lo standard non conosce, dalla registrazione alla notifica degli incidenti fino alla responsabilità degli organi di amministrazione. Su questi occorre lavorare in modo specifico, partendo dalla <a href="/risorse/nis2">guida completa alla NIS2</a>.</p>
+
+<p><strong>Per capire quanto del tuo SGSI è già conforme</strong>, <a href="/inizia">la gap analysis NIS2 di RegulaeOS</a> confronta le misure adottate con i requisiti dell'allegato applicabile della determinazione ACN, evidenzia le lacune rispetto alla ISO/IEC 27001 e raccoglie le prove documentali in un unico posto.</p>
+
+<h2>Fonti</h2>
+<ul>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art7" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 7 (identificazione ed elencazione dei soggetti), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art23" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 23 (organi di amministrazione e direttivi), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 24 (misure di gestione dei rischi), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 25 (obblighi di notifica degli incidenti), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art27" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 27 (uso di schemi di certificazione della cybersicurezza), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art28" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 28 (specifiche tecniche), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 38 (sanzioni amministrative), Normattiva</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Direttiva (UE) 2022/2555 (NIS2), artt. 21 e 25, EUR-Lex</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32024R2690" target="_blank" rel="noopener">Regolamento di esecuzione (UE) 2024/2690 della Commissione, EUR-Lex</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">ACN, determinazione n. 379907 del 19 dicembre 2025 (specifiche di base)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/guida-alla-lettura-specifiche-di-base" target="_blank" rel="noopener">ACN, Linee guida NIS, specifiche di base, guida alla lettura (versione 2.1, aprile 2026)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/misure-di-sicurezza-e-notifica-di-incidenti" target="_blank" rel="noopener">ACN, FAQ NIS, misure di sicurezza e notifica di incidenti</a></li>
+  <li><a href="https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance" target="_blank" rel="noopener">ENISA, NIS2 Technical Implementation Guidance (giugno 2025)</a></li>
+  <li><a href="https://www.iso.org/standard/27001" target="_blank" rel="noopener">ISO, scheda della norma ISO/IEC 27001, edizione 2022</a></li>
+</ul>
+`,
+    en: {
+      title: "NIS2 and ISO 27001: differences, overlaps and why certification is not enough",
+      excerpt:
+        "ISO/IEC 27001 certification helps a great deal with NIS2, but it is not the same as compliance. What the Italian NIS decree, ACN determination 379907/2025 and Implementing Regulation (EU) 2024/2690 say, where the two frameworks overlap and which obligations remain uncovered.",
+      date: "19 November 2026",
+      readTime: "8 min",
+      category: "Regulation",
+      tags: ["NIS2", "ISO 27001", "NIS2 and ISO 27001", "ISO/IEC 27001", "ISMS", "baseline security measures", "ACN determination 379907/2025", "Regulation 2024/2690", "Legislative Decree 138/2024"],
+      metaTitle: "NIS2 and ISO 27001: differences and why it is not enough",
+      metaDescription:
+        "NIS2 and ISO 27001 compared. What the NIS decree, ACN measures and Regulation 2024/2690 say, where they overlap and which obligations remain uncovered.",
+      faqSchema: [
+        {
+          q: "Does ISO 27001 certification make an organisation NIS2 compliant?",
+          a: "No. The NIS decree gives ISO/IEC 27001 certification no presumption of conformity, and ACN FAQ MSB.6 clarifies that adopting the baseline security measures means implementing all of their requirements. Certification is therefore an excellent starting point, but it must be checked requirement by requirement against the applicable annex of ACN determination 379907/2025.",
+        },
+        {
+          q: "Does NIS2 require ISO 27001 certification?",
+          a: "No. Neither the NIS decree nor ACN determination 379907/2025 requires ISO/IEC 27001 certification. Article 27 of the decree allows ACN to require the use of ICT products, services and processes certified under European cybersecurity certification schemes, which is a different instrument from the certification of a management system.",
+        },
+        {
+          q: "What does NIS2 require on top of ISO 27001?",
+          a: "It requires obligations that a voluntary standard cannot provide for: annual registration on the ACN portal (Art. 7), notification of significant incidents to CSIRT Italia within 24 hours, 72 hours and one month (Art. 25), approval and training obligations for management bodies (Art. 23) and implementation of specific requirements set by ACN, all backed by administrative penalties (Art. 38).",
+        },
+        {
+          q: "Can I reuse the risk assessment carried out for ISO 27001?",
+          a: "Yes. According to ACN FAQ MSB.9, measure ID.RA-05 does not impose any particular standard for the risk assessment, so the entity may use the model it already has. The assessment must, however, cover the network and information systems relevant for NIS2 and be approved by the management bodies.",
+        },
+        {
+          q: "Does ISO 27001 carry more weight for digital service providers?",
+          a: "For some categories it does, at least as a technical reference. Recital 3 of Implementing Regulation (EU) 2024/2690, which applies among others to cloud, data centre and managed service providers, states that its requirements are based on standards such as ISO/IEC 27001 and 27002. ENISA, however, warns that its mapping to these standards does not indicate equivalence.",
+        },
+      ],
+      content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · updated 19 Nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In short.</strong> NIS2 and ISO 27001 pursue the same goal with different tools; the first is law, the second a voluntary standard. An ISO/IEC 27001 certified management system covers a large part of the security measures required by ACN, but it does not guarantee compliance; every requirement of ACN determination 379907/2025 must still be checked, and registration, incident notification to CSIRT Italia and management body obligations remain uncovered.
+</p>
+
+<p>The relationship between NIS2 and ISO 27001 is one of the most frequent questions among companies falling within Legislative Decree No. 138 of 2024, the NIS decree that transposed Directive (EU) 2022/2555 in Italy. Many of them already have an information security management system (ISMS) compliant with ISO/IEC 27001, often certified, and want to know how much work remains.</p>
+<p>This article explains what the official sources say, where the two frameworks overlap and which obligations certification does not cover. For the general framework, see the <a href="/risorse/nis2">NIS2 guide</a>; for the state of transposition in Italy and Europe, see the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">state of NIS2 implementation</a>.</p>
+
+<h2>How do NIS2 and ISO 27001 relate to each other?</h2>
+<p>NIS2 is binding law, backed by penalties, that requires essential and important entities to adopt cybersecurity risk management measures. ISO/IEC 27001 is a voluntary international standard setting the requirements for an information security management system. The NIS decree refers to international standards as a benchmark without making them mandatory.</p>
+<p>According to the <a href="https://www.iso.org/standard/27001" target="_blank" rel="noopener">official ISO page</a>, the standard, now in its third edition of 2022, defines the requirements an ISMS must meet; organisations implementing it decide whether or not to seek certification. It is therefore a voluntary choice.</p>
+<p>The NIS decree addresses standards in two places. <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">Article 24(1)(a)</a>, which governs risk management measures, requires a level of security appropriate to the risks, taking into account the state of the art and, where applicable, relevant national, European and international standards. <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art28" target="_blank" rel="noopener">Article 28</a>, on technical specifications, then tasks ACN with promoting European and international technical specifications, without imposing or favouring any particular type of technology.</p>
+<p>The directive takes the same approach. <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Article 25 of Directive (EU) 2022/2555</a>, on standardisation, asks Member States to encourage the use of European and international standards and technical specifications; encouraging, however, does not mean requiring.</p>
+
+<h2>Is ISO 27001 certification enough to comply with NIS2?</h2>
+<p>No. No provision of the NIS decree or of ACN determination 379907/2025 gives ISO/IEC 27001 certification a presumption of conformity. ACN clarifies that adopting the baseline security measures means implementing all their requirements; certification is therefore a good starting point, but it does not replace a detailed check.</p>
+<p>The first argument is textual. The security obligations are specified by Annexes 1 and 2 of <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">ACN determination No. 379907/2025</a>, which set the measures for important and essential entities respectively. According to <a href="https://www.acn.gov.it/portale/faq/nis/misure-di-sicurezza-e-notifica-di-incidenti" target="_blank" rel="noopener">ACN FAQ MSB.6</a>, adopting the measures means implementing all the requirements; what matters, therefore, is each individual requirement, not holding a certificate.</p>
+<p>The second argument concerns the certification provided for by law. <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art27" target="_blank" rel="noopener">Article 27 of the NIS decree</a>, on the use of cybersecurity certification schemes, allows ACN to require the use of ICT products, services and processes certified under the European schemes of Article 49 of Regulation (EU) 2019/881 or, pending those, under schemes recognised at national or European level. The provision thus concerns certification of products, services and processes, an instrument different from the voluntary certification of a management system.</p>
+<p>Finally, ACN built the measures on its own model. The <a href="https://www.acn.gov.it/portale/documents/d/guest/guida-alla-lettura-specifiche-di-base" target="_blank" rel="noopener">reading guide to the baseline specifications</a> states that the measures were developed in accordance with the 2025 edition of the Italian National Framework for Cybersecurity and Data Protection and are organised into functions, categories, subcategories and requirements. Their structure does not match ISO/IEC 27001, so a mapping is needed.</p>
+
+<h2>Where ISO 27001 really helps</h2>
+<p>The overlaps are extensive. <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">Article 24(2) of the NIS decree</a> lists the minimum elements of security measures, from risk analysis policies to cryptography; these are areas a mature ISMS already addresses. The table links the main elements to the corresponding ACN measures and shows what to check if the organisation already has an ISMS.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Element of Art. 24(2)</th><th>Relevant ACN measures</th><th>What to check in the existing ISMS</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>(a) Risk analysis and security policies</td><td>GV.PO-01, ID.RA-05, ID.RA-06</td><td>That policies cover the required areas and that risk assessment and treatment are approved by management</td></tr>
+      <tr><td>(b) Incident handling</td><td>RS.MA-01</td><td>That the plan includes notifications to CSIRT Italia and their deadlines</td></tr>
+      <tr><td>(c) Business continuity and backups</td><td>ID.IM-04, PR.DS-11</td><td>That continuity and recovery plans exist and are reviewed at the required intervals</td></tr>
+      <tr><td>(d) Supply chain security</td><td>GV.SC-01, GV.SC-05, GV.SC-07</td><td>That supplier risk is assessed and security requirements are included in new or renewed contracts</td></tr>
+      <tr><td>(e) Vulnerability handling</td><td>ID.RA-08</td><td>That a vulnerability management plan approved by management exists</td></tr>
+      <tr><td>(g) Basic cyber hygiene and training</td><td>PR.AT-01</td><td>That the training plan includes the management bodies</td></tr>
+      <tr><td>(l) Multi-factor authentication</td><td>PR.AA-03</td><td>That MFA is applied at least to relevant systems, in line with the risk assessment</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Two ACN clarifications make reuse easier. FAQ MSB.9 states that measure ID.RA-05 does not impose any particular standard for risk assessment, so the entity may use the model already in place; FAQ MSB.11 allows documentation to be organised in one or more documents, provided it reflects the current situation. The ISMS documentation can therefore be supplemented rather than rewritten from scratch.</p>
+<p>For the full list of measures and documents, see the article on <a href="/risorse/misure-sicurezza-base-nis2-acn">NIS2 baseline security measures</a>.</p>
+
+<h2>What does NIS2 require on top of ISO 27001?</h2>
+<p>NIS2 adds obligations that no voluntary standard can provide for, because they arise from a relationship with a public authority: registration on the ACN portal, incident notification to CSIRT Italia and personal accountability of management bodies. On top of these come specific requirements set by ACN and a regime of administrative penalties.</p>
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Aspect</th><th>ISO/IEC 27001</th><th>NIS2 (NIS decree and ACN determinations)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Nature</td><td>Voluntary standard; certification is optional</td><td>Legal obligation for essential and important entities</td></tr>
+      <tr><td>Registration</td><td>Not provided for</td><td>Registration or update from 1 January to 28 February each year (Art. 7(1))</td></tr>
+      <tr><td>Incident notification</td><td>No notification to an authority</td><td>Early warning within 24 hours, notification within 72 hours and final report within one month to CSIRT Italia (Art. 25(5))</td></tr>
+      <tr><td>Top management</td><td>Leadership commitment within the management system</td><td>Approval of measures, mandatory training and liability for infringements (Art. 23)</td></tr>
+      <tr><td>Content of measures</td><td>Defined by the organisation based on risk</td><td>Specific requirements in Annexes 1 and 2 of ACN determination 379907/2025</td></tr>
+      <tr><td>Oversight</td><td>Audit by the certification body</td><td>ACN supervision and administrative penalties (Art. 38)</td></tr>
+    </tbody>
+  </table>
+</div>
+<p>The most sensitive aspect concerns management bodies. <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art23" target="_blank" rel="noopener">Article 23 of the NIS decree</a>, which governs management bodies, provides that they approve how the measures are implemented, oversee compliance, are liable for infringements and must follow cybersecurity training. The topic is covered in the article on <a href="/risorse/nis2-organi-di-amministrazione-obblighi-cda">NIS2 and management bodies</a>.</p>
+<p>Incident notification also has its own rules. <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">Article 25 of the NIS decree</a>, which governs incident notification, sets tight deadlines; Annexes 3 and 4 of ACN determination 379907/2025 then identify the types of significant incident to be notified. An incident management procedure compliant with ISO/IEC 27001 must therefore be supplemented with these deadlines and incident types.</p>
+<p>Finally, the consequences of non-compliance are significant. For infringements of Articles 23, 24 and 25, <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">Article 38 of the NIS decree</a>, on administrative penalties, provides fines of up to EUR 10 million or 2% of worldwide annual turnover for essential entities and up to EUR 7 million or 1.4% for important entities, whichever is higher. For the deadlines of all obligations, see the <a href="/risorse/nis2-adempimenti-scadenze">NIS2 obligations calendar</a>.</p>
+
+<h2>The case of digital service providers</h2>
+<p>For some categories in the digital sector the link with ISO/IEC 27001 is closer. Implementing Regulation (EU) 2024/2690, which sets the technical requirements of the measures for cloud, data centre, managed service and other digital providers, states that it is based on standards such as ISO/IEC 27001 and 27002. Here too, however, there is no automatic equivalence.</p>
+<p><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R2690" target="_blank" rel="noopener">Commission Implementing Regulation (EU) 2024/2690 of 17 October 2024</a> applies, among others, to DNS service providers, TLD name registries, cloud computing and data centre service providers, managed service and managed security service providers, online marketplaces, search engines, social networking platforms and trust service providers. Recital 3 states that the technical and methodological requirements in its annex are based on European and international standards, such as ISO/IEC 27001, ISO/IEC 27002 and ETSI EN 319401, and on technical specifications such as CEN/TS 18026:2024.</p>
+<p>To support the regulation, ENISA published on 26 June 2025 a <a href="https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance" target="_blank" rel="noopener">technical implementation guidance</a> that maps each requirement, among others, to the 2022 editions of ISO/IEC 27001 and 27002 and to the NIST Cybersecurity Framework 2.0. The guidance warns, however, that the mapping should not be interpreted as a measure of equivalence among different standards or frameworks; the certificate remains a useful indication, not proof of compliance.</p>
+
+<h2>How can an ISO 27001 ISMS be used to achieve NIS2 compliance?</h2>
+<p>The most effective method is a requirement-by-requirement gap analysis. The controls already implemented in the ISMS are compared with the requirements of the applicable annex of the ACN determination, gaps are closed, and the obligations ISO/IEC 27001 does not cover, such as registration, notification and formal management involvement, are added.</p>
+<p>In practice, it is advisable to proceed in this order:</p>
+<ol>
+  <li>check that the ISMS scope includes the network and information systems relevant to the activities and services for which the entity falls under NIS2, drawing up the list required by measure GV.OC-04;</li>
+  <li>map existing controls to the requirements of Annex 1, for important entities, or Annex 2, for essential entities, documenting the degree of coverage of each;</li>
+  <li>reuse the ISMS risk assessment and treatment, updating them where necessary, as FAQ MSB.9 allows;</li>
+  <li>supplement the incident management plan with the deadlines of Article 25 and the incident types in Annexes 3 and 4 of the determination;</li>
+  <li>submit to the management bodies the documents that the ACN reading guide requires them to approve, and plan their training;</li>
+  <li>keep the evidence for the certification audit separate from the evidence for ACN, so that compliance with the national requirements can be demonstrated.</li>
+</ol>
+
+<h2>Conclusions</h2>
+<p>NIS2 and ISO 27001 are not alternatives but complements. Organisations with an ISO/IEC 27001 compliant ISMS start with an advantage, since many ACN measures match existing processes; however, the NIS decree gives the certificate no presumption of conformity, so compliance must be demonstrated requirement by requirement.</p>
+<p>Some obligations are also unknown to the standard, from registration to incident notification and management body accountability. These require specific work, starting from the <a href="/risorse/nis2">complete NIS2 guide</a>.</p>
+
+<p><strong>To find out how much of your ISMS is already compliant</strong>, <a href="/inizia">the RegulaeOS NIS2 gap analysis</a> compares the measures adopted with the requirements of the applicable annex of the ACN determination, highlights the gaps relative to ISO/IEC 27001 and gathers the documentary evidence in one place.</p>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art7" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 7 (identification and listing of entities), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art23" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 23 (management bodies), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 24 (risk management measures), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 25 (incident notification obligations), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art27" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 27 (use of cybersecurity certification schemes), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art28" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 28 (technical specifications), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 38 (administrative penalties), Normattiva</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Directive (EU) 2022/2555 (NIS2), Articles 21 and 25, EUR-Lex</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R2690" target="_blank" rel="noopener">Commission Implementing Regulation (EU) 2024/2690, EUR-Lex</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">ACN, determination No. 379907 of 19 December 2025 (baseline specifications)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/guida-alla-lettura-specifiche-di-base" target="_blank" rel="noopener">ACN, NIS guidelines, baseline specifications, reading guide (version 2.1, April 2026)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/faq/nis/misure-di-sicurezza-e-notifica-di-incidenti" target="_blank" rel="noopener">ACN, NIS FAQ, security measures and incident notification</a></li>
+  <li><a href="https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance" target="_blank" rel="noopener">ENISA, NIS2 Technical Implementation Guidance (June 2025)</a></li>
+  <li><a href="https://www.iso.org/standard/27001" target="_blank" rel="noopener">ISO, ISO/IEC 27001:2022 standard page</a></li>
+</ul>
+`,
+    },
+  },
+  {
     slug: "nis2-adempimenti-scadenze",
     title: "NIS2, adempimenti e scadenze 2027, il calendario completo per soggetti essenziali e importanti",
     excerpt:
