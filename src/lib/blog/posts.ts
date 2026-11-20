@@ -38,6 +38,286 @@ export interface BlogPost {
 
 export const POSTS: BlogPost[] = [
   {
+    slug: "nis2-cyber-resilience-act",
+    title: "NIS2 e Cyber Resilience Act, differenze, notifiche e rapporti tra le due norme",
+    excerpt:
+      "La NIS2 disciplina la sicurezza delle organizzazioni, il Cyber Resilience Act quella dei prodotti con elementi digitali. Oggetto, destinatari, date di applicazione, notifiche al CSIRT Italia e all'ENISA, catena di fornitura e sanzioni a confronto, con il rinvio puntuale agli articoli.",
+    date: "20 novembre 2026",
+    dateISO: "2026-11-20",
+    author: { name: "Umberto Mottola", jobTitle: "Avvocato, CIPP/E" },
+    dateModifiedISO: "2026-11-20",
+    readTime: "9 min",
+    category: "Normativa",
+    tags: ["NIS2", "Cyber Resilience Act", "CRA", "NIS2 e CRA", "regolamento (UE) 2024/2847", "D.Lgs. 138/2024", "prodotti con elementi digitali", "ENISA", "CSIRT Italia"],
+    metaTitle: "NIS2 e Cyber Resilience Act, differenze e rapporti",
+    metaDescription:
+      "NIS2 e Cyber Resilience Act a confronto. Chi riguardano, quando si applicano, come funzionano le notifiche al CSIRT e all'ENISA e cosa cambia per i fornitori.",
+    faqSchema: [
+      {
+        q: "Qual è la differenza tra NIS2 e Cyber Resilience Act?",
+        a: "La NIS2, ossia la direttiva (UE) 2022/2555 recepita in Italia con il D.Lgs. 138/2024, impone misure di sicurezza e notifiche alle organizzazioni che operano nei settori elencati. Il Cyber Resilience Act, ossia il regolamento (UE) 2024/2847, fissa invece requisiti di cibersicurezza per i prodotti hardware e software immessi sul mercato dell'Unione e obblighi per chi li fabbrica e li commercializza.",
+      },
+      {
+        q: "Da quando si applica il Cyber Resilience Act?",
+        a: "Secondo l'art. 71 del regolamento (UE) 2024/2847, il regolamento si applica in generale dall'11 dicembre 2027. Gli obblighi di segnalazione dell'art. 14 si applicano già dall'11 settembre 2026 e le norme sugli organismi di valutazione della conformità, ossia il capo IV, dall'11 giugno 2026.",
+      },
+      {
+        q: "Un'azienda può essere soggetta sia alla NIS2 sia al Cyber Resilience Act?",
+        a: "Sì. Un fabbricante di software o di dispositivi connessi che opera in un settore NIS2 e supera le soglie dimensionali è un soggetto NIS2 per la propria organizzazione e, nello stesso tempo, un fabbricante ai sensi del CRA per i prodotti che immette sul mercato. I due insiemi di obblighi hanno presupposti diversi e vanno valutati separatamente.",
+      },
+      {
+        q: "A chi si notificano le vulnerabilità secondo il Cyber Resilience Act?",
+        a: "L'art. 14 del regolamento prevede che il fabbricante notifichi simultaneamente al CSIRT designato come coordinatore e all'ENISA, tramite la piattaforma unica di segnalazione dell'art. 16, le vulnerabilità attivamente sfruttate e gli incidenti gravi. Per i fabbricanti con stabilimento principale in Italia il CSIRT coordinatore è il CSIRT Italia, designato dall'art. 16 del decreto NIS.",
+      },
+      {
+        q: "Quali sanzioni prevede il Cyber Resilience Act?",
+        a: "L'art. 64 del regolamento prevede, per la violazione dei requisiti essenziali dell'allegato I e degli obblighi degli artt. 13 e 14, sanzioni fino a 15 milioni di euro o, per le imprese, fino al 2,5% del fatturato mondiale annuo, se superiore. Per altre violazioni i massimi scendono a 10 milioni o al 2% e a 5 milioni o all'1%.",
+      },
+    ],
+    content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · aggiornato al 20 nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In sintesi.</strong> La NIS2 e il Cyber Resilience Act sono complementari ma diversi. La NIS2 chiede alle organizzazioni dei settori elencati di gestire i rischi informatici e di notificare gli incidenti; il Cyber Resilience Act, ossia il regolamento (UE) 2024/2847, chiede ai fabbricanti di immettere sul mercato prodotti hardware e software sicuri e di segnalare vulnerabilità e incidenti. Dall'11 settembre 2026 si applicano già gli obblighi di segnalazione del CRA; il resto dall'11 dicembre 2027.
+</p>
+
+<p>Il rapporto tra NIS2 e Cyber Resilience Act interessa due categorie di imprese. Da un lato i soggetti NIS2 che acquistano software e dispositivi connessi, e che devono valutare la sicurezza dei propri fornitori; dall'altro i fabbricanti di quei prodotti, che dal 2026 hanno obblighi propri di segnalazione e dal 2027 dovranno rispettare requisiti di sicurezza fin dalla progettazione.</p>
+<p>Questo articolo mette a confronto le due norme, con il rinvio agli articoli dei testi ufficiali. Per una panoramica completa degli obblighi si rinvia alla <a href="/risorse/nis2">guida alla NIS2</a>; per le scadenze nazionali, alla pagina sullo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>.</p>
+
+<h2>Che cos'è il Cyber Resilience Act?</h2>
+<p>Il Cyber Resilience Act è il <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32024R2847" target="_blank" rel="noopener">regolamento (UE) 2024/2847</a> del 23 ottobre 2024, pubblicato nella Gazzetta ufficiale dell'Unione il 20 novembre 2024. Stabilisce requisiti di cibersicurezza per i prodotti con elementi digitali e obblighi per chi li fabbrica e li mette in commercio; essendo un regolamento, si applica direttamente in tutti gli Stati membri, senza bisogno di recepimento.</p>
+<p>L'art. 1 del regolamento, che ne definisce l'oggetto, indica quattro contenuti; norme sulla messa a disposizione sul mercato dei prodotti, requisiti essenziali per la loro progettazione e produzione, requisiti per la gestione delle vulnerabilità durante l'uso e norme sulla vigilanza del mercato. Per «prodotto con elementi digitali» l'art. 3, punto 1), intende qualsiasi prodotto software o hardware, comprese le relative soluzioni di elaborazione dati da remoto e i componenti immessi sul mercato separatamente.</p>
+<p>La ragione dell'intervento è spiegata dal considerando 3; il diritto dell'Unione già vigente, compresa la direttiva (UE) 2022/2555, non prevede direttamente requisiti obbligatori per la sicurezza dei prodotti. La NIS2, infatti, si rivolge a chi usa i sistemi informativi, non a chi li produce.</p>
+
+<h2>Qual è la differenza tra NIS2 e Cyber Resilience Act?</h2>
+<p>La differenza essenziale riguarda l'oggetto della disciplina. La NIS2 regola le organizzazioni e il modo in cui proteggono i propri sistemi; il Cyber Resilience Act regola i prodotti e gli obblighi di chi li immette sul mercato. Ne conseguono destinatari, autorità e strumenti diversi, anche se le due norme condividono il CSIRT coordinatore e l'ENISA.</p>
+<p>La tabella riassume il confronto.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Aspetto</th><th>NIS2</th><th>Cyber Resilience Act</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Atto</td><td>Direttiva (UE) 2022/2555, recepita con il D.Lgs. 138/2024 (decreto NIS)</td><td>Regolamento (UE) 2024/2847, direttamente applicabile</td></tr>
+      <tr><td>Oggetto</td><td>Sicurezza dei sistemi informativi e di rete delle organizzazioni</td><td>Sicurezza dei prodotti hardware e software lungo tutto il ciclo di vita</td></tr>
+      <tr><td>Destinatari</td><td>Soggetti essenziali e importanti dei settori degli allegati I e II</td><td>Fabbricanti e altri operatori economici che commercializzano prodotti con elementi digitali</td></tr>
+      <tr><td>Obblighi principali</td><td>Misure di gestione dei rischi (art. 24 decreto NIS) e notifica degli incidenti significativi (art. 25)</td><td>Requisiti essenziali dell'allegato I (art. 13) e segnalazione di vulnerabilità e incidenti (art. 14)</td></tr>
+      <tr><td>Destinatario delle notifiche</td><td>CSIRT Italia</td><td>CSIRT designato come coordinatore e ENISA, tramite la piattaforma unica di segnalazione</td></tr>
+      <tr><td>Autorità in Italia</td><td>Agenzia per la cybersicurezza nazionale (ACN)</td><td>ACN quale autorità di vigilanza del mercato, secondo la legge di delegazione europea 2025</td></tr>
+      <tr><td>Sanzioni massime</td><td>10 milioni di euro o 2% del fatturato; 7 milioni o 1,4% (art. 38 decreto NIS)</td><td>15 milioni di euro o 2,5% del fatturato (art. 64 CRA)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>I dati della colonna NIS2 sono tratti dal <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">decreto NIS su Normattiva</a>; quelli della colonna CRA dal testo del regolamento su EUR-Lex. Le sezioni che seguono approfondiscono i punti di contatto.</p>
+
+<h2>Quando si applica il Cyber Resilience Act?</h2>
+<p>Il Cyber Resilience Act si applica in tre tempi. Le norme sugli organismi di valutazione della conformità valgono dall'11 giugno 2026, gli obblighi di segnalazione dei fabbricanti dall'11 settembre 2026 e tutte le altre disposizioni, compresi i requisiti essenziali di sicurezza dei prodotti, dall'11 dicembre 2027.</p>
+<p>Le date sono fissate dall'<a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32024R2847" target="_blank" rel="noopener">art. 71 del regolamento</a>, che disciplina entrata in vigore e applicazione. Il paragrafo 2 stabilisce che il regolamento si applica dall'11 dicembre 2027; tuttavia l'art. 14, relativo agli obblighi di segnalazione, si applica dall'11 settembre 2026 e il capo IV, ossia gli artt. da 35 a 51 sulla notifica degli organismi di valutazione della conformità, dall'11 giugno 2026.</p>
+<p>Ne consegue che, alla data di questo articolo, i fabbricanti devono già segnalare le vulnerabilità attivamente sfruttate e gli incidenti gravi relativi ai propri prodotti, anche se i requisiti di progettazione non sono ancora obbligatori. La NIS2, invece, è applicabile in Italia dal 18 ottobre 2024, con le scadenze di prima applicazione illustrate nella <a href="/risorse/nis2-stato-attuazione-italia-europa">pagina sullo stato di attuazione</a>.</p>
+
+<h2>Notifiche NIS2 e notifiche CRA, due obblighi distinti</h2>
+<p>Le due norme prevedono notifiche con tempi simili ma con presupposti diversi. La NIS2 riguarda gli incidenti significativi che colpiscono i servizi dell'organizzazione; il CRA riguarda le vulnerabilità attivamente sfruttate e gli incidenti gravi che incidono sulla sicurezza di un prodotto.</p>
+<p>Per la NIS2 l'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">art. 25 del decreto NIS</a>, che disciplina la notifica degli incidenti, prevede una pre-notifica al CSIRT Italia entro 24 ore, una notifica entro 72 ore e una relazione finale entro un mese. Per il CRA, l'art. 14 del regolamento impone al fabbricante di notificare simultaneamente al CSIRT designato come coordinatore e all'ENISA, tramite la piattaforma unica di segnalazione che l'ENISA istituisce e gestisce secondo l'art. 16.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Fase</th><th>NIS2 (art. 25 decreto NIS)</th><th>CRA, vulnerabilità attivamente sfruttata (art. 14, par. 2)</th><th>CRA, incidente grave (art. 14, par. 4)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Primo avviso</td><td>Pre-notifica entro 24 ore</td><td>Preallarme entro 24 ore</td><td>Preallarme entro 24 ore</td></tr>
+      <tr><td>Notifica</td><td>Entro 72 ore</td><td>Entro 72 ore</td><td>Entro 72 ore</td></tr>
+      <tr><td>Relazione finale</td><td>Entro un mese dalla notifica</td><td>Entro 14 giorni dalla messa a disposizione di una misura correttiva</td><td>Entro un mese dalla notifica</td></tr>
+      <tr><td>Destinatario</td><td>CSIRT Italia</td><td colspan="2">CSIRT coordinatore dello Stato dello stabilimento principale e ENISA</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Il CSIRT coordinatore è individuato tramite la NIS2. L'art. 3, punto 51), del CRA rinvia infatti al CSIRT designato a norma dell'art. 12, par. 1, della direttiva (UE) 2022/2555; in Italia l'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art16" target="_blank" rel="noopener">art. 16 del decreto NIS</a>, che disciplina la divulgazione coordinata delle vulnerabilità, designa a tal fine il CSIRT Italia. Secondo l'art. 14, par. 7, del CRA, la notifica va al CSIRT coordinatore dello Stato in cui il fabbricante ha lo stabilimento principale nell'Unione.</p>
+<p>Il CRA aggiunge un obbligo verso il mercato. L'art. 14, par. 8, impone al fabbricante di informare gli utilizzatori interessati della vulnerabilità o dell'incidente e delle misure che possono adottare per attenuarne l'impatto; se il fabbricante non lo fa tempestivamente, può provvedervi il CSIRT coordinatore.</p>
+<p>Un fabbricante che è anche soggetto NIS2 deve quindi valutare ogni evento due volte. Lo stesso attacco può costituire un incidente significativo per i servizi dell'organizzazione e, nello stesso tempo, un incidente grave per la sicurezza di un prodotto; in tal caso scattano entrambi gli obblighi, con canali e contenuti differenti.</p>
+
+<h2>Come si collega il CRA alla sicurezza della catena di fornitura NIS2?</h2>
+<p>Il collegamento passa per le misure di sicurezza dei soggetti NIS2. Il decreto NIS chiede di valutare la sicurezza dei fornitori e la qualità dei loro prodotti; il CRA impone ai fabbricanti requisiti di sicurezza e di gestione delle vulnerabilità. Un prodotto conforme al CRA, dunque, è un elemento utile, ma non sufficiente, per dimostrare la diligenza dell'acquirente.</p>
+<p>L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">art. 24 del decreto NIS</a>, che disciplina gli obblighi in materia di misure di gestione dei rischi, include tra gli elementi minimi, al comma 2, lettera d), la sicurezza della catena di approvvigionamento e, alla lettera e), la sicurezza dell'acquisizione, dello sviluppo e della manutenzione dei sistemi, comprese la gestione e la divulgazione delle vulnerabilità. Il comma 3 precisa che i soggetti tengono conto delle vulnerabilità specifiche di ciascun fornitore e della qualità complessiva dei prodotti e delle pratiche di sicurezza dei fornitori, comprese le loro procedure di sviluppo sicuro.</p>
+<p>Il CRA interviene proprio su questi aspetti. L'art. 13 obbliga il fabbricante a progettare e produrre il prodotto conformemente ai requisiti essenziali dell'allegato I, parte I, e a gestirne le vulnerabilità per un periodo di assistenza che, di regola, è di almeno cinque anni; il considerando 66 spiega inoltre che le segnalazioni dei fabbricanti servono anche a innalzare il livello di cibersicurezza dei soggetti essenziali e importanti della NIS2.</p>
+<p>Nella pratica, il soggetto NIS2 può chiedere ai propri fornitori di prodotti con elementi digitali informazioni sulla conformità al CRA, sul periodo di assistenza e sulle modalità di segnalazione delle vulnerabilità. Tali richieste trovano posto nei contratti di fornitura, che restano comunque soggetti alla valutazione del rischio richiesta dall'art. 24.</p>
+
+<h2>Quali prodotti rientrano nel Cyber Resilience Act?</h2>
+<p>Rientrano, in linea di principio, tutti i prodotti hardware e software con elementi digitali messi a disposizione sul mercato dell'Unione. Alcuni prodotti, ritenuti più delicati, sono classificati come importanti o critici e seguono procedure di valutazione della conformità più rigorose; altri sono esclusi perché già disciplinati da norme settoriali.</p>
+<p>L'art. 7 del regolamento considera importanti i prodotti la cui funzionalità principale corrisponde a una delle categorie dell'allegato III, divise in classe I e classe II. Tra queste figurano, ad esempio, i browser, i sistemi di gestione delle password, i software antimalware, i prodotti con funzione di rete privata virtuale (VPN) e i sistemi di gestione della rete. L'art. 8 consente invece alla Commissione di richiedere, per i prodotti critici dell'allegato IV, un certificato europeo di cibersicurezza di livello almeno «sostanziale».</p>
+<p>L'art. 2 esclude dall'ambito, tra gli altri, i prodotti cui si applicano i regolamenti (UE) 2017/745 e 2017/746, sui dispositivi medici e sui dispositivi medico-diagnostici in vitro, e il regolamento (UE) 2019/2144, sull'omologazione dei veicoli a motore.</p>
+
+<h2>Sanzioni e autorità competenti</h2>
+<p>Le sanzioni del CRA sono più elevate di quelle della NIS2. L'art. 64 del regolamento, che disciplina le sanzioni, prevede tre fasce, calcolate sul fatturato mondiale totale annuo dell'esercizio precedente se l'importo così ottenuto è superiore.</p>
+<ol>
+  <li>Fino a 15 milioni di euro o al 2,5% del fatturato, per la non conformità ai requisiti essenziali dell'allegato I e agli obblighi degli artt. 13 e 14;</li>
+  <li>fino a 10 milioni di euro o al 2% del fatturato, per la violazione di altri obblighi degli operatori economici e degli organismi notificati indicati al par. 3;</li>
+  <li>fino a 5 milioni di euro o all'1% del fatturato, per la fornitura di informazioni inesatte, incomplete o fuorvianti agli organismi notificati e alle autorità di vigilanza del mercato.</li>
+</ol>
+<p>Il par. 10 dello stesso articolo esclude le sanzioni pecuniarie per microimprese e piccole imprese quanto al mancato rispetto del termine di 24 ore per il preallarme, e per le violazioni commesse dai gestori di software open source. Per confronto, l'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">art. 38 del decreto NIS</a>, che disciplina le sanzioni amministrative NIS2, prevede fino a 10 milioni di euro o il 2% del fatturato per i soggetti essenziali e fino a 7 milioni o l'1,4% per i soggetti importanti.</p>
+<p>Quanto alle autorità, l'art. 52 del CRA chiede a ogni Stato membro di designare una o più autorità di vigilanza del mercato. In Italia l'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:legge:2026-03-17;36~art15" target="_blank" rel="noopener">art. 15 della legge 17 marzo 2026, n. 36</a>, ossia la legge di delegazione europea 2025, ha delegato il Governo ad adeguare la normativa nazionale al regolamento, indicando l'ACN quale autorità di notifica e autorità di vigilanza del mercato. Secondo fonti di stampa, che qui si citano solo per contesto, il Consiglio dei ministri ha approvato il relativo decreto legislativo in esame preliminare il 2 ottobre 2026 (<a href="https://www.ipsoa.it/documents/quotidiano/2026/10/03/ciberresilienza-net-zero-sicurezza-macchine-cdm-tre-decreti-adeguamento-normativa-ue" target="_blank" rel="noopener">IPSOA Quotidiano, fonte secondaria</a>); il testo definitivo va verificato sulla Gazzetta Ufficiale una volta pubblicato.</p>
+
+<h2>Conclusioni</h2>
+<p>NIS2 e Cyber Resilience Act non si sovrappongono, ma si completano. La prima chiede alle organizzazioni di proteggere i propri sistemi e di scegliere fornitori affidabili; il secondo chiede ai fabbricanti di immettere sul mercato prodotti sicuri e di segnalare tempestivamente vulnerabilità e incidenti. Il punto di incontro è la catena di fornitura, poiché le garanzie del CRA alimentano le valutazioni che l'art. 24 del decreto NIS impone ai soggetti NIS2.</p>
+<p>Chi fabbrica software o dispositivi connessi ed è anche soggetto NIS2 deve organizzare due flussi di segnalazione distinti, già operativi dall'11 settembre 2026; chi acquista tali prodotti dovrebbe aggiornare i contratti di fornitura in vista dell'11 dicembre 2027. Per gli obblighi NIS2 nel dettaglio si rinvia alla <a href="/risorse/nis2">guida completa alla NIS2</a>.</p>
+
+<p><strong>Per verificare a che punto è la tua organizzazione</strong>, <a href="/inizia">la gap analysis NIS2 di RegulaeOS</a> permette di confrontare le misure adottate, comprese quelle sulla catena di fornitura, con i requisiti della determinazione ACN e di raccogliere in un unico posto le prove documentali.</p>
+
+<h2>Fonti</h2>
+<ul>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32024R2847" target="_blank" rel="noopener">Regolamento (UE) 2024/2847 (Cyber Resilience Act), EUR-Lex</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Direttiva (UE) 2022/2555 (NIS2), EUR-Lex</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art16" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 16 (divulgazione coordinata delle vulnerabilità), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 24 (misure di gestione dei rischi), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 25 (notifica degli incidenti), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 38 (sanzioni amministrative), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:legge:2026-03-17;36~art15" target="_blank" rel="noopener">Legge 17 marzo 2026, n. 36, art. 15 (delega per l'adeguamento al regolamento (UE) 2024/2847), Normattiva</a></li>
+  <li><a href="https://www.ipsoa.it/documents/quotidiano/2026/10/03/ciberresilienza-net-zero-sicurezza-macchine-cdm-tre-decreti-adeguamento-normativa-ue" target="_blank" rel="noopener">IPSOA Quotidiano, 3 ottobre 2026 (fonte secondaria, solo per contesto)</a></li>
+</ul>
+`,
+    en: {
+      title: "NIS2 and the Cyber Resilience Act: differences, reporting and how the two laws interact",
+      excerpt:
+        "NIS2 governs the security of organisations, the Cyber Resilience Act the security of products with digital elements. Subject matter, addressees, application dates, reporting to CSIRT Italia and ENISA, supply chain and penalties compared, with precise references to the articles.",
+      date: "20 November 2026",
+      readTime: "9 min",
+      category: "Regulation",
+      tags: ["NIS2", "Cyber Resilience Act", "CRA", "NIS2 and CRA", "Regulation (EU) 2024/2847", "Legislative Decree 138/2024", "products with digital elements", "ENISA", "CSIRT Italia"],
+      metaTitle: "NIS2 and the Cyber Resilience Act: differences",
+      metaDescription:
+        "NIS2 and the Cyber Resilience Act compared. Who they cover, when they apply, how reporting to the CSIRT and ENISA works and what changes for suppliers.",
+      faqSchema: [
+        {
+          q: "What is the difference between NIS2 and the Cyber Resilience Act?",
+          a: "NIS2, that is Directive (EU) 2022/2555, transposed in Italy by Legislative Decree 138/2024, imposes security measures and reporting duties on organisations operating in the listed sectors. The Cyber Resilience Act, that is Regulation (EU) 2024/2847, instead sets cybersecurity requirements for hardware and software products placed on the EU market and obligations for those who manufacture and sell them.",
+        },
+        {
+          q: "When does the Cyber Resilience Act apply?",
+          a: "Under Article 71 of Regulation (EU) 2024/2847, the regulation generally applies from 11 December 2027. The reporting obligations in Article 14 already apply from 11 September 2026, and the rules on conformity assessment bodies, Chapter IV, from 11 June 2026.",
+        },
+        {
+          q: "Can a company be subject to both NIS2 and the Cyber Resilience Act?",
+          a: "Yes. A manufacturer of software or connected devices that operates in a NIS2 sector and exceeds the size thresholds is a NIS2 entity for its own organisation and, at the same time, a manufacturer under the CRA for the products it places on the market. The two sets of obligations have different triggers and must be assessed separately.",
+        },
+        {
+          q: "Who must vulnerabilities be reported to under the Cyber Resilience Act?",
+          a: "Article 14 of the regulation requires the manufacturer to notify actively exploited vulnerabilities and severe incidents simultaneously to the CSIRT designated as coordinator and to ENISA, through the single reporting platform under Article 16. For manufacturers with their main establishment in Italy, the coordinating CSIRT is CSIRT Italia, designated by Article 16 of the NIS decree.",
+        },
+        {
+          q: "What penalties does the Cyber Resilience Act provide for?",
+          a: "Article 64 of the regulation provides, for breaches of the essential requirements in Annex I and of the obligations in Articles 13 and 14, fines of up to EUR 15 million or, for undertakings, up to 2.5% of total worldwide annual turnover, whichever is higher. For other breaches the maximums drop to EUR 10 million or 2% and EUR 5 million or 1%.",
+        },
+      ],
+      content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · updated 20 Nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In short.</strong> NIS2 and the Cyber Resilience Act are complementary but different. NIS2 requires organisations in the listed sectors to manage cyber risks and report incidents; the Cyber Resilience Act, that is Regulation (EU) 2024/2847, requires manufacturers to place secure hardware and software products on the market and to report vulnerabilities and incidents. The CRA reporting obligations have applied since 11 September 2026; the rest applies from 11 December 2027.
+</p>
+
+<p>The relationship between NIS2 and the Cyber Resilience Act matters to two groups of companies. On one side, NIS2 entities that buy software and connected devices and must assess the security of their suppliers; on the other, the manufacturers of those products, which since 2026 have their own reporting obligations and from 2027 will have to meet security-by-design requirements.</p>
+<p>This article compares the two laws, with references to the articles of the official texts. For a full overview of the obligations, see the <a href="/risorse/nis2">NIS2 guide</a>; for national deadlines, see the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">NIS2 implementation status</a>.</p>
+
+<h2>What is the Cyber Resilience Act?</h2>
+<p>The Cyber Resilience Act is <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32024R2847" target="_blank" rel="noopener">Regulation (EU) 2024/2847</a> of 23 October 2024, published in the Official Journal of the EU on 20 November 2024. It lays down cybersecurity requirements for products with digital elements and obligations for those who manufacture and sell them; as a regulation, it applies directly in all Member States without transposition.</p>
+<p>Article 1 of the regulation, which sets out its subject matter, lists four elements; rules on making products available on the market, essential requirements for their design and production, requirements for handling vulnerabilities while the products are in use, and rules on market surveillance. Under Article 3(1), a "product with digital elements" is any software or hardware product and its remote data processing solutions, including components placed on the market separately.</p>
+<p>The reason for the regulation is explained in recital 3; existing EU law, including Directive (EU) 2022/2555, does not directly lay down mandatory requirements for the security of products. NIS2, in fact, addresses those who use information systems, not those who make them.</p>
+
+<h2>What is the difference between NIS2 and the Cyber Resilience Act?</h2>
+<p>The key difference lies in what each law regulates. NIS2 regulates organisations and how they protect their own systems; the Cyber Resilience Act regulates products and the obligations of those who place them on the market. Addressees, authorities and tools therefore differ, although the two laws share the coordinating CSIRT and ENISA.</p>
+<p>The table summarises the comparison.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Aspect</th><th>NIS2</th><th>Cyber Resilience Act</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Instrument</td><td>Directive (EU) 2022/2555, transposed by Legislative Decree 138/2024 (NIS decree)</td><td>Regulation (EU) 2024/2847, directly applicable</td></tr>
+      <tr><td>Subject matter</td><td>Security of organisations' network and information systems</td><td>Security of hardware and software products throughout their life cycle</td></tr>
+      <tr><td>Addressees</td><td>Essential and important entities in the sectors of Annexes I and II</td><td>Manufacturers and other economic operators selling products with digital elements</td></tr>
+      <tr><td>Main obligations</td><td>Risk management measures (Art. 24 NIS decree) and notification of significant incidents (Art. 25)</td><td>Essential requirements of Annex I (Art. 13) and reporting of vulnerabilities and incidents (Art. 14)</td></tr>
+      <tr><td>Reports go to</td><td>CSIRT Italia</td><td>CSIRT designated as coordinator and ENISA, through the single reporting platform</td></tr>
+      <tr><td>Authority in Italy</td><td>National Cybersecurity Agency (ACN)</td><td>ACN as market surveillance authority, under the 2025 European Delegation Law</td></tr>
+      <tr><td>Maximum fines</td><td>EUR 10 million or 2% of turnover; EUR 7 million or 1.4% (Art. 38 NIS decree)</td><td>EUR 15 million or 2.5% of turnover (Art. 64 CRA)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The NIS2 column is based on the <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">NIS decree on Normattiva</a>; the CRA column on the text of the regulation on EUR-Lex. The following sections look at the points where the two laws meet.</p>
+
+<h2>When does the Cyber Resilience Act apply?</h2>
+<p>The Cyber Resilience Act applies in three stages. The rules on conformity assessment bodies have applied since 11 June 2026, manufacturers' reporting obligations since 11 September 2026, and all other provisions, including the essential security requirements for products, apply from 11 December 2027.</p>
+<p>The dates are set by <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32024R2847" target="_blank" rel="noopener">Article 71 of the regulation</a>, on entry into force and application. Paragraph 2 provides that the regulation applies from 11 December 2027; however, Article 14 on reporting obligations applies from 11 September 2026 and Chapter IV, that is Articles 35 to 51 on the notification of conformity assessment bodies, from 11 June 2026.</p>
+<p>As a result, at the date of this article manufacturers must already report actively exploited vulnerabilities and severe incidents affecting their products, even though the design requirements are not yet mandatory. NIS2, by contrast, has applied in Italy since 18 October 2024, with the initial deadlines described on the <a href="/risorse/nis2-stato-attuazione-italia-europa">implementation status page</a>.</p>
+
+<h2>NIS2 reporting and CRA reporting, two separate obligations</h2>
+<p>The two laws set similar timelines but different triggers. NIS2 covers significant incidents affecting the organisation's services; the CRA covers actively exploited vulnerabilities and severe incidents affecting the security of a product.</p>
+<p>For NIS2, <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">Article 25 of the NIS decree</a>, on incident notification, requires an early warning to CSIRT Italia within 24 hours, a notification within 72 hours and a final report within one month. For the CRA, Article 14 of the regulation requires the manufacturer to notify simultaneously the CSIRT designated as coordinator and ENISA, through the single reporting platform that ENISA establishes and runs under Article 16.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Stage</th><th>NIS2 (Art. 25 NIS decree)</th><th>CRA, actively exploited vulnerability (Art. 14(2))</th><th>CRA, severe incident (Art. 14(4))</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>First alert</td><td>Early warning within 24 hours</td><td>Early warning within 24 hours</td><td>Early warning within 24 hours</td></tr>
+      <tr><td>Notification</td><td>Within 72 hours</td><td>Within 72 hours</td><td>Within 72 hours</td></tr>
+      <tr><td>Final report</td><td>Within one month of the notification</td><td>Within 14 days after a corrective measure is available</td><td>Within one month of the notification</td></tr>
+      <tr><td>Recipient</td><td>CSIRT Italia</td><td colspan="2">Coordinating CSIRT of the Member State of main establishment, and ENISA</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The coordinating CSIRT is identified through NIS2. Article 3(51) of the CRA refers to the CSIRT designated under Article 12(1) of Directive (EU) 2022/2555; in Italy, <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art16" target="_blank" rel="noopener">Article 16 of the NIS decree</a>, on coordinated vulnerability disclosure, designates CSIRT Italia for this role. Under Article 14(7) of the CRA, the report goes to the coordinating CSIRT of the Member State where the manufacturer has its main establishment in the Union.</p>
+<p>The CRA adds a duty towards the market. Article 14(8) requires the manufacturer to inform the affected users of the vulnerability or incident and of the measures they can take to mitigate its impact; if the manufacturer fails to do so in a timely manner, the coordinating CSIRT may do so.</p>
+<p>A manufacturer that is also a NIS2 entity must therefore assess every event twice. The same attack may be a significant incident for the organisation's services and, at the same time, a severe incident affecting the security of a product; in that case both obligations apply, with different channels and content.</p>
+
+<h2>How does the CRA connect to NIS2 supply chain security?</h2>
+<p>The connection runs through the security measures of NIS2 entities. The NIS decree requires them to assess the security of suppliers and the quality of their products; the CRA imposes security and vulnerability handling requirements on manufacturers. A CRA-compliant product is therefore a useful element, but not a sufficient one, to show the buyer's diligence.</p>
+<p><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">Article 24 of the NIS decree</a>, on cybersecurity risk management measures, lists among the minimum elements, in paragraph 2(d), supply chain security and, in letter (e), security in the acquisition, development and maintenance of systems, including vulnerability handling and disclosure. Paragraph 3 specifies that entities must take into account the vulnerabilities specific to each supplier and the overall quality of suppliers' products and cybersecurity practices, including their secure development procedures.</p>
+<p>The CRA acts precisely on these aspects. Article 13 requires the manufacturer to design and produce the product in line with the essential requirements of Annex I, Part I, and to handle its vulnerabilities for a support period that, as a rule, is at least five years; recital 66 also explains that manufacturers' reports serve to raise the level of cybersecurity of the essential and important entities under NIS2.</p>
+<p>In practice, a NIS2 entity can ask its suppliers of products with digital elements for information on CRA compliance, the support period and how vulnerabilities are reported. Such requests belong in supply contracts, which remain subject to the risk assessment required by Article 24.</p>
+
+<h2>Which products fall under the Cyber Resilience Act?</h2>
+<p>In principle, all hardware and software products with digital elements made available on the EU market are covered. Some products, considered more sensitive, are classified as important or critical and follow stricter conformity assessment procedures; others are excluded because they are already governed by sector rules.</p>
+<p>Article 7 of the regulation treats as important the products whose core functionality matches one of the categories in Annex III, divided into class I and class II. These include, for example, browsers, password managers, anti-malware software, products with virtual private network (VPN) functionality and network management systems. Article 8 instead allows the Commission to require, for the critical products in Annex IV, a European cybersecurity certificate at assurance level at least "substantial".</p>
+<p>Article 2 excludes from the scope, among others, products covered by Regulations (EU) 2017/745 and 2017/746, on medical devices and in vitro diagnostic medical devices, and by Regulation (EU) 2019/2144, on motor vehicle type-approval.</p>
+
+<h2>Penalties and competent authorities</h2>
+<p>CRA penalties are higher than NIS2 penalties. Article 64 of the regulation, on penalties, sets three tiers, calculated on total worldwide annual turnover for the preceding financial year where that amount is higher.</p>
+<ol>
+  <li>Up to EUR 15 million or 2.5% of turnover, for non-compliance with the essential requirements of Annex I and the obligations in Articles 13 and 14;</li>
+  <li>up to EUR 10 million or 2% of turnover, for breaches of other obligations of economic operators and notified bodies listed in paragraph 3;</li>
+  <li>up to EUR 5 million or 1% of turnover, for supplying incorrect, incomplete or misleading information to notified bodies and market surveillance authorities.</li>
+</ol>
+<p>Paragraph 10 of the same article excludes administrative fines for microenterprises and small enterprises as regards failure to meet the 24-hour early warning deadline, and for breaches by open-source software stewards. By comparison, <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">Article 38 of the NIS decree</a>, on NIS2 administrative penalties, provides for up to EUR 10 million or 2% of turnover for essential entities and up to EUR 7 million or 1.4% for important entities.</p>
+<p>As for authorities, Article 52 of the CRA requires each Member State to designate one or more market surveillance authorities. In Italy, <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:legge:2026-03-17;36~art15" target="_blank" rel="noopener">Article 15 of Law no. 36 of 17 March 2026</a>, the 2025 European Delegation Law, empowered the Government to adapt national law to the regulation, designating ACN as notifying authority and market surveillance authority. According to press reports, cited here for context only, the Council of Ministers approved the implementing legislative decree on a preliminary reading on 2 October 2026 (<a href="https://www.ipsoa.it/documents/quotidiano/2026/10/03/ciberresilienza-net-zero-sicurezza-macchine-cdm-tre-decreti-adeguamento-normativa-ue" target="_blank" rel="noopener">IPSOA Quotidiano, secondary source</a>); the final text should be checked in the Gazzetta Ufficiale once published.</p>
+
+<h2>Conclusions</h2>
+<p>NIS2 and the Cyber Resilience Act do not overlap; they complement each other. The first requires organisations to protect their systems and choose reliable suppliers; the second requires manufacturers to place secure products on the market and report vulnerabilities and incidents promptly. They meet in the supply chain, since CRA guarantees feed into the assessments that Article 24 of the NIS decree requires of NIS2 entities.</p>
+<p>Anyone who manufactures software or connected devices and is also a NIS2 entity must run two separate reporting flows, both already in operation since 11 September 2026; anyone who buys such products should update supply contracts ahead of 11 December 2027. For NIS2 obligations in detail, see the <a href="/risorse/nis2">complete NIS2 guide</a>.</p>
+
+<p><strong>To check where your organisation stands</strong>, <a href="/inizia">the RegulaeOS NIS2 gap analysis</a> lets you compare the measures in place, including supply chain measures, with the requirements of the ACN determination and collect the supporting evidence in one place.</p>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32024R2847" target="_blank" rel="noopener">Regulation (EU) 2024/2847 (Cyber Resilience Act), EUR-Lex</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Directive (EU) 2022/2555 (NIS2), EUR-Lex</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art16" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 16 (coordinated vulnerability disclosure), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 24 (risk management measures), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 25 (incident notification), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 38 (administrative penalties), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:legge:2026-03-17;36~art15" target="_blank" rel="noopener">Law no. 36 of 17 March 2026, Art. 15 (delegation to adapt national law to Regulation (EU) 2024/2847), Normattiva</a></li>
+  <li><a href="https://www.ipsoa.it/documents/quotidiano/2026/10/03/ciberresilienza-net-zero-sicurezza-macchine-cdm-tre-decreti-adeguamento-normativa-ue" target="_blank" rel="noopener">IPSOA Quotidiano, 3 October 2026 (secondary source, context only)</a></li>
+</ul>
+`,
+    },
+  },
+  {
     slug: "nis2-dora",
     title: "NIS2 e DORA, differenze e rapporti per banche ed entità finanziarie",
     excerpt:
