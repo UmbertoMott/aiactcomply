@@ -38,6 +38,316 @@ export interface BlogPost {
 
 export const POSTS: BlogPost[] = [
   {
+    slug: "nis2-sanita",
+    title: "NIS2 e sanità, chi rientra e quali obblighi per ospedali, cliniche e ASL",
+    excerpt:
+      "Quali strutture sanitarie rientrano nella NIS2, quando sono soggetti essenziali o importanti, come si collocano ASL, produttori farmaceutici e fabbricanti di dispositivi medici e quali obblighi derivano dal D.Lgs. 138/2024, con il rinvio puntuale agli allegati del decreto.",
+    date: "21 novembre 2026",
+    dateISO: "2026-11-21",
+    author: { name: "Umberto Mottola", jobTitle: "Avvocato, CIPP/E" },
+    dateModifiedISO: "2026-11-21",
+    readTime: "9 min",
+    category: "Normativa",
+    tags: ["NIS2", "NIS2 sanità", "strutture sanitarie", "ospedali", "ASL", "dispositivi medici", "farmaceutica", "D.Lgs. 138/2024"],
+    metaTitle: "NIS2 sanità, chi rientra e quali obblighi",
+    metaDescription:
+      "NIS2 in sanità. Ospedali, cliniche, ASL, farmaceutica e dispositivi medici, soggetti essenziali o importanti, obblighi ACN e notifica degli incidenti.",
+    faqSchema: [
+      {
+        q: "La NIS2 si applica agli studi medici?",
+        a: "Di regola no. Lo studio medico o il piccolo ambulatorio è normalmente una micro o piccola impresa e resta fuori dalla regola dimensionale dell'art. 3, comma 2, del decreto NIS. L'ACN può tuttavia includerlo, a prescindere dalle dimensioni, nei casi dell'art. 3, comma 9, ad esempio se una perturbazione del servizio potrebbe avere un impatto significativo sulla salute pubblica; inoltre, nel calcolo delle dimensioni contano anche le imprese del gruppo.",
+      },
+      {
+        q: "Un ospedale privato è soggetto essenziale o importante?",
+        a: "I prestatori di assistenza sanitaria sono nell'allegato I del decreto NIS. Ai sensi dell'art. 6, comma 1, lettera a), l'ospedale privato che supera i massimali della media impresa, ossia è una grande impresa, è soggetto essenziale; se è una media impresa, è soggetto importante.",
+      },
+      {
+        q: "Le ASL devono rispettare la NIS2?",
+        a: "Sì. L'allegato III del decreto NIS include le Aziende sanitarie locali tra le amministrazioni locali e l'art. 3, comma 6, applica la disciplina a queste amministrazioni indipendentemente dalle dimensioni. Di regola sono soggetti importanti, poiché l'art. 6 considera essenziali di diritto solo le amministrazioni centrali, salvo diversa qualificazione da parte dell'ACN.",
+      },
+      {
+        q: "I produttori di dispositivi medici rientrano nella NIS2?",
+        a: "Sì, se superano i massimali della piccola impresa. I fabbricanti di dispositivi medici e di dispositivi medico-diagnostici in vitro sono nell'allegato II del decreto NIS e sono quindi, di regola, soggetti importanti; fanno eccezione i fabbricanti di dispositivi critici durante un'emergenza di sanità pubblica, collocati nell'allegato I, che se grandi imprese sono soggetti essenziali.",
+      },
+      {
+        q: "In caso di attacco informatico a una struttura sanitaria, a chi va notificato?",
+        a: "Se l'incidente è significativo, al CSIRT Italia, con pre-notifica entro 24 ore, notifica entro 72 ore e relazione finale entro un mese, come prevede l'art. 25 del decreto NIS. Se l'incidente comporta una violazione di dati personali, il titolare deve anche notificarla al Garante per la protezione dei dati personali ai sensi dell'art. 33 del GDPR, ove possibile entro 72 ore.",
+      },
+    ],
+    content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · aggiornato al 21 nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In sintesi.</strong> La NIS2 in sanità riguarda i cinque tipi di soggetti del settore sanitario elencati nell'allegato I del decreto NIS, tra cui i prestatori di assistenza sanitaria e i produttori farmaceutici, oltre ai fabbricanti di dispositivi medici dell'allegato II e alle Aziende sanitarie locali dell'allegato III. Ospedali e cliniche private rientrano se sono almeno medie imprese; le grandi strutture sono soggetti essenziali, le medie soggetti importanti.
+</p>
+
+<p>La NIS2 in sanità interessa direttori sanitari, responsabili dei sistemi informativi e titolari di strutture private, poiché il settore sanitario è tra quelli che la direttiva considera ad alta criticità. Un attacco informatico a un ospedale, infatti, non produce solo un danno economico; può interrompere prestazioni di cura e mettere a rischio dati particolarmente delicati.</p>
+<p>Questo articolo spiega, sulla base del testo del D.Lgs. 138/2024, chi rientra nell'ambito, come si distingue tra soggetto essenziale e soggetto importante e quali obblighi ne derivano. Per il quadro generale si rinvia alla <a href="/risorse/nis2">guida alla NIS2</a>; per le scadenze aggiornate, alla pagina sullo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>.</p>
+
+<h2>Quali soggetti sanitari rientrano nella NIS2?</h2>
+<p>Rientrano nella NIS2 i soggetti elencati al punto 5 dell'allegato I del decreto NIS, dedicato al settore sanitario, ossia prestatori di assistenza sanitaria, laboratori di riferimento dell'UE, soggetti che svolgono ricerca e sviluppo sui medicinali, fabbricanti di prodotti farmaceutici e fabbricanti di dispositivi medici critici in caso di emergenza di sanità pubblica.</p>
+<p>L'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=7&amp;art.flagTipoArticolo=1&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=1&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">allegato I del decreto NIS</a>, che elenca i settori altamente critici, riprende testualmente l'allegato I della <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">direttiva (UE) 2022/2555</a>. I cinque tipi di soggetto sono i seguenti.</p>
+<ol>
+  <li><strong>Prestatori di assistenza sanitaria</strong>, ossia, secondo l'art. 3, lettera g), della <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32011L0024" target="_blank" rel="noopener">direttiva 2011/24/UE</a> sui diritti dei pazienti nell'assistenza sanitaria transfrontaliera, qualsiasi persona fisica o giuridica o altra entità che presti legalmente assistenza sanitaria nel territorio di uno Stato membro;</li>
+  <li><strong>laboratori di riferimento dell'UE</strong>, definiti dall'art. 15 del regolamento (UE) 2022/2371 sulle gravi minacce per la salute a carattere transfrontaliero;</li>
+  <li><strong>soggetti che svolgono attività di ricerca e sviluppo relative ai medicinali</strong>, come definiti dall'art. 1, punto 2), della direttiva 2001/83/CE, ossia il codice europeo dei medicinali per uso umano;</li>
+  <li><strong>soggetti che fabbricano prodotti farmaceutici di base e preparati farmaceutici</strong>, ossia le attività della sezione C, divisione 21, della classificazione statistica NACE Rev. 2;</li>
+  <li><strong>soggetti che fabbricano dispositivi medici considerati critici durante un'emergenza di sanità pubblica</strong>, inclusi nell'elenco previsto dall'art. 22 del regolamento (UE) 2022/123.</li>
+</ol>
+<p>La nozione di assistenza sanitaria è ampia. L'art. 3, lettera a), della stessa direttiva 2011/24/UE la definisce come i servizi prestati da professionisti sanitari a pazienti per valutare, mantenere o ristabilire il loro stato di salute, compresa la prescrizione, la somministrazione e la fornitura di medicinali e dispositivi medici; vi rientrano, dunque, ospedali, case di cura, poliambulatori e centri diagnostici.</p>
+<p>L'elenco dell'allegato, tuttavia, non basta a far rientrare un soggetto nella NIS2. Occorre anche superare una soglia dimensionale, come si spiega nella sezione che segue.</p>
+
+<h2>Ospedali e cliniche private sono soggetti essenziali o importanti?</h2>
+<p>Dipende dalle dimensioni. Una clinica o un ospedale privato che supera i massimali della piccola impresa rientra nella NIS2 come soggetto importante; se supera anche i massimali della media impresa, ossia è una grande impresa, è soggetto essenziale ai sensi dell'art. 6 del decreto NIS.</p>
+<p>Le soglie sono quelle della <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32003H0361" target="_blank" rel="noopener">raccomandazione 2003/361/CE</a> sulla definizione delle PMI, richiamata dall'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=3&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">art. 3 del decreto NIS</a>, che ne delimita l'ambito di applicazione. Secondo l'art. 2 dell'allegato alla raccomandazione, è piccola l'impresa che occupa meno di 50 persone e ha un fatturato annuo o un totale di bilancio non superiore a 10 milioni di euro; è media l'impresa che occupa meno di 250 persone e ha un fatturato non superiore a 50 milioni di euro oppure un totale di bilancio non superiore a 43 milioni.</p>
+<p>L'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=6&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">art. 6 del decreto NIS</a>, che distingue i soggetti essenziali dai soggetti importanti, considera essenziali, al comma 1, lettera a), i soggetti dell'allegato I che superano i massimali della media impresa; gli altri soggetti nell'ambito sono importanti, secondo il comma 3. La tabella applica la regola a un prestatore di assistenza sanitaria privato.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Dimensione della struttura</th><th>Esempio indicativo</th><th>Posizione nella NIS2</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Micro o piccola impresa</td><td>Studio medico, piccolo ambulatorio</td><td>Fuori dall'ambito per regola generale, salvo individuazione da parte dell'ACN (art. 3, comma 9)</td></tr>
+      <tr><td>Media impresa</td><td>Clinica o poliambulatorio di medie dimensioni</td><td>Soggetto importante</td></tr>
+      <tr><td>Grande impresa</td><td>Ospedale privato, gruppo di case di cura</td><td>Soggetto essenziale (art. 6, comma 1, lettera a)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Nel calcolo delle dimensioni contano anche le imprese del gruppo. L'art. 3, comma 4, del decreto richiama infatti l'art. 6, paragrafo 2, dell'allegato alla raccomandazione, che somma i dati delle imprese associate e collegate, salvo che ciò non sia proporzionato, tenuto conto dell'indipendenza del soggetto in termini di sistemi informativi e di servizi; ne consegue che una piccola casa di cura appartenente a un grande gruppo sanitario può rientrare nella NIS2 anche se, da sola, resterebbe fuori.</p>
+<p>Lo studio medico o il piccolo ambulatorio, invece, resta di regola fuori. L'art. 3, comma 9, consente tuttavia all'ACN di includere, a prescindere dalle dimensioni, ad esempio l'unico fornitore nazionale di un servizio essenziale o il soggetto la cui perturbazione potrebbe avere un impatto significativo sulla salute pubblica; lo stesso comma, alla lettera a), permette di includere chi era già operatore di servizi essenziali sotto la vecchia disciplina, nella quale il settore sanitario era già presente, come spiegato nell'articolo su <a href="/risorse/nis-nis2-differenze">NIS e NIS2</a>. L'individuazione avviene su proposta delle Autorità di settore ed è notificata all'interessato, secondo il comma 13.</p>
+
+<h2>Le ASL e le strutture sanitarie pubbliche rientrano nella NIS2?</h2>
+<p>Le Aziende sanitarie locali rientrano nella NIS2 indipendentemente dalle dimensioni. L'allegato III del decreto NIS, che elenca le categorie di pubbliche amministrazioni soggette alla disciplina, le include espressamente tra le amministrazioni locali, a condizione che figurino nell'elenco delle amministrazioni pubbliche previsto dalla legge di contabilità e finanza pubblica.</p>
+<p>Il fondamento è l'art. 3, comma 6, del decreto, che applica la disciplina, anche indipendentemente dalle dimensioni, alle pubbliche amministrazioni di cui all'art. 1, comma 3, della legge 31 dicembre 2009, n. 196, ricomprese nelle categorie dell'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=7&amp;art.flagTipoArticolo=3&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=1&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">allegato III</a>. Tra gli altri soggetti pubblici, lo stesso allegato cita anche gli Istituti zooprofilattici sperimentali e gli Enti e le Istituzioni di ricerca.</p>
+<p>Le ASL sono, di regola, soggetti importanti. L'art. 6, comma 1, lettera e), considera infatti essenziali, a prescindere dalle dimensioni, solo le amministrazioni centrali dell'allegato III; il comma 2 dello stesso articolo consente però all'ACN di qualificare come essenziali anche le altre amministrazioni.</p>
+<p>Le aziende ospedaliere e gli altri enti pubblici che erogano prestazioni non sono nominati nell'allegato III. Poiché l'art. 3, comma 1, si riferisce a soggetti pubblici e privati, essi possono tuttavia rientrare come prestatori di assistenza sanitaria dell'allegato I, con le regole dimensionali viste sopra; la posizione di ciascun ente, perciò, va verificata sulla comunicazione ricevuta dall'ACN.</p>
+
+<h2>Farmaceutica e dispositivi medici, allegato I o allegato II</h2>
+<p>Per le imprese della filiera la distinzione tra i due allegati è decisiva. I fabbricanti di prodotti farmaceutici di base e di preparati farmaceutici sono nell'allegato I, tra i settori altamente critici; i fabbricanti di dispositivi medici e di dispositivi medico-diagnostici in vitro sono invece, di regola, nell'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=7&amp;art.flagTipoArticolo=2&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=1&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">allegato II</a>, che elenca gli altri settori critici, al punto 5, lettera a), dedicato alla fabbricazione.</p>
+<p>L'allegato II rinvia, per le definizioni, all'art. 2, punto 1), del regolamento (UE) 2017/745 sui dispositivi medici e all'art. 2, punto 2), del regolamento (UE) 2017/746 sui dispositivi medico-diagnostici in vitro. Ne restano esclusi soltanto i fabbricanti di dispositivi critici durante un'emergenza di sanità pubblica, che, come visto, sono collocati nell'allegato I.</p>
+<p>La collocazione incide sulla categoria. Poiché l'art. 6, comma 1, lettera a), considera essenziali per ragioni dimensionali solo i soggetti dell'allegato I, un fabbricante di dispositivi medici dell'allegato II, anche se grande, è di regola soggetto importante, mentre un grande produttore farmaceutico è soggetto essenziale.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Tipo di soggetto</th><th>Allegato</th><th>Media impresa</th><th>Grande impresa</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Prestatori di assistenza sanitaria</td><td>I</td><td>Importante</td><td>Essenziale</td></tr>
+      <tr><td>Laboratori di riferimento dell'UE</td><td>I</td><td>Importante</td><td>Essenziale</td></tr>
+      <tr><td>Ricerca e sviluppo sui medicinali</td><td>I</td><td>Importante</td><td>Essenziale</td></tr>
+      <tr><td>Fabbricanti di prodotti farmaceutici (NACE 21)</td><td>I</td><td>Importante</td><td>Essenziale</td></tr>
+      <tr><td>Fabbricanti di dispositivi medici critici in emergenza</td><td>I</td><td>Importante</td><td>Essenziale</td></tr>
+      <tr><td>Fabbricanti di dispositivi medici e diagnostici in vitro</td><td>II</td><td>Importante</td><td>Importante</td></tr>
+      <tr><td>Aziende sanitarie locali</td><td>III</td><td colspan="2">Rientrano a prescindere dalle dimensioni; di regola importanti, salvo qualificazione come essenziali da parte dell'ACN</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2>Quali obblighi NIS2 hanno le strutture sanitarie?</h2>
+<p>Le strutture sanitarie hanno gli stessi obblighi di ogni soggetto NIS. Devono registrarsi ogni anno sul portale dell'ACN, adottare le misure di sicurezza di base della determinazione ACN n. 379907/2025, notificare gli incidenti significativi al CSIRT Italia e coinvolgere gli organi di amministrazione nella gestione del rischio informatico.</p>
+<ul>
+  <li><strong>Registrazione.</strong> Dal 1° gennaio al 28 febbraio di ogni anno i soggetti NIS devono registrarsi o aggiornare la registrazione sul portale dei servizi dell'ACN, come indica la <a href="https://www.acn.gov.it/portale/nis/registrazione" target="_blank" rel="noopener">pagina ACN sulla registrazione</a>; secondo il <a href="https://www.acn.gov.it/portale/documents/20119/600993/VademecumNIS_2026_v1.pdf/9631c10d-9157-ae43-43b3-a353aa962d09?t=1789134752314" target="_blank" rel="noopener">Vademecum NIS dell'ACN</a>, entro il 14 aprile ricevono la comunicazione di inserimento, permanenza o espunzione dall'elenco.</li>
+  <li><strong>Misure di sicurezza di base.</strong> Secondo la <a href="https://www.acn.gov.it/portale/nis/modalita-specifiche-base" target="_blank" rel="noopener">pagina ACN sulle modalità e specifiche di base</a>, entro 18 mesi dalla comunicazione di inserimento nell'elenco i soggetti importanti adottano le misure dell'allegato 1 della determinazione ACN n. 379907/2025, mentre i soggetti essenziali adottano quelle dell'allegato 2. Le misure sono spiegate nell'articolo sulle <a href="/risorse/misure-sicurezza-base-nis2-acn">misure di sicurezza di base NIS2</a>.</li>
+  <li><strong>Notifica degli incidenti.</strong> Gli incidenti significativi vanno notificati al CSIRT Italia nei termini dell'art. 25 del decreto, illustrati nella sezione che segue.</li>
+  <li><strong>Responsabilità del vertice.</strong> L'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=23&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">art. 23 del decreto NIS</a>, che disciplina gli obblighi degli organi di amministrazione e direttivi, stabilisce che essi approvano le modalità di attuazione delle misure di sicurezza, sovrintendono agli obblighi, sono responsabili delle violazioni e devono seguire una formazione in materia di sicurezza informatica. Il tema è approfondito nell'articolo su <a href="/risorse/nis2-organi-di-amministrazione-obblighi-cda">NIS2 e organi di amministrazione</a>.</li>
+</ul>
+<p>Le violazioni sono sanzionate dall'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=5&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=38&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">art. 38 del decreto NIS</a>, che disciplina le sanzioni amministrative. Per le violazioni più gravi, i soggetti essenziali diversi dalle pubbliche amministrazioni rischiano fino a 10 milioni di euro o il 2% del fatturato mondiale annuo, se superiore, e i soggetti importanti fino a 7 milioni di euro o l'1,4%; per le pubbliche amministrazioni dell'allegato III che sono soggetti essenziali, la sanzione va da 25.000 a 125.000 euro.</p>
+
+<h2>Incidenti informatici in sanità, notifica NIS2 e data breach</h2>
+<p>Un attacco informatico che blocca i sistemi di un ospedale è spesso, al tempo stesso, un incidente NIS e una violazione di dati personali. Le due notifiche hanno destinatari e presupposti diversi, sicché vanno gestite in parallelo.</p>
+<p>Ai sensi dell'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=25&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">art. 25 del decreto NIS</a>, che disciplina la notifica degli incidenti, è significativo l'incidente che ha causato o può causare una grave perturbazione operativa dei servizi o perdite finanziarie per il soggetto, oppure che ha avuto o può avere ripercussioni su altre persone, fisiche o giuridiche, con perdite materiali o immateriali considerevoli. In tal caso il soggetto trasmette al CSIRT Italia tre comunicazioni.</p>
+<ol>
+  <li>Una pre-notifica entro 24 ore da quando è venuto a conoscenza dell'incidente;</li>
+  <li>una notifica entro 72 ore, con una valutazione iniziale della gravità e dell'impatto;</li>
+  <li>una relazione finale entro un mese dalla notifica, con la descrizione dell'incidente, la causa probabile e le misure adottate.</li>
+</ol>
+<p>Se l'incidente è ancora in corso alla scadenza della relazione finale, il soggetto invia relazioni mensili sui progressi e la relazione finale entro un mese dalla conclusione della gestione dell'incidente.</p>
+<p>Se l'incidente coinvolge dati personali, come i dati sanitari dei pazienti, si aggiunge l'art. 33 del <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32016R0679" target="_blank" rel="noopener">regolamento (UE) 2016/679 (GDPR)</a>, che impone al titolare di notificare la violazione all'autorità di controllo, in Italia il Garante per la protezione dei dati personali, senza ingiustificato ritardo e, ove possibile, entro 72 ore, salvo che sia improbabile un rischio per i diritti e le libertà delle persone. Ne consegue che la procedura interna di gestione degli incidenti deve prevedere entrambi i canali, con un'unica raccolta dei fatti e due comunicazioni distinte.</p>
+
+<h2>Conclusioni</h2>
+<p>La NIS2 tocca quasi tutta la filiera della salute. I prestatori di assistenza sanitaria privati rientrano se sono almeno medie imprese e sono essenziali se grandi; le ASL rientrano comunque, in quanto amministrazioni dell'allegato III; i produttori farmaceutici sono nell'allegato I, mentre i fabbricanti di dispositivi medici sono di regola nell'allegato II. Ne consegue che ogni struttura deve prima verificare la propria posizione, tenendo conto anche del gruppo di appartenenza, e poi organizzare registrazione, misure di sicurezza e procedura di notifica.</p>
+<p>Per gli obblighi nel dettaglio si rinvia alla <a href="/risorse/nis2">guida completa alla NIS2</a>.</p>
+
+<p><strong>Per verificare a che punto è la tua struttura</strong>, <a href="/inizia">la gap analysis NIS2 di RegulaeOS</a> permette di confrontare le misure adottate con i requisiti della determinazione ACN e di raccogliere in un unico posto le prove documentali.</p>
+
+<h2>Fonti</h2>
+<ul>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Direttiva (UE) 2022/2555 (NIS2), allegato I, EUR-Lex</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/eli/id/2024/10/01/24G00155/sg" target="_blank" rel="noopener">D.Lgs. 4 settembre 2024, n. 138 (decreto NIS), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=3&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 3 (ambito di applicazione), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=6&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 6 (soggetti essenziali e importanti), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=23&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 23 (organi di amministrazione e direttivi), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=25&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 25 (notifica degli incidenti), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=5&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=38&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 38 (sanzioni amministrative), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=7&amp;art.flagTipoArticolo=1&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=1&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, allegato I (settori altamente critici), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=7&amp;art.flagTipoArticolo=2&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=1&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, allegato II (altri settori critici), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=7&amp;art.flagTipoArticolo=3&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=1&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, allegato III (pubbliche amministrazioni), Gazzetta Ufficiale</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32011L0024" target="_blank" rel="noopener">Direttiva 2011/24/UE (assistenza sanitaria transfrontaliera), art. 3, EUR-Lex</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32003H0361" target="_blank" rel="noopener">Raccomandazione 2003/361/CE (definizione delle PMI), EUR-Lex</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32016R0679" target="_blank" rel="noopener">Regolamento (UE) 2016/679 (GDPR), art. 33, EUR-Lex</a></li>
+  <li><a href="https://www.acn.gov.it/portale/nis/registrazione" target="_blank" rel="noopener">ACN, Registrazione NIS</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/20119/600993/VademecumNIS_2026_v1.pdf/9631c10d-9157-ae43-43b3-a353aa962d09?t=1789134752314" target="_blank" rel="noopener">ACN, Vademecum NIS 2026</a></li>
+  <li><a href="https://www.acn.gov.it/portale/nis/modalita-specifiche-base" target="_blank" rel="noopener">ACN, Modalità e specifiche di base</a></li>
+</ul>
+`,
+    en: {
+      title: "NIS2 and healthcare: who is in scope and what hospitals, clinics and local health authorities must do",
+      excerpt:
+        "Which healthcare organisations fall under NIS2, when they are essential or important entities, where local health authorities, pharmaceutical manufacturers and medical device manufacturers stand, and which obligations follow from Legislative Decree 138/2024, with precise references to the annexes of the decree.",
+      date: "21 November 2026",
+      readTime: "9 min",
+      category: "Regulation",
+      tags: ["NIS2", "NIS2 healthcare", "healthcare providers", "hospitals", "local health authorities", "medical devices", "pharmaceuticals", "Legislative Decree 138/2024"],
+      metaTitle: "NIS2 and healthcare: who is in scope and obligations",
+      metaDescription:
+        "NIS2 in healthcare. Hospitals, clinics, local health authorities, pharma, medical devices, essential or important entities, ACN duties and incident reporting.",
+      faqSchema: [
+        {
+          q: "Does NIS2 apply to medical practices?",
+          a: "As a rule, no. A medical practice or small outpatient clinic is normally a micro or small enterprise and falls outside the size rule of Article 3(2) of the NIS Decree. However, the ACN may include it regardless of size in the cases listed in Article 3(9), for instance where a disruption of the service could have a significant impact on public health; moreover, group companies are counted when calculating size.",
+        },
+        {
+          q: "Is a private hospital an essential or an important entity?",
+          a: "Healthcare providers are listed in Annex I of the NIS Decree. Under Article 6(1)(a), a private hospital that exceeds the ceilings for medium-sized enterprises, that is, a large enterprise, is an essential entity; if it is a medium-sized enterprise, it is an important entity.",
+        },
+        {
+          q: "Do local health authorities (ASL) have to comply with NIS2?",
+          a: "Yes. Annex III of the NIS Decree lists local health authorities (Aziende sanitarie locali) among local administrations, and Article 3(6) applies the rules to these administrations regardless of size. As a rule they are important entities, since Article 6 treats only central administrations as essential by law, unless the ACN classifies them otherwise.",
+        },
+        {
+          q: "Are medical device manufacturers covered by NIS2?",
+          a: "Yes, if they exceed the ceilings for small enterprises. Manufacturers of medical devices and in vitro diagnostic medical devices are listed in Annex II of the NIS Decree and are therefore, as a rule, important entities; the exception is manufacturers of devices deemed critical during a public health emergency, listed in Annex I, which are essential entities if they are large enterprises.",
+        },
+        {
+          q: "Who must be notified of a cyberattack on a healthcare organisation?",
+          a: "If the incident is significant, CSIRT Italia must be notified, with an early warning within 24 hours, an incident notification within 72 hours and a final report within one month, as required by Article 25 of the NIS Decree. If the incident involves a personal data breach, the controller must also notify the Italian Data Protection Authority under Article 33 GDPR, where feasible within 72 hours.",
+        },
+      ],
+      content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · updated 21 Nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In short.</strong> NIS2 in healthcare covers the five types of healthcare entities listed in Annex I of the Italian NIS Decree, including healthcare providers and pharmaceutical manufacturers, as well as medical device manufacturers under Annex II and local health authorities under Annex III. Private hospitals and clinics are in scope if they are at least medium-sized enterprises; large facilities are essential entities, medium-sized ones important entities.
+</p>
+
+<p>NIS2 in healthcare concerns medical directors, heads of information systems and owners of private facilities, because the health sector is one of those the directive considers highly critical. A cyberattack on a hospital does not only cause financial damage; it can interrupt patient care and expose particularly sensitive data.</p>
+<p>This article explains, on the basis of the text of Legislative Decree 138/2024, who is in scope, how essential and important entities are distinguished and which obligations follow. For the general picture, see our <a href="/risorse/nis2">NIS2 guide</a>; for up-to-date deadlines, see the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">state of NIS2 implementation</a>.</p>
+
+<h2>Which healthcare entities fall under NIS2?</h2>
+<p>NIS2 covers the entities listed in point 5 of Annex I of the NIS Decree, which concerns the health sector, namely healthcare providers, EU reference laboratories, entities carrying out research and development of medicinal products, pharmaceutical manufacturers and manufacturers of medical devices deemed critical during a public health emergency.</p>
+<p><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=7&amp;art.flagTipoArticolo=1&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=1&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Annex I of the NIS Decree</a>, which lists the sectors of high criticality, reproduces Annex I of <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Directive (EU) 2022/2555</a> word for word. The five types of entity are the following.</p>
+<ol>
+  <li><strong>Healthcare providers</strong>, that is, under Article 3(g) of <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32011L0024" target="_blank" rel="noopener">Directive 2011/24/EU</a> on patients' rights in cross-border healthcare, any natural or legal person or any other entity legally providing healthcare on the territory of a Member State;</li>
+  <li><strong>EU reference laboratories</strong>, as defined in Article 15 of Regulation (EU) 2022/2371 on serious cross-border threats to health;</li>
+  <li><strong>entities carrying out research and development activities of medicinal products</strong>, as defined in Article 1(2) of Directive 2001/83/EC, the EU code relating to medicinal products for human use;</li>
+  <li><strong>entities manufacturing basic pharmaceutical products and pharmaceutical preparations</strong>, that is, the activities in section C, division 21, of the NACE Rev. 2 statistical classification;</li>
+  <li><strong>entities manufacturing medical devices considered critical during a public health emergency</strong>, included in the list provided for by Article 22 of Regulation (EU) 2022/123.</li>
+</ol>
+<p>The notion of healthcare is broad. Article 3(a) of the same Directive 2011/24/EU defines it as health services provided by health professionals to patients to assess, maintain or restore their state of health, including the prescription, dispensation and provision of medicinal products and medical devices; it therefore covers hospitals, nursing homes, outpatient clinics and diagnostic centres.</p>
+<p>Being listed in the annex, however, is not enough to bring an entity within NIS2. It must also exceed a size threshold, as explained in the next section.</p>
+
+<h2>Are private hospitals and clinics essential or important entities?</h2>
+<p>It depends on their size. A private clinic or hospital that exceeds the ceilings for small enterprises falls under NIS2 as an important entity; if it also exceeds the ceilings for medium-sized enterprises, that is, it is a large enterprise, it is an essential entity under Article 6 of the NIS Decree.</p>
+<p>The thresholds are those of <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32003H0361" target="_blank" rel="noopener">Recommendation 2003/361/EC</a> on the definition of SMEs, referred to in <a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=3&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Article 3 of the NIS Decree</a>, which sets its scope. Under Article 2 of the annex to the recommendation, a small enterprise employs fewer than 50 persons and has an annual turnover or balance sheet total not exceeding EUR 10 million; a medium-sized enterprise employs fewer than 250 persons and has a turnover not exceeding EUR 50 million or a balance sheet total not exceeding EUR 43 million.</p>
+<p><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=6&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Article 6 of the NIS Decree</a>, which distinguishes essential from important entities, treats as essential, in paragraph 1(a), the Annex I entities that exceed the ceilings for medium-sized enterprises; the other entities in scope are important, under paragraph 3. The table applies the rule to a private healthcare provider.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Size of the facility</th><th>Indicative example</th><th>Position under NIS2</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Micro or small enterprise</td><td>Medical practice, small outpatient clinic</td><td>Out of scope under the general rule, unless identified by the ACN (Article 3(9))</td></tr>
+      <tr><td>Medium-sized enterprise</td><td>Medium-sized clinic or outpatient centre</td><td>Important entity</td></tr>
+      <tr><td>Large enterprise</td><td>Private hospital, group of nursing homes</td><td>Essential entity (Article 6(1)(a))</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Group companies count when calculating size. Article 3(4) of the decree refers to Article 6(2) of the annex to the recommendation, which aggregates the data of partner and linked enterprises, unless this is disproportionate, taking into account the entity's independence in terms of information systems and services; it follows that a small nursing home belonging to a large healthcare group may fall under NIS2 even though, on its own, it would be out of scope.</p>
+<p>A medical practice or small outpatient clinic, by contrast, is normally out of scope. However, Article 3(9) allows the ACN to include, regardless of size, for example the sole national provider of an essential service or an entity whose disruption could have a significant impact on public health; point (a) of the same paragraph allows the inclusion of entities that were already operators of essential services under the old rules, which already covered the health sector, as explained in our article on <a href="/risorse/nis-nis2-differenze">NIS and NIS2</a>. Identification takes place on a proposal from the sectoral authorities and is notified to the entity concerned, under paragraph 13.</p>
+
+<h2>Are local health authorities and public healthcare bodies covered by NIS2?</h2>
+<p>Local health authorities (Aziende sanitarie locali, ASL) fall under NIS2 regardless of their size. Annex III of the NIS Decree, which lists the categories of public administrations subject to the rules, expressly includes them among local administrations, provided they appear in the list of public administrations drawn up under the public accounting and finance law.</p>
+<p>The legal basis is Article 3(6) of the decree, which applies the rules, regardless of size, to the public administrations referred to in Article 1(3) of Law no. 196 of 31 December 2009 that fall within the categories of <a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=7&amp;art.flagTipoArticolo=3&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=1&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Annex III</a>. Among other public bodies, the same annex also mentions experimental zooprophylactic institutes and research bodies and institutions.</p>
+<p>Local health authorities are, as a rule, important entities. Article 6(1)(e) treats as essential, regardless of size, only the central administrations in Annex III; paragraph 2 of the same article, however, allows the ACN to classify other administrations as essential too.</p>
+<p>Hospital trusts (aziende ospedaliere) and other public bodies that provide care are not named in Annex III. Since Article 3(1) refers to both public and private entities, they may nonetheless fall under Annex I as healthcare providers, subject to the size rules described above; the position of each body should therefore be checked against the communication received from the ACN.</p>
+
+<h2>Pharmaceuticals and medical devices: Annex I or Annex II</h2>
+<p>For companies in the supply chain, the distinction between the two annexes is decisive. Manufacturers of basic pharmaceutical products and pharmaceutical preparations are in Annex I, among the sectors of high criticality; manufacturers of medical devices and in vitro diagnostic medical devices are instead, as a rule, in <a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=7&amp;art.flagTipoArticolo=2&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=1&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Annex II</a>, which lists the other critical sectors, under point 5(a) on manufacturing.</p>
+<p>For definitions, Annex II refers to Article 2(1) of Regulation (EU) 2017/745 on medical devices and to Article 2(2) of Regulation (EU) 2017/746 on in vitro diagnostic medical devices. The only exclusion concerns manufacturers of devices deemed critical during a public health emergency, which, as seen above, are placed in Annex I.</p>
+<p>The placement affects the category. Since Article 6(1)(a) treats only Annex I entities as essential on the basis of size, a medical device manufacturer under Annex II is, as a rule, an important entity even if it is large, whereas a large pharmaceutical manufacturer is an essential entity.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Type of entity</th><th>Annex</th><th>Medium-sized enterprise</th><th>Large enterprise</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Healthcare providers</td><td>I</td><td>Important</td><td>Essential</td></tr>
+      <tr><td>EU reference laboratories</td><td>I</td><td>Important</td><td>Essential</td></tr>
+      <tr><td>Research and development of medicinal products</td><td>I</td><td>Important</td><td>Essential</td></tr>
+      <tr><td>Pharmaceutical manufacturers (NACE 21)</td><td>I</td><td>Important</td><td>Essential</td></tr>
+      <tr><td>Manufacturers of medical devices critical in an emergency</td><td>I</td><td>Important</td><td>Essential</td></tr>
+      <tr><td>Manufacturers of medical devices and in vitro diagnostics</td><td>II</td><td>Important</td><td>Important</td></tr>
+      <tr><td>Local health authorities</td><td>III</td><td colspan="2">In scope regardless of size; as a rule important, unless classified as essential by the ACN</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2>What NIS2 obligations do healthcare organisations have?</h2>
+<p>Healthcare organisations have the same obligations as any other NIS entity. They must register every year on the ACN portal, adopt the baseline security measures of ACN Determination no. 379907/2025, notify significant incidents to CSIRT Italia and involve their management bodies in cybersecurity risk management.</p>
+<ul>
+  <li><strong>Registration.</strong> From 1 January to 28 February each year, NIS entities must register or update their registration on the ACN services portal, as stated on the <a href="https://www.acn.gov.it/portale/nis/registrazione" target="_blank" rel="noopener">ACN registration page</a>; according to the <a href="https://www.acn.gov.it/portale/documents/20119/600993/VademecumNIS_2026_v1.pdf/9631c10d-9157-ae43-43b3-a353aa962d09?t=1789134752314" target="_blank" rel="noopener">ACN NIS Vademecum</a>, by 14 April they receive the communication of inclusion in, continued presence on or removal from the list.</li>
+  <li><strong>Baseline security measures.</strong> According to the <a href="https://www.acn.gov.it/portale/nis/modalita-specifiche-base" target="_blank" rel="noopener">ACN page on baseline arrangements and specifications</a>, within 18 months of the communication of inclusion in the list, important entities adopt the measures in Annex 1 of ACN Determination no. 379907/2025, while essential entities adopt those in Annex 2. The measures are explained in our article on <a href="/risorse/misure-sicurezza-base-nis2-acn">NIS2 baseline security measures</a>.</li>
+  <li><strong>Incident notification.</strong> Significant incidents must be notified to CSIRT Italia within the time limits of Article 25 of the decree, described in the next section.</li>
+  <li><strong>Management accountability.</strong> <a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=23&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Article 23 of the NIS Decree</a>, which governs the obligations of management and governing bodies, provides that they approve how the security measures are implemented, oversee compliance, are liable for infringements and must follow cybersecurity training. The topic is covered in our article on <a href="/risorse/nis2-organi-di-amministrazione-obblighi-cda">NIS2 and management bodies</a>.</li>
+</ul>
+<p>Infringements are penalised under <a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=5&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=38&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Article 38 of the NIS Decree</a>, which governs administrative penalties. For the most serious infringements, essential entities other than public administrations face fines of up to EUR 10 million or 2% of total worldwide annual turnover, whichever is higher, and important entities up to EUR 7 million or 1.4%; for Annex III public administrations that are essential entities, the fine ranges from EUR 25,000 to EUR 125,000.</p>
+
+<h2>Cyber incidents in healthcare: NIS2 notification and data breach</h2>
+<p>A cyberattack that shuts down a hospital's systems is often both a NIS incident and a personal data breach. The two notifications have different recipients and conditions, so they must be handled in parallel.</p>
+<p>Under <a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=25&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Article 25 of the NIS Decree</a>, which governs incident notification, an incident is significant if it has caused or is capable of causing severe operational disruption of the services or financial loss for the entity, or if it has affected or is capable of affecting other natural or legal persons by causing considerable material or non-material damage. In that case the entity sends CSIRT Italia three communications.</p>
+<ol>
+  <li>An early warning within 24 hours of becoming aware of the incident;</li>
+  <li>an incident notification within 72 hours, with an initial assessment of severity and impact;</li>
+  <li>a final report within one month of the notification, describing the incident, its likely cause and the measures taken.</li>
+</ol>
+<p>If the incident is still ongoing when the final report is due, the entity sends monthly progress reports and the final report within one month of the end of incident handling.</p>
+<p>If the incident involves personal data, such as patients' health data, Article 33 of <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32016R0679" target="_blank" rel="noopener">Regulation (EU) 2016/679 (GDPR)</a> also applies; it requires the controller to notify the breach to the supervisory authority, in Italy the Garante per la protezione dei dati personali, without undue delay and, where feasible, within 72 hours, unless the breach is unlikely to result in a risk to the rights and freedoms of individuals. It follows that the internal incident management procedure must cover both channels, with a single fact-finding process and two separate communications.</p>
+
+<h2>Conclusions</h2>
+<p>NIS2 reaches almost the entire health supply chain. Private healthcare providers are in scope if they are at least medium-sized and essential if they are large; local health authorities are in scope in any case, as Annex III administrations; pharmaceutical manufacturers are in Annex I, while medical device manufacturers are, as a rule, in Annex II. Every organisation must therefore first check its position, taking its group into account, and then organise registration, security measures and the notification procedure.</p>
+<p>For a detailed overview of the obligations, see our <a href="/risorse/nis2">complete NIS2 guide</a>.</p>
+
+<p><strong>To check where your organisation stands</strong>, <a href="/inizia">RegulaeOS's NIS2 gap analysis</a> lets you compare the measures you have adopted with the requirements of the ACN determination and collect all documentary evidence in one place.</p>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Directive (EU) 2022/2555 (NIS2), Annex I, EUR-Lex</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/eli/id/2024/10/01/24G00155/sg" target="_blank" rel="noopener">Legislative Decree no. 138 of 4 September 2024 (NIS Decree), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=3&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Article 3 (scope), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=6&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Article 6 (essential and important entities), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=23&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Article 23 (management and governing bodies), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=25&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Article 25 (incident notification), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=5&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=38&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Article 38 (administrative penalties), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=7&amp;art.flagTipoArticolo=1&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=1&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Annex I (sectors of high criticality), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=7&amp;art.flagTipoArticolo=2&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=1&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Annex II (other critical sectors), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=7&amp;art.flagTipoArticolo=3&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=1&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Annex III (public administrations), Gazzetta Ufficiale</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32011L0024" target="_blank" rel="noopener">Directive 2011/24/EU (cross-border healthcare), Article 3, EUR-Lex</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32003H0361" target="_blank" rel="noopener">Recommendation 2003/361/EC (definition of SMEs), EUR-Lex</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32016R0679" target="_blank" rel="noopener">Regulation (EU) 2016/679 (GDPR), Article 33, EUR-Lex</a></li>
+  <li><a href="https://www.acn.gov.it/portale/nis/registrazione" target="_blank" rel="noopener">ACN, NIS registration (Italian)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/20119/600993/VademecumNIS_2026_v1.pdf/9631c10d-9157-ae43-43b3-a353aa962d09?t=1789134752314" target="_blank" rel="noopener">ACN, NIS Vademecum 2026 (Italian)</a></li>
+  <li><a href="https://www.acn.gov.it/portale/nis/modalita-specifiche-base" target="_blank" rel="noopener">ACN, Baseline arrangements and specifications (Italian)</a></li>
+</ul>
+`,
+    },
+  },
+  {
     slug: "nis2-cyber-resilience-act",
     title: "NIS2 e Cyber Resilience Act, differenze, notifiche e rapporti tra le due norme",
     excerpt:
