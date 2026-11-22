@@ -38,6 +38,280 @@ export interface BlogPost {
 
 export const POSTS: BlogPost[] = [
   {
+    slug: "nis2-manifattura",
+    title: "NIS2 e manifattura, quali imprese manifatturiere rientrano e quali obblighi hanno",
+    excerpt:
+      "Quali imprese manifatturiere rientrano nella NIS2, come si leggono il punto 5 dell'allegato II del decreto NIS e i codici NACE, quando si superano le soglie dimensionali, chi è l'Autorità di settore e quali obblighi derivano dal D.Lgs. 138/2024.",
+    date: "22 novembre 2026",
+    dateISO: "2026-11-22",
+    author: { name: "Umberto Mottola", jobTitle: "Avvocato, CIPP/E" },
+    dateModifiedISO: "2026-11-22",
+    readTime: "9 min",
+    category: "Normativa",
+    tags: ["NIS2", "NIS2 manifattura", "settore manifatturiero", "fabbricazione", "allegato II", "codici NACE", "MIMIT", "D.Lgs. 138/2024"],
+    metaTitle: "NIS2 e manifattura, chi rientra e quali obblighi",
+    metaDescription:
+      "NIS2 nella manifattura. Le sei attività di fabbricazione dell'allegato II, codici NACE, soglie dimensionali, Autorità di settore e obblighi ACN.",
+    faqSchema: [
+      {
+        q: "Tutte le aziende manifatturiere rientrano nella NIS2?",
+        a: "No. Il settore fabbricazione, al punto 5 dell'allegato II del decreto NIS, comprende solo sei attività, ossia dispositivi medici e diagnostici in vitro e le divisioni 26, 27, 28, 29 e 30 della sezione C della NACE Rev. 2, che vanno dall'elettronica ai mezzi di trasporto. Chimica e alimentare sono settori distinti dello stesso allegato; le altre attività manifatturiere, come il tessile o il mobile, non sono elencate.",
+      },
+      {
+        q: "Un'impresa manifatturiera con meno di 50 dipendenti è soggetta alla NIS2?",
+        a: "Di regola no, se è una piccola impresa, ossia ha meno di 50 dipendenti e un fatturato annuo o un totale di bilancio non superiore a 10 milioni di euro. Nel calcolo, però, contano anche le imprese associate e collegate, secondo l'art. 3, comma 4, del decreto NIS; inoltre l'ACN può includere un soggetto a prescindere dalle dimensioni nei casi dell'art. 3, comma 9.",
+      },
+      {
+        q: "Un grande costruttore di macchinari è soggetto essenziale?",
+        a: "Di regola no. L'art. 6, comma 1, lettera a), del decreto NIS considera essenziali per ragioni dimensionali solo le grandi imprese dell'allegato I, mentre la fabbricazione è nell'allegato II; il costruttore di macchinari è quindi soggetto importante anche se grande. Può diventare essenziale solo se è identificato come soggetto critico o se l'ACN lo qualifica come tale ai sensi dell'art. 6, comma 2.",
+      },
+      {
+        q: "Chi vigila sulle imprese manifatturiere soggette alla NIS2?",
+        a: "L'Autorità nazionale competente NIS è l'ACN. L'art. 11 del decreto NIS designa poi come Autorità di settore il Ministero delle imprese e del made in Italy per la fabbricazione di elettronica, apparecchiature elettriche, macchinari, autoveicoli e altri mezzi di trasporto, e il Ministero della salute per la fabbricazione di dispositivi medici e diagnostici in vitro.",
+      },
+      {
+        q: "Quanto rischia un'impresa manifatturiera che non rispetta la NIS2?",
+        a: "L'art. 38 del decreto NIS prevede, per i soggetti importanti, sanzioni amministrative pecuniarie fino a 7 milioni di euro o all'1,4% del fatturato annuo mondiale, se superiore; per i soggetti essenziali il massimo sale a 10 milioni di euro o al 2%. Gli organi di amministrazione, inoltre, sono responsabili delle violazioni ai sensi dell'art. 23 del decreto.",
+      },
+    ],
+    content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · aggiornato al 22 nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In sintesi.</strong> La NIS2 nella manifattura riguarda le sei attività del settore fabbricazione elencate al punto 5 dell'allegato II del decreto NIS, ossia dispositivi medici, elettronica e ottica, apparecchiature elettriche, macchinari, autoveicoli e altri mezzi di trasporto. Le imprese rientrano se superano i massimali della piccola impresa e sono, di regola, soggetti importanti anche se grandi; l'Autorità di settore è il Ministero delle imprese e del made in Italy, salvo i dispositivi medici.
+</p>
+
+<p>La NIS2 nella manifattura interessa titolari, direttori di stabilimento e responsabili IT di molte imprese industriali italiane, che spesso non si sono mai occupate di sicurezza informatica in chiave normativa. La vecchia disciplina NIS, infatti, non comprendeva la fabbricazione; come risulta dalla tavola di concordanza dell'allegato III della <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">direttiva (UE) 2022/2555</a>, il settore non ha corrispondenti nella direttiva (UE) 2016/1148 ed è entrato nell'ambito di applicazione solo con la NIS2 e con il D.Lgs. 138/2024, che l'ha recepita.</p>
+<p>Questo articolo spiega, sulla base del testo del decreto, quali imprese manifatturiere rientrano, come si applicano le soglie dimensionali, chi vigila e quali obblighi ne derivano. Per il quadro generale si rinvia alla <a href="/risorse/nis2">guida alla NIS2</a>; per le scadenze aggiornate, alla pagina sullo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>.</p>
+
+<h2>Quali aziende manifatturiere rientrano nella NIS2?</h2>
+<p>Rientrano nella NIS2 le imprese che svolgono una delle sei attività del settore fabbricazione, al punto 5 dell'allegato II del decreto NIS. Si tratta della fabbricazione di dispositivi medici e diagnostici in vitro e delle attività delle divisioni 26, 27, 28, 29 e 30 della sezione C della classificazione NACE Rev. 2, purché l'impresa superi i massimali della piccola impresa.</p>
+<p>L'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=7&amp;art.flagTipoArticolo=2&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=1&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">allegato II del decreto NIS</a>, che elenca gli altri settori critici, riprende l'allegato II della direttiva NIS2. La tabella riassume i sei sottosettori e il criterio con cui il decreto individua le imprese.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Sottosettore (allegato II, punto 5)</th><th>Imprese incluse</th><th>Esempi indicativi</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>a) Dispositivi medici e dispositivi medico-diagnostici in vitro</td><td>Fabbricanti ai sensi dei regolamenti (UE) 2017/745 e 2017/746</td><td>Apparecchi elettromedicali, reagenti diagnostici</td></tr>
+      <tr><td>b) Computer e prodotti di elettronica e ottica</td><td>NACE Rev. 2, sezione C, divisione 26</td><td>Componenti elettronici, strumenti di misura</td></tr>
+      <tr><td>c) Apparecchiature elettriche</td><td>NACE Rev. 2, sezione C, divisione 27</td><td>Motori elettrici, quadri, cavi, elettrodomestici</td></tr>
+      <tr><td>d) Macchinari e apparecchiature n.c.a.</td><td>NACE Rev. 2, sezione C, divisione 28</td><td>Macchine utensili, macchine per l'imballaggio</td></tr>
+      <tr><td>e) Autoveicoli, rimorchi e semirimorchi</td><td>NACE Rev. 2, sezione C, divisione 29</td><td>Veicoli, carrozzerie, componentistica auto</td></tr>
+      <tr><td>f) Altri mezzi di trasporto</td><td>NACE Rev. 2, sezione C, divisione 30</td><td>Navi, materiale ferroviario, aeromobili</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Gli esempi sono indicativi; la verifica va fatta sull'attività effettivamente svolta, confrontandola con la descrizione della divisione NACE. Le altre attività manifatturiere, come il tessile, l'abbigliamento, il mobile o la lavorazione dei metalli, non sono elencate nel punto 5 e, di per sé, non portano l'impresa nell'ambito della NIS2.</p>
+<p>Per collocare correttamente attività e servizi è utile anche l'articolo sulla <a href="/risorse/categorizzazione-nis2-attivita-servizi-art-30">categorizzazione NIS2 di attività e servizi</a>, che spiega il modello predisposto dall'ACN.</p>
+
+<h2>Come si calcolano le soglie dimensionali per le imprese manifatturiere?</h2>
+<p>L'impresa manifatturiera rientra se supera i massimali della piccola impresa, ossia se occupa almeno 50 persone oppure supera i 10 milioni di euro sia di fatturato annuo sia di totale di bilancio. Nel calcolo contano anche le imprese associate e collegate, salvo che ciò non sia proporzionato.</p>
+<p>La regola è nell'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=3&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">art. 3 del decreto NIS</a>, che delimita l'ambito di applicazione. Il comma 2 applica il decreto ai soggetti degli allegati I e II che superano i massimali per le piccole imprese dell'art. 2, paragrafo 2, dell'allegato alla <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32003H0361" target="_blank" rel="noopener">raccomandazione 2003/361/CE</a>; questa norma definisce piccola l'impresa che occupa meno di 50 persone e realizza un fatturato annuo o un totale di bilancio annuo non superiori a 10 milioni di euro.</p>
+<p>Il comma 4 dello stesso articolo richiama l'art. 6, paragrafo 2, dell'allegato alla raccomandazione, che somma i dati delle imprese associate e collegate. Il calcolo non si applica se non è proporzionato, tenuto conto dell'indipendenza del soggetto dalle imprese collegate quanto a sistemi informativi e di rete e a servizi forniti; ne consegue che una piccola società produttiva controllata da un grande gruppo può rientrare anche se, da sola, resterebbe fuori.</p>
+<p>Le dimensioni, tuttavia, non sono l'unico criterio. L'art. 3, comma 9, consente all'ACN di includere un soggetto a prescindere dalle dimensioni, ad esempio se è l'unico fornitore nazionale di un servizio essenziale o se è un elemento sistemico della catena di approvvigionamento di soggetti essenziali o importanti; l'individuazione avviene su proposta delle Autorità di settore ed è notificata all'interessato, secondo il comma 13.</p>
+
+<h2>Un'impresa manifatturiera può essere soggetto essenziale?</h2>
+<p>Di regola no. Le imprese manifatturiere del punto 5 dell'allegato II sono soggetti importanti anche quando sono grandi imprese, poiché la qualifica di soggetto essenziale per ragioni dimensionali spetta solo alle grandi imprese dei settori altamente critici dell'allegato I.</p>
+<p>L'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=6&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">art. 6 del decreto NIS</a>, che distingue i soggetti essenziali dai soggetti importanti, considera essenziali, al comma 1, lettera a), i soggetti dell'allegato I che superano i massimali per le medie imprese; il comma 3 qualifica come importanti tutti gli altri soggetti nell'ambito. La fabbricazione è nell'allegato II, sicché la grande impresa manifatturiera resta, di norma, soggetto importante.</p>
+<p>Restano due eccezioni. La prima riguarda i soggetti identificati come soggetti critici ai sensi del decreto che recepisce la direttiva (UE) 2022/2557 sulla resilienza dei soggetti critici, che il comma 1, lettera b), considera essenziali indipendentemente dalle dimensioni; la seconda riguarda i soggetti individuati ai sensi dell'art. 3, commi 9 e 10, che l'ACN può qualificare come essenziali secondo il comma 2. Occorre dunque leggere con attenzione la comunicazione ricevuta dall'ACN.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Dimensione dell'impresa</th><th>Posizione nella NIS2</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Micro o piccola impresa, calcolata con il gruppo</td><td>Fuori dall'ambito per regola generale, salvo individuazione da parte dell'ACN (art. 3, comma 9)</td></tr>
+      <tr><td>Media impresa</td><td>Soggetto importante</td></tr>
+      <tr><td>Grande impresa</td><td>Soggetto importante, salvo identificazione come soggetto critico o qualificazione come essenziale da parte dell'ACN (art. 6, commi 1, lettera b, e 2)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2>Chimica, alimentare e dispositivi medici, i settori vicini alla fabbricazione</h2>
+<p>Molte imprese industriali non svolgono le attività del punto 5, ma rientrano comunque per altra via. L'allegato II, infatti, prevede due settori produttivi distinti dalla fabbricazione, ossia il punto 3, sulla fabbricazione, produzione e distribuzione di sostanze chimiche, e il punto 4, sulla produzione, trasformazione e distribuzione di alimenti.</p>
+<p>Il punto 3 comprende le imprese che fabbricano sostanze o distribuiscono sostanze o miscele, nonché quelle che producono articoli da sostanze o miscele, secondo le definizioni del regolamento (CE) n. 1907/2006 (REACH). Il punto 4 comprende le imprese alimentari, come definite dal regolamento (CE) n. 178/2002, che si occupano della distribuzione all'ingrosso e della produzione industriale e trasformazione.</p>
+<p>Per i dispositivi medici occorre una distinzione ulteriore. Il sottosettore a) del punto 5 esclude i fabbricanti di dispositivi medici critici durante un'emergenza di sanità pubblica, collocati nell'allegato I tra i soggetti del settore sanitario; per questi soli fabbricanti, quindi, la grande impresa è soggetto essenziale ai sensi dell'art. 6, comma 1, lettera a).</p>
+
+<h2>Quali obblighi NIS2 hanno le imprese manifatturiere?</h2>
+<p>Le imprese manifatturiere nell'ambito hanno gli stessi obblighi di ogni soggetto NIS. Devono registrarsi ogni anno sul portale dell'ACN, adottare le misure di sicurezza di base della determinazione ACN n. 379907/2025, notificare gli incidenti significativi al CSIRT Italia e coinvolgere gli organi di amministrazione nella gestione del rischio informatico.</p>
+<ul>
+  <li><strong>Registrazione.</strong> Dal 1° gennaio al 28 febbraio di ogni anno i soggetti NIS devono registrarsi o aggiornare la registrazione sul portale dei servizi dell'ACN, come indica la <a href="https://www.acn.gov.it/portale/nis/registrazione" target="_blank" rel="noopener">pagina ACN sulla registrazione</a>. Il calendario completo è nell'articolo su <a href="/risorse/nis2-adempimenti-scadenze">adempimenti e scadenze NIS2</a>.</li>
+  <li><strong>Misure di sicurezza di base.</strong> Secondo la <a href="https://www.acn.gov.it/portale/nis/modalita-specifiche-base" target="_blank" rel="noopener">pagina ACN sulle modalità e specifiche di base</a>, entro 18 mesi dalla comunicazione di inserimento nell'elenco i soggetti importanti adottano le misure dell'allegato 1 della <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">determinazione ACN n. 379907/2025</a>, mentre i soggetti essenziali adottano quelle dell'allegato 2. Le misure sono spiegate nell'articolo sulle <a href="/risorse/misure-sicurezza-base-nis2-acn">misure di sicurezza di base NIS2</a>.</li>
+  <li><strong>Notifica degli incidenti.</strong> L'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=25&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">art. 25 del decreto NIS</a>, che disciplina la notifica degli incidenti, considera significativo l'incidente che ha causato o può causare una grave perturbazione operativa dei servizi o perdite finanziarie per il soggetto, oppure ripercussioni su altre persone con perdite materiali o immateriali considerevoli. In tal caso l'impresa invia al CSIRT Italia una pre-notifica entro 24 ore, una notifica entro 72 ore e una relazione finale entro un mese dalla notifica.</li>
+  <li><strong>Responsabilità del vertice.</strong> L'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=23&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">art. 23 del decreto NIS</a>, che disciplina gli obblighi degli organi di amministrazione e direttivi, stabilisce che essi approvano le modalità di implementazione delle misure di sicurezza, sovrintendono agli obblighi, sono responsabili delle violazioni e devono seguire una formazione in materia di sicurezza informatica. Il tema è approfondito nell'articolo su <a href="/risorse/nis2-organi-di-amministrazione-obblighi-cda">NIS2 e organi di amministrazione</a>.</li>
+</ul>
+<p>Le violazioni sono sanzionate dall'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=5&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=38&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">art. 38 del decreto NIS</a>, che disciplina le sanzioni amministrative. Per i soggetti importanti la sanzione può arrivare a 7 milioni di euro o all'1,4% del fatturato annuo mondiale dell'esercizio precedente, se superiore; per i soggetti essenziali il massimo è di 10 milioni di euro o del 2%.</p>
+
+<h2>Autorità di settore e sistemi di produzione, due aspetti pratici</h2>
+<p>Il primo aspetto riguarda l'interlocutore pubblico. L'Autorità nazionale competente NIS è l'ACN; l'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=2&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=11&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">art. 11 del decreto NIS</a>, che designa le Autorità di settore, affida al Ministero delle imprese e del made in Italy i sottosettori b), c) e d) del punto 5 e, sentito il Ministero delle infrastrutture e dei trasporti, i sottosettori e) e f), mentre il sottosettore a), sui dispositivi medici, spetta al Ministero della salute. Lo stesso articolo assegna al Ministero delle imprese e del made in Italy anche il settore chimico, sentito il Ministero della salute, e al Ministero dell'agricoltura, della sovranità alimentare e delle foreste il settore alimentare.</p>
+<p>Il secondo aspetto riguarda il perimetro delle misure. L'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=24&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">art. 24 del decreto NIS</a>, che disciplina le misure di gestione dei rischi, impone un approccio multi-rischio volto a proteggere i sistemi informativi e di rete e il loro ambiente fisico, e include tra gli elementi minimi la continuità operativa e la sicurezza della catena di approvvigionamento. Il decreto non distingue tra sistemi gestionali e sistemi di produzione; a nostro avviso, perciò, l'analisi dei rischi di un'impresa manifatturiera non dovrebbe fermarsi agli uffici, ma considerare anche le linee produttive collegate in rete e gli accessi remoti dei fornitori di macchinari.</p>
+<p>Chi fabbrica macchinari o apparecchiature con componenti digitali, infine, deve considerare anche il regolamento (UE) 2024/2847 sulla ciberresilienza, che riguarda i prodotti e non l'organizzazione; i rapporti tra le due norme sono spiegati nell'articolo su <a href="/risorse/nis2-cyber-resilience-act">NIS2 e Cyber Resilience Act</a>.</p>
+
+<h2>Conclusioni</h2>
+<p>La NIS2 non riguarda tutta la manifattura, ma solo le sei attività del punto 5 dell'allegato II, oltre ai settori chimico e alimentare previsti dallo stesso allegato. L'impresa che svolge una di queste attività rientra se supera, anche tenendo conto del gruppo, i massimali della piccola impresa, ed è di regola soggetto importante. Ne consegue che il primo passo è verificare con cura la divisione NACE dell'attività svolta e le dimensioni del gruppo; il secondo è organizzare registrazione, misure di sicurezza e procedura di notifica, estendendo l'analisi anche ai sistemi di produzione.</p>
+<p>Per gli obblighi nel dettaglio si rinvia alla <a href="/risorse/nis2">guida completa alla NIS2</a>.</p>
+
+<p><strong>Per verificare a che punto è la tua impresa</strong>, <a href="/inizia">la gap analysis NIS2 di RegulaeOS</a> permette di confrontare le misure adottate con i requisiti della determinazione ACN e di raccogliere in un unico posto le prove documentali.</p>
+
+<h2>Fonti</h2>
+<ul>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Direttiva (UE) 2022/2555 (NIS2), allegato II, EUR-Lex</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/eli/id/2024/10/01/24G00155/sg" target="_blank" rel="noopener">D.Lgs. 4 settembre 2024, n. 138 (decreto NIS), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=7&amp;art.flagTipoArticolo=2&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=1&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, allegato II (altri settori critici), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=3&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 3 (ambito di applicazione), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=6&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 6 (soggetti essenziali e soggetti importanti), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=2&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=11&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 11 (Autorità di settore NIS), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=23&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 23 (organi di amministrazione e direttivi), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=24&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 24 (misure di gestione dei rischi), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=25&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 25 (notifica di incidente), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=5&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=38&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 38 (sanzioni amministrative), Gazzetta Ufficiale</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32003H0361" target="_blank" rel="noopener">Raccomandazione 2003/361/CE sulla definizione delle PMI, EUR-Lex</a></li>
+  <li><a href="https://www.acn.gov.it/portale/nis/registrazione" target="_blank" rel="noopener">ACN, Registrazione</a></li>
+  <li><a href="https://www.acn.gov.it/portale/nis/modalita-specifiche-base" target="_blank" rel="noopener">ACN, Modalità e specifiche di base</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">Determinazione ACN n. 379907/2025</a></li>
+</ul>
+`,
+    en: {
+      title: "NIS2 and manufacturing, which manufacturers are in scope and what they must do",
+      excerpt:
+        "Which manufacturing companies fall under NIS2, how to read point 5 of Annex II to the Italian NIS decree and the NACE codes, when the size thresholds are exceeded, who the sector authority is and what obligations follow from Legislative Decree 138/2024.",
+      date: "22 November 2026",
+      readTime: "9 min",
+      category: "Regulation",
+      tags: ["NIS2", "NIS2 manufacturing", "manufacturing sector", "Annex II", "NACE codes", "MIMIT", "Legislative Decree 138/2024"],
+      metaTitle: "NIS2 and manufacturing, scope and obligations",
+      metaDescription:
+        "NIS2 in manufacturing. The six Annex II manufacturing activities, NACE codes, size thresholds, sector authorities and ACN obligations.",
+      faqSchema: [
+        {
+          q: "Do all manufacturing companies fall under NIS2?",
+          a: "No. The manufacturing sector, in point 5 of Annex II to the NIS decree, covers only six activities, namely medical and in vitro diagnostic devices and divisions 26, 27, 28, 29 and 30 of section C of NACE Rev. 2, ranging from electronics to transport equipment. Chemicals and food are separate sectors of the same Annex; other manufacturing activities, such as textiles or furniture, are not listed.",
+        },
+        {
+          q: "Is a manufacturer with fewer than 50 employees subject to NIS2?",
+          a: "As a rule, no, if it is a small enterprise, meaning it has fewer than 50 employees and an annual turnover or balance sheet total not exceeding EUR 10 million. Partner and linked enterprises are, however, included in the calculation under Article 3(4) of the NIS decree; moreover, ACN may include an entity regardless of its size in the cases listed in Article 3(9).",
+        },
+        {
+          q: "Is a large machinery manufacturer an essential entity?",
+          a: "As a rule, no. Article 6(1)(a) of the NIS decree treats as essential, on size grounds, only large enterprises in Annex I, whereas manufacturing is in Annex II; a machinery manufacturer is therefore an important entity even if large. It becomes essential only if it is identified as a critical entity or if ACN designates it as such under Article 6(2).",
+        },
+        {
+          q: "Who supervises manufacturers subject to NIS2?",
+          a: "The national competent NIS authority is ACN. Article 11 of the NIS decree also designates as sector authorities the Ministry of Enterprises and Made in Italy for the manufacture of electronics, electrical equipment, machinery, motor vehicles and other transport equipment, and the Ministry of Health for the manufacture of medical and in vitro diagnostic devices.",
+        },
+        {
+          q: "What penalties does a manufacturer face for breaching NIS2?",
+          a: "Article 38 of the NIS decree provides, for important entities, administrative fines of up to EUR 7 million or 1.4% of worldwide annual turnover, whichever is higher; for essential entities the maximum rises to EUR 10 million or 2%. Management bodies are also liable for breaches under Article 23 of the decree.",
+        },
+      ],
+      content: `
+<p><em>Umberto Mottola, Attorney, CIPP/E · updated 22 Nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In short.</strong> NIS2 in manufacturing covers the six activities of the manufacturing sector listed in point 5 of Annex II to the Italian NIS decree, namely medical devices, electronics and optics, electrical equipment, machinery, motor vehicles and other transport equipment. Companies are in scope if they exceed the small-enterprise ceilings and, as a rule, they are important entities even when large; the sector authority is the Ministry of Enterprises and Made in Italy, except for medical devices.
+</p>
+
+<p>NIS2 in manufacturing concerns owners, plant managers and IT managers of many Italian industrial companies, which have often never dealt with cybersecurity as a legal obligation. The old NIS framework did not cover manufacturing; as the correlation table in Annex III to <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Directive (EU) 2022/2555</a> shows, the sector has no counterpart in Directive (EU) 2016/1148 and came into scope only with NIS2 and Legislative Decree 138/2024, which transposed it.</p>
+<p>This article explains, on the basis of the text of the decree, which manufacturers are in scope, how the size thresholds apply, who supervises them and what obligations follow. For the general framework, see our <a href="/risorse/nis2">NIS2 guide</a>; for up-to-date deadlines, see the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">implementation status of NIS2</a>.</p>
+
+<h2>Which manufacturing companies fall under NIS2?</h2>
+<p>NIS2 covers companies carrying out one of the six activities of the manufacturing sector, in point 5 of Annex II to the NIS decree. These are the manufacture of medical and in vitro diagnostic devices and the activities in divisions 26, 27, 28, 29 and 30 of section C of the NACE Rev. 2 classification, provided the company exceeds the small-enterprise ceilings.</p>
+<p><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=7&amp;art.flagTipoArticolo=2&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=1&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Annex II to the NIS decree</a>, which lists the other critical sectors, mirrors Annex II to the NIS2 Directive. The table summarises the six subsectors and the criterion the decree uses to identify companies.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Subsector (Annex II, point 5)</th><th>Companies included</th><th>Indicative examples</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>(a) Medical devices and in vitro diagnostic medical devices</td><td>Manufacturers within the meaning of Regulations (EU) 2017/745 and 2017/746</td><td>Electromedical equipment, diagnostic reagents</td></tr>
+      <tr><td>(b) Computer, electronic and optical products</td><td>NACE Rev. 2, section C, division 26</td><td>Electronic components, measuring instruments</td></tr>
+      <tr><td>(c) Electrical equipment</td><td>NACE Rev. 2, section C, division 27</td><td>Electric motors, switchboards, cables, household appliances</td></tr>
+      <tr><td>(d) Machinery and equipment n.e.c.</td><td>NACE Rev. 2, section C, division 28</td><td>Machine tools, packaging machinery</td></tr>
+      <tr><td>(e) Motor vehicles, trailers and semi-trailers</td><td>NACE Rev. 2, section C, division 29</td><td>Vehicles, bodywork, automotive parts</td></tr>
+      <tr><td>(f) Other transport equipment</td><td>NACE Rev. 2, section C, division 30</td><td>Ships, railway rolling stock, aircraft</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The examples are indicative; the check must be made on the activity actually carried out, comparing it with the description of the NACE division. Other manufacturing activities, such as textiles, clothing, furniture or metalworking, are not listed in point 5 and do not, in themselves, bring a company within the scope of NIS2.</p>
+<p>To classify activities and services correctly, see also the article on <a href="/risorse/categorizzazione-nis2-attivita-servizi-art-30">NIS2 categorisation of activities and services</a>, which explains the model prepared by ACN.</p>
+
+<h2>How are the size thresholds calculated for manufacturers?</h2>
+<p>A manufacturer is in scope if it exceeds the small-enterprise ceilings, meaning it employs at least 50 people or exceeds EUR 10 million in both annual turnover and balance sheet total. Partner and linked enterprises are included in the calculation, unless this would be disproportionate.</p>
+<p>The rule is in <a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=3&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Article 3 of the NIS decree</a>, which sets out its scope. Paragraph 2 applies the decree to entities in Annexes I and II that exceed the small-enterprise ceilings of Article 2(2) of the Annex to <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32003H0361" target="_blank" rel="noopener">Recommendation 2003/361/EC</a>; that provision defines a small enterprise as one employing fewer than 50 people with an annual turnover or annual balance sheet total not exceeding EUR 10 million.</p>
+<p>Paragraph 4 of the same Article refers to Article 6(2) of the Annex to the Recommendation, which aggregates the data of partner and linked enterprises. The aggregation does not apply where it would be disproportionate, taking into account the entity's independence from its linked enterprises in terms of network and information systems and services provided; a small production company controlled by a large group may therefore be in scope even if, on its own, it would not be.</p>
+<p>Size is not the only criterion, however. Article 3(9) allows ACN to include an entity regardless of its size, for example where it is the sole national provider of an essential service or a systemic element of the supply chain of essential or important entities; identification takes place on a proposal from the sector authorities and is notified to the entity, under paragraph 13.</p>
+
+<h2>Can a manufacturer be an essential entity?</h2>
+<p>As a rule, no. Manufacturers in point 5 of Annex II are important entities even when they are large enterprises, because essential status on size grounds is reserved for large enterprises in the highly critical sectors of Annex I.</p>
+<p><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=6&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Article 6 of the NIS decree</a>, which distinguishes essential from important entities, treats as essential, in paragraph 1(a), Annex I entities that exceed the medium-enterprise ceilings; paragraph 3 classifies all other in-scope entities as important. Manufacturing is in Annex II, so a large manufacturer normally remains an important entity.</p>
+<p>There are two exceptions. The first concerns entities identified as critical entities under the decree transposing Directive (EU) 2022/2557 on the resilience of critical entities, which paragraph 1(b) treats as essential regardless of size; the second concerns entities identified under Article 3(9) and (10), which ACN may designate as essential under paragraph 2. The communication received from ACN must therefore be read carefully.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Size of the company</th><th>Position under NIS2</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Micro or small enterprise, calculated at group level</td><td>Out of scope as a general rule, unless identified by ACN (Art. 3(9))</td></tr>
+      <tr><td>Medium-sized enterprise</td><td>Important entity</td></tr>
+      <tr><td>Large enterprise</td><td>Important entity, unless identified as a critical entity or designated as essential by ACN (Art. 6(1)(b) and (2))</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2>Chemicals, food and medical devices, the sectors next to manufacturing</h2>
+<p>Many industrial companies do not carry out point 5 activities but are nonetheless in scope by another route. Annex II provides for two production sectors distinct from manufacturing, namely point 3, on the manufacture, production and distribution of chemicals, and point 4, on the production, processing and distribution of food.</p>
+<p>Point 3 covers undertakings that manufacture substances or distribute substances or mixtures, as well as those that produce articles from substances or mixtures, as defined in Regulation (EC) No 1907/2006 (REACH). Point 4 covers food businesses, as defined in Regulation (EC) No 178/2002, engaged in wholesale distribution and industrial production and processing.</p>
+<p>Medical devices require a further distinction. Subsector (a) of point 5 excludes manufacturers of medical devices considered critical during a public health emergency, which are placed in Annex I among health sector entities; for these manufacturers alone, a large enterprise is an essential entity under Article 6(1)(a).</p>
+
+<h2>What NIS2 obligations do manufacturers have?</h2>
+<p>In-scope manufacturers have the same obligations as any NIS entity. They must register every year on the ACN portal, adopt the baseline security measures of ACN determination no. 379907/2025, notify significant incidents to CSIRT Italia and involve their management bodies in cyber risk management.</p>
+<ul>
+  <li><strong>Registration.</strong> From 1 January to 28 February each year, NIS entities must register or update their registration on the ACN services portal, as stated on the <a href="https://www.acn.gov.it/portale/nis/registrazione" target="_blank" rel="noopener">ACN registration page</a>. The full calendar is in the article on <a href="/risorse/nis2-adempimenti-scadenze">NIS2 obligations and deadlines</a>.</li>
+  <li><strong>Baseline security measures.</strong> According to the <a href="https://www.acn.gov.it/portale/nis/modalita-specifiche-base" target="_blank" rel="noopener">ACN page on baseline arrangements and specifications</a>, within 18 months of the communication of inclusion in the list, important entities adopt the measures in Annex 1 to <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">ACN determination no. 379907/2025</a>, while essential entities adopt those in Annex 2. The measures are explained in the article on <a href="/risorse/misure-sicurezza-base-nis2-acn">NIS2 baseline security measures</a>.</li>
+  <li><strong>Incident notification.</strong> <a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=25&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Article 25 of the NIS decree</a>, which governs incident notification, treats as significant an incident that has caused or is capable of causing severe operational disruption of services or financial loss for the entity, or that has affected other persons by causing considerable material or non-material damage. In that case the company sends CSIRT Italia an early warning within 24 hours, an incident notification within 72 hours and a final report within one month of the notification.</li>
+  <li><strong>Management responsibility.</strong> <a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=23&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Article 23 of the NIS decree</a>, which governs the obligations of management and governing bodies, provides that they approve how security measures are implemented, oversee compliance, are liable for breaches and must follow cybersecurity training. The topic is covered in the article on <a href="/risorse/nis2-organi-di-amministrazione-obblighi-cda">NIS2 and management bodies</a>.</li>
+</ul>
+<p>Breaches are penalised under <a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=5&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=38&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Article 38 of the NIS decree</a>, which governs administrative penalties. For important entities, fines can reach EUR 7 million or 1.4% of worldwide annual turnover in the previous financial year, whichever is higher; for essential entities the maximum is EUR 10 million or 2%.</p>
+
+<h2>Sector authorities and production systems, two practical points</h2>
+<p>The first point concerns the public counterpart. The national competent NIS authority is ACN; <a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=2&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=11&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Article 11 of the NIS decree</a>, which designates the sector authorities, assigns subsectors (b), (c) and (d) of point 5 to the Ministry of Enterprises and Made in Italy and, after consulting the Ministry of Infrastructure and Transport, subsectors (e) and (f), while subsector (a), on medical devices, is assigned to the Ministry of Health. The same Article also assigns the chemicals sector to the Ministry of Enterprises and Made in Italy, after consulting the Ministry of Health, and the food sector to the Ministry of Agriculture, Food Sovereignty and Forests.</p>
+<p>The second point concerns the perimeter of the measures. <a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=24&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Article 24 of the NIS decree</a>, which governs risk management measures, requires an all-hazards approach aimed at protecting network and information systems and their physical environment, and lists business continuity and supply chain security among the minimum elements. The decree does not distinguish between business systems and production systems; in our view, therefore, a manufacturer's risk analysis should not stop at the offices but should also cover networked production lines and remote access by machinery suppliers.</p>
+<p>Finally, anyone who manufactures machinery or equipment with digital elements must also consider Regulation (EU) 2024/2847 on cyber resilience, which concerns products rather than the organisation; the relationship between the two laws is explained in the article on <a href="/risorse/nis2-cyber-resilience-act">NIS2 and the Cyber Resilience Act</a>.</p>
+
+<h2>Conclusions</h2>
+<p>NIS2 does not cover all of manufacturing, but only the six activities in point 5 of Annex II, in addition to the chemicals and food sectors provided for in the same Annex. A company carrying out one of these activities is in scope if, taking its group into account, it exceeds the small-enterprise ceilings, and it is as a rule an important entity. The first step is therefore to check carefully the NACE division of the activity carried out and the size of the group; the second is to organise registration, security measures and the notification procedure, extending the analysis to production systems as well.</p>
+<p>For obligations in detail, see the <a href="/risorse/nis2">complete NIS2 guide</a>.</p>
+
+<p><strong>To check where your company stands</strong>, <a href="/inizia">RegulaeOS's NIS2 gap analysis</a> lets you compare the measures you have adopted with the requirements of the ACN determination and collect all documentary evidence in one place.</p>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Directive (EU) 2022/2555 (NIS2), Annex II, EUR-Lex</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/eli/id/2024/10/01/24G00155/sg" target="_blank" rel="noopener">Legislative Decree no. 138 of 4 September 2024 (NIS decree), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=7&amp;art.flagTipoArticolo=2&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=1&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Annex II (other critical sectors), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=3&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 3 (scope), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=6&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 6 (essential and important entities), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=2&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=11&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 11 (NIS sector authorities), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=23&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 23 (management and governing bodies), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=24&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 24 (risk management measures), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=25&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 25 (incident notification), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=5&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=38&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 38 (administrative penalties), Gazzetta Ufficiale</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32003H0361" target="_blank" rel="noopener">Recommendation 2003/361/EC concerning the definition of SMEs, EUR-Lex</a></li>
+  <li><a href="https://www.acn.gov.it/portale/nis/registrazione" target="_blank" rel="noopener">ACN, Registration</a></li>
+  <li><a href="https://www.acn.gov.it/portale/nis/modalita-specifiche-base" target="_blank" rel="noopener">ACN, Baseline arrangements and specifications</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">ACN determination no. 379907/2025</a></li>
+</ul>
+`,
+    },
+  },
+  {
     slug: "nis2-cyber-resilience-act",
     title: "NIS2 e Cyber Resilience Act, differenze, notifiche e rapporti tra le due norme",
     excerpt:
