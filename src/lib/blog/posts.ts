@@ -38,6 +38,264 @@ export interface BlogPost {
 
 export const POSTS: BlogPost[] = [
   {
+    slug: "enisa-nis2",
+    title: "ENISA e NIS2, il ruolo dell'Agenzia europea per la cibersicurezza e cosa comporta per le imprese",
+    excerpt:
+      "Che cosa fa l'ENISA nella NIS2 e che cosa non fa. Registro dei fornitori digitali, banca dati europea delle vulnerabilità, relazioni di sintesi sugli incidenti, linee guida tecniche e proposta di riforma del 2026, con il rinvio puntuale agli articoli della direttiva e del decreto NIS.",
+    date: "23 novembre 2026",
+    dateISO: "2026-11-23",
+    author: { name: "Umberto Mottola", jobTitle: "Avvocato, CIPP/E" },
+    dateModifiedISO: "2026-11-23",
+    readTime: "8 min",
+    category: "Normativa",
+    tags: ["NIS2", "ENISA", "ENISA NIS2", "direttiva (UE) 2022/2555", "D.Lgs. 138/2024", "banca dati europea delle vulnerabilità", "EUVD", "registro dei soggetti", "regolamento di esecuzione (UE) 2024/2690", "CSIRT Italia", "ACN"],
+    metaTitle: "ENISA e NIS2, ruolo e compiti dell'Agenzia UE",
+    metaDescription:
+      "Il ruolo dell'ENISA nella NIS2. Registro dei fornitori digitali, banca dati delle vulnerabilità, linee guida tecniche e rapporti con ACN e CSIRT Italia.",
+    faqSchema: [
+      {
+        q: "Che cos'è l'ENISA?",
+        a: "L'ENISA è l'Agenzia dell'Unione europea per la cibersicurezza. La direttiva (UE) 2022/2555, ossia la NIS2, le attribuisce compiti di supporto tecnico, di raccolta di informazioni e di coordinamento tra gli Stati membri; tra questi la banca dati europea delle vulnerabilità (art. 12), il segretariato della rete di CSIRT (art. 15) e di EU-CyCLONe (art. 16), la relazione biennale sullo stato della cibersicurezza (art. 18) e il registro dei soggetti (art. 27).",
+      },
+      {
+        q: "L'ENISA può sanzionare le imprese che non rispettano la NIS2?",
+        a: "No. La NIS2 non attribuisce all'ENISA poteri di vigilanza o sanzionatori nei confronti dei soggetti essenziali e importanti. In Italia tali poteri spettano all'Agenzia per la cybersicurezza nazionale, che l'art. 10 del D.Lgs. 138/2024 designa come Autorità nazionale competente NIS e Punto di contatto unico.",
+      },
+      {
+        q: "Gli incidenti NIS2 si notificano all'ENISA?",
+        a: "No. I soggetti italiani notificano gli incidenti significativi al CSIRT Italia, secondo l'art. 25 del decreto NIS. L'ENISA riceve, ogni tre mesi, una relazione di sintesi con dati anonimizzati e aggregati trasmessa dal punto di contatto unico, come prevede l'art. 23, par. 9, della direttiva, e può essere informata degli incidenti che interessano più Stati membri.",
+      },
+      {
+        q: "Che cos'è il registro ENISA previsto dall'art. 27 della NIS2?",
+        a: "È un registro che l'ENISA crea e mantiene per alcuni fornitori digitali, tra cui fornitori di servizi DNS, cloud computing, data center, reti di distribuzione dei contenuti, servizi gestiti e di sicurezza gestiti, mercati online, motori di ricerca e social network. L'ENISA lo alimenta con le informazioni inoltrate dai punti di contatto unici nazionali; in Italia tali soggetti forniscono i dati all'ACN secondo l'art. 7, comma 5, del decreto NIS.",
+      },
+      {
+        q: "Le linee guida tecniche ENISA sulla NIS2 sono obbligatorie?",
+        a: "No. La guida tecnica pubblicata dall'ENISA il 26 giugno 2025 supporta l'attuazione del regolamento di esecuzione (UE) 2024/2690 per i soggetti delle infrastrutture digitali, della gestione dei servizi TIC e dei fornitori digitali. È un documento di orientamento, utile per interpretare le misure e collegarle agli standard, ma non sostituisce gli obblighi fissati dalla legge e dai provvedimenti dell'ACN.",
+      },
+    ],
+    content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · aggiornato al 23 nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In sintesi.</strong> Nella NIS2 l'ENISA, ossia l'Agenzia dell'Unione europea per la cibersicurezza, non vigila sulle imprese e non riceve le loro notifiche; svolge invece compiti tecnici e di coordinamento a livello europeo. Gestisce la banca dati europea delle vulnerabilità, tiene il registro dei principali fornitori digitali, assicura il segretariato della rete di CSIRT e di EU-CyCLONe e pubblica linee guida non vincolanti. In Italia l'interlocutore delle imprese resta l'ACN, con il CSIRT Italia.
+</p>
+
+<p>Il rapporto tra ENISA e NIS2 genera spesso un equivoco. Molte imprese ritengono che l'Agenzia europea sia l'autorità a cui rispondere; in realtà la direttiva (UE) 2022/2555 affida vigilanza e sanzioni alle autorità nazionali e riserva all'ENISA un ruolo di supporto, di raccolta di informazioni e di coordinamento tra gli Stati membri.</p>
+<p>Questo articolo spiega quali compiti la NIS2 assegna all'ENISA, con il rinvio agli articoli del <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">testo ufficiale su EUR-Lex</a>, e quali di questi compiti hanno effetti concreti per le imprese italiane. Per una panoramica completa degli obblighi si rinvia alla <a href="/risorse/nis2">guida alla NIS2</a>; per le scadenze nazionali, alla pagina sullo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>.</p>
+
+<h2>Che cos'è l'ENISA?</h2>
+<p>L'ENISA è l'Agenzia dell'Unione europea per la cibersicurezza. Il suo mandato generale è disciplinato dal regolamento (UE) 2019/881, il cosiddetto Cybersecurity Act; la NIS2 le attribuisce poi compiti specifici, che riguardano soprattutto lo scambio di informazioni, la gestione delle vulnerabilità e il supporto tecnico agli Stati membri e alla Commissione.</p>
+<p>La stessa direttiva richiama il regolamento (UE) 2019/881 in più punti; ad esempio l'art. 18, par. 2, rinvia alle relazioni sulla situazione tecnica della cibersicurezza che l'ENISA elabora a norma dell'art. 7, par. 6, di quel regolamento. La Commissione europea, nel <a href="https://ec.europa.eu/commission/presscorner/api/files/document/print/en/ip_26_105/IP_26_105_EN.pdf" target="_blank" rel="noopener">comunicato del 20 gennaio 2026</a>, descrive l'ENISA come un pilastro dell'ecosistema europeo della cibersicurezza, cresciuto a partire dal primo Cybersecurity Act del 2019.</p>
+
+<h2>Quali compiti assegna la NIS2 all'ENISA?</h2>
+<p>La NIS2 assegna all'ENISA compiti di tre tipi. Compiti propri, come la banca dati europea delle vulnerabilità e il registro dei soggetti; compiti di segretariato e di supporto alle reti di cooperazione tra Stati membri; compiti di analisi e di orientamento, come la relazione biennale sullo stato della cibersicurezza e i documenti sulla normazione.</p>
+<p>La tabella riassume le disposizioni principali della direttiva.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Articolo della NIS2</th><th>Contenuto</th><th>Compito dell'ENISA</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Art. 12, par. 2</td><td>Divulgazione coordinata delle vulnerabilità</td><td>Elabora e mantiene una banca dati europea delle vulnerabilità</td></tr>
+      <tr><td>Art. 14, par. 3</td><td>Gruppo di cooperazione</td><td>Ne è membro, insieme a Stati membri e Commissione</td></tr>
+      <tr><td>Art. 15, par. 2</td><td>Rete di CSIRT</td><td>Ne assicura il segretariato e assiste la cooperazione fra i CSIRT</td></tr>
+      <tr><td>Art. 16, par. 2</td><td>EU-CyCLONe, la rete per la gestione delle crisi informatiche su vasta scala</td><td>Ne assicura il segretariato e sostiene lo scambio sicuro di informazioni</td></tr>
+      <tr><td>Art. 18</td><td>Relazione sullo stato della cibersicurezza nell'Unione</td><td>La pubblica ogni due anni e la presenta al Parlamento europeo</td></tr>
+      <tr><td>Art. 19</td><td>Revisioni tra pari tra Stati membri</td><td>Assiste nella metodologia e partecipa come osservatore</td></tr>
+      <tr><td>Art. 23, par. 9</td><td>Obblighi di segnalazione</td><td>Riceve ogni tre mesi relazioni di sintesi anonimizzate sugli incidenti</td></tr>
+      <tr><td>Art. 25, par. 2</td><td>Normazione</td><td>Elabora documenti di orientamento sulle norme tecniche applicabili</td></tr>
+      <tr><td>Art. 27</td><td>Registro dei soggetti</td><td>Crea e mantiene il registro di alcuni fornitori digitali</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>A questi compiti si aggiungono funzioni di assistenza su richiesta. L'art. 7, par. 4, prevede che l'ENISA assista gli Stati membri nell'elaborazione delle strategie nazionali per la cibersicurezza; l'art. 10, par. 10, consente agli Stati membri di chiederne l'assistenza nello sviluppo dei propri CSIRT; l'art. 29, par. 5, le affida il compito di offrire orientamenti per gli accordi di condivisione delle informazioni tra soggetti.</p>
+
+<h2>L'ENISA vigila sulle imprese italiane?</h2>
+<p>No. La NIS2 non attribuisce all'ENISA poteri di vigilanza, di ispezione o sanzionatori nei confronti dei soggetti essenziali e importanti. Tali poteri spettano alle autorità nazionali; in Italia all'Agenzia per la cybersicurezza nazionale, che è anche il canale attraverso cui le informazioni nazionali raggiungono l'ENISA.</p>
+<p>L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art10" target="_blank" rel="noopener">art. 10 del decreto NIS</a>, che disciplina l'Autorità nazionale competente e il Punto di contatto unico, designa l'ACN in entrambi i ruoli. Come Punto di contatto unico, l'ACN svolge una funzione di collegamento per garantire la cooperazione transfrontaliera con le autorità degli altri Stati membri, la Commissione e l'ENISA.</p>
+<p>Lo stesso vale per gli incidenti. L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">art. 25 del decreto NIS</a>, che disciplina la notifica degli incidenti, individua come destinatario il CSIRT Italia, non l'ENISA. L'Agenzia europea riceve invece, secondo l'art. 23, par. 9, della direttiva, una relazione di sintesi trimestrale dal punto di contatto unico, con dati anonimizzati e aggregati su incidenti significativi, incidenti, minacce informatiche e quasi incidenti; ogni sei mesi ne riferisce al gruppo di cooperazione e alla rete di CSIRT. L'art. 23, par. 6, prevede inoltre che l'ENISA sia informata, se opportuno, degli incidenti significativi che interessano due o più Stati membri.</p>
+<p>Ne consegue che l'impresa non ha, di regola, rapporti diretti con l'ENISA per gli adempimenti NIS2. Fa eccezione, in parte, il registro dei fornitori digitali, di cui si dice nella sezione seguente.</p>
+
+<h2>Il registro ENISA dei fornitori digitali</h2>
+<p>L'art. 27 della direttiva, che disciplina il registro dei soggetti, impone all'ENISA di creare e mantenere un registro di specifiche categorie di fornitori digitali. Si tratta di soggetti che operano per natura in più Stati membri, per i quali è utile una visione europea unitaria.</p>
+<p>Le categorie sono le seguenti.</p>
+<ul>
+  <li>fornitori di servizi DNS, registri dei nomi di dominio di primo livello e soggetti che forniscono servizi di registrazione dei nomi di dominio;</li>
+  <li>fornitori di servizi di cloud computing, di servizi di data center e di reti di distribuzione dei contenuti;</li>
+  <li>fornitori di servizi gestiti e di servizi di sicurezza gestiti;</li>
+  <li>fornitori di mercati online, di motori di ricerca online e di piattaforme di servizi di social network.</li>
+</ul>
+<p>Il registro è alimentato dalle informazioni che le imprese trasmettono alle autorità nazionali e che i punti di contatto unici inoltrano all'ENISA, ai sensi dell'art. 27, par. 4. Le informazioni comprendono, secondo il par. 2, nome, settore e tipo di soggetto, indirizzo dello stabilimento principale e degli altri stabilimenti nell'Unione, dati di contatto, Stati membri in cui il soggetto opera e serie di IP; queste ultime, tuttavia, non sono inoltrate all'ENISA. Su richiesta, l'ENISA consente alle autorità competenti di accedere al registro, tutelando la riservatezza delle informazioni.</p>
+<p>In Italia l'obbligo è recepito dall'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art7" target="_blank" rel="noopener">art. 7 del decreto NIS</a>, che disciplina l'identificazione e l'elencazione dei soggetti. Il comma 5 impone alle stesse categorie di fornitori di comunicare all'ACN, oltre ai dati richiesti a tutti i soggetti, l'indirizzo della sede principale e delle altre sedi nell'Unione o, se non stabiliti nell'Unione, della sede del rappresentante. Il collegamento con la giurisdizione è diretto; l'art. 26, par. 1, lettera b), della direttiva considera infatti questi fornitori sotto la giurisdizione dello Stato membro in cui hanno lo stabilimento principale nell'Unione.</p>
+
+<h2>Che cos'è la banca dati europea delle vulnerabilità?</h2>
+<p>È una banca dati pubblica, gestita dall'ENISA, che raccoglie informazioni sulle vulnerabilità note presenti nei prodotti e nei servizi TIC. La prevede l'art. 12, par. 2, della NIS2; l'ENISA l'ha resa operativa nel 2025 con il nome di European Vulnerability Database, o EUVD, consultabile da chiunque.</p>
+<p>Secondo l'art. 12, par. 2, la banca dati consente ai soggetti, rientranti o meno nella NIS2, e ai loro fornitori di divulgare e registrare su base volontaria le vulnerabilità pubblicamente note. Per ciascuna vulnerabilità contiene tre elementi; la descrizione, i prodotti o servizi interessati con la relativa gravità, e la disponibilità di patch o, in mancanza, gli orientamenti delle autorità o dei CSIRT per attenuare i rischi.</p>
+<p>Con il <a href="https://www.enisa.europa.eu/news/consult-the-european-vulnerability-database-to-enhance-your-digital-security" target="_blank" rel="noopener">comunicato del 13 maggio 2025</a> l'ENISA ha annunciato che la EUVD, sviluppata come previsto dalla NIS2, è operativa. Il comunicato precisa che la EUVD è distinta dalla piattaforma unica di segnalazione prevista dal Cyber Resilience Act, attraverso cui i fabbricanti segnalano le vulnerabilità attivamente sfruttate dei propri prodotti.</p>
+<p>Per un soggetto NIS2 la banca dati è uno strumento pratico. L'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">art. 24 del decreto NIS</a>, che disciplina le misure di gestione dei rischi, include tra gli elementi minimi, al comma 2, lettera e), la gestione e la divulgazione delle vulnerabilità; consultare la EUVD aiuta a monitorare i prodotti in uso e a documentare tale attività.</p>
+
+<h2>Le linee guida tecniche ENISA sulle misure di sicurezza</h2>
+<p>Il 26 giugno 2025 l'ENISA ha pubblicato la <a href="https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance" target="_blank" rel="noopener">NIS2 Technical Implementation Guidance</a>. Il documento fornisce indicazioni tecniche per attuare le misure di sicurezza richieste ai soggetti delle infrastrutture digitali, della gestione dei servizi TIC e dei fornitori digitali, i cui requisiti sono fissati a livello europeo dal regolamento di esecuzione (UE) 2024/2690 della Commissione, del 17 ottobre 2024.</p>
+<p>La base normativa è l'art. 21, par. 5, della direttiva, che imponeva alla Commissione di adottare entro il 17 ottobre 2024 atti di esecuzione con i requisiti tecnici e metodologici delle misure di sicurezza per fornitori di servizi DNS, cloud, data center, servizi gestiti, mercati online e altre categorie; nel prepararli, la Commissione coopera con il gruppo di cooperazione e con l'ENISA.</p>
+<p>La guida è un documento di orientamento, che la direttiva non rende obbligatorio. Per le imprese italiane che non rientrano in quelle categorie, gli obblighi di riferimento restano quelli fissati dall'ACN, illustrati nell'articolo sulle misure di sicurezza di base; la guida ENISA, tuttavia, resta un utile strumento di lettura, poiché offre, come indica la stessa ENISA, consigli pratici, esempi di prove documentali e tavole di corrispondenza tra i requisiti.</p>
+
+<h2>Cosa cambia con la proposta di riforma del 2026?</h2>
+<p>Il 20 gennaio 2026 la Commissione europea ha proposto un pacchetto che comprende un nuovo Cybersecurity Act, con la riforma del mandato dell'ENISA, e una direttiva di modifica mirata della NIS2. Si tratta di proposte, che producono effetti solo dopo l'approvazione del Parlamento europeo e del Consiglio.</p>
+<p>Secondo il <a href="https://ec.europa.eu/commission/presscorner/api/files/document/print/en/ip_26_105/IP_26_105_EN.pdf" target="_blank" rel="noopener">comunicato della Commissione</a>, l'ENISA dovrebbe emettere allerte precoci su minacce e incidenti informatici, sostenere le imprese nella risposta e nel ripristino dopo attacchi ransomware, in cooperazione con Europol e con i CSIRT, e sviluppare un approccio europeo alla gestione delle vulnerabilità. Le modifiche alla NIS2 mirano a semplificare le regole sulla giurisdizione, a razionalizzare la raccolta dei dati sugli attacchi ransomware e a facilitare la vigilanza sui soggetti transfrontalieri, con un ruolo di coordinamento rafforzato dell'ENISA.</p>
+<p>Il comunicato precisa che, una volta adottata la direttiva di modifica, gli Stati membri avranno un anno per recepirla. Lo stato dell'iter legislativo va verificato sui siti istituzionali dell'Unione prima di qualsiasi decisione organizzativa.</p>
+
+<h2>Conclusioni</h2>
+<p>L'ENISA è un attore centrale della NIS2, ma non è l'autorità a cui le imprese rispondono. Gestisce strumenti comuni, come la banca dati europea delle vulnerabilità e il registro dei fornitori digitali, sostiene la cooperazione tra Stati membri e produce analisi e linee guida; vigilanza, notifiche e sanzioni restano invece nazionali, sicché in Italia gli interlocutori sono l'ACN e il <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art15" target="_blank" rel="noopener">CSIRT Italia, disciplinato dall'art. 15 del decreto NIS</a>.</p>
+<p>Per l'impresa il valore pratico dell'ENISA sta negli strumenti che mette a disposizione. La EUVD aiuta a gestire le vulnerabilità, la guida tecnica aiuta a tradurre le misure in controlli concreti, la <a href="https://www.enisa.europa.eu/sites/default/files/2026-11/2026%20Report%20on%20the%20State%20of%20Cybersecurity%20in%20the%20Union%20-%20FINAL.pdf" target="_blank" rel="noopener">relazione 2026 sullo stato della cibersicurezza nell'Unione</a> offre un quadro delle minacce utile per la valutazione dei rischi. Per gli obblighi NIS2 nel dettaglio si rinvia alla <a href="/risorse/nis2">guida completa alla NIS2</a>.</p>
+
+<p><strong>Per verificare a che punto è la tua organizzazione</strong>, <a href="/inizia">la gap analysis NIS2 di RegulaeOS</a> permette di confrontare le misure adottate, compresa la gestione delle vulnerabilità, con i requisiti della determinazione ACN e di raccogliere in un unico posto le prove documentali.</p>
+
+<h2>Fonti</h2>
+<ul>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Direttiva (UE) 2022/2555 (NIS2), EUR-Lex</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art7" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 7 (identificazione ed elencazione dei soggetti), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art10" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 10 (Autorità nazionale competente e Punto di contatto unico), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art15" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 15 (CSIRT Italia), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 24 (misure di gestione dei rischi), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 25 (notifica degli incidenti), Normattiva</a></li>
+  <li><a href="https://www.enisa.europa.eu/news/consult-the-european-vulnerability-database-to-enhance-your-digital-security" target="_blank" rel="noopener">ENISA, comunicato del 13 maggio 2025 sulla European Vulnerability Database</a></li>
+  <li><a href="https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance" target="_blank" rel="noopener">ENISA, NIS2 Technical Implementation Guidance, 26 giugno 2025</a></li>
+  <li><a href="https://www.enisa.europa.eu/sites/default/files/2026-11/2026%20Report%20on%20the%20State%20of%20Cybersecurity%20in%20the%20Union%20-%20FINAL.pdf" target="_blank" rel="noopener">ENISA, 2026 Report on the State of Cybersecurity in the Union</a></li>
+  <li><a href="https://ec.europa.eu/commission/presscorner/api/files/document/print/en/ip_26_105/IP_26_105_EN.pdf" target="_blank" rel="noopener">Commissione europea, comunicato stampa IP/26/105 del 20 gennaio 2026</a></li>
+</ul>
+`,
+    en: {
+      title: "ENISA and NIS2: the role of the EU Agency for Cybersecurity and what it means for companies",
+      excerpt:
+        "What ENISA does under NIS2, and what it does not do. Registry of digital providers, European vulnerability database, incident summary reports, technical guidance and the 2026 reform proposal, with precise references to the articles of the directive and the Italian NIS decree.",
+      date: "23 November 2026",
+      readTime: "8 min",
+      category: "Regulation",
+      tags: ["NIS2", "ENISA", "ENISA NIS2", "Directive (EU) 2022/2555", "Legislative Decree 138/2024", "European vulnerability database", "EUVD", "registry of entities", "Implementing Regulation (EU) 2024/2690", "CSIRT Italia", "ACN"],
+      metaTitle: "ENISA and NIS2: role and tasks of the EU agency",
+      metaDescription:
+        "ENISA's role under NIS2. Registry of digital providers, vulnerability database, technical guidance and how it relates to ACN and CSIRT Italia.",
+      faqSchema: [
+        {
+          q: "What is ENISA?",
+          a: "ENISA is the European Union Agency for Cybersecurity. Directive (EU) 2022/2555, that is NIS2, gives it technical support, information gathering and coordination tasks among Member States; these include the European vulnerability database (Art. 12), the secretariat of the CSIRTs network (Art. 15) and of EU-CyCLONe (Art. 16), the biennial report on the state of cybersecurity (Art. 18) and the registry of entities (Art. 27).",
+        },
+        {
+          q: "Can ENISA fine companies that do not comply with NIS2?",
+          a: "No. NIS2 does not give ENISA supervisory or enforcement powers over essential and important entities. In Italy those powers lie with the National Cybersecurity Agency, which Article 10 of Legislative Decree 138/2024 designates as the national NIS competent authority and single point of contact.",
+        },
+        {
+          q: "Are NIS2 incidents reported to ENISA?",
+          a: "No. Italian entities report significant incidents to CSIRT Italia, under Article 25 of the NIS decree. ENISA receives, every three months, a summary report with anonymised and aggregated data sent by the single point of contact, as provided by Article 23(9) of the directive, and may be informed of incidents affecting more than one Member State.",
+        },
+        {
+          q: "What is the ENISA registry under Article 27 of NIS2?",
+          a: "It is a registry that ENISA creates and maintains for certain digital providers, including providers of DNS, cloud computing, data centre, content delivery network, managed and managed security services, online marketplaces, search engines and social networks. ENISA builds it from information forwarded by national single points of contact; in Italy these entities provide the data to ACN under Article 7(5) of the NIS decree.",
+        },
+        {
+          q: "Is ENISA's NIS2 technical guidance mandatory?",
+          a: "No. The technical guidance published by ENISA on 26 June 2025 supports the implementation of Implementing Regulation (EU) 2024/2690 for entities in digital infrastructure, ICT service management and digital providers. It is a guidance document, useful to interpret the measures and link them to standards, but it does not replace the obligations set by law and by ACN decisions.",
+        },
+      ],
+      content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · updated 23 Nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In short.</strong> Under NIS2, ENISA, the European Union Agency for Cybersecurity, does not supervise companies and does not receive their incident reports; it performs technical and coordination tasks at EU level instead. It runs the European vulnerability database, keeps the registry of the main digital providers, provides the secretariat of the CSIRTs network and of EU-CyCLONe and publishes non-binding guidance. In Italy, companies continue to deal with ACN and CSIRT Italia.
+</p>
+
+<p>The relationship between ENISA and NIS2 is often misunderstood. Many companies assume the EU agency is the authority they answer to; in fact Directive (EU) 2022/2555 entrusts supervision and penalties to national authorities and gives ENISA a role of support, information gathering and coordination among Member States.</p>
+<p>This article explains which tasks NIS2 assigns to ENISA, with references to the articles of the <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">official text on EUR-Lex</a>, and which of them have practical effects for Italian companies. For a full overview of the obligations, see the <a href="/risorse/nis2">NIS2 guide</a>; for national deadlines, see the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">NIS2 implementation status</a>.</p>
+
+<h2>What is ENISA?</h2>
+<p>ENISA is the European Union Agency for Cybersecurity. Its general mandate is governed by Regulation (EU) 2019/881, known as the Cybersecurity Act; NIS2 then gives it specific tasks, mainly concerning information sharing, vulnerability management and technical support to Member States and the Commission.</p>
+<p>The directive itself refers to Regulation (EU) 2019/881 in several places; for example, Article 18(2) refers to the technical reports on the cybersecurity situation that ENISA prepares under Article 7(6) of that regulation. In its <a href="https://ec.europa.eu/commission/presscorner/api/files/document/print/en/ip_26_105/IP_26_105_EN.pdf" target="_blank" rel="noopener">press release of 20 January 2026</a>, the European Commission describes ENISA as a cornerstone of the EU cybersecurity ecosystem, which has grown since the first Cybersecurity Act of 2019.</p>
+
+<h2>What tasks does NIS2 assign to ENISA?</h2>
+<p>NIS2 assigns ENISA three kinds of tasks. Its own tasks, such as the European vulnerability database and the registry of entities; secretariat and support tasks for the cooperation networks among Member States; analysis and guidance tasks, such as the biennial report on the state of cybersecurity and the documents on standardisation.</p>
+<p>The table summarises the main provisions of the directive.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>NIS2 article</th><th>Subject</th><th>ENISA's task</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Art. 12(2)</td><td>Coordinated vulnerability disclosure</td><td>Develops and maintains a European vulnerability database</td></tr>
+      <tr><td>Art. 14(3)</td><td>Cooperation Group</td><td>Is a member, together with Member States and the Commission</td></tr>
+      <tr><td>Art. 15(2)</td><td>CSIRTs network</td><td>Provides the secretariat and supports cooperation among CSIRTs</td></tr>
+      <tr><td>Art. 16(2)</td><td>EU-CyCLONe, the network for managing large-scale cyber crises</td><td>Provides the secretariat and supports secure information sharing</td></tr>
+      <tr><td>Art. 18</td><td>Report on the state of cybersecurity in the Union</td><td>Publishes it every two years and presents it to the European Parliament</td></tr>
+      <tr><td>Art. 19</td><td>Peer reviews among Member States</td><td>Assists with the methodology and takes part as an observer</td></tr>
+      <tr><td>Art. 23(9)</td><td>Reporting obligations</td><td>Receives anonymised summary reports on incidents every three months</td></tr>
+      <tr><td>Art. 25(2)</td><td>Standardisation</td><td>Draws up guidance on the applicable technical standards</td></tr>
+      <tr><td>Art. 27</td><td>Registry of entities</td><td>Creates and maintains the registry of certain digital providers</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>On top of these come assistance functions on request. Article 7(4) provides that ENISA assists Member States in developing national cybersecurity strategies; Article 10(10) allows Member States to request its assistance in developing their CSIRTs; Article 29(5) tasks it with providing guidance for information-sharing arrangements between entities.</p>
+
+<h2>Does ENISA supervise Italian companies?</h2>
+<p>No. NIS2 does not give ENISA supervisory, inspection or enforcement powers over essential and important entities. Those powers lie with national authorities; in Italy with the National Cybersecurity Agency, which is also the channel through which national information reaches ENISA.</p>
+<p><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art10" target="_blank" rel="noopener">Article 10 of the NIS decree</a>, on the competent authority and single point of contact, designates ACN for both roles. As single point of contact, ACN performs a liaison function to ensure cross-border cooperation with the authorities of other Member States, the Commission and ENISA.</p>
+<p>The same applies to incidents. <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">Article 25 of the NIS decree</a>, on incident notification, names CSIRT Italia as the recipient, not ENISA. The EU agency instead receives, under Article 23(9) of the directive, a quarterly summary report from the single point of contact, with anonymised and aggregated data on significant incidents, incidents, cyber threats and near misses; every six months it reports its findings to the Cooperation Group and the CSIRTs network. Article 23(6) also provides that ENISA is informed, where appropriate, of significant incidents affecting two or more Member States.</p>
+<p>As a result, a company does not normally deal directly with ENISA for NIS2 compliance. The registry of digital providers, described in the next section, is a partial exception.</p>
+
+<h2>The ENISA registry of digital providers</h2>
+<p>Article 27 of the directive, on the registry of entities, requires ENISA to create and maintain a registry of specific categories of digital providers. These are entities that by nature operate in several Member States, for which a single EU-wide view is useful.</p>
+<p>The categories are the following.</p>
+<ul>
+  <li>DNS service providers, top-level domain name registries and entities providing domain name registration services;</li>
+  <li>providers of cloud computing services, data centre services and content delivery networks;</li>
+  <li>managed service providers and managed security service providers;</li>
+  <li>providers of online marketplaces, online search engines and social networking services platforms.</li>
+</ul>
+<p>The registry is fed by the information that companies submit to national authorities and that single points of contact forward to ENISA under Article 27(4). Under paragraph 2, the information includes name, sector and type of entity, address of the main establishment and other establishments in the Union, contact details, Member States where the entity provides services and IP ranges; the IP ranges, however, are not forwarded to ENISA. On request, ENISA gives competent authorities access to the registry, while protecting the confidentiality of the information.</p>
+<p>In Italy the obligation is transposed by <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art7" target="_blank" rel="noopener">Article 7 of the NIS decree</a>, on the identification and listing of entities. Paragraph 5 requires the same categories of providers to give ACN, in addition to the data required of all entities, the address of their main establishment and other establishments in the Union or, if not established in the Union, of their representative. The link with jurisdiction is direct; Article 26(1)(b) of the directive places these providers under the jurisdiction of the Member State where they have their main establishment in the Union.</p>
+
+<h2>What is the European vulnerability database?</h2>
+<p>It is a public database, run by ENISA, that collects information on known vulnerabilities in ICT products and services. It is provided for by Article 12(2) of NIS2; ENISA made it operational in 2025 under the name European Vulnerability Database, or EUVD, open to everyone.</p>
+<p>Under Article 12(2), the database allows entities, whether or not they fall under NIS2, and their suppliers to disclose and register publicly known vulnerabilities on a voluntary basis. For each vulnerability it contains three elements; a description, the affected products or services and the severity, and the availability of patches or, where none exist, guidance from authorities or CSIRTs on mitigating the risks.</p>
+<p>In its <a href="https://www.enisa.europa.eu/news/consult-the-european-vulnerability-database-to-enhance-your-digital-security" target="_blank" rel="noopener">press release of 13 May 2025</a>, ENISA announced that the EUVD, developed as provided for by NIS2, is operational. The release specifies that the EUVD is separate from the single reporting platform under the Cyber Resilience Act, through which manufacturers report actively exploited vulnerabilities in their products.</p>
+<p>For a NIS2 entity the database is a practical tool. <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">Article 24 of the NIS decree</a>, on risk management measures, includes vulnerability handling and disclosure among the minimum elements, in paragraph 2(e); consulting the EUVD helps monitor the products in use and document that activity.</p>
+
+<h2>ENISA technical guidance on security measures</h2>
+<p>On 26 June 2025 ENISA published the <a href="https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance" target="_blank" rel="noopener">NIS2 Technical Implementation Guidance</a>. The document provides technical guidance for implementing the security measures required of entities in digital infrastructure, ICT service management and digital providers, whose requirements are set at EU level by Commission Implementing Regulation (EU) 2024/2690 of 17 October 2024.</p>
+<p>The legal basis is Article 21(5) of the directive, which required the Commission to adopt, by 17 October 2024, implementing acts laying down the technical and methodological requirements of the security measures for DNS, cloud, data centre, managed service providers, online marketplaces and other categories; in preparing them, the Commission cooperates with the Cooperation Group and ENISA.</p>
+<p>The guidance is a guidance document, which the directive does not make mandatory. For Italian companies outside those categories, the reference obligations remain those set by ACN, explained in the article on basic security measures; the ENISA guidance nevertheless remains a useful reading aid, since, as ENISA itself states, it offers practical advice, examples of evidence and mappings of security requirements.</p>
+
+<h2>What changes with the 2026 reform proposal?</h2>
+<p>On 20 January 2026 the European Commission proposed a package including a new Cybersecurity Act, reforming ENISA's mandate, and a targeted amending directive for NIS2. These are proposals, which take effect only after approval by the European Parliament and the Council.</p>
+<p>According to the <a href="https://ec.europa.eu/commission/presscorner/api/files/document/print/en/ip_26_105/IP_26_105_EN.pdf" target="_blank" rel="noopener">Commission press release</a>, ENISA would issue early alerts on cyber threats and incidents, support companies in responding to and recovering from ransomware attacks, in cooperation with Europol and CSIRTs, and develop a Union approach to vulnerability management. The NIS2 amendments aim to simplify jurisdictional rules, streamline the collection of data on ransomware attacks and facilitate the supervision of cross-border entities, with a reinforced coordinating role for ENISA.</p>
+<p>The release states that, once the amending directive is adopted, Member States will have one year to transpose it. The status of the legislative procedure should be checked on the EU institutional websites before any organisational decision.</p>
+
+<h2>Conclusions</h2>
+<p>ENISA is a central player in NIS2, but it is not the authority companies answer to. It runs common tools, such as the European vulnerability database and the registry of digital providers, supports cooperation among Member States and produces analysis and guidance; supervision, reporting and penalties remain national, so in Italy the counterparts are ACN and <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art15" target="_blank" rel="noopener">CSIRT Italia, governed by Article 15 of the NIS decree</a>.</p>
+<p>For companies, ENISA's practical value lies in the tools it provides. The EUVD helps manage vulnerabilities, the technical guidance helps turn measures into concrete controls, and the <a href="https://www.enisa.europa.eu/sites/default/files/2026-11/2026%20Report%20on%20the%20State%20of%20Cybersecurity%20in%20the%20Union%20-%20FINAL.pdf" target="_blank" rel="noopener">2026 report on the state of cybersecurity in the Union</a> offers a picture of threats useful for risk assessment. For NIS2 obligations in detail, see the <a href="/risorse/nis2">complete NIS2 guide</a>.</p>
+
+<p><strong>To check where your organisation stands</strong>, <a href="/inizia">the RegulaeOS NIS2 gap analysis</a> lets you compare the measures in place, including vulnerability management, with the requirements of the ACN determination and collect the supporting evidence in one place.</p>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Directive (EU) 2022/2555 (NIS2), EUR-Lex</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art7" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 7 (identification and listing of entities), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art10" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 10 (competent authority and single point of contact), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art15" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 15 (CSIRT Italia), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art24" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 24 (risk management measures), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art25" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 25 (incident notification), Normattiva</a></li>
+  <li><a href="https://www.enisa.europa.eu/news/consult-the-european-vulnerability-database-to-enhance-your-digital-security" target="_blank" rel="noopener">ENISA, press release of 13 May 2025 on the European Vulnerability Database</a></li>
+  <li><a href="https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance" target="_blank" rel="noopener">ENISA, NIS2 Technical Implementation Guidance, 26 June 2025</a></li>
+  <li><a href="https://www.enisa.europa.eu/sites/default/files/2026-11/2026%20Report%20on%20the%20State%20of%20Cybersecurity%20in%20the%20Union%20-%20FINAL.pdf" target="_blank" rel="noopener">ENISA, 2026 Report on the State of Cybersecurity in the Union</a></li>
+  <li><a href="https://ec.europa.eu/commission/presscorner/api/files/document/print/en/ip_26_105/IP_26_105_EN.pdf" target="_blank" rel="noopener">European Commission, press release IP/26/105 of 20 January 2026</a></li>
+</ul>
+`,
+    },
+  },
+  {
     slug: "nis2-cyber-resilience-act",
     title: "NIS2 e Cyber Resilience Act, differenze, notifiche e rapporti tra le due norme",
     excerpt:
