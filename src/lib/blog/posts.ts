@@ -38,6 +38,236 @@ export interface BlogPost {
 
 export const POSTS: BlogPost[] = [
   {
+    slug: "sanzioni-nis2",
+    title: "Sanzioni NIS2, importi, violazioni e responsabilità degli amministratori (art. 38 decreto NIS)",
+    excerpt:
+      "Quanto si rischia se non si rispetta la NIS2. Le due fasce di sanzioni dell'art. 38 del decreto NIS, i minimi e i massimi per soggetti essenziali, importanti e pubbliche amministrazioni, le conseguenze della mancata registrazione, la responsabilità degli amministratori e gli strumenti per chiudere il procedimento.",
+    date: "24 novembre 2026",
+    dateISO: "2026-11-24",
+    author: { name: "Umberto Mottola", jobTitle: "Avvocato, CIPP/E" },
+    dateModifiedISO: "2026-11-24",
+    readTime: "9 min",
+    category: "Normativa",
+    tags: ["NIS2", "sanzioni NIS2", "art. 38 decreto NIS", "D.Lgs. 138/2024", "ACN", "soggetti essenziali", "soggetti importanti", "responsabilità amministratori", "direttiva (UE) 2022/2555"],
+    metaTitle: "Sanzioni NIS2, importi e violazioni (art. 38 decreto NIS)",
+    metaDescription:
+      "Le sanzioni NIS2 in Italia. Importi minimi e massimi, violazioni punite, mancata registrazione, pubbliche amministrazioni e responsabilità degli amministratori.",
+    faqSchema: [
+      {
+        q: "Quali sono le sanzioni NIS2 in Italia?",
+        a: "L'art. 38 del D.Lgs. 138/2024 prevede due fasce. Per la violazione degli obblighi sugli organi di amministrazione, sulle misure di sicurezza e sulla notifica degli incidenti la sanzione arriva a 10 milioni di euro o al 2% del fatturato mondiale per i soggetti essenziali e a 7 milioni o all'1,4% per i soggetti importanti, se l'importo percentuale è superiore. Per le violazioni informative, come la mancata registrazione, il massimo è lo 0,1% del fatturato per gli essenziali e lo 0,07% per gli importanti.",
+      },
+      {
+        q: "Esiste un minimo per le sanzioni NIS2?",
+        a: "Sì. Il comma 9 dell'art. 38 fissa il minimo in un ventesimo del massimo edittale per i soggetti essenziali e in un trentesimo per i soggetti importanti. Se il massimo è di 10 milioni di euro, il minimo è quindi di 500.000 euro; se il massimo è di 7 milioni, il minimo è di circa 233.333 euro.",
+      },
+      {
+        q: "Cosa rischia chi non si è registrato sul portale ACN?",
+        a: "La mancata registrazione è di per sé sanzionata dai commi 10 e 11 dell'art. 38. Inoltre il comma 13 prevede che, in caso di mancata o tardiva registrazione, siano contestate tutte le violazioni dei commi 8 e 10 e si applichi la sanzione prevista per la violazione più grave aumentata fino al triplo.",
+      },
+      {
+        q: "Gli amministratori rispondono personalmente delle violazioni NIS2?",
+        a: "Le sanzioni pecuniarie colpiscono il soggetto. Tuttavia l'art. 38, comma 5, prevede che le persone fisiche che rappresentano o controllano un soggetto essenziale possano essere ritenute responsabili dell'inadempimento; il comma 6 consente all'ACN, se una diffida resta inadempiuta, di disporre verso gli amministratori dei soggetti essenziali e importanti l'incapacità temporanea a svolgere funzioni dirigenziali nel medesimo soggetto.",
+      },
+      {
+        q: "Si può evitare la sanzione NIS2 adeguandosi dopo la contestazione?",
+        a: "Il comma 15 dell'art. 38 prevede l'invito a conformarsi, con un termine perentorio; se il trasgressore si adegua nel termine, il procedimento non prosegue. Lo strumento non si applica in caso di reiterazione né a chi abbia già ricevuto una diffida ai sensi dell'art. 37, comma 6. È prevista inoltre l'estinzione del procedimento con il pagamento in misura ridotta entro sessanta giorni dalla notifica della contestazione.",
+      },
+    ],
+    content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · aggiornato al 24 nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In sintesi.</strong> Le sanzioni NIS2 in Italia sono disciplinate dall'art. 38 del D.Lgs. 138/2024. Le violazioni più gravi, che riguardano organi di amministrazione, misure di sicurezza e notifica degli incidenti, costano fino a 10 milioni di euro o al 2% del fatturato mondiale per i soggetti essenziali e fino a 7 milioni o all'1,4% per gli importanti. Le violazioni informative hanno massimi più bassi; tuttavia la mancata registrazione può triplicare la sanzione.
+</p>
+
+<p>Le sanzioni NIS2 sono la domanda che molte imprese si pongono per prima, spesso prima ancora di chiedersi quali obblighi abbiano. In Italia la materia è regolata dall'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">art. 38 del D.Lgs. 138/2024</a>, il decreto che ha recepito la direttiva (UE) 2022/2555 e che qui chiamiamo decreto NIS. Il testo dell'articolo è in vigore, senza modifiche, dal 16 ottobre 2024.</p>
+<p>Questo articolo spiega quali violazioni sono punite, con quali importi, che cosa cambia per le pubbliche amministrazioni, quando rispondono gli amministratori e come si svolge il procedimento. Per il quadro generale degli obblighi si rinvia alla <a href="/risorse/nis2">guida alla NIS2</a>; per il calendario degli adempimenti, alla pagina sullo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>.</p>
+
+<h2>Quali sanzioni prevede la NIS2 in Italia?</h2>
+<p>Il decreto NIS prevede sanzioni amministrative pecuniarie divise in due fasce, oltre a sanzioni accessorie. La fascia più alta, fino a 10 milioni di euro o al 2% del fatturato mondiale, riguarda gli obblighi sostanziali di sicurezza; la fascia più bassa, espressa in percentuale del fatturato, riguarda gli obblighi informativi e di collaborazione. Le irroga l'ACN, quale Autorità nazionale competente NIS.</p>
+<p>Gli importi massimi derivano dalla direttiva. L'<a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">art. 34 della direttiva (UE) 2022/2555</a>, che fissa le condizioni generali per le sanzioni pecuniarie, chiede agli Stati di prevedere massimi pari almeno a 10 milioni di euro o al 2% del fatturato per i soggetti essenziali e almeno a 7 milioni o all'1,4% per i soggetti importanti, se l'importo percentuale è superiore. Lo stesso articolo, al par. 7, lascia agli Stati la scelta se e in quale misura sanzionare gli enti pubblici; il legislatore italiano ha previsto per loro importi fissi e più bassi.</p>
+<p>Il fatturato si calcola secondo la <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32003H0361" target="_blank" rel="noopener">raccomandazione 2003/361/CE</a>, ossia la raccomandazione della Commissione che definisce micro, piccole e medie imprese. Ne consegue che, di regola, si tiene conto anche dei dati delle imprese associate e collegate, secondo le regole della raccomandazione.</p>
+
+<h2>Quali violazioni sono punite con le sanzioni più alte?</h2>
+<p>Le sanzioni più alte colpiscono le violazioni elencate al comma 8 dell'art. 38. Si tratta degli obblighi degli organi di amministrazione dell'art. 23, delle misure di gestione dei rischi dell'art. 24, della notifica degli incidenti dell'art. 25 e dell'inottemperanza agli ordini e alle diffide dell'ACN previsti dall'art. 37, commi 3 e 4. Per queste violazioni il comma 9 fissa un minimo e un massimo.</p>
+<p>Le violazioni sono quindi due gruppi. Il primo riguarda il cuore della NIS2, ossia l'approvazione e la supervisione delle misure da parte del vertice, l'adozione delle misure di sicurezza e la notifica al CSIRT Italia; il secondo riguarda il mancato rispetto dei provvedimenti con cui l'ACN impone, per esempio, un audit, l'attuazione delle raccomandazioni o l'osservanza di istruzioni vincolanti.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Destinatario</th><th>Massimo</th><th>Minimo</th><th>Base normativa</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Soggetto essenziale</td><td>10 milioni di euro o 2% del fatturato annuo mondiale, se superiore</td><td>Un ventesimo del massimo (500.000 euro se il massimo è di 10 milioni)</td><td>Art. 38, comma 9, lett. a)</td></tr>
+      <tr><td>Soggetto importante</td><td>7 milioni di euro o 1,4% del fatturato annuo mondiale, se superiore</td><td>Un trentesimo del massimo (circa 233.333 euro se il massimo è di 7 milioni)</td><td>Art. 38, comma 9, lett. b)</td></tr>
+      <tr><td>Pubblica amministrazione essenziale</td><td>125.000 euro</td><td>25.000 euro</td><td>Art. 38, comma 9, lett. c)</td></tr>
+      <tr><td>Pubblica amministrazione importante</td><td>Importi della riga precedente ridotti di un terzo</td><td>Importi della riga precedente ridotti di un terzo</td><td>Art. 38, comma 9, lett. d)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Il minimo non è un dettaglio. Poiché la sanzione non può scendere sotto un ventesimo o un trentesimo del massimo, anche una violazione lieve accertata nella fascia alta comporta un importo rilevante; di qui l'importanza degli strumenti deflattivi, di cui si dirà più avanti. Per gli obblighi del vertice si veda anche l'articolo sugli <a href="/risorse/nis2-organi-di-amministrazione-obblighi-cda">obblighi degli organi di amministrazione</a>.</p>
+
+<h2>Quanto costa non registrarsi o non aggiornare i dati sul portale ACN?</h2>
+<p>La mancata registrazione, comunicazione o aggiornamento delle informazioni sulla piattaforma ACN è punita dai commi 10 e 11 dell'art. 38, fino allo 0,1% del fatturato mondiale per i soggetti essenziali e fino allo 0,07% per gli importanti. Tuttavia, se la registrazione manca o è tardiva, il comma 13 impone di contestare tutte le violazioni e di triplicare, al massimo, la sanzione più grave.</p>
+<p>Il comma 10 elenca le violazioni di questa fascia. Vi rientrano gli obblighi di registrazione e aggiornamento dell'art. 7, che disciplina la registrazione dei soggetti sulla piattaforma digitale dell'ACN; la comunicazione dell'elenco delle attività e dei servizi e della loro categorizzazione, prevista dall'art. 30, comma 1; gli obblighi sugli schemi di certificazione, sulla banca dati dei nomi di dominio e le previsioni settoriali degli artt. 27, 29 e 32; infine la mancata collaborazione con l'ACN e con il CSIRT Italia.</p>
+<p>Per i soggetti essenziali e importanti il comma 11 richiama espressamente i minimi del comma 9. La lettera della norma, dunque, affianca un massimo in percentuale molto basso a un minimo calcolato sulla fascia alta; il coordinamento tra i due limiti è un punto che l'applicazione concreta dell'ACN dovrà chiarire. Per le pubbliche amministrazioni essenziali la sanzione va da 10.000 a 50.000 euro, ridotta di un terzo per quelle importanti.</p>
+<p>Il comma 13 è la norma più severa dell'intero articolo. Chi non si registra, infatti, non risponde solo dell'omessa registrazione; gli sono contestate tutte le violazioni dei commi 8 e 10, e si applica la sanzione prevista per la più grave aumentata fino al triplo. Sugli adempimenti di registrazione e categorizzazione si veda la guida alla <a href="/risorse/categorizzazione-nis2-attivita-servizi-art-30">categorizzazione di attività e servizi</a>.</p>
+
+<h2>Sanzioni NIS2 per le pubbliche amministrazioni</h2>
+<p>Le pubbliche amministrazioni dell'allegato III del decreto NIS, che elenca le categorie di pubbliche amministrazioni incluse nell'ambito di applicazione, hanno un regime proprio. Lo stesso regime vale per alcuni soggetti dell'allegato IV partecipati o sottoposti a controllo pubblico, quando individuati secondo l'art. 40, comma 4.</p>
+<p>Le differenze sono tre. In primo luogo le sanzioni sono in cifra fissa, come indicato nella tabella, e non in percentuale del fatturato; in secondo luogo, per la mancata notifica degli incidenti, il comma 14 applica la sanzione solo in caso di reiterazione specifica nell'arco di cinque anni, ma consente all'ACN di esercitare per dodici mesi i poteri di verifica e ispezione dell'art. 36; in terzo luogo la sospensione di certificati e autorizzazioni prevista dal comma 4 non si applica a questi soggetti.</p>
+<p>Per i dipendenti pubblici che esercitano poteri di rappresentanza o di decisione, il comma 7 rinvia alle norme sulla responsabilità dei dipendenti pubblici. La violazione degli obblighi NIS può quindi costituire causa di responsabilità dirigenziale, disciplinare e amministrativo-contabile.</p>
+
+<h2>Gli amministratori rispondono personalmente?</h2>
+<p>Le sanzioni pecuniarie dell'art. 38 sono irrogate al soggetto, non alle persone fisiche. Tuttavia il comma 5 prevede che chi rappresenta, decide o esercita un controllo su un soggetto essenziale assicuri il rispetto del decreto e possa essere ritenuto responsabile dell'inadempimento; il comma 6 aggiunge una sanzione accessoria personale, applicabile anche agli amministratori dei soggetti importanti.</p>
+<p>La sanzione accessoria è l'incapacità a svolgere funzioni dirigenziali all'interno del medesimo soggetto. Presuppone che il soggetto non abbia adempiuto nei termini a una diffida emessa ai sensi dell'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art37" target="_blank" rel="noopener">art. 37 del decreto NIS</a>, che disciplina le misure di esecuzione; colpisce gli organi di amministrazione e direttivi dell'art. 23, l'amministratore delegato e il rappresentante legale, e dura finché il soggetto non pone rimedio alle carenze.</p>
+<p>Per i soli soggetti essenziali il comma 4 prevede una misura ulteriore, sempre dopo una diffida inadempiuta. L'ACN può sospendere temporaneamente, o chiedere all'organismo competente o al giudice di sospendere, un certificato o un'autorizzazione relativi in tutto o in parte ai servizi o alle attività del soggetto, fino a quando le carenze non siano sanate.</p>
+
+<h2>Come si arriva alla sanzione e come si può chiudere il procedimento?</h2>
+<p>La sanzione è l'ultimo passaggio di un'attività di vigilanza più ampia. L'ACN monitora, verifica e ispeziona ai sensi degli artt. 35 e 36, adotta misure di esecuzione ai sensi dell'art. 37 e tiene conto degli esiti di queste attività nel decidere la sanzione. Il decreto prevede però anche strumenti per evitare la sanzione o ridurne l'importo.</p>
+<p>Nel commisurare la sanzione l'ACN applica i criteri dell'<a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art34" target="_blank" rel="noopener">art. 34, comma 6, del decreto NIS</a>, che fissa i principi della vigilanza. I principali sono elencati di seguito.</p>
+<ul>
+  <li>La gravità della violazione; sono considerate gravi, in particolare, le violazioni ripetute, la mancata notifica di incidenti significativi, il mancato rimedio dopo istruzioni vincolanti, l'ostacolo alla vigilanza e le informazioni false o gravemente inesatte.</li>
+  <li>La durata della violazione e i precedenti del soggetto.</li>
+  <li>Il danno causato, incluse le perdite economiche e il numero di utenti interessati.</li>
+  <li>Il dolo o la negligenza, le misure adottate per attenuare il danno, l'adesione a codici di condotta o a certificazioni approvate e il livello di collaborazione con l'ACN.</li>
+</ul>
+<p>Prima di adottare ordini o diffide, l'art. 37, comma 8, impone all'ACN di notificare le conclusioni preliminari e di concedere almeno quindici giorni per le osservazioni, salvo che occorra agire subito per prevenire un incidente. Il comma 3 dell'art. 38 precisa, tuttavia, che l'esercizio dei poteri di esecuzione non impedisce di contestare la violazione e irrogare la sanzione.</p>
+<p>Il comma 15 dell'art. 38 prevede due strumenti deflattivi, le cui modalità di applicazione sono rimesse ai provvedimenti attuativi dell'art. 40, comma 1, lett. c). Il primo è l'invito a conformarsi; se il trasgressore si adegua entro il termine perentorio assegnato, il procedimento non prosegue, ma lo strumento non vale in caso di reiterazione né per chi ha già ricevuto una diffida. Il secondo è il pagamento in misura ridotta, pari a un terzo del massimo o, se più favorevole, al doppio del minimo, entro sessanta giorni dalla notifica della contestazione.</p>
+<p>Infine, il comma 12 regola la reiterazione richiamando l'art. 8-bis della legge 689/1981, ossia la nuova violazione della stessa indole commessa entro cinque anni. In caso di reiterazione specifica la sanzione è aumentata fino al doppio; in caso di reiterazione non specifica si applica la sanzione più grave aumentata fino al triplo.</p>
+
+<h2>Conclusioni</h2>
+<p>Il sistema sanzionatorio NIS2 è costruito per premiare chi si organizza per tempo. Le sanzioni più alte colpiscono la mancata adozione delle misure, la mancata notifica e l'inerzia del vertice; quelle informative sono più basse, ma la mancata registrazione le trasforma in un moltiplicatore di tutte le altre. A ciò si aggiungono, dopo una diffida inadempiuta, l'incapacità temporanea degli amministratori e, per i soggetti essenziali, la sospensione di certificati e autorizzazioni.</p>
+<p>Ne consegue che la prima difesa è documentale. Registrazione e aggiornamento puntuali, misure approvate dal vertice e procedure di notifica collaudate consentono di dimostrare la diligenza richiesta dall'art. 34 e di accedere, se necessario, all'invito a conformarsi. Per gli obblighi nel dettaglio si rinvia alla <a href="/risorse/nis2">guida completa alla NIS2</a> e al <a href="/risorse/nis2-adempimenti-scadenze">calendario degli adempimenti NIS2</a>.</p>
+
+<p><strong>Per verificare a che punto è la tua organizzazione</strong>, <a href="/inizia">la gap analysis NIS2 di RegulaeOS</a> permette di confrontare le misure adottate con i requisiti della determinazione ACN, individuare le lacune che espongono a sanzioni e raccogliere in un unico posto le prove documentali.</p>
+
+<h2>Fonti</h2>
+<ul>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 38 (sanzioni amministrative), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art37" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 37 (misure di esecuzione), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art34" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 34 (principi generali di vigilanza ed esecuzione), Normattiva</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Direttiva (UE) 2022/2555 (NIS2), art. 34, EUR-Lex</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32003H0361" target="_blank" rel="noopener">Raccomandazione 2003/361/CE (definizione di micro, piccole e medie imprese), EUR-Lex</a></li>
+</ul>
+`,
+    en: {
+      title: "NIS2 penalties in Italy: amounts, infringements and directors' liability (Art. 38 of the NIS Decree)",
+      excerpt:
+        "What you risk if you do not comply with NIS2. The two penalty tiers of Article 38 of the Italian NIS Decree, minimum and maximum amounts for essential entities, important entities and public administrations, the consequences of failing to register, directors' liability and the tools to close the proceedings.",
+      date: "24 November 2026",
+      readTime: "9 min",
+      category: "Regulation",
+      tags: ["NIS2", "NIS2 penalties", "Article 38 NIS Decree", "Legislative Decree 138/2024", "ACN", "essential entities", "important entities", "directors' liability", "Directive (EU) 2022/2555"],
+      metaTitle: "NIS2 penalties in Italy: amounts and infringements",
+      metaDescription:
+        "NIS2 penalties in Italy. Minimum and maximum fines, infringements covered, failure to register, public administrations and directors' personal liability.",
+      faqSchema: [
+        {
+          q: "What are the NIS2 penalties in Italy?",
+          a: "Article 38 of Legislative Decree 138/2024 provides for two tiers. Breaches of the obligations on management bodies, security measures and incident notification are punished with fines of up to EUR 10 million or 2% of worldwide turnover for essential entities and up to EUR 7 million or 1.4% for important entities, whichever is higher. For information-related breaches, such as failure to register, the maximum is 0.1% of turnover for essential entities and 0.07% for important entities.",
+        },
+        {
+          q: "Is there a minimum NIS2 fine?",
+          a: "Yes. Paragraph 9 of Article 38 sets the minimum at one twentieth of the statutory maximum for essential entities and one thirtieth for important entities. Where the maximum is EUR 10 million, the minimum is therefore EUR 500,000; where the maximum is EUR 7 million, the minimum is about EUR 233,333.",
+        },
+        {
+          q: "What does an entity that has not registered on the ACN portal risk?",
+          a: "Failure to register is itself punished under paragraphs 10 and 11 of Article 38. In addition, paragraph 13 provides that, in case of failure to register or late registration, all the infringements in paragraphs 8 and 10 are charged and the penalty for the most serious one applies, increased up to three times.",
+        },
+        {
+          q: "Are directors personally liable for NIS2 breaches?",
+          a: "Fines are imposed on the entity. However, Article 38(5) provides that natural persons who represent or control an essential entity may be held liable for the breach; paragraph 6 allows the ACN, where a formal warning is not complied with, to impose on the directors of essential and important entities a temporary ban from exercising managerial functions within the same entity.",
+        },
+        {
+          q: "Can a NIS2 fine be avoided by complying after the breach is charged?",
+          a: "Paragraph 15 of Article 38 provides for an invitation to comply with a mandatory deadline; if the offender complies in time, the proceedings do not continue. This tool does not apply to repeat offences or to entities that have already received a formal warning under Article 37(6). Proceedings can also be closed by paying a reduced amount within sixty days of notification of the charge.",
+        },
+      ],
+      content: `
+<p><em>Umberto Mottola, Lawyer, CIPP/E · updated 24 Nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In short.</strong> NIS2 penalties in Italy are governed by Article 38 of Legislative Decree 138/2024. The most serious breaches, concerning management bodies, security measures and incident notification, cost up to EUR 10 million or 2% of worldwide turnover for essential entities and up to EUR 7 million or 1.4% for important entities. Information-related breaches carry lower maximums; however, failure to register can triple the penalty.
+</p>
+
+<p>NIS2 penalties are the first question many businesses ask, often before asking which obligations apply to them. In Italy the matter is governed by <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">Article 38 of Legislative Decree 138/2024</a>, the decree that transposed Directive (EU) 2022/2555, referred to here as the NIS Decree. The text of the article has been in force, unamended, since 16 October 2024.</p>
+<p>This article explains which breaches are punished, with what amounts, what changes for public administrations, when directors are liable and how the proceedings work. For an overview of the obligations, see the <a href="/risorse/nis2">NIS2 guide</a>; for the compliance calendar, see the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">status of NIS2 implementation</a>.</p>
+
+<h2>What penalties does NIS2 provide for in Italy?</h2>
+<p>The NIS Decree provides for administrative fines in two tiers, in addition to ancillary penalties. The higher tier, up to EUR 10 million or 2% of worldwide turnover, covers the substantive security obligations; the lower tier, expressed as a percentage of turnover, covers information and cooperation duties. Fines are imposed by the ACN, the Italian National Cybersecurity Agency, acting as the national competent authority for NIS.</p>
+<p>The maximum amounts come from the directive. <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Article 34 of Directive (EU) 2022/2555</a>, which sets the general conditions for administrative fines, requires Member States to provide for maximums of at least EUR 10 million or 2% of turnover for essential entities and at least EUR 7 million or 1.4% for important entities, whichever is higher. Paragraph 7 of the same article leaves Member States free to decide whether and to what extent public bodies may be fined; the Italian legislature chose fixed and lower amounts for them.</p>
+<p>Turnover is calculated under <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32003H0361" target="_blank" rel="noopener">Recommendation 2003/361/EC</a>, the Commission recommendation defining micro, small and medium-sized enterprises. As a result, the data of partner and linked enterprises are, as a rule, also taken into account under the rules of the recommendation.</p>
+
+<h2>Which breaches carry the highest penalties?</h2>
+<p>The highest penalties apply to the breaches listed in paragraph 8 of Article 38. These are the obligations of management bodies under Article 23, the risk management measures under Article 24, incident notification under Article 25 and failure to comply with the orders and warnings issued by the ACN under Article 37(3) and (4). For these breaches paragraph 9 sets a minimum and a maximum.</p>
+<p>The breaches therefore fall into two groups. The first concerns the core of NIS2, that is approval and oversight of the measures by senior management, adoption of security measures and notification to CSIRT Italia; the second concerns failure to comply with ACN measures requiring, for example, an audit, implementation of recommendations or compliance with binding instructions.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Addressee</th><th>Maximum</th><th>Minimum</th><th>Legal basis</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Essential entity</td><td>EUR 10 million or 2% of annual worldwide turnover, whichever is higher</td><td>One twentieth of the maximum (EUR 500,000 where the maximum is EUR 10 million)</td><td>Art. 38(9)(a)</td></tr>
+      <tr><td>Important entity</td><td>EUR 7 million or 1.4% of annual worldwide turnover, whichever is higher</td><td>One thirtieth of the maximum (about EUR 233,333 where the maximum is EUR 7 million)</td><td>Art. 38(9)(b)</td></tr>
+      <tr><td>Essential public administration</td><td>EUR 125,000</td><td>EUR 25,000</td><td>Art. 38(9)(c)</td></tr>
+      <tr><td>Important public administration</td><td>Amounts in the previous row reduced by one third</td><td>Amounts in the previous row reduced by one third</td><td>Art. 38(9)(d)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The minimum is not a detail. Since the fine cannot fall below one twentieth or one thirtieth of the maximum, even a minor breach established in the higher tier leads to a significant amount; hence the importance of the settlement tools described below. On senior management duties, see also the article on the <a href="/risorse/nis2-organi-di-amministrazione-obblighi-cda">obligations of management bodies</a>.</p>
+
+<h2>What does failing to register or update data on the ACN portal cost?</h2>
+<p>Failure to register, communicate or update information on the ACN platform is punished under paragraphs 10 and 11 of Article 38, up to 0.1% of worldwide turnover for essential entities and up to 0.07% for important entities. However, where registration is missing or late, paragraph 13 requires all breaches to be charged and the most serious penalty to be increased up to three times.</p>
+<p>Paragraph 10 lists the breaches in this tier. They include the registration and update obligations under Article 7, which governs the registration of entities on the ACN digital platform; communication of the list of activities and services and their categorisation under Article 30(1); the obligations on certification schemes, the domain name registration database and the sector-specific provisions of Articles 27, 29 and 32; and failure to cooperate with the ACN and with CSIRT Italia.</p>
+<p>For essential and important entities, paragraph 11 expressly refers to the minimums in paragraph 9. The wording therefore pairs a very low percentage maximum with a minimum calculated on the higher tier; how the two limits fit together is a point the ACN's practice will need to clarify. For essential public administrations the fine ranges from EUR 10,000 to EUR 50,000, reduced by one third for important ones.</p>
+<p>Paragraph 13 is the strictest rule in the whole article. An entity that fails to register is not liable only for the missing registration; all breaches under paragraphs 8 and 10 are charged, and the penalty for the most serious one applies, increased up to three times. On registration and categorisation, see the guide to the <a href="/risorse/categorizzazione-nis2-attivita-servizi-art-30">categorisation of activities and services</a>.</p>
+
+<h2>NIS2 penalties for public administrations</h2>
+<p>The public administrations in Annex III of the NIS Decree, which lists the categories of public administrations within scope, have their own regime. The same regime applies to certain Annex IV entities that are publicly owned or controlled, where identified under Article 40(4).</p>
+<p>There are three differences. First, fines are fixed amounts, as shown in the table, rather than a percentage of turnover; second, for failure to notify incidents, paragraph 14 applies the fine only in case of a specific repeat offence within five years, but allows the ACN to exercise its verification and inspection powers under Article 36 for twelve months; third, the suspension of certificates and authorisations under paragraph 4 does not apply to these entities.</p>
+<p>For public employees who hold powers of representation or decision, paragraph 7 refers to the rules on the liability of public employees. Breach of NIS obligations may therefore give rise to managerial, disciplinary and administrative-accounting liability.</p>
+
+<h2>Are directors personally liable?</h2>
+<p>The fines under Article 38 are imposed on the entity, not on natural persons. However, paragraph 5 provides that anyone who represents, takes decisions for or controls an essential entity must ensure compliance with the decree and may be held liable for the breach; paragraph 6 adds a personal ancillary penalty, which also applies to directors of important entities.</p>
+<p>The ancillary penalty is a ban from exercising managerial functions within the same entity. It requires that the entity has failed to comply in time with a formal warning issued under <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art37" target="_blank" rel="noopener">Article 37 of the NIS Decree</a>, which governs enforcement measures; it applies to the management and governing bodies under Article 23, the chief executive officer and the legal representative, and lasts until the entity remedies the deficiencies.</p>
+<p>For essential entities only, paragraph 4 provides a further measure, again after a warning has not been complied with. The ACN may temporarily suspend, or ask the competent body or a court to suspend, a certificate or authorisation covering all or part of the entity's services or activities, until the deficiencies are remedied.</p>
+
+<h2>How is a penalty imposed and how can proceedings be closed?</h2>
+<p>The penalty is the last step of a broader supervisory process. The ACN monitors, verifies and inspects under Articles 35 and 36, adopts enforcement measures under Article 37 and takes the results of these activities into account when deciding on a fine. The decree, however, also provides tools to avoid the fine or reduce it.</p>
+<p>When setting the fine, the ACN applies the criteria in <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art34" target="_blank" rel="noopener">Article 34(6) of the NIS Decree</a>, which sets out the principles of supervision. The main ones are listed below.</p>
+<ul>
+  <li>The seriousness of the breach; repeated breaches, failure to notify significant incidents, failure to remedy after binding instructions, obstruction of supervision and false or grossly inaccurate information are considered serious in particular.</li>
+  <li>The duration of the breach and the entity's previous breaches.</li>
+  <li>The damage caused, including economic losses and the number of users affected.</li>
+  <li>Intent or negligence, measures taken to mitigate the damage, adherence to approved codes of conduct or certification schemes and the level of cooperation with the ACN.</li>
+</ul>
+<p>Before adopting orders or warnings, Article 37(8) requires the ACN to notify its preliminary findings and grant at least fifteen days for observations, unless immediate action is needed to prevent an incident. Paragraph 3 of Article 38 makes clear, however, that the exercise of enforcement powers does not prevent the breach from being charged and a fine from being imposed.</p>
+<p>Paragraph 15 of Article 38 provides for two settlement tools, whose detailed rules are left to the implementing measures under Article 40(1)(c). The first is the invitation to comply; if the offender complies within the mandatory deadline, the proceedings do not continue, but the tool does not apply to repeat offences or to those who have already received a warning. The second is payment of a reduced amount, equal to one third of the maximum or, if more favourable, twice the minimum, within sixty days of notification of the charge.</p>
+<p>Finally, paragraph 12 governs repeat offences by referring to Article 8-bis of Law 689/1981, that is a new breach of the same kind committed within five years. For a specific repeat offence the fine is increased up to twice; for a non-specific repeat offence the penalty for the most serious breach applies, increased up to three times.</p>
+
+<h2>Conclusions</h2>
+<p>The NIS2 penalty system is designed to reward those who get organised in time. The highest fines target failure to adopt measures, failure to notify and inaction by senior management; information-related fines are lower, but failure to register turns them into a multiplier of all the others. On top of this, after a warning has not been complied with, come the temporary ban on directors and, for essential entities, the suspension of certificates and authorisations.</p>
+<p>It follows that the first line of defence is documentary. Timely registration and updates, measures approved by senior management and tested notification procedures make it possible to demonstrate the diligence required by Article 34 and, where necessary, to benefit from the invitation to comply. For the obligations in detail, see the <a href="/risorse/nis2">complete NIS2 guide</a> and the <a href="/risorse/nis2-adempimenti-scadenze">NIS2 compliance calendar</a>.</p>
+
+<p><strong>To check where your organisation stands</strong>, <a href="/inizia">the RegulaeOS NIS2 gap analysis</a> lets you compare the measures in place with the requirements of the ACN determination, identify the gaps that expose you to penalties and collect the supporting evidence in one place.</p>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art38" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 38 (administrative penalties), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art37" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 37 (enforcement measures), Normattiva</a></li>
+  <li><a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2024-09-04;138~art34" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 34 (general principles of supervision and enforcement), Normattiva</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Directive (EU) 2022/2555 (NIS2), Art. 34, EUR-Lex</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32003H0361" target="_blank" rel="noopener">Recommendation 2003/361/EC (definition of micro, small and medium-sized enterprises), EUR-Lex</a></li>
+</ul>
+`,
+    },
+  },
+  {
     slug: "nis2-cyber-resilience-act",
     title: "NIS2 e Cyber Resilience Act, differenze, notifiche e rapporti tra le due norme",
     excerpt:
