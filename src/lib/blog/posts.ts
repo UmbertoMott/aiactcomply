@@ -38,6 +38,322 @@ export interface BlogPost {
 
 export const POSTS: BlogPost[] = [
   {
+    slug: "nis2-settore-energia",
+    title: "NIS2 e settore energia, chi rientra e quali obblighi per elettricità, gas, petrolio e idrogeno",
+    excerpt:
+      "L'energia è il primo dei settori ad alta criticità del decreto NIS. Quali imprese elettriche, del gas, del petrolio, del teleriscaldamento e dell'idrogeno rientrano, quando sono soggetti essenziali o importanti, chi vigila, quali obblighi e scadenze si applicano e come si coordina la NIS2 con il codice di rete europeo sulla cibersicurezza dell'energia elettrica.",
+    date: "25 novembre 2026",
+    dateISO: "2026-11-25",
+    author: { name: "Umberto Mottola", jobTitle: "Avvocato, CIPP/E" },
+    dateModifiedISO: "2026-11-25",
+    readTime: "9 min",
+    category: "Normativa",
+    tags: ["NIS2", "NIS2 energia", "settore energia", "D.Lgs. 138/2024", "MASE", "ACN", "CSIRT Italia", "regolamento (UE) 2024/1366", "punti di ricarica"],
+    metaTitle: "NIS2 e settore energia, chi rientra e quali obblighi",
+    metaDescription:
+      "NIS2 nel settore energia. Quali imprese elettriche, del gas, del petrolio e dell'idrogeno rientrano, chi vigila, obblighi, scadenze ACN e sanzioni.",
+    faqSchema: [
+      {
+        q: "La NIS2 si applica alle imprese del settore energia?",
+        a: "Sì. L'energia è il primo dei settori ad alta criticità elencati nell'allegato I del D.Lgs. 138/2024, che ha recepito la NIS2. Vi rientrano, se superano i massimali della piccola impresa, gli operatori dei sottosettori energia elettrica, teleriscaldamento e teleraffrescamento, petrolio, gas e idrogeno; le grandi imprese sono soggetti essenziali, le medie soggetti importanti.",
+      },
+      {
+        q: "Un gestore di colonnine di ricarica rientra nella NIS2?",
+        a: "Può rientrarvi. L'allegato I del decreto NIS include, nel sottosettore energia elettrica, i gestori di punti di ricarica responsabili della gestione e del funzionamento di un punto che fornisce il servizio di ricarica a utenti finali, anche per conto di un fornitore di servizi di mobilità. Occorre poi superare i massimali della piccola impresa, calcolati tenendo conto delle imprese collegate.",
+      },
+      {
+        q: "Chi è l'Autorità di settore NIS per l'energia?",
+        a: "È il Ministero dell'ambiente e della sicurezza energetica, designato dall'art. 11, comma 2, lettera e), del decreto NIS. Il Ministero supporta l'Agenzia per la Cybersicurezza Nazionale, tra l'altro verificando l'elenco dei soggetti NIS del settore, collaborando all'individuazione dei soggetti essenziali e importanti e coordinando i tavoli settoriali.",
+      },
+      {
+        q: "Entro quanto si notifica un incidente NIS2 nel settore energia?",
+        a: "L'art. 25 del decreto NIS prevede una pre-notifica al CSIRT Italia entro 24 ore da quando si è venuti a conoscenza dell'incidente significativo, una notifica entro 72 ore con una valutazione iniziale e una relazione finale entro un mese dalla notifica. Quali incidenti siano significativi lo stabiliscono gli allegati 3 e 4 della determinazione ACN n. 379907/2025.",
+      },
+      {
+        q: "Quali sanzioni rischia un'impresa energetica che non rispetta la NIS2?",
+        a: "L'art. 38 del decreto NIS prevede, per i soggetti essenziali, sanzioni fino a 10 milioni di euro o al 2% del fatturato mondiale annuo, se superiore; per i soggetti importanti, fino a 7 milioni di euro o all'1,4% del fatturato mondiale annuo, se superiore. Gli organi di amministrazione, inoltre, sono responsabili delle violazioni ai sensi dell'art. 23.",
+      },
+    ],
+    content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · aggiornato al 25 nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In sintesi.</strong> L'energia è il primo dei settori ad alta criticità dell'allegato I del decreto NIS, ossia il D.Lgs. 138/2024 che ha recepito la NIS2. Vi rientrano imprese elettriche, gestori di reti e di punti di ricarica, operatori del gas, del petrolio, del teleriscaldamento e dell'idrogeno; le grandi imprese sono soggetti essenziali, le medie soggetti importanti. L'Autorità di settore è il Ministero dell'ambiente e della sicurezza energetica, mentre gli incidenti si notificano al CSIRT Italia.
+</p>
+
+<p>La NIS2 nel settore energia riguarda una platea più ampia di quanto si pensi. Oltre ai grandi produttori e ai gestori delle reti, infatti, il decreto NIS include i fornitori di energia elettrica, gli aggregatori, gli operatori di stoccaggio e i gestori di colonnine di ricarica, purché superino le soglie dimensionali previste.</p>
+<p>Questo articolo spiega chi rientra, come si distingue tra soggetto essenziale e soggetto importante, chi vigila, quali obblighi si applicano e quali scadenze sono in corso. Per il quadro generale si rinvia alla <a href="/risorse/nis2">guida alla NIS2</a>; per il calendario nazionale aggiornato, alla pagina sullo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>.</p>
+
+<h2>Quali imprese del settore energia rientrano nella NIS2?</h2>
+<p>Rientrano nella NIS2 le imprese dei cinque sottosettori elencati al punto 1 dell'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=7&amp;art.flagTipoArticolo=1&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=1&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">allegato I del decreto NIS</a>, ossia energia elettrica, teleriscaldamento e teleraffrescamento, petrolio, gas e idrogeno, che superano i massimali della piccola impresa. L'allegato, dedicato ai settori ad alta criticità, individua per ciascun sottosettore le tipologie di soggetto.</p>
+<p>La tabella riassume le tipologie previste dall'allegato I.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Sottosettore</th><th>Tipologie di soggetto</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Energia elettrica</td><td>Imprese elettriche che svolgono attività di fornitura; gestori dei sistemi di distribuzione e di trasmissione; produttori; gestori del mercato elettrico designati; partecipanti al mercato che forniscono servizi di aggregazione, gestione della domanda o stoccaggio; gestori di punti di ricarica che forniscono il servizio a utenti finali</td></tr>
+      <tr><td>Teleriscaldamento e teleraffrescamento</td><td>Gestori di teleriscaldamento o teleraffrescamento come definiti dalla direttiva (UE) 2018/2001</td></tr>
+      <tr><td>Petrolio</td><td>Gestori di oleodotti; gestori di impianti di produzione, raffinazione, trattamento, deposito e trasporto di petrolio; organismi centrali di stoccaggio</td></tr>
+      <tr><td>Gas</td><td>Imprese fornitrici; gestori dei sistemi di distribuzione e di trasporto; gestori degli impianti di stoccaggio e dei sistemi GNL; imprese di gas naturale; gestori di impianti di raffinazione e trattamento di gas naturale</td></tr>
+      <tr><td>Idrogeno</td><td>Gestori di impianti di produzione, stoccaggio e trasporto di idrogeno</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Le definizioni rinviano, per l'energia elettrica, alla direttiva (UE) 2019/944 e al regolamento (UE) 2019/943 e, per il gas, alla direttiva 2009/73/CE. Ne consegue che la qualificazione dipende dall'attività effettivamente svolta, non dalla sola denominazione sociale. Un operatore di colonnine di ricarica aperte agli utenti finali, per esempio, rientra nel sottosettore dell'energia elettrica anche se non produce né vende energia nel senso tradizionale.</p>
+
+<h2>Quando un'impresa energetica è soggetto essenziale o importante?</h2>
+<p>Un'impresa energetica è soggetto essenziale quando supera i massimali della media impresa, ossia quando è una grande impresa; è soggetto importante quando è una media impresa. Lo stabilisce l'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=6&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">art. 6 del decreto NIS</a>, che distingue le due categorie, mentre l'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=3&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">art. 3</a>, che definisce l'ambito di applicazione, esclude in linea di principio piccole e microimprese.</p>
+<p>Le soglie sono quelle della raccomandazione 2003/361/CE. È media impresa quella che occupa meno di 250 persone e ha un fatturato annuo non superiore a 50 milioni di euro oppure un totale di bilancio non superiore a 43 milioni; è piccola impresa quella che occupa meno di 50 persone e ha un fatturato o un totale di bilancio non superiore a 10 milioni.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Dimensione dell'impresa</th><th>Qualifica NIS2</th><th>Sanzione massima (art. 38)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Grande impresa, oltre i massimali della media impresa</td><td>Soggetto essenziale</td><td>10 milioni di euro o 2% del fatturato mondiale annuo, se superiore</td></tr>
+      <tr><td>Media impresa</td><td>Soggetto importante</td><td>7 milioni di euro o 1,4% del fatturato mondiale annuo, se superiore</td></tr>
+      <tr><td>Piccola impresa o microimpresa</td><td>In linea di principio esclusa</td><td>Non applicabile, salvo i casi particolari previsti dal decreto</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Due eccezioni meritano attenzione. In primo luogo, l'art. 6, comma 1, lettera b), qualifica come essenziali, indipendentemente dalle dimensioni, i soggetti individuati come critici ai sensi del decreto che recepisce la direttiva (UE) 2022/2557 sulla resilienza dei soggetti critici; in secondo luogo, il comma 2 dello stesso articolo consente all'autorità di individuare ulteriori soggetti essenziali nei casi previsti dall'art. 3.</p>
+<p>Conta, inoltre, la struttura del gruppo. L'art. 3, comma 4, impone di calcolare le dimensioni tenendo conto delle imprese collegate, salvo che ciò non sia proporzionato in ragione dell'indipendenza del soggetto quanto a sistemi informativi, reti e servizi. Il punto è rilevante nel settore energia, dove gli impianti sono spesso intestati a società veicolo di piccole dimensioni; queste, infatti, possono superare le soglie per effetto del gruppo cui appartengono.</p>
+
+<h2>Chi vigila sulle imprese energetiche soggette alla NIS2?</h2>
+<p>Sulle imprese energetiche operano due autorità con ruoli distinti. L'Agenzia per la Cybersicurezza Nazionale (ACN) è l'Autorità nazionale competente NIS, che gestisce la piattaforma di registrazione e adotta le determinazioni attuative; il Ministero dell'ambiente e della sicurezza energetica (MASE) è l'Autorità di settore per l'energia, designata dall'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=2&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=11&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">art. 11, comma 2, lettera e), del decreto NIS</a>.</p>
+<p>Il comma 4 dello stesso articolo elenca i compiti dell'Autorità di settore. Il MASE, in particolare, verifica l'elenco dei soggetti NIS del settore, supporta l'individuazione dei soggetti essenziali e importanti, individua i soggetti cui si applicano le deroghe dell'art. 3, comma 4, sulle imprese collegate, istituisce e coordina i tavoli settoriali e partecipa alle attività del Gruppo di cooperazione NIS a livello europeo.</p>
+<p>Il MASE svolge lo stesso ruolo anche per la fornitura di acqua potabile, le acque reflue e la gestione dei rifiuti. Ne consegue che le multiutility attive in più di questi settori hanno, di regola, un unico interlocutore ministeriale, pur dovendo valutare la propria posizione per ciascuna attività.</p>
+
+<h2>Quali obblighi NIS2 si applicano al settore energia?</h2>
+<p>Gli obblighi sono quelli comuni a tutti i soggetti NIS, ossia registrazione annuale, misure di gestione dei rischi, notifica degli incidenti e responsabilità degli organi di amministrazione. Il decreto NIS non prevede un regime separato per l'energia; cambia, piuttosto, il numero delle misure da adottare, più ampio per i soggetti essenziali.</p>
+<p>Gli obblighi principali sono i seguenti:</p>
+<ul>
+  <li><strong>registrazione</strong>; l'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=7&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">art. 7, comma 1</a>, che disciplina la registrazione, impone di registrarsi o aggiornare la registrazione sulla piattaforma dell'ACN dal 1 gennaio al 28 febbraio di ogni anno;</li>
+  <li><strong>misure di gestione dei rischi</strong>; l'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=24&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">art. 24</a> chiede misure tecniche, operative e organizzative adeguate e proporzionate, basate su un approccio multi-rischio che protegga i sistemi informativi e di rete e il loro ambiente fisico, comprese la continuità operativa, la sicurezza della catena di approvvigionamento e l'autenticazione a più fattori;</li>
+  <li><strong>organi di amministrazione</strong>; l'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=23&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">art. 23</a> stabilisce che approvino le modalità di attuazione delle misure, ne sovrintendano l'implementazione, rispondano delle violazioni e seguano una formazione in materia di sicurezza informatica;</li>
+  <li><strong>notifica degli incidenti</strong>; l'<a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=25&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">art. 25</a> impone di notificare al CSIRT Italia gli incidenti significativi, con una pre-notifica entro 24 ore, una notifica entro 72 ore e una relazione finale entro un mese dalla notifica.</li>
+</ul>
+<p>Il contenuto concreto delle misure è fissato dalla <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">determinazione ACN n. 379907 del 19 dicembre 2025</a>, che si applica dal 15 gennaio 2026. L'allegato 1 contiene le misure di base per i soggetti importanti e l'allegato 2 quelle per i soggetti essenziali; gli allegati 3 e 4, del pari, descrivono gli incidenti significativi di base da notificare.</p>
+<p>Nel settore energia conviene includere nell'analisi dei rischi anche i sistemi che controllano impianti e reti, e non soltanto i sistemi d'ufficio. L'art. 24, infatti, riferisce le misure a tutti i sistemi informativi e di rete utilizzati nell'attività o nella fornitura dei servizi, e chiede di proteggerne anche l'ambiente fisico.</p>
+
+<h2>NIS2 e codice di rete sulla cibersicurezza dell'energia elettrica</h2>
+<p>Per l'energia elettrica esiste una disciplina europea ulteriore, il <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32024R1366" target="_blank" rel="noopener">regolamento delegato (UE) 2024/1366</a> dell'11 marzo 2024, che istituisce un codice di rete per la cibersicurezza dei flussi transfrontalieri di energia elettrica. Il codice si aggiunge alla NIS2 e non la sostituisce; si applica, infatti, solo ai soggetti che le autorità competenti individuano come ad alto impatto o a impatto critico.</p>
+<p>L'art. 2 del regolamento, che ne definisce l'ambito, comprende tra l'altro le imprese elettriche, i gestori del mercato elettrico designati, i responsabili del bilanciamento, i gestori di punti di ricarica e i prestatori di servizi di sicurezza gestiti. L'individuazione avviene secondo l'art. 24, sulla base di un indice che misura le conseguenze di un attacco informatico sui flussi transfrontalieri.</p>
+<p>Il considerando 3 chiarisce che il regolamento integra le disposizioni della direttiva (UE) 2022/2555 relative al settore dell'energia elettrica. Il considerando 15, inoltre, prevede che le autorità competenti possano considerare la conformità all'uno come garanzia della conformità ai requisiti corrispondenti dell'altra, e viceversa; tuttavia, si tratta di una facoltà, sicché la conformità al codice di rete non esonera automaticamente dagli obblighi del decreto NIS.</p>
+
+<h2>Quali scadenze NIS2 riguardano oggi le imprese energetiche?</h2>
+<p>Le scadenze dipendono dall'anno in cui l'impresa ha ricevuto la comunicazione di inserimento nell'elenco dei soggetti NIS. Per i soggetti inseriti nel 2025 i termini decorrono dalla comunicazione; per quelli inseriti nel 2026, invece, la <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_misuresicurezza-v4_post" target="_blank" rel="noopener">determinazione ACN del 13 aprile 2026 (n. 127434/2026)</a> fissa date precise.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Termine</th><th>Chi</th><th>Adempimento</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>9 mesi dalla comunicazione di inserimento</td><td>Soggetti inseriti nell'elenco nel 2025</td><td>Notificare gli incidenti significativi di base (art. 3 della determinazione n. 379907/2025)</td></tr>
+      <tr><td>18 mesi dalla comunicazione di inserimento</td><td>Soggetti inseriti nell'elenco nel 2025</td><td>Adottare le misure di sicurezza di base degli allegati 1 e 2</td></tr>
+      <tr><td>1 gennaio 2027</td><td>Soggetti inseriti nell'elenco nel 2026</td><td>Inizia l'obbligo di notifica degli incidenti significativi</td></tr>
+      <tr><td>1 gennaio - 28 febbraio 2027</td><td>Tutti i soggetti NIS</td><td>Registrazione o aggiornamento annuale sulla piattaforma ACN</td></tr>
+      <tr><td>31 luglio 2027</td><td>Soggetti inseriti nell'elenco nel 2026</td><td>Adottare le misure di sicurezza di base degli allegati 1 e 2</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>In concreto, un operatore energetico dovrebbe muoversi in questo ordine:</p>
+<ol>
+  <li>verificare, attività per attività, se rientra in uno dei sottosettori dell'allegato I e calcolare le dimensioni tenendo conto del gruppo;</li>
+  <li>controllare la registrazione sulla piattaforma ACN in vista della finestra che si apre il 1 gennaio 2027;</li>
+  <li>confrontare le misure adottate con l'allegato della determinazione n. 379907/2025 applicabile alla propria categoria, raccogliendo le prove documentali;</li>
+  <li>predisporre la procedura di notifica al CSIRT Italia, coordinandola con gli eventuali obblighi derivanti dal codice di rete per l'energia elettrica;</li>
+  <li>far approvare le misure dall'organo di amministrazione e pianificarne la formazione.</li>
+</ol>
+
+<h2>Conclusioni</h2>
+<p>Nel settore energia la NIS2 non riguarda soltanto i grandi operatori di rete. Aggregatori, operatori di stoccaggio, gestori di punti di ricarica e società veicolo dei gruppi energetici possono rientrarvi, sicché la prima verifica da compiere è quella sull'ambito di applicazione, condotta sull'attività effettiva e sulle dimensioni del gruppo.</p>
+<p>Chiarito l'inquadramento, gli obblighi sono quelli comuni a tutti i soggetti NIS, declinati dalla determinazione ACN in requisiti verificabili. Per gli operatori elettrici, poi, occorre coordinare la NIS2 con il codice di rete europeo, evitando di duplicare procedure e controlli.</p>
+
+<p><strong>Per sapere a che punto è la tua impresa energetica</strong>, <a href="/inizia">la gap analysis NIS2 di RegulaeOS</a> permette di verificare l'inquadramento, confrontare le misure adottate con i requisiti degli allegati della determinazione ACN e raccogliere le prove documentali per ciascuno.</p>
+
+<h2>Fonti</h2>
+<ul>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=7&amp;art.flagTipoArticolo=1&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=1&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, allegato I (settori ad alta criticità), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=3&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 3 (ambito di applicazione), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=6&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 6 (soggetti essenziali e soggetti importanti), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=7&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 7 (registrazione), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=2&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=11&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 11 (Autorità di settore NIS), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=23&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 23 (organi di amministrazione e direttivi), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=24&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 24 (misure di gestione dei rischi), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=25&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 25 (notifica degli incidenti), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=5&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=38&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">D.Lgs. 138/2024, art. 38 (sanzioni amministrative), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">ACN, determinazione n. 379907/2025, specifiche di base</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_misuresicurezza-v4_post" target="_blank" rel="noopener">ACN, determinazione n. 127434/2026, termini per i soggetti inseriti nell'elenco nel 2026</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32024R1366" target="_blank" rel="noopener">Regolamento delegato (UE) 2024/1366, codice di rete sulla cibersicurezza dei flussi transfrontalieri di energia elettrica, EUR-Lex</a></li>
+</ul>
+`,
+    en: {
+      title: "NIS2 and the energy sector: who is covered and what obligations apply to electricity, gas, oil and hydrogen",
+      excerpt:
+        "Energy is the first of the highly critical sectors in the Italian NIS decree. Which electricity, gas, oil, district heating and hydrogen undertakings are covered, when they are essential or important entities, who supervises them, which obligations and deadlines apply and how NIS2 interacts with the EU network code on cybersecurity for electricity.",
+      date: "25 November 2026",
+      readTime: "9 min",
+      category: "Regulation",
+      tags: ["NIS2", "NIS2 energy", "energy sector", "Legislative Decree 138/2024", "MASE", "ACN", "CSIRT Italia", "Regulation (EU) 2024/1366", "recharging points"],
+      metaTitle: "NIS2 and the energy sector: who is covered",
+      metaDescription:
+        "NIS2 in the energy sector. Which electricity, gas, oil and hydrogen undertakings are covered, who supervises them, obligations, ACN deadlines and penalties.",
+      faqSchema: [
+        {
+          q: "Does NIS2 apply to energy companies?",
+          a: "Yes. Energy is the first of the highly critical sectors listed in Annex I to Legislative Decree 138/2024, which transposed NIS2 in Italy. Operators in the electricity, district heating and cooling, oil, gas and hydrogen subsectors are covered if they exceed the ceilings for small enterprises; large enterprises are essential entities and medium-sized ones are important entities.",
+        },
+        {
+          q: "Is an EV charging point operator covered by NIS2?",
+          a: "It may be. Annex I to the NIS decree includes, in the electricity subsector, operators of recharging points responsible for the management and operation of a recharging point providing a recharging service to end users, including on behalf of a mobility service provider. The operator must also exceed the small enterprise ceilings, calculated taking linked enterprises into account.",
+        },
+        {
+          q: "Who is the NIS sector authority for energy in Italy?",
+          a: "The Ministry of the Environment and Energy Security (MASE), designated by Article 11(2)(e) of the NIS decree. The Ministry supports the National Cybersecurity Agency by, among other things, verifying the list of NIS entities in the sector, helping to identify essential and important entities and coordinating sector working groups.",
+        },
+        {
+          q: "How quickly must an energy company report a NIS2 incident?",
+          a: "Article 25 of the NIS decree requires an early warning to CSIRT Italia within 24 hours of becoming aware of a significant incident, an incident notification within 72 hours with an initial assessment, and a final report within one month of the notification. Which incidents are significant is set out in Annexes 3 and 4 to ACN determination no. 379907/2025.",
+        },
+        {
+          q: "What penalties does an energy company face for breaching NIS2?",
+          a: "Article 38 of the NIS decree provides, for essential entities, fines of up to EUR 10 million or 2% of total worldwide annual turnover, whichever is higher; for important entities, up to EUR 7 million or 1.4% of worldwide annual turnover, whichever is higher. Management bodies are also liable for infringements under Article 23.",
+        },
+      ],
+      content: `
+<p><em>Umberto Mottola, Attorney, CIPP/E · updated 25 Nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In brief.</strong> Energy is the first of the highly critical sectors in Annex I to the NIS decree, that is Legislative Decree 138/2024, which transposed NIS2 in Italy. It covers electricity undertakings, network and recharging point operators, and gas, oil, district heating and hydrogen operators; large enterprises are essential entities, medium-sized ones important entities. The sector authority is the Ministry of the Environment and Energy Security, while incidents are reported to CSIRT Italia.
+</p>
+
+<p>NIS2 in the energy sector reaches further than many expect. Besides large generators and network operators, the NIS decree also covers electricity suppliers, aggregators, storage operators and EV charging point operators, provided they exceed the size thresholds.</p>
+<p>This article explains who is covered, how essential and important entities are distinguished, who supervises them, which obligations apply and which deadlines are running. For the general framework see our <a href="/risorse/nis2">NIS2 guide</a>; for the up-to-date national calendar, see the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">NIS2 implementation status</a>.</p>
+
+<h2>Which energy companies are covered by NIS2?</h2>
+<p>NIS2 covers undertakings in the five subsectors listed in point 1 of <a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=7&amp;art.flagTipoArticolo=1&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=1&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Annex I to the NIS decree</a>, namely electricity, district heating and cooling, oil, gas and hydrogen, that exceed the ceilings for small enterprises. The annex, devoted to highly critical sectors, identifies the types of entity for each subsector.</p>
+<p>The table summarises the types of entity listed in Annex I.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Subsector</th><th>Types of entity</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Electricity</td><td>Electricity undertakings carrying out supply; distribution and transmission system operators; producers; nominated electricity market operators; market participants providing aggregation, demand response or energy storage services; operators of recharging points providing a recharging service to end users</td></tr>
+      <tr><td>District heating and cooling</td><td>Operators of district heating or district cooling as defined in Directive (EU) 2018/2001</td></tr>
+      <tr><td>Oil</td><td>Operators of oil transmission pipelines; operators of oil production, refining and treatment facilities, storage and transmission; central stockholding entities</td></tr>
+      <tr><td>Gas</td><td>Supply undertakings; distribution and transmission system operators; storage system operators and LNG system operators; natural gas undertakings; operators of natural gas refining and treatment facilities</td></tr>
+      <tr><td>Hydrogen</td><td>Operators of hydrogen production, storage and transmission</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The definitions refer, for electricity, to Directive (EU) 2019/944 and Regulation (EU) 2019/943 and, for gas, to Directive 2009/73/EC. It follows that classification depends on the activity actually carried out, not merely on the company name. An operator of charging points open to end users, for example, falls within the electricity subsector even if it does not generate or sell energy in the traditional sense.</p>
+
+<h2>When is an energy company an essential or an important entity?</h2>
+<p>An energy company is an essential entity when it exceeds the ceilings for medium-sized enterprises, that is when it is a large enterprise; it is an important entity when it is a medium-sized enterprise. This follows from <a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=6&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Article 6 of the NIS decree</a>, which distinguishes the two categories, while <a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=3&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Article 3</a>, which sets the scope, in principle excludes small and micro enterprises.</p>
+<p>The thresholds are those of Recommendation 2003/361/EC. A medium-sized enterprise employs fewer than 250 persons and has an annual turnover not exceeding EUR 50 million or an annual balance sheet total not exceeding EUR 43 million; a small enterprise employs fewer than 50 persons and has a turnover or balance sheet total not exceeding EUR 10 million.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Company size</th><th>NIS2 status</th><th>Maximum fine (Art. 38)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Large enterprise, above the medium-sized ceilings</td><td>Essential entity</td><td>EUR 10 million or 2% of worldwide annual turnover, whichever is higher</td></tr>
+      <tr><td>Medium-sized enterprise</td><td>Important entity</td><td>EUR 7 million or 1.4% of worldwide annual turnover, whichever is higher</td></tr>
+      <tr><td>Small or micro enterprise</td><td>In principle excluded</td><td>Not applicable, save for the special cases provided by the decree</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Two exceptions deserve attention. First, Article 6(1)(b) classifies as essential, regardless of size, entities identified as critical under the decree transposing Directive (EU) 2022/2557 on the resilience of critical entities; second, paragraph 2 of the same article allows the authority to identify further essential entities in the cases provided by Article 3.</p>
+<p>Group structure also matters. Article 3(4) requires size to be calculated taking linked enterprises into account, unless this is disproportionate given the entity's independence in terms of information systems, networks and services. This is relevant in the energy sector, where plants are often held by small special purpose vehicles; these may exceed the thresholds because of the group they belong to.</p>
+
+<h2>Who supervises energy companies subject to NIS2?</h2>
+<p>Two authorities with distinct roles are involved. The National Cybersecurity Agency (ACN) is the national competent NIS authority, which runs the registration platform and adopts the implementing determinations; the Ministry of the Environment and Energy Security (MASE) is the sector authority for energy, designated by <a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=2&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=11&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Article 11(2)(e) of the NIS decree</a>.</p>
+<p>Paragraph 4 of the same article lists the sector authority's tasks. MASE, in particular, verifies the list of NIS entities in the sector, supports the identification of essential and important entities, identifies the entities to which the derogations of Article 3(4) on linked enterprises apply, sets up and coordinates sector working groups and takes part in the activities of the NIS Cooperation Group at EU level.</p>
+<p>MASE plays the same role for drinking water, waste water and waste management. As a result, multi-utilities active in several of these sectors generally deal with a single ministry, although they must assess their position for each activity.</p>
+
+<h2>Which NIS2 obligations apply to the energy sector?</h2>
+<p>The obligations are those common to all NIS entities, namely annual registration, risk-management measures, incident reporting and accountability of management bodies. The NIS decree has no separate regime for energy; what changes is the number of measures to adopt, which is larger for essential entities.</p>
+<p>The main obligations are the following:</p>
+<ul>
+  <li><strong>registration</strong>; <a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=7&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Article 7(1)</a>, which governs registration, requires entities to register or update their registration on the ACN platform between 1 January and 28 February each year;</li>
+  <li><strong>risk-management measures</strong>; <a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=24&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Article 24</a> requires appropriate and proportionate technical, operational and organisational measures, based on an all-hazards approach protecting network and information systems and their physical environment, including business continuity, supply chain security and multi-factor authentication;</li>
+  <li><strong>management bodies</strong>; <a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=23&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Article 23</a> provides that they approve how the measures are implemented, oversee their implementation, are liable for infringements and follow cybersecurity training;</li>
+  <li><strong>incident reporting</strong>; <a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=25&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Article 25</a> requires significant incidents to be reported to CSIRT Italia, with an early warning within 24 hours, an incident notification within 72 hours and a final report within one month of the notification.</li>
+</ul>
+<p>The specific content of the measures is set by <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">ACN determination no. 379907 of 19 December 2025</a>, applicable from 15 January 2026. Annex 1 contains the baseline measures for important entities and Annex 2 those for essential entities; Annexes 3 and 4 describe the baseline significant incidents to be reported.</p>
+<p>In the energy sector the risk analysis should also cover the systems that control plants and networks, not only office systems. Article 24 refers the measures to all network and information systems used in the entity's activities or in the provision of its services, and requires their physical environment to be protected as well.</p>
+
+<h2>NIS2 and the network code on cybersecurity for electricity</h2>
+<p>For electricity there is an additional EU framework, <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32024R1366" target="_blank" rel="noopener">Delegated Regulation (EU) 2024/1366</a> of 11 March 2024, which establishes a network code on cybersecurity aspects of cross-border electricity flows. The code adds to NIS2 and does not replace it; it applies only to entities that the competent authorities identify as high-impact or critical-impact.</p>
+<p>Article 2 of the regulation, which sets its scope, includes among others electricity undertakings, nominated electricity market operators, balance responsible parties, recharging point operators and managed security service providers. Identification takes place under Article 24, on the basis of an index measuring the consequences of a cyberattack on cross-border electricity flows.</p>
+<p>Recital 3 states that the regulation supplements the provisions of Directive (EU) 2022/2555 relating to the electricity sector. Recital 15 adds that competent authorities could consider compliance with one as assurance of compliance with the corresponding requirements of the other, and vice versa; this is, however, an option, so compliance with the network code does not automatically discharge the obligations under the NIS decree.</p>
+
+<h2>Which NIS2 deadlines currently affect energy companies?</h2>
+<p>Deadlines depend on the year in which the company received the notice of inclusion in the list of NIS entities. For entities added in 2025 the deadlines run from that notice; for those added in 2026, the <a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_misuresicurezza-v4_post" target="_blank" rel="noopener">ACN determination of 13 April 2026 (no. 127434/2026)</a> sets fixed dates.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Deadline</th><th>Who</th><th>Obligation</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>9 months after the notice of inclusion</td><td>Entities added to the list in 2025</td><td>Report baseline significant incidents (Art. 3 of determination no. 379907/2025)</td></tr>
+      <tr><td>18 months after the notice of inclusion</td><td>Entities added to the list in 2025</td><td>Adopt the baseline security measures in Annexes 1 and 2</td></tr>
+      <tr><td>1 January 2027</td><td>Entities added to the list in 2026</td><td>The obligation to report significant incidents begins</td></tr>
+      <tr><td>1 January - 28 February 2027</td><td>All NIS entities</td><td>Annual registration or update on the ACN platform</td></tr>
+      <tr><td>31 July 2027</td><td>Entities added to the list in 2026</td><td>Adopt the baseline security measures in Annexes 1 and 2</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>In practice, an energy operator should proceed in this order:</p>
+<ol>
+  <li>check, activity by activity, whether it falls within one of the Annex I subsectors and calculate its size taking the group into account;</li>
+  <li>check its registration on the ACN platform ahead of the window opening on 1 January 2027;</li>
+  <li>compare the measures adopted with the annex to determination no. 379907/2025 applicable to its category, collecting documentary evidence;</li>
+  <li>set up the procedure for reporting to CSIRT Italia, coordinating it with any obligations arising from the electricity network code;</li>
+  <li>have the measures approved by the management body and plan its training.</li>
+</ol>
+
+<h2>Conclusions</h2>
+<p>In the energy sector NIS2 is not only about large network operators. Aggregators, storage operators, charging point operators and the special purpose vehicles of energy groups may be covered, so the first check is on scope, carried out on the actual activity and on group size.</p>
+<p>Once classification is clear, the obligations are those common to all NIS entities, translated by the ACN determination into verifiable requirements. Electricity operators must also coordinate NIS2 with the EU network code, avoiding duplicated procedures and controls.</p>
+
+<p><strong>To find out where your energy company stands</strong>, <a href="/inizia">the RegulaeOS NIS2 gap analysis</a> lets you check your classification, compare the measures you have adopted with the requirements of the annexes to the ACN determination and collect the documentary evidence for each one.</p>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=7&amp;art.flagTipoArticolo=1&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=1&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Annex I (highly critical sectors), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=3&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 3 (scope), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=6&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 6 (essential and important entities), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=1&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=7&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 7 (registration), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=2&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=11&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 11 (NIS sector authorities), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=23&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 23 (management bodies), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=24&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 24 (risk-management measures), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=4&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=25&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 25 (incident reporting), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.versione=1&amp;art.idGruppo=5&amp;art.flagTipoArticolo=0&amp;art.codiceRedazionale=24G00155&amp;art.idArticolo=38&amp;art.idSottoArticolo=1&amp;art.idSottoArticolo1=10&amp;art.dataPubblicazioneGazzetta=2024-10-01&amp;art.progressivo=0" target="_blank" rel="noopener">Legislative Decree 138/2024, Art. 38 (administrative penalties), Gazzetta Ufficiale</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_obblighi_2511-v3_signed" target="_blank" rel="noopener">ACN, determination no. 379907/2025, baseline specifications</a></li>
+  <li><a href="https://www.acn.gov.it/portale/documents/d/guest/detacn_misuresicurezza-v4_post" target="_blank" rel="noopener">ACN, determination no. 127434/2026, deadlines for entities added to the list in 2026</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32024R1366" target="_blank" rel="noopener">Delegated Regulation (EU) 2024/1366, network code on cybersecurity aspects of cross-border electricity flows, EUR-Lex</a></li>
+</ul>
+`,
+    },
+  },
+  {
     slug: "nis2-cyber-resilience-act",
     title: "NIS2 e Cyber Resilience Act, differenze, notifiche e rapporti tra le due norme",
     excerpt:
