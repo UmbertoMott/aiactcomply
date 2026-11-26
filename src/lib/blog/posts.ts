@@ -38,6 +38,250 @@ export interface BlogPost {
 
 export const POSTS: BlogPost[] = [
   {
+    slug: "nis2-trasporti",
+    title: "NIS2 e trasporti, chi rientra e quali obblighi per aeroporti, ferrovie, porti e strade",
+    excerpt:
+      "Quali operatori del trasporto aereo, ferroviario, marittimo e stradale rientrano nella NIS2, quando sono soggetti essenziali o importanti, come si collocano trasporto pubblico locale e autotrasporto merci, chi vigila sul settore e quali obblighi derivano dal D.Lgs. 138/2024, con il rinvio puntuale agli allegati del decreto.",
+    date: "26 novembre 2026",
+    dateISO: "2026-11-26",
+    author: { name: "Umberto Mottola", jobTitle: "Avvocato, CIPP/E" },
+    dateModifiedISO: "2026-11-26",
+    readTime: "9 min",
+    category: "Normativa",
+    tags: ["NIS2", "NIS2 trasporti", "aeroporti", "trasporto ferroviario", "porti", "trasporto marittimo", "trasporto pubblico locale", "Ministero delle infrastrutture e dei trasporti", "D.Lgs. 138/2024"],
+    metaTitle: "NIS2 trasporti, chi rientra e quali obblighi",
+    metaDescription:
+      "NIS2 nei trasporti. Aeroporti, vettori aerei, ferrovie, porti, compagnie di navigazione e strade, soggetti essenziali o importanti, autorità e obblighi.",
+    faqSchema: [
+      {
+        q: "Quali soggetti del settore trasporti rientrano nella NIS2?",
+        a: "L'allegato I del D.Lgs. 138/2024, al numero 2, divide il settore trasporti in quattro sottosettori. Vi rientrano vettori aerei, gestori aeroportuali e fornitori di servizi di controllo del traffico aereo; gestori dell'infrastruttura e imprese ferroviarie; compagnie di navigazione, organi di gestione dei porti e gestori dei servizi VTS; autorità stradali responsabili della gestione del traffico e gestori di sistemi di trasporto intelligenti.",
+      },
+      {
+        q: "Un'impresa di trasporto è soggetto essenziale o importante?",
+        a: "Dipende dalle dimensioni. Secondo l'art. 6 del decreto NIS sono essenziali i soggetti dell'allegato I che superano i massimali delle medie imprese, ossia, in sostanza, le grandi imprese; le medie imprese sono di regola soggetti importanti. Sono inoltre essenziali, a prescindere dalle dimensioni, i soggetti identificati come critici ai sensi della disciplina che recepisce la direttiva (UE) 2022/2557.",
+      },
+      {
+        q: "Le aziende di trasporto pubblico locale rientrano nella NIS2?",
+        a: "Possono rientrarvi. L'allegato IV del decreto NIS indica, al numero 1, i soggetti che forniscono servizi di trasporto pubblico locale; secondo l'art. 3, commi 8 e 13, il decreto si applica a tali soggetti, indipendentemente dalle dimensioni, se sono individuati dall'ACN su proposta dell'autorità di settore, che per questi soggetti è il Ministero delle infrastrutture e dei trasporti.",
+      },
+      {
+        q: "Le imprese di autotrasporto merci e di logistica sono soggette alla NIS2?",
+        a: "Non in quanto tali. Per il trasporto su strada l'allegato I indica solo le autorità stradali responsabili della gestione del traffico e i gestori di sistemi di trasporto intelligenti. Un'impresa di autotrasporto o di logistica può tuttavia rientrare per altre vie, ad esempio come fornitore di servizi di corriere dell'allegato II o se individuata dall'ACN ai sensi dell'art. 3, comma 9.",
+      },
+      {
+        q: "Chi è l'autorità di settore NIS per i trasporti?",
+        a: "L'art. 11, comma 2, lettera f), del decreto NIS designa il Ministero delle infrastrutture e dei trasporti quale autorità di settore per il settore trasporti dell'allegato I e per i soggetti che forniscono servizi di trasporto pubblico locale dell'allegato IV. Il Ministero supporta l'Agenzia per la cybersicurezza nazionale, che resta l'autorità nazionale competente NIS.",
+      },
+    ],
+    content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · aggiornato al 26 nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In sintesi.</strong> Nella NIS2 i trasporti sono un settore altamente critico. Il D.Lgs. 138/2024 vi include vettori aerei, aeroporti e controllo del traffico aereo, gestori dell'infrastruttura e imprese ferroviarie, compagnie di navigazione, porti e servizi VTS, autorità stradali e gestori di sistemi di trasporto intelligenti. Le grandi imprese sono di regola soggetti essenziali, le medie importanti; l'autorità di settore è il Ministero delle infrastrutture e dei trasporti.
+</p>
+
+<p>La NIS2 nei trasporti riguarda un perimetro preciso, ma non tutto il mondo della mobilità. Il decreto legislativo n. 138 del 2024, ossia il decreto NIS che ha recepito in Italia la direttiva (UE) 2022/2555, elenca in modo puntuale quali operatori del trasporto aereo, ferroviario, per vie d'acqua e su strada rientrano nella disciplina; chi non compare nell'elenco, come di regola l'autotrasporto merci, ne resta fuori, salvo che vi rientri per altre vie.</p>
+<p>Questo articolo spiega chi rientra, quando un operatore è soggetto essenziale o importante, chi vigila e quali obblighi ne derivano, con il rinvio agli articoli del decreto. Per il quadro generale si rinvia alla <a href="/risorse/nis2">guida alla NIS2</a>; per le scadenze nazionali, alla pagina sullo <a href="/risorse/nis2-stato-attuazione-italia-europa">stato di attuazione della NIS2</a>.</p>
+
+<h2>Quali soggetti del settore trasporti rientrano nella NIS2?</h2>
+<p>Rientrano nella NIS2 i soggetti elencati al numero 2 dell'allegato I del decreto NIS, che divide il settore trasporti in quattro sottosettori; trasporto aereo, ferroviario, per vie d'acqua e su strada. Per ciascuno l'allegato indica le tipologie di soggetto, richiamando le definizioni di regolamenti e direttive europee di settore.</p>
+<p>L'<a href="https://www.gazzettaufficiale.it/eli/id/2024/10/01/24G00155/sg" target="_blank" rel="noopener">allegato I del decreto NIS</a>, che elenca i settori ritenuti altamente critici, riproduce per i trasporti l'allegato I della <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">direttiva (UE) 2022/2555</a>. La tabella riassume le tipologie previste per i trasporti.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Sottosettore</th><th>Tipologie di soggetto (allegato I, n. 2)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>a) Trasporto aereo</td><td>Vettori aerei utilizzati a fini commerciali (art. 3, punto 4, reg. (CE) n. 300/2008); gestori aeroportuali e aeroporti (direttiva 2009/12/CE), compresi gli aeroporti centrali della rete transeuropea dei trasporti, e soggetti che gestiscono impianti annessi situati negli aeroporti; operatori che forniscono servizi di controllo del traffico aereo (reg. (CE) n. 549/2004)</td></tr>
+      <tr><td>b) Trasporto ferroviario</td><td>Gestori dell'infrastruttura; imprese ferroviarie, compresi gli operatori degli impianti di servizio (direttiva 2012/34/UE)</td></tr>
+      <tr><td>c) Trasporto per vie d'acqua</td><td>Compagnie di navigazione per il trasporto marittimo, costiero e per vie d'acqua interne di passeggeri e merci, escluse le singole navi; organi di gestione dei porti, compresi i relativi impianti portuali, e soggetti che gestiscono opere e attrezzature all'interno dei porti; gestori dei servizi di assistenza al traffico marittimo, ossia VTS (direttiva 2002/59/CE)</td></tr>
+      <tr><td>d) Trasporto su strada</td><td>Autorità stradali responsabili del controllo della gestione del traffico (reg. delegato (UE) 2015/962), esclusi i soggetti pubblici per cui tale attività è solo una parte non essenziale; gestori di sistemi di trasporto intelligenti (direttiva 2010/40/UE)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Due precisazioni sono utili in pratica. Per le compagnie di navigazione l'allegato esclude «le singole navi gestite da tale compagnia», sicché gli obblighi gravano sulla compagnia e non sulla singola nave; per i porti, invece, il perimetro è ampio, poiché comprende anche i soggetti che gestiscono opere e attrezzature all'interno del porto, come gli operatori di terminal.</p>
+
+<h2>Quando un operatore dei trasporti è soggetto essenziale o importante?</h2>
+<p>La distinzione dipende soprattutto dalle dimensioni. Un operatore dell'allegato I che è una grande impresa è soggetto essenziale; se è una media impresa è soggetto importante; se è una piccola o micro impresa, di regola, resta fuori. Alcuni operatori sono tuttavia inclusi o qualificati essenziali a prescindere dalle dimensioni.</p>
+<p>L'<a href="https://www.gazzettaufficiale.it/eli/id/2024/10/01/24G00155/sg" target="_blank" rel="noopener">art. 3, comma 2, del decreto NIS</a>, che delimita l'ambito di applicazione, applica il decreto ai soggetti degli allegati I e II che superano i massimali delle piccole imprese fissati dalla raccomandazione 2003/361/CE. L'art. 6, che distingue soggetti essenziali e importanti, qualifica invece come essenziali, al comma 1, lettera a), i soggetti dell'allegato I che superano i massimali delle medie imprese; tutti gli altri soggetti inclusi sono importanti, secondo il comma 3.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Dimensione dell'operatore</th><th>Criterio (raccomandazione 2003/361/CE)</th><th>Qualificazione</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Grande impresa</td><td>Almeno 250 persone, oppure fatturato annuo superiore a 50 milioni di euro e totale di bilancio superiore a 43 milioni</td><td>Soggetto essenziale (art. 6, comma 1, lett. a)</td></tr>
+      <tr><td>Media impresa</td><td>Supera i massimali della piccola impresa ma non quelli della media impresa</td><td>Soggetto importante (art. 6, comma 3)</td></tr>
+      <tr><td>Piccola o micro impresa</td><td>Meno di 50 persone e fatturato annuo o totale di bilancio non superiore a 10 milioni di euro</td><td>Di regola esclusa, salvo i casi dell'art. 3, commi 5 e 9</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Il conteggio non riguarda la sola società. L'art. 3, comma 4, rinvia all'art. 6, paragrafo 2, dell'allegato alla raccomandazione, che impone di sommare i dati delle imprese associate e collegate, salvo che ciò non sia proporzionato in ragione dell'indipendenza dei sistemi informativi del soggetto da quelli del gruppo.</p>
+<p>Le eccezioni alla regola dimensionale sono rilevanti nei trasporti. L'art. 6, comma 1, lettera b), qualifica come essenziali, a prescindere dalle dimensioni, i soggetti identificati come critici ai sensi della disciplina che recepisce la direttiva (UE) 2022/2557, sulla resilienza dei soggetti critici. L'art. 3, comma 9, consente inoltre all'ACN di includere un soggetto di qualsiasi dimensione, ad esempio se era già operatore di servizi essenziali ai sensi del D.Lgs. 65/2018, ossia della prima disciplina NIS, o se è l'unico fornitore nazionale di un servizio essenziale.</p>
+
+<h2>Trasporto pubblico locale e autotrasporto merci, chi è dentro e chi è fuori</h2>
+<p>Il trasporto pubblico locale ha una disciplina propria. L'<a href="https://www.gazzettaufficiale.it/eli/id/2024/10/01/24G00155/sg" target="_blank" rel="noopener">allegato IV del decreto NIS</a>, che elenca ulteriori tipologie di soggetti voluti dal legislatore italiano, indica al numero 1 i «soggetti che forniscono servizi di trasporto pubblico locale». Si tratta di una scelta nazionale, poiché la direttiva non prevede questa categoria.</p>
+<p>L'inclusione, tuttavia, non è automatica. Secondo l'art. 3, comma 8, il decreto si applica ai soggetti dell'allegato IV, indipendentemente dalle dimensioni, solo se individuati secondo la procedura del comma 13; ne consegue che è l'ACN, su proposta dell'autorità di settore, a individuarli e a notificare loro l'individuazione ai fini della registrazione.</p>
+<p>Diverso è il caso dell'autotrasporto merci. Per il trasporto su strada l'allegato I menziona soltanto le autorità stradali che gestiscono il traffico e i gestori di sistemi di trasporto intelligenti; le imprese che trasportano merci su strada, come pure gli spedizionieri e gli operatori della logistica, non compaiono come tali. Esse possono però rientrare per altre vie, ad esempio come fornitori di servizi postali e di corriere dell'allegato II, numero 1, o se individuate dall'ACN ai sensi dell'art. 3, comma 9; inoltre, se forniscono servizi a un soggetto NIS, possono subirne le richieste contrattuali in tema di sicurezza della catena di approvvigionamento.</p>
+<p>Anche i costruttori di veicoli seguono un regime diverso. La fabbricazione di autoveicoli, rimorchi e semirimorchi e di altri mezzi di trasporto è un sottosettore dell'allegato II, numero 5, ossia dei settori critici, e non dell'allegato I; per tali imprese, secondo l'art. 11, comma 2, lettera c), l'autorità di settore è il Ministero delle imprese e del made in Italy, sentito il Ministero delle infrastrutture e dei trasporti.</p>
+
+<h2>Chi vigila sul settore trasporti?</h2>
+<p>La vigilanza spetta all'Agenzia per la cybersicurezza nazionale, che è l'autorità nazionale competente NIS. Per i trasporti la affianca, quale autorità di settore, il Ministero delle infrastrutture e dei trasporti, che verifica l'elenco dei soggetti del settore e contribuisce a individuare quelli essenziali e importanti.</p>
+<p>L'<a href="https://www.gazzettaufficiale.it/eli/id/2024/10/01/24G00155/sg" target="_blank" rel="noopener">art. 11 del decreto NIS</a>, che individua le autorità di settore, designa al comma 2, lettera f), il Ministero delle infrastrutture e dei trasporti per il settore trasporti dell'allegato I e per i soggetti di trasporto pubblico locale dell'allegato IV. Il comma 4 dello stesso articolo ne elenca i compiti; tra questi, la verifica dell'elenco dei soggetti registrati, il supporto all'individuazione dei soggetti essenziali e importanti, l'individuazione dei soggetti cui si applicano le deroghe dell'art. 3, comma 4, e l'istituzione di tavoli settoriali.</p>
+
+<h2>Trasporto aereo, come si coordinano NIS2 e sicurezza dell'aviazione?</h2>
+<p>Nel trasporto aereo la NIS2 si somma alle norme europee sulla sicurezza dell'aviazione civile. La direttiva chiede alle autorità dei due ambiti di cooperare, per evitare lacune o duplicazioni; la conformità ai requisiti di sicurezza aeronautici può essere considerata dall'autorità NIS conformità ai corrispondenti requisiti della direttiva.</p>
+<p>Lo prevede il <a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">considerando 29 della direttiva (UE) 2022/2555</a>, che richiama il regolamento (CE) n. 300/2008, sulle norme comuni per la sicurezza dell'aviazione civile, e il regolamento (UE) 2018/1139, sulle norme comuni nel settore dell'aviazione civile e sull'Agenzia dell'Unione europea per la sicurezza aerea. Il considerando usa il verbo «potrebbe», sicché il riconoscimento è una facoltà dell'autorità e non un esonero automatico; il gestore aeroportuale o il vettore deve quindi poter dimostrare la corrispondenza tra le misure aeronautiche adottate e quelle richieste dal decreto NIS.</p>
+
+<h2>Quali obblighi NIS2 hanno le imprese di trasporto?</h2>
+<p>Gli obblighi sono quelli comuni a tutti i soggetti NIS; registrazione sul portale ACN, misure di gestione dei rischi informatici approvate dagli organi di amministrazione, notifica degli incidenti significativi al CSIRT Italia. Ciò che cambia, nei trasporti, è l'oggetto da proteggere, ossia i sistemi da cui dipende la continuità del servizio di trasporto.</p>
+<ul>
+  <li><strong>Organi di amministrazione</strong>; l'<a href="https://www.gazzettaufficiale.it/eli/id/2024/10/01/24G00155/sg" target="_blank" rel="noopener">art. 23 del decreto NIS</a>, che disciplina gli organi di amministrazione e direttivi, impone loro di approvare le modalità di attuazione delle misure di sicurezza, di sovrintendere agli obblighi e di seguire una formazione in materia di sicurezza informatica; essi sono inoltre responsabili delle violazioni.</li>
+  <li><strong>Misure di gestione dei rischi</strong>; l'art. 24, che disciplina tali misure, richiede un approccio multi-rischio che protegga i sistemi e il loro ambiente fisico, comprendente almeno, tra l'altro, la gestione degli incidenti, la continuità operativa con backup e ripristino, la sicurezza della catena di approvvigionamento e l'autenticazione a più fattori.</li>
+  <li><strong>Notifica degli incidenti</strong>; l'art. 25, che disciplina la notifica, prevede una pre-notifica al CSIRT Italia entro 24 ore da quando si è venuti a conoscenza dell'incidente significativo, una notifica entro 72 ore e una relazione finale entro un mese.</li>
+</ul>
+<p>Il contenuto concreto delle misure è fissato dalla <a href="https://www.acn.gov.it/portale/nis/modalita-specifiche-base" target="_blank" rel="noopener">determinazione ACN 379907/2025</a>, sulle specifiche di base. L'allegato 1 contiene le misure per i soggetti importanti e l'allegato 2 quelle per i soggetti essenziali; gli allegati 3 e 4 individuano gli incidenti significativi da notificare, rispettivamente, per gli importanti e per gli essenziali. Per i soggetti inseriti nell'elenco nel 2025 l'ACN indica due termini, decorrenti dalla ricezione della comunicazione di inserimento; 9 mesi per l'obbligo di notifica degli incidenti e 18 mesi per l'adozione delle misure. Ne consegue che, per costoro, entrambi i termini sono già scaduti; per i soggetti inseriti nel 2026 valgono invece termini diversi.</p>
+<p>Nei trasporti la catena di approvvigionamento merita un'attenzione particolare. Biglietteria, segnalamento, sistemi di gestione del traffico e manutenzione sono spesso affidati a terzi, sicché l'analisi dei fornitori prevista dall'art. 24, comma 2, lettera d), è uno dei punti più delicati. Il dettaglio delle misure è illustrato nell'articolo sulle <a href="/risorse/misure-sicurezza-base-nis2-acn">misure di sicurezza di base NIS2</a>; il calendario degli adempimenti, in quello su <a href="/risorse/nis2-adempimenti-scadenze">adempimenti e scadenze NIS2</a>.</p>
+
+<h2>Conclusioni</h2>
+<p>Nei trasporti la prima domanda da porsi è se la propria attività corrisponda a una delle tipologie del numero 2 dell'allegato I; la seconda riguarda le dimensioni, calcolate tenendo conto del gruppo. Chi gestisce aeroporti, reti ferroviarie, porti, terminal o sistemi di gestione del traffico, e supera la soglia della piccola impresa, è quasi certamente un soggetto NIS.</p>
+<p>Chi opera nel trasporto pubblico locale deve verificare se è stato individuato dall'ACN; chi opera nell'autotrasporto e nella logistica, invece, deve accertare se rientra per altre vie e, comunque, prepararsi alle richieste dei clienti soggetti alla NIS2. Per il quadro completo degli obblighi si rinvia alla <a href="/risorse/nis2">guida alla NIS2</a>.</p>
+<p><strong>Per verificare a che punto è la tua organizzazione</strong>, <a href="/inizia">la gap analysis NIS2 di RegulaeOS</a> permette di confrontare le misure adottate con i requisiti della determinazione ACN 379907/2025 e di raccogliere in un unico posto le prove documentali, comprese quelle sulla catena di fornitura.</p>
+
+<h2>Fonti</h2>
+<ul>
+  <li><a href="https://www.gazzettaufficiale.it/eli/id/2024/10/01/24G00155/sg" target="_blank" rel="noopener">D.Lgs. 4 settembre 2024, n. 138 (decreto NIS), artt. 3, 6, 11, 23, 24, 25 e allegati I, II e IV, Gazzetta Ufficiale</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/IT/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Direttiva (UE) 2022/2555 (NIS2), considerando 29 e allegato I, EUR-Lex</a></li>
+  <li><a href="https://www.acn.gov.it/portale/nis/modalita-specifiche-base" target="_blank" rel="noopener">ACN, Modalità e specifiche di base (determinazione ACN 379907/2025)</a></li>
+</ul>
+`,
+    en: {
+      title: "NIS2 and transport: who is covered and what obligations apply to airports, railways, ports and roads",
+      excerpt:
+        "Which air, rail, maritime and road transport operators fall under NIS2, when they are essential or important entities, where local public transport and road haulage stand, who supervises the sector and what obligations follow from Legislative Decree 138/2024, with precise references to the annexes of the decree.",
+      date: "26 November 2026",
+      readTime: "9 min",
+      category: "Regulation",
+      tags: ["NIS2", "NIS2 transport", "airports", "rail transport", "ports", "maritime transport", "local public transport", "Ministry of Infrastructure and Transport", "Legislative Decree 138/2024"],
+      metaTitle: "NIS2 and transport: who is covered and obligations",
+      metaDescription:
+        "NIS2 in transport. Airports, air carriers, railways, ports, shipping companies and roads, essential or important entities, authorities and obligations.",
+      faqSchema: [
+        {
+          q: "Which transport entities fall under NIS2?",
+          a: "Annex I to Legislative Decree 138/2024, point 2, divides the transport sector into four subsectors. It covers air carriers, airport managing bodies and air traffic control service providers; railway infrastructure managers and railway undertakings; shipping companies, port managing bodies and VTS operators; road authorities responsible for traffic management control and operators of intelligent transport systems.",
+        },
+        {
+          q: "Is a transport company an essential or an important entity?",
+          a: "It depends on size. Under Article 6 of the NIS decree, Annex I entities that exceed the ceilings for medium-sized enterprises, in essence large enterprises, are essential; medium-sized enterprises are, as a rule, important entities. Entities identified as critical under the rules transposing Directive (EU) 2022/2557 are also essential, regardless of size.",
+        },
+        {
+          q: "Are local public transport companies covered by NIS2?",
+          a: "They may be. Annex IV to the NIS decree lists, at point 1, entities providing local public transport services; under Article 3(8) and (13), the decree applies to them, regardless of size, if they are identified by ACN on a proposal from the sector authority, which for these entities is the Ministry of Infrastructure and Transport.",
+        },
+        {
+          q: "Are road haulage and logistics companies subject to NIS2?",
+          a: "Not as such. For road transport, Annex I only lists road authorities responsible for traffic management control and operators of intelligent transport systems. A road haulage or logistics company may nonetheless be covered by other routes, for example as a courier service provider under Annex II or if identified by ACN under Article 3(9).",
+        },
+        {
+          q: "Who is the NIS sector authority for transport?",
+          a: "Article 11(2)(f) of the NIS decree designates the Ministry of Infrastructure and Transport as sector authority for the transport sector in Annex I and for local public transport providers in Annex IV. The Ministry supports the National Cybersecurity Agency (ACN), which remains the national NIS competent authority.",
+        },
+      ],
+      content: `
+<p><em>Avv. Umberto Mottola, CIPP/E · updated 26 Nov 2026</em></p>
+
+<p class="ac-tldr">
+  <strong>In short.</strong> Under NIS2, transport is a sector of high criticality. Legislative Decree 138/2024 covers air carriers, airports and air traffic control, railway infrastructure managers and railway undertakings, shipping companies, ports and VTS services, road authorities and operators of intelligent transport systems. Large enterprises are, as a rule, essential entities and medium-sized ones important entities; the sector authority is the Ministry of Infrastructure and Transport.
+</p>
+
+<p>NIS2 in transport covers a precise perimeter, not the whole mobility world. Legislative Decree no. 138 of 2024, the NIS decree that transposed Directive (EU) 2022/2555 in Italy, lists specifically which air, rail, waterborne and road transport operators are covered; those not on the list, as is usually the case for road haulage, remain outside, unless they are covered by another route.</p>
+<p>This article explains who is covered, when an operator is an essential or important entity, who supervises the sector and which obligations follow, with references to the articles of the decree. For the general framework, see the <a href="/risorse/nis2">NIS2 guide</a>; for national deadlines, see the page on the <a href="/risorse/nis2-stato-attuazione-italia-europa">NIS2 implementation status</a>.</p>
+
+<h2>Which transport entities fall under NIS2?</h2>
+<p>NIS2 covers the entities listed in point 2 of Annex I to the NIS decree, which divides the transport sector into four subsectors; air, rail, water and road transport. For each, the annex lists the types of entity, referring to the definitions in sector-specific EU regulations and directives.</p>
+<p><a href="https://www.gazzettaufficiale.it/eli/id/2024/10/01/24G00155/sg" target="_blank" rel="noopener">Annex I to the NIS decree</a>, which lists the sectors of high criticality, reproduces for transport Annex I to <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Directive (EU) 2022/2555</a>. The table summarises the types of entity in transport.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Subsector</th><th>Types of entity (Annex I, point 2)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>(a) Air</td><td>Air carriers used for commercial purposes (Art. 3(4) of Regulation (EC) No 300/2008); airport managing bodies and airports (Directive 2009/12/EC), including core airports of the trans-European transport network, and entities operating ancillary installations within airports; traffic management control operators providing air traffic control services (Regulation (EC) No 549/2004)</td></tr>
+      <tr><td>(b) Rail</td><td>Infrastructure managers; railway undertakings, including operators of service facilities (Directive 2012/34/EU)</td></tr>
+      <tr><td>(c) Water</td><td>Inland, sea and coastal passenger and freight water transport companies, not including the individual vessels they operate; managing bodies of ports, including their port facilities, and entities operating works and equipment within ports; operators of vessel traffic services, that is VTS (Directive 2002/59/EC)</td></tr>
+      <tr><td>(d) Road</td><td>Road authorities responsible for traffic management control (Delegated Regulation (EU) 2015/962), excluding public entities for which this is only a non-essential part of their general activity; operators of intelligent transport systems (Directive 2010/40/EU)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Two clarifications matter in practice. For shipping companies, the annex excludes "the individual vessels operated by those companies", so the obligations fall on the company and not on each vessel; for ports, by contrast, the perimeter is broad, since it also includes entities operating works and equipment within the port, such as terminal operators.</p>
+
+<h2>When is a transport operator an essential or an important entity?</h2>
+<p>The distinction depends mainly on size. An Annex I operator that is a large enterprise is an essential entity; a medium-sized enterprise is an important entity; a small or micro enterprise is, as a rule, outside the scope. Some operators, however, are covered or classified as essential regardless of size.</p>
+<p><a href="https://www.gazzettaufficiale.it/eli/id/2024/10/01/24G00155/sg" target="_blank" rel="noopener">Article 3(2) of the NIS decree</a>, which sets the scope, applies the decree to Annex I and II entities that exceed the ceilings for small enterprises laid down in Recommendation 2003/361/EC. Article 6, which distinguishes essential and important entities, classifies as essential, in paragraph 1(a), Annex I entities that exceed the ceilings for medium-sized enterprises; all other covered entities are important, under paragraph 3.</p>
+
+<div class="ac-table-wrap">
+  <table class="ac-table">
+    <thead>
+      <tr><th>Operator size</th><th>Criterion (Recommendation 2003/361/EC)</th><th>Classification</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Large enterprise</td><td>At least 250 staff, or annual turnover above EUR 50 million and balance sheet total above EUR 43 million</td><td>Essential entity (Art. 6(1)(a))</td></tr>
+      <tr><td>Medium-sized enterprise</td><td>Exceeds the small enterprise ceilings but not the medium-sized enterprise ceilings</td><td>Important entity (Art. 6(3))</td></tr>
+      <tr><td>Small or micro enterprise</td><td>Fewer than 50 staff and annual turnover or balance sheet total not exceeding EUR 10 million</td><td>As a rule excluded, except in the cases of Art. 3(5) and (9)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The count is not limited to the company itself. Article 3(4) refers to Article 6(2) of the Annex to the Recommendation, which requires adding the data of partner and linked enterprises, unless this is disproportionate given the independence of the entity's information systems from those of the group.</p>
+<p>The exceptions to the size rule are relevant in transport. Article 6(1)(b) classifies as essential, regardless of size, entities identified as critical under the rules transposing Directive (EU) 2022/2557 on the resilience of critical entities. Article 3(9) also allows ACN to include an entity of any size, for example if it was already an operator of essential services under Legislative Decree 65/2018, the first NIS framework, or if it is the sole national provider of an essential service.</p>
+
+<h2>Local public transport and road haulage: who is in and who is out</h2>
+<p>Local public transport has its own rules. <a href="https://www.gazzettaufficiale.it/eli/id/2024/10/01/24G00155/sg" target="_blank" rel="noopener">Annex IV to the NIS decree</a>, which lists further types of entity chosen by the Italian legislature, includes at point 1 "entities providing local public transport services". This is a national choice, since the directive does not provide for this category.</p>
+<p>Inclusion, however, is not automatic. Under Article 3(8), the decree applies to Annex IV entities, regardless of size, only if they are identified under the procedure in paragraph 13; it is therefore ACN, on a proposal from the sector authority, that identifies them and notifies them for registration purposes.</p>
+<p>Road haulage is a different matter. For road transport, Annex I only mentions road authorities that manage traffic and operators of intelligent transport systems; companies carrying goods by road, as well as freight forwarders and logistics operators, are not listed as such. They may nonetheless be covered by other routes, for example as postal and courier service providers under Annex II, point 1, or if identified by ACN under Article 3(9); moreover, if they supply services to a NIS entity, they may face contractual requirements on supply chain security.</p>
+<p>Vehicle manufacturers also follow a different regime. The manufacture of motor vehicles, trailers and semi-trailers and of other transport equipment is a subsector of Annex II, point 5, that is the other critical sectors, and not of Annex I; for these companies, under Article 11(2)(c), the sector authority is the Ministry of Enterprises and Made in Italy, after consulting the Ministry of Infrastructure and Transport.</p>
+
+<h2>Who supervises the transport sector?</h2>
+<p>Supervision lies with the National Cybersecurity Agency (ACN), the national NIS competent authority. In transport it is supported, as sector authority, by the Ministry of Infrastructure and Transport, which verifies the list of entities in the sector and helps identify essential and important entities.</p>
+<p><a href="https://www.gazzettaufficiale.it/eli/id/2024/10/01/24G00155/sg" target="_blank" rel="noopener">Article 11 of the NIS decree</a>, which designates the sector authorities, appoints in paragraph 2(f) the Ministry of Infrastructure and Transport for the transport sector in Annex I and for local public transport entities in Annex IV. Paragraph 4 of the same article lists its tasks; among them, verifying the list of registered entities, supporting the identification of essential and important entities, identifying the entities to which the derogations in Article 3(4) apply, and setting up sector tables.</p>
+
+<h2>Air transport: how do NIS2 and aviation security fit together?</h2>
+<p>In air transport, NIS2 adds to EU rules on civil aviation security. The directive asks the authorities in both fields to cooperate, to avoid gaps or duplication; compliance with aviation security requirements may be considered by the NIS authority as compliance with the corresponding requirements of the directive.</p>
+<p>This is set out in <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">recital 29 of Directive (EU) 2022/2555</a>, which refers to Regulation (EC) No 300/2008, on common rules in the field of civil aviation security, and Regulation (EU) 2018/1139, on common rules in the field of civil aviation and the European Union Aviation Safety Agency. The recital uses the word "may", so recognition is an option for the authority and not an automatic exemption; airport managing bodies and carriers must therefore be able to show how the aviation measures they have adopted match those required by the NIS decree.</p>
+
+<h2>What NIS2 obligations do transport companies have?</h2>
+<p>The obligations are those common to all NIS entities; registration on the ACN portal, cyber risk management measures approved by the management bodies, and notification of significant incidents to CSIRT Italia. What changes in transport is the object to be protected, that is the systems on which the continuity of the transport service depends.</p>
+<ul>
+  <li><strong>Management bodies</strong>; <a href="https://www.gazzettaufficiale.it/eli/id/2024/10/01/24G00155/sg" target="_blank" rel="noopener">Article 23 of the NIS decree</a>, on management and executive bodies, requires them to approve how the security measures are implemented, to oversee compliance and to follow cybersecurity training; they are also liable for infringements.</li>
+  <li><strong>Risk management measures</strong>; Article 24, on such measures, requires an all-hazards approach that protects systems and their physical environment and includes at least, among other things, incident handling, business continuity with backup and recovery, supply chain security and multi-factor authentication.</li>
+  <li><strong>Incident notification</strong>; Article 25, on notification, requires an early warning to CSIRT Italia within 24 hours of becoming aware of the significant incident, a notification within 72 hours and a final report within one month.</li>
+</ul>
+<p>The specific content of the measures is set by <a href="https://www.acn.gov.it/portale/nis/modalita-specifiche-base" target="_blank" rel="noopener">ACN determination 379907/2025</a> on the basic specifications. Annex 1 contains the measures for important entities and Annex 2 those for essential entities; Annexes 3 and 4 identify the significant incidents to be notified by important and essential entities respectively. For entities included in the list in 2025, ACN sets two deadlines running from receipt of the notice of inclusion; 9 months for the incident notification obligation and 18 months for adopting the measures. For them, therefore, both deadlines have already passed; entities included in 2026 are subject to different deadlines.</p>
+<p>In transport the supply chain deserves particular attention. Ticketing, signalling, traffic management systems and maintenance are often outsourced, so the supplier assessment required by Article 24(2)(d) is one of the most sensitive points. The measures are described in detail in the article on <a href="/risorse/misure-sicurezza-base-nis2-acn">NIS2 basic security measures</a>; the compliance calendar in the one on <a href="/risorse/nis2-adempimenti-scadenze">NIS2 obligations and deadlines</a>.</p>
+
+<h2>Conclusions</h2>
+<p>In transport, the first question is whether one's activity matches one of the types in point 2 of Annex I; the second concerns size, calculated taking the group into account. Anyone operating airports, rail networks, ports, terminals or traffic management systems who exceeds the small enterprise threshold is almost certainly a NIS entity.</p>
+<p>Local public transport operators should check whether ACN has identified them; road haulage and logistics operators should instead check whether they are covered by another route and, in any case, prepare for requests from customers subject to NIS2. For the full picture of obligations, see the <a href="/risorse/nis2">NIS2 guide</a>.</p>
+<p><strong>To check where your organisation stands</strong>, <a href="/inizia">the RegulaeOS NIS2 gap analysis</a> lets you compare the measures in place with the requirements of ACN determination 379907/2025 and collect the supporting evidence in one place, including evidence on the supply chain.</p>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://www.gazzettaufficiale.it/eli/id/2024/10/01/24G00155/sg" target="_blank" rel="noopener">Legislative Decree no. 138 of 4 September 2024 (NIS decree), Arts. 3, 6, 11, 23, 24, 25 and Annexes I, II and IV, Gazzetta Ufficiale</a></li>
+  <li><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32022L2555" target="_blank" rel="noopener">Directive (EU) 2022/2555 (NIS2), recital 29 and Annex I, EUR-Lex</a></li>
+  <li><a href="https://www.acn.gov.it/portale/nis/modalita-specifiche-base" target="_blank" rel="noopener">ACN, Basic procedures and specifications (ACN determination 379907/2025)</a></li>
+</ul>
+`,
+    },
+  },
+  {
     slug: "nis2-cyber-resilience-act",
     title: "NIS2 e Cyber Resilience Act, differenze, notifiche e rapporti tra le due norme",
     excerpt:
